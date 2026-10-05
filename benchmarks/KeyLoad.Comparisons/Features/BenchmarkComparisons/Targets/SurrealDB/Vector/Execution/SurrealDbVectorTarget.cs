@@ -1,7 +1,4 @@
 using Microsoft.Extensions.Options;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
@@ -9,7 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name = "http">Owned native HTTP client.</param>
 /// <param name = "image">The immutable native server image.</param>
 /// <param name = "runId">Unique corpus scope.</param>
-/// <param name = "executionOptions">The required operational policy.</param>
+/// <param name = "executionOptions">The required operational Policy.</param>
 public sealed class SurrealDbVectorTarget(HttpClient http, string image, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions) : IVectorComparisonTarget
 {
     private const string SurrealDBCommunityOnePersistentRocksDBNode = "SurrealDB Community; one persistent RocksDB node";
@@ -20,16 +17,20 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private const int SingleResultCardinality = 1;
     private const string SingleSurrealDBCommunityNodeNoReplicationConfigured = "single SurrealDB Community node; no replication configured";
     private const string PersistentRocksDBPath = "persistent RocksDB path";
-    private const string NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat = "DEFINE TABLE IF NOT EXISTS {0} SCHEMALESS;";
+    private const string NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate = "DEFINE TABLE IF NOT EXISTS {0} SCHEMALESS;";
+    private static readonly System.Text.CompositeFormat NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat = System.Text.CompositeFormat.Parse(NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormatTemplate);
     private const int EmptyResultCount = 0;
     private const char VectorRecordPrefix = 'v';
     private const string HTTPSqlRocksDBPersistentBackend = "; HTTP /sql; RocksDB persistent backend";
     private const string SurrealDBProfileIsUnavailable = "SurrealDB profile is unavailable.";
     private const string NoANNIndexSurrealDBBruteForceKNN = "no ANN index; SurrealDB brute-force KNN";
     private const string SurrealDBSupportsOnlyExactAndNativeHNSWProfiles = "SurrealDB supports only exact and native HNSW profiles.";
-    private const string NativeREMOVEINDEXONTABLEFormat = "REMOVE INDEX {0} ON TABLE {1};";
-    private const string NativeDELETEFROMREMOVETABLEFormat = "DELETE FROM {0}; REMOVE TABLE {1};";
-    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
+    private const string NativeREMOVEINDEXONTABLEFormatTemplate = "REMOVE INDEX {0} ON TABLE {1};";
+    private static readonly System.Text.CompositeFormat NativeREMOVEINDEXONTABLEFormat = System.Text.CompositeFormat.Parse(NativeREMOVEINDEXONTABLEFormatTemplate);
+    private const string NativeDELETEFROMREMOVETABLEFormatTemplate = "DELETE FROM {0}; REMOVE TABLE {1};";
+    private static readonly System.Text.CompositeFormat NativeDELETEFROMREMOVETABLEFormat = System.Text.CompositeFormat.Parse(NativeDELETEFROMREMOVETABLEFormatTemplate);
+    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
+    private NativeComparisonExecutionOptions Policy => execution.Value;
     private const string RunIdentityFormat = "N";
     private const string Table = "vector_doc";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
@@ -58,9 +59,9 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     {
         ArgumentNullException.ThrowIfNull(documents);
         await VerifyServerAsync(cancellationToken).ConfigureAwait(false);
-        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat, table), policy, cancellationToken).ConfigureAwait(false);
+        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLEIFNOTEXISTSSCHEMALESSFormat, table), Policy, cancellationToken).ConfigureAwait(false);
         ownsData = true;
-        var batch = new List<VectorDocument>(policy.WriteBatchCapacity);
+        var batch = new List<VectorDocument>(Policy.WriteBatchCapacity);
         var count = EmptyResultCount;
         await foreach (var document in documents.WithCancellation(cancellationToken).ConfigureAwait(false))
         {
@@ -71,7 +72,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
 
             batch.Add(document);
             count++;
-            if (batch.Count == policy.WriteBatchCapacity)
+            if (batch.Count == Policy.WriteBatchCapacity)
             {
                 await IngestBatchAsync(batch, cancellationToken).ConfigureAwait(false);
                 batch.Clear();
@@ -104,7 +105,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         if (profile.IndexKind == VectorIndexKind.Exact)
         {
             var parameters = new Dictionary<string, string>();
-            policy.RecordEvidence(parameters);
+            Policy.RecordEvidence(parameters);
             return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, parameters, EmptyResultCount);
         }
 
@@ -114,14 +115,14 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         }
 
         ownsIndex = true;
-        return await SurrealDbVectorIndex.BuildAsync(http, table, index, profile, policy, cancellationToken).ConfigureAwait(false);
+        return await SurrealDbVectorIndex.BuildAsync(http, table, index, profile, Policy, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<VectorNeighbor>> SearchAsync(ReadOnlyMemory<float> query, int topK, VectorQueryMode mode, CancellationToken cancellationToken)
     {
         var sql = SurrealDbVectorProtocol.SearchSql(table, query.Span, topK, mode, ProfileIndex, HnswEf);
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (result.ValueKind != JsonValueKind.Array)
         {
@@ -135,21 +136,20 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     public async Task<string> ExplainAsync(ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken cancellationToken)
     {
         var sql = SurrealDbVectorProtocol.ExplainSql(table, query.Span, mode, ProfileIndex, HnswEf);
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
-        var plan = SurrealDbVectorProtocol.SingleResult(response.RootElement).ToString();
-        if (ProfileIndex == VectorIndexKind.Hnsw && !plan.Contains(index, StringComparison.OrdinalIgnoreCase))
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
+        var nativePlan = SurrealDbVectorProtocol.SingleResult(response.RootElement);
+        if (ProfileIndex == VectorIndexKind.Hnsw)
         {
-            throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbHnswPlanNotProven);
+            SurrealDbVectorPlan.Validate(nativePlan, index, HnswEf, query.Length, mode);
         }
-
-        return plan;
+        return nativePlan.GetRawText();
     }
 
     /// <inheritdoc/>
     public async Task UpdateAsync(VectorUpdate update, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(update);
-        await SurrealDbSqlTransport.ExecuteAsync(http, SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span), policy, cancellationToken).ConfigureAwait(false);
+        await SurrealDbSqlTransport.ExecuteAsync(http, SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span), Policy, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -159,13 +159,13 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(policy.CleanupTimeout);
+                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
                 if (ownsIndex)
                 {
-                    await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVEINDEXONTABLEFormat, index, table), policy, timeout.Token).ConfigureAwait(false);
+                    await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVEINDEXONTABLEFormat, index, table), Policy, timeout.Token).ConfigureAwait(false);
                 }
 
-                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDELETEFROMREMOVETABLEFormat, table, table), policy, timeout.Token).ConfigureAwait(false);
+                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDELETEFROMREMOVETABLEFormat, table, table), Policy, timeout.Token).ConfigureAwait(false);
             }
         }
         finally
@@ -178,17 +178,17 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
 
     private async Task VerifyServerAsync(CancellationToken cancellationToken)
     {
-        databaseVersion = await SurrealDbServer.VerifyAsync(http, policy, cancellationToken).ConfigureAwait(false);
+        databaseVersion = await SurrealDbServer.VerifyAsync(http, Policy, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task IngestBatchAsync(List<VectorDocument> batch, CancellationToken cancellationToken)
     {
         var sql = SurrealDbVectorProtocol.CreateBatchSql(table, batch);
-        await SurrealDbSqlTransport.ExecuteAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
+        await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public IAsyncEnumerable<VectorReadback> ReadbackAsync(CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadbackAsync(http, table, policy, corpusCount, cancellationToken);
+    public IAsyncEnumerable<VectorReadback> ReadbackAsync(CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadbackAsync(http, table, Policy, corpusCount, cancellationToken);
     /// <inheritdoc/>
-    public Task<VectorReadback?> ReadAsync(string id, CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadAsync(http, table, policy, id, cancellationToken);
+    public Task<VectorReadback?> ReadAsync(string id, CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadAsync(http, table, Policy, id, cancellationToken);
 }

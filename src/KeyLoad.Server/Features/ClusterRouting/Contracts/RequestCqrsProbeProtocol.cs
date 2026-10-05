@@ -39,12 +39,9 @@ internal static class RequestCqrsProbeProtocol
     internal const int MaximumRecordBytes = 8_192;
     internal const int MaximumFiles = 400;
     internal const int MaximumArms = 32;
-    internal const int MaximumActiveGates = 4;
     internal const int MaximumMarkersPerRequest = 8;
     internal const int MaximumAggregateBytes = 1_048_576;
     internal const int ReadBufferBytes = 8_193;
-    internal const int PollMilliseconds = 100;
-    internal const int HoldSeconds = 60;
     internal const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 }

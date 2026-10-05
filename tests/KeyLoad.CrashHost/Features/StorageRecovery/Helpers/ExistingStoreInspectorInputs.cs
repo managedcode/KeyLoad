@@ -33,7 +33,7 @@ internal sealed class ExistingStoreInspectorInputs(ExistingStoreInspectionReques
 
     private ZoneTreeStoreOptions ConfigureCache(ZoneTreeStoreOptions options)
     {
-        Budget = new(new());
+        Budget = new(CrashExecutionOptions.CacheMemory());
         return options with { EmbeddedPointCache = new ZoneTreePointCacheOptions(Budget) };
     }
 }

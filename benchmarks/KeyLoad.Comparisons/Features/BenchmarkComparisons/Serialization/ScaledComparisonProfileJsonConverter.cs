@@ -6,6 +6,9 @@ namespace KeyLoad.Comparisons;
 /// <summary>Serializes and strictly reconstitutes one of the exact closed scaled profile identities.</summary>
 public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledComparisonProfile>
 {
+    private const int PropertyCount = 14;
+    private const string InvalidShape = "Scaled profile shape is invalid.";
+    private const string SettingsMismatch = "Scaled profile settings mismatch.";
     private const string ConcurrencyProperty = "concurrency";
     private const string DimensionsProperty = "dimensions";
     private const string DocumentsProperty = "documents";
@@ -25,10 +28,10 @@ public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledC
     {
         using var document = JsonDocument.ParseValue(ref reader);
         var root = document.RootElement;
-        if (root.ValueKind != JsonValueKind.Object || root.EnumerateObject().Count() != 14
+        if (root.ValueKind != JsonValueKind.Object || root.EnumerateObject().Count() != PropertyCount
             || !root.TryGetProperty(IdProperty, out var id) || id.ValueKind != JsonValueKind.String)
         {
-            throw new JsonException("Scaled profile shape is invalid.");
+            throw new JsonException(InvalidShape);
         }
         var profile = ScaledComparisonProfileParser.Parse(id.GetString()!);
         Validate(root, profile);
@@ -68,7 +71,7 @@ public sealed class ScaledComparisonProfileJsonConverter : JsonConverter<ScaledC
         if (!root.TryGetProperty(name, out var value) || value.ValueKind != JsonValueKind.Number
             || !value.TryGetInt32(out var actual) || actual != expected)
         {
-            throw new JsonException("Scaled profile settings mismatch.");
+            throw new JsonException(SettingsMismatch);
         }
     }
 

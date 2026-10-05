@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core;
 
 /// <summary>Reserves bounded node, tenant, principal, and retained-byte capacity for commands.</summary>
@@ -19,11 +21,23 @@ public sealed class CommandAdmissionGovernor
     public CommandAdmissionLimits Limits { get; }
 
     /// <summary>Creates a governor with validated limits.</summary>
-    /// <param name="limits">Optional limits; defaults are used when omitted.</param>
-    public CommandAdmissionGovernor(CommandAdmissionLimits? limits = null)
+    /// <param name="options">Centrally validated node-local limits, frozen for this admission owner.</param>
+    public CommandAdmissionGovernor(IOptions<CommandAdmissionLimits> options)
     {
-        Limits = limits ?? new();
+        ArgumentNullException.ThrowIfNull(options);
+        Limits = options.Value;
         Limits.Validate();
+    }
+
+    private CommandAdmissionGovernor(CommandAdmissionLimits validatedHttpLimits)
+    {
+        Limits = validatedHttpLimits;
+    }
+
+    internal static CommandAdmissionGovernor CreateDerivedHttpPool(CommandAdmissionLimits limits)
+    {
+        limits.Validate();
+        return new(limits);
     }
 
     /// <summary>Returns whether an operation uses the reserved control lane.</summary>

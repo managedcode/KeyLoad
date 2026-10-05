@@ -9,8 +9,9 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <summary>Owns only one native target and tracks partial HTTP construction until ownership transfers.</summary>
 internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
 {
-    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
-    internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions => executionOptions;
+    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
+    private NativeComparisonExecutionOptions Policy => execution.Value;
+    internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions => execution;
     private readonly List<HttpClient> unownedClients = [];
     private IComparisonTarget? target;
     private IVectorComparisonTarget? vectorTarget;
@@ -118,7 +119,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             if (ownedVectorTarget is not null)
             {
                 var cleanup = ownedVectorTarget.DisposeAsync().AsTask();
-                await cleanup.WaitAsync(policy.CleanupTimeout);
+                await cleanup.WaitAsync(Policy.CleanupTimeout);
             }
         }
         finally
@@ -136,7 +137,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         var cleanup = ownedTarget.DisposeAsync().AsTask();
         try
         {
-            await cleanup.WaitAsync(policy.CleanupTimeout);
+            await cleanup.WaitAsync(Policy.CleanupTimeout);
         }
         catch (Exception)
         {

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core;
 
 /// <summary>Reserves request-body, working-set, and verified-principal capacity before HTTP deserialization.</summary>
@@ -27,10 +29,11 @@ public sealed class HttpAdmissionGovernor
     public HttpAdmissionLimits Limits { get; }
 
     /// <summary>Creates an HTTP governor with validated limits.</summary>
-    /// <param name="limits">Optional HTTP limits; defaults are used when omitted.</param>
-    public HttpAdmissionGovernor(HttpAdmissionLimits? limits = null)
+    /// <param name="options">Centrally validated HTTP limits, frozen for this admission owner.</param>
+    public HttpAdmissionGovernor(IOptions<HttpAdmissionLimits> options)
     {
-        Limits = limits ?? new();
+        ArgumentNullException.ThrowIfNull(options);
+        Limits = options.Value;
         Limits.Validate();
         node = CreateNodeGovernor(Limits);
         scopes = CreateScopeGovernor(Limits, node.Limits);
@@ -73,7 +76,7 @@ public sealed class HttpAdmissionGovernor
             MaxTenantControlCommands = limits.ReservedControlRequests,
             MaxPrincipalControlCommands = limits.ReservedControlRequests
         };
-        return new(settings);
+        return CommandAdmissionGovernor.CreateDerivedHttpPool(settings);
     }
 
     private static CommandAdmissionGovernor CreateScopeGovernor(HttpAdmissionLimits limits, CommandAdmissionLimits nodeLimits)
@@ -85,7 +88,7 @@ public sealed class HttpAdmissionGovernor
             MaxTenantControlCommands = limits.MaxTenantControlRequests,
             MaxPrincipalControlCommands = limits.MaxPrincipalControlRequests
         };
-        return new(settings);
+        return CommandAdmissionGovernor.CreateDerivedHttpPool(settings);
     }
 
     private static bool IsControlPath(string path)

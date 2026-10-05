@@ -26,16 +26,3 @@ public interface ICacheReadPermit
 /// <param name="PreviousRevision">Last accepted sequence, including after withdrawal; zero before the first acceptance.</param>
 /// <param name="Continuous">Whether the prior local lease was eligible at acceptance.</param>
 public readonly record struct CacheReadPermitAcceptance(long Revision, long PreviousRevision, bool Continuous);
-
-/// <summary>Defines fixed receiver-monotonic eligibility ceilings, not measured latency budgets.</summary>
-public static class CacheReadPermitLimits
-{
-    private const int PrepareValiditySeconds = 10;
-    private const int LeaseValiditySeconds = 15;
-
-    /// <summary>Maximum prepare age at acceptance; the exact boundary is rejected.</summary>
-    public static readonly TimeSpan PrepareValidity = TimeSpan.FromSeconds(PrepareValiditySeconds);
-
-    /// <summary>Maximum lease age from receiver preparation; the exact boundary is expired.</summary>
-    public static readonly TimeSpan LeaseValidity = TimeSpan.FromSeconds(LeaseValiditySeconds);
-}

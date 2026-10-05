@@ -6,8 +6,6 @@ namespace KeyLoad.Orleans;
 /// <summary>Stable wire identities and bounded transport metadata.</summary>
 public static class ReplicaTransportProtocol
 {
-    private const int DefaultConnectTimeoutMilliseconds = 500;
-
     /// <summary>Authenticated envelope format version.</summary>
     public const int Version = 3;
     /// <summary>Unchanged discovery MAC version, independent of application peer envelopes.</summary>
@@ -34,14 +32,6 @@ public static class ReplicaTransportProtocol
     public const int MaximumMetadataBytes = 65_536;
     /// <summary>Bounded Orleans envelope allowance above the exact payload byte count.</summary>
     public const int MaximumEnvelopeOverheadBytes = MaximumMetadataBytes;
-    /// <summary>Default per-voter consensus and control nonce capacity.</summary>
-    public const int DefaultCriticalReplayCapacity = 16_384;
-    /// <summary>Default per-voter application forwarding nonce capacity.</summary>
-    public const int DefaultForwardReplayCapacity = 32_768;
-    /// <summary>Default per-voter application read-barrier nonce capacity.</summary>
-    public const int DefaultReadBarrierReplayCapacity = 16_384;
-    /// <summary>Default per-voter data-append nonce capacity.</summary>
-    public const int DefaultDataAppendReplayCapacity = 32_768;
     /// <summary>Absolute aggregate retained nonce ceiling across all fixed voters and pools.</summary>
     public const int MaximumRetainedReplayNonces = 1_048_576;
     /// <summary>MAC encoding for a successful response.</summary>
@@ -90,8 +80,6 @@ public static class ReplicaTransportProtocol
     public const string TransportUnavailable = "The Orleans replica transport is unavailable. Retry the same command ID.";
     /// <summary>Lifecycle observer diagnostic identity.</summary>
     public const string LifecycleName = "KeyLoadReplicaTransport";
-    /// <summary>Default bounded HTTP discovery connection timeout.</summary>
-    public static TimeSpan DefaultConnectTimeout { get; } = TimeSpan.FromMilliseconds(DefaultConnectTimeoutMilliseconds);
     /// <summary>Exact UTF8 without a BOM, rejecting malformed characters and bytes.</summary>
     public static UTF8Encoding Utf8 { get; } = new(false, true);
 }

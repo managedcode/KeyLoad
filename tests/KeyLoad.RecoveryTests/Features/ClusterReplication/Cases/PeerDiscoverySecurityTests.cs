@@ -136,6 +136,30 @@ internal sealed class PeerDiscoverySecurityTests
         await Assert.That(sockets.ConnectTimeout).IsEqualTo(new PeerDiscoveryOptions().ConnectTimeout);
     }
 
+    /// <summary>Nondefault socket settings reach the native handler and later options mutation cannot change the receiver snapshot.</summary>
+    [Test]
+    public async Task ConfiguredHandlerUsesFrozenNativeTransportDurations()
+    {
+        using var fixture = new PeerDiscoveryFixture();
+        var configuredTimeout = TimeSpan.FromMilliseconds(175);
+        var configuredLifetime = TimeSpan.FromSeconds(45);
+        var settings = new PeerDiscoveryOptions
+        {
+            ConnectTimeout = configuredTimeout,
+            PooledConnectionLifetime = configuredLifetime
+        };
+        using var security = new PeerSecurity(fixture.Secret, TimeProvider.System,
+            RecoveryExecutionOptions.PeerDiscovery(settings));
+        settings.ConnectTimeout = TimeSpan.Zero;
+        settings.PooledConnectionLifetime = TimeSpan.Zero;
+        using var handler = security.CreateHandler();
+        var sockets = (SocketsHttpHandler)((DelegatingHandler)handler).InnerHandler!;
+
+        await Assert.That(sockets.ConnectTimeout).IsEqualTo(configuredTimeout);
+        await Assert.That(sockets.PooledConnectionLifetime).IsEqualTo(configuredLifetime);
+        await Assert.That(sockets.AllowAutoRedirect).IsFalse();
+    }
+
     /// <summary>Invalid credentials and replay limits fail before a discovery handler can be created.</summary>
     [Test]
     public async Task InvalidConstructorConfigurationIsTyped()

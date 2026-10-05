@@ -1,12 +1,14 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
-internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, int voterCount)
+internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, int voterCount,
+    IOptions<ReplicaTransportOptions> transportOptions)
 {
     private const int CapacityEvent = 2101;
     private const int ConfigurationEvent = 2102;
-    private const long IntervalMilliseconds = 30_000;
+    private readonly long intervalMilliseconds = checked((long)transportOptions.Value.ReplayDiagnosticInterval.TotalMilliseconds);
     private const string CapacityMessage = "ReplicaReplayCapacity senderIndex={SenderIndex} pool={Pool} method={Method} "
         + "critical={CriticalCount} forward={ForwardCount} read={ReadCount} data={DataCount} capacity={Capacity} "
         + "voterMaximum={VoterMaximum} nodeMaximum={NodeMaximum} observedUnixMs={Observed} oldestExpiryUnixMs={OldestExpiry} suppressed={Suppressed}";
@@ -32,7 +34,7 @@ internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, 
         lock (gate)
         {
             var rate = rates[checked(failure.SenderIndex * PoolCount + (int)failure.Pool)];
-            if (rate.Emitted && failure.ObservedUnixMilliseconds - rate.Last < IntervalMilliseconds)
+            if (rate.Emitted && failure.ObservedUnixMilliseconds - rate.Last < intervalMilliseconds)
             {
                 if (rate.Suppressed < long.MaxValue)
                 { rate.Suppressed++; }

@@ -12,11 +12,33 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ReplicaExecutionOptions> ReplicaExecution,
     IOptions<PeerDiscoveryOptions> PeerDiscovery,
     IOptions<ReplicaTransportOptions> ReplicaTransport,
+    IOptions<ReplicaPeerOptions> Peer,
+    IOptions<ReplicaReplayLimits> Replay,
+    IOptions<CommandAdmissionLimits> CommandAdmission,
+    IOptions<HttpAdmissionLimits> HttpAdmission,
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<ServerExecutionOptions> ServerExecution,
     CoreRuntimeOptions Core)
 {
+    internal void ValidateBeforePhysicalOwnership()
+    {
+        _ = Node.Value;
+        _ = ReplicaConfiguration.Value;
+        _ = DueCoordination.Value;
+        _ = ReplicaExecution.Value;
+        _ = PeerDiscovery.Value;
+        _ = ReplicaTransport.Value;
+        _ = Replay.Value;
+        _ = Peer.Value;
+        _ = CommandAdmission.Value;
+        _ = HttpAdmission.Value;
+        _ = Membership.Value;
+        _ = GrainRouting.Value;
+        _ = ServerExecution.Value;
+        Core.ValidateBeforePhysicalOwnership();
+    }
+
     internal void RegisterBorrowed(IServiceCollection services)
     {
         services.AddSingleton(Node);
@@ -25,6 +47,10 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(ReplicaExecution);
         services.AddSingleton(PeerDiscovery);
         services.AddSingleton(ReplicaTransport);
+        services.AddSingleton(Peer);
+        services.AddSingleton(Replay);
+        services.AddSingleton(CommandAdmission);
+        services.AddSingleton(HttpAdmission);
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
         services.AddSingleton(ServerExecution);

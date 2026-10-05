@@ -11,6 +11,13 @@ internal static class HelixDbDocumentAst
     internal static JsonObject Update(string label, BenchmarkDocument document) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenSetProperty, new() { [HelixDbNativeTokens.TokenInput] = Lookup(label, document.Id), [HelixDbNativeTokens.TokenName] = HelixDbNativeTokens.TokenPayload, [HelixDbNativeTokens.TokenValue] = HelixDbProtocol.Value(HelixDbNativeTokens.TokenString, document.Json) });
     internal static JsonObject Page(string label, int after, int capacity) => HelixDbProtocol.Project(HelixDbProtocol.Limit(HelixDbProtocol.Ordered(HelixDbProtocol.Nodes(label, HelixDbProtocol.Compare(HelixDbNativeTokens.TokenGt, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenI64, after)), HelixDbNativeTokens.TokenNumber), capacity), HelixDbNativeTokens.TokenId, HelixDbNativeTokens.TokenNumber, HelixDbNativeTokens.TokenPayload);
     internal static JsonObject Index(string label, string property, bool range) => HelixDbProtocol.Node(HelixDbNativeTokens.TokenCreateIndex, new() { [HelixDbNativeTokens.TokenIfNotExists] = false, [HelixDbNativeTokens.TokenSpec] = HelixDbProtocol.Node(range ? HelixDbNativeTokens.TokenNodeRange : HelixDbNativeTokens.TokenNodeEquality, range ? new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenDirection] = HelixDbNativeTokens.TokenAsc } : new() { [HelixDbNativeTokens.TokenLabel] = label, [HelixDbNativeTokens.TokenProperty] = property, [HelixDbNativeTokens.TokenUnique] = true }) });
+    internal static JsonObject DropIndex(string label, string property, bool range)
+    {
+        var fields = Index(label, property, range)[HelixDbNativeTokens.TokenCreateIndex]!.AsObject();
+        return HelixDbProtocol.Node(HelixDbNativeTokens.TokenDropIndex,
+            new() { [HelixDbNativeTokens.TokenSpec] = fields[HelixDbNativeTokens.TokenSpec]!.DeepClone() });
+    }
+
     internal static JsonObject Graph(string label, string id, int depth)
     {
         var branches = new JsonArray();

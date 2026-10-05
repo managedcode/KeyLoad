@@ -8,6 +8,10 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 {
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansActivityCapture> records = [];
+    private int maximumRecords;
+
+    internal void Configure(OrleansTelemetryCaptureOptions options)
+        => maximumRecords = options.MaximumRecords;
 
     internal OrleansActivityCapture[] Snapshot()
     {
@@ -23,7 +27,7 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
         {
             foreach (var activity in batch)
             {
-                if (records.Count >= OrleansRuntimeTelemetryTokens.MaximumCapturedRecords)
+                if (records.Count >= maximumRecords)
                 {
                     break;
                 }
@@ -40,6 +44,10 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
 {
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansMetricPointCapture> records = [];
+    private int maximumRecords;
+
+    internal void Configure(OrleansTelemetryCaptureOptions options)
+        => maximumRecords = options.MaximumRecords;
 
     internal OrleansMetricPointCapture[] Snapshot()
     {
@@ -57,7 +65,7 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
             {
                 foreach (var point in metric.GetMetricPoints())
                 {
-                    if (records.Count >= OrleansRuntimeTelemetryTokens.MaximumCapturedRecords)
+                    if (records.Count >= maximumRecords)
                     {
                         return ExportResult.Success;
                     }
@@ -85,7 +93,7 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
 
 internal sealed record OrleansActivityCapture(string SourceName, string DisplayName, string TraceId,
     string SpanId, string ParentSpanId, ActivityStatusCode Status, string? StatusDescription,
-    string? TraceState, string[] Baggage, KeyValuePair<string, string?>[] Tags,
+    string? TraceState, string[] Baggage, bool HasLinks, KeyValuePair<string, string?>[] Tags,
     OrleansActivityEventCapture[] Events)
 {
     internal static OrleansActivityCapture From(Activity activity)
@@ -93,6 +101,7 @@ internal sealed record OrleansActivityCapture(string SourceName, string DisplayN
             activity.SpanId.ToHexString(), activity.ParentSpanId.ToHexString(), activity.Status,
             activity.StatusDescription, activity.TraceStateString,
             activity.Baggage.Select(static item => item.Key + "=" + item.Value).ToArray(),
+            activity.Links.Any(),
             activity.TagObjects.Select(static tag => new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())).ToArray(),
             activity.Events.Select(static activityEvent => new OrleansActivityEventCapture(activityEvent.Name,
                 activityEvent.Tags.Select(static tag => new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())).ToArray())).ToArray());

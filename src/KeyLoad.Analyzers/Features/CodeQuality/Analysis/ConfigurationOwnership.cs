@@ -41,7 +41,8 @@ internal static class ConfigurationOwnership
     private static bool HasMarker(Compilation compilation, ISymbol symbol, string markerName)
     {
         var marker = compilation.GetTypeByMetadataName(markerName);
-        return marker is not null && symbol.GetAttributes().Any(attribute =>
+        return marker?.ContainingAssembly.Name == ConfigurationMetadataNames.OwnerAssembly &&
+            symbol.GetAttributes().Any(attribute =>
             SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, marker));
     }
 }

@@ -24,16 +24,16 @@ internal static class OrleansSiloConfiguration
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
         runtimeOptions.RegisterBorrowed(builder.Services);
-        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation);
+        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation, runtimeOptions);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value));
         return builder.Build();
     }
 
     private static void RegisterBorrowedServices(IServiceCollection services, PartitionHost partition,
         INodeAdministration administration, NodeOptions options, NativeRequestWorkOwner requestWork,
-        CancellationToken startupCancellation)
+        CancellationToken startupCancellation, ServerRuntimeOptions runtimeOptions)
     {
-        var peers = options.CreatePeerOptions();
+        var peers = runtimeOptions.Peer.Value;
         peers.Validate(partition.Configuration);
         var expectedOwner = new PhysicalShardRecord(options.PhysicalShardId, partition.Configuration.Incarnation,
             ImmutableArray.CreateRange(partition.Configuration.VoterIds),
@@ -43,7 +43,6 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);
-        services.AddSingleton(peers);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
@@ -55,12 +54,14 @@ internal static class OrleansSiloConfiguration
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         services.AddSingleton<ReplicaSiloDiscoveryState>();
-        services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), peers,
+        services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
+            provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
             provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
         services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
-            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), peers, provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), TimeProvider.System,
             provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>(),
             options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture

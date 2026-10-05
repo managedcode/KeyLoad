@@ -32,7 +32,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 
     private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology,
         executionOptions ?? throw new InvalidOperationException(QdrantVectorProtocol.MissingExecutionPolicy));
-    string IVectorComparisonTarget.Name => "Qdrant";
+    string IVectorComparisonTarget.Name => QdrantVectorProtocol.TargetName;
     bool IVectorComparisonTarget.Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
         => indexKind is VectorIndexKind.Exact or VectorIndexKind.Hnsw && Enum.IsDefined(queryMode);
     async Task<int> IVectorComparisonTarget.IngestAsync(IAsyncEnumerable<VectorDocument> documents, CancellationToken token)
@@ -44,8 +44,9 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     async Task<VectorIndexReceipt> IVectorComparisonTarget.BuildIndexAsync(VectorComparisonProfile profile, CancellationToken token)
     {
         var receipt = await Vectors.BuildIndexAsync(profile, token);
-        Profile = Profile with { ReadContract = $"native {profile.IndexKind} cosine; hnsw_ef=200; native {profile.QueryMode} predicate; "
-            + (ComparisonTopologies.NodeCount(topology) > 1 ? "consistency=majority" : "single primary") };
+        Profile = Profile with { ReadContract = QdrantVectorProtocol.NativeReadPrefix + profile.IndexKind
+            + QdrantVectorProtocol.CosineReadDescription + profile.QueryMode + QdrantVectorProtocol.PredicateReadDescription
+            + QdrantNativePolicy.ReadContract(topology) };
         return receipt;
     }
     IAsyncEnumerable<VectorReadback> IVectorComparisonTarget.ReadbackAsync(CancellationToken token) => Vectors.ReadbackAsync(token);
@@ -90,7 +91,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         HttpClient[]? nodeClients, IOptions<NativeComparisonExecutionOptions> executionOptions)
         : this(http, runId, image, topology, nodeClients)
     {
-        this.executionOptions = executionOptions ?? throw new ArgumentNullException(nameof(executionOptions));
+        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
     }
 
     /// <summary>Gets the server version, native topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>

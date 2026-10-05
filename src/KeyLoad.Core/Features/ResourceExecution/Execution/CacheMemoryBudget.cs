@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Atomically admits modeled retained cache bytes and entries for one node.</summary>
@@ -16,10 +18,11 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
     private bool closed;
 
     /// <summary>Validates and owns immutable node admission ceilings before creating pool state.</summary>
-    /// <param name="limits">Modeled retained-byte and entry ceilings.</param>
-    public CacheMemoryBudget(CacheMemoryLimits limits)
+    /// <param name="options">Centrally validated modeled retained-byte and entry ceilings.</param>
+    public CacheMemoryBudget(IOptions<CacheMemoryLimits> options)
     {
-        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(options);
+        var limits = options.Value;
         limits.Validate();
         maxRetainedBytes = limits.MaxRetainedBytes;
         maxRetainedEntries = limits.MaxRetainedEntries;

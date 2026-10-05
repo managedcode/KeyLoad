@@ -1,10 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class ReplicaMembershipAuthorityOperations(NodeOptions options, ReplicaMembershipAuthorityMac mac)
+internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions> nodeOptions, ReplicaMembershipAuthorityMac mac)
 {
+    private readonly NodeOptions options = nodeOptions.Value;
     internal async Task<ReplicaMembershipAuthorityReplyV1> ExecuteAsync(IMembershipTable provider,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken cancellationToken)
     {

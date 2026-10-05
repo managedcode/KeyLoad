@@ -70,6 +70,7 @@ function validateVectorMetrics(metrics, profile) {
   requireValue(close(metrics.exactRecall, average) && close(metrics.minimumRecall, minimum) &&
     close(metrics.queryUsefulOperationsPerSecond, profile.measuredQueries / metrics.queryElapsedSeconds), ERROR);
   if (profile.indexKind === 'Exact') requireValue(metrics.exactRecall === 1 && metrics.indexBuildMilliseconds === 0, ERROR);
+  else requireValue(metrics.indexBuildMilliseconds > 0, ERROR);
   if (profile.indexKind === 'Hnsw') requireValue(/hnsw/iu.test(metrics.nativeIndexDefinition)
     && /hnsw/iu.test(metrics.nativeQueryPlan), ERROR);
   if (profile.indexKind === 'IvfFlat') requireValue(/ivfflat/iu.test(metrics.nativeIndexDefinition)

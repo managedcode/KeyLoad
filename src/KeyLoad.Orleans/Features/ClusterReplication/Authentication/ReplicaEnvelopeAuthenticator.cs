@@ -22,18 +22,19 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
 
     /// <summary>Creates authentication for one node, fixed voter scope and system clock.</summary>
     /// <param name="configurationOptions">The node identity, voter set, incarnation and payload limits.</param>
-    /// <param name="options">The fixed-cluster signing secret, control budget and replay capacities.</param>
+    /// <param name="peerOptions">The fixed-cluster signing secret, control budget and replay capacities.</param>
     /// <param name="local">The actual local Orleans runtime generation.</param>
     /// <param name="clock">The system clock used for envelope freshness.</param>
     /// <param name="transportOptions">Centrally validated envelope freshness and retry settings.</param>
     /// <param name="logger">Optional closed numeric replay-admission diagnostics.</param>
     /// <param name="canonicalDatabase">Optional borrowed canonical authority; required for non-null native operations.</param>
-    public ReplicaEnvelopeAuthenticator(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    public ReplicaEnvelopeAuthenticator(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
         ReplicaSiloDiscoveryState local, TimeProvider clock, IOptions<ReplicaTransportOptions> transportOptions,
         ILogger<ReplicaEnvelopeAuthenticator>? logger = null,
         DatabaseEngine? canonicalDatabase = null)
     {
         var configuration = configurationOptions.Value;
+        var options = peerOptions.Value;
         settings = transportOptions.Value;
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
@@ -43,17 +44,17 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.InvalidPeer);
         }
-        this.configuration = configuration;
+        this.configuration = configurationOptions.Value;
         this.local = local;
         this.clock = clock;
         this.canonicalDatabase = canonicalDatabase;
         voters = new(configuration.VoterIds, StringComparer.Ordinal);
         mac = new(options.Secret, options.ClusterId);
-        replay = new(configuration.VoterIds, options.ReplayLimits, transportOptions);
+        replay = new(configuration.VoterIds, peerOptions, transportOptions);
         maximumControlPayloadBytes = options.MaxControlPayloadBytes;
         if (logger is not null)
         {
-            diagnostics = new(logger, configuration.VoterIds.Length);
+            diagnostics = new(logger, configuration.VoterIds.Length, transportOptions);
             diagnostics.Configured(options.ReplayLimits);
         }
     }

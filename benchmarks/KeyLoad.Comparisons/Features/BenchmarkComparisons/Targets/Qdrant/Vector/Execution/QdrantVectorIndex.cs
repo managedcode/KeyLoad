@@ -9,6 +9,9 @@ internal static class QdrantVectorIndex
     internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient client, HttpClient[] nodes, string collection,
         VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
     {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);
+        token = deadline.Token;
         var path = QdrantVectorProtocol.CollectionPrefix + collection;
         var watch = Stopwatch.StartNew();
         if (profile.IndexKind == VectorIndexKind.Hnsw)

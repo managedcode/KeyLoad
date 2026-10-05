@@ -375,7 +375,7 @@ remain mandatory; source preparation does not establish native RF3 completion.
 ### Central native options join for open-loop execution
 
 TASK-SCALE-OPENLOOP-OPTIONS-001 applies the owner correction in
-[ADR-112](../../ADR/ADR-112-centralized-runtime-options.md) before the private
+[ADR-113](../../ADR/ADR-113-centralized-runtime-options.md) before the private
 open-loop packet enters live execution. A dedicated worker owns new
 `KeyLoad.Comparisons/Features/BenchmarkComparisons/Configuration/` option and
 native-validator files, the feature-local execution consumers and typed evidence

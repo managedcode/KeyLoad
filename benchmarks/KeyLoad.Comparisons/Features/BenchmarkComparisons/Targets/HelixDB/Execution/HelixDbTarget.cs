@@ -17,11 +17,14 @@ public sealed class HelixDbTarget(HttpClient http, string runId, string image, I
     private const int SingleResultCardinality = 1;
     private const string SingleLocalWriterNoReplicationConfigured = "single local writer; no replication configured";
     private const string HELIXDATADIRPersistentDirectory = "HELIX_DATA_DIR persistent directory";
-    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
+    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
+    private NativeComparisonExecutionOptions Policy => execution.Value;
     private readonly string label = HelixDbNativeTokens.TokenKeyLoadDoc + Guid.Parse(runId).ToString(HelixDbNativeTokens.TokenN);
     private int count;
     private int depth;
     private bool ownsData;
+    private bool ownsEqualityIndex;
+    private bool ownsRangeIndex;
     /// <inheritdoc/>
     public TargetProfile Profile { get; } = new(HelixDbNativeTokens.TokenHelixDB, V0PinnedNativeServerImage, OnePersistentNativeLocalWriter, XHelixAwaitDurableTrueNativeDiskFlush, CommittedNativeReadsAndDirectedGraphTraversal, POSTV2QueryOperationTree, IsolatedLocalServerNoAuthentication, image)
     {
@@ -39,16 +42,18 @@ public sealed class HelixDbTarget(HttpClient http, string runId, string image, I
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
         ownsData = true;
-        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenId, range: false), policy, cancellationToken).ConfigureAwait(false);
-        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenNumber, range: true), policy, cancellationToken).ConfigureAwait(false);
-        await HelixDbDocumentStorage.SeedAsync(http, label, dataset, policy, cancellationToken).ConfigureAwait(false);
+        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenId, range: false), Policy, cancellationToken).ConfigureAwait(false);
+        ownsEqualityIndex = true;
+        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, cancellationToken).ConfigureAwait(false);
+        ownsRangeIndex = true;
+        await HelixDbDocumentStorage.SeedAsync(http, label, dataset, Policy, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<IComparisonSession>(new HelixDbSession(http, label, count, depth, policy));
+        return Task.FromResult<IComparisonSession>(new HelixDbSession(http, label, count, depth, execution));
     }
 
     /// <inheritdoc/>
@@ -58,8 +63,16 @@ public sealed class HelixDbTarget(HttpClient http, string runId, string image, I
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(policy.CleanupTimeout);
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, policy, timeout.Token).ConfigureAwait(false);
+                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
+                if (ownsEqualityIndex)
+                {
+                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenId, range: false), Policy, timeout.Token).ConfigureAwait(false);
+                }
+                if (ownsRangeIndex)
+                {
+                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, timeout.Token).ConfigureAwait(false);
+                }
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, timeout.Token).ConfigureAwait(false);
             }
         }
         finally

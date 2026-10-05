@@ -17,6 +17,10 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), EventSourceExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<QueryExecutionOptions>().Bind(configuration.GetSection(QueryExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), QueryExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<CacheMemoryLimits>().Bind(configuration.GetSection(CacheMemoryLimits.SectionName))
+            .Validate(options => { options.Validate(); return true; }, CacheMemoryLimits.ValidationMessage).ValidateOnStart();
+        services.AddOptions<CacheReadPermitOptions>().Bind(configuration.GetSection(CacheReadPermitOptions.SectionName))
+            .Validate(options => options.IsValid(), CacheReadPermitOptions.ValidationMessage).ValidateOnStart();
         services.AddSingleton<CoreRuntimeOptions>();
     }
 }

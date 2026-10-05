@@ -34,6 +34,16 @@ public sealed class NativeComparisonExecutionOptions
     /// <summary>The interval between native index completion checks.</summary>
     public TimeSpan IndexPollInterval { get; set; }
 
+    /// <summary>Validates the injected wrapper before any native target is created.</summary>
+    /// <param name="options">The centrally bound options.</param>
+    /// <returns>The validated native options wrapper.</returns>
+    public static IOptions<NativeComparisonExecutionOptions> Require(IOptions<NativeComparisonExecutionOptions> options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        options.Value.Validate();
+        return options;
+    }
+
     /// <summary>Rejects omitted or inconsistent operational configuration.</summary>
     /// <returns>This validated policy.</returns>
     public NativeComparisonExecutionOptions Validate()

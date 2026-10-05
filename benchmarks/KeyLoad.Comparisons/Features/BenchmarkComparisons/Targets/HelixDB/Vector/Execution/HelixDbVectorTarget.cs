@@ -24,7 +24,8 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     private const int CanonicalTopK = 10;
     private const string ObservedIndexLifecycle = "; observed index lifecycle=";
     private const int EmptyResultCount = 0;
-    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
+    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
+    private NativeComparisonExecutionOptions Policy => execution.Value;
     private const string RunIdentityFormat = "N";
     private readonly string label = HelixDbNativeTokens.TokenKeyLoadVector + Guid.Parse(runId).ToString(RunIdentityFormat);
     private int corpusCount;
@@ -49,7 +50,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         using var health = await http.GetAsync(new Uri(HelixDbNativeTokens.TokenReadyz, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         health.EnsureSuccessStatusCode();
         ownsData = true;
-        corpusCount = await HelixDbVectorStorage.IngestAsync(http, label, documents, policy, cancellationToken).ConfigureAwait(false);
+        corpusCount = await HelixDbVectorStorage.IngestAsync(http, label, documents, Policy, cancellationToken).ConfigureAwait(false);
         return corpusCount;
     }
 
@@ -64,17 +65,17 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
 
         dimensions = profile.Dimensions;
         ownsIndex = true;
-        var receipt = await HelixDbIndexLifecycle.BuildAsync(http, label, dimensions, policy, cancellationToken).ConfigureAwait(false);
+        var receipt = await HelixDbIndexLifecycle.BuildAsync(http, label, dimensions, Policy, cancellationToken).ConfigureAwait(false);
         indexDefinition = receipt.Definition;
         return receipt;
     }
 
     /// <inheritdoc/>
-    public IAsyncEnumerable<VectorReadback> ReadbackAsync(CancellationToken cancellationToken) => HelixDbVectorStorage.ReadbackAsync(http, label, corpusCount, policy, cancellationToken);
+    public IAsyncEnumerable<VectorReadback> ReadbackAsync(CancellationToken cancellationToken) => HelixDbVectorStorage.ReadbackAsync(http, label, corpusCount, Policy, cancellationToken);
     /// <inheritdoc/>
     public async Task<IReadOnlyList<VectorNeighbor>> SearchAsync(ReadOnlyMemory<float> query, int topK, VectorQueryMode mode, CancellationToken cancellationToken)
     {
-        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Search(label, query.Span, topK, mode), false), false, policy, cancellationToken).ConfigureAwait(false);
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Search(label, query.Span, topK, mode), false), false, Policy, cancellationToken).ConfigureAwait(false);
         return HelixDbProtocol.Rows(response).EnumerateArray().Select(ReadNeighbor).ToArray();
     }
 
@@ -90,7 +91,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     public async Task UpdateAsync(VectorUpdate update, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(update);
-        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Update(label, update), true), true, policy, cancellationToken).ConfigureAwait(false);
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Update(label, update), true), true, Policy, cancellationToken).ConfigureAwait(false);
         if (HelixDbProtocol.Rows(response).GetArrayLength() != SingleResultCardinality)
         {
             throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbUpdateCardinalityMismatch);
@@ -100,7 +101,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     /// <inheritdoc/>
     public async Task<VectorReadback?> ReadAsync(string id, CancellationToken cancellationToken)
     {
-        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Read(label, id), false), false, policy, cancellationToken).ConfigureAwait(false);
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Read(label, id), false), false, Policy, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
         return rows.GetArrayLength() == EmptyResultCount ? null : HelixDbVectorStorage.Read(rows[EmptyResultCount]);
     }
@@ -110,15 +111,15 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     {
         try
         {
-            using var timeout = new CancellationTokenSource(policy.CleanupTimeout);
+            using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
             if (ownsIndex)
             {
-                await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbVectorAst.Index(label, dimensions, drop: true), policy, timeout.Token).ConfigureAwait(false);
+                await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbVectorAst.Index(label, dimensions, drop: true), Policy, timeout.Token).ConfigureAwait(false);
             }
 
             if (ownsData)
             {
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, policy, timeout.Token).ConfigureAwait(false);
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, timeout.Token).ConfigureAwait(false);
             }
         }
         finally

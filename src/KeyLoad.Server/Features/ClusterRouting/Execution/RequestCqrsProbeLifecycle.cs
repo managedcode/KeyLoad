@@ -1,9 +1,11 @@
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeLifecycle
+internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOptions> executionOptions)
 {
+    private readonly RequestProbeExecutionOptions settings = executionOptions.Value;
     private readonly Lock sync = new();
     private readonly Dictionary<Guid, RequestCqrsProbeClaim> claims = [];
     private TaskCompletionSource drained = Completed();
@@ -69,7 +71,7 @@ internal sealed class RequestCqrsProbeLifecycle
     {
         lock (sync)
         {
-            if (activeGates >= RequestCqrsProbeProtocol.MaximumActiveGates)
+            if (activeGates >= settings.MaximumActiveGates)
             { throw Invalid(); }
             activeGates++;
         }

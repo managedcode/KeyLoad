@@ -52,7 +52,7 @@ public static class NativeComparisonResponse
                     throw new ComparisonFailureException(LimitFailure);
                 }
 
-                body.Write(buffer, EmptyResultCount, count);
+                await body.WriteAsync(buffer.AsMemory(EmptyResultCount, count), token).ConfigureAwait(false);
             }
 
             return body.GetBuffer().AsMemory(EmptyResultCount, checked((int)body.Length));

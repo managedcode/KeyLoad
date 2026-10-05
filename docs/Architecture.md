@@ -1,6 +1,6 @@
 # KeyLoad architecture and ownership map
 
-[ADR-112](ADR/ADR-112-centralized-runtime-options.md) requires the complete runtime
+[ADR-113](ADR/ADR-113-centralized-runtime-options.md) requires the complete runtime
 literal migration and centralized validated native IOptions for operational policy.
 Immutable endpoint/method/format identities use constants/nameof; timeout and
 resource policies flow to their actual execution owners through typed options.
@@ -1128,7 +1128,7 @@ flowchart LR
 
 ## Independent optional benchmark website publication
 
-[ADR-112](ADR/ADR-112-independent-website-publication.md) and
+[ADR-113](ADR/ADR-112-independent-website-publication.md) and
 [REQ/AC-BC-WEB-001..005](Features/BenchmarkComparisons.md) let CI publish website
 source independently. The latest ready authenticated benchmark aggregate enriches
 the website when available; absence emits no metric catalog or figures. Content

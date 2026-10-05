@@ -34,7 +34,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         options.Validate();
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
-        stores = new(options, DirectoryPath);
+        stores = new(runtimeOptions.Node, DirectoryPath);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;

@@ -13,7 +13,7 @@ namespace KeyLoad.Comparisons;
 public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
     private readonly VectorComparisonProfile profile = profile ?? throw new ArgumentNullException(nameof(profile));
-    private readonly NativeComparisonExecutionOptions execution = ReadExecution(profile, executionOptions);
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = ReadExecution(profile, executionOptions);
 
     /// <summary>Executes corpus verification, index construction, warmup and the measured vector workload.</summary>
     /// <param name="target">The real native target owned by the Aspire host.</param>
@@ -39,28 +39,28 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
             throw new InvalidDataException($"{VectorComparisonRunnerValues.NativeIngestionLoaded}{loaded}{VectorComparisonRunnerValues.RecordsExpected}{profile.RecordCount}{VectorComparisonRunnerValues.SentencePeriod}");
         }
 
-        await new VectorResultValidator(profile, execution).ValidateReadbackAsync(target, corpus, cancellationToken).ConfigureAwait(false);
+        await new VectorResultValidator(profile, executionOptions).ValidateReadbackAsync(target, corpus, cancellationToken).ConfigureAwait(false);
 
         var index = await target.BuildIndexAsync(profile, cancellationToken).ConfigureAwait(false);
         var parameters = new Dictionary<string, string>(index.Parameters, StringComparer.Ordinal);
-        execution.RecordEvidence(parameters);
+        executionOptions.Value.RecordEvidence(parameters);
         index = index with { Parameters = parameters };
         var queries = corpus.CreateQueries();
         var expected = corpus.ExactNeighborsBatch(queries, cancellationToken);
 
         var plan = await target.ExplainAsync(queries[VectorComparisonRunnerValues.FirstIndex], profile.QueryMode, cancellationToken).ConfigureAwait(false);
-        ValidateIndex(index, plan);
+        ValidateIndex(profile, index, plan);
         for (var i = VectorComparisonRunnerValues.FirstIndex; i < profile.WarmupQueries; i++)
         {
-            await new VectorResultValidator(profile, execution).ValidateQueryAsync(target, corpus, queries[i % queries.Count], expected[i % queries.Count], cancellationToken).ConfigureAwait(false);
+            await new VectorResultValidator(profile, executionOptions).ValidateQueryAsync(target, corpus, queries[i % queries.Count], expected[i % queries.Count], cancellationToken).ConfigureAwait(false);
         }
 
-        var measured = await new VectorWorkloadExecutor(profile, execution).RunAsync(target, corpus, queries, expected,
+        var measured = await new VectorWorkloadExecutor(profile, executionOptions).RunAsync(target, corpus, queries, expected,
             cancellationToken).ConfigureAwait(false);
         return CreateReport(target, sourceRevision, storage, started, datasetHash, loaded, index, plan, measured);
     }
 
-    private static NativeComparisonExecutionOptions ReadExecution(VectorComparisonProfile profile,
+    private static IOptions<NativeComparisonExecutionOptions> ReadExecution(VectorComparisonProfile profile,
         IOptions<NativeComparisonExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(profile);
@@ -71,13 +71,14 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
         {
             throw new ArgumentException(VectorComparisonRunnerValues.TheNativeOperationTimeoutMustEqual, nameof(options));
         }
-        return execution;
+        return options;
     }
 
-    private void ValidateIndex(VectorIndexReceipt index, string plan)
+    internal static void ValidateIndex(VectorComparisonProfile profile, VectorIndexReceipt index, string plan)
     {
         if (index.IndexKind != profile.IndexKind || !double.IsFinite(index.BuildMilliseconds) || index.BuildMilliseconds < VectorComparisonRunnerValues.FirstIndex
-            || (profile.IndexKind == VectorIndexKind.Exact && index.BuildMilliseconds != VectorComparisonRunnerValues.FirstIndex))
+            || (profile.IndexKind == VectorIndexKind.Exact && index.BuildMilliseconds != VectorComparisonRunnerValues.FirstIndex)
+            || (profile.IndexKind != VectorIndexKind.Exact && index.BuildMilliseconds <= VectorComparisonRunnerValues.FirstIndex))
         {
             throw new InvalidDataException(VectorComparisonRunnerValues.NativeIndexReceiptDoesNotMatch);
         }

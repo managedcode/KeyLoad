@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -7,28 +8,32 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
 {
     private readonly Lock disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
-    private readonly RequestCqrsProbeLifecycle lifecycle = new();
+    private readonly RequestCqrsProbeLifecycle lifecycle;
     private readonly ReplicaConfiguration replica;
     private readonly IHostApplicationLifetime applicationLifetime;
     private readonly string siloAddress;
     private readonly CancellationTokenSource stopping = new();
     private Task? shutdown;
+    private readonly RequestProbeExecutionOptions settings;
 
-    private RequestCqrsProbeObserver(RequestCqrsProbeFiles files, ReplicaConfiguration replica,
-        string siloAddress, IHostApplicationLifetime applicationLifetime)
+    private RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
+        string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions)
     {
-        this.replica = replica;
+        replica = replicaOptions.Value;
         this.applicationLifetime = applicationLifetime;
         this.siloAddress = siloAddress;
         this.files = files;
+        settings = executionOptions.Value;
+        lifecycle = new(executionOptions);
     }
 
     internal static RequestCqrsProbeObserver Create(RequestCqrsProbeOptions options,
-        ReplicaConfiguration replica, ILocalSiloDetails localSilo, IHostApplicationLifetime applicationLifetime)
+        IOptions<ReplicaConfiguration> replicaOptions, ILocalSiloDetails localSilo, IHostApplicationLifetime applicationLifetime,
+        IOptions<RequestProbeExecutionOptions> executionOptions)
     {
         var address = localSilo.SiloAddress.ToParsableString();
-        var files = RequestCqrsProbeFiles.Open(options, replica);
-        return new(files, replica, address, applicationLifetime);
+        var files = RequestCqrsProbeFiles.Open(options, replicaOptions.Value);
+        return new(files, replicaOptions, address, applicationLifetime, executionOptions);
     }
 
     public ValueTask ObserveIncompatibleAsync(string voterId, ReplicaDiscoveryObservation observation,
@@ -146,7 +151,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
     private async Task HoldAsync(RequestCqrsProbeClaim claim, RequestCqrsProbePhase phase,
         CancellationToken requestCancellation)
     {
-        using var ceiling = new CancellationTokenSource(TimeSpan.FromSeconds(RequestCqrsProbeProtocol.HoldSeconds));
+        var holdTimeout = settings.HoldTimeout;
+        var pollInterval = settings.PollInterval;
+        using var ceiling = new CancellationTokenSource(holdTimeout);
         using var hostStop = CancellationTokenSource.CreateLinkedTokenSource(applicationLifetime.ApplicationStopping, stopping.Token);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(requestCancellation, hostStop.Token);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(request.Token, ceiling.Token);
@@ -166,7 +173,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
                     files.WriteMarker(CreateMarker(claim, phase, RequestCqrsProbeOutcome.Released));
                     return;
                 }
-                await Task.Delay(RequestCqrsProbeProtocol.PollMilliseconds, linked.Token).ConfigureAwait(true);
+                await Task.Delay(pollInterval, linked.Token).ConfigureAwait(true);
             }
         }
         catch (OperationCanceledException cancellation) when (linked.IsCancellationRequested)

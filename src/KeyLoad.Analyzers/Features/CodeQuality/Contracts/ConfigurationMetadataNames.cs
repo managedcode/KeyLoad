@@ -2,6 +2,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class ConfigurationMetadataNames
 {
+    internal const string OwnerAssembly = "KeyLoad.Abstractions";
     internal const string OptionsOwner = "KeyLoad.ConfigurationOptionsAttribute";
     internal const string BindingOwner = "KeyLoad.ConfigurationBindingAttribute";
     internal const string Options = "Microsoft.Extensions.Options.IOptions`1";

@@ -4712,13 +4712,14 @@
           "REQ-BC-WEB-004",
           "REQ-BC-WEB-005"
         ],
-        "implementation": "in_progress",
+        "implementation": "source_implemented; development_builder_and_site_tests_compile_passed; acceptance_blocked",
         "noDataArtifact": "explicit_benchmarks_none; no_numeric_catalog_or_measurement_requests; publication_benchmarks_null",
         "qualification": "complete_content_assets_browser_source_coverage_for_none; original_full_metric_archive_suite_for_measured",
-        "finalBuild": "pending",
-        "focusedAspireTests": "pending",
-        "deliveredSourceLinuxCi": "pending",
-        "pagesDeployment": "pending"
+        "finalBuild": "failed_372_errors_in_unrelated_in_progress_analyzer_configuration_changes",
+        "focusedAspireTests": "blocked_current_AppHost_build; not_executed",
+        "deliveredSourceLinuxCi": "pending_run37383777995_source68a8660a69e3b88273750b19c1ca396ec5039b0d",
+        "pagesDeployment": "not_verified",
+        "developmentEvidence": "docs/implementation/independent-website-development-2026-10-06.json"
       },
       "genuineCompletedCohort": {
         "sourceRevision": "73aebfd3f72695357834599e813aba77b9e274ad",

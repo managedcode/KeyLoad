@@ -1,10 +1,11 @@
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, NativeComparisonExecutionOptions execution)
+internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
     internal async Task RunAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         VectorWorkloadObservations measured, CancellationToken cancellationToken)
@@ -43,13 +44,13 @@ internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, Nati
     }
     private async Task UpdateAsync(IVectorComparisonTarget target, VectorUpdate update, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(execution, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
         await target.UpdateAsync(update, deadline.Token).ConfigureAwait(false);
     }
 
     private async Task<VectorReadback?> ReadAsync(IVectorComparisonTarget target, string id, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(execution, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
         return await target.ReadAsync(id, deadline.Token).ConfigureAwait(false);
     }
 }

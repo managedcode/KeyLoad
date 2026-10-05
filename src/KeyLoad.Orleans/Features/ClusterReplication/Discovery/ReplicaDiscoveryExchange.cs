@@ -15,16 +15,17 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
     private readonly PeerSecurity security;
     private readonly HttpClient http;
 
-    internal ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    internal ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
         var configuration = configurationOptions.Value;
+        var options = peerSettings.Value;
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(authentication);
         ArgumentNullException.ThrowIfNull(clock);
-        this.configuration = configuration;
-        this.options = options;
+        this.configuration = configurationOptions.Value;
+        this.options = peerSettings.Value;
         this.authentication = authentication;
         this.clock = clock;
         endpoints = new(options.Endpoints, StringComparer.Ordinal);

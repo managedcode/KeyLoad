@@ -39,6 +39,7 @@ internal sealed class VectorExecutionPolicyContractTests
         await Assert.That(linked.IsCancellationRequested).IsTrue();
     }
 
+    [ConfigurationBinding]
     private static NativeComparisonExecutionOptions SourcePolicy()
     {
         var path = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "benchmarks", "KeyLoad.ComparisonHost",

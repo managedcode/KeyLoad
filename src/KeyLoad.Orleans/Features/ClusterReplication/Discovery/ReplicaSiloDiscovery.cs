@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -21,12 +22,14 @@ public sealed record ReplicaSiloDiscovery(
     [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = 0);
 
 /// <summary>Publishes the actual local Orleans runtime generation after early service initialization.</summary>
-/// <param name="configuration">The local voter and current database incarnation.</param>
-/// <param name="options">The fixed cluster identity used in discovery documents.</param>
+/// <param name="configurationOptions">The local voter and current database incarnation.</param>
+/// <param name="peerOptions">The fixed cluster identity used in discovery documents.</param>
 /// <param name="localSilo">The Orleans runtime details containing the true silo generation.</param>
-public sealed class ReplicaSiloDiscoveryState(ReplicaConfiguration configuration, ReplicaPeerOptions options,
+public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
     ILocalSiloDetails localSilo)
 {
+    private readonly ReplicaConfiguration configuration = configurationOptions.Value;
+    private readonly ReplicaPeerOptions options = peerOptions.Value;
     private int ready;
 
     /// <summary>Full local address including the actual runtime generation.</summary>

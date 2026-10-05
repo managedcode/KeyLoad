@@ -23,7 +23,7 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
     private readonly CancellationTokenSource stopping;
     private int disposed;
 
-    internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
         ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
         exchange = new(configurationOptions, options, authentication, clock, peerOptions);

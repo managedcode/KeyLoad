@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "sourceBaseRevision": "68a8660a69e3b88273750b19c1ca396ec5039b0d",
+  "sourceState": "shared_checkpoint_pushed_by_concurrent_owner; subsequent_unrelated_edits_present",
+  "qualification": "development_only; not_publication_qualified",
+  "requirements": [
+    "REQ-BC-WEB-001",
+    "REQ-BC-WEB-002",
+    "REQ-BC-WEB-003",
+    "REQ-BC-WEB-004",
+    "REQ-BC-WEB-005"
+  ],
+  "checks": {
+    "noDataBuilder": {
+      "passed": true,
+      "mode": "none",
+      "benchmarkSource": "none",
+      "dataDirectory": false,
+      "canonicalTemporaryPathRequired": true
+    },
+    "siteTestsCompilation": {
+      "passed": true,
+      "warnings": 0,
+      "errors": 0
+    },
+    "yamlAndBashSyntax": "passed",
+    "javascriptSyntaxAndImports": "passed",
+    "repositoryGovernance": "passed",
+    "canonicalReleaseBuild": {
+      "passed": false,
+      "warnings": 0,
+      "errors": 372,
+      "blocker": "unrelated_in_progress_configuration_and_analyzer_changes; Diagnostics, Abstractions and ServiceDefaults"
+    },
+    "canonicalFormat": {
+      "passed": false,
+      "exitCode": 2,
+      "blocker": "current_workspace_compilation_errors; typed_configuration_constructor_migrations_in_unit_tests"
+    },
+    "aspireRegressions": {
+      "executed": false,
+      "blocker": "current_AppHost_canonical_build_fails_in_unrelated_Diagnostics_and_ServiceDefaults"
+    },
+    "linuxCi": {
+      "runId": 37383777995,
+      "sourceRevision": "68a8660a69e3b88273750b19c1ca396ec5039b0d",
+      "status": "pending_at_observation"
+    },
+    "pages": "not_verified"
+  },
+  "logs": {
+    "keyload-independent-website-final-build.log": {
+      "path": "/private/tmp/keyload-independent-website-final-build.log",
+      "sha256": "fe7f81191ea592a826b64a497b8637225fa9705890bc5aabda65fe963496a5b8"
+    },
+    "keyload-independent-site-tests-build.log": {
+      "path": "/private/tmp/keyload-independent-site-tests-build.log",
+      "sha256": "7f4990779da3a93b0b15fd17d08b4bd510a8e87ac3006805655eef76510d66b2"
+    },
+    "keyload-independent-website-format.log": {
+      "path": "/private/tmp/keyload-independent-website-format.log",
+      "sha256": "b58df9d60c7ca3501ab47133997ad5c497dd7dad8315b54bb864a056ff80a27a"
+    },
+    "keyload-independent-apphost-build.log": {
+      "path": "/private/tmp/keyload-independent-apphost-build.log",
+      "sha256": "6b947b493f4cfa91d58c11284b9be042c1821a461b4158ed36dae278243cf8c4"
+    }
+  }
+}

@@ -145,27 +145,27 @@ internal sealed record NodeOptions
         ReplayLimits = ReplayAdmission,
         MaxControlPayloadBytes = CommandAdmission.MaxControlPayloadBytes
     };
-}
 
-internal static class NodeDefaults
-{
-    internal const string DataDirectory = "data/node";
-    internal const string PublicEndpoint = "http://127.0.0.1:5100";
-    internal const string ClusterId = "keyload";
-    internal const string SiloAddress = "127.0.0.1";
-    internal const string AdminPrefix = "root.";
-    internal const string OriginPath = "/";
-    internal const string InvalidIdentity = "Cluster identity, credentials or silo port are invalid.";
-    internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
-    internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
-    internal const int MinimumVoters = 3;
-    internal const int MinimumBenchmarkVoters = 1;
-    internal const int MaximumBenchmarkVoters = 3;
-    internal const int SiloPort = 11_111;
-    internal const int SnapshotThreshold = 1_024;
-    internal const int LowerElectionMilliseconds = 4_000;
-    internal const int UpperElectionMilliseconds = 8_000;
-    internal const int ConnectMilliseconds = 500;
-    internal const int RpcMilliseconds = 2_000;
-    internal const int MinimumAdminCharacters = 32;
+    private static class NodeDefaults
+    {
+        internal const string DataDirectory = "data/node";
+        internal const string PublicEndpoint = "http://127.0.0.1:5100";
+        internal const string ClusterId = "keyload";
+        internal const string SiloAddress = "127.0.0.1";
+        internal const string AdminPrefix = "root.";
+        internal const string OriginPath = "/";
+        internal const string InvalidIdentity = "Cluster identity, credentials or silo port are invalid.";
+        internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
+        internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
+        internal const int MinimumVoters = 3;
+        internal const int MinimumBenchmarkVoters = 1;
+        internal const int MaximumBenchmarkVoters = 3;
+        internal const int SiloPort = 11_111;
+        internal const int SnapshotThreshold = 1_024;
+        internal const int LowerElectionMilliseconds = 4_000;
+        internal const int UpperElectionMilliseconds = 8_000;
+        internal const int ConnectMilliseconds = 500;
+        internal const int RpcMilliseconds = 2_000;
+        internal const int MinimumAdminCharacters = 32;
+    }
 }

@@ -123,3 +123,10 @@ and every new native execution owner use the same validated policy. Existing
 unrelated runtime-policy migration stays with its owning task. AC-VQ-004/005/006
 include invalid-policy rejection, actual effective settings and unchanged
 corpus/accuracy/native algorithm, tested through the real composed host.
+
+All isolated worker selectors and immutable-workload override detection are bound
+from the trusted `Benchmarks` section into `IOptions<ComparisonWorkerSelectionOptions>` by `ComparisonWorkerSelection.Read`
+composition, then parsed against the frozen profile inventory before allocating
+resources. An absent selector admits the existing control/scaled families; an
+invalid or simultaneous selector rejects the worker selection. The vector worker
+owns this small configuration join and its profile-selection regressions.

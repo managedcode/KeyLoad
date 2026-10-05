@@ -27,7 +27,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
         IOptions<ReplicaExecutionOptions> executionOptions)
     {
         var options = nodeOptions.Value;
-        this.options = options;
+        this.options = nodeOptions.Value;
         this.owner = owner;
         this.clock = clock;
         settings = membershipOptions.Value;
@@ -42,7 +42,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
         {
             callerMac = new(callerKey);
             authorityMac = new(authorityKey);
-            operations = new(options, authorityMac);
+            operations = new(nodeOptions, authorityMac);
         }
         finally
         {

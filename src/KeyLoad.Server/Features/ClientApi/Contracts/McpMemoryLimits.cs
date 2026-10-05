@@ -1,6 +1,7 @@
 namespace KeyLoad.Server;
 
 /// <summary>Independent node-local retained-allocation budgets for the official MCP adapter.</summary>
+[ConfigurationOptions]
 internal sealed record McpMemoryLimits
 {
     private const long DefaultDataBytes = 2_147_483_648;

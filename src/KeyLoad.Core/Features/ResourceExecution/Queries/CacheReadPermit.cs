@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Maintains one receiver-local finite cache eligibility lease without granting read authority.</summary>
@@ -8,14 +10,22 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
 
     private readonly Lock writer = new();
     private readonly TimeProvider clock;
+    private readonly TimeSpan prepareValidity;
+    private readonly TimeSpan leaseValidity;
     private State state = new(null, 0, false);
 
     /// <summary>Creates a cold receiver-local permit that evaluates leases with the supplied monotonic clock.</summary>
     /// <param name="clock">The receiver clock used for preparation age and eligibility.</param>
-    public CacheReadPermit(TimeProvider clock)
+    /// <param name="options">Centrally validated eligibility policy, frozen for this receiver.</param>
+    public CacheReadPermit(TimeProvider clock, IOptions<CacheReadPermitOptions> options)
     {
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(options);
+        var settings = options.Value;
+        settings.Validate();
         this.clock = clock;
+        prepareValidity = settings.PrepareValidity;
+        leaseValidity = settings.LeaseValidity;
     }
 
     /// <summary>Accepts only a newer, locally fresh grant already authenticated by its trusted receiver.</summary>
@@ -30,7 +40,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
                 return false;
             }
             var now = clock.GetTimestamp();
-            if (!TryElapsed(preparedTimestamp, now, out var age) || age >= CacheReadPermitLimits.PrepareValidity)
+            if (!TryElapsed(preparedTimestamp, now, out var age) || age >= prepareValidity)
             {
                 return false;
             }
@@ -106,7 +116,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     }
 
     private bool IsEligible(Lease lease, long now)
-        => TryElapsed(lease.PreparedTimestamp, now, out var age) && age < CacheReadPermitLimits.LeaseValidity;
+        => TryElapsed(lease.PreparedTimestamp, now, out var age) && age < leaseValidity;
 
     private bool TryElapsed(long preparedTimestamp, long now, out TimeSpan elapsed)
     {

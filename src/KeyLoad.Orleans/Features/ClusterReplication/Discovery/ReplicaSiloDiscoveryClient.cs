@@ -15,13 +15,13 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
     /// <param name="authentication">The shared request/reply and discovery verifier.</param>
     /// <param name="clock">The system clock and monotonic cache timer.</param>
     /// <param name="peerOptions">The centrally validated discovery timing and replay limits.</param>
-    public ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    public ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
         IOptions<PeerDiscoveryOptions> peerOptions)
         : this(configurationOptions, options, local, authentication, clock, peerOptions, null)
     { }
 
-    internal ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    internal ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
         IOptions<PeerDiscoveryOptions> peerOptions, IReplicaDiscoveryObservationSink? observationSink)
     {

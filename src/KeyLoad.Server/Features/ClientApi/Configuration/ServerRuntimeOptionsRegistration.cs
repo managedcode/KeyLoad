@@ -34,6 +34,18 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddSingleton<IValidateOptions<NodeOptions>, NodeOptionsValidator>();
         services.AddOptions<ReplicaConfiguration>();
         services.AddSingleton<IOptionsFactory<ReplicaConfiguration>, ReplicaConfigurationFactory>();
+        services.AddOptions<ReplicaReplayLimits>();
+        services.AddSingleton<IOptionsFactory<ReplicaReplayLimits>, ReplicaReplayOptionsFactory>();
+        services.AddOptions<ReplicaPeerOptions>();
+        services.AddSingleton<IOptionsFactory<ReplicaPeerOptions>, ReplicaPeerOptionsFactory>();
+        services.AddOptions<CommandAdmissionLimits>();
+        services.AddSingleton<IOptionsFactory<CommandAdmissionLimits>>(provider =>
+            new NodeOptionsProjectionFactory<CommandAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
+                node => node.CommandAdmission));
+        services.AddOptions<HttpAdmissionLimits>();
+        services.AddSingleton<IOptionsFactory<HttpAdmissionLimits>>(provider =>
+            new NodeOptionsProjectionFactory<HttpAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
+                node => node.HttpAdmission));
         services.AddSingleton<ServerRuntimeOptions>();
         return services;
     }

@@ -1,11 +1,13 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.Comparisons.Targets;
-internal sealed class HelixDbSession(HttpClient http, string label, int count, int depth, NativeComparisonExecutionOptions policy) : IComparisonSession
+internal sealed class HelixDbSession(HttpClient http, string label, int count, int depth, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
+    private NativeComparisonExecutionOptions Policy => executionOptions.Value;
     private const int EmptyResultCount = 0;
     private const int SingleResultCardinality = 1;
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
@@ -21,7 +23,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
         var seen = EmptyResultCount;
         while (true)
         {
-            using var response = await QueryAsync(HelixDbDocumentAst.Page(label, after, policy.ReadbackBatchCapacity), false, cancellationToken).ConfigureAwait(false);
+            using var response = await QueryAsync(HelixDbDocumentAst.Page(label, after, Policy.ReadbackBatchCapacity), false, cancellationToken).ConfigureAwait(false);
             var rows = HelixDbProtocol.Rows(response);
             if (rows.GetArrayLength() == EmptyResultCount)
             {
@@ -75,7 +77,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
                 HelixDbProtocol.Entry(HelixDbProtocol.Node(HelixDbNativeTokens.TokenCount, new() { [HelixDbNativeTokens.TokenInput] = HelixDbDocumentAst.Lookup(label, document.Id) }), HelixDbNativeTokens.TokenAffected),
                 HelixDbProtocol.Entry(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbDocumentAst.Lookup(label, document.Id) }), HelixDbNativeTokens.TokenRemoved)
             };
-            using var result = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, [HelixDbNativeTokens.TokenAffected]), true, policy, token).ConfigureAwait(false);
+            using var result = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, [HelixDbNativeTokens.TokenAffected]), true, Policy, token).ConfigureAwait(false);
             RequireOne(result.RootElement.GetProperty(HelixDbNativeTokens.TokenAffected), scenario);
             return;
         }
@@ -89,7 +91,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
         RequireOne(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows), scenario);
     }
 
-    private Task<JsonDocument> QueryAsync(JsonObject ast, bool write, CancellationToken token) => HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, write), write, policy, token);
+    private Task<JsonDocument> QueryAsync(JsonObject ast, bool write, CancellationToken token) => HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, write), write, Policy, token);
     private static FoundDocument Read(JsonElement row) => new(row.GetProperty(HelixDbNativeTokens.TokenId).GetString()!, row.GetProperty(HelixDbNativeTokens.TokenPayload).GetString()!);
     private static void RequireOne(JsonElement result, Scenario scenario)
     {

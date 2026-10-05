@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -11,10 +12,11 @@ internal sealed class ReplicaDiscoveryObservationCache
     private readonly TimeProvider clock;
     private readonly ConcurrentDictionary<string, ReplicaDiscoveryObservation> observations;
 
-    internal ReplicaDiscoveryObservationCache(ReplicaConfiguration configuration, ReplicaSiloDiscoveryState local,
+    internal ReplicaDiscoveryObservationCache(IOptions<ReplicaConfiguration> configurationOptions, ReplicaSiloDiscoveryState local,
         TimeProvider clock)
     {
-        this.configuration = configuration;
+        var configuration = configurationOptions.Value;
+        this.configuration = configurationOptions.Value;
         this.local = local;
         this.clock = clock;
         observations = new(configuration.VoterIds.Length, configuration.VoterIds.Length, StringComparer.Ordinal);

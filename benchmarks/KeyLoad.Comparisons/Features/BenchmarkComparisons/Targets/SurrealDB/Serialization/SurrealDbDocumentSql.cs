@@ -9,14 +9,18 @@ internal static class SurrealDbDocumentSql
     private const char IdentitySeparator = '-';
     private const string RecordIdentifierStart = "⟨";
     private const string RecordIdentifierEnd = "⟩";
-    private const string NativeCREATEONLYSETKeyNumberPayloadEmbeddingFormat = "CREATE ONLY {0}:{1} SET key = {2}, number = {3}, payload = {4}, embedding = {5};";
-    private const string NativeUPDATESETPayloadRETURNAFTERFormat = "UPDATE {0}:{1} SET payload = {2} RETURN AFTER;";
-    private const string NativeDELETERETURNBEFOREFormat = "DELETE {0}:{1} RETURN BEFORE;";
+    private const string NativeCREATEONLYSETKeyNumberPayloadEmbeddingFormatTemplate = "CREATE ONLY {0}:{1} SET key = {2}, number = {3}, payload = {4}, embedding = {5};";
+    private static readonly System.Text.CompositeFormat NativeCREATEONLYSETKeyNumberPayloadEmbeddingFormat = System.Text.CompositeFormat.Parse(NativeCREATEONLYSETKeyNumberPayloadEmbeddingFormatTemplate);
+    private const string NativeUPDATESETPayloadRETURNAFTERFormatTemplate = "UPDATE {0}:{1} SET payload = {2} RETURN AFTER;";
+    private static readonly System.Text.CompositeFormat NativeUPDATESETPayloadRETURNAFTERFormat = System.Text.CompositeFormat.Parse(NativeUPDATESETPayloadRETURNAFTERFormatTemplate);
+    private const string NativeDELETERETURNBEFOREFormatTemplate = "DELETE {0}:{1} RETURN BEFORE;";
+    private static readonly System.Text.CompositeFormat NativeDELETERETURNBEFOREFormat = System.Text.CompositeFormat.Parse(NativeDELETERETURNBEFOREFormatTemplate);
     private const int SingleResultCardinality = 1;
     private const string RelationTraversal = "->";
     private const string GraphKeyProjection = ".key";
     private const char VectorComponentSeparator = ',';
-    private const string NativeRETURNArraySortArrayDifferenceArrayDistinctArrayFormat = "RETURN array::sort(array::difference(array::distinct(array::flatten((SELECT VALUE [{0}] FROM {1}:{2})[0])), [{3}]));";
+    private const string NativeRETURNArraySortArrayDifferenceArrayDistinctArrayFormatTemplate = "RETURN array::sort(array::difference(array::distinct(array::flatten((SELECT VALUE [{0}] FROM {1}:{2})[0])), [{3}]));";
+    private static readonly System.Text.CompositeFormat NativeRETURNArraySortArrayDifferenceArrayDistinctArrayFormat = System.Text.CompositeFormat.Parse(NativeRETURNArraySortArrayDifferenceArrayDistinctArrayFormatTemplate);
     internal static string Key(string value)
     {
         if (value.Length is < MinimumNativeIdentifierLength or > MaximumNativeIdentifierLength || value.Any(c => !char.IsAsciiLetterOrDigit(c) && c != IdentitySeparator))

@@ -38,6 +38,9 @@ internal static class QdrantVectorProtocol
     internal const string TargetName = "Qdrant";
     internal const string Unverified = "unverified";
     internal const string InitialReadContract = "native cosine vectors; bounded numeric predicate metadata";
+    internal const string NativeReadPrefix = "native ";
+    internal const string CosineReadDescription = " cosine; native ";
+    internal const string PredicateReadDescription = " predicate; ";
     internal const string Transport = "HTTP JSON";
     internal const string Authentication = "Aspire API key";
     internal const string CollectionPrefix = "/collections/";

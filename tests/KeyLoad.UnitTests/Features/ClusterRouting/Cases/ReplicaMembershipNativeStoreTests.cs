@@ -83,7 +83,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
             ReplicaExecutionTestOptions.Configuration(configuration)), ReplicaExecutionTestOptions.Execution());
         await using var consensus = new ReplicaConsensus(materializer, ReplicaExecutionTestOptions.Configuration(configuration),
             ReplicaExecutionTestOptions.Execution(), TimeProvider.System);
-        await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(), TimeProvider.System,
+        await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(UnitExecutionOptions.Validated(new CommandAdmissionLimits(), static settings => settings.Validate())), TimeProvider.System,
             ReplicaExecutionTestOptions.Execution());
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);

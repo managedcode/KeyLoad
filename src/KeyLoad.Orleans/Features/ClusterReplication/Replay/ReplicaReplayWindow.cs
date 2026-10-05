@@ -9,13 +9,14 @@ internal sealed class ReplicaReplayWindow
     private readonly Dictionary<string, ReplicaVoterReplayWindow> voters;
     private readonly int nodeMaximum;
 
-    internal ReplicaReplayWindow(IReadOnlyList<string> voterIds, ReplicaReplayLimits limits,
+    internal ReplicaReplayWindow(IReadOnlyList<string> voterIds, IOptions<ReplicaPeerOptions> peerOptions,
         IOptions<ReplicaTransportOptions> transportOptions)
     {
+        var limits = peerOptions.Value.ReplayLimits;
         limits.Validate(voterIds.Count);
         nodeMaximum = limits.MaximumRetainedNonces(voterIds.Count);
         voters = voterIds.Select((voter, index) => (voter, index)).ToDictionary(item => item.voter,
-            item => new ReplicaVoterReplayWindow(limits, item.index, transportOptions.Value.EnvelopeLifetime), StringComparer.Ordinal);
+            item => new ReplicaVoterReplayWindow(peerOptions, item.index, transportOptions.Value.EnvelopeLifetime), StringComparer.Ordinal);
     }
 
     internal void Admit(string sender, Guid nonce, long timestamp, long now, ReplicaReplayPool pool)
@@ -55,8 +56,9 @@ internal sealed class ReplicaReplayWindow
     }
 }
 
-internal sealed class ReplicaVoterReplayWindow(ReplicaReplayLimits limits, int senderIndex, TimeSpan envelopeLifetime)
+internal sealed class ReplicaVoterReplayWindow(IOptions<ReplicaPeerOptions> peerOptions, int senderIndex, TimeSpan envelopeLifetime)
 {
+    private readonly ReplicaReplayLimits limits = peerOptions.Value.ReplayLimits;
     private readonly Dictionary<Guid, ReplicaReplayPool> nonces = [];
     private readonly PriorityQueue<Guid, long> expirations = new();
     private readonly Dictionary<ReplicaReplayPool, int> counts = Enum.GetValues<ReplicaReplayPool>().ToDictionary(pool => pool, _ => 0);

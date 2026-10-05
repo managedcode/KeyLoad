@@ -16,11 +16,15 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
     private const int SingleResultCardinality = 1;
     private const string SingleCommunityNode = "single Community node";
     private const string PersistentRocksDBDirectory = "persistent RocksDB directory";
-    private const string NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat = "DEFINE TABLE {0} SCHEMALESS; DEFINE TABLE {1} SCHEMALESS;";
+    private const string NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormatTemplate = "DEFINE TABLE {0} SCHEMALESS; DEFINE TABLE {1} SCHEMALESS;";
+    private static readonly System.Text.CompositeFormat NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat = System.Text.CompositeFormat.Parse(NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormatTemplate);
     private const char SqlStatementSeparator = ' ';
-    private const string NativeRELATEFormat = "RELATE {0}:{1}->{2}:{3}->{4}:{5};";
-    private const string NativeREMOVETABLEREMOVETABLEFormat = "REMOVE TABLE {0}; REMOVE TABLE {1};";
-    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
+    private const string NativeRELATEFormatTemplate = "RELATE {0}:{1}->{2}:{3}->{4}:{5};";
+    private static readonly System.Text.CompositeFormat NativeRELATEFormat = System.Text.CompositeFormat.Parse(NativeRELATEFormatTemplate);
+    private const string NativeREMOVETABLEREMOVETABLEFormatTemplate = "REMOVE TABLE {0}; REMOVE TABLE {1};";
+    private static readonly System.Text.CompositeFormat NativeREMOVETABLEREMOVETABLEFormat = System.Text.CompositeFormat.Parse(NativeREMOVETABLEREMOVETABLEFormatTemplate);
+    private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
+    private NativeComparisonExecutionOptions Policy => execution.Value;
     private const string RunIdentityFormat = "N";
     private readonly string table = SurrealDbNativeTokens.TokenKeyloadDoc + Guid.Parse(runId).ToString(RunIdentityFormat);
     private readonly string edge = SurrealDbNativeTokens.TokenKeyloadLink + Guid.Parse(runId).ToString(RunIdentityFormat);
@@ -42,23 +46,23 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         ArgumentNullException.ThrowIfNull(dataset);
         Profile = Profile with
         {
-            Version = await SurrealDbServer.VerifyAsync(http, policy, cancellationToken).ConfigureAwait(false)
+            Version = await SurrealDbServer.VerifyAsync(http, Policy, cancellationToken).ConfigureAwait(false)
         };
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
         topK = dataset.Settings.TopK;
         ownsData = true;
-        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), policy, cancellationToken).ConfigureAwait(false);
-        foreach (var batch in dataset.Documents.Chunk(policy.WriteBatchCapacity))
+        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), Policy, cancellationToken).ConfigureAwait(false);
+        foreach (var batch in dataset.Documents.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(document => SurrealDbDocumentSql.Create(table, document)));
-            await SurrealDbSqlTransport.ExecuteAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
+            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
         }
 
-        foreach (var batch in dataset.Edges.Chunk(policy.WriteBatchCapacity))
+        foreach (var batch in dataset.Edges.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(link => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeRELATEFormat, table, SurrealDbDocumentSql.Key(link.From), edge, SurrealDbDocumentSql.Key(link.Id), table, SurrealDbDocumentSql.Key(link.To))));
-            await SurrealDbSqlTransport.ExecuteAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
+            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -66,7 +70,7 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<IComparisonSession>(new SurrealDbSession(http, table, edge, count, depth, topK, policy));
+        return Task.FromResult<IComparisonSession>(new SurrealDbSession(http, table, edge, count, depth, topK, execution));
     }
 
     /// <inheritdoc/>
@@ -76,8 +80,8 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(policy.CleanupTimeout);
-                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVETABLEREMOVETABLEFormat, edge, table), policy, timeout.Token).ConfigureAwait(false);
+                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
+                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVETABLEREMOVETABLEFormat, edge, table), Policy, timeout.Token).ConfigureAwait(false);
             }
         }
         finally

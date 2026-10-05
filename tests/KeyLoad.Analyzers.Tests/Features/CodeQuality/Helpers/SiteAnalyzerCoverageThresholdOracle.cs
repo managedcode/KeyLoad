@@ -165,10 +165,10 @@ internal static class SiteAnalyzerCoverageThresholdOracle
             }
         }
 
-        return Pipelines.Select(pipeline => pipeline.Sources.Sum(source =>
+        return Pipelines.Select(pipeline => pipeline.Sources.Sum(source => (long)(
             moduleCoveredLinePercent is null
                 ? SiteAnalyzerCoverageTokens.LinesPerSource
-                : coveredLines[source])).ToArray();
+                : coveredLines[source]))).ToArray();
     }
 
     private static string[] ReadExecutableSources()

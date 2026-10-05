@@ -14,7 +14,7 @@ function row(cell, vector) {
   const values = [cell.target, cell.nodeCount, cell.scenario,
     measured ? 'Measured' : cell.reason, number(vector ? metrics?.queryUsefulOperationsPerSecond : data?.usefulOperationsPerSecond),
     number(vector ? metrics?.latencyP95Ms : data?.latency?.p95Ms), number(vector ? metrics?.latencyP99Ms : data?.latency?.p99Ms),
-    ...(vector ? [number(metrics?.exactRecall), number(metrics?.minimumRecall), number(metrics?.indexBuildMilliseconds)] : []),
+    ...(vector ? [number(metrics?.updateUsefulOperationsPerSecond), number(metrics?.exactRecall), number(metrics?.minimumRecall), number(metrics?.indexBuildMilliseconds)] : []),
     memory(measured ? cell.serverMemoryBytes : null)];
   const target = cell.nativeTarget;
   const contract = target ? `${target.writeAcknowledgement}; ${target.readContract}; ${target.cluster.observations.join('; ')}` : cell.reason;
@@ -28,12 +28,13 @@ function row(cell, vector) {
 function profile(profile, vector) {
   const settings = profile.settings;
   const headers = ['Database', 'Native nodes', 'Operation', 'Status', 'Useful operations/s', 'p95 ms (sample estimate)', 'p99 ms (sample estimate)',
-    ...(vector ? ['Mean recall@10', 'Minimum recall@10', 'Index build ms'] : []), 'Observed server RAM', 'GitHub results'];
+    ...(vector ? ['Updates/s (includes readback)', 'Mean recall@10', 'Minimum recall@10', 'Index build ms'] : []), 'Observed server RAM', 'GitHub results'];
   const description = vector ? `${settings.recordCount.toLocaleString('en')} records; ${settings.indexKind}; ${settings.queryMode}; cosine; ` +
     `${settings.measuredQueries.toLocaleString('en')} measured queries; ${settings.updateCount.toLocaleString('en')} updates; concurrency ${settings.concurrency}.`
     : `${settings.documents.toLocaleString('en')} records; ${settings.operations.toLocaleString('en')} measured operations; concurrency ${settings.concurrency}.`;
   return `<details data-profile="${escape(profile.id)}"><summary>${escape(profile.id)}</summary><p>${escape(description)}</p>` +
     `<p>Corpus SHA256 ${escape(profile.datasetSha256 ?? 'unavailable')}. RAM is the sum of observed per-node RSS maxima over the whole run, sampled every 5 seconds; these maxima need not occur together. It is not a peak or an index/query phase measurement.</p>` +
+    (vector ? '<p>Query throughput includes result validation. Update throughput includes native readback and validation after acknowledgement. Query latency excludes result validation; ingestion, oracle calculation and index construction are separate setup phases.</p>' : '') +
     `<div class="table-scroll"><table><caption>${escape(profile.id)} · compare matching native topology and acknowledgement contracts</caption><thead><tr>` +
     headers.map(header => `<th scope="col">${escape(header)}</th>`).join('') + '</tr></thead><tbody>' +
     profile.cells.map(cell => row(cell, vector)).join('') + '</tbody></table></div></details>';

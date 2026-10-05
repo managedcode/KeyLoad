@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorResultValidator(VectorComparisonProfile profile, NativeComparisonExecutionOptions execution)
+internal sealed class VectorResultValidator(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
     internal async Task ValidateReadbackAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         CancellationToken cancellationToken)
@@ -32,7 +33,7 @@ internal sealed class VectorResultValidator(VectorComparisonProfile profile, Nat
     internal async Task ValidateQueryAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         ReadOnlyMemory<float> query, IReadOnlyList<VectorNeighbor> expected, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(execution, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
         VectorResponseValidator.CalculateRecall(corpus,
             await target.SearchAsync(query, profile.TopK, profile.QueryMode, deadline.Token).ConfigureAwait(false), expected);
     }

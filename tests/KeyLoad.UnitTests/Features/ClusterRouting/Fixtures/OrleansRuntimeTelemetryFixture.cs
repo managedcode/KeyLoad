@@ -33,6 +33,9 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         var metrics = new OrleansMetricCaptureExporter();
         var builder = Host.CreateApplicationBuilder();
         builder.AddServiceDefaults();
+        builder.Services.AddOptions<OrleansTelemetryCaptureOptions>()
+            .Validate(options => options.IsValid(), OrleansTelemetryCaptureOptions.ValidationMessage)
+            .ValidateOnStart();
         builder.Services.AddOpenTelemetry()
             .WithTracing(tracing => tracing.AddSource(OrleansRuntimeTelemetryTokens.ParentSource)
                 .AddProcessor(activities))
@@ -41,6 +44,9 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         var host = builder.Build();
         try
         {
+            var captureOptions = host.Services.GetRequiredService<IOptions<OrleansTelemetryCaptureOptions>>().Value;
+            activities.Configure(captureOptions);
+            metrics.Configure(captureOptions);
             await host.StartAsync();
             return new(host, activities, metrics);
         }

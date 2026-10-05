@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -9,11 +10,11 @@ internal sealed class ReplicaCohortAdmission
     private readonly ReplicaDiscoveryObservationCache observations;
     private readonly Func<string, bool, CancellationToken, Task<ReplicaDiscoveryObservation?>> resolve;
 
-    internal ReplicaCohortAdmission(ReplicaConfiguration configuration,
+    internal ReplicaCohortAdmission(IOptions<ReplicaConfiguration> configurationOptions,
         ReplicaDiscoveryObservationCache observations,
         Func<string, bool, CancellationToken, Task<ReplicaDiscoveryObservation?>> resolve)
     {
-        this.configuration = configuration;
+        configuration = configurationOptions.Value;
         this.observations = observations;
         this.resolve = resolve;
     }

@@ -1,4 +1,4 @@
-# ADR-112: General runtime literals and centralized typed options
+# ADR-113: General runtime literals and centralized typed options
 
 Status: Accepted (implementation and verification pending)
 Date: 2026-10-06

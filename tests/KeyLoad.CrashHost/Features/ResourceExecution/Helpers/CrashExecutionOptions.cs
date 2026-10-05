@@ -28,6 +28,13 @@ internal static class CrashExecutionOptions
         return Options.Create(settings);
     }
 
+    internal static IOptions<CacheMemoryLimits> CacheMemory(CacheMemoryLimits? configured = null)
+    {
+        var settings = configured ?? new CacheMemoryLimits();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
     internal static IOptions<ReplicaExecutionOptions> Replica(ReplicaExecutionOptions? configured = null)
     {
         var settings = configured ?? new ReplicaExecutionOptions();

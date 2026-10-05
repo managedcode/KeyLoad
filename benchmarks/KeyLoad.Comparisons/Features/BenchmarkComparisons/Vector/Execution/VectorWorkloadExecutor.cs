@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, NativeComparisonExecutionOptions execution)
+internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
     internal async Task<VectorWorkloadObservations> RunAsync(IVectorComparisonTarget target,
         VectorComparisonCorpus corpus, IReadOnlyList<ReadOnlyMemory<float>> queries,
@@ -27,7 +28,7 @@ internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, Na
                 () => ExecuteQueriesAsync(target, corpus, queries, expected, measured, token));
         }
         var writer = profile.UpdateCount > VectorWorkloadExecutorValues.FirstIndex ? CancelOnFailureAsync(start.Task, failure, measured,
-            () => new VectorUpdateExecutor(profile, execution).RunAsync(target, corpus, measured, token)) : Task.CompletedTask;
+            () => new VectorUpdateExecutor(profile, executionOptions).RunAsync(target, corpus, measured, token)) : Task.CompletedTask;
         var timer = Stopwatch.StartNew();
         start.SetResult();
         try
@@ -91,7 +92,7 @@ internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, Na
             var index = operation % queries.Count;
             var sample = SampleOrdinal(operation, profile.MeasuredQueries, profile.LatencySampleCount);
             var started = sample < VectorWorkloadExecutorValues.FirstIndex ? VectorWorkloadExecutorValues.FirstIndex : Stopwatch.GetTimestamp();
-            using var deadline = VectorOperationDeadline.Create(execution, cancellationToken);
+            using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
             var neighbors = await target.SearchAsync(queries[index], profile.TopK, profile.QueryMode,
                 deadline.Token).ConfigureAwait(false);
             if (sample >= VectorWorkloadExecutorValues.FirstIndex)

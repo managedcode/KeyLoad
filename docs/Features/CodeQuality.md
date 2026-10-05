@@ -443,7 +443,7 @@ The owner's explicit answer selects the complete runtime migration. This
 supersedes the narrower context boundaries of AC-CQ-029/030/032 above; preserve
 those native API regressions and extend their expected findings. Operational
 policy is configuration, so moving deadlines into per-class constants is rejected.
-[ADR-112](../ADR/ADR-112-centralized-runtime-options.md) owns REQ-CQ-012/013 and
+[ADR-113](../ADR/ADR-113-centralized-runtime-options.md) owns REQ-CQ-012/013 and
 TASK-CQ-GENERAL-001..005. Runtime scope is every nongenerated KeyLoad C# product,
 CLI, infrastructure and benchmark project. Test input/expected-data assemblies
 remain distinct; their configuration helpers follow the same native options path.
@@ -500,3 +500,37 @@ utilities may help preserve exact tokens/types but every resulting symbol has a
 meaningful owner; do not introduce Literal1/value-per-number dumping or rewrite
 protocol bytes. Existing record options used as public request data are not
 application configuration merely because their name contains Options.
+
+### Native test-image identity for functional coverage
+
+TASK-CQ-FUNCTIONAL-TEST-IDENTITY-001B extends AC-CQ-018/020 under ADR-033.
+The current Query-only profile must bind the actual Release UnitTests DLL/PDB
+alongside the Query image. Binding only the selected 21 test/support source files
+does not bind their shared helpers to the executable that actually ran them.
+
+Before collection, enumerate every non-generated C# source under the UnitTests
+project, including tests excluded from coverage contribution, and retain its
+actual SHA-256. Identity inventory and accepted contributor selection have
+different purposes: an inventoried load or shape-only case does not become a
+coverage contributor. Verify this complete project-source inventory against the
+actual UnitTests portable PDB through the existing native compiled-identity
+helper; reject source drift, unsafe links/paths, duplicate or unsupported
+identities and incomplete bindings. Retain generated documents as unmeasured.
+Bound traversal and retained source inventory to 5000 entries before admitting
+the next entry, and do not follow directory symlinks.
+
+Also capture the actual SHA-256 of `global.json`, `Directory.Build.props`,
+`Directory.Build.targets`, `Directory.Packages.props`, `KeyLoad.slnx` and the
+UnitTests project file before and after collection. The new helper belongs to
+`scripts/Features/CodeQuality/functional-coverage.test-identity.ps1`; it reuses
+the canonical path/hash/native metadata helpers and adds no alternative caller,
+test runner, parser dependency or coverage framework. A Luna worker owns only a
+guarded private helper packet; root owns canonical Prepare/Verify joins and
+manifest integration. Existing reports remain immutable and cannot acquire
+this binding retrospectively.
+
+Verification uses actual native DLL/PDB/source inspection and rejected stale
+source, foreign/missing PDB, missing central input and unsafe-link controls.
+It remains static identity evidence. Fresh complete-flow TUnit collection still
+runs through Aspire after a successful current-source build; full unit/scalar,
+recovery, RF3 and sixteen-module/server coverage remain required independently.

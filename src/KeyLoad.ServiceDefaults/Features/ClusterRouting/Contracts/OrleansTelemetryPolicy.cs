@@ -19,6 +19,9 @@ internal static class OrleansTelemetryPolicy
     internal const string GenericMethodValue = "grain.invoke";
     internal const string RequestMethodValue = "request.execute";
     internal const string CapabilityMethodValue = "capability.execute";
+    internal const string RequestStreamMethodName = "ExecuteStreamAsync";
+    internal const string CapabilityMethodName = "ExecuteAsync";
+    internal const string MethodNameSeparator = "/";
     internal const string GrainTypeTag = "orleans.grain.type";
     internal const string GrainTypeValue = "grain";
     internal const string ActivationCauseTag = "orleans.activation.cause";

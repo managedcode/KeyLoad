@@ -10,6 +10,9 @@ internal static class QdrantVectorHttp
     internal static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path,
         object? body, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
     {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        deadline.CancelAfter(executionOptions.Value.OperationTimeout);
+        token = deadline.Token;
         using var request = new HttpRequestMessage(method, new Uri(path, UriKind.Relative));
         if (body is not null)
         {

@@ -46,7 +46,12 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
         }
 
         data.TraceStateString = null;
-        _ = ClearBoundedBaggage(data);
+        if (ClearBoundedBaggage(data))
+        {
+            Suppress(data, OrleansTelemetryPolicy.SuppressionBaggageLimit);
+            return;
+        }
+
         var tagCount = 0;
         foreach (var _ in data.TagObjects)
         {
@@ -192,8 +197,14 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
     private static string NormalizeMethod(string method)
         => method switch
         {
-            "ExecuteStreamAsync" => OrleansTelemetryPolicy.RequestMethodValue,
-            "ExecuteAsync" => OrleansTelemetryPolicy.CapabilityMethodValue,
+            OrleansTelemetryPolicy.RequestStreamMethodName => OrleansTelemetryPolicy.RequestMethodValue,
+            OrleansTelemetryPolicy.CapabilityMethodName => OrleansTelemetryPolicy.CapabilityMethodValue,
+            _ when method.EndsWith(OrleansTelemetryPolicy.MethodNameSeparator
+                + OrleansTelemetryPolicy.RequestStreamMethodName, StringComparison.Ordinal)
+                => OrleansTelemetryPolicy.RequestMethodValue,
+            _ when method.EndsWith(OrleansTelemetryPolicy.MethodNameSeparator
+                + OrleansTelemetryPolicy.CapabilityMethodName, StringComparison.Ordinal)
+                => OrleansTelemetryPolicy.CapabilityMethodValue,
             _ => OrleansTelemetryPolicy.GenericMethodValue
         };
 

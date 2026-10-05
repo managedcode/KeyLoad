@@ -28,7 +28,7 @@ internal static class ServerConfiguration
         Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();
-        _ = app.Services.GetRequiredService<IOptions<NodeOptions>>().Value;
+        app.Services.GetRequiredService<ServerRuntimeOptions>().ValidateBeforePhysicalOwnership();
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>()).InvokeAsync);
@@ -74,9 +74,9 @@ internal static class ServerConfiguration
         services.AddSingleton<AdminNodeObserver>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
         services.AddSingleton(provider => new CommandAdmissionGovernor(
-            provider.GetRequiredService<IOptions<NodeOptions>>().Value.CommandAdmission));
+            provider.GetRequiredService<IOptions<CommandAdmissionLimits>>()));
         services.AddSingleton(provider => new HttpAdmissionGovernor(
-            provider.GetRequiredService<IOptions<NodeOptions>>().Value.HttpAdmission));
+            provider.GetRequiredService<IOptions<HttpAdmissionLimits>>()));
         services.AddSingleton<PartitionHost>();
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();

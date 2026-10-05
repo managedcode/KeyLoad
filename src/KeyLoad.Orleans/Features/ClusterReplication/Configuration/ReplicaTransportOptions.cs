@@ -17,10 +17,14 @@ public sealed class ReplicaTransportOptions
     public TimeSpan EnvelopeLifetime { get; set; } = TimeSpan.FromSeconds(MaximumLifetimeSeconds);
     /// <summary>Gets or sets the total RPC attempts, with at most one generation rediscovery.</summary>
     public int MaximumAttempts { get; set; } = MaximumSafeAttempts;
+    /// <summary>Gets or sets the minimum interval between replay admission capacity diagnostics.</summary>
+    public TimeSpan ReplayDiagnosticInterval { get; set; } = TimeSpan.FromSeconds(MaximumLifetimeSeconds);
 
     /// <summary>Checks the accepted freshness and retry ceiling before native transport startup.</summary>
     /// <returns>Whether both values stay within the frozen safety bounds.</returns>
     public bool IsValid() => EnvelopeLifetime > TimeSpan.Zero
         && EnvelopeLifetime <= TimeSpan.FromSeconds(MaximumLifetimeSeconds)
-        && MaximumAttempts is >= MinimumAttempts and <= MaximumSafeAttempts;
+        && MaximumAttempts is >= MinimumAttempts and <= MaximumSafeAttempts
+        && ReplayDiagnosticInterval > TimeSpan.Zero
+        && ReplayDiagnosticInterval <= TimeSpan.FromSeconds(MaximumLifetimeSeconds);
 }

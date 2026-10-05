@@ -14,23 +14,24 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
     private readonly TimeProvider clock;
     private readonly IReplicaDiscoveryObservationSink? observationSink;
 
-    internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+    internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
         IOptions<PeerDiscoveryOptions> peerOptions, IReplicaDiscoveryObservationSink? observationSink = null)
     {
         var configuration = configurationOptions.Value;
+        var options = peerSettings.Value;
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
         ArgumentNullException.ThrowIfNull(local);
         ArgumentNullException.ThrowIfNull(authentication);
         ArgumentNullException.ThrowIfNull(clock);
-        this.configuration = configuration;
+        this.configuration = configurationOptions.Value;
         this.clock = clock;
         this.observationSink = observationSink;
-        observations = new(configuration, local, clock);
-        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, options, authentication, clock, peerOptions);
+        observations = new(configurationOptions, local, clock);
+        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, peerOptions);
         resources = new(ownedResources);
-        admission = new(configuration, observations, GetObservationAsync);
+        admission = new(configurationOptions, observations, GetObservationAsync);
         lifetime = new(ownedResources);
     }
 

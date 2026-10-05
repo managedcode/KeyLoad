@@ -14,7 +14,7 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 
 ## Decision inventory
 
-[ADR-112 centralized runtime options](ADR-112-centralized-runtime-options.md)
+[ADR-113 centralized runtime options](ADR-113-centralized-runtime-options.md)
 supersedes ADR-111's selected-context scope with general literal enforcement and
 typed, centrally validated operational configuration.
 

@@ -1,5 +1,6 @@
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -9,8 +10,9 @@ internal sealed class PartitionStores : IDisposable
     private readonly FileStream ownership;
     private int disposed;
 
-    internal PartitionStores(NodeOptions options, string directory)
+    internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory)
     {
+        var options = nodeOptions.Value;
         Directory.CreateDirectory(directory);
         if (!OperatingSystem.IsWindows())
         {

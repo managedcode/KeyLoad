@@ -1,5 +1,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
@@ -24,14 +26,9 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     public const string VectorProfileSetting = "Benchmarks:VectorProfile";
     /// <summary>Optional fixed offered-rate selector for the independent open-loop cohort.</summary>
     public const string OpenLoopRateSetting = "Benchmarks:OpenLoopRate";
-    private const string AppHostProfileSetting = "Benchmarks:Profile";
     private const string GeneralAppHostProfile = "general";
     private const string TimeSeriesAppHostProfile = "timeseries";
     internal const string InvalidSelection = "IsolatedComparisonSelectionInvalid";
-    private static readonly string[] WorkloadOverrideNames =
-        [ComparisonWorkerSelectionValues.Documents, ComparisonWorkerSelectionValues.Operations, ComparisonWorkerSelectionValues.Warmup, ComparisonWorkerSelectionValues.Repetitions, ComparisonWorkerSelectionValues.Concurrency, ComparisonWorkerSelectionValues.PayloadBytes, ComparisonWorkerSelectionValues.Seed, ComparisonWorkerSelectionValues.Dimensions,
-            ComparisonWorkerSelectionValues.TopK, ComparisonWorkerSelectionValues.TimeoutSeconds, ComparisonWorkerSelectionValues.GraphVertices, ComparisonWorkerSelectionValues.GraphFanOut, ComparisonWorkerSelectionValues.GraphDepth];
-
     /// <summary>Gets the exact typed scaled profile when the isolated worker selects one.</summary>
     public ScaledComparisonProfile? ScaledProfile { get; init; }
 
@@ -75,33 +72,45 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     public static ComparisonWorkerSelection Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        var text = configuration[ScenarioSetting];
-        if (!int.TryParse(configuration[NodeCountSetting], NumberStyles.None, CultureInfo.InvariantCulture, out var nodes)
+        var selection = ReadSelection(configuration).Value;
+        var text = selection.Scenario;
+        if (!int.TryParse(selection.NodeCount, NumberStyles.None, CultureInfo.InvariantCulture, out var nodes)
             || !Enum.TryParse<Scenario>(text, out var scenario) || !Enum.IsDefined(scenario) || text != scenario.ToString())
         {
             throw new InvalidOperationException(InvalidSelection);
         }
-        var scaleText = configuration[ScaleProfileSetting];
+        var scaleText = selection.ScaleProfile;
         var scaledProfile = scaleText is null ? null : ParseScaledProfile(scaleText);
-        var vectorText = configuration[VectorProfileSetting];
+        var vectorText = selection.VectorProfile;
         var vectorProfile = vectorText is null ? null : ParseVectorProfile(vectorText);
         if (scaledProfile is not null)
         {
-            ValidateScaledMode(configuration, scaledProfile);
+            ValidateScaledMode(selection, scaledProfile);
         }
         if (vectorProfile is not null)
         {
-            ValidateVectorMode(configuration, vectorProfile);
+            ValidateVectorMode(selection, vectorProfile);
         }
-        var result = new ComparisonWorkerSelection(configuration[TargetSetting] ?? string.Empty, nodes, scenario,
-            configuration[ProfileSetting] ?? string.Empty)
+        var result = new ComparisonWorkerSelection(selection.Target ?? string.Empty, nodes, scenario,
+            selection.EvidenceProfile ?? string.Empty)
         {
             ScaledProfile = scaledProfile,
             VectorProfile = vectorProfile,
-            OpenLoopRate = OpenLoopRateSelection.Read(configuration[OpenLoopRateSetting])
+            OpenLoopRate = OpenLoopRateSelection.Read(selection.OpenLoopRate)
         };
         result.Validate();
         return result;
+    }
+
+    [ConfigurationBinding]
+    private static IOptions<ComparisonWorkerSelectionOptions> ReadSelection(IConfiguration configuration)
+    {
+        var services = new ServiceCollection();
+        services.AddOptions<ComparisonWorkerSelectionOptions>()
+            .Bind(configuration.GetSection(ComparisonWorkerSelectionOptions.SectionName));
+        using var provider = services.BuildServiceProvider();
+        return Microsoft.Extensions.Options.Options.Create(
+            provider.GetRequiredService<IOptions<ComparisonWorkerSelectionOptions>>().Value);
     }
 
     private static ScaledComparisonProfile ParseScaledProfile(string id)
@@ -122,40 +131,35 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         catch (ArgumentOutOfRangeException) { throw new InvalidOperationException(InvalidSelection); }
     }
 
-    private static void ValidateScaledMode(IConfiguration configuration, ScaledComparisonProfile profile)
+    private static void ValidateScaledMode(ComparisonWorkerSelectionOptions selection, ScaledComparisonProfile profile)
     {
-        var appHostProfile = configuration[AppHostProfileSetting];
-        if (configuration[ProfileSetting] != profile.Id
-            || configuration[VectorProfileSetting] is not null
+        var appHostProfile = selection.Profile;
+        if (selection.EvidenceProfile != profile.Id
+            || selection.VectorProfile is not null
             || (appHostProfile is not null && !string.Equals(appHostProfile, GeneralAppHostProfile, StringComparison.OrdinalIgnoreCase))
             || string.Equals(appHostProfile, TimeSeriesAppHostProfile, StringComparison.OrdinalIgnoreCase)
-            || HasWorkloadOverride(configuration))
+            || HasWorkloadOverride(selection))
         {
             throw new InvalidOperationException(InvalidSelection);
         }
     }
 
-    private static void ValidateVectorMode(IConfiguration configuration, VectorComparisonProfile profile)
+    private static void ValidateVectorMode(ComparisonWorkerSelectionOptions selection, VectorComparisonProfile profile)
     {
-        var appHostProfile = configuration[AppHostProfileSetting];
-        if (configuration[ProfileSetting] != profile.Id || configuration[ScaleProfileSetting] is not null
+        var appHostProfile = selection.Profile;
+        if (selection.EvidenceProfile != profile.Id || selection.ScaleProfile is not null
             || (appHostProfile is not null && !string.Equals(appHostProfile, GeneralAppHostProfile, StringComparison.OrdinalIgnoreCase))
             || string.Equals(appHostProfile, TimeSeriesAppHostProfile, StringComparison.OrdinalIgnoreCase)
-            || HasWorkloadOverride(configuration))
+            || HasWorkloadOverride(selection))
         {
             throw new InvalidOperationException(InvalidSelection);
         }
     }
 
-    private static bool HasWorkloadOverride(IConfiguration configuration)
-    {
-        foreach (var name in WorkloadOverrideNames)
-        {
-            if (configuration[ComparisonWorkerSelectionValues.Benchmarks + name] is not null)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    private static bool HasWorkloadOverride(ComparisonWorkerSelectionOptions selection)
+        => selection.Documents is not null || selection.Operations is not null || selection.Warmup is not null
+            || selection.Repetitions is not null || selection.Concurrency is not null || selection.PayloadBytes is not null
+            || selection.Seed is not null || selection.Dimensions is not null || selection.TopK is not null
+            || selection.TimeoutSeconds is not null || selection.GraphVertices is not null || selection.GraphFanOut is not null
+            || selection.GraphDepth is not null;
 }

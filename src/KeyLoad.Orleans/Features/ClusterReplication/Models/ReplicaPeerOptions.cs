@@ -6,10 +6,11 @@ namespace KeyLoad.Orleans;
 /// <param name="Endpoints">Configured voter origins used only for authenticated discovery.</param>
 /// <param name="Secret">Read-only shared peer HMAC credential.</param>
 /// <param name="ClusterId">Shared Orleans cluster identity.</param>
+[ConfigurationOptions]
 public sealed record ReplicaPeerOptions(Dictionary<string, Uri> Endpoints, ReadOnlyMemory<byte> Secret, string ClusterId)
 {
     /// <summary>Discovery connection establishment bound, shorter than the overall RPC deadline.</summary>
-    public TimeSpan ConnectTimeout { get; init; } = ReplicaTransportProtocol.DefaultConnectTimeout;
+    public required TimeSpan ConnectTimeout { get; init; }
 
     /// <summary>Immutable bounded replay admission pools for each configured voter.</summary>
     public ReplicaReplayLimits ReplayLimits { get; init; } = new();

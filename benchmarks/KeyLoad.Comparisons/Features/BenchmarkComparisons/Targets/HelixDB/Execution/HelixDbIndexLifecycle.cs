@@ -7,6 +7,7 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class HelixDbIndexLifecycle
 {
     private const string ProviderNativeANNOpaqueTuning = "provider-native ANN; opaque tuning";
+    private const string CompletedOperation = "; completed operation=";
     private const string CompletedReceipt = "; completed receipt=";
     private const int SingleResultCardinality = 1;
     private const int EmptyResultCount = 0;
@@ -24,8 +25,8 @@ internal static class HelixDbIndexLifecycle
         }
 
         var operation = receipt.GetProperty(HelixDbNativeTokens.TokenOperationId).GetString()!;
-        await WaitAsync(http, operation, policy, token).ConfigureAwait(false);
-        return receipt.GetRawText();
+        var completion = await WaitAsync(http, operation, policy, token).ConfigureAwait(false);
+        return receipt.GetRawText() + CompletedOperation + completion;
     }
 
     internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string label, int dimensions, NativeComparisonExecutionOptions policy, CancellationToken token)
@@ -45,17 +46,18 @@ internal static class HelixDbIndexLifecycle
         return new(VectorIndexKind.NativeAnn, definition.ToJsonString() + CompletedReceipt + receipt, parameters, watch.Elapsed.TotalMilliseconds);
     }
 
-    private static async Task WaitAsync(HttpClient http, string operation, NativeComparisonExecutionOptions policy, CancellationToken token)
+    private static async Task<string> WaitAsync(HttpClient http, string operation, NativeComparisonExecutionOptions policy, CancellationToken token)
     {
         var deadline = TimeProvider.System.GetUtcNow() + policy.IndexBuildTimeout;
         while (true)
         {
             var ast = HelixDbProtocol.Node(HelixDbNativeTokens.TokenGetIndexOperation, new() { [HelixDbNativeTokens.TokenOperationId] = operation });
             using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, false), false, policy, token).ConfigureAwait(false);
-            var status = Single(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows)).GetProperty(HelixDbNativeTokens.TokenStatus).GetString();
+            var observedOperation = Single(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows));
+            var status = observedOperation.GetProperty(HelixDbNativeTokens.TokenStatus).GetString();
             if (status == HelixDbNativeTokens.TokenSucceeded)
             {
-                return;
+                return observedOperation.GetRawText();
             }
 
             if (status is HelixDbNativeTokens.TokenBlocked or HelixDbNativeTokens.TokenAborted || TimeProvider.System.GetUtcNow() >= deadline)
