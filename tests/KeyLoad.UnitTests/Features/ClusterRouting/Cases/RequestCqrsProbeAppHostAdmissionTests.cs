@@ -1,0 +1,110 @@
+using Aspire.Hosting;
+using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.ClusterRouting;
+using Microsoft.Extensions.Configuration;
+
+namespace KeyLoad.UnitTests.Features.ClusterRouting;
+
+internal sealed class RequestCqrsProbeAppHostAdmissionTests
+{
+    private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
+    private const string SuiteKey = "KeyLoadTests:Suite";
+    private const string BenchmarkKey = "Benchmarks:Enabled";
+    private const string BenchmarkProfileKey = "Benchmarks:Profile";
+    private const string ComparisonTargetKey = "Benchmarks:Target";
+    private const string ComparisonNodesKey = "Benchmarks:NodeCount";
+
+    [Test]
+    public async Task ExactEphemeralThreeVoterEqualDigestProfileIsAdmitted()
+    {
+        await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(fixture =>
+        {
+            var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture);
+            var images = RequestCqrsProbeAppHostBuilder.ReadThreeImages(builder);
+            var profile = RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, images);
+            return AssertAdmittedAsync(profile, images, fixture);
+        });
+    }
+
+    [Test]
+    public async Task DisabledProfileRequiresNeitherFilesNorImageSettings()
+    {
+        var absent = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
+        await Assert.That(RequestCqrsProbeProfile.Read(absent, "/missing/data", false, null, null!)).IsNull();
+        var disabled = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
+        disabled.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        { [RequestCqrsProbeAppHostBuilder.EnabledKey] = "false" });
+        var profile = RequestCqrsProbeProfile.Read(disabled, "/missing/data", false, null, null!);
+        await Assert.That(profile).IsNull();
+    }
+
+    [Test]
+    public async Task IncompatibleSuiteBenchmarkAndCohortModesAreRejected()
+    {
+        await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
+        {
+            var validBuilder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture);
+            var images = RequestCqrsProbeAppHostBuilder.ReadThreeImages(validBuilder);
+            foreach (var setting in new[] { SuiteKey, BenchmarkKey, BenchmarkProfileKey,
+                         ComparisonTargetKey, ComparisonNodesKey })
+            {
+                var value = setting == SuiteKey ? "unit" : setting == BenchmarkProfileKey ? "micro" : "true";
+                var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture, new(setting, value));
+                var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                    RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, images));
+                await Assert.That(error.Message).IsEqualTo(InvalidConfiguration);
+            }
+            var cohort = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
+                new("KeyLoadTests:ProtocolCohort:Enabled", "true"),
+                new("KeyLoadTests:ProtocolCohort:Voters:node1", "old"),
+                new("KeyLoadTests:ProtocolCohort:Voters:node2", "old"),
+                new("KeyLoadTests:ProtocolCohort:Voters:node3", "old"));
+            var cohortError = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                RequestCqrsProbeProfile.Read(cohort, fixture.DataRoot, true, null, images));
+            await Assert.That(cohortError.Message).IsEqualTo(InvalidConfiguration);
+            var nonEphemeral = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture);
+            var modeError = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                RequestCqrsProbeProfile.Read(nonEphemeral, fixture.DataRoot, false, null, images));
+            await Assert.That(modeError.Message).IsEqualTo(InvalidConfiguration);
+            var benchmarkNodes = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture);
+            var benchmarkError = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                RequestCqrsProbeProfile.Read(benchmarkNodes, fixture.DataRoot, true, 3, images));
+            await Assert.That(benchmarkError.Message).IsEqualTo(InvalidConfiguration);
+        });
+    }
+
+    [Test]
+    public async Task UnequalOrMissingImageMembersAreRejected()
+    {
+        await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
+        {
+            var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
+                new("TestImages:node1", RequestCqrsProbeAppHostBuilder.ValidImage),
+                new("TestImages:node2", RequestCqrsProbeAppHostBuilder.ValidImage),
+                new("TestImages:node3", "ghcr.io/managedcode/keyload:other@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+            var unequal = new Dictionary<string, RuntimeContainerImage>(StringComparer.Ordinal)
+            {
+                ["node1"] = RuntimeContainerImage.Read(builder, "TestImages:node1"),
+                ["node2"] = RuntimeContainerImage.Read(builder, "TestImages:node2"),
+                ["node3"] = RuntimeContainerImage.Read(builder, "TestImages:node3")
+            };
+            var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, unequal));
+            await Assert.That(error.Message).IsEqualTo(InvalidConfiguration);
+            var missing = new Dictionary<string, RuntimeContainerImage>(unequal, StringComparer.Ordinal);
+            missing.Remove("node3");
+            var missingError = Assert.ThrowsExactly<InvalidOperationException>(() =>
+                RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, missing));
+            await Assert.That(missingError.Message).IsEqualTo(InvalidConfiguration);
+        });
+    }
+
+    private static async Task AssertAdmittedAsync(RequestCqrsProbeProfile? profile,
+        IReadOnlyDictionary<string, RuntimeContainerImage> images, RequestCqrsProbeAppHostFileFixture fixture)
+    {
+        await Assert.That(profile).IsNotNull();
+        await Assert.That(profile!.SessionId).IsEqualTo(fixture.SessionId);
+        await Assert.That(images.Count).IsEqualTo(3);
+        await Assert.That(images.Values.Select(image => image.Reference).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(1);
+    }
+}

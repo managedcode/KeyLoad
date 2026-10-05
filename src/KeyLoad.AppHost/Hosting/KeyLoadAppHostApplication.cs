@@ -38,6 +38,7 @@ internal static class KeyLoadAppHostApplication
     {
         ArgumentNullException.ThrowIfNull(builder);
         ProtocolCohortImages.ValidateMode(builder.Configuration);
+        RequestCqrsProbeProfile.ValidateMode(builder.Configuration);
         if (TestSuiteSettings.Read(builder.Configuration) is { } tests)
         {
             TestSuiteResources.Add(builder, tests);

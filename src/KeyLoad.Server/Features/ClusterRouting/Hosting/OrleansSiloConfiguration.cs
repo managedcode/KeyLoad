@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Query;
 using KeyLoad.Replication;
+using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
@@ -41,7 +42,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
-        services.AddSingleton<GrainRequestCodec>();
+        RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
@@ -56,6 +57,21 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(partition.Database, partition.Coordinator,
             partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
             startupCancellation));
+    }
+
+    private static void RegisterRequestCodec(IServiceCollection services, PartitionHost partition, NodeOptions options)
+    {
+        if (options.RequestCqrsProbe.Enabled)
+        {
+            services.AddSingleton<IGrainRequestPhaseObserver>(provider => RequestCqrsProbeObserverFactory.Create(
+                options.RequestCqrsProbe, partition.Configuration, options.AllowPrivateNetworkHttp,
+                provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>())
+                ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions));
+        }
+        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, TimeProvider.System)
+        {
+            PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>()
+        });
     }
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address)

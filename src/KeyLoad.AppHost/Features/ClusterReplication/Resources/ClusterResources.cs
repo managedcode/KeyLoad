@@ -50,8 +50,9 @@ internal static class ClusterResources
         var nodeNames = ReadNodeNames(benchmarkNodeCount);
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
-        ClusterProfileStore.PrepareDirectory(root);
         var images = ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount);
+        var probes = RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images);
+        ClusterProfileStore.PrepareDirectory(root);
         var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
         var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
@@ -82,6 +83,7 @@ internal static class ClusterResources
                 .WithEnvironment(HttpPortEnvironment, HttpPort.ToString(CultureInfo.InvariantCulture))
                 .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
+            probes?.Apply(resource, name);
             ApplyPeers(resource, nodeNames, benchmarkNodeCount.HasValue);
             nodes[index] = resource;
         }

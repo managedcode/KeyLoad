@@ -20,7 +20,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         var principal = database.Store.Read(view =>
             database.Principal(view, hint.CreatorPrincipalId, clock.GetUtcNow()));
-        var commandId = DueWorkCommandIdentity.Create(hint);
+        var commandId = Guid.NewGuid();
         var mutation = RecurringDueCommand.Create(hint);
         var payload = NativeSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
         var result = await DispatchWithOneUncertaintyRetry(principal, commandId, payload, token).ConfigureAwait(true);

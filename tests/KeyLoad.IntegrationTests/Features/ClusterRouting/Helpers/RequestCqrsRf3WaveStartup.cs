@@ -10,19 +10,20 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
-    CancellationToken cancellationToken)
+    CancellationToken cancellationToken, RequestCqrsProbeFixture? controls)
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
-    private readonly string[] args = CreateArguments(dataRoot, images, configureCohort, snapshotThresholdArgument);
+    private readonly string[] args = CreateArguments(dataRoot, images, configureCohort, snapshotThresholdArgument, controls);
     private DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3Wave? wave;
 
     internal static Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
-        string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken)
+        string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
+        RequestCqrsProbeFixture? controls = null)
         => new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort, requireHealthy,
-            snapshotThresholdArgument, diagnosticsWaveId, cancellationToken).RunAsync();
+            snapshotThresholdArgument, diagnosticsWaveId, cancellationToken, controls).RunAsync();
 
     private async Task<RequestCqrsRf3Wave> RunAsync()
     {
@@ -79,7 +80,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     }
 
     private static string[] CreateArguments(string dataRoot, IReadOnlyDictionary<string, string> images,
-        bool configureCohort, string? snapshotThresholdArgument)
+        bool configureCohort, string? snapshotThresholdArgument, RequestCqrsProbeFixture? controls)
     {
         var args = new List<string>
         {
@@ -93,6 +94,12 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
             args.Add(RequestCqrsRf3Protocol.CohortEnabled);
             foreach (var node in Nodes())
             { args.Add(RequestCqrsRf3Protocol.VoterPrefix + node + "=" + images[node]); }
+        }
+        if (controls is not null)
+        {
+            args.Add("--KeyLoadTests:RequestCqrsProbe:Enabled=true");
+            args.Add("--KeyLoadTests:RequestCqrsProbe:Root=" + controls.Root);
+            args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
         }
         return [.. args];
     }

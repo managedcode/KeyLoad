@@ -1,6 +1,7 @@
 using System.Net;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
@@ -51,6 +52,7 @@ internal sealed record NodeOptions
     public McpMemoryLimits McpMemory { get; init; } = new();
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
+    internal RequestCqrsProbeOptions RequestCqrsProbe { get; init; } = new(false, null, string.Empty);
 
     /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
     public void Validate()
@@ -74,6 +76,7 @@ internal sealed record NodeOptions
         var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
         configuration.Validate();
         CreatePeerOptions().Validate(configuration);
+        RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
     }
 
     private void ValidatePeers()

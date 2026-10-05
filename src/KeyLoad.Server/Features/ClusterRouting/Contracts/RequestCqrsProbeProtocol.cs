@@ -1,0 +1,36 @@
+namespace KeyLoad.Server.Features.ClusterRouting;
+
+internal static class RequestCqrsProbeProtocol
+{
+    internal const string ConfigurationSection = "KeyLoad:RequestCqrsProbe";
+    internal const string EnabledSetting = "Enabled";
+    internal const string RootSetting = "Root";
+    internal const string SessionSetting = "SessionId";
+    internal const string FixedRoot = "/request-probes";
+    internal const string OwnerFile = "owner.json";
+    internal const string OwnerKind = "Owner";
+    internal const string ArmKind = "Arm";
+    internal const string ReleaseKind = "Release";
+    internal const string MarkerKind = "Marker";
+    internal const string PrincipalPrefix = "c1-probe-";
+    internal const string InvalidOptions = "The private request probe configuration is invalid.";
+    internal const string InvalidRecord = "The private request probe record is invalid.";
+    internal const string InvalidFiles = "The private request probe files are invalid.";
+    internal const string OrdinaryMessage = "keyload-c1-private-probe-ordinary-canary";
+    internal const string OrdinaryDataKey = "keyload-c1-private-probe-data";
+    internal const string OrdinaryDataValue = "keyload-c1-private-probe-data-canary";
+    internal const int Version = 1;
+    internal const int MaximumJsonDepth = 4;
+    internal const int MaximumPrincipalBytes = 256;
+    internal const int MaximumRecordBytes = 8_192;
+    internal const int MaximumFiles = 400;
+    internal const int MaximumArms = 32;
+    internal const int MaximumActiveGates = 4;
+    internal const int MaximumMarkersPerRequest = 8;
+    internal const int MaximumAggregateBytes = 1_048_576;
+    internal const int ReadBufferBytes = 8_193;
+    internal const int PollMilliseconds = 100;
+    internal const int HoldSeconds = 60;
+    internal const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
+    internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+}

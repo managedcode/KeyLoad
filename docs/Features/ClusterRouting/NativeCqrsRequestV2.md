@@ -683,3 +683,70 @@ claim log privacy from filtered diagnostics or report remote-voter death.
 Root runs the two actual Aspire RF3 cases and required exact-source Linux gates;
 source alone cannot close these criteria. Existing ADR-034/058 and C1 control
 contracts cover this test surface without public/format/topology changes.
+
+### C1 guarded offline outcome observation
+
+TASK-CRS-C1-OUTCOME-INSPECTION supplies the missing native-store oracle for
+AC-CRS-004/005. Root accepts the existing guarded current-format recovery open
+after complete RF3 shutdown. This is a logical canonical-state observation;
+native journal recovery may replay, truncate an incomplete tail and flush.
+It is not a byte-preserving forensic reader, format converter, power-loss test
+or public command-outcome API. Existing ADR-034/058 and the guarded-store
+ownership contract cover this test-only addition; persisted records and
+generated native serializer contracts remain unchanged.
+
+1. Add the distinct CrashHost mode `c1-outcome-inspect`. Its closed V1 private
+   UTF-8 input contains only `Version`, `Directory`, `ExpectedNodeId`,
+   `Incarnation`, `PrincipalId` and `CommandId`. Reject unknown/duplicate/missing
+   or null fields, invalid UTF-8, trailing content, empty IDs, non-canonical
+   paths and principal identifiers over 256 UTF-8 bytes. Bound input to 8192
+   bytes and JSON depth to four before the native existing-store open.
+2. Open only through `ZoneTreeExistingStore.Open`, with the supplied observed
+   node ID and same-wave incarnation. Do not bootstrap, create directories,
+   add a cache/fault observer, decode keys/records independently, use reflection
+   or call a format migration. Construct the normal DatabaseEngine with its
+   persisted-store policy implementation and call `Outcome(principal,id)`.
+   The result oracle is only null versus non-null.
+3. On successful native close, emit a closed V1 receipt containing only
+   `Version`, `NodeId`, `Incarnation`, `FormatVersion`, `Position` and
+   `OutcomePresent`, bounded to 4096 UTF-8 bytes. Never emit a path, principal,
+   command, result content, credential or exception message/data/stack. Invalid
+   input or failed open/read/close exits with fixed code 2 and no receipt.
+   Preserve original failures internally and always close the owned native
+   store; successful opening alone is insufficient.
+4. Root joins the additive dispatcher, project reference and internal friend
+   metadata. The existing guard inspector and recovery modes stay exact. A
+   parent invoked by the Aspire-owned runner holds the actual outer
+   `node.owner.lock` through the original child exit, bounded pipe drains and
+   process-handle close. The child acquires the canonical inner owner lock;
+   the parent must not hold that same inner lock.
+5. The two held-authority scenarios capture actual node status IDs and the
+   wave incarnation while the real cluster runs. Before revocation, a real
+   caller command writes a separate positive-control document and records its
+   command ID. Capture the no-effect baseline after that control. After the
+   original held request, callbacks, public callers, diagnostics and all
+   Aspire resources have joined and every owner-lock check passes, inspect the
+   held and positive-control IDs on each actual node store. Require absence of
+   the held outcome on all three nodes and presence of the positive control on
+   at least the acknowledged quorum of two. Do not assume every follower had
+   applied the latest command merely because the client obtained an ACK.
+6. Add actual existing-store process regressions for present/absent outcomes,
+   wrong node/incarnation fail-closed behavior and strict malformed input.
+   Retain the original child and cleanup failures. Execute these through the
+   same Aspire unit/scalar caller. Root then runs the two actual RF3 authority
+   cases and exact-source Linux gates; private code or local mechanism tests
+   do not qualify AC-CRS-004/005 by themselves.
+
+Agent graph: cluster_wave Luna/high owns only new CrashHost ClusterRouting
+Contracts/Serialization/Helpers files prefixed C1OutcomeInspection, privately
+against exact absent bases. lifecycle_wave Luna/high owns new CrashHost
+ClusterRouting Processes files prefixed C1OutcomeInspection for one shared
+bounded parent lifetime and new UnitTests ClusterRouting Cases/Helpers files
+with that prefix. Unit and RF3 callers reuse the child DTOs and that one parent
+lifetime; do not duplicate either. Parent execution and cleanup bounds are 30
+and 15 seconds respectively; neither bound substitutes a completed wrapper for
+joining its original child/pipe tasks. Root owns shared dispatch, metadata,
+RF3 status capture, positive-control/cleanup ordering and the parent-call join.
+Workers must not edit the checkout or start builds/tests/processes/Git; deliver
+complete private source, patch, hashes and self-review. Root reads every byte,
+integrates, runs the gates and commits the complete stage scope.

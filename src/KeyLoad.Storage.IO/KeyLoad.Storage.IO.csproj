@@ -5,6 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
+    <InternalsVisibleTo Include="KeyLoad.AppHost" />
     <InternalsVisibleTo Include="KeyLoad.Storage.ZoneTree" />
     <InternalsVisibleTo Include="KeyLoad.Replication" />
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />

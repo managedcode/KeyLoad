@@ -4,6 +4,7 @@ using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Security;
+using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.ServiceDefaults;
 
 namespace KeyLoad.Server;
@@ -40,15 +41,22 @@ internal static class ServerConfiguration
             with
         { DataDirectory = destination };
         node.Validate();
-        return node;
+        return ReadRequestProbes(node, builder.Configuration);
     }
 
     private static NodeOptions ReadNode(ConfigurationManager configuration)
     {
         var node = configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new();
         node.Validate();
-        return node;
+        return ReadRequestProbes(node, configuration);
     }
+
+    private static NodeOptions ReadRequestProbes(NodeOptions node, IConfiguration configuration)
+        => node with
+        {
+            RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
+                node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp)
+        };
 
     private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options)
     {
