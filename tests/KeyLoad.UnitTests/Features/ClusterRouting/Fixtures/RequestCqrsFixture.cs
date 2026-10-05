@@ -48,7 +48,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             builder.AddSiloBuilderConfigurator<RequestCqrsSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RequestCqrsClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System);
+            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         }
         catch (Exception startupFailure)
         {
@@ -72,7 +72,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal TestCluster Cluster { get; }
     internal GrainRequestCodec Codec { get; }
     internal TestDatabase Database { get; }
-    internal NativeRequestWorkOwner RequestWork => requestWork ??= new();
+    internal NativeRequestWorkOwner RequestWork => requestWork ??= new(UnitRoutingOptions.Routing());
 
     public async Task InitializeAsync()
     {

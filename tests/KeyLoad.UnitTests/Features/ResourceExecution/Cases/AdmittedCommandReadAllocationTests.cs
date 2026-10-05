@@ -19,12 +19,12 @@ internal sealed class AdmittedCommandReadAllocationTests
     [Test]
     public async Task WarmedPrefilledInboxReadsWithinSmallAllocationWindow()
     {
-        var governor = new CommandAdmissionGovernor(new()
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new()
         {
             MaxCommands = TotalCommandCount,
             MaxTenantCommands = TotalCommandCount,
             MaxPrincipalCommands = TotalCommandCount
-        });
+        }));
         await using var inbox = new AdmittedCommandInbox(governor);
         var principal = new PrincipalRecord(PrincipalId, TenantId, [], []);
         var commandCount = TotalCommandCount;

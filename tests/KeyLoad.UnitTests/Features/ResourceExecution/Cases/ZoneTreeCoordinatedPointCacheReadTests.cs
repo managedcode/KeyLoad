@@ -93,7 +93,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheReadTests
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
-            using var permit = new CacheReadPermit(TimeProvider.System);
+            using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
             var store = fixture.OpenStore();
             ZoneTreeCoordinatedPointCacheTestSupport.Put(store, Key, Value);
             var control = ZoneTreeCoordinatedPointCacheTestSupport.CreateControl(store, fixture, permit);

@@ -52,7 +52,7 @@ internal sealed class McpNativeAuthenticationTests
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
-        var governor = new HttpAdmissionGovernor();
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         using (var state = new McpRequestState(governor, memory, RequestCapacity, CancellationToken.None))
         {
             state.Authenticate(payload, CancellationToken.None);

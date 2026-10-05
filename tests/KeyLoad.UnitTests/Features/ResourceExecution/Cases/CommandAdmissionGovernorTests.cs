@@ -11,7 +11,7 @@ internal sealed class CommandAdmissionGovernorTests
     [Test]
     public async Task BytesAndScopesAreReservedAtomicallyAndReleasedExactlyOnce()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxRetainedBytes = 4_497 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxRetainedBytes = 4_497 }));
         var first = Reserve(governor, OperationKind.Batch, Principal(), 100, 100);
         await Assert.That(governor.Snapshot().RetainedBytes).IsEqualTo(4_496);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -25,7 +25,7 @@ internal sealed class CommandAdmissionGovernorTests
     [Test]
     public async Task TenantAndPrincipalCapsCannotBeEvadedWithMoreApiKeys()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxPrincipalCommands = 1, MaxTenantCommands = 2 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxPrincipalCommands = 1, MaxTenantCommands = 2 }));
         using var first = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Reserve(governor, OperationKind.Batch, Principal(), 0, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -38,7 +38,7 @@ internal sealed class CommandAdmissionGovernorTests
     [Test]
     public async Task FullDataAdmissionPreservesBoundedControlCapacity()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxCommands = 1, ReservedControlCommands = 2, MaxControlPayloadBytes = 16 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 1, ReservedControlCommands = 2, MaxControlPayloadBytes = 16 }));
         using var data = Reserve(governor, OperationKind.Batch, Principal(), 0, 0);
         using var acknowledgement = Reserve(governor, OperationKind.Delivery, Principal(), 16, 16);
         using var membership = Reserve(governor, OperationKind.Membership, Principal("root"), 0, 0);
@@ -52,7 +52,7 @@ internal sealed class CommandAdmissionGovernorTests
     [Test]
     public async Task CancellationBeforeAdmissionDoesNotConsumeCapacity()
     {
-        var governor = new CommandAdmissionGovernor();
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => Reserve(governor, OperationKind.Batch, Principal(), 0, 0, cancellation.Token));
@@ -61,7 +61,7 @@ internal sealed class CommandAdmissionGovernorTests
     [Test]
     public async Task ConcurrentLoadCannotExceedTheNodeCeilingAndReleasedScopesDoNotAccumulate()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxCommands = 8 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 8 }));
         using var held = new CountdownEvent(8);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var admitted = Enumerable.Range(0, 8).Select(i => Task.Run(async () =>

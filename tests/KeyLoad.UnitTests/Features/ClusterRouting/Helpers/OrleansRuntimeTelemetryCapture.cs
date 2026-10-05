@@ -32,7 +32,7 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
                     break;
                 }
 
-                records.Add(OrleansActivityCapture.From(activity));
+                records.Add(OrleansActivityCaptureMapper.From(activity));
             }
         }
 
@@ -91,10 +91,7 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
     }
 }
 
-internal sealed record OrleansActivityCapture(string SourceName, string DisplayName, string TraceId,
-    string SpanId, string ParentSpanId, ActivityStatusCode Status, string? StatusDescription,
-    string? TraceState, string[] Baggage, bool HasLinks, KeyValuePair<string, string?>[] Tags,
-    OrleansActivityEventCapture[] Events)
+internal static class OrleansActivityCaptureMapper
 {
     internal static OrleansActivityCapture From(Activity activity)
         => new(activity.Source.Name, activity.DisplayName, activity.TraceId.ToHexString(),
@@ -106,8 +103,3 @@ internal sealed record OrleansActivityCapture(string SourceName, string DisplayN
             activity.Events.Select(static activityEvent => new OrleansActivityEventCapture(activityEvent.Name,
                 activityEvent.Tags.Select(static tag => new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())).ToArray())).ToArray());
 }
-
-internal sealed record OrleansActivityEventCapture(string Name, KeyValuePair<string, string?>[] Tags);
-
-internal sealed record OrleansMetricPointCapture(string MeterName, string MetricName,
-    KeyValuePair<string, string?>[] Tags, KeyValuePair<string, string?>[] ExemplarTags);

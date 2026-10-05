@@ -16,7 +16,7 @@ internal sealed class SqlAdmissionTests
     [Test]
     public async Task AcAiSql007SqlAndQueryReserveTheSameWorkingBudgetBeforePrincipalBinding()
     {
-        var governor = new HttpAdmissionGovernor();
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         long queryBytes;
         using (var query = governor.Begin(QueryRoute, BodyBytes))
         {
@@ -37,7 +37,7 @@ internal sealed class SqlAdmissionTests
     [Test]
     public async Task AcAiSql007SqlDataSaturationCannotConsumeDirectControlProgress()
     {
-        var governor = new HttpAdmissionGovernor(new() { MaxRequests = 1, MaxPrincipalRequests = 1 });
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(new() { MaxRequests = 1, MaxPrincipalRequests = 1 }));
         using var sql = governor.Begin(SqlOperationProtocol.Route, BodyBytes);
         sql.Bind(Principal);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => governor.Begin(SqlOperationProtocol.Route, BodyBytes));

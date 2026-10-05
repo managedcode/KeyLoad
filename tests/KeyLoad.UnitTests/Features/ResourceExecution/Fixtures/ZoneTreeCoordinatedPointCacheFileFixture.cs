@@ -18,7 +18,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheFileFixture : IDisposable
     internal CacheMemoryBudget Budget { get; }
 
     internal ZoneTreeCoordinatedPointCacheFileFixture(CacheMemoryLimits? limits = null)
-        => Budget = new CacheMemoryBudget(limits ?? new CacheMemoryLimits());
+        => Budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(limits ?? new CacheMemoryLimits()));
 
     internal ZoneTreeStore OpenStore(int maxEntries = 8, bool embedded = false,
         Action<CommitStage, long, int>? faultObserver = null)

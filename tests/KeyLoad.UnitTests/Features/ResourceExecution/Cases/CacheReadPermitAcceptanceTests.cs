@@ -7,7 +7,7 @@ internal sealed class CacheReadPermitAcceptanceTests
     [Test]
     public async Task CurrentAcceptanceRequiresEveryReceiptFieldAndRejectsColdOrClosedState()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         await Assert.That(permit.IsCurrentAcceptance(default)).IsFalse();
         var firstGrant = Guid.NewGuid();
         var firstPrepared = TimeProvider.System.GetTimestamp();
@@ -43,7 +43,7 @@ internal sealed class CacheReadPermitAcceptanceTests
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var clock = TimeProvider.System;
         var prepared = clock.GetTimestamp();
         await WaitForPrepareAgeAsync(clock, prepared, TimeSpan.FromSeconds(2), linked.Token);

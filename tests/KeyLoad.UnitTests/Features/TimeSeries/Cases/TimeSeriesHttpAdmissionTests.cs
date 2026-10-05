@@ -23,7 +23,7 @@ internal sealed class TimeSeriesHttpAdmissionTests
     [Arguments(WindowsRoute)]
     public async Task AcSeries011NewReadsReserveTheSharedHeavyWorkingSetAndReleaseAfterRejection(string route)
     {
-        var governor = new HttpAdmissionGovernor(new()
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(new()
         {
             MaxRequests = RequestCapacity,
             MaxReservedBytes = NodeCapacity,
@@ -33,7 +33,7 @@ internal sealed class TimeSeriesHttpAdmissionTests
             MaxControlBodyBytes = ControlBodyBytes,
             ReservedControlRequests = ControlRequests,
             ReservedControlBytes = ControlCapacity
-        });
+        }));
         using var query = governor.Begin(ExistingQueryRoute, 0);
         await Assert.That(governor.Status().Node.RetainedBytes).IsEqualTo(ReservedReadBytes);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() => governor.Begin(route, 0));

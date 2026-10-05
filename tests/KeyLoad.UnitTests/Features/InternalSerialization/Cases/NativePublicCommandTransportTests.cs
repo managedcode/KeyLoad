@@ -19,7 +19,7 @@ internal sealed class NativePublicCommandTransportTests
         var decoded = Decode(database, operation);
         await Assert.That(decoded.CommandId).IsEqualTo(operation.Id);
         await Assert.That(decoded.CommandKind).IsEqualTo(operation.Kind);
-        var codec = new GrainRequestCodec(database.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
             operation.Kind, operation.Id, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);

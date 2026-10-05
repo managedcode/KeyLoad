@@ -57,7 +57,7 @@ internal sealed class McpNativeAuthenticationMalformedTests
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None)).Code)
                 .IsEqualTo(ErrorCode.Validation);
-            using (var state = new McpRequestState(new HttpAdmissionGovernor(), memory, RequestCapacity, CancellationToken.None))
+            using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None))
             {
                 await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => state.Authenticate(payload, CancellationToken.None)).Code)
                     .IsEqualTo(ErrorCode.Validation);

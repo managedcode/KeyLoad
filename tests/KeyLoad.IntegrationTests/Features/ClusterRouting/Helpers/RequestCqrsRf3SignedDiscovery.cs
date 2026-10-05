@@ -39,7 +39,7 @@ internal static class RequestCqrsRf3SignedDiscovery
     private static async Task<ReplicaSiloDiscovery> ReadOwnedAsync(DistributedApplication app, string nodeName,
         Guid incarnation, ReadOnlyMemory<byte> credential, CancellationToken cancellationToken)
     {
-        using var signer = new PeerSecurity(credential, TimeProvider.System);
+        using var signer = new PeerSecurity(credential, TimeProvider.System, IntegrationRoutingOptions.Discovery());
         using var http = McpCallerHttp.Create(app, nodeName);
         using var request = new HttpRequestMessage(HttpMethod.Get,
             new Uri(http.BaseAddress ?? throw new InvalidOperationException(InvalidSignedObservation), DiscoveryPath));

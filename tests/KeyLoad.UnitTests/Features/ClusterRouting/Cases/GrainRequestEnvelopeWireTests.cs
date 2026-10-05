@@ -55,7 +55,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task ActualDatabaseSignedReadPreservesNativePayloadAndVersionedPurpose()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var payload = NativeSerialization.Serialize(new GetDocumentRequest(new(fixture.Partition, Principal, Principal)));
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
@@ -75,7 +75,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task SignedLegacyNullOrMissingPayloadIsInvalidatedWithoutJsonFallback(bool missing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var json = OriginalJson.Replace(WireMember, missing ? string.Empty : NullWireMember, StringComparison.Ordinal);
         await AssertLegacyRejectedAsync(fixture, codec, json);
     }
@@ -93,7 +93,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task DefaultOrEmptyNativePayloadIsRejectedAtTheRealScopeBoundary(bool missing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(NoDtoMarker));
         var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with
@@ -108,7 +108,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task NativeSignatureWithLegacyPurposeIsAlsoInvalidated()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(NoDtoMarker));
         var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with { Purpose = LegacyPurpose };

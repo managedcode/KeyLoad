@@ -42,7 +42,7 @@ internal sealed class NativeAuthenticationUnknownMetadataTests
 
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
-        var governor = new HttpAdmissionGovernor();
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         using (var rejected = new McpRequestState(governor, memory, RequestCapacity, CancellationToken.None))
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => rejected.Authenticate(invalid, CancellationToken.None));

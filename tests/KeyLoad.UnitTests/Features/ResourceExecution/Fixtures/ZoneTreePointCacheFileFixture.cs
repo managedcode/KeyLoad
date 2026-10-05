@@ -15,7 +15,7 @@ internal sealed class ZoneTreePointCacheFileFixture : IDisposable
     internal CacheMemoryBudget Budget { get; }
 
     internal ZoneTreePointCacheFileFixture(CacheMemoryLimits? limits = null)
-        => Budget = new CacheMemoryBudget(limits ?? new CacheMemoryLimits());
+        => Budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(limits ?? new CacheMemoryLimits()));
 
     internal ZoneTreeStore OpenStore(int maxEntries = 8, int maxValueBytes = 128, int maxPinsPerEntry = 8,
         Guid? incarnation = null, byte[]? signingKey = null, int maxKeyBytes = 128)

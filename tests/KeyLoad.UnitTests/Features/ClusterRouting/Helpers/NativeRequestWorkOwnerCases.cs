@@ -12,7 +12,7 @@ internal static class NativeRequestWorkOwnerCases
 
     internal static async Task AssertCapacityAndReleaseAsync()
     {
-        await using var owner = new NativeRequestWorkOwner();
+        await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var leases = new List<IDisposable>();
         try
         {
@@ -56,7 +56,7 @@ internal static class NativeRequestWorkOwnerCases
 
     internal static async Task AssertDrainAndClosedAdmissionAsync()
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
         var cancellationObserved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var cancellationRegistration = owner.ShutdownToken.Register(() => cancellationObserved.TrySetResult());
@@ -89,7 +89,7 @@ internal static class NativeRequestWorkOwnerCases
 
     internal static async Task AssertCallbackFailureJoinsLiveLeaseAsync()
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var lease = owner.Acquire(Guid.NewGuid(), NativeRequestWorkKind.ReadCapability);
         var callbackEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var callbackFailure = new InvalidOperationException("The owner shutdown callback failed.");

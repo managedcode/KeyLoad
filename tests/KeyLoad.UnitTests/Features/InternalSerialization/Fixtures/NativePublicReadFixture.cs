@@ -71,7 +71,7 @@ internal static class NativePublicReadFixture
     internal static DecodedGrainRequest Signed(TestDatabase database, ReadOnlyMemory<byte> payload, GrainReadKind kind,
         string principal = NativeAuthorityFixture.Root)
     {
-        var codec = new GrainRequestCodec(database.Database, TimeProvider.System);
+        var codec = new GrainRequestCodec(database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         return codec.Verify(codec.CreateRead(Guid.NewGuid(), principal, kind, payload));
     }
 

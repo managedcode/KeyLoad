@@ -56,7 +56,7 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
 
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(), memory, RequestCapacity, CancellationToken.None))
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None))
         {
             await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
         }
@@ -76,7 +76,7 @@ internal sealed class NativeAuthenticationReaderFailureTests
 
         await AssertCancelledAsync(() => McpNativeAuthentication.Inspect(payload, cancelled.Token));
         await AssertCancelledAsync(() => McpNativeAuthentication.ReadPrincipal(payload, cancelled.Token));
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(), memory, RequestCapacity, CancellationToken.None))
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None))
         {
             await AssertCancelledAsync(() => state.Authenticate(payload, cancelled.Token));
         }

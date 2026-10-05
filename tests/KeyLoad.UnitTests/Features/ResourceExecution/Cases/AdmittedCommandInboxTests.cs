@@ -12,7 +12,7 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task ActiveCommandsRetainCapacityAndAcknowledgementsHaveTheirOwnLane()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxCommands = 1 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 1 }));
         await using var queue = new AdmittedCommandInbox(governor);
         var data = Enqueue(queue, Operation(), Principal(), 2);
         var acknowledgement = Enqueue(queue, Operation(OperationKind.Delivery), Principal(), 2);
@@ -30,7 +30,7 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task AControlFloodCannotStarveWaitingDataAndEachLanePreservesFifo()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxPrincipalControlCommands = 16, MaxTenantControlCommands = 16 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxPrincipalControlCommands = 16, MaxTenantControlCommands = 16 }));
         await using var queue = new AdmittedCommandInbox(governor);
         var data = Enumerable.Range(0, 2).Select(_ => Enqueue(queue, Operation(), Principal(), 2)).ToArray();
         var control = Enumerable.Range(0, 10).Select(_ => Enqueue(queue, Operation(OperationKind.Membership), Principal(), 2)).ToArray();
@@ -43,7 +43,7 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task CancellingAResponseDoesNotReleaseAnAcceptedCommandsReservation()
     {
-        var governor = new CommandAdmissionGovernor(new() { MaxCommands = 1 });
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 1 }));
         await using var queue = new AdmittedCommandInbox(governor);
         var pending = Enqueue(queue, Operation(), Principal(), 2);
         using var cancellation = new CancellationTokenSource();
@@ -59,7 +59,7 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task ShutdownRejectsQueuedCommandsReleasesTheirReservationsAndWakesTheReader()
     {
-        var governor = new CommandAdmissionGovernor();
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         await using var queue = new AdmittedCommandInbox(governor);
         var active = Enqueue(queue, Operation(), Principal(), 2);
         await Assert.That(await queue.ReadAsync(TestContext.Current!.Execution.CancellationToken)).IsSameReferenceAs(active);
@@ -83,7 +83,7 @@ internal sealed class AdmittedCommandInboxTests
     [Test]
     public async Task CancelledReadersAndMismatchedPrincipalClaimsCannotConsumeQueuedWorkOrBypassScopes()
     {
-        var governor = new CommandAdmissionGovernor();
+        var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
         await using var queue = new AdmittedCommandInbox(governor);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             Enqueue(queue, Operation() with { PrincipalId = "other" }, Principal(), 2)).Code).IsEqualTo(ErrorCode.PermissionDenied);

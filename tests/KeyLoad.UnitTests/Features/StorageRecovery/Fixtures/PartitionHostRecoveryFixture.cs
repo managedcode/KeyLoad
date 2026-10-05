@@ -97,8 +97,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         incoming.Complete(Pending.TransferId);
     }
 
-    internal PartitionHost OpenHost() => new(Options, new AuthorizationPolicy(),
-        new CommandAdmissionGovernor(Options.CommandAdmission), TimeProvider.System, logging.CreateLogger<ReplicaConsensus>());
+    internal PartitionHost OpenHost() => new(ServerRuntimeTestOptions.Runtime(Options), new AuthorizationPolicy(),         new CommandAdmissionGovernor(UnitAdmissionOptions.Command(Options.CommandAdmission)), TimeProvider.System, logging.CreateLogger<ReplicaConsensus>());
 
     internal async Task OpenAndDisposeHostAsync()
     {

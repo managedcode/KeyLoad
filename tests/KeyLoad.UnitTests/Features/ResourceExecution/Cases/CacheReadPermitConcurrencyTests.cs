@@ -11,7 +11,7 @@ internal sealed class CacheReadPermitConcurrencyTests
     [Test]
     public async Task ConcurrentDuplicateSequenceHasOneWinnerAndLeavesOneCurrentRevision()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         await RunContendersAsync(permit);
 
         await Assert.That(permit.TryCapture(out var revision)).IsTrue();

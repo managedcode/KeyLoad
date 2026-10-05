@@ -24,7 +24,7 @@ internal sealed class McpUnknownLengthAdmissionTests
         var principalBytes = NativeSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
-        var governor = new HttpAdmissionGovernor();
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         var wire = Encoding.UTF8.GetBytes(DiscoveryFrame);
 
         using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, CancellationToken.None))

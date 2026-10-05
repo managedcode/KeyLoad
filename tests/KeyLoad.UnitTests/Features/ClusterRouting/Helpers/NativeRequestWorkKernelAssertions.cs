@@ -12,7 +12,7 @@ internal static class NativeRequestWorkKernelAssertions
 
     internal static async Task AssertHealthyFollowingStreamAsync(RequestCqrsClusterFixture fixture)
     {
-        await using var owner = new NativeRequestWorkOwner();
+        await using var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var probe = new NativeRequestWorkProbe();
         probe.ReleaseProducer();

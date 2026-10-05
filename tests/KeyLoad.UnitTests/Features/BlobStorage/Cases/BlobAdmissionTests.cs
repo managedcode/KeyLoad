@@ -15,7 +15,7 @@ internal sealed class BlobAdmissionTests
     [Test]
     public async Task AcBlob004CleanupUsesTwoBoundedControlReservationsDuringDataSaturation()
     {
-        var governor = new HttpAdmissionGovernor(Limits());
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Limits()));
         using var data = Begin(governor, BlobAgentCases.PartRoute, 0);
         data.Bind(Principal);
         using var abort = Begin(governor, BlobAgentCases.AbortRoute, ControlBodyLimit);
@@ -39,7 +39,7 @@ internal sealed class BlobAdmissionTests
     [Test]
     public async Task AcBlob004OnlyAbortAndReclaimUseTheBoundedCleanupLane()
     {
-        var governor = new HttpAdmissionGovernor(Limits());
+        var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http(Limits()));
         foreach (var item in BlobAgentCases.All().Where(item => item.CommandKind.HasValue))
         {
             var cleanup = item.Name is BlobAgentCases.Abort or BlobAgentCases.Reclaim;

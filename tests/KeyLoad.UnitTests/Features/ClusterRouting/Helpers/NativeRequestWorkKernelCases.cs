@@ -12,7 +12,7 @@ internal static class NativeRequestWorkKernelCases
 
     internal static async Task AssertLazyStreamAsync(RequestCqrsClusterFixture fixture)
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var probe = new NativeRequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe).GetAsyncEnumerator();
@@ -31,7 +31,7 @@ internal static class NativeRequestWorkKernelCases
 
     internal static async Task AssertHeldProducerJoinAsync(RequestCqrsClusterFixture fixture)
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var probe = new NativeRequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe).GetAsyncEnumerator();
@@ -72,7 +72,7 @@ internal static class NativeRequestWorkKernelCases
 
     internal static async Task AssertCallbackFailureJoinAsync(RequestCqrsClusterFixture fixture)
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var probe = new NativeRequestWorkProbe();
         var enumerator = CreateStream(fixture, owner, requestId, probe, throwOnCancellation: true)
@@ -117,7 +117,7 @@ internal static class NativeRequestWorkKernelCases
 
     internal static async Task AssertRejectedAdmissionSettlesAsync(RequestCqrsClusterFixture fixture)
     {
-        var owner = new NativeRequestWorkOwner();
+        var owner = new NativeRequestWorkOwner(UnitRoutingOptions.Routing());
         var held = new List<IDisposable>();
         var requestId = Guid.NewGuid();
         var probe = new NativeRequestWorkProbe();

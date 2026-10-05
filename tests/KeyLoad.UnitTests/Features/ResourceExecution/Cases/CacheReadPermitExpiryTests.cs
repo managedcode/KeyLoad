@@ -15,7 +15,7 @@ internal sealed class CacheReadPermitExpiryTests
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var grant = Guid.NewGuid();
         var stalePrepared = TimeProvider.System.GetTimestamp();
         await WaitForPreparedAgeAsync(TimeProvider.System, stalePrepared,
@@ -36,7 +36,7 @@ internal sealed class CacheReadPermitExpiryTests
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var clock = TimeProvider.System;
         var prepared = clock.GetTimestamp();
         await WaitForMeasuredAgeAsync(clock, prepared, GrantPreparationDelay, linked.Token);

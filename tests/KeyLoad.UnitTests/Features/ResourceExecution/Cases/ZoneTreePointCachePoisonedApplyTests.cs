@@ -14,7 +14,7 @@ internal sealed class ZoneTreePointCachePoisonedApplyTests
     {
         var shouldFail = false;
         var directory = Path.Combine(Path.GetTempPath(), "keyload-point-cache-poison-" + Guid.NewGuid().ToString("N"));
-        using var budget = new CacheMemoryBudget(new());
+        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new()));
         try
         {
             {

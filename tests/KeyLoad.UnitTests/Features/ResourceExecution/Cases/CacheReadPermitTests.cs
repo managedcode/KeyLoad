@@ -7,7 +7,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task StartsColdAndAcceptsFreshReceiverPreparedLease()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         await Assert.That(permit.TryCapture(out var coldRevision)).IsFalse();
         await Assert.That(coldRevision).IsEqualTo(0);
 
@@ -25,7 +25,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task RejectedInputsDoNotChangeCurrentLeaseOrConsumeSequence()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var grant = Guid.NewGuid();
         var prepared = TimeProvider.System.GetTimestamp();
         await Assert.That(permit.TryAccept(grant, 5, prepared, out _)).IsTrue();
@@ -46,7 +46,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task RenewalReportsContinuityAndInvalidatesPreviousCapturedRevision()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var firstGrant = Guid.NewGuid();
         var firstPrepared = TimeProvider.System.GetTimestamp();
         await Assert.That(permit.TryAccept(firstGrant, 1, firstPrepared, out _)).IsTrue();
@@ -65,7 +65,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task WithdrawalRequiresExactGrantAndRevisionAndPreservesSequenceHistory()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var grant = Guid.NewGuid();
         await Assert.That(permit.TryAccept(grant, 7, TimeProvider.System.GetTimestamp(), out _)).IsTrue();
 
@@ -88,7 +88,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task FinalSequenceCanBeAcceptedButNeverWraps()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var accepted = permit.TryAccept(Guid.NewGuid(), long.MaxValue, TimeProvider.System.GetTimestamp(), out var receipt);
 
         await Assert.That(accepted).IsTrue();
@@ -100,7 +100,7 @@ internal sealed class CacheReadPermitTests
     [Test]
     public async Task DisposePublishesColdAndPermanentlyRejectsAcceptance()
     {
-        using var permit = new CacheReadPermit(TimeProvider.System);
+        using var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         var grant = Guid.NewGuid();
         await Assert.That(permit.TryAccept(grant, 1, TimeProvider.System.GetTimestamp(), out _)).IsTrue();
         permit.Dispose();

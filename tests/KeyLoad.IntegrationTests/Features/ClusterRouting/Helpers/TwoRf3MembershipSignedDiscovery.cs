@@ -15,7 +15,7 @@ internal static class TwoRf3MembershipSignedDiscovery
     internal static async Task<ReplicaSiloDiscovery> ReadAsync(DistributedApplication app, string node,
         string clusterId, Guid incarnation, ReadOnlyMemory<byte> secret, CancellationToken token)
     {
-        using var security = new PeerSecurity(secret, TimeProvider.System);
+        using var security = new PeerSecurity(secret, TimeProvider.System, IntegrationRoutingOptions.Discovery());
         using var http = McpCallerHttp.Create(app, node);
         using var request = new HttpRequestMessage(HttpMethod.Get,
             new Uri(http.BaseAddress ?? throw new InvalidOperationException(Invalid), ReplicaProtocol.DiscoveryPath));

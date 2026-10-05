@@ -176,7 +176,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheFactoryTests
 
     private static CacheReadPermit AcceptedPermit(out CacheReadPermitAcceptance receipt)
     {
-        var permit = new CacheReadPermit(TimeProvider.System);
+        var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         if (!permit.TryAccept(Guid.NewGuid(), 1, TimeProvider.System.GetTimestamp(), out receipt))
         {
             permit.Dispose();

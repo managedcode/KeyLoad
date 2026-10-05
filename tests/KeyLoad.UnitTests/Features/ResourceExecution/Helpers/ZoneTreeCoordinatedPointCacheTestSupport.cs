@@ -17,7 +17,7 @@ internal static class ZoneTreeCoordinatedPointCacheTestSupport
     internal static CacheReadPermit CreateAcceptedPermit(long sequence, out Guid grantId,
         out CacheReadPermitAcceptance acceptance)
     {
-        var permit = new CacheReadPermit(TimeProvider.System);
+        var permit = new CacheReadPermit(TimeProvider.System, UnitAdmissionOptions.Permit());
         grantId = Guid.NewGuid();
         if (!permit.TryAccept(grantId, sequence, TimeProvider.System.GetTimestamp(), out acceptance))
         {
