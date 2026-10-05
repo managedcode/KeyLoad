@@ -1,7 +1,7 @@
 namespace KeyLoad.Orleans;
 
 /// <summary>Opens native journal work only after replicated identity and catalog verification.</summary>
-internal sealed class RuntimeJournalAdmission : IDisposable
+public sealed class RuntimeJournalAdmission : IDisposable
 {
     private readonly Lock lifecycle = new();
     private readonly TaskCompletionSource ready = new(TaskCreationOptions.RunContinuationsAsynchronously);

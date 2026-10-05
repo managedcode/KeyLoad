@@ -160,7 +160,14 @@
       "trx": "TestResults/quality-repair-frozen-threshold-20261006/KeyLoad.Analyzers.Tests_net10.0_arm64.trx",
       "fixtureDrift": 0,
       "limitation": "Frozen copied36-source contract with native synthetic coverage fixtures; no whole-current-catalog, functional coverage, complete source-cohort suite or current CRAP acceptance."
-    }
+    },
+    "governance": {
+      "status": "passed",
+      "artifact": "governance-final2.log",
+      "projects": 27,
+      "modules": 4
+    },
+    "orderedReviewSourceDriftCheck": "Diagnostics eight authored hashes from the native review still match at final evidence join; frozen threshold fixture inputs remain identical to their captured copy."
   },
   "remainingFindings": [
     {
@@ -175,7 +182,7 @@
       "severity": "high",
       "status": "open; independently owned analyzer implementation in progress",
       "source": "scripts/Features/CodeQuality/site-analyzer-coverage.contract.json",
-      "consequence": "Ten new analyzer files are not bound by the current catalog; Prepare correctly fails closed. Full threshold runtime verification remains blocked.",
+      "consequence": "Ten new analyzer files are not bound by the current catalog; Prepare correctly fails closed. Five native frozen-fixture threshold controls pass, but complete current-catalog qualification remains blocked.",
       "artifact": "catalog-blocker.json"
     },
     {

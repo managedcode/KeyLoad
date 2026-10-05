@@ -45,7 +45,7 @@ public class EmbeddedBenchmarks : IDisposable
             throw new InvalidOperationException(ActiveSetupMessage);
         }
 
-        var candidate = new EmbeddedBenchmarkResources();
+        var candidate = new EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeRegistration.Read());
         var initialized = false;
         try
         {
@@ -108,7 +108,7 @@ public class EmbeddedBenchmarks : IDisposable
     private EmbeddedBenchmarkResources RequireResources()
         => resources ?? throw new InvalidOperationException(EmbeddedBenchmarkResources.InactiveFixtureMessage);
 
-    private sealed class EmbeddedBenchmarkResources : IDisposable
+    private sealed class EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeOptions options) : IDisposable
     {
         internal const string InactiveFixtureMessage = "The benchmark fixture is not initialized.";
         private const string GuidFormat = "N";
@@ -123,8 +123,9 @@ public class EmbeddedBenchmarks : IDisposable
 
         internal void Initialize(PartitionRef partition)
         {
-            store = new(new(directory));
-            database = new(store, new AuthorizationPolicy());
+            store = new(new(directory), options.Storage, options.PointCache);
+            database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
+                options.Messaging);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },

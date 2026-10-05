@@ -66,7 +66,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
             throw new ArgumentOutOfRangeException(nameof(RecordCount), InvalidCountMessage);
         }
 
-        _fixture = new ScaledRawStorageFixture(RecordCount, PayloadBytes);
+        _fixture = new ScaledRawStorageFixture(RecordCount, PayloadBytes, ScaledStorageExecutionRegistration.Read());
     }
 
     /// <summary>Consumes one million checked sequential actual record identities.</summary>
