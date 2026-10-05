@@ -1,7 +1,5 @@
-using KeyLoad;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.AI;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -32,6 +30,7 @@ internal sealed class McpGatewayCatalogAdapterTests
             DocumentGet,
             new Dictionary<string, object?>(),
             CancellationToken.None));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
     }
 }

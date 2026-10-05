@@ -27,7 +27,6 @@ internal static class McpGatewayMetaArgumentReader
         return Select(name, parameters[McpGatewayMetaProtocol.Arguments]);
     }
 
-
     internal static McpGatewayMetaSelection Select(string? name, JsonNode? arguments)
     {
         if (string.IsNullOrWhiteSpace(name) || !McpGatewayMetaProtocol.TryGetOperation(name, out var operation))
@@ -84,7 +83,7 @@ internal static class McpGatewayMetaArgumentReader
             McpGatewayMetaProtocol.DefaultRouteLimit, McpGatewayMetaProtocol.MaximumRouteLimit);
         var tools = ReadOptionalInt(arguments, McpGatewayMetaProtocol.MaxToolsPerCategory,
             McpGatewayMetaProtocol.DefaultRouteLimit, McpGatewayMetaProtocol.MaximumRouteLimit);
-        var prefer = arguments.TryGetValue(McpGatewayMetaProtocol.PreferReadOnly, out var value)
+        bool? prefer = arguments.TryGetValue(McpGatewayMetaProtocol.PreferReadOnly, out var value)
             ? ReadBoolean(value) : null;
         return new(McpGatewayMetaOperation.Route, query, CategoryLimit: categories,
             ToolsPerCategory: tools, PreferReadOnly: prefer);

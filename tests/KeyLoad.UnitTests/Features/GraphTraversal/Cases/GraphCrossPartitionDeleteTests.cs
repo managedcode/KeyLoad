@@ -1,10 +1,12 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionDeleteTests
 {
+    private const string MachineKeySource = "source";
+    private const string MachineKeyTarget = "target";
     private const string EdgeId = "deleted-edge";
     private const string Label = "links";
 
@@ -12,8 +14,8 @@ internal sealed class GraphCrossPartitionDeleteTests
     public async Task DeleteCommitsOwnerTombstoneAndRemovesDeliveredIncomingEdge()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var source = GraphCrossPartitionTestSupport.Partition("source");
-        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("target"), "to");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
+        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "to");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
         GraphCrossPartitionTestSupport.Commit(database, source,

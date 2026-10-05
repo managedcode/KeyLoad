@@ -1,9 +1,10 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesTests
 {
+    private const string MachineKeySourceA = "source-a";
+    private const string MachineKeySourceB = "source-b";
+    private const string MachineKeyTarget = "target";
     private const string EdgeId = "shared-edge-id";
     private const string Label = "links";
 
@@ -11,10 +12,10 @@ internal sealed class GraphIncomingEdgesTests
     public async Task IncomingProjectionKeepsDistinctFullSourcePartitionsAndIsBoundedAsOnePage()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var firstSource = GraphCrossPartitionTestSupport.Partition("source-a");
-        var secondSource = GraphCrossPartitionTestSupport.Partition("source-b");
+        var firstSource = GraphCrossPartitionTestSupport.Partition(MachineKeySourceA);
+        var secondSource = GraphCrossPartitionTestSupport.Partition(MachineKeySourceB);
         var target = GraphCrossPartitionTestSupport.Vertex(
-            GraphCrossPartitionTestSupport.Partition("target"), "same-vertex-id");
+            GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "same-vertex-id");
         var localSource = GraphCrossPartitionTestSupport.Vertex(target.Partition, "local-source");
         var firstFrom = GraphCrossPartitionTestSupport.Vertex(firstSource, "same-vertex-id");
         var secondFrom = GraphCrossPartitionTestSupport.Vertex(secondSource, "same-vertex-id");
@@ -31,7 +32,7 @@ internal sealed class GraphIncomingEdgesTests
             .SetEquals([target.Partition, firstSource, secondSource])).IsTrue();
         await Assert.That(page.Rows.Select(row => row.DeliveredRevision).SequenceEqual([1L, 1L, 0L])).IsTrue();
         await Assert.That(page.Rows.Select(row => row.Edge.From.Partition.PartitionKey)
-            .SequenceEqual(["source-a", "source-b", "target"])).IsTrue();
+            .SequenceEqual([MachineKeySourceA, MachineKeySourceB, MachineKeyTarget])).IsTrue();
         await Assert.That(page.Rows.All(row => row.Edge.Id == EdgeId)).IsTrue();
         await Assert.That(page.Projection).IsEqualTo(GraphCrossPartitionProtocol.EventualProjection);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
@@ -46,7 +47,7 @@ internal sealed class GraphIncomingEdgesTests
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var target = GraphCrossPartitionTestSupport.Vertex(
-            GraphCrossPartitionTestSupport.Partition("target"), "vertex");
+            GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "vertex");
         var malformed = new ReadIncomingGraphEdgesRequestV1(2, target,
             GraphCrossPartitionTestSupport.Graph, 1);
 

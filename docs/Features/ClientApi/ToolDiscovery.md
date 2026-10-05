@@ -180,6 +180,15 @@ focused partition-query Aspire units pass25/25. RF3 startup stopped before node
 creation due to a missing required server image. The required formatter baseline
 fails on source whitespace/import ordering; these are open, not passing gates.
 
+Stage85 on2026-10-05 joins the resource and prompt handlers and consumes the
+published MCPGateway0.4.17 owning repair. Its original NuGet package and nuspec
+commit were verified after the successful owning release. The combined Release
+build passes with zero warnings/errors, and native ClientApi passes347/347 in
+normal and scalar modes through Aspire. These are filtered local development
+results; official SDK resource/prompt RF3 and complete Linux gates remain open.
+The original reports and dependency delivery are bound in
+[the stage85 receipt](../../implementation/mcp-guidance-graph-development-2026-10-05.json).
+
 Ordered stages: freeze this contract and ADR; implement code and mapped tests;
 root reviews both packets and removes replaced paths; restore/build the combined
 source; run focused then related suites through Aspire; repair actual failures;

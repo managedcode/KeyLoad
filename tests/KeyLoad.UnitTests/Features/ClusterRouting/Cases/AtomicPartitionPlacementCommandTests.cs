@@ -92,14 +92,16 @@ internal sealed class AtomicPartitionPlacementCommandTests
             AtomicPartitionPlacementTestSupport.MaximumAssignments - 1);
         var finalPartition = new PartitionRef("tenant-final", "db", "domain", FinalPartitionKey);
         var final = Apply(fixture, Request(AtomicPartitionPlacementTestSupport.MaximumAssignments - 1,
-            AtomicPartitionPlacementTestSupport.ShardId) with { Partition = finalPartition }, Guid.NewGuid());
+            AtomicPartitionPlacementTestSupport.ShardId) with
+        { Partition = finalPartition }, Guid.NewGuid());
         var directoryBytes = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
         var directory = fixture.Store.Read(view => view.GetRecord<AtomicPartitionPlacementDirectoryV1>(
             AtomicPartitionPlacementTestSupport.DirectoryKey()));
         var overLimitPartition = new PartitionRef("tenant-over", "db", "domain", OverLimitPartitionKey);
         var overLimit = Apply(fixture, Request(AtomicPartitionPlacementTestSupport.MaximumAssignments,
-            AtomicPartitionPlacementTestSupport.ShardId) with { Partition = overLimitPartition }, Guid.NewGuid());
+            AtomicPartitionPlacementTestSupport.ShardId) with
+        { Partition = overLimitPartition }, Guid.NewGuid());
         var after = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.DirectoryKey());
         var absentRow = AtomicPartitionPlacementTestSupport.ReadValue(fixture,

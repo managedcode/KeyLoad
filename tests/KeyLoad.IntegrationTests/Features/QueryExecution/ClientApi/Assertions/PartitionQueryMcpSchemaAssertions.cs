@@ -153,8 +153,10 @@ internal static class PartitionQueryMcpSchemaAssertions
     {
         if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type))
         {
-            if (type.ValueKind == JsonValueKind.String && type.GetString() == expected) { return true; }
-            if (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(item => item.GetString() == expected)) { return true; }
+            if (type.ValueKind == JsonValueKind.String && type.GetString() == expected)
+            { return true; }
+            if (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(item => item.GetString() == expected))
+            { return true; }
         }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
@@ -175,7 +177,8 @@ internal static class PartitionQueryMcpSchemaAssertions
             { continue; }
             foreach (var variant in variants.EnumerateArray())
             {
-                if (HasType(variant, expectedType)) { return variant; }
+                if (HasType(variant, expectedType))
+                { return variant; }
             }
         }
         throw new InvalidOperationException(MaximumReferenceDepthMessage);

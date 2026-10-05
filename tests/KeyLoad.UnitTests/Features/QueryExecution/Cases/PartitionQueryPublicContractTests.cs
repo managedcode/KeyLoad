@@ -39,7 +39,7 @@ internal sealed class PartitionQueryPublicContractTests
         var duplicate = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
             valid with { Partitions = [fixture.First, fixture.First] }));
         var oversizedParts = Enumerable.Range(0, 9).Select(index => fixture.First with
-            { PartitionKey = "query-partition-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) })
+        { PartitionKey = "query-partition-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) })
             .ToImmutableArray();
         var oversized = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
             valid with { Partitions = oversizedParts }));

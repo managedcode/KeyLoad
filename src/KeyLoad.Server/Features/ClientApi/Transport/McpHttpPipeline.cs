@@ -35,7 +35,7 @@ internal static class McpHttpPipeline
                 pendingBody = null;
             }
             else
-            { state.Admit(null, context.RequestAborted); }
+            { state.Admit(default, context.RequestAborted); }
             await next(context).ConfigureAwait(false);
         }
         catch (KeyLoadException error) when (McpTransportDiagnostics.HasStage(error))

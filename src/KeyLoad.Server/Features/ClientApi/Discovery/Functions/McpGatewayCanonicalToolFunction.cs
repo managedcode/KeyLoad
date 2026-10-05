@@ -1,7 +1,5 @@
 using System.Text.Json;
-using KeyLoad;
 using Microsoft.Extensions.AI;
-using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 
@@ -33,8 +31,7 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
     {
         cancellationToken.ThrowIfCancellationRequested();
         var context = _httpContextAccessor.HttpContext;
-        var state = context?.Items[McpHttpPipeline.StateItem] as McpRequestState;
-        if (context is null || state is null || !ReferenceEquals(state.Operation, _operation))
+        if (context is null || context.Items[McpHttpPipeline.StateItem] is not McpRequestState state || !ReferenceEquals(state.Operation, _operation))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidInvocation);
         }
@@ -45,7 +42,7 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
         return result;
     }
 
-    private static IDictionary<string, JsonElement>? ToJsonArguments(AIFunctionArguments arguments)
+    private static Dictionary<string, JsonElement>? ToJsonArguments(AIFunctionArguments arguments)
     {
         if (arguments.Count == 0)
         {

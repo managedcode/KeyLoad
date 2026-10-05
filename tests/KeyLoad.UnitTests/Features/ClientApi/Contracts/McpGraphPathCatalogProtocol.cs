@@ -26,6 +26,7 @@ internal static class McpGraphPathCatalogProtocol
     internal const string DatabaseId = "databaseId";
     internal const string TransactionDomainId = "transactionDomainId";
     internal const string PartitionKey = "partitionKey";
+    internal const string AtomicPartitionId = "atomicPartitionId";
     internal const string GraphRoute = "/v1/graph/shortest-path";
     internal const string SqlRoute = "/v1/query/graph-path";
 }

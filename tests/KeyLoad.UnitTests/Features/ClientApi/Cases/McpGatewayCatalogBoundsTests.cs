@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
@@ -26,7 +25,8 @@ internal sealed class McpGatewayCatalogBoundsTests
         await using var host = McpGatewayCatalogTestHost.Create();
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             host.Owner.SearchAsync(ValidQuery, TooManySearchResults, CancellationToken.None));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Validation);
     }
 
     [Test]
@@ -37,8 +37,10 @@ internal sealed class McpGatewayCatalogBoundsTests
             host.Owner.RouteAsync(ValidQuery, TooManyRouteCategories, 1, null, CancellationToken.None));
         var utf8Failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             host.Owner.RouteAsync(new string('\u4e00', 683), 1, 1, null, CancellationToken.None));
-        await Assert.That(categoryFailure.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(utf8Failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(categoryFailure).IsNotNull();
+        await Assert.That(utf8Failure).IsNotNull();
+        await Assert.That(categoryFailure!.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(utf8Failure!.Code).IsEqualTo(ErrorCode.Validation);
     }
 
     [Test]
@@ -52,8 +54,10 @@ internal sealed class McpGatewayCatalogBoundsTests
                 1, CancellationToken.None));
         var invalidUtf16 = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             host.Owner.SearchAsync("\ud800", 1, CancellationToken.None));
-        await Assert.That(tooLong.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(invalidUtf16.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(tooLong).IsNotNull();
+        await Assert.That(invalidUtf16).IsNotNull();
+        await Assert.That(tooLong!.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(invalidUtf16!.Code).IsEqualTo(ErrorCode.Validation);
     }
 
     [Test]
@@ -61,7 +65,7 @@ internal sealed class McpGatewayCatalogBoundsTests
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         using var cancellation = new CancellationTokenSource();
-        cancellation.Cancel();
+        await cancellation.CancelAsync();
 
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => host.Owner.InitializeAsync(cancellation.Token));
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>

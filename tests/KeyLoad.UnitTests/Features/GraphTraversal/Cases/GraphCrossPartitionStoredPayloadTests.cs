@@ -2,6 +2,10 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionStoredPayloadTests
 {
+    private const string MachineKeyNativeIntentSource = "native-intent-source";
+    private const string MachineKeyNativeIntentTarget = "native-intent-target";
+    private const string MachineKeyNativeReceiverSource = "native-receiver-source";
+    private const string MachineKeyNativeReceiverTarget = "native-receiver-target";
     private const string EdgeId = "native-edge-stored";
     private const string Fingerprint = "fingerprint-0123456789abcdef";
 
@@ -16,8 +20,8 @@ internal sealed class GraphCrossPartitionStoredPayloadTests
     [Test]
     public async Task DeliveryIntentRoundTripPreservesEveryScopedFieldAndSnapshot()
     {
-        var source = GraphCrossPartitionTestSupport.Partition("native-intent-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("native-intent-target");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeIntentSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeIntentTarget);
         var from = GraphCrossPartitionTestSupport.Vertex(source, "native-from");
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "native-to");
         var edge = new EdgeRecord(EdgeId, from, destination, "intent-label", "{\"v\":1}", 41);
@@ -30,8 +34,8 @@ internal sealed class GraphCrossPartitionStoredPayloadTests
     [Test]
     public async Task ReceiverStateRoundTripPreservesHighWaterFieldsWithoutIdCollision()
     {
-        var source = GraphCrossPartitionTestSupport.Partition("native-receiver-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("native-receiver-target");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeReceiverSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeReceiverTarget);
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "native-receiver-to");
         var expected = new GraphCrossPartitionReceiverStateV1(1, source, "receiver-graph",
             EdgeId, destination, 53, true, Fingerprint);

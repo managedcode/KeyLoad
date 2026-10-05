@@ -17,6 +17,20 @@ The existing source atomic partition remains the canonical owner of each graph e
 
 ## Limits, rollout and rollback
 
+The source-stage fingerprint correction implements REQ/AC-GRAPH-XPART-001 before
+this feature's first qualified release. Root owns the GraphTraversal Serialization
+input-tree normalizer and native regression cases. Freeze a fixed independently
+owned record and string-occurrence tree before encoding the unchanged generated fingerprint tuple;
+CLR reference sharing cannot determine a delivery or corruption decision. Verify
+equal digests after separate actual native edge-frame decoding, independently
+allocated equal references, and changed full identity/content. Keep all aliases,
+field IDs, exact content and global native serialization behavior unchanged.
+Unqualified prior digests stay fail closed with immutable original evidence; no
+fallback or automatic rewrite is accepted. Writer-stopped bounded data rebuild
+and real restart/RF3 qualification remain required for any populated upgrade.
+Rollback retains original canonical data, intents and high-water records rather
+than treating either source generation as proven compatible.
+
 ```mermaid
 sequenceDiagram
     participant R as Request grain

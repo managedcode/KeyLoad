@@ -118,7 +118,7 @@ internal sealed class McpGraphPathCatalogTests
         await VerifyObjectAsync(schema, [Partition, McpGraphPathCatalogProtocol.Collection, McpGraphPathCatalogProtocol.Id],
             [Partition, McpGraphPathCatalogProtocol.Collection, McpGraphPathCatalogProtocol.Id]);
         var partition = Resolve(root, schema.GetProperty(Properties).GetProperty(Partition));
-        await VerifyObjectAsync(partition, [McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId, McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey],
+        await VerifyObjectAsync(partition, [McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId, McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey, McpGraphPathCatalogProtocol.AtomicPartitionId],
             [McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId, McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey]);
         var properties = schema.GetProperty(Properties);
         await VerifyTypeAsync(root, properties.GetProperty(McpGraphPathCatalogProtocol.Collection), String);
@@ -132,7 +132,7 @@ internal sealed class McpGraphPathCatalogTests
         schema = Resolve(root, schema);
         var fields = new[] { McpGraphPathCatalogProtocol.TenantId, McpGraphPathCatalogProtocol.DatabaseId,
             McpGraphPathCatalogProtocol.TransactionDomainId, McpGraphPathCatalogProtocol.PartitionKey };
-        await VerifyObjectAsync(schema, fields, fields);
+        await VerifyObjectAsync(schema, [.. fields, McpGraphPathCatalogProtocol.AtomicPartitionId], fields);
         foreach (var field in schema.GetProperty(Properties).EnumerateObject())
         { await VerifyTypeAsync(root, field.Value, String); }
     }
@@ -169,8 +169,8 @@ internal sealed class McpGraphPathCatalogTests
 
     private static JsonElement Resolve(JsonElement root, JsonElement schema)
     {
-        var reference = McpSchemaInspector.References(schema).FirstOrDefault();
-        return reference is null ? schema : McpSchemaInspector.Resolve(root, reference);
+        return schema.TryGetProperty(McpSchemaInspector.Ref, out var reference)
+            ? McpSchemaInspector.Resolve(root, reference.GetString()!) : schema;
     }
 
     private static McpOperationDescriptor Find(string name)

@@ -87,11 +87,17 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
         await BindMcpAsync(commandId, request, cancellationToken).ConfigureAwait(false);
         var changed = request with { PhysicalShardId = Guid.NewGuid() };
         await BindMcpErrorAsync(commandId, changed, ErrorCode.Conflict, cancellationToken).ConfigureAwait(false);
-        await BindMcpErrorAsync(Guid.NewGuid(), request with { ExpectedRevision = 0,
-            Partition = AtomicPartitionPlacementRf3ScenarioFactory.Create().FallbackPartition },
+        await BindMcpErrorAsync(Guid.NewGuid(), request with
+        {
+            ExpectedRevision = 0,
+            Partition = AtomicPartitionPlacementRf3ScenarioFactory.Create().FallbackPartition
+        },
             ErrorCode.Conflict, cancellationToken).ConfigureAwait(false);
-        await BindMcpErrorAsync(Guid.NewGuid(), request with { ExpectedRevision = 1,
-            PhysicalShardId = Guid.NewGuid() }, ErrorCode.UnsupportedCapability, cancellationToken).ConfigureAwait(false);
+        await BindMcpErrorAsync(Guid.NewGuid(), request with
+        {
+            ExpectedRevision = 1,
+            PhysicalShardId = Guid.NewGuid()
+        }, ErrorCode.UnsupportedCapability, cancellationToken).ConfigureAwait(false);
         var after = await AtomicPartitionPlacementRf3Assertions.SdkReadAsync(fixture.App,
             RequestCqrsRf3Protocol.Node1, fixture.AdminKey, new(RequestVersion, partition), cancellationToken)
             .ConfigureAwait(false);

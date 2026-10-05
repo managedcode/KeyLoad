@@ -37,7 +37,7 @@ internal sealed class McpUnknownLengthAdmissionTests
             await Assert.That(body.RetainedCapacity).IsLessThan(DefaultHttpBodyLimitBytes);
             state.Attach(body);
 
-            state.Admit(null, CancellationToken.None);
+            state.Admit(default, CancellationToken.None);
 
             await Assert.That(state.MaximumPayloadBytes).IsEqualTo(new HttpAdmissionLimits().MaxControlBodyBytes);
             await Assert.That(state.MaximumReplyBytes).IsEqualTo(McpFramingProtocol.MaximumControlReplyBytes);

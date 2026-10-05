@@ -1,9 +1,9 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphIncomingProjectionTests
 {
+    private const string MachineKeyLocal = "local";
+    private const string MachineKeyRemote = "remote";
     private const string Reader = "projection-reader";
     private const string EdgeId = "projection-edge";
     private const string Label = "links";
@@ -16,7 +16,7 @@ internal sealed class GraphIncomingProjectionTests
     public async Task LocalCanonicalIncomingEdgeUsesZeroDeliveryRevision()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var partition = GraphCrossPartitionTestSupport.Partition("local");
+        var partition = GraphCrossPartitionTestSupport.Partition(MachineKeyLocal);
         var from = GraphCrossPartitionTestSupport.Vertex(partition, "from");
         var target = GraphCrossPartitionTestSupport.Vertex(partition, "target");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
@@ -35,8 +35,8 @@ internal sealed class GraphIncomingProjectionTests
     {
         var policies = new[] { new SensitiveFieldPolicy(SecretPath, "private") };
         using var database = GraphCrossPartitionTestSupport.CreateDatabase(graphFields: policies);
-        var localPartition = GraphCrossPartitionTestSupport.Partition("local");
-        var remotePartition = GraphCrossPartitionTestSupport.Partition("remote");
+        var localPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyLocal);
+        var remotePartition = GraphCrossPartitionTestSupport.Partition(MachineKeyRemote);
         var localFrom = GraphCrossPartitionTestSupport.Vertex(localPartition, "local-from");
         var target = GraphCrossPartitionTestSupport.Vertex(localPartition, "target");
         var remoteFrom = GraphCrossPartitionTestSupport.Vertex(remotePartition, "remote-from");

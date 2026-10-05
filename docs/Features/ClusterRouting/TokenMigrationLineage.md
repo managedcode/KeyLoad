@@ -25,6 +25,10 @@ Together these stages do not implement split/merge. The one-default-shard catalo
   - `AC-PMOVE-006`: The canonical outcome key remains `KeySpace.Outcome(principal,id)`. A bounded partition family `outcome-locator-v1` stores `(full PartitionRef, principal, commandId)` locator keys atomically with each scoped outcome; tests cross-check each locator with the canonical global outcome scope metadata and reject missing/extra/mismatched locators. Global and Unknown rows are never emitted as movable partition records. Old native outcome frames missing new fields decode as `Unknown`; they remain readable/deduplicable, are never automatically rewritten, and make affected-store movement ineligible until an explicit ADR-011 offline migration has complete verified source history and an immutable backup. No retained history means no backfill and no movement.
 - `REQ-MTOKEN-004`: Ownership changes are monotonic; unverifiable old token positions are explicitly invalidated instead of translated or compared across separate Raft groups.
   - `AC-MTOKEN-004`: No epoch-bump or cross-group cutover API is included. Tests verify stale-vs-current semantics only through the actual placement witness; source code and docs record that translation remains N/A until accepted durable lineage/sequence and destination quorum/read-barrier protocols exist.
+- `REQ-MTOKEN-005`: The current generated Orleans reader consumes an actual six-field committed outcome from the immutable prior native6 producer, preserving its known result.
+  - `AC-MTOKEN-005`: The recovery AppHost prepares revision `2801b03091efc5cf45b1268c6570457539f12f27`, tree `678ac682c90294306a0ae4092c4c80b382c4a18b`, through its existing prior-probe prerequisite. That exact source has the existing StoredOutcome alias and IDs 0..5, including CompositionAuthority at ID5. A bounded prior-process operation applies a small real ConfigureResource command with a test-owned principal and command ID, then captures the exact committed value at `KeySpace.Outcome(principal,id)` from that same ZoneTree store. The parent verifies the existing archive/tree, overlay-driver and published-binary receipts before launching the existing bounded process, inserts the returned bytes unchanged under that canonical key in a separately owned current ZoneTree store, and asserts the known result through `DatabaseEngine.Outcome`. No current-code frame producer, rewritten fields, JSON outcome or replacement codec can satisfy this criterion.
+- `REQ-MTOKEN-006`: Missing appended fields in that same genuine prior frame have the exact native defaults; malformed frames and unverified provenance fail closed.
+  - `AC-MTOKEN-006`: Decode the same unchanged frame with current `NativeSerialization.Deserialize<StoredOutcome>` and assert `ScopeKind == Unknown`, `Partition == null`, unchanged prior identity/result fields and no partition locator or rewrite after the public outcome read. Add only `KeyLoad.RecoveryTests` to the existing Core test-visibility list for these internal assertions; expose no product API. Raw frames are nonempty and at most 16,384 bytes, Base64 transport at most 21,848 characters, within the existing 65,536-character process-output bound. Wrong epoch/source, invalid Base64, oversized output/frame, nonzero child exit, truncated native frame and missing/mismatched artifact receipts fail the case without current-source fallback. Native5 cannot be substituted for the six-field producer. Retain original artifacts and distinguish local process interoperability from Linux/RF3, mixed-writer, endurance and power-loss qualification.
 
 ## Exhaustive operation outcome classification
 
@@ -38,7 +42,25 @@ Unknown: decode failure marker; malformed/null required partition; unsupported/f
 
 ## Forward-only native format and upgrade
 
-Append stable Orleans fields to `StoredOutcome`: `ScopeKind` (`Unknown=0`, `Global=1`, `Partition=2`) and nullable full `PartitionRef`. Append stable `StoredOutcomeFields` IDs after all currently allocated fields; preserve alias and existing IDs. Missing fields in old Orleans binary frames default to Unknown/null; they do not trigger alternate JSON decoding. Add no replacement key and no key migration for current global replay.
+Preserve the existing `StoredOutcome` alias and field IDs 0..5. Append
+`StoredOutcomeFields.ScopeKind=6` and nullable full `PartitionRef` at
+`StoredOutcomeFields.Partition=7`. `CommandOutcomeScopeKind` has explicit native
+`int` values `Unknown=0`, `Global=1`, `Partition=2`, with append-only allocation
+and stable alias `keyload.command-outcome-scope-kind.v1` through the native Orleans
+generator. Its primitive numeric representation stays unchanged; unsupported
+generator attributes must fail the build rather than introduce a new codec.
+Missing fields in old Orleans binary frames default to Unknown/null; unrecognized
+numeric scope values fail Corruption. No alternate JSON decoding, replacement key
+or current global replay-key migration is allowed.
+
+Qualification must cover native round-trip scope/partition fields, legacy missing
+fields and unrecognized numeric values using actual generated serializers. Until
+native unknown-field retention is proven, prohibit mixed-version outcome writers
+and old-writer rollback after scoped outcomes exist. Roll out a cold-compatible
+fleet with writers stopped, retaining existing committed outcomes, metadata and
+locators. A compatible reader may recover forward; an old writer may not silently
+discard the new scope. Immutable backup/history requirements for any offline
+backfill remain separate under ADR-011.
 
 For each new scoped outcome, the canonical outcome row and partition locator are written in the existing atomic apply transaction, including a persisted domain failure. For Global/Unknown, no locator is written. Replay verifies a present scope against the normalized typed operation and treats contradictory metadata/index as Corruption; it does not “repair” a locator implicitly. A previously Unknown row stays Unknown on replay to avoid automatic data rewrites. Command principal and ID uniqueness/conflict rules are unchanged.
 
@@ -56,6 +78,7 @@ Any backfill is a separate explicit ADR-011 offline, quiescent, writer-excluded 
 - `src/KeyLoad.Core/AtomicCommandCommit.cs` and `src/KeyLoad.Core/CommandOutcomes.cs`: persist/cross-check metadata and index in existing commit/replay path; no second dispatcher.
 - `PartitionRecordFamilies` adds the scoped outcome locator family; global `outcome` remains excluded from ordinary partition page inventory.
 - UnitTests: shared `TestDatabase`/`RemoteTransferDatabase` explicitly bootstrap a test-owned physical catalog tuple with stable, independent voter identities; add focused `ClusterRouting/Cases/PartitionOwnershipEpochTests.cs`, `CommandOutcomePartitionScopeTests.cs`, and role-local helpers. Extend Messaging remote-transfer receipt cases to prove same-view owner tuple/epoch and preserve existing error/replay oracle. Use actual ZoneTree store, real generated Orleans records, current TestDatabase boundaries, no mocks.
+- Genuine prior-frame proof uses the existing shared StorageRecovery probe infrastructure: `scripts/Features/StorageRecovery/build-prior-probe.sh`, CrashHost `Features/StorageRecovery/Helpers/EpochPriorSourceProbe.cs` and `Fixtures/EpochUpgradeFixture.cs`, and RecoveryTests `EpochPriorExecutableArtifact`/`EpochPriorExecutableProcess`. Keep immutable provider/serializer/project source untouched; the existing receipt hashes every overlaid driver. The new consumer case and its bounded receipt/serialization helpers belong under `tests/KeyLoad.RecoveryTests/Features/ClusterRouting/{Cases,Contracts,Serialization,Helpers}/`. Core `Features/InternalSerialization/Execution/CoreTestVisibility.cs` owns only the additive test friendship. Root freezes this contract before Luna implements the private packet and before required Aspire recovery qualification.
 - Documentation integration owner: root updates `docs/Features/ClusterRouting/PartitionTransfer.md`, `docs/ADR/ADR-017-migration-tokens.md`, and only if required `docs/ADR/ADR-011-format-upgrades.md`. Root joins the feature/ADR amendment before any source implementation.
 
 ## Movement and token claims still deferred

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>All twenty-three real public mutation DTOs, independent of catalog discovery.</summary>
+/// <summary>All twenty-five real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
     private const string EventId = "mcp-event";
@@ -24,6 +24,9 @@ internal static class McpMutationTestData
     private const string EnqueueKind = "enqueue";
     private const string UpsertEdgeKind = "upsertEdge";
     private const string DeleteEdgeKind = "deleteEdge";
+    private const string ApplyReverseEdgeKind = "applyCrossPartitionReverseEdge";
+    private const string CompleteReverseEdgeKind = "completeCrossPartitionReverseEdge";
+    private const string TargetPartitionKey = "mcp-reverse-target";
     private const string SamplesKind = "appendSamples";
     private const string VectorKind = "putVector";
     private const string QueueToGraphKind = "queueToGraph";
@@ -41,7 +44,7 @@ internal static class McpMutationTestData
     private const string ExpireSagaKind = "expireSaga";
     internal static readonly ImmutableArray<string> Discriminators =
         [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind,
-         EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, SamplesKind, VectorKind,
+         EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
          QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
          ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind];
@@ -58,6 +61,10 @@ internal static class McpMutationTestData
         new EnqueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.EmptyJson),
         new UpsertEdge(McpCanonicalTestData.Resource, EdgeId, McpCanonicalTestData.Reference, McpCanonicalTestData.Reference, Label),
         new DeleteEdge(McpCanonicalTestData.Resource, EdgeId),
+        new ApplyCrossPartitionReverseEdge(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource,
+            EdgeId, ReverseDestination(), Revision),
+        new CompleteCrossPartitionReverseEdge(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource,
+            EdgeId, ReverseDestination(), Revision),
         new AppendSamples(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             [new SampleData(EventId, DateTimeOffset.UnixEpoch, Sample)]),
         new PutVector(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.Field,
@@ -73,4 +80,9 @@ internal static class McpMutationTestData
     ];
 
     private static EventData Event() => new(EventId, EventType, McpCanonicalTestData.EmptyJson);
+
+    private static EntityRef ReverseDestination() => McpCanonicalTestData.Reference with
+    {
+        Partition = McpCanonicalTestData.Partition with { PartitionKey = TargetPartitionKey }
+    };
 }

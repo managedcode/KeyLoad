@@ -15,7 +15,7 @@
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.0" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.0" />
-    <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.16" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.17" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.10" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.10.0" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />

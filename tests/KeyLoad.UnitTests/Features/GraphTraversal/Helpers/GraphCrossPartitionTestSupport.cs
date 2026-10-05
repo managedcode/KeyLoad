@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
 using KeyLoad.Storage;
 
@@ -96,7 +95,9 @@ internal static class GraphCrossPartitionTestSupport
     {
         var request = new BootstrapPhysicalShardCatalogRequest(1, 0, ShardId, Incarnation, Voters);
         var id = PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId);
-        database.Submit(OperationKind.BootstrapPhysicalShardCatalog, request, id: id)
-            .Get<PhysicalShardCatalog>();
+        if (!database.Submit(OperationKind.BootstrapPhysicalShardCatalog, request, id: id).Get<bool>())
+        {
+            throw new InvalidOperationException("The graph fixture did not bootstrap its physical owner.");
+        }
     }
 }

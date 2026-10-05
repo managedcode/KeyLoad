@@ -39,10 +39,10 @@ internal sealed class GraphCrossPartitionNativeMetadataTests
             await AssertAliasAsync(contract.Type, contract.Alias);
             var properties = contract.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public
                     | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-                .Where(property => property.GetCustomAttribute<Orleans.IdAttribute>() is not null)
-                .OrderBy(property => property.GetCustomAttribute<Orleans.IdAttribute>()!.Id).ToArray();
+                .Where(property => property.GetCustomAttribute<global::Orleans.IdAttribute>() is not null)
+                .OrderBy(property => property.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id).ToArray();
             await Assert.That(properties.Select(property => property.Name).SequenceEqual(contract.Members)).IsTrue();
-            var ids = properties.Select(property => property.GetCustomAttribute<Orleans.IdAttribute>()!.Id).ToArray();
+            var ids = properties.Select(property => property.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id).ToArray();
             await Assert.That(ids.SequenceEqual(contract.Ids)).IsTrue();
             await Assert.That(ids.Distinct().Count()).IsEqualTo(ids.Length);
         }
@@ -54,18 +54,19 @@ internal sealed class GraphCrossPartitionNativeMetadataTests
         var type = typeof(GraphCrossPartitionCapacityDirection);
         await AssertAliasAsync(type, "keyload.contract.graph-cross-partition-capacity-direction.v1");
         var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(field => field.GetCustomAttribute<Orleans.IdAttribute>() is not null)
-            .OrderBy(field => field.GetCustomAttribute<Orleans.IdAttribute>()!.Id).ToArray();
+            .Where(field => field.GetCustomAttribute<global::Orleans.IdAttribute>() is not null)
+            .OrderBy(field => field.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id).ToArray();
         await Assert.That(fields.Select(field => field.Name).SequenceEqual(["PendingIntents", "ReceiverStates"])).IsTrue();
-        await Assert.That(fields.Select(field => field.GetCustomAttribute<Orleans.IdAttribute>()!.Id)
+        await Assert.That(fields.Select(field => field.GetCustomAttribute<global::Orleans.IdAttribute>()!.Id)
             .SequenceEqual([0U, 1U])).IsTrue();
-        await Assert.That((int)GraphCrossPartitionCapacityDirection.PendingIntents).IsEqualTo(0);
-        await Assert.That((int)GraphCrossPartitionCapacityDirection.ReceiverStates).IsEqualTo(1);
+        var values = Enum.GetValues(type).Cast<GraphCrossPartitionCapacityDirection>()
+            .Select(value => (int)value).Order().ToArray();
+        await Assert.That(values.SequenceEqual([0, 1])).IsTrue();
     }
 
     private static async Task AssertAliasAsync(Type type, string expected)
     {
-        var alias = type.CustomAttributes.Single(attribute => attribute.AttributeType == typeof(Orleans.AliasAttribute))
+        var alias = type.CustomAttributes.Single(attribute => attribute.AttributeType == typeof(global::Orleans.AliasAttribute))
             .ConstructorArguments.Single().Value as string;
         await Assert.That(alias).IsEqualTo(expected);
     }

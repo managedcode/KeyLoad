@@ -10,6 +10,7 @@ internal static class McpPartitionPlacementCatalogProtocol
     internal const string DatabaseId = "databaseId";
     internal const string TransactionDomainId = "transactionDomainId";
     internal const string PartitionKey = "partitionKey";
+    internal const string AtomicPartitionId = "atomicPartitionId";
     internal const string PhysicalShardId = "physicalShardId";
     internal const string Incarnation = "incarnation";
     internal const string VoterIds = "voterIds";

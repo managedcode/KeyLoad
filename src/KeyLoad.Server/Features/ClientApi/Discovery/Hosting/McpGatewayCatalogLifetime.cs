@@ -1,12 +1,15 @@
+using System.Runtime.ExceptionServices;
+using ManagedCode.Communication.CQRS;
 using ManagedCode.MCPGateway.Abstractions;
 
 namespace KeyLoad.Server;
 
 /// <summary>Drains active graph calls before disposing the factory-owned native gateway instance.</summary>
-internal sealed class McpGatewayCatalogLifetime(
-    Func<CancellationToken, Task<IMcpGatewayInstance>> createInstance) : IAsyncDisposable
+internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 {
     private const string IndexUnavailable = "The canonical MCP metadata index is unavailable.";
+    private readonly Func<CancellationToken, Task<IMcpGatewayInstance>> _createInstance;
+    private readonly Action _releaseLease;
     private readonly object _sync = new();
     private IMcpGatewayInstance? _instance;
     private Task? _initialization;
@@ -14,6 +17,13 @@ internal sealed class McpGatewayCatalogLifetime(
     private TaskCompletionSource? _drained;
     private int _active;
     private bool _closing;
+
+    internal McpGatewayCatalogLifetime(Func<CancellationToken, Task<IMcpGatewayInstance>> createInstance)
+    {
+        ArgumentNullException.ThrowIfNull(createInstance);
+        _createInstance = createInstance;
+        _releaseLease = Release;
+    }
 
     internal Task InitializeAsync(CancellationToken cancellationToken)
     {
@@ -35,7 +45,7 @@ internal sealed class McpGatewayCatalogLifetime(
             }
 
             _active++;
-            return new Lease(this, _instance);
+            return new Lease(_releaseLease, _instance);
         }
     }
 
@@ -49,7 +59,7 @@ internal sealed class McpGatewayCatalogLifetime(
 
     private async Task InitializeCoreAsync(CancellationToken cancellationToken)
     {
-        var instance = await createInstance(cancellationToken).ConfigureAwait(false);
+        var instance = await _createInstance(cancellationToken).ConfigureAwait(false);
         var rejected = false;
         lock (_sync)
         {
@@ -82,15 +92,11 @@ internal sealed class McpGatewayCatalogLifetime(
 
         if (initialization is not null)
         {
-            try
+            // Startup owns nonfatal initialization errors; disposal still joins the original task.
+            await initialization.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            if (initialization.Exception is { } error && CqrsRuntimeFailures.FindFatal(error) is { } fatal)
             {
-                await initialization.ConfigureAwait(false);
-            }
-            catch (Exception) when (initialization.IsFaulted || initialization.IsCanceled)
-            {
-                // BuildInstance owns failed-attempt cleanup; InitializeAsync reports the primary failure.
-                await drained.ConfigureAwait(false);
-                return;
+                ExceptionDispatchInfo.Capture(fatal).Throw();
             }
         }
 
@@ -120,11 +126,11 @@ internal sealed class McpGatewayCatalogLifetime(
         }
     }
 
-    internal sealed class Lease(McpGatewayCatalogLifetime owner, IMcpGatewayInstance instance) : IDisposable
+    internal sealed class Lease(Action release, IMcpGatewayInstance instance) : IDisposable
     {
-        private McpGatewayCatalogLifetime? _owner = owner;
+        private Action? _release = release;
         internal IMcpGatewayInstance Instance { get; } = instance;
 
-        public void Dispose() => Interlocked.Exchange(ref _owner, null)?.Release();
+        public void Dispose() => Interlocked.Exchange(ref _release, null)?.Invoke();
     }
 }

@@ -73,8 +73,14 @@ membership, SDK/MCP, fault and shutdown contracts. Invalid or mixed selectors fa
 before composing resources. There is no implicit fallback from missing GitHub proof.
 
 The local producer owns a unique invocation tag, a bounded fingerprint of the
-actual Dockerfile/build inputs and a custom input label. Its separate bounded
-receipt names provenance `local-development`, the actual Docker image config ID,
+actual Dockerfile/build inputs and a custom input label. The
+producer captures an invocation-owned immutable build-context snapshot and builds
+from that exact snapshot, with a verified digest over names, modes and bytes.
+It admits no more than 20,000 files and 512 MiB before reading their contents,
+streams individual files and distinguishes the two accepted context COPY rules
+from the exact internal build-stage copy. Unsupported Dockerfile/ignore rules
+fail closed. Mutable checkout before/after hashes cannot prove captured inputs.
+Its separate bounded receipt names provenance `local-development`, the actual Docker image config ID,
 tag, input digest, pinned base references and producer version. It never fabricates
 a Git revision, GitHub run or registry manifest digest. The child verifies this
 receipt against current inputs and actual daemon metadata before startup, all
@@ -90,9 +96,25 @@ Aspire RF3 entry. Relevant roles remain within Features/TestInfrastructure and
 Features/ClusterReplication; scripts/Features/TestInfrastructure owns the producer.
 No new database API, stored format, package or production topology applies.
 
+Request admission is owned by TestInfrastructure/Validation and invocation
+construction by Execution; retain no executable legacy copies in Models.
+The two owned native termination helpers use generated LibraryImport, with
+AllowUnsafeBlocks enabled narrowly in KeyLoad.AppHost.csproj and
+KeyLoad.IntegrationTests.csproj. No global unsafe setting or diagnostic suppression
+is authorized. Root joins LocalRf3ImageCleanup into TestSuiteApplication after
+actual AppHost stop and owned process settlement, using a separate 45-second
+cleanup token, before final output settlement and application disposal. Preserve
+the original test/startup failure alongside any cleanup failure.
+
 Every build/start/test/cancel path joins and releases its owned resources. After
 owned nodes stop, cleanup rechecks the invocation tag's image ID and input label
 before removing only that tag, without force/prune or unrelated-resource deletion.
+Cleanup uses the immutable owned receipt and daemon identity rather than requiring
+the checkout to remain unchanged; startup still checks current inputs. Any running
+or stopped image user blocks deletion. Native cancellation, timeout and output
+overflow arm bounded owned-process escalation immediately and join the actual
+exit plus both original output readers. Dispose the context snapshot after that
+settlement and retain a bounded original build-output tail with the receipt.
 Keep original receipts/reports as development evidence. Rollback removes only the
 explicit local selector and its owned helpers; the default GitHub path remains
 fail closed. Model/parser checks do not prove real image creation or cleanup:

@@ -36,7 +36,15 @@ resources. Missing image configuration continues to fail closed in the default m
 
 The producer builds the repository server Dockerfile using its actual effective
 COPY inputs, names, modes and bytes, `.dockerignore` and pinned base digests. It
-records a bounded canonical input fingerprint, unique invocation tag, actual local
+first creates an invocation-owned immutable build-context snapshot of exactly
+those inputs and builds Docker from that snapshot. It validates the two context
+COPY declarations separately from the exact internal `COPY --from=build` stage
+copy; an unsupported Dockerfile or ignore declaration rejects before building.
+Admission charges at most 20,000 input files and 512 MiB of aggregate bytes before
+reading or retaining their contents; hashing and copying stream one admitted file
+at a time. The captured snapshot digest binds the actual Docker build input,
+including modes; before/after hashes of a mutable checkout alone are insufficient.
+The producer records a bounded canonical input fingerprint, unique invocation tag, actual local
 Docker image config ID and a custom input label in a separate `local-development`
 receipt. A dirty working tree is identified by these inputs, never a fabricated
 GitHub revision. The config ID is not a registry manifest digest. Before startup,
@@ -48,8 +56,16 @@ wrong tags/labels/IDs and conflicting proof selectors fail before database effec
 Build failure prevents runner execution. Every failure/cancellation joins the
 owned producer, runner and child resources. Image cleanup occurs only after owned
 nodes stop, targets only this invocation's unique tag and rechecks image ID/label
-before removal; no force deletion, pruning or unrelated-resource cleanup. Retain
-the original development receipt and native test reports. Local results cannot
+before removal; no force deletion, pruning or unrelated-resource cleanup.
+Cleanup validates the immutable owned receipt, tag, label, image ID and absence
+of every running or stopped container using that image; a subsequent checkout
+edit does not prevent cleanup of its proven owned tag. Current checkout input
+validation remains mandatory before database startup. Cancellation, output-limit
+failure and timeout signal only the owned native process, escalate within a
+bounded grace period and join its actual exit and both original stream readers.
+The context snapshot is removed after producer settlement; receipts and a bounded
+original Docker build-output tail remain available for diagnosing failure.
+Retain the original development receipt and native test reports. Local results cannot
 qualify delivered-source Linux CI, registry image provenance or website metrics;
 the existing GitHub image producer and verifiers remain mandatory and unchanged.
 
@@ -58,7 +74,12 @@ TASK-TEST-LOCAL-RF3-CONTRACT (root) precedes TASK-TEST-LOCAL-RF3-IMAGE
 settings, prerequisite and cleanup; ClusterReplication/Resources local image
 selection; scripts/Features/TestInfrastructure bounded producer; separate
 IntegrationTests ClusterReplication local verification and native AppHost model
-regressions. Root owns shared ClusterFixture/TestSuiteResources composition joins,
+regressions. Request admission belongs to Validation and invocation construction
+to Execution; obsolete executable copies under Models are removed. Native
+SIGTERM/kill helpers use generated LibraryImport with AllowUnsafeBlocks enabled
+only in KeyLoad.AppHost.csproj and KeyLoad.IntegrationTests.csproj. This does not
+enable unsafe code solution-wide or suppress analyzer diagnostics. Root owns
+shared ClusterFixture/TestSuiteResources/TestSuiteApplication composition joins,
 review, build, Aspire runtime evidence and delivery. Tests use the actual Aspire
 builder to prove dependency ordering and absence of outer nodes; parser/input
 tests cover negative cells without pretending to prove Docker creation. Real

@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;

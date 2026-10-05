@@ -76,7 +76,8 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
     private static Guid DifferentIdentity(Guid configured)
     {
         Guid candidate;
-        do { candidate = Guid.NewGuid(); }
+        do
+        { candidate = Guid.NewGuid(); }
         while (candidate == Guid.Empty || candidate == configured);
         return candidate;
     }

@@ -18,8 +18,10 @@ internal static class PhysicalShardCatalogRf3Assertions
         EntityRef reference, string expectedJson, CancellationToken cancellationToken)
     {
         foreach (var node in Nodes)
-        { await VerifyVoterAsync(app, adminKey, node, reference, expectedJson, cancellationToken)
-            .ConfigureAwait(false); }
+        {
+            await VerifyVoterAsync(app, adminKey, node, reference, expectedJson, cancellationToken)
+            .ConfigureAwait(false);
+        }
     }
 
     internal static async Task VerifyAbsentAsync(Aspire.Hosting.DistributedApplication app, string adminKey,

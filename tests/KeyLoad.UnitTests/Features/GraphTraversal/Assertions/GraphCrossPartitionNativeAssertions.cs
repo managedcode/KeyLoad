@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 

@@ -21,7 +21,7 @@ internal static class GraphIncomingMcpCatalogAssertions
         await Assert.That(descriptor.Idempotent).IsTrue();
         await Assert.That(descriptor.Destructive).IsFalse();
         await VerifyInputAsync(descriptor.InputSchema);
-        await VerifyOutputAsync(descriptor.OutputSchema!.Value);
+        await VerifyOutputAsync(descriptor.OutputSchema!);
     }
 
     private static async Task VerifyInputAsync(JsonElement schema)
@@ -108,10 +108,10 @@ internal static class GraphIncomingMcpCatalogAssertions
     {
         await Assert.That(schema.GetProperty(McpSchemaInspector.Type).GetString()).IsEqualTo(GraphIncomingMcpProtocol.Object);
         await Assert.That(schema.GetProperty(GraphIncomingMcpProtocol.AdditionalProperties).GetBoolean()).IsFalse();
-        var actual = schema.GetProperty(GraphIncomingMcpProtocol.Properties).EnumerateObject()
+        var actual = schema.GetProperty(McpSchemaInspector.Properties).EnumerateObject()
             .Select(property => property.Name).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(actual.SetEquals(fields)).IsTrue();
-        var required = schema.GetProperty(GraphIncomingMcpProtocol.Required).EnumerateArray()
+        var required = schema.GetProperty(McpSchemaInspector.Required).EnumerateArray()
             .Select(item => item.GetString()!).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(required.SetEquals(requiredFields)).IsTrue();
     }

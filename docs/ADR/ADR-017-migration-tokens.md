@@ -43,3 +43,43 @@ Current files: `src/KeyLoad.Abstractions/Contracts.cs`, `src/KeyLoad.Core/`, `sr
 The complete implementation contract is frozen in [TokenMigrationLineage](../Features/ClusterRouting/TokenMigrationLineage.md), REQ/AC-MTOKEN-001..004 and REQ/AC-PMOVE-005..006. Root integrates the contract before source work. Luna owns private Core native view-bearing token issuance/fencing, exhaustive normalized outcome scope association and actual ZoneTree regression packets. Root joins shared paths and executes the required Aspire build/normal/scalar/recovery/RF3 gates, then commits and pushes the complete stage.
 
 Ordered stages: explicit same-view authority resolution and token producers/consumers; additive native scope fields and atomic locator/replay checks; explicit test-owned catalog bootstrap and independent regressions; root source review, canonical gates and exact-source Linux evidence. Preserve the existing global dedup key, original domain-failure semantics and all old outcomes. Rollout is additive native metadata with stable existing aliases/IDs, and no automatic backfill. Rollback stops movement preparation/exposure while retaining outcome metadata and locators for a compatible reader; it never deletes or resets acknowledged outcomes or ownership epochs. Old unknown-scope records remain movement-ineligible without the separate writer-excluded, verified-history/backup ADR-011 migration. No translation, cross-group install, owner switch or physical movement is authorized by this stage.
+
+The 2026-10-05 native format freeze preserves StoredOutcome fields 0..5 and its
+alias, appends ScopeKind Id6 and nullable Partition Id7, and assigns the native
+int enum Unknown=0, Global=1, Partition=2 with stable alias
+`keyload.command-outcome-scope-kind.v1`. Values and IDs are append-only; no JSON
+fallback or replacement codec. Missing fields decode Unknown/null; unrecognized
+numeric values reject as Corruption. The owning Orleans generator must verify
+the enum's unchanged primitive representation. Native round-trip, legacy frame
+and corrupt-value regressions join AC-PMOVE-005/006 before acceptance. Until
+native unknown-field retention is proven, cold-compatible writer-stopped rollout
+is mandatory; mixed-version outcome writers and old-writer rollback after scoped
+outcomes exist are prohibited. Keep outcomes/locators and recover forward through
+a compatible reader without guessing or deleting committed metadata.
+
+## Accepted genuine prior-frame proof, 2026-10-05
+
+REQ/AC-MTOKEN-005/006 in TokenMigrationLineage freeze the independent native
+compatibility oracle before implementation. Reuse the existing recovery
+AppHost-owned native6 prerequisite pinned to revision
+`2801b03091efc5cf45b1268c6570457539f12f27`, tree
+`678ac682c90294306a0ae4092c4c80b382c4a18b`: its actual StoredOutcome source
+contains the unchanged alias and exact IDs 0..5. The prior generated serializer
+must produce bytes through a real Apply and raw canonical outcome-key read.
+The current reader receives those bytes unchanged, with a 16,384-byte frame
+bound and existing archive/driver/assembly receipts and process ownership intact.
+
+Ordered stages: extend the shared prior-probe test driver without changing the
+immutable provider/codec; add the ClusterRouting recovery consumer using existing
+artifact/process verification; add only the RecoveryTests Core friendship to
+assert genuine missing-field defaults; run the actual Aspire-owned recovery gate
+and retain original evidence. Luna owns the private driver/case packet; root owns
+shared joins, review, build/formatter and qualification. The final join must
+preserve every existing epoch5/epoch6 operation, receipt and negative fixture.
+
+This is a test-only compatibility proof: no target database migration, automatic
+backfill, mixed-version writer permission or old-writer rollback is introduced.
+Removal or rollback of the test must retain qualification artifacts; product
+outcomes/locators retain the compatible forward-reader rollout contract above.
+The ADR remains accepted with implementation and all required gates open until
+the genuine prior-frame case and complete related source qualification pass.

@@ -4,12 +4,16 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionReadPayloadTests
 {
+    private const string MachineKeyNativeFingerprintSource = "native-fingerprint-source";
+    private const string MachineKeyNativeFingerprintTarget = "native-fingerprint-target";
+    private const string MachineKeyNativePagePartition = "native-page-partition";
+    private const string MachineKeyNativeRequestPartition = "native-request-partition";
     private const string EdgeId = "native-edge-read";
 
     [Test]
     public async Task IncomingRequestRoundTripPreservesVersionTargetGraphAndLimit()
     {
-        var partition = GraphCrossPartitionTestSupport.Partition("native-request-partition");
+        var partition = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeRequestPartition);
         var target = GraphCrossPartitionTestSupport.Vertex(partition, "native-request-target");
         var expected = new ReadIncomingGraphEdgesRequestV1(1, target, "request-graph", 17);
 
@@ -19,7 +23,7 @@ internal sealed class GraphCrossPartitionReadPayloadTests
     [Test]
     public async Task IncomingRowAndPageRoundTripsPreserveDeliveryAndReadCut()
     {
-        var partition = GraphCrossPartitionTestSupport.Partition("native-page-partition");
+        var partition = GraphCrossPartitionTestSupport.Partition(MachineKeyNativePagePartition);
         var from = GraphCrossPartitionTestSupport.Vertex(partition, "native-page-from");
         var to = GraphCrossPartitionTestSupport.Vertex(partition, "native-page-to");
         var edge = new EdgeRecord(EdgeId, from, to, "page-label", "{\"field\":true}", 23);
@@ -34,8 +38,8 @@ internal sealed class GraphCrossPartitionReadPayloadTests
     [Test]
     public async Task CapacityAndFingerprintRoundTripsPreserveTheirDistinctFieldLayouts()
     {
-        var source = GraphCrossPartitionTestSupport.Partition("native-fingerprint-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("native-fingerprint-target");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeFingerprintSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyNativeFingerprintTarget);
         var from = GraphCrossPartitionTestSupport.Vertex(source, "native-fingerprint-from");
         var to = GraphCrossPartitionTestSupport.Vertex(targetPartition, "native-fingerprint-to");
         var edge = new EdgeRecord(EdgeId, from, to, "fingerprint-label", "{\"n\":7}", 47);

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
 using KeyLoad.Storage;
 
@@ -6,6 +5,8 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionReceiverTests
 {
+    private const string MachineKeySource = "source";
+    private const string MachineKeyTarget = "target";
     private const string EdgeId = "receiver-edge";
     private const string Label = "links";
     private const string ConflictingFingerprint = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
@@ -14,8 +15,8 @@ internal sealed class GraphCrossPartitionReceiverTests
     public async Task DuplicateTargetApplyIsAnIdempotentNativeNoOp()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var source = GraphCrossPartitionTestSupport.Partition("source");
-        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("target"), "to");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
+        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "to");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
         GraphCrossPartitionTestSupport.Commit(database, source,
@@ -38,8 +39,8 @@ internal sealed class GraphCrossPartitionReceiverTests
     public async Task EqualRevisionDifferentFingerprintFailsConflictWithoutReplacingReceiver()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var source = GraphCrossPartitionTestSupport.Partition("source");
-        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("target"), "to");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
+        var target = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "to");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
         GraphCrossPartitionTestSupport.Commit(database, source,

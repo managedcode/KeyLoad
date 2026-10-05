@@ -32,6 +32,24 @@ The owner-version key is source-partition scoped by graph and edge ID and persis
 
 Fingerprint is lowercase SHA-256 over generated native serialization of the exact versioned delivery tuple (source and target full references, revision, disposition, and full edge snapshot). The persisted receiver high-water state never expires in this stage. Tombstones remain as high-water state.
 
+REQ/AC-GRAPH-XPART-001 additionally requires this digest to depend on tuple values,
+never on CLR object sharing. Before native encoding, construct the same fixed
+tree of independently owned source/destination/edge endpoint reference records
+and independently owned string occurrences, including exact attributes content.
+Equal references decoded from separate canonical-edge and intent frames must
+produce the same digest as shared references at source commit. Preserve every
+tuple field, exact attributes bytes, generated aliases/field IDs and native
+envelope; do not alter global serializer/reference semantics or use JSON fallback.
+`GraphCrossPartitionFingerprintTests` proves independent native-frame equality,
+object-sharing independence and full-reference/content sensitivity.
+
+This is a correction before the first qualified cross-partition feature release.
+Earlier unqualified development digests are not a compatible persisted generation:
+retain their original evidence and fail closed on mismatches. Do not silently
+rewrite, accept a legacy digest or use a dual decoder. Existing feature data must
+be writer-stopped and explicitly rebuilt under a separately qualified migration
+before it can be counted as accepted upgrade evidence.
+
 Capacity records validate version, direction, nonnegative counts/bytes and the actual configured bounds before use. Checked delta accounting is part of the same native transaction as its owned intent or receiver state. Missing capacity is an empty initial state only when the corresponding native family is empty; contradictory capacity/family state is `Corruption`. The generated fingerprint tuple is the single canonical digest input; no JSON serialization or caller-supplied digest is used as authority.
 
 ## Mutation and delivery rules

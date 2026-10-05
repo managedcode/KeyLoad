@@ -137,7 +137,8 @@ internal static class PartitionQueryMcpCatalogAssertions
         var actualFields = schema.GetProperty(McpSchemaInspector.Properties).EnumerateObject()
             .Select(item => item.Name).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(actualFields.SetEquals(fields)).IsTrue();
-        if (required.IsDefault) { required = fields; }
+        if (required.IsDefault)
+        { required = fields; }
         var actualRequired = schema.GetProperty(McpSchemaInspector.Required).EnumerateArray()
             .Select(item => item.GetString()!).ToImmutableHashSet(StringComparer.Ordinal);
         await Assert.That(actualRequired.SetEquals(required)).IsTrue();

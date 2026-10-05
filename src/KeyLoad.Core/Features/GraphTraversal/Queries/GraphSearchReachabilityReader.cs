@@ -136,47 +136,17 @@ internal sealed class GraphSearchReachabilityReader(
             budget.Check();
             entries[index++] = new(reference, depth);
         }
-        Array.Sort(entries, new ReachabilityOrder(budget));
+        var comparer = new GraphSearchReachabilityOrderComparer(budget);
+        try
+        {
+            Array.Sort(entries, comparer);
+        }
+        catch (InvalidOperationException exception)
+        {
+            comparer.RethrowOwnedBudgetFailure(exception);
+            throw;
+        }
         budget.Check();
         return entries;
-    }
-
-    private sealed class ReachabilityOrder(ReadExecutionBudget budget) : IComparer<GraphSearchReachability>
-    {
-        public int Compare(GraphSearchReachability left, GraphSearchReachability right)
-        {
-            budget.Check();
-            var depth = left.ShortestHops.CompareTo(right.ShortestHops);
-            if (depth != 0)
-            {
-                return depth;
-            }
-            var partition = EntityRefOrder.ComparePartition(left.Reference.Partition, right.Reference.Partition);
-            if (partition != 0)
-            {
-                return partition;
-            }
-            var collection = StringComparer.Ordinal.Compare(left.Reference.Collection, right.Reference.Collection);
-            return collection != 0 ? collection : StringComparer.Ordinal.Compare(left.Reference.Id, right.Reference.Id);
-        }
-    }
-
-    private static class EntityRefOrder
-    {
-        internal static int ComparePartition(PartitionRef left, PartitionRef right)
-        {
-            var tenant = StringComparer.Ordinal.Compare(left.TenantId, right.TenantId);
-            if (tenant != 0)
-            {
-                return tenant;
-            }
-            var database = StringComparer.Ordinal.Compare(left.DatabaseId, right.DatabaseId);
-            if (database != 0)
-            {
-                return database;
-            }
-            var domain = StringComparer.Ordinal.Compare(left.TransactionDomainId, right.TransactionDomainId);
-            return domain != 0 ? domain : StringComparer.Ordinal.Compare(left.PartitionKey, right.PartitionKey);
-        }
     }
 }

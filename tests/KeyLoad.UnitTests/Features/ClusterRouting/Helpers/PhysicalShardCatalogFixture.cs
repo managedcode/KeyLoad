@@ -79,7 +79,8 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
     {
         OpenExisting();
         Database.Bootstrap(new PrincipalRecord(RootPrincipalId, TenantId,
-            [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
+            [new("*", "*", Capability.All)], ["*"])
+        { ClusterAdministrator = true },
             DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
     }
 

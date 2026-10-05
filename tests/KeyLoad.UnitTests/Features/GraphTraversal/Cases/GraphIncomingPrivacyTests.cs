@@ -1,9 +1,11 @@
-using KeyLoad.Core;
-
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphIncomingPrivacyTests
 {
+    private const string MachineKeyHiddenTarget = "hidden-target";
+    private const string MachineKeyPrivateSource = "private-source";
+    private const string MachineKeyReaderTarget = "reader-target";
+    private const string MachineKeyVisibleSource = "visible-source";
     private const string Writer = "row-writer";
     private const string Reader = "incoming-reader";
     private const string EdgeId = "private-edge";
@@ -13,8 +15,8 @@ internal sealed class GraphIncomingPrivacyTests
     public async Task HiddenSourceEndpointIsOmittedFromIncomingProjection()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var sourcePartition = GraphCrossPartitionTestSupport.Partition("private-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("reader-target");
+        var sourcePartition = GraphCrossPartitionTestSupport.Partition(MachineKeyPrivateSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyReaderTarget);
         var source = GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source");
         var target = GraphCrossPartitionTestSupport.Vertex(targetPartition, "target");
         GraphCrossPartitionTestSupport.Commit(database, sourcePartition,
@@ -37,8 +39,8 @@ internal sealed class GraphIncomingPrivacyTests
     public async Task HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var sourcePartition = GraphCrossPartitionTestSupport.Partition("visible-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("hidden-target");
+        var sourcePartition = GraphCrossPartitionTestSupport.Partition(MachineKeyVisibleSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyHiddenTarget);
         var source = GraphCrossPartitionTestSupport.Vertex(sourcePartition, "source");
         var target = GraphCrossPartitionTestSupport.Vertex(targetPartition, "target");
         GraphCrossPartitionTestSupport.SeedVertices(database, source);

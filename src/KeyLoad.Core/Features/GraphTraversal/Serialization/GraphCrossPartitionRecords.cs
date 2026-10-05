@@ -37,9 +37,8 @@ internal static class GraphCrossPartitionRecords
     internal static string Fingerprint(PartitionRef source, string graph, string edgeId,
         EntityRef destination, long revision, bool deleted, EdgeRecord edge)
     {
-        var bytes = NativeSerialization.Serialize(new GraphCrossPartitionFingerprintV1(
-            GraphCrossPartitionProtocol.CurrentVersion, source, graph, edgeId, destination,
-            revision, deleted, edge));
+        var bytes = NativeSerialization.Serialize(GraphCrossPartitionFingerprintInput.Create(
+            source, graph, edgeId, destination, revision, deleted, edge));
         return Convert.ToHexStringLower(SHA256.HashData(bytes));
     }
 

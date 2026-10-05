@@ -35,8 +35,11 @@ internal sealed class PartitionQueryContractTests
         var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1), limits);
         var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], limits);
         var original = plan.Leaves[1];
-        var invalid = plan with { Leaves = plan.Leaves.SetItem(1,
-            original with { Request = original.Request with { Partition = database.Partition } }) };
+        var invalid = plan with
+        {
+            Leaves = plan.Leaves.SetItem(1,
+            original with { Request = original.Request with { Partition = database.Partition } })
+        };
         var position = database.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanValidation.Validate(invalid, limits));
 

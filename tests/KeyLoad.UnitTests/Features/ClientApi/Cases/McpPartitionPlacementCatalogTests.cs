@@ -139,8 +139,8 @@ internal sealed class McpPartitionPlacementCatalogTests
         var fields = ImmutableArray.Create(McpPartitionPlacementCatalogProtocol.TenantId,
             McpPartitionPlacementCatalogProtocol.DatabaseId, McpPartitionPlacementCatalogProtocol.TransactionDomainId,
             McpPartitionPlacementCatalogProtocol.PartitionKey);
-        await VerifyObjectAsync(schema, fields, fields);
-        foreach (var field in fields)
+        await VerifyObjectAsync(schema, fields.Add(McpPartitionPlacementCatalogProtocol.AtomicPartitionId), fields);
+        foreach (var field in fields.Add(McpPartitionPlacementCatalogProtocol.AtomicPartitionId))
         { await VerifyTypeAsync(root, schema.GetProperty(Properties).GetProperty(field), String); }
     }
 

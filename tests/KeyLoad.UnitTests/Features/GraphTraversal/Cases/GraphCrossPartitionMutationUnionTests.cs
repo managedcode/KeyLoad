@@ -4,6 +4,22 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionMutationUnionTests
 {
+    private const string MachineKeyCollection = "collection";
+    private const string MachineKeyDestination = "destination";
+    private const string MachineKeyEdgeId = "edgeId";
+    private const string MachineKeyExpectedRevision = "expectedRevision";
+    private const string MachineKeyGraph = "graph";
+    private const string MachineKeyId = "id";
+    private const string MachineKeyKind = "kind";
+    private const string MachineKeyMutations = "mutations";
+    private const string MachineKeyPartition = "partition";
+    private const string MachineKeyPartitionKey = "partitionKey";
+    private const string MachineKeyResource = "resource";
+    private const string MachineKeySourcePartition = "sourcePartition";
+    private const string MachineKeyUnionCompleteSource = "union-complete-source";
+    private const string MachineKeyUnionCompleteTarget = "union-complete-target";
+    private const string MachineKeyUnionSource = "union-source";
+    private const string MachineKeyUnionTarget = "union-target";
     private const string Graph = "native-union-graph";
     private const string EdgeId = "native-union-edge";
     private const string ApplyKind = "applyCrossPartitionReverseEdge";
@@ -13,8 +29,8 @@ internal sealed class GraphCrossPartitionMutationUnionTests
     [Test]
     public async Task ApplyMutationPreservesInheritedScopeAndLocatorAcrossBothSerializers()
     {
-        var source = GraphCrossPartitionTestSupport.Partition("union-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("union-target");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyUnionSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyUnionTarget);
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "union-destination");
         var expected = new MutationExpectation(source, Graph, EdgeId, destination, 71);
         await AssertUnionAsync(new ApplyCrossPartitionReverseEdge(source, Graph, EdgeId, destination, 71),
@@ -24,8 +40,8 @@ internal sealed class GraphCrossPartitionMutationUnionTests
     [Test]
     public async Task CompletionMutationPreservesInheritedScopeAndLocatorAcrossBothSerializers()
     {
-        var source = GraphCrossPartitionTestSupport.Partition("union-complete-source");
-        var targetPartition = GraphCrossPartitionTestSupport.Partition("union-complete-target");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyUnionCompleteSource);
+        var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyUnionCompleteTarget);
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "union-complete-destination");
         var expected = new MutationExpectation(source, Graph, EdgeId, destination, 89);
         await AssertUnionAsync(new CompleteCrossPartitionReverseEdge(source, Graph, EdgeId,
@@ -56,20 +72,20 @@ internal sealed class GraphCrossPartitionMutationUnionTests
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(command, JsonDefaults.Options);
         using var document = JsonDocument.Parse(bytes);
-        var mutation = document.RootElement.GetProperty("mutations")[0];
-        await Assert.That(mutation.GetProperty("kind").GetString()).IsEqualTo(expectedKind);
-        await Assert.That(mutation.GetProperty("resource").GetString()).IsEqualTo(expected.Graph);
-        await Assert.That(mutation.GetProperty("graph").GetString()).IsEqualTo(expected.Graph);
-        await Assert.That(mutation.GetProperty("sourcePartition").GetProperty("partitionKey").GetString())
+        var mutation = document.RootElement.GetProperty(MachineKeyMutations)[0];
+        await Assert.That(mutation.GetProperty(MachineKeyKind).GetString()).IsEqualTo(expectedKind);
+        await Assert.That(mutation.GetProperty(MachineKeyResource).GetString()).IsEqualTo(expected.Graph);
+        await Assert.That(mutation.GetProperty(MachineKeyGraph).GetString()).IsEqualTo(expected.Graph);
+        await Assert.That(mutation.GetProperty(MachineKeySourcePartition).GetProperty(MachineKeyPartitionKey).GetString())
             .IsEqualTo(expected.Source.PartitionKey);
-        await Assert.That(mutation.GetProperty("destination").GetProperty("partition").GetProperty("partitionKey")
+        await Assert.That(mutation.GetProperty(MachineKeyDestination).GetProperty(MachineKeyPartition).GetProperty(MachineKeyPartitionKey)
             .GetString()).IsEqualTo(expected.Destination.Partition.PartitionKey);
-        await Assert.That(mutation.GetProperty("destination").GetProperty("collection").GetString())
+        await Assert.That(mutation.GetProperty(MachineKeyDestination).GetProperty(MachineKeyCollection).GetString())
             .IsEqualTo(expected.Destination.Collection);
-        await Assert.That(mutation.GetProperty("destination").GetProperty("id").GetString())
+        await Assert.That(mutation.GetProperty(MachineKeyDestination).GetProperty(MachineKeyId).GetString())
             .IsEqualTo(expected.Destination.Id);
-        await Assert.That(mutation.GetProperty("edgeId").GetString()).IsEqualTo(expected.EdgeId);
-        await Assert.That(mutation.GetProperty("expectedRevision").GetInt64()).IsEqualTo(expected.Revision);
+        await Assert.That(mutation.GetProperty(MachineKeyEdgeId).GetString()).IsEqualTo(expected.EdgeId);
+        await Assert.That(mutation.GetProperty(MachineKeyExpectedRevision).GetInt64()).IsEqualTo(expected.Revision);
         var decoded = JsonSerializer.Deserialize<CommandRequest>(bytes, JsonDefaults.Options);
         await Assert.That(decoded).IsNotNull();
         await Assert.That(decoded!.Mutations).HasSingleItem();

@@ -2,6 +2,10 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionRepairTests
 {
+    private const string MachineKeyFirst = "first";
+    private const string MachineKeySecond = "second";
+    private const string MachineKeySource = "source";
+    private const string MachineKeyThird = "third";
     private const string EdgeId = "edge-1";
     private const string Label = "links";
 
@@ -9,10 +13,10 @@ internal sealed class GraphCrossPartitionRepairTests
     public async Task CoalescedMultiHopRepairTombstonesEveryPreviouslyDeliveredDestination()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var source = GraphCrossPartitionTestSupport.Partition("source");
-        var first = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("first"), "v");
-        var second = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("second"), "v");
-        var third = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("third"), "v");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
+        var first = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyFirst), "v");
+        var second = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeySecond), "v");
+        var third = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyThird), "v");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, first, second, third);
 

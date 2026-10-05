@@ -1,7 +1,7 @@
-using KeyLoad.UnitTests.Features.ClusterRouting.Serialization;
 using System.Text.Json;
 using KeyLoad.UnitTests.Features.BenchmarkComparisons;
 using KeyLoad.UnitTests.Features.ClusterRouting.Models;
+using KeyLoad.UnitTests.Features.ClusterRouting.Serialization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting.Helpers;
 

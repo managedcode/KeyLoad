@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using KeyLoad.Server;
 using ManagedCode.MCPGateway;
 using ModelContextProtocol.Protocol;
@@ -11,6 +10,8 @@ internal sealed class McpGatewayReplyTests
 {
     private const string Marker = "native-call-result";
     private const string ToolName = "keyload_documents_get";
+    private const string RequestIdKey = "requestId";
+    private const string ResultKey = "result";
 
     [Test]
     public async Task MetadataSuccessHasNullExecutionIdentityAndOwnerLifetime()
@@ -21,8 +22,8 @@ internal sealed class McpGatewayReplyTests
         using var owner = McpReplyOwner.Success(canonical, null, canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes);
         var result = owner.ToolResult();
         var wrapper = result.StructuredContent!.Value;
-        await Assert.That(wrapper.GetProperty("requestId").ValueKind).IsEqualTo(JsonValueKind.Null);
-        await Assert.That(JsonElement.DeepEquals(wrapper.GetProperty("result"), expected)).IsTrue();
+        await Assert.That(wrapper.GetProperty(RequestIdKey).ValueKind).IsEqualTo(JsonValueKind.Null);
+        await Assert.That(JsonElement.DeepEquals(wrapper.GetProperty(ResultKey), expected)).IsTrue();
         await Assert.That(result.IsError).IsFalse();
     }
 

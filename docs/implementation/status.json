@@ -8,14 +8,14 @@
     "updatedExistingPins": 17,
     "allFinalCentralPinsCurrent": true,
     "restorePassed": true,
-    "canonicalBuildPassed": false,
+    "canonicalBuildPassed": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Combined source compilation and formatter verification pending after MCP composition import repair",
-      "Final canonical Release build and Aspire-owned native compatibility suites",
-      "Scoped verified dependency refresh checkpoint"
-    ]
+      "Complete unfiltered Aspire-owned native compatibility and recovery/RF3 suites",
+      "Exact delivered-source Linux qualification"
+    ],
+    "focusedNativeCompatibilityReceipt": "docs/implementation/mcp-guidance-graph-development-2026-10-05.json"
   },
   "MCP-GATEWAY-001": {
     "title": "Bounded native MCP gateway and Markdown-LD tool discovery",
@@ -29,22 +29,30 @@
     ],
     "feature": "docs/Features/ClientApi/ToolDiscovery.md",
     "decision": "docs/ADR/ADR-104-mcp-gateway-tool-discovery.md",
-    "sourceStage": "native_catalog_three_meta_transport_official_caller_migration_joined_guide_resource_prompt_in_progress",
+    "sourceStage": "native_catalog_three_meta_transport_guidance_resource_prompt_joined_published_gateway_repair_consumed_ClientApi347_normal_and_scalar_pass_RF3_pending",
     "dependencies": {
-      "ManagedCode.MCPGateway": "0.4.16",
+      "ManagedCode.MCPGateway": "0.4.17",
       "ManagedCode.MarkdownLd.Kb": "0.2.10",
-      "feedObservation": "published_versions_verified_and_normal_NuGet_restore_passed_2026_10_05_owning_privacy_fatal_repair_release_in_progress"
+      "feedObservation": "published_0_4_17_release37339716310_nupkg_and_nuspec_commit_verified_normal_restore_and_consumer_build_normal_scalar_pass_2026_10_05"
     },
     "publicInitialToolCount": 3,
     "implementationQualified": false,
     "rf3Qualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Agent guidance resource/prompt integration and published native dependency repair chain",
-      "Combined Release build formatter and native normal scalar recovery gates",
+      "Complete unfiltered Aspire-owned unit scalar analyzer recovery and exact delivered-source Linux gates",
       "Aspire RF3 official MCP authority operation parity cancellation restart and guidance evidence",
       "Native graph allocation peak RAM and exact delivered-source Linux qualification"
-    ]
+    ],
+    "localDevelopmentReceipt": "docs/implementation/mcp-guidance-graph-development-2026-10-05.json",
+    "guidance": {
+      "resource": "keyload://guides/agent-quickstart",
+      "prompt": "keyload_agent_quickstart",
+      "sourceJoined": true,
+      "normalUnitPassed": true,
+      "scalarUnitPassed": true,
+      "officialRf3Passed": false
+    }
   },
   "DATABASE-COMPOSITION-001": {
     "title": "Одна база для агентів: пов'язані моделі та SQL composition",
@@ -1013,7 +1021,8 @@
       },
       "qualification": "pending",
       "allAcceptanceClosed": false
-    }
+    },
+    "localDevelopmentCheckpoint85": "docs/implementation/mcp-guidance-graph-development-2026-10-05.json"
   },
   "KL-024": {
     "title": "Time-series core",

@@ -1,10 +1,13 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionCapacityTests
 {
+    private const string MachineKeyFirst = "first";
+    private const string MachineKeySecond = "second";
+    private const string MachineKeySource = "source";
     private const string EdgeId = "capacity-edge";
     private const string Label = "links";
 
@@ -13,9 +16,9 @@ internal sealed class GraphCrossPartitionCapacityTests
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase(
             new DatabaseLimits { MaxScanRecords = 1 });
-        var source = GraphCrossPartitionTestSupport.Partition("source");
-        var first = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("first"), "v");
-        var second = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition("second"), "v");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeySource);
+        var first = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeyFirst), "v");
+        var second = GraphCrossPartitionTestSupport.Vertex(GraphCrossPartitionTestSupport.Partition(MachineKeySecond), "v");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, first, second);
         GraphCrossPartitionTestSupport.Commit(database, source,

@@ -24,8 +24,10 @@ internal sealed class RequestCqrsProbeDiscoveryOptionsTests
         await Assert.That(absent.DiscoveryCaptureMode).IsEqualTo(RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
         var accepted = RequestCqrsProbeOptionsReader.Read(Configuration(new Dictionary<string, string?>
         {
-            [EnabledKey] = "true", [RootKey] = RequestCqrsProbeProtocol.FixedRoot,
-            [SessionKey] = Session, [CaptureKey] = RequestCqrsProbeProtocol.MixedInterface3Capture
+            [EnabledKey] = "true",
+            [RootKey] = RequestCqrsProbeProtocol.FixedRoot,
+            [SessionKey] = Session,
+            [CaptureKey] = RequestCqrsProbeProtocol.MixedInterface3Capture
         }), replica, true);
         await Assert.That(accepted.DiscoveryCaptureMode).IsEqualTo(RequestCqrsProbeProtocol.MixedInterface3Capture);
         await AssertRejectedAsync(Configuration(new Dictionary<string, string?>
@@ -33,8 +35,10 @@ internal sealed class RequestCqrsProbeDiscoveryOptionsTests
         var wrongObserver = replica with { LocalId = Voter2 };
         await AssertRejectedAsync(Configuration(new Dictionary<string, string?>
         {
-            [EnabledKey] = "true", [RootKey] = RequestCqrsProbeProtocol.FixedRoot,
-            [SessionKey] = Session, [CaptureKey] = RequestCqrsProbeProtocol.MixedInterface3Capture
+            [EnabledKey] = "true",
+            [RootKey] = RequestCqrsProbeProtocol.FixedRoot,
+            [SessionKey] = Session,
+            [CaptureKey] = RequestCqrsProbeProtocol.MixedInterface3Capture
         }), wrongObserver);
     }
 

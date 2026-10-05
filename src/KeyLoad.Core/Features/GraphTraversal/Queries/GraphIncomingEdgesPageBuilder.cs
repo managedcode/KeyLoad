@@ -55,15 +55,18 @@ internal sealed class GraphIncomingEdgesPageBuilder
     internal GraphIncomingEdgesPageV1 Build()
     {
         budget.Check();
-        var result = new GraphIncomingEdgesPageV1(Version,
-            rows.OrderBy(row => row.Edge.From.Partition.TenantId, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.From.Partition.DatabaseId, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.From.Partition.TransactionDomainId, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.From.Partition.PartitionKey, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.From.Collection, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.From.Id, StringComparer.Ordinal)
-                .ThenBy(row => row.Edge.Id, StringComparer.Ordinal).ToImmutableArray(),
-            cutPosition, GraphCrossPartitionProtocol.EventualProjection);
+        var comparer = new GraphIncomingEdgesOrderComparer(budget);
+        try
+        {
+            rows.Sort(comparer);
+        }
+        catch (InvalidOperationException exception)
+        {
+            comparer.RethrowOwnedBudgetFailure(exception);
+            throw;
+        }
+        var result = new GraphIncomingEdgesPageV1(Version, rows.ToImmutable(), cutPosition,
+            GraphCrossPartitionProtocol.EventualProjection);
         budget.CheckResult(result);
         return result;
     }

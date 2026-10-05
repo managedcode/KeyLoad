@@ -1,5 +1,5 @@
-using System.Text.Json;
 using System.Collections.Immutable;
+using System.Text.Json;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>Independently freezes direct and SQL shortest-path tool schemas.</summary>

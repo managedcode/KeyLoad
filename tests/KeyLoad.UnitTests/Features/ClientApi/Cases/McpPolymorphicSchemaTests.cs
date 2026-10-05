@@ -15,7 +15,7 @@ internal sealed class McpPolymorphicSchemaTests
     private const string Equal = "=";
     private const string And = "and";
     private const string UnknownKind = "unsupported-mutation";
-    private const int MutationCount = 23;
+    private const int MutationCount = 25;
     private const int QueryLimit = 10;
     private const string ComparisonKind = "comparison";
     private const string LogicalKind = "logical";
@@ -31,7 +31,7 @@ internal sealed class McpPolymorphicSchemaTests
     private static readonly ImmutableArray<string> Predicates = [ComparisonKind, LogicalKind, NegationKind, NullTestKind, InKind];
     private static readonly ImmutableArray<string> Operands = [FieldKind, ValueKind, ParameterKind];
 
-    /// <summary>All twenty-three actual mutation DTOs retain discriminator schemas and exact typed round trips.</summary>
+    /// <summary>All twenty-five actual mutation DTOs retain discriminator schemas and exact typed round trips.</summary>
     [Test]
     public async Task AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder()
     {

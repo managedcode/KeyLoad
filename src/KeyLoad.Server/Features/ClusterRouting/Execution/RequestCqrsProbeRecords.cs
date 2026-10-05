@@ -65,14 +65,14 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     private void ReadDiscovery(string name, byte[] bytes, HashSet<string> presentControls,
         List<RequestCqrsProbeDiscoveryRecord> loadedDiscoveries)
     {
-            var discovery = RequestCqrsProbeJson.ReadDiscovery(bytes);
-            discoveryPolicy.Validate(sessionId, voter, discovery);
-            var slot = discoveryPolicy.GetSlot(discovery.PeerVoterId);
-            if (name != RequestCqrsProbeFiles.DiscoveryName(slot))
-            { throw Invalid(); }
-            RegisterImmutable(name, bytes);
-            presentControls.Add(name);
-            loadedDiscoveries.Add(discovery);
+        var discovery = RequestCqrsProbeJson.ReadDiscovery(bytes);
+        discoveryPolicy.Validate(sessionId, voter, discovery);
+        var slot = discoveryPolicy.GetSlot(discovery.PeerVoterId);
+        if (name != RequestCqrsProbeFiles.DiscoveryName(slot))
+        { throw Invalid(); }
+        RegisterImmutable(name, bytes);
+        presentControls.Add(name);
+        loadedDiscoveries.Add(discovery);
     }
 
     internal void ValidatePresence(HashSet<string> presentControls)

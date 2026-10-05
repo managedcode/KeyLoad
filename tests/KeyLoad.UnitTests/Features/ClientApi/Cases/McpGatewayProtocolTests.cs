@@ -10,6 +10,17 @@ internal sealed class McpGatewayProtocolTests
     private const string SearchName = "gateway_tools_search";
     private const string RouteName = "gateway_tools_route";
     private const string InvokeName = "gateway_tool_invoke";
+    private const string AdditionalPropertiesKey = "additionalProperties";
+    private const string OneOfKey = "oneOf";
+    private const string PropertiesKey = "properties";
+    private const string RequestIdKey = "requestId";
+    private const string TypeKey = "type";
+    private const string ErrorKey = "error";
+    private const string ResultKey = "result";
+    private const string MatchesKey = "matches";
+    private const string ItemsKey = "items";
+    private const string RequiredKey = "required";
+    private const string CategoriesKey = "categories";
     private const int MaximumListBytes = 65_536;
 
     [Test]
@@ -20,35 +31,35 @@ internal sealed class McpGatewayProtocolTests
         await Assert.That(page.Tools.Select(tool => tool.Name).SequenceEqual(names)).IsTrue();
         await Assert.That(page.NextCursor).IsNull();
         await Assert.That(page.Tools.All(tool => tool.Annotations is not null)).IsTrue();
-        await Assert.That(page.Tools.Where(tool => tool.Name != InvokeName).All(tool => tool.Annotations!.ReadOnlyHint)).IsTrue();
+        await Assert.That(page.Tools.Where(tool => tool.Name != InvokeName).All(tool => tool.Annotations!.ReadOnlyHint == true)).IsTrue();
         var invoke = page.Tools.Single(tool => tool.Name == InvokeName).Annotations!;
         await Assert.That(invoke.ReadOnlyHint).IsFalse();
         await Assert.That(invoke.IdempotentHint).IsFalse();
         await Assert.That(invoke.DestructiveHint).IsTrue();
         foreach (var tool in page.Tools)
         {
-            await Assert.That(tool.InputSchema.GetProperty("additionalProperties").ValueKind).IsEqualTo(JsonValueKind.False);
+            await Assert.That(tool.InputSchema.GetProperty(AdditionalPropertiesKey).ValueKind).IsEqualTo(JsonValueKind.False);
             var output = tool.OutputSchema!.Value;
-            var success = output.GetProperty("oneOf")[0];
-            var failure = output.GetProperty("oneOf")[1];
-            await Assert.That(success.GetProperty("properties").GetProperty("requestId").GetProperty("type").ValueKind)
+            var success = output.GetProperty(OneOfKey)[0];
+            var failure = output.GetProperty(OneOfKey)[1];
+            await Assert.That(success.GetProperty(PropertiesKey).GetProperty(RequestIdKey).GetProperty(TypeKey).ValueKind)
                 .IsEqualTo(JsonValueKind.Array);
-            await Assert.That(failure.GetProperty("properties").GetProperty("error").ValueKind).IsEqualTo(JsonValueKind.Object);
+            await Assert.That(failure.GetProperty(PropertiesKey).GetProperty(ErrorKey).ValueKind).IsEqualTo(JsonValueKind.Object);
         }
         var searchMatches = page.Tools.Single(tool => tool.Name == SearchName).OutputSchema!.Value
-            .GetProperty("oneOf")[0].GetProperty("properties").GetProperty("result").GetProperty("properties")
-            .GetProperty("matches");
-        await Assert.That(searchMatches.GetProperty("type").GetString()).IsEqualTo("array");
-        await Assert.That(searchMatches.GetProperty("items").GetProperty("required").GetArrayLength()).IsEqualTo(2);
+            .GetProperty(OneOfKey)[0].GetProperty(PropertiesKey).GetProperty(ResultKey).GetProperty(PropertiesKey)
+            .GetProperty(MatchesKey);
+        await Assert.That(searchMatches.GetProperty(TypeKey).GetString()).IsEqualTo("array");
+        await Assert.That(searchMatches.GetProperty(ItemsKey).GetProperty(RequiredKey).GetArrayLength()).IsEqualTo(2);
         var routeCategories = page.Tools.Single(tool => tool.Name == RouteName).OutputSchema!.Value
-            .GetProperty("oneOf")[0].GetProperty("properties").GetProperty("result").GetProperty("properties")
-            .GetProperty("categories");
-        await Assert.That(routeCategories.GetProperty("type").GetString()).IsEqualTo("array");
-        await Assert.That(routeCategories.GetProperty("items").GetProperty("required").GetArrayLength()).IsEqualTo(3);
+            .GetProperty(OneOfKey)[0].GetProperty(PropertiesKey).GetProperty(ResultKey).GetProperty(PropertiesKey)
+            .GetProperty(CategoriesKey);
+        await Assert.That(routeCategories.GetProperty(TypeKey).GetString()).IsEqualTo("array");
+        await Assert.That(routeCategories.GetProperty(ItemsKey).GetProperty(RequiredKey).GetArrayLength()).IsEqualTo(3);
         var search = page.Tools.Single(tool => tool.Name == SearchName).Annotations!;
         var route = page.Tools.Single(tool => tool.Name == RouteName).Annotations!;
-        await Assert.That(search.ReadOnlyHint && search.IdempotentHint && !search.DestructiveHint).IsTrue();
-        await Assert.That(route.ReadOnlyHint && route.IdempotentHint && !route.DestructiveHint).IsTrue();
+        await Assert.That(search.ReadOnlyHint == true && search.IdempotentHint == true && search.DestructiveHint == false).IsTrue();
+        await Assert.That(route.ReadOnlyHint == true && route.IdempotentHint == true && route.DestructiveHint == false).IsTrue();
     }
 
     [Test]
@@ -87,7 +98,6 @@ internal sealed class McpGatewayProtocolTests
             McpGatewayMetaOperation.Route, McpGatewayProtocolInputs.Read("{\"query\":\"x\",\"maxCategories\":3}")));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
     }
-
 
     [Test]
     public async Task MetaArgumentsRejectUnknownCaseChangedAndDuplicateNestedFields()

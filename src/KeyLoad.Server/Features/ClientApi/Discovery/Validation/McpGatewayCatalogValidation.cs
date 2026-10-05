@@ -100,7 +100,7 @@ internal static class McpGatewayCatalogValidation
     private static string ResolveCategory(string name)
     {
         name = name.StartsWith(OperationPrefix, StringComparison.Ordinal) ? name[OperationPrefix.Length..] : name;
-        var separator = name.IndexOf('_');
+        var separator = name.IndexOf('_', StringComparison.Ordinal);
         var category = separator > 0 ? name[..separator] : name;
         return category switch
         {

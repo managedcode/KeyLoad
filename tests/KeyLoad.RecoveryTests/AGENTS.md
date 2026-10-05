@@ -19,7 +19,8 @@
 
 ## Read-first and canonical slice ownership
 - Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned test slices: `StorageRecovery` and `ClusterReplication`; target paths: `Features/StorageRecovery/` and `Features/ClusterReplication/`.
+- Owned test slices: `StorageRecovery`, `ClusterReplication` and `ClusterRouting`; target paths: `Features/StorageRecovery/`, `Features/ClusterReplication/` and `Features/ClusterRouting/`.
+- `Features/ClusterRouting/` owns the genuine prior StoredOutcome compatibility cases under TokenMigrationLineage REQ/AC-MTOKEN-005/006 and ADR-017. Reuse the existing AppHost-owned, immutable-source StorageRecovery probe infrastructure; preserve all source/driver/binary receipts and bounded process cleanup. A current serializer or rewritten Unknown/null record is not prior-frame evidence.
 - `Features/StorageRecovery/Cases/RecoveryTests.cs`, `Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs` and `Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs` are current entry points; other recovery scenarios follow the matching slice.
 
 ## Owner-authorized local development verification, 2026-10-03

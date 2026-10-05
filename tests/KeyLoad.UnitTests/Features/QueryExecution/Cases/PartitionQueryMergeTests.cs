@@ -25,7 +25,7 @@ internal sealed class PartitionQueryMergeTests
         var actual = new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database), [.. partitions]);
         var expected = seeds.SelectMany((items, index) => items.Select(item => new
-            { Partition = partitions[index], Seed = item }))
+        { Partition = partitions[index], Seed = item }))
             .OrderByDescending(item => item.Seed.Score)
             .ThenBy(item => item.Partition.TenantId, StringComparer.Ordinal)
             .ThenBy(item => item.Partition.DatabaseId, StringComparer.Ordinal)

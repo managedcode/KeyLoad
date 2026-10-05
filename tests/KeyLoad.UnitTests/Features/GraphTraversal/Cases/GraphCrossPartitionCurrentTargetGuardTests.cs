@@ -1,10 +1,12 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal sealed class GraphCrossPartitionCurrentTargetGuardTests
 {
+    private const string MachineKeyCurrentSource = "current-source";
+    private const string MachineKeyCurrentTarget = "current-target";
     private const string EdgeId = "current-target-edge";
     private const string Label = "links";
 
@@ -12,9 +14,9 @@ internal sealed class GraphCrossPartitionCurrentTargetGuardTests
     public async Task TombstoneIntentCannotDeleteItsStillCurrentCanonicalDestination()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
-        var source = GraphCrossPartitionTestSupport.Partition("current-source");
+        var source = GraphCrossPartitionTestSupport.Partition(MachineKeyCurrentSource);
         var target = GraphCrossPartitionTestSupport.Vertex(
-            GraphCrossPartitionTestSupport.Partition("current-target"), "current-to");
+            GraphCrossPartitionTestSupport.Partition(MachineKeyCurrentTarget), "current-to");
         var from = GraphCrossPartitionTestSupport.Vertex(source, "current-from");
         GraphCrossPartitionTestSupport.SeedVertices(database, from, target);
         GraphCrossPartitionTestSupport.Commit(database, source,
