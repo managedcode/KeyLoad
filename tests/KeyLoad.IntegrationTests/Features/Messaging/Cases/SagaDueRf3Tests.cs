@@ -40,7 +40,7 @@ internal sealed class SagaDueRf3Tests(ClusterFixture fixture)
             SagaPhase.TimedOut, 2, dueAt, identity.Secret, deadline.Token);
         await DueSagaRf3Assertions.AssertTimeoutAsync(sdk, mcp, scenario, sagaId, dueAt, identity.Secret,
             deadline.Token);
-        await DueSagaRf3Assertions.ConsumeAndAcknowledgeExactlyOneAsync(sdk, mcp, scenario, sagaId,
+        await DueSagaRf3Assertions.ConsumeAndAcknowledgeExactlyOneAsync(sdk, mcp, scenario, sagaId, identity.Secret,
             deadline.Token);
         await DueSagaRf3Assertions.AssertSagaAsync(sdk, mcp, scenario, sagaId,
             SagaPhase.TimedOut, 2, dueAt, identity.Secret, deadline.Token);

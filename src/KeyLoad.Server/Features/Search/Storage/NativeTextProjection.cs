@@ -88,7 +88,7 @@ internal sealed class NativeTextProjection : ITextProjection
             lifecycle.SourceNodeId, budget, building, invalidate, completed, currentInvalidation,
             () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate),
             failures);
-        ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(failures.Count == 0 ? budget : null), failures);
+        ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == 0 ? budget : null), failures);
         var retired = state.CompleteLease(slot, Failure(failures));
         if (retired is not null)
         {

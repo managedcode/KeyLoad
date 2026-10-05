@@ -80,6 +80,53 @@ invalidation, unknown-path denial and closed/restart corruption controls through
 the actual Aspire caller. This source repair does not qualify L1, L2 or RF3;
 full suites and exact-source Linux evidence remain required.
 
+TASK-LEASE-LIVE-SIZE, accepted 2026-10-05, corrects the actual native-text71
+failure while preserving REQ/AC-LEASE-001/002/003. The retained manifest describes
+the fully closed publication inventory; a manager-owned reopened native WAL may
+have a different current length. Live preflight must inspect every tracked native
+file without reopening it, reject nonregular/linked files and any current file
+over MaximumDiskBytes, and retain the existing per-generation and aggregate
+actual-byte census. It must not compare a live file length with its closed
+manifest length. Retained manifest scope, records and file metadata must still
+match the manager's verified publication. All cold generations, publication,
+reopen, retirement, deletion and restart keep exact lengths and checksums.
+Luna query_wave owns only a private NativeTextLiveGenerationMetadata correction;
+root reviews and joins it before the same original native tests run through
+Aspire. No provider, sharing mode, ceiling, deadline or persisted format changes.
+
+TASK-LEASE-COLD-FIXTURE, accepted 2026-10-05, preserves the original native
+capacity and retirement oracles. Luna lifecycle_wave owns only a private patch
+for NativeTextGenerationCapacityTests and NativeTextGenerationLifetimeTests,
+with a feature-local cleanup helper if the numeric policy requires extraction.
+Sort the independently created expected generation leaves ordinally before the
+existing exact ordered comparison. Every borrowed lease must settle before its
+owning projection's shutdown even when an earlier operation fails; retain every
+primary and cleanup failure through ServerFailureObserver. The restart fixture
+must first preserve its real borrowed retired generation by the existing owned
+foreign-file failure, settle that lease, then run and observe failed projection
+shutdown so both native indexes are actually closed. Only after closure may it
+remove the fixture-owned foreign file, create the third leaf through the
+unchanged cold WriteOwner call, and restore that same owned foreign entry.
+Restart must still reject the entry before deleting any of the three generations,
+preserve every original generation, and succeed after removing only that entry.
+Keep the original old-reader, revisions, three-leaf bound, denial, healthy retry
+and real provider assertions. Do not pass fabricated live slots into cold calls
+or weaken full cold inventory validation. Root runs the unchanged acceptance
+suite and captures actual source/runtime and terminal results.
+
+TASK-LEASE-CANCEL-SETTLEMENT, accepted 2026-10-05, addresses the actual Aspire
+native-text72b failure in SaturationAndCancellationReleaseNativeLeaseForHealthySearch.
+The final aggregate physical census in NativeTextProjection.Release must use the
+same completed-operation rule as NativeTextSettlement.Refresh: an incomplete
+or cancelled operation settles without consulting its exhausted caller budget,
+while retaining all real file, byte and generation ceilings and distinct cleanup
+errors. A successfully completed operation retains its existing budget checks.
+Luna query_wave owns a private patch to NativeTextProjection.Release only,
+unless the unchanged original regression identifies a further owning defect.
+Do not suppress cancellation globally, hide physical failures, change deadlines,
+or weaken tests. Root reviews the joined change and reruns the original 36-case
+native-text selection through the Aspire AppHost; full qualification stays open.
+
 Frontend/new SDK/MCP syntax N/A: unchanged public search surfaces consume this
 manager. Migration N/A: no canonical record or persisted index format changes.
 Rollback stops the capable node and rebuilds disposable indexes; no canonical

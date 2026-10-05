@@ -196,3 +196,49 @@ current-source patch. Preserve numeric limits and existing tests. Review owned
 carrier/uniqueness invariants, run full Release/format/governance and unchanged
 Aspire normal/scalar/related recovery/RF3; retain original failures and exact-source
 Linux results. No acceleration or qualification claim precedes those results.
+
+## Accepted prepared-value refinement, 2026-10-05
+
+TASK-ANN-R1-PREPARED-VALUE refines the existing owned-score path without changing
+its score formulas, work accounting or admission. The current diversification and
+reciprocal-overflow loops allocate one PreparedSimilarity object for each examined
+candidate. Use a private-constructor readonly PreparedPackedSimilarity value,
+created only from an actual finite-checked PackedAnnVectors carrier and ordinal.
+Its internal API is Create(PackedAnnVectors, int ordinal, DistanceMetric) and
+Score(PackedAnnVectors, int ordinal), returning the exact double similarity.
+It retains only that owned query slice, metric and one query norm; no norm array,
+new retained vector copy, normalization, approximate formula or public bypass.
+
+REQ-ANN-010 / AC-ANN-010: its scores equal SearchEngine.Similarity exactly in the
+same native/scalar invocation mode for all three metrics, zero, subnormal, large
+finite values and dimensions1/4096. Invalid ordinal, metric, dimension and
+untrusted nonfinite input still fail through the original typed validation.
+Mutating input buffers after Copy cannot affect the value. A warmed synchronous
+loop of actual packed-value construction and scoring must allocate zero bytes
+as measured on that same thread; setup, persisted corpus and assertions remain
+outside that interval. This is an allocation oracle, not a latency claim.
+
+Keep one canonical implementation of the existing ordered metric reductions in
+a feature-local execution helper consumed by both PreparedSimilarity and the
+new packed value. Preserve the exact widen, reduction, tail, zero and square-root
+order. PackedAnnNeighborSelection uses the value in diversification and overflow;
+the existing budgeted PackedAnnLayerSearch score join charges the identical work
+before scoring. Ordinary untrusted search and other prepared-query ownership stay
+unchanged. No public DTO, native alias/field ID, canonical record or persisted
+index format changes are permitted.
+
+Root freezes this contract and ADR-019, and owns integration and gates. Luna
+query_wave owns a private exact-base patch for PreparedSimilarity,
+PackedAnnNeighborSelection, PackedAnnLayerSearch and new cohesive Search/Execution
+numeric/value helpers only. Luna cluster_wave independently owns new
+PackedAnnPreparedValueOracleTests and cohesive feature-local test helpers for the
+exact-score, invalid-input, ownership and allocation criteria. Implement
+the shared numeric helper, finite-owned value, consumed loop joins, then independent
+public-oracle/allocation tests. Preserve every existing test, corpus, deadline,
+option, graph order, budget charge and error. Root reviews the complete diff,
+builds/formats/governs the full solution and runs Aspire native/scalar metric and
+the unchanged ANN corpus/recall/filter/deadline gates before qualification.
+Rollback reverts the computational joins; there is no data migration. Public
+SDK/MCP/frontend additions are N/A because this internal optimization preserves
+their existing exact operation contracts. Comparable GitHub measurements and
+remaining ANN projection/public/RF3 acceptance are still mandatory.

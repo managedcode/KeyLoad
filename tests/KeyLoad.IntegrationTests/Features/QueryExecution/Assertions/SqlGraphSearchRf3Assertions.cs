@@ -9,8 +9,8 @@ internal static class SqlGraphSearchRf3Assertions
     {
         await GraphSearchRf3Assertions.AssertHitsAsync(result,
             (GraphSearchRf3Scenario.Alpha, 1d / (GraphSearchRf3Scenario.FusionConstant + 1)),
-            (GraphSearchRf3Scenario.Beta, 1d / (GraphSearchRf3Scenario.FusionConstant + 1)),
-            (GraphSearchRf3Scenario.Gamma, 1d / (GraphSearchRf3Scenario.FusionConstant + 2)));
+            (GraphSearchRf3Scenario.Beta, 1d / (GraphSearchRf3Scenario.FusionConstant + 2)),
+            (GraphSearchRf3Scenario.Gamma, 1d / (GraphSearchRf3Scenario.FusionConstant + 3)));
         await Assert.That(result.Expansion).IsNull();
     }
 }

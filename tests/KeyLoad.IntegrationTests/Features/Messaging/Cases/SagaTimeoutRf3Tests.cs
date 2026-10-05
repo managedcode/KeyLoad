@@ -55,7 +55,8 @@ internal sealed class SagaTimeoutRf3Tests(ClusterFixture fixture)
             expectedRevision: 2, dueAt, deadline.Token);
         await SagaTimeoutRf3Assertions.AssertTimeoutMessageAsync(sdk, mcp, scenario, sagaId, dueAt,
             identity.Secret, deadline.Token);
-        await SagaTimeoutRf3Assertions.AcknowledgeSingleTimeoutAsync(sdk, mcp, scenario, sagaId, deadline.Token);
+        await SagaTimeoutRf3Assertions.AcknowledgeSingleTimeoutAsync(sdk, mcp, scenario, sagaId, identity.Secret,
+            deadline.Token);
         await SagaTimeoutRf3Assertions.AssertNoSecondTransitionAsync(sdk, scenario, sagaId, deadline.Token);
     }
 }

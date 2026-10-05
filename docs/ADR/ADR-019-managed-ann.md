@@ -74,3 +74,16 @@ quality, work/deadline limits and all existing tests remain mandatory. A unique
 DotProduct candidate copy may remove redundant membership work with actual
 charges and identical selection/ties. Root reviews the private Luna patch and
 retains full normal/scalar/Linux evidence before any qualification claim.
+
+The 2026-10-05 [prepared-value refinement](../Features/Search/ManagedAnn.md#accepted-prepared-value-refinement-2026-10-05)
+accepts REQ/AC-ANN-010 and TASK-ANN-R1-PREPARED-VALUE. Replace per-candidate
+prepared-object allocations only in privately owned packed neighbor work with a
+finite-checked-carrier readonly value. One shared helper retains the exact current
+metric reduction and untrusted validation remains mandatory. Implement numeric
+extraction, private value, consumed diversification/overflow joins and independent
+exact-score/allocation regressions in that order. Query worker owns its private
+Search implementation packet, cluster worker owns its independent real-store test
+packet, and root owns complete review, joins, full checks,
+Aspire native/scalar corpus gates and original exact-source evidence. No data,
+wire, capability or format migration is introduced; rollback reverts the value
+joins. This ADR remains unqualified until its original full acceptance is proven.

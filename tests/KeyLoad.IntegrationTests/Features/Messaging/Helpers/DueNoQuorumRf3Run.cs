@@ -57,7 +57,7 @@ internal static class DueNoQuorumRf3Run
         await wave.RestartAsync(plan.RecoveryNode, cancellationToken).ConfigureAwait(false);
         await DueNoQuorumRf3Topology.AssertOneRestartedAsync(wave.App, profile, plan, cancellationToken)
             .ConfigureAwait(false);
-        var minimumApplied = await VerifyAutonomousResumeAsync(wave.App, plan, seed, cancellationToken).ConfigureAwait(false);
+        var minimumApplied = await VerifyAutonomousResumeAsync(wave.App, profile, plan, seed, cancellationToken).ConfigureAwait(false);
         await wave.RestartAsync(plan.Leader, cancellationToken).ConfigureAwait(false);
         await VerifyThreeVoterCatchupAsync(wave.App, profile, plan, seed, minimumApplied, cancellationToken)
             .ConfigureAwait(false);
@@ -80,15 +80,18 @@ internal static class DueNoQuorumRf3Run
     }
 
     private static async Task<long> VerifyAutonomousResumeAsync(Aspire.Hosting.DistributedApplication app,
-        DueNoQuorumRf3FaultPlan plan, DueNoQuorumRf3Seed seed, CancellationToken cancellationToken)
+        NodeEpochRf3Profile profile, DueNoQuorumRf3FaultPlan plan, DueNoQuorumRf3Seed seed,
+        CancellationToken cancellationToken)
     {
         await using var restored = await DueNoQuorumRf3Callers.ConnectAsync(app, plan.RecoveryNode,
             seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
         await DueNoQuorumRf3Assertions.WaitForOrdinalOneAsync(restored, seed, cancellationToken).ConfigureAwait(false);
-        var status = await McpCallerAssertions.SdkSuccessAsync(await restored.Sdk.StatusAsync(cancellationToken)
+        using var recoveryHttp = McpCallerHttp.Create(app, plan.RecoveryNode);
+        var recoveryAdmin = new KeyLoad.Client.KeyLoadClient(recoveryHttp, profile.AdminKey);
+        var status = await McpCallerAssertions.SdkSuccessAsync(await recoveryAdmin.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         using var survivorHttp = McpCallerHttp.Create(app, plan.Survivor);
-        var survivorSdk = new KeyLoad.Client.KeyLoadClient(survivorHttp, seed.Creator.Secret);
+        var survivorSdk = new KeyLoad.Client.KeyLoadClient(survivorHttp, profile.AdminKey);
         var survivorStatus = await McpCallerAssertions.SdkSuccessAsync(await survivorSdk.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(status.RoutingReady).IsTrue();

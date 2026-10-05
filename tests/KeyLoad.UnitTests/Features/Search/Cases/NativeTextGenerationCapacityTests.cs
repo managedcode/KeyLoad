@@ -10,6 +10,7 @@ internal sealed class NativeTextGenerationCapacityTests
 {
     private const string Collection = "native-text-generation-capacity";
     private const string Field = "/text";
+    private static readonly byte[] ForeignBytes = [0x41, 0x62, 0x73];
 
     [Test]
     public async Task ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem()
@@ -18,13 +19,13 @@ internal sealed class NativeTextGenerationCapacityTests
         database.Configure(Collection, ResourceKind.Collection);
         var root = InitializeRoot(database);
         var scope = CaptureScope(database);
-        var leaves = CreateOwnerLeaves(root, database, scope, 3);
+        var leaves = CreateOwnerLeaves(root, database, scope, 3).Order(StringComparer.Ordinal).ToArray();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.WriteOwner(root,
             NativeTextValidation.GenerationLeaf(), database.Store.Identity.NodeId, scope, database.Database.Limits));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(GenerationPaths(root)).IsEquivalentTo(leaves, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(GenerationPaths(root).SequenceEqual(leaves)).IsTrue();
     }
 
     [Test]
@@ -34,41 +35,80 @@ internal sealed class NativeTextGenerationCapacityTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle original\"}"));
         var root = Path.Combine(database.Directory, "native-text-generation-capacity");
-        using var projection = new NativeTextProjection(root, database.Database.Limits,
-            database.Store.Identity.NodeId);
+        var cleanup = new NativeTextGenerationFixtureLifetime();
+        await cleanup.RunAsync(() => RunRestartScenarioAsync(database, cleanup, root));
+    }
+
+    private static async Task RunRestartScenarioAsync(TestDatabase database,
+        NativeTextGenerationFixtureLifetime cleanup, string root)
+    {
+        var projection = cleanup.TrackProjection(OpenForRestart(root, database));
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var request = new SearchRequest(database.Partition, Collection, Field, "needle");
         var original = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
-        var retired = Directory.EnumerateDirectories(root).Single();
+        var retired = Path.Combine(root, GenerationPaths(root).Single());
         var oldScope = CaptureScope(database);
         var oldBudget = new ReadExecutionBudget(database.Database.Limits);
-        using var oldLease = projection.Acquire(oldScope, oldBudget);
+        var oldLease = cleanup.TrackLease(projection.Acquire(oldScope, oldBudget));
         oldLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         oldLease.ObserveToken("needle");
-        database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
-        _ = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        await ReplaceDocumentAsync(database, projection, request, cancellation);
         oldLease.VerifyCandidates(["needle"], [original[0].Document.Reference], oldBudget);
-        var scope = CaptureScope(database);
-        NativeTextFiles.WriteOwner(root, NativeTextValidation.GenerationLeaf(), database.Store.Identity.NodeId,
-            scope, database.Database.Limits);
-        await Assert.That(GenerationPaths(root).Length).IsEqualTo(3);
-        var foreign = Path.Combine(retired, "foreign-entry.bin");
-        await File.WriteAllBytesAsync(foreign, [0x41, 0x62, 0x73],
-            cancellation);
-        var settlement = Assert.ThrowsExactly<KeyLoadException>(oldLease.Dispose);
-        await Assert.That(settlement.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OpenForRestart(root, database));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(Directory.Exists(retired)).IsTrue();
-        await Assert.That(GenerationPaths(root).Length).IsEqualTo(3);
-        File.Delete(foreign);
-        using var restarted = OpenForRestart(root, database);
-        await Assert.That(GenerationPaths(root)).IsEmpty();
-        projection.Dispose();
+        await AssertForeignRetirementAndShutdownAsync(cleanup, projection, oldLease, root, retired);
+        var restarted = await AssertThirdLeafRestartAsync(database, cleanup, root, retired, cancellation);
+        cleanup.ShutdownProjection(projection);
         var healthy = await new SearchEngine(database.Database, restarted).SearchAsync("root", request, cancellation);
         await Assert.That(healthy).HasSingleItem();
+        await Assert.That(healthy[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
+    }
+
+    private static async Task ReplaceDocumentAsync(TestDatabase database, NativeTextProjection projection,
+        SearchRequest request, CancellationToken cancellation)
+    {
+        database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
+        var replacement = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        await Assert.That(replacement).HasSingleItem();
+    }
+
+    private static async Task AssertForeignRetirementAndShutdownAsync(NativeTextGenerationFixtureLifetime cleanup,
+        NativeTextProjection projection, ITextProjectionLease oldLease, string root, string retired)
+    {
+        var existingLeaves = GenerationPaths(root);
+        await Assert.That(existingLeaves.Length).IsEqualTo(2);
+        var foreign = Path.Combine(retired, "foreign-entry.bin");
+        await File.WriteAllBytesAsync(foreign, ForeignBytes,
+            TestContext.Current!.Execution.CancellationToken);
+        var leaseFailure = Assert.ThrowsExactly<KeyLoadException>(() => cleanup.SettleLease(oldLease));
+        await Assert.That(leaseFailure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+        var shutdownFailure = Assert.ThrowsExactly<KeyLoadException>(() => cleanup.ShutdownProjection(projection));
+        await Assert.That(shutdownFailure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+        await Assert.That(GenerationPaths(root).SequenceEqual(existingLeaves)).IsTrue();
+        await Assert.That((await File.ReadAllBytesAsync(foreign,
+            TestContext.Current!.Execution.CancellationToken)).SequenceEqual(ForeignBytes)).IsTrue();
+    }
+
+    private static async Task<NativeTextProjection> AssertThirdLeafRestartAsync(TestDatabase database,
+        NativeTextGenerationFixtureLifetime cleanup, string root, string retired, CancellationToken cancellation)
+    {
+        var foreign = Path.Combine(retired, "foreign-entry.bin");
+        File.Delete(foreign);
+        var existingLeaves = GenerationPaths(root);
+        var thirdLeaf = NativeTextValidation.GenerationLeaf();
+        NativeTextFiles.WriteOwner(root, thirdLeaf, database.Store.Identity.NodeId, CaptureScope(database),
+            database.Database.Limits);
+        var expectedLeaves = existingLeaves.Append(thirdLeaf).Order(StringComparer.Ordinal).ToArray();
+        await Assert.That(expectedLeaves.Length).IsEqualTo(3);
+        await Assert.That(GenerationPaths(root).SequenceEqual(expectedLeaves)).IsTrue();
+        await File.WriteAllBytesAsync(foreign, ForeignBytes, cancellation);
+
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OpenForRestart(root, database));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+        await Assert.That(GenerationPaths(root).SequenceEqual(expectedLeaves)).IsTrue();
+        await Assert.That((await File.ReadAllBytesAsync(foreign, cancellation)).SequenceEqual(ForeignBytes)).IsTrue();
+        File.Delete(foreign);
+        var restarted = cleanup.TrackProjection(OpenForRestart(root, database));
+        await Assert.That(GenerationPaths(root)).IsEmpty();
+        return restarted;
     }
 
     private static string InitializeRoot(TestDatabase database)

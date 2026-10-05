@@ -64,7 +64,7 @@ internal static class DueRecurringRf3Assertions
         await Assert.That(sdkView.Definition.HeadersJson).IsEqualTo("{}");
         await Assert.That(sdkView.Redacted).IsTrue();
         await Assert.That(sdkView.RedactedFields)
-            .IsEquivalentTo(["payload:secret", "headers:secret"], CollectionOrdering.Matching);
+            .IsEquivalentTo(["payload:/secret", "headers:/secret"], CollectionOrdering.Matching);
         await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);

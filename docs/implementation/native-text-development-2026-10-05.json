@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-development-native-text-lifetime",
+  "qualified": false,
+  "acceptanceClosed": false,
+  "source": {
+    "baseHead": "d3c86d8acdec01955fc68018917ee2540d9c0f62",
+    "dirtyStage": true,
+    "sourceInventorySha256": "0bf8179dfe38abd7deb6b05e7112b90930cb91b28c364dfb963de799eac130f8",
+    "sourceFiles": 3444,
+    "runtimeInventorySha256": "265531fc4974ac854c1e8933b0bb9b3ab3f79025d915f15e84003155ee08b102",
+    "runtimeFiles": 662,
+    "preInventory": "/private/tmp/keyload-stage72f-pretest-inventory-20261005.json",
+    "preInventorySha256": "31d9b4e9e59d8294f3f4011921bfc0a77534315d9dc98bcd40a4c02b724fb142",
+    "postInventory": "/private/tmp/keyload-stage72f-posttest-inventory-20261005.json",
+    "postInventorySha256": "0fbcae3fac16c916d3b14800cebc5d0daca2f3c6b128f7584c0289a1e5d21066",
+    "unchanged": {
+      "head": true,
+      "source": true,
+      "runtime": true
+    }
+  },
+  "focused72f": {
+    "entry": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeText*/*' --KeyLoadTests:ResultsDirectory=TestResults/native-text72f-20261005 --KeyLoadTests:ReportTrx=true",
+    "exitCode": 0,
+    "originalReport": "TestResults/native-text72f-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "e897bddf630ba09c1ea94461fb6f4e5768401b109851ec7d9771682bf5b285f1",
+    "summary": {
+      "total": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "totalDurationMs": 6781.722,
+    "operatingSystem": "macOS 27.0.1",
+    "runtimeVersion": ".NET 10.0.12",
+    "scope": "Selected NativeText cases; not a complete unit suite or Linux/RF3 qualification"
+  },
+  "original72b": {
+    "exitCode": 2,
+    "originalReport": "TestResults/native-text72b-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+    "reportSha256": "8fae8c991465e098e9dd22d97356b5e41e16a400a99b82985ea29456487262fe",
+    "summary": {
+      "total": 36,
+      "passed": 35,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "failure": "Actual cancellation during verification was re-observed in final lease census. Incomplete/cancelled cleanup now retains bounded physical census without the already-cancelled caller budget."
+  },
+  "gates": {
+    "build": {
+      "entry": "dotnet build KeyLoad.slnx --no-restore --configuration Release",
+      "exitCode": 0,
+      "originalLog": "/private/tmp/keyload-build72f-20261005.log",
+      "sha256": "dc93e2e8cd22cf741e78f8f17d7b3d600731307d30222ff25de0b2032999a8e3",
+      "warnings": 0,
+      "errors": 0,
+      "elapsedSeconds": 4.64
+    },
+    "format": {
+      "entry": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+      "exitCode": 0,
+      "originalLog": "/private/tmp/keyload-format72f-20261005.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "governance": {
+      "entry": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "exitCode": 0,
+      "originalLog": "/private/tmp/keyload-governance72f-20261005.log",
+      "sha256": "9f2e6fce971c91fe39e70cbd3474beb57e8c04429f2016ec731ecc1f4592bce0"
+    }
+  },
+  "remaining": [
+    "Real Aspire RF3 diagnostics/cold migration/messaging/graph source repairs require exact-source runtime evidence",
+    "Full normal/scalar/recovery/RF3 suites and L2B replay/pin/catalog qualification remain open",
+    "No performance, power-loss durability, production readiness or full-task closure claim"
+  ]
+}

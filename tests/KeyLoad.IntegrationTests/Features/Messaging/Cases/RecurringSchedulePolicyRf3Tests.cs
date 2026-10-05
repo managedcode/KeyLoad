@@ -129,7 +129,7 @@ internal sealed class RecurringSchedulePolicyRf3Tests(ClusterFixture fixture)
         await Assert.That(sdkView.Definition.PayloadJson).IsEqualTo("{}");
         await Assert.That(sdkView.Definition.HeadersJson).IsEqualTo("{}");
         await Assert.That(sdkView.RedactedFields).IsEquivalentTo(
-            ["payload:secret", "headers:secret"], CollectionOrdering.Matching);
+            ["payload:/secret", "headers:/secret"], CollectionOrdering.Matching);
         await Assert.That(JsonDefaults.Serialize(mcpView.Value).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(sdkView))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedPayload);

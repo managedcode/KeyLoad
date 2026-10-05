@@ -803,7 +803,9 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
-      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs"
+      "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs",
+      "docs/implementation/runtime-qualification-37245840909.json",
+      "docs/implementation/native-text-development-2026-10-05.json"
     ],
     "nativeRequestCqrs": {
       "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
@@ -848,6 +850,11 @@
         "failure": "all_41_require_verified_immutable_native5_probe_missing_at_admission",
         "originalReport": "TestResults/c1-recovery25-20261004/KeyLoad.RecoveryTests-macos-net10.0.tunit-report.json",
         "sourceQualified": false
+      },
+      "mcpRejectionEvidenceStage72": {
+        "source": "bounded_actual_Aspire_resource_log_subscriptions_joined_before_disposal",
+        "runtime": "not_yet_verified_RF3_initialize400_cause_unproved",
+        "receipt": "docs/implementation/native-text-development-2026-10-05.json"
       }
     }
   },
@@ -1202,7 +1209,9 @@
       "docs/implementation/native-readcut-development-2026-10-05.json",
       "docs/implementation/runtime-qualification-37242346547.json",
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Queries/ZoneTreeReadCutLease.cs",
-      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutConsistencyTests.cs"
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutConsistencyTests.cs",
+      "docs/implementation/runtime-qualification-37245840909.json",
+      "docs/implementation/native-text-development-2026-10-05.json"
     ],
     "implementation": {
       "stage": "L1_live_owned_preflight_and_L2A_native_snapshot_capture_joined_source_development_regressions_pending",
@@ -1213,6 +1222,14 @@
         "L2B_same_cut_delta_retention_replay_catalog_switch_and_interrupted_build_recovery",
         "delivered_source_Linux_fault_resource_and_original_online_index_acceptance"
       ]
+    },
+    "localDevelopmentStage72": {
+      "receipt": "docs/implementation/native-text-development-2026-10-05.json",
+      "nativeText": "36_of36_passed_through_actual_Aspire_unit_caller",
+      "sourceAndRuntimeUnchanged": true,
+      "fullBuildFormatGovernance": "passed",
+      "rf3AndL2B": "not_qualified",
+      "allAcceptanceClosed": false
     }
   },
   "KL-040": {
@@ -1858,7 +1875,9 @@
       "docs/ADR/ADR-074-aspire-owned-test-entry.md",
       "src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs",
       "tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/Cases/AspireTestEntryModelTests.cs",
-      "docs/implementation/owner-wave-001-development-2026-10-03.json"
+      "docs/implementation/owner-wave-001-development-2026-10-03.json",
+      "docs/implementation/runtime-qualification-37245840909.json",
+      "docs/implementation/native-text-development-2026-10-05.json"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",
@@ -1866,7 +1885,18 @@
     "remaining": [
       "all_required_Aspire_owned_suites_and_original_exit_cleanup_evidence",
       "all_integrated_feature_acceptance_and_performance_fault_endurance_release_gates"
-    ]
+    ],
+    "latestOriginalLinuxRun": {
+      "sha": "d3c86d8acdec01955fc68018917ee2540d9c0f62",
+      "runId": 37245840909,
+      "conclusion": "failure",
+      "rf3": "103_of118_15_failed_no_skips",
+      "analyzers": "118_of118",
+      "unit": "cancelled_no_complete_report",
+      "unitScalar": "not_executed",
+      "recovery": "not_executed",
+      "receipt": "docs/implementation/runtime-qualification-37245840909.json"
+    }
   },
   "KL-081": {
     "title": "Eventing contracts і shared TransactionDomain",

@@ -7,7 +7,7 @@ SQL, distributed ranking, performance and RF3 qualification requirements.
 
 TASK-GSEARCH-RF3-RANK-FAILOVER preserves REQ/AC-GSEARCH-003/006 and ADR-090
 after original run37242346547. Luna cluster_wave owns only a private overlay of
-GraphSearchRf3Tests, SqlGraphSearchRf3Tests, GraphSearchRf3LeaderLossTests and
+GraphSearchRf3Tests, SqlGraphSearchRf3Assertions, GraphSearchRf3LeaderLossTests and
 a feature-local bounded survivor-status helper if needed. Preserve exact corpus,
 policy, projected results, expansion, public SDK/official MCP parity and faults.
 The independent graph branch sorts shortest hops then full EntityRef and feeds

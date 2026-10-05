@@ -92,7 +92,7 @@ internal static class DueSagaRf3Assertions
     }
 
     internal static async Task ConsumeAndAcknowledgeExactlyOneAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
+        MessagingRf3Scenario scenario, Guid sagaId, string credential, CancellationToken cancellationToken)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2);
         var receiveReply = await mcp.CallAsync(McpCallerTools.MessagesReceive, request, cancellationToken);
@@ -101,8 +101,10 @@ internal static class DueSagaRf3Assertions
         await Assert.That(received.Value.Deliveries).HasSingleItem();
         var delivery = received.Value.Deliveries[0];
         await Assert.That(delivery.Id).IsEqualTo(TimeoutId(sagaId, InitialRevision));
-        await Assert.That(delivery.PayloadJson).IsEqualTo(MessagingRf3Scenario.SagaTimeoutPayload);
-        await Assert.That(delivery.HeadersJson).IsEqualTo(MessagingRf3Scenario.ProtectedHeaders);
+        await Assert.That(delivery.PayloadJson).IsEqualTo("{}");
+        await Assert.That(delivery.HeadersJson).IsEqualTo("{}");
+        await McpCallerAssertions.DoesNotDiscloseAsync(receiveReply, credential, MessagingRf3Scenario.SagaTimeoutPayload);
+        await McpCallerAssertions.DoesNotDiscloseAsync(receiveReply, credential, MessagingRf3Scenario.ProtectedHeaders);
 
         var ack = new DeliveryCommand(Guid.NewGuid(), scenario.TimeoutQueue, delivery.Token, DeliveryAction.Ack);
         var mcpReceipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(

@@ -9,8 +9,10 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 [NotInParallel]
 internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
 {
-    private const double OneHopScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 1);
-    private const double TwoHopScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 2);
+    private const double RankOneScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 1);
+    private const double RankTwoScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 2);
+    private const double RankThreeScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 3);
+    private const double RankFourScore = 1d / (GraphSearchRf3Scenario.FusionConstant + 4);
 
     [Test]
     public async Task AcGsearch006SdkAndOfficialMcpReturnIndependentMultiseedRanksAndContext()
@@ -29,7 +31,7 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         var mcpResult = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
             GraphSearchRf3Scenario.SearchGraphTool, request, deadline.Token));
         await GraphSearchRf3Assertions.AssertHitsAsync(sdkResult,
-            (GraphSearchRf3Scenario.Alpha, OneHopScore), (GraphSearchRf3Scenario.Beta, OneHopScore));
+            (GraphSearchRf3Scenario.Alpha, RankOneScore), (GraphSearchRf3Scenario.Beta, RankTwoScore));
         await GraphSearchRf3Assertions.AssertExpansionAsync(sdkResult, GraphSearchRf3Scenario.Context);
         await GraphSearchRf3Assertions.AssertEquivalentAsync(sdkResult, mcpResult.Value);
     }
@@ -61,8 +63,8 @@ internal sealed class GraphSearchRf3Tests(ClusterFixture fixture)
         await scenario.AddReachableDocumentAsync(admin, deadline.Token);
         var updated = await McpCallerAssertions.SdkSuccessAsync(await sdk.GraphSearchAsync(labeled, deadline.Token));
         await GraphSearchRf3Assertions.AssertHitsAsync(updated,
-            (GraphSearchRf3Scenario.Alpha, OneHopScore), (GraphSearchRf3Scenario.Beta, OneHopScore),
-            ("delta", OneHopScore), (GraphSearchRf3Scenario.Gamma, TwoHopScore));
+            (GraphSearchRf3Scenario.Alpha, RankOneScore), (GraphSearchRf3Scenario.Beta, RankTwoScore),
+            ("delta", RankThreeScore), (GraphSearchRf3Scenario.Gamma, RankFourScore));
         var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
             GraphSearchRf3Scenario.SearchGraphTool, labeled, deadline.Token));
         await GraphSearchRf3Assertions.AssertEquivalentAsync(updated, official.Value);

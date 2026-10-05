@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
@@ -15,15 +14,11 @@ internal static class DueFaultRf3SeedWriter
         var recurringLane = new QueueLaneRef(partition, DueFaultRf3Protocol.RecurringQueue);
         var sagaLane = new QueueLaneRef(partition, DueFaultRf3Protocol.SagaQueue);
         var timeoutLane = new QueueLaneRef(partition, DueFaultRf3Protocol.TimeoutQueue);
+        var creator = await DueFaultRf3IdentityWriter.CreateAsync(app, partition, recurringLane, sagaLane, timeoutLane,
+            profile, cancellationToken).ConfigureAwait(false);
         await using var callers = await NodeEpochRf3Callers.ConnectAsync(app,
             RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
-            profile.AdminKey, cancellationToken).ConfigureAwait(false);
-        await ConfigureQueueAsync(callers.Sdk, partition, DueFaultRf3Protocol.RecurringQueue, cancellationToken)
-            .ConfigureAwait(false);
-        await ConfigureQueueAsync(callers.Sdk, partition, DueFaultRf3Protocol.SagaQueue, cancellationToken)
-            .ConfigureAwait(false);
-        await ConfigureQueueAsync(callers.Sdk, partition, DueFaultRf3Protocol.TimeoutQueue, cancellationToken)
-            .ConfigureAwait(false);
+            creator.Secret, cancellationToken).ConfigureAwait(false);
         return await WriteDueRecordsAsync(callers, partition, recurringLane, sagaLane, timeoutLane, cancellationToken)
             .ConfigureAwait(false);
     }
@@ -53,15 +48,6 @@ internal static class DueFaultRf3SeedWriter
         return new(partition, recurringLane, sagaLane, timeoutLane, scheduleId, sagaId,
             DueFaultRf3Identifiers.Occurrence(scheduleId), DueFaultRf3Identifiers.TimeoutMessage(sagaId), dueAt,
             schedule, scheduleCommand, sagaCommand);
-    }
-
-    private static async Task ConfigureQueueAsync(KeyLoadClient client, PartitionRef partition, string name,
-        CancellationToken cancellationToken)
-    {
-        var resource = new ResourceDefinition(name, ResourceKind.WorkQueue, partition.TransactionDomainId);
-        var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource);
-        _ = await McpCallerAssertions.SdkSuccessAsync(await client.ConfigureResourceAsync(Guid.NewGuid(), request,
-            cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     private static CommandRequest SagaCommand(PartitionRef partition, QueueLaneRef sagaLane,

@@ -20,6 +20,110 @@ flowchart LR
 
 ## Requirements and acceptance
 
+TASK-CRS-CANCEL-FAILURE-JOIN, accepted 2026-10-05, is an owning-dependency
+prerequisite of AC-CRS-004 and the explicit node producer-drain contract. Current
+Communication CreateCore awaits CancelAsync before awaiting its real producer;
+an actual registered cancellation callback can throw and skip that producer join.
+Repair ManagedCode.Communication in its owning repository, never in KeyLoad.
+Observe cancellation and then unconditionally await the original producer task,
+retaining distinct original cancellation/producer failures without flattening
+their identities and preserving the existing fatal-runtime priority. Retain an
+iteration cancellation together with a later cleanup failure when both occur;
+ordinary cancellation, capacity-one backpressure and native terminal shape stay
+unchanged. Cancellation errors cannot become a reason to abandon native work.
+
+REQ-CRS-JOIN-001 / AC-CRS-JOIN-001: a real Create producer with a throwing
+registered cancellation callback remains joined by early enumerator disposal;
+the disposal cannot complete while that original producer's controlled finally
+is still active, and the callback failure is observable afterward. Healthy
+subsequent creation, ordinary cancellation and existing fatal-aggregate cases
+remain passing. Use real native Create, tokens and controlled tasks; no fake
+enumerator or abandoned observation wait. Always release and join original work
+in fixture cleanup, preserving observation plus cleanup failures.
+
+Luna lifecycle_wave owns a private source repair to Communication/Cqrs/CqrsStream
+and one cohesive cleanup helper; Luna cluster_wave independently owns new owning
+CQRS tests. Root owns README, canonical patch10.2.11 over published10.2.10, complete
+review, owning build/full TUnit/format checks, scoped commit/push, successful
+GitHub release, actual NuGet-feed/package verification and only then KeyLoad's
+central package update and Aspire consumer regressions. Both workers read the
+owning AGENTS.md and preserve its timestamps, constants, logging and API rules.
+No public stream, binary alias/field ID, database format or dependency replacement
+is introduced. Rollback retains the previous published package and its explicit
+failed-join evidence; no local package or project reference qualifies delivery.
+
+TASK-CRS-C1-PRIOR-CHECKPOINT, accepted 2026-10-05, retains AC-CRS-002 and
+ADR-077/091's actual cold native6-to-native7 migration evidence after original
+run37242346547. One ten-document command does not produce the required native
+replica checkpoint at the default threshold1024. Luna cluster_wave owns a private
+patch for RequestCqrsRf3Epoch7Scenario, RequestCqrsRf3Epoch7WaveRunner,
+RequestCqrsRf3Wave and a new feature-local RequestCqrsRf3CheckpointSeed helper.
+Add an explicitly selected threshold16 only to that scenario's original prior
+wave through the existing AppHost KeyLoad:SnapshotThreshold configuration;
+ordinary waves and product defaults remain1024. Preserve cancellation-last
+signatures and existing native image proof, explicit RF3 membership, readiness,
+owned stop/dispose, exclusive lock joins and failure preservation.
+After the unchanged ten-document seed and exact SDK/MCP replay, issue at least20
+distinct real public SDK commits into a separately configured fixture collection,
+with independent stable command IDs and expected revision0. Validate their actual
+receipts and records and wait for all three real voters to apply the last receipt
+before capturing prior observations and stopping the original wave. Preserve
+every original seed document/revision and receipt oracle. Conversion runs only
+after owned shutdown and exclusive locks; original non-null snapshot, threshold,
+length/hash inventory, topology, byte-identical private profile, mixed-version
+rejection, restart, later-write and both-client assertions remain unchanged.
+No synthetic hard state, copied snapshot pointer, lowered oracle, shared corpus
+expansion, invented prior-image feature or new test authority is allowed. Root
+reviews the complete patch and qualifies it through the real Aspire RF3 caller.
+
+TASK-CRS-C1-MCP-REJECTION-EVIDENCE, accepted 2026-10-05, refines
+AC-CRS-002/004 after the original follower-restart initialize HTTP400. The
+original capped shared-fixture logs did not retain a transport stage for the
+separately owned C1 wave. Luna cluster_wave owns a private patch for feature-local
+RequestCqrsRf3Diagnostics helpers/pure records, RequestCqrsRf3Wave and
+RequestCqrsRf3Epoch7WaveRunner; root joins other C1 wave callers if required.
+Subscribe to the actual Aspire wave's ResourceLoggerService before starting its
+resources and join every owned subscription before deleting or disposing its
+owner. Parse only the existing fixed MCP rejection message into defined
+McpTransportStage and McpTransportMethodCategory values; retain at most32 closed
+records per actual node, a server-test-derived wave GUID and closed node identity.
+Never retain raw log lines, exception text, HTTP headers/body/target, credentials,
+private profile or user data in this artifact. Preserve ordinary public MCP
+behavior and the official SDK; no branch guess, client fallback or hidden retry.
+The diagnostics ownership correction may extract a cohesive WaveStartup helper
+inside the same ClusterRouting/Helpers scope to keep existing numeric limits.
+Luna query_wave owns that private correction after the source packet is frozen;
+root reviews it and runs the integrated warnings-as-errors build. Disposable
+ownership must transfer explicitly or settle in unconditional finally, and the
+CTS must dispose directly after its original subscriptions join. Preserve every
+original failure and stop-before-subscription-before-app-disposal ordering; no
+analyzer suppression, relaxed numeric policy or interface-removal bypass.
+
+On an actual C1 failure, retain a uniquely named bounded JSON under the existing
+qualification artifact directory, associate its path with the original test
+failure, and preserve both original and diagnostic/stop/disposal failures through
+ServerFailureObserver. Do not overwrite another wave's receipt. Source/image/run
+provenance remains the original verified image proof and TUnit artifacts.
+Captured node/wave/stage/category evidence may identify a rejecting check; if
+multiple events prevent unique correlation, report that limit rather than
+inventing a request correlation or declaring the MCP cause fixed. Verify the
+actual follower-restart case through the same Aspire RF3 caller before making a
+runtime claim. No public contract, authorization, data or topology change occurs.
+
+REQ-CRS-DIAG-001 / AC-CRS-DIAG-001: feature-local TUnit tests use the actual
+Aspire ResourceLoggerService and three ContainerResource identities to publish
+the existing fixed transport message and inspect the resulting bounded artifact.
+They verify defined stage/category values, distinct wave identity, the32-record
+limit per node, and exclusion of oversized, repeated-marker, numeric-enum,
+unknown-value and trailing-content lines. Retained JSON contains only the
+version, wave, node and closed stage/category fields. Tests join the actual
+subscription owner before reading/removing its uniquely owned artifact and
+verify repeated disposal observes the same completion. No parser copy, fake
+logger stream or weaker test-only parser entry is permitted. Luna lifecycle_wave
+owns only a private patch for new ClusterRouting/Cases diagnostics tests and a
+cohesive Helpers support file in IntegrationTests; root owns source integration,
+the warnings-as-errors build and the real Aspire test caller.
+
 | Requirement | Measurable acceptance | Automated evidence |
 |---|---|---|
 | REQ-CRS-001: one versioned native stream replaces the request Task RPC | AC-CRS-001: genuine native Orleans calls execute the signed read and command through exactly one independently keyed request grain and the existing capability grains. The new interface/method aliases and generated progress record round-trip with the native Communication converter. The retired request Task method and unused envelope-alias constant are absent; there is no runtime fallback or second dispatcher. | RequestCqrsRoutingTests; real Aspire SDK/MCP RF3 operations |

@@ -34,6 +34,17 @@ ANN algorithm work owns disjoint Search files and may proceed in parallel. Root 
 
 ## Migration, delivery and rollback
 
+The 2026-10-05 TASK-CRS-CANCEL-FAILURE-JOIN prerequisite is frozen in
+[NativeCqrsRequestV2](../Features/ClusterRouting/NativeCqrsRequestV2.md),
+REQ/AC-CRS-JOIN-001. An owning Communication cancellation-callback failure must
+not skip the original native producer join. Source repair and independently
+controlled native tests precede canonical patch release, full owning checks,
+GitHub publication and verified NuGet availability; root then updates KeyLoad
+and qualifies actual Aspire consumer behavior. Source/test workers own disjoint
+private Communication scopes; root owns package/docs/delivery/consumer joins.
+Original failure identities, fatal priority, stream backpressure and public shape
+remain unchanged. No data migration, replacement or consumer workaround is allowed.
+
 C0 changes only test infrastructure; canonical data epoch6, signed request envelope, RPCv1, discovery, HTTP/SDK/MCP responses and RF3 topology remain unchanged. No database migration is needed. The new test-only package is pinned to the current native Orleans family and adds no product dependency.
 
 C1 explicitly versions its RPC shape and homogeneous cold rollout independently of data-format upgrades in NativeCqrsRequestV2. Existing source still lacks application-RPC cohort validation until that implementation is qualified. The accepted peer-envelope/MAC upgrade prevents cross-version replica acknowledgements; separate discovery-MACv2 preserves authenticated observation of old versions. No mixed-node rolling compatibility or runtime legacy fallback is approved. Two compatible surviving RF3 voters remain the required failure topology; a reachable authenticated incompatible voter fails public admission/readiness with a bounded cache-detection delay.

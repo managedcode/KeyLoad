@@ -55,13 +55,16 @@ internal static class RequestCqrsRf3Epoch7Scenario
     {
         RequestCqrsRf3Workload? workload = null;
         NodeEpochRf3NodeObservation[]? nodes = null;
-        await RequestCqrsRf3Epoch7WaveRunner.RunAsync(dataRoot, All(rpc1Image), true, true, async wave =>
-        {
-            workload = await RequestCqrsRf3Workload.SeedAsync(wave.App, profile, cancellationToken)
-                .ConfigureAwait(false);
-            nodes = await NodeEpochRf3StatusOracle.CaptureAsync(wave.App, profile, cancellationToken)
-                .ConfigureAwait(false);
-        }, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsRf3Epoch7WaveRunner.RunPriorNative6Async(dataRoot, All(rpc1Image), true, true,
+            async wave =>
+            {
+                workload = await RequestCqrsRf3Workload.SeedAsync(wave.App, profile, cancellationToken)
+                    .ConfigureAwait(false);
+                await RequestCqrsRf3CheckpointSeed.SeedAndVerifyAsync(wave.App, workload, profile,
+                    cancellationToken).ConfigureAwait(false);
+                nodes = await NodeEpochRf3StatusOracle.CaptureAsync(wave.App, profile, cancellationToken)
+                    .ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
         return (workload ?? throw new InvalidOperationException("The original C1 workload was not seeded."),
             nodes ?? throw new InvalidOperationException("The native6 node observations were not captured."));
     }

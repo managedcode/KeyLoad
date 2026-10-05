@@ -103,9 +103,9 @@ internal static class SagaTimeoutRf3Assertions
     }
 
     internal static async Task AcknowledgeSingleTimeoutAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
+        MessagingRf3Scenario scenario, Guid sagaId, string credential, CancellationToken cancellationToken)
     {
-        var delivery = await ReceiveSingleTimeoutAsync(mcp, scenario, sagaId, cancellationToken);
+        var delivery = await ReceiveSingleTimeoutAsync(mcp, scenario, sagaId, credential, cancellationToken);
         var ack = new DeliveryCommand(Guid.NewGuid(), scenario.TimeoutQueue, delivery.Token, DeliveryAction.Ack);
         var mcpReceipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.MessagesComplete, ack, cancellationToken));
@@ -116,7 +116,7 @@ internal static class SagaTimeoutRf3Assertions
     }
 
     private static async Task<Delivery> ReceiveSingleTimeoutAsync(McpOfficialClient mcp,
-        MessagingRf3Scenario scenario, Guid sagaId, CancellationToken cancellationToken)
+        MessagingRf3Scenario scenario, Guid sagaId, string credential, CancellationToken cancellationToken)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), scenario.TimeoutQueue, MaxMessages: 2);
         var reply = await mcp.CallAsync(McpCallerTools.MessagesReceive, request, cancellationToken);
@@ -125,8 +125,10 @@ internal static class SagaTimeoutRf3Assertions
         await Assert.That(received.Value.Deliveries).HasSingleItem();
         var delivery = received.Value.Deliveries[0];
         await Assert.That(delivery.Id).IsEqualTo(TimeoutMessageId(sagaId));
-        await Assert.That(delivery.PayloadJson).IsEqualTo(MessagingRf3Scenario.SagaTimeoutPayload);
-        await Assert.That(delivery.HeadersJson).IsEqualTo(MessagingRf3Scenario.ProtectedHeaders);
+        await Assert.That(delivery.PayloadJson).IsEqualTo("{}");
+        await Assert.That(delivery.HeadersJson).IsEqualTo("{}");
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.SagaTimeoutPayload);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, MessagingRf3Scenario.ProtectedHeaders);
         return delivery;
     }
 

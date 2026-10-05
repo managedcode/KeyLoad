@@ -37,7 +37,7 @@ internal static class NativeTextLiveGenerationMetadata
         var expectedPaths = NativeTextLiveOwnedPaths.FromFiles(manifest.Files);
         RequireManifestPathsTracked(expectedPaths, owner.OwnedPaths);
         NativeTextLiveOwnedPaths.VerifyFilesystem(path, owner.OwnedPaths, expectedPaths);
-        VerifyLengths(path, manifest.Files);
+        VerifyCurrentSizes(path, manifest.Files);
     }
 
     private static void RequireManifestPathsTracked(NativeTextOwnedPath[] expectedPaths,
@@ -52,14 +52,14 @@ internal static class NativeTextLiveGenerationMetadata
         }
     }
 
-    private static void VerifyLengths(string path, NativeTextFile[] files)
+    private static void VerifyCurrentSizes(string path, NativeTextFile[] files)
     {
         foreach (var file in files)
         {
             var filePath = Path.Combine(path, file.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-            if (OfflineRegularFile.Inspect(filePath).Length != file.Length)
+            if (OfflineRegularFile.Inspect(filePath).Length > NativeTextProtocol.MaximumDiskBytes)
             {
-                throw NativeTextErrors.Corrupt();
+                throw NativeTextErrors.BoundExceeded();
             }
         }
     }

@@ -146,7 +146,8 @@ internal sealed class RemoteTransfersRf3Tests(ClusterFixture fixture)
         var mcpAck = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.MessagesComplete, ack, cancellationToken));
         var sdkAck = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, cancellationToken));
-        await Assert.That(sdkAck).IsEqualTo(mcpAck.Value);
+        await Assert.That(JsonDefaults.Serialize(sdkAck).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(mcpAck.Value))).IsTrue();
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await sdk.InspectAsync(
             new(scenario.DestinationQueue, TransferMessageId), cancellationToken));
         await Assert.That(persisted!.Metadata.State).IsEqualTo(MessageState.Acked);
