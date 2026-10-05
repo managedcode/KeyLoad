@@ -17,6 +17,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private const string InvalidWaveIdMessage = "The C1 diagnostics wave identifier must be nonempty.";
     private const string InvalidNodesMessage = "C1 diagnostics require the three actual RF3 node resources.";
     private const string OversizedArtifactMessage = "The bounded C1 MCP rejection artifact exceeded its byte limit.";
+    private const string IncompleteSubscriptionMessage = "C1 diagnostics cannot be saved before every original subscription joins.";
     private const int MaximumRecordsPerNode = 32;
     private const int MaximumLineCharacters = 4_096;
     private const int MaximumArtifactBytes = 16 * 1_024;
@@ -65,8 +66,18 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     internal void SaveFailureEvidence(Exception failure)
     {
         ArgumentNullException.ThrowIfNull(failure);
-        var path = artifactPath ??= WriteArtifact();
+        var path = SaveEvidence();
         failure.Data[ArtifactDataKey] = path;
+    }
+
+    internal string SaveEvidence()
+    {
+        lock (disposalGate)
+        {
+            if (disposalTask is not { IsCompleted: true } || subscriptions.Any(subscription => !subscription.IsCompleted))
+            { throw new InvalidOperationException(IncompleteSubscriptionMessage); }
+            return artifactPath ??= WriteArtifact();
+        }
     }
 
     public ValueTask DisposeAsync()

@@ -1001,3 +1001,28 @@ assertions before joining. Owner explicitly requests no tests or benchmarks for
 this Actions layout task: verify YAML, JavaScript syntax, matrix inventory and diff
 statically; do not dispatch workflows. Runtime/native qualification is unverified.
 Backend/API/storage/transport and database tests are outside this change.
+
+## TASK-IMAGE-LIFE-PROCESS-IDENTITY-RACE
+
+Root freezes this narrow unit-process oracle correction on2026-10-05 after the
+original full Aspire unit75g report:3247/3248 passed, with an actual Win32Exception
+while reading StartTime after HasExited in AcImageLife003CancellationKillsAndReapsRealNodeProcessTree.
+REQ-BC-PROCESS-IDENTITY-001 / AC-BC-PROCESS-IDENTITY-001 refine AC-IMAGE-LIFE-003:
+the original PID and captured UTC start identity stay mandatory. CaptureIdentity
+remains strict. A later identity observation may treat a Win32 failure as exited
+only when a subsequent HasExited on that same actual Process confirms exit.
+An unconfirmed/live observation preserves the original failure; a failed
+confirmation retains both original errors and fatal-runtime priority. No broad
+Win32-to-success handling, PID-only replacement or synthetic process is allowed.
+
+Use one cohesive new IsolatedAggregateNodeIdentityObservation helper for the
+existing support and reaper probes. Luna query_wave privately owns only those two
+probe joins and that new helper. Preserve all original cancellation, process-tree
+kill/reap, stdout/stderr joins, exact streams,5s cleanup and test deadlines.
+The cancellation aggregate from the failed original run stays evidence; do not
+remove it as presumed expected cancellation. Existing five real Node lifetime
+cases provide the runtime regression. Root reviews, integrates and runs their
+actual Aspire unit caller, then full normal/scalar gates as required. ADR-056
+records the implementation contract. No benchmark runner, native database,
+website, public contract or persisted data is changed; rollback restores the two
+original probes and removes the helper. Local tests remain development evidence.

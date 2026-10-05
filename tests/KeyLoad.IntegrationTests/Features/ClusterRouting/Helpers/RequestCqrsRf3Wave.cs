@@ -77,6 +77,8 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal void SaveFailureEvidence(Exception failure) => diagnostics.SaveFailureEvidence(failure);
 
+    internal string SaveDiagnosticsEvidence() => diagnostics.SaveEvidence();
+
     internal Task RestartAsync(string node, CancellationToken cancellationToken)
         => runtime.RestartAsync(node, cancellationToken);
 

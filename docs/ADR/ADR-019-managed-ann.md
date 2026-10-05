@@ -87,3 +87,16 @@ packet, and root owns complete review, joins, full checks,
 Aspire native/scalar corpus gates and original exact-source evidence. No data,
 wire, capability or format migration is introduced; rollback reverts the value
 joins. This ADR remains unqualified until its original full acceptance is proven.
+
+Root accepts the R2B pin prerequisite in
+[ManagedAnnSeed](../Features/Search/ManagedAnnSeed.md#accepted-r2b-outbox-pin-contract-proof-2026-10-05),
+REQ/AC-ASD-007–009 and TASK-ANN-R2-PIN-CONTRACT-PROOF. Select the existing
+persisted administrator-gated canonical consumer operations: commit an observed
+current-Tail pin before seed capture, bridge exactly through the captured Tail
+with signed empty-effect receipts, and retain later history for replay. The
+bounded single-record bridge in independent real-store tests is a correctness
+control, not a production performance choice. Cluster worker owns only new
+private Search test files; root owns review, Aspire normal/scalar/full gates,
+original evidence and all-code checkpoints. No physical generation, alias,
+format, public capability or canonical migration is accepted by this prerequisite;
+the complete native ZoneTree projection/recovery contract remains required.

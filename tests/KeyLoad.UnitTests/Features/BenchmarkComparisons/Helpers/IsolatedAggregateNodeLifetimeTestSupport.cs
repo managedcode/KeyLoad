@@ -147,11 +147,8 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         }
         using (process)
         {
-            if (process.HasExited || process.StartTime.ToUniversalTime().Ticks != identity.StartTimeUtcTicks)
-            {
-                return false;
-            }
-            return !process.HasExited;
+            return IsolatedAggregateNodeIdentityObservation.IsSameProcessRunning(process,
+                identity.StartTimeUtcTicks);
         }
     }
 }

@@ -1581,3 +1581,21 @@ Write ownership is only benchmarks/KeyLoad.Comparisons/Features/BenchmarkCompari
 Accepted ISO005/007 and AC-PQ-036-001/002: comparison-images invokes17 TUnit suites sequentially, and the default report path overwrites earlier original JSON. Root owns only their ci.yml results-directory arguments, using17 distinct named directories beneath TestResults/comparison-images. Keep every invocation/filter/order/build/timeout/action/permission/native and aggregate boundary unchanged. The existing always-upload glob retains every original report and accompanying logs; no rewritten report or log-count substitute is admitted as JSON evidence.
 
 Ordered stages are unique-directory static inspection, scoped workflow mutation, full development source/format/governance, scoped delivery and actual GitHub execution. Join all17 original JSON source/case/summary facts with exact job/upload/provider ZIP metadata and digest before claiming this evidence gate passed. Existing native1/2/3 and270 remain separate. Rollback reverts only results-directory arguments; no product data/API migration. Root is sole workflow/evidence owner; read-only audit performs provider reconciliation. This ADR remains Accepted until the required genuine gates finish.
+
+## TASK-IMAGE-LIFE-PROCESS-IDENTITY-RACE
+
+REQ/AC-BC-PROCESS-IDENTITY-001 in BenchmarkComparisons freeze the actual
+HasExited/StartTime race observed in the full unit75g original report. Only a
+follow-up HasExited on the same real Process can confirm exit after a Win32 probe
+failure; unconfirmed or failed confirmation preserves original failures and fatal
+priority. Original PID/start identity acquisition, cancellation, reader/process
+joins and every bound remain mandatory.
+
+Ordered stages: root freezes the contract; Luna query_wave privately adds one
+cohesive UnitTests BenchmarkComparisons/Helpers identity-observation helper and
+updates only the support/reaper probe calls; root reviews and integrates, runs
+the five existing real Node cases through Aspire and required full gates, retains
+original failed/passing reports and commits. Benchmark producer/site/measurement
+paths receive no writes. No data/API/topology migration occurs; rollback restores
+the two probes and removes the helper. This correction does not qualify native
+database/process fault cohorts or the full comparison matrix.

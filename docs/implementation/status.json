@@ -1824,8 +1824,18 @@
   },
   "KL-074": {
     "title": "Hybrid quality/performance benchmark",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/Search.md",
+      "docs/ADR/ADR-018-global-rank-fusion.md",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityMetricOracleTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/HybridQualityRealStoreTests.cs",
+      "docs/implementation/hybrid-quality-development-2026-10-05.json"
+    ],
+    "sourceStage": "fixed32_record6_query24_window_real_native_search_quality_oracle_local_normal3_scalar3_pass_representative_quality_performance_and_Linux_gates_pending",
+    "runtimeQualified": false,
+    "allAcceptanceClosed": false,
+    "localDevelopmentGatePassed": true
   },
   "KL-075": {
     "title": "Scaling benchmark і fair deployment arms",

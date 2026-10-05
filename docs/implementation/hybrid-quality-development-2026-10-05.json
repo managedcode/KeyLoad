@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-development-stage",
+  "stage": "TASK-SEARCH-QUALITY-CORPUS",
+  "qualified": false,
+  "acceptanceClosed": false,
+  "requirements": "docs/Features/Search.md",
+  "decision": "docs/ADR/ADR-018-global-rank-fusion.md",
+  "source": {
+    "gitHead": "cb5ce1f8fd983fc4488d908835114402d25af4c5",
+    "workingTree": "Reviewed fixed-qrel real-store corpus, literal tie correction and frozen input inventories; native reports are local development observations",
+    "githubQualified": false
+  },
+  "caller": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<unit|unit-scalar> --KeyLoadTests:Filter=/*/*/HybridQuality*/*",
+  "machine": {
+    "operatingSystem": "macOS 27.0.1",
+    "runtimeVersion": ".NET 10.0.12",
+    "tunitVersion": "1.72.10.0"
+  },
+  "cohorts": {
+    "normal": {
+      "suite": "unit",
+      "nativeExit": 0,
+      "report": "TestResults/hybrid-quality76f-normal-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "reportSha256": "4005231e15992924704ffe42097530fe44a68abb3e17122581fc67ea9b063609",
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "durationMs": 1507.447,
+      "queryObservations": 6,
+      "windowObservations": 24,
+      "inputInventory": {
+        "before": {
+          "original": "/private/tmp/keyload-hybrid-quality76f-prenormal-inventory-20261005.json",
+          "sha256": "8857125fc36aab75d956e50b0cdc12cc61edab4e51de6cef2e9c8807743e3b3c"
+        },
+        "after": {
+          "original": "/private/tmp/keyload-hybrid-quality76f-postnormal-inventory-20261005.json",
+          "sha256": "4b0152d1cace7a5ba759de3a6d6b6a4e3e2d0d05d9ab5e8acbb265a5f750c3ab"
+        },
+        "head": "cb5ce1f8fd983fc4488d908835114402d25af4c5",
+        "source": {
+          "count": 3483,
+          "sha256": "dcad2ed58d73fd2e0fa7cb3a1c8eb5e8e1411d66d43c9f236c16bd84fa483e83"
+        },
+        "runtime": {
+          "count": 544,
+          "sha256": "753fb8a77f2785c356b177f32c5e40ad1a29c3c3d73edae6703409cf1d29d8b2"
+        },
+        "unchanged": true
+      },
+      "originalFiles": [
+        {
+          "name": "KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "ec168b19866cbe938bba878e0a0468aab903c978a8d1a1fe276662494dd2ddbc"
+        },
+        {
+          "name": "KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "4005231e15992924704ffe42097530fe44a68abb3e17122581fc67ea9b063609"
+        },
+        {
+          "name": "KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "1f210adfcb3ef782607df1127bcad42909ba7a8a448bdf7705a406194f94efc5"
+        }
+      ]
+    },
+    "scalar": {
+      "suite": "unit-scalar",
+      "nativeExit": 0,
+      "report": "TestResults/hybrid-quality76f-scalar-20261005/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "reportSha256": "91e1c1ac6dc1e9c9cf495e0d26088dcc940d9fdd022a0ef5517553aa1d95fcd0",
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "durationMs": 2041.735,
+      "queryObservations": 6,
+      "windowObservations": 24,
+      "inputInventory": {
+        "before": {
+          "original": "/private/tmp/keyload-hybrid-quality76f-prescalar-inventory-20261005.json",
+          "sha256": "992e183dcd3591ee5c922e1820abcbae2e28afa5bcb2b56929418ec1964b22f3"
+        },
+        "after": {
+          "original": "/private/tmp/keyload-hybrid-quality76f-postscalar-inventory-20261005.json",
+          "sha256": "98cf501f828b2baa92e0761c651192f0a677779c212fa88774faf309479af13d"
+        },
+        "head": "cb5ce1f8fd983fc4488d908835114402d25af4c5",
+        "source": {
+          "count": 3483,
+          "sha256": "dcad2ed58d73fd2e0fa7cb3a1c8eb5e8e1411d66d43c9f236c16bd84fa483e83"
+        },
+        "runtime": {
+          "count": 544,
+          "sha256": "753fb8a77f2785c356b177f32c5e40ad1a29c3c3d73edae6703409cf1d29d8b2"
+        },
+        "unchanged": true
+      },
+      "originalFiles": [
+        {
+          "name": "KeyLoad.UnitTests-macos-net10.0-report.html",
+          "sha256": "57668f90ef83939c4ed004ab18db8149ae4f7089f7e10ee511f380e53f3e806e"
+        },
+        {
+          "name": "KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "91e1c1ac6dc1e9c9cf495e0d26088dcc940d9fdd022a0ef5517553aa1d95fcd0"
+        },
+        {
+          "name": "KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "f2487987f814da80705e8c318bdc69a72b5dc5d5aa951cbe15bdee493970ba6e"
+        }
+      ]
+    }
+  },
+  "originalFailure": {
+    "nativeExit": 2,
+    "total": 3,
+    "passed": 2,
+    "failed": 1,
+    "reportSha256": "47601c75572ad5fba372f02644b3e874e19137294a8f1ad9573e0dcbb9c9a357",
+    "cause": "Single-branch public search returns RRF rank contributions; equal canonical vectors have literal first/second rank scores1/61 and1/62. The original equal-fused-score assertion was invalid.",
+    "correction": "Read and compare both real committed vector records, their exact values and revision; separately assert literal caller-visible RRF scores and stable IDs. No production ranking or quality threshold changed."
+  },
+  "measuredLimitation": {
+    "query": "missing-text",
+    "recallAt10": 0.5,
+    "scope": "Fixed32-record corpus only; not representative scale/performance qualification"
+  },
+  "nodeIdentityRegression": {
+    "nativeExit": 2,
+    "summary": {
+      "total": 5,
+      "passed": 4,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "reportSha256": "4904d43436a920312dd37ec37df79240df87f00a0018644d3478dd7b3da027cb",
+    "cause": "The actual macOS process StartTime probe failed and the following HasExited observation did not establish exit; the original native Win32 failure and cleanup cancellation remain visible.",
+    "qualified": false
+  },
+  "build": {
+    "nativeExit": 0,
+    "warnings": 0,
+    "errors": 0,
+    "elapsedSeconds": 42.59,
+    "originalLog": "/private/tmp/keyload-hybrid-quality-build76f-20261005.log"
+  },
+  "retainedOriginals": "artifacts/qualification/hybrid-quality76f-20261005",
+  "remaining": [
+    "Exact delivered-source Linux corpus proof",
+    "Representative multilingual judged datasets, memory/latency and candidate-recall quality targets",
+    "Real distributed-query/ranking and RF3 failure contracts",
+    "Original required full scalar/recovery/RF3/endurance/performance gates"
+  ],
+  "formatter": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "nativeExit": 0,
+    "originalLog": "/private/tmp/keyload-hybrid-quality-format76f-20261005.log"
+  },
+  "governance": {
+    "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+    "nativeExit": 0,
+    "originalLog": "/private/tmp/keyload-hybrid-quality-governance76f-20261005.log",
+    "scope": "Static policy inventory, not runtime qualification"
+  }
+}

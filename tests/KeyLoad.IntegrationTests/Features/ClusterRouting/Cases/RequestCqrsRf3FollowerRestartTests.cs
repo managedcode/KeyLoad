@@ -1,7 +1,6 @@
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -41,21 +40,9 @@ internal sealed class RequestCqrsRf3FollowerRestartTests
 internal sealed class RequestCqrsRf3FollowerRun(string dataRoot, NodeEpochRf3Profile profile,
     CancellationToken cancellationToken)
 {
-    internal async Task ExecuteAsync(IReadOnlyDictionary<string, string> images)
-    {
-        var failures = new List<Exception>();
-        try
-        {
-            await using var wave = await RequestCqrsRf3Wave.StartAsync(dataRoot, images, false, true, cancellationToken)
-                .ConfigureAwait(false);
-            await ServerFailureObserver.ObserveAsync(() => RunInWaveAsync(wave), failures).ConfigureAwait(false);
-        }
-        catch (Exception error) when (KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!KeyLoad.Orleans.NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+    internal Task ExecuteAsync(IReadOnlyDictionary<string, string> images)
+        => RequestCqrsRf3Epoch7WaveRunner.RunAsync(dataRoot, images, false, true,
+            RunInWaveAsync, cancellationToken);
 
     private async Task RunInWaveAsync(RequestCqrsRf3Wave wave)
     {

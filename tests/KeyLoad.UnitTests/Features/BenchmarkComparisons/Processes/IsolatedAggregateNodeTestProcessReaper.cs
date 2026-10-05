@@ -74,7 +74,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
         try
         {
             return IsolatedAggregateNodeGuardedInvocation.Invoke(() =>
-                !process.HasExited && process.StartTime.ToUniversalTime().Ticks == identity.StartTimeUtcTicks);
+                IsolatedAggregateNodeIdentityObservation.IsSameProcessRunning(process, identity.StartTimeUtcTicks));
         }
         catch (AggregateException envelope)
         {

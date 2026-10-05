@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "kind": "original-linux-github-qualification",
+  "sourceSha": "cb5ce1f8fd983fc4488d908835114402d25af4c5",
+  "runId": 37254939723,
+  "attempt": 1,
+  "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37254939723",
+  "conclusion": "in_progress_at_retrieval",
+  "observedUtc": "2026-10-05T03:02:03Z",
+  "qualified": false,
+  "acceptanceClosed": false,
+  "artifactRetrieval": "Authenticated gh run download; original native report bytes independently hashed by root",
+  "artifactIds": {
+    "analyzer-rule-evidence": 11321589203,
+    "test-results-ubuntu-latest": 11322594301,
+    "docker-rf3-qualification": 11322947528
+  },
+  "reports": {
+    "analyzer-rule-evidence/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/analyzer-rule-evidence/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "reportSha256": "bb3e1ea71d738d1f48c06417edda559396638ad7339229db15e47c0e3aa0c215",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 98444.9207,
+      "failedMethods": []
+    },
+    "docker-rf3-qualification/TestResults/rf3/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/docker-rf3-qualification/TestResults/rf3/KeyLoad.IntegrationTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "86449e6533376109297e33efbc393324ddf9eeb044b645af502ce749d01cd36c",
+      "summary": {
+        "total": 118,
+        "passed": 115,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 972174.6968,
+      "failedMethods": [
+        {
+          "className": "DueFaultRf3LeaderAndColdRestartTests",
+          "methodName": "AcDue003AutonomousOutcomesSurviveLeaderRejoinAndCurrentColdRestart",
+          "status": "error"
+        },
+        {
+          "className": "RequestCqrsRf3ColdMigrationTests",
+          "methodName": "Native6Rpc1WorkloadUpgradesBeforeCurrentMixedImageRejectionAndRestart",
+          "status": "error"
+        },
+        {
+          "className": "RecurringDueRf3Tests(ClusterFixture)",
+          "methodName": "AcDue002And004AutonomouslyEmitsOnlyAuthorizedUncancelledOccurrences",
+          "status": "error"
+        }
+      ]
+    },
+    "test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+      "reportSha256": "051858d41ff6c953661192a982072e2e25ff8a2bf944e6cafeb0b359d6be6264",
+      "summary": {
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 97655.5305,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/aspire-failure/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/aspire-failure/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "c733ea75b8665e15db5833627840fa12ed253e74a721998c07b0e807a56225df",
+      "summary": {
+        "total": 36,
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 1578.4369,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/live-benchmark-counters/KeyLoad.UnitTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/live-benchmark-counters/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "e15bd48000cbf366846a6ec4da00ff97e665c5b9ca31c8747f6d10210208d7a2",
+      "summary": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 30268.9385,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/live-benchmark-entry/KeyLoad.UnitTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/live-benchmark-entry/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "4f97cbcead4ea541258742d9085f55b4e15f8eba54a4b00db7524dcf3a52a0d3",
+      "summary": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 521.6191,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/live-benchmark-progress/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/live-benchmark-progress/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "6dbaff62c1fbbc1ff5fc86cf85f7536626b66f37278b1cd6f1d7800e9439e025",
+      "summary": {
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 400.2721,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/live-benchmark-workflow/KeyLoad.UnitTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/live-benchmark-workflow/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "ca9cbd38403bf3c73cbe4005f9e64912a8dc827cdfaaa29959abcce4ee40566c",
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 171.1428,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/recovery-prerequisites/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/recovery-prerequisites/KeyLoad.ComparisonTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "c2e06fbe214e03f7bf310536b08d063b8eda27cedbae9119185b766ce0f18c37",
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 287.2106,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/unit/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "90ac82b8df2f0eabaf387dbbbe5d56ddb779c5f2398b36dfdcad380f115342f8",
+      "summary": {
+        "total": 3248,
+        "passed": 3248,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 524769.523,
+      "failedMethods": []
+    },
+    "test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json": {
+      "originalReport": "/private/tmp/keyload-ci-cb5-original-20261005/test-results-ubuntu-latest/TestResults/unit-scalar/KeyLoad.UnitTests-linux-net10.0.tunit-report.json",
+      "reportSha256": "a8c1fc4be554567e089d6b46b7a513337509379101d5d16a65d60de4b5ae8596",
+      "summary": {
+        "total": 3248,
+        "passed": 3245,
+        "failed": 3,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "totalDurationMs": 530616.8498,
+      "failedMethods": [
+        {
+          "className": "AdaptiveFilteredPlannerTests",
+          "methodName": "AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch",
+          "status": "error"
+        },
+        {
+          "className": "AdaptiveFilteredPlannerTests",
+          "methodName": "AcFilter004SelectivityPlanAndPackedSearchMatchIndependentScalarCohortOracles",
+          "status": "error"
+        },
+        {
+          "className": "AnnSeedCancellationTests",
+          "methodName": "InProgressChargedCaptureCancelsAndFollowingCaptureRemainsHealthy",
+          "status": "error"
+        }
+      ]
+    }
+  },
+  "notExecuted": [
+    "Full recovery suite; no native recovery report exists in the downloaded original artifacts"
+  ],
+  "jobStateAtRetrieval": {
+    "Check repository rules": "success",
+    "Test code analyzers": "success",
+    "Test three-node database": "failure",
+    "Build and test KeyLoad (ubuntu-latest)": "cancelled",
+    "Check website": "in_progress"
+  },
+  "scope": "Unit3248/3248 native completion is real. Scalar3245/3248 and RF3115/118 are failures; cancelled whole job and absent recovery cannot qualify the required complete gate. These reports do not cover subsequent working-tree search-quality, identity, diagnostic or recovery changes."
+}

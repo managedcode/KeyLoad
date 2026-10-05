@@ -81,6 +81,23 @@ feature's original development and delivery receipts. RF3, migration and complet
 scalar/Linux/resource/endurance qualification remain open; this ADR is not marked
 Implemented by a source checkpoint or an owning package release.
 
+TASK-CRS-C1-MCP-GUARD-EVIDENCE implements REQ/AC-CRS-DIAG-002 in the linked
+feature. Root freezes the follower join to the existing Epoch7WaveRunner, actual
+primary-failure artifact persistence after stop/subscription join, and a separate
+valid-credential malformed-transport RF3 warning oracle before delegated writes.
+Luna lifecycle_wave owns only the private follower join and new prefixed
+integration tests; root owns review, image/build/Aspire gates and checkpoint.
+Existing deadlines, public guard/errors, authorization and V1 closed-artifact
+schema stay unchanged. There is no data/wire migration; rollback removes the new
+fixture and restores the previous runner join. An empty observed inventory stays
+empty, and no original initialize fault is declared fixed without its own actual
+passing caller-visible evidence.
+
+Its success artifact uses a memoized Diagnostics.SaveEvidence and thin Wave
+forwarder only after original disposal/subscriptions complete. Existing failure
+association reuses that writer. The private implementation scope includes those
+two helpers; no synthetic failure is introduced to obtain healthy-wave evidence.
+
 Rollback of C0 removes unused test infrastructure; it cannot establish product stream readiness. Later product rollout, rollback, long-work checkpoint authority, terminal cancellation and fault qualification require their concrete accepted contracts. Frontend N/A: no UI. Required real SDK/MCP Docker/Aspire RF3, recovery, resource and exact-source Linux gates remain mandatory.
 
 TASK-CRS-C1-IMAGE/RF3 follow the accepted same-epoch image/AppHost contract in NativeCqrsRequestV2. The immutable prior executable is377886f35928866f083806062b446056d64539e3, data epoch6/RPC1/peer2, independently inventoried against all native Git blobs. A distinct ClusterRouting producer/proof binds that source separately from the actual current Linux docker-rf3 job. Root adds only an explicitly enabled ephemeral fixed-three-voter test image seam and preserves homogeneous current and native5 proofs. Genuine cold seed, mixed rejection, homogeneous current rollout/receipt preservation, homogeneous rollback, and two-survivor/rejoin waves use SDK/official MCP through owned Aspire resources; live HTTP/cache/shutdown controls remain separate. Per-voter admission, exact image/reference metadata, typed public rejection, finite bounds, cleanup/join ownership, files, worker roles and evidence are frozen in that feature contract before writes.

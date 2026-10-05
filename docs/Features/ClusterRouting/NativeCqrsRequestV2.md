@@ -221,6 +221,73 @@ owns only a private patch for new ClusterRouting/Cases diagnostics tests and a
 cohesive Helpers support file in IntegrationTests; root owns source integration,
 the warnings-as-errors build and the real Aspire test caller.
 
+TASK-CRS-C1-MCP-GUARD-EVIDENCE, frozen2026-10-05, adds
+REQ-CRS-DIAG-002 / AC-CRS-DIAG-002. The actual follower runner must use the existing
+Epoch7WaveRunner ownership/failure path so an original action failure receives its
+own bounded diagnostics artifact only after original wave stop and subscription
+join. Preserve primary, stop, disposal and artifact failures through the existing
+ServerFailureObserver; retain every follower loss/rejoin, signed-generation,
+receipt, topology and both-client assertion. An empty rejection inventory is a
+truthful observation and must not become an invented authentication/transport stage.
+
+A separate real healthy current-image Aspire RF3 case connects the original .NET
+and official MCP clients, then sends one fixed malformed MCP transport request
+using a genuine persisted fixture credential and discovered endpoint. The server's
+actual guard must return its existing typed Validation result and publish one
+closed warning; after actual wave stop/subscription join the artifact must contain
+the exact expected closed node/stage/method category. A following healthy SDK and
+official MCP operation must succeed before stopping the wave. No synthetic log
+publication qualifies this end-to-end case; the independent ResourceLoggerService
+mechanism tests above remain separate. Credentials, headers, targets, body and
+exception text must not enter the retained artifact or diagnostics.
+
+Luna lifecycle_wave privately edits only the existing follower ExecuteAsync join
+and NEW RequestCqrsRf3McpGuard-prefixed Cases/Helpers/Assertions as required. Root
+reviews/integrates and owns image preparation, full build and actual Aspire RF3
+execution. Preserve image proof, RF3 membership and all existing time/resource
+bounds; no broad retry, new accepted errors, auth logging guess, production guard
+change or secondary parser is authorized. This fixture-only stage uses ADR-082's
+existing contracts, with no data/wire migration; rollback restores the prior runner
+join and removes the new test. It cannot claim that either original MCP initialize
+failure has been fixed before the original public fault cases pass.
+
+Success-path evidence refinement, frozen before its writes: Diagnostics gains one
+memoized SaveEvidence method and Wave one thin SaveDiagnosticsEvidence forwarder.
+Both require the original disposal task and every subscription to have completed
+before writing the unchanged uniquely named V1 artifact. SaveFailureEvidence uses
+that same writer and preserves its existing Exception.Data association. The healthy
+guard case retains its wave only to call this method after the original runner
+returns; no manufactured failure sentinel is used. Luna lifecycle_wave's private
+scope includes only these two additional existing Helpers joins. An unjoined
+snapshot fails closed and cannot become evidence; normal SDK/MCP behavior is
+unchanged.
+
+The successful real-guard case retains its closed diagnostics artifact under the
+qualification output directory after all owned resources join; cleanup removes
+only the private database root. CI must collect that original artifact alongside
+the native test report.
+
+TASK-CRS-C1-APPHOST-ADMISSION-TESTS freezes REQ/AC-CRS-PROBE-APP-001 before
+private writes. Exercise the accepted AppHost probe helpers with real native
+configuration/builders and actual owned regular files: disabled/absent settings
+admit no profile; the exact enabled ephemeral three-equal-current-image mode with
+0700 session/node directories and0600 closed owner records is admitted. Unknown,
+nested, missing, malformed or inconsistent settings, suite/benchmark/cohort
+selection, a non-ephemeral host, unequal/missing image members, roots overlapping
+DataRoot, links/nonregular files, incorrect permission or owner identity, and
+owner bytes over8192 fail closed with the existing safe configuration boundary.
+This is genuine configuration/filesystem proof; no Docker start, fake transport,
+synthetic served database or mutable-image bypass is allowed.
+
+Luna lifecycle_wave owns only NEW UnitTests ClusterRouting RequestCqrsProbeAppHost
+Cases/Helpers/Assertions as required, in a private patch against the reviewed
+AppHost R3 packet. Root owns its shared references/friend/composition joins,
+strict build, actual Aspire unit/scalar execution and all-code commit. Reuse
+production validation instead of a parser copy; preserve typed primary/cleanup
+errors, owned cleanup and400/200/50 limits. Existing ADR-082 controls suffice:
+no new public/data/wire contract or deployment mode is added. This stage cannot
+qualify actual armed RF3 phases or replace their mandatory both-client cases.
+
 | Requirement | Measurable acceptance | Automated evidence |
 |---|---|---|
 | REQ-CRS-001: one versioned native stream replaces the request Task RPC | AC-CRS-001: genuine native Orleans calls execute the signed read and command through exactly one independently keyed request grain and the existing capability grains. The new interface/method aliases and generated progress record round-trip with the native Communication converter. The retired request Task method and unused envelope-alias constant are absent; there is no runtime fallback or second dispatcher. | RequestCqrsRoutingTests; real Aspire SDK/MCP RF3 operations |

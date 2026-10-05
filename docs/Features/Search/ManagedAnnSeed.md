@@ -95,3 +95,49 @@ The implemented seam has nine Core files and twelve independent TUnit files with
 Original native JSON/TRX/HTML, AppHost execution/shutdown logs and before/after inventories are sealed in `artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json` and `scalar03-originals/manifest.json`. The earlier 31/33 failed run remains in `focused01-originals`; its fixes report the maximum admitted owned reservation through reference-array trim and inject genuine malformed native bytes before capture. A separate structurally valid partition-mismatch corruption case keeps semantic validation covered. Compiler failures18–21, prior static22 and passing static23 originals are retained in `static23-originals/manifest.json`.
 
 These are local development regressions for historical seed capture. Complete unit/scalar/recovery suites, delivered-source Linux CI, persisted projection/replay/current authorization and RF3 SDK/MCP acceptance remain required. KL-031 and ADR-019 remain in progress; this receipt closes no complete product acceptance gate.
+
+## Accepted R2B outbox pin contract proof, 2026-10-05
+
+TASK-ANN-R2-PIN-CONTRACT-PROOF freezes REQ/AC-ASD-007 through009 before
+private implementation. This stage qualifies the existing canonical consumer
+primitive as a prerequisite of AC-ANN-007; it does not implement or publish a
+physical ANN generation. Only an actually persisted current cluster administrator
+may configure/read/advance/release a pin or purge history. A supplied role or the
+seed's saved authority is never accepted. Use the existing authorized canonical
+operations and actual TestDatabase/ZoneTree; do not add an unreplicated metadata
+write, wrapper consumer, production dispatcher or public contract.
+
+The selected pin checkpoint is an observed current outbox Tail, committed BEFORE
+AnnSeedCollector captures any snapshot. If concurrent purge makes that requested
+checkpoint unavailable before configuration, preserve HistoryUnavailable and
+create no seed/pin; later production retry/admission remains separately bounded.
+Concurrent commits between successful pin and seed capture are included in the
+seed at Tail T. After capture, bridge only through T with actual signed batches
+and empty effects, then keep entries after T for replay. The proof uses bounded
+one-raw-entry batches to prevent a later concurrent write from advancing the
+checkpoint beyond T; this is a correctness control, not the selected production
+batching/performance strategy. No pin may be created after capture or advanced
+past source records not yet represented by the snapshot/replay state.
+
+| Requirement | Measurable acceptance | Automated mapping |
+|---|---|---|
+| REQ-ASD-007: pin-before-capture with an exact snapshot/replay boundary | AC-ASD-007: actual writes after pin and before capture appear exactly once in the seed; a later PutVector at the same DocumentRevision changes exact float bits and outbox position. Bounded original signed empty-effect commits advance exactly to T, append no source entry/effect and replay idempotently. The next batch retains the later update; checkpoint metadata may change local Position without being confused with the source Tail or document revision. | AnnProjectionPinCutTests |
+| REQ-ASD-008: retained history and current persisted administrator authority | AC-ASD-008: purge past an active checkpoint is Conflict and leaves canonical state unchanged; advancing through T permits purge only through that checkpoint while later entries remain. Releasing the original generation permits subsequent reclamation, invalidates its batch token and prevents reusing its consumer identity for a new generation. Real non-administrator and revoked-administrator configure/read/commit/release/purge calls fail with the existing typed error; a separate persisted current administrator owns cleanup. | AnnProjectionPinRetentionTests, AnnProjectionPinAuthorityTests |
+| REQ-ASD-009: finite inclusive native budgets and fail-closed gaps | AC-ASD-009: real consumer-count and batch count/byte bounds pass at the allowed boundary and reject excess. Measure first-entry bytes from its actual canonical stored native value; one byte under fails with BudgetExceeded and leaves the pin unchanged. Purged/unavailable requested start and malformed/gapped canonical history return the existing HistoryUnavailable/Corruption errors without advancing, publishing a seed or changing other canonical values. | AnnProjectionPinBudgetTests |
+
+Luna cluster_wave owns only NEW UnitTests/Search AnnProjectionPin-prefixed Cases,
+Helpers, Assertions and pure Models as needed in an immutable private packet.
+Root reviews every diff, joins source, executes the actual Aspire normal/scalar
+caller with frozen pre/post inventories, retains originals, then commits all
+visible work. No test hooks, fake stores/principals/clocks, source changes to
+consumer/seed implementations, shared fixtures, packages, CI, other model slices
+or Git writes are delegated. Keep400/200/50 numeric limits and preserve exact
+primary/cleanup/fatal failures in all genuine concurrent work and cleanup.
+
+ADR-019 accepts this ordered prerequisite without a new wire/storage migration.
+Rollout adds only regression sources for existing canonical APIs; rollback removes
+those unused test helpers after retaining evidence. Backend production, frontend,
+SQL/SDK/MCP contracts and new native aliases/formats are N/A for this proof.
+Root must still freeze native ZoneTree generation records/publication, owner locks,
+replay, combined reservations and real process recovery before R2 production
+implementation. Existing R2A and AC-ANN-007/008 qualification remain open.

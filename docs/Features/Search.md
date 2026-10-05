@@ -223,6 +223,15 @@ GitHub performance cohorts and gain/no-gain publication. Frontend and public SDK
 changes are N/A for this controlled unit oracle because request contracts are
 unchanged; their existing Search RF3 acceptance remains mandatory.
 
+The initial actual Aspire cohort passed the two independent metric-golden cases
+and exposed an invalid equality assertion on the single-vector caller's RRF
+scores. The tie oracle must read the two actual authorized canonical vector
+records, verify their literal four0.5 components/full space/revision, then assert
+the observed d20/d21 first-two ID order and the distinct literal RRF contributions
+1/61 and1/62. Equal source similarity does not make rank-based fusion scores equal.
+Preserve that failed original report and repeat the unchanged quality/eligibility
+requirements; no production scoring change or assertion relaxation is authorized.
+
 Rollback removes only the new test harness and restores this stage's prior status;
 there is no data or wire migration. Root review verifies qrels are independent,
 tests use actual providers and observations are labeled. Required evidence is the
