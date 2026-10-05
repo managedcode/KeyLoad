@@ -29,7 +29,7 @@ internal static class PackedAnnNeighborSelection
             budget.Check();
             var candidate = nodes[index];
             budget.Charge(dimension);
-            var similarity = PreparedSimilarity.CreatePacked(vectors, candidate, metric);
+            var similarity = PreparedPackedSimilarity.Create(vectors, candidate, metric);
             if (IsDiverse(sourceScores[index], similarity, scratch.SelectedNeighbors, selected,
                 vectors, dimension, budget))
             {
@@ -39,7 +39,7 @@ internal static class PackedAnnNeighborSelection
         return FillPruned(source, nodes, candidateCount, maximum, selected, scratch, budget);
     }
 
-    private static bool IsDiverse(double sourceScore, PreparedSimilarity similarity,
+    private static bool IsDiverse(double sourceScore, PreparedPackedSimilarity similarity,
         int[] selectedNodes, int selectedCount, PackedAnnVectors vectors, int dimension, AnnWorkBudget budget)
     {
         for (var index = 0; index < selectedCount; index++)
@@ -142,7 +142,7 @@ internal static class PackedAnnNeighborSelection
         PackedAnnBuildScratch scratch, AnnWorkBudget budget)
     {
         budget.Charge(dimension);
-        var similarity = PreparedSimilarity.CreatePacked(vectors, node, metric);
+        var similarity = PreparedPackedSimilarity.Create(vectors, node, metric);
         for (var index = 0; index < existing; index++)
         {
             budget.Charge(1);

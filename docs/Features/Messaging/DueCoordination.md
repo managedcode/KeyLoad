@@ -6,6 +6,17 @@ UTC due arithmetic, caller/creator checks, occurrence identities, queue limits
 and atomic transitions remain the authority. No separate durable due index or
 storage-format transition is introduced.
 
+TASK-DUE-NATIVE-BUDGET-ORACLE preserves REQ/AC-DUE-001 after the original
+Linux run37249197752 exact-byte test failure. Expected native bytes must use
+the actual fixture's lane and canonical persisted record, and account for
+both the fixed-tail capture and forward scan including native lookahead.
+Retain inclusive exact-cap success, one-byte-less BudgetExceeded and distinct
+admitted-value bytes. Luna query_wave owns only a private correction to
+DueWorkNativeReadBudgetTests and a cohesive test helper if necessary. It must
+not change storage charging, limits, canonical data or the criterion; a source
+charging defect requires root review before expanding scope. Root integrates,
+runs the actual Aspire normal/scalar caller and retains original failures.
+
 TASK-DUE-RF3-AUTH-ORACLES preserves REQ/AC-DUE-002/003/004 and
 REQ/AC-JOBS-004/005 after original run37242346547 at5fa61f2. Luna lifecycle_wave
 owns a private overlay of DueFaultRf3SeedWriter, DueNoQuorumRf3Run,

@@ -216,7 +216,11 @@ untrusted nonfinite input still fail through the original typed validation.
 Mutating input buffers after Copy cannot affect the value. A warmed synchronous
 loop of actual packed-value construction and scoring must allocate zero bytes
 as measured on that same thread; setup, persisted corpus and assertions remain
-outside that interval. This is an allocation oracle, not a latency claim.
+outside that interval. Run this exact-zero measurement independently of other
+TUnit cases, preserving its warmup, corpus, all metrics and zero-byte threshold;
+the existing concurrent ANN correctness cases remain concurrent. The original
+concurrent scalar failure and isolated diagnostic result are retained before
+this scheduling correction. This is an allocation oracle, not a latency claim.
 
 Keep one canonical implementation of the existing ordered metric reductions in
 a feature-local execution helper consumed by both PreparedSimilarity and the

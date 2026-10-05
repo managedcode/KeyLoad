@@ -45,6 +45,17 @@ private Communication scopes; root owns package/docs/delivery/consumer joins.
 Original failure identities, fatal priority, stream backpressure and public shape
 remain unchanged. No data migration, replacement or consumer workaround is allowed.
 
+TASK-CRS-NODE-WORK-JOIN implements REQ/AC-CRS-WORK-001 in the linked feature
+spec: finite silo-local producer/capability ownership, original cancellation and
+frame joins before native transport/store shutdown, exact failure retention and
+no timeout-as-settlement shortcut. Source and independent test workers own
+disjoint private files under the linked ordered roles: query owns owner/kernel,
+cluster owns independent tests and lifecycle owns verified capability joins.
+Root owns review/integration, Server shutdown/DI, native fixture joins, published
+Communication repair and actual Aspire/Linux/RF3 evidence. Original storage,
+RPC and authority contracts remain unchanged. Private metadata tests alone
+cannot mark this decision Implemented or establish shutdown safety.
+
 C0 changes only test infrastructure; canonical data epoch6, signed request envelope, RPCv1, discovery, HTTP/SDK/MCP responses and RF3 topology remain unchanged. No database migration is needed. The new test-only package is pinned to the current native Orleans family and adds no product dependency.
 
 C1 explicitly versions its RPC shape and homogeneous cold rollout independently of data-format upgrades in NativeCqrsRequestV2. Existing source still lacks application-RPC cohort validation until that implementation is qualified. The accepted peer-envelope/MAC upgrade prevents cross-version replica acknowledgements; separate discovery-MACv2 preserves authenticated observation of old versions. No mixed-node rolling compatibility or runtime legacy fallback is approved. Two compatible surviving RF3 voters remain the required failure topology; a reachable authenticated incompatible voter fails public admission/readiness with a bounded cache-detection delay.

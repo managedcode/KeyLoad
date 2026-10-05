@@ -805,7 +805,8 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs",
       "docs/implementation/runtime-qualification-37245840909.json",
-      "docs/implementation/native-text-development-2026-10-05.json"
+      "docs/implementation/native-text-development-2026-10-05.json",
+      "docs/implementation/runtime-qualification-37249197752.json"
     ],
     "nativeRequestCqrs": {
       "status": "implementation_checkpoint_with_local_unit_pass_RF3_and_exact_source_qualification_pending",
@@ -823,20 +824,14 @@
       ],
       "acceptanceClosed": false,
       "latestLinuxCI": {
-        "runId": 37220907026,
-        "sourceSha": "2801b03091efc5cf45b1268c6570457539f12f27",
-        "status": "failed",
-        "unit": {
-          "total": 3060,
-          "passed": 3055,
-          "failed": 5,
-          "skipped": 0,
-          "artifactId": 11310553232,
-          "originalZipSha256": "aa420cea0c8237a61545228b98f917b2f5b0f0428084beaa2c50ef6fa2ebdc2f"
-        },
-        "unitFailures": "native_C1_cohort_cancellation_shutdown_transition_unavailable_cases",
-        "scalarAndRecovery": "not_run_after_unit_failure",
-        "rf3": "image_native_command_journal_cap_failed_before_RF3_tests",
+        "runId": 37249197752,
+        "sourceSha": "f8b3ba68da2f28660da1a36db396882ba2f72b7d",
+        "status": "failure",
+        "unit": "3232_of3237",
+        "scalar": "not_executed",
+        "recovery": "296_of296",
+        "rf3": "113_of118",
+        "receipt": "docs/implementation/runtime-qualification-37249197752.json",
         "qualificationClosed": false
       },
       "latestRecoveryDevelopment": {
@@ -1110,13 +1105,24 @@
       "docs/ADR/ADR-019-managed-ann.md",
       "src/KeyLoad.Core/Features/Search/Execution/AnnSeedCollector.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReadBudgetTests.cs",
-      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs"
+      "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs",
+      "docs/implementation/runtime-qualification-37249197752.json",
+      "docs/implementation/ann-prepared-value-development-2026-10-05.json"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
     "runtimeQualified": false,
     "allAcceptanceClosed": false,
     "localDevelopmentGatePassed": true,
-    "localDevelopmentEvidence": "artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json"
+    "localDevelopmentEvidence": "artifacts/qualification/managed-ann-r2a-development-20261004/focused02-originals/manifest.json",
+    "preparedValueDevelopment": {
+      "stage": "TASK-ANN-R1-PREPARED-VALUE",
+      "normal": "26_of26",
+      "scalar": "26_of26",
+      "fullSolutionBuild": "passed_zero_warnings_zero_errors",
+      "receipt": "docs/implementation/ann-prepared-value-development-2026-10-05.json",
+      "qualified": false,
+      "acceptanceClosed": false
+    }
   },
   "KL-032": {
     "title": "Filtered vector planner",
@@ -1877,7 +1883,9 @@
       "tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/Cases/AspireTestEntryModelTests.cs",
       "docs/implementation/owner-wave-001-development-2026-10-03.json",
       "docs/implementation/runtime-qualification-37245840909.json",
-      "docs/implementation/native-text-development-2026-10-05.json"
+      "docs/implementation/native-text-development-2026-10-05.json",
+      "docs/implementation/runtime-qualification-37249197752.json",
+      "docs/implementation/ann-prepared-value-development-2026-10-05.json"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",
@@ -1887,15 +1895,15 @@
       "all_integrated_feature_acceptance_and_performance_fault_endurance_release_gates"
     ],
     "latestOriginalLinuxRun": {
-      "sha": "d3c86d8acdec01955fc68018917ee2540d9c0f62",
-      "runId": 37245840909,
+      "sha": "f8b3ba68da2f28660da1a36db396882ba2f72b7d",
+      "runId": 37249197752,
       "conclusion": "failure",
-      "rf3": "103_of118_15_failed_no_skips",
+      "rf3": "113_of118_5_failed_no_skips",
       "analyzers": "118_of118",
-      "unit": "cancelled_no_complete_report",
-      "unitScalar": "not_executed",
-      "recovery": "not_executed",
-      "receipt": "docs/implementation/runtime-qualification-37245840909.json"
+      "unit": "3232_of3237_5_failed_no_skips",
+      "unitScalar": "not_executed_after_unit_failure",
+      "recovery": "296_of296_no_skips",
+      "receipt": "docs/implementation/runtime-qualification-37249197752.json"
     }
   },
   "KL-081": {

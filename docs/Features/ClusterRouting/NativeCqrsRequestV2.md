@@ -32,6 +32,85 @@ iteration cancellation together with a later cleanup failure when both occur;
 ordinary cancellation, capacity-one backpressure and native terminal shape stay
 unchanged. Cancellation errors cannot become a reason to abandon native work.
 
+TASK-CRS-NODE-WORK-JOIN, accepted before implementation on2026-10-05,
+defines REQ-CRS-WORK-001 / AC-CRS-WORK-001. A silo-local
+NativeRequestWorkOwner tracks at most64 request-producer frames and128 total
+producer, verified-read and verified-command frames. An entry retains only a
+request GUID, a closed work-kind value and its actual lease identity; it never
+retains activation context, request content, principal, credentials or open
+storage. Duplicate live GUID/kind admission and capacity exhaustion fail with
+the existing typed ResourceExhausted error. Admission after shutdown fails with
+OwnershipLost. Limits apply to internal due dispatch and remotely placed
+capabilities as well as public callers; HTTP admission is not their proof.
+An empty request GUID or an undefined work kind fails with typed Validation
+before admission and consumes no capacity.
+
+The owner closes admission atomically, cancels its own token and unconditionally
+joins every originally admitted frame even if a real cancellation callback
+throws. DrainAsync callers observe the same original task; caller observation
+cancellation never replaces or cancels that task. Lease release is exactly once,
+checked against its actual registered identity, and occurs only after the real
+native child disposal plus phase/activation settlement, or the original
+capability finally. IsJoined becomes true only after cancellation observation
+and every original frame have settled, including a faulted cancellation outcome.
+DisposeAsync joins that same drain before disposing its CTS, preserving exact
+original errors and the existing fatal-runtime priority. No reset, synthesized
+completion, continuation-only cleanup or abandoned task is allowed.
+
+The request kernel's existing Run gains a trailing optional owner parameter;
+its client-side use remains unowned by the silo registry. A lazy unenumerated
+request admits no frame. On the first actual enumeration the server kernel
+admits one RequestProducer lease and links the owner token into its existing
+execution token. Rejected admission still performs the actual activation
+settlement, then rethrows its original typed KeyLoadException; no native producer
+or synthesized Started/Failed chunk exists for that rejected frame. Existing
+outer RPC failure translation remains unchanged. A consumer paused after a
+yielded chunk must actually resume or dispose; cancellation alone cannot release
+its registered frame. The published
+Communication producer-join repair is required before qualifying callback-fault
+settlement. This is ownership metadata around the existing native producer,
+never a second stream implementation or dispatcher.
+
+Ordered roles: Luna query_wave privately implements only new Orleans
+ClusterRouting/Streaming NativeRequestWorkOwner, NativeRequestWorkLease and a
+cohesive drain helper if needed, a pure Models work-kind declaration, and
+Contracts constants if needed. Luna cluster_wave independently implements new
+UnitTests ClusterRouting/Cases and Helpers tests. Root reviews both packets,
+integrates them, and Luna query_wave then privately updates the existing
+NativeCqrsStreamLifetime kernel and RequestGrain to use that same owner; a
+cohesive Streaming helper may preserve numeric limits without duplicating native
+execution. Root reviews and applies this packet. Luna lifecycle_wave then owns
+only private edits to DatabaseReadGrain, CommandPartitionGrain and
+GrainCommandExecutor, plus one cohesive ClusterRouting/Streaming capability
+lifetime helper if required. Read work is admitted only after VerifyRead and
+the exact identity-context match; command work is admitted only after the
+existing ValidateRoute, before its quorum barrier. Link the owner token into
+every original barrier, authorization reload, phase observation, execution and
+reply encoding. Release read work after the original telemetry and deactivation
+finally, and command work after its original executor finally. Preserve primary
+and cleanup failures and fatal priority; do not duplicate route/authority checks,
+change Task leaf contracts or put executable behavior in Models/Contracts.
+Optional owner use in the existing direct executor tests does not qualify the
+mandatory owner registered for real grains. Root owns review/integration,
+Server DI/shutdown and native fixture joins, delivers the owning dependency, and
+runs Aspire tests. Unit oracles
+cover producer/total caps, duplicate identity, lazy admission, held real native
+producer finally, paused consumer, repeated drain/disposal, actual callback
+failure and rejection followed by activation settlement. Registry-count tests
+alone do not establish native producer settlement.
+
+Before native Silo.StopAsync, the node closes this work admission and joins all
+actual local producer and capability frames while the phase observer remains
+alive. Only that join permits native transport, discovery, consensus, observer
+and physical-store shutdown. A30-second observation deadline reports failure
+without releasing an unfinished owner or pretending it joined; a later caller
+awaits the same original drain. ServerApplication must retain the native host
+and physical owner until the original join has occurred. Real Aspire RF3
+held-phase shutdown/restart through SDK and official MCP, exact Linux suites,
+fault/resource/endurance gates and bounded authority remain required. No data,
+public wire, placement or authorization migration occurs; rollback requires a
+homogeneous stopped cluster and cannot detach already admitted work.
+
 REQ-CRS-JOIN-001 / AC-CRS-JOIN-001: a real Create producer with a throwing
 registered cancellation callback remains joined by early enumerator disposal;
 the disposal cannot complete while that original producer's controlled finally

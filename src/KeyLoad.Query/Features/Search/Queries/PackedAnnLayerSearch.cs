@@ -9,6 +9,13 @@ internal static class PackedAnnLayerSearch
         return similarity.ScorePacked(vectors, node);
     }
 
+    internal static double Score(PackedAnnVectors vectors, int node, PreparedPackedSimilarity similarity,
+        int dimension, AnnWorkBudget budget)
+    {
+        budget.ChargeDistance(dimension);
+        return similarity.Score(vectors, node);
+    }
+
     internal static int Greedy(PackedAnnGraph graph, PackedAnnVectors vectors,
         PreparedSimilarity similarity, int start, int layer, int dimension, AnnWorkBudget budget)
     {
