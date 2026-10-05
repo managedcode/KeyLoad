@@ -80,3 +80,5 @@ flowchart LR
     Budget --> Page[Exact owned bounded page]
     Page --> Later[Later complete ownership and fenced transfer]
 ```
+
+The accepted native epoch/outcome prerequisite is [TokenMigrationLineage](TokenMigrationLineage.md), REQ/AC-PMOVE-005..006 and REQ/AC-MTOKEN-001..004 under ADR-017. Its partition-associated locator is additive; global authority and old unknown-scope outcomes remain explicit complete-image blockers. Family pages or a locator alone do not authorize installation or cutover.

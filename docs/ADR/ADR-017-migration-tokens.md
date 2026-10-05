@@ -1,6 +1,6 @@
 # ADR-017: Migration-aware commit and session tokens
 
-Status: Proposed. The representation that preserves order across physical-group movement is unresolved. No source format or public token migration is approved by this proposal.
+Status: Accepted for the native same-view epoch and additive outcome-association stages described below; implementation and qualification remain open. Translation across physical-group movement remains Proposed. Public CommitToken fields stay unchanged.
 
 ## Context and decision
 
@@ -37,3 +37,9 @@ Related: `REQ-REP-004/AC-REP-004`, `REQ-ROUTE-002/AC-ROUTE-002`, `REQ-ROUTE-004/
 5. **Qualify** the exact delivered SHA through GitHub unit, recovery, and Docker/Aspire RF3 SDK/MCP gates before changing status.
 
 Current files: `src/KeyLoad.Abstractions/Contracts.cs`, `src/KeyLoad.Core/`, `src/KeyLoad.Replication/`. Target files: matching `Features/ClusterReplication/` and consuming slice helpers. Integration owner: root cluster lead; dependencies: ADR-036, snapshot installation, and partition movement. No local test run qualifies this decision.
+
+## Accepted native preparation stages, 2026-10-05
+
+The complete implementation contract is frozen in [TokenMigrationLineage](../Features/ClusterRouting/TokenMigrationLineage.md), REQ/AC-MTOKEN-001..004 and REQ/AC-PMOVE-005..006. Root integrates the contract before source work. Luna owns private Core native view-bearing token issuance/fencing, exhaustive normalized outcome scope association and actual ZoneTree regression packets. Root joins shared paths and executes the required Aspire build/normal/scalar/recovery/RF3 gates, then commits and pushes the complete stage.
+
+Ordered stages: explicit same-view authority resolution and token producers/consumers; additive native scope fields and atomic locator/replay checks; explicit test-owned catalog bootstrap and independent regressions; root source review, canonical gates and exact-source Linux evidence. Preserve the existing global dedup key, original domain-failure semantics and all old outcomes. Rollout is additive native metadata with stable existing aliases/IDs, and no automatic backfill. Rollback stops movement preparation/exposure while retaining outcome metadata and locators for a compatible reader; it never deletes or resets acknowledged outcomes or ownership epochs. Old unknown-scope records remain movement-ineligible without the separate writer-excluded, verified-history/backup ADR-011 migration. No translation, cross-group install, owner switch or physical movement is authorized by this stage.

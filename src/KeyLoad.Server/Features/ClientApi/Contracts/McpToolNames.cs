@@ -24,6 +24,7 @@ internal static class McpToolNames
     internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionTool;
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QueryAst = "keyload_query_ast";
+    internal const string QueryPartitions = "keyload_query_partitions";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     internal const string ChangesRead = "keyload_changes_read";
     internal const string QueryLiveStart = "keyload_query_live_start";

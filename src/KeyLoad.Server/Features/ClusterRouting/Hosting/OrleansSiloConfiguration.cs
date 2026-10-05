@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Net;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
@@ -31,6 +32,10 @@ internal static class OrleansSiloConfiguration
     {
         var peers = options.CreatePeerOptions();
         peers.Validate(partition.Configuration);
+        var expectedOwner = new PhysicalShardRecord(options.PhysicalShardId, partition.Configuration.Incarnation,
+            ImmutableArray.CreateRange(partition.Configuration.VoterIds),
+            PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch);
+        services.AddSingleton(expectedOwner);
         services.AddSingleton(partition.Database);
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);

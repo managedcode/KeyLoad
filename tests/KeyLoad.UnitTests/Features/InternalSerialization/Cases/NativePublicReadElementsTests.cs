@@ -24,7 +24,9 @@ internal sealed class NativePublicReadElementsTests
         var payload = NativePublicReadFixture.Encode(query, kind, database);
         var request = NativePublicReadFixture.Signed(database, payload, kind);
         var position = database.Store.Position;
-        var native = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => NativePublicReadFixture.ExecuteQueryAsync(database, request)))!;
+        var native = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+            NativePublicReadFixture.ExecuteQueryAsync(database, request,
+                NativePublicReadFixture.ExpectedOwner)))!;
         await Assert.That(native.Code).IsEqualTo(NativePublicReadFixture.Code(shape));
         await Assert.That(native.Message).IsEqualTo(NativePublicReadFixture.Detail(shape));
         await Assert.That(native.Code).IsEqualTo(original.Code);
@@ -40,7 +42,9 @@ internal sealed class NativePublicReadElementsTests
         var payload = NativePublicReadFixture.Encode(query, GrainReadKind.AstQuery, database);
         var request = NativePublicReadFixture.Signed(database, payload, GrainReadKind.AstQuery,
             NativeAuthorityFixture.OtherPrincipal);
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => NativePublicReadFixture.ExecuteQueryAsync(database, request)))!;
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
+            NativePublicReadFixture.ExecuteQueryAsync(database, request,
+                NativePublicReadFixture.ExpectedOwner)))!;
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
     }
 

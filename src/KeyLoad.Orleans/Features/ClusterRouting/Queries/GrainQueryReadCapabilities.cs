@@ -2,11 +2,18 @@ using KeyLoad.Query;
 
 namespace KeyLoad.Orleans;
 
-internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngine search, TimeProvider clock)
+internal sealed class GrainQueryReadCapabilities(QueryEngine queries, SearchEngine search, TimeProvider clock,
+    PhysicalShardRecord expectedOwner)
 {
     internal async ValueTask<object> ExecuteAsync(GrainReadKind kind, string principal, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (kind == GrainReadKind.PartitionQuery)
+        {
+            return queries.QueryPartitions(principal,
+                GrainNativePayload.ReadPublicInput<PartitionQueryRequestV1>(payload), expectedOwner, clock,
+                cancellationToken);
+        }
         if (kind == GrainReadKind.Search)
         {
             return await search.SearchAsync(principal, GrainNativePayload.Read<SearchRequest>(payload), cancellationToken).ConfigureAwait(true);

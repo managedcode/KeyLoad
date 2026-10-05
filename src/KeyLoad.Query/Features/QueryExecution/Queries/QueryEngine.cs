@@ -51,16 +51,9 @@ public sealed partial class QueryEngine
     /// <param name="request">Versioned SQL graph-search request.</param>
     /// <param name="cancellationToken">Caller cancellation for bounded parse and search work.</param>
     /// <returns>The same graph-search result produced by the direct request contract.</returns>
-    public async Task<GraphSearchResult> SearchSqlAsync(string principalId, SqlGraphSearchRequest request,
+    public Task<GraphSearchResult> SearchSqlAsync(string principalId, SqlGraphSearchRequest request,
         CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
-        budget.Check();
-        var graphRequest = SqlGraphSearchParser.Parse(request, database.Limits, budget);
-        budget.Check();
-        return await graphSearch.GraphSearchAsync(principalId, graphRequest, cancellationToken).ConfigureAwait(false);
-    }
+        => SqlGraphSearchExecutor.ExecuteAsync(database, graphSearch, principalId, request, cancellationToken);
     /// <summary>Executes a typed bounded query against one authorized read cut.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">Validated AST input and optional continuation.</param>
@@ -96,13 +89,7 @@ public sealed partial class QueryEngine
 
     internal static string QueryHash(AstQueryRequest request) => QueryRequestIdentity.Hash(request);
     internal void Bind(PrincipalRecord principal, ResourceDefinition resource, AstQueryRequest request)
-    {
-        foreach (var field in PredicateEvaluator.Fields(request.Query.Filter).Concat(request.Query.Order.Select(o => o.Path)))
-        {
-            database.Authorization.RequireFieldUse(principal, resource, field);
-        }
-        PredicateEvaluator.CheckParameters(request.Query.Filter, request.Parameters);
-    }
+        => QueryFieldAuthorization.Validate(database, principal, resource, request);
     internal QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
     {

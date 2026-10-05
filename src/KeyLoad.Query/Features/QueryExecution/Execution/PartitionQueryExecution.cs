@@ -20,20 +20,41 @@ internal static class PartitionQueryExecution
         ImmutableArray<PartitionRef> partitions, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var database = engine.PartitionQueryOwner;
-        ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         ArgumentNullException.ThrowIfNull(budget);
+        var database = engine.PartitionQueryOwner;
         budget.Check();
         using var admission = database.AdmitQuery(budget.Cancellation);
         budget.Check();
         var normalized = QueryValidation.Normalize(request, database.Limits);
+        return ExecuteNormalized(engine, principalId, normalized, partitions, budget, null,
+            measureInternalResult: true);
+    }
+
+    internal static PartitionQueryResultV1 ExecutePartitionQuery(this QueryEngine engine, string principalId,
+        PartitionQueryRequestV1 request, ReadExecutionBudget budget, PhysicalShardRecord expectedOwner)
+    {
+        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(budget);
+        var database = engine.PartitionQueryOwner;
+        budget.Check();
+        var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits);
+        return ExecuteNormalized(engine, principalId, prepared.Request, prepared.Partitions,
+            budget, expectedOwner, measureInternalResult: false);
+    }
+
+    private static PartitionQueryResultV1 ExecuteNormalized(QueryEngine engine, string principalId,
+        AstQueryRequest normalized, ImmutableArray<PartitionRef> partitions, ReadExecutionBudget budget,
+        PhysicalShardRecord? expectedOwner, bool measureInternalResult)
+    {
+        var database = engine.PartitionQueryOwner;
+        ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         budget.Check();
         var identity = database.Store.Identity;
         var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, database.Limits);
         _ = PartitionQueryPlanValidation.Validate(plan, database.Limits);
         var grants = ReserveGrants(budget, plan);
         var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
-        var executor = new PartitionQueryLeafExecutor(engine, database, budget);
+        var executor = new PartitionQueryLeafExecutor(engine, database, budget, expectedOwner);
         for (var index = 0; index < plan.Leaves.Length; index++)
         {
             budget.Check();
@@ -41,7 +62,10 @@ internal static class PartitionQueryExecution
             { Partition = plan.Leaves[index].Partition }, grants[index]));
         }
         var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget);
-        budget.CheckResult(result);
+        if (measureInternalResult)
+        {
+            budget.CheckResult(result);
+        }
         return result;
     }
 

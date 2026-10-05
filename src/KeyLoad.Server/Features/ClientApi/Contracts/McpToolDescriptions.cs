@@ -25,6 +25,7 @@ internal static class McpToolDescriptions
     private const string SeriesRetention = "Read the persisted exclusive UTC retention floor, cumulative physical purge count and remaining-page status under current series read authorization.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
+    private const string QueryPartitions = "Read one complete bounded query over up to eight authorized atomic partitions on the same physical owner. Results carry full entity references and separate leaf cuts; this operation has no cursor or global snapshot.";
     private const string QueryCapabilities = "Discover supported query versions, predicates, read profiles and bounded execution limits.";
     private const string ChangesRead = "Read a bounded document change-feed page and preserve the returned signed cursor.";
     private const string QueryLiveStart = "Start a bounded live query snapshot and retain its cursor for subsequent reads.";
@@ -74,7 +75,7 @@ internal static class McpToolDescriptions
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
             or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention => SeriesDescription(name),
         McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst
-            or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead
+            or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead or McpToolNames.QueryPartitions
             => QueryDescription(name),
         McpToolNames.ChangesRead => ChangesRead,
         McpToolNames.OutboxStatus => OutboxStatus,
@@ -133,6 +134,7 @@ internal static class McpToolDescriptions
         McpToolNames.QueryGraphPath => QueryGraphPath,
         McpToolNames.QueryExecute => QueryExecute,
         McpToolNames.QueryAst => QueryAst,
+        McpToolNames.QueryPartitions => QueryPartitions,
         McpToolNames.QueryCapabilities => QueryCapabilities,
         McpToolNames.QueryLiveStart => QueryLiveStart,
         McpToolNames.QueryLiveRead => QueryLiveRead,

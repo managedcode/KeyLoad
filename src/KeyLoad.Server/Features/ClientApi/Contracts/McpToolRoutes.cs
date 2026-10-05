@@ -24,6 +24,7 @@ internal static class McpToolRoutes
     internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionRoute;
     internal const string QueryExecute = "/v1/query";
     internal const string QueryAst = "/v1/query/ast";
+    internal const string QueryPartitions = "/v1/query/partitions";
     internal const string QueryCapabilities = "/v1/query/capabilities";
     internal const string ChangesRead = "/v1/changes/read";
     internal const string QueryLiveStart = "/v1/query/live/start";

@@ -20,6 +20,10 @@ internal static class NativePublicReadFixture
     internal const string End = "b";
     internal const string Edge = "ab";
     internal const string Label = "next";
+    internal static readonly PhysicalShardRecord ExpectedOwner = new(
+        Guid.Parse("10213243-5465-7687-98a9-bacbdcedfe0f"),
+        Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"),
+        ["configured-voter-a", "configured-voter-b", "configured-voter-c"], 1);
     private const string Path = "/@id";
     private const string Alias = "document";
     private const string MissingProjection = "A query projection entry is missing.";
@@ -71,10 +75,12 @@ internal static class NativePublicReadFixture
         return codec.Verify(codec.CreateRead(Guid.NewGuid(), principal, kind, payload));
     }
 
-    internal static async Task<object> ExecuteQueryAsync(TestDatabase database, DecodedGrainRequest request)
+    internal static async Task<object> ExecuteQueryAsync(TestDatabase database, DecodedGrainRequest request,
+        PhysicalShardRecord expectedOwner)
     {
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
         return await new GrainQueryReadCapabilities(new QueryEngine(database.Database), new SearchEngine(database.Database),
-            TimeProvider.System).ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id, request.Payload, CancellationToken.None).ConfigureAwait(false);
+            TimeProvider.System, expectedOwner).ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id,
+            request.Payload, CancellationToken.None).ConfigureAwait(false);
     }
 }

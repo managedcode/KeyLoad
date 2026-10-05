@@ -84,5 +84,7 @@ public enum GrainReadKind
     /// <summary>Execute bounded SQL graph-path syntax through the canonical path reader.</summary>
     SqlGraphPath,
     /// <summary>Read a persisted administrator-authorized atomic-partition placement witness.</summary>
-    AtomicPartitionPlacement
+    AtomicPartitionPlacement,
+    /// <summary>Read one complete bounded query over same-owner atomic partitions.</summary>
+    PartitionQuery
 }

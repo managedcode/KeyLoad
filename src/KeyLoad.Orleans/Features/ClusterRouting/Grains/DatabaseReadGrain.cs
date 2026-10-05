@@ -11,13 +11,15 @@ namespace KeyLoad.Orleans;
 /// <param name="coordinator">Node-owned quorum barrier and canonical apply boundary.</param>
 /// <param name="queries">Existing authorized query and live-query engine.</param>
 /// <param name="search">Existing authorized text, vector and hybrid search engine.</param>
+/// <param name="expectedOwner">Immutable physical-owner tuple from fenced host configuration.</param>
 /// <param name="administration">Borrowed physical-node capabilities guarded by persisted administrator authority.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry and query deadlines.</param>
 /// <param name="workOwner">Silo-local admission and cancellation owner for verified reads.</param>
 /// <param name="diagnostics">Unexpected failure diagnostics; public replies contain only safe typed errors.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.ReadAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    QueryEngine queries, SearchEngine search, INodeAdministration administration, TimeProvider clock, NativeRequestWorkOwner workOwner,
+    QueryEngine queries, SearchEngine search, PhysicalShardRecord expectedOwner, INodeAdministration administration,
+    TimeProvider clock, NativeRequestWorkOwner workOwner,
     ILogger<DatabaseReadGrain> diagnostics)
     : Grain, IDatabaseReadGrain
 {
@@ -25,7 +27,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     private readonly TimeProvider runtimeClock = clock;
     private readonly NativeRequestWorkOwner requestWorkOwner = workOwner;
     private readonly GrainCoreReadCapabilities core = new(database);
-    private readonly GrainQueryReadCapabilities query = new(queries, search, clock);
+    private readonly GrainQueryReadCapabilities query = new(queries, search, clock, expectedOwner);
     private readonly GrainBlobReadCapabilities blobs = new(database);
 
     /// <inheritdoc />

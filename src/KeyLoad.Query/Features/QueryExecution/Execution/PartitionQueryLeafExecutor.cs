@@ -6,7 +6,7 @@ using KeyLoad.Storage;
 namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEngine database,
-    ReadExecutionBudget budget)
+    ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null)
 {
     internal PartitionQueryLeafResultV1 Execute(string principalId, PartitionQueryLeafPlanV1 plan,
         AstQueryRequest normalized, ReadExecutionBudgetReadGrant grant)
@@ -24,6 +24,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
     {
         budget.Check();
         engine.Bind(principal, resource, request);
+        ValidatePlacement(view, plan.Partition, grant);
         PreparedQuery? prepared = null;
         prepared = new(request.Query, 0, plan.MaxCandidates, ordinalFullReferenceOrder: true,
             projectCandidate: document => engine.Project(principal, resource, document,
@@ -38,6 +39,19 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         return new(1, plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion, grant.ExaminedRecords,
             grant.ReadBytes, retention.CurrentBytes, accessPath, candidates);
+    }
+
+    private void ValidatePlacement(IKeyValueView view, PartitionRef partition,
+        PartitionQueryLeafReadGrant grant)
+    {
+        if (expectedOwner is null)
+        {
+            return;
+        }
+
+        var resolution = DatabaseEngine.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition,
+            grant.NativeGrant);
+        PartitionQueryPlacementValidation.Validate(resolution, partition, expectedOwner);
     }
 
     private static void Accept(DocumentRecord document, AstQueryRequest request, PreparedQuery prepared,

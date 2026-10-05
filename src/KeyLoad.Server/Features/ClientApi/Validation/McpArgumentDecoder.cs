@@ -11,7 +11,7 @@ internal static class McpArgumentDecoder
         new(kind, null, Guid.Empty,
             kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
                 or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.SqlGraphPath
-                or GrainReadKind.AtomicPartitionPlacement
+                or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.PartitionQuery
                 ? InternalNativePayload.SerializePublicInput(Request<TRequest>(arguments, false), maximumPayloadBytes)
                 : InternalNativePayload.Serialize(Request<TRequest>(arguments, false), maximumPayloadBytes));
 

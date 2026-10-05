@@ -23,6 +23,8 @@ internal static class QueryApi
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));
         app.MapPost(AstPath, (AstQueryRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.AstQuery, request));
+        app.MapPost(McpToolRoutes.QueryPartitions, (PartitionQueryRequestV1 request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.PartitionQuery, request));
         app.MapGet(CapabilitiesPath, (Func<HttpContext, Task<IResult>>)(context =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.QueryCapabilities)));
         app.MapPost(LiveStartPath, (StartLiveQueryRequest request, HttpContext context) =>
