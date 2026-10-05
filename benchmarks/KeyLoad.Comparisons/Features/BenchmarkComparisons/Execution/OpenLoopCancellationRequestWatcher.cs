@@ -4,8 +4,6 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopCancellationRequestWatcher
 {
-    private const int RequestBytes = 10;
-    private const int ReadLimit = 11;
 
     internal static void ValidateFresh(string output)
     {
@@ -71,13 +69,13 @@ internal static class OpenLoopCancellationRequestWatcher
     private static async Task ValidateRequestAsync(string path, CancellationToken cancellationToken)
     {
         var info = new FileInfo(path);
-        if (info.Length != RequestBytes)
+        if (info.Length != OpenLoopCancellationProofContract.RequestBytes)
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationControlInvalid);
         }
-        var bytes = new byte[ReadLimit];
+        var bytes = new byte[OpenLoopCancellationProofContract.RequestReadBufferBytes];
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            ReadLimit, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            OpenLoopCancellationProofContract.RequestReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         var read = 0;
         while (read < bytes.Length)
         {
@@ -86,7 +84,7 @@ internal static class OpenLoopCancellationRequestWatcher
             read += count;
         }
         var expected = Encoding.UTF8.GetBytes(OpenLoopCancellationProofContract.RequestText);
-        if (read != RequestBytes || !bytes.AsSpan(0, RequestBytes).SequenceEqual(expected))
+        if (read != OpenLoopCancellationProofContract.RequestBytes || !bytes.AsSpan(0, OpenLoopCancellationProofContract.RequestBytes).SequenceEqual(expected))
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationControlInvalid);
         }

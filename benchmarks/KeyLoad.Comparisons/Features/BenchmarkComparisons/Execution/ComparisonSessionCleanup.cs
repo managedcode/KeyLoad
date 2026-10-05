@@ -7,6 +7,7 @@ namespace KeyLoad.Comparisons;
 internal static class ComparisonSessionCleanup
 {
     internal const string Failure = "ComparisonSessionCleanupFailed";
+    private const int MinimumTimeoutSeconds = 1;
 
     internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
     {
@@ -19,7 +20,7 @@ internal static class ComparisonSessionCleanup
         IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
     {
         ArgumentNullException.ThrowIfNull(sessions);
-        ArgumentOutOfRangeException.ThrowIfLessThan(timeoutSeconds, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(timeoutSeconds, MinimumTimeoutSeconds);
         return CloseAndJoinAsync(sessions, TimeSpan.FromSeconds(timeoutSeconds));
     }
 

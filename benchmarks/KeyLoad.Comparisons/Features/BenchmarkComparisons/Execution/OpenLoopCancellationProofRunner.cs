@@ -99,7 +99,7 @@ public static class OpenLoopCancellationProofRunner
             || !OpenLoopRateContract.AcceptedRates.Contains(rate) || target.Profile.Name != OpenLoopProtocolIdentities.KeyLoadTarget
             || !target.Supports(Scenario.PointRead))
         {
-            throw new ArgumentOutOfRangeException(nameof(worker), "The cancellation proof cell is unsupported.");
+            throw new ArgumentOutOfRangeException(nameof(worker), OpenLoopFailureMessages.CancellationProofCellUnsupported);
         }
     }
 
@@ -136,7 +136,7 @@ public static class OpenLoopCancellationProofRunner
 
     private static OpenLoopCancellationProofV1 CreateProof(OpenLoopComparisonReport report,
         OpenLoopProgressV1 milestone, OpenLoopHealthyReadResult health)
-        => new(1, report.Worker!, report.ProfileId, report.OfferedRatePerSecond, report.Scenario,
+        => new(OpenLoopCancellationProofContract.SchemaVersion, report.Worker!, report.ProfileId, report.OfferedRatePerSecond, report.Scenario,
             report.DatasetRecords, report.DatasetSha256, milestone, report.Accounting, report.ExecutionPolicy,
             report.CallerCancelled,
             true, true, report.SessionsClosed, true, health.Revision, health.JsonSha256, health.SessionClosed);

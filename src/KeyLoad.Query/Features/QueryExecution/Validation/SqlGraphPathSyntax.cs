@@ -10,8 +10,6 @@ internal static class SqlGraphPathSyntax
     internal const string ParameterBudgetDetail = "The SQL graph-path parameter budget is exceeded.";
     internal const string VersionProfile = "graph-path-v1";
     internal const int Version = 1;
-    internal const int MaximumParameters = 256;
-    internal const int MaximumLabels = 64;
     internal const int MandatoryArgumentCount = 8;
 
     internal static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Validation, InvalidDetail);

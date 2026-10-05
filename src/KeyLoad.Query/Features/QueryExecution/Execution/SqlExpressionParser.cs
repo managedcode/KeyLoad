@@ -1,11 +1,13 @@
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 
 /// <summary>Parses Q1 predicates and operands with the established precedence and depth budget.</summary>
-internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits limits, string? alias)
+internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<DatabaseLimits> limitsOptions, int maximumInValues, string? alias)
 {
+    private readonly DatabaseLimits limits = limitsOptions.Value;
     private int depth;
 
     internal Predicate Parse() => Expression();
@@ -89,7 +91,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, DatabaseLimits 
             values.Add(Operand());
         } while (cursor.Eat(SqlSyntax.Comma));
         cursor.Need(SqlSyntax.CloseParen);
-        if (values.Count > SqlSyntax.MaximumInValues)
+        if (values.Count > maximumInValues)
         {
             throw SqlSyntax.Invalid();
         }

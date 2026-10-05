@@ -7,6 +7,10 @@ public sealed record OpenLoopExecutionPolicy(int QueueCapacity, int ConcurrentSe
     int OperationDeadlineMilliseconds, int DrainMilliseconds, int ControlPollMilliseconds,
     int SpinWindowMicroseconds)
 {
+    private const int MillisecondsPerSecond = 1_000;
+    private const int MicrosecondsPerSecond = 1_000_000;
+    private const int CeilingRoundingAdjustment = 1;
+
     /// <summary>Checks that evidence carries the single currently qualified v1 policy.</summary>
     /// <returns>Whether all seven values match the canonical options definition.</returns>
     internal bool IsQualifiedV1()
@@ -19,17 +23,17 @@ public sealed record OpenLoopExecutionPolicy(int QueueCapacity, int ConcurrentSe
             && SpinWindowMicroseconds == OpenLoopExecutionOptions.DefaultSpinWindowMicroseconds;
 
     internal long OperationDeadlineTicks
-        => ToStopwatchTicks(OperationDeadlineMilliseconds, 1_000);
+        => ToStopwatchTicks(OperationDeadlineMilliseconds, MillisecondsPerSecond);
 
     internal long DrainTicks
-        => ToStopwatchTicks(DrainMilliseconds, 1_000);
+        => ToStopwatchTicks(DrainMilliseconds, MillisecondsPerSecond);
 
     internal long SpinWindowTicks
-        => ToStopwatchTicks(SpinWindowMicroseconds, 1_000_000);
+        => ToStopwatchTicks(SpinWindowMicroseconds, MicrosecondsPerSecond);
 
     private static long ToStopwatchTicks(int amount, int unitsPerSecond)
     {
         var numerator = checked((long)amount * Stopwatch.Frequency);
-        return checked((numerator + unitsPerSecond - 1) / unitsPerSecond);
+        return checked((numerator + unitsPerSecond - CeilingRoundingAdjustment) / unitsPerSecond);
     }
 }

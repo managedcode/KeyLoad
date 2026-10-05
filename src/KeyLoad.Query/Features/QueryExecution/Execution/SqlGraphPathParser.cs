@@ -6,12 +6,12 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class SqlGraphPathParser
 {
     internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, int maximumParameters, int maximumLabels)
     {
         ValidateEnvelope(request);
-        SqlGraphPathRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, budget);
+        SqlGraphPathRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget);
         budget.Check();
-        return new SqlGraphPathStatementReader(request.Query, limits, budget).Parse();
+        return new SqlGraphPathStatementReader(request.Query, limits, budget, maximumLabels).Parse();
     }
 
     private static void ValidateEnvelope(SqlGraphPathRequest request)
@@ -34,11 +34,12 @@ internal sealed class SqlGraphPathStatementReader
     private readonly SqlGraphPathValueReader values;
     private readonly SqlTokenCursor cursor;
 
-    internal SqlGraphPathStatementReader(QueryRequest query, DatabaseLimits limits, ReadExecutionBudget budget)
+    internal SqlGraphPathStatementReader(QueryRequest query, DatabaseLimits limits, ReadExecutionBudget budget,
+        int maximumLabels)
     {
         this.query = query;
         cursor = new(SqlTokenizer.Lex(query.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, budget));
-        values = new(cursor, query, budget);
+        values = new(cursor, query, budget, maximumLabels);
     }
 
     internal GraphShortestPathRequest Parse()

@@ -49,9 +49,6 @@ internal static class SqlSyntax
     internal const string UnsupportedSyntaxDetail = "The SQL statement contains unsupported syntax.";
     internal const string InvalidDetail = "The SQL statement is invalid for the supported Q1 dialect.";
     internal const int DefaultLimit = 100;
-    internal const int MaximumProjection = 256;
-    internal const int MaximumOrdering = 16;
-    internal const int MaximumInValues = 256;
 
     internal static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Validation, InvalidDetail);
 }

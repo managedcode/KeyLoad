@@ -67,30 +67,32 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         var observedCount = 0;
         do
         {
-            var query = KeyLoadQuery.From<CorpusQueryMarker>(partition, OpenLoopProtocolIdentities.DocumentsCollection, translationOptions)
-                .OrderBy(row => QueryFunctions.DocumentId(row)).Take(256);
+            var query = KeyLoadQuery.From<CorpusQueryMarker>(partition,
+                OpenLoopProtocolIdentities.DocumentsCollection, translationOptions)
+                .OrderBy(row => QueryFunctions.DocumentId(row))
+                .Take(KeyLoadWorkloadIdentities.CorpusReadbackPageSize);
             var page = KeyLoadClientResults.Success(await client.QueryAsync(query, allowFullScan: true,
-                cursor: cursor, cancellationToken: cancellationToken), "ScaledCorpusReadback");
+                cursor: cursor, cancellationToken: cancellationToken), ScaledCorpusReadbackFailureCodes.Operation);
             foreach (var row in page.Rows)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (++observedCount > corpusCount)
                 {
-                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                    throw new ComparisonFailureException(ScaledCorpusReadbackFailureCodes.ExtraRecord);
                 }
 
                 yield return new(row.EntityId, row.Json);
             }
             if (page.Rows.IsEmpty && page.Cursor is not null)
             {
-                throw new ComparisonFailureException("ScaledCorpusReadbackCursorDidNotAdvance");
+                throw new ComparisonFailureException(ScaledCorpusReadbackFailureCodes.CursorDidNotAdvance);
             }
             cursor = page.Cursor;
         } while (cursor is not null);
 
         if (observedCount != corpusCount)
         {
-            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+            throw new ComparisonFailureException(ScaledCorpusReadbackFailureCodes.CountMismatch);
         }
     }
 
@@ -112,7 +114,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var found = KeyLoadClientResults.Success(await client.GetAsync(
-            new(partition, "documents", document.Id), cancellationToken));
+            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), cancellationToken));
         return found is null ? null : new(found.Reference.Id, found.Json);
     }
 
@@ -122,8 +124,10 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     private async Task<OperationResult> SearchVectorAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
-        var neighbors = KeyLoadClientResults.Success(await client.SearchAsync(new(partition, "documents",
-            VectorField: "/embedding", Vector: document.Vector, Space: space, Limit: topK), cancellationToken));
+        var request = new SearchRequest(partition, OpenLoopProtocolIdentities.DocumentsCollection,
+            VectorField: KeyLoadWorkloadIdentities.VectorEmbeddingField, Vector: document.Vector,
+            Space: space, Limit: topK);
+        var neighbors = KeyLoadClientResults.Success(await client.SearchAsync(request, cancellationToken));
         var owned = neighbors.Select(item => new FoundDocument(item.Document.Reference.Id, item.Document.Json)).ToArray();
         return new(Neighbors: ImmutableCollectionsMarshal.AsImmutableArray(owned));
     }
@@ -131,9 +135,11 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     private async Task<OperationResult> TraverseGraphAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
-        var graph = KeyLoadClientResults.Success(await client.TraverseAsync(new(partition, "links",
-            new(partition, "documents", document.Id), scenario == Scenario.GraphNeighbors ? 1 : graphDepth,
-            graphVertices, graphEdges, ["links"]), cancellationToken));
+        var request = new TraverseRequest(partition, KeyLoadWorkloadIdentities.GraphName,
+            new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id),
+            scenario == Scenario.GraphNeighbors ? KeyLoadWorkloadIdentities.NeighborTraversalDepth : graphDepth,
+            graphVertices, graphEdges, [KeyLoadWorkloadIdentities.GraphName]);
+        var graph = KeyLoadClientResults.Success(await client.TraverseAsync(request, cancellationToken));
         var owned = graph.Vertices.Where(vertex => vertex.Id != document.Id).Select(vertex => vertex.Id)
             .Order(StringComparer.Ordinal).ToArray();
         return new(Vertices: ImmutableCollectionsMarshal.AsImmutableArray(owned));
@@ -142,16 +148,18 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     private async Task<OperationResult> ExecuteQueueCycleAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
-        var lane = new QueueLaneRef(partition, "jobs");
+        var lane = new QueueLaneRef(partition, KeyLoadWorkloadIdentities.QueueName);
         var begin = Stopwatch.GetTimestamp();
         KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
-            [new EnqueueMessage("jobs", document.Id, document.Json)]), cancellationToken));
+            [new EnqueueMessage(KeyLoadWorkloadIdentities.QueueName, document.Id, document.Json)]), cancellationToken));
         var enqueued = Stopwatch.GetTimestamp();
         Delivery? delivery = null;
         while (delivery is null)
         {
-            delivery = KeyLoadClientResults.Success(await client.ReceiveAsync(new(Guid.NewGuid(), lane, LeaseSeconds: checked((int)Math.Ceiling(lifecycle.QueueLeaseDuration.TotalSeconds))),
-                cancellationToken)).Deliveries.SingleOrDefault();
+            var request = new ReceiveRequest(Guid.NewGuid(), lane,
+                LeaseSeconds: checked((int)Math.Ceiling(lifecycle.QueueLeaseDuration.TotalSeconds)));
+            delivery = KeyLoadClientResults.Success(await client.ReceiveAsync(request, cancellationToken))
+                .Deliveries.SingleOrDefault();
             if (delivery is null)
             {
                 await Task.Delay(lifecycle.QueueClaimPollInterval, cancellationToken);

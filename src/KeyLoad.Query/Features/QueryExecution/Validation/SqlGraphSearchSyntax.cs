@@ -30,7 +30,6 @@ internal static class SqlGraphSearchSyntax
     internal const string ParameterBudgetDetail = "The SQL graph-search parameter budget is exceeded.";
     internal const string ProfileName = "graph-search-v1";
     internal const int Version = 1;
-    internal const int MaximumParameters = 256;
     internal const int DefaultLimit = 10;
     internal const int DefaultFusion = 60;
     internal const double DefaultWeight = 1;

@@ -14,11 +14,11 @@ internal static class PartitionQueryMerge
 
     internal static PartitionQueryResultV1 Complete(PartitionQueryPlanV1 plan,
         ImmutableArray<PartitionQueryLeafResultV1> leaves, StoreIdentity owner, DatabaseLimits limits,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(budget);
-        var partitions = PartitionQueryPlanValidation.Validate(plan, limits);
+        var partitions = PartitionQueryPlanValidation.Validate(plan, limits, execution);
         if (leaves.IsDefault || leaves.Length != plan.Leaves.Length)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage);

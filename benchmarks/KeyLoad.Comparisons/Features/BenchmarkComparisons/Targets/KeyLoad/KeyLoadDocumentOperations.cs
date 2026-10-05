@@ -4,13 +4,15 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadDocumentOperations
 {
-    private const string DocumentsCollection = "documents";
 
     internal static Mutation CreateMutation(Scenario scenario, BenchmarkDocument document) => scenario switch
     {
-        Scenario.DocumentWrite => new PutDocument(DocumentsCollection, document.Id, document.Json, 0),
-        Scenario.DocumentUpdate => new PutDocument(DocumentsCollection, document.Id, document.Json, 1, ExplicitReplacement: true),
-        Scenario.DocumentDelete => new DeleteDocument(DocumentsCollection, document.Id, 1),
+        Scenario.DocumentWrite => new PutDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+            document.Id, document.Json, KeyLoadWorkloadIdentities.InitialDocumentRevision),
+        Scenario.DocumentUpdate => new PutDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+            document.Id, document.Json, KeyLoadWorkloadIdentities.CreatedDocumentRevision, ExplicitReplacement: true),
+        Scenario.DocumentDelete => new DeleteDocument(OpenLoopProtocolIdentities.DocumentsCollection,
+            document.Id, KeyLoadWorkloadIdentities.CreatedDocumentRevision),
         _ => throw new ArgumentOutOfRangeException(nameof(scenario))
     };
 
@@ -27,7 +29,8 @@ internal static class KeyLoadDocumentOperations
             }
             if (scenario == Scenario.DocumentUpdate && code == nameof(ErrorCode.RevisionConflict))
             {
-                var observed = await client.GetAsync(new(partition, DocumentsCollection, document.Id), token);
+                var observed = await client.GetAsync(
+                    new(partition, OpenLoopProtocolIdentities.DocumentsCollection, document.Id), token);
                 if (observed.IsSuccess && observed.Value is null)
                 {
                     throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
@@ -59,12 +62,14 @@ internal static class KeyLoadDocumentOperations
 
     private static void ValidateReceipt(CommitReceipt receipt, Scenario scenario, BenchmarkDocument document)
     {
-        var expectedRevision = scenario == Scenario.DocumentWrite ? 1 : 2;
+        var expectedRevision = scenario == Scenario.DocumentWrite
+            ? KeyLoadWorkloadIdentities.CreatedDocumentRevision
+            : KeyLoadWorkloadIdentities.UpdatedDocumentRevision;
         if (receipt.Durability != DurabilityProfile.QuorumProcessDurable)
         {
             throw new ComparisonFailureException(KeyLoadEventOperations.WrongWriteProfile);
         }
-        if (receipt.Mutations.Length != 1 || receipt.Mutations[0].Resource != DocumentsCollection
+        if (receipt.Mutations.Length != 1 || receipt.Mutations[0].Resource != OpenLoopProtocolIdentities.DocumentsCollection
             || receipt.Mutations[0].Id != document.Id || receipt.Mutations[0].Revision != expectedRevision)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);

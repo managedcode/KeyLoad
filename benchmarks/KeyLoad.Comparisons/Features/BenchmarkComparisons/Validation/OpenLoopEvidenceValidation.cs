@@ -10,32 +10,56 @@ internal static class OpenLoopEvidenceValidation
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopEvidenceIdentityInvalid);
         }
-        _ = OpenLoopAccountingValidator.ValidateAndCreate(report.Accounting.NotOffered,
-            report.Accounting.HarnessRejected, report.Accounting.TimedOutBeforeStart,
-            report.Accounting.Succeeded, report.Accounting.Failed, report.Accounting.TargetRejected,
-            report.Accounting.TimedOutAfterStart, report.Accounting.UnfinishedQueued,
-            report.Accounting.UnfinishedStarted, report.Accounting.Started, report.Accounting.Completed);
-        if (report.ExecutionPolicy is null || !report.ExecutionPolicy.IsQualifiedV1()
-            || report.Version != 1 || report.Samples.Length != OpenLoopRateContract.SampleCapacity
-            || worker.Profile != report.ProfileId || worker.Scenario != report.Scenario
-            || worker.Target != report.Target.Name || worker.SourceRevision != report.SourceRevision
-            || worker.JobId != report.JobId || worker.RunId != report.RunId
-            || worker.Attempt != report.Attempt || report.JobId < 1 || report.RunId < 1
-            || report.Attempt < 1 || report.DatasetRecords < 1 || report.DatasetSha256.Length != 64
-            || report.SourceRevision?.Length != 40 || !OpenLoopRateContract.AcceptedRates.Contains(report.OfferedRatePerSecond)
-            || report.Timing.CollectedSamples != report.Samples.Length
-            || report.Timing.MissingSamples != report.Timing.SampleCapacity - report.Samples.Length
-            || report.Timing.SampleCapacity != OpenLoopRateContract.SampleCapacity
-            || !ValidDimensions(report.Timing)
-            || !Within(report.Storage, 512) || report.Runtime is not { } runtime || !Within(runtime, 256)
-            || !double.IsFinite(report.ElapsedSeconds) || report.ElapsedSeconds <= 0
-            || !report.ScheduleComplete && report.Accounting.NotOffered == 0
-            || report.ScheduleComplete && report.Accounting.NotOffered != 0
-            || !ValidIdentityText(worker) || !ValidTargetMetadata(report.Target)
-            || report.Target.Cluster is not { } cluster || cluster.Nodes != worker.NodeCount)
+        ValidateAccounting(report.Accounting);
+        if (!ValidReportIdentityAndMeasurements(report, worker))
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopEvidenceIdentityInvalid);
         }
+        ValidateSampleSelection(report);
+    }
+
+    private static void ValidateAccounting(OpenLoopOperationAccounting accounting)
+        => _ = OpenLoopAccountingValidator.ValidateAndCreate(accounting.NotOffered, accounting.HarnessRejected,
+            accounting.TimedOutBeforeStart, accounting.Succeeded, accounting.Failed, accounting.TargetRejected,
+            accounting.TimedOutAfterStart, accounting.UnfinishedQueued, accounting.UnfinishedStarted,
+            accounting.Started, accounting.Completed);
+
+    private static bool ValidReportIdentityAndMeasurements(OpenLoopComparisonReport report,
+        IsolatedComparisonWorker worker)
+        => ValidFormatAndIdentity(report, worker) && ValidTiming(report) && ValidTarget(report, worker);
+
+    private static bool ValidFormatAndIdentity(OpenLoopComparisonReport report,
+        IsolatedComparisonWorker worker)
+        => report.ExecutionPolicy is not null && report.ExecutionPolicy.IsQualifiedV1()
+            && report.Version == OpenLoopEvidenceContract.SchemaVersion
+            && report.Samples.Length == OpenLoopRateContract.SampleCapacity
+            && worker.Profile == report.ProfileId && worker.Scenario == report.Scenario
+            && worker.Target == report.Target.Name && worker.SourceRevision == report.SourceRevision
+            && worker.JobId == report.JobId && worker.RunId == report.RunId
+            && worker.Attempt == report.Attempt && report.JobId > 0 && report.RunId > 0
+            && report.Attempt > 0 && report.DatasetRecords > 0
+            && report.DatasetSha256.Length == OpenLoopEvidenceContract.Sha256HexCharacters
+            && report.SourceRevision?.Length == OpenLoopEvidenceContract.GitRevisionHexCharacters
+            && OpenLoopRateContract.AcceptedRates.Contains(report.OfferedRatePerSecond);
+
+    private static bool ValidTiming(OpenLoopComparisonReport report)
+        => report.Timing.CollectedSamples == report.Samples.Length
+            && report.Timing.MissingSamples == report.Timing.SampleCapacity - report.Samples.Length
+            && report.Timing.SampleCapacity == OpenLoopRateContract.SampleCapacity
+            && ValidDimensions(report.Timing)
+            && double.IsFinite(report.ElapsedSeconds) && report.ElapsedSeconds > 0
+            && (!report.ScheduleComplete || report.Accounting.NotOffered == 0)
+            && (report.ScheduleComplete || report.Accounting.NotOffered > 0);
+
+    private static bool ValidTarget(OpenLoopComparisonReport report, IsolatedComparisonWorker worker)
+        => Within(report.Storage, OpenLoopEvidenceContract.MaximumStorageDescriptionCharacters)
+            && report.Runtime is { } runtime
+            && Within(runtime, OpenLoopEvidenceContract.MaximumRuntimeDescriptionCharacters)
+            && ValidIdentityText(worker) && ValidTargetMetadata(report.Target)
+            && report.Target.Cluster is { } cluster && cluster.Nodes == worker.NodeCount;
+
+    private static void ValidateSampleSelection(OpenLoopComparisonReport report)
+    {
         var expectedIndices = ScaledLatencySample.Indices(report.Accounting.Planned,
             OpenLoopRateContract.SampleCapacity);
         if (report.Samples.Where((sample, index) => index >= expectedIndices.Length
@@ -44,7 +68,6 @@ internal static class OpenLoopEvidenceValidation
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopEvidenceSampleSelectionInvalid);
         }
     }
-
 
     private static bool ValidDimensions(OpenLoopTimingSummary timing)
         => ValidDimension(timing.ScheduledToTerminal, timing.SampleCapacity)
@@ -59,20 +82,24 @@ internal static class OpenLoopEvidenceValidation
             && dimension.SampleCount == capacity - dimension.MissingSamples;
 
     private static bool ValidIdentityText(IsolatedComparisonWorker worker)
-        => Within(worker.Target, 256) && Within(worker.Profile, 64) && Within(worker.SourceRevision, 64)
-            && Within(worker.Repository, 512) && Within(worker.Ref, 512) && Within(worker.Workflow, 256);
+        => Within(worker.Target, OpenLoopEvidenceContract.MaximumWorkerTargetCharacters)
+            && Within(worker.Profile, OpenLoopEvidenceContract.MaximumProfileIdCharacters)
+            && Within(worker.SourceRevision, OpenLoopEvidenceContract.MaximumWorkerSourceRevisionCharacters)
+            && Within(worker.Repository, OpenLoopEvidenceContract.MaximumRepositoryCharacters)
+            && Within(worker.Ref, OpenLoopEvidenceContract.MaximumRefCharacters)
+            && Within(worker.Workflow, OpenLoopEvidenceContract.MaximumWorkflowCharacters);
 
     private static bool ValidTargetMetadata(TargetProfile target)
     {
         var values = new[] { target.Name, target.Version, target.Topology, target.WriteAcknowledgement,
             target.ReadContract, target.Transport, target.Authorization,
-            target.Cluster?.State ?? "" };
-        return values.All(value => Within(value, 2_048))
-            && values.Sum(value => Encoding.UTF8.GetByteCount(value)) <= 8_192
-            && (target.Image is null || Within(target.Image, 2_048))
-            && (target.Cluster?.Observations.Length ?? 0) <= 64
-            && (target.Cluster?.Observations.All(value => Within(value, 1_024)) ?? false)
-            && (target.Cluster?.Observations.Sum(value => (long)Encoding.UTF8.GetByteCount(value)) ?? 0) <= 8_192;
+            target.Cluster?.State ?? string.Empty };
+        return values.All(value => Within(value, OpenLoopEvidenceContract.MaximumTargetFieldCharacters))
+            && values.Sum(value => Encoding.UTF8.GetByteCount(value)) <= OpenLoopEvidenceContract.MaximumTargetMetadataBytes
+            && (target.Image is null || Within(target.Image, OpenLoopEvidenceContract.MaximumTargetFieldCharacters))
+            && (target.Cluster?.Observations.Length ?? 0) <= OpenLoopEvidenceContract.MaximumClusterObservations
+            && (target.Cluster?.Observations.All(value => Within(value, OpenLoopEvidenceContract.MaximumObservationCharacters)) ?? false)
+            && (target.Cluster?.Observations.Sum(value => (long)Encoding.UTF8.GetByteCount(value)) ?? 0) <= OpenLoopEvidenceContract.MaximumObservationBytes;
     }
 
     private static bool Within(string value, int maximum) => !string.IsNullOrWhiteSpace(value) && value.Length <= maximum;

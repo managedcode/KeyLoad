@@ -39,6 +39,20 @@ public sealed record OpenLoopNativeCompletionV1(string ProfileId, Scenario Scena
 /// <summary>Names and bounds the separate child-process cancellation proof artifacts.</summary>
 public static class OpenLoopCancellationProofContract
 {
+    /// <summary>Gets the fixed cancellation proof schema version.</summary>
+    public const int SchemaVersion = 1;
+    /// <summary>Gets the fixed pending proof path name beneath the owned output directory.</summary>
+    public const string PendingProofFileName = ".open-loop-cancellation-proof.v1.json.pending";
+    /// <summary>Gets the fixed marker field separator.</summary>
+    public const char MarkerFieldSeparator = '|';
+    /// <summary>Gets the exact request bytes.</summary>
+    public const int RequestBytes = 10;
+    /// <summary>Gets the bounded request read buffer size, including one excess byte.</summary>
+    public const int RequestReadBufferBytes = 11;
+    /// <summary>Gets the exact number of fields in the marker.</summary>
+    public const int CompletionMarkerFieldCount = 7;
+    /// <summary>Gets the largest ASCII code point admitted by the marker format.</summary>
+    public const int MaximumMarkerAsciiCodePoint = 0x7F;
     /// <summary>Gets the fixed request path name beneath the owned output directory.</summary>
     public const string RequestFileName = "open-loop-cancel.v1.request";
     /// <summary>Gets the fixed pending request path name beneath the owned output directory.</summary>
@@ -49,6 +63,8 @@ public static class OpenLoopCancellationProofContract
     public const string CompletionMarkerPrefix = "OpenLoopNativeCompletionV1";
     /// <summary>Gets the fixed request token bytes.</summary>
     public const string RequestText = "cancel-v1\n";
+    /// <summary>Gets the asynchronous JSON writer buffer size in bytes.</summary>
+    public const int JsonWriterBufferBytes = 8_192;
     /// <summary>Gets the maximum proof artifact size in bytes.</summary>
     public const int MaximumProofBytes = 4 * 1024 * 1024;
     /// <summary>Gets the maximum child marker length in ASCII bytes.</summary>

@@ -5,6 +5,13 @@ namespace KeyLoad.Comparisons;
 /// <summary>Formats and parses the fixed, bounded cancellation milestone line.</summary>
 public static class OpenLoopNativeCompletionMarker
 {
+    private const int PrefixFieldIndex = 0;
+    private const int ProfileIdFieldIndex = 1;
+    private const int ScenarioFieldIndex = 2;
+    private const int RateFieldIndex = 3;
+    private const int CompletedFieldIndex = 4;
+    private const int StartedFieldIndex = 5;
+    private const int PlannedFieldIndex = 6;
     /// <summary>Formats one actual runner progress snapshot using invariant decimal counters.</summary>
     /// <param name="progress">The actual bounded runner snapshot.</param>
     /// <param name="profileId">The exact selected scale profile.</param>
@@ -18,7 +25,7 @@ public static class OpenLoopNativeCompletionMarker
         {
             throw new ArgumentOutOfRangeException(nameof(progress));
         }
-        var marker = string.Join('|', OpenLoopCancellationProofContract.CompletionMarkerPrefix, profileId,
+        var marker = string.Join(OpenLoopCancellationProofContract.MarkerFieldSeparator, OpenLoopCancellationProofContract.CompletionMarkerPrefix, profileId,
             progress.Scenario.ToString(), progress.OfferedRatePerSecond.ToString(CultureInfo.InvariantCulture),
             progress.Completed.ToString(CultureInfo.InvariantCulture), progress.Started.ToString(CultureInfo.InvariantCulture),
             progress.Planned.ToString(CultureInfo.InvariantCulture));
@@ -34,24 +41,25 @@ public static class OpenLoopNativeCompletionMarker
     {
         marker = null;
         if (string.IsNullOrEmpty(value) || value.Length > OpenLoopCancellationProofContract.MaximumMarkerBytes
-            || value.Any(character => character > 0x7F))
+            || value.Any(character => character > OpenLoopCancellationProofContract.MaximumMarkerAsciiCodePoint))
         {
             return false;
         }
-        var fields = value.Split('|');
-        if (fields.Length != 7 || fields[0] != OpenLoopCancellationProofContract.CompletionMarkerPrefix
-            || !TryProfile(fields[1]) || !Enum.TryParse<Scenario>(fields[2], false, out var scenario)
-            || scenario != Scenario.PointRead || scenario.ToString() != fields[2]
-            || !TryInt32(fields[3], out var rate) || !OpenLoopRateContract.AcceptedRates.Contains(rate)
-            || !TryInt64(fields[4], out var completed) || completed < OpenLoopRateContract.ProgressInterval
+        var fields = value.Split(OpenLoopCancellationProofContract.MarkerFieldSeparator);
+        if (fields.Length != OpenLoopCancellationProofContract.CompletionMarkerFieldCount
+            || fields[PrefixFieldIndex] != OpenLoopCancellationProofContract.CompletionMarkerPrefix
+            || !TryProfile(fields[ProfileIdFieldIndex]) || !Enum.TryParse<Scenario>(fields[ScenarioFieldIndex], false, out var scenario)
+            || scenario != Scenario.PointRead || scenario.ToString() != fields[ScenarioFieldIndex]
+            || !TryInt32(fields[RateFieldIndex], out var rate) || !OpenLoopRateContract.AcceptedRates.Contains(rate)
+            || !TryInt64(fields[CompletedFieldIndex], out var completed) || completed < OpenLoopRateContract.ProgressInterval
             || completed % OpenLoopRateContract.ProgressInterval != 0
-            || !TryInt64(fields[5], out var started) || started < completed
-            || !TryInt64(fields[6], out var planned) || planned != OpenLoopRateContract.PlannedOperations
+            || !TryInt64(fields[StartedFieldIndex], out var started) || started < completed
+            || !TryInt64(fields[PlannedFieldIndex], out var planned) || planned != OpenLoopRateContract.PlannedOperations
             || started > planned)
         {
             return false;
         }
-        marker = new(fields[1], scenario, rate, completed, started, planned);
+        marker = new(fields[ProfileIdFieldIndex], scenario, rate, completed, started, planned);
         return true;
     }
 

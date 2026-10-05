@@ -27,8 +27,6 @@ internal sealed class RuntimeJournalNativeDataSourceAttribute : DataSourceGenera
             SharedType.PerTestSession, metadata, null, static () => new RuntimeJournalNativeFixture());
     }
 }
-#pragma warning restore ORLEANSEXP005
-
 internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDisposable
 {
     private const int StartupSeconds = 30;
@@ -201,3 +199,4 @@ internal sealed class RuntimeJournalNativeClientConfigurator : IClientBuilderCon
         clientBuilder.AddOrleansGraph().UseOrleansCommunication();
     }
 }
+#pragma warning restore ORLEANSEXP005

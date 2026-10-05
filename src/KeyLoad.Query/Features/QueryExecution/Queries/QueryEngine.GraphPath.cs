@@ -22,7 +22,7 @@ public sealed partial class QueryEngine
         }
         using var admission = database.AdmitQuery(cancellationToken);
         budget.Check();
-        var graphRequest = SqlGraphPathParser.Parse(request, database.Limits, budget);
+        var graphRequest = SqlGraphPathParser.Parse(request, database.Limits, budget, execution.MaximumParameters, database.GraphExecution.MaximumLabels);
         budget.Check();
         return database.ShortestPath(principalId, graphRequest, budget);
     }

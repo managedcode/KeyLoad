@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
 using KeyLoad.Core;
@@ -10,21 +11,30 @@ public sealed class SqlParser
 {
     private readonly SqlTokenCursor cursor;
     private readonly DatabaseLimits limits;
+    private readonly QueryExecutionOptions execution;
+    private readonly IOptions<DatabaseLimits> operationLimitsOptions;
     private string? alias;
 
     /// <summary>Creates a parser with the configured SQL byte and token limits.</summary>
     /// <param name="sql">Q1 SQL text.</param>
-    /// <param name="limits">Database query limits.</param>
-    public SqlParser(string sql, DatabaseLimits limits)
-        : this(sql, limits, null)
+    /// <param name="limitsOptions">Centrally validated database query limits.</param>
+    /// <param name="executionOptions">Centrally validated query structure limits.</param>
+    public SqlParser(string sql, IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> executionOptions)
+        : this(sql, limitsOptions, executionOptions, null)
     {
     }
 
-    internal SqlParser(string sql, DatabaseLimits limits, ReadExecutionBudget? budget)
+    internal SqlParser(string sql, IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> executionOptions,
+        ReadExecutionBudget? budget)
     {
         ArgumentNullException.ThrowIfNull(sql);
-        ArgumentNullException.ThrowIfNull(limits);
-        this.limits = limits;
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        limits = limitsOptions.Value;
+        limits.Validate();
+        execution = executionOptions.Value;
+        execution.Validate();
+        operationLimitsOptions = limitsOptions;
         if (sql.Length > limits.MaxQueryBytes || Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.ByteBudgetDetail);
@@ -43,7 +53,7 @@ public sealed class SqlParser
         var (collection, modelSource) = ReadSource();
         ReadAlias();
         projection = projection.Select(p => p with { Path = BoundPath(p.Path) }).ToList();
-        var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, limits, alias).Parse() : null;
+        var filter = cursor.Eat(SqlSyntax.Where) ? new SqlExpressionParser(cursor, operationLimitsOptions, execution.MaximumInValues, alias).Parse() : null;
         var order = ReadOrder();
         var limit = ReadLimit();
         cursor.Eat(SqlSyntax.Semicolon);
@@ -51,7 +61,7 @@ public sealed class SqlParser
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
         }
-        if (limit < 1 || limit > limits.MaxResults || projection.Count > SqlSyntax.MaximumProjection || order.Count > SqlSyntax.MaximumOrdering
+        if (limit < 1 || limit > limits.MaxResults || projection.Count > execution.MaximumProjection || order.Count > execution.MaximumOrdering
             || projection.Select(p => p.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Count)
         {
             throw SqlSyntax.Invalid();

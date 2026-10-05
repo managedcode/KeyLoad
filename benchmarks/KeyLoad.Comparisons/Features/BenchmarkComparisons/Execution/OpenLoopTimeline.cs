@@ -5,6 +5,8 @@ namespace KeyLoad.Comparisons;
 internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RatePerSecond,
     OpenLoopExecutionPolicy ExecutionPolicy)
 {
+    private const int MinimumSpinThresholdTicks = 1;
+
     internal long DueTimestamp(int index)
         => checked(OriginTimestamp + OpenLoopRateContract.ToStopwatchTicks(
             OpenLoopRateContract.DueOffsetNanoseconds(index, RatePerSecond)));
@@ -27,7 +29,7 @@ internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RateP
 
     internal async Task WaitUntilAsync(long timestamp, CancellationToken cancellationToken)
     {
-        var spinThreshold = Math.Max(1, ExecutionPolicy.SpinWindowTicks);
+        var spinThreshold = Math.Max(MinimumSpinThresholdTicks, ExecutionPolicy.SpinWindowTicks);
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();

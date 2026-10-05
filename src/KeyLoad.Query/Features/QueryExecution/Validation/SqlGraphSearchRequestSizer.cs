@@ -5,14 +5,14 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Measures a whole typed SQL graph request without retaining serialized bytes.</summary>
 internal static class SqlGraphSearchRequestSizer
 {
-    internal static void EnsureBounded(SqlGraphSearchRequest request, int maximumBytes, CancellationToken cancellationToken)
+    internal static void EnsureBounded(SqlGraphSearchRequest request, int maximumBytes, int maximumParameters, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         if (request.Query is null)
         {
             throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.WrapperDetail);
         }
-        if (request.Query.Parameters?.Count > SqlGraphSearchSyntax.MaximumParameters)
+        if (request.Query.Parameters?.Count > maximumParameters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlGraphSearchSyntax.ParameterBudgetDetail);
         }
@@ -32,7 +32,7 @@ internal static class SqlGraphSearchRequestSizer
         }
     }
 
-    private sealed class BoundedCountingStream(int maximumBytes, CancellationToken cancellationToken) : Stream
+    private sealed class BoundedCountingStream(int maximumBytes, int maximumParameters, CancellationToken cancellationToken) : Stream
     {
         private long written;
         public override bool CanRead => false;

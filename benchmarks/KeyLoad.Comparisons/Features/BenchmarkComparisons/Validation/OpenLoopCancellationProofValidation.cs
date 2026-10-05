@@ -18,7 +18,7 @@ internal static class OpenLoopCancellationProofValidation
         ValidateIdentity(proof, profile);
         ValidateMilestone(proof.Milestone, proof.ProfileId, proof.Rate, proof.Scenario);
         ValidateAccounting(proof.Accounting, proof.Milestone);
-        if (proof.Version != 1 || proof.DatasetRecords != profile.Documents
+        if (proof.Version != OpenLoopCancellationProofContract.SchemaVersion || proof.DatasetRecords != profile.Documents
             || !ValidHash(proof.DatasetSha256) || !ValidHash(proof.HealthyReadSha256)
             || proof.HealthyReadRevision <= 0 || !proof.CallerCancelled || !proof.ProducerSettled
             || !proof.NativeCallsSettled || !proof.SessionsClosed || !proof.HealthyReadVerified
@@ -35,7 +35,7 @@ internal static class OpenLoopCancellationProofValidation
     {
         var worker = proof.Worker ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationProofIdentityInvalid);
         if (worker.Target != OpenLoopProtocolIdentities.KeyLoadTarget || worker.NodeCount != proof.ExecutionPolicy.MaximumNodes || worker.Scenario != Scenario.PointRead
-            || worker.Profile != profile.Id || worker.RunId < 1 || worker.Attempt < 1 || worker.JobId < 1
+            || worker.Profile != profile.Id || worker.RunId <= 0 || worker.Attempt <= 0 || worker.JobId <= 0
             || proof.Scenario != Scenario.PointRead || !OpenLoopRateContract.AcceptedRates.Contains(proof.Rate))
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationProofIdentityInvalid);
@@ -68,6 +68,6 @@ internal static class OpenLoopCancellationProofValidation
     }
 
     private static bool ValidHash(string value)
-        => value is { Length: 64 }
+        => value is { Length: OpenLoopEvidenceContract.Sha256HexCharacters }
             && value.All(character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
 }

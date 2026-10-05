@@ -5,15 +5,14 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class PartitionQueryPlanValidation
 {
     private const int MinimumLeafCount = 1;
-    private const int MaximumLeafCount = 8;
     private const string InvalidPlanMessage = "The partition query plan is invalid.";
     private const string PlanBudgetMessage = "The partition query plan exceeds its resource budget.";
 
-    internal static PartitionRef[] Validate(PartitionQueryPlanV1 plan, DatabaseLimits limits)
+    internal static PartitionRef[] Validate(PartitionQueryPlanV1 plan, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(limits);
-        ValidateBounds(plan, limits);
+        ValidateBounds(plan, limits, execution.MaximumPartitions);
 
         var partitions = new PartitionRef[plan.Leaves.Length];
         var firstRequest = NormalizeShape(plan.Leaves[0], plan, partitions, 0);
@@ -57,11 +56,11 @@ internal static class PartitionQueryPlanValidation
         return partitions;
     }
 
-    private static void ValidateBounds(PartitionQueryPlanV1 plan, DatabaseLimits limits)
+    private static void ValidateBounds(PartitionQueryPlanV1 plan, DatabaseLimits limits, int maximumLeafCount)
     {
         if (plan.Version != 1 || plan.NodeId == Guid.Empty || plan.Incarnation == Guid.Empty
             || plan.ReadGeneration < 0 || plan.Leaves.IsDefaultOrEmpty
-            || plan.Leaves.Length is < MinimumLeafCount or > MaximumLeafCount)
+            || plan.Leaves.Length < MinimumLeafCount || plan.Leaves.Length > maximumLeafCount)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
         }

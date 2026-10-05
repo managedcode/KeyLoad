@@ -6,7 +6,8 @@ using KeyLoad.Core;
 namespace KeyLoad.Query.Features.QueryExecution;
 
 /// <summary>Reads exact string and Int32 literals or matching scalar parameters.</summary>
-internal sealed class SqlGraphPathValueReader(SqlTokenCursor cursor, QueryRequest query, ReadExecutionBudget budget)
+internal sealed class SqlGraphPathValueReader(SqlTokenCursor cursor, QueryRequest query, ReadExecutionBudget budget,
+    int maximumLabels)
 {
     internal string ReadString()
     {
@@ -61,7 +62,7 @@ internal sealed class SqlGraphPathValueReader(SqlTokenCursor cursor, QueryReques
         do
         {
             budget.Check();
-            if (labels.Count == SqlGraphPathSyntax.MaximumLabels)
+            if (labels.Count == maximumLabels)
             {
                 throw SqlGraphPathSyntax.Invalid();
             }

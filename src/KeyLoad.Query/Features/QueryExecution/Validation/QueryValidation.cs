@@ -7,13 +7,9 @@ namespace KeyLoad.Query;
 
 internal static class QueryValidation
 {
-    private const int MaximumProjection = 256;
-    private const int MaximumOrdering = 16;
-    private const int MaximumParameters = 256;
-    private const int MaximumInValues = 256;
     private const string InvalidPath = "The query field path is invalid.";
 
-    public static AstQueryRequest Normalize(AstQueryRequest request, DatabaseLimits limits)
+    public static AstQueryRequest Normalize(AstQueryRequest request, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         if (request is null || request.Partition is null || request.Query is null)
         {
@@ -29,16 +25,16 @@ internal static class QueryValidation
         JsonData.Identifier(query.Collection);
         ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault
-            || query.Projection is not { Length: >= 1 and <= MaximumProjection }
-            || query.Order.Length > MaximumOrdering || query.Limit < 1 || query.Limit > limits.MaxResults
-            || request.Parameters?.Count > MaximumParameters)
+            || query.Projection.Length < 1 || query.Projection.Length > execution.MaximumProjection
+            || query.Order.Length > execution.MaximumOrdering || query.Limit < 1 || query.Limit > limits.MaxResults
+            || request.Parameters?.Count > execution.MaximumParameters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, "The query structure exceeds its budget.");
         }
 
         var projection = NormalizeProjection(query.Projection, limits);
         var order = NormalizeOrder(query.Order, limits);
-        var predicates = new PredicateNormalizer(limits);
+        var predicates = new PredicateNormalizer(limits, execution.MaximumInValues);
         var filter = query.Filter is null ? null : predicates.Filter(query.Filter, 1);
         var parameters = NormalizeParameters(request.Parameters, predicates);
         var normalized = request with
@@ -130,7 +126,7 @@ internal static class QueryValidation
         }
     }
 
-    private sealed class PredicateNormalizer(DatabaseLimits limits)
+    private sealed class PredicateNormalizer(DatabaseLimits limits, int maximumInValues)
     {
         private int count;
 
@@ -176,7 +172,7 @@ internal static class QueryValidation
                 Logical logical => NormalizeLogical(logical, depth),
                 Negation negation => new Negation(Filter(negation.Inner, depth + 1)),
                 NullTest test => new NullTest(NormalizeOperand(test.Value, depth + 1), test.Negated, test.Missing),
-                InPredicate list when !list.Values.IsDefault && list.Values is { Length: >= 1 and <= MaximumInValues }
+                InPredicate list when !list.Values.IsDefault && list.Values.Length >= 1 && list.Values.Length <= maximumInValues
                     => new InPredicate(NormalizeOperand(list.Value, depth + 1),
                         [.. list.Values.Select(value => NormalizeOperand(value, depth + 1))], list.Negated),
                 _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query predicate is unsupported.")

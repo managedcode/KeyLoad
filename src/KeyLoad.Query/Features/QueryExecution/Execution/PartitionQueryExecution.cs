@@ -25,7 +25,7 @@ internal static class PartitionQueryExecution
         budget.Check();
         using var admission = database.AdmitQuery(budget.Cancellation);
         budget.Check();
-        var normalized = QueryValidation.Normalize(request, database.Limits);
+        var normalized = QueryValidation.Normalize(request, database.Limits, engine.Execution);
         return ExecuteNormalized(engine, principalId, normalized, partitions, budget, null,
             measureInternalResult: true);
     }
@@ -37,7 +37,7 @@ internal static class PartitionQueryExecution
         ArgumentNullException.ThrowIfNull(budget);
         var database = engine.PartitionQueryOwner;
         budget.Check();
-        var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits);
+        var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits, engine.Execution);
         return ExecuteNormalized(engine, principalId, prepared.Request, prepared.Partitions,
             budget, expectedOwner, measureInternalResult: false);
     }
@@ -51,7 +51,7 @@ internal static class PartitionQueryExecution
         budget.Check();
         var identity = database.Store.Identity;
         var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, database.Limits);
-        _ = PartitionQueryPlanValidation.Validate(plan, database.Limits);
+        _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
         var grants = ReserveGrants(budget, plan);
         var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResultV1>(plan.Leaves.Length);
         var executor = new PartitionQueryLeafExecutor(engine, database, budget, expectedOwner);
@@ -61,7 +61,7 @@ internal static class PartitionQueryExecution
             results.Add(executor.Execute(principalId, plan.Leaves[index], normalized with
             { Partition = plan.Leaves[index].Partition }, grants[index]));
         }
-        var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget);
+        var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget, engine.Execution);
         if (measureInternalResult)
         {
             budget.CheckResult(result);

@@ -111,7 +111,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
 
     private AstQueryRequest LiveRequest(AstQueryRequest request)
     {
-        request = QueryValidation.Normalize(request, database.Limits);
+        request = QueryValidation.Normalize(request, database.Limits, queryEngine.Execution);
         if (request.Cursor is not null || request.Query.Order.Length != 0 || request.Query.Explain)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability,

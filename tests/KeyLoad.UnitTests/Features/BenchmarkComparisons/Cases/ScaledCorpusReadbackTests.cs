@@ -78,7 +78,7 @@ internal sealed class ScaledCorpusReadbackTests
                     yield return new(document.Id, document.Json);
                     if (number == 2)
                     {
-                        source.Cancel();
+                        await source.CancelAsync();
                     }
 
                     await Task.Yield();

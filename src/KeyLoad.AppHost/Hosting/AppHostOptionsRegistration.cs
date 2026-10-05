@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using KeyLoad;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -24,6 +25,11 @@ internal static class AppHostOptionsRegistration
             AppHostStartupOptions.ValidationMessage);
         var resources = Bind<ScaleServerResourceOptions>(builder.Configuration.GetSection(ScaleServerResourceOptions.SectionName),
             options => options.IsValid(), ScaleServerResourceOptions.ValidationMessage);
+        var images = Bind<ContainerImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
+        var imageExecution = Bind<ContainerImageExecutionOptions>(builder.Configuration.GetSection(ContainerImageExecutionOptions.SectionName),
+            options => options.IsValid(), ContainerImageExecutionOptions.ValidationMessage);
+        builder.Services.AddSingleton(images);
+        builder.Services.AddSingleton(imageExecution);
         var provenance = BenchmarkProvenanceRegistration.Bind();
         var control = AppHostControlOptionsRegistration.Bind(builder.Configuration, execution);
         builder.Services.AddSingleton(control);
@@ -31,7 +37,7 @@ internal static class AppHostOptionsRegistration
         builder.Services.AddSingleton(provenance);
         builder.Services.AddSingleton(execution);
         builder.Services.AddSingleton(startup);
-        return new(execution, startup, resources, provenance, control);
+        return new(execution, startup, resources, provenance, control, images, imageExecution);
     }
 
     internal static IOptions<TestExecutionOptions> BindTestExecution(IConfiguration configuration) =>
@@ -50,4 +56,5 @@ internal static class AppHostOptionsRegistration
 
 internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> TestExecution, IOptions<AppHostStartupOptions> Startup,
     IOptions<ScaleServerResourceOptions> ServerResources, IOptions<BenchmarkProvenanceOptions> Provenance,
-    IOptions<AppHostControlOptions> Control);
+    IOptions<AppHostControlOptions> Control, IOptions<ContainerImageOptions> Images,
+    IOptions<ContainerImageExecutionOptions> ImageExecution);

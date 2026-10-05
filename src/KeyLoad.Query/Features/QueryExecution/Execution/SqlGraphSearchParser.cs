@@ -7,13 +7,14 @@ namespace KeyLoad.Query;
 /// <summary>Parses the closed Q1.Search.v1 statement into the existing graph-search request.</summary>
 internal static class SqlGraphSearchParser
 {
-    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget)
+    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget,
+        int maximumParameters)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         ValidateEnvelope(request);
-        SqlGraphSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, budget.Cancellation);
+        SqlGraphSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget.Cancellation);
         budget.Check();
         var reader = new SqlGraphSearchStatementReader(request.Query, limits, budget);
         return reader.Parse();

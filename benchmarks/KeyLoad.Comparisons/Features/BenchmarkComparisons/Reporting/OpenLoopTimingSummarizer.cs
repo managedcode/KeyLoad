@@ -2,6 +2,11 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopTimingSummarizer
 {
+    private const int MinimumQuantileIndex = 0;
+    private const double P50Quantile = 0.50;
+    private const double P95Quantile = 0.95;
+    private const double P99Quantile = 0.99;
+    private const double NanosecondsPerMillisecond = 1_000_000d;
     internal static OpenLoopTimingSummary Summarize(OpenLoopStateSnapshot state, int capacity)
     {
         var samples = state.Samples;
@@ -27,13 +32,13 @@ internal static class OpenLoopTimingSummarizer
             or OpenLoopOutcome.TimedOutAfterStart;
 
     private static double DueMilliseconds(OpenLoopLatencySample sample)
-        => sample.DueOffsetNanoseconds / 1_000_000d;
+        => sample.DueOffsetNanoseconds / NanosecondsPerMillisecond;
 
     private static OpenLoopLatencyQuantiles Quantiles(IEnumerable<double?> values, int denominator)
     {
         var ordered = values.Where(value => value is not null).Select(value => value!.Value)
             .Order().ToArray();
-        return new(Percentile(ordered, .50), Percentile(ordered, .95), Percentile(ordered, .99),
+        return new(Percentile(ordered, P50Quantile), Percentile(ordered, P95Quantile), Percentile(ordered, P99Quantile),
             ordered.Length, denominator - ordered.Length, denominator);
     }
 
@@ -47,5 +52,5 @@ internal static class OpenLoopTimingSummarizer
     }
 
     private static double? Percentile(double[] values, double quantile)
-        => values.Length == 0 ? null : values[Math.Max(0, (int)Math.Ceiling(values.Length * quantile) - 1)];
+        => values.Length == 0 ? null : values[Math.Max(MinimumQuantileIndex, (int)Math.Ceiling(values.Length * quantile) - 1)];
 }

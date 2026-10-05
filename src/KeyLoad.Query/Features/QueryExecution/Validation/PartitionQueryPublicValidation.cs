@@ -6,21 +6,20 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal static class PartitionQueryPublicValidation
 {
     private const int RequestVersion = 1;
-    private const int MaximumPartitions = 8;
     private const string InvalidRequest = "The partition query request is invalid.";
     private const string UnsupportedQuery = "The partition query contains unsupported query options.";
     private const string RequestBytesExceeded = "The partition query request exceeds its byte budget.";
 
     internal static (AstQueryRequest Request, ImmutableArray<PartitionRef> Partitions) Prepare(
-        PartitionQueryRequestV1? request, DatabaseLimits limits)
+        PartitionQueryRequestV1? request, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(limits);
         ValidateHeader(request);
-        var partitions = OrderPartitions(request!.Partitions);
+        var partitions = OrderPartitions(request!.Partitions, execution.MaximumPartitions);
         ValidateOptions(request.Query);
         var ast = new AstQueryRequest(partitions[0], request.Query, request.Parameters,
             request.AllowFullScan, AstVersion: request.AstVersion);
-        var normalized = QueryValidation.Normalize(ast, limits);
+        var normalized = QueryValidation.Normalize(ast, limits, execution);
         var boundedRequest = request with
         {
             Partitions = partitions,
@@ -47,9 +46,9 @@ internal static class PartitionQueryPublicValidation
         }
     }
 
-    private static ImmutableArray<PartitionRef> OrderPartitions(ImmutableArray<PartitionRef> partitions)
+    private static ImmutableArray<PartitionRef> OrderPartitions(ImmutableArray<PartitionRef> partitions, int maximumPartitions)
     {
-        if (partitions.IsDefaultOrEmpty || partitions.Length > MaximumPartitions)
+        if (partitions.IsDefaultOrEmpty || partitions.Length > maximumPartitions)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }

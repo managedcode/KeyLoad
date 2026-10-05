@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
@@ -13,8 +14,6 @@ internal sealed partial record RuntimeContainerImage(string Image, string Tag, s
     private const string DigestGroup = "digest";
     private const string TagSeparator = ":";
     private const string DigestSeparator = "@sha256:";
-    private const int MaximumImageCharacters = 1_024;
-    private const int RegexTimeoutMilliseconds = 100;
     private const string ImagePattern =
         "\\A(?<image>(?<registry>[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?)" +
         "(?:/[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*)+):" +
@@ -25,13 +24,23 @@ internal sealed partial record RuntimeContainerImage(string Image, string Tag, s
     internal static RuntimeContainerImage Read(IDistributedApplicationBuilder builder, string configurationKey)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var value = builder.Configuration[configurationKey]
-            ?? throw new InvalidOperationException(MissingPrefix + configurationKey);
-        if (value.Length > MaximumImageCharacters)
+        var runtime = AppHostOptionsRegistration.Get(builder);
+        var images = runtime.Images.Value;
+        var policy = runtime.ImageExecution.Value;
+        var value = configurationKey switch
+        {
+            ContainerImageOptions.ServerKey => images.Server,
+            ContainerImageOptions.RunnerKey => images.Runner,
+            ContainerImageOptions.VoterOneKey => images.VoterOne,
+            ContainerImageOptions.VoterTwoKey => images.VoterTwo,
+            ContainerImageOptions.VoterThreeKey => images.VoterThree,
+            _ => throw new ArgumentOutOfRangeException(nameof(configurationKey))
+        } ?? throw new InvalidOperationException(MissingPrefix + configurationKey);
+        if (value.Length > policy.MaximumImageCharacters)
         {
             throw new InvalidOperationException(InvalidImage);
         }
-        var match = ImageReference().Match(value);
+        var match = new Regex(ImagePattern, RegexOptions.CultureInvariant, policy.MatchTimeout).Match(value);
         if (!match.Success || !Uri.TryCreate(Uri.UriSchemeHttp + Uri.SchemeDelimiter +
                 match.Groups[RegistryGroup].Value, UriKind.Absolute, out var registry)
             || !string.IsNullOrEmpty(registry.UserInfo))
@@ -44,6 +53,4 @@ internal sealed partial record RuntimeContainerImage(string Image, string Tag, s
     internal IResourceBuilder<ContainerResource> Add(IDistributedApplicationBuilder builder, string name)
         => builder.AddContainer(name, Image, Tag).WithImageSHA256(Digest);
 
-    [GeneratedRegex(ImagePattern, RegexOptions.CultureInvariant, RegexTimeoutMilliseconds)]
-    private static partial Regex ImageReference();
 }

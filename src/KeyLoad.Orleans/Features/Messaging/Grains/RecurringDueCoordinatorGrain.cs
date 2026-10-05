@@ -63,11 +63,6 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     private async Task ExecuteNativeTimeoutAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
     {
         var hint = DecodeJob(context);
-        if (context.Job.DueTime > clock.GetUtcNow())
-        {
-            return;
-        }
-
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken);
         deadline.CancelAfter(settings.DispatchDeadline);
         var token = deadline.Token;

@@ -9,7 +9,11 @@ internal static class OpenLoopRateContract
     internal const int SampleCapacity = 4_096;
     internal const int ProgressInterval = 1_024;
     internal const long NanosecondsPerSecond = 1_000_000_000;
-    internal static readonly ImmutableArray<int> AcceptedRates = [250, 1_000, 4_000];
+    internal const int LowLoadRatePerSecond = 250;
+    internal const int MediumLoadRatePerSecond = 1_000;
+    internal const int HighLoadRatePerSecond = 4_000;
+    internal static readonly ImmutableArray<int> AcceptedRates =
+        [LowLoadRatePerSecond, MediumLoadRatePerSecond, HighLoadRatePerSecond];
 
     internal static void Validate(int rate)
     {

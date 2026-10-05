@@ -5,10 +5,11 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopHealthyReadVerifier
 {
+    private const int FirstCorpusDocumentIndex = 0;
     internal static async Task<OpenLoopHealthyReadResult> ReadAndVerifyAsync(IComparisonTarget target,
         ScaledComparisonCorpus corpus, CancellationToken hostToken)
     {
-        var expected = corpus.CreateDocument(0);
+        var expected = corpus.CreateDocument(FirstCorpusDocumentIndex);
         var session = await target.OpenSessionAsync(hostToken).ConfigureAwait(false);
         Exception? primary = null;
         OpenLoopCancellationHealthRead? result = null;

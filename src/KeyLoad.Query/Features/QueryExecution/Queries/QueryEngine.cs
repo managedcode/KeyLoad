@@ -17,6 +17,9 @@ public sealed partial class QueryEngine
     internal const string ExplainId = "explain";
     internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private readonly TimeSpan cursorLifetime;
+    private readonly QueryExecutionOptions execution;
+    private readonly IOptions<QueryExecutionOptions> executionOptions;
+    internal QueryExecutionOptions Execution => execution;
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
     internal DatabaseEngine PartitionQueryOwner => database;
@@ -32,9 +35,10 @@ public sealed partial class QueryEngine
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(options);
-        var settings = options.Value;
-        settings.Validate();
-        cursorLifetime = settings.CursorLifetime;
+        execution = options.Value;
+        execution.Validate();
+        executionOptions = options;
+        cursorLifetime = execution.CursorLifetime;
         this.database = database;
         graphSearch = searchEngine ?? new SearchEngine(database);
         liveQueries = new(database, this);
@@ -49,7 +53,7 @@ public sealed partial class QueryEngine
     /// <returns>A bounded page with authorized continuation metadata.</returns>
     public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
-        => Execute(principalId, budget => new(request.Partition, new SqlParser(request.Sql, database.Limits, budget).Parse(), request.Parameters,
+        => Execute(principalId, budget => new(request.Partition, new SqlParser(request.Sql, database.OperationLimitsOptions, executionOptions, budget).Parse(), request.Parameters,
             request.AllowFullScan, request.Cursor), timeProvider, cancellationToken);
 
     /// <summary>Executes a bounded Q1.Search.v1 statement through the canonical graph-search engine.</summary>
@@ -59,7 +63,7 @@ public sealed partial class QueryEngine
     /// <returns>The same graph-search result produced by the direct request contract.</returns>
     public Task<GraphSearchResult> SearchSqlAsync(string principalId, SqlGraphSearchRequest request,
         CancellationToken cancellationToken = default)
-        => SqlGraphSearchExecutor.ExecuteAsync(database, graphSearch, principalId, request, cancellationToken);
+        => SqlGraphSearchExecutor.ExecuteAsync(database, graphSearch, principalId, request, execution, cancellationToken);
     /// <summary>Executes a typed bounded query against one authorized read cut.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
     /// <param name="request">Validated AST input and optional continuation.</param>
@@ -80,7 +84,7 @@ public sealed partial class QueryEngine
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();
-        var request = QueryValidation.Normalize(adapt(budget), database.Limits);
+        var request = QueryValidation.Normalize(adapt(budget), database.Limits, execution);
         var query = request.Query;
         if (query.ModelSource is not null)
         {

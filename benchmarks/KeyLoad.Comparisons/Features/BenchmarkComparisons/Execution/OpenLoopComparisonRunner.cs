@@ -13,6 +13,8 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
     IOptions<OpenLoopExecutionOptions> executionOptions, Action<string>? progress = null,
     Action<OpenLoopProgressV1>? nativeProgress = null)
 {
+    private const double AccountingSnapshotElapsedSeconds = 1d;
+
     private readonly OpenLoopExecutionPolicy executionPolicy = OpenLoopExecutionOptions.Snapshot(
         (executionOptions ?? throw new ArgumentNullException(nameof(executionOptions))).Value);
 
@@ -95,7 +97,7 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         ScaledOperationInputs inputs, CancellationToken cancellationToken)
     {
         var state = execution.State ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopMeasurementNotStarted);
-        if (state.Snapshot(1).Accounting.Succeeded != OpenLoopRateContract.PlannedOperations
+        if (state.Snapshot(AccountingSnapshotElapsedSeconds).Accounting.Succeeded != OpenLoopRateContract.PlannedOperations
             || execution.Scenario == Scenario.PointRead)
         {
             return;

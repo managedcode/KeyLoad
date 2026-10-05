@@ -14,12 +14,14 @@ internal static class OpenLoopComparisonValidation
             || worker.Profile != profile.Id || worker.Target != target.Profile.Name
             || profile.Operations != OpenLoopRateContract.PlannedOperations
             || profile.Concurrency != policy.ConcurrentSessions
-            || worker.NodeCount is < 1 or > policy.MaximumNodes || !IsSupportedScenario(worker.Scenario)
+            || worker.NodeCount <= 0 || worker.NodeCount > policy.MaximumNodes || !IsSupportedScenario(worker.Scenario)
             || !target.Supports(worker.Scenario) || !ValidSource(worker.SourceRevision)
-            || worker.RunId < 1 || worker.Attempt < 1 || worker.JobId < 1
-            || !Within(worker.Repository, 512) || !Within(worker.Ref, 512) || !Within(worker.Workflow, 256))
+            || worker.RunId <= 0 || worker.Attempt <= 0 || worker.JobId <= 0
+            || !Within(worker.Repository, OpenLoopEvidenceContract.MaximumRepositoryCharacters)
+            || !Within(worker.Ref, OpenLoopEvidenceContract.MaximumRefCharacters)
+            || !Within(worker.Workflow, OpenLoopEvidenceContract.MaximumWorkflowCharacters))
         {
-            throw new ArgumentOutOfRangeException(nameof(rate), "The open-loop cell is outside its frozen profile.");
+            throw new ArgumentOutOfRangeException(nameof(rate), OpenLoopFailureMessages.CellOutsideFrozenProfile);
         }
     }
 
@@ -35,7 +37,7 @@ internal static class OpenLoopComparisonValidation
         => scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete;
 
     private static bool ValidSource(string value)
-        => value.Length == 40 && value.All(Uri.IsHexDigit);
+        => value.Length == OpenLoopEvidenceContract.GitRevisionHexCharacters && value.All(Uri.IsHexDigit);
 
     private static bool Within(string value, int limit) => !string.IsNullOrWhiteSpace(value) && value.Length <= limit;
 }
