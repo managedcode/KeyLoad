@@ -2,15 +2,16 @@
 
 ## License distribution
 
-Owner decision 2026-10-05 selects Business Source License 1.1 with the
-SurrealDB-style Database Service restriction and Apache License 2.0 as the Change License.
-[ADR-107](../ADR/ADR-107-business-source-license.md) owns the parameters and
+The owner's final decision on 2026-10-05 selects Elastic License 2.0 to permit
+application use while reserving third-party hosted/managed database services
+for separate authorization from ManagedCode, without automatic expiry.
+[ADR-107](../ADR/ADR-107-elastic-license.md) owns the license and
 implementation contract; the complete root [LICENSE](../../LICENSE) is authoritative.
 
 | Requirement | Acceptance and pass/fail evidence |
 | --- | --- |
-| REQ-LIC-001 standard license | AC-LIC-001: unchanged upstream BSL 1.1 Notice/Terms/Covenants, ManagedCode/KeyLoad parameters, Change Date 2030-10-05 and Apache 2.0 Change License. Exact standard-text comparison is the manual legal-text exception; absent or altered standard terms fail. |
-| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file and dotnet publish copies it into server/CLI distribution roots; README and site identify BSL/source availability and JSON-LD links to that license. Inspect an actual local package/publish output and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. An MIT expression or missing license file fails. |
+| REQ-LIC-001 standard license | AC-LIC-001: the complete ELv2 body matches the authoritative published source byte-for-byte, with a separate KeyLoad/ManagedCode copyright and licensor header. The hosted/managed-service, license-key and notice-preservation limitations remain unchanged; no BSL Change Date, Apache conversion or GPL covenant remains. Exact standard-text comparison is the manual legal-text exception; absent or altered standard terms fail. |
+| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file and dotnet publish copies it into server/CLI distribution roots; README identifies ELv2/source availability and site JSON-LD links to that license. Inspect an actual local package/publish output and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. An obsolete MIT/BSL declaration or missing license file fails. |
 | REQ-LIC-003 preserve independent licenses | AC-LIC-003: third-party license notices and vendored Three.js bytes remain unchanged. Review the scoped diff and original vendor manifest hashes; no dependency relicensing or runtime/storage changes are permitted. |
 
 TASK-LIC-001 freezes the contract, TASK-LIC-002 updates the license/metadata and
@@ -20,10 +21,10 @@ performance gates remain unchanged; license metadata does not qualify the databa
 
 ```mermaid
 flowchart LR
-    License[Root BSL 1.1 LICENSE] --> Package[NuGet license file]
+    License[Root Elastic License 2.0 LICENSE] --> Package[NuGet license file]
     License --> Readme[Product licensing summary]
     License --> Site[Source available metadata]
-    License --> Change[Apache 2.0 on the standard Change Date]
+    License --> Commercial[Separate authorization for hosted database services]
 ```
 
 The owner requires three pipelines and a real dated database release. The immutable

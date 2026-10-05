@@ -19,8 +19,8 @@ records the per-method audit, bounded worker/advisory/control/job candidates and
 required real-operation tests. Selection is Accepted; runtime/provider adoption
 and qualification remain pending.
 
-[ADR-107 Business Source License 1.1](ADR-107-business-source-license.md) records
-the owner's licensing choice, Apache 2.0 Change License and distribution metadata contract.
+[ADR-107 Elastic License 2.0](ADR-107-elastic-license.md) records
+the owner's hosted-database-service restriction and distribution metadata contract.
 
 
 [ADR-105 published NuGet refresh](ADR-105-published-nuget-upgrade.md) records the

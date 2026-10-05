@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BSL%201.1-black" alt="Business Source License 1.1"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Elastic%202.0-black" alt="Elastic License 2.0"></a>
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <img src="https://img.shields.io/badge/built%20on-Orleans-0b5cad" alt="Built on Orleans">
   <img src="https://img.shields.io/badge/storage-ZoneTree-222222" alt="ZoneTree storage">
@@ -394,7 +394,7 @@ Yes, through MCP or the HTTP API under `/v1/`. The typed SDK is .NET for now.
 
 ### Is the KeyLoad source available?
 
-Yes. KeyLoad is developed publicly on GitHub under the [Business Source License 1.1](LICENSE). Application use is permitted, including production use; offering KeyLoad as a database service to third parties who can create, manage or control schemas or tables requires a separate commercial license. Current BSL distributions are source available.
+Yes. KeyLoad is developed publicly on GitHub under the [Elastic License 2.0](LICENSE). You can use it in your own applications, including commercial production applications. Providing KeyLoad to third parties as a hosted or managed database service with access to a substantial set of its features requires separate authorization from ManagedCode. KeyLoad is source available.
 
 ### Can I run it in production?
 
@@ -456,7 +456,7 @@ Development and presentation also use [Aspire](https://github.com/dotnet/aspire)
 
 ## License
 
-KeyLoad is licensed under [Business Source License 1.1](LICENSE), with Apache License 2.0 as the Change License. The Change Date is October 5, 2030; the standard earlier fourth-anniversary rule applies to each version. Dependency licenses remain with their respective owners.
+KeyLoad is licensed under the [Elastic License 2.0](LICENSE). Use it in your own applications; contact [ManagedCode](https://www.managed-code.com/) for authorization to offer it as a hosted or managed database service to third parties. Dependency licenses remain with their respective owners.
 
 ---
 

@@ -103,7 +103,7 @@ AC-SEO-001..007 in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.
 Preserve the canonical SVG and existing identity; derive six PNG/ICO files under
 console Assets with byte-identical site mirrors. Static landing metadata and an
 authored SVG/1200×630 PNG share card use the existing www canonical. JSON-LD
-describes the actual project license from the root LICENSE (BSL 1.1 under ADR-107) without invented ratings/offers or measurements.
+describes the actual project license from the root LICENSE (Elastic License 2.0 under ADR-107) without invented ratings/offers or measurements.
 The console receives only those finite public GET/HEAD icon routes and noindex;
 its authentication, CSP and data routes remain unchanged. Existing robots/sitemap
 generation is extended within BenchmarkComparisons, not a second crawl source.

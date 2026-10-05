@@ -57,8 +57,9 @@ ManagedCode packages are our projects. Fix dependency defects in their owning si
 
 ## Licensing
 
-- Owner direction 2026-10-05 selects Business Source License 1.1 for new KeyLoad-owned distributions, using the SurrealDB-style Additional Use Grant: use in applications, including production, is permitted; providing database functionality to third parties who can create, manage or control schemas or tables requires a separate commercial license. Keep the standard BSL 1.1 terms unchanged and the complete KeyLoad parameters in the root `LICENSE`.
-- Keep README, website metadata and packaged license files consistent with the root `LICENSE`; describe BSL distributions as source available, not open source. Preserve every third-party or independently owned dependency's original license and notices. Owner final clarification 2026-10-05 selects Apache License 2.0 as the Change License; each distribution must retain its applicable Change Date and the standard maximum four-year conversion rule.
+- Owner final scope clarification 2026-10-05 requires permitting application use while reserving third-party hosted/managed database services for separate authorization from ManagedCode. Use the unmodified Elastic License 2.0 for new KeyLoad-owned distributions to implement this requirement without automatic expiry. This rule-specific direction supersedes the earlier BSL 1.1 selection, Apache 2.0 Change License and Change Date requests; those parameters MUST NOT remain active licensing promises.
+- Keep README, website metadata and packaged license files consistent with the root `LICENSE`; describe Elastic License 2.0 distributions as source available, not open source. Preserve every third-party or independently owned dependency's original license and notices.
+- Validate the complete license against its authoritative published text. Identify ManagedCode as KeyLoad's copyright holder and licensor; license names or their authors MUST NOT be presented as database dependencies or ownership of KeyLoad code.
 
 ## MCAF repository workflow
 
