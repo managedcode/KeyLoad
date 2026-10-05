@@ -10,7 +10,7 @@ internal static class McpReplyWriter
     /// <param name="requestId">The actual operation execution identity.</param>
     /// <param name="maximumBytes">The pre-reserved private wrapper capacity.</param>
     /// <returns>The complete independent wrapper bytes.</returns>
-    internal static byte[] Success(ReadOnlySpan<byte> canonical, Guid requestId, int maximumBytes)
+    internal static byte[] Success(ReadOnlySpan<byte> canonical, Guid? requestId, int maximumBytes)
     {
         using var stream = new McpBoundedWriteStream(maximumBytes);
         using var writer = new Utf8JsonWriter(stream);

@@ -18,7 +18,7 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         var tool = request?.Method == RequestMethods.ToolsCall;
         try
         {
-            state.Admit(tool ? Select(request!) : null, cancellationToken);
+            state.Admit(tool ? McpGatewayMetaArgumentReader.Select(request!) : default, cancellationToken);
         }
         catch (KeyLoadException error)
         {
@@ -51,15 +51,6 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
         }
         await next(message, cancellationToken).ConfigureAwait(false);
     };
-
-    private static McpOperationDescriptor Select(JsonRpcRequest request)
-    {
-        if (request.Params is not JsonObject parameters || parameters[McpTransportProtocol.Name] is not JsonValue name
-            || !name.TryGetValue<string>(out var toolName) || string.IsNullOrWhiteSpace(toolName))
-        { throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments); }
-        return McpOperationCatalog.TryGetTool(toolName, out var descriptor) ? descriptor
-            : throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation);
-    }
 
     private async Task RejectAsync(MessageContext message, JsonRpcRequest request, bool tool, ErrorCode code,
         CancellationToken cancellationToken)

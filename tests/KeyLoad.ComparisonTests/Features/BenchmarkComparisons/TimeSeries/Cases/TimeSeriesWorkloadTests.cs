@@ -60,7 +60,7 @@ internal sealed class TimeSeriesWorkloadTests
             ?? throw new InvalidOperationException("The loaded TimeSeries assembly has no informational version.");
         var separator = loadedVersion.IndexOf('+', StringComparison.Ordinal);
         var packageVersion = separator < 0 ? loadedVersion : loadedVersion[..separator];
-        await Assert.That(packageVersion).IsEqualTo("10.0.3");
+        await Assert.That(packageVersion).IsEqualTo("10.1.1");
 
         var workload = TimeSeriesComparisonWorkloadFactory.Create("package-version-run");
         var recorder = new TimeSeriesComparisonRecorder(workload, TimeProvider.System);
@@ -69,7 +69,7 @@ internal sealed class TimeSeriesWorkloadTests
             .Targets.Single(target => target.Name == "ManagedCode.TimeSeries");
 
         await Assert.That(library.PackageVersion).IsEqualTo(packageVersion);
-        await Assert.That(library.PackageVersion).IsEqualTo("10.0.3");
+        await Assert.That(library.PackageVersion).IsEqualTo("10.1.1");
     }
 
     private static ImmutableArray<TimeSeriesBucketValue> Oracle(

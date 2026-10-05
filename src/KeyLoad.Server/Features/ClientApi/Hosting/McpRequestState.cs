@@ -25,6 +25,8 @@ internal sealed class McpRequestState : IDisposable
     internal PrincipalRecord Principal { get; private set; } = null!;
     /// <summary>Gets the exact public capability selected before native typed decoding.</summary>
     internal McpOperationDescriptor? Operation { get; private set; }
+    /// <summary>Gets the one fixed public meta operation admitted for this request.</summary>
+    internal McpGatewayMetaOperation MetaOperation { get; private set; }
     /// <summary>Gets the canonical payload ceiling after admission.</summary>
     internal int MaximumPayloadBytes => admission.MaximumPayloadBytes;
     /// <summary>Gets the classified canonical result bound.</summary>
@@ -51,13 +53,15 @@ internal sealed class McpRequestState : IDisposable
     }
 
     /// <summary>Admits one raw native message before typed parameter conversion.</summary>
-    internal void Admit(McpOperationDescriptor? descriptor, CancellationToken cancellationToken)
+    internal void Admit(McpGatewayMetaSelection selection, CancellationToken cancellationToken)
     {
+        var descriptor = selection.CanonicalOperation;
         var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? 0,
             body?.Shape ?? default,
             0, authentication.Length, authenticationShape);
         admission.Acquire(Principal, descriptor, input, cancellationToken);
         Operation = descriptor;
+        MetaOperation = selection.Operation;
     }
 
     /// <summary>Grows before creating a canonical success wrapper and retains its borrowed native element.</summary>
@@ -70,6 +74,34 @@ internal sealed class McpRequestState : IDisposable
             checked(reply.Payload.Length + McpFramingProtocol.EnvelopeAllowanceBytes));
         replies.Add(owner);
         return owner.ToolResult();
+    }
+
+    /// <summary>Wraps bounded gateway metadata without assigning a database execution identity.</summary>
+    internal CallToolResult MetaSuccess(byte[] canonical, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(canonical);
+        try
+        {
+            admission.CoverReplyScan(canonical.Length, cancellationToken);
+            var shape = McpFrameBounds.InspectReply(canonical, MaximumReplyBytes);
+            admission.CoverReply(canonical.Length, shape, cancellationToken);
+            var owner = McpReplyOwner.Success(canonical, null,
+                checked(canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes));
+            var retained = false;
+            try
+            {
+                replies.Add(owner);
+                retained = true;
+                return owner.ToolResult();
+            }
+            finally
+            {
+                if (!retained)
+                { owner.Dispose(); }
+            }
+        }
+        finally
+        { System.Security.Cryptography.CryptographicOperations.ZeroMemory(canonical); }
     }
 
     /// <summary>Creates only fixed safe error content, retaining null or actual execution identity.</summary>

@@ -161,7 +161,7 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
     {
         await using var client = await McpOfficialClient.ConnectAsync(fixture.App, RequestCqrsRf3Protocol.Node1,
             fixture.AdminKey, cancellationToken).ConfigureAwait(false);
-        var reply = await client.Client.CallToolAsync(AtomicPartitionPlacementPublicRf3Protocol.BindTool,
+        var reply = await client.Client.InvokeKeyLoadToolAsync(AtomicPartitionPlacementPublicRf3Protocol.BindTool,
             McpBindArguments(commandId, request), cancellationToken: cancellationToken).ConfigureAwait(false);
         var result = await McpCallerAssertions.SuccessAsync<bool>(reply).ConfigureAwait(false);
         await Assert.That(result.Value).IsTrue();
@@ -180,7 +180,7 @@ internal sealed class AtomicPartitionPlacementPublicRf3Workflow(ClusterFixture f
     private static async Task BindMcpErrorOnAsync(McpOfficialClient client, Guid commandId,
         BindAtomicPartitionPlacementRequest request, ErrorCode error, CancellationToken cancellationToken)
     {
-        var reply = await client.Client.CallToolAsync(AtomicPartitionPlacementPublicRf3Protocol.BindTool,
+        var reply = await client.Client.InvokeKeyLoadToolAsync(AtomicPartitionPlacementPublicRf3Protocol.BindTool,
             McpBindArguments(commandId, request), cancellationToken: cancellationToken).ConfigureAwait(false);
         await McpCallerAssertions.ErrorAsync(reply, error, dispatched: true).ConfigureAwait(false);
     }

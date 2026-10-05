@@ -86,5 +86,7 @@ public enum GrainReadKind
     /// <summary>Read a persisted administrator-authorized atomic-partition placement witness.</summary>
     AtomicPartitionPlacement,
     /// <summary>Read one complete bounded query over same-owner atomic partitions.</summary>
-    PartitionQuery
+    PartitionQuery,
+    /// <summary>Read the bounded eventual reverse-adjacency projection for one visible graph target.</summary>
+    GraphIncomingEdges
 }

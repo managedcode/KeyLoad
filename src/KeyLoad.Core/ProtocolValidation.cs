@@ -70,6 +70,8 @@ public sealed partial class DatabaseEngine
             EnqueueMessage message => message.Queue,
             UpsertEdge edge => edge.Graph,
             DeleteEdge edge => edge.Graph,
+            ApplyCrossPartitionReverseEdge edge => edge.Graph,
+            CompleteCrossPartitionReverseEdge edge => edge.Graph,
             AppendSamples samples => samples.SeriesSet,
             ExpireSamples samples => samples.SeriesSet,
             StoreAggregateSnapshot snapshot => snapshot.StreamSet,
@@ -98,6 +100,8 @@ public sealed partial class DatabaseEngine
             ApplyVectorProjection projection => projection.SourceStream is null || projection.SourceDocument is null
                 || projection.SourceStream.Partition is null || projection.SourceDocument.Partition is null
                 || projection.Target is null || projection.Target.Space is null,
+            ApplyCrossPartitionReverseEdge edge => edge.SourcePartition is null || edge.Destination?.Partition is null,
+            CompleteCrossPartitionReverseEdge edge => edge.SourcePartition is null || edge.Destination?.Partition is null,
             ConfigureRecurringSchedule schedule => schedule.Definition?.Lane?.Partition is null,
             EmitRecurringOccurrences schedule => schedule.Lane?.Partition is null,
             CancelRecurringSchedule schedule => schedule.Lane?.Partition is null,

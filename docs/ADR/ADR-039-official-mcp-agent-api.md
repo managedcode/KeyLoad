@@ -2,6 +2,12 @@
 
 Status: Accepted for implementation; runtime and delivery qualification pending. Date: 2026-10-02. Owner: ClientApi lead / KeyLoad integration owner. Related: [ClientApi](../Features/ClientApi.md), REQ-CLIENT-004–007 / AC-CLIENT-004–007; [Authorization](../Features/Authorization.md), [BlobStorage](../Features/BlobStorage.md), [TestInfrastructure](../Features/TestInfrastructure.md).
 
+Owner revision 2026-10-05: [ADR-104](ADR-104-mcp-gateway-tool-discovery.md)
+supersedes the public all-operation tool list with three native gateway meta tools
+and static agent resource/prompt guidance. Canonical typed operations, persisted
+authorization, official SDK transport and signed Orleans execution remain governed
+by this ADR; replaced public pagination/direct-tool paths are removed together.
+
 ## Accepted runtime root-name framing refinement
 
 TASK-RUNTIME-MCP-FRAME-W maps REQ-CLIENT-006 and AC-MCP-003/005/007 to the actual
@@ -246,15 +252,15 @@ forces an initialize handshake which the current stateless protocol does not use
 Keep the server's current protocol, official transport and per-request persisted
 bearer authentication unchanged. Do not pin an older revision or emulate protocol.
 
-The worker owns only IntegrationTests/ClientApi/McpOfficialClient.cs and UnitTests/
-ClientApi/McpPaginationTestData.cs, McpToolPaginationTests.cs,
-McpTransportGuardTestData.cs. Retain the 65,536-byte cap, exact cursor/one-byte-short
-assertions, former index36 continuation plus current terminal index46, out-of-range
-index47, all47 unique tools and every negative/authority scenario. A present empty
-header is one empty StringValues element; a no-values header is absent in this
-abstraction. Mutate a copied native Tool to a different valid object input schema,
-because its public setter rejects default/invalid schemas before isolation can be
-tested. Add no reflection discovery, new catalog source or protocol workaround.
+The official caller retains native default negotiation and per-request persisted
+authentication. ADR-104 now owns discovery tests: exactly three meta tools, the
+65,536-byte cap, nonempty cursor and one-byte-short rejection, fresh mutable Tool
+isolation, and complete canonical operation/schema parity through native graph
+search and invocation. Every existing negative/authority scenario remains. A
+present empty header is one empty StringValues element; a no-values header is
+absent in this abstraction. No reflection discovery, duplicate catalog source or
+protocol workaround is permitted. Replaced operation-list paginator tests and
+their fixture are deleted rather than retained as an active legacy path.
 
 Ordered stages: accepted contracts and actual failure baseline; preserving test
 vectors/caller repair; lead source review/build/formatter/static checks; complete

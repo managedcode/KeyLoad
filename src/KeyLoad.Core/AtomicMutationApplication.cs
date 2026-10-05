@@ -87,6 +87,8 @@ public sealed partial class DatabaseEngine
             EnqueueMessage message => Enqueue(tx, principal, partition, message, now),
             UpsertEdge edge => Upsert(tx, principal, partition, edge),
             DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
+            ApplyCrossPartitionReverseEdge edge => ApplyGraphReverseDelivery(tx, principal, partition, edge),
+            CompleteCrossPartitionReverseEdge edge => CompleteGraphReverseDelivery(tx, principal, partition, edge),
             AppendSamples samples => Append(tx, principal, partition, samples),
             ExpireSamples samples => Expire(tx, principal, partition, samples, now),
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),

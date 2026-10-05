@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.IntegrationTests.Features.GraphTraversal;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
@@ -28,6 +29,10 @@ internal static class McpCatalogExpectations
             McpDiscoveryProtocol.Graph, McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To],
             [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
                 McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
+        Read(McpCallerTools.GraphIncomingEdges, [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Target,
+            GraphIncomingMcpProtocol.Graph, GraphIncomingMcpProtocol.Limit],
+            [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Rows, GraphIncomingMcpProtocol.CutPosition,
+                GraphIncomingMcpProtocol.Projection]),
         Read(McpCallerTools.SeriesRead, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From, McpDiscoveryProtocol.Until]),
         Read(McpCallerTools.SeriesLatest, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId]),
         Read(McpCallerTools.SeriesAggregate, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From]),

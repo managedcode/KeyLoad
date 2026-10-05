@@ -15,6 +15,7 @@ internal static class McpCallerTools
     internal const string SagaInspect = "keyload_saga_inspect";
     internal const string GraphTraverse = "keyload_graph_traverse";
     internal const string GraphShortestPath = McpCallerProtocol.GraphShortestPath;
+    internal const string GraphIncomingEdges = McpCallerProtocol.GraphIncomingEdges;
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = "keyload_series_latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";

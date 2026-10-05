@@ -62,6 +62,46 @@ results; model assertions alone cannot qualify launch configuration.
 
 ## Implementation task graph
 
+### Local development RF3 image prerequisite (2026-10-05)
+
+REQ/AC-TEST-015 adds the explicit `KeyLoadTests:LocalRf3Image:Enabled=true`
+selector only for the RF3 suite with an explicit nonblank bounded development
+filter. The outer AppHost composes one native executable
+image-preparation resource; its TUnit runner `WaitForCompletion`s that resource.
+The child AppHost retains the existing AddContainer RF3 model and all readiness,
+membership, SDK/MCP, fault and shutdown contracts. Invalid or mixed selectors fail
+before composing resources. There is no implicit fallback from missing GitHub proof.
+
+The local producer owns a unique invocation tag, a bounded fingerprint of the
+actual Dockerfile/build inputs and a custom input label. Its separate bounded
+receipt names provenance `local-development`, the actual Docker image config ID,
+tag, input digest, pinned base references and producer version. It never fabricates
+a Git revision, GitHub run or registry manifest digest. The child verifies this
+receipt against current inputs and actual daemon metadata before startup, all
+three modeled tags, and actual container image config IDs after startup. Existing
+GitHub exact-source/manifest verification and ADR-034 publication remain unchanged;
+this receipt is never accepted by qualification or website provenance validators.
+
+Stages: root freezes this contract and TestInfrastructure acceptance first;
+dependency_closeout supplies disjoint local settings, producer, image selection,
+verification and real model/negative regressions; root joins the shared AppHost and
+ClusterFixture composition, reviews ownership, builds and runs the canonical
+Aspire RF3 entry. Relevant roles remain within Features/TestInfrastructure and
+Features/ClusterReplication; scripts/Features/TestInfrastructure owns the producer.
+No new database API, stored format, package or production topology applies.
+
+Every build/start/test/cancel path joins and releases its owned resources. After
+owned nodes stop, cleanup rechecks the invocation tag's image ID and input label
+before removing only that tag, without force/prune or unrelated-resource deletion.
+Keep original receipts/reports as development evidence. Rollback removes only the
+explicit local selector and its owned helpers; the default GitHub path remains
+fail closed. Model/parser checks do not prove real image creation or cleanup:
+actual Docker/Aspire SDK/MCP execution and failure receipts are required. Local
+comparison mode is deferred to its own accepted contract. Immutable prior-image
+and mixed-image protocol cases keep their qualified historical image requirements;
+if selected without those proofs they fail closed, with no skipping or local
+receipt substitution. This development filter cannot qualify the complete RF3 suite.
+
 1. TASK-TEST-CONTRACT, root: this contract and requirements precede implementation.
 2. TASK-TEST-ENTRY, root: AppHost Features/TestInfrastructure owns closed suite
    selection, executable composition and bounded completion/exit handling;

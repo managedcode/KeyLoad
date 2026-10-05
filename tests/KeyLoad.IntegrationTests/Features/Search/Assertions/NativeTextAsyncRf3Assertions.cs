@@ -49,7 +49,7 @@ internal static class NativeTextAsyncRf3Assertions
         await Assert.That(statuses.All(status => string.Equals(status.Leader, leader,
             StringComparison.Ordinal))).IsTrue();
         var official = await McpCallerAssertions.SuccessAsync<NodeStatus>(await officialAdministrator.Client
-            .CallToolAsync(McpCallerTools.AdminStatus, cancellationToken: cancellationToken));
+            .InvokeKeyLoadToolAsync(McpCallerTools.AdminStatus, cancellationToken: cancellationToken));
         await Assert.That(official.Value.NodeId).IsEqualTo(statuses[0].NodeId);
         await Assert.That(official.Value.Incarnation).IsEqualTo(statuses[0].Incarnation);
         await Assert.That(official.Value.ProcessId).IsEqualTo(statuses[0].ProcessId);

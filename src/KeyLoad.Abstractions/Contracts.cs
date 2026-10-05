@@ -17,6 +17,8 @@ internal static class MutationDiscriminatorNames
     internal const string EnqueueMessage = "enqueue";
     internal const string UpsertEdge = "upsertEdge";
     internal const string DeleteEdge = "deleteEdge";
+    internal const string ApplyCrossPartitionReverseEdge = "applyCrossPartitionReverseEdge";
+    internal const string CompleteCrossPartitionReverseEdge = "completeCrossPartitionReverseEdge";
     internal const string AppendSamples = "appendSamples";
     internal const string ExpireSamples = "expireSamples";
     internal const string StoreAggregateSnapshot = "storeAggregateSnapshot";
@@ -260,6 +262,8 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(EnqueueMessage), MutationDiscriminatorNames.EnqueueMessage)]
 [JsonDerivedType(typeof(UpsertEdge), MutationDiscriminatorNames.UpsertEdge)]
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
+[JsonDerivedType(typeof(ApplyCrossPartitionReverseEdge), MutationDiscriminatorNames.ApplyCrossPartitionReverseEdge)]
+[JsonDerivedType(typeof(CompleteCrossPartitionReverseEdge), MutationDiscriminatorNames.CompleteCrossPartitionReverseEdge)]
 [JsonDerivedType(typeof(AppendSamples), MutationDiscriminatorNames.AppendSamples)]
 [JsonDerivedType(typeof(ExpireSamples), MutationDiscriminatorNames.ExpireSamples)]
 [JsonDerivedType(typeof(StoreAggregateSnapshot), MutationDiscriminatorNames.StoreAggregateSnapshot)]

@@ -14,6 +14,15 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 
 ## Decision inventory
 
+[ADR-105 published NuGet refresh](ADR-105-published-nuget-upgrade.md) records the
+2026-10-05 aligned dependency upgrades and required integrated compatibility gates.
+It remains Accepted until its recorded build and native qualification are complete.
+
+[ADR-104 native gateway and graph-based tool discovery](ADR-104-mcp-gateway-tool-discovery.md)
+is Accepted for implementation in ClientApi. Three initial meta tools replace
+the public default all-operation MCP catalog; existing signed execution and
+persisted authorization remain mandatory. Runtime qualification is pending.
+
 | ID / рішення | Статус рішення | Основний Feature |
 |---|---|---|
 | [ADR-001 partition identity/affinity](ADR-001-partition-identity-affinity.md) | Accepted | DocumentStorage, ClusterRouting |

@@ -22,6 +22,54 @@ ComparisonTests Features/TestInfrastructure; shared IntegrationTests fixture and
 CI composition are root-owned joins. No public database or persisted format change.
 Local entry runs are development evidence; delivered-source Linux gates remain.
 
+## Explicit local RF3 image preparation
+
+REQ-TEST-015 / AC-TEST-015 extends [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md)
+with an explicit `KeyLoadTests:LocalRf3Image:Enabled=true` development mode,
+accepted only with `Suite=rf3` and an explicit nonblank bounded development filter.
+The outer AppHost owns a bounded executable image
+preparation resource and the native TUnit runner waits for its successful completion.
+The tested child AppHost owns exactly three Docker nodes, readiness, discovered
+SDK/MCP endpoints, scoped faults and complete shutdown; no idle outer cluster is
+created. Unknown, non-RF3, protocol-cohort or mixed GitHub/local modes reject before
+resources. Missing image configuration continues to fail closed in the default mode.
+
+The producer builds the repository server Dockerfile using its actual effective
+COPY inputs, names, modes and bytes, `.dockerignore` and pinned base digests. It
+records a bounded canonical input fingerprint, unique invocation tag, actual local
+Docker image config ID and a custom input label in a separate `local-development`
+receipt. A dirty working tree is identified by these inputs, never a fabricated
+GitHub revision. The config ID is not a registry manifest digest. Before startup,
+the child verifies receipt schema/bounds, current input fingerprint, actual image
+ID/label and all three modeled tags. After startup it verifies each owned container's
+actual image config ID. Missing, oversized or malformed receipts, changed inputs,
+wrong tags/labels/IDs and conflicting proof selectors fail before database effects.
+
+Build failure prevents runner execution. Every failure/cancellation joins the
+owned producer, runner and child resources. Image cleanup occurs only after owned
+nodes stop, targets only this invocation's unique tag and rechecks image ID/label
+before removal; no force deletion, pruning or unrelated-resource cleanup. Retain
+the original development receipt and native test reports. Local results cannot
+qualify delivered-source Linux CI, registry image provenance or website metrics;
+the existing GitHub image producer and verifiers remain mandatory and unchanged.
+
+TASK-TEST-LOCAL-RF3-CONTRACT (root) precedes TASK-TEST-LOCAL-RF3-IMAGE
+(dependency_closeout). The worker owns AppHost Features/TestInfrastructure local
+settings, prerequisite and cleanup; ClusterReplication/Resources local image
+selection; scripts/Features/TestInfrastructure bounded producer; separate
+IntegrationTests ClusterReplication local verification and native AppHost model
+regressions. Root owns shared ClusterFixture/TestSuiteResources composition joins,
+review, build, Aspire runtime evidence and delivery. Tests use the actual Aspire
+builder to prove dependency ordering and absence of outer nodes; parser/input
+tests cover negative cells without pretending to prove Docker creation. Real
+Docker/Aspire RF3 SDK and official MCP evidence must prove image identity, three
+nodes and cleanup. Frontend, production data/API migration and local comparison
+mode are N/A for this infrastructure stage. Immutable prior-image and mixed-image
+protocol tests retain their genuine qualified-image requirements and fail closed
+if explicitly selected without that proof; local mode never skips or substitutes
+those cases. Original 104-task acceptance remains
+open until its complete required qualification exists.
+
 ## Prompt termination on owned Aspire failure
 
 [ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle

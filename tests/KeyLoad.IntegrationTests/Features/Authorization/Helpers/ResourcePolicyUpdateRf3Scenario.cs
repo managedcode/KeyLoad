@@ -84,7 +84,7 @@ internal sealed record ResourcePolicyUpdateRf3Scenario(PartitionRef Partition, E
         var request = scenario.Request(readGrant, useGrant, expectedVersion);
         var arguments = McpOfficialClient.Arguments(request);
         arguments.Add(McpCallerProtocol.CommandId, Guid.NewGuid());
-        var reply = await administratorMcp.Client.CallToolAsync(McpCallerTools.ResourcesConfigure,
+        var reply = await administratorMcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.ResourcesConfigure,
             arguments, cancellationToken: cancellationToken);
         var receipt = await McpCallerAssertions.SuccessAsync<ResourceDefinition>(reply);
         await ResourcePolicyUpdateRf3Assertions.AssertSameDefinitionAsync(request.Definition, receipt.Value);

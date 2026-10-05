@@ -4,6 +4,24 @@ Status: configured locally and independently reviewed; GitHub delivery pending. 
 
 ## Requirements
 
+The 2026-10-05 published NuGet refresh follows
+[ADR-105](../ADR/ADR-105-published-nuget-upgrade.md). Its maintenance scope is
+central pins, existing active version checks and truthful qualification records;
+product API, frontend, schema and physical topology changes are N/A.
+
+| Requirement | Measurable acceptance and verification |
+|---|---|
+| REQ-NUGET-001: inspect every central dependency and Aspire SDK against the configured feed. | AC-NUGET-001: all 45 final central entries and the SDK have a recorded published latest stable version, or an explicit existing prerelease-only release; actual restore succeeds without downgrade or lock-file generation. Feed inventory/manual review is the explicit metadata-test exception. |
+| REQ-NUGET-002: preserve native APIs and aligned dependency families while updating active version checks. | AC-NUGET-002: all 17 selected pins and active TimeSeries/Orleans capture checks agree; full Release build, formatter, governance and existing TimeSeries package/report regressions pass. No new behavior is selected, so existing meaningful regressions supply compatibility coverage. |
+| REQ-NUGET-003: keep qualification and unrelated work truthful and intact. | AC-NUGET-003: Aspire-owned analyzers, unit, scalar, recovery and RF3 SDK/MCP suites have their actual recorded outcome; failures or unavailable infrastructure keep qualification open; immutable historical receipts and concurrent changes remain intact. |
+
+TASK-NUGET-001..004 in ADR-105 map every same-numbered REQ/AC to the feed
+inventory, integrated compilation, existing TUnit/real-process/client suites and
+final refresh receipt. Positive flow updates published versions and verifies native
+consumption. Negative/error flow retains exact restore/build/test failure without
+suppressions or dependency workarounds. Edge cases cover prerelease-only packages,
+unchanged current pins and concurrent additions to the central manifest.
+
 All requirements are mandatory. IDs remain stable when implementation changes.
 
 | ID | Type / priority | Requirement and rationale | Measurable acceptance |

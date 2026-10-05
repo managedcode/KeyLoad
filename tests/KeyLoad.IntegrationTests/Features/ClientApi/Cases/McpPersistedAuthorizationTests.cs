@@ -54,7 +54,7 @@ internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)
         var forged = McpOfficialClient.Arguments(request);
         forged.Add(McpCallerProtocol.PrincipalId, identity.Principal.Id);
         forged.Add(McpCallerProtocol.Roles, new[] { McpCallerProtocol.AdministratorRole });
-        var rejected = await session.Client.CallToolAsync(McpCallerTools.DocumentsGet, forged, cancellationToken: deadline.Token);
+        var rejected = await session.Client.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsGet, forged, cancellationToken: deadline.Token);
         await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false);
         var authorized = await McpCallerAssertions.SuccessAsync<DocumentResult>(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(owned.Reference), deadline.Token));

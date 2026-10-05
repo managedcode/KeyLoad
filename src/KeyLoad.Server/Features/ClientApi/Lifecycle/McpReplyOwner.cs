@@ -30,7 +30,7 @@ internal sealed class McpReplyOwner : IDisposable
     /// <param name="requestId">The actual database execution identity.</param>
     /// <param name="maximumBytes">The inclusive complete wrapper ceiling and private writer capacity.</param>
     /// <returns>An owner that must survive native response serialization and draining.</returns>
-    internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid requestId, int maximumBytes)
+    internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid? requestId, int maximumBytes)
     {
         _ = McpFrameBounds.InspectReply(canonical.Span, maximumBytes);
         return Open(McpReplyWriter.Success(canonical.Span, requestId, maximumBytes), isError: false);

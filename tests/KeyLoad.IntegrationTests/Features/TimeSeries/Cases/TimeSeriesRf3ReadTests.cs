@@ -42,10 +42,8 @@ internal sealed class TimeSeriesRf3ReadTests(ClusterFixture fixture)
         var sdk = new KeyLoadClient(http, identity.Secret);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, TimeSeriesRf3Scenario.Node2,
             identity.Secret, deadline.Token);
-        var discovery = await mcp.Client.ListToolsAsync(cancellationToken: deadline.Token);
-
-        await Assert.That(discovery.Select(tool => tool.Name))
-            .Contains(McpCallerTools.SeriesLatest);
+        var discovered = await mcp.Client.DiscoverKeyLoadToolAsync(McpCallerTools.SeriesLatest, deadline.Token);
+        await McpDiscoveryAssertions.VerifyAsync(discovered);
         var latest = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadLatestSampleAsync(request, deadline.Token));
         var native = await McpCallerAssertions.SuccessAsync<LatestSampleResult>(
             await mcp.CallAsync(McpCallerTools.SeriesLatest, request, deadline.Token));

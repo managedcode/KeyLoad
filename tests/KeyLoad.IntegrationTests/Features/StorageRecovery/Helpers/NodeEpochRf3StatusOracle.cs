@@ -25,7 +25,7 @@ internal static class NodeEpochRf3StatusOracle
                 profile.AdminKey, cancellationToken).ConfigureAwait(false);
             var status = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(cancellationToken)
                 .ConfigureAwait(false)).ConfigureAwait(false);
-            var dashboard = await callers.Mcp.Client.CallToolAsync(AdminDashboardProtocol.SnapshotTool,
+            var dashboard = await callers.Mcp.Client.InvokeKeyLoadToolAsync(AdminDashboardProtocol.SnapshotTool,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
             var snapshot = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(dashboard).ConfigureAwait(false);
             await Assert.That(snapshot.Value.Node.NodeId).IsEqualTo(status.NodeId);

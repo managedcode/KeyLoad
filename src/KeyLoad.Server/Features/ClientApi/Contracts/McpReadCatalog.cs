@@ -26,6 +26,8 @@ internal static class McpReadCatalog
         McpOperationFactory.Read<TraverseRequest, GraphTraversal>(McpToolNames.GraphTraverse, McpToolRoutes.GraphTraverse, GrainReadKind.Traverse),
         McpOperationFactory.Read<GraphShortestPathRequest, GraphShortestPathResult>(McpToolNames.GraphShortestPath,
             McpToolRoutes.GraphShortestPath, GrainReadKind.GraphShortestPath),
+        McpOperationFactory.Read<ReadIncomingGraphEdgesRequestV1, GraphIncomingEdgesPageV1>(McpToolNames.GraphIncomingEdges,
+            McpToolRoutes.GraphIncomingEdges, GrainReadKind.GraphIncomingEdges),
         McpOperationFactory.Read<ReadSamplesRequest, SampleRecord[]>(McpToolNames.SeriesRead, McpToolRoutes.SeriesRead, GrainReadKind.Samples),
         McpOperationFactory.Read<ReadLatestSampleRequest, LatestSampleResult>(McpToolNames.SeriesLatest, McpToolRoutes.SeriesLatest, GrainReadKind.LatestSample),
         McpOperationFactory.Read<AggregateSamplesRequest, SampleAggregate>(McpToolNames.SeriesAggregate, McpToolRoutes.SeriesAggregate, GrainReadKind.AggregateSamples),

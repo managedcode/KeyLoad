@@ -10,6 +10,9 @@ internal sealed class IsolatedKeyLoadPublicRegressionMcp : IAsyncDisposable
     private const string Endpoint = "/mcp";
     private const string Authorization = "Authorization";
     private const string Bearer = "Bearer ";
+    private const string GatewayInvoke = "gateway_tool_invoke";
+    private const string ToolId = "toolId";
+    private const string Arguments = "arguments";
     private readonly HttpClient http;
     private HttpClientTransport? transport;
     private McpClient? client;
@@ -50,8 +53,12 @@ internal sealed class IsolatedKeyLoadPublicRegressionMcp : IAsyncDisposable
     private async Task<ModelContextProtocol.Protocol.CallToolResult> CallAsync(string operation, object request, CancellationToken token)
     {
         var native = client ?? throw new InvalidOperationException("The actual MCP client is not connected.");
-        return await native.CallToolAsync(operation, new Dictionary<string, object?>(StringComparer.Ordinal)
-        { [IsolatedKeyLoadPublicRegressionProtocol.Request] = JsonSerializer.SerializeToElement(request, request.GetType(), JsonDefaults.Options) },
+        return await native.CallToolAsync(GatewayInvoke, new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            [ToolId] = operation,
+            [Arguments] = new Dictionary<string, object?>(StringComparer.Ordinal)
+            { [IsolatedKeyLoadPublicRegressionProtocol.Request] = JsonSerializer.SerializeToElement(request, request.GetType(), JsonDefaults.Options) }
+        },
             cancellationToken: token);
     }
 

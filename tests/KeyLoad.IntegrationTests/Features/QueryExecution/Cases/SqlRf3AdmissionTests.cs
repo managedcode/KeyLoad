@@ -77,7 +77,7 @@ internal sealed class SqlRf3AdmissionTests
             ErrorCode.ResourceExhausted, dispatched: false);
         var arguments = McpOfficialClient.Arguments(false);
         arguments.Add(McpCallerProtocol.CommandId, commandId);
-        var completed = await McpCallerAssertions.SuccessAsync<bool>(await mcp.Client.CallToolAsync(
+        var completed = await McpCallerAssertions.SuccessAsync<bool>(await mcp.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.AdminDispatch, arguments, cancellationToken: cancellationToken));
         await Assert.That(completed.Value).IsTrue();
     }

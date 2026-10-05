@@ -1,5 +1,15 @@
 # ClientApi
 
+Owner direction2026-10-05 accepts [ToolDiscovery](ClientApi/ToolDiscovery.md)
+and [ADR-104](../ADR/ADR-104-mcp-gateway-tool-discovery.md): three initial
+ManagedCode.MCPGateway search/route/invoke tools replace the public default
+all-operation catalog, with native MarkdownLd.Kb graph search and unchanged
+fresh persisted authentication, canonical schemas and signed Orleans execution.
+The complete internal operation inventory remains independently tested; public
+gateway composition and real caller qualification are pending. This explicitly
+supersedes the all-operation default discovery expectation below, not any required
+operation, authorization, resource or RF3 acceptance.
+
 TASK-MCP-RF3-CATALOG-INVENTORY preserves REQ/AC-CLIENT-006 and AC-MCP-001.
 Luna query_wave owns the private McpCallerProtocol tool-count inventory and
 discovery assertions only if the actual current canonical tool names are absent.

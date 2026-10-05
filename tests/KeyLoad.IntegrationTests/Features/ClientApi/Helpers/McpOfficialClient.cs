@@ -96,7 +96,7 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     /// <param name="cancellationToken">The bounded external caller token.</param>
     /// <returns>The official SDK's actual tool result.</returns>
     internal Task<CallToolResult> CallAsync<T>(string toolName, T request, CancellationToken cancellationToken)
-        => Client.CallToolAsync(toolName, Arguments(request), cancellationToken: cancellationToken).AsTask();
+        => Client.InvokeKeyLoadToolAsync(toolName, Arguments(request), cancellationToken).AsTask();
 
     /// <summary>Builds only public tool arguments from the exact canonical serializer.</summary>
     /// <typeparam name="T">The actual canonical request type.</typeparam>

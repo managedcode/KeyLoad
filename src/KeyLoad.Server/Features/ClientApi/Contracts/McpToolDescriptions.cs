@@ -17,6 +17,7 @@ internal static class McpToolDescriptions
     private const string QuerySearch = "Execute the bounded Q1.Search.v1 SQL graph-search profile under the same current policy and read cut as graph search.";
     private const string GraphTraverse = "Traverse a graph with explicit depth, vertex and edge limits under the current principal.";
     private const string GraphShortestPath = "Find one shortest directed path between authorized graph entities in one current read cut, with explicit depth, vertex and examined-edge limits.";
+    private const string GraphIncomingEdges = "Read a bounded eventual reverse-adjacency page for one authorized graph target; rows are verified against current canonical source edges and endpoint visibility.";
     private const string QueryGraphPath = "Execute the bounded Q1.GraphPath.v1 SQL profile for one shortest directed graph path under the same current policy and read cut as the typed graph operation.";
     private const string SeriesRead = "Read a bounded time-series page in the supplied UTC time range.";
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
@@ -72,6 +73,7 @@ internal static class McpToolDescriptions
         McpToolNames.SagaInspect => SagaInspect,
         McpToolNames.GraphTraverse => GraphTraverse,
         McpToolNames.GraphShortestPath => GraphShortestPath,
+        McpToolNames.GraphIncomingEdges => GraphIncomingEdges,
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
             or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention => SeriesDescription(name),
         McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst

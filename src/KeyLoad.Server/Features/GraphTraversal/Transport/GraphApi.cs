@@ -9,5 +9,7 @@ internal static class GraphApi
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.Traverse, request));
         app.MapPost(McpToolRoutes.GraphShortestPath, (GraphShortestPathRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.GraphShortestPath, request));
+        app.MapPost(McpToolRoutes.GraphIncomingEdges, (ReadIncomingGraphEdgesRequestV1 request, HttpContext context) =>
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Orleans.GrainReadKind.GraphIncomingEdges, request));
     }
 }

@@ -310,7 +310,7 @@ Model views (`QUEUE_MESSAGES`, `EVENTS`) and unindexed filters require `AllowFul
 
 ### From an AI agent (MCP)
 
-Every node has a built-in [MCP](https://modelcontextprotocol.io/) server at `/mcp`. Database operations are available as tools, such as `keyload_sql_execute`, `keyload_documents_commit`, `keyload_search_execute`, `keyload_graph_traverse`, `keyload_messages_receive` and `keyload_blobs_read_range`. Add it to any MCP client. In Claude Code's `.mcp.json`, for example:
+Every node has a built-in [MCP](https://modelcontextprotocol.io/) server at `/mcp`. Its compact discovery entry lists `gateway_tools_search`, `gateway_tools_route` and `gateway_tool_invoke`. Our ManagedCode.MCPGateway uses the native Markdown-LD graph to find relevant database operations and return their exact schemas and effect hints. Add the server to an MCP client. In Claude Code's `.mcp.json`, for example:
 
 ```json
 {
@@ -324,7 +324,9 @@ Every node has a built-in [MCP](https://modelcontextprotocol.io/) server at `/mc
 }
 ```
 
-The agent sees exactly what its API key allows. Permissions are stored in the database, so a prompt can't escalate them. The [MCP and API guide](docs/Features/ClientApi.md) describes the full operation catalog, along with the plain HTTP routes under `/v1/`.
+Read the Markdown resource `keyload://guides/agent-quickstart` or request the no-argument prompt `keyload_agent_quickstart` for an introduction and usage instructions. Search with `gateway_tools_search` using `{ "query": "keyload_query_capabilities", "maxResults": 1 }`, inspect the returned tool schema, then call `gateway_tool_invoke` with `{ "toolId": "keyload_query_capabilities", "arguments": {} }`. Use the returned canonical argument shape for other operations; retain the same command identity and payload when retrying an uncertain write.
+
+Discovery exposes static operation documentation. Each invocation checks current permissions persisted in the database, so neither a prompt nor caller-supplied roles can escalate them. The [MCP and API guide](docs/Features/ClientApi.md) describes canonical operations and `/v1/` HTTP routes. The [gateway integration contract](docs/Features/ClientApi/ToolDiscovery.md) records the open runtime, RF3 and delivery qualification gates for this discovery revision.
 
 ## Project status
 

@@ -19,7 +19,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
             or GrainReadKind.RecurringSchedule or GrainReadKind.Saga
             => new(true, true, false),
-        GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.SqlGraphPath
+        GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges or GrainReadKind.SqlGraphPath
             => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
         GrainReadKind.LatestSample or GrainReadKind.AggregateSamples or GrainReadKind.AggregateSampleWindows

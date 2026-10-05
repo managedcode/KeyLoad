@@ -3,41 +3,49 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>AC-MCP-001/003/007: genuine official discovery exposes the complete frozen RF3 capability contract.</summary>
+/// <summary>AC-MCPGW-001/002/004: compact discovery resolves canonical capabilities through the genuine official client.</summary>
 /// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDiscoveryTests(ClusterFixture fixture)
 {
-    /// <summary>Raw native cursors and the SDK's aggregate API both discover every declared schema and hint.</summary>
+    /// <summary>Both native listing APIs expose three meta tools and graph search retains every canonical schema.</summary>
     [Test]
-    public async Task AcMcp001OfficialClientDiscoversAllPagesWithCanonicalSchemasAndHints()
+    public async Task AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints()
     {
         using var deadline = McpCallerDeadline.Create();
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             fixture.AdminKey, deadline.Token);
         var discovered = new HashSet<string>(StringComparer.Ordinal);
-        var cursors = new HashSet<string>(StringComparer.Ordinal);
-        string? cursor = null;
-        do
-        {
-            var page = await session.Client.ListToolsAsync(new ListToolsRequestParams { Cursor = cursor }, deadline.Token);
-            await Assert.That(page.Tools.Count).IsGreaterThan(0);
-            await Assert.That(discovered.Count + page.Tools.Count).IsLessThanOrEqualTo(McpCallerProtocol.ToolCount);
-            foreach (var tool in page.Tools)
-            {
-                await Assert.That(discovered.Add(tool.Name)).IsTrue();
-                await McpDiscoveryAssertions.VerifyAsync(tool);
-            }
-            cursor = page.NextCursor;
-            if (cursor is not null)
-            { await Assert.That(cursors.Add(cursor)).IsTrue(); }
-        } while (cursor is not null);
-
-        await McpDiscoveryAssertions.VerifyInventoryAsync(discovered);
+        var page = await session.Client.ListToolsAsync(new ListToolsRequestParams(), deadline.Token);
+        await Assert.That(page.NextCursor is null).IsTrue();
+        await McpGatewayDiscoveryAssertions.VerifyAsync(page.Tools);
         var aggregate = await session.Client.ListToolsAsync(cancellationToken: deadline.Token);
-        await Assert.That(aggregate.Count).IsEqualTo(McpCallerProtocol.ToolCount);
-        await McpDiscoveryAssertions.VerifyInventoryAsync(aggregate.Select(tool => tool.Name));
+        await Assert.That(aggregate.Count).IsEqualTo(McpCallerProtocol.InitialToolCount);
+        await McpGatewayDiscoveryAssertions.VerifyAsync(aggregate.Select(tool => tool.ProtocolTool));
+        foreach (var expected in McpCatalogExpectations.Entries)
+        {
+            var tool = await session.Client.DiscoverKeyLoadToolAsync(expected.Name, deadline.Token);
+            await Assert.That(discovered.Add(tool.Name)).IsTrue();
+            await McpDiscoveryAssertions.VerifyAsync(tool);
+        }
+        await McpDiscoveryAssertions.VerifyInventoryAsync(discovered);
+    }
+
+    /// <summary>Removed direct names, unknown targets and recursive targets fail before an operation is dispatched.</summary>
+    [Test]
+    public async Task AcMcpGw001RemovedAndRecursiveToolsFailBeforeExecution()
+    {
+        using var deadline = McpCallerDeadline.Create();
+        await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
+            fixture.AdminKey, deadline.Token);
+        var direct = await session.Client.CallToolAsync(McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token);
+        await McpCallerAssertions.ErrorAsync(direct, ErrorCode.UnsupportedCapability, dispatched: false);
+        foreach (var target in new[] { McpCallerProtocol.GatewayInvoke, "missing-canonical-operation" })
+        {
+            var recursive = await session.Client.InvokeKeyLoadToolAsync(target, cancellationToken: deadline.Token);
+            await McpCallerAssertions.ErrorAsync(recursive, ErrorCode.UnsupportedCapability, dispatched: false);
+        }
     }
 
     /// <summary>No-body official calls decode the canonical capability manifest and receive separate execution identities.</summary>
@@ -47,9 +55,9 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         using var deadline = McpCallerDeadline.Create();
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
-        var first = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.CallToolAsync(
+        var first = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
-        var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.CallToolAsync(
+        var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         await Assert.That(first.Value.AstVersion).IsEqualTo(McpCallerProtocol.AstVersion);
         await Assert.That(first.Value.ReadOnly).IsTrue();
@@ -66,9 +74,9 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             fixture.AdminKey, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await cancellation.CancelAsync();
-        await Assert.ThrowsAsync<OperationCanceledException>(() => session.Client.CallToolAsync(
+        await Assert.ThrowsAsync<OperationCanceledException>(() => session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: cancellation.Token).AsTask());
-        var next = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.CallToolAsync(
+        var next = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         await Assert.That(next.Value.ReadOnly).IsTrue();
     }

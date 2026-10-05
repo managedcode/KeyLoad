@@ -119,6 +119,15 @@ The [documentation index](README.md) is the complete entry point for 22 canonica
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
+Owner direction2026-10-05 accepts [ClientApi ToolDiscovery](Features/ClientApi/ToolDiscovery.md)
+under [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md). The official MCP host
+will expose three bounded search/route/invoke tools, backed by native
+ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool metadata graphs.
+Fresh persisted authentication and the existing typed signed Orleans execution
+remain authoritative. The graph contains public operation documentation only;
+KeyLoad data continues using node-local ZoneTree RF3 owners. Source and actual
+caller qualification are pending.
+
 The owner also requires ManagedCode.Communication native CQRS IAsyncEnumerable
 results and long operations through Orleans. [NativeCqrs](Features/ClusterRouting/NativeCqrs.md)
 and [ADR-082](ADR/ADR-082-native-cqrs-streams.md) first qualify the actual Graph

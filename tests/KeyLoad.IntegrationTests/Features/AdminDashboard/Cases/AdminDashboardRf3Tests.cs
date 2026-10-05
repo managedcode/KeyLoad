@@ -65,7 +65,7 @@ internal sealed class AdminDashboardRf3Tests(ClusterFixture fixture)
             await Assert.That(first.Storage.Files.All(file => !Path.IsPathRooted(file.Path) && file.Bytes >= 0)).IsTrue();
             await Assert.That(first.Storage.Complete || !string.IsNullOrWhiteSpace(first.Storage.Notice)).IsTrue();
             await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, fixture.AdminKey, deadline.Token);
-            var native = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(await mcp.Client.CallToolAsync(
+            var native = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(await mcp.Client.InvokeKeyLoadToolAsync(
                 AdminDashboardProtocol.SnapshotTool, cancellationToken: deadline.Token));
             await Assert.That(native.Value.Node.NodeId).IsEqualTo(first.Node.NodeId);
             await Assert.That(native.Value.Node.Incarnation).IsEqualTo(first.Node.Incarnation);

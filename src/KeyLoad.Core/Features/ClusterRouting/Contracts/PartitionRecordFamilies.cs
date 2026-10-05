@@ -19,6 +19,10 @@ internal static class PartitionRecordFamilies
     internal const string EventFeed = "event-feed";
     internal const string EventIdentity = "event-id";
     internal const string EventSequence = "event-sequence";
+    internal const string GraphCrossPartitionCapacity = "graph-cross-partition-capacity";
+    internal const string GraphCrossPartitionIntent = "graph-cross-partition-intent";
+    internal const string GraphCrossReverseAdjacency = "graph-cross-reverse-adjacency";
+    internal const string GraphEdgeOwnerVersion = "graph-edge-owner-version";
     internal const string Inbox = "inbox";
     internal const string Index = "index";
     internal const string Lease = "lease";
@@ -72,6 +76,10 @@ internal static class PartitionRecordFamilies
         EventFeed,
         EventIdentity,
         EventSequence,
+        GraphCrossPartitionCapacity,
+        GraphCrossPartitionIntent,
+        GraphCrossReverseAdjacency,
+        GraphEdgeOwnerVersion,
         Inbox,
         Index,
         Lease,

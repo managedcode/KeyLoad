@@ -114,7 +114,8 @@ public sealed partial class DatabaseEngine
                 AppendEvents => Capability.EventsAppend,
                 PublishTopic => Capability.TopicsPublish,
                 EnqueueMessage => Capability.QueuePublish,
-                UpsertEdge or DeleteEdge or QueueToGraph => Capability.GraphWrite,
+                UpsertEdge or DeleteEdge or QueueToGraph or ApplyCrossPartitionReverseEdge
+                    or CompleteCrossPartitionReverseEdge => Capability.GraphWrite,
                 GraphToQueueMutation => Capability.QueuePublish,
                 CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer => Capability.QueuePublish,
                 ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule
@@ -142,14 +143,21 @@ public sealed partial class DatabaseEngine
         if (mutation is ConfigureRecurringSchedule or EmitRecurringOccurrences or CancelRecurringSchedule or CompareExchangeSaga or ExpireSaga)
         {
             AuthorizeRecurringSagaRequest(view, principal, partition, mutation);
+            return;
         }
-        else if (mutation is ApplyVectorProjection projection)
+        if (mutation is ApplyVectorProjection projection)
         {
             ReauthorizeVectorProjection(view, principal, partition, projection);
+            return;
         }
-        else if (mutation is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
+        if (mutation is CreateQueueTransfer or AcceptQueueTransfer or CompleteQueueTransfer)
         {
             AuthorizeQueueTransferRequest(view, principal, partition, mutation);
+            return;
+        }
+        if (mutation is ApplyCrossPartitionReverseEdge or CompleteCrossPartitionReverseEdge)
+        {
+            ReauthorizeGraphDelivery(view, principal, partition, mutation);
         }
     }
 }

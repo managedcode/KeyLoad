@@ -21,7 +21,7 @@ internal sealed class McpCanonicalInputRejectionTests(ClusterFixture fixture)
             fixture.AdminKey, deadline.Token);
         var arguments = new Dictionary<string, object?>(StringComparer.Ordinal)
         { [McpCallerProtocol.Request] = nullBody ? null : new Dictionary<string, object?>(StringComparer.Ordinal) };
-        var rejected = await session.Client.CallToolAsync(McpCallerTools.DocumentsGet, arguments, cancellationToken: deadline.Token);
+        var rejected = await session.Client.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsGet, arguments, cancellationToken: deadline.Token);
         await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false);
         var valid = await McpCallerAssertions.SuccessAsync<DocumentResult?>(await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), deadline.Token));

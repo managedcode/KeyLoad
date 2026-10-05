@@ -30,7 +30,9 @@ internal static class McpCatalogExpectations
     internal const string GraphTraverse = "keyload_graph_traverse";
     private const string GraphTraverseRoute = "/v1/graph/traverse";
     internal const string GraphShortestPath = "keyload_graph_shortest_path";
+    internal const string GraphIncomingEdges = "keyload_graph_incoming";
     private const string GraphShortestPathRoute = "/v1/graph/shortest-path";
+    private const string GraphIncomingEdgesRoute = "/v1/graph/incoming";
     internal const string QueryGraphPath = "keyload_query_graph_path";
     private const string QueryGraphPathRoute = "/v1/query/graph-path";
     internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
@@ -120,7 +122,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 67;
+    internal const int Count = 68;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -135,6 +137,7 @@ internal static class McpCatalogExpectations
         (SagaInspect, SagaInspectRoute, GrainReadKind.Saga, null),
         (GraphTraverse, GraphTraverseRoute, GrainReadKind.Traverse, null),
         (GraphShortestPath, GraphShortestPathRoute, GrainReadKind.GraphShortestPath, null),
+        (GraphIncomingEdges, GraphIncomingEdgesRoute, GrainReadKind.GraphIncomingEdges, null),
         (QueryGraphPath, QueryGraphPathRoute, GrainReadKind.SqlGraphPath, null),
         (AdminPartitionPlacementBind, AdminPartitionPlacementBindRoute, null, OperationKind.BindAtomicPartitionPlacement),
         (AdminPartitionPlacementRead, AdminPartitionPlacementReadRoute, GrainReadKind.AtomicPartitionPlacement, null),

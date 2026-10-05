@@ -1,3 +1,5 @@
+using ManagedCode.MCPGateway;
+using ManagedCode.MCPGateway.Abstractions;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -10,14 +12,20 @@ internal static class McpServerComposition
     private const string ServerName = "KeyLoad";
     private const string ServerVersion = "1.0.0";
     private const string SdkLoggerPrefix = "ModelContextProtocol";
-    private const string Instructions = "Use the typed request schema. Retry writes with the same command identity and payload. "
-        + "Cancellation does not prove rollback. Paginate bounded reads and discovery using their returned cursors.";
+    private const string Instructions = "Find relevant operations with gateway_tools_search or gateway_tools_route. "
+        + "Use the returned exact schema with gateway_tool_invoke. Retry writes with the same command identity and payload. "
+        + "Cancellation does not prove rollback. Paginate bounded database reads using their returned cursors.";
 
     /// <summary>Registers fresh per-request native handlers and independent retained-memory ownership.</summary>
     internal static void Register(WebApplicationBuilder builder, NodeOptions node)
     {
         builder.Logging.AddFilter(SdkLoggerPrefix, LogLevel.None);
         builder.Services.AddHttpContextAccessor();
+        builder.Services.AddMcpGateway();
+        builder.Services.AddSingleton(services => new McpGatewayCatalogOwner(
+            services.GetRequiredService<IMcpGatewayFactory>(), services.GetRequiredService<IHttpContextAccessor>()));
+        builder.Services.AddHostedService(services => new McpGatewayCatalogWarmup(
+            services.GetRequiredService<McpGatewayCatalogOwner>()));
         builder.Services.AddSingleton(new McpMemoryBudget(node.McpMemory.DataBytes,
             node.McpMemory.ControlBytes, node.McpMemory.IngressBytes));
         builder.Services.AddMcpServer(options =>
@@ -47,3 +55,5 @@ internal static class McpServerComposition
         return Task.CompletedTask;
     }
 }
+using ManagedCode.MCPGateway;
+using ManagedCode.MCPGateway.Abstractions;

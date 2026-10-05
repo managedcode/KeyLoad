@@ -101,7 +101,7 @@ internal static class DueFaultRf3Leadership
     private static async Task AssertSnapshotMatchesAsync(NodeEpochRf3Callers callers, string nodeName,
         NodeStatus status, CancellationToken cancellationToken)
     {
-        var reply = await callers.Mcp.Client.CallToolAsync(AdminDashboardProtocol.SnapshotTool,
+        var reply = await callers.Mcp.Client.InvokeKeyLoadToolAsync(AdminDashboardProtocol.SnapshotTool,
             cancellationToken: cancellationToken).ConfigureAwait(false);
         var snapshot = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(reply).ConfigureAwait(false);
         await Assert.That(snapshot.Value.Node.NodeId).IsEqualTo(status.NodeId);

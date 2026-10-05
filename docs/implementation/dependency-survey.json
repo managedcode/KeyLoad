@@ -1,6 +1,7 @@
 {
   "schemaVersion": 2,
-  "surveyType": "Current root-reviewed centrally pinned and complete restored package inventory; exact-source Linux, native execution, legal compatibility and reproducibility qualification remain explicit separate gates.",
+  "surveyType": "Historical 2026-10-04 root-reviewed dependency snapshot; current pins and feed observations are recorded in nuget-refresh-2026-10-05.json. Historical qualification and license observations remain bound to their original versions.",
+  "supersededBy": "docs/implementation/nuget-refresh-2026-10-05.json",
   "checkedAt": "2026-10-04T00:10:01.346Z",
   "sdk": {
     "version": "10.0.401",

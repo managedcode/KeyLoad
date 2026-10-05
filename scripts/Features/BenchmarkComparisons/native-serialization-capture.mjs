@@ -5,7 +5,7 @@ import { collectFacts, fileFact, hashObject, readBounded } from './native-serial
 import { command, sourceFacts } from './native-serialization-process.mjs';
 
 const packageVersions = Object.freeze({ BenchmarkDotNet: '0.15.8',
-  'Microsoft.Orleans.Serialization': '10.3.1', 'Microsoft.Orleans.CodeGenerator': '10.3.1' });
+  'Microsoft.Orleans.Serialization': '10.4.0', 'Microsoft.Orleans.CodeGenerator': '10.4.0' });
 const assemblies = ['KeyLoad.Benchmarks.dll', 'KeyLoad.BenchmarkScenarios.dll', 'KeyLoad.Abstractions.dll',
   'BenchmarkDotNet.dll', 'Orleans.Serialization.dll'];
 const environmentKeys = ['DOTNET_EnableHWIntrinsic', 'DOTNET_TieredPGO', 'DOTNET_TieredCompilation',

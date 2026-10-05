@@ -17,6 +17,7 @@ internal static class McpToolRoutes
     internal const string QueryGraphPath = "/v1/query/graph-path";
     internal const string GraphTraverse = "/v1/graph/traverse";
     internal const string GraphShortestPath = "/v1/graph/shortest-path";
+    internal const string GraphIncomingEdges = "/v1/graph/incoming";
     internal const string SeriesRead = "/v1/series/read";
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestRoute;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateRoute;

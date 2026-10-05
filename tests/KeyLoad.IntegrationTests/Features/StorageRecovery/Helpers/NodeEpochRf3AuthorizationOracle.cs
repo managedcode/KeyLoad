@@ -65,7 +65,7 @@ internal static class NodeEpochRf3AuthorizationOracle
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.StatusAsync(cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(sdk.RoutingReady).IsTrue();
-        var reply = await admin.Mcp.Client.CallToolAsync(McpCallerTools.AdminStatus,
+        var reply = await admin.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.AdminStatus,
             cancellationToken: cancellationToken).ConfigureAwait(false);
         var mcp = await McpCallerAssertions.SuccessAsync<NodeStatus>(reply).ConfigureAwait(false);
         await Assert.That(mcp.Value.RoutingReady).IsTrue();

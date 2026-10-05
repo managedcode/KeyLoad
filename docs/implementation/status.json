@@ -1,4 +1,51 @@
 {
+  "NUGET-REFRESH-001": {
+    "title": "All published NuGet versions refreshed on 2026-10-05",
+    "status": "in_progress",
+    "feature": "docs/Features/RepositoryGovernance.md",
+    "decision": "docs/ADR/ADR-105-published-nuget-upgrade.md",
+    "receipt": "docs/implementation/nuget-refresh-2026-10-05.json",
+    "updatedExistingPins": 17,
+    "allFinalCentralPinsCurrent": true,
+    "restorePassed": true,
+    "canonicalBuildPassed": false,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Combined source compilation and formatter verification pending after MCP composition import repair",
+      "Final canonical Release build and Aspire-owned native compatibility suites",
+      "Scoped verified dependency refresh checkpoint"
+    ]
+  },
+  "MCP-GATEWAY-001": {
+    "title": "Bounded native MCP gateway and Markdown-LD tool discovery",
+    "status": "in_progress",
+    "originalTaskJoins": [
+      "KL-002",
+      "KL-014",
+      "KL-061",
+      "KL-076",
+      "KL-080"
+    ],
+    "feature": "docs/Features/ClientApi/ToolDiscovery.md",
+    "decision": "docs/ADR/ADR-104-mcp-gateway-tool-discovery.md",
+    "sourceStage": "native_catalog_three_meta_transport_official_caller_migration_joined_guide_resource_prompt_in_progress",
+    "dependencies": {
+      "ManagedCode.MCPGateway": "0.4.16",
+      "ManagedCode.MarkdownLd.Kb": "0.2.10",
+      "feedObservation": "published_versions_verified_and_normal_NuGet_restore_passed_2026_10_05_owning_privacy_fatal_repair_release_in_progress"
+    },
+    "publicInitialToolCount": 3,
+    "implementationQualified": false,
+    "rf3Qualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Agent guidance resource/prompt integration and published native dependency repair chain",
+      "Combined Release build formatter and native normal scalar recovery gates",
+      "Aspire RF3 official MCP authority operation parity cancellation restart and guidance evidence",
+      "Native graph allocation peak RAM and exact delivered-source Linux qualification"
+    ]
+  },
   "DATABASE-COMPOSITION-001": {
     "title": "Одна база для агентів: пов'язані моделі та SQL composition",
     "status": "in_progress",
@@ -1354,8 +1401,23 @@
   },
   "KL-038": {
     "title": "Cross-partition graph edges",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/GraphTraversal/CrossPartitionEdges.md",
+      "docs/ADR/ADR-102-cross-partition-graph-edges.md",
+      "src/KeyLoad.Core/Features/GraphTraversal/Commands/DatabaseEngine.GraphCrossPartitionDelivery.cs",
+      "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphIncomingEdges.cs",
+      "src/KeyLoad.Client/Features/GraphTraversal/Transport/GraphIncomingEdgesClient.cs",
+      "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphCrossPartitionReceiverTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphIncomingRf3Tests.cs"
+    ],
+    "sourceStage": "same_physical_owner_rf3_intent_reverse_receiver_completion_incoming_sdk_mcp_joined_core_release_passed_runtime_gates_pending",
+    "fullTaskComplete": false,
+    "remaining": [
+      "Combined solution build and native unit/scalar/recovery/RF3 gates",
+      "Independent physical-owner delivery, retention/resource bounds and complete fault qualification",
+      "Exact delivered-source Linux acceptance evidence"
+    ]
   },
   "KL-039": {
     "title": "Online index generation swap",

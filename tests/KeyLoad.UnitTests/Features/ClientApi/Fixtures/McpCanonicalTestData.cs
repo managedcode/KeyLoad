@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Query;
+using KeyLoad.UnitTests.Features.GraphTraversal;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -91,6 +92,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.GraphTraverse, new TraverseRequest(Partition, Resource, Reference)),
         Read(McpCatalogExpectations.GraphShortestPath,
             new GraphShortestPathRequest(ContractVersion, Partition, Resource, Reference, Reference)),
+        Read(McpCatalogExpectations.GraphIncomingEdges, GraphIncomingMcpTestData.Request()),
         Read(McpCatalogExpectations.QueryGraphPath,
             new SqlGraphPathRequest(ContractVersion, new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.AdminPartitionPlacementRead,

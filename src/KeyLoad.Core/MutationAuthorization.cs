@@ -41,6 +41,11 @@ public sealed partial class DatabaseEngine
             ReauthorizeQueueTransfer(view, principal, partition, effect);
             return;
         }
+        if (effect is ApplyCrossPartitionReverseEdge or CompleteCrossPartitionReverseEdge)
+        {
+            ReauthorizeGraphDelivery(view, principal, partition, effect);
+            return;
+        }
         AuthorizeComposition(view, principal, partition, effect);
         var resource = Resource(view, partition, effect.Resource);
         var documentId = effect switch

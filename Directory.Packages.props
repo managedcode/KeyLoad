@@ -8,23 +8,27 @@
     <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
     <PackageVersion Include="ZoneTree" Version="1.9.8" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.0.9" />
-    <PackageVersion Include="ManagedCode.Communication" Version="10.2.11" />
-    <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.2.11" />
-    <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.2.11" />
-    <PackageVersion Include="ManagedCode.TimeSeries" Version="10.0.3" />
-    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.0.13" />
-    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.0.10" />
-    <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.0.3" />
+    <PackageVersion Include="ManagedCode.Communication" Version="10.3.1" />
+    <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.1" />
+    <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.1" />
+    <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.1" />
+    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.0" />
+    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.2" />
+    <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.0" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="0.4.16" />
+    <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.10" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.10.0" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.3.1" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.4.0" />
     <!-- Orleans' existing Roslyn dependency; analyzer tests select SDK compiler assets. -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="5.9.0" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.0" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.0" />
     <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.0" />
@@ -38,14 +42,14 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
-    <PackageVersion Include="TUnit" Version="1.72.10" />
+    <PackageVersion Include="TUnit" Version="1.72.16" />
     <!-- Pin TUnit's existing native MTP collector; no additional collector. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.3.1" />
     <PackageVersion Include="MongoDB.Driver" Version="3.12.0" />
-    <PackageVersion Include="KurrentDB.Client" Version="1.4.0" />
+    <PackageVersion Include="KurrentDB.Client" Version="1.4.1" />
   </ItemGroup>
 </Project>
