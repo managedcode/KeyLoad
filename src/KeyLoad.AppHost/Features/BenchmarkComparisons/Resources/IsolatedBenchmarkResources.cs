@@ -1,5 +1,7 @@
 using System.Globalization;
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
@@ -33,6 +35,12 @@ internal static class IsolatedBenchmarkResources
         Bind(runner, ComparisonWorkerSelection.ProfileSetting, selection.Profile);
         runner.WithEnvironment(StorageSetting, Storage);
         var context = new IsolatedResourceContext(builder, selection, runner, root);
+        if (selection.ScaledProfile is not null)
+        {
+            builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
+                builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory),
+                serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping));
+        }
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))
         {

@@ -751,7 +751,8 @@
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
       "docs/implementation/keycodec-crud-development-2026-10-04.json",
-      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs",
+      "docs/implementation/runtime-qualification-37349838022.json"
     ],
     "qualification": {
       "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
@@ -766,7 +767,7 @@
       "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
       "remaining": [
         "complete_exact_source_Linux_Docker_Aspire_RF3_gate",
-        "successful_Patch_Delete_and_stale_explicit_replacement_through_both_real_RF3_clients"
+        "exact_literal_document_content_through_both_native_RF3_clients_and_restart"
       ],
       "earlierDeliveredSource": {
         "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
@@ -783,8 +784,15 @@
         "cases": 3,
         "rootReviewed": true,
         "ReleaseBuildAndFormatterPassed": true,
-        "actualRF3Executed": false,
-        "traceability": "TASK-DSTORE-RF3-PARITY"
+        "actualRF3Executed": true,
+        "traceability": "TASK-DSTORE-RF3-PARITY",
+        "passed": 3,
+        "sourceRevision": "788b8fd49141c233426ed95c86faf070e27d5056",
+        "runId": 37349838022,
+        "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37349838022",
+        "originalNativeReportSha256": "1d0dd5b41a38eaad02b74c00f4b95eb927a2822f137b7a5fcb36041eb3987dd2",
+        "completeSuiteQualified": false,
+        "laterSourceQualified": false
       }
     }
   },
@@ -2161,8 +2169,26 @@
   },
   "KL-075": {
     "title": "Scaling benchmark і fair deployment arms",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/BenchmarkComparisons/ScalingQualification.md",
+      "docs/ADR/ADR-103-scaled-fair-comparisons.md",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
+      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs"
+    ],
+    "sourceStage": "closed_loop_S1_three_dataset_profiles_native_1_2_3_topologies_resource_evidence_and_original_teardown_joined_compiler_repair_in_progress",
+    "qualification": {
+      "allAcceptanceClosed": false,
+      "nativeCohortQualified": false,
+      "remaining": [
+        "actual_native_complete_scaled_Linux_cohort_and_fairness",
+        "original_one_three_six_node_objective",
+        "fixed_rate_open_loop_load",
+        "shard_skew_and_cross_owner_fanout",
+        "replica_recovery_and_activation_owner_movement",
+        "full_exact_source_unit_scalar_recovery_RF3_coverage_endurance_and_fault_gates"
+      ]
+    }
   },
   "KL-076": {
     "title": "Multi-tenant resource governor",

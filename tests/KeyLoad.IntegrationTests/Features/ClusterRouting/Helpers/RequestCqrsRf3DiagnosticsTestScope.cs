@@ -7,11 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
-internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDisposable
+internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqrsLifecycleEvidence lifecycle) : IAsyncDisposable
 {
-    private readonly HashSet<string> completedResourceNames = new(StringComparer.Ordinal);
     private DistributedApplication? application;
     private RequestCqrsRf3Diagnostics? diagnostics;
+    private RequestCqrsRf3DiagnosticsScopeStreamOwner? streamOwner;
     private RequestCqrsRf3DiagnosticsIndependentConsumer? independentConsumer;
     private ContainerResource[] resources = [];
     private readonly RequestCqrsRf3DiagnosticsSubscriberObserver subscriberObserver = new();
@@ -31,8 +31,20 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
     internal RequestCqrsRf3DiagnosticsIndependentConsumer IndependentConsumer => independentConsumer
         ?? throw new InvalidOperationException("The native independent consumer is absent.");
 
+    internal Task WaitForSubscriberStateAsync(bool expected)
+    {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.SubscriberAdmission);
+        return subscriberObserver.WaitForStateAsync(expected);
+    }
+
+    internal void CompleteResourceStream(string node)
+        => (streamOwner ?? throw new InvalidOperationException("The native stream owner is absent."))
+            .CompleteResource(node);
+
     internal async Task StartAsync(CancellationToken cancellationToken, bool startIndependentConsumer = false)
     {
+        lifecycle.SetTokens(cancellationToken, default, default);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.BuilderCreate);
         var plannedDataRoot = RequestCqrsRf3DiagnosticsArtifactFiles.DataRootPath(WaveId);
         RequestCqrsRf3DiagnosticsArtifactFiles.CreateDataRootDirectory(plannedDataRoot);
         dataRoot = plannedDataRoot;
@@ -42,25 +54,35 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
         resources = RequestCqrsRf3NodeResources.Select(builder);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.AppHostBuild);
         var ownedApplication = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         application = ownedApplication;
         applicationAcquired = true;
         var loggerService = ownedApplication.Services.GetRequiredService<ResourceLoggerService>();
-        subscriberObserver.Initialize(loggerService, cancellationToken);
-        diagnostics = RequestCqrsRf3Diagnostics.Start(WaveId, resources, loggerService);
+        streamOwner = new(loggerService, resources, lifecycle);
+        subscriberObserver.Initialize(loggerService, cancellationToken, lifecycle.RecordOwnerFailure);
+        lifecycle.BindObserver(subscriberObserver);
+        diagnostics = RequestCqrsRf3Diagnostics.Start(WaveId, resources, loggerService,
+            lifecycle.RecordOwnerFailure);
+        streamOwner.BindDiagnostics(diagnostics);
+        lifecycle.BindDiagnostics(diagnostics);
         artifactPath = RequestCqrsRf3DiagnosticsArtifactFiles.ExpectedPath(WaveId);
         if (startIndependentConsumer)
         {
             var resource = builder.Resources.OfType<ParameterResource>()
                 .Single(candidate => candidate.Name == "admin-key");
-            independentConsumer = new(loggerService, resource, cancellationToken);
+            independentConsumer = new(loggerService, resource, cancellationToken,
+                lifecycle.RecordOwnerFailure);
+            lifecycle.BindConsumer(independentConsumer);
             await independentConsumer.StartAsync(cancellationToken).ConfigureAwait(false);
         }
+        lifecycle.SetStage(RequestCqrsLifecycleStage.SubscriberAdmission);
         await subscriberObserver.WaitForStateAsync(true).ConfigureAwait(false);
     }
 
     internal void EmitMalformedThenOneValidPerNode()
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.Scenario);
         foreach (var resource in resources)
         {
             var logger = application!.Services.GetRequiredService<ResourceLoggerService>().GetLogger(resource);
@@ -71,6 +93,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
 
     internal void EmitFortyValidLinesPerNode()
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.Scenario);
         foreach (var resource in resources)
         {
             var logger = application!.Services.GetRequiredService<ResourceLoggerService>().GetLogger(resource);
@@ -80,58 +103,53 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
 
     internal async Task<byte[]> CompleteAndReadArtifactAsync(CancellationToken cancellationToken)
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
         await JoinOriginalSubscriptionsAsync().ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ArtifactWrite);
         return await RequestCqrsRf3DiagnosticsArtifactFiles.WriteAndReadAsync(diagnostics!, artifactPath!,
             cancellationToken).ConfigureAwait(false);
     }
 
     internal async Task JoinOriginalSubscriptionsAsync()
     {
-        CompleteResourceStreams();
-        await JoinDiagnosticsTwiceAsync().ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
+        (streamOwner ?? throw new InvalidOperationException("The native stream owner is absent."))
+            .CompleteResourceStreams();
+        await (streamOwner ?? throw new InvalidOperationException("The native stream owner is absent."))
+            .JoinDiagnosticsTwiceAsync().ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ObserverJoin);
         await subscriberObserver.DisposeAsync().ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        CompleteResourceStreams(failures);
-        if (independentConsumer is not null)
-        {
-            var ownedConsumer = independentConsumer;
-            try
-            { await independentConsumer.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            await ownedConsumer.RetryFailedCloseAsync(failures).ConfigureAwait(false);
-            if (ownedConsumer.IsJoined)
-            { independentConsumer = null; }
-            else
-            { failures.Add(new InvalidOperationException("The independent native consumer did not fully join.")); }
-        }
-        if (!diagnosticsJoined && diagnostics is not null)
-        {
-            try
-            {
-                await diagnostics.DisposeAsync().ConfigureAwait(false);
-                diagnosticsJoined = true;
-                diagnostics = null;
-            }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-        }
-        await DisposeSubscriberObserverAsync(failures).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
+        streamOwner?.CompleteResourceStreams(failures);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.IndependentConsumerJoin);
+        await DisposeIndependentConsumerAsync(failures).ConfigureAwait(false);
+        await DisposeDiagnosticsAsync(failures).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ObserverJoin);
+        await RequestCqrsRf3DiagnosticsObserverCleanup.DisposeAsync(subscriberObserver, failures,
+                lifecycle.RecordOwnerFailure)
+            .ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.AppHostDispose);
         await DisposeApplicationAsync(failures).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.ArtifactWrite);
+        var artifactFailureCount = failures.Count;
         RequestCqrsRf3DiagnosticsArtifactFiles.DeleteOwned(artifactPath, failures);
+        if (failures.Count > artifactFailureCount)
+        { lifecycle.RecordOwnerFailure(RequestCqrsLifecycleStage.ArtifactWrite); }
         cleanupJoinFailed |= failures.Count != 0;
-        if (CanDeleteDataRoot(failures))
+        lifecycle.SetStage(RequestCqrsLifecycleStage.OwnedRootCleanup);
+        if (RequestCqrsRf3DiagnosticsRootGuard.CanDelete(dataRootOwned, dataRoot,
+            diagnostics is null || diagnosticsJoined, independentConsumer is null || independentConsumer.IsJoined,
+            subscriberObserver.IsJoined, !applicationAcquired || applicationDisposedSuccessfully,
+            cleanupJoinFailed, failures.Count != 0))
         {
             var ownedRoot = dataRoot!;
-            ServerFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true), failures);
+            RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(ownedRoot, recursive: true),
+                failures, lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.OwnedRootCleanup);
             if (failures.Count == 0)
             {
                 dataRoot = null;
@@ -141,16 +159,40 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task DisposeSubscriberObserverAsync(List<Exception> failures)
+    private async Task DisposeIndependentConsumerAsync(List<Exception> failures)
     {
+        if (independentConsumer is null)
+        { return; }
+        var ownedConsumer = independentConsumer;
         try
-        { await subscriberObserver.DisposeAsync().ConfigureAwait(false); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        await subscriberObserver.RetryFailedCloseAsync(failures).ConfigureAwait(false);
+        { await ownedConsumer.DisposeAsync().ConfigureAwait(false); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { RequestCqrsLifecycleFailureObserver.Append(failures, error, lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { RequestCqrsLifecycleFailureObserver.Append(failures, error, lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
+        await ownedConsumer.RetryFailedCloseAsync(failures, lifecycle.RecordOwnerFailure).ConfigureAwait(false);
+        if (ownedConsumer.IsJoined)
+        { independentConsumer = null; }
+        else
+        { RequestCqrsLifecycleFailureObserver.Append(failures,
+            new InvalidOperationException("The independent native consumer did not fully join."),
+            lifecycle.RecordOwnerFailure, RequestCqrsLifecycleStage.IndependentJoin); }
     }
+
+    private async Task DisposeDiagnosticsAsync(List<Exception> failures)
+    {
+        var ownedDiagnostics = diagnostics;
+        if (diagnosticsJoined || ownedDiagnostics is null)
+        { return; }
+        var before = failures.Count;
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(
+            () => ownedDiagnostics.DisposeAsync().AsTask(), failures, lifecycle.RecordOwnerFailure,
+            RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
+        if (failures.Count == before)
+        {
+            diagnosticsJoined = true;
+            diagnostics = null;
+        }
+    }
+
 
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {
@@ -158,8 +200,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         if (ownedApplication is null)
         { return; }
         var before = failures.Count;
-        await ServerFailureObserver.ObserveAsync(() => ownedApplication.DisposeAsync().AsTask(), failures)
-            .ConfigureAwait(false);
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(
+            () => ownedApplication.DisposeAsync().AsTask(), failures, lifecycle.RecordOwnerFailure,
+            RequestCqrsLifecycleStage.AppHostDispose).ConfigureAwait(false);
         if (failures.Count == before)
         {
             application = null;
@@ -169,47 +212,5 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         { cleanupJoinFailed = true; }
     }
 
-    private bool CanDeleteDataRoot(List<Exception> failures)
-        => dataRootOwned && dataRoot is not null && DiagnosticsSettled && IndependentConsumerSettled
-            && subscriberObserver.IsJoined && ApplicationSettled && !cleanupJoinFailed
-            && failures.Count == 0 && Directory.Exists(dataRoot);
-
-    private bool DiagnosticsSettled => diagnostics is null || diagnosticsJoined;
-    private bool IndependentConsumerSettled => independentConsumer is null || independentConsumer.IsJoined;
-    private bool ApplicationSettled => !applicationAcquired || applicationDisposedSuccessfully;
-
-    private void CompleteResourceStreams()
-    {
-        var failures = new List<Exception>();
-        CompleteResourceStreams(failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
-
-    private void CompleteResourceStreams(List<Exception> failures)
-    {
-        var logger = application?.Services.GetService<ResourceLoggerService>();
-        if (logger is null)
-        { return; }
-        foreach (var resource in resources)
-        {
-            if (completedResourceNames.Contains(resource.Name))
-            { continue; }
-            var before = failures.Count;
-            ServerFailureObserver.Observe(() => logger.Complete(resource), failures);
-            if (failures.Count == before)
-            { completedResourceNames.Add(resource.Name); }
-        }
-    }
-
-    private async Task JoinDiagnosticsTwiceAsync()
-    {
-        var capture = diagnostics ?? throw new InvalidOperationException("The Aspire diagnostics owner is absent.");
-        var first = capture.DisposeAsync().AsTask();
-        var repeated = capture.DisposeAsync().AsTask();
-        if (!ReferenceEquals(first, repeated))
-        { throw new InvalidOperationException("Repeated diagnostics disposal did not share one completion task."); }
-        await first.ConfigureAwait(false);
-        diagnosticsJoined = true;
-    }
 
 }

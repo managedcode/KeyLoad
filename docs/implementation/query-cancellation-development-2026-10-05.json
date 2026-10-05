@@ -46,8 +46,9 @@
     "errors": 8,
     "warnings": 0,
     "cause": "Six CA1031 catch diagnostics and two IDE0005 imports were repaired without suppression",
-    "log": "/private/tmp/keyload-stage88a-query-cancellation-build-20261005.log",
-    "logPresent": false
+    "log": "/private/tmp/keyload-stage88-query-cancellation-build-20261005.log",
+    "logPresent": true,
+    "sha256": "4d69fcf97777c66df242cb3f6c94893eba03bc078c1a5a3fbaad0a4a41cbe6cd"
   },
   "formatter": {
     "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",

@@ -40,10 +40,19 @@ internal static class KeyLoadAppHostApplication
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+        var twoRf3 = TwoRf3Profile.ValidateAndRead(builder.Configuration);
         ProtocolCohortImages.ValidateMode(builder.Configuration);
         RequestCqrsProbeProfile.ValidateMode(builder.Configuration);
-        if (TestSuiteSettings.Read(builder.Configuration) is { } tests)
+        var tests = TestSuiteSettings.Read(builder.Configuration);
+        var scaleSelected = builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.ScaleProfileSetting] is not null;
+        if (scaleSelected && (tests is not null
+            || builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.TargetSetting] is null))
         {
+            throw new InvalidOperationException(KeyLoad.Comparisons.ComparisonWorkerSelection.InvalidSelection);
+        }
+        if (tests is not null)
+        {
+            if (twoRf3) { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
             TestSuiteResources.Add(builder, tests);
             return;
         }
@@ -54,6 +63,11 @@ internal static class KeyLoadAppHostApplication
         }
         var configuration = global::AppHostConfiguration.Read(builder);
         var profile = global::ClusterProfileStore.Open(configuration.DataRoot);
+        if (twoRf3)
+        {
+            _ = TwoRf3ClusterResources.Add(builder, profile, configuration.DataRoot);
+            return;
+        }
         var nodes = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral);
         if (configuration.BenchmarkMode)
         {

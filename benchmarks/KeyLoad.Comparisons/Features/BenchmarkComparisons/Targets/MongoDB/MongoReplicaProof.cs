@@ -10,7 +10,7 @@ internal static class MongoReplicaVerifier
 {
     public static async Task<MongoReplicaProof> VerifyAsync(string connectionString,
         IMongoDatabase adminDatabase, IMongoDatabase database,
-        IMongoCollection<BsonDocument> documents, ComparisonTopology topology, BenchmarkDataset dataset, CancellationToken cancellationToken)
+        IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         var status = await adminDatabase.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
@@ -37,7 +37,7 @@ internal static class MongoReplicaVerifier
             }
 
             ValidateConcerns(settings);
-            await VerifyCopiedProbeAsync(documents, clients.ToArray(), database.DatabaseNamespace.DatabaseName, dataset.Options.TimeoutSeconds, cancellationToken);
+            await VerifyCopiedProbeAsync(documents, clients.ToArray(), database.DatabaseNamespace.DatabaseName, dataset.Settings.TimeoutSeconds, cancellationToken);
             await MongoSeededCopies.VerifyAsync(clients, database.DatabaseNamespace.DatabaseName, dataset, cancellationToken);
             var observations = BuildObservations(status, members, versions[0], settings);
             return new(new ClusterEvidence(members.Length, members.Length, MongoSchema.HealthyState, observations), versions[0], clients.ToArray());

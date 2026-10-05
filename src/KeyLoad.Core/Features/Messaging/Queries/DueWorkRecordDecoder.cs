@@ -61,28 +61,37 @@ internal static class DueWorkRecordDecoder
     private static void ValidateSchedule(DatabaseEngine database, ReadOnlySpan<byte> key,
         RecurringScheduleRecord record)
     {
-        if (record is null || record.Lane is null || record.Lane.Partition is null || record.Definition is null
-            || record.CreatorPrincipalId is null || record.ScheduleId == Guid.Empty || record.Revision < 1
-            || record.Generation < 1 || record.NextOrdinal < 0 || record.Lane != record.Definition.Lane
-            || record.ScheduleId != record.Definition.ScheduleId || record.Definition.FirstDueAt.Offset != TimeSpan.Zero
-            || record.Definition.TimeZone != DueWorkFields.UtcZone
-            || record.Definition.PayloadJson is null || record.Definition.HeadersJson is null
-            || record.Definition.Interval.Ticks is < DueWorkFields.MinimumIntervalTicks or > DueWorkFields.MaximumIntervalTicks
-            || record.Definition.Misfire != RecurringMisfirePolicy.CatchUp
-            || record.Definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl > TimeSpan.FromDays(365)))
+        if (HasInvalidScheduleShape(record))
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
-        ValidateLane(record.Lane);
-        JsonData.Identifier(record.CreatorPrincipalId);
-        ValidateKey(key, DueWorkProtocol.ScheduleSpace, record.Lane, record.ScheduleId);
-        _ = JsonData.Validate(record.Definition.PayloadJson, database.Limits);
-        _ = JsonData.Validate(record.Definition.HeadersJson, database.Limits);
+        ValidateLane(record.Lane!);
+        JsonData.Identifier(record.CreatorPrincipalId!);
+        ValidateKey(key, DueWorkProtocol.ScheduleSpace, record.Lane!, record.ScheduleId);
+        _ = JsonData.Validate(record.Definition!.PayloadJson!, database.Limits);
+        _ = JsonData.Validate(record.Definition!.HeadersJson!, database.Limits);
         if (record.Definition.OrderingKey is { } orderingKey)
         {
             JsonData.Identifier(orderingKey);
         }
     }
+
+    private static bool HasInvalidScheduleShape(RecurringScheduleRecord record)
+        => HasInvalidScheduleIdentity(record) || HasInvalidScheduleDefinition(record);
+
+    private static bool HasInvalidScheduleIdentity(RecurringScheduleRecord record)
+        => record is null || record.Lane is null || record.Lane.Partition is null || record.Definition is null
+            || record.CreatorPrincipalId is null || record.ScheduleId == Guid.Empty || record.Revision < 1
+            || record.Generation < 1 || record.NextOrdinal < 0 || record.Lane != record.Definition.Lane
+            || record.ScheduleId != record.Definition.ScheduleId;
+
+    private static bool HasInvalidScheduleDefinition(RecurringScheduleRecord record)
+        => record.Definition!.FirstDueAt.Offset != TimeSpan.Zero
+            || record.Definition.TimeZone != DueWorkFields.UtcZone
+            || record.Definition.PayloadJson is null || record.Definition.HeadersJson is null
+            || record.Definition.Interval.Ticks is < DueWorkFields.MinimumIntervalTicks or > DueWorkFields.MaximumIntervalTicks
+            || record.Definition.Misfire != RecurringMisfirePolicy.CatchUp
+            || record.Definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl > TimeSpan.FromDays(365));
 
     private static void ValidateSaga(DatabaseEngine database, ReadOnlySpan<byte> key, SagaRecord record)
     {

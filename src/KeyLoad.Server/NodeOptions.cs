@@ -55,6 +55,8 @@ internal sealed record NodeOptions
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
     internal RequestCqrsProbeOptions RequestCqrsProbe { get; init; } = new(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
+    /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
+    public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
 
     /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
     public void Validate()
@@ -63,6 +65,7 @@ internal sealed record NodeOptions
         ArgumentNullException.ThrowIfNull(HttpAdmission);
         ArgumentNullException.ThrowIfNull(ReplayAdmission);
         ArgumentNullException.ThrowIfNull(McpMemory);
+        ArgumentNullException.ThrowIfNull(MembershipAuthority);
         CommandAdmission.Validate();
         HttpAdmission.Validate();
         McpMemory.Validate();
@@ -79,6 +82,7 @@ internal sealed record NodeOptions
         var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
         configuration.Validate();
         CreatePeerOptions().Validate(configuration);
+        MembershipAuthoritySettingsValidator.Validate(MembershipAuthority, this);
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
     }
 

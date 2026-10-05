@@ -18,6 +18,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     private IMongoCollection<BsonDocument>? edges;
     private IMongoCollection<BsonDocument>? events;
     private int graphDepth;
+    private int corpusCount;
 
     /// <summary>Gets the verified server profile after initialization.</summary>
     public TargetProfile Profile { get; private set; } = MongoProfileFactory.Create(connectionString, image, topology);
@@ -33,11 +34,16 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     /// <param name="dataset">The deterministic comparison corpus and options.</param>
     /// <param name="cancellationToken">Cancels initialization.</param>
     /// <returns>A task that completes after verification.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
-        graphDepth = dataset.Options.GraphDepth;
-        var settings = CreateSettings(connectionString, dataset.Options.Concurrency);
+        graphDepth = dataset.Settings.GraphDepth;
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            Profile = Profile with { ReadContract = "primary majority document reads; S1 seeds documents only, with no edge or event records" };
+        }
+        corpusCount = dataset.Documents.Count;
+        var settings = CreateSettings(connectionString, dataset.Settings.Concurrency);
         primaryClient = new MongoClient(settings);
         ownedClients.Add(primaryClient);
         database = primaryClient.GetDatabase(databaseName);
@@ -47,7 +53,10 @@ public sealed class MongoTarget(string connectionString, string runId, string im
 
         await CreateIndexesAsync(cancellationToken);
         await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, cancellationToken);
-        await VerifyUniqueStreamInsertionAsync(cancellationToken);
+        if (dataset.Settings is not ScaledComparisonProfile)
+        {
+            await VerifyUniqueStreamInsertionAsync(cancellationToken);
+        }
         var version = await ReadPrimaryVersionAsync(cancellationToken);
         var profile = Profile with { Version = version };
         if (ComparisonTopologies.NodeCount(topology) > 1)
@@ -79,7 +88,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             throw new ComparisonFailureException(MongoSchema.FailureNotInitialized);
         }
-        return Task.FromResult<IComparisonSession>(new MongoSession(this, documents, edges, events, graphDepth));
+        return Task.FromResult<IComparisonSession>(new MongoSession(this, documents, edges, events, graphDepth, corpusCount));
     }
 
     /// <summary>Drops the isolated benchmark database and disposes owned clients.</summary>

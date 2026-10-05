@@ -1,11 +1,12 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using KeyLoad.Client;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
-    int topK, int graphDepth, int graphVertices, int graphEdges) : IComparisonSession
+    int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount) : IComparisonSession
 {
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
@@ -35,7 +36,42 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         }
     }
 
+    public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        string? cursor = null;
+        var observedCount = 0;
+        do
+        {
+            var query = KeyLoadQuery.From<CorpusQueryMarker>(partition, "documents")
+                .OrderBy(row => QueryFunctions.DocumentId(row)).Take(256);
+            var page = KeyLoadClientResults.Success(await client.QueryAsync(query, allowFullScan: true,
+                cursor: cursor, cancellationToken: cancellationToken), "ScaledCorpusReadback");
+            foreach (var row in page.Rows)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (++observedCount > corpusCount)
+                {
+                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                }
+
+                yield return new(row.EntityId, row.Json);
+            }
+            if (page.Rows.IsEmpty && page.Cursor is not null)
+            {
+                throw new ComparisonFailureException("ScaledCorpusReadbackCursorDidNotAdvance");
+            }
+            cursor = page.Cursor;
+        } while (cursor is not null);
+
+        if (observedCount != corpusCount)
+        {
+            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+        }
+    }
+
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    private sealed record CorpusQueryMarker;
 
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {

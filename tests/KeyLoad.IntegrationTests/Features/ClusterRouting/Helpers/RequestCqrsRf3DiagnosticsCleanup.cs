@@ -16,21 +16,35 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     private readonly RequestCqrsRf3McpRejectionNodeCapture[] nodes;
     private readonly Guid waveId;
     private readonly Task[] subscriptions;
+    private readonly Action<RequestCqrsLifecycleStage>? failureObserver;
     private Task? disposalTask;
+    private bool fallbackRequested;
 
     internal RequestCqrsRf3DiagnosticsCleanup(Guid waveId, ResourceLoggerService logger,
-        ContainerResource[] resources, RequestCqrsRf3McpRejectionNodeCapture[] nodes)
+        ContainerResource[] resources, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
+        Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         this.waveId = waveId;
         this.logger = logger;
         this.resources = resources;
         this.nodes = nodes;
+        this.failureObserver = failureObserver;
         subscriptions = resources.Select(resource => CaptureNodeAsync(logger, resource,
             nodes.Single(node => string.Equals(node.Name, resource.Name, StringComparison.Ordinal))))
             .ToArray();
     }
 
     internal bool IsJoined => subscriptions.All(subscription => subscription.IsCompleted);
+    internal RequestCqrsCaptureLifecycleSnapshot ReadLifecycleSnapshot()
+        => new(StatusFor(RequestCqrsRf3Protocol.Node1), StatusFor(RequestCqrsRf3Protocol.Node2),
+            StatusFor(RequestCqrsRf3Protocol.Node3),
+            lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, fallbackRequested);
+
+    private TaskStatus? StatusFor(string node)
+    {
+        var index = Array.FindIndex(resources, resource => string.Equals(resource.Name, node, StringComparison.Ordinal));
+        return index < 0 ? null : subscriptions[index].Status;
+    }
 
     internal Task CompleteAndDrainAsync(CancellationToken cancellationToken)
     {
@@ -61,32 +75,41 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         try
         {
             CompleteResourceStreams(failures);
-            await ServerFailureObserver.ObserveAsync(() => drain.WaitAsync(cancellationToken), failures)
-                .ConfigureAwait(false);
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => drain.WaitAsync(cancellationToken),
+                failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.CaptureDrain); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+            RequestCqrsLifecycleStage.CaptureDrain); }
         finally
         {
             if (!drain.IsCompleted)
             {
-                await ObserveCleanupAsync(lifetime.CancelAsync, failures).ConfigureAwait(false);
-                await ObserveCleanupAsync(() => drain, failures).ConfigureAwait(false);
+                fallbackRequested = true;
+                await ObserveCleanupAsync(lifetime.CancelAsync, failures,
+                    RequestCqrsLifecycleStage.CaptureFallbackCancellation).ConfigureAwait(false);
+                await ObserveCleanupAsync(() => drain, failures,
+                    RequestCqrsLifecycleStage.CaptureFallbackJoin).ConfigureAwait(false);
             }
             try
             { lifetime.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureLifetimeDispose); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureLifetimeDispose); }
             try
             { cleanupDeadline.Dispose(); }
             catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDeadlineDispose); }
             catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            { RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
+                RequestCqrsLifecycleStage.CaptureDeadlineDispose); }
         }
         ThrowWithNativeFatalPriority(failures);
     }
@@ -95,14 +118,18 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     {
         foreach (var resource in resources)
         {
-            try
-            { ServerFailureObserver.Observe(() => logger.Complete(resource), failures); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            RequestCqrsLifecycleFailureObserver.Observe(() => logger.Complete(resource), failures,
+                failureObserver, CompletionStage(resource.Name));
         }
     }
+
+    private static RequestCqrsLifecycleStage CompletionStage(string resourceName) => resourceName switch
+    {
+        RequestCqrsRf3Protocol.Node1 => RequestCqrsLifecycleStage.CaptureCompleteNode1,
+        RequestCqrsRf3Protocol.Node2 => RequestCqrsLifecycleStage.CaptureCompleteNode2,
+        RequestCqrsRf3Protocol.Node3 => RequestCqrsLifecycleStage.CaptureCompleteNode3,
+        _ => throw new ArgumentOutOfRangeException(nameof(resourceName))
+    };
 
     private async Task CaptureNodeAsync(ResourceLoggerService resourceLogger, ContainerResource resource,
         RequestCqrsRf3McpRejectionNodeCapture node)
@@ -123,15 +150,9 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         { node.Complete(); }
     }
 
-    private static async Task ObserveCleanupAsync(Func<Task> operation, List<Exception> failures)
-    {
-        try
-        { await ServerFailureObserver.ObserveAsync(operation, failures).ConfigureAwait(false); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-    }
+    private Task ObserveCleanupAsync(Func<Task> operation, List<Exception> failures,
+        RequestCqrsLifecycleStage stage)
+        => RequestCqrsLifecycleFailureObserver.ObserveAsync(operation, failures, failureObserver, stage);
 
     private static void ThrowWithNativeFatalPriority(List<Exception> failures)
     {

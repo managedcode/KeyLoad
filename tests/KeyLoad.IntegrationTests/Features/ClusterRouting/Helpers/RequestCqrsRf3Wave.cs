@@ -1,3 +1,5 @@
+using KeyLoad.Orleans;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
@@ -12,10 +14,14 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
     private readonly string dataRoot;
     private readonly ContainerRuntimeControl runtime;
     private readonly RequestCqrsRf3Diagnostics diagnostics;
+    private readonly RequestCqrsLifecycleEvidence? lifecycleEvidence;
     private DistributedApplication? application;
+    private Action<RequestCqrsLifecycleStage>? FailureObserver => lifecycleEvidence is null
+        ? null : lifecycleEvidence.RecordOwnerFailure;
 
     private RequestCqrsRf3Wave(string dataRoot, ref DistributedApplication? application,
-        ContainerRuntimeControl runtime, ref RequestCqrsRf3Diagnostics? diagnostics)
+        ContainerRuntimeControl runtime, ref RequestCqrsRf3Diagnostics? diagnostics,
+        RequestCqrsLifecycleEvidence? lifecycleEvidence)
     {
         if (application is null || diagnostics is null)
         {
@@ -25,6 +31,7 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         this.application = application;
         this.runtime = runtime;
         this.diagnostics = diagnostics;
+        this.lifecycleEvidence = lifecycleEvidence;
         application = null;
         diagnostics = null;
     }
@@ -53,9 +60,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
 
     internal static Task<RequestCqrsRf3Wave> StartProbedAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, RequestCqrsProbeFixture controls,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null)
         => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort: false, requireHealthy: true,
-            null, Guid.NewGuid(), cancellationToken, controls);
+            null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle);
 
     internal static Task<RequestCqrsRf3Wave> StartPriorNative6Async(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
@@ -64,8 +71,9 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
             NodeEpochRf3Protocol.SnapshotThresholdArgument, diagnosticsWaveId, cancellationToken);
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
-        ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics)
-        => new(dataRoot, ref application, runtime, ref diagnostics);
+        ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,
+        RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
+        => new(dataRoot, ref application, runtime, ref diagnostics, lifecycleEvidence);
 
     internal Task KillAsync(string node, CancellationToken cancellationToken)
         => runtime.KillAsync(node, RequestCqrsRf3Protocol.FollowerLossScenario, cancellationToken);
@@ -101,30 +109,56 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         if (owned is null)
         { return; }
         var failures = new List<Exception>();
-        await CompleteAsync(owned, diagnostics, failures).ConfigureAwait(false);
+        await CompleteAsync(owned, diagnostics, failures, lifecycleEvidence).ConfigureAwait(false);
         if (failures.Count == 0)
         {
-            ServerFailureObserver.Observe(() => AssertNodeLocksReleased(dataRoot), failures);
+            RequestCqrsLifecycleFailureObserver.Observe(() => AssertNodeLocksReleased(dataRoot), failures,
+                FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveLockCheck);
             application = null;
         }
-        SaveFailureEvidence(diagnostics, failures);
+        if (failures.Count > 0)
+        {
+            RequestCqrsLifecycleFailureObserver.Observe(
+                () => diagnostics.SaveFailureEvidence(failures[0]), failures,
+                FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public ValueTask DisposeAsync() => new(StopAsync());
 
     internal static async Task CompleteAsync(DistributedApplication app,
-        RequestCqrsRf3Diagnostics? diagnostics, List<Exception> failures)
+        RequestCqrsRf3Diagnostics? diagnostics, List<Exception> failures,
+        RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
     {
-        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
-        await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures,
+            FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppStop).ConfigureAwait(false);
         if (diagnostics is not null)
         {
-            await ServerFailureObserver.ObserveAsync(
-                () => diagnostics.CompleteAndDrainAsync(deadline.Token), failures).ConfigureAwait(false);
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(
+                () => diagnostics.CompleteAndDrainAsync(deadline.Token), failures,
+                FailureObserver,
+                RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain).ConfigureAwait(false);
         }
-        await ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        SaveFailureEvidence(diagnostics, failures);
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures,
+            FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppDispose)
+            .ConfigureAwait(false);
+        try
+        { deadline.Dispose(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        var ownedDiagnostics = diagnostics;
+        if (ownedDiagnostics is not null && failures.Count > 0)
+        {
+            RequestCqrsLifecycleFailureObserver.Observe(
+                () => ownedDiagnostics.SaveFailureEvidence(failures[0]), failures,
+                FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
+        }
     }
 
     internal static void SaveFailureEvidence(RequestCqrsRf3Diagnostics? diagnostics, List<Exception> failures)

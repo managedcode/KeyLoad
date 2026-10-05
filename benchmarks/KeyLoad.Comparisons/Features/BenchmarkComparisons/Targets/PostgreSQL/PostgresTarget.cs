@@ -17,6 +17,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     private bool schemaCommitAttempted;
     private int topK;
     private int graphDepth;
+    private int corpusCount;
 
     /// <summary>Gets the observed PostgreSQL and topology profile.</summary>
     public TargetProfile Profile { get; private set; } = new("PostgreSQL + pgvector", "unverified", "single primary, no replicas",
@@ -32,16 +33,21 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <param name="dataset">The deterministic corpus and dimensions, graph, and concurrency options.</param>
     /// <param name="cancellationToken">A token that cancels database setup and data operations.</param>
     /// <returns>A task that completes after schema creation, seeding, and copy observation.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
-        topK = dataset.Options.TopK;
-        graphDepth = dataset.Options.GraphDepth;
+        topK = dataset.Settings.TopK;
+        graphDepth = dataset.Settings.GraphDepth;
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            Profile = Profile with { ReadContract = "READ COMMITTED primary document reads; S1 keeps the native nullable embedding column NULL" };
+        }
+        corpusCount = dataset.Documents.Count;
         var settings = new NpgsqlConnectionStringBuilder(connectionString)
         {
             MaxAutoPrepare = 32,
             AutoPrepareMinUsages = 1,
-            MaxPoolSize = Math.Max(10, dataset.Options.Concurrency),
+            MaxPoolSize = Math.Max(10, dataset.Settings.Concurrency),
             SearchPath = schema + ",public"
         };
         source = NpgsqlDataSource.Create(settings.ConnectionString);
@@ -73,7 +79,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <param name="cancellationToken">A token that cancels opening the session connection.</param>
     /// <returns>A session whose disposal returns its connection to the data source.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth);
+        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth, corpusCount);
 
     /// <summary>Drops only this target's marked schema and disposes its owned data source.</summary>
     /// <returns>A value task that completes after schema cleanup and data-source disposal.</returns>

@@ -35,7 +35,7 @@ internal static class ReplicaDiscoveryEndpoints
 
     private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node, CancellationToken cancellationToken)
     {
-        if (!node.CatalogReady)
+        if (!node.DatabaseReady)
         { return Results.StatusCode(StatusCodes.Status503ServiceUnavailable); }
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(ServerProtocol.ReadyTimeout);

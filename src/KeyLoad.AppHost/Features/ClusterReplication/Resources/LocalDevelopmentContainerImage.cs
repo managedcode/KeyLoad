@@ -39,12 +39,35 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
             return null;
         }
 
-        if (provenance != LocalRf3ImageExecution.Provenance || reference is null || receiptPath is null
+        if (HasInvalidLocalImageRequest(builder, provenance, reference, receiptPath, child))
+        {
+            throw new InvalidOperationException(Invalid);
+        }
+
+        var tag = reference![(reference.IndexOf(':', StringComparison.Ordinal) + 1)..];
+        var invocation = tag[TagPrefix.Length..];
+        var expectedReceipt = $"TestResults/rf3/local-images/image-{invocation}.json";
+        if (!string.Equals(receiptPath, expectedReceipt, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(Invalid);
+        }
+        return new(reference!, tag, receiptPath!);
+    }
+
+    private static bool HasInvalidLocalImageRequest(IDistributedApplicationBuilder builder, string? provenance,
+        string? reference, string? receiptPath, string? child)
+        => HasInvalidImageIdentity(provenance, reference, receiptPath, child)
+            || HasConflictingImageSelectors(builder);
+
+    private static bool HasInvalidImageIdentity(string? provenance, string? reference, string? receiptPath, string? child)
+        => provenance != LocalRf3ImageExecution.Provenance || reference is null || receiptPath is null
             || child != "true"
-            || reference.Length > 256 || !ImageReference().IsMatch(reference)
-            || receiptPath.Length is 0 or > MaximumReceiptPathCharacters
-            || Path.IsPathRooted(receiptPath) || receiptPath.Contains('\\', StringComparison.Ordinal)
-            || HasValue(builder, GithubReceiptSetting)
+            || reference!.Length > 256 || !ImageReference().IsMatch(reference)
+            || receiptPath!.Length is 0 or > MaximumReceiptPathCharacters
+            || Path.IsPathRooted(receiptPath) || receiptPath.Contains('\\', StringComparison.Ordinal);
+
+    private static bool HasConflictingImageSelectors(IDistributedApplicationBuilder builder)
+        => HasValue(builder, GithubReceiptSetting)
             || HasValue(builder, GithubRevisionSetting)
             || HasValue(builder, GithubActionsSetting)
             || HasValue(builder, ProtocolCohortEnabledSetting)
@@ -52,20 +75,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
             || HasValue(builder, ProtocolNode2Setting)
             || HasValue(builder, ProtocolNode3Setting)
             || builder.Configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(1).Any()
-            || HasComparisonSelector(builder))
-        {
-            throw new InvalidOperationException(Invalid);
-        }
-
-        var tag = reference[(reference.IndexOf(':', StringComparison.Ordinal) + 1)..];
-        var invocation = tag[TagPrefix.Length..];
-        var expectedReceipt = $"TestResults/rf3/local-images/image-{invocation}.json";
-        if (!string.Equals(receiptPath, expectedReceipt, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(Invalid);
-        }
-        return new(reference, tag, receiptPath);
-    }
+            || HasComparisonSelector(builder);
 
     private static bool HasComparisonSelector(IDistributedApplicationBuilder builder)
         => HasValue(builder, ComparisonEnabledSetting)

@@ -700,3 +700,58 @@ flowchart LR
     Pending --> Start
     PullRequest[PR submission] --> Cancel[Replace obsolete PR run]
 ```
+
+### Accepted functional coverage implementation, 2026-10-05
+
+REQ-CQ-009 / AC-CQ-018..021 in CodeQuality implement the owner's mandatory
+functional-only coverage and complete-operation testing correction. Preserve every
+existing analyzer/site contract, native test gate and 80/70/90/no-decrease rule.
+
+1. Root freezes this contract, the exact `PartitionQuery*` contributor profile,
+   source/native module identities, parser bounds and evidence limits before code.
+   Luna owns only new guarded private `scripts/Features/CodeQuality/functional-coverage*`
+   settings/inventory/report code. Existing AppHost forwards the pinned native MTP
+   CodeCoverage 18.11.2 Cobertura flags; no Coverlet/VSTest or parallel collector is
+   introduced. Native static managed instrumentation covers platforms without
+   dynamic support, scoped to the inventory-owned Release test deployment module
+   directory; require exact original DLL/PDB restoration after collector settlement.
+   No shared CI/AppHost edits occur in this first private packet.
+2. Root reviews and joins the packet, collects the complete selected native unit
+   and scalar operation flows through Aspire, and retains original Cobertura,
+   TRX/TUnit, process outcomes and pre/post source/DLL/PDB hashes. Scope is the
+   actual KeyLoad.Query module with these contributors; local evidence remains
+   development-only and cannot close complete-suite/Linux/server acceptance.
+3. The bounded verifier accepts only inventory-owned production source and native
+   module identities, rejects DTD/external XML, drift, absent/incomplete reports,
+   invalid/conflicting counts and unexpected sources, then emits exact raw-count
+   JSON/Markdown and uncovered locations. OR-union matching line hits rather than
+   summing duplicated runs. Native coarse branch pairs cannot prove a merged
+   outcome union: retain their per-run counts and leave merged branches unmeasured
+   until native outcome identity is actually available. Exercise real retained
+   reports plus actual missing/corrupt/drift failures without fake collector XML.
+4. Root freezes the subsequent complete functional contributor classification and
+   native binary/branch merge contract, then the exact pinned ephemeral RF3 server
+   collector image/invocation/export/stop/join contract before implementation.
+   Instrument the actual three Docker servers from the same source/DLL/PDB/image
+   identities; test-host coverage does not substitute for server coverage. Exclude
+   load/stress/performance/comparison cases even when hosted in ordinary suites;
+   required complete CI suites still execute separately and retain their failures.
+5. Close one module at a time only after uncovered behaviour has meaningful full
+   operation success/failure/edge tests, fresh source-bound coverage and all original
+   acceptance gates. Partial reports, source existence, trivial accessors, missing
+   exports or skipped/failed suites never establish the global AC-CQ-009 gate.
+
+Root exclusively owns policy/docs, AppHost/CI/image integration, native collection,
+delivery and final review. No worker runs gates, changes shared code or installs
+tools for the first profile. No runtime persistence/public API migration occurs;
+rollback restores coherent tooling and retains originals without reducing gates.
+ADR remains Accepted until the required complete implementation and evidence exist.
+
+```mermaid
+flowchart LR
+    Profile[Functional contributor profile] --> Original[Native Aspire coverage reports]
+    Original --> Identity[Source and module identity checks]
+    Identity --> Counts[Exact counts and uncovered flows]
+    Counts --> Repair[Real complete-operation tests]
+    Repair --> Profile
+```

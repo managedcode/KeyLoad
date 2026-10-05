@@ -1,0 +1,999 @@
+{
+  "version": 1,
+  "observedOn": "2026-10-05",
+  "scope": "local development, exactly25 PartitionQuery functional tests, Query production module only",
+  "baseRevision": "c16a1d928d7d6941db74403e47f3dbcea206d86a",
+  "orchestration": "Aspire AppHost KeyLoadTests unit/unit-scalar; native MTP collector",
+  "platform": "macOS arm64",
+  "loadComparisonContributors": 0,
+  "runs": [
+    {
+      "suite": "unit",
+      "filter": "/*/*/PartitionQuery*/*",
+      "nativeProcessExitCode": 0,
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "rawCoverage": {
+        "path": "TestResults/stage89a-partition-query-coverage/coverage.cobertura.xml",
+        "sha256": "8a53d64171925b7375aa87a735680d48eeda426f2c603be089c658c59bc611a7",
+        "bytes": 985837,
+        "nativeRoot": {
+          "line-rate": "0.21836158192090396",
+          "branch-rate": "0.19013490725126475",
+          "complexity": "2441",
+          "version": "1.9",
+          "timestamp": "1791233373",
+          "lines-covered": "773",
+          "lines-valid": "3540",
+          "branches-covered": "451",
+          "branches-valid": "2372"
+        },
+        "packages": [
+          {
+            "line-rate": "0.21836158192090396",
+            "branch-rate": "0.19013490725126475",
+            "complexity": "2441",
+            "name": "KeyLoad.Query"
+          }
+        ]
+      },
+      "guardedPaths": [
+        {
+          "path": "Directory.Build.props",
+          "sha256": "3a014e35d12712f70388c9d3aab68d3287f970a0d7a35302a310fac680669860"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "sha256": "be927523cfc85b8b2ac18fb5d08bdf7625aee31d4f8fec37a4cbc2782acc24bf"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "sha256": "415f87b4f75e9a7c04f9ecc82020e02ebda0d8a41b62a4ba2bbe1fa672bc3c66"
+        },
+        {
+          "path": "global.json",
+          "sha256": "eaa896ea27d7225150b24f86b81bd875a76af1fe8d3006ac3aa9eaf058b5052e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Contracts/LiveCursorClaims.cs",
+          "sha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
+          "sha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Queries/LiveQueryExecutor.cs",
+          "sha256": "6c456b3b3718424aa031375a11f6ff39fd1a5355536a6a13cbfa5c6561ceca6f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryCandidateV1.cs",
+          "sha256": "7e39b4b958b18d0b45c4c54e7ff22d3a89423bc226ea266e4d8e6dd74fdcb71a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafPlanV1.cs",
+          "sha256": "e8fe666038b7e79a9dbec4e6878f7d084a27408860d54ebacc0568f4347d666d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafResultV1.cs",
+          "sha256": "2618dea5e889188ff3385b3e9e89072304a2c4e8f9a1231c41e1a5742ca00a8d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryPlanV1.cs",
+          "sha256": "1361234218b35e1c1012f56ae1497a2cc54827335efa3ff31678154ae2594dbb"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryResultV1.cs",
+          "sha256": "c079768baa64a945852e0b62d816e7cf6c74f2b736aba323bc12371a3f5a3cd9"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQuerySerializationAliases.cs",
+          "sha256": "783dce44532341caa96747a6f4690d32801495a7a6f5cb94513ce2b2a4f59299"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/QueryCursorClaims.cs",
+          "sha256": "f1520de4ec3f36bb00a6d48b94c360caba308626af93f4777d57713acd4cd76d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/ModelQueryExecutor.cs",
+          "sha256": "1fd51e262712253009ce20c7a0359792c2d19cbc079e7a195c168dd01056144d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryExecution.cs",
+          "sha256": "fc124df2ebcde60194119dcf3afeecb673bfc32495b46f6cbc260fab7e21286c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafExecutor.cs",
+          "sha256": "ecdc738267bb626c28c0022b13290fc1093102e60230665ce948125c4de6e55b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafReadGrant.cs",
+          "sha256": "528a27158e3ea5cc06a4cb9cadbe263cb7428489d496e04e4a516609767cd263"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafRetention.cs",
+          "sha256": "4bf569144884ba61a49b8cc16e814bbafc4bf8a98c9a10ea5fee7d517bbe5a9e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryMerge.cs",
+          "sha256": "e5e6b67ffe8955628f0eb28eca9af8c7f05f1ad38cf464307ef3c35f812ccc67"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryOrder.cs",
+          "sha256": "71357623f8feff3e77c23358b44cf2eacaca723e5dc31c426c78d0f1ab2867c0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicExecution.cs",
+          "sha256": "5acce65211a9ce5908d92bd6eda318dfa8d73445b9ce96d9deffd4f14d11e40d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicMapper.cs",
+          "sha256": "e50d10419161dc893369b7bb72e2ce6b819e41c65f91cc1e9b9a32e259c60373"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryRetention.cs",
+          "sha256": "820adc1b7ede2bccc31bd3ad0ff4255701008f7ed383be826febf71acd33fbde"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlCommentSyntax.cs",
+          "sha256": "e32f7bcf60584bac4291f0f361a458bdc7ac542e6c17c2c2f89d4855227fa3a8"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlExpressionParser.cs",
+          "sha256": "f0d2d6a8daad82a1d0a26737bb612cce864d10de59c9bc693aa21002b045f2c1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathParser.cs",
+          "sha256": "c720f2286b34d83164e072ef534a5f609e2409733db53915d1a286c39426451f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathValueReader.cs",
+          "sha256": "f17a2c9edf6b25135f32de0e9572e640610b5c987a2b75f9ee318c5c02899216"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchParser.cs",
+          "sha256": "227b651bcbe43661decd2aa9a9767b34b79860c5565ad09ea83946d2c9663c2f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchValueReader.cs",
+          "sha256": "62866831384b3bf9e4941a5e8d93aadd9d5c5995af13fec50bc612c616d67660"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+          "sha256": "5143fb60012fa99e5f80da01a20dba7681ad9d146229d335d35a6342a6d8881a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlSyntax.cs",
+          "sha256": "ad5138a29cd8c8e1a31f0aa938caa79298dc80d6b791963732f7579fafbf2b5c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlTokenizer.cs",
+          "sha256": "aa99d12fee11fe26390b42567eb50d2d8363694423443ef7c90faa23e9c7d8f3"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Identity/ModelQueryPolicies.cs",
+          "sha256": "3533d3e05fa71af0031da3baf0e7779e88f950da529993f0c2748c4c92f559db"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/PreparedQuery.cs",
+          "sha256": "3073ba7a4657fc8e965518c2bb74be5c9d3f3bbc6fbd9cf044f864ce42ab1b36"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+          "sha256": "2e0ef6cd9bba8643598424273e97ac04ee794baabad95b18b24f71080462d61e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryCandidateReader.cs",
+          "sha256": "ee359f416a32d5516f4923beda3ea4a7c230c8726f441af3730ffa8c57afd1a9"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.GraphPath.cs",
+          "sha256": "e9fe72db0697cfc6582433a9cddaf9b3f8923d6f9dfa5e0d674d9ddea911173f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.PartitionQuery.cs",
+          "sha256": "c6e3b276b8733730a6d1a4a7d3f4777ecd37ec4075b20971b144f7e50e1539f0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
+          "sha256": "8439026bbc633d2a529c68adf1fffbd5f9ee2f7edf15acb55f479e88319382ef"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlGraphSearchExecutor.cs",
+          "sha256": "1b9a4109e1ec5686676e056f527a2b6691602fe3efaf7f3d77c5d0a31b251f4b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlTokenCursor.cs",
+          "sha256": "01dcd3cce19a690cbf9b96462bd722cffba41fe30bec8e4f7550485b4dcfae42"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Serialization/QueryRequestIdentity.cs",
+          "sha256": "90e64c8ef6e332be6239a75e76f5f1235d72a8c3e5f7e15f095fc5d088a25001"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlacementValidation.cs",
+          "sha256": "63f65d4d0b49a6aaaa0b88b3d05359f820b935487368a5a92ab9811bbc86607c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanFactory.cs",
+          "sha256": "e33f89712df45bb5bf2057532c3e3446781af7cb3033eaf83909c05bb0e2f82e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanValidation.cs",
+          "sha256": "d84b4cf690e2921b8d46e771338031231c471617abc5402e611f57e8c68388be"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPublicValidation.cs",
+          "sha256": "93cff10ee8d15bc7376c2ff74a55426ac592dc6cc7b561bdb85cd8c3ce0ece47"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryFieldAuthorization.cs",
+          "sha256": "92c99691eaf60a04806c4055d9f20521bb2e9938affaf5816869bf67e742de66"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
+          "sha256": "db94224905aed668e122e242fb83f6732a0a4b4f12b4a3aae399faaf66b66f14"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathRequestSizer.cs",
+          "sha256": "40d72a841c2e886edb8d34056328e88f38c6ff92d20ac850b75f7facb5cde3c7"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathSyntax.cs",
+          "sha256": "4e6b6f8fa4af1e53b3c2f6d16ed1b3858f0f9c535d855c64d8ce43b5cf5d163a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchRequestSizer.cs",
+          "sha256": "dc2f80c98edb784b3800c40fc9aaf4990b0b4929f38575bc4f60b83e07808b83"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchSyntax.cs",
+          "sha256": "1675574fe14ceffcf6058d6fced2f13e998eb6ffc43bbad90abfa3a57094995e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/AnnWorkBudget.cs",
+          "sha256": "5746f2f0abd4c0856d7cdb398172fff29fe90798e59050f2f863d7a526cd7435"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/FilteredSearchRequestSizer.cs",
+          "sha256": "e9bdfe5e7044242aac82d93c87ceec76ea6edc5d716c58c755c3ceba65d80c9d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnAdmission.cs",
+          "sha256": "60ed1938df901377dadf84ed76c77ccf1ee76bdb8274a0a67d3550d33d53cc2e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnReservations.cs",
+          "sha256": "91dedf2ae447cd9cb5158a501ab21c912cb9b15dee41a8618cc71a1d577b0f67"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/GlobalBranchContracts.cs",
+          "sha256": "bd11abfe9f183880ca4aaebced529d78333af7f4fd90938daae25dd26487c106"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/IPackedAnnSimilarity.cs",
+          "sha256": "3ad1e97be4c5f521768e100ce599fd5df36537f6a156d17f9de8499697cb9917"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionContracts.cs",
+          "sha256": "52aafc41ac5b7860479fde14fd8a61539477d2c817053cbfae2170459ba234e1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionProtocol.cs",
+          "sha256": "9e1936281436c474921e355b56004be3a5ef45a5e14aff5792db8a3ba4a2b4cc"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuildScratch.cs",
+          "sha256": "85533c94d45fc5830354b0644e2561c5ac0471c0a3a21b47a41a9ef4fff174f1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuilder.cs",
+          "sha256": "5f67ef978b98012c7e891c5977dfd616c024d809883a238ed90d2dd7d4806a2b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnConstruction.cs",
+          "sha256": "38ac307db0c4599adfad21b6a5a11e78cde7da2a5ccd40edff51f4048ee759c8"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnGraph.cs",
+          "sha256": "a2d281f265c27208f9ae48b243495e16a01712f55a9a20a88cb82f6e66ce3604"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
+          "sha256": "4c80da9bd68105860731ee1d2c7ba4d8519b82fd57e014e6de95f9d73eeb57db"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLayerBuffers.cs",
+          "sha256": "032d639c455084dfd2602c4453ddcba34a7e24bde15e4dc8a198718481974b49"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLevels.cs",
+          "sha256": "4ef43f7b1f34052643d92e2e31373dd616c1caef1b051655de0df645b1a56991"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborOrdering.cs",
+          "sha256": "957c4068e814cb50d745539f8afeb34994a3a6bd6f6d7da801ec714cbf7370be"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborSelection.cs",
+          "sha256": "948a4ba53b282eefac3076a8807e9625682a0701041cb10d0a6e1dcf74073116"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PreparedSimilarity.cs",
+          "sha256": "ffe0dd46fe1190ebf1534c14850419fe959245c35ce3f03712fd3b5e6f41b09f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/SimilarityMetricMath.cs",
+          "sha256": "8f4edc0c9a6a407c2903e90292cf1c5579f871edc28421a606e39ec94d8a03d0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Lifecycle/TextProjectionLifecycle.cs",
+          "sha256": "bbc8db7ef17df47469b924bceebfeb80bcc5a427a1576105c8b7fdf4d422da22"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Models/FilteredVectorPlan.cs",
+          "sha256": "9b0a349ccfc6a305f1e6c9ffe574035bfb64ef926814af9718024d680c9c15b1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Models/PackedAnnApproximateResult.cs",
+          "sha256": "cd06afa1d338b5c71589234f960f39a01327b53d2f84d1238d4eae041e8a62e6"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchBranch.cs",
+          "sha256": "11852f3a6b9e965974f8d647efbc932279b6c6afee8ecda833962d6c592a92b5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchCountingStream.cs",
+          "sha256": "b4414c6f67f7896dd19802943786d1411d64d812b55fa927acc4721d5e6ce039"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchErrors.cs",
+          "sha256": "1d9e7f5e66d1ab6b417f11e39183dfc49b7a7088867a334c0b95459042ac8142"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredVectorPlanner.cs",
+          "sha256": "20cd9215d1733083313db627aacf2362e6941081d6829225fa3a01b357b897b5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchByteAdmission.cs",
+          "sha256": "12b880ae72623d21be0398c9ed0a4000ea2b6c45677719ade5c02d2e933d6dc5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchOrder.cs",
+          "sha256": "06cf6e7255a82404ed71c0f73e86d262f0ed0510a4f9ed1dc8ea7df62401639e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchSinglePartitionAdapter.cs",
+          "sha256": "114fdc59880d76d0972f697a77719bd4872edbb49f2cc3646dbac3a1dbfc8a8c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchWindowMerger.cs",
+          "sha256": "eaa0a0866f3e0a5cace27b1cf0036d1ed46afdfd3dd30a1a48f8e35ccf35f5bd"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExecutor.cs",
+          "sha256": "84309230e4feaf2aa5872470199b72c2e00f7e3789a8f1d9153d6e3da17abd4e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExpansion.cs",
+          "sha256": "61555d6dfc74259d2fb6c759c00b003997d8cebf7c6e55a731e27c4dd187b177"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnApproximateSearch.cs",
+          "sha256": "f03e3b4e06c432967350e1ae820d2cb1e534f9f8133eca6bd6ef14be3d25ebfa"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnCandidateHeaps.cs",
+          "sha256": "d3f738b439c51df76db3d8ad97262258c0b7716008183dbb46534614a116ea2f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnExactSearch.cs",
+          "sha256": "415287ac59d4743c1e98bf222f34003a4354b2272460b4448e3f3087f0390d90"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnLayerSearch.cs",
+          "sha256": "149f38522070c6a06b61e992d75fb32a840a8b620e48120cae6a8d74a4fb0bbd"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnSearch.cs",
+          "sha256": "2fd76fb849795d9234ce319bd37665fcb3451fe9c5425c7b8e2b65872681b24c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnVectors.cs",
+          "sha256": "e999383c7bc5831cb9a22bbf20cbc42f42bdd949c4ddf6d1a26b8a15dedeef7a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchBranchExecution.cs",
+          "sha256": "503f88c6165662d23f55c5bb11b3067cfd81edfe493b1e8c1c2a30d9a6250378"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
+          "sha256": "647d8435f21999db34d7e7bf32e8fc8bfbc295b7e100e9eca18bc86e456b502a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRankFusion.cs",
+          "sha256": "a6ddcb5e613fc8355dee581b22fe706cae1a9237cfa967743d85407a68b36e56"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRequestValidation.cs",
+          "sha256": "1987d3fe705bb1da5d12e746c2b86a43c15553f6b867dafe3bfb7f34469ce7fe"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchScore.cs",
+          "sha256": "3d6f26e9663abe2fa5427627aad070342c1ec2dc36d4f563b7d2d2f6dc66d762"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchTerms.cs",
+          "sha256": "6b610ae6f08f6013404bead031fb62312bc4a2a028af0af59919dce36833fff6"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/TextRanker.cs",
+          "sha256": "c04dcf59a17220caa40df5f9586abeb3816002992acd16001a59c026e4b6f5c4"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/VectorRanker.cs",
+          "sha256": "0e621b02aa5260832fc4715efd603f7ef369e3e52e482408494bafb7746bfa87"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/FilteredSearchEligibility.cs",
+          "sha256": "d386e8c03a065d856f7554a6ff0f79edb985b9135d9048a7fc05c1bdf32bcbe3"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/GlobalBranchValidation.cs",
+          "sha256": "88030e751c8e43b375ccfb82fe127dcfc0e63fb2cde654564fb54f0dddb3abd1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/GraphSearchValidation.cs",
+          "sha256": "083574cde9e2e889b456f429a08638f7b1c4491b611d352e563f7356c30bd4a7"
+        },
+        {
+          "path": "src/KeyLoad.Query/KeyLoad.Query.csproj",
+          "sha256": "d837cba7cbbf4b6cd5666bf86642902c433d871bea84014194b1728ce497c993"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Query.dll",
+          "sha256": "b1fea978f0b40acbc35cd629be35ead650890ed916e37b27dca88ed0a087d164"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Query.pdb",
+          "sha256": "4b26aef866d045aac8c1deb29876938062e7c84170a78cca2968509d62b81f50"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+          "sha256": "13080386da4e6e365fc7e04df24e4c8cdebb546385a3e69d09de19b892581760"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+          "sha256": "d3deeddfef9ed3d200fc9f166496c27b913a196e3ffafe3f14bdf5b62d8994bc"
+        }
+      ],
+      "prePostDrift": [],
+      "settingsSha256": "8898fc47560204d4b7e6dc35bf4f8dd8fcc5711c4864144a8e8b0aa1a2b22017",
+      "originalReports": [
+        {
+          "path": "TestResults/stage89a-partition-query-coverage/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "d98823acc171b92b6c62af1508a9743c69c50fb86133c2551c76bb0d39b7f521",
+          "bytes": 77426
+        },
+        {
+          "path": "TestResults/stage89a-partition-query-coverage/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "f365ea03384e987570b8183fdb7759889e496b360f637e1c241eff83636fecee",
+          "bytes": 35584
+        },
+        {
+          "path": "TestResults/stage89a-partition-query-coverage/coverage.cobertura.xml",
+          "sha256": "8a53d64171925b7375aa87a735680d48eeda426f2c603be089c658c59bc611a7",
+          "bytes": 985837
+        }
+      ]
+    },
+    {
+      "suite": "unit-scalar",
+      "filter": "/*/*/PartitionQuery*/*",
+      "nativeProcessExitCode": 0,
+      "summary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "rawCoverage": {
+        "path": "TestResults/stage89b-partition-query-coverage-scalar/coverage.cobertura.xml",
+        "sha256": "ef87ff09b087d857150229f524566818b3ec1378176a5d8625b097f45b4f5974",
+        "bytes": 985837,
+        "nativeRoot": {
+          "line-rate": "0.21836158192090396",
+          "branch-rate": "0.19013490725126475",
+          "complexity": "2441",
+          "version": "1.9",
+          "timestamp": "1791233559",
+          "lines-covered": "773",
+          "lines-valid": "3540",
+          "branches-covered": "451",
+          "branches-valid": "2372"
+        },
+        "packages": [
+          {
+            "line-rate": "0.21836158192090396",
+            "branch-rate": "0.19013490725126475",
+            "complexity": "2441",
+            "name": "KeyLoad.Query"
+          }
+        ]
+      },
+      "guardedPaths": [
+        {
+          "path": "Directory.Build.props",
+          "sha256": "3a014e35d12712f70388c9d3aab68d3287f970a0d7a35302a310fac680669860"
+        },
+        {
+          "path": "Directory.Build.targets",
+          "sha256": "be927523cfc85b8b2ac18fb5d08bdf7625aee31d4f8fec37a4cbc2782acc24bf"
+        },
+        {
+          "path": "Directory.Packages.props",
+          "sha256": "415f87b4f75e9a7c04f9ecc82020e02ebda0d8a41b62a4ba2bbe1fa672bc3c66"
+        },
+        {
+          "path": "global.json",
+          "sha256": "eaa896ea27d7225150b24f86b81bd875a76af1fe8d3006ac3aa9eaf058b5052e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Contracts/LiveCursorClaims.cs",
+          "sha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
+          "sha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/ChangeFeeds/Queries/LiveQueryExecutor.cs",
+          "sha256": "6c456b3b3718424aa031375a11f6ff39fd1a5355536a6a13cbfa5c6561ceca6f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryCandidateV1.cs",
+          "sha256": "7e39b4b958b18d0b45c4c54e7ff22d3a89423bc226ea266e4d8e6dd74fdcb71a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafPlanV1.cs",
+          "sha256": "e8fe666038b7e79a9dbec4e6878f7d084a27408860d54ebacc0568f4347d666d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafResultV1.cs",
+          "sha256": "2618dea5e889188ff3385b3e9e89072304a2c4e8f9a1231c41e1a5742ca00a8d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryPlanV1.cs",
+          "sha256": "1361234218b35e1c1012f56ae1497a2cc54827335efa3ff31678154ae2594dbb"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryResultV1.cs",
+          "sha256": "c079768baa64a945852e0b62d816e7cf6c74f2b736aba323bc12371a3f5a3cd9"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQuerySerializationAliases.cs",
+          "sha256": "783dce44532341caa96747a6f4690d32801495a7a6f5cb94513ce2b2a4f59299"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/QueryCursorClaims.cs",
+          "sha256": "f1520de4ec3f36bb00a6d48b94c360caba308626af93f4777d57713acd4cd76d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/ModelQueryExecutor.cs",
+          "sha256": "1fd51e262712253009ce20c7a0359792c2d19cbc079e7a195c168dd01056144d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryExecution.cs",
+          "sha256": "fc124df2ebcde60194119dcf3afeecb673bfc32495b46f6cbc260fab7e21286c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafExecutor.cs",
+          "sha256": "ecdc738267bb626c28c0022b13290fc1093102e60230665ce948125c4de6e55b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafReadGrant.cs",
+          "sha256": "528a27158e3ea5cc06a4cb9cadbe263cb7428489d496e04e4a516609767cd263"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafRetention.cs",
+          "sha256": "4bf569144884ba61a49b8cc16e814bbafc4bf8a98c9a10ea5fee7d517bbe5a9e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryMerge.cs",
+          "sha256": "e5e6b67ffe8955628f0eb28eca9af8c7f05f1ad38cf464307ef3c35f812ccc67"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryOrder.cs",
+          "sha256": "71357623f8feff3e77c23358b44cf2eacaca723e5dc31c426c78d0f1ab2867c0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicExecution.cs",
+          "sha256": "5acce65211a9ce5908d92bd6eda318dfa8d73445b9ce96d9deffd4f14d11e40d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicMapper.cs",
+          "sha256": "e50d10419161dc893369b7bb72e2ce6b819e41c65f91cc1e9b9a32e259c60373"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryRetention.cs",
+          "sha256": "820adc1b7ede2bccc31bd3ad0ff4255701008f7ed383be826febf71acd33fbde"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlCommentSyntax.cs",
+          "sha256": "e32f7bcf60584bac4291f0f361a458bdc7ac542e6c17c2c2f89d4855227fa3a8"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlExpressionParser.cs",
+          "sha256": "f0d2d6a8daad82a1d0a26737bb612cce864d10de59c9bc693aa21002b045f2c1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathParser.cs",
+          "sha256": "c720f2286b34d83164e072ef534a5f609e2409733db53915d1a286c39426451f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathValueReader.cs",
+          "sha256": "f17a2c9edf6b25135f32de0e9572e640610b5c987a2b75f9ee318c5c02899216"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchParser.cs",
+          "sha256": "227b651bcbe43661decd2aa9a9767b34b79860c5565ad09ea83946d2c9663c2f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchValueReader.cs",
+          "sha256": "62866831384b3bf9e4941a5e8d93aadd9d5c5995af13fec50bc612c616d67660"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+          "sha256": "5143fb60012fa99e5f80da01a20dba7681ad9d146229d335d35a6342a6d8881a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlSyntax.cs",
+          "sha256": "ad5138a29cd8c8e1a31f0aa938caa79298dc80d6b791963732f7579fafbf2b5c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlTokenizer.cs",
+          "sha256": "aa99d12fee11fe26390b42567eb50d2d8363694423443ef7c90faa23e9c7d8f3"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Identity/ModelQueryPolicies.cs",
+          "sha256": "3533d3e05fa71af0031da3baf0e7779e88f950da529993f0c2748c4c92f559db"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/PreparedQuery.cs",
+          "sha256": "3073ba7a4657fc8e965518c2bb74be5c9d3f3bbc6fbd9cf044f864ce42ab1b36"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+          "sha256": "2e0ef6cd9bba8643598424273e97ac04ee794baabad95b18b24f71080462d61e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryCandidateReader.cs",
+          "sha256": "ee359f416a32d5516f4923beda3ea4a7c230c8726f441af3730ffa8c57afd1a9"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.GraphPath.cs",
+          "sha256": "e9fe72db0697cfc6582433a9cddaf9b3f8923d6f9dfa5e0d674d9ddea911173f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.PartitionQuery.cs",
+          "sha256": "c6e3b276b8733730a6d1a4a7d3f4777ecd37ec4075b20971b144f7e50e1539f0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
+          "sha256": "8439026bbc633d2a529c68adf1fffbd5f9ee2f7edf15acb55f479e88319382ef"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlGraphSearchExecutor.cs",
+          "sha256": "1b9a4109e1ec5686676e056f527a2b6691602fe3efaf7f3d77c5d0a31b251f4b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlTokenCursor.cs",
+          "sha256": "01dcd3cce19a690cbf9b96462bd722cffba41fe30bec8e4f7550485b4dcfae42"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Serialization/QueryRequestIdentity.cs",
+          "sha256": "90e64c8ef6e332be6239a75e76f5f1235d72a8c3e5f7e15f095fc5d088a25001"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlacementValidation.cs",
+          "sha256": "63f65d4d0b49a6aaaa0b88b3d05359f820b935487368a5a92ab9811bbc86607c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanFactory.cs",
+          "sha256": "e33f89712df45bb5bf2057532c3e3446781af7cb3033eaf83909c05bb0e2f82e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanValidation.cs",
+          "sha256": "d84b4cf690e2921b8d46e771338031231c471617abc5402e611f57e8c68388be"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPublicValidation.cs",
+          "sha256": "93cff10ee8d15bc7376c2ff74a55426ac592dc6cc7b561bdb85cd8c3ce0ece47"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryFieldAuthorization.cs",
+          "sha256": "92c99691eaf60a04806c4055d9f20521bb2e9938affaf5816869bf67e742de66"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
+          "sha256": "db94224905aed668e122e242fb83f6732a0a4b4f12b4a3aae399faaf66b66f14"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathRequestSizer.cs",
+          "sha256": "40d72a841c2e886edb8d34056328e88f38c6ff92d20ac850b75f7facb5cde3c7"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathSyntax.cs",
+          "sha256": "4e6b6f8fa4af1e53b3c2f6d16ed1b3858f0f9c535d855c64d8ce43b5cf5d163a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchRequestSizer.cs",
+          "sha256": "dc2f80c98edb784b3800c40fc9aaf4990b0b4929f38575bc4f60b83e07808b83"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchSyntax.cs",
+          "sha256": "1675574fe14ceffcf6058d6fced2f13e998eb6ffc43bbad90abfa3a57094995e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/AnnWorkBudget.cs",
+          "sha256": "5746f2f0abd4c0856d7cdb398172fff29fe90798e59050f2f863d7a526cd7435"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/FilteredSearchRequestSizer.cs",
+          "sha256": "e9bdfe5e7044242aac82d93c87ceec76ea6edc5d716c58c755c3ceba65d80c9d"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnAdmission.cs",
+          "sha256": "60ed1938df901377dadf84ed76c77ccf1ee76bdb8274a0a67d3550d33d53cc2e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnReservations.cs",
+          "sha256": "91dedf2ae447cd9cb5158a501ab21c912cb9b15dee41a8618cc71a1d577b0f67"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/GlobalBranchContracts.cs",
+          "sha256": "bd11abfe9f183880ca4aaebced529d78333af7f4fd90938daae25dd26487c106"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/IPackedAnnSimilarity.cs",
+          "sha256": "3ad1e97be4c5f521768e100ce599fd5df36537f6a156d17f9de8499697cb9917"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionContracts.cs",
+          "sha256": "52aafc41ac5b7860479fde14fd8a61539477d2c817053cbfae2170459ba234e1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionProtocol.cs",
+          "sha256": "9e1936281436c474921e355b56004be3a5ef45a5e14aff5792db8a3ba4a2b4cc"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuildScratch.cs",
+          "sha256": "85533c94d45fc5830354b0644e2561c5ac0471c0a3a21b47a41a9ef4fff174f1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuilder.cs",
+          "sha256": "5f67ef978b98012c7e891c5977dfd616c024d809883a238ed90d2dd7d4806a2b"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnConstruction.cs",
+          "sha256": "38ac307db0c4599adfad21b6a5a11e78cde7da2a5ccd40edff51f4048ee759c8"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnGraph.cs",
+          "sha256": "a2d281f265c27208f9ae48b243495e16a01712f55a9a20a88cb82f6e66ce3604"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
+          "sha256": "4c80da9bd68105860731ee1d2c7ba4d8519b82fd57e014e6de95f9d73eeb57db"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLayerBuffers.cs",
+          "sha256": "032d639c455084dfd2602c4453ddcba34a7e24bde15e4dc8a198718481974b49"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLevels.cs",
+          "sha256": "4ef43f7b1f34052643d92e2e31373dd616c1caef1b051655de0df645b1a56991"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborOrdering.cs",
+          "sha256": "957c4068e814cb50d745539f8afeb34994a3a6bd6f6d7da801ec714cbf7370be"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborSelection.cs",
+          "sha256": "948a4ba53b282eefac3076a8807e9625682a0701041cb10d0a6e1dcf74073116"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/PreparedSimilarity.cs",
+          "sha256": "ffe0dd46fe1190ebf1534c14850419fe959245c35ce3f03712fd3b5e6f41b09f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Execution/SimilarityMetricMath.cs",
+          "sha256": "8f4edc0c9a6a407c2903e90292cf1c5579f871edc28421a606e39ec94d8a03d0"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Lifecycle/TextProjectionLifecycle.cs",
+          "sha256": "bbc8db7ef17df47469b924bceebfeb80bcc5a427a1576105c8b7fdf4d422da22"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Models/FilteredVectorPlan.cs",
+          "sha256": "9b0a349ccfc6a305f1e6c9ffe574035bfb64ef926814af9718024d680c9c15b1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Models/PackedAnnApproximateResult.cs",
+          "sha256": "cd06afa1d338b5c71589234f960f39a01327b53d2f84d1238d4eae041e8a62e6"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchBranch.cs",
+          "sha256": "11852f3a6b9e965974f8d647efbc932279b6c6afee8ecda833962d6c592a92b5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchCountingStream.cs",
+          "sha256": "b4414c6f67f7896dd19802943786d1411d64d812b55fa927acc4721d5e6ce039"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchErrors.cs",
+          "sha256": "1d9e7f5e66d1ab6b417f11e39183dfc49b7a7088867a334c0b95459042ac8142"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredVectorPlanner.cs",
+          "sha256": "20cd9215d1733083313db627aacf2362e6941081d6829225fa3a01b357b897b5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchByteAdmission.cs",
+          "sha256": "12b880ae72623d21be0398c9ed0a4000ea2b6c45677719ade5c02d2e933d6dc5"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchOrder.cs",
+          "sha256": "06cf6e7255a82404ed71c0f73e86d262f0ed0510a4f9ed1dc8ea7df62401639e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchSinglePartitionAdapter.cs",
+          "sha256": "114fdc59880d76d0972f697a77719bd4872edbb49f2cc3646dbac3a1dbfc8a8c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchWindowMerger.cs",
+          "sha256": "eaa0a0866f3e0a5cace27b1cf0036d1ed46afdfd3dd30a1a48f8e35ccf35f5bd"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExecutor.cs",
+          "sha256": "84309230e4feaf2aa5872470199b72c2e00f7e3789a8f1d9153d6e3da17abd4e"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExpansion.cs",
+          "sha256": "61555d6dfc74259d2fb6c759c00b003997d8cebf7c6e55a731e27c4dd187b177"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnApproximateSearch.cs",
+          "sha256": "f03e3b4e06c432967350e1ae820d2cb1e534f9f8133eca6bd6ef14be3d25ebfa"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnCandidateHeaps.cs",
+          "sha256": "d3f738b439c51df76db3d8ad97262258c0b7716008183dbb46534614a116ea2f"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnExactSearch.cs",
+          "sha256": "415287ac59d4743c1e98bf222f34003a4354b2272460b4448e3f3087f0390d90"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnLayerSearch.cs",
+          "sha256": "149f38522070c6a06b61e992d75fb32a840a8b620e48120cae6a8d74a4fb0bbd"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnSearch.cs",
+          "sha256": "2fd76fb849795d9234ce319bd37665fcb3451fe9c5425c7b8e2b65872681b24c"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnVectors.cs",
+          "sha256": "e999383c7bc5831cb9a22bbf20cbc42f42bdd949c4ddf6d1a26b8a15dedeef7a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchBranchExecution.cs",
+          "sha256": "503f88c6165662d23f55c5bb11b3067cfd81edfe493b1e8c1c2a30d9a6250378"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
+          "sha256": "647d8435f21999db34d7e7bf32e8fc8bfbc295b7e100e9eca18bc86e456b502a"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRankFusion.cs",
+          "sha256": "a6ddcb5e613fc8355dee581b22fe706cae1a9237cfa967743d85407a68b36e56"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRequestValidation.cs",
+          "sha256": "1987d3fe705bb1da5d12e746c2b86a43c15553f6b867dafe3bfb7f34469ce7fe"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchScore.cs",
+          "sha256": "3d6f26e9663abe2fa5427627aad070342c1ec2dc36d4f563b7d2d2f6dc66d762"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/SearchTerms.cs",
+          "sha256": "6b610ae6f08f6013404bead031fb62312bc4a2a028af0af59919dce36833fff6"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/TextRanker.cs",
+          "sha256": "c04dcf59a17220caa40df5f9586abeb3816002992acd16001a59c026e4b6f5c4"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Queries/VectorRanker.cs",
+          "sha256": "0e621b02aa5260832fc4715efd603f7ef369e3e52e482408494bafb7746bfa87"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/FilteredSearchEligibility.cs",
+          "sha256": "d386e8c03a065d856f7554a6ff0f79edb985b9135d9048a7fc05c1bdf32bcbe3"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/GlobalBranchValidation.cs",
+          "sha256": "88030e751c8e43b375ccfb82fe127dcfc0e63fb2cde654564fb54f0dddb3abd1"
+        },
+        {
+          "path": "src/KeyLoad.Query/Features/Search/Validation/GraphSearchValidation.cs",
+          "sha256": "083574cde9e2e889b456f429a08638f7b1c4491b611d352e563f7356c30bd4a7"
+        },
+        {
+          "path": "src/KeyLoad.Query/KeyLoad.Query.csproj",
+          "sha256": "d837cba7cbbf4b6cd5666bf86642902c433d871bea84014194b1728ce497c993"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Query.dll",
+          "sha256": "b1fea978f0b40acbc35cd629be35ead650890ed916e37b27dca88ed0a087d164"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.Query.pdb",
+          "sha256": "4b26aef866d045aac8c1deb29876938062e7c84170a78cca2968509d62b81f50"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+          "sha256": "13080386da4e6e365fc7e04df24e4c8cdebb546385a3e69d09de19b892581760"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+          "sha256": "d3deeddfef9ed3d200fc9f166496c27b913a196e3ffafe3f14bdf5b62d8994bc"
+        }
+      ],
+      "prePostDrift": [],
+      "settingsSha256": "8898fc47560204d4b7e6dc35bf4f8dd8fcc5711c4864144a8e8b0aa1a2b22017",
+      "originalReports": [
+        {
+          "path": "TestResults/stage89b-partition-query-coverage-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+          "sha256": "6a20d9d25ba8e34934aed5395bc0c48ce2e0458d5664a1d762e42c48f4c8822e",
+          "bytes": 77428
+        },
+        {
+          "path": "TestResults/stage89b-partition-query-coverage-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+          "sha256": "be15746d9b05c8e603eaffb8df4d00cdfe2cee3f2e80055e66e1368bf503ef01",
+          "bytes": 35584
+        },
+        {
+          "path": "TestResults/stage89b-partition-query-coverage-scalar/coverage.cobertura.xml",
+          "sha256": "ef87ff09b087d857150229f524566818b3ec1378176a5d8625b097f45b4f5974",
+          "bytes": 985837
+        }
+      ]
+    }
+  ],
+  "nativeCountsPerRun": {
+    "coveredLines": 773,
+    "executableLines": 3540,
+    "coveredBranches": 451,
+    "executableBranches": 2372
+  },
+  "normalizedSourceLineUnion": "pending_portable_verifier",
+  "mergedBranchCoverage": "unmeasured_no_native_outcome_id_union",
+  "strictContributorQualification": false,
+  "limitation": "original pre/post manifests guard production source and exact executed Query/Unit DLL/PDB, but do not contain a separate initial contributor-source-file manifest; do not substitute retrospective preparation for that proof",
+  "wholeSolutionCoverage": "unmeasured",
+  "rf3ServerCoverage": "unmeasured",
+  "fullModuleAcceptanceClosed": false,
+  "deliveredLinuxQualified": false
+}

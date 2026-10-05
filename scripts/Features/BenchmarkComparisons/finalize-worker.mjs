@@ -6,9 +6,10 @@ import { AGGREGATE, requireValue, validateCohort } from './aggregate-contracts.m
 import { validateWorkerEnvelope } from './aggregate-validation.mjs';
 import { createIsolatedPlan, readIsolatedContract } from './isolated-plan.mjs';
 import { createDirectory, requireDirectory } from './image-bundle-files.mjs';
-import { createGitHubContext } from './isolated-github-context.mjs';
 import { captureCurrentJob } from './isolated-github-job.mjs';
-import { GH, isolatedJobName, positive, requireGitHub } from './isolated-github-contract.mjs';
+import { GH, isolatedEvidenceJobName, positive, requireGitHub } from './isolated-github-contract.mjs';
+import { contextForProfile, createGitHubContext } from './isolated-github-context.mjs';
+import { createScaledPlans, validateScaledPlan } from './scaled-isolated-plan.mjs';
 import { hashRegularFile, readJson, writeJson } from './isolated-github-files.mjs';
 
 const FINAL = Object.freeze({ workers: ['artifacts', 'comparisons', 'isolated', 'workers'],
@@ -27,21 +28,25 @@ async function ensureDirectory(root, components) {
 
 // A parser/filesystem contract; authentic job agreement is checked by the GitHub collector.
 export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }) {
-  requireValue(cell !== undefined && isDeepStrictEqual(createIsolatedPlan().cells.find(item => item.id === cell.id), cell),
-    AGGREGATE.errors.envelope);
+  const contract = readIsolatedContract();
+  const plan = cell?.profile === contract.profile ? createIsolatedPlan() : validateScaledPlan(
+    createScaledPlans().find(item => item.profile === cell?.profile));
+  requireValue(cell !== undefined && isDeepStrictEqual(plan.cells.find(item => item.id === cell.id), cell), AGGREGATE.errors.envelope);
   requireValue(positive(jobId) && [AGGREGATE.success, AGGREGATE.failure].includes(outcome), AGGREGATE.errors.envelope);
   validateCohort(cohort, cell.profile);
   const directory = await ensureDirectory(workspace, [...FINAL.workers, cell.id]);
   const target = path.join(directory, FINAL.raw);
   if (outcome === AGGREGATE.success) {
-    const value = validateWorkerEnvelope(await readJson(target, GH.workerRawBytes), cell, cohort, readIsolatedContract());
+    const value = validateWorkerEnvelope(await readJson(target, GH.workerRawBytes), cell, cohort,
+      plan.profile === contract.profile ? contract : { ...contract, profile: plan.profile, options: plan.profileSettings });
     requireValue(value.worker.jobId === jobId && value.disposition !== AGGREGATE.failed, AGGREGATE.errors.envelope);
     return value;
   }
   const value = { schemaVersion: AGGREGATE.version, worker: {
     target: cell.target, nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, ...cohort, jobId },
     disposition: AGGREGATE.failed, reason: AGGREGATE.failureReason, report: null };
-  validateWorkerEnvelope(value, cell, cohort, readIsolatedContract());
+  validateWorkerEnvelope(value, cell, cohort,
+    plan.profile === contract.profile ? contract : { ...contract, profile: plan.profile, options: plan.profileSettings });
   const existing = await lstat(target).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
   if (existing) {
     await hashRegularFile(target, GH.workerRawBytes);
@@ -58,12 +63,14 @@ export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }
 export async function finalizeCurrentWorker(environment = process.env, argv = process.argv.slice(2)) {
   requireGitHub(argv.length === 0);
   const context = createGitHubContext(environment, process.platform);
-  const cell = context.plan.cells.find(item => item.id === environment[FINAL.cell]);
-  requireGitHub(cell !== undefined && [isolatedJobName(cell), isolatedJobName(cell, true)]
-    .includes(environment.KEYLOAD_COMPARISON_JOB_NAME));
+  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells)];
+  const cell = cells.find(item => item.id === environment[FINAL.cell]);
+  requireGitHub(cell !== undefined && cell.profile === environment.Benchmarks__EvidenceProfile &&
+    isolatedEvidenceJobName(cell) === environment.KEYLOAD_COMPARISON_JOB_NAME);
+  const profileContext = contextForProfile(context, cell.profile);
   let jobId = Number(environment[FINAL.identity]);
   if (!positive(jobId)) jobId = (await captureCurrentJob(environment, [], true)).id;
-  return finalizeWorker({ workspace: context.native.workspace, cell, cohort: context.cohort, jobId,
+  return finalizeWorker({ workspace: context.native.workspace, cell, cohort: profileContext.cohort, jobId,
     outcome: environment[FINAL.outcome] });
 }
 

@@ -2,19 +2,17 @@ using KeyLoad.Client;
 
 namespace KeyLoad.Comparisons.Targets;
 
-public sealed partial class KeyLoadTarget
+internal static class KeyLoadAdmissionObserver
 {
-    internal bool RequireIsolatedAdmission { get; init; }
-    private string[] admissionObservations = [];
-
-    private async Task ObserveAdmissionAsync(CancellationToken cancellationToken)
+    internal static async Task<string[]> ObserveAsync(bool required, HttpClient[] peers, string credential,
+        CancellationToken cancellationToken)
     {
-        if (!RequireIsolatedAdmission)
+        if (!required)
         {
-            return;
+            return [];
         }
-        var observations = new List<string>(peerClients.Length);
-        foreach (var peer in peerClients)
+        var observations = new List<string>(peers.Length);
+        foreach (var peer in peers)
         {
             var reader = new KeyLoadClient(peer, credential);
             var status = KeyLoadClientResults.Success(await reader.AdmissionStatusAsync(cancellationToken), "Admission");
@@ -25,6 +23,6 @@ public sealed partial class KeyLoadTarget
                 + $"{limits.ReservedControlRequests} node / {limits.MaxTenantControlRequests} tenant / "
                 + $"{limits.MaxPrincipalControlRequests} principal control requests; member endpoint {peer.BaseAddress}");
         }
-        admissionObservations = observations.ToArray();
+        return observations.ToArray();
     }
 }

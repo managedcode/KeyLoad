@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" alt="MIT license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BSL%201.1-black" alt="Business Source License 1.1"></a>
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <img src="https://img.shields.io/badge/built%20on-Orleans-0b5cad" alt="Built on Orleans">
   <img src="https://img.shields.io/badge/storage-ZoneTree-222222" alt="ZoneTree storage">
@@ -332,13 +332,22 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **0 fully accepted, 103 in progress and 1 pending**.
-The latest local checkpoint passes the Release build, formatter and governance
-checks; its full unit suite passes **3,490 of 3,492 tests**, with two failures
-and no skips. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
+The original 104-task plan has **0 fully accepted, 104 in progress and 0 pending**.
+KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
+fanout, recovery and movement acceptance remains open. The joined stage has
+compiler/analyzer failures under repair. The earlier local full unit suite passed
+**3,490 of 3,492 tests**, with two failures and no skips; this does not qualify
+the later source. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
 passes the official MCP SDK guidance case but fails the complete RF3 and release
 gates. [Checkpoint evidence](docs/implementation/partition-runtime-development-2026-10-05.json)
 keeps those failures and the remaining scalar, recovery, RF3 and scale gates explicit.
+
+Functional coverage excludes load/comparison runs. The first 25-test Query profile
+passed in normal and scalar modes and measured **773 of 3,540 lines** and
+**451 of 2,372 branches** in the native reports. This is a scoped local measurement;
+whole-solution and actual RF3-server coverage remain unmeasured. See the
+[coverage contract](docs/Features/CodeQuality.md) for source/contributor binding,
+native report preservation and complete-operation test requirements.
 
 | Ready to try (in source, covered by tests) | Still in progress |
 |---|---|
@@ -383,9 +392,9 @@ Orleans already handles cluster membership, failure detection and request routin
 
 Yes, through MCP or the HTTP API under `/v1/`. The typed SDK is .NET for now.
 
-### Is KeyLoad open source?
+### Is the KeyLoad source available?
 
-Yes. KeyLoad is MIT-licensed and developed in the open on GitHub.
+Yes. KeyLoad is developed publicly on GitHub under the [Business Source License 1.1](LICENSE). Application use is permitted, including production use; offering KeyLoad as a database service to third parties who can create, manage or control schemas or tables requires a separate commercial license. Current BSL distributions are source available.
 
 ### Can I run it in production?
 
@@ -447,7 +456,7 @@ Development and presentation also use [Aspire](https://github.com/dotnet/aspire)
 
 ## License
 
-KeyLoad is licensed under [MIT](LICENSE).
+KeyLoad is licensed under [Business Source License 1.1](LICENSE), with Apache License 2.0 as the Change License. The Change Date is October 5, 2030; the standard earlier fourth-anniversary rule applies to each version. Dependency licenses remain with their respective owners.
 
 ---
 

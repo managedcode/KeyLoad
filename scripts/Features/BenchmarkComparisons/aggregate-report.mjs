@@ -1,10 +1,14 @@
+import { isDeepStrictEqual } from 'node:util';
 import { AGGREGATE, KEYS, SUPPORT, exactKeys, matches, positive, requireValue, text } from './aggregate-contracts.mjs';
 import { validateMeasurement } from './sample-metrics.mjs';
+import { scaleProfileSettings } from './scaled-isolated-plan.mjs';
 
 const ERROR = AGGREGATE.errors.report;
 const PLATFORM_FIELDS = Object.freeze(['loadModel', 'hostOs', 'architecture', 'runtime', 'storage']);
 const TARGET_TEXT_FIELDS = Object.freeze(['version', 'topology', 'writeAcknowledgement', 'readContract', 'transport', 'authorization']);
 const DATE = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/;
+const SCALE_SAMPLE_CAPACITY = 4_096;
+const SCALE_SAMPLE_ALGORITHM = 'evenly-spaced-operation-indices.v1';
 
 function validateOptions(options, cell, contract) {
   requireValue(exactKeys(options, [...Object.keys(contract.options), 'topology']) &&
@@ -21,9 +25,11 @@ function validateTarget(target, cell) {
     cluster.observations.every(text), ERROR);
 }
 
-function validateCase(item, cell, options, repetitions) {
-  requireValue(exactKeys(item, KEYS.case) && item.target === cell.target && item.scenario === cell.scenario &&
-    Number.isSafeInteger(item.repetition) && item.repetition >= 0 && item.repetition < options.repetitions &&
+function validateCase(item, cell, options, repetitions, scaled = false) {
+  const fields = scaled ? KEYS.scaledCase : KEYS.case;
+  const repeatCount = scaled ? 1 : options.repetitions;
+  requireValue(exactKeys(item, fields) && item.target === cell.target && item.scenario === cell.scenario &&
+    Number.isSafeInteger(item.repetition) && item.repetition >= 0 && item.repetition < repeatCount &&
     !repetitions.has(item.repetition), ERROR);
   repetitions.add(item.repetition);
   if (!SUPPORT[cell.target].includes(cell.scenario)) {
@@ -32,7 +38,53 @@ function validateCase(item, cell, options, repetitions) {
     return;
   }
   requireValue(item.status === AGGREGATE.measured && item.detail === null, ERROR);
-  validateMeasuredCase(item, options, cell.scenario);
+  if (scaled) validateScaledMeasuredCase(item, cell.scenario);
+  else validateMeasuredCase(item, options, cell.scenario);
+}
+
+function validScaledSample(sample, index, scenario) {
+  const operation = Math.floor(index * 99_999 / (SCALE_SAMPLE_CAPACITY - 1));
+  return exactKeys(sample, KEYS.sample) && sample.operation === operation &&
+    Number.isInteger(sample.worker) && sample.worker >= 0 && sample.worker < 16 &&
+    Number.isFinite(sample.startedMs) && Number.isFinite(sample.completedMs) && sample.startedMs >= 0 &&
+    sample.completedMs >= sample.startedMs && sample.success === true && sample.error === null &&
+    sample.payloadBytes === 1_024 && sample.queue === null && sample.completedMessageId === null &&
+    Number.isFinite(sample.latencyMs) && Math.abs(sample.latencyMs - (sample.completedMs - sample.startedMs)) <= 1e-8 &&
+    scenario !== 'QueueCycle';
+}
+
+function validateScaledAccounting(value, sampleCount) {
+  requireValue(exactKeys(value, KEYS.scaledCaseAccounting) && value.requested === 100_000 &&
+    value.attempted === 100_000 && value.successes === 100_000 && value.failures === 0 &&
+    value.deadlineTimeouts === 0 && value.rejections === 0 && value.unfinished === 0 &&
+    value.samplingAlgorithm === SCALE_SAMPLE_ALGORITHM && value.sampleCapacity === SCALE_SAMPLE_CAPACITY &&
+    value.collectedSamples === sampleCount && sampleCount === SCALE_SAMPLE_CAPACITY && value.missingSamples === 0 &&
+    value.latencyQuantileMethod === 'sampled-estimate', ERROR);
+}
+
+function validateScaledMeasuredCase(item, scenario) {
+  validateScaledAccounting(item.scaled, item.samples.length);
+  requireValue(exactKeys(item.measurement, KEYS.measurement) && exactKeys(item.measurement.latency, KEYS.latency) &&
+    item.samples.every((sample, index) => validScaledSample(sample, index, scenario)), ERROR);
+  const measurement = item.measurement;
+  const resources = measurement.clientResources;
+  requireValue(measurement.attempts === 100_000 && measurement.successes === 100_000 && measurement.failures === 0 &&
+    Number.isFinite(measurement.elapsedSeconds) && measurement.elapsedSeconds > 0 &&
+    Number.isFinite(measurement.usefulOperationsPerSecond) && measurement.usefulOperationsPerSecond > 0 &&
+    measurement.uniqueCompletedMessages === 0 && measurement.enqueue === null && measurement.receive === null &&
+    measurement.ack === null && exactKeys(resources, ['cpuSeconds', 'allocatedBytes', 'peakObservedWorkingSetBytes', 'samplingIntervalMs']) &&
+    Number.isFinite(resources.cpuSeconds) && resources.cpuSeconds >= 0 && Number.isSafeInteger(resources.allocatedBytes) &&
+    resources.allocatedBytes >= 0 && Number.isSafeInteger(resources.peakObservedWorkingSetBytes) &&
+    resources.peakObservedWorkingSetBytes >= 0 && Number.isSafeInteger(resources.samplingIntervalMs) &&
+    resources.samplingIntervalMs > 0, ERROR);
+  const maxCompletion = Math.max(...item.samples.map(sample => sample.completedMs));
+  const latencies = item.samples.map(sample => sample.latencyMs).sort((left, right) => left - right);
+  const percentile = fraction => latencies[Math.ceil(fraction * latencies.length) - 1];
+  const close = (left, right) => Number.isFinite(left) && Math.abs(left - right) <= Math.max(1e-8, Math.abs(right) * 1e-8);
+  requireValue(maxCompletion <= measurement.elapsedSeconds * 1_000 &&
+    close(measurement.usefulOperationsPerSecond, 100_000 / measurement.elapsedSeconds) &&
+    close(measurement.latency.p50Ms, percentile(0.50)) && close(measurement.latency.p95Ms, percentile(0.95)) &&
+    close(measurement.latency.p99Ms, percentile(0.99)), ERROR);
 }
 
 function validateMeasuredCase(item, options, scenario) {
@@ -48,18 +100,30 @@ function validateMeasuredCase(item, options, scenario) {
 }
 
 export function validateReport(report, cell, cohort, contract) {
-  requireValue(exactKeys(report, KEYS.report) && report.schemaVersion === AGGREGATE.reportVersion &&
+  const scaled = cell.profile !== readControlProfile();
+  const reportFields = scaled ? KEYS.scaledReport : KEYS.report;
+  requireValue(exactKeys(report, reportFields) && report.schemaVersion === AGGREGATE.reportVersion &&
     matches(AGGREGATE.guid, report.runId) && matches(DATE, report.startedAt) && Number.isFinite(Date.parse(report.startedAt)) &&
     report.sourceRevision === cohort.sourceRevision && matches(AGGREGATE.digest, report.datasetSha256) &&
     PLATFORM_FIELDS.every(field => text(report[field])) && matches(AGGREGATE.linux, report.hostOs) &&
     positive(report.logicalProcessors) && matches(AGGREGATE.image, report.loadGeneratorImage), ERROR);
   requireValue(exactKeys(report.provenance, KEYS.provenance) &&
     KEYS.provenance.every(key => report.provenance[key] === cohort[key]), ERROR);
-  validateOptions(report.options, cell, contract);
+  if (scaled) {
+    requireValue(report.options === null && isDeepStrictEqual(report.scaledProfile, scaleProfileSettings(cell.profile)), ERROR);
+  } else {
+    validateOptions(report.options, cell, contract);
+  }
   requireValue(Array.isArray(report.targets) && report.targets.length === 1, ERROR);
   validateTarget(report.targets[0], cell);
-  requireValue(Array.isArray(report.cases) && report.cases.length === contract.options.repetitions, ERROR);
-  const repetitions = new Set();
-  for (const item of report.cases) validateCase(item, cell, report.options, repetitions);
+  const profileSettings = scaled ? scaleProfileSettings(cell.profile) : null;
+  const repeatCount = scaled ? profileSettings.repetitions : contract.options.repetitions;
+  requireValue(Array.isArray(report.cases) && report.cases.length === repeatCount, ERROR);
+  const seenRepetitions = new Set();
+  for (const item of report.cases) validateCase(item, cell, scaled ? profileSettings : report.options, seenRepetitions, scaled);
   return report;
+}
+
+function readControlProfile() {
+  return 'intensive-1k-c16';
 }

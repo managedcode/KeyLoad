@@ -58,53 +58,10 @@ internal sealed class BlobRecordReader(Guid incarnation)
     }
 
     internal static void ValidateHead(BlobHead head, BlobRef blob, Guid authority)
-    {
-        Version(head.FormatVersion);
-        var metadata = head.Metadata;
-        if (head.Incarnation != authority)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
-        if (metadata is null || metadata.Blob != blob || metadata.Access is null || metadata.Revision < 0
-            || metadata.Length is < 0 or > BlobLimits.MaximumBlobBytes || metadata.PartCount != PartCount(metadata.Length))
-        { throw BlobErrors.Corruption(); }
-        BlobMetadataRules.Access(metadata.Access, true);
-        if (metadata.VersionId is { } id)
-        {
-            if (id == Guid.Empty || metadata.Revision == 0 || metadata.Deleted || metadata.IntegrityHash is null)
-            { throw BlobErrors.Corruption(); }
-            Hash(metadata.IntegrityHash);
-        }
-        else if (metadata.Length != 0 || metadata.PartCount != 0 || metadata.IntegrityHash is not null
-            || metadata.Revision > 0 && !metadata.Deleted)
-        { throw BlobErrors.Corruption(); }
-    }
+        => BlobHeadValidation.Validate(head, blob, authority);
 
     internal static void ValidateState(BlobState state, BlobRef blob, Guid upload, Guid authority)
-    {
-        Version(state.FormatVersion);
-        if (state.Incarnation != authority)
-        { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
-        if (state.Blob != blob || state.UploadId != upload || upload == Guid.Empty
-            || state.BeginCommandId == Guid.Empty || state.IntegrityIncarnation == Guid.Empty
-            || string.IsNullOrEmpty(state.CreatorPrincipalId) || state.Access is null
-            || state.DeclaredLength is < 0 or > BlobLimits.MaximumBlobBytes || state.ExpectedRevision < 0
-            || !Enum.IsDefined(state.Status) || state.NextOrdinal < 0 || state.NextOrdinal > PartCount(state.DeclaredLength)
-            || state.ReclaimCursor < 0 || state.ReclaimCursor > state.NextOrdinal || state.StoredBytes < 0
-            || state.RemainingReservation < 0 || state.StoredBytes > state.DeclaredLength
-            || state.RemainingReservation > state.DeclaredLength - state.StoredBytes)
-        { throw BlobErrors.Corruption(); }
-        BlobMetadataRules.Access(state.Access, true);
-        var accepted = Math.Min(state.DeclaredLength, (long)state.NextOrdinal * BlobLimits.RawPartBytes);
-        var deleted = Math.Min(state.DeclaredLength, (long)state.ReclaimCursor * BlobLimits.RawPartBytes);
-        if (state.StoredBytes != accepted - deleted || state.Retired && state.Status != BlobUploadStatus.Complete
-            || state.Status == BlobUploadStatus.Active && (state.ReclaimCursor != 0 || state.RemainingReservation != state.DeclaredLength - accepted)
-            || state.Status != BlobUploadStatus.Active && state.RemainingReservation != 0
-            || state.Status == BlobUploadStatus.Complete && state.NextOrdinal != PartCount(state.DeclaredLength))
-        { throw BlobErrors.Corruption(); }
-        Hash(state.IntegrityHash);
-        if (state.NextOrdinal == 0 && !BlobIntegrity.Matches(state.IntegrityHash,
-            BlobIntegrity.InitialHash(state.IntegrityIncarnation, blob, upload, state.DeclaredLength)))
-        { throw BlobErrors.Corruption(); }
-    }
+        => BlobStateValidation.Validate(state, blob, upload, authority);
 
     internal static void Hash(string hash)
     {

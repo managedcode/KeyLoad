@@ -115,3 +115,36 @@ memoized original completion task, preserves cancellation-callback failures
 while joining its original observation, and retains failed write settlement on
 repeated teardown. Its schema, byte/time bounds and unqualified categories stay
 unchanged. This lifecycle amendment precedes the private repair.
+
+## Accepted stage12: independent fixed-rate open-loop S1
+
+Related REQ-SCALE-018 / AC-SCALE-018..021 and TASK-SCALE-OPEN-LOOP are frozen in
+ScalingQualification before implementation. The actual current worker is
+completion-paced, generic exceptions are currently labeled rejection, and the
+session-cleanup helper can abandon its original disposal task after a timeout.
+The new stage must repair those seams while retaining every native target,
+correctness oracle, ownership bound and existing control/closed-loop result.
+
+Ordered implementation: (1) add strict rate/schedule/accounting contracts and
+document the exact typed native rejection mapping; (2) repair original session
+disposal settlement under SCALE-017; (3) implement monotonic bounded producer,
+16 native consumers,64 queued items, scheduled-arrival deadline, terminal state
+freeze, original join and4096-sample reporting; (4) add exact internal selector
+forwarding through the canonical Aspire comparison entry and separate worker-
+bound sidecar; (5) implement the independent972-cell receipt inside the existing
+nine named database groups; (6) execute complete real native positive/error/
+cancellation/drain flows, whole solution gates and authenticated isolated Linux
+workloads. No source-only or local result qualifies the global cohort.
+
+Library ownership is BenchmarkComparisons Contracts/Execution/Validation/
+Reporting and the narrow actual adapters/ComparisonSessionCleanup; native tests
+use ComparisonTests Cases/Helpers/Assertions. Root owns durable contracts,
+shared AppHost/workflow joins and evidence/commits; the dedicated partition_pages
+Luna owns private guarded implementation. Scripts use new feature-local
+open-loop executable artifacts. Dependencies are the S1 native corpus and
+resource evidence, genuine provider topology and SCALE-017 original settlement.
+Public/product schema migration is N/A: this is a separate internal artifact;
+control schema3,324 closed-loop cells and website projection remain unchanged.
+Rollback removes the new selection/cohort without rewriting original receipts.
+The actual1/3/6-node objective, two physical owners, skew/fanout and recovery/
+movement depend on their own contracts and remain open after this stage.

@@ -14,6 +14,10 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 
 ## Decision inventory
 
+[ADR-107 Business Source License 1.1](ADR-107-business-source-license.md) records
+the owner's licensing choice, Apache 2.0 Change License and distribution metadata contract.
+
+
 [ADR-105 published NuGet refresh](ADR-105-published-nuget-upgrade.md) records the
 2026-10-05 aligned dependency upgrades and required integrated compatibility gates.
 It remains Accepted until its recorded build and native qualification are complete.

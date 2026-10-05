@@ -95,7 +95,7 @@ internal sealed class ComparisonHarnessTests
         public int Executions => executions;
         public TargetProfile Profile => new(name, "test", "unit fixture", "none", "static", "in-process", "none", null);
         public bool Supports(Scenario scenario) => scenario == Scenario.PointRead;
-        public Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+        public Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
             => failSetup ? Task.FromException(new InvalidOperationException("secret-value")) : Task.CompletedTask;
         public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken) => Task.FromResult<IComparisonSession>(this);
         public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)

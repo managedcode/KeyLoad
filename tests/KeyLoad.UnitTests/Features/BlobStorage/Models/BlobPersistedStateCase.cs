@@ -1,0 +1,38 @@
+namespace KeyLoad.UnitTests.Features.BlobStorage;
+
+internal enum BlobPersistedStateCase
+{
+    BlobIdentity,
+    UploadIdentity,
+    EmptyUploadIdentity,
+    EmptyBeginCommand,
+    EmptyIntegrityIncarnation,
+    EmptyCreator,
+    MissingAccess,
+    InvalidAccess,
+    NegativeLength,
+    ExcessiveLength,
+    NegativeRevision,
+    InvalidStatus,
+    NegativeNextOrdinal,
+    ExcessiveNextOrdinal,
+    NegativeReclaimCursor,
+    ExcessiveReclaimCursor,
+    NegativeStoredBytes,
+    ExcessiveStoredBytes,
+    NegativeReservation,
+    ExcessiveReservation,
+    StoredByteEquation,
+    RetiredActive,
+    ActiveReclaimed,
+    ActiveReservation,
+    InactiveReservation,
+    CompletePartCount,
+    InvalidHash,
+    InitialHashMismatch,
+    FencedIncarnation,
+    MissingQuotaObject,
+    MissingQuotaVersion,
+    MissingQuotaReservation,
+    MissingQuotaUpload
+}

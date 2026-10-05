@@ -23,7 +23,8 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
         ?? throw new InvalidOperationException("This model test requires the actual GitHub source revision.");
 
     internal async Task<ContainerResource[]> BuildAsync(string? target, int count,
-        string? invalidSetting = null, string? invalidValue = null)
+        string? invalidSetting = null, string? invalidValue = null, string? scaleProfile = null,
+        string? evidenceProfile = null, string? appHostProfile = null)
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         var arguments = new List<string>
@@ -32,7 +33,8 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
             $"--KeyLoad:ContainerUser={IsolatedResourceTopologyFixture.User}",
             $"--KeyLoad:ContainerImages:Server={IsolatedResourceTopologyFixture.ServerImage}",
             $"--Benchmarks:ContainerImages:LoadGenerator={RunnerImage}",
-            $"--Benchmarks:DataRoot={Root}", $"--Benchmarks:Output={Output}", "--Benchmarks:Profile=timeseries"
+            $"--Benchmarks:DataRoot={Root}", $"--Benchmarks:Output={Output}",
+            "--Benchmarks:Profile=" + (appHostProfile ?? (scaleProfile is null ? "timeseries" : "general"))
         };
         if (target is null)
         {
@@ -40,11 +42,15 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
         }
         else
         {
-            AddSelection(arguments, target, count);
+            AddSelection(arguments, target, count, scaleProfile, evidenceProfile);
         }
         if (invalidSetting is not null)
         {
             arguments.Add("--" + invalidSetting + "=" + invalidValue);
+        }
+        if (target is null && scaleProfile is not null)
+        {
+            arguments.Add("--" + ComparisonWorkerSelection.ScaleProfileSetting + "=" + scaleProfile);
         }
         _ = Source;
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
@@ -63,12 +69,18 @@ internal sealed class IsolatedResourceTopologyApplication : IAsyncDisposable
         Directory.Delete(Root, recursive: true);
     }
 
-    private static void AddSelection(List<string> arguments, string target, int count)
+    private static void AddSelection(List<string> arguments, string target, int count, string? scaleProfile,
+        string? evidenceProfile)
     {
         arguments.Add("--Benchmarks:Enabled=true");
         arguments.Add("--" + ComparisonWorkerSelection.TargetSetting + "=" + target);
         arguments.Add("--" + ComparisonWorkerSelection.NodeCountSetting + "=" + count.ToString(CultureInfo.InvariantCulture));
         arguments.Add("--" + ComparisonWorkerSelection.ScenarioSetting + "=" + Scenario.PointRead);
-        arguments.Add("--" + ComparisonWorkerSelection.ProfileSetting + "=" + IsolatedComparisonContract.Current.Profile);
+        arguments.Add("--" + ComparisonWorkerSelection.ProfileSetting + "=" + (evidenceProfile
+            ?? scaleProfile ?? IsolatedComparisonContract.Current.Profile));
+        if (scaleProfile is not null)
+        {
+            arguments.Add("--" + ComparisonWorkerSelection.ScaleProfileSetting + "=" + scaleProfile);
+        }
     }
 }

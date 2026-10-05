@@ -20,34 +20,63 @@ internal static class CommandOutcomePartitionIdentity
             return CommandOutcomePartitionScope.Unknown;
         }
 
-        return operation.Kind switch
+        return ResolveKind(operation.Kind, envelope.Value);
+    }
+
+    private static CommandOutcomePartitionScope ResolveKind(OperationKind kind, ReadOnlyMemory<byte> payload)
+        => kind switch
         {
-            OperationKind.Batch => ForPayload<CommandRequest>(envelope.Value, static request => request.Partition),
-            OperationKind.Receive => ForPayload<ReceiveRequest>(envelope.Value, static request => request.Lane?.Partition),
-            OperationKind.Delivery => ForPayload<DeliveryCommand>(envelope.Value, static request => request.Lane?.Partition),
-            OperationKind.Processing => ForPayload<ProcessingRequest>(envelope.Value, static request => request.Lane?.Partition),
-            OperationKind.ConfigureSubscription => ForPayload<ConfigureSubscriptionRequest>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.SeekSubscription => ForPayload<SeekSubscriptionRequest>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.ReceiveSubscription => ForPayload<ReceiveSubscriptionRequest>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.SubscriptionDelivery => ForPayload<SubscriptionDeliveryCommand>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.SubscriptionProcessing => ForPayload<SubscriptionProcessingRequest>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.SetSubscriptionPaused => ForPayload<SetSubscriptionPausedRequest>(envelope.Value, static request => request.Subscription?.Source?.Partition),
-            OperationKind.ConfigureProjectionConsumer => ForPayload<ConfigureProjectionConsumerRequest>(envelope.Value, static request => request.Consumer?.Partition),
-            OperationKind.CommitProjectionBatch => ForPayload<CommitProjectionBatchRequest>(envelope.Value, static request => request.Consumer?.Partition),
-            OperationKind.ReleaseProjectionConsumer => ForPayload<ReleaseProjectionConsumerRequest>(envelope.Value, static request => request.Consumer?.Partition),
-            OperationKind.PurgeOutbox => ForPayload<PurgeOutboxRequest>(envelope.Value, static request => request.Partition),
-            OperationKind.BeginBlobUpload => ForPayload<BeginBlobUploadRequest>(envelope.Value, static request => request.Blob?.Partition),
-            OperationKind.WriteBlobPart => ForPayload<WriteBlobPartRequest>(envelope.Value, static request => request.Blob?.Partition),
-            OperationKind.CompleteBlobUpload => ForPayload<CompleteBlobUploadRequest>(envelope.Value, static request => request.Blob?.Partition),
-            OperationKind.AbortBlobUpload => ForPayload<AbortBlobUploadRequest>(envelope.Value, static request => request.Blob?.Partition),
-            OperationKind.DeleteBlob => ForPayload<DeleteBlobRequest>(envelope.Value, static request => request.Blob?.Partition),
-            OperationKind.ReclaimBlob => ForPayload<ReclaimBlobRequest>(envelope.Value, static request => request.Blob?.Partition),
+            OperationKind.Batch => ForPayload<CommandRequest>(payload, static request => request.Partition),
+            OperationKind.Receive => ForPayload<ReceiveRequest>(payload, static request => request.Lane?.Partition),
+            OperationKind.Delivery => ForPayload<DeliveryCommand>(payload, static request => request.Lane?.Partition),
+            OperationKind.Processing => ForPayload<ProcessingRequest>(payload, static request => request.Lane?.Partition),
+            OperationKind.PurgeOutbox => ForPayload<PurgeOutboxRequest>(payload, static request => request.Partition),
+            OperationKind.ConfigureSubscription or OperationKind.SeekSubscription or OperationKind.ReceiveSubscription
+                or OperationKind.SubscriptionDelivery or OperationKind.SubscriptionProcessing or OperationKind.SetSubscriptionPaused
+                => ResolveSubscription(kind, payload),
+            OperationKind.ConfigureProjectionConsumer or OperationKind.CommitProjectionBatch
+                or OperationKind.ReleaseProjectionConsumer => ResolveProjection(kind, payload),
+            OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.CompleteBlobUpload
+                or OperationKind.AbortBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob
+                => ResolveBlob(kind, payload),
             OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey
                 or OperationKind.SetDispatch or OperationKind.Membership or OperationKind.BootstrapPhysicalShardCatalog
                 or OperationKind.BindAtomicPartitionPlacement => CommandOutcomePartitionScope.Global,
             _ => CommandOutcomePartitionScope.Unknown
         };
-    }
+
+    private static CommandOutcomePartitionScope ResolveSubscription(OperationKind kind, ReadOnlyMemory<byte> payload)
+        => kind switch
+        {
+            OperationKind.ConfigureSubscription => ForPayload<ConfigureSubscriptionRequest>(payload, static request => request.Subscription?.Source?.Partition),
+            OperationKind.SeekSubscription => ForPayload<SeekSubscriptionRequest>(payload, static request => request.Subscription?.Source?.Partition),
+            OperationKind.ReceiveSubscription => ForPayload<ReceiveSubscriptionRequest>(payload, static request => request.Subscription?.Source?.Partition),
+            OperationKind.SubscriptionDelivery => ForPayload<SubscriptionDeliveryCommand>(payload, static request => request.Subscription?.Source?.Partition),
+            OperationKind.SubscriptionProcessing => ForPayload<SubscriptionProcessingRequest>(payload, static request => request.Subscription?.Source?.Partition),
+            OperationKind.SetSubscriptionPaused => ForPayload<SetSubscriptionPausedRequest>(payload, static request => request.Subscription?.Source?.Partition),
+            _ => CommandOutcomePartitionScope.Unknown
+        };
+
+    private static CommandOutcomePartitionScope ResolveProjection(OperationKind kind, ReadOnlyMemory<byte> payload)
+        => kind switch
+        {
+            OperationKind.ConfigureProjectionConsumer => ForPayload<ConfigureProjectionConsumerRequest>(payload, static request => request.Consumer?.Partition),
+            OperationKind.CommitProjectionBatch => ForPayload<CommitProjectionBatchRequest>(payload, static request => request.Consumer?.Partition),
+            OperationKind.ReleaseProjectionConsumer => ForPayload<ReleaseProjectionConsumerRequest>(payload, static request => request.Consumer?.Partition),
+            _ => CommandOutcomePartitionScope.Unknown
+        };
+
+    private static CommandOutcomePartitionScope ResolveBlob(OperationKind kind, ReadOnlyMemory<byte> payload)
+        => kind switch
+        {
+            OperationKind.BeginBlobUpload => ForPayload<BeginBlobUploadRequest>(payload, static request => request.Blob?.Partition),
+            OperationKind.WriteBlobPart => ForPayload<WriteBlobPartRequest>(payload, static request => request.Blob?.Partition),
+            OperationKind.CompleteBlobUpload => ForPayload<CompleteBlobUploadRequest>(payload, static request => request.Blob?.Partition),
+            OperationKind.AbortBlobUpload => ForPayload<AbortBlobUploadRequest>(payload, static request => request.Blob?.Partition),
+            OperationKind.DeleteBlob => ForPayload<DeleteBlobRequest>(payload, static request => request.Blob?.Partition),
+            OperationKind.ReclaimBlob => ForPayload<ReclaimBlobRequest>(payload, static request => request.Blob?.Partition),
+            _ => CommandOutcomePartitionScope.Unknown
+        };
 
     private static CommandOutcomePartitionScope ForPayload<T>(ReadOnlyMemory<byte> payload,
         Func<T, PartitionRef?> partition) where T : class

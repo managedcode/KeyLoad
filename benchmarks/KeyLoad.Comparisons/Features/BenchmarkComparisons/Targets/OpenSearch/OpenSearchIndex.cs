@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+
 using System.Globalization;
 using System.Text.Json;
 
@@ -39,7 +39,7 @@ internal static class OpenSearchIndex
         _ = response.RootElement;
     }
 
-    internal static async Task SeedAsync(HttpClient client, string index, ImmutableArray<BenchmarkDocument> documents, int expectedCopies,
+    internal static async Task SeedAsync(HttpClient client, string index, IReadOnlyList<BenchmarkDocument> documents, int expectedCopies,
         CancellationToken cancellationToken)
     {
         foreach (var batch in documents.Chunk(BulkBatchSize))
@@ -55,7 +55,9 @@ internal static class OpenSearchIndex
                         [OpenSearchNames.DocumentActionId] = document.Id
                     }
                 }, OpenSearchHttp.JsonOptions));
-                lines.Add(JsonSerializer.Serialize(OpenSearchDocument.Create(document.Id, document.Json, document.Vector), OpenSearchHttp.JsonOptions));
+                lines.Add(JsonSerializer.Serialize(document.Vector.IsDefaultOrEmpty
+                    ? OpenSearchDocument.CreateWithoutVector(document.Id, document.Json)
+                    : OpenSearchDocument.Create(document.Id, document.Json, document.Vector), OpenSearchHttp.JsonOptions));
             }
             var body = string.Join(OpenSearchNames.LineFeed, lines) + OpenSearchNames.LineFeed;
             using var response = await OpenSearchHttp.SendNdjsonAsync(client, OpenSearchNames.PathSeparator + index + OpenSearchNames.BulkSuffix, body, cancellationToken);

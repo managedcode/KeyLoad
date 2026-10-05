@@ -16,10 +16,15 @@ internal static class IsolatedPlanNodeProcess
         const plannerUrl = pathToFileURL(process.env.KEYLOAD_ISOLATED_PLAN_MODULE);
         const planner = await import(plannerUrl.href);
         const preflight = await import(new URL('./isolated-preflight.mjs', plannerUrl).href);
+        const scale = await import(new URL('./scaled-isolated-plan.mjs', plannerUrl).href);
         const request = JSON.parse(readFileSync(0, 'utf8'));
         try {
           const contract = request.contract ?? await planner.readIsolatedContract();
           const value = request.operation === 'create' ? planner.createIsolatedPlan(contract)
+            : request.operation === 'create-scales' ? scale.createScaledPlans(contract)
+            : request.operation === 'create-composite' ? scale.createCompositePlan(planner.createIsolatedPlan(contract), scale.createScaledPlans(contract))
+            : request.operation === 'validate-scales' ? scale.validateScaledPlans(request.plan, contract)
+            : request.operation === 'matrices' ? preflight.createDatabaseMatrices(request.plan, request.scaledPlans)
             : request.operation === 'preflight' ? preflight.createPreflightMatrix(request.plan)
             : planner.validateIsolatedPlan(request.plan, contract);
           process.stdout.write(JSON.stringify({ ok: true, value }));

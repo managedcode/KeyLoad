@@ -9,7 +9,7 @@ namespace KeyLoad.Comparisons;
 
 /// <summary>Creates the deterministic document, vector, and graph corpus used by comparisons.</summary>
 /// <remarks>Inference and exhaustive oracle work are outside measured requests.</remarks>
-public sealed class BenchmarkDataset
+public sealed class BenchmarkDataset : IComparisonCorpus
 {
     private const string MutationTextProperty = "text";
     private const string InitialMutationText = "KeyLoad initial value";
@@ -26,6 +26,9 @@ public sealed class BenchmarkDataset
     public string Sha256 { get; }
     /// <summary>Gets the validated options used to create the corpus.</summary>
     public ComparisonOptions Options => options;
+    IComparisonSettings IComparisonCorpus.Settings => options;
+    IReadOnlyList<BenchmarkDocument> IComparisonCorpus.Documents => Documents;
+    IReadOnlyList<BenchmarkEdge> IComparisonCorpus.Edges => Edges;
 
     /// <summary>Creates and hashes the deterministic corpus described by the supplied options.</summary>
     /// <param name="options">The workload options used to generate documents, vectors, and graph edges.</param>

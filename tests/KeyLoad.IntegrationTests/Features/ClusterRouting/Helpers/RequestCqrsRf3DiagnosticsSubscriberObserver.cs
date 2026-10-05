@@ -7,19 +7,28 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDisposable
 {
     private CancellationTokenSource? lifetime;
+    private CancellationToken lifetimeToken;
     private IAsyncEnumerator<LogSubscriber>? enumerator;
     private Task<bool>? pendingMove;
+    private Task<bool>? lastMove;
     private Task? disposeTask;
+    private Action<RequestCqrsLifecycleStage>? failureObserver;
     private bool Initialized { get; set; }
+
+    internal RequestCqrsSingleTaskLifecycleSnapshot ReadLifecycleSnapshot()
+        => new(pendingMove?.Status ?? lastMove?.Status, lifetimeToken.IsCancellationRequested);
 
     internal bool IsJoined => !Initialized || (enumerator is null && lifetime is null && pendingMove is null
         && disposeTask is { IsCompleted: true });
 
-    internal void Initialize(ResourceLoggerService logger, CancellationToken cancellationToken)
+    internal void Initialize(ResourceLoggerService logger, CancellationToken cancellationToken,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
+        failureObserver = observer;
         Initialized = true;
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        enumerator = logger.WatchAnySubscribersAsync(lifetime.Token).GetAsyncEnumerator(lifetime.Token);
+        lifetimeToken = lifetime.Token;
+        enumerator = logger.WatchAnySubscribersAsync(lifetimeToken).GetAsyncEnumerator(lifetimeToken);
         pendingMove = enumerator.MoveNextAsync().AsTask();
     }
 
@@ -36,7 +45,16 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
                 pending = active.MoveNextAsync().AsTask();
                 pendingMove = pending;
             }
-            var moved = await pending.ConfigureAwait(false);
+            bool moved;
+            try
+            { moved = await pending.ConfigureAwait(false); }
+            catch
+            {
+                lastMove = pending;
+                pendingMove = null;
+                throw;
+            }
+            lastMove = pending;
             pendingMove = null;
             if (!moved)
             { throw new InvalidOperationException("Aspire ended its resource subscriber observation unexpectedly."); }
@@ -52,12 +70,13 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         return new(actual);
     }
 
-    internal async Task RetryFailedCloseAsync(List<Exception> failures)
+    internal async Task RetryFailedCloseAsync(List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
         if (enumerator is not null)
-        { await CloseEnumeratorAsync(failures).ConfigureAwait(false); }
+        { await CloseEnumeratorAsync(failures, observer ?? failureObserver).ConfigureAwait(false); }
         if (lifetime is not null)
-        { CloseLifetime(failures); }
+        { CloseLifetime(failures, observer ?? failureObserver); }
     }
 
     private async Task ShutdownCoreAsync()
@@ -74,7 +93,8 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
     {
         var active = lifetime;
         if (active is not null)
-        { await ServerFailureObserver.ObserveAsync(active.CancelAsync, failures).ConfigureAwait(false); }
+        { await RequestCqrsLifecycleFailureObserver.ObserveAsync(active.CancelAsync, failures,
+            failureObserver, RequestCqrsLifecycleStage.ObserverCancellation).ConfigureAwait(false); }
     }
 
     private async Task JoinPendingMoveAsync(List<Exception> failures)
@@ -82,27 +102,32 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
         var pending = pendingMove;
         if (pending is null)
         { return; }
-        await ServerFailureObserver.ObserveAsync(() => pending, failures).ConfigureAwait(false);
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => pending, failures,
+            failureObserver, RequestCqrsLifecycleStage.ObserverJoin).ConfigureAwait(false);
+        lastMove = pending;
         pendingMove = null;
     }
 
-    private async Task CloseEnumeratorAsync(List<Exception> failures)
+    private async Task CloseEnumeratorAsync(List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
         var active = enumerator;
         if (active is null)
         { return; }
+        var before = failures.Count;
         try
-        {
-            await active.DisposeAsync().ConfigureAwait(false);
-            enumerator = null;
-        }
+        { await active.DisposeAsync().ConfigureAwait(false); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverEnumeratorDispose); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverEnumeratorDispose); }
+        if (failures.Count == before)
+        { enumerator = null; }
     }
 
-    private void CloseLifetime(List<Exception> failures)
+    private void CloseLifetime(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer = null)
     {
         var active = lifetime;
         if (active is null)
@@ -113,9 +138,11 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
             lifetime = null;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverLifetimeDispose); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.ObserverLifetimeDispose); }
     }
 
     private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1

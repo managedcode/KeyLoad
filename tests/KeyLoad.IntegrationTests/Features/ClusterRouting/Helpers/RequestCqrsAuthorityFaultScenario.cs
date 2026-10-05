@@ -1,3 +1,5 @@
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Assertions;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
@@ -7,7 +9,8 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
+internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrsLifecycleEvidence lifecycle,
+    CancellationToken callerToken)
 {
     private const string MissingOwner = "The authority-fault wave did not retain its owner.";
     private const string AdminJson = RequestCqrsAuthorityFaultAssertions.AdministratorJson;
@@ -32,27 +35,35 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
     private Guid commandId;
     private bool originalStarted;
 
-    internal static async Task RunAsync(bool officialMcp, CancellationToken cancellationToken)
+    internal static Task RunAsync(bool officialMcp, CancellationToken cancellationToken)
+        => RequestCqrsAuthorityFaultLifecycleRunner.RunAsync(officialMcp, cancellationToken);
+
+    internal List<Exception> Failures => failures;
+
+    internal async Task ExecuteObservedAsync(CancellationToken parentToken)
     {
-        using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        parent.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
-        var scenario = new RequestCqrsAuthorityFaultScenario(officialMcp);
-        await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteAsync(parent.Token), scenario.failures)
-            .ConfigureAwait(false);
-        await RequestCqrsAuthorityFaultCleanup.RunAsync(scenario.root, scenario.rootCreated,
-            scenario.waveStartupAttempted, scenario.controls, scenario.wave,
-            scenario.caller, scenario.administrator, scenario.discovery, scenario.operationDeadline,
-            scenario.sdkCall, scenario.mcpCall, scenario.armId, scenario.originalStarted,
-            scenario.outcomeOracle, scenario.commandId, scenario.failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(scenario.failures);
+        try
+        { await ExecuteAsync(parentToken).ConfigureAwait(false); }
+        catch
+        {
+            lifecycle.RecordFirstFailure();
+            throw;
+        }
     }
+
+    internal Task CleanupAsync()
+        => RequestCqrsAuthorityFaultCleanup.RunAsync(root, rootCreated, waveStartupAttempted,
+            controls, wave, caller, administrator, discovery, operationDeadline, sdkCall, mcpCall,
+            armId, originalStarted, outcomeOracle, commandId, failures, lifecycle.RecordOwnerFailure);
 
     private async Task ExecuteAsync(CancellationToken parentToken)
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         root = RequestCqrsAuthorityFaultProvisioning.NewPrivateRootPath();
         RequestCqrsAuthorityFaultProvisioning.CreatePrivateRoot(root, () => rootCreated = true);
         operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
         operationDeadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
+        lifecycle.SetTokens(callerToken, parentToken, operationDeadline.Token);
         await PrepareAsync(operationDeadline.Token).ConfigureAwait(false);
         await RevokeWhileHeldAsync(operationDeadline.Token).ConfigureAwait(false);
         await VerifyAdminAndRevokedCallerAsync(operationDeadline.Token).ConfigureAwait(false);
@@ -63,18 +74,21 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
 
     private async Task PrepareAsync(CancellationToken cancellationToken)
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         dataRoot = Path.Combine(root, "data");
         var profile = (await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, cancellationToken).ConfigureAwait(false)).Profile;
         var proof = await RequestCqrsRf3ImageProof.ReadAsync(cancellationToken).ConfigureAwait(false);
         controls = RequestCqrsProbeFixture.Create(dataRoot, Guid.NewGuid());
         waveStartupAttempted = true;
+        lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         wave = await RequestCqrsRf3Wave.StartProbedAsync(dataRoot,
-            RequestCqrsAuthorityFaultProvisioning.CurrentImages(proof.Current), controls, cancellationToken)
-            .ConfigureAwait(false);
+            RequestCqrsAuthorityFaultProvisioning.CurrentImages(proof.Current), controls, cancellationToken,
+            lifecycle).ConfigureAwait(false);
         var app = (wave ?? throw new InvalidOperationException(MissingOwner)).App;
         discovery = await RequestCqrsAuthorityFaultDiscovery.ReadAsync(app, profile, cancellationToken).ConfigureAwait(false);
         administrator = await RequestCqrsRf3Callers.ConnectAsync(app, RequestCqrsRf3Protocol.Node1,
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.IdentityCreate);
         identity = await RequestCqrsAuthorityFaultProvisioning.CreateIdentityAsync(
             administrator.Sdk, cancellationToken).ConfigureAwait(false);
         caller = await RequestCqrsRf3Callers.ConnectAsync(app, RequestCqrsRf3Protocol.Node2,
@@ -91,6 +105,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
 
     private async Task StartHeldWriteAsync(CancellationToken cancellationToken)
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.HeldWrite);
         var activeIdentity = identity ?? throw new InvalidOperationException(MissingOwner);
         var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
         commandId = Guid.NewGuid();
@@ -108,12 +123,15 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
             RequestCqrsProbeOutcome.Observed, discovery ?? throw new InvalidOperationException(MissingOwner),
             cancellationToken).ConfigureAwait(false);
         heldMarker = marker;
+        lifecycle.MarkHeldWriteObserved();
         await RequestCqrsAuthorityFaultAssertions.VerifyHeldMarkerAsync(marker, armId, commandId, discovery)
             .ConfigureAwait(false);
     }
 
     private async Task RevokeWhileHeldAsync(CancellationToken cancellationToken)
     {
+        lifecycle.SetStage(RequestCqrsLifecycleStage.PersistedRevocation);
+        lifecycle.MarkPersistedRevocationEntered();
         var activeIdentity = identity ?? throw new InvalidOperationException(MissingOwner);
         var expected = RequestCqrsAuthorityFaultProvisioning.Revoke(activeIdentity.Principal);
         var saved = await McpCallerAssertions.SdkSuccessAsync(await (administrator
@@ -124,28 +142,16 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp)
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
         var marker = heldMarker ?? throw new InvalidOperationException(MissingOwner);
         (controls ?? throw new InvalidOperationException(MissingOwner)).WriteRelease(armId, marker.RequestId);
-        await VerifyReleasedAndDisposedAsync(marker, cancellationToken).ConfigureAwait(false);
+        await RequestCqrsAuthorityFaultLifecycleAssertions.VerifyReleasedAndDisposedAsync(
+            controls ?? throw new InvalidOperationException(MissingOwner),
+            discovery ?? throw new InvalidOperationException(MissingOwner), armId, commandId, marker,
+            cancellationToken).ConfigureAwait(false);
         await JoinOriginalAndAssertDeniedAsync().ConfigureAwait(false);
         await (controls ?? throw new InvalidOperationException(MissingOwner)).RetireArmAsync(armId,
             cancellationToken).ConfigureAwait(false);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task VerifyReleasedAndDisposedAsync(RequestCqrsProbeMarkerRecord original,
-        CancellationToken cancellationToken)
-    {
-        var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
-        var actualDiscovery = discovery ?? throw new InvalidOperationException(MissingOwner);
-        var released = await activeControls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.AuthorizationReload,
-            RequestCqrsProbeOutcome.Released, actualDiscovery, cancellationToken).ConfigureAwait(false);
-        await Assert.That(released.RequestId).IsEqualTo(original.RequestId);
-        await Assert.That(released.CommandId).IsEqualTo(commandId);
-        var disposed = await activeControls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.ProducerDisposed,
-            RequestCqrsProbeOutcome.Observed, actualDiscovery, cancellationToken).ConfigureAwait(false);
-        await Assert.That(disposed.RequestId).IsEqualTo(original.RequestId);
-        await Assert.That(disposed.CommandId).IsEqualTo(commandId);
-        await Assert.That(activeControls.ArmFor(armId).ProducerDisposedSeen).IsTrue();
-    }
 
     private async Task JoinOriginalAndAssertDeniedAsync()
     {

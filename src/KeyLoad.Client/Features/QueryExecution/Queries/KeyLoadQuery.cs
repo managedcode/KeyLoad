@@ -159,52 +159,55 @@ internal static class QueryExpressions
         }
 
         var parts = new List<string>();
-        bool Walk(Expression node, int depth)
-        {
-            if (depth > QueryPredicateTokens.MaximumDepth)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, QueryPredicateTokens.QueryPathDepthExceededMessage);
-            }
-
-            node = Unwrap(node);
-            if (node == parameter)
-            {
-                return true;
-            }
-
-            if (node is MemberExpression member && member.Expression is not null)
-            {
-                if (Nullable.GetUnderlyingType(member.Expression.Type) is not null)
-                {
-                    return member.Member.Name == "Value" && Walk(member.Expression, depth + 1);
-                }
-
-                if (member.Expression.Type == typeof(string) || member.Expression.Type.IsPrimitive || member.Expression.Type == typeof(decimal)
-                    || member.Member.GetCustomAttribute<JsonIgnoreAttribute>() is { Condition: JsonIgnoreCondition.Always }
-                    || member.Member is not PropertyInfo && member.Member.GetCustomAttribute<JsonIncludeAttribute>() is null)
-                {
-                    return false;
-                }
-
-                if (!Walk(member.Expression, depth + 1))
-                {
-                    return false;
-                }
-
-                parts.Add(Name(member.Member));
-                return true;
-            }
-            if (node is BinaryExpression { NodeType: ExpressionType.ArrayIndex } index && Constant(index.Right, out var value)
-                && value is int ordinal && ordinal >= 0 && Walk(index.Left, depth + 1))
-            { parts.Add(ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture)); return true; }
-            return false;
-        }
-        if (!Walk(expression, 1) || parts.Count == 0)
+        if (!WalkFieldPath(expression, parameter, 1, parts) || parts.Count == 0)
         {
             throw Unsupported();
         }
 
         return "/" + string.Join('/', parts.Select(part => part.Replace("~", "~0", StringComparison.Ordinal).Replace("/", "~1", StringComparison.Ordinal)));
+    }
+
+    private static bool WalkFieldPath(Expression node, ParameterExpression parameter, int depth, List<string> parts)
+    {
+        if (depth > QueryPredicateTokens.MaximumDepth)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, QueryPredicateTokens.QueryPathDepthExceededMessage);
+        }
+
+        node = Unwrap(node);
+        if (node == parameter)
+        {
+            return true;
+        }
+
+        if (node is MemberExpression member && member.Expression is not null)
+        {
+            if (Nullable.GetUnderlyingType(member.Expression.Type) is not null)
+            {
+                return member.Member.Name == "Value"
+                    && WalkFieldPath(member.Expression, parameter, depth + 1, parts);
+            }
+
+            if (member.Expression.Type == typeof(string) || member.Expression.Type.IsPrimitive || member.Expression.Type == typeof(decimal)
+                || member.Member.GetCustomAttribute<JsonIgnoreAttribute>() is { Condition: JsonIgnoreCondition.Always }
+                || member.Member is not PropertyInfo && member.Member.GetCustomAttribute<JsonIncludeAttribute>() is null)
+            {
+                return false;
+            }
+
+            if (!WalkFieldPath(member.Expression, parameter, depth + 1, parts))
+            {
+                return false;
+            }
+
+            parts.Add(Name(member.Member));
+            return true;
+        }
+        if (node is BinaryExpression { NodeType: ExpressionType.ArrayIndex } index
+            && Constant(index.Right, out var value) && value is int ordinal && ordinal >= 0
+            && WalkFieldPath(index.Left, parameter, depth + 1, parts))
+        { parts.Add(ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture)); return true; }
+        return false;
     }
     internal static bool Constant(Expression expression, out object? value, int depth = 1)
     {

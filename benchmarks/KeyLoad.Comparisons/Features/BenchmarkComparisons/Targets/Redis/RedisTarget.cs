@@ -31,6 +31,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     private readonly ComparisonTopology configuredTopology = topology;
     private readonly string[] replicaEndpoints = replicas ?? [];
     private ConnectionMultiplexer? connection;
+    private int corpusCount;
 
     /// <summary>Gets the observed version, direct-replica topology, fsync acknowledgement, read, transport, and authorization profile.</summary>
     public TargetProfile Profile { get; private set; } = new(TargetName, InitialVersion, InitialTopology,
@@ -44,9 +45,14 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     /// <param name="dataset">The deterministic document corpus used to seed and probe the target.</param>
     /// <param name="cancellationToken">A token that cancels connection and replica-verification operations.</param>
     /// <returns>A task that completes after the observed Redis profile has been recorded.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
+        corpusCount = dataset.Documents.Count;
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            Profile = Profile with { ReadContract = "primary key reads; S1 seeds document keys only" };
+        }
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
         if (settings.EndPoints.Count != 1)
         {
@@ -58,9 +64,16 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var primaryEndpoint = RedisNativeProtocol.RequirePrimaryEndpoint(connection);
         var primaryIdentity = await RedisReplicaProof.ReadIdentityAsync(connection, primaryEndpoint, cancellationToken);
         var database = connection.GetDatabase();
-        foreach (var document in dataset.Documents)
+        if (dataset.Settings is ScaledComparisonProfile)
         {
-            await database.StringSetAsync(prefix + document.Id, document.Json, flags: CommandFlags.DemandMaster).WaitAsync(cancellationToken);
+            await RedisScaledCorpusSeeder.SeedAsync(database, prefix, dataset.Documents, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            foreach (var document in dataset.Documents)
+            {
+                await database.StringSetAsync(prefix + document.Id, document.Json, flags: CommandFlags.DemandMaster).WaitAsync(cancellationToken);
+            }
         }
 
         var probeKey = prefix + Guid.NewGuid().ToString("N");
@@ -96,7 +109,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         try
         { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
-        return new RedisComparisonSession(workerConnection, prefix, configuredTopology);
+        return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount);
     }
 
     /// <summary>Closes and disposes the target-owned Redis connection.</summary>

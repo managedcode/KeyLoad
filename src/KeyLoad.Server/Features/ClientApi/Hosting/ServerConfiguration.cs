@@ -28,6 +28,8 @@ internal static class ServerConfiguration
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
         app.MapDefaultEndpoints();
         ReplicaDiscoveryEndpoints.Map(app);
+        ReplicaMembershipHealthEndpoints.Map(app);
+        ReplicaMembershipAuthorityEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
@@ -37,16 +39,20 @@ internal static class ServerConfiguration
     internal static NodeOptions ReadOfflineNode(string destination)
     {
         var builder = WebApplication.CreateBuilder([]);
-        var node = (builder.Configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new())
+        var section = builder.Configuration.GetSection(ServerProtocol.ConfigurationSection);
+        var node = (section.Get<NodeOptions>() ?? new())
             with
         { DataDirectory = destination };
+        MembershipAuthoritySettingsValidator.ValidateSection(section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
         node.Validate();
         return ReadRequestProbes(node, builder.Configuration);
     }
 
     private static NodeOptions ReadNode(ConfigurationManager configuration)
     {
-        var node = configuration.GetSection(ServerProtocol.ConfigurationSection).Get<NodeOptions>() ?? new();
+        var section = configuration.GetSection(ServerProtocol.ConfigurationSection);
+        var node = section.Get<NodeOptions>() ?? new();
+        MembershipAuthoritySettingsValidator.ValidateSection(section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
         node.Validate();
         return ReadRequestProbes(node, configuration);
     }
@@ -84,6 +90,10 @@ internal static class ServerConfiguration
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         services.AddSingleton<OrleansNode>();
+        services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
+        services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(options,
+            provider.GetRequiredService<ReplicaMembershipAuthorityOwner>(),
+            provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton<GrainRequestCodec>();
         services.AddSingleton(provider => CreatePeerSecurity(options, provider.GetRequiredService<TimeProvider>()));
     }

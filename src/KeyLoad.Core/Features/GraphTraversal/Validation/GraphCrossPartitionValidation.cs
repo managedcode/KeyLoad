@@ -78,25 +78,37 @@ internal static class GraphCrossPartitionValidation
     internal static void ValidateIntent(GraphCrossPartitionDeliveryIntentV1? intent,
         PartitionRef source, string graph, string edgeId, EntityRef destination, DatabaseLimits limits)
     {
-        if (intent is null || intent.Version != GraphCrossPartitionProtocol.CurrentVersion
-            || intent.SourcePartition != source || intent.Graph != graph || intent.EdgeId != edgeId
-            || intent.SourcePartition is null || HasNullPartitionPart(intent.SourcePartition)
-            || intent.Destination != destination || intent.Destination.Partition is null
-            || HasNullPartitionPart(intent.Destination.Partition) || intent.Destination.Collection is null
-            || intent.Destination.Id is null || intent.Revision <= 0 || intent.Edge is null
-            || intent.SourcePartition == intent.Destination.Partition
-            || string.IsNullOrWhiteSpace(intent.OriginalPrincipalId) || intent.OriginalPolicyEpoch < 0
-            || !ValidFingerprint(intent.Fingerprint) || intent.Edge.Id != edgeId
-            || intent.Edge.From?.Partition != source || intent.Edge.To != destination
-            || intent.Edge.Revision != intent.Revision)
+        if (HasInvalidIntentIdentity(intent, source, graph, edgeId, destination)
+            || HasInvalidIntentPolicy(intent!)
+            || HasInvalidIntentEdge(intent!, source, edgeId, destination))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
-        ValidateStoredLocator(intent.SourcePartition, intent.Graph, intent.EdgeId,
+        ValidateStoredLocator(intent!.SourcePartition, intent.Graph, intent.EdgeId,
             intent.Destination, intent.Revision);
         ValidateStoredIdentifier(intent.OriginalPrincipalId);
         ValidateEdge(intent.Edge, limits);
     }
+
+    private static bool HasInvalidIntentIdentity(GraphCrossPartitionDeliveryIntentV1? intent,
+        PartitionRef source, string graph, string edgeId, EntityRef destination)
+        => intent is null || intent.Version != GraphCrossPartitionProtocol.CurrentVersion
+            || intent.SourcePartition != source || intent.Graph != graph || intent.EdgeId != edgeId
+            || intent.SourcePartition is null || HasNullPartitionPart(intent.SourcePartition)
+            || intent.Destination != destination || intent.Destination.Partition is null
+            || HasNullPartitionPart(intent.Destination.Partition) || intent.Destination.Collection is null
+            || intent.Destination.Id is null || intent.Revision <= 0
+            || intent.SourcePartition == intent.Destination.Partition;
+
+    private static bool HasInvalidIntentPolicy(GraphCrossPartitionDeliveryIntentV1 intent)
+        => string.IsNullOrWhiteSpace(intent.OriginalPrincipalId) || intent.OriginalPolicyEpoch < 0
+            || !ValidFingerprint(intent.Fingerprint);
+
+    private static bool HasInvalidIntentEdge(GraphCrossPartitionDeliveryIntentV1 intent,
+        PartitionRef source, string edgeId, EntityRef destination)
+        => intent.Edge is null || intent.Edge.Id != edgeId
+            || intent.Edge.From?.Partition != source || intent.Edge.To != destination
+            || intent.Edge.Revision != intent.Revision;
 
     internal static void ValidateReceiver(GraphCrossPartitionReceiverStateV1? state,
         PartitionRef source, string graph, string edgeId, EntityRef destination)

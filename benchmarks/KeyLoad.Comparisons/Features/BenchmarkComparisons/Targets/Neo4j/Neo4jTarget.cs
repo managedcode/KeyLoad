@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Runtime.CompilerServices;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -18,6 +19,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString("N");
     private bool ownsConstraint;
     private int depth;
+    private int corpusCount;
     /// <summary>Gets the observed Neo4j version and declared single-node, local-transaction, and query profile.</summary>
     public TargetProfile Profile { get; private set; } = new("Neo4j", "unverified", "Community; single node; heap 512 MiB, page cache 256 MiB",
         "local committed transaction; no synchronous replicas; durability not fault-qualified", "committed primary; indexed IDs and bounded directed reachability",
@@ -32,10 +34,15 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     /// <param name="dataset">The deterministic documents and directed graph edges to seed.</param>
     /// <param name="cancellationToken">A token that cancels HTTP queries and setup operations.</param>
     /// <returns>A task that completes after index readiness.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
-        depth = dataset.Options.GraphDepth;
+        depth = dataset.Settings.GraphDepth;
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            Profile = Profile with { ReadContract = "indexed primary document reads; S1 seeds nodes only, with no graph relationships" };
+        }
+        corpusCount = dataset.Documents.Count;
         using var version = await QueryAsync("CALL dbms.components() YIELD name,versions,edition WHERE name='Neo4j Kernel' RETURN versions[0],edition", null, cancellationToken);
         var row = Rows(version).EnumerateArray().Single();
         var edition = row[1].GetString();
@@ -117,6 +124,33 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     /// <summary>Executes one comparison session’s document and directed graph queries.</summary>
     private sealed class Session(Neo4jTarget target) : IComparisonSession
     {
+        public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            string? after = null;
+            var seen = 0;
+            while (true)
+            {
+                using var response = await target.QueryAsync($"MATCH (n:{target.label}) WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT 256",
+                    new { after }, cancellationToken);
+                var rows = Rows(response);
+                if (rows.GetArrayLength() == 0)
+                {
+                    break;
+                }
+                foreach (var row in rows.EnumerateArray())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    after = row[0].GetString();
+                    seen++;
+                    yield return new(after!, row[1].GetString()!);
+                }
+            }
+            if (seen != target.corpusCount)
+            {
+                throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+            }
+        }
+
         public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
             using var response = await target.QueryAsync($"MATCH (n:{target.label} {{id:$id}}) RETURN n.json", new { id = document.Id }, cancellationToken);

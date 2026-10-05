@@ -11,6 +11,7 @@ internal static class ReplicaMembershipProtocol
     internal const string DeleteConflict = "Membership changed during deletion.";
     internal const int HeartbeatAttempts = 16;
     internal static TimeSpan StartupRetryDelay { get; } = TimeSpan.FromMilliseconds(250);
+    internal static TimeSpan StartupTimeout { get; } = TimeSpan.FromSeconds(120);
     internal static TimeSpan RequestTimeout { get; } = ReplicaProtocol.ReadBarrierTimeout + ReplicaProtocol.CommandTimeout;
 
     internal static CancellationTokenSource Deadline(TimeProvider clock) => new(RequestTimeout, clock);

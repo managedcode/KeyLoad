@@ -16,7 +16,8 @@ internal static class TestSuiteResources
         var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine("TestResults", settings.Suite));
         var arguments = BuildArguments(root, settings, resultsDirectory);
         var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, arguments)
-            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "");
+            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "")
+            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, "");
         if (settings.LocalRf3ImageEnabled)
         {
             var execution = LocalRf3ImageExecution.Create(root);
@@ -43,6 +44,10 @@ internal static class TestSuiteResources
         if (settings.Suite == "comparison" && settings.ComparisonTarget is not null)
         {
             runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);
+        }
+        if (settings.ScaleProfile is not null)
+        {
+            runner.WithEnvironment("Benchmarks__ScaleProfile", settings.ScaleProfile.Id);
         }
         if (settings.Suite == "unit-scalar")
         {

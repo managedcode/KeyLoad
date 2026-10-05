@@ -61,10 +61,12 @@ internal sealed record ComparisonExecutionIdentity(
     /// <param name="configuration">The native container execution settings.</param>
     /// <param name="sourceRevision">The measured source revision.</param>
     /// <param name="topology">The selected native topology.</param>
+    /// <param name="scaledProfileId">The exact scaled profile identity, or null for the existing control.</param>
     /// <returns>The validated native image and GitHub provenance.</returns>
     internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
-        ComparisonTopology topology)
-        => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true);
+        ComparisonTopology topology, string? scaledProfileId = null)
+        => ReadIdentity(configuration, sourceRevision, topology, isTimeSeries: false, isIsolated: true,
+            isolatedScaleProfileId: scaledProfileId);
 
     /// <summary>Requires the separate intensive TimeSeries family identity.</summary>
     internal static ComparisonExecutionIdentity ReadTimeSeriesIntensive(IConfiguration configuration, string sourceRevision)
@@ -72,7 +74,8 @@ internal sealed record ComparisonExecutionIdentity(
             ?? throw InvalidIdentity();
 
     private static ComparisonExecutionIdentity? ReadIdentity(IConfiguration configuration, string? sourceRevision,
-        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false)
+        ComparisonTopology? topology, bool isTimeSeries, bool isIsolated = false, bool isIntensiveTimeSeries = false,
+        string? isolatedScaleProfileId = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var loadGeneratorImage = configuration[LoadGeneratorImageSetting];
@@ -98,7 +101,11 @@ internal sealed record ComparisonExecutionIdentity(
             || !string.Equals(sourceRevision, configuredRevision, StringComparison.Ordinal)
             || !IsRevision(gitHubSha)
             || !string.Equals(sourceRevision, gitHubSha, StringComparison.Ordinal)
-            || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries))
+            || (isIsolated && isolatedScaleProfileId is not null
+                && !string.Equals(configuration[ComparisonWorkerSelection.ScaleProfileSetting], isolatedScaleProfileId,
+                    StringComparison.Ordinal))
+            || !IsAcceptedExecutionProfile(profile, topology, isTimeSeries, isIsolated, isIntensiveTimeSeries,
+                isolatedScaleProfileId))
         {
             throw InvalidIdentity();
         }
@@ -108,12 +115,26 @@ internal sealed record ComparisonExecutionIdentity(
     }
 
     private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
-        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries)
+        bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId)
         => isIntensiveTimeSeries
             ? profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile
             : isIsolated ? topology is { } selected && Enum.IsDefined(selected)
-                && profile == IsolatedComparisonContract.Current.Profile
+                && (isolatedScaleProfileId is null
+                    ? profile == IsolatedComparisonContract.Current.Profile
+                    : profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId))
                 : IsAcceptedProfile(profile, topology, isTimeSeries);
+
+    private static bool IsExactScaledProfile(string profile)
+    {
+        try
+        {
+            return ScaledComparisonProfileParser.Parse(profile).Id == profile;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return false;
+        }
+    }
 
     private static string Required(IConfiguration configuration, string key)
         => configuration[key] ?? throw new InvalidOperationException(MissingSettingPrefix + key);

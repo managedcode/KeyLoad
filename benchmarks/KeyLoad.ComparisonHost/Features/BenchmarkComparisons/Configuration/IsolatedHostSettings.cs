@@ -14,7 +14,8 @@ internal sealed record IsolatedHostSettings(ComparisonWorkerSelection Selection,
         ArgumentNullException.ThrowIfNull(configuration);
         var selection = ComparisonWorkerSelection.Read(configuration);
         var revision = Required(configuration, ComparisonHostConstants.SourceRevision);
-        var identity = ComparisonExecutionIdentity.ReadIsolated(configuration, revision, selection.Options.Topology)
+        var identity = ComparisonExecutionIdentity.ReadIsolated(configuration, revision, selection.Options.Topology,
+            selection.ScaledProfile?.Id)
             ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
         var jobText = Required(configuration, IsolatedHostConstants.JobId);
         if (!long.TryParse(jobText, NumberStyles.None, CultureInfo.InvariantCulture, out var jobId) || jobId <= 0)

@@ -97,7 +97,8 @@ export function projectArtifact(artifact) {
     digest: artifact.digest, expired: artifact.expired };
 }
 
-export function projectWorkerProof(job, artifact, cell, cohort, workerSha256) {
+export function projectWorkerProof(job, artifact, cell, cohort, workerSha256, serverResource) {
   requireGitHub(hashPattern.test(workerSha256));
-  return { id: cell.id, job: projectJob(job, cohort, GH.workerSteps), artifact: projectArtifact(artifact), workerSha256 };
+  const proof = { id: cell.id, job: projectJob(job, cohort, GH.workerSteps), artifact: projectArtifact(artifact), workerSha256 };
+  return serverResource === undefined ? proof : { ...proof, serverResource };
 }

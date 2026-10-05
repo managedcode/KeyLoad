@@ -33,10 +33,10 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     public bool Supports(Scenario scenario) => scenario == Scenario.QueueCycle;
 
     /// <summary>Declares a durable quorum queue, verifies broker membership, and checks persistent publish, receive, and acknowledgement behavior.</summary>
-    /// <param name="dataset">The common target-contract corpus parameter; queue setup does not use it.</param>
+    /// <param name="corpus">The common target-contract corpus parameter; queue setup does not use it.</param>
     /// <param name="cancellationToken">A token that cancels connection, queue, and management operations.</param>
     /// <returns>A task that completes after queue semantics and cluster evidence are verified.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
         var endpoint = new Uri(brokerConnectionString);
         var factory = new ConnectionFactory { Uri = endpoint, AutomaticRecoveryEnabled = false };

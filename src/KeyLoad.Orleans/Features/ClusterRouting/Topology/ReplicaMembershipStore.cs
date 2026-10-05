@@ -11,8 +11,10 @@ internal sealed class ReplicaMembershipStore
     private readonly ICommitCoordinator coordinator;
     private readonly ReplicaConsensus consensus;
     private readonly string principal;
+    private readonly int maximumRows;
 
-    internal ReplicaMembershipStore(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus consensus, string principal)
+    internal ReplicaMembershipStore(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus consensus,
+        string principal, int maximumRows = 0)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(coordinator);
@@ -22,6 +24,7 @@ internal sealed class ReplicaMembershipStore
         this.coordinator = coordinator;
         this.consensus = consensus;
         this.principal = principal;
+        this.maximumRows = maximumRows;
     }
 
     internal async Task<ReplicaMembershipSnapshot> ReadAsync(CancellationToken cancellationToken)
@@ -30,12 +33,16 @@ internal sealed class ReplicaMembershipStore
         await consensus.ReadControlBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var record = database.Store.Read(view => view.GetRecord<MembershipRecord>(Key));
-        return ReplicaMembershipSnapshot.Read(record);
+        if (maximumRows > 0 && record is not null
+            && record.Payload.Length > ReplicaMembershipAuthorityProtocol.MaximumSnapshotBytes)
+        { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.MembershipCapacity); }
+        return ReplicaMembershipSnapshot.Read(record, maximumRows);
     }
 
     internal async Task<bool> CompareExchangeAsync(ReplicaMembershipSnapshot snapshot, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        snapshot.ValidateCapacity(maximumRows);
         var mutation = new MembershipMutation(ReplicaMembershipProtocol.TableKey, snapshot.ExpectedVersion, snapshot.Serialize());
         var result = await coordinator.SubmitNativeAsync(OperationKind.Membership, Guid.NewGuid(), principal,
             NativeSerialization.Serialize(mutation), cancellationToken).ConfigureAwait(false);

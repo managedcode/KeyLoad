@@ -12,6 +12,8 @@ const maximumInteger = 2_147_483_647;
 const marker = /^KeyLoadBenchmarkProgress phase=(oracle|initialize|warmup|prepare|measure|validate|complete) repetition=(\d{1,10}) completed=(\d{1,10}) total=(\d{1,10}) failed=(\d{1,10}) elapsedSeconds=(\d+(?:\.\d+)?)$/;
 const missingFile = 'ENOENT';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const controlProfile = 'intensive-1k-c16';
+const scaleProfiles = new Set(['scaled-100k-c16', 'scaled-1m-c16', 'scaled-5m-c16']);
 
 export function validProgress(line) {
   if (line.length > maximumProgressBytes) return false;
@@ -20,6 +22,31 @@ export function validProgress(line) {
   const [repetition, completed, total, failed, elapsed] = match.slice(2).map(Number);
   return [repetition, completed, total, failed].every(value => Number.isInteger(value) && value <= maximumInteger)
     && Number.isFinite(elapsed) && failed <= completed && completed <= total;
+}
+
+export function selectedScaleProfile(environment) {
+  const scaleProfile = environment.KEYLOAD_SCALE_PROFILE;
+  if (scaleProfile !== undefined && scaleProfile !== '') {
+    if (!scaleProfiles.has(scaleProfile) || environment.Benchmarks__EvidenceProfile !== scaleProfile) {
+      throw new Error('The native comparison profile identity is invalid.');
+    }
+    return scaleProfile;
+  }
+  if (environment.Benchmarks__EvidenceProfile !== controlProfile) {
+    throw new Error('The native comparison profile identity is invalid.');
+  }
+  return undefined;
+}
+
+export function workloadArguments(scaleProfile) {
+  const scaled = scaleProfile !== undefined;
+  const arguments_ = [
+    'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
+    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*',
+    `--KeyLoadTests:TimeoutMinutes=${scaled ? 140 : 60}`
+  ];
+  if (scaled) arguments_.push(`--KeyLoadTests:ScaleProfile=${scaleProfile}`);
+  return arguments_;
 }
 
 export async function readProgress(file) {
@@ -126,12 +153,10 @@ export async function runWorkload() {
   if (typeof cell !== 'string' || cell.length > 256 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cell)) {
     throw new Error('The native comparison cell identity is invalid.');
   }
+  const scaleProfile = selectedScaleProfile(process.env);
   const progress = path.join(root, 'artifacts/comparisons/isolated/failures', cell, 'progress.log');
-  return await runProgressProcess('dotnet', [
-    'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
-    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*',
-    '--KeyLoadTests:TimeoutMinutes=140'
-  ], root, progress);
+  const arguments_ = workloadArguments(scaleProfile);
+  return await runProgressProcess('dotnet', arguments_, root, progress);
 }
 
 const evaluated = process.execArgv.some(argument => argument === '--eval' || argument === '-e');

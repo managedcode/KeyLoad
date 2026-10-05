@@ -1,13 +1,17 @@
 import { AGGREGATE, KEYS, exactKeys, matches, positive, requireValue, validateCohort } from './aggregate-contracts.mjs';
-import { validateIsolatedPlan } from './isolated-plan.mjs';
-import { matchesIsolatedJobName } from './isolated-github-contract.mjs';
+import { readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs';
+import { isolatedEvidenceJobName, matchesIsolatedJobName } from './isolated-github-contract.mjs';
+import { validateScaledPlan } from './scaled-isolated-plan.mjs';
+import { validateScaleResourceProof } from './server-resource-evidence.mjs';
 
 const ERROR = AGGREGATE.errors.proof;
 const ARTIFACT_PREFIX = 'comparison-worker-';
 const GITHUB = 'https://github.com/';
 
 function validateJob(job, cell, cohort, identities) {
-  requireValue(exactKeys(job, KEYS.job) && positive(job.id) && !identities.has(job.id) && matchesIsolatedJobName(job.name, cell) &&
+  const nameMatches = cell.profile === readIsolatedContract().profile
+    ? matchesIsolatedJobName(job?.name, cell) : job?.name === isolatedEvidenceJobName(cell);
+  requireValue(exactKeys(job, KEYS.job) && positive(job.id) && !identities.has(job.id) && nameMatches &&
     job.url === `${GITHUB}${cohort.repository}/actions/runs/${cohort.runId}/job/${job.id}` && [AGGREGATE.success, AGGREGATE.failure].includes(job.conclusion) &&
     Array.isArray(job.steps) && job.steps.length === AGGREGATE.steps.length, ERROR);
   identities.add(job.id);
@@ -27,19 +31,28 @@ function validateArtifact(artifact, cell, identities) {
 }
 
 export function validateAggregateProof(value, plan) {
-  validateIsolatedPlan(plan);
+  const contract = readIsolatedContract();
+  const canonical = plan?.profile === contract.profile ? validateIsolatedPlan(plan, contract) : validateScaledPlan(plan, contract);
+  requireValue(canonical.profile === plan.profile, ERROR);
   requireValue(exactKeys(value, KEYS.proof) && value.schemaVersion === AGGREGATE.proofVersion &&
     Array.isArray(value.cells) && value.cells.length === plan.cells.length, ERROR);
   validateCohort(value.cohort, plan.profile);
+  const scaled = canonical.profile !== contract.profile;
   const expected = new Map(plan.cells.map(cell => [cell.id, cell]));
   const seen = new Set();
   const jobs = new Set();
   const artifacts = new Set();
   for (const item of value.cells) {
-    requireValue(exactKeys(item, KEYS.proofCell) && expected.has(item.id) && !seen.has(item.id) &&
-      matches(AGGREGATE.digest, item.workerSha256), ERROR);
+    const cell = expected.get(item.id);
+    requireValue(exactKeys(item, scaled ? KEYS.scaleProofCell : KEYS.proofCell)
+      && cell !== undefined && !seen.has(item.id) && matches(AGGREGATE.digest, item.workerSha256), ERROR);
     seen.add(item.id);
-    validateJob(item.job, expected.get(item.id), value.cohort, jobs);
+    if (scaled) {
+      const unsupported = contract.unsupportedTopologies.some(entry => entry.target === cell.target
+        && entry.nodeCounts.includes(cell.nodeCount));
+      validateScaleResourceProof(item.serverResource, !unsupported);
+    }
+    validateJob(item.job, cell, value.cohort, jobs);
     validateArtifact(item.artifact, expected.get(item.id), artifacts);
   }
   return value;

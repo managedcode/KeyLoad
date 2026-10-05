@@ -32,4 +32,26 @@ internal static class IsolatedPlanFields
     internal const string Native = "native";
     internal const string PathEnvironment = "PATH";
     internal const string ModuleEnvironment = "KEYLOAD_ISOLATED_PLAN_MODULE";
+    internal const string ScaledProfiles = "scaledProfiles";
+    internal const string ProfileSettings = "profileSettings";
+    internal const string Documents = "documents";
+    internal const string OperationsPerCell = "operations";
+    internal const string Warmup = "warmup";
+    internal const string Repetitions = "repetitions";
+    internal const string Concurrency = "concurrency";
+    internal const string Preflight = "preflight";
+    internal const string Label = "label";
+    internal const string JobName = "jobName";
+    internal const string ArtifactPrefix = "artifactPrefix";
+    internal const string QualificationPrefix = "qualificationPrefix";
+    internal const string ScaleProfile = "scaleProfile";
+    internal const string Seed = "seed";
+    internal const string PayloadBytes = "payloadBytes";
+    internal const string Dimensions = "dimensions";
+    internal const string TopK = "topK";
+    internal const string TimeoutSeconds = "timeoutSeconds";
+    internal const string GraphVertices = "graphVertices";
+    internal const string GraphFanOut = "graphFanOut";
+    internal const string GraphDepth = "graphDepth";
+    internal const string CrudFamily = "crud";
 }

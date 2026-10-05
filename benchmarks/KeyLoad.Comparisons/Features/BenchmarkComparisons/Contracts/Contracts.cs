@@ -45,7 +45,7 @@ public enum ComparisonTopology
 }
 
 /// <summary>Configures the generated workload and its measurement budgets.</summary>
-public sealed record ComparisonOptions
+public sealed record ComparisonOptions : IComparisonSettings
 {
     private const string ConfigurationSection = "Benchmarks";
     /// <summary>Gets or initializes the requested target topology.</summary>
@@ -180,7 +180,7 @@ public interface IComparisonTarget : IAsyncDisposable
     /// <param name="dataset">The deterministic corpus and workload oracle.</param>
     /// <param name="cancellationToken">A token used to cancel initialization.</param>
     /// <returns>A task that completes when initialization finishes.</returns>
-    Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken);
+    Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken);
     /// <summary>Opens a session for executing operations against the target.</summary>
     /// <param name="cancellationToken">A token used to cancel session creation.</param>
     /// <returns>A task whose result is the opened comparison session.</returns>
@@ -206,6 +206,8 @@ public interface IComparisonSession : IAsyncDisposable
     /// <param name="cancellationToken">A token used to cancel the read.</param>
     /// <returns>A task whose result is the found event, or <see langword="null"/> when it is absent.</returns>
     Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
+    /// <summary>Reads all actual target corpus records once in bounded ascending identifier order.</summary>
+    IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken) => throw new NotSupportedException("Native ordered corpus readback is unavailable.");
 }
 
 /// <summary>Captures one operation's timing, outcome, payload, and queue measurements.</summary>
@@ -262,7 +264,12 @@ public sealed record Measurement(int Attempts, int Successes, int Failures, doub
 /// <param name="Measurement">The aggregate measurements, when the scenario ran.</param>
 /// <param name="Samples">The individual operation samples.</param>
 public sealed record ComparisonCase(string Target, Scenario Scenario, int Repetition, string Status,
-    string? Detail, Measurement? Measurement, [property: JsonRequired] ImmutableArray<OperationSample> Samples);
+    string? Detail, Measurement? Measurement, [property: JsonRequired] ImmutableArray<OperationSample> Samples)
+{
+    /// <summary>Gets exact scaled-run request accounting, omitted for existing control cases.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ScaledOperationAccounting? Scaled { get; init; }
+}
 
 /// <summary>Contains the configuration, environment, targets, and cases for one comparison run.</summary>
 /// <param name="SchemaVersion">The serialized report schema version.</param>
@@ -280,7 +287,7 @@ public sealed record ComparisonCase(string Target, Scenario Scenario, int Repeti
 /// <param name="Targets">The target profiles included in the run.</param>
 /// <param name="Cases">The target/scenario repetition results.</param>
 public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
-    ComparisonOptions Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
+    ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
     int LogicalProcessors, string Runtime, string Storage, string? SourceRevision,
     [property: JsonRequired] ImmutableArray<TargetProfile> Targets,
     [property: JsonRequired] ImmutableArray<ComparisonCase> Cases)
@@ -289,6 +296,17 @@ public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOff
     public GitHubProvenance? Provenance { get; init; }
     /// <summary>Gets or initializes the load-generator container image reference, when used.</summary>
     public string? LoadGeneratorImage { get; init; }
+    /// <summary>Validates that exactly one control or scaled configuration is present.</summary>
+    public void ValidateConfiguration()
+    {
+        if ((Options is null) == (ScaledProfile is null))
+        {
+            throw new InvalidOperationException("A comparison report must carry exactly one configuration.");
+        }
+    }
+    /// <summary>Gets the exact scaled profile when this report is not a materialized control run.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ScaledComparisonProfile? ScaledProfile { get; init; }
 }
 
 /// <summary>Identifies the GitHub Actions workflow run and selected comparison profile.</summary>

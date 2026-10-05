@@ -6,16 +6,16 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class MongoSeededCopies
 {
     internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName,
-        BenchmarkDataset dataset, CancellationToken cancellationToken)
+        IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds));
+        deadline.CancelAfter(TimeSpan.FromSeconds(dataset.Settings.TimeoutSeconds));
         try
         {
             foreach (var client in clients)
             {
                 await WaitForCopyAsync(client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
-                    dataset.Documents[0], dataset.Documents.Length, deadline.Token);
+                    dataset.Documents[0], dataset.Documents.Count, deadline.Token);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

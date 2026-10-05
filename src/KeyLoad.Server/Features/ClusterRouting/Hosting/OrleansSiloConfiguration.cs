@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Net;
+using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
 using KeyLoad.Query;
@@ -63,9 +64,44 @@ internal static class OrleansSiloConfiguration
                 ? provider.GetRequiredService<IReplicaDiscoveryObservationSink>() : null));
         services.AddSingleton<ReplicaGrainServiceClient>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>, ReplicaTransportLifecycle>();
+        RegisterMembershipTable(services, partition, options, startupCancellation);
+    }
+
+    private static void RegisterMembershipTable(IServiceCollection services, PartitionHost partition,
+        NodeOptions options, CancellationToken startupCancellation)
+    {
+        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
+        {
+            services.AddSingleton<IMembershipTable>(provider => CreateMembershipProxy(provider, options));
+            return;
+        }
+        var boundedRows = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
+            ? ReplicaMembershipAuthorityProtocol.MaximumRows : 0;
         services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(partition.Database, partition.Coordinator,
             partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
-            startupCancellation));
+            boundedRows, startupCancellation));
+    }
+
+    private static ReplicaMembershipAuthorityClientTable CreateMembershipProxy(IServiceProvider provider, NodeOptions options)
+    {
+        var authority = options.MembershipAuthority;
+        var callerSecret = Convert.FromBase64String(options.PeerSecret);
+        var authoritySecret = Convert.FromBase64String(authority.AuthorityPeerSecret!);
+        try
+        {
+            var local = provider.GetRequiredService<ILocalSiloDetails>();
+            var settings = new ReplicaMembershipAuthorityExchangeOptions(options.ClusterId,
+                authority.AuthorityPhysicalShardId, authority.AuthorityIncarnation, options.PhysicalShardId,
+                options.Incarnation, options.PublicEndpoint, local.SiloAddress.ToParsableString(),
+                authority.AuthorityEndpoints.Select(endpoint => new Uri(endpoint)).ToArray(), callerSecret,
+                authoritySecret, TimeProvider.System);
+            return new(settings);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(callerSecret);
+            CryptographicOperations.ZeroMemory(authoritySecret);
+        }
     }
 
     private static void RegisterRequestCodec(IServiceCollection services, PartitionHost partition, NodeOptions options)

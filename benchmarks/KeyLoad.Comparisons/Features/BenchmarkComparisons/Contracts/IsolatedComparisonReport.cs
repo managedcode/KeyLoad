@@ -13,7 +13,7 @@ public sealed record IsolatedComparisonReport(int SchemaVersion, IsolatedCompari
 /// <param name="Target">The exact target name.</param>
 /// <param name="NodeCount">The requested actual native members.</param>
 /// <param name="Scenario">The one scenario.</param>
-/// <param name="Profile">The canonical intensive profile.</param>
+/// <param name="Profile">The canonical control profile or exact admitted scale profile.</param>
 /// <param name="SourceRevision">The measured source SHA.</param>
 /// <param name="RunId">The actual GitHub run.</param>
 /// <param name="Attempt">The actual run attempt.</param>

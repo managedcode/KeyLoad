@@ -1,8 +1,9 @@
 using StackExchange.Redis;
+using System.Runtime.CompilerServices;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology)
+internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount)
     : IComparisonSession
 {
     private const string ClientCommand = "CLIENT";
@@ -15,6 +16,46 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     private const int RequiredReplicaFsync = 1;
     private const int ReceiptTimeoutMilliseconds = 3000;
     private readonly IDatabase database = connection.GetDatabase();
+
+    public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        const int pageSize = 256;
+        var endpoint = connection.GetEndPoints(configuredOnly: true).Single();
+        var server = connection.GetServer(endpoint);
+        var observed = 0;
+        await foreach (var _ in server.KeysAsync(pattern: prefix + "d?????????", pageSize: pageSize).WithCancellation(cancellationToken).ConfigureAwait(false))
+        {
+            observed++;
+            if (observed > corpusCount)
+            {
+                throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+            }
+        }
+        if (observed != corpusCount)
+        {
+            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+        }
+        for (var offset = 0; offset < corpusCount; offset += pageSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var count = Math.Min(pageSize, corpusCount - offset);
+            var keys = new RedisKey[count];
+            for (var index = 0; index < count; index++)
+            {
+                keys[index] = prefix + ScaledComparisonCorpus.Id(offset + index);
+            }
+            var values = await database.StringGetAsync(keys, CommandFlags.DemandMaster).WaitAsync(cancellationToken);
+            for (var index = 0; index < values.Length; index++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (values[index].IsNull)
+                {
+                    throw new ComparisonFailureException("ScaledCorpusReadbackMissingRecord");
+                }
+                yield return new(ScaledComparisonCorpus.Id(offset + index), values[index].ToString());
+            }
+        }
+    }
 
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {

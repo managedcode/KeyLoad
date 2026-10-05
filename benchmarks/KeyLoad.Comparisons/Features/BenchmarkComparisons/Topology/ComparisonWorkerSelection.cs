@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons;
 /// <param name="Target">The canonical engine name.</param>
 /// <param name="NodeCount">The required actual native member count.</param>
 /// <param name="Scenario">The one measured workload.</param>
-/// <param name="Profile">The canonical intensive profile.</param>
+/// <param name="Profile">The canonical control or scaled profile.</param>
 public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Scenario Scenario, string Profile)
 {
     /// <summary>Exact target configuration key.</summary>
@@ -16,11 +16,22 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     public const string NodeCountSetting = "Benchmarks:NodeCount";
     /// <summary>Single measured workload configuration key.</summary>
     public const string ScenarioSetting = "Benchmarks:Scenario";
-    /// <summary>Canonical intensive profile configuration key.</summary>
+    /// <summary>Authenticated profile configuration key.</summary>
     public const string ProfileSetting = "Benchmarks:EvidenceProfile";
-    private const string InvalidSelection = "IsolatedComparisonSelectionInvalid";
+    /// <summary>Optional exact scaled-profile configuration key.</summary>
+    public const string ScaleProfileSetting = "Benchmarks:ScaleProfile";
+    private const string AppHostProfileSetting = "Benchmarks:Profile";
+    private const string GeneralAppHostProfile = "general";
+    private const string TimeSeriesAppHostProfile = "timeseries";
+    internal const string InvalidSelection = "IsolatedComparisonSelectionInvalid";
+    private static readonly string[] WorkloadOverrideNames =
+        ["Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
+            "TopK", "TimeoutSeconds", "GraphVertices", "GraphFanOut", "GraphDepth"];
 
-    /// <summary>Gets common intensive options with the actual native topology selected.</summary>
+    /// <summary>Gets the exact typed scaled profile when the isolated worker selects one.</summary>
+    public ScaledComparisonProfile? ScaledProfile { get; init; }
+
+    /// <summary>Gets the legacy control options with the selected native topology.</summary>
     public ComparisonOptions Options
     {
         get
@@ -35,7 +46,11 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     {
         var contract = IsolatedComparisonContract.Current;
         if (!contract.Targets.Contains(Target, StringComparer.Ordinal) || !contract.NodeCounts.Contains(NodeCount)
-            || !Enum.IsDefined(Scenario) || Profile != contract.Profile)
+            || !Enum.IsDefined(Scenario)
+            || (ScaledProfile is not null && Scenario is not (Scenario.PointRead or Scenario.DocumentWrite
+                or Scenario.DocumentUpdate or Scenario.DocumentDelete))
+            || (ScaledProfile is null && Profile != contract.Profile)
+            || (ScaledProfile is not null && Profile != ScaledProfile.Id))
         {
             throw new InvalidOperationException(InvalidSelection);
         }
@@ -53,9 +68,51 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         {
             throw new InvalidOperationException(InvalidSelection);
         }
+        var scaleText = configuration[ScaleProfileSetting];
+        var scaledProfile = scaleText is null ? null : ParseScaledProfile(scaleText);
+        if (scaledProfile is not null)
+        {
+            ValidateScaledMode(configuration, scaledProfile);
+        }
         var result = new ComparisonWorkerSelection(configuration[TargetSetting] ?? string.Empty, nodes, scenario,
-            configuration[ProfileSetting] ?? string.Empty);
+            configuration[ProfileSetting] ?? string.Empty) { ScaledProfile = scaledProfile };
         result.Validate();
         return result;
+    }
+
+    private static ScaledComparisonProfile ParseScaledProfile(string id)
+    {
+        try
+        {
+            return ScaledComparisonProfileParser.Parse(id);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw new InvalidOperationException(InvalidSelection);
+        }
+    }
+
+    private static void ValidateScaledMode(IConfiguration configuration, ScaledComparisonProfile profile)
+    {
+        var appHostProfile = configuration[AppHostProfileSetting];
+        if (configuration[ProfileSetting] != profile.Id
+            || (appHostProfile is not null && !string.Equals(appHostProfile, GeneralAppHostProfile, StringComparison.OrdinalIgnoreCase))
+            || string.Equals(appHostProfile, TimeSeriesAppHostProfile, StringComparison.OrdinalIgnoreCase)
+            || HasWorkloadOverride(configuration))
+        {
+            throw new InvalidOperationException(InvalidSelection);
+        }
+    }
+
+    private static bool HasWorkloadOverride(IConfiguration configuration)
+    {
+        foreach (var name in WorkloadOverrideNames)
+        {
+            if (configuration["Benchmarks:" + name] is not null)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

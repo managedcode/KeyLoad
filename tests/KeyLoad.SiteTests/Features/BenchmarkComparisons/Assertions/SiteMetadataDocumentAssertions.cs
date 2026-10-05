@@ -111,10 +111,10 @@ internal static class SiteMetadataDocumentAssertions
             [SiteMetadataTokens.OgImageTypeKey] = "image/png",
             [SiteMetadataTokens.OgImageWidthKey] = "1200",
             [SiteMetadataTokens.OgImageHeightKey] = "630",
-            [SiteMetadataTokens.OgImageAltKey] = "KeyLoad: an open-source database for AI agents",
+            [SiteMetadataTokens.OgImageAltKey] = "KeyLoad: a source-available database for AI agents",
             [SiteMetadataTokens.TwitterCardKey] = "summary_large_image",
             [SiteMetadataTokens.TwitterImageKey] = SiteMetadataTokens.SocialImageUrl,
-            [SiteMetadataTokens.TwitterImageAltKey] = "KeyLoad: an open-source database for AI agents",
+            [SiteMetadataTokens.TwitterImageAltKey] = "KeyLoad: a source-available database for AI agents",
         };
         foreach (var (key, expected) in required)
         {
@@ -174,7 +174,7 @@ internal static class SiteMetadataDocumentAssertions
         await Assert.That(software.GetProperty(SiteMetadataTokens.SchemaUrlKey).GetString()).IsEqualTo(SiteMetadataTokens.CanonicalUrl);
         await Assert.That(software.GetProperty(SiteMetadataTokens.SchemaRepositoryKey).GetString()).IsEqualTo(SiteMetadataTokens.RepositoryUrl);
         await Assert.That(software.GetProperty(SiteMetadataTokens.SchemaLanguageKey).GetString()).IsEqualTo(SiteMetadataTokens.CSharp);
-        await Assert.That(software.GetProperty(SiteMetadataTokens.SchemaLicenseKey).GetString()).IsEqualTo(SiteMetadataTokens.MitLicense);
+        await Assert.That(software.GetProperty(SiteMetadataTokens.SchemaLicenseKey).GetString()).IsEqualTo(SiteMetadataTokens.KeyLoadLicense);
         var json = Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(root));
         foreach (var forbidden in new[] { SiteMetadataTokens.SchemaOffers, SiteMetadataTokens.SchemaRating, SiteMetadataTokens.SchemaReview, SiteMetadataTokens.SchemaPotentialAction })
         {

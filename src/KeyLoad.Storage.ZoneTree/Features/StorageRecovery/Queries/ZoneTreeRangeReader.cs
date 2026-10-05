@@ -38,7 +38,29 @@ internal static class ZoneTreeRangeReader
             var comparison = hasBaseline && hasStaged
                 ? baseline.Key.Span.SequenceCompareTo(staged.Key) * (reverse ? -1 : 1)
                 : hasBaseline ? -1 : 1;
-            var useStaged = hasStaged && comparison >= 0;
+            if (ProcessCurrent(baseline, staged, work, comparison, maxRecords, visitor, ref delivered) is { } result)
+            {
+                return result;
+            }
+
+            if (hasBaseline && comparison <= 0)
+            {
+                hasBaseline = baseline.MoveNext();
+            }
+            if (hasStaged && comparison >= 0)
+            {
+                hasStaged = staged.MoveNext();
+            }
+        }
+
+        return new(delivered, false, false, work.ReadBytes);
+    }
+
+    private static StorageScanResult? ProcessCurrent(ZoneTreeBaselineCursor baseline,
+        ZoneTreeStagedCursor staged, ZoneTreeRangeWork work, int comparison, int maxRecords,
+        StorageRecordVisitor visitor, ref int delivered)
+    {
+            var useStaged = comparison >= 0;
             var key = useStaged ? staged.Key.AsSpan() : baseline.Key.Span;
             var value = useStaged ? staged.Value : null;
             if (useStaged)
@@ -62,18 +84,7 @@ internal static class ZoneTreeRangeReader
                     return new(delivered, false, true, work.ReadBytes);
                 }
             }
-
-            if (hasBaseline && comparison <= 0)
-            {
-                hasBaseline = baseline.MoveNext();
-            }
-            if (hasStaged && comparison >= 0)
-            {
-                hasStaged = staged.MoveNext();
-            }
-        }
-
-        return new(delivered, false, false, work.ReadBytes);
+        return null;
     }
 
     private static void Validate(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,

@@ -107,20 +107,7 @@ internal static class VectorProjectionEligibility
     internal static void ValidateLineage(VectorProjectionLineage lineage, PartitionRef partition,
         DocumentRecord targetDocument, VectorRecord vector)
     {
-        if (lineage.SourceStream?.Partition != partition || lineage.SourceDocument?.Partition != partition
-            || lineage.SourceStream.Generation < 1 || lineage.SourceEventRevision < 1
-            || lineage.SourceDocumentRevision < 1 || lineage.SourceSchemaVersion < 1
-            || lineage.SourcePolicyEpoch < 0 || lineage.TargetSchemaVersion < 1
-            || lineage.ReducerGeneration < 1 || lineage.SourceEventId is null
-            || lineage.InputField is null || lineage.ReducerId is null || lineage.ReducerVersion is null
-            || lineage.TargetCollection is null || lineage.TargetId is null || lineage.TargetField is null
-            || lineage.TargetSpace is null || lineage.SourceClassifications.IsDefault
-            || lineage.TargetClassifications.IsDefault || targetDocument.Reference is null
-            || targetDocument.Reference.Partition != partition
-            || targetDocument.Reference.Collection != lineage.TargetCollection
-            || targetDocument.Reference.Id != vector.DocumentId
-            || lineage.TargetCollection != targetDocument.Reference.Collection || lineage.TargetId != vector.DocumentId
-            || lineage.TargetField != vector.Field || lineage.TargetSpace != vector.Space)
+        if (HasInvalidLineageShape(lineage, partition, targetDocument, vector))
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
@@ -129,6 +116,29 @@ internal static class VectorProjectionEligibility
         ValidateClassifications(lineage.SourceClassifications);
         ValidateClassifications(lineage.TargetClassifications);
     }
+
+    private static bool HasInvalidLineageShape(VectorProjectionLineage lineage, PartitionRef partition,
+        DocumentRecord targetDocument, VectorRecord vector)
+        => HasInvalidSourceLineage(lineage, partition) || HasInvalidTargetLineage(lineage, partition, targetDocument, vector);
+
+    private static bool HasInvalidSourceLineage(VectorProjectionLineage lineage, PartitionRef partition)
+        => lineage.SourceStream?.Partition != partition || lineage.SourceDocument?.Partition != partition
+            || lineage.SourceStream.Generation < 1 || lineage.SourceEventRevision < 1
+            || lineage.SourceDocumentRevision < 1 || lineage.SourceSchemaVersion < 1
+            || lineage.SourcePolicyEpoch < 0 || lineage.TargetSchemaVersion < 1
+            || lineage.ReducerGeneration < 1 || lineage.SourceEventId is null
+            || lineage.InputField is null || lineage.ReducerId is null || lineage.ReducerVersion is null
+            || lineage.TargetCollection is null || lineage.TargetId is null || lineage.TargetField is null
+            || lineage.TargetSpace is null || lineage.SourceClassifications.IsDefault;
+
+    private static bool HasInvalidTargetLineage(VectorProjectionLineage lineage, PartitionRef partition,
+        DocumentRecord targetDocument, VectorRecord vector)
+        => lineage.TargetClassifications.IsDefault || targetDocument.Reference is null
+            || targetDocument.Reference.Partition != partition
+            || targetDocument.Reference.Collection != lineage.TargetCollection
+            || targetDocument.Reference.Id != vector.DocumentId
+            || lineage.TargetCollection != targetDocument.Reference.Collection || lineage.TargetId != vector.DocumentId
+            || lineage.TargetField != vector.Field || lineage.TargetSpace != vector.Space;
 
     private static void ValidateIdentifiers(VectorProjectionLineage lineage)
     {

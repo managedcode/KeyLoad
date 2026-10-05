@@ -41,7 +41,7 @@ internal static class SiteMetadataTokens
     internal const string JsonLdPattern = "<script\\b(?=[^>]*type=[\"']application/ld\\+json[\"'])[^>]*>(?<json>.*?)</script>";
     internal const string InvalidMetadata = "Built landing metadata is missing or conflicting.";
     internal const string TestDirectoryPrefix = "keyload-site-metadata-";
-    internal const string MitLicense = "https://opensource.org/license/mit/";
+    internal const string KeyLoadLicense = "https://github.com/managedcode/KeyLoad/blob/main/LICENSE";
     internal const string CSharp = "C#";
     internal const string RepositoryUrl = "https://github.com/managedcode/KeyLoad";
     internal const string ForbiddenClaims = "world's fastest|industry-leading|production-ready|guaranteed performance";

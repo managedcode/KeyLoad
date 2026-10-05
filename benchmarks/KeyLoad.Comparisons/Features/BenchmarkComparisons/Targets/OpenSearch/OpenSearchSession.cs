@@ -1,7 +1,68 @@
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies) : IComparisonSession
+internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount) : IComparisonSession
 {
+    private const string HitsProperty = "hits";
+    private const string IdKeywordField = "id.keyword";
+    private const string QueryProperty = "query";
+    private const string SearchAfterProperty = "search_after";
+    private const string SizeProperty = "size";
+    private const string SortProperty = "sort";
+    public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        object?[]? searchAfter = null;
+        var seen = 0;
+        while (true)
+        {
+            var body = new Dictionary<string, object>
+            {
+                [SizeProperty] = 256,
+                [SortProperty] = new object[] { new Dictionary<string, string> { [IdKeywordField] = "asc" } },
+                [QueryProperty] = new { match_all = new { } }
+            };
+            if (searchAfter is not null)
+            {
+                body[SearchAfterProperty] = searchAfter;
+            }
+            using var response = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
+                OpenSearchNames.PathSeparator + index + OpenSearchNames.SearchSuffix, body, cancellationToken);
+            var hits = response.RootElement.GetProperty(HitsProperty).GetProperty(HitsProperty);
+            if (hits.GetArrayLength() == 0)
+            {
+                break;
+            }
+            foreach (var hit in hits.EnumerateArray())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (seen >= corpusCount)
+                {
+                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                }
+                yield return OpenSearchDocument.Read(hit.GetProperty(OpenSearchNames.Source));
+                seen++;
+            }
+            var lastSort = hits[hits.GetArrayLength() - 1].GetProperty(SortProperty);
+            searchAfter = lastSort.EnumerateArray().Select(ReadSortValue).ToArray();
+        }
+        if (seen != corpusCount)
+        {
+            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+        }
+    }
+
+    private static object? ReadSortValue(JsonElement value) => value.ValueKind switch
+    {
+        JsonValueKind.String => value.GetString(),
+        JsonValueKind.Number => value.GetInt64(),
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        JsonValueKind.Null => null,
+        _ => throw new ComparisonFailureException("OpenSearchCorpusSortValueInvalid")
+    };
+
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var result = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,

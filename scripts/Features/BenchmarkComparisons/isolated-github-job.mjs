@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { validateEntryArguments } from './image-inputs.mjs';
 import { verifySourceCheckout } from './prepare-images.mjs';
 import { createDirectory, requireOutputFile } from './image-bundle-files.mjs';
-import { createGitHubContext, requireCurrentJobName } from './isolated-github-context.mjs';
+import { contextForProfile, createGitHubContext, requireCurrentJobName } from './isolated-github-context.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { captureCurrentJobPages } from './isolated-github-api.mjs';
 import { captureFreshCurrentJob } from './isolated-current-job.mjs';
@@ -25,17 +25,21 @@ async function appendJobEnvironment(target, id) {
 export async function captureCurrentJob(environment = process.env, argv = process.argv.slice(2), finalizing = false) {
   validateEntryArguments(argv);
   const context = createGitHubContext(environment, process.platform);
-  const name = requireCurrentJobName(environment.KEYLOAD_COMPARISON_JOB_NAME, context.plan);
+  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells)];
+  const cell = cells.find(item => item.id === environment.KEYLOAD_COMPARISON_CELL_ID);
+  requireGitHub(cell !== undefined && cell.profile === environment.Benchmarks__EvidenceProfile);
+  const profileContext = contextForProfile(context, cell.profile);
+  const name = requireCurrentJobName(environment.KEYLOAD_COMPARISON_JOB_NAME, profileContext);
   requireGitHub(environment.GITHUB_WORKFLOW_REF === `${GH.repository}/${GH.workflowPath}@refs/heads/main`);
   requireGitHub(typeof environment.GITHUB_ENV === 'string' && path.isAbsolute(environment.GITHUB_ENV));
   await requireOutputFile(environment.GITHUB_ENV);
   await verifySourceCheckout(context.native);
   const directory = await createDirectory(path.join(context.native.runnerTemp, GH.captureDirectory + (finalizing ? '-finalize' : '')));
   await initializeTransport(context, directory, directory);
-  const discovered = validateJobIdentity(await captureCurrentJobPages(directory, context, name), context.cohort, name);
-  const job = await captureFreshCurrentJob(discovered, directory, context, name);
+  const discovered = validateJobIdentity(await captureCurrentJobPages(directory, profileContext, name), profileContext.cohort, name);
+  const job = await captureFreshCurrentJob(discovered, directory, profileContext, name);
   await writeJson(path.join(directory, 'job.json'), job);
-  await writeJson(path.join(directory, 'cohort.json'), context.cohort);
+  await writeJson(path.join(directory, 'cohort.json'), profileContext.cohort);
   await appendJobEnvironment(environment.GITHUB_ENV, job.id);
   return job;
 }

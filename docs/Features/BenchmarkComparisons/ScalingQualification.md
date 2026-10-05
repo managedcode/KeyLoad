@@ -141,3 +141,72 @@ owns the private guarded implementation packet. No change to provider topology,
 measurement timing, ACK/durability, source provenance or publication eligibility
 is authorized. Rollback may revert the repair but cannot claim successful
 settlement or qualification for a detached original task.
+
+## Accepted next stage: fixed-rate open-loop S1
+
+REQ-SCALE-018 requires an independent fixed-arrival measurement over the same
+real native targets and lazy 100K/1M/5M corpora. TASK-SCALE-OPEN-LOOP owns
+AC-SCALE-018..021 below. It does not close the original KL-075 six-node,
+shard-skew, cross-owner fanout, recovery or movement requirements. Existing270
+control and324 closed-loop identities, report schema3 and website projections
+remain unchanged. Open-loop results are a separate internal cohort.
+
+- AC-SCALE-018: each cell binds target, actual1/2/3-node topology, exact dataset,
+  scenario and offered rate250/1000/4000 per second. Offer exactly100000 planned
+  positions at monotonic due offset `floor(i * 1000000000 / rate)` nanoseconds,
+  using overflow-checked arithmetic. One producer admits without waiting into a
+  channel of at most64 items; at most16 native sessions/calls execute concurrently.
+  A full channel increments harness rejection; it never shifts subsequent due
+  times. When an entire subsequent arrival interval has already elapsed, record
+  missed positions without a catch-up burst. Any missed position invalidates a
+  successful workload. Record actual scheduler lag rather than pretending due
+  timestamps are actual start timestamps. Real monotonic/native admission tests
+  and the actual Linux workload exercise the schedule and bounds.
+- AC-SCALE-019: retain disjoint terminal counts and verify the exact equations
+  `planned = notOffered + harnessRejected + timedOutBeforeStart + succeeded + failed
+  + targetRejected + timedOutAfterStart + unfinishedQueued + unfinishedStarted`,
+  `started = succeeded + failed + targetRejected + timedOutAfterStart
+  + unfinishedStarted`, and
+  `completed = succeeded + failed + targetRejected + timedOutAfterStart`.
+  The actual KeyLoad typed ResourceExhausted response can produce a bounded typed
+  adapter rejection; ordinary errors, transport failures, correctness mismatch,
+  cancellation and fatal errors cannot. Every other native rejection mapping
+  needs its exact provider response contract and complete native regression
+  before classification; unknown responses remain failures. Overflow, double
+  completion or inconsistent counters reject the cell. Tests execute actual
+  target operations/admission responses and verify the resulting accounting.
+- AC-SCALE-020: an accepted operation has30 seconds from its scheduled arrival,
+  including queue time. A queued expired item never invokes the native operation.
+  The drain horizon is30 seconds after the last due position. At drain expiry or
+  caller cancellation, freeze unfinished queued/started dispositions, cancel
+  through the actual owner, and join every original native call and disposal
+  before teardown. Later settlement cannot count that operation twice or convert
+  its unfinished disposition into success. SCALE-017 original failure/object/
+  token/fatal ordering also applies to ComparisonSessionCleanup; WaitAsync
+  expiry never authorizes abandonment of the original DisposeAsync task. Preserve
+  deterministic lazy inputs, exact native result/receipt checks and post-mutation
+  readback. Native cancellation/failure/full-drain flows prove original settlement
+  and preserved state; no fake provider, replacement task or deadline relaxation.
+- AC-SCALE-021: retain at most4096 deterministically selected samples, each with
+  index, session, due/offer/start/terminal offsets, bounded payload size and closed
+  outcome. Report scheduled-to-terminal latency, scheduler lag, queue delay and
+  service time separately, with P50/P95/P99, useful successful throughput and
+  explicit denominators/missing samples. Keep per-cell worker bytes/hash and a
+  bounded versioned `open-loop-evidence.v1.json` tied to the exact source/run/
+  attempt/job/target/topology/dataset/scenario/rate. The independent972-cell
+  inventory rejects missing/duplicate/corrupt/mixed-source originals and compares
+  actual hardware, effective resource/storage limits, native membership and ACK
+  contracts within each matched workload tuple. Unsupported native topology is
+  explicit. Existing control/closed-loop files are unchanged; open-loop evidence
+  cannot refresh the website. Independent native plan/receipt flows and original
+  authenticated Linux artifacts establish this acceptance.
+
+Root freezes contracts, shared AppHost/workflow joins, source-bound evidence and
+Git stages. The dedicated KL-075 Luna agent implements private guarded library
+Contracts/Execution/Validation/Reporting files, the narrow native adapter and
+session-cleanup joins, and ComparisonTests Cases/Helpers/Assertions. Reuse the
+existing corpus, setup, target sessions, correctness checks and resource collector.
+Scripts own new feature-local open-loop plan/receipt tooling. No test-owned
+database or load/comparison run contributes to functional coverage. Rollout adds
+new internal selectors and artifacts; rollback removes them without rewriting
+old results or weakening mandatory closed-loop and original KL-075 gates.

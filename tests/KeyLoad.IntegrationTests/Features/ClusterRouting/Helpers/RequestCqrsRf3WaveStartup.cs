@@ -13,7 +13,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
     RequestCqrsProbeFixture? controls, string? physicalShardOverrideNode,
-    Guid? physicalShardOverrideId, CancellationToken cancellationToken) : IAsyncDisposable
+    Guid? physicalShardOverrideId, CancellationToken cancellationToken,
+    RequestCqrsLifecycleEvidence? lifecycleEvidence) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
     private const string IncompletePhysicalShardOverride = "The physical shard override requires both a node and identity.";
@@ -22,16 +23,18 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsSubscriberObserver? subscriberObserver;
     private RequestCqrsRf3Wave? wave;
+    private Action<RequestCqrsLifecycleStage>? FailureObserver => lifecycleEvidence is null
+        ? null : lifecycleEvidence.RecordOwnerFailure;
 
     internal static async Task<RequestCqrsRf3Wave> StartAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
         string? snapshotThresholdArgument, Guid diagnosticsWaveId, CancellationToken cancellationToken,
         RequestCqrsProbeFixture? controls = null, string? physicalShardOverrideNode = null,
-        Guid? physicalShardOverrideId = null)
+        Guid? physicalShardOverrideId = null, RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
     {
         await using var startup = new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
             requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
-            physicalShardOverrideNode, physicalShardOverrideId, cancellationToken);
+            physicalShardOverrideNode, physicalShardOverrideId, cancellationToken, lifecycleEvidence);
         return await startup.RunAsync().ConfigureAwait(false);
     }
 
@@ -49,6 +52,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
         var failures = new List<Exception>();
+        lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(deadline.Token), failures)
             .ConfigureAwait(false);
         if (failures.Count == 0 && wave is { } startedWave)
@@ -58,6 +62,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         }
         if (failures.Count == 0)
         { failures.Add(new InvalidOperationException(MissingWaveMessage)); }
+        lifecycleEvidence?.RecordFirstFailure();
         await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         throw new InvalidOperationException(MissingWaveMessage);
@@ -65,6 +70,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
 
     private async Task StartCoreAsync(CancellationToken cancellationToken)
     {
+        lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
         ApplyPhysicalShardOverride(builder);
@@ -79,8 +85,11 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         application = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         var loggerService = application.Services.GetRequiredService<ResourceLoggerService>();
         subscriberObserver = new RequestCqrsRf3DiagnosticsSubscriberObserver();
-        subscriberObserver.Initialize(loggerService, cancellationToken);
-        diagnostics = RequestCqrsRf3Diagnostics.Start(diagnosticsWaveId, nodeResources, loggerService);
+        subscriberObserver.Initialize(loggerService, cancellationToken, FailureObserver);
+        lifecycleEvidence?.BindObserver(subscriberObserver);
+        diagnostics = RequestCqrsRf3Diagnostics.Start(diagnosticsWaveId, nodeResources, loggerService,
+            FailureObserver);
+        lifecycleEvidence?.BindDiagnostics(diagnostics);
         await subscriberObserver.WaitForStateAsync(true).ConfigureAwait(false);
         var observerFailures = new List<Exception>();
         await DisposeSubscriberObserverAsync(observerFailures).ConfigureAwait(false);
@@ -88,11 +97,13 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images, cancellationToken)
             .ConfigureAwait(false);
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
+        lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.NodeReadiness);
         await RequestCqrsRf3WaveReadiness.WaitForNodesAsync(application, requireHealthy,
-            controls?.CaptureDiscovery == true, cancellationToken).ConfigureAwait(false);
+            controls?.CaptureDiscovery == true, cancellationToken, lifecycleEvidence).ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
-        wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics);
+        wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics,
+            lifecycleEvidence);
     }
 
     public async ValueTask DisposeAsync()
@@ -102,51 +113,57 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         {
             try
             { await subscriberObserver.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.ObserverJoin); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.ObserverJoin); }
         }
-        await ServerFailureObserver.ObserveAsync(() => JoinSubscriberObserverAsync(failures), failures)
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => JoinSubscriberObserverAsync(failures), failures,
+            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin)
             .ConfigureAwait(false);
         if (wave is not null)
         {
             try
             { await wave.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { failures.Add(error); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.AuthorityWaveStop); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { AppendFailure(failures, error, RequestCqrsLifecycleStage.AuthorityWaveStop); }
             wave = null;
         }
         if (application is not null)
         {
-            await ServerFailureObserver.ObserveAsync(
-                () => RequestCqrsRf3Wave.CompleteAsync(application, diagnostics, failures), failures)
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(
+                () => RequestCqrsRf3Wave.CompleteAsync(application, diagnostics, failures, lifecycleEvidence),
+                failures, FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppStop)
                 .ConfigureAwait(false);
             application = null;
         }
-        if (diagnostics is not null)
+        var ownedDiagnostics = diagnostics;
+        if (ownedDiagnostics is not null)
         {
             try
-            { await diagnostics.DisposeAsync().ConfigureAwait(false); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RecordDiagnosticsFailure(error, failures); }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            { RecordDiagnosticsFailure(error, failures); }
-            RequestCqrsRf3Wave.SaveFailureEvidence(diagnostics, failures);
+            { await ownedDiagnostics.DisposeAsync().ConfigureAwait(false); }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { RecordDiagnosticsFailure(error, failures, FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain); }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { RecordDiagnosticsFailure(error, failures, FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain); }
+            if (failures.Count > 0)
+            {
+                RequestCqrsLifecycleFailureObserver.Observe(
+                    () => ownedDiagnostics.SaveFailureEvidence(failures[0]), failures,
+                    FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
+            }
             diagnostics = null;
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static void RecordDiagnosticsFailure(Exception error, List<Exception> failures)
+    private void AppendFailure(List<Exception> failures, Exception failure, RequestCqrsLifecycleStage stage)
+        => RequestCqrsLifecycleFailureObserver.Append(failures, failure, FailureObserver, stage);
+
+    private static void RecordDiagnosticsFailure(Exception error, List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? failureObserver, RequestCqrsLifecycleStage stage)
     {
         var terminal = error is AggregateException aggregate ? aggregate.InnerExceptions : [error];
         foreach (var failure in terminal)
         {
             if (!failures.Contains(failure))
-            { failures.Add(failure); }
+            { RequestCqrsLifecycleFailureObserver.Append(failures, failure, failureObserver, stage); }
         }
     }
 
@@ -155,7 +172,8 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         var observer = subscriberObserver;
         if (observer is null)
         { return; }
-        await ServerFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures)
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures,
+            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin)
             .ConfigureAwait(false);
         await JoinSubscriberObserverAsync(failures).ConfigureAwait(false);
     }
@@ -166,9 +184,11 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         if (observer is null)
         { return; }
         if (!observer.IsJoined)
-        { await observer.RetryFailedCloseAsync(failures).ConfigureAwait(false); }
+        { await observer.RetryFailedCloseAsync(failures, FailureObserver).ConfigureAwait(false); }
         if (!observer.IsJoined)
-        { failures.Add(new InvalidOperationException("The Aspire subscriber observer did not join its original stream.")); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures,
+            new InvalidOperationException("The Aspire subscriber observer did not join its original stream."),
+            FailureObserver, RequestCqrsLifecycleStage.ObserverJoin); }
         if (observer.IsJoined)
         { subscriberObserver = null; }
     }

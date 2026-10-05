@@ -3,11 +3,35 @@ using System.Runtime.InteropServices;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Runs the shared workload and records every measured attempt against supplied database targets.</summary>
-/// <param name="options">The validated workload, corpus and measurement settings.</param>
-/// <param name="progress">An optional observer of setup and case progress.</param>
-public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? progress = null)
+/// <summary>Runs the shared materialized control or one accepted bounded scaled profile.</summary>
+public sealed class ComparisonRunner
 {
+    private readonly ComparisonOptions options = null!;
+    private readonly ScaledComparisonProfile? scaledProfile;
+    private readonly Action<string>? progress;
+
+    /// <summary>Creates a runner for the unchanged materialized control workload.</summary>
+    /// <param name="options">Validated bounded control settings.</param>
+    /// <param name="progress">Optional progress observer.</param>
+    public ComparisonRunner(ComparisonOptions options, Action<string>? progress = null)
+    {
+        this.options = options ?? throw new ArgumentNullException(nameof(options));
+        this.progress = progress;
+    }
+
+    private ComparisonRunner(ScaledComparisonProfile scaledProfile, Action<string>? progress)
+    {
+        this.scaledProfile = scaledProfile;
+        this.progress = progress;
+    }
+
+    /// <summary>Creates a runner for one exact typed scaled profile without manufacturing control options.</summary>
+    /// <param name="profile">The closed accepted scaled profile.</param>
+    /// <param name="progress">Optional progress observer.</param>
+    /// <returns>The shared comparison runner with its bounded scale path selected.</returns>
+    public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, Action<string>? progress = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
+
     private const string SetupPrefix = "setup:";
     private const string PreviousSetupFailure = "PreviousSetupFailure";
     private const string LoadModel = "closed-loop; setup, oracle, validation and warmup excluded";
@@ -24,6 +48,11 @@ public sealed class ComparisonRunner(ComparisonOptions options, Action<string>? 
     public async Task<ComparisonReport> RunAsync(IComparisonTarget[] targets, string? sourceRevision, CancellationToken cancellationToken,
         string storage = UnrecordedStorage, Scenario? scenario = null)
     {
+        if (scaledProfile is { } profile)
+        {
+            return await new ScaledComparisonRunner(profile, progress).RunAsync(targets, sourceRevision,
+                storage, scenario, cancellationToken).ConfigureAwait(false);
+        }
         ValidateTargets(targets, scenario);
 
         var started = TimeProvider.System.GetUtcNow();

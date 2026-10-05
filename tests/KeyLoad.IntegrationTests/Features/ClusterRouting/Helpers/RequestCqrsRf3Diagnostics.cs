@@ -28,15 +28,16 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
     private string? artifactPath;
 
     private RequestCqrsRf3Diagnostics(Guid waveId, RequestCqrsRf3McpRejectionNodeCapture[] nodes,
-        ResourceLoggerService logger, ContainerResource[] resources)
+        ResourceLoggerService logger, ContainerResource[] resources,
+        Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         this.waveId = waveId;
         this.nodes = nodes;
-        cleanup = new(waveId, logger, resources, nodes);
+        cleanup = new(waveId, logger, resources, nodes, failureObserver);
     }
 
     internal static RequestCqrsRf3Diagnostics Start(Guid waveId, IEnumerable<ContainerResource> resources,
-        ResourceLoggerService logger)
+        ResourceLoggerService logger, Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         ArgumentNullException.ThrowIfNull(resources);
         ArgumentNullException.ThrowIfNull(logger);
@@ -54,7 +55,7 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
             || captures.Any(node => nodeResources.Count(resource => resource.Name == node.Name) != 1))
         { throw new InvalidOperationException(InvalidNodesMessage); }
 
-        return new(waveId, captures, logger, nodeResources);
+        return new(waveId, captures, logger, nodeResources, failureObserver);
     }
 
     internal void SaveFailureEvidence(Exception failure)
@@ -73,6 +74,9 @@ internal sealed class RequestCqrsRf3Diagnostics : IAsyncDisposable
             return artifactPath ??= WriteArtifact();
         }
     }
+
+    internal RequestCqrsCaptureLifecycleSnapshot ReadLifecycleSnapshot()
+        => cleanup.ReadLifecycleSnapshot();
 
     internal Task WaitForRecordAsync(string node, McpTransportStage stage,
         McpTransportMethodCategory methodCategory, CancellationToken cancellationToken)

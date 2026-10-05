@@ -62,18 +62,29 @@ internal sealed class NativeCqrsStreamAdmission(
     {
         if (chunk.Kind == CqrsStreamChunkKind.Started)
         {
-            if (nextCount != 1 || chunk.Sequence != 1 || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
-                || chunk.ProgressResult.Value.Problem is not null
-                || chunk.ProgressResult.Value.Value.RequestId != requestId || chunk.Final is not null
-                || chunk.Message is not null || chunk.EventId is not null
-                || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
-            }
-
+            ValidateStartedShape(chunk, nextCount);
             return;
         }
 
+        ValidateFinalShape(chunk, nextCount);
+    }
+
+    private void ValidateStartedShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
+        int nextCount)
+    {
+        if (nextCount != 1 || chunk.Sequence != 1 || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
+            || chunk.ProgressResult.Value.Problem is not null
+            || chunk.ProgressResult.Value.Value.RequestId != requestId || chunk.Final is not null
+            || chunk.Message is not null || chunk.EventId is not null
+            || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+        }
+    }
+
+    private static void ValidateFinalShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
+        int nextCount)
+    {
         var earlyFailure = chunk.Kind == CqrsStreamChunkKind.Failed && nextCount == 1;
         var expectedSequence = earlyFailure ? 1 : 2;
         if (nextCount is < 1 or > 2 || (!earlyFailure && nextCount != 2)

@@ -286,24 +286,38 @@ public sealed partial class DatabaseEngine
 
     private void ValidateIntentRecord(IKeyValueView view, RemoteTransferIntentRecord record, QueueLaneRef source, Guid transferId)
     {
-        if (record.Source != source || record.TransferId != transferId || record.TransferId == Guid.Empty
-            || record.Destination is null || record.PrincipalId is null || record.Message is null || record.IntentToken is null
-            || record.ReceiptReservationBytes < 0 || record.Fingerprint is null)
+        if (HasInvalidIntentRecordShape(record, source, transferId))
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
-        var claims = Verify<RemoteTransferIntentClaims>(record.IntentToken, Limits.MaxBatchBytes);
+        var claims = Verify<RemoteTransferIntentClaims>(record.IntentToken!, Limits.MaxBatchBytes);
         if (claims is null || claims.Source is null || claims.Destination is null || claims.Message is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
         ValidateStoredIntentClaims(claims, record);
+        ValidateIntentRecordState(record);
+        ValidateReceiptToken(view, record);
+    }
+
+    private static bool HasInvalidIntentRecordShape(RemoteTransferIntentRecord record,
+        QueueLaneRef source, Guid transferId)
+        => record.Source != source || record.TransferId != transferId || record.TransferId == Guid.Empty
+            || record.Destination is null || record.PrincipalId is null || record.Message is null || record.IntentToken is null
+            || record.ReceiptReservationBytes < 0 || record.Fingerprint is null;
+
+    private static void ValidateIntentRecordState(RemoteTransferIntentRecord record)
+    {
         if (record.State is not (QueueTransferState.OutputPending or QueueTransferState.Delivered)
             || record.State == QueueTransferState.OutputPending && record.ReceiptToken is not null
             || record.State == QueueTransferState.Delivered && record.ReceiptToken is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
+    }
+
+    private void ValidateReceiptToken(IKeyValueView view, RemoteTransferIntentRecord record)
+    {
         if (record.ReceiptToken is { } receiptToken)
         {
             var receipt = Verify<RemoteTransferReceiptClaims>(receiptToken, Limits.MaxBatchBytes);

@@ -1,5 +1,6 @@
 import { validateIsolatedPlan } from './isolated-plan.mjs';
 import { requireIsolatedPlan } from './isolated-plan-contract.mjs';
+import { createScaledPlans, validateScaledPlans } from './scaled-isolated-plan.mjs';
 import { isolatedJobLabel, isolatedJobName } from '../../../site/Features/BenchmarkComparisons/isolated-contracts.mjs';
 
 const representatives = Object.freeze({ Qdrant: 'VectorExact', RabbitMQ: 'QueueCycle', KurrentDB: 'StreamAppend' });
@@ -15,19 +16,24 @@ export function createPreflightMatrix(plan) {
 }
 
 function databaseRow(cell, preflight) {
-  return { ...cell, preflight, label: isolatedJobLabel(cell, preflight), jobName: isolatedJobName(cell, preflight),
+  const baseLabel = isolatedJobLabel(cell, preflight);
+  const scaledLabel = !preflight && cell.profile !== 'intensive-1k-c16' ? ` / ${cell.profile}` : '';
+  return { ...cell, preflight, label: baseLabel + scaledLabel, jobName: isolatedJobName(cell, preflight) + scaledLabel,
+    scaleProfile: !preflight && cell.profile !== 'intensive-1k-c16' ? cell.profile : null,
     artifactPrefix: preflight ? 'comparison-preflight-' : 'comparison-worker-',
     qualificationPrefix: preflight ? 'comparison-preflight-qualification-' : 'comparison-case-qualification-' };
 }
 
-export function createDatabaseMatrices(plan) {
+export function createDatabaseMatrices(plan, scaledPlans = createScaledPlans()) {
   const canonical = validateIsolatedPlan(plan);
+  const scales = validateScaledPlans(scaledPlans);
   const checks = createPreflightMatrix(canonical).include;
   requireIsolatedPlan(new Set(canonical.cells.map(cell => cell.target)).size === Object.keys(databaseKeys).length);
   return Object.fromEntries(Object.entries(databaseKeys).map(([target, key]) => {
     const include = [...checks.filter(cell => cell.target === target).map(cell => databaseRow(cell, true)),
-      ...canonical.cells.filter(cell => cell.target === target).map(cell => databaseRow(cell, false))];
-    requireIsolatedPlan(include.length === 33 && new Set(include.map(cell => cell.jobName)).size === include.length);
+      ...canonical.cells.filter(cell => cell.target === target).map(cell => databaseRow(cell, false)),
+      ...scales.flatMap(profile => profile.cells.filter(cell => cell.target === target).map(cell => databaseRow(cell, false)))];
+    requireIsolatedPlan(include.length === 69 && new Set(include.map(cell => cell.jobName)).size === include.length);
     return [key, { include }];
   }));
 }

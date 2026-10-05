@@ -15,19 +15,25 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
     private readonly IResource resource;
     private readonly ILogger resourceLogger;
     private readonly CancellationTokenSource lifetime;
+    private readonly Action<RequestCqrsLifecycleStage>? failureObserver;
     private IAsyncEnumerator<IReadOnlyList<LogLine>>? enumerator;
     private Task<bool>? pendingMove;
+    private Task<bool>? lastMove;
     private Task? disposalTask;
     private bool lifetimeDisposed;
 
     internal RequestCqrsRf3DiagnosticsIndependentConsumer(ResourceLoggerService logger, IResource resource,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         this.logger = logger;
         this.resource = resource;
+        this.failureObserver = failureObserver;
         resourceLogger = logger.GetLogger(resource);
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     }
+
+    internal RequestCqrsSingleTaskLifecycleSnapshot ReadLifecycleSnapshot()
+        => new(pendingMove?.Status ?? lastMove?.Status, lifetime.IsCancellationRequested);
 
     internal bool IsJoined => enumerator is null && pendingMove is null && lifetimeDisposed
         && disposalTask is { IsCompleted: true };
@@ -51,15 +57,17 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
         return new(actual);
     }
 
-    internal async Task RetryFailedCloseAsync(List<Exception> failures)
+    internal async Task RetryFailedCloseAsync(List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
         if (pendingMove is { IsCompleted: false })
         {
-            await ServerFailureObserver.ObserveAsync(lifetime.CancelAsync, failures).ConfigureAwait(false);
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(lifetime.CancelAsync, failures,
+                observer ?? failureObserver, RequestCqrsLifecycleStage.IndependentLifetimeDispose).ConfigureAwait(false);
         }
-        await JoinPendingReadAsync(failures).ConfigureAwait(false);
-        await DisposeEnumeratorAsync(failures).ConfigureAwait(false);
-        DisposeLifetime(failures);
+        await JoinPendingReadAsync(failures, observer ?? failureObserver).ConfigureAwait(false);
+        await DisposeEnumeratorAsync(failures, observer ?? failureObserver).ConfigureAwait(false);
+        DisposeLifetime(failures, observer ?? failureObserver);
     }
 
     private async Task WaitForMarkerAsync(string marker, CancellationToken cancellationToken)
@@ -69,6 +77,7 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
             var move = pendingMove
                 ?? throw new InvalidOperationException("The original native log read is absent.");
             var moved = await move.WaitAsync(cancellationToken).ConfigureAwait(false);
+            lastMove = move;
             pendingMove = null;
             if (!moved)
             { throw new InvalidOperationException("The independent native log stream completed before its marker."); }
@@ -84,39 +93,46 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => logger.Complete(resource), failures);
-        await JoinPendingReadAsync(failures).ConfigureAwait(false);
-        await DisposeEnumeratorAsync(failures).ConfigureAwait(false);
-        DisposeLifetime(failures);
+        RequestCqrsLifecycleFailureObserver.Observe(() => logger.Complete(resource), failures,
+            failureObserver, RequestCqrsLifecycleStage.IndependentComplete);
+        await JoinPendingReadAsync(failures, failureObserver).ConfigureAwait(false);
+        await DisposeEnumeratorAsync(failures, failureObserver).ConfigureAwait(false);
+        DisposeLifetime(failures, failureObserver);
         ThrowWithNativeFatalPriority(failures);
     }
 
-    private async Task JoinPendingReadAsync(List<Exception> failures)
+    private async Task JoinPendingReadAsync(List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
         var actual = pendingMove;
         if (actual is null)
         { return; }
-        await ServerFailureObserver.ObserveAsync(() => actual, failures).ConfigureAwait(false);
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => actual, failures,
+            observer ?? failureObserver, RequestCqrsLifecycleStage.IndependentJoin).ConfigureAwait(false);
+        lastMove = actual;
         pendingMove = null;
     }
 
-    private async Task DisposeEnumeratorAsync(List<Exception> failures)
+    private async Task DisposeEnumeratorAsync(List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? observer = null)
     {
         var actual = enumerator;
         if (actual is null)
         { return; }
+        var before = failures.Count;
         try
-        {
-            await enumerator!.DisposeAsync().ConfigureAwait(false);
-            enumerator = null;
-        }
+        { await enumerator!.DisposeAsync().ConfigureAwait(false); }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentEnumeratorDispose); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentEnumeratorDispose); }
+        if (failures.Count == before)
+        { enumerator = null; }
     }
 
-    private void DisposeLifetime(List<Exception> failures)
+    private void DisposeLifetime(List<Exception> failures, Action<RequestCqrsLifecycleStage>? observer = null)
     {
         if (lifetimeDisposed)
         { return; }
@@ -126,9 +142,11 @@ internal sealed class RequestCqrsRf3DiagnosticsIndependentConsumer : IAsyncDispo
             lifetimeDisposed = true;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentLifetimeDispose); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        { RequestCqrsLifecycleFailureObserver.Append(failures, error, observer ?? failureObserver,
+            RequestCqrsLifecycleStage.IndependentLifetimeDispose); }
     }
 
     private static void ThrowWithNativeFatalPriority(List<Exception> failures)

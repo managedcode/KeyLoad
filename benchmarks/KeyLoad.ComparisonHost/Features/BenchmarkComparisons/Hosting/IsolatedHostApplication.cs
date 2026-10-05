@@ -54,7 +54,9 @@ internal static class IsolatedHostApplication
     {
         await using var owner = new IsolatedHostTargetOwner();
         var target = owner.Create(settings);
-        var runner = new ComparisonRunner(settings.Selection.Options, Console.WriteLine);
+        var runner = settings.Selection.ScaledProfile is { } scaledProfile
+            ? ComparisonRunner.ForScaled(scaledProfile, Console.WriteLine)
+            : new ComparisonRunner(settings.Selection.Options, Console.WriteLine);
         var report = await runner.RunAsync([target], settings.Worker.SourceRevision, cancellationToken,
             settings.Storage, settings.Selection.Scenario);
         report = report with { Provenance = settings.Identity.Provenance, LoadGeneratorImage = settings.Identity.LoadGeneratorImage };
@@ -69,8 +71,13 @@ internal static class IsolatedHostApplication
     {
         var selection = settings.Selection;
         if (report.Targets.Length != 1 || report.Targets[0].Name != selection.Target
-            || report.Cases.Length != selection.Options.Repetitions
+            || report.Cases.Length != (selection.ScaledProfile?.Repetitions ?? selection.Options.Repetitions)
             || report.Cases.Any(item => item.Target != selection.Target || item.Scenario != selection.Scenario))
+        {
+            throw new ComparisonFailureException(IsolatedHostConstants.Failure);
+        }
+        if (selection.ScaledProfile is { } scaledProfile
+            && (report.Options is not null || report.ScaledProfile?.Id != scaledProfile.Id))
         {
             throw new ComparisonFailureException(IsolatedHostConstants.Failure);
         }

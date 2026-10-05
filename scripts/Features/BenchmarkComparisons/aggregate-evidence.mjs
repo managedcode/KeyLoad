@@ -3,6 +3,7 @@ import { readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs'
 import { requireWorkerJobAgreement, validateAggregateProof, validateWorkerEnvelope } from './aggregate-validation.mjs';
 import { createStage, hashBytes, parseBytes, publishStage, rawFile, rawPath, readBytes, removeStage,
   retainBytes, validateInventory, validatePaths } from './aggregate-files.mjs';
+import { validateScaledPlan } from './scaled-isolated-plan.mjs';
 
 function retainCommonFacts(common, report) {
   if (report === null) return;
@@ -43,7 +44,11 @@ async function retainWorker(input, stage, cell, proof, cohort, contract, common)
 export async function aggregateEvidence({ input, output, plan, proof }) {
   await validatePaths({ input, output, plan, proof });
   const contract = readIsolatedContract();
-  const inventory = validateIsolatedPlan(parseBytes(await readBytes(plan, AGGREGATE.metadataBytes)), contract);
+  const requestedPlan = parseBytes(await readBytes(plan, AGGREGATE.metadataBytes));
+  const inventory = requestedPlan?.profile === contract.profile
+    ? validateIsolatedPlan(requestedPlan, contract) : validateScaledPlan(requestedPlan, contract);
+  const profileContract = inventory.profile === contract.profile ? contract
+    : { ...contract, profile: inventory.profile, options: inventory.profileSettings };
   const evidence = validateAggregateProof(parseBytes(await readBytes(proof, AGGREGATE.metadataBytes)), inventory);
   await validateInventory(input, inventory.cells);
   const byId = new Map(evidence.cells.map(cell => [cell.id, cell]));
@@ -52,10 +57,13 @@ export async function aggregateEvidence({ input, output, plan, proof }) {
     const common = { bytes: 0, targets: new Map() };
     const workers = [];
     for (const cell of inventory.cells) {
-      workers.push(await retainWorker(input, stage, cell, byId.get(cell.id), evidence.cohort, contract, common));
+      workers.push(await retainWorker(input, stage, cell, byId.get(cell.id), evidence.cohort, profileContract, common));
     }
-    const manifest = { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
-      options: inventory.options, datasetSha256: common.datasetSha256 ?? null, workers };
+    const manifest = inventory.profileSettings === undefined
+      ? { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
+        options: inventory.options, datasetSha256: common.datasetSha256 ?? null, workers }
+      : { schemaVersion: AGGREGATE.version, cohort: evidence.cohort, profile: inventory.profile,
+        profileSettings: inventory.profileSettings, datasetSha256: common.datasetSha256 ?? null, workers };
     await publishStage(stage, output, manifest);
     return manifest;
   } catch (error) {

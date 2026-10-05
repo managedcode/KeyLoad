@@ -1,6 +1,7 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -13,86 +14,129 @@ internal static class RequestCqrsAuthorityFaultCleanup
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? operationDeadline,
         Task<Result<CommitReceipt>>? sdkCall, Task<RequestCqrsFaultMcpObservation>? mcpCall,
         Guid armId, bool originalStarted, RequestCqrsAuthorityOutcomeOracle? outcomeOracle,
-        Guid heldCommandId, List<Exception> failures)
+        Guid heldCommandId, List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         var cleanup = new List<Exception>();
-        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
         if (operationDeadline is not null)
-        { await ServerFailureObserver.ObserveAsync(operationDeadline.CancelAsync, cleanup).ConfigureAwait(false); }
-        await ServerFailureObserver.ObserveAsync(() => ReleaseAndJoinAsync(controls, discovery, sdkCall,
-            mcpCall, armId, originalStarted, cleanup, deadline.Token), cleanup).ConfigureAwait(false);
-        await DisposeCallersAsync(caller, administrator, cleanup).ConfigureAwait(false);
-        var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup).ConfigureAwait(false);
-        await DisposeControlsAsync(controls, waveStopped, cleanup).ConfigureAwait(false);
-        if (waveStopped && cleanup.Count == 0 && outcomeOracle is { ReadyToInspect: true })
+        { await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityDeadlineCancellation).ConfigureAwait(false); }
+        await ReleaseAndJoinAsync(controls, discovery, sdkCall, mcpCall, armId, originalStarted,
+            cleanup, deadline.Token, failureObserver).ConfigureAwait(false);
+        await DisposeCallersAsync(caller, administrator, cleanup, failureObserver).ConfigureAwait(false);
+        var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup, failureObserver)
+            .ConfigureAwait(false);
+        await DisposeControlsAsync(controls, waveStopped, cleanup, failureObserver).ConfigureAwait(false);
+        var oracle = outcomeOracle;
+        if (waveStopped && cleanup.Count == 0 && oracle is not null)
         {
-            await ServerFailureObserver.ObserveAsync(
-                () => outcomeOracle.InspectAfterWaveJoinedAsync(heldCommandId, deadline.Token), cleanup)
-                .ConfigureAwait(false);
+            await ObserveAsync(() => InspectIfReadyAsync(oracle, heldCommandId, deadline.Token),
+                cleanup, failureObserver, RequestCqrsLifecycleStage.AuthorityOutcomeInspect).ConfigureAwait(false);
         }
-        ServerFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup);
+        RequestCqrsLifecycleFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup,
+            failureObserver, RequestCqrsLifecycleStage.AuthorityDeadlineDispose);
         if (rootCreated && waveStopped && cleanup.Count == 0)
-        { ServerFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup); }
+        { RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,
+            failureObserver, RequestCqrsLifecycleStage.AuthorityRootDelete); }
+        try
+        { deadline.Dispose(); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        { RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose); }
         failures.AddRange(cleanup);
     }
 
     private static async Task ReleaseAndJoinAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Task<Result<CommitReceipt>>? sdkCall,
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, bool originalStarted,
-        List<Exception> failures, CancellationToken cancellationToken)
+        List<Exception> failures, CancellationToken cancellationToken,
+        Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (controls is not null)
         {
-            ServerFailureObserver.Observe(controls.StopAdmission, failures);
+            RequestCqrsLifecycleFailureObserver.Observe(controls.StopAdmission, failures, failureObserver,
+                RequestCqrsLifecycleStage.AuthorityAdmissionRelease);
             if (discovery is not null)
-            { await ServerFailureObserver.ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken), failures).ConfigureAwait(false); }
+            { await ObserveAsync(() => controls.ReleaseOpenArmsAsync(discovery, cancellationToken), failures,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityAdmissionRelease).ConfigureAwait(false); }
         }
         if (sdkCall is not null)
-        { await ServerFailureObserver.ObserveAsync(() => sdkCall, failures).ConfigureAwait(false); }
+        { await ObserveAsync(() => sdkCall, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthoritySdkJoin).ConfigureAwait(false); }
         if (mcpCall is not null)
-        { await ServerFailureObserver.ObserveAsync(() => mcpCall, failures).ConfigureAwait(false); }
-        await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures, cancellationToken).ConfigureAwait(false);
-        if (controls is not null && armId != Guid.Empty && !controls.ArmFor(armId).Retired)
-        { await ServerFailureObserver.ObserveAsync(() => controls.RetireArmAsync(armId, cancellationToken), failures).ConfigureAwait(false); }
+        { await ObserveAsync(() => mcpCall, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityMcpJoin).ConfigureAwait(false); }
+        await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures,
+            cancellationToken, failureObserver).ConfigureAwait(false);
+        if (controls is not null && armId != Guid.Empty)
+        { await ObserveAsync(() => RetireArmIfOpenAsync(controls, armId, cancellationToken), failures,
+            failureObserver, RequestCqrsLifecycleStage.AuthorityArmRetire).ConfigureAwait(false); }
     }
 
     private static async Task ObserveProducerDisposedAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, bool originalStarted,
-        List<Exception> failures, CancellationToken cancellationToken)
+        List<Exception> failures, CancellationToken cancellationToken,
+        Action<RequestCqrsLifecycleStage>? failureObserver)
     {
-        if (controls is null || armId == Guid.Empty || !originalStarted
-            || controls.ArmFor(armId).ProducerDisposedSeen || discovery is null)
-        { return; }
-        await ServerFailureObserver.ObserveAsync(async () =>
+        await ObserveAsync(async () =>
         {
+            if (controls is null || armId == Guid.Empty || !originalStarted
+                || controls.ArmFor(armId).ProducerDisposedSeen || discovery is null)
+            { return; }
             _ = await controls.WaitForMarkerAsync(armId, RequestCqrsProbePhase.ProducerDisposed,
                 RequestCqrsProbeOutcome.Observed, discovery, cancellationToken).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
+        }, failures, failureObserver, RequestCqrsLifecycleStage.AuthorityProducerDispose).ConfigureAwait(false);
     }
 
     private static async Task DisposeCallersAsync(RequestCqrsRf3Callers? caller,
-        RequestCqrsRf3Callers? administrator, List<Exception> failures)
+        RequestCqrsRf3Callers? administrator, List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (caller is not null)
-        { await ServerFailureObserver.ObserveAsync(() => caller.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        { await ObserveAsync(() => caller.DisposeAsync().AsTask(), failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCallerDispose).ConfigureAwait(false); }
         if (administrator is not null)
-        { await ServerFailureObserver.ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures).ConfigureAwait(false); }
+        { await ObserveAsync(() => administrator.DisposeAsync().AsTask(), failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityAdministratorDispose).ConfigureAwait(false); }
     }
 
     private static async Task<bool> StopWaveAsync(RequestCqrsRf3Wave? wave, bool startupAttempted,
-        List<Exception> failures)
+        List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (wave is null)
         { return !startupAttempted; }
         var prior = failures.Count;
-        await ServerFailureObserver.ObserveAsync(wave.StopAsync, failures).ConfigureAwait(false);
+        await ObserveAsync(wave.StopAsync, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityWaveStop).ConfigureAwait(false);
         return prior == failures.Count;
     }
 
     private static async Task DisposeControlsAsync(RequestCqrsProbeFixture? controls, bool waveStopped,
-        List<Exception> failures)
+        List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         if (controls is not null && waveStopped)
-        { await ServerFailureObserver.ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures).ConfigureAwait(false); }
+        { await ObserveAsync(controls.DisposeAfterResourcesJoinedAsync, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityControlsDispose).ConfigureAwait(false); }
     }
+
+    private static Task ObserveAsync(Func<Task> operation, List<Exception> failures,
+        Action<RequestCqrsLifecycleStage>? failureObserver, RequestCqrsLifecycleStage stage)
+        => RequestCqrsLifecycleFailureObserver.ObserveAsync(operation, failures, failureObserver, stage);
+
+    private static async Task RetireArmIfOpenAsync(RequestCqrsProbeFixture controls, Guid armId,
+        CancellationToken cancellationToken)
+    {
+        if (!controls.ArmFor(armId).Retired)
+        { await controls.RetireArmAsync(armId, cancellationToken).ConfigureAwait(false); }
+    }
+
+    private static Task InspectIfReadyAsync(RequestCqrsAuthorityOutcomeOracle outcomeOracle,
+        Guid commandId, CancellationToken cancellationToken)
+        => outcomeOracle.ReadyToInspect
+            ? outcomeOracle.InspectAfterWaveJoinedAsync(commandId, cancellationToken)
+            : Task.CompletedTask;
 }

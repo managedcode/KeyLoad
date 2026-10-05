@@ -24,6 +24,7 @@ verification cases: [working acceptance](CodeQuality.md).
 | REQ-CQ-006: executable numeric maintainability and coverage gates | AC-CQ-008/009 | TASK-MP-010AC-W and TASK-CQ-009; real Roslyn boundaries/self-inventory; later strict coverage/export/no-decrease qualification |
 | REQ-CQ-007: preserving CLI, live-query, search, redaction and site/query/storage/remaining-unit quality joins with explicit lifetime/constructor validation | AC-CQ-010/011/012/013/014/015/016 | TASK-MP-010AH-C/Q/L/QN/SA/SB, TASK-MP-010UQ/US/UTF; source parity, real null/lifetime and deterministic workload regressions, enabled builds and actual GitHub feature suites |
 | REQ-CQ-008: started main qualification survives subsequent main submissions within bounded workflow concurrency | AC-CQ-017 / AC-QUAL-001..003 | TASK-QUAL-CI-QUEUE-R9; exact workflow review and live same-group run/SHA/job/native evidence under the ADR033 continuation |
+| REQ-CQ-009: source-bound functional coverage and meaningful uncovered-flow repair | AC-CQ-018/019/020/021 | TASK-CQ-FUNCTIONAL-COVERAGE-001..003; original native MTP reports, contributor/source/PDB inventories, module/file/line/branch reports, actual RF3 server export and complete-flow regressions |
 
 The website candidate's REQ/AC-BC-027 is a bounded REQ-CQ-006 dependency substage,
 owned by TASK-SITE-ANALYZER-COVERAGE-011 in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md).
@@ -172,3 +173,115 @@ denominators. SiteTests and final qualification remain pending; source repair
 alone cannot close AC-CQ-009 or AC-BC-027. Exact failed artifacts and joins live
 in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md) and
 [site status](../implementation/site-design.json).
+
+## Owner functional coverage contract, 2026-10-05
+
+The owner requires measured test coverage without load tests and meaningful
+repairs of uncovered behaviour while finalizing each module. A test must execute
+a complete real operation and verify its outcome and resulting or preserved state;
+getter/setter, property-only or implementation-mirroring tests are insufficient.
+This extends REQ-CQ-006/009 and the accepted ADR-033 numeric contract. It does not
+replace any complete mandatory suite or turn source inspection into coverage.
+
+### Quality review repair, 2026-10-05
+
+The owner requires repairs of the actual findings from the installed quality
+bundle. TASK-CQ-REPAIR-001 follows the preserving source-repair contract in
+ADR-033 and extends REQ-CQ-004/006 with the criteria below. Existing product
+requirements, numeric limits, diagnostic severity and qualification gates remain
+mandatory. Optional analyzer defaults which conflict with the owning EditorConfig
+are reviewed individually; their raw count is not a confirmed defect count.
+
+- AC-CQ-022: the complete current solution passes the strict Release build and
+  `dotnet format --verify-no-changes`; retain failed and passing original reports.
+  Compiler and analyzer repairs preserve public signatures, persistence bytes,
+  signed identity, real topology, workload results and cancellation/lifetime rules.
+- AC-CQ-023: review every source-bound method with native cyclomatic complexity
+  above20, extract only coherent validation/execution responsibilities where
+  needed, and remeasure the changed source. Preserve original evaluation order,
+  short-circuiting, errors and side effects. Existing real-operation feature tests
+  and the complete required suites provide the behavioral regression contract;
+  numerical improvement alone does not establish correctness or performance.
+- AC-CQ-024: BlobRecordReader repairs retain AC-BLOB-001–007 and add complete
+  persisted-corruption operations for uncovered validation failures, asserting the
+  error and unchanged canonical state. Native functional coverage must meet the
+  existing90% critical-flow line and70% branch thresholds for changed validation;
+  retain exact source/DLL/PDB identities and the original reports.
+
+Execution: disjoint workers own the existing Orleans membership compiler repairs,
+comparison-library compiler repairs and exact high-complexity source files. The
+lead owns Blob validation/tests, compiler aggregation closure removal, shared
+documentation and final integration. First finish and inspect preserving repairs;
+then format, build, run the mapped tests through Aspire, collect functional
+coverage and repeat metrics. Run complete unit/scalar/recovery/RF3 gates and retain
+actual outcomes. No source repair closes an unexecuted or failed acceptance gate.
+
+- AC-CQ-018: the first contributor profile is exactly the functional
+  `PartitionQuery*` TUnit cases in `unit` and `unit-scalar`, through the existing
+  Aspire-owned entry and native MTP CodeCoverage 18.11.2. The profile includes
+  `KeyLoad.Query` production source and the actual Release DLL/PDB hashes. Use
+  native static managed instrumentation when the actual platform lacks dynamic
+  support, with only the inventory-owned Release test deployment module directory.
+  Require exact restoration of the original DLL/PDB hashes after native settlement;
+  a modified build image cannot count as original-source evidence. Retain
+  both original Cobertura reports and original TRX/TUnit outcomes, including
+  failed runs. Inventory exact contributors and source hashes before and after;
+  missing/cancelled reports, changed source, unexpected modules, paths or integer
+  counts make the report unqualified rather than zero. This is scoped evidence.
+- AC-CQ-019: report per-module/file covered and executable line counts, original
+  native branch counts where available, percentages and uncovered source locations.
+  Never sum normal/scalar or replica duplicates. Exact line hits may be OR-unioned
+  on matching module/source/line identity. Aggregate branches only when native
+  evidence identifies each outcome; coarse per-line covered/total pairs alone
+  cannot establish a branch union. Until then retain per-run branch counts and
+  mark the merged branch result unmeasured. Preserve the mandatory 80/70/90 and
+  module/no-decrease gates; an unqualified partial report cannot close AC-CQ-009.
+- AC-CQ-020: complete coverage has an explicit functional contributor inventory
+  and classification of every production project. Exclude all load, stress,
+  performance and comparison contributors, including such cases inside an
+  otherwise ordinary suite. Keep complete ordinary CI suites mandatory; a separate
+  coverage selection does not qualify a full suite. Site V8 evidence stays separate.
+  Collect each of the three real Docker `KeyLoad.Server` processes, bind report
+  exports to exact server image/DLL/PDB/source identities, and settle the actual
+  collector and AppHost-owned nodes before consuming exports. Test-host coverage
+  alone does not establish RF3/server or whole-solution coverage. Freeze the pinned
+  native collector invocation and lifetime/export contract before that integration.
+- AC-CQ-021: for module closure, review uncovered locations against REQ/AC flows,
+  implement real success/failure/edge regressions and remeasure the same source.
+  Rejected operations must prove their error and preserved state. No fake provider,
+  fabricated task, trivial accessor test, executable-source exclusion, missing
+  report, skipped suite or ignored failure can make the gate pass.
+
+TASK-CQ-FUNCTIONAL-COVERAGE-001 owns the bounded first profile and report under
+`scripts/Features/CodeQuality/functional-coverage*`; it reuses the existing Aspire
+settings/output handoff and native collector, with no new test framework or public
+database contract. Root owns docs, source joins, actual collection and final review;
+the Luna worker writes only a guarded private source packet. Original XML is
+bounded to 32 MiB, inventory to 5,000 sources and 100,000 distinct line locations;
+XML DTD/external resolution is prohibited and all accepted source paths resolve
+within the source-bound production inventory. Reports are deterministic JSON and
+Markdown with raw counts, contributor identities, source/DLL/PDB hashes and
+uncovered locations, without user data or secrets. Existing analyzer/site coverage
+settings, inventory and gate remain unchanged. Real native profile collection,
+successful and rejected processing of its retained reports, source drift and
+missing-report rejection provide the verification flow; authored fixture XML is
+not a substitute for native evidence.
+
+TASK-CQ-FUNCTIONAL-COVERAGE-002 expands the explicit functional inventory, native
+merge/export and CI always-retained artifacts after the native identity contract
+is frozen. TASK-CQ-FUNCTIONAL-COVERAGE-003 closes modules against actual uncovered
+flows and the complete original acceptance/gates. Neither later task is complete
+because the first scoped profile exists. No persistence or public API migration
+occurs; rollback restores a coherent tooling profile and retains original reports
+without disabling required quality or functional test gates.
+
+```mermaid
+flowchart LR
+    Functional[Explicit functional contributors] --> Aspire[Aspire-owned tests and RF3 nodes]
+    Aspire --> Native[Original native coverage and test reports]
+    Source[Source DLL and PDB identities] --> Verify[Bounded coverage verifier]
+    Native --> Verify
+    Verify --> Gaps[Module counts and uncovered locations]
+    Gaps --> Flows[Complete operation regressions]
+    Flows --> Functional
+```

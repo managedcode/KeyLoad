@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
 /// <summary>Write-only report projection which streams its existing case array.</summary>
 internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
-    ComparisonOptions Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
+    ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
     int LogicalProcessors, string Runtime, string Storage, string? SourceRevision,
     ImmutableArray<TargetProfile> Targets, IAsyncEnumerable<StreamedComparisonCase> Cases)
 {
@@ -15,9 +16,13 @@ internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, D
     /// <summary>Gets the load-generator image reference, when available.</summary>
     public string? LoadGeneratorImage { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ScaledComparisonProfile? ScaledProfile { get; init; }
+
     internal static StreamedComparisonReport Create(ComparisonReport report)
     {
         ArgumentNullException.ThrowIfNull(report);
+        report.ValidateConfiguration();
         if (report.Cases.IsDefault)
         {
             throw new JsonException(ImmutableArrayAsyncView.InvalidCollectionMessage);
@@ -29,7 +34,8 @@ internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, D
             report.Runtime, report.Storage, report.SourceRevision, report.Targets, cases)
         {
             Provenance = report.Provenance,
-            LoadGeneratorImage = report.LoadGeneratorImage
+            LoadGeneratorImage = report.LoadGeneratorImage,
+            ScaledProfile = report.ScaledProfile
         };
     }
 }

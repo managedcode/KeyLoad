@@ -56,12 +56,16 @@ public sealed class QdrantTarget : IComparisonTarget
     public bool Supports(Scenario scenario) => scenario == Scenario.VectorExact;
 
     /// <summary>Creates the collection, seeds vectors with acknowledged writes, and verifies point copies across configured nodes.</summary>
-    /// <param name="dataset">The deterministic vector corpus and vector dimensions and result limit.</param>
+    /// <param name="corpus">The deterministic vector corpus and vector dimensions and result limit.</param>
     /// <param name="cancellationToken">A token that cancels collection setup, seeding, and replica verification.</param>
     /// <returns>A task that completes after the verified profile has been recorded.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(dataset);
+        ArgumentNullException.ThrowIfNull(corpus);
+        if (corpus is not BenchmarkDataset dataset)
+        {
+            throw new NotSupportedException("This target does not support the bounded scaled document corpus.");
+        }
         topK = dataset.Options.TopK;
         QdrantReplicaProof.ValidateClients(nodeClients, topology);
         collectionCreationAttempted = true;

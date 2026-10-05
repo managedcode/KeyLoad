@@ -94,19 +94,16 @@ public sealed partial class DatabaseEngine
     {
         var invalid = mutation switch
         {
-            CreateQueueTransfer transfer => transfer.SourceQueue?.Partition is null || transfer.Destination?.Partition is null || transfer.Message is null,
+            CreateQueueTransfer transfer => HasInvalidTransferShape(transfer),
             AcceptQueueTransfer transfer => transfer.DestinationQueue?.Partition is null,
             CompleteQueueTransfer transfer => transfer.SourceQueue?.Partition is null,
-            ApplyVectorProjection projection => projection.SourceStream is null || projection.SourceDocument is null
-                || projection.SourceStream.Partition is null || projection.SourceDocument.Partition is null
-                || projection.Target is null || projection.Target.Space is null,
-            ApplyCrossPartitionReverseEdge edge => edge.SourcePartition is null || edge.Destination?.Partition is null,
-            CompleteCrossPartitionReverseEdge edge => edge.SourcePartition is null || edge.Destination?.Partition is null,
+            ApplyVectorProjection projection => HasInvalidProjectionShape(projection),
+            ApplyCrossPartitionReverseEdge edge => HasInvalidReverseEdgeShape(edge.SourcePartition, edge.Destination),
+            CompleteCrossPartitionReverseEdge edge => HasInvalidReverseEdgeShape(edge.SourcePartition, edge.Destination),
             ConfigureRecurringSchedule schedule => schedule.Definition?.Lane?.Partition is null,
             EmitRecurringOccurrences schedule => schedule.Lane?.Partition is null,
             CancelRecurringSchedule schedule => schedule.Lane?.Partition is null,
-            CompareExchangeSaga saga => saga.Lane?.Partition is null
-                || saga.Timeout is { } timeout && timeout.Queue?.Partition is null,
+            CompareExchangeSaga saga => HasInvalidSagaShape(saga),
             ExpireSaga saga => saga.Lane?.Partition is null,
             _ => false
         };
@@ -115,4 +112,19 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, MissingMutationEntryMessage);
         }
     }
+
+    private static bool HasInvalidTransferShape(CreateQueueTransfer transfer)
+        => transfer.SourceQueue?.Partition is null || transfer.Destination?.Partition is null
+            || transfer.Message is null;
+
+    private static bool HasInvalidProjectionShape(ApplyVectorProjection projection)
+        => projection.SourceStream is null || projection.SourceDocument is null
+            || projection.SourceStream.Partition is null || projection.SourceDocument.Partition is null
+            || projection.Target is null || projection.Target.Space is null;
+
+    private static bool HasInvalidReverseEdgeShape(PartitionRef? source, EntityRef? destination)
+        => source is null || destination?.Partition is null;
+
+    private static bool HasInvalidSagaShape(CompareExchangeSaga saga)
+        => saga.Lane?.Partition is null || saga.Timeout is { } timeout && timeout.Queue?.Partition is null;
 }

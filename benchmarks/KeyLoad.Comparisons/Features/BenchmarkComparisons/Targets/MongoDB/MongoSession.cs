@@ -1,11 +1,39 @@
+using System.Runtime.CompilerServices;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocument> documents,
-    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth) : IComparisonSession
+    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount) : IComparisonSession
 {
+    public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var find = documents.Find(FilterDefinition<BsonDocument>.Empty,
+                new FindOptions { BatchSize = 256 })
+            .Sort(Builders<BsonDocument>.Sort.Ascending(MongoSchema.IdField));
+        using var cursor = await find.ToCursorAsync(cancellationToken);
+        var seen = 0;
+        while (await cursor.MoveNextAsync(cancellationToken))
+        {
+            foreach (var stored in cursor.Current)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (seen >= corpusCount)
+                {
+                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                }
+                yield return new(stored.GetValue(MongoSchema.IdField).AsString,
+                    stored.GetValue(MongoSchema.BodyField).AsString);
+                seen++;
+            }
+        }
+        if (seen != corpusCount)
+        {
+            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+        }
+    }
+
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var stored = await documents.Find(IdFilter(document.Id)).FirstOrDefaultAsync(cancellationToken);

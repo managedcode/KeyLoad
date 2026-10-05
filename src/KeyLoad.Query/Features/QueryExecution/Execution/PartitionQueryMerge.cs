@@ -74,26 +74,11 @@ internal static class PartitionQueryMerge
     private static void ValidateLeaf(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1? result,
         PartitionRef partition, StoreIdentity owner, ReadExecutionBudget budget)
     {
-        if (result is null || result.Partition != partition || result.NodeId != owner.NodeId
-            || result.Incarnation != owner.Incarnation || result.ReadGeneration != owner.ReadGeneration)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, InconsistentOwnerMessage);
-        }
-        if (result.Version != Version || result.CutPosition < 0 || result.PolicyEpoch < 1
-            || result.SchemaVersion < 1 || result.ExaminedRecords < 0 || result.ReadBytes < 0
-            || result.RetainedBytes < 0 || string.IsNullOrEmpty(result.AccessPath) || result.Candidates.IsDefault)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
-        }
-
-        if (result.Candidates.Length > plan.MaxCandidates || result.ExaminedRecords > plan.MaxExaminedRecords
-            || result.ReadBytes > plan.MaxReadBytes || result.RetainedBytes > plan.MaxRetainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The partition query leaf exceeded its reserved budget.");
-        }
-
-        ValidateCandidates(result, plan, partition, budget);
-        var expectedRetained = PartitionQueryRetention.CandidateArrayBytes(result.Candidates.Length);
+        ValidateLeafOwner(result, partition, owner);
+        ValidateLeafShape(result!);
+        ValidateLeafBudgets(plan, result!);
+        ValidateCandidates(result!, plan, partition, budget);
+        var expectedRetained = PartitionQueryRetention.CandidateArrayBytes(result!.Candidates.Length);
         foreach (var candidate in result.Candidates)
         {
             expectedRetained = checked(expectedRetained + PartitionQueryRetention.CandidateBytes(candidate));
@@ -102,6 +87,35 @@ internal static class PartitionQueryMerge
         if (result.RetainedBytes != expectedRetained)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
+        }
+    }
+
+    private static void ValidateLeafOwner(PartitionQueryLeafResultV1? result, PartitionRef partition,
+        StoreIdentity owner)
+    {
+        if (result is null || result.Partition != partition || result.NodeId != owner.NodeId
+            || result.Incarnation != owner.Incarnation || result.ReadGeneration != owner.ReadGeneration)
+        {
+            throw Errors.Fail(ErrorCode.OwnershipLost, InconsistentOwnerMessage);
+        }
+    }
+
+    private static void ValidateLeafShape(PartitionQueryLeafResultV1 result)
+    {
+        if (result.Version != Version || result.CutPosition < 0 || result.PolicyEpoch < 1
+            || result.SchemaVersion < 1 || result.ExaminedRecords < 0 || result.ReadBytes < 0
+            || result.RetainedBytes < 0 || string.IsNullOrEmpty(result.AccessPath) || result.Candidates.IsDefault)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
+        }
+    }
+
+    private static void ValidateLeafBudgets(PartitionQueryLeafPlanV1 plan, PartitionQueryLeafResultV1 result)
+    {
+        if (result.Candidates.Length > plan.MaxCandidates || result.ExaminedRecords > plan.MaxExaminedRecords
+            || result.ReadBytes > plan.MaxReadBytes || result.RetainedBytes > plan.MaxRetainedBytes)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, "The partition query leaf exceeded its reserved budget.");
         }
     }
 

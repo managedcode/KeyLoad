@@ -18,17 +18,24 @@ internal static class ServerNodeUpgradeCurrentState
         VerifyIdentities(receipt, canonical.Store.Identity, replica.Identity, authority, published);
         var original = receipt.OriginalReplicaHardState;
         var minimumReplica = checked(receipt.ReplicaPhysicalPositionBefore + (original.Snapshot is null ? 0 : 1));
-        if (canonical.Store.Position < receipt.CanonicalPosition || replica.Position < minimumReplica
-            || canonical.LastApplied < receipt.CanonicalAppliedPosition || canonical.LastApplied > state.CommittedIndex
-            || canonical.LastApplied < (state.Snapshot?.Index ?? 0) || state.Term < original.Term
-            || state.CommittedIndex < original.CommittedIndex || state.LastIndex < original.LastIndex)
-        { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
-        if (!published && (canonical.Store.Position != receipt.CanonicalPosition || replica.Position != minimumReplica
-            || canonical.LastApplied != receipt.CanonicalAppliedPosition || state.Term != original.Term
-            || state.VotedFor != original.VotedFor || state.LastIndex != original.LastIndex
-            || state.CommittedIndex != original.CommittedIndex || !SameSnapshotCut(state.Snapshot, original.Snapshot)))
+        if (HasInvalidCurrentProgress(receipt, canonical, replica, state, original, minimumReplica)
+            || HasUnexpectedUnpublishedState(receipt, canonical, replica, state, original, minimumReplica, published))
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
     }
+
+    private static bool HasInvalidCurrentProgress(ServerNodeUpgradeReceipt receipt, DatabaseEngine canonical,
+        IAtomicStore replica, ReplicaHardState state, ReplicaHardState original, long minimumReplica)
+        => canonical.Store.Position < receipt.CanonicalPosition || replica.Position < minimumReplica
+            || canonical.LastApplied < receipt.CanonicalAppliedPosition || canonical.LastApplied > state.CommittedIndex
+            || canonical.LastApplied < (state.Snapshot?.Index ?? 0) || state.Term < original.Term
+            || state.CommittedIndex < original.CommittedIndex || state.LastIndex < original.LastIndex;
+
+    private static bool HasUnexpectedUnpublishedState(ServerNodeUpgradeReceipt receipt, DatabaseEngine canonical,
+        IAtomicStore replica, ReplicaHardState state, ReplicaHardState original, long minimumReplica, bool published)
+        => !published && (canonical.Store.Position != receipt.CanonicalPosition || replica.Position != minimumReplica
+            || canonical.LastApplied != receipt.CanonicalAppliedPosition || state.Term != original.Term
+            || state.VotedFor != original.VotedFor || state.LastIndex != original.LastIndex
+            || state.CommittedIndex != original.CommittedIndex || !SameSnapshotCut(state.Snapshot, original.Snapshot));
 
     private static void VerifyIdentities(ServerNodeUpgradeReceipt receipt, StoreIdentity canonical,
         StoreIdentity replica, ServerNodeUpgradeAuthority authority, bool published)

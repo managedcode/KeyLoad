@@ -81,9 +81,14 @@ internal static class PostgresDocumentOperations
         }
     }
 
-    internal static async Task SeedAsync(NpgsqlConnection connection, BenchmarkDataset dataset,
+    internal static async Task SeedAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         CancellationToken cancellationToken)
     {
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            await SeedScaledAsync(connection, dataset.Documents, cancellationToken);
+            return;
+        }
         foreach (var document in dataset.Documents)
         {
             await using var command = connection.CreateCommand();
@@ -93,5 +98,20 @@ internal static class PostgresDocumentOperations
             command.Parameters.AddWithValue(PostgresVectorOperations.VectorLiteral(document.Vector));
             RequireAffected(Scenario.DocumentWrite, await command.ExecuteNonQueryAsync(cancellationToken));
         }
+    }
+
+    private static async Task SeedScaledAsync(NpgsqlConnection connection, IReadOnlyList<BenchmarkDocument> documents,
+        CancellationToken cancellationToken)
+    {
+        await using var copy = await connection.BeginBinaryImportAsync(
+            "COPY documents(id,body) FROM STDIN (FORMAT BINARY)", cancellationToken).ConfigureAwait(false);
+        foreach (var document in documents)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await copy.StartRowAsync(cancellationToken).ConfigureAwait(false);
+            await copy.WriteAsync(document.Id, NpgsqlDbType.Text, cancellationToken).ConfigureAwait(false);
+            await copy.WriteAsync(document.Json, NpgsqlDbType.Jsonb, cancellationToken).ConfigureAwait(false);
+        }
+        await copy.CompleteAsync(cancellationToken).ConfigureAwait(false);
     }
 }

@@ -12,17 +12,20 @@ internal static class PostgresSchemaInitialization
     private const string TlsTransport = "pooled prepared SQL/TLS";
     private const string TcpTransport = "pooled prepared SQL/TCP";
 
-    internal static async Task InitializeAsync(NpgsqlConnection connection, BenchmarkDataset dataset,
+    internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile,
         Action<TargetProfile> updateProfile, Action markCommitAttempted, CancellationToken cancellationToken)
     {
         await PostgresTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
-        await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Options.Dimensions,
+        await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
             markCommitAttempted, cancellationToken);
         var profile = await VerifySettingsAsync(connection, initialProfile, updateProfile, cancellationToken);
         await PostgresDocumentOperations.SeedAsync(connection, dataset, cancellationToken);
-        await PostgresStreamOperations.SeedAsync(connection, dataset, cancellationToken);
-        await CopyEdgesAsync(connection, dataset, cancellationToken);
+        if (dataset is BenchmarkDataset control)
+        {
+            await PostgresStreamOperations.SeedAsync(connection, control, cancellationToken);
+            await CopyEdgesAsync(connection, dataset, cancellationToken);
+        }
         await AnalyzeAsync(connection, cancellationToken);
         updateProfile(await PostgresTopology.ObserveCopiesAsync(connection, topology, profile, cancellationToken));
     }
@@ -48,7 +51,7 @@ internal static class PostgresSchemaInitialization
         return observed;
     }
 
-    private static async Task CopyEdgesAsync(NpgsqlConnection connection, BenchmarkDataset dataset,
+    private static async Task CopyEdgesAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         CancellationToken cancellationToken)
     {
         await using var copy = await connection.BeginBinaryImportAsync(EdgeCopySql, cancellationToken);

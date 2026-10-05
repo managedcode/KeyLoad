@@ -46,12 +46,15 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Plan all benchmark scenarios
         id: plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --github-output="$GITHUB_OUTPUT"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --github-output="$GITHUB_OUTPUT"
       - name: Save benchmark plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: comparison-plan
-          path: ${{ runner.temp }}/isolated-plan.json
+          path: |
+            ${{ runner.temp }}/isolated-plan.json
+            ${{ runner.temp }}/scaled-plan.json
+            ${{ runner.temp }}/composite-plan.json
           if-no-files-found: error
           retention-days: 90
   comparison-images:
@@ -201,6 +204,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
       KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
+      KEYLOAD_SCALE_PROFILE: ${{ matrix.scaleProfile }}
       Benchmarks__Target: ${{ matrix.target }}
       Benchmarks__NodeCount: ${{ matrix.nodeCount }}
       Benchmarks__Scenario: ${{ matrix.scenario }}
@@ -350,16 +354,26 @@ jobs:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Verify benchmark plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json"
       - name: Download benchmark results
-        run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture"
-      - name: Check all 270 benchmark results
-        run: node scripts/Features/BenchmarkComparisons/aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --input="$RUNNER_TEMP/isolated-capture/data" --proof="$RUNNER_TEMP/isolated-capture/github/proof.json" --output="$RUNNER_TEMP/isolated-aggregate"
+        run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --input="$RUNNER_TEMP/isolated-capture"
+      - name: Check control and complete scale accounting
+        id: composite-aggregate
+        run: node scripts/Features/BenchmarkComparisons/scaled-cohort-aggregate-cli.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --composite-plan="$RUNNER_TEMP/composite-plan.json" --input="$RUNNER_TEMP/isolated-capture" --proof-root="$RUNNER_TEMP/isolated-capture/github" --output="$RUNNER_TEMP/isolated-aggregate" --scale-output="$RUNNER_TEMP/scale-cohort"
       - name: Save combined benchmark results
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: comparison-isolated-suite
           path: ${{ runner.temp }}/isolated-aggregate/**
+          if-no-files-found: error
+          retention-days: 90
+      - name: Save internal scaled cohort receipt
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-scaled-internal-cohort
+          path: ${{ runner.temp }}/scale-cohort/**
           if-no-files-found: error
           retention-days: 90
       - name: Save GitHub result verification

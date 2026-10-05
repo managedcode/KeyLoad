@@ -11,6 +11,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
     private readonly int expectedCopies = ComparisonTopologies.NodeCount(topology);
     private bool indexCreated;
     private int topK;
+    private int corpusCount;
 
     /// <summary>Gets the observed server, transport, index-copy, and acknowledgement evidence collected during initialization.</summary>
     public TargetProfile Profile { get; private set; } = new(OpenSearchNames.TargetName, OpenSearchNames.Unverified,
@@ -29,7 +30,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
     /// <param name="dataset">The deterministic document and vector corpus and query options.</param>
     /// <param name="cancellationToken">A token that cancels HTTP requests and index setup.</param>
     /// <returns>A task that completes after index and cluster evidence have been collected.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
         if (image != OpenSearchNames.ExpectedImage)
@@ -37,7 +38,12 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             throw new ComparisonFailureException(OpenSearchNames.PinnedImageMismatch);
         }
 
-        topK = dataset.Options.TopK;
+        topK = dataset.Settings.TopK;
+        if (dataset.Settings is ScaledComparisonProfile)
+        {
+            Profile = Profile with { ReadContract = "real-time document GET; S1 source contains no vector values" };
+        }
+        corpusCount = dataset.Documents.Count;
         using var root = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get, OpenSearchNames.PathSeparator, null, cancellationToken);
         var version = OpenSearchJson.RequiredString(root.RootElement, OpenSearchNames.Version, OpenSearchNames.VersionNumber);
         if (version != OpenSearchNames.ExpectedVersion)
@@ -45,11 +51,14 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             throw new ComparisonFailureException(OpenSearchNames.ServerVersionMismatch);
         }
 
-        await OpenSearchIndex.CreateAsync(client, index, dataset.Options.Dimensions, expectedCopies - 1, cancellationToken);
+        await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - 1, cancellationToken);
         indexCreated = true;
         var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
         await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, cancellationToken);
-        await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[0].Vector, expectedCopies, cancellationToken);
+        if (dataset.Settings is not ScaledComparisonProfile)
+        {
+            await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[0].Vector, expectedCopies, cancellationToken);
+        }
         using (var refresh = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
             OpenSearchNames.PathSeparator + index + OpenSearchNames.RefreshSuffix, null, cancellationToken))
         {
@@ -69,7 +78,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
     /// <param name="cancellationToken">A token accepted for the common target contract; session creation itself does not perform I/O.</param>
     /// <returns>A comparison session backed by this target’s HTTP client and index.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IComparisonSession>(new OpenSearchSession(client, index, topK, expectedCopies));
+        => Task.FromResult<IComparisonSession>(new OpenSearchSession(client, index, topK, expectedCopies, corpusCount));
 
     /// <summary>Deletes the run-specific index when created and disposes the target-owned HTTP client.</summary>
     /// <returns>A value task that completes after index cleanup and client disposal.</returns>

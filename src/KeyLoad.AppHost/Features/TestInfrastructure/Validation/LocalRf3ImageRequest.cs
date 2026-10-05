@@ -41,28 +41,45 @@ internal sealed record LocalRf3ImageRequest
         var child = configuration[ChildSetting];
         if (!string.IsNullOrEmpty(child))
         {
-            if (child != "true" || enabledText is not null || !string.IsNullOrWhiteSpace(suite)
-                || !string.Equals(configuration[ProvenanceSetting], "local-development", StringComparison.Ordinal)
-                || string.IsNullOrWhiteSpace(configuration[LocalReceiptSetting])
-                || string.IsNullOrWhiteSpace(configuration[ServerImageSetting])
-                || HasValue(configuration, GithubReceiptSetting) || HasValue(configuration, GithubRevisionSetting)
-                || HasValue(configuration, GithubActionsSetting)
-                || HasProtocolCohortSelector(configuration) || HasComparisonSelector(configuration))
-            {
-                throw new InvalidOperationException(Invalid);
-            }
-            return false;
+            return ValidateChildRequest(configuration, child, enabledText, suite);
         }
 
         if (!enabled)
         {
-            if (HasValue(configuration, LocalReceiptSetting) || HasValue(configuration, ProvenanceSetting))
-            {
-                throw new InvalidOperationException(Invalid);
-            }
+            ValidateDisabledRequest(configuration);
             return false;
         }
 
+        ValidateEnabledRequest(configuration, suite, filter);
+        return true;
+    }
+
+    private static bool ValidateChildRequest(IConfiguration configuration, string child, string? enabledText,
+        string? suite)
+    {
+        if (child != "true" || enabledText is not null || !string.IsNullOrWhiteSpace(suite)
+            || !string.Equals(configuration[ProvenanceSetting], "local-development", StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(configuration[LocalReceiptSetting])
+            || string.IsNullOrWhiteSpace(configuration[ServerImageSetting])
+            || HasValue(configuration, GithubReceiptSetting) || HasValue(configuration, GithubRevisionSetting)
+            || HasValue(configuration, GithubActionsSetting)
+            || HasProtocolCohortSelector(configuration) || HasComparisonSelector(configuration))
+        {
+            throw new InvalidOperationException(Invalid);
+        }
+        return false;
+    }
+
+    private static void ValidateDisabledRequest(IConfiguration configuration)
+    {
+        if (HasValue(configuration, LocalReceiptSetting) || HasValue(configuration, ProvenanceSetting))
+        {
+            throw new InvalidOperationException(Invalid);
+        }
+    }
+
+    private static void ValidateEnabledRequest(IConfiguration configuration, string? suite, string? filter)
+    {
         if (suite != "rf3" || string.IsNullOrWhiteSpace(filter)
             || HasValue(configuration, ProvenanceSetting)
             || HasValue(configuration, LocalReceiptSetting)
@@ -75,8 +92,6 @@ internal sealed record LocalRf3ImageRequest
         {
             throw new InvalidOperationException(Invalid);
         }
-
-        return true;
     }
 
     private static string? ReadEnabledText(IConfiguration configuration)

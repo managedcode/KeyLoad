@@ -50,6 +50,11 @@ ManagedCode packages are our projects. Fix dependency defects in their owning si
 - Each isolated comparison agent MUST retain its own source/run/attempt/target/topology/profile-bound JSON. After all target agents finish, one aggregation job MUST validate completeness, comparable settings and provenance, collect their results and generate the website metrics from those JSON files. Failed, missing, skipped or mixed-cohort measurements MUST NOT refresh published performance evidence (owner direction 2026-10-03).
 - The comparison matrix MUST include actual native one-node, two-node and three-node configurations and intensive read/create/update/delete workloads. Each engine/node-count/scenario measurement MUST run on a separate isolated runner agent; record real membership, acknowledgement, correctness, latency, throughput and resource use. Do not relabel client counts or independent standalone databases as cluster node counts. Unsupported native/community topology remains explicitly unavailable, and benchmark topology changes require a fault/consistency ADR before implementation; the initial production RF3 requirement remains mandatory (owner direction 2026-10-03).
 
+## Licensing
+
+- Owner direction 2026-10-05 selects Business Source License 1.1 for new KeyLoad-owned distributions, using the SurrealDB-style Additional Use Grant: use in applications, including production, is permitted; providing database functionality to third parties who can create, manage or control schemas or tables requires a separate commercial license. Keep the standard BSL 1.1 terms unchanged and the complete KeyLoad parameters in the root `LICENSE`.
+- Keep README, website metadata and packaged license files consistent with the root `LICENSE`; describe BSL distributions as source available, not open source. Preserve every third-party or independently owned dependency's original license and notices. Owner final clarification 2026-10-05 selects Apache License 2.0 as the Change License; each distribution must retain its applicable Change Date and the standard maximum four-year conversion rule.
+
 ## MCAF repository workflow
 
 Project: KeyLoad

@@ -14,11 +14,12 @@ internal sealed class AggregateTypeCodeLineAccumulator
     {
         measurements.AddOrUpdate(
             type,
-            new AggregateTypeCodeMeasurement(type, codeLines, location),
-            (_, current) => new AggregateTypeCodeMeasurement(
-                type,
-                current.CodeLines + codeLines,
-                EarlierLocation(current.Location, location)));
+            static (symbol, state) => new AggregateTypeCodeMeasurement(symbol, state.CodeLines, state.Location),
+            static (symbol, current, state) => new AggregateTypeCodeMeasurement(
+                symbol,
+                current.CodeLines + state.CodeLines,
+                EarlierLocation(current.Location, state.Location)),
+            (CodeLines: codeLines, Location: location));
     }
 
     internal AggregateTypeCodeMeasurement[] Snapshot() => measurements.Values.ToArray();

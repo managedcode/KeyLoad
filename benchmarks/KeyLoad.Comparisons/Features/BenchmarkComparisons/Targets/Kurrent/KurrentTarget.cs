@@ -44,12 +44,16 @@ public sealed class KurrentTarget : IComparisonTarget
     public bool Supports(Scenario scenario) => scenario is Scenario.StreamAppend or Scenario.StreamRead;
 
     /// <summary>Verifies the cluster and one-event stream semantics, seeds isolated streams, and captures replica-copy evidence.</summary>
-    /// <param name="dataset">The deterministic corpus and timeout used to seed and verify streams.</param>
+    /// <param name="corpus">The deterministic corpus and timeout used to seed and verify streams.</param>
     /// <param name="cancellationToken">A token that cancels connection, verification, and seeding operations.</param>
     /// <returns>A task that completes after profile evidence has been recorded.</returns>
-    public async Task InitializeAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(dataset);
+        ArgumentNullException.ThrowIfNull(corpus);
+        if (corpus is not BenchmarkDataset dataset)
+        {
+            throw new NotSupportedException("This target does not support the bounded scaled document corpus.");
+        }
         if (ownership is not null)
         {
             throw new ComparisonFailureException(KurrentConstants.OwnershipAlreadyInitialized);
