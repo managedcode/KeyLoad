@@ -1,7 +1,8 @@
-using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -87,20 +88,16 @@ internal static class PartitionQueryRf3Leadership
     {
         using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
         var failures = new List<Exception>();
-        try
-        { await fixture.RestartContainerAsync(leader, recovery.Token).ConfigureAwait(false); }
-        catch (Exception error)
-        { failures.Add(error); }
+        await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(leader, recovery.Token), failures)
+            .ConfigureAwait(false);
         if (failures.Count == 0)
         {
-            try
+            await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(leader,
                     WaitBehavior.WaitOnResourceUnavailable, recovery.Token).ConfigureAwait(false);
                 await VerifyAllNodesReadyAsync(fixture, recovery.Token).ConfigureAwait(false);
-            }
-            catch (Exception error)
-            { failures.Add(error); }
+            }, failures).ConfigureAwait(false);
         }
         if (failures.Count == 0)
         { return; }

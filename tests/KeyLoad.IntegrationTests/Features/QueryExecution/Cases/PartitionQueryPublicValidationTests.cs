@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -90,11 +91,11 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     {
         var largeText = new string('x', OversizedValueChars);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        { ["value"] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options) };
+        { [PartitionQueryRf3Protocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options) };
         var query = scenario.Query with
         {
             Filter = new Comparison(new FieldOperand(PartitionQueryRf3Protocol.ValueField), "=",
-                new ParameterOperand("value"))
+                new ParameterOperand(PartitionQueryRf3Protocol.ValueAlias))
         };
         return scenario.Request([scenario.Partitions[0]], query) with { Parameters = parameters };
     }

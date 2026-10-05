@@ -41,7 +41,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         var args = RequestCqrsRf3DiagnosticsArtifactFiles.CreateAppHostArguments(plannedDataRoot);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args,
             cancellationToken).ConfigureAwait(false);
-        resources = SelectNodeResources(builder);
+        resources = RequestCqrsRf3NodeResources.Select(builder);
         var ownedApplication = await builder.BuildAsync(cancellationToken).ConfigureAwait(false);
         application = ownedApplication;
         applicationAcquired = true;
@@ -211,17 +211,5 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId) : IAsyncDi
         await first.ConfigureAwait(false);
         diagnosticsJoined = true;
     }
-
-    private static ContainerResource[] SelectNodeResources(IDistributedApplicationTestingBuilder builder)
-    {
-        var selected = builder.Resources.OfType<ContainerResource>().Where(resource => IsNode(resource.Name))
-            .OrderBy(resource => resource.Name, StringComparer.Ordinal).ToArray();
-        if (selected.Length != RequestCqrsRf3Protocol.NodeCount)
-        { throw new InvalidOperationException("The actual Aspire model did not contain three C1 node containers."); }
-        return selected;
-    }
-
-    private static bool IsNode(string name) => name is RequestCqrsRf3Protocol.Node1
-        or RequestCqrsRf3Protocol.Node2 or RequestCqrsRf3Protocol.Node3;
 
 }

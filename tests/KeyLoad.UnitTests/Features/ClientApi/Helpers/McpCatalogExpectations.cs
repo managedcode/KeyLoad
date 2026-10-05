@@ -52,6 +52,8 @@ internal static class McpCatalogExpectations
     internal const string QuerySearch = "keyload_query_search";
     private const string QuerySearchRoute = "/v1/query/search";
     internal const string QueryAst = "keyload_query_ast";
+    internal const string QueryPartitions = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Tool;
+    private const string QueryPartitionsRoute = KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpProtocol.Route;
     private const string QueryAstRoute = "/v1/query/ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     private const string QueryCapabilitiesRoute = "/v1/query/capabilities";
@@ -118,7 +120,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 66;
+    internal const int Count = 67;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -144,6 +146,7 @@ internal static class McpCatalogExpectations
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),
         (QueryAst, QueryAstRoute, GrainReadKind.AstQuery, null),
+        (QueryPartitions, QueryPartitionsRoute, GrainReadKind.PartitionQuery, null),
         (QueryCapabilities, QueryCapabilitiesRoute, GrainReadKind.QueryCapabilities, null),
         (ChangesRead, ChangesReadRoute, GrainReadKind.ChangeFeed, null),
         (QueryLiveStart, QueryLiveStartRoute, GrainReadKind.LiveQueryStart, null),

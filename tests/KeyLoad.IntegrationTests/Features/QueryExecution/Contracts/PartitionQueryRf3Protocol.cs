@@ -12,6 +12,11 @@ internal static class PartitionQueryRf3Protocol
     internal const string RankIndex = "rank-order";
     internal const string DuplicateTextId = "same-id";
     internal const string NodeFailureScenario = "partition-query-leader-loss";
+    internal const string AuthorizedPartition = "authorized-leaf";
+    internal const string DeniedPartition = "denied-leaf";
+    internal const string BoundPartition = "a-bound";
+    internal const string FallbackPartition = "b-fallback";
+    internal const string EmptyPartition = "c-empty";
     internal const int Version = 1;
     internal const int AstVersion = 1;
     internal const int Limit = 100;

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
@@ -39,6 +40,10 @@ internal static class McpCatalogExpectations
         Read(McpCallerTools.QueryGraphPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query],
             [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
                 McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
+        Read(McpCallerTools.QueryPartitions, [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Partitions, PartitionQueryMcpProtocol.Query,
+                PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan, PartitionQueryMcpProtocol.AstVersion],
+            [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Rows, PartitionQueryMcpProtocol.Leaves,
+                PartitionQueryMcpProtocol.Complete]),
         new(McpCallerTools.AdminPartitionPlacementBind, false, true, false, McpExpectedBody.Object, true,
             [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.ExpectedRevision, McpDiscoveryProtocol.Partition,
                 McpDiscoveryProtocol.PhysicalShardId]),

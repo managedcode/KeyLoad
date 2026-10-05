@@ -10,6 +10,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <param name="Body">The accepted actual argument root type.</param>
 /// <param name="OuterCommandId">Whether the header-command adapter has a required outer GUID.</param>
 /// <param name="BodyFields">Required canonical constructor fields, excluding optional defaults.</param>
+/// <param name="ResultFields">Canonical result fields asserted when the expected result is an object.</param>
 internal sealed record McpToolExpectation(string Name, bool ReadOnly, bool Idempotent, bool Destructive,
     McpExpectedBody Body, bool OuterCommandId, ImmutableArray<string> BodyFields,
     ImmutableArray<string> ResultFields = default);

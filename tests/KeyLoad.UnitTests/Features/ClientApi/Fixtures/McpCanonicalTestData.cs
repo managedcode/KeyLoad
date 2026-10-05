@@ -98,6 +98,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, Sql))),
+        Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
         Read(McpCatalogExpectations.QueryAst, Ast()),
         Read(McpCatalogExpectations.ChangesRead, new ReadChangeFeedRequest(Partition, Resource)),
         Read(McpCatalogExpectations.QueryLiveStart, new StartLiveQueryRequest(Ast())),
@@ -109,6 +110,10 @@ internal static class McpCanonicalTestData
             Retriever: new(new(Resource, [Reference])))),
         Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
+
+    private static PartitionQueryRequestV1 PartitionQuery() => new(1, [Partition],
+        new SelectQuery(Resource, null, [new Selection(Field, Field)], null, [], Limit),
+        null, false, 1);
 
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];
 

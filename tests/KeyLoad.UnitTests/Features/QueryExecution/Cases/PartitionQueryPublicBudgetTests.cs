@@ -15,7 +15,7 @@ internal sealed class PartitionQueryPublicBudgetTests
     public async Task OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries()
     {
         using var oversizedFixture = new PartitionQueryPublicTestSupport(new() { MaxQueryBytes = 128 });
-        var oversized = oversizedFixture.Request([oversizedFixture.First], 1);
+        var oversized = PartitionQueryPublicTestSupport.Request([oversizedFixture.First], 1);
         var position = oversizedFixture.Position;
         var requestFailure = Assert.ThrowsExactly<KeyLoadException>(() => Run(oversizedFixture, oversized));
         await Assert.That(requestFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -31,12 +31,12 @@ internal sealed class PartitionQueryPublicBudgetTests
             JsonDefaults.Serialize(projected).Length));
         using var exact = new PartitionQueryPublicTestSupport(new() { MaxBatchBytes = exactBytes });
         SeedOne(exact);
-        var page = Run(exact, exact.Request([exact.First], 1));
+        var page = Run(exact, PartitionQueryPublicTestSupport.Request([exact.First], 1));
         await Assert.That(page.Complete).IsTrue();
 
         using var below = new PartitionQueryPublicTestSupport(new() { MaxBatchBytes = exactBytes - 1 });
         SeedOne(below);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Run(below, below.Request([below.First], 1)));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Run(below, PartitionQueryPublicTestSupport.Request([below.First], 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -44,7 +44,7 @@ internal sealed class PartitionQueryPublicBudgetTests
     {
         using var fixture = new PartitionQueryPublicTestSupport();
         SeedOne(fixture);
-        var query = fixture.Query(1);
+        var query = PartitionQueryPublicTestSupport.Query(1);
         var request = QueryValidation.Normalize(new AstQueryRequest(fixture.First, query, AllowFullScan: true),
             fixture.Database.Limits);
         return new QueryEngine(fixture.Database).ExecutePartitionQuery("root", request, [fixture.First]);
@@ -58,10 +58,10 @@ internal sealed class PartitionQueryPublicBudgetTests
     }
 
     private static void SeedOne(PartitionQueryPublicTestSupport fixture)
-        => fixture.AddRows(fixture.First, new PartitionQuerySeed("budget-row", 1, "one"));
+        => fixture.AddRows(fixture.First, new PartitionQueryPublicSeed("budget-row", 1, "one"));
 
     private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
         PartitionQueryRequestV1 request)
         => new QueryEngine(fixture.Database).QueryPartitions("root", request,
-            fixture.ExpectedOwner);
+            PartitionQueryPublicTestSupport.ExpectedOwner);
 }

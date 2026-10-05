@@ -31,18 +31,18 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
     internal DatabaseEngine Database => fixture.Database;
     internal PartitionRef First => fixture.Partition with { PartitionKey = FirstKey };
     internal PartitionRef Second => fixture.Partition with { PartitionKey = SecondKey };
-    internal PhysicalShardRecord ExpectedOwner => new(ShardId, Incarnation,
+    internal static PhysicalShardRecord ExpectedOwner => new(ShardId, Incarnation,
         PhysicalShardCatalogVoterIds.Standard, 1);
 
-    internal PartitionQueryRequestV1 Request(ImmutableArray<PartitionRef> partitions, int limit = 8,
+    internal static PartitionQueryRequestV1 Request(ImmutableArray<PartitionRef> partitions, int limit = 8,
         SelectQuery? query = null)
         => new(1, partitions, query ?? Query(limit), null, true, 1);
 
-    internal SelectQuery Query(int limit = 8)
+    internal static SelectQuery Query(int limit = 8)
         => new(Collection, null, [new("/label", "label")], null,
             [new("/score", true)], limit);
 
-    internal void AddRows(PartitionRef partition, params PartitionQuerySeed[] rows)
+    internal void AddRows(PartitionRef partition, params PartitionQueryPublicSeed[] rows)
     {
         var mutations = rows.Select(row => (Mutation)new PutDocument(Collection, row.Id,
             JsonSerializer.Serialize(new { score = row.Score, label = row.Label, secret = row.Secret },
@@ -72,4 +72,3 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
 
     public void Dispose() => fixture.Dispose();
 }
-

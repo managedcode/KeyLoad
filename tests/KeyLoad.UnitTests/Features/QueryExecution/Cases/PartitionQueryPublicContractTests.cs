@@ -9,9 +9,9 @@ internal sealed class PartitionQueryPublicContractTests
     public async Task GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses()
     {
         using var fixture = new PartitionQueryPublicTestSupport();
-        fixture.AddRows(fixture.First, new PartitionQuerySeed("same", 2, "first"));
-        fixture.AddRows(fixture.Second, new PartitionQuerySeed("same", 1, "second"));
-        var request = fixture.Request([fixture.Second, fixture.First], 2);
+        fixture.AddRows(fixture.First, new PartitionQueryPublicSeed("same", 2, "first"));
+        fixture.AddRows(fixture.Second, new PartitionQueryPublicSeed("same", 1, "second"));
+        var request = PartitionQueryPublicTestSupport.Request([fixture.Second, fixture.First], 2);
         var result = Run(fixture, request);
         var bytes = NativeSerialization.Serialize(result);
         var roundTrip = NativeSerialization.Deserialize<PartitionQueryPageV1>(bytes);
@@ -31,7 +31,7 @@ internal sealed class PartitionQueryPublicContractTests
     public async Task DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead()
     {
         using var fixture = new PartitionQueryPublicTestSupport();
-        var valid = fixture.Request([fixture.First], 1);
+        var valid = PartitionQueryPublicTestSupport.Request([fixture.First], 1);
         var position = fixture.Position;
         var empty = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Partitions = [] }));
         var defaultArray = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture,
@@ -61,5 +61,5 @@ internal sealed class PartitionQueryPublicContractTests
     private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
         PartitionQueryRequestV1 request, string principalId = "root")
         => new QueryEngine(fixture.Database).QueryPartitions(principalId, request,
-            fixture.ExpectedOwner);
+            PartitionQueryPublicTestSupport.ExpectedOwner);
 }

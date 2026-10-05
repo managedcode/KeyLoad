@@ -37,8 +37,8 @@ internal sealed record PartitionQueryRf3Scenario(
     {
         var run = Guid.NewGuid().ToString(GuidFormat);
         var partitions = ImmutableArray.Create(
-            new PartitionRef(Tenant, "a-pquery-authorized-db-" + run, Domain, "authorized-leaf"),
-            new PartitionRef(Tenant, "b-pquery-denied-db-" + run, Domain, "denied-leaf"));
+            new PartitionRef(Tenant, "a-pquery-authorized-db-" + run, Domain, PartitionQueryRf3Protocol.AuthorizedPartition),
+            new PartitionRef(Tenant, "b-pquery-denied-db-" + run, Domain, PartitionQueryRf3Protocol.DeniedPartition));
         var inputs = ImmutableArray.Create(
             new PartitionQueryRf3InputRow(partitions[0], "authorized-row", 1, "authorized"),
             new PartitionQueryRf3InputRow(partitions[1], "denied-row", 1, "denied"));
@@ -72,9 +72,9 @@ internal sealed record PartitionQueryRf3Scenario(
     {
         var run = Guid.NewGuid().ToString(GuidFormat);
         return ImmutableArray.Create(
-            new PartitionRef(Tenant + "-" + run, Database, Domain, "a-bound"),
-            new PartitionRef(Tenant + "-" + run, Database, Domain, "b-fallback"),
-            new PartitionRef(Tenant + "-" + run, Database, Domain, "c-empty"));
+            new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryRf3Protocol.BoundPartition),
+            new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryRf3Protocol.FallbackPartition),
+            new PartitionRef(Tenant + "-" + run, Database, Domain, PartitionQueryRf3Protocol.EmptyPartition));
     }
 
     private static ImmutableArray<PartitionQueryRf3InputRow> CreateInputs(ImmutableArray<PartitionRef> partitions)

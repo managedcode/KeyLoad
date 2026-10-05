@@ -55,6 +55,6 @@ internal static class AtomicPartitionPlacementRf3Assertions
         await Assert.That(actual.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.VoterIds.Length).IsEqualTo(PhysicalShardCatalogRf3Protocol.VoterCount);
         await Assert.That(actual.VoterIds.Distinct(StringComparer.Ordinal).Count())
-            .IsEqualTo(PhysicalShardCatalogRf3Protocol.VoterCount).ConfigureAwait(false);
+            .IsEqualTo(PhysicalShardCatalogRf3Protocol.VoterCount);
     }
 }

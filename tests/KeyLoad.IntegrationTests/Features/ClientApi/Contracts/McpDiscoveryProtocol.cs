@@ -38,6 +38,7 @@ internal static class McpDiscoveryProtocol
     internal const string MaxVertices = "maxVertices";
     internal const string MaxEdges = "maxEdges";
     internal const string Labels = "labels";
+    internal const string Label = "label";
     internal const string Found = "found";
     internal const string Hops = "hops";
     internal const string Vertices = "vertices";

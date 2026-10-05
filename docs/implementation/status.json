@@ -1335,8 +1335,22 @@
   },
   "KL-037": {
     "title": "Distributed query execution",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/QueryExecution/DistributedQueryExecution.md",
+      "docs/ADR/ADR-100-local-partition-query-merge.md",
+      "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.PartitionQuery.cs",
+      "src/KeyLoad.Client/Features/QueryExecution/Transport/PartitionQueryClient.cs",
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicContractTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/QueryExecution/Cases/PartitionQueryPublicRf3Tests.cs"
+    ],
+    "sourceStage": "bounded_same_physical_owner_partition_query_public_sdk_http_mcp_and_native_orleans_read_path",
+    "qualification": {
+      "implementation": "source joined; local Release solution build has zero warnings/errors; focused Aspire unit validation passed 25/25",
+      "acceptance": "open",
+      "remotePhysicalOwnerFanout": "not implemented",
+      "fullTaskComplete": false
+    }
   },
   "KL-038": {
     "title": "Cross-partition graph edges",

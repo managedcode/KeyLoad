@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 /// <summary>AC-MCP-003: every body-bearing read DTO and exact no-body contracts.</summary>
 internal sealed class McpReadDecodeTests
 {
-    private const int BodyReadCount = 26;
+    private const int BodyReadCount = 27;
     private const string WrongCaseRequestKey = "Request";
     private const string ReferenceKey = "reference";
     private const string PrivateMarker = "private-value-that-must-not-appear-in-an-error";

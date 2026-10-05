@@ -142,13 +142,12 @@ internal static class McpGraphPathInputSchemaAssertions
         { return schema; }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
-            if (schema.TryGetProperty(keyword, out var variants) && variants.ValueKind == JsonValueKind.Array)
+            if (!schema.TryGetProperty(keyword, out var variants) || variants.ValueKind != JsonValueKind.Array)
+            { continue; }
+            foreach (var variant in variants.EnumerateArray())
             {
-                foreach (var variant in variants.EnumerateArray())
-                {
-                    if (ContainsType(variant, expected, root))
-                    { return FindType(variant, expected, root); }
-                }
+                if (ContainsType(variant, expected, root))
+                { return FindType(variant, expected, root); }
             }
         }
         throw new InvalidOperationException(InvalidSchemaType);
