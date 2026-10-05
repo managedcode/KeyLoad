@@ -1,6 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+using KeyLoad.Core.Features.ClusterRouting.Identity;
+using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -32,12 +35,44 @@ public sealed partial class DatabaseEngine
         long position, long replicationIndex)
     {
         var resultKey = KeySpace.Outcome(operation.PrincipalId, operation.Id);
-        if (replicationIndex > 0 && transaction.ReadOwnedValue(KeySpace.AppliedBytes) is { } appliedBytes
-            && NativeSerialization.Deserialize<long>(appliedBytes) >= replicationIndex)
+        var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
+        if (ReadAlreadyAppliedOutcome(transaction, operation, replicationIndex) is { } applied)
         {
-            return transaction.GetRecord<StoredOutcome>(resultKey)?.Result ?? new(null);
+            return applied;
         }
         var fingerprint = CommandFingerprint(operation);
+        var outcome = ExecuteAndBuildOutcome(transaction, operation, position, replicationIndex, fingerprint,
+            partitionScope, out var replayed);
+        if (replayed)
+        {
+            return outcome.Result;
+        }
+        PersistCommandOutcome(transaction, operation, resultKey, outcome, replicationIndex);
+        return ValidateCompiledCommand(transaction, operation, resultKey, outcome, replicationIndex);
+    }
+
+    private static OperationResult? ReadAlreadyAppliedOutcome(IAtomicTransaction transaction, ReplicatedOperation operation,
+        long replicationIndex)
+    {
+        if (replicationIndex <= 0 || transaction.ReadOwnedValue(KeySpace.AppliedBytes) is not { } appliedBytes
+            || NativeSerialization.Deserialize<long>(appliedBytes) < replicationIndex)
+        {
+            return null;
+        }
+        var resultKey = KeySpace.Outcome(operation.PrincipalId, operation.Id);
+        if (transaction.GetRecord<StoredOutcome>(resultKey) is not { } applied)
+        {
+            return new(null);
+        }
+        ValidateOutcomePartitionScope(transaction, operation, applied);
+        return applied.Result;
+    }
+
+    private StoredOutcome ExecuteAndBuildOutcome(IAtomicTransaction transaction, ReplicatedOperation operation,
+        long position, long replicationIndex, string fingerprint, CommandOutcomePartitionScope partitionScope,
+        out bool replayed)
+    {
+        replayed = false;
         long policyEpoch = 0;
         BlobOutcomeAuthority? blobAuthority = null;
         OperationResult result;
@@ -46,38 +81,53 @@ public sealed partial class DatabaseEngine
         {
             var principal = Principal(transaction, operation.PrincipalId, operation.EvaluatedAt);
             policyEpoch = principal.PolicyEpoch;
-            AuthorizeOperation(transaction, principal, operation);
+            var placement = AuthorizeOperation(transaction, principal, operation);
+            var resultKey = KeySpace.Outcome(operation.PrincipalId, operation.Id);
             if (transaction.GetRecord<StoredOutcome>(resultKey) is { } previous)
             {
-                return ReplayCommand(transaction, principal, operation, previous, fingerprint, replicationIndex);
+                result = ReplayCommand(transaction, principal, operation, previous, fingerprint, replicationIndex);
+                replayed = true;
+                return previous;
             }
-            ValidateCommandClock(transaction, operation.EvaluatedAt);
-            if (BlobStorageOperations.Handles(operation.Kind))
+            else
             {
-                blobAuthority = new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation);
+                ValidateCommandClock(transaction, operation.EvaluatedAt);
+                if (BlobStorageOperations.Handles(operation.Kind))
+                {
+                    blobAuthority = new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation);
+                }
+                result = Execute(transaction, principal, operation, replicationIndex > 0 ? replicationIndex : position,
+                    placement);
+                compositionAuthority = CaptureCompositionOutcome(operation, result);
             }
-            result = Execute(transaction, principal, operation, replicationIndex > 0 ? replicationIndex : position);
-            compositionAuthority = CaptureCompositionOutcome(operation, result);
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
         {
             transaction.Reset();
+            replayed = false;
             result = new(null, exception.Code, exception.Message);
         }
         catch (JsonException)
         {
             transaction.Reset();
+            replayed = false;
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
-        var outcome = new StoredOutcome(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
+        return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope);
+    }
+
+    private StoredOutcome BuildStoredOutcome(string fingerprint, long policyEpoch, OperationResult result,
+        BlobOutcomeAuthority? blobAuthority,
+        global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority,
+        CommandOutcomePartitionScope partitionScope)
+        => new(fingerprint, Store.Identity.Incarnation, policyEpoch, result)
         {
             BlobAuthority = result.Error is null ? blobAuthority : null,
-            CompositionAuthority = result.Error is null ? compositionAuthority : null
+            CompositionAuthority = result.Error is null ? compositionAuthority : null,
+            ScopeKind = partitionScope.Kind,
+            Partition = partitionScope.Partition
         };
-        PersistCommandOutcome(transaction, operation, resultKey, outcome, replicationIndex);
-        return ValidateCompiledCommand(transaction, operation, resultKey, outcome, replicationIndex);
-    }
 
     private OperationResult ReplayCommand(IAtomicTransaction transaction, PrincipalRecord principal,
         ReplicatedOperation operation, StoredOutcome previous, string fingerprint, long replicationIndex)
@@ -90,6 +140,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
         }
+        ValidateOutcomePartitionScope(transaction, operation, previous);
         ValidateCachedResult(transaction, principal, operation, previous);
         if (replicationIndex > 0)
         {
@@ -113,6 +164,14 @@ public sealed partial class DatabaseEngine
         if (transaction.ReadOwnedValue(resultKey) is null)
         {
             transaction.PutRecord(resultKey, outcome);
+            if (outcome.ScopeKind == CommandOutcomeScopeKind.Partition)
+            {
+                if (outcome.Partition is null)
+                {
+                    throw Errors.Fail(ErrorCode.Corruption, "A partition-scoped command outcome has no partition identity.");
+                }
+                CommandOutcomePartitionLocatorSerialization.Write(transaction, outcome.Partition, operation.PrincipalId, operation.Id);
+            }
         }
         if (replicationIndex > 0)
         {

@@ -104,7 +104,7 @@ internal static class PartitionQueryMcpSchemaAssertions
     private static async Task VerifyDictionaryAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        schema = FindBranch(schema, McpDiscoveryProtocol.Object);
+        schema = FindBranch(schema, McpDiscoveryProtocol.Object, allowNullType: true);
         await Assert.That(schema.TryGetProperty(McpDiscoveryProtocol.AdditionalProperties, out var additional)).IsTrue();
         await Assert.That(additional.ValueKind).IsNotEqualTo(JsonValueKind.False);
     }
@@ -151,13 +151,8 @@ internal static class PartitionQueryMcpSchemaAssertions
 
     private static bool HasType(JsonElement schema, string expected)
     {
-        if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type))
-        {
-            if (type.ValueKind == JsonValueKind.String && type.GetString() == expected)
-            { return true; }
-            if (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(item => item.GetString() == expected))
-            { return true; }
-        }
+        if (HasDirectType(schema, expected, allowNullType: false))
+        { return true; }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
             if (schema.TryGetProperty(keyword, out var variants) && variants.EnumerateArray().Any(item => HasType(item, expected)))
@@ -166,10 +161,9 @@ internal static class PartitionQueryMcpSchemaAssertions
         return false;
     }
 
-    private static JsonElement FindBranch(JsonElement schema, string expectedType)
+    private static JsonElement FindBranch(JsonElement schema, string expectedType, bool allowNullType = false)
     {
-        if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var actual)
-            && actual.ValueKind == JsonValueKind.String && actual.GetString() == expectedType)
+        if (HasDirectType(schema, expectedType, allowNullType))
         { return schema; }
         foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
         {
@@ -177,10 +171,28 @@ internal static class PartitionQueryMcpSchemaAssertions
             { continue; }
             foreach (var variant in variants.EnumerateArray())
             {
-                if (HasType(variant, expectedType))
+                if (HasDirectType(variant, expectedType, allowNullType))
                 { return variant; }
             }
         }
         throw new InvalidOperationException(MaximumReferenceDepthMessage);
+    }
+
+    private static bool HasDirectType(JsonElement schema, string expected, bool allowNullType)
+    {
+        if (!schema.TryGetProperty(McpDiscoveryProtocol.Type, out var actual))
+        { return false; }
+        if (actual.ValueKind == JsonValueKind.String)
+        { return actual.GetString() == expected; }
+        if (actual.ValueKind != JsonValueKind.Array)
+        { return false; }
+
+        var types = actual.EnumerateArray().ToArray();
+        if (types.Length == 1)
+        { return types[0].ValueKind == JsonValueKind.String && types[0].GetString() == expected; }
+        return allowNullType && types.Length == 2
+            && types.All(item => item.ValueKind == JsonValueKind.String)
+            && types.Count(item => item.GetString() == expected) == 1
+            && types.Count(item => item.GetString() == McpDiscoveryProtocol.Null) == 1;
     }
 }

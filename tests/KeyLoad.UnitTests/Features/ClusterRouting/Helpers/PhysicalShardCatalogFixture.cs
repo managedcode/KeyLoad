@@ -2,8 +2,8 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Security;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -46,6 +46,10 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
         => Database.Apply(new(Guid.NewGuid(), OperationKind.ConfigurePrincipal, RootPrincipalId,
             Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(new ConfigurePrincipalRequest(principal), JsonDefaults.Options)));
 
+    internal OperationResult BootstrapPublic(BootstrapPhysicalShardCatalogRequest request)
+        => Database.Apply(new(Guid.NewGuid(), OperationKind.BootstrapPhysicalShardCatalog, RootPrincipalId,
+            Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options)));
+
     internal byte[] ReadCatalogBytes()
     {
         byte[]? bytes = null;
@@ -55,11 +59,10 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
     }
 
     internal void ReplaceCatalog(PhysicalShardCatalog catalog)
-        => Store.Commit((transaction, _) =>
-        {
-            transaction.PutRecord(PhysicalShardCatalogRecordSerialization.CatalogKey(), catalog);
-            return true;
-        });
+    {
+        using var encoder = new NativeSerializerFixture();
+        ReplaceCatalogBytes(encoder.Encode(catalog));
+    }
 
     internal void ReplaceCatalogBytes(byte[] bytes)
         => Store.Commit((transaction, _) =>

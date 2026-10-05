@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -59,6 +60,7 @@ internal sealed class AggregateReplayFixture : IDisposable
             Open(limits, timeProvider);
             database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+            PhysicalShardTestBootstrap.Bootstrap(database, RootId);
             ConfigureResource(protectedFields);
             ConfigurePrincipal(WorkerId, Capability.EventsReplay | Capability.EventsRead | Capability.EventsSnapshotsManage,
                 protectedFields ? [PayloadReadGrant, PayloadUseGrant, HeaderReadGrant, HeaderUseGrant] : []);
@@ -162,6 +164,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     {
         store.Dispose();
         Open(limits, timeProvider);
+        PhysicalShardTestBootstrap.RequireExisting(database);
     }
 
     internal long Position => Store.Position;

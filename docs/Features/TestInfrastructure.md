@@ -1,5 +1,34 @@
 # TestInfrastructure
 
+### Native process settlement and complete CI suite budget
+
+REQ/AC-TEST-015 requires the local-image lifetime helpers to await already
+completed original exit/stdout/stderr tasks on every observation-loop entry.
+A completed reader fault immediately starts owned failure cleanup. Cleanup sends
+SIGTERM, allows the existing one-second grace and kills only the original owned
+tree if actual exit remains pending. Five seconds is a failed-cleanup escalation
+threshold, never successful settlement: record the timeout, retry the owned kill
+when necessary, await actual exit, then close only still-pending owned pipe
+handles and await both original readers. Preserve the primary failure before
+cleanup failures. Never release process/context/application owners while original
+tasks are unsettled or use a detached continuation as settlement. Native tests
+cover an already faulted reader while the child remains alive and cancellation
+after actual readiness; explicit temporary-directory helpers delete only after
+process settlement and preserve deletion failures.
+
+Root joins local image cleanup in TestSuiteApplication only after actual AppHost
+stop and producer/runner settlement, under a separate45-second cleanup token,
+before output settlement and application disposal. Preparation output is included
+only for explicit local mode. Default GitHub image selection and full RF3 gates
+remain mandatory.
+
+REQ/AC-TEST-010 also requires enough bounded GitHub job time for all three
+sequential unit, scalar and recovery suites plus build/format/preflight. Exact
+run37349838022 exhausted the previous30-minute job limit after both unit suites
+failed and cancelled recovery. The Linux verify job receives120 minutes; no
+individual native suite deadline, required check, artifact or failure predicate
+is removed. A failed, timed out or cancelled suite remains failed/unqualified.
+
 AC-TEST-010 requires original per-suite MTP/TRX evidence from every required
 CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`;
 an omitted report setting, absent report, cancelled suite or failed native

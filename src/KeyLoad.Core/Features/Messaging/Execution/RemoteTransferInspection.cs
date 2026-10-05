@@ -86,7 +86,7 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        ValidateIntentRecord(record, source, transferId);
+        ValidateIntentRecord(view, record, source, transferId);
         _ = RemoteTransferStorage.RequireSourceCounter(view, source);
         return new(source, transferId, record.Destination, record.State, record.IntentToken, record.ReceiptToken);
     }
@@ -109,12 +109,12 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        ValidateTargetReceiptRecord(record, source, destination, transferId);
+        ValidateTargetReceiptRecord(view, record, source, destination, transferId);
         _ = RemoteTransferStorage.RequireTargetCounter(view, destination);
         return new(destination, source, transferId, record.ReceiptToken, record.TargetCommit);
     }
 
-    private void ValidateTargetReceiptRecord(RemoteTransferTargetReceiptRecord record,
+    private void ValidateTargetReceiptRecord(IKeyValueView view, RemoteTransferTargetReceiptRecord record,
         QueueLaneRef source, QueueLaneRef destination, Guid transferId)
     {
         if (record.Source != source || record.Destination != destination || record.TransferId != transferId
@@ -130,12 +130,12 @@ public sealed partial class DatabaseEngine
         if (claims.Purpose != RemoteTransferProtocol.ReceiptPurpose || claims.Incarnation != Store.Identity.Incarnation
             || claims.Source != source || claims.Destination != destination || claims.TransferId != transferId
             || claims.PrincipalId != record.PrincipalId || claims.Fingerprint != record.Fingerprint
-            || claims.TargetCommit != record.TargetCommit || record.TargetCommit.Incarnation != Store.Identity.Incarnation
-            || record.TargetCommit.AtomicPartitionId != destination.Partition.AtomicPartitionId
-            || record.TargetCommit.Position < 1 || record.TargetCommit.OwnershipEpoch != 1)
+            || claims.TargetCommit != record.TargetCommit)
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);
         }
+        ValidateCommitToken(view, destination.Partition, record.TargetCommit,
+            ErrorCode.Corruption, TransferReceiptCorruptMessage);
     }
 
     private static void ValidateTransferSource(QueueLaneRef source, Guid transferId, PartitionRef partition)

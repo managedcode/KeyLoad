@@ -51,8 +51,7 @@ internal static class ClusterResources
         var nodeNames = ReadNodeNames(benchmarkNodeCount);
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
-        var images = ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount);
-        var probes = RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images);
+        var (localImage, images, probes) = ReadImagesAndProbes(builder, root, ephemeral, benchmarkNodeCount);
         ClusterProfileStore.PrepareDirectory(root);
         var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
         var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
@@ -64,9 +63,11 @@ internal static class ClusterResources
         for (var index = 0; index < nodes.Length; index++)
         {
             var name = nodeNames[index];
-            var directory = Path.Combine(root, name);
-            ClusterProfileStore.PrepareDirectory(directory);
-            var resource = images[name].Add(builder, name)
+            var directory = PrepareVoterDirectory(root, name);
+            var resource = localImage is null
+                ? images![name].Add(builder, name)
+                : builder.AddContainer(name, LocalDevelopmentContainerImage.Repository, localImage.Tag);
+            resource
                 .WithContainerName(string.Format(CultureInfo.InvariantCulture, ContainerNameCompositeFormat,
                     profile.Incarnation.ToString(ClusterGuidFormat), name))
                 .WithContainerNetworkAlias(name)
@@ -91,6 +92,32 @@ internal static class ClusterResources
             nodes[index] = resource;
         }
         return nodes;
+    }
+
+    private static (LocalDevelopmentContainerImage? LocalImage,
+        IReadOnlyDictionary<string, RuntimeContainerImage>? Images, RequestCqrsProbeProfile? Probes)
+        ReadImagesAndProbes(IDistributedApplicationBuilder builder, string root, bool ephemeral,
+            int? benchmarkNodeCount)
+    {
+        var localImage = LocalDevelopmentContainerImage.Read(builder);
+        if (localImage is not null && (!ephemeral || benchmarkNodeCount is not null))
+        {
+            throw new InvalidOperationException("Local RF3 image mode requires the ordinary ephemeral RF3 topology.");
+        }
+        var images = localImage is null ? ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount) : null;
+        var probes = localImage is null
+            ? RequestCqrsProbeProfile.Read(builder, root, ephemeral, benchmarkNodeCount, images!)
+            : RequestCqrsProbeProfileSettingsReader.Read(builder.Configuration) is null
+                ? null
+                : throw new InvalidOperationException("Local RF3 image mode cannot be combined with a protocol probe.");
+        return (localImage, images, probes);
+    }
+
+    private static string PrepareVoterDirectory(string root, string name)
+    {
+        var directory = Path.Combine(root, name);
+        ClusterProfileStore.PrepareDirectory(directory);
+        return directory;
     }
 
     private static string[] ReadNodeNames(int? benchmarkNodeCount)

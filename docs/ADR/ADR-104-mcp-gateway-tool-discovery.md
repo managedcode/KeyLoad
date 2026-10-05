@@ -44,7 +44,10 @@ sequenceDiagram
 
 The exact wire, metadata permission boundary, index/input/output bounds,
 canonical-adapter seam, cancellation/drain contract and test matrix are owned
-once by ToolDiscovery. Metadata is public operation documentation visible to a
+once by ToolDiscovery. AC-MCP-001 separately verifies the current independently
+enumerated 68-name internal canonical catalog and exact schemas/hints through the
+official client; that count is not the three-name public initial listing. Metadata
+is public operation documentation visible to a
 fresh authenticated principal, never actual resources/data or an access grant.
 Invocation revalidates persisted authorization even after discovery. The graph is
 disposable metadata; ZoneTree remains canonical for every database model.

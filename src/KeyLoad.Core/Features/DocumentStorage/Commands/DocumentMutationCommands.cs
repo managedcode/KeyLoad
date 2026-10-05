@@ -30,7 +30,7 @@ public sealed partial class DatabaseEngine
         }
 
         Features.RelationalStorage.RelationalRowValidation.ValidateRow(resource, put.Id, put.Json, Limits);
-        var json = JsonData.Validate(put.Json, Limits);
+        var json = JsonData.ValidateDocument(put.Json, Limits);
         foreach (var policy in resource.FieldPolicies)
         {
             Authorization.RequireFieldWrite(principal, resource, policy.Path);

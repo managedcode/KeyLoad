@@ -29,7 +29,7 @@ public sealed partial class DatabaseEngine
         {
             tx.PutRecord(QueueKey(QueueCountersSpace, request.Lane), state.Counters!);
         }
-        return new(request.RequestId, state.Deliveries.ToImmutableArray(), Token(request.Lane.Partition, position));
+        return new(request.RequestId, state.Deliveries.ToImmutableArray(), Token(tx, request.Lane.Partition, position));
     }
 
     private bool CaptureReadyItem(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request,

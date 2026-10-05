@@ -30,6 +30,12 @@ public static class JsonData
     /// <param name="requireObject">Whether the root must be an object.</param>
     /// <returns>Owned canonical text with ordinal property order.</returns>
     public static string Validate(string json, DatabaseLimits limits, bool requireObject = true)
+        => ValidateCore(json, limits, requireObject, preserveContent: false);
+
+    internal static string ValidateDocument(string json, DatabaseLimits limits)
+        => ValidateCore(json, limits, requireObject: true, preserveContent: true);
+
+    private static string ValidateCore(string json, DatabaseLimits limits, bool requireObject, bool preserveContent)
     {
         ArgumentNullException.ThrowIfNull(json);
         ArgumentNullException.ThrowIfNull(limits);
@@ -44,12 +50,13 @@ public static class JsonData
             {
                 throw Errors.Fail(ErrorCode.Validation, ObjectRequiredDetail);
             }
-            using var bytes = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(bytes))
+            using var bytes = preserveContent ? null : new MemoryStream();
+            using (var writer = new Utf8JsonWriter(bytes is null ? Stream.Null : bytes))
             {
                 CanonicalJsonWriter.Write(writer, document.RootElement);
             }
-            return Encoding.UTF8.GetString(bytes.GetBuffer().AsSpan(0, checked((int)bytes.Length)));
+            return bytes is null ? json
+                : Encoding.UTF8.GetString(bytes.GetBuffer().AsSpan(0, checked((int)bytes.Length)));
         }
         catch (JsonException)
         {

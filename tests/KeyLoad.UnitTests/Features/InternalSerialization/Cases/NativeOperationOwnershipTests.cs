@@ -26,7 +26,7 @@ internal sealed class NativeOperationOwnershipTests
         await Assert.That(first.Get<CommitReceipt>().Token).IsEqualTo(replay.Get<CommitReceipt>().Token);
         var entity = database.Database.GetDocument(NativeAuthorityFixture.Root,
             new(database.Partition, NativeAuthorityFixture.Collection, NativeAuthorityFixture.Entity))!;
-        await Assert.That(entity.Json).IsEqualTo(JsonData.Validate(NativeAuthorityFixture.Json, database.Database.Limits));
+        await Assert.That(entity.Json).IsEqualTo(NativeAuthorityFixture.Json);
         await Assert.That(entity.Revision).IsEqualTo(1L);
         await Assert.That(database.Database.ResolveOutcome(verified).Get<CommitReceipt>().Token).IsEqualTo(first.Get<CommitReceipt>().Token);
     }

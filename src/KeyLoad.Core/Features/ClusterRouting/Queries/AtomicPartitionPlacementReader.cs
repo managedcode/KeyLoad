@@ -37,6 +37,17 @@ public sealed partial class DatabaseEngine
         return ResolvePlacement(view, partition, catalog.DefaultShard);
     }
 
+    internal static AtomicPartitionPlacementResolution ReadPlacementWitness(IKeyValueView view,
+        PartitionRef partition)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        ValidatePartition(partition);
+        var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, "The physical shard catalog is not initialized.");
+        PhysicalShardCatalogValidation.ValidateCatalog(catalog);
+        return ResolvePlacement(view, partition, catalog.DefaultShard);
+    }
+
     private static AtomicPartitionPlacementResolution ResolvePlacement(IKeyValueView view,
         PartitionRef partition, PhysicalShardRecord defaultShard)
     {

@@ -14,7 +14,7 @@ internal sealed class EmbeddedBenchmarkContractTests
 {
     private const string TemporaryDirectoryPrefix = "keyload-benchmark-";
     private const string BenchmarkDocumentId = "1";
-    private const string BenchmarkDocumentJson = "{\"number\":42,\"text\":\"clustered document database\"}";
+    private const string BenchmarkDocumentJson = "{\"text\":\"clustered document database\",\"number\":42}";
     private const string TenantKeyPart = "tenant";
     private const string DatabaseKeyPart = "database";
     private const string PartitionKeyPart = "partition";

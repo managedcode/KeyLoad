@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
@@ -51,6 +52,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
             Open(new());
             database.Bootstrap(new(AdministratorId, SystemTenantId, [new(AllScopes, AllScopes, Capability.All)], [AllScopes]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(AdministratorId, AdministratorId, CredentialSecret));
+            PhysicalShardTestBootstrap.Bootstrap(database, AdministratorId);
             ConfigureResource(protectedFields);
             ConfigureReader();
             AppendEvents(eventCount);
@@ -84,6 +86,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     {
         store.Dispose();
         Open(limits);
+        PhysicalShardTestBootstrap.RequireExisting(database);
     }
 
     public long HeadAndFirstEventReadBytes()

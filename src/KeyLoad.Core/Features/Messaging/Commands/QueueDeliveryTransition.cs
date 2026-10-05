@@ -38,7 +38,7 @@ public sealed partial class DatabaseEngine
         }
         tx.PutRecord(QueueKey(MessageMetadataSpace, command.Lane, metadata.Id), updated);
         tx.PutRecord(QueueKey(QueueCountersSpace, command.Lane), counters);
-        return new(command.CommandId, Token(command.Lane.Partition, position),
+        return new(command.CommandId, Token(tx, command.Lane.Partition, position),
             [new(command.Action.ToString(), command.Lane.Queue, metadata.Id, updated.StateVersion)], Durability);
     }
 

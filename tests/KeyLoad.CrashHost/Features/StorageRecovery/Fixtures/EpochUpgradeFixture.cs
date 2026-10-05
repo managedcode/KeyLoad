@@ -14,6 +14,13 @@ internal static class EpochUpgradeFixture
     private const string RecordKeyName = "record";
     private const string SystemNamespace = "system";
     private const string LastAppliedKey = "last-applied";
+    private const string OutcomePrincipal = "epoch-outcome-probe";
+    private const string OutcomeAdminKey = "epoch-outcome-probe-owned-admin-key-2026";
+    private const string OutcomeTenant = "epoch-outcome-tenant";
+    private const string OutcomeDatabase = "epoch-outcome-database";
+    private const string OutcomeResource = "epoch-outcome-resource";
+    private const string OutcomeDomain = "epoch-outcome-domain";
+    private const string OutcomeCreateFailure = "The prior outcome probe command did not commit successfully.";
 
     internal static byte[] FirstKey => KeyCodec.Encode(Namespace, RecordKeyName, 0L);
     internal static byte[] SecondKey => KeyCodec.Encode(Namespace, RecordKeyName, 1L);
@@ -22,6 +29,31 @@ internal static class EpochUpgradeFixture
     internal static byte[] FirstValue => [0x00, 0x7F, 0x80, 0xFF];
     internal static byte[] SecondValue => [0x11, 0x00, 0xFE, 0x22];
     internal static byte[] MarkerValue => [0xE0, 0x00, 0x0D];
+    internal const string OutcomePrincipalId = OutcomePrincipal;
+
+    internal static byte[] CreateOutcomeFrame(ZoneTreeStore store, Guid commandId)
+    {
+        ArgumentNullException.ThrowIfNull(store);
+        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        store.Commit((transaction, _) =>
+        {
+            transaction.PutRecord(AppliedKey, 0L);
+            return true;
+        });
+        BootstrapOutcomeNode(database);
+        var definition = new ResourceDefinition(OutcomeResource, ResourceKind.Collection, OutcomeDomain);
+        var request = new ConfigureResourceRequest(OutcomeTenant, OutcomeDatabase, definition);
+        var operation = database.CreateNativeOperation(OperationKind.ConfigureResource, commandId, OutcomePrincipal,
+            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var result = database.Apply(operation);
+        if (result.Error is not null)
+        {
+            throw Errors.Fail(result.Error.Value, OutcomeCreateFailure);
+        }
+        var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.Outcome(OutcomePrincipal, commandId)))
+            ?? throw Errors.Fail(ErrorCode.Corruption, OutcomeCreateFailure);
+        return bytes;
+    }
 
     internal static void Seed(ZoneTreeStore store, bool compacted)
     {
@@ -74,6 +106,12 @@ internal static class EpochUpgradeFixture
             _ = snapshots.Create(index, 1);
         }
         return EpochPriorSourceReply.Succeeded(canonical.Identity, canonical.Position, database.LastApplied);
+    }
+
+    private static void BootstrapOutcomeNode(DatabaseEngine database)
+    {
+        database.Bootstrap(new(OutcomePrincipal, "system", [new("*", "*", Capability.All)], ["*"])
+        { ClusterAdministrator = true }, DatabaseEngine.Credential("outcome-probe-key", OutcomePrincipal, OutcomeAdminKey));
     }
 
     private static void BootstrapNode(DatabaseEngine database, string key)

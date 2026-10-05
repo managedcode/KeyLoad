@@ -17,6 +17,8 @@ internal static class CrashDatabase
                 [new(CrashFixtureValues.Wildcard, CrashFixtureValues.Wildcard, Capability.All)], [CrashFixtureValues.Wildcard])
         { ClusterAdministrator = true },
             DatabaseEngine.Credential(CrashFixtureValues.Principal, CrashFixtureValues.Principal, CrashFixtureValues.Credential));
+        RecoveryPhysicalShardBootstrap.Bootstrap(database, CrashFixtureValues.Principal,
+            ["crash-a", "crash-b", "crash-c"]);
         return database;
     }
 

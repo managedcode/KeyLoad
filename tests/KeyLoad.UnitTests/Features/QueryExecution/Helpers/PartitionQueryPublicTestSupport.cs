@@ -21,7 +21,7 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
 
     internal PartitionQueryPublicTestSupport(DatabaseLimits? limits = null, SensitiveFieldPolicy[]? fields = null)
     {
-        fixture = new TestDatabase(limits);
+        fixture = new TestDatabase(limits, bootstrapPhysicalShardCatalog: false);
         fixture.Submit(OperationKind.BootstrapPhysicalShardCatalog,
             new BootstrapPhysicalShardCatalogRequest(1, 0, ShardId, Incarnation,
                 PhysicalShardCatalogVoterIds.Standard));

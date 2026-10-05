@@ -57,4 +57,8 @@ public static class KeySpace
     /// <param name="id">Stable operation identifier.</param>
     /// <returns>The canonical independent outcome key.</returns>
     public static byte[] Outcome(string principal, Guid id) => KeyCodec.Encode(OutcomeSpace, principal, id);
+
+    /// <summary>Creates a partition-scoped locator for a globally keyed command outcome.</summary>
+    internal static byte[] OutcomeLocator(PartitionRef partition, string principal, Guid id)
+        => Partition("outcome-locator-v1", partition, principal, id);
 }

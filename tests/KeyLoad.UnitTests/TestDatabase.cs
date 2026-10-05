@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests;
 
@@ -23,7 +24,8 @@ internal sealed class TestDatabase : IDisposable
     public ZoneTreeStore Store { get; }
     public DatabaseEngine Database { get; }
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
-    public TestDatabase(DatabaseLimits? limits = null, string? directory = null)
+    public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
+        bool bootstrapPhysicalShardCatalog = true)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
@@ -37,6 +39,10 @@ internal sealed class TestDatabase : IDisposable
             Database = new(Store, new AuthorizationPolicy(), limits);
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
+            if (bootstrapPhysicalShardCatalog)
+            {
+                PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipalId);
+            }
         }
         catch (Exception)
         {

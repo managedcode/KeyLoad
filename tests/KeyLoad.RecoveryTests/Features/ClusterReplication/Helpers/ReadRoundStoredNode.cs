@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
+using KeyLoad.CrashHost;
 using KeyLoad.Replication;
 using KeyLoad.Security;
 
@@ -31,6 +32,7 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
             Database.Bootstrap(new(Principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
+            RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
             Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, Configuration));
             Consensus = new(Materializer, Configuration, TimeProvider.System);
         }

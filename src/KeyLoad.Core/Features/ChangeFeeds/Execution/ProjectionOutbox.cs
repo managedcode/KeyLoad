@@ -225,11 +225,11 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Validation, "An empty projection batch cannot produce effects.");
             }
 
-            return new(new(request.CommandId, Token(request.Consumer.Partition, position), [], Durability), false, state.Checkpoint);
+            return new(new(request.CommandId, Token(tx, request.Consumer.Partition, position), [], Durability), false, state.Checkpoint);
         }
         var effects = ApplyMutations(tx, principal, request.Consumer.Partition, request.Effects, now, position,
             allowOutboxProgressReserve: state.LastProgressReservationCut != head.FirstAvailable);
-        var receipt = new CommitReceipt(request.CommandId, Token(request.Consumer.Partition, position), effects, Durability);
+        var receipt = new CommitReceipt(request.CommandId, Token(tx, request.Consumer.Partition, position), effects, Durability);
         var after = ReadOutboxHead(tx, request.Consumer.Partition);
         var usedReserve = effects.Length > 0 && (after.StoredRecords > Limits.MaxOutboxRecords || after.StoredBytes > Limits.MaxOutboxBytes);
         tx.PutRecord(ConsumerKey(request.Consumer), state with

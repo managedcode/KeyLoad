@@ -4,6 +4,7 @@ using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -179,6 +180,7 @@ internal sealed class SampleRetentionLifecycleTests
 
             store = new(new ZoneTreeStoreOptions(path));
             var reopened = new DatabaseEngine(store, new AuthorizationPolicy());
+            PhysicalShardTestBootstrap.RequireExisting(reopened);
             var status = reopened.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
                 new(new("tenant", "database", "orders", CustomerId),
                     SampleAggregateTestData.Set, SampleAggregateTestData.Series));
@@ -208,6 +210,7 @@ internal sealed class SampleRetentionLifecycleTests
         var database = new DatabaseEngine(store, new AuthorizationPolicy());
         database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
+        PhysicalShardTestBootstrap.Bootstrap(database, "root");
         database.Apply(new(Guid.NewGuid(), OperationKind.ConfigureResource, "root", TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(new ConfigureResourceRequest("tenant", "database",
                 new ResourceDefinition(SampleAggregateTestData.Set, ResourceKind.TimeSeries, "orders")), JsonDefaults.Options)));

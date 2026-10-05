@@ -2,6 +2,17 @@
 
 Status: Accepted, 2026-10-05; implementation and qualification pending.
 
+Current-format recovery setup follows REQ/AC-SCAT-006 in the linked feature:
+root adds a test-only native bootstrap/read-and-validate helper, then joins it
+after persisted administrator setup in current positive CrashDatabase,
+ReplicaCrashNode and ReadRoundStoredNode fixtures. It uses the actual configured
+voters/store incarnation and UnixEpoch, preserves reopen identity, original
+replica positions and all crash/replay assertions. The ordinary Core apply path
+remains strict when the catalog is absent. Genuine prior source/image drivers
+and deliberately missing/corrupt negative fixtures receive no bootstrap. Verify
+through the sequential Aspire-owned recovery runner; this setup is not a
+production quorum or movement qualification.
+
 ## Decision and implementation contract
 
 Implement [PhysicalShardCatalog](../Features/ClusterRouting/PhysicalShardCatalog.md)

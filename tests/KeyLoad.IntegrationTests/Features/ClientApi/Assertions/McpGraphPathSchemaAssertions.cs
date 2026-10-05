@@ -16,9 +16,11 @@ internal static class McpGraphPathSchemaAssertions
         McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition];
     private static readonly ImmutableArray<string> EntityProperties =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.Id];
-    private static readonly ImmutableArray<string> PartitionProperties =
+    private static readonly ImmutableArray<string> PartitionRequired =
     [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId,
         McpDiscoveryProtocol.TransactionDomainId, McpDiscoveryProtocol.PartitionKey];
+    private static readonly ImmutableArray<string> PartitionProperties =
+        PartitionRequired.Add(McpDiscoveryProtocol.AtomicPartitionId);
     private static readonly ImmutableArray<string> EdgeProperties =
     [McpDiscoveryProtocol.Id, McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To,
         McpDiscoveryProtocol.Label, McpDiscoveryProtocol.AttributesJson, McpDiscoveryProtocol.Revision];
@@ -71,7 +73,7 @@ internal static class McpGraphPathSchemaAssertions
         await VerifyFieldsAsync(schema, EntityProperties, EntityProperties);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
         var partition = Resolve(root, properties.GetProperty(McpDiscoveryProtocol.Partition));
-        await VerifyFieldsAsync(partition, PartitionProperties, PartitionProperties);
+        await VerifyFieldsAsync(partition, PartitionProperties, PartitionRequired);
         foreach (var field in PartitionProperties)
         { await VerifyPrimitiveAsync(partition, field, McpDiscoveryProtocol.String, root); }
         await VerifyPrimitiveAsync(schema, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.String, root);

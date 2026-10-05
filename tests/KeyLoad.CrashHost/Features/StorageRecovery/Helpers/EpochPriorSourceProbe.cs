@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -15,10 +16,13 @@ internal static class EpochPriorSourceProbe
     internal const string CreateNodeOperation = "createNode";
     internal const string InspectOperation = "inspect";
     internal const string VerifySnapshotOperation = "verifySnapshot";
+    internal const string CreateOutcomeFrameOperation = "createOutcomeFrame";
     private const int ExpectedDataEpoch = 5;
     private const int Native6DataEpoch = 6;
     private const int RejectedExitCode = 1;
     private const int MaximumInputCharacters = 16384;
+    internal const int MaximumOutcomeFrameBytes = 16384;
+    internal const int MaximumOutcomeFrameBase64Characters = 21848;
     private const string InvalidProbe = "The prior-executable probe input or data epoch is invalid.";
     internal static JsonSerializerOptions JsonOptions { get; } = new(JsonSerializerDefaults.Web);
 
@@ -82,14 +86,7 @@ internal static class EpochPriorSourceProbe
 
     private static async Task<EpochPriorSourceReply> ExecuteAsync(EpochPriorSourceRequest request, int expectedDataEpoch)
     {
-        if (string.IsNullOrWhiteSpace(request.Directory) || !KnownOperation(request.Operation))
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidProbe);
-        }
-        if (request.Operation is CreateOperation or CreateNodeOperation && Directory.Exists(request.Directory))
-        {
-            throw Errors.Fail(ErrorCode.Conflict, InvalidProbe);
-        }
+        ValidateRequest(request);
         if (request.Operation == CreateNodeOperation)
         {
             var reply = await EpochUpgradeFixture.CreateNodeAsync(request.Directory,
@@ -104,6 +101,10 @@ internal static class EpochPriorSourceProbe
         {
             return VerifySnapshot(request) with { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
         }
+        if (request.Operation == CreateOutcomeFrameOperation && expectedDataEpoch != Native6DataEpoch)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidProbe);
+        }
 
         using var store = new ZoneTreeStore(new(request.Directory));
         if (store.Identity.FormatVersion != expectedDataEpoch)
@@ -114,10 +115,56 @@ internal static class EpochPriorSourceProbe
         {
             EpochUpgradeFixture.Seed(store, request.Compacted);
         }
+        if (request.Operation == CreateOutcomeFrameOperation)
+        {
+            return CreateOutcomeFrame(store, request) with
+            { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
+        }
         var applied = store.Read(view => NativeSerialization.Deserialize<long>(
             view.ReadOwnedValue(EpochUpgradeFixture.AppliedKey)!));
         return EpochPriorSourceReply.Succeeded(store.Identity, store.Position, applied) with
         { SourceRevision = SourceRevisionForEpoch(expectedDataEpoch) };
+    }
+
+    private static void ValidateRequest(EpochPriorSourceRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Directory) || !KnownOperation(request.Operation))
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidProbe);
+        }
+        if (request.Operation == CreateOutcomeFrameOperation
+            && (request.OutcomeCommandId is not { } commandId || commandId == Guid.Empty))
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidProbe);
+        }
+        if ((request.Operation is CreateOperation or CreateNodeOperation or CreateOutcomeFrameOperation)
+            && Directory.Exists(request.Directory))
+        {
+            throw Errors.Fail(ErrorCode.Conflict, InvalidProbe);
+        }
+    }
+
+    private static EpochPriorSourceReply CreateOutcomeFrame(ZoneTreeStore store, EpochPriorSourceRequest request)
+    {
+        var commandId = request.OutcomeCommandId!.Value;
+        var bytes = EpochUpgradeFixture.CreateOutcomeFrame(store, commandId);
+        if (bytes.Length is <= 0 or > MaximumOutcomeFrameBytes)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidProbe);
+        }
+        var encoded = Convert.ToBase64String(bytes);
+        if (encoded.Length > MaximumOutcomeFrameBase64Characters)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidProbe);
+        }
+        var applied = store.Read(view => NativeSerialization.Deserialize<long>(
+            view.ReadOwnedValue(EpochUpgradeFixture.AppliedKey)!));
+        return EpochPriorSourceReply.Succeeded(store.Identity, store.Position, applied) with
+        {
+            OutcomeFrameBase64 = encoded,
+            OutcomeCommandId = commandId,
+            OutcomePrincipalId = EpochUpgradeFixture.OutcomePrincipalId
+        };
     }
 
     private static EpochPriorSourceReply VerifySnapshot(EpochPriorSourceRequest request)
@@ -130,16 +177,27 @@ internal static class EpochPriorSourceProbe
     }
 
     private static bool KnownOperation(string operation)
-        => operation is CreateOperation or CreateNodeOperation or InspectOperation or VerifySnapshotOperation;
+        => operation is CreateOperation or CreateNodeOperation or InspectOperation or VerifySnapshotOperation
+            or CreateOutcomeFrameOperation;
 }
 
 internal sealed record EpochPriorSourceRequest(string Directory, string Operation, bool Compacted = false,
-    string? Snapshot = null, EpochPriorNodeProfile? NodeProfile = null);
+    string? Snapshot = null, EpochPriorNodeProfile? NodeProfile = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] Guid? OutcomeCommandId = null);
 
 internal sealed record EpochPriorSourceReply(string SourceRevision, int DataEpoch, long Position,
     long AppliedPosition, Guid NodeId, Guid Incarnation, long ReadGeneration, bool DispatchPaused,
     string SigningKeySha256, DurabilityProfile Durability, string? ErrorCode = null)
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? OutcomeFrameBase64 { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Guid? OutcomeCommandId { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? OutcomePrincipalId { get; init; }
+
     internal static EpochPriorSourceReply Succeeded(StoreIdentity identity, long position, long applied)
         => new(EpochPriorSourceProbe.SourceRevision, identity.FormatVersion, position, applied,
             identity.NodeId, identity.Incarnation, identity.ReadGeneration, identity.DispatchPaused,

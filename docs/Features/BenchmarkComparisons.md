@@ -1027,6 +1027,19 @@ records the implementation contract. No benchmark runner, native database,
 website, public contract or persisted data is changed; rollback restores the two
 original probes and removes the helper. Local tests remain development evidence.
 
+The original stage86e full-unit report retains the later genuine unconfirmed
+StartTime race. Before its test-oracle repair, root freezes a readonly retry:
+AssertExitedAsync may retain that original Win32Exception and observe the same
+captured PID/start identity again at the existing10ms cadence until the unchanged
+test deadline. An unknown observation remains pending, never false/success and
+never authority to kill. Only confirmed native absence/exit or a verified
+different start identity establishes that the old process exited. If no proof
+arrives, rethrow the retained original failure; dual/fatal confirmation failures
+remain immediate. CaptureIdentity, the kill/reaper identity checks, original
+process/cancellation ownership and5s cleanup are unchanged. Root owns only the
+readonly support loop; the actual five native Node cases and full suites remain
+the proof, with no synthetic process or broader Win32-to-success handling.
+
 
 ## Accepted native Chrome session admission (2026-10-05)
 

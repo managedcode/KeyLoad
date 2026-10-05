@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
@@ -36,6 +37,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         Apply(ConfigureResource(new(Collection, ResourceKind.Collection, DomainId)
         { SchemaVersion = initialSchemaVersion })).Get<ResourceDefinition>();
         Commit(new PutDocument(Collection, DocumentId, PublicDocument));

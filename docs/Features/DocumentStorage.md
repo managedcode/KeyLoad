@@ -1,5 +1,30 @@
 # DocumentStorage
 
+### Exact caller-owned document text (REQ/AC-DSTORE-008)
+
+REQ-DSTORE-008 retains the exact validated `PutDocument.Json` text in the native
+canonical document record: Unicode, escapes, property order, whitespace and
+decimal spelling remain caller-owned. Validation still enforces the same byte,
+depth, object-root, duplicate-member and decimal-range rules. Reuse the existing
+CanonicalJsonWriter validation walk with a discard sink rather than materializing
+rewritten canonical text. `JsonData.Validate` and every frozen canonical
+fingerprint/golden digest remain unchanged. Patch produces its existing validated
+derived document; redacted reads still use the existing persisted field policy.
+There is no promise of original text for a redacted or patched result.
+
+AC-DSTORE-008 maps to `DocumentExactContentTests`: real TestDatabase/ZoneTree Put,
+authorized raw read, native record roundtrip and exact same-command replay retain
+literal caller text; replacement retains its new literal text; duplicate members
+and out-of-range decimals still fail without effects. Existing CRUD, rollback,
+index, image/outbox and native serialization regressions remain mandatory. The
+real SDK/official MCP `PhysicalShardCatalogRf3Tests` Unicode assertion remains
+exact across every voter and restart. Root owns JsonData's shared validation join
+and the document command/test slice; [ADR-060](../ADR/ADR-060-native-internal-serialization.md)
+already requires exact caller-owned document strings. Stored record aliases/IDs,
+native format, public DTOs and command fingerprints do not change; existing
+historical records are not rewritten. Local proof and exact-source Linux RF3
+qualification are separate required evidence.
+
 Status: source-present baseline documented; complete product and GitHub qualification remain pending. Current behavior is distinguished below from the accepted target architecture in [design sections 7 and 37–41](../design/architecture-v0.3.uk.md).
 
 ## Purpose and actors
@@ -38,7 +63,7 @@ The current root-level files are documented migration debt under ADR-032, not th
 | REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; actual `DocumentScalarIndexMutationTests` covers persisted old/new index transitions and rollback. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; actual field/row/tenant matrix plus isolated replacement-write and Delete-index-use controls. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
-| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. | TASK-MP-007I in ADR-035; new real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
+| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Native placement admission adds exactly three bounded metadata point reads to the prior six, reused by the Batch receipt and every outbox effect under REQ/AC-MTOKEN-007; paired-size payload work remains unchanged. | TASK-MP-007I in ADR-035 and ADR-017; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
 | REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. This remains planned until original Aspire/native reports exist. |
 | REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | TASK-DSTORE-OUTCOME-MATRIX under ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
 
@@ -129,3 +154,11 @@ TASK-DSTORE-RF3-PARITY adds only new `McpDocumentCrudParityTests`, `McpDocumentC
 Two mirrored success cases use the actual existing keyed Aspire ClusterFixture, separate real scoped persisted principal/API-key grants, the .NET SDK and official MCP C# SDK on different RF3 endpoints. One executes SDK create -> MCP explicit replacement -> SDK Patch -> MCP Delete; the other reverses each caller. Both callers therefore successfully execute Patch and Delete, and opposite-client reads assert exact canonical JSON and revisions 1/2/3, revision4 tombstone mutation receipt, and null from both after deletion. Matching accepted command retries through the other client preserve the original command receipt/token. A third case performs an explicit replacement at revision1, then repeats a stale expected revision1 through MCP and the same stable command through SDK: exact RevisionConflict and unchanged revision2/JSON are required. Error assertions do not infer durable storage of a failed outcome merely from repeated identical errors.
 
 Use the existing bounded McpCallerDeadline, actual persisted authorization helpers, native official tool serializers and existing fixture cleanup. No mock, hand-written MCP transport, trusted client role, new listener, broadened retries or weakened test is allowed. Existing document and policy tests stay intact. The earlier e97 Linux RF3 report remains 83/84 overall; this test scope counts only after its own complete exact-source Linux Aspire RF3 result.
+
+TASK-DSTORE-EXACT-TEXT also updates the existing native ownership, malformed
+record restore, canonical retry and embedded-fixture oracles to require the
+original submitted literal JSON, rather than `JsonData.Validate` output. Their
+authority/corruption/revision/receipt/no-second-effect assertions stay intact.
+Canonical validation/fingerprint golden bytes remain unchanged; canonical retry
+equivalence must not rewrite the first acknowledged document text. These cases
+map to REQ/AC-DSTORE-008 and ADR-060 with the dedicated exact-content tests.

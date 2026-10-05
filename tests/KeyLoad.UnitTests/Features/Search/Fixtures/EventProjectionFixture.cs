@@ -5,6 +5,7 @@ using KeyLoad.Core.Features.Search;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -196,6 +197,7 @@ internal sealed class EventProjectionHarness : IDisposable
         Open();
         Database.Bootstrap(new(RootId, SystemTenant, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
+        PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         bootstrapped = true;
     }
 
@@ -225,6 +227,7 @@ internal sealed class EventProjectionHarness : IDisposable
     {
         Store.Dispose();
         Open();
+        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

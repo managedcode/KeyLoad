@@ -11,26 +11,25 @@ public sealed partial class DatabaseEngine
     private const string UnsupportedBatchMutationMessage = "This mutation is unsupported.";
     private const string CompositionBatchRequiredMessage = "Database composition requires a standalone atomic command.";
 
-    private void AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
+    private AtomicPartitionPlacementResolution? AuthorizeOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
     {
         ClusterPrincipalPolicy.RequireOperation(principal, operation.Kind);
         if (BlobStorageOperations.Handles(operation.Kind))
         {
             new BlobStorageOperations(this).Authorize(view, principal, operation);
-            return;
+            return null;
         }
         if (operation.Kind is OperationKind.ConfigureSubscription or OperationKind.SeekSubscription
             or OperationKind.SetSubscriptionPaused or OperationKind.ReceiveSubscription
             or OperationKind.SubscriptionDelivery or OperationKind.SubscriptionProcessing)
         {
             AuthorizeSubscriptionOperation(view, principal, operation);
-            return;
+            return null;
         }
         switch (operation.Kind)
         {
             case OperationKind.Batch:
-                AuthorizeBatch(view, principal, Payload<CommandRequest>(operation));
-                break;
+                return AuthorizeBatch(view, principal, Payload<CommandRequest>(operation));
             case OperationKind.Receive:
                 var receive = Payload<ReceiveRequest>(operation);
                 Authorization.Require(principal, receive.Lane.Partition, receive.Lane.Queue, Capability.QueueConsume);
@@ -53,6 +52,7 @@ public sealed partial class DatabaseEngine
                 }
                 break;
         }
+        return null;
     }
 
     private void AuthorizeSubscriptionOperation(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation)
@@ -87,10 +87,10 @@ public sealed partial class DatabaseEngine
                 break;
         }
     }
-    private void AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
+    private AtomicPartitionPlacementResolution AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
     {
-        ValidatePartition(request.Partition);
-        if (request.OwnershipEpoch != 1)
+        var placement = ReadPlacementWitness(view, request.Partition);
+        if (request.OwnershipEpoch != placement.PlacementEpoch)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
         }
@@ -136,6 +136,7 @@ public sealed partial class DatabaseEngine
             AuthorizeComposition(view, principal, request.Partition, mutation);
             AuthorizeExtendedMutation(view, principal, request.Partition, mutation);
         }
+        return placement;
     }
 
     private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)

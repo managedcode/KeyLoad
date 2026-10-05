@@ -1,6 +1,6 @@
 # Native CQRS stream contract v2
 
-The active epoch7 admission contract is [ADR-091](../../ADR/ADR-091-epoch7-interpretation-fence.md): application RequestInterfaceVersion3 and signed data-epoch7-rpc3 purposes admit the new feature cohort, while native stream shapes, v2 aliases/Ids and KLT2 framing remain frozen. The epoch6/rpc2 pins recorded below describe the prior C1 stage and do not authorize a mixed epoch6/7 deployment. Cancellation/shutdown/unavailable cohort fixtures now run without parallel contention, preserving every native RPC/TTL bound and failure oracle after the original Linux5-failure report.
+[ADR-091](../../ADR/ADR-091-epoch7-interpretation-fence.md) records the historical epoch7/rpc3 admission decision and its native stream-shape, v2 alias/Id, and KLT2 framing constraints. The current application discovery contract publishes RequestInterfaceVersion4 while signed data-epoch7-rpc3 purposes remain the cohort admission evidence; this current test-oracle expectation does not retroactively amend ADR-091. The epoch6/rpc2 pins recorded below describe the prior C1 stage and do not authorize a mixed epoch6/7 deployment. Cancellation/shutdown/unavailable cohort fixtures now run without parallel contention, preserving every native RPC/TTL bound and failure oracle after the original Linux5-failure report.
 
 Status: root implementation contract accepted, 2026-10-04; C1 implementation and regression fixtures are authored. The unchanged six C0 Aspire oracles also passed with published Communication10.2.9. C1 product qualification remains required; authored fault fixtures and local mechanism results do not close it. Canonical slice: ClusterRouting; parent [NativeCqrs](NativeCqrs.md). Decision: [ADR-082](../../ADR/ADR-082-native-cqrs-streams.md). Related slices: ClusterReplication, ClientApi, Authorization, ResourceExecution and StorageRecovery.
 
@@ -446,7 +446,7 @@ Before current serving, create one owned negative mixed root containing complete
 copies of published epoch7 node1 and untouched original epoch6 node2/3, with exact
 profile bytes and verified current/RPC1/RPC1 per-voter image references. This
 is an explicit incompatible-format/RPC fault wave, not a supported deployment or
-rolling upgrade. Assert signed current-node self-discovery reports RPC3/peer3,
+rolling upgrade. Assert signed current-node self-discovery reports RPC4/peer3,
 current node1 readiness503, and SDK/MCP closed OwnershipLost or MCP initialization503.
 The prior discovery uses the epoch6 signing purpose and cannot be authenticated
 as a version-zero record by the epoch7 verifier; never assert that false witness.
@@ -788,6 +788,50 @@ observes a later native log line, then completes and joins that consumer during
 scope cleanup. Repeated disposal, fail-closed publication, original task
 settlement, cleanup and fatal/error preservation remain asserted. No parser,
 artifact shape, cap, topology or timeout is changed.
+
+REQ-CRS-DIAG-006 / AC-CRS-DIAG-006 adds test-only first-failure lifecycle
+evidence before changing any cancellation behavior. Retain at most 2,048 UTF-8
+bytes using fixed stage/task labels, native `TaskStatus` and boolean
+cancellation facts. Capture the first failing stage and the states of the
+three exact original capture tasks, admission-observer move and optional
+independent-consumer move before cleanup changes them; capture their terminal
+states after every owned join. Record caller, parent/wave, capture, drain,
+observer and consumer cancellation separately. An absent task has the closed
+value `NotAdmitted`; it is not a fabricated completed task. Retain only fixed
+terminal kinds and slots, with no payload, identity, credential, log line,
+exception text, token value or filesystem path. Prove the complete fixed shape
+fits the byte cap; oversized context fails closed without truncating evidence.
+
+Stages include builder creation/build, subscriber admission, scenario,
+capture/consumer/observer join, artifact write, AppHost disposal and owned-root
+cleanup. Authority-fault cases separately record actual wave startup,
+three-node readiness, identity creation, held write and persisted revocation;
+readiness uses only bounded closed outcomes for the three actual resources.
+A startup failure cannot be reported as the intended post-revocation result.
+Neither suite deadlines nor readiness behavior changes.
+
+Attach context only at the test evidence boundary. Nonfatal failures may use
+one test-only aggregate with the exact original ordered exception objects,
+including nested aggregates, preserved as its inner exceptions. Fatal failure
+classification and existing propagation/priority remain unchanged; retain its
+fixed context separately without replacing the original failure. Do not edit
+`ServerFailureObserver`, filter cancellation, flatten aggregates, detach tasks,
+extend deadlines or change the parser, artifact schema or success conditions.
+The diagnostics owner may expose a read-only lifecycle snapshot of its native
+cleanup owner; no alternate collector or inferred task state is permitted.
+
+TASK-CRS-DIAG-FIRST-FAILURE first freezes this contract and ADR-082, then
+privately implements bounded feature-local lifecycle helpers and read-only
+joins in the existing diagnostics scope, cleanup, subscriber observer,
+independent consumer and authority-fault/readiness helpers. Native regressions
+require three captures to finish normally while the actual independent
+consumer receives a later marker; exact caller cancellation must fail at
+admission while joining all originals; actual early stream completion must
+remain a failure without published success evidence. Keep the real SDK/MCP
+held-revocation and no-effect assertions when readiness succeeds. Root reviews
+and joins the guarded patch, runs the serialized Aspire cases and delivered
+Linux RF3 gates, and retains original failures. Source evidence does not prove
+the cause of run37349838022 or close C1. Rollback removes only this test context.
 
 TASK-CRS-DIAG-DRAIN stages: freeze this contract, privately implement subscriber
 admission in `RequestCqrsRf3WaveStartup.cs`, bounded live-record observation

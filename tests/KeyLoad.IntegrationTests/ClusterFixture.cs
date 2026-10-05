@@ -73,8 +73,18 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             containerRuntime = new(App, containerNames, repository.FullName);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            await ClusterFixtureImageIdentity.VerifyAsync(App, timeout.Token);
+            var localImageIdentity = await LocalRf3ImageIdentity.VerifyBeforeStartAsync(App, repository.FullName,
+                timeout.Token);
+            if (localImageIdentity is null)
+            {
+                await ClusterFixtureImageIdentity.VerifyAsync(App, timeout.Token);
+            }
             await App.StartAsync(timeout.Token);
+            if (localImageIdentity is not null)
+            {
+                await LocalRf3ImageIdentity.VerifyStartedContainersAsync(localImageIdentity, containerNames,
+                    timeout.Token);
+            }
             ReadPrivateProfile();
 
             var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)

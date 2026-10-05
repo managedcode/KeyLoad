@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -25,6 +26,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         Database = new(this, new AuthorizationPolicy());
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(GraphSearchTestSupport.Documents, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Projects, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Graph, ResourceKind.Graph);

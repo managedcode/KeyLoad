@@ -37,26 +37,30 @@ async function copyBounded(child, handle, maximumBytes, state, decoder) {
   return { bytes, sha256: hash.digest('hex') };
 }
 
-export async function streamToFile(command, argv, target, maximumBytes, timeoutMs, cwd) {
-  return captureStream(command, argv, target, maximumBytes, timeoutMs, cwd);
+export async function streamToFile(command, argv, target, maximumBytes, timeoutMs, cwd, signal) {
+  return captureStream(command, argv, target, maximumBytes, timeoutMs, cwd, undefined, signal);
 }
 
-export async function streamHttpToFile(command, argv, target, headers, maximumBytes, timeoutMs, cwd) {
-  return captureStream(command, argv, target, maximumBytes, timeoutMs, cwd, responseDecoder(headers));
+export async function streamHttpToFile(command, argv, target, headers, maximumBytes, timeoutMs, cwd, signal) {
+  return captureStream(command, argv, target, maximumBytes, timeoutMs, cwd, responseDecoder(headers), signal);
 }
 
-async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd, decoder) {
+async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd, decoder, signal) {
   requireGitHub(Number.isSafeInteger(maximumBytes) && maximumBytes > 0 && Number.isSafeInteger(timeoutMs) && timeoutMs > 0);
+  signal?.throwIfAborted();
   const handle = await openExclusive(target);
   let child;
   try {
+    signal?.throwIfAborted();
     child = spawn(command, argv, { cwd, shell: false, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, NO_COLOR: '1', CLICOLOR_FORCE: '0', GH_FORCE_TTY: '' } });
   } catch { await handle.close(); throw new Error(GH.failure); }
   const state = { timedOut: false, exceeded: false, spawnFailed: false, stopping: false, stderrBytes: 0 };
   const cancel = () => { state.cancelled = true; stopOwned(child, state); };
+  signal?.addEventListener('abort', cancel, { once: true });
   process.on('SIGTERM', cancel);
   process.on('SIGINT', cancel);
+  if (signal?.aborted) cancel();
   const exit = monitor(child, state, timeoutMs);
   try {
     const output = await copyBounded(child, handle, maximumBytes, state, decoder);
@@ -70,6 +74,7 @@ async function captureStream(command, argv, target, maximumBytes, timeoutMs, cwd
     await exit;
     clearTimeout(state.timeout);
     clearTimeout(state.force);
+    signal?.removeEventListener('abort', cancel);
     process.off('SIGTERM', cancel);
     process.off('SIGINT', cancel);
     await handle.chmod(0o400);

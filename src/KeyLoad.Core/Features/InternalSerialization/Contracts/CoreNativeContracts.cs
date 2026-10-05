@@ -115,6 +115,14 @@ internal sealed record StoredOutcome(
     [JsonIgnore]
     [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.CompositionAuthority)]
     public global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? CompositionAuthority { get; init; }
+
+    [JsonIgnore]
+    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.ScopeKind)]
+    public global::KeyLoad.Core.Features.ClusterRouting.Contracts.CommandOutcomeScopeKind ScopeKind { get; init; }
+
+    [JsonIgnore]
+    [global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredOutcomeFields.Partition)]
+    public PartitionRef? Partition { get; init; }
 }
 
 [global::Orleans.GenerateSerializer]

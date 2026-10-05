@@ -84,7 +84,7 @@ internal sealed class CoreModelPersistenceTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         database.Store.Commit((transaction, _) => { transaction.Put(key, original); return true; });
         await Assert.That(database.Database.GetDocument(RootPrincipal, new(database.Partition, Collection, RecordId))!.Json)
-            .IsEqualTo(JsonData.Validate(RawJson, database.Database.Limits));
+            .IsEqualTo(RawJson);
     }
 
     private const string DocumentSpace = "document";

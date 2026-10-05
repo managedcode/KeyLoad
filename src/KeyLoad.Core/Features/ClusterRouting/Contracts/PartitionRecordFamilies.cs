@@ -30,6 +30,7 @@ internal static class PartitionRecordFamilies
     internal const string MessageMetadata = "message-meta";
     internal const string Outbox = "outbox";
     internal const string OutboxHead = "outbox-head";
+    internal const string OutcomeLocator = "outcome-locator-v1";
     internal const string ProjectionConsumer = "projection-consumer";
     internal const string ProjectionReceipt = "projection-receipt";
     internal const string QueueCounters = "queue-counters";
@@ -87,6 +88,7 @@ internal static class PartitionRecordFamilies
         MessageMetadata,
         Outbox,
         OutboxHead,
+        OutcomeLocator,
         ProjectionConsumer,
         ProjectionReceipt,
         QueueCounters,

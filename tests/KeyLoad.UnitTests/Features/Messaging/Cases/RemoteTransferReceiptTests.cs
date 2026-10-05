@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -28,6 +29,10 @@ internal sealed class RemoteTransferReceiptTests
         var target = fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transferId)!;
         var receipt = fixture.Database.Verify<RemoteTransferReceiptClaims>(target.ReceiptToken);
+        var destinationOwner = fixture.Store.Read(view => DatabaseEngine.ReadPlacementWitness(view, fixture.DestinationPartition));
+        await Assert.That(receipt.TargetCommit.Incarnation).IsEqualTo(destinationOwner.Incarnation);
+        await Assert.That(receipt.TargetCommit.AtomicPartitionId).IsEqualTo(fixture.DestinationPartition.AtomicPartitionId);
+        await Assert.That(receipt.TargetCommit.OwnershipEpoch).IsEqualTo(destinationOwner.PlacementEpoch);
 
         foreach (var invalidToken in InvalidReceipts(fixture, receipt, target.ReceiptToken))
         {
@@ -76,6 +81,7 @@ internal sealed class RemoteTransferReceiptTests
             fixture.Database.Sign(receipt with { PrincipalId = Principal }),
             fixture.Database.Sign(receipt with { Fingerprint = ChangedFingerprint }),
             fixture.Database.Sign(receipt with { TargetCommit = receipt.TargetCommit with { Position = 0 } }),
+            fixture.Database.Sign(receipt with { TargetCommit = receipt.TargetCommit with { OwnershipEpoch = 2 } }),
             RemoteTransferTokenTestSupport.TamperClaims(fixture.Database, validToken,
                 receipt with { TargetCommit = receipt.TargetCommit with { Position = receipt.TargetCommit.Position + 1 } }),
             validToken[..^1] + "!"

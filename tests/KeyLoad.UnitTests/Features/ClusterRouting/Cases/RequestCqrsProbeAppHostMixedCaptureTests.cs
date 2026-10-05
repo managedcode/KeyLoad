@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class RequestCqrsProbeAppHostMixedCaptureTests
 {
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
+    private const string InvalidProtocolConfiguration = "ProtocolCohortTestConfigurationInvalid";
     private const string CaptureKey = "KeyLoadTests:RequestCqrsProbe:DiscoveryCaptureMode";
     private const string CaptureMode = "mixed-interface3-v1";
     private const string CohortEnabled = "KeyLoadTests:ProtocolCohort:Enabled";
@@ -42,7 +43,7 @@ internal sealed class RequestCqrsProbeAppHostMixedCaptureTests
             await AssertRejectedAsync(fixture, homogeneous);
             var malformed = CreateBuilder(fixture, CurrentImage, PriorImage, PriorImage, CaptureMode,
                 new KeyValuePair<string, string?>(UnknownVoterKey, PriorImage));
-            await AssertRejectedAsync(fixture, malformed);
+            await AssertRejectedAsync(fixture, malformed, InvalidProtocolConfiguration);
         });
     }
 
@@ -72,10 +73,10 @@ internal sealed class RequestCqrsProbeAppHostMixedCaptureTests
         };
 
     private static async Task AssertRejectedAsync(RequestCqrsProbeAppHostFileFixture fixture,
-        IDistributedApplicationBuilder builder)
+        IDistributedApplicationBuilder builder, string expected = InvalidConfiguration)
     {
         var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
             RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, Images(builder)));
-        await Assert.That(error.Message).IsEqualTo(InvalidConfiguration);
+        await Assert.That(error.Message).IsEqualTo(expected);
     }
 }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -54,6 +55,7 @@ internal sealed class TransactionProtocolTests
                 var database = new DatabaseEngine(store, new AuthorizationPolicy());
                 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
                     DatabaseEngine.Credential("root", "root", "root.frame-test-credential-32-characters"));
+                PhysicalShardTestBootstrap.Bootstrap(database, "root");
                 OperationResult Submit<T>(OperationKind kind, Guid id, T payload, long index) => database.Apply(new(id, kind, "root", TimeProvider.System.GetUtcNow(),
                     JsonSerializer.Serialize(payload, JsonDefaults.Options)), index);
                 var partition = new PartitionRef("tenant", "database", "orders", PartitionId);
@@ -73,6 +75,7 @@ internal sealed class TransactionProtocolTests
             }
             using var reopened = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 });
             var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy());
+            PhysicalShardTestBootstrap.RequireExisting(recovered);
             await Assert.That(recovered.LastApplied).IsEqualTo(4);
             await Assert.That(recovered.Outcome("root", rejectedId)!.Error).IsEqualTo(ErrorCode.ResourceExhausted);
         }

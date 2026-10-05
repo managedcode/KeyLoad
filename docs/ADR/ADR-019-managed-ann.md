@@ -184,3 +184,21 @@ The source owner is restricted to `PackedAnnCandidateHeaps.cs` and
 patches, review, normal/scalar unchanged-corpus observations, strict gates and
 qualification. This is an unmeasured repeated-check optimization candidate,
 not a deadline diagnosis or speed claim. Rollback restores the five checks.
+
+## Accepted reciprocal insertion invariant, 2026-10-05
+
+REQ/AC-ANN-018 and TASK-ANN-RECIPROCAL-INSERTION in ManagedAnn freeze a narrow
+source-proven correction. Ascending private construction inserts a source once
+per layer; distinct prior reciprocal targets cannot already contain that new
+source at that layer. Remove only the target membership scan and unused helper,
+preserving the graph, candidate deduplication, scores, actual distance/edge work,
+cancellation, original deadlines and admission. Work counters must report the
+comparisons actually performed, without fabricated replacement charges.
+
+The Luna owner supplies the guarded source packet and independent native
+adjacency regressions. Root compares complete successful controls, retains
+original incomplete Linux normal/scalar observations, and owns the join and
+all strict/Aspire gates. A partial failed build cannot prove graph equivalence
+or speed. Migration is N/A: R1 remains an internal immutable candidate with no
+serialized/public contract; R2/R3 require separate accepted contracts. Rollback
+restores only the removed scan and helper.

@@ -28,6 +28,7 @@ internal static class CoreNativeAliases
     internal const string StoredMessageBody = "keyload.core.v1.StoredMessageBody";
     internal const string StoredOutboxEntry = "keyload.core.v1.StoredOutboxEntry";
     internal const string StoredOutcome = "keyload.core.v1.StoredOutcome";
+    internal const string CommandOutcomeScopeKind = "keyload.command-outcome-scope-kind.v1";
     internal const string SubscriptionCompletion = "keyload.core.v1.SubscriptionCompletion";
     internal const string TopicHead = "keyload.core.v1.TopicHead";
     internal const string TopicHeadSnapshot = "keyload.core.v1.TopicHeadSnapshot";

@@ -34,7 +34,6 @@ internal sealed class PhysicalShardCatalogVoterIdentityTests
         var invalidLists = new[]
         {
             ImmutableArray.Create(overlong),
-            ImmutableArray.CreateRange<string>([null!]),
             ImmutableArray.Create("  "),
             ImmutableArray.Create(PhysicalShardCatalogVoterIds.First, PhysicalShardCatalogVoterIds.First)
         };
@@ -42,11 +41,19 @@ internal sealed class PhysicalShardCatalogVoterIdentityTests
         foreach (var voters in invalidLists)
         {
             var request = PhysicalShardCatalogBootstrapTests.Request(ShardId, Incarnation, voters);
-            await Assert.That(fixture.Bootstrap(request).Error).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(fixture.Bootstrap(request, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Validation);
             var absent = Assert.ThrowsExactly<KeyLoadException>(() =>
                 fixture.Database.ReadPhysicalShardCatalog(PhysicalShardCatalogFixture.RootPrincipalId));
             await Assert.That(absent.Code).IsEqualTo(ErrorCode.NotFound);
         }
+        var nullVoter = PhysicalShardCatalogBootstrapTests.Request(ShardId, Incarnation,
+            ImmutableArray.CreateRange<string>([null!]));
+        var malformedNative = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Bootstrap(nullVoter));
+        await Assert.That(malformedNative.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(fixture.BootstrapPublic(nullVoter).Error).IsEqualTo(ErrorCode.Validation);
+        var missing = Assert.ThrowsExactly<KeyLoadException>(() =>
+            fixture.Database.ReadPhysicalShardCatalog(PhysicalShardCatalogFixture.RootPrincipalId));
+        await Assert.That(missing.Code).IsEqualTo(ErrorCode.NotFound);
     }
 
     [Test]

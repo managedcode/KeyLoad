@@ -22,7 +22,7 @@ internal sealed class CoreArgumentContractTests
         Assert.ThrowsExactly<ArgumentNullException>(() => database.Database.Apply(null!));
         Assert.ThrowsExactly<ArgumentNullException>(() => database.Database.ResolveOutcome(null!));
         Assert.ThrowsExactly<ArgumentNullException>(() => database.Database.Resource(null!, database.Partition, CollectionName));
-        Assert.ThrowsExactly<ArgumentNullException>(() => database.Database.Token(null!, 0));
+        Assert.ThrowsExactly<ArgumentNullException>(() => DatabaseEngine.Token(null!, database.Partition, 0));
         Assert.ThrowsExactly<ArgumentNullException>(() => DatabaseEngine.ValidatePartition(null!));
         Assert.ThrowsExactly<ArgumentNullException>(() => KeySpace.Partition(KeySpaceName, null!));
         Assert.ThrowsExactly<ArgumentNullException>(() => DatabaseEngine.Credential(CredentialId, RootPrincipal, null!));

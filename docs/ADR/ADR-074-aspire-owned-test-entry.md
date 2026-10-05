@@ -3,6 +3,19 @@
 Status: Accepted owner implementation contract; runtime qualification pending.
 Date: 2026-10-03. Related: REQ/AC-TEST-009..011 in TestInfrastructure, KL-080.
 
+Accepted2026-10-05 settlement amendment: follow the exact original-process and
+reader ownership contract in TestInfrastructure REQ/AC-TEST-015. Root joins image
+cleanup after actual AppHost stop/producer/runner settlement and before output
+join/disposal. Five-second cleanup escalation records failure and still awaits
+actual exit plus original readers; native overflow/readiness-cancellation cases
+retain primary and cleanup failures. No detached settlement or DirectoryInfo
+using declaration. Runtime proof remains pending until Aspire suites run.
+
+REQ/AC-TEST-010 increases only the Linux verify job's enclosing bound from30 to120
+minutes after original run37349838022 cancelled recovery at the old job limit.
+Keep unit, scalar and recovery sequential, every suite's native deadline and all
+required source/runtime/artifact gates. No timeout or failed suite becomes green.
+
 ## Decision and boundaries
 
 `KeyLoad.AppHost --KeyLoadTests:Suite=<suite>` composes one actual Aspire

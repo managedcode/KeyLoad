@@ -182,7 +182,7 @@ public sealed partial class DatabaseEngine
         state = FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result);
         state = AdvanceCheckpoint(tx, subscription, state);
         tx.PutRecord(GroupKey("subscription", subscription), state);
-        return new(request.RequestId, result.ToImmutableArray(), GroupInfo(tx, subscription, state), Token(subscription.Source.Partition, position));
+        return new(request.RequestId, result.ToImmutableArray(), GroupInfo(tx, subscription, state), Token(tx, subscription.Source.Partition, position));
     }
     private GroupState FillSubscriptionWindow(IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request,
         DateTimeOffset now, GroupState state, SubscriptionPolicy policy, ResourceDefinition resource, EventSourceHead head,
@@ -327,7 +327,7 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(key, delivery);
         state = AdvanceCheckpoint(tx, request.Subscription, state);
         tx.PutRecord(GroupKey("subscription", request.Subscription), state);
-        return new(request.CommandId, Token(request.Subscription.Source.Partition, position),
+        return new(request.CommandId, Token(tx, request.Subscription.Source.Partition, position),
             [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], Durability);
     }
     private SubscriptionProcessingResult CompleteSubscriptionProcessing(IAtomicTransaction tx, PrincipalRecord principal,

@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
@@ -11,7 +12,8 @@ internal sealed record TestSuiteSettings(
     bool ReportTrx,
     string? CoverageSettings,
     string? CoverageOutput,
-    string? ComparisonTarget)
+    string? ComparisonTarget,
+    bool LocalRf3ImageEnabled)
 {
     internal const string SuiteSetting = "KeyLoadTests:Suite";
     internal const string SuiteEnvironment = "KeyLoadTests__Suite";
@@ -36,6 +38,7 @@ internal sealed record TestSuiteSettings(
         var suite = configuration[SuiteSetting];
         if (string.IsNullOrWhiteSpace(suite))
         {
+            _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, configuration[FilterSetting]);
             return null;
         }
         var project = suite switch
@@ -56,6 +59,7 @@ internal sealed record TestSuiteSettings(
         }
         var filter = configuration[FilterSetting];
         ValidateBoundedValue(filter, MaximumFilterLength, "The test filter is invalid.", allowBlank: true);
+        var localRf3ImageEnabled = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
         var resultsDirectory = configuration[ResultsDirectorySetting];
         var coverageSettings = configuration[CoverageSettingsSetting];
         var coverageOutput = configuration[CoverageOutputSetting];
@@ -70,7 +74,8 @@ internal sealed record TestSuiteSettings(
         ArgumentOutOfRangeException.ThrowIfLessThan(minutes, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minutes, 180);
         return new(suite, project, filter, TimeSpan.FromMinutes(minutes), resultsDirectory,
-            configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget);
+            configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
+            localRf3ImageEnabled);
     }
 
     private static void ValidateBoundedValue(string? value, int maximumLength, string message, bool allowBlank = false)

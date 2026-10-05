@@ -471,3 +471,39 @@ workload, package, persistence, public API, migration, or RF3 change occurs.
    test, benchmark, Git, or checkout edit.
 4. Rollback restores these five original checks. No persisted or public format
    changes exist.
+
+## Accepted reciprocal insertion invariant, 2026-10-05
+
+REQ-ANN-018: Build inserts strictly ascending source ordinals with one private
+writer. Before insertion at a given layer, no prior node at that layer can have
+an edge to the new source. The selected reciprocal targets are distinct prior
+nodes; installing the source's own outgoing adjacency does not mutate their
+adjacency. Remove only the impossible target-adjacency membership scan for the
+new source from `PackedAnnNeighborSelection.AddReciprocalLinks`, and delete its
+now-unused `ContainsNeighbors` helper. Preserve candidate deduplication,
+selection and ordering, every actual distance and edge examination, graph
+updates, per-target cancellation/deadline checks, byte/work admission and the
+original 30-second `ReadExecutionBudget` bound. This invariant applies to each
+layer separately; it does not authorize a mutable-index update path.
+
+AC-ANN-018: Independent native tests inspect complete successful graph
+adjacency for valid prior/new source identities, unique neighbors, degree bounds
+and deterministic ordinal ordering on small deterministic and 10,000-record
+DotProduct corpora. Existing exact score, recall, eligibility, fallback,
+cancellation, deadline and healthy-follow-up assertions remain unchanged.
+Successful before/after controls must preserve graph contents, scores, distance
+and edge counts; work counters truthfully omit only comparisons no longer
+performed. An interrupted build has no complete graph/counter baseline and
+cannot establish that equivalence by comparing its partial counters. Root
+retains the original Linux normal/scalar deadline failures at source `788b8fd`
+and runs actual normal/scalar Aspire observations before any speed or deadline
+repair claim. Source proof alone is not a performance or acceptance result.
+
+Traceability: REQ-ANN-018 -> AC-ANN-018 -> ADR-019 amendment ->
+TASK-ANN-RECIPROCAL-INSERTION -> independent native graph tests and original
+Aspire reports. The Luna source owner produces a hash-guarded private packet
+for `src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborSelection.cs`
+and independent tests in the Search test slice. Root owns contract review,
+baseline/after observations, join, strict build/format and all required gates.
+No public, persistence, package, long-operation or RF3 contract changes occur.
+Rollback restores the scan and helper; R2/R3 remain separately unimplemented.

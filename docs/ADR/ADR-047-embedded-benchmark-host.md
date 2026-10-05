@@ -1,5 +1,15 @@
 # ADR-047: public embedded benchmark scenarios and typed executable
 
+The 2026-10-05 native placement prerequisite preserves REQ-BC-022 / AC-EM-002/003's
+real embedded microbenchmark contract: its setup must bootstrap a native physical
+catalog using that actual local store's NodeId/Incarnation and one explicit local
+voter before the existing ConfigureResource/Batch seed. Use the existing Core
+native operation factory and persisted bootstrap command, outside measured
+methods, with the same TimeProvider.System clock and owned cleanup. Root owns
+the BenchmarkScenarios setup join and real fixture/generated-consumer regressions
+through Aspire. This is the existing embedded control, not RF3 or comparison
+topology qualification; its three measured methods and inputs remain unchanged.
+
 Status: Accepted; implementation and qualification pending.
 Related: REQ-BC-022, AC-EM-001..004, AC-CQ-007/008, ADR032/033/035.
 

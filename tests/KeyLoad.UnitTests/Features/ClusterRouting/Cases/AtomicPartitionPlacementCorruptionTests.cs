@@ -75,11 +75,11 @@ internal sealed class AtomicPartitionPlacementCorruptionTests
         await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.Corruption);
         var before = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.RowKey(partition));
-        var bound = AtomicPartitionPlacementTestSupport.Bind(fixture,
-            new BindAtomicPartitionPlacementRequest(1, 1, partition, AtomicPartitionPlacementTestSupport.ShardId));
+        var bound = Assert.ThrowsExactly<KeyLoadException>(() => AtomicPartitionPlacementTestSupport.Bind(fixture,
+            new BindAtomicPartitionPlacementRequest(1, 1, partition, AtomicPartitionPlacementTestSupport.ShardId)));
         var after = AtomicPartitionPlacementTestSupport.ReadValue(fixture,
             AtomicPartitionPlacementTestSupport.RowKey(partition));
-        await Assert.That(bound.Error).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(bound.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(after.SequenceEqual(before)).IsTrue();
     }
 

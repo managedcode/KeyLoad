@@ -4,6 +4,7 @@ using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -45,6 +46,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
         Database = new(store, new AuthorizationPolicy(), limits);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
+        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(SourceQueue, sourceFields, sourceHeaders);
         Configure(DestinationQueue, destinationFields, destinationHeaders, destinationPolicy);
     }
@@ -106,6 +108,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
         store.Dispose();
         store = new(new(directory));
         Database = new(store, new AuthorizationPolicy(), replacementLimits ?? limits);
+        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

@@ -23,7 +23,7 @@ internal static class RequestCqrsRf3Protocol
     internal static readonly Uri ReadyUri = new(ReadyPath, UriKind.Relative);
     internal const int NodeCount = 3;
     internal const int CurrentMajority = 2;
-    internal const int ApplicationProtocolVersion = 3;
+    internal const int ApplicationProtocolVersion = 4;
     internal const int PeerEnvelopeVersion = 3;
     internal const int RequestCount = 20;
     internal static readonly TimeSpan ParentDeadline = TimeSpan.FromMinutes(12);

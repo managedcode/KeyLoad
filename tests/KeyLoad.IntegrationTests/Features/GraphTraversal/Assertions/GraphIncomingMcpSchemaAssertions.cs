@@ -86,14 +86,24 @@ internal static class GraphIncomingMcpSchemaAssertions
     {
         schema = Resolve(root, schema);
         await VerifyObjectAsync(schema, PartitionFields.Add(GraphIncomingMcpProtocol.AtomicPartitionId), PartitionFields);
-        foreach (var field in PartitionFields)
-        { await VerifyPrimitiveAsync(root, schema.GetProperty(GraphIncomingMcpProtocol.Properties).GetProperty(field), GraphIncomingMcpProtocol.String); }
+        var properties = schema.GetProperty(GraphIncomingMcpProtocol.Properties);
+        foreach (var field in PartitionFields.Add(GraphIncomingMcpProtocol.AtomicPartitionId))
+        { await VerifyPrimitiveAsync(root, properties.GetProperty(field), GraphIncomingMcpProtocol.String); }
     }
 
     private static async Task VerifyPrimitiveAsync(JsonElement root, JsonElement schema, string expected)
     {
         schema = Resolve(root, schema);
-        await Assert.That(schema.GetProperty(GraphIncomingMcpProtocol.Type).GetString()).IsEqualTo(expected);
+        var type = schema.GetProperty(GraphIncomingMcpProtocol.Type);
+        if (type.ValueKind == JsonValueKind.String)
+        {
+            await Assert.That(type.GetString()).IsEqualTo(expected);
+            return;
+        }
+        await Assert.That(type.ValueKind).IsEqualTo(JsonValueKind.Array);
+        var actualTypes = type.EnumerateArray().Select(item => item.GetString()).ToArray();
+        await Assert.That(actualTypes.Length).IsEqualTo(1);
+        await Assert.That(actualTypes[0]).IsEqualTo(expected);
     }
 
     private static Task VerifyObjectAsync(JsonElement schema, ImmutableArray<string> fields)

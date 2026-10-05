@@ -332,6 +332,14 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
+The original 104-task plan has **0 fully accepted, 103 in progress and 1 pending**.
+The latest local checkpoint passes the Release build, formatter and governance
+checks; its full unit suite passes **3,490 of 3,492 tests**, with two failures
+and no skips. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
+passes the official MCP SDK guidance case but fails the complete RF3 and release
+gates. [Checkpoint evidence](docs/implementation/partition-runtime-development-2026-10-05.json)
+keeps those failures and the remaining scalar, recovery, RF3 and scale gates explicit.
+
 | Ready to try (in source, covered by tests) | Still in progress |
 |---|---|
 | Documents, typed rows, graphs, queues, events, time series, blobs and search behind one permission model | Full SQL (joins, foreign keys) and a native SQL client protocol |

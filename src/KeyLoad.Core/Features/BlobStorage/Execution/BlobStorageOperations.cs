@@ -86,25 +86,25 @@ public sealed class BlobStorageOperations(DatabaseEngine database, TimeProvider?
         var publication = new BlobPublicationCommands(database);
         return operation.Kind switch
         {
-            OperationKind.BeginBlobUpload => Result(operation, scope, position,
+            OperationKind.BeginBlobUpload => Result(transaction, operation, scope, position,
                 upload.Begin(transaction, principal, BlobCommandScope.Payload<BeginBlobUploadRequest>(operation), operation.EvaluatedAt)),
-            OperationKind.WriteBlobPart => Result(operation, scope, position,
+            OperationKind.WriteBlobPart => Result(transaction, operation, scope, position,
                 upload.Write(transaction, BlobCommandScope.Payload<WriteBlobPartRequest>(operation), operation.EvaluatedAt)),
-            OperationKind.CompleteBlobUpload => Result(operation, scope, position,
+            OperationKind.CompleteBlobUpload => Result(transaction, operation, scope, position,
                 publication.Complete(transaction, BlobCommandScope.Payload<CompleteBlobUploadRequest>(operation), operation.EvaluatedAt)),
-            OperationKind.AbortBlobUpload => Result(operation, scope, position,
+            OperationKind.AbortBlobUpload => Result(transaction, operation, scope, position,
                 upload.Abort(transaction, BlobCommandScope.Payload<AbortBlobUploadRequest>(operation))),
-            OperationKind.DeleteBlob => Result(operation, scope, position,
+            OperationKind.DeleteBlob => Result(transaction, operation, scope, position,
                 publication.Delete(transaction, BlobCommandScope.Payload<DeleteBlobRequest>(operation), operation.EvaluatedAt)),
-            OperationKind.ReclaimBlob => Result(operation, scope, position,
+            OperationKind.ReclaimBlob => Result(transaction, operation, scope, position,
                 new BlobReclaimCommand(database).Execute(transaction, BlobCommandScope.Payload<ReclaimBlobRequest>(operation), operation.EvaluatedAt)),
             _ => throw BlobErrors.Validation()
         };
     }
 
-    private OperationResult Result<T>(ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
+    private OperationResult Result<T>(IKeyValueView view, ReplicatedOperation operation, BlobCommandScope scope, long position, T value)
     {
-        var receipt = new CommitReceipt(operation.Id, database.Token(scope.Blob.Partition, position), [], database.Durability);
+        var receipt = new CommitReceipt(operation.Id, DatabaseEngine.Token(view, scope.Blob.Partition, position), [], database.Durability);
         return new(null) { NativeValue = new BlobCommitResult<T>(receipt, value) };
     }
 

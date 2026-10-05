@@ -20,7 +20,7 @@ internal static class GraphCrossPartitionTestSupport
     internal static TestDatabase CreateDatabase(DatabaseLimits? limits = null,
         SensitiveFieldPolicy[]? graphFields = null)
     {
-        var database = new TestDatabase(limits);
+        var database = new TestDatabase(limits, bootstrapPhysicalShardCatalog: false);
         database.Configure(Collection, ResourceKind.Collection);
         database.Configure(Graph, ResourceKind.Graph, fields: graphFields);
         BootstrapOwner(database);

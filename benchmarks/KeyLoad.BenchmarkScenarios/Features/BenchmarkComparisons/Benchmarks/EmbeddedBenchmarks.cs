@@ -129,6 +129,12 @@ public class EmbeddedBenchmarks : IDisposable
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },
                 DatabaseEngine.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
+            var shardId = store.Identity.NodeId;
+            var catalog = new BootstrapPhysicalShardCatalogRequest(1, 0, shardId, store.Identity.Incarnation,
+                [shardId.ToString(GuidFormat)]);
+            Database.Apply(Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
+                PhysicalShardCatalogIdentity.CreateBootstrapCommandId(shardId), PrincipalId,
+                TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(catalog))).Get<bool>();
             Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(TenantId, DatabaseId,
                     new(CollectionId, ResourceKind.Collection, CollectionId)));

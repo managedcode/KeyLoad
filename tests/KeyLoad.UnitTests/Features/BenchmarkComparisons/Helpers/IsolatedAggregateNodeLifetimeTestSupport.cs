@@ -1,4 +1,6 @@
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -127,9 +129,26 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
     private static async Task AssertExitedAsync(List<IsolatedAggregateNodeIdentity> identities,
         Stopwatch timer, TimeSpan testDeadline)
     {
-        while (timer.Elapsed < testDeadline && identities.Any(IsSameProcessRunning))
+        Win32Exception? pending = null;
+        while (timer.Elapsed < testDeadline)
         {
+            try
+            {
+                if (!identities.Any(IsSameProcessRunning))
+                {
+                    return;
+                }
+                pending = null;
+            }
+            catch (Win32Exception failure)
+            {
+                pending = failure;
+            }
             await Task.Delay(ReceiptPollMilliseconds);
+        }
+        if (pending is not null)
+        {
+            ExceptionDispatchInfo.Capture(pending).Throw();
         }
         await Assert.That(identities.All(identity => !IsSameProcessRunning(identity))).IsTrue();
     }

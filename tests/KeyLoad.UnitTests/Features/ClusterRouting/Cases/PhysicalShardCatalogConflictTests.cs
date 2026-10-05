@@ -25,8 +25,8 @@ internal sealed class PhysicalShardCatalogConflictTests
         await Assert.That(fixture.Bootstrap(differentShard).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(differentIncarnation).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(reorderedVoters).Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(fixture.Bootstrap(emptyVoters).Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(fixture.Bootstrap(duplicateVoters).Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(fixture.Bootstrap(emptyVoters, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(fixture.Bootstrap(duplicateVoters, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Validation);
         var stale = request with { ExpectedRevision = 1 };
         await Assert.That(fixture.Bootstrap(stale, Guid.NewGuid()).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Bootstrap(request with { ExpectedRevision = -1 }, Guid.NewGuid()).Error)

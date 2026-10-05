@@ -11,8 +11,9 @@ public sealed partial class DatabaseEngine
     private const string DocumentEpochSpace = "document-epoch";
 
     private ImmutableArray<MutationReceipt> ApplyMutations(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations,
-        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false)
+        DateTimeOffset now, long position, bool allowOutboxProgressReserve = false, CommitToken? commitToken = null)
     {
+        var token = commitToken ?? Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
         foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now))
         {
@@ -34,7 +35,7 @@ public sealed partial class DatabaseEngine
             }
             receipts.Add(receipt);
             var after = image?.After;
-            AppendOutbox(tx, partition, new(0, receipts.Count - 1, Token(partition, position), now, mutation, receipt, before, after), allowOutboxProgressReserve);
+            AppendOutbox(tx, partition, new(0, receipts.Count - 1, token, now, mutation, receipt, before, after), allowOutboxProgressReserve);
             if (before is not null && after is not null && before.Access != after.Access)
             {
                 AdvanceVisibilityEpoch(tx, partition, mutation.Resource);

@@ -83,3 +83,24 @@ Removal or rollback of the test must retain qualification artifacts; product
 outcomes/locators retain the compatible forward-reader rollout contract above.
 The ADR remains accepted with implementation and all required gates open until
 the genuine prior-frame case and complete related source qualification pass.
+
+## Accepted transaction-local witness reuse, 2026-10-05
+
+REQ/AC-MTOKEN-007 fixes the source-review gap where Batch authorization still
+compared a literal epoch while receipt and per-effect outbox token creation
+repeated placement reads. Root first freezes the feature contract, then joins
+CommandAuthorization, AtomicCommandCommit, OperationDispatcher and
+AtomicMutationApplication in the existing apply path. Authorization returns only
+its validated same-transaction Batch witness; receipt and all outbox effects
+reuse one typed token. Other mutation groups resolve one token per group. No
+request/transaction cache or public/native format change is introduced.
+
+The genuine document paired-size read counters account for exactly three new
+placement point reads, with unchanged single before-image decode and no final
+staged image read. Native epoch, same-ID replay, domain-failure, composition,
+messaging, recovery and RF3 tests remain required through Aspire. Root retains
+original failures, source-bound receipts and actual gate outcomes before stage
+delivery. Rollback joins authorization/issuance/outbox callers coherently and
+cannot restore an invented epoch or discard scoped outcomes; recover forward if
+acknowledged metadata already exists. No movement-created epoch or acceleration
+claim follows from source/counter changes alone.

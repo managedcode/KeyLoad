@@ -32,7 +32,7 @@ public sealed partial class DatabaseEngine
         var existing = tx.GetRecord<RemoteTransferIntentRecord>(key);
         if (existing is not null)
         {
-            RequireExistingIntent(existing, request, principal.Id, fingerprint);
+            RequireExistingIntent(tx, existing, request, principal.Id, fingerprint);
             RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
             return TransferMutationReceipt(RemoteTransferProtocol.CreateReceiptKind, request.SourceQueue, request.TransferId, 1);
         }
@@ -41,7 +41,7 @@ public sealed partial class DatabaseEngine
         var claims = new RemoteTransferIntentClaims(RemoteTransferProtocol.IntentPurpose, Store.Identity.Incarnation,
             request.SourceQueue, request.TransferId, request.Destination, principal.Id, request.Message, fingerprint);
         var intentToken = Sign(claims);
-        var reservationBytes = ReceiptReservationBytes(request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint);
+        var reservationBytes = ReceiptReservationBytes(tx, request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint);
         RequireTokenBound(intentToken);
         var record = new RemoteTransferIntentRecord(request.SourceQueue, request.TransferId, request.Destination, principal.Id,
             request.Message, fingerprint, QueueTransferState.OutputPending, intentToken, null, reservationBytes);
@@ -71,14 +71,14 @@ public sealed partial class DatabaseEngine
         var existing = tx.GetRecord<RemoteTransferTargetReceiptRecord>(key);
         if (existing is not null)
         {
-            RequireExistingTargetReceipt(existing, claims);
+            RequireExistingTargetReceipt(tx, existing, claims);
             RemoteTransferStorage.RequireTargetCounter(tx, claims.Destination);
             return TransferMutationReceipt(RemoteTransferProtocol.AcceptReceiptKind, claims.Destination,
                 claims.TransferId, existing.TargetCommit.Position);
         }
 
         ValidateTransferMessage(claims.Message, claims.Destination, now);
-        var targetCommit = Token(partition, position);
+        var targetCommit = Token(tx, partition, position);
         var receiptClaims = new RemoteTransferReceiptClaims(RemoteTransferProtocol.ReceiptPurpose, Store.Identity.Incarnation,
             claims.Source, claims.TransferId, claims.Destination, claims.PrincipalId, claims.Fingerprint, targetCommit);
         var receiptToken = Sign(receiptClaims);
@@ -109,7 +109,7 @@ public sealed partial class DatabaseEngine
         var key = RemoteTransferStorage.IntentKey(request.SourceQueue, request.TransferId);
         var existing = tx.GetRecord<RemoteTransferIntentRecord>(key)
             ?? throw Errors.Fail(ErrorCode.NotFound, TransferMissingMessage);
-        ValidateIntentRecord(existing, request.SourceQueue, request.TransferId);
+        ValidateIntentRecord(tx, existing, request.SourceQueue, request.TransferId);
         if (principal.Id != existing.PrincipalId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
@@ -120,7 +120,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
         }
-        ValidateReceipt(receipt, existing);
+        ValidateReceipt(tx, receipt, existing);
         if (existing.State == QueueTransferState.Delivered)
         {
             if (existing.ReceiptToken != request.ReceiptToken)
@@ -145,10 +145,10 @@ public sealed partial class DatabaseEngine
         return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue, request.TransferId, 2);
     }
 
-    private int ReceiptReservationBytes(QueueLaneRef source, Guid transferId, QueueLaneRef destination,
+    private int ReceiptReservationBytes(IKeyValueView view, QueueLaneRef source, Guid transferId, QueueLaneRef destination,
         string principalId, string fingerprint)
     {
-        var maximumCommit = Token(destination.Partition, long.MaxValue);
+        var maximumCommit = Token(view, destination.Partition, long.MaxValue);
         var claims = new RemoteTransferReceiptClaims(RemoteTransferProtocol.ReceiptPurpose, Store.Identity.Incarnation,
             source, transferId, destination, principalId, fingerprint, maximumCommit);
         var bytes = Encoding.UTF8.GetByteCount(Sign(claims));
@@ -159,17 +159,17 @@ public sealed partial class DatabaseEngine
         return bytes;
     }
 
-    private void RequireExistingIntent(RemoteTransferIntentRecord existing, CreateQueueTransfer request,
+    private void RequireExistingIntent(IKeyValueView view, RemoteTransferIntentRecord existing, CreateQueueTransfer request,
         string principalId, string fingerprint)
     {
-        ValidateIntentRecord(existing, request.SourceQueue, request.TransferId);
+        ValidateIntentRecord(view, existing, request.SourceQueue, request.TransferId);
         if (existing.Destination != request.Destination || existing.PrincipalId != principalId || existing.Fingerprint != fingerprint)
         {
             throw Errors.Fail(ErrorCode.Conflict, TransferConflictMessage);
         }
     }
 
-    private void RequireExistingTargetReceipt(RemoteTransferTargetReceiptRecord existing, RemoteTransferIntentClaims claims)
+    private void RequireExistingTargetReceipt(IKeyValueView view, RemoteTransferTargetReceiptRecord existing, RemoteTransferIntentClaims claims)
     {
         if (existing.Source != claims.Source || existing.TransferId != claims.TransferId || existing.Destination != claims.Destination
             || existing.PrincipalId is null || existing.Fingerprint is null || existing.ReceiptToken is null
@@ -182,33 +182,35 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
-        ValidateReceiptClaims(receipt, claims, existing.TargetCommit);
+        ValidateReceiptClaims(view, receipt, claims, existing.TargetCommit);
     }
 
-    private void ValidateReceipt(RemoteTransferReceiptClaims receipt, RemoteTransferIntentRecord intent)
+    private void ValidateReceipt(IKeyValueView view, RemoteTransferReceiptClaims receipt, RemoteTransferIntentRecord intent)
     {
         if (receipt.Purpose != RemoteTransferProtocol.ReceiptPurpose || receipt.Incarnation != Store.Identity.Incarnation
             || receipt.Source != intent.Source || receipt.TransferId != intent.TransferId || receipt.Destination != intent.Destination
             || receipt.PrincipalId != intent.PrincipalId || receipt.Fingerprint != intent.Fingerprint
             || receipt.TargetCommit.Incarnation != Store.Identity.Incarnation
-            || receipt.TargetCommit.AtomicPartitionId != intent.Destination.Partition.AtomicPartitionId
-            || receipt.TargetCommit.Position < 1 || receipt.TargetCommit.OwnershipEpoch != 1)
+            || receipt.TargetCommit.AtomicPartitionId != intent.Destination.Partition.AtomicPartitionId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
         }
+        ValidateCommitToken(view, intent.Destination.Partition, receipt.TargetCommit,
+            ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
     }
 
-    private void ValidateReceiptClaims(RemoteTransferReceiptClaims receipt, RemoteTransferIntentClaims intent, CommitToken targetCommit)
+    private void ValidateReceiptClaims(IKeyValueView view, RemoteTransferReceiptClaims receipt, RemoteTransferIntentClaims intent, CommitToken targetCommit)
     {
         if (receipt.Purpose != RemoteTransferProtocol.ReceiptPurpose || receipt.Incarnation != Store.Identity.Incarnation
             || receipt.Source != intent.Source || receipt.TransferId != intent.TransferId || receipt.Destination != intent.Destination
             || receipt.PrincipalId != intent.PrincipalId || receipt.Fingerprint != intent.Fingerprint || receipt.TargetCommit != targetCommit
             || targetCommit.Incarnation != Store.Identity.Incarnation
-            || targetCommit.AtomicPartitionId != intent.Destination.Partition.AtomicPartitionId
-            || targetCommit.Position < 1 || targetCommit.OwnershipEpoch != 1)
+            || targetCommit.AtomicPartitionId != intent.Destination.Partition.AtomicPartitionId)
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
         }
+        ValidateCommitToken(view, intent.Destination.Partition, targetCommit,
+            ErrorCode.Corruption, TransferCorruptionMessage);
     }
 
     private void ValidateIntentClaims(RemoteTransferIntentClaims claims, QueueLaneRef destination, string principalId)
@@ -282,7 +284,7 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private void ValidateIntentRecord(RemoteTransferIntentRecord record, QueueLaneRef source, Guid transferId)
+    private void ValidateIntentRecord(IKeyValueView view, RemoteTransferIntentRecord record, QueueLaneRef source, Guid transferId)
     {
         if (record.Source != source || record.TransferId != transferId || record.TransferId == Guid.Empty
             || record.Destination is null || record.PrincipalId is null || record.Message is null || record.IntentToken is null
@@ -309,7 +311,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Corruption, TransferCorruptionMessage);
             }
-            ValidateReceipt(receipt, record);
+            ValidateReceipt(view, receipt, record);
         }
     }
 

@@ -1,4 +1,6 @@
 using KeyLoad.AppHost.Features.StorageRecovery;
+using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
+using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
@@ -15,6 +17,20 @@ internal static class TestSuiteResources
         var arguments = BuildArguments(root, settings, resultsDirectory);
         var runner = builder.AddExecutable(settings.ResourceName, "dotnet", root, arguments)
             .WithEnvironment(TestSuiteSettings.SuiteEnvironment, "");
+        if (settings.LocalRf3ImageEnabled)
+        {
+            var execution = LocalRf3ImageExecution.Create(root);
+            var preparation = LocalRf3ImagePrerequisite.Add(builder, root, execution);
+            runner.WaitForCompletion(preparation);
+            runner.WithEnvironment(LocalRf3ImageExecution.ProvenanceEnvironment, LocalRf3ImageExecution.Provenance)
+                .WithEnvironment(LocalRf3ImageExecution.ImageReferenceEnvironment, execution.ImageReference)
+                .WithEnvironment(LocalRf3ImageExecution.ReceiptEnvironment, execution.ReceiptPath)
+                .WithEnvironment("KEYLOAD_LOCAL_RF3_IMAGE_CHILD", "true")
+                .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
+                .WithEnvironment("KEYLOAD_IMAGE_RECEIPT", string.Empty)
+                .WithEnvironment("GITHUB_SHA", string.Empty)
+                .WithEnvironment("GITHUB_ACTIONS", string.Empty);
+        }
         if (settings.Suite == PriorProbeResources.RecoverySuite)
         {
             var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);

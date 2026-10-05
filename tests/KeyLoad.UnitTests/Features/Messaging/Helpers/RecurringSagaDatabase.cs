@@ -3,6 +3,7 @@ using KeyLoad.Core;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -44,6 +45,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
         Database = new(store, new AuthorizationPolicy(), limits);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, Credential));
+        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         ConfigureQueueDefinition(Queue, fields, headers, queuePolicy, null);
         ConfigureQueueDefinition(TimeoutQueue, null, null, timeoutQueuePolicy, null);
     }
@@ -89,6 +91,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
         store.Dispose();
         store = new(new(directory));
         Database = new(store, new AuthorizationPolicy(), limits);
+        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

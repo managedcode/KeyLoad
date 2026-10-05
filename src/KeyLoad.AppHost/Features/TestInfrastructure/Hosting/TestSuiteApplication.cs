@@ -24,6 +24,12 @@ internal static class TestSuiteApplication
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await CollectAsync(() => app.StopAsync(cleanup.Token), failures).ConfigureAwait(false);
+            if (settings.LocalRf3ImageEnabled)
+            {
+                using var imageCleanup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                await CollectAsync(() => app.Services.GetRequiredService<LocalRf3ImageCleanup>()
+                    .CleanupAsync(imageCleanup.Token), failures).ConfigureAwait(false);
+            }
             await CollectAsync(outputLifetime.CancelAsync, failures).ConfigureAwait(false);
             await CollectAsync(() => output, failures).ConfigureAwait(false);
             await CollectAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
@@ -47,6 +53,10 @@ internal static class TestSuiteApplication
         string[] resources = settings.Suite == PriorProbeResources.RecoverySuite
             ? [settings.ResourceName, PriorProbeResources.Native5Resource, PriorProbeResources.Native6Resource]
             : [settings.ResourceName];
+        if (settings.LocalRf3ImageEnabled)
+        {
+            resources = [.. resources, LocalRf3ImagePrerequisite.ResourceName];
+        }
         return Task.WhenAll(resources.Select(name => TestSuiteOutput.ForwardAsync(app, name, token)));
     }
 

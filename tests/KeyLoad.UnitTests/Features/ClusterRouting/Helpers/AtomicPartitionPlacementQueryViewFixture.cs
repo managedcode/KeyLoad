@@ -16,7 +16,7 @@ internal sealed class AtomicPartitionPlacementQueryViewFixture : IDisposable
     internal static readonly Guid ShardId = Guid.Parse("10213243-5465-7687-98a9-bacbdcedfe0f");
     internal static readonly Guid Incarnation = Guid.Parse("00112233-4455-6677-8899-aabbccddeeff");
     internal static readonly ImmutableArray<string> Voters = ["node-a", "node-b", "node-c"];
-    private readonly TestDatabase database = new();
+    private readonly TestDatabase database = new(bootstrapPhysicalShardCatalog: false);
 
     internal AtomicPartitionPlacementQueryViewFixture(bool bindPartition = true)
     {
@@ -38,7 +38,7 @@ internal sealed class AtomicPartitionPlacementQueryViewFixture : IDisposable
         var operation = database.Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
             PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId), "root",
             database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(bootstrap));
-        database.Database.Apply(operation).Get<PhysicalShardCatalog>();
+        database.Database.Apply(operation).Get<bool>();
         if (bindPartition)
         {
             database.Submit(OperationKind.BindAtomicPartitionPlacement,

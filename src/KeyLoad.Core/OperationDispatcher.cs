@@ -11,10 +11,11 @@ public sealed partial class DatabaseEngine
     private const string DispatchSystemSpaceName = "system";
     private const string DispatchPausedStateName = "dispatch-paused";
 
-    private OperationResult Execute(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation, long position)
+    private OperationResult Execute(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation,
+        long position, AtomicPartitionPlacementResolution? placement)
         => operation.Kind switch
         {
-            OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position),
+            OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),
             OperationKind.Receive => Result(Receive(transaction, principal, Payload<ReceiveRequest>(operation), operation.EvaluatedAt, position)),
             OperationKind.Delivery => Result(CompleteDelivery(transaction, principal, Payload<DeliveryCommand>(operation), operation.EvaluatedAt, position)),
             OperationKind.Processing => Result(CompleteProcessing(transaction, principal, Payload<ProcessingRequest>(operation), operation.EvaluatedAt, position)),
@@ -41,15 +42,23 @@ public sealed partial class DatabaseEngine
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage)
         };
 
-    private OperationResult ExecuteBatch(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation, long position)
+    private OperationResult ExecuteBatch(IAtomicTransaction transaction, PrincipalRecord principal, ReplicatedOperation operation,
+        long position, AtomicPartitionPlacementResolution? placement)
     {
         var batch = Payload<CommandRequest>(operation);
         if (batch.CommandId != operation.Id)
         {
             throw Errors.Fail(ErrorCode.Validation, BatchEnvelopeMismatchMessage);
         }
-        return Result(new CommitReceipt(batch.CommandId, Token(batch.Partition, position),
-            ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position), Durability));
+        if (placement is null || placement.Partition != batch.Partition)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, "The Batch placement witness does not match its transaction.");
+        }
+        var token = new CommitToken(placement.Incarnation, batch.Partition.AtomicPartitionId, position,
+            placement.PlacementEpoch);
+        return Result(new CommitReceipt(batch.CommandId, token,
+            ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position,
+                commitToken: token), Durability));
     }
 
     private static OperationResult ExecuteMembership(IAtomicTransaction transaction, ReplicatedOperation operation)

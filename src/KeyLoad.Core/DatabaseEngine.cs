@@ -49,14 +49,31 @@ public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPol
         return resource;
     }
 
-    /// <summary>Creates the commit token for one atomic partition and applied position.</summary>
+    /// <summary>Creates a commit token from the placement witness in the command's existing native view.</summary>
+    /// <param name="view">The command's already-owned transaction or committed read view.</param>
     /// <param name="partition">Complete atomic partition identity.</param>
     /// <param name="position">Applied commit position.</param>
-    /// <returns>The token scoped to the current store incarnation.</returns>
-    public CommitToken Token(PartitionRef partition, long position)
+    /// <returns>The token bound to the resolved incarnation and placement epoch.</returns>
+    internal static CommitToken Token(IKeyValueView view, PartitionRef partition, long position)
     {
+        ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
-        return new(Store.Identity.Incarnation, partition.AtomicPartitionId, position, 1);
+        var owner = ReadPlacementWitness(view, partition);
+        return new(owner.Incarnation, partition.AtomicPartitionId, position, owner.PlacementEpoch);
+    }
+
+    internal static void ValidateCommitToken(IKeyValueView view, PartitionRef partition, CommitToken token,
+        ErrorCode failureCode, string safeDetail)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(token);
+        var owner = ReadPlacementWitness(view, partition);
+        if (token.Incarnation != owner.Incarnation || token.AtomicPartitionId != partition.AtomicPartitionId
+            || token.Position < 1 || token.OwnershipEpoch != owner.PlacementEpoch)
+        {
+            throw Errors.Fail(failureCode, safeDetail);
+        }
     }
     /// <summary>Validates every component of an atomic partition identity.</summary>
     /// <param name="partition">Complete identity to validate.</param>

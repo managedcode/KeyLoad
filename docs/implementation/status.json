@@ -29,7 +29,7 @@
     ],
     "feature": "docs/Features/ClientApi/ToolDiscovery.md",
     "decision": "docs/ADR/ADR-104-mcp-gateway-tool-discovery.md",
-    "sourceStage": "native_catalog_three_meta_transport_guidance_resource_prompt_joined_published_gateway_repair_consumed_ClientApi347_normal_and_scalar_pass_RF3_pending",
+    "sourceStage": "native_catalog_three_meta_transport_guidance_resource_prompt_joined_published_gateway_repair_consumed_ClientApi347_normal_scalar_pass_guidance_official_Linux_RF3_pass_full_gates_pending",
     "dependencies": {
       "ManagedCode.MCPGateway": "0.4.17",
       "ManagedCode.MarkdownLd.Kb": "0.2.10",
@@ -51,8 +51,19 @@
       "sourceJoined": true,
       "normalUnitPassed": true,
       "scalarUnitPassed": true,
-      "officialRf3Passed": false
-    }
+      "officialRf3Passed": true,
+      "officialRf3Evidence": {
+        "sourceCommit": "788b8fd49141c233426ed95c86faf070e27d5056",
+        "runId": 37349838022,
+        "artifactId": 11364407413,
+        "reportSha256": "1d0dd5b41a38eaad02b74c00f4b95eb927a2822f137b7a5fcb36041eb3987dd2",
+        "case": "OfficialGuideAndPromptAreBoundedAndRevokedCredentialsAreRejected",
+        "receipt": "docs/implementation/runtime-qualification-37349838022.json"
+      }
+    },
+    "evidence": [
+      "docs/implementation/runtime-qualification-37349838022.json"
+    ]
   },
   "DATABASE-COMPOSITION-001": {
     "title": "Одна база для агентів: пов'язані моделі та SQL composition",
@@ -2040,13 +2051,43 @@
   },
   "KL-071": {
     "title": "Physical shard split/merge",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/ClusterRouting/PhysicalShardCatalog.md",
+      "src/KeyLoad.Core/Features/ClusterRouting/Contracts/CommandOutcomePartitionScope.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Identity/CommandOutcomePartitionIdentity.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs"
+    ],
+    "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
+    "decision": "docs/ADR/ADR-106-partition-owner-movement.md",
+    "sourceStage": "native_partition_pages_and_scoped_outcome_inventory_joined_shared_membership_stage1A_contract_accepted_movement_pending",
+    "fullTaskComplete": false,
+    "runtimeQualified": false,
+    "remaining": [
+      "Six-silo shared membership and distinct RF3-owner execution",
+      "Prepare/copy/tail/validate/fence/CAS/release split and merge protocols",
+      "Interruption, retry, authorization, bounded resources and exact-source Linux RF3 SDK/MCP qualification"
+    ]
   },
   "KL-072": {
     "title": "Token migration lineage",
-    "status": "pending",
-    "evidence": []
+    "status": "in_progress",
+    "evidence": [
+      "docs/Features/ClusterRouting/PhysicalShardCatalog.md",
+      "src/KeyLoad.Core/Features/ClusterRouting/Contracts/CommandOutcomePartitionScope.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Identity/CommandOutcomePartitionIdentity.cs",
+      "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs"
+    ],
+    "feature": "docs/Features/ClusterRouting/TokenMigrationLineage.md",
+    "decision": "docs/ADR/ADR-017-migration-tokens.md",
+    "sourceStage": "native_stored_outcome_partition_scope_and_current_cut_placement_witness_joined_genuine_prior6_frames_passed_full_movement_lineage_pending",
+    "fullTaskComplete": false,
+    "runtimeQualified": false,
+    "remaining": [
+      "Fenced placement changes and durable token lineage contracts across physical movement",
+      "Stale/current lineage SDK/MCP positive/negative outcomes under migration, restart and failover",
+      "Complete normal/scalar/recovery/RF3 gates on delivered source"
+    ]
   },
   "KL-073": {
     "title": "PostgreSQL baseline kit",
@@ -2167,7 +2208,9 @@
       "docs/implementation/runtime-qualification-37249197752.json",
       "docs/implementation/ann-prepared-value-development-2026-10-05.json",
       "docs/implementation/node-work-development-2026-10-05.json",
-      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json"
+      "docs/implementation/native-cqrs-cancel-join-delivery-2026-10-05.json",
+      "docs/implementation/runtime-qualification-37349838022.json",
+      "docs/implementation/partition-runtime-development-2026-10-05.json"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",
@@ -2177,15 +2220,24 @@
       "all_integrated_feature_acceptance_and_performance_fault_endurance_release_gates"
     ],
     "latestOriginalLinuxRun": {
-      "sha": "f8b3ba68da2f28660da1a36db396882ba2f72b7d",
-      "runId": 37249197752,
+      "sha": "788b8fd49141c233426ed95c86faf070e27d5056",
+      "runId": 37349838022,
       "conclusion": "failure",
-      "rf3": "113_of118_5_failed_no_skips",
-      "analyzers": "118_of118",
-      "unit": "3232_of3237_5_failed_no_skips",
-      "unitScalar": "not_executed_after_unit_failure",
-      "recovery": "296_of296_no_skips",
-      "receipt": "docs/implementation/runtime-qualification-37249197752.json"
+      "rf3": "128_of152_24_failed_no_skips",
+      "analyzers": "job_success",
+      "unit": "3461_of3473_12_failed_no_skips",
+      "unitScalar": "3461_of3473_12_failed_no_skips",
+      "recovery": "cancelled_at_enclosing_job_timeout_no_complete_report",
+      "receipt": "docs/implementation/runtime-qualification-37349838022.json"
+    },
+    "latestLocalDevelopment": {
+      "checkpoint": "stage86",
+      "releaseBuild": "0_warnings_0_errors",
+      "formatter": "passed",
+      "governance": "passed",
+      "unit": "3490_of3492_2_failed_no_skips_or_cancellations",
+      "fullTaskComplete": false,
+      "receipt": "docs/implementation/partition-runtime-development-2026-10-05.json"
     }
   },
   "KL-081": {

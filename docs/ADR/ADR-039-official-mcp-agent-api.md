@@ -91,7 +91,7 @@ then the existing capability/partition grain with a reloaded persisted principal
 ## Frozen catalog and wire contract
 
 ADR-098 adds its direct and SQL graph-path tools as additive version-one reads;
-AC-MCP-001 independently verifies the complete 66-name catalog, typed schemas
+AC-MCP-001 independently verifies the current complete 68-name catalog, typed schemas
 and effect hints. The two PMAP tools use strict generated request/result schemas:
 bind is `{ commandId, request }` with version, expectedRevision, complete
 partition and physicalShardId, while read is `{ request }` and returns the full

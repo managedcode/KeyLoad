@@ -2,6 +2,17 @@
 
 Status: Accepted. Date:2026-10-03. Owner: serialization integration lead.
 
+Accepted2026-10-05 TASK-DSTORE-EXACT-TEXT repairs the existing exact caller-owned
+document-string requirement under REQ/AC-DSTORE-008. Root separates validation
+from PutDocument text rewriting: the same native canonical writer validates into
+a discard sink and the record retains the original validated string. Public
+JsonData.Validate output, canonical fingerprint digests, record aliases/field IDs,
+and native data epochs remain unchanged. No automatic existing-record rewrite;
+patch/redaction retain their derived-text contracts. Run real-store exact-text,
+replacement/replay and invalid atomicity regressions, unchanged canonical golden
+tests, and actual Aspire RF3 SDK/official MCP Unicode/restart cases before
+qualification. This is a repair of the frozen contract, not a new data format.
+
 ## Decision and contracts
 
 Implement REQ-IS-001..009 / AC-IS-001..009 using Orleans10.3.1 generated codecs, stable aliases and explicit immutable field IDs across all owned internal concrete DTOs. Use pooled native sessions and raw ReadOnlyMemory<byte> codecs; reject incomplete/trailing/malformed input and validate required semantic fields before effects. Do not use Orleans' optional JSON codec or a runtime JSON fallback. JSON DOM adapters represent structural ordered fields and original numeric lexemes; native DOM materialization is a concrete boundary, not a persisted JSON subtree.
@@ -506,3 +517,10 @@ recovery228/228 passes with unchanged complete source/runtime inventories.
 No tolerance, product cache, runtime switch or allocation bound was changed.
 This is local development evidence; exact delivered-source Linux and RF3
 qualification and comparative performance remain required.
+
+TASK-DSTORE-EXACT-TEXT retains the original literal JSON in the existing native
+operation-ownership, restored-record, canonical-retry and embedded-fixture
+oracles. Only their obsolete normalized-document expectation changes; all
+native authority, corruption, revision, canonical digest and no-second-effect
+checks remain. This is the REQ/AC-DSTORE-008 contract already frozen above,
+not a change to canonical fingerprint bytes or stored aliases/field IDs.

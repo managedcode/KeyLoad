@@ -136,7 +136,7 @@ The image/cohort test never assumes the original run's registry persists, never 
 | Requirement | Acceptance and automated mapping |
 |---|---|
 | REQ-SCAT-001: one native committed catalog authority | AC-SCAT-001: actual TestDatabase/ZoneTree bootstrap creates exactly rev1/epoch1 with native roundtrip/reopen and unchanged existing records; same tuple/different request and same-ID retry preserve result/effects; conflicting ID/incarnation/voters/revision and non-admin fail without changes. PhysicalShardCatalogTests and native payload tests. |
-| REQ-SCAT-002: stable identity and finite validation | AC-SCAT-002: independent ID/command golden vectors; reject empty/default/duplicate/out-of-bound voter shapes and versions before retention; one production RF3 shard plus explicit comparison count; encoded bound, corrupt persisted row, unchanged token/atomic IDs. PhysicalShardCatalogValidationTests. |
+| REQ-SCAT-002: stable identity and finite validation | AC-SCAT-002: independent ID/command golden vectors; reject empty/default/duplicate/out-of-bound voter shapes and versions before retention; one production RF3 shard plus explicit comparison count; encoded bound, corrupt persisted row, unchanged token/atomic IDs. PhysicalShardCatalogValidationTests. Native null reference elements fail Corruption before native operation admission; the public JSON normalization path retains its owning Validation result. Corrupt persisted fixtures use the official generated writer and raw canonical key insertion, rather than the strict valid-record writer. |
 | REQ-SCAT-003: native startup and current host fence | AC-SCAT-003: actual Aspire RF3 SDK/official MCP starts only after all three voters observe the same quorum-committed catalog; cancellation/unknown retry/restart and conflicting config retain closed readiness and cleanup; genuine mismatch denies admission, no sidecar authority. PhysicalShardCatalogRf3Tests. |
 | REQ-SCAT-004: explicit config/cohort lifecycle | AC-SCAT-004: new V2 profile stable across reopen; strict old-profile rejection and explicit offline upgrade preserve secrets/permissions; exact CLI-only offline conversion of a real disposable legacy profile preserves verified backup and exits before Aspire composition (`ClusterProfileUpgradeCommandTests`); exact-source homogeneous interface3→4 cold upgrade, authenticated mixed3/4 fencing on the v4 voter, and rollback by restoring a verified untouched pre-upgrade copy. Real image/cohort RF3 tests. |
 
@@ -331,3 +331,28 @@ Ownership is only new `PhysicalShardCatalogInterface34` assertion/oracle helpers
 Only when the explicit private fixture has CaptureDiscovery=true and the verified node1=current4/node2=node3=prior3 image model is selected, the shared wave may transfer ownership after node1 reaches actual Running, Exited, FailedToStart or Finished; nodes2/3 still require actual Running. All other existing waves keep their existing healthy/Running rules. This transfer permits the frozen live503 or statusless terminal denial assertions to observe the original process; it does not establish readiness or success. Preserve the original single wave deadline, original cancellation and full stop/join ownership. Root owns the role-local RequestCqrsRf3WaveArguments argument helper and startup readiness seam.
 
 Root integration keeps probe record emission in Execution/RequestCqrsProbeDiscoveryObservation.cs, native path/permission checks in Validation/RequestCqrsProbePaths.cs, and serialized inventory reads in RequestCqrsProbeFiles. These role-local extractions preserve callback order, the original native attempt token, exact file bounds and strict failure behavior.
+
+### Current native recovery-fixture catalog setup (REQ/AC-SCAT-006)
+
+REQ-SCAT-006 requires current-format positive crash and stored-replication fixtures
+to initialize the actual canonical catalog before their first partition operation.
+The test-only `KeyLoad.CrashHost/Features/ClusterRouting/Helpers/RecoveryPhysicalShardBootstrap`
+uses the existing native bootstrap operation and `DatabaseEngine.Apply` after
+persisting the test administrator. It supplies one independently fixed test shard
+ID, the actual canonical-store incarnation and the fixture's exact ordered voter
+configuration. Reopen reads and validates the persisted tuple instead of replacing
+it. The bootstrap's evaluated time is UnixEpoch, so setup cannot advance the
+business clock past a scenario's deterministic operations. No direct catalog-key
+write, Core fallback, production startup bypass or caller-supplied authority is added.
+
+AC-SCAT-006 maps to the existing real-process document, composition, projection,
+messaging, retention, aggregate and snapshot crash cases and the genuinely stored
+`ReadRoundProtocolTests` one/two/three-voter cases. They must retain their exact
+crash boundaries, committed prefix, receipts, replay and cleanup assertions after
+explicit setup. A conflicting persisted tuple must fail setup without rewriting
+it. One-process fixture preparation is development/test setup, not RF3 quorum
+qualification. Genuine prior native5/native6 source drivers, raw-image upgrade
+fixtures and intentionally missing/corrupt-catalog negative controls remain
+unchanged. Root owns these fixture joins and the sequential Aspire recovery gate.
+
+TASK-SCAT-VALIDATION-IDENTITY preserves REQ/AC-SCAT-002: independent invalid native bootstrap bodies use independent command GUIDs. Reusing the deterministic shard bootstrap GUID with different bodies tests the mandatory global command-identity Conflict contract, not standalone Validation. Keep exact invalid-list/null/corruption, absent-catalog and unchanged-state assertions and the separate replay/conflict tests. This fixture-only refinement uses existing ADR-099; it changes no product identity or validation ordering.

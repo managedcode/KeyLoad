@@ -4,9 +4,9 @@ import { readJson, writeJson } from './isolated-github-files.mjs';
 import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { flattenPages, validateWorkflowRun } from './isolated-github-validation.mjs';
 
-export async function captureApi(endpoint, target, paginated, context) {
+export async function captureApi(endpoint, target, paginated, context, requestOptions = {}) {
   requireGitHub(paginated === false);
-  await requestNative(endpoint, target, GH.metadataBytes, GH.metadataTimeoutMs, context);
+  await requestNative(endpoint, target, GH.metadataBytes, GH.metadataTimeoutMs, context, requestOptions);
   return readJson(target);
 }
 

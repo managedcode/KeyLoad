@@ -181,3 +181,28 @@ After cleanup has stopped private-control admission, released any still-open hol
 ## Regression and qualification
 
 The existing actual SDK held-revocation RF3 case is the focused regression: it reaches the authenticated held request, persisted revocation ACK, release, typed `Unauthenticated`, producer settlement, first retirement, no-effect checks and then common cleanup. The test was previously marked failed solely because common cleanup repeated the completed retirement. Do not add a fake-provider fixture test: the relevant state transition requires real signed phase markers and the actual original producer. Keep the MCP case and its independent startup status; the CI55 MCP failure occurred before revocation and remains an unresolved startup diagnostic. Root owns the full strict build and Aspire RF3 rerun.
+
+## Accepted first-failure lifecycle evidence, 2026-10-05
+
+TASK-CRS-DIAG-FIRST-FAILURE implements REQ/AC-CRS-DIAG-006 in the linked
+NativeCqrsRequestV2 specification before any cancellation behavior changes.
+Original Linux source788/run37349838022 preserves canceled tasks but does not
+identify the initiating capture stage; the authority-fault cases fail during
+startup before revocation. Freeze the complete fixed 2,048-byte context,
+first-failure and post-join native task snapshots, separate cancellation facts
+and authority-startup/readiness stages in that feature contract. Nonfatal test
+wrappers preserve every exact ordered original exception object and nested
+aggregate. Existing native fatal propagation/priority is unchanged and its
+fixed context is retained separately. No shared observer, parser, artifact,
+public/persisted contract, deadline or topology change is authorized.
+
+The private diagnostics worker owns only IntegrationTests ClusterRouting
+feature-local lifecycle helpers and narrow read-only joins in the existing
+diagnostics owner/cleanup/scope, subscriber observer, independent consumer and
+authority-fault/readiness helpers. Root owns contract integration before code,
+guarded source review/join, build/format, actual Aspire positive and negative
+lifecycle cases and exact-source Linux RF3 evidence. Native regressions retain
+the live independent consumer, normal original captures, exact caller
+cancellation, early stream completion and genuine SDK/MCP revocation outcomes.
+Rollback removes the test-only context. This addition is diagnostic evidence,
+not proof of the old cancellation cause or completion of this ADR.

@@ -24,9 +24,11 @@ internal static class McpGraphPathInputSchemaAssertions
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql];
     private static readonly ImmutableArray<string> EntityProperties =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.Id];
-    private static readonly ImmutableArray<string> PartitionProperties =
+    private static readonly ImmutableArray<string> PartitionRequired =
     [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId,
         McpDiscoveryProtocol.TransactionDomainId, McpDiscoveryProtocol.PartitionKey];
+    private static readonly ImmutableArray<string> PartitionProperties =
+        PartitionRequired.Add(McpDiscoveryProtocol.AtomicPartitionId);
 
     internal static async Task VerifyAsync(string toolName, JsonElement request, JsonElement root)
     {
@@ -85,7 +87,7 @@ internal static class McpGraphPathInputSchemaAssertions
     private static async Task VerifyPartitionAsync(JsonElement schema, JsonElement root)
     {
         schema = Resolve(root, schema);
-        await VerifyFieldsAsync(root, schema, PartitionProperties, PartitionProperties);
+        await VerifyFieldsAsync(root, schema, PartitionProperties, PartitionRequired);
         var properties = schema.GetProperty(McpDiscoveryProtocol.Properties);
         foreach (var field in PartitionProperties)
         { await VerifyTypeAsync(properties.GetProperty(field), McpDiscoveryProtocol.String, root); }

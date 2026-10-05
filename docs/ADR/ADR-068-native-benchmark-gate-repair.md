@@ -80,7 +80,8 @@ matches provider/upload proof. Accepting queued as running is forbidden.
 Keep bounded attempt-page discovery and all existing source/job/attempt/main/
 workflow and existing canonical-or-legacy URL checks. Corroborate only the discovered ID through the
 authenticated exact jobs/{id} endpoint. A still-queued same-identity/null-result
-record permits at most3 captures separated by1000ms. Any mismatch, terminal/
+record originally permitted at most3 captures separated by1000ms; the accepted
+G2 cache-window contract below replaces that insufficient refresh bound. Any mismatch, terminal/
 unknown state or network/parse failure rejects immediately; final queued state
 rejects. Only exact in_progress/null-result authority permits native allocation.
 No reselection, workload retry, invented runtime evidence or queued success.
@@ -142,7 +143,8 @@ data migration. This ADR remains Accepted.
    isolated-current-job.mjs and the necessary existing isolated-github-api.mjs /
    isolated-github-job.mjs joins. Use existing captureApi/requestNative byte,
    network, rate and original-child lifetime bounds. NEW private constants fix
-   captures3/delay1000; no shared GH/transport/workflow changes. Preserve original
+   captures3/delay1000 was the original G1 contract; G2 below owns the narrow
+   current-job transport extension. No unrelated GH/workflow changes. Preserve original
    pages and every exact request/response under current-job-refresh-NN files;
    final job.json and environment ID appear only after strict fresh validation.
    Existing validateJobIdentity remains authoritative, including optional attempt
@@ -174,13 +176,77 @@ Kurrent rollout/rollback must be frozen before that stage's implementation.
 
 Source review covers actual transport joining and absence of doubles. First-author
 pure policy tests cover stale/valid/wrong-ID/source/attempt/terminal/error records;
-Actual source review verifies the fixed three captures, two bounded waits, immediate
+Actual source review verifies the accepted G2 capture/deadline bounds, immediate
 transport failure and absence of writes before final validation. Pure classifier
 tests do not execute refresh exhaustion or authenticate HTTP. Actual GitHub
 current-job startup must cover authenticated transport/exhaustion and original
 same-ID running proof. Neither source/static checks nor supplied JSON authenticate
 the provider. Every worker escalates contract/scope/lifecycle drift. This ADR stays
 Accepted until all required implementation and genuine verification exist.
+
+## Accepted G2: native current-job cache revalidation
+
+REQ-NGR-001 / AC-NGR-001 / TASK-NGR-G2 addresses the retained genuine Benchmarks
+run37320853130 attempt1 failure before workload setup. Two executing cells received
+three exact queued responses with the same ETag and advertised
+`Cache-Control: private, max-age=60, s-maxage=60`. These originals support a stale
+provider-cache hypothesis; they do not authenticate running state or permit a
+failed/null workload substitute. The site correctly rejected the incomplete
+producer. Preserve that historical failure and every original capture.
+
+Before code, freeze this ordered contract: first author captured-record/header
+policy and actual-caller regressions; then extend only the existing current-job
+helper, API/transport joins and native HTTP stream cancellation seam. Send
+`Cache-Control: no-cache, max-age=0` only to the authenticated same discovered
+`jobs/{id}` route. General metadata/download requests keep their existing header
+and rate behavior. Do not add a query cache-buster, choose another job/run/route,
+accept queued, drop a required cell or fall back to an older producer.
+
+The initial current-job request retains the existing120,000ms metadata deadline.
+After the first exact queued/null-result response, one monotonic60,000ms window
+owns all further1,000ms cadence waits, native requests and permitted rate waits;
+at most61 captures include the initial request. Each next native timeout is the
+minimum of the existing bound and the positive remaining window. Do not start a
+request/wait after exhaustion. Rate delays must fit both the existing accumulated
+rate budget and the remaining window; otherwise reject. Network, parse, auth,
+identity, terminal and unknown-state failures reject immediately at their existing
+boundary. Only the unchanged exact in_progress/null-result proof authorizes
+job.json/environment-ID finalization and database/timing allocation.
+
+The current-job scope owns one cancellation signal, observes SIGTERM/SIGINT
+during polling as well as HTTP, cancels the same original native child, and joins
+its exit/readers before releasing files or returning. Preserve the existing
+one-second TERM-to-KILL grace and original byte/file/privacy bounds. Abort is not
+a successful capture or a replacement request. Timers/listeners are disposed and
+original failures remain observable. The60s window bounds admitted work; actual
+owned-child termination/join is retained after deadline, never WaitAsync-style
+abandonment or timeout-as-settlement. No credential/raw response diagnostic text.
+
+Ownership: root freezes these docs, reviews/joins source, owns Aspire gates,
+receipts, commits/pushes and exact-source GitHub evidence. One gpt-6-luna/high
+worker owns scripts/Features/BenchmarkComparisons/isolated-current-job.mjs,
+isolated-github-api.mjs, isolated-github-transport.mjs and only the necessary
+optional-signal join in isolated-github-stream.mjs, plus focused UnitTests
+Features/BenchmarkComparisons IsolatedCurrentJob-prefixed cases/helpers. Keep
+default callers byte/behavior compatible, fixed closed headers, original
+authenticated transport and canonical-or-legacy URL/source/attempt/name checks.
+Any required additional boundary is returned for freeze before implementation.
+
+Tests retain captured identical-ETag queued/header sequences and the separate
+authentic running record unchanged. No retained artifact currently shows that
+same-ID transition. An explicitly constructed pure policy transition fixture
+may test queued-to-running control flow, but is not provider/runtime evidence.
+Actual same-ID queued-to-running proof remains pending real GitHub startup.
+Tests map persistent queued to exact cutoff;
+wrong ID/name/SHA/run/attempt/workflow/URL,
+terminal/auth/parse states to rejection; cancellation while waiting and in the
+real native child to joined cleanup; rate delays to both budgets; and the actual
+captureCurrentJob caller to finalization only after strict running proof. Pure
+records do not authenticate GitHub or qualify workload success. Local tests run
+through the Aspire-owned entry under the root's later local-development
+authorization; actual Linux GitHub startup must retain fresh source/job/provider
+originals before G2 is qualified. Roll back the helper/optional transport joins and
+tests together; no public schema, data, engine, image or website policy migration.
 
 ## Accepted Kurrent metadata stage A
 

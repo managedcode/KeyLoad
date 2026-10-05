@@ -127,6 +127,7 @@ internal sealed class ReplicaCrashNode : IDisposable
         var principal = ReplicaCrashModel.PrincipalId;
         Database.Bootstrap(new(principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
             DatabaseEngine.Credential(principal, principal, Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
+        RecoveryPhysicalShardBootstrap.Bootstrap(Database, principal, Configuration.VoterIds);
     }
 
     /// <summary>Disposes independently owned physical stores after all materializers have stopped.</summary>

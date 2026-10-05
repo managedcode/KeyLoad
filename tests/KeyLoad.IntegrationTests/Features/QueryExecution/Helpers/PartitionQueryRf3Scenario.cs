@@ -99,7 +99,7 @@ internal sealed record PartitionQueryRf3Scenario(
         {
             var definition = new ResourceDefinition(PartitionQueryRf3Protocol.Collection,
                 ResourceKind.Collection, partition.TransactionDomainId)
-            { Indexes = [new(PartitionQueryRf3Protocol.RankIndex, [PartitionQueryRf3Protocol.RankField], true)] };
+            { Indexes = [new(PartitionQueryRf3Protocol.RankIndex, [PartitionQueryRf3Protocol.RankField], Unique: false)] };
             await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
                 new(partition.TenantId, partition.DatabaseId, definition), cancellationToken).ConfigureAwait(false))
                 .ConfigureAwait(false);

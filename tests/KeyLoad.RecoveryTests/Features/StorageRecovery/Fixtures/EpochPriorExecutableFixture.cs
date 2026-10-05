@@ -21,6 +21,51 @@ internal static class EpochPriorExecutableFixture
         return receipt;
     }
 
+    internal static async Task<EpochPriorProbeReceipt> CreateOutcomeFrameAsync(string directory, Guid commandId,
+        CancellationToken cancellationToken, int dataEpoch = 6)
+    {
+        if (dataEpoch != 6 || commandId == Guid.Empty)
+        {
+            throw new InvalidDataException(InvalidReceipt);
+        }
+        var receipt = await InvokeAsync(new(directory, EpochPriorSourceProbe.CreateOutcomeFrameOperation,
+            OutcomeCommandId: commandId), dataEpoch, cancellationToken);
+        ValidateOutcomeFrame(receipt, commandId);
+        return receipt;
+    }
+
+    internal static async Task AssertMissingOutcomeCommandRejectedAsync(string directory,
+        CancellationToken cancellationToken)
+    {
+        var receipt = await InvokeAsync(new(directory, EpochPriorSourceProbe.CreateOutcomeFrameOperation),
+            6, cancellationToken);
+        if (receipt.DataEpoch != 0 || receipt.ErrorCode != ErrorCode.Validation.ToString()
+            || receipt.OutcomeCommandId is not null || receipt.OutcomeFrameBase64 is not null
+            || Directory.Exists(directory))
+        {
+            throw new InvalidDataException(InvalidReceipt);
+        }
+    }
+
+    private static void ValidateOutcomeFrame(EpochPriorProbeReceipt receipt, Guid commandId)
+    {
+        if (receipt.ErrorCode is not null || receipt.DataEpoch != 6 || receipt.Position <= 0
+            || receipt.NodeId == Guid.Empty || receipt.Incarnation == Guid.Empty
+            || receipt.OutcomeCommandId != commandId
+            || receipt.OutcomePrincipalId != EpochUpgradeFixture.OutcomePrincipalId
+            || string.IsNullOrEmpty(receipt.OutcomeFrameBase64)
+            || receipt.OutcomeFrameBase64.Length > EpochPriorSourceProbe.MaximumOutcomeFrameBase64Characters)
+        {
+            throw new InvalidDataException(InvalidReceipt);
+        }
+        var bytes = Convert.FromBase64String(receipt.OutcomeFrameBase64);
+        if (bytes.Length is <= 0 or > EpochPriorSourceProbe.MaximumOutcomeFrameBytes
+            || Convert.ToBase64String(bytes) != receipt.OutcomeFrameBase64)
+        {
+            throw new InvalidDataException(InvalidReceipt);
+        }
+    }
+
     internal static async Task<EpochPriorProbeReceipt> CreateNodeAsync(string directory, EpochPriorNodeProfile profile,
         CancellationToken cancellationToken, int dataEpoch = Native5DataEpoch)
     {
