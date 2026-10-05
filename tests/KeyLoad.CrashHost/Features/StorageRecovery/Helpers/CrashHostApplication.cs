@@ -1,4 +1,5 @@
 using System.Globalization;
+using KeyLoad.CrashHost.Features.DocumentStorage;
 using KeyLoad.CrashHost.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 
@@ -45,6 +46,8 @@ internal static class CrashHostApplication
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),
             SagaTimeoutCrashScenario.Mode => SagaTimeoutCrashScenario.RunAsync(directory, store, boundary),
+            CommandIdempotencyCrashContract.FirstMode => CommandIdempotencyCrashScenario.RunFirstAsync(directory, store),
+            CommandIdempotencyCrashContract.ReplayMode => CommandIdempotencyCrashScenario.RunReplayAsync(directory, store),
             _ => RunCanonicalAsync(directory, store, boundary, mode)
         };
 

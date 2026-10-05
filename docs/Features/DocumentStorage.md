@@ -40,6 +40,7 @@ The current root-level files are documented migration debt under ADR-032, not th
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
 | REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. | TASK-MP-007I in ADR-035; new real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
 | REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. This remains planned until original Aspire/native reports exist. |
+| REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | TASK-DSTORE-OUTCOME-MATRIX under ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
 
 The current command-outcome retention contract has no automatic TTL/purge path.
 Retries are supported while the original outcome remains in the canonical store
@@ -47,6 +48,23 @@ with the same incarnation and current persisted authorization. No finite minimum
 time window or retry guarantee after explicit outcome/store removal or changed
 incarnation is advertised. This is documented current behavior, not an implemented
 expiry policy. A new policy needs an accepted ADR and its own qualification.
+
+TASK-DSTORE-OUTCOME-MATRIX is a bounded completion of two existing ADR-002 test
+rows. Root owns the contract and review; query_wave Luna/high owns only the two
+new named cases and cohesive helpers under UnitTests/Features/DocumentStorage.
+Use the real persisted policies and original native outcome bytes, with literal
+document/revision and outbox expectations. Physical apply position may advance
+on error/replay and must not be mistaken for a new domain effect. No production
+key, fingerprint, serializer, public outcome API, expiry or permission changes
+are authorized by this test stage.
+
+The2026-10-05 source audit separately found that current outcome keys bind only
+PrincipalId and CommandId, while the canonical fingerprint binds the batch's
+partition. Reusing an ID for another partition currently conflicts. This is not
+proof of ADR-002's accepted independent resolved-partition scope; that row remains
+open until an explicit format/key upgrade contract reconciles the outcome lookup
+and public resolution paths. Do not change the ADR's target or claim this partial
+matrix closes partition isolation.
 
 The accepted [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md)
 assigns CRUD handlers and new matching tests to one worker, and shared

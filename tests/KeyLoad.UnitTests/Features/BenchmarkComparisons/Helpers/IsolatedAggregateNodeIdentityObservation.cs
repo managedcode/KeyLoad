@@ -36,6 +36,7 @@ internal static class IsolatedAggregateNodeIdentityObservation
     {
         try
         {
+            process.Refresh();
             if (process.HasExited)
             {
                 return false;

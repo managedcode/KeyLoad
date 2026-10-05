@@ -26,6 +26,17 @@ Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-0
 
 ## TASK-DSTORE-COMMAND-100-RESTART implementation contract
 
+TASK-DSTORE-OUTCOME-MATRIX maps REQ-DSTORE-007 / AC-DSTORE-007 to actual persisted
+precondition-error replay and independent authenticated-principal tests in
+UnitTests/Features/DocumentStorage. Root freezes the literal error, document,
+revision and outbox oracles; query_wave owns only the new cases/helpers. This
+stage changes no outcome format, canonical key or public API. Current source
+uses principal/command keys and partition-bearing fingerprints; independent
+resolved-partition identity remains an explicit implementation gap. The Accepted
+decision above is unchanged. Root must define the exact upgrade and public
+resolution contract under ADR-011 before repairing that separate gap. Tests of
+principal isolation must not stand in for partition isolation.
+
 Current command outcomes have no automatic TTL or purge implementation. A
 matching authorized retry resolves its retained canonical outcome in the same
 store incarnation. This does not promise a finite minimum retention period,
