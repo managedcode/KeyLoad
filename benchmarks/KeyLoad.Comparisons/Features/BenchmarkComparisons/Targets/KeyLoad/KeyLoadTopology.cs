@@ -5,6 +5,9 @@ namespace KeyLoad.Comparisons.Targets;
 
 public sealed partial class KeyLoadTarget
 {
+    private const int ReadinessTimeoutSeconds = 60;
+    private const int ReadinessPollMilliseconds = 100;
+
     private const string MissingPeers = "KeyLoadExpectedRealEndpointsRequired";
     private const string InvalidCluster = "KeyLoadClusterReceiptMissing";
     private const string Rf3Required = "KeyLoadRf3Required";
@@ -63,11 +66,11 @@ public sealed partial class KeyLoadTarget
         var initial = await ReadStatusesAsync(readers, cancellationToken);
         var required = initial.Max(status => status.Applied);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(60));
+        deadline.CancelAfter(TimeSpan.FromSeconds(ReadinessTimeoutSeconds));
         var receipts = initial;
         while (receipts.Any(status => status.Applied < required))
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(100), deadline.Token);
+            await Task.Delay(TimeSpan.FromMilliseconds(ReadinessPollMilliseconds), deadline.Token);
             receipts = await ReadStatusesAsync(readers, deadline.Token);
         }
         ValidateStatuses(receipts);

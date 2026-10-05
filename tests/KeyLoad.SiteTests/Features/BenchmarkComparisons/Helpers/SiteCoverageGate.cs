@@ -4,50 +4,30 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteCoverageGate
 {
-    private static readonly string[] CriticalSources =
-    [
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-contracts.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-metadata.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-metrics-validation.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-report-validation.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-projection.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-http.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-loader.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-measurements.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-view.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-controls.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}isolated-lab.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}measurements.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}measurement-loader.mjs",
-        $"{SiteCoverageTokens.FeatureSourcePrefix}build-site.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-api.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-capture.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-cli.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-context.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-contract.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-files.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-fresh.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-native-proof.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-proof.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-receipt.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-runs.mjs",
-    ];
-
     private static SiteIsolatedGitHubArchiveReceipt? isolatedArchiveReceipt;
+    private static SiteCoverageMode sessionMode;
 
     [Before(HookType.TestSession)]
     public static async Task CaptureSourceBaselineAsync()
     {
+        sessionMode = SiteCoverageModeSelector.Current;
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
         var revision = Environment.GetEnvironmentVariable(SitePublicationTokens.SourceRevisionEnvironment);
         await SiteQualificationSource.RequireCheckoutAsync(repository, revision ?? string.Empty, CancellationToken.None);
-        isolatedArchiveReceipt = await SiteIsolatedGitHubArchiveSetup.PrepareFromEnvironmentAsync(CancellationToken.None);
+        if (sessionMode == SiteCoverageMode.Measured)
+        {
+            isolatedArchiveReceipt = await SiteIsolatedGitHubArchiveSetup.PrepareFromEnvironmentAsync(CancellationToken.None);
+        }
         await SiteCoverageSourceManifestWriter.CaptureAsync();
     }
 
     [After(HookType.TestSession)]
     public static async Task JoinAndEnforceCoverageAsync()
     {
+        if (SiteCoverageModeSelector.Current != sessionMode)
+        {
+            throw new InvalidOperationException(SiteCoverageTokens.InvalidModeFailure);
+        }
         var repository = RequiredPath(SiteTokens.RepositoryEnvironment);
         var artifactRoot = RequiredPath(SiteCoverageTokens.CoverageRootEnvironment);
         var manifestHash = await SiteCoverageSourceManifestWriter.VerifyManifestAsync(artifactRoot).ConfigureAwait(false);
@@ -58,15 +38,19 @@ internal static class SiteCoverageGate
         }
 
         await SiteCoverageSourceManifestWriter.VerifyUnchangedAsync(repository, manifest).ConfigureAwait(false);
-        await SiteIsolatedGitHubArchiveSetup.VerifyUnchangedAsync(isolatedArchiveReceipt ??
-            throw new InvalidOperationException(SitePublicationTokens.MissingArchivePreparation), CancellationToken.None);
+        if (sessionMode == SiteCoverageMode.Measured)
+        {
+            await SiteIsolatedGitHubArchiveSetup.VerifyUnchangedAsync(isolatedArchiveReceipt ??
+                throw new InvalidOperationException(SitePublicationTokens.MissingArchivePreparation), CancellationToken.None);
+        }
         var collection = await SiteCoverageArtifactReader.ReadAsync(repository, artifactRoot, manifest,
             CancellationToken.None).ConfigureAwait(false);
         var fileResults = AnalyzeFiles(repository, manifest, collection);
         var totals = SiteCoverageAnalyzer.Sum(fileResults);
-        var critical = AnalyzeCritical(fileResults);
+        var critical = AnalyzeCritical(fileResults, SiteCoverageModeSelector.CriticalSources(sessionMode));
         var passed = IsPassing(collection.Errors, totals, critical);
-        var report = CreateReport(manifest, manifestHash, collection, fileResults, totals, critical, passed);
+        var report = CreateReport(manifest, manifestHash, collection, fileResults, totals, critical, passed,
+            sessionMode == SiteCoverageMode.ContentOnly ? SiteCoverageTokens.NoBenchmarkMode : SiteCoverageTokens.MeasuredBenchmarkMode);
         await WriteReportAsync(artifactRoot, report).ConfigureAwait(false);
         if (!passed)
         {
@@ -94,9 +78,9 @@ internal static class SiteCoverageGate
     }
 
     private static SiteCoverageCriticalResult[] AnalyzeCritical(
-        IReadOnlyList<SiteCoverageFileResult> files)
+        IReadOnlyList<SiteCoverageFileResult> files, IReadOnlyList<string> criticalSources)
     {
-        return CriticalSources.Select(path =>
+        return criticalSources.Select(path =>
         {
             var file = files.SingleOrDefault(item => item.Path == path);
             var percent = file is null ? SiteCoverageTokens.Zero : Percent(file.CoveredLines, file.ExecutableLines);
@@ -118,12 +102,13 @@ internal static class SiteCoverageGate
     private static object CreateReport(SiteCoverageSourceManifest manifest, string manifestHash,
         SiteCoverageCollection collection,
         IReadOnlyList<SiteCoverageFileResult> files, SiteCoverageTotals totals,
-        IReadOnlyList<SiteCoverageCriticalResult> critical, bool passed)
+        IReadOnlyList<SiteCoverageCriticalResult> critical, bool passed, string benchmarkMode)
     {
         return new
         {
             schemaVersion = SiteCoverageTokens.Schema,
             sourceRevision = manifest.SourceRevision,
+            benchmarkMode,
             sourceManifestSha256 = manifestHash,
             nodeVersion = manifest.NodeVersion,
             lineSemantics = SiteCoverageTokens.LineSemantics,
@@ -133,7 +118,7 @@ internal static class SiteCoverageGate
                 aggregateLinePercent = SiteCoverageTokens.AggregateLinePercent,
                 aggregateBranchPercent = SiteCoverageTokens.AggregateBranchPercent,
                 criticalLinePercent = SiteCoverageTokens.CriticalLinePercent,
-                criticalSources = CriticalSources,
+                criticalSources = critical.Select(item => item.Path).ToArray(),
             },
             files,
             totals = new
@@ -172,11 +157,12 @@ internal static class SiteCoverageGate
         var path = Path.Combine(artifactRoot, SiteCoverageTokens.SourceManifestFile);
         var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
         var manifest = JsonSerializer.Deserialize<SiteCoverageSourceManifest>(bytes, SiteCoverageTokens.JsonOptions);
+        var expectedSources = SiteCoverageModeSelector.Sources(sessionMode);
         if (manifest is null || manifest.SchemaVersion != SiteCoverageTokens.Schema ||
-            !SiteCoverageSourceManifestWriter.IsRevision(manifest.SourceRevision) || manifest.Sources.Count != SiteCoverageTokens.ProductionSources.Length ||
+            !SiteCoverageSourceManifestWriter.IsRevision(manifest.SourceRevision) || manifest.Sources.Count != expectedSources.Length ||
             !manifest.NodeVersion.StartsWith(SiteCoverageTokens.NodeVersionPrefix, StringComparison.Ordinal) ||
             !manifest.Sources.Select(item => item.Path).Order(StringComparer.Ordinal)
-                .SequenceEqual(SiteCoverageTokens.ProductionSources.Order(StringComparer.Ordinal), StringComparer.Ordinal))
+                .SequenceEqual(expectedSources.Order(StringComparer.Ordinal), StringComparer.Ordinal))
         {
             throw new InvalidOperationException(SiteCoverageTokens.InvalidRootFailure);
         }

@@ -5,15 +5,11 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
 internal static class SiteAnalyzerCoverageThresholdOracle
 {
-    private const int EndpointPipelineIndex = 1;
-    private static readonly string[] PipelineIds = [
-        "KLD0001", SiteAnalyzerCoverageTokens.CriticalPipelineId, "KLD0014", "KLD0020", "KLD0021", "KLD0022",
-        "KLD0023", "KLD0024", "KLD0030", "KLD0031", "KLD0032", "KLD0033", "KLD0034"];
-    private static readonly long[] PipelineLineTotals = [40, 10, 10, 20, 20, 10, 40, 10, 30, 50, 40, 40, 10];
-    internal static readonly long[] FullPipelineCounts = PipelineLineTotals;
-    internal static readonly long[] BelowLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 5];
-    internal static readonly long[] ExactLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 8];
-    internal static readonly long[] AboveLinePipelineCounts = [30, 10, 10, 20, 10, 10, 30, 0, 20, 30, 30, 30, 10];
+    private static readonly CoveragePipeline[] Pipelines = ReadPipelines();
+    internal static readonly long[] FullPipelineCounts = GetPipelineLineCounts(null);
+    internal static readonly long[] BelowLinePipelineCounts = GetPipelineLineCounts(SiteAnalyzerCoverageTokens.BelowLineBoundary);
+    internal static readonly long[] ExactLinePipelineCounts = GetPipelineLineCounts(SiteAnalyzerCoverageTokens.ExactLineBoundary);
+    internal static readonly long[] AboveLinePipelineCounts = GetPipelineLineCounts(SiteAnalyzerCoverageTokens.AboveLineBoundary);
 
     internal static async Task AssertModuleAsync(
         SiteAnalyzerCoverageTestScope scope,
@@ -32,8 +28,10 @@ internal static class SiteAnalyzerCoverageThresholdOracle
 
     internal static async Task AssertPipelineAsync(SiteAnalyzerCoverageTestScope scope, int coveredLineCount)
     {
-        var expectedPipelineCounts = (long[])FullPipelineCounts.Clone();
-        expectedPipelineCounts[EndpointPipelineIndex] = coveredLineCount;
+        var expectedPipelineCounts = GetPipelineLineCounts(null);
+        var endpointPipelineIndex = Array.FindIndex(Pipelines, static pipeline =>
+            pipeline.Diagnostic == SiteAnalyzerCoverageTokens.CriticalPipelineId);
+        expectedPipelineCounts[endpointPipelineIndex] = coveredLineCount;
         await scope.WriteFixtureAsync(SiteAnalyzerCoverageFixture.PipelineLineBoundary(coveredLineCount));
         var result = await scope.RunAsync(SiteAnalyzerCoverageTokens.ModeVerify);
         using var report = SiteAnalyzerCoverageTestScope.ReadJson(scope.SummaryPath);
@@ -87,19 +85,20 @@ internal static class SiteAnalyzerCoverageThresholdOracle
         var rows = report.GetProperty(SiteAnalyzerCoverageTokens.JsonCriticalPipelines).EnumerateArray().ToArray();
         await Assert.That(rows.Length).IsEqualTo(SiteAnalyzerCoverageTokens.ExpectedPipelineCount);
         await Assert.That(expectedCoveredCounts.Length).IsEqualTo(SiteAnalyzerCoverageTokens.ExpectedPipelineCount);
+        await Assert.That(Pipelines.Length).IsEqualTo(SiteAnalyzerCoverageTokens.ExpectedPipelineCount);
         var failures = new List<string>();
         for (var index = 0; index < rows.Length; index++)
         {
             var row = rows[index];
             var covered = expectedCoveredCounts[index];
-            var total = PipelineLineTotals[index];
+            var total = Pipelines[index].LineCount;
             var passed = (long)covered * SiteAnalyzerCoverageTokens.CoveragePercentageScale >= (long)total * SiteAnalyzerCoverageTokens.RequiredPipelinePercent;
-            await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonDiagnostic).GetString()).IsEqualTo(PipelineIds[index]);
+            await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonDiagnostic).GetString()).IsEqualTo(Pipelines[index].Diagnostic);
             await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonLinesCovered).GetInt64()).IsEqualTo(covered);
             await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonLinesValid).GetInt64()).IsEqualTo(total);
             await Assert.That(row.GetProperty(SiteAnalyzerCoverageTokens.JsonPassed).GetBoolean()).IsEqualTo(passed);
             if (!passed)
-            { failures.Add(PipelineIds[index]); }
+            { failures.Add(Pipelines[index].Diagnostic); }
         }
 
         return failures.ToArray();
@@ -107,4 +106,86 @@ internal static class SiteAnalyzerCoverageThresholdOracle
 
     private static string[] ReadFailures(JsonElement report) => report.GetProperty(SiteAnalyzerCoverageTokens.JsonFailuresProperty)
         .EnumerateArray().Select(static failure => failure.GetString()!).ToArray();
+
+    private static CoveragePipeline[] ReadPipelines()
+    {
+        var contractPath = Path.Combine(
+            SiteAnalyzerCoverageXmlBuilder.FindRepositoryRoot(),
+            SiteAnalyzerCoverageTokens.ContractRelativePath);
+        using var contract = JsonDocument.Parse(File.ReadAllText(contractPath));
+        var executableSources = contract.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSources)
+            .EnumerateArray()
+            .Where(static source => source.GetProperty(SiteAnalyzerCoverageTokens.ClassificationProperty).GetString() == SiteAnalyzerCoverageTokens.ExecutableKind)
+            .Select(static source => source.GetProperty(SiteAnalyzerCoverageTokens.PathProperty).GetString()!)
+            .ToHashSet(StringComparer.Ordinal);
+        return contract.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonPipelines)
+            .EnumerateArray()
+            .Select(pipeline => new CoveragePipeline(
+                pipeline.GetProperty(SiteAnalyzerCoverageTokens.JsonDiagnostic).GetString()!,
+                pipeline.GetProperty(SiteAnalyzerCoverageTokens.JsonSources).EnumerateArray()
+                    .Select(static source => source.GetString()!)
+                    .Select(path =>
+                    {
+                        if (!executableSources.Contains(path))
+                        {
+                            throw new InvalidOperationException($"Pipeline source is not executable in the frozen inventory: {path}");
+                        }
+
+                        return path;
+                    })
+                    .ToArray()))
+            .ToArray();
+    }
+
+    private static long[] GetPipelineLineCounts(int? moduleCoveredLinePercent)
+    {
+        var executableSources = ReadExecutableSources();
+        var coveredLines = new Dictionary<string, int>(StringComparer.Ordinal);
+        if (moduleCoveredLinePercent is not null)
+        {
+            var totalCovered = executableSources.Length * SiteAnalyzerCoverageTokens.LinesPerSource * moduleCoveredLinePercent.Value /
+                SiteAnalyzerCoverageTokens.CoveragePercentageScale;
+            if (executableSources.Contains(SiteAnalyzerCoverageTokens.CriticalPipelineSource, StringComparer.Ordinal))
+            {
+                var protectedLines = Math.Min(SiteAnalyzerCoverageTokens.LinesPerSource, totalCovered);
+                coveredLines.Add(SiteAnalyzerCoverageTokens.CriticalPipelineSource, protectedLines);
+                totalCovered -= protectedLines;
+            }
+
+            foreach (var source in executableSources)
+            {
+                if (coveredLines.ContainsKey(source))
+                {
+                    continue;
+                }
+
+                var coveredHere = Math.Min(SiteAnalyzerCoverageTokens.LinesPerSource, totalCovered);
+                coveredLines.Add(source, coveredHere);
+                totalCovered -= coveredHere;
+            }
+        }
+
+        return Pipelines.Select(pipeline => pipeline.Sources.Sum(source =>
+            moduleCoveredLinePercent is null
+                ? SiteAnalyzerCoverageTokens.LinesPerSource
+                : coveredLines[source])).ToArray();
+    }
+
+    private static string[] ReadExecutableSources()
+    {
+        var contractPath = Path.Combine(
+            SiteAnalyzerCoverageXmlBuilder.FindRepositoryRoot(),
+            SiteAnalyzerCoverageTokens.ContractRelativePath);
+        using var contract = JsonDocument.Parse(File.ReadAllText(contractPath));
+        return contract.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSources)
+            .EnumerateArray()
+            .Where(static source => source.GetProperty(SiteAnalyzerCoverageTokens.ClassificationProperty).GetString() == SiteAnalyzerCoverageTokens.ExecutableKind)
+            .Select(static source => source.GetProperty(SiteAnalyzerCoverageTokens.PathProperty).GetString()!)
+            .ToArray();
+    }
+
+    private sealed record CoveragePipeline(string Diagnostic, string[] Sources)
+    {
+        internal long LineCount => Sources.Length * SiteAnalyzerCoverageTokens.LinesPerSource;
+    }
 }

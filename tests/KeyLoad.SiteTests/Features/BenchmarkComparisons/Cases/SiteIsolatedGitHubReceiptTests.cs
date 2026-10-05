@@ -12,7 +12,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var result = await ProbeAsync(inputs.Metadata, token);
         await Assert.That(result).IsTrue();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
+            .IsEqualTo(SiteIsolatedInventory.Workers(inputs.Metadata));
         var actualSite = SiteTestInputs.Read();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Source]![SiteIsolatedGitHubTokens.Website]!.GetValue<string>())
             .IsEqualTo(actualSite.SiteRevision);
@@ -83,7 +83,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Image],
             inputs.Metadata[SiteIsolatedGitHubFields.Image])).IsTrue();
         await Assert.That(copy[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
+            .IsEqualTo(SiteIsolatedInventory.Workers(inputs.Metadata));
     }
 
     /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or image checks remain rejected.</summary>

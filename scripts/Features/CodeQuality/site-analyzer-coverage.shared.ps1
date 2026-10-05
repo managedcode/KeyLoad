@@ -1,10 +1,10 @@
 $script:CoverageTokens = [ordered]@{
     SchemaVersion = 1
-    RequiredSourceCount = 32
+    RequiredSourceCount = 36
     RequiredConfigurationCount = 8
-    RequiredExecutableCount = 26
-    RequiredDeclarationCount = 6
-    RequiredPipelineCount = 13
+    RequiredExecutableCount = 29
+    RequiredDeclarationCount = 7
+    RequiredPipelineCount = 15
     RequiredModuleLinePercent = 80
     RequiredModuleBranchPercent = 70
     RequiredPipelineLinePercent = 90
@@ -146,7 +146,7 @@ $script:CoverageTokens = [ordered]@{
     ErrorPercentBounds = 'Coverage percent numerator exceeds its denominator.'
     ErrorCounterOverflow = 'Coverage counter aggregation overflowed Int64.'
     ErrorLineBeyondSource = 'Cobertura line number exceeds the hash-verified physical source file.'
-    ErrorInventoryCount = 'Contract must inventory exactly 25 executable and 5 declaration-only sources.'
+    ErrorInventoryCount = 'Contract must inventory exactly 29 executable and 7 declaration-only sources.'
     ErrorInvalidPipeline = 'Critical pipeline inventory must cover every executable source exactly by path.'
     ErrorSourceInventory = 'Analyzer source directory contents differ from the frozen source inventory.'
     NativePackageSelector = '/coverage/packages/package'
@@ -200,10 +200,17 @@ function Assert-CoveragePathHasNoLinks([string] $RepositoryRoot, [string] $Relat
     $segments = $RelativePath.Split([char[]]@($tokens.PathSeparator, $tokens.AlternatePathSeparator))
     foreach ($segment in $segments) {
         $currentPath = [IO.Path]::Combine($currentPath, $segment)
-        if (Test-Path -LiteralPath $currentPath) {
-            $item = Get-Item -LiteralPath $currentPath -Force
-            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $tokens.ErrorUnsafePath }
+        try {
+            $attributes = [IO.File]::GetAttributes($currentPath)
         }
+        catch [IO.FileNotFoundException] {
+            continue
+        }
+        catch [IO.DirectoryNotFoundException] {
+            continue
+        }
+
+        if (($attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw $tokens.ErrorUnsafePath }
     }
 }
 

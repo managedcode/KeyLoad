@@ -28,6 +28,7 @@ internal static class VectorProfileJsonFields
 /// <summary>Persists the profile identity and rejects any caller-modified workload settings.</summary>
 public sealed class VectorComparisonProfileJsonConverter : JsonConverter<VectorComparisonProfile>
 {
+    /// <inheritdoc />
     public override VectorComparisonProfile Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using var json = JsonDocument.ParseValue(ref reader);
@@ -50,15 +51,18 @@ public sealed class VectorComparisonProfileJsonConverter : JsonConverter<VectorC
         Require(root, VectorProfileJsonFields.Repetitions, profile.Repetitions);
         Require(root, VectorProfileJsonFields.MinimumRecall, profile.MinimumRecall);
         Require(root, VectorProfileJsonFields.UpdateCount, profile.UpdateCount);
-        if (root.EnumerateObject().Count() != 18)
+        if (root.EnumerateObject().Count() != VectorComparisonProfileJsonConverterValues.ProfileFieldCount)
         {
-            throw new JsonException("Vector profile has unexpected fields.");
+            throw new JsonException(VectorComparisonProfileJsonConverterValues.VectorProfileHasUnexpectedFields);
         }
         return profile;
     }
 
+    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, VectorComparisonProfile value, JsonSerializerOptions options)
     {
+        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(value);
         writer.WriteStartObject();
         writer.WriteString(VectorProfileJsonFields.Id, value.Id);
         writer.WriteNumber(VectorProfileJsonFields.RecordCount, value.RecordCount);
@@ -84,18 +88,24 @@ public sealed class VectorComparisonProfileJsonConverter : JsonConverter<VectorC
     private static void Require(JsonElement root, string name, int value)
     {
         if (!root.TryGetProperty(name, out var actual) || actual.ValueKind != JsonValueKind.Number || actual.GetInt32() != value)
-            throw new JsonException($"Vector profile field '{name}' differs from its immutable profile.");
+        {
+            throw new JsonException($"{VectorComparisonProfileJsonConverterValues.VectorProfileField}{name}{VectorComparisonProfileJsonConverterValues.DiffersFromItsImmutableProfile}");
+        }
     }
 
     private static void Require(JsonElement root, string name, double value)
     {
         if (!root.TryGetProperty(name, out var actual) || actual.ValueKind != JsonValueKind.Number || actual.GetDouble() != value)
-            throw new JsonException($"Vector profile field '{name}' differs from its immutable profile.");
+        {
+            throw new JsonException($"{VectorComparisonProfileJsonConverterValues.VectorProfileField}{name}{VectorComparisonProfileJsonConverterValues.DiffersFromItsImmutableProfile}");
+        }
     }
 
     private static void Require(JsonElement root, string name, string value)
     {
         if (!root.TryGetProperty(name, out var actual) || actual.GetString() != value)
-            throw new JsonException($"Vector profile field '{name}' differs from its immutable profile.");
+        {
+            throw new JsonException($"{VectorComparisonProfileJsonConverterValues.VectorProfileField}{name}{VectorComparisonProfileJsonConverterValues.DiffersFromItsImmutableProfile}");
+        }
     }
 }

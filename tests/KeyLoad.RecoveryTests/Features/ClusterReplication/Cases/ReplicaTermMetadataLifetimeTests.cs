@@ -29,7 +29,7 @@ internal sealed class ReplicaTermMetadataLifetimeTests
             {
                 Incarnation = originalIdentity.Incarnation
             }));
-            var reopenedLog = fixture.Own(new DurableReplicaLog(reopenedStore, fixture.Configuration with { Directory = restoredDirectory }));
+            var reopenedLog = fixture.Own(new DurableReplicaLog(reopenedStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = restoredDirectory })));
             var reopenedBefore = reopenedStore.GetReadDiagnostics();
             await Assert.That(reopenedLog.TermAt(ReplicaIndex)).IsEqualTo(EntryTerm);
             var reopenedAfter = reopenedStore.GetReadDiagnostics();

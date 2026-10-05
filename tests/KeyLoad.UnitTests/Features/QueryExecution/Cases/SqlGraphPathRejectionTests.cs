@@ -21,7 +21,7 @@ internal sealed class SqlGraphPathRejectionTests
     public async Task InvalidVersionCursorAndFullScanFlagRejectBeforeReturningAPath()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
             version: UnsupportedVersion));
@@ -34,7 +34,7 @@ internal sealed class SqlGraphPathRejectionTests
     public async Task ExtraStatementsAndAlternateProjectionGrammarReject()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var extra = SqlGraphPathTestSupport.LiteralSql + "; SELECT * FROM " + ExistingCollection;
         var alternate = SqlGraphPathTestSupport.LiteralSql.Replace(SelectAll, SelectId, StringComparison.Ordinal);
 
@@ -46,7 +46,7 @@ internal sealed class SqlGraphPathRejectionTests
     public async Task MissingAndWrongScalarParametersReject()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var missing = SqlGraphPathTestSupport.Parameters((GraphParameter, SqlGraphPathTestSupport.Graph));
         var wrongString = SqlGraphPathTestSupport.Parameters((GraphParameter, new[] { SqlGraphPathTestSupport.Graph }));
         var wrongInteger = SqlGraphPathTestSupport.Parameters(
@@ -65,12 +65,9 @@ internal sealed class SqlGraphPathRejectionTests
     public async Task CompleteRequestBytesTokensAndParameterCountAreBounded()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var smallRequestEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,
-            new KeyLoad.Security.AuthorizationPolicy(), new() { MaxQueryBytes = 32 }));
-        var tokenEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,
-            new KeyLoad.Security.AuthorizationPolicy(), new() { MaxQueryTokens = 8 }));
-        var depthEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,
-            new KeyLoad.Security.AuthorizationPolicy(), new() { MaxQueryDepth = 1 }));
+        var smallRequestEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,             new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 32 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
+        var tokenEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,             new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryTokens = 8 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
+        var depthEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,             new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
         var tooMany = Enumerable.Range(0, MaximumParameters).ToDictionary(index => "p" + index,
             index => JsonSerializer.SerializeToElement(index), StringComparer.Ordinal);
         var byteFailure = Failure(smallRequestEngine, SqlGraphPathTestSupport.Request(database,

@@ -168,8 +168,14 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
         .sort(compareStorage)
     })).sort((left, right) => ordinalCompare(JSON.stringify(left), JSON.stringify(right)))
   } : null;
+  const memorySamples = supported && !value.missingEvidence.includes('serverCpuRss')
+    ? value.containers.filter(item => item.sampleCount >= 2) : [];
+  const observedServerMemory = memorySamples.length === cell.nodeCount ? {
+    bytes: memorySamples.reduce((total, item) => total + item.maxObservedRssBytes, 0),
+    sampleCount: Math.min(...memorySamples.map(item => item.sampleCount))
+  } : null;
   return { sha256: sidecarSha256, qualified: value.qualified, missingEvidence: value.missingEvidence,
-    comparison };
+    comparison, observedServerMemory };
 }
 
 function ordinalCompare(left, right) { return left < right ? -1 : left > right ? 1 : 0; }
@@ -179,13 +185,18 @@ function compareStorage(left, right) {
 }
 
 export function validateScaleResourceProof(value, supported) {
-  requireGitHub(keys(value, ['sha256', 'qualified', 'missingEvidence', 'comparison'])
+  requireGitHub(keys(value, ['sha256', 'qualified', 'missingEvidence', 'comparison', 'observedServerMemory'])
     && hashPattern.test(value.sha256) && typeof value.qualified === 'boolean'
     && Array.isArray(value.missingEvidence) && value.missingEvidence.every(item => missingKinds.includes(item))
     && isDeepStrictEqual(value.missingEvidence, [...new Set(value.missingEvidence)].sort())
     && value.qualified === (value.missingEvidence.length === 0)
     && (supported ? (value.qualified ? value.comparison !== null : value.comparison === null)
-      : value.comparison === null && !value.qualified && value.missingEvidence.includes('serverCpuRss')));
+      : value.comparison === null && !value.qualified && value.missingEvidence.includes('serverCpuRss'))
+    && (value.observedServerMemory === null || keys(value.observedServerMemory, ['bytes', 'sampleCount'])
+      && Number.isSafeInteger(value.observedServerMemory.bytes) && value.observedServerMemory.bytes >= 0
+      && Number.isSafeInteger(value.observedServerMemory.sampleCount) && value.observedServerMemory.sampleCount >= 2)
+    && (supported ? (value.missingEvidence.includes('serverCpuRss') ? value.observedServerMemory === null
+      : value.observedServerMemory !== null) : value.observedServerMemory === null));
 }
 
 export function requireComparableScaleProfiles(profiles) {
@@ -193,9 +204,9 @@ export function requireComparableScaleProfiles(profiles) {
   for (const profile of profiles) {
     requireGitHub(typeof profile.profile === 'string' && profile.profile.length > 0 && Array.isArray(profile.workers));
     for (const worker of profile.workers) {
-      requireGitHub(['measured', 'failed', 'unsupportedTopology'].includes(worker.disposition)
+      requireGitHub(['measured', 'failed', 'unsupported', 'unsupportedTopology'].includes(worker.disposition)
         && typeof worker.serverResourceQualified === 'boolean');
-      if (worker.disposition === 'unsupportedTopology' || !worker.serverResourceQualified) continue;
+      if (worker.disposition === 'unsupported' || worker.disposition === 'unsupportedTopology' || !worker.serverResourceQualified) continue;
       requireGitHub(worker.resourceEquivalence !== null && worker.resourceEquivalence !== undefined);
       const key = JSON.stringify([profile.profile, worker.nodeCount, worker.scenario]);
       const previous = groups.get(key);

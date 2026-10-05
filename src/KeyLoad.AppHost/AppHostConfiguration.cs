@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+using KeyLoad.AppHost.Hosting;
 
 internal sealed record AppHostConfiguration(bool BenchmarkMode, string BenchmarkProfile, string BenchmarkRoot,
     string DataRoot, bool Ephemeral)
@@ -18,18 +18,19 @@ internal sealed record AppHostConfiguration(bool BenchmarkMode, string Benchmark
 
     internal static AppHostConfiguration Read(IDistributedApplicationBuilder builder)
     {
-        var benchmark = builder.Configuration.GetValue<bool>(BenchmarkEnabled);
-        var benchmarkProfile = (builder.Configuration[BenchmarkProfileConfiguration] ?? GeneralBenchmarkProfile).Trim();
+        var options = AppHostOptionsRegistration.Get(builder).Startup.Value;
+        var benchmark = options.BenchmarkMode;
+        var benchmarkProfile = options.BenchmarkProfile.Trim();
         if (benchmark && !string.Equals(benchmarkProfile, GeneralBenchmarkProfile, StringComparison.OrdinalIgnoreCase)
             && !string.Equals(benchmarkProfile, TimeSeriesBenchmarkProfile, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException("The configured benchmark profile is not supported.");
         }
-        var benchmarkRoot = Path.GetFullPath(builder.Configuration[BenchmarkDataRoot]
+        var benchmarkRoot = Path.GetFullPath(options.BenchmarkRoot
             ?? Path.Combine(builder.AppHostDirectory, DefaultBenchmarkRoot, Guid.NewGuid().ToString(GuidFormat)));
-        var dataRoot = Path.GetFullPath(builder.Configuration[ClusterDataRoot] ?? (benchmark
+        var dataRoot = Path.GetFullPath(options.DataRoot ?? (benchmark
             ? Path.Combine(benchmarkRoot, BenchmarkClusterDirectory) : Path.Combine(builder.AppHostDirectory, DefaultDataRoot)));
         return new(benchmark, benchmarkProfile, benchmarkRoot, dataRoot,
-            builder.Configuration.GetValue(EphemeralConfiguration, benchmark));
+            options.Ephemeral ?? benchmark);
     }
 }

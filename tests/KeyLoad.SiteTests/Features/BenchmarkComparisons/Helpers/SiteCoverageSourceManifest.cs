@@ -36,7 +36,7 @@ internal static class SiteCoverageSourceManifestWriter
             throw new InvalidOperationException(SiteCoverageTokens.InvalidRootFailure);
         }
 
-        var sources = await CaptureSourcesAsync(repository).ConfigureAwait(false);
+        var sources = await CaptureSourcesAsync(repository, SiteCoverageModeSelector.Current).ConfigureAwait(false);
         RejectStaleReceipts(artifactRoot);
         var nodeVersion = await ReadNodeVersionAsync(repository).ConfigureAwait(false);
         var manifest = new SiteCoverageSourceManifest(SiteCoverageTokens.Schema, revision!, nodeVersion, sources);
@@ -72,18 +72,22 @@ internal static class SiteCoverageSourceManifestWriter
         }
     }
 
-    private static async Task<IReadOnlyList<SiteCoverageSourceEntry>> CaptureSourcesAsync(string repository)
+    private static async Task<IReadOnlyList<SiteCoverageSourceEntry>> CaptureSourcesAsync(string repository,
+        SiteCoverageMode mode)
     {
-        var expected = SiteCoverageTokens.ProductionSources.Order(StringComparer.Ordinal).ToArray();
+        var inventory = SiteCoverageSourceInventory.ProductionSources.Order(StringComparer.Ordinal).ToArray();
+        var expected = SiteCoverageModeSelector.Sources(mode).Order(StringComparer.Ordinal).ToArray();
         var actualFeature = SiteCoverageSourcePaths.EnumerateModules(repository,
             SiteCoverageTokens.FeatureSourcePrefix).Order(StringComparer.Ordinal).ToArray();
-        var expectedFeature = expected.Where(path => path.StartsWith(SiteCoverageTokens.FeatureSourcePrefix, StringComparison.Ordinal))
+        var expectedFeature = inventory.Where(path => path.StartsWith(SiteCoverageTokens.FeatureSourcePrefix, StringComparison.Ordinal))
             .ToArray();
         var actualTools = SiteCoverageSourcePaths.EnumerateModules(repository,
-                SitePublicationTokens.EvidenceToolsPrefix, SitePublicationTokens.IsolatedEvidenceModulePrefix)
+                SitePublicationTokens.EvidenceToolsPrefix)
+            .Where(SiteCoverageSourceInventory.IsTrackedEvidenceModule)
             .Order(StringComparer.Ordinal).ToArray();
-        var expectedTools = expected.Where(path => path.StartsWith(SitePublicationTokens.EvidenceToolsPrefix,
-            StringComparison.Ordinal)).ToArray();
+        var expectedTools = inventory.Where(path => path.StartsWith(SitePublicationTokens.EvidenceToolsPrefix,
+                StringComparison.Ordinal) && SiteCoverageSourceInventory.IsTrackedEvidenceModule(path))
+            .ToArray();
         if (!actualFeature.SequenceEqual(expectedFeature, StringComparer.Ordinal) ||
             !actualTools.SequenceEqual(expectedTools, StringComparer.Ordinal))
         {

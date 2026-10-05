@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>One of the three immutable, bounded S1 scaled comparison profiles.</summary>
+/// <summary>One of the two immutable, bounded S1 scaled comparison profiles.</summary>
 [JsonConverter(typeof(ScaledComparisonProfileJsonConverter))]
 public sealed record ScaledComparisonProfile : IComparisonSettings
 {
@@ -17,27 +17,27 @@ public sealed record ScaledComparisonProfile : IComparisonSettings
     /// <inheritdoc />
     public int Documents { get; }
     /// <inheritdoc />
-    public int Operations => 100_000;
+    public int Operations => ScaledComparisonProfileValues.Scale100kCount;
     /// <inheritdoc />
-    public int Warmup => 256;
+    public int Warmup => ScaledComparisonProfileValues.WarmupQueries;
     /// <inheritdoc />
-    public int Repetitions => 1;
+    public int Repetitions => ScaledComparisonProfileValues.RepetitionCount;
     /// <inheritdoc />
-    public int Concurrency => 16;
+    public int Concurrency => ScaledComparisonProfileValues.QueryConcurrency;
     /// <inheritdoc />
-    public int PayloadBytes => 1_024;
+    public int PayloadBytes => ScaledComparisonProfileValues.PayloadBytes;
     /// <inheritdoc />
-    public int Seed => 1_729;
+    public int Seed => ScaledComparisonProfileValues.CorpusSeed;
     /// <inheritdoc />
-    public int Dimensions => 32;
+    public int Dimensions => ScaledComparisonProfileValues.VectorDimensions;
     /// <inheritdoc />
-    public int TopK => 10;
+    public int TopK => ScaledComparisonProfileValues.TopKNeighbors;
     /// <inheritdoc />
-    public int TimeoutSeconds => 30;
+    public int TimeoutSeconds => ScaledComparisonProfileValues.OperationTimeoutSeconds;
     /// <inheritdoc />
-    public int GraphVertices => 0;
+    public int GraphVertices => ScaledComparisonProfileValues.NoGraphEntities;
     /// <inheritdoc />
-    public int GraphFanOut => 0;
+    public int GraphFanOut => ScaledComparisonProfileValues.NoGraphEntities;
     /// <inheritdoc />
-    public int GraphDepth => 0;
+    public int GraphDepth => ScaledComparisonProfileValues.NoGraphEntities;
 }

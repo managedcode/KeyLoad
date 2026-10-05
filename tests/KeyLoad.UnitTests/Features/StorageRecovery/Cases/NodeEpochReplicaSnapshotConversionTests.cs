@@ -20,8 +20,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
         var originalCanonicalPosition = fixture.CanonicalStore.Position;
         ReplicaHardState originalHardState;
         (ImmutableArray<ReplicaEntry> Entries, byte[][] Bytes) originalSuffix;
-        using (var originalLog = new DurableReplicaLog(fixture.ReplicaStore, fixture.Configuration,
-                   canonicalDatabase: fixture.Database))
+        using (var originalLog = new DurableReplicaLog(fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration),                    canonicalDatabase: fixture.Database))
         {
             originalHardState = originalLog.State;
             originalSuffix = await CaptureRetainedSuffixAsync(fixture, originalLog);
@@ -37,7 +36,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
             fixture.Configuration with { VoterIds = [.. fixture.Configuration.VoterIds] },
             fixture.DestinationSnapshots, fixture.Convert);
 
-        using var log = new DurableReplicaLog(fixture.ReplicaStore, fixture.Configuration, canonicalDatabase: fixture.Database);
+        using var log = new DurableReplicaLog(fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), canonicalDatabase: fixture.Database);
         var converted = log.State.Snapshot!;
         await Assert.That(fixture.ReplicaStore.Position).IsEqualTo(originalReplicaPosition + SnapshotMetadataCommits);
         await Assert.That(fixture.CanonicalStore.Position).IsEqualTo(originalCanonicalPosition);
@@ -56,7 +55,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
             .IsEquivalentTo(additionalSourceBytes);
         await Assert.That(Directory.EnumerateFiles(fixture.DestinationSnapshots).Select(path => Path.GetFileName(path)!))
             .IsEquivalentTo([originalPointer.FileName, AdditionalSourceImage]);
-        new ReplicaSnapshotStore(fixture.CanonicalStore, log, fixture.Configuration).Recover();
+        new ReplicaSnapshotStore(fixture.CanonicalStore, log, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration)).Recover();
     }
 
     private static async Task<(ImmutableArray<ReplicaEntry> Entries, byte[][] Bytes)> CaptureRetainedSuffixAsync(

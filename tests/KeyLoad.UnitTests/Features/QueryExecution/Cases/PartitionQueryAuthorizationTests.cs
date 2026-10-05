@@ -19,13 +19,13 @@ internal sealed class PartitionQueryAuthorizationTests
         PartitionQueryTestSupport.ConfigureSinglePartitionReader(database);
         var position = database.Store.Position;
 
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database)
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution())
             .ExecutePartitionQuery("partition-query-reader", PartitionQueryTestSupport.Request(database),
                 [database.Partition, foreign]));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(database.Store.Position).IsEqualTo(position);
-        var healthy = new QueryEngine(database.Database).ExecutePartitionQuery("partition-query-reader",
+        var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery("partition-query-reader",
             PartitionQueryTestSupport.Request(database), [database.Partition]);
         await Assert.That(healthy.Rows.Select(row => row.Reference.Id).SequenceEqual(["visible"])).IsTrue();
     }

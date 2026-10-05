@@ -13,7 +13,7 @@ internal sealed class WorkflowLayoutCurrentSiteTests
     private const string FeatureRoot = "site/Features/BenchmarkComparisons";
     private const string ThinBuilder = "site/scripts/build.mjs";
     private const string Closure = "scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt";
-    private const int ClosureCount = 70;
+    private const int ClosureCount = 83;
 
     [Test]
     public async Task AcBcCurrent003TrustedClosureIncludesEveryActualBuilderAndBrowserConsumer()
@@ -59,7 +59,7 @@ internal sealed class WorkflowLayoutCurrentSiteTests
         foreach (var contract in new[]
         {
             "isolated_receipt_limit=4194304", "chmod 400", "verify_authority",
-            "result.workers == 270 and .result.files == 277", "schemaVersion:2",
+            "result.workers == ($receipt[0].workers | length)", "result.files == ($receipt[0].inputFiles | length)", "schemaVersion:2",
             "source:$isolated[0].source", "tests:$tests[0]", "isolated:$isolated[0]",
             "nativeReportSha256:$native_hash", "siteReportSha256:$site_hash",
             "cmp \"$KEYLOAD_SITE_ISOLATED_AGGREGATE/aggregate.json\"",

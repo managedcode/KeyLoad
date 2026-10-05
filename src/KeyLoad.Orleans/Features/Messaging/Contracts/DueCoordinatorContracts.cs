@@ -7,15 +7,19 @@ internal static class DueCoordinatorAliases
     internal const string Service = "keyload.orleans.messaging.due-service.v1";
     internal const string Coordinator = "keyload.orleans.messaging.due-coordinator.v1";
     internal const string Result = "keyload.orleans.messaging.due-dispatch-result.v1";
-    internal const string Process = "ProcessDueAsync";
+    internal const string Process = nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync);
     internal const int CoordinatorInterfaceVersion = 1;
 }
 
 internal static class DueCoordinatorFields
 {
+    internal const int FirstRevision = 1;
+    internal const int FirstScheduleGeneration = 1;
+    internal const int NoGeneration = 0;
+    internal const int FirstOrdinal = 0;
+
     internal const int Error = 0;
     internal const string InvalidHint = "The due-work hint does not match this coordinator partition.";
-    internal static readonly TimeSpan DispatchDeadline = TimeSpan.FromSeconds(5);
 }
 
 [global::Orleans.Alias(DueCoordinatorAliases.Service)]

@@ -8,6 +8,9 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3ClusterResources
 {
+    private const string ParameterIdentityFormat = "D";
+    private const string ResourceIdentityFormat = "N";
+
     private const string Data = "/data";
     private const string Http = "http";
     private const string Silo = "silo";
@@ -42,8 +45,8 @@ internal static class TwoRf3ClusterResources
         var secondPhysical = Guid.NewGuid();
         var secondIncarnation = Guid.NewGuid();
         var secondPeerSecret = RandomSecret();
-        var physicalB = builder.AddParameter(ParameterPrefix + "physical-b", secondPhysical.ToString("D"));
-        var incarnationB = builder.AddParameter(ParameterPrefix + "incarnation-b", secondIncarnation.ToString("D"));
+        var physicalB = builder.AddParameter(ParameterPrefix + "physical-b", secondPhysical.ToString(ParameterIdentityFormat));
+        var incarnationB = builder.AddParameter(ParameterPrefix + "incarnation-b", secondIncarnation.ToString(ParameterIdentityFormat));
         var signing = builder.AddParameter("signing-key", profile.SigningKey, secret: true);
         var admin = builder.AddParameter("admin-key", profile.AdminKey, secret: true);
         var firstPeer = builder.AddParameter("membership-peer-a", profile.PeerSecret, secret: true);
@@ -52,7 +55,7 @@ internal static class TwoRf3ClusterResources
         var containerUser = ClusterContainerUser.Resolve(builder);
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
-        var clusterId = ClusterPrefix + profile.Incarnation.ToString("N");
+        var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);
         return AddNodes(builder, profile, root, image, secondPhysical, secondIncarnation, physicalB, incarnationB, signing, admin,
             firstPeer, secondPeer, containerUser, firstGroup, secondGroup, clusterId);
     }
@@ -76,7 +79,7 @@ internal static class TwoRf3ClusterResources
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
             var resource = image.Add(builder, name)
-                .WithContainerName("keyload-" + incarnation.ToString("N") + "-" + name)
+                .WithContainerName("keyload-" + incarnation.ToString(ResourceIdentityFormat) + "-" + name)
                 .WithContainerNetworkAlias(name)
                 .WithBindMount(directory, Data)
                 .WithHttpEndpoint(targetPort: TwoRf3ProfileProtocol.HttpPort, name: Http, isProxied: false)
@@ -86,8 +89,8 @@ internal static class TwoRf3ClusterResources
                 .WithEnvironment(ClusterEnvironment, clusterId);
             if (groupA)
             {
-                resource.WithEnvironment(PhysicalEnvironment, physical.ToString("D"))
-                .WithEnvironment(IncarnationEnvironment, incarnation.ToString("D"));
+                resource.WithEnvironment(PhysicalEnvironment, physical.ToString(ParameterIdentityFormat))
+                .WithEnvironment(IncarnationEnvironment, incarnation.ToString(ParameterIdentityFormat));
             }
             else
             { resource.WithEnvironment(PhysicalEnvironment, physicalB).WithEnvironment(IncarnationEnvironment, incarnationB); }
@@ -129,8 +132,8 @@ internal static class TwoRf3ClusterResources
         }
         else
         {
-            resource.WithEnvironment(AuthorityPrefix + "AuthorityPhysicalShardId", profile.PhysicalShardId.ToString("D"))
-                .WithEnvironment(AuthorityPrefix + "AuthorityIncarnation", profile.Incarnation.ToString("D"))
+            resource.WithEnvironment(AuthorityPrefix + "AuthorityPhysicalShardId", profile.PhysicalShardId.ToString(ParameterIdentityFormat))
+                .WithEnvironment(AuthorityPrefix + "AuthorityIncarnation", profile.Incarnation.ToString(ParameterIdentityFormat))
                 .WithEnvironment(AuthorityPrefix + "AuthorityPeerSecret", firstSecret);
             AddVector(resource, "AuthorityEndpoints", firstGroup.Select(Origin).ToArray());
         }

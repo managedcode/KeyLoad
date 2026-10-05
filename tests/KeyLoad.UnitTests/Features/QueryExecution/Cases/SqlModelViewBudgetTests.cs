@@ -9,7 +9,7 @@ internal sealed class SqlModelViewBudgetTests
     {
         using var database = SqlModelViewTestSupport.Create(new() { MaxScanRecords = 1 });
         SqlModelViewTestSupport.Seed(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var exactLimit = engine.Execute("root",
             SqlModelViewTestSupport.Request(database, "SELECT * FROM QUEUE_MESSAGES('jobs')"));
         await Assert.That(exactLimit.Rows).HasSingleItem();
@@ -31,7 +31,7 @@ internal sealed class SqlModelViewBudgetTests
     {
         using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
 

@@ -57,10 +57,13 @@ internal sealed class PeerDiscoveryFixture : IDisposable
     internal PeerDiscoveryFixture(int capacity = SingleCapacity)
     {
         Secret = RandomNumberGenerator.GetBytes(PeerDiscoveryProtocol.SecretBytes);
-        Sender = new(Secret, TimeProvider.System);
-        Receiver = new(Secret, TimeProvider.System, replayCapacity: capacity);
+        Settings = new PeerDiscoveryOptions { ReplayCapacity = capacity };
+        Sender = new(Secret, TimeProvider.System, RecoveryExecutionOptions.PeerDiscovery());
+        Receiver = new(Secret, TimeProvider.System, RecoveryExecutionOptions.PeerDiscovery(Settings));
     }
 
+    internal PeerDiscoveryOptions Settings { get; }
+    internal long TimestampWindowMilliseconds => Settings.TimestampWindow.Ticks / TimeSpan.TicksPerMillisecond;
     internal byte[] Secret { get; }
     internal PeerSecurity Sender { get; }
     internal PeerSecurity Receiver { get; }

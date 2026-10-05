@@ -167,7 +167,7 @@ internal sealed class DatabaseCompositionReplayTests
             var original = db.Database.Apply(operation).Get<CommitReceipt>();
             db.Store.Dispose();
             using var reopened = new ZoneTreeStore(new(db.Directory));
-            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy());
+            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
 
             var retry = engine.Apply(operation).Get<CommitReceipt>();
             var resolved = engine.ResolveOutcome(operation).Get<CommitReceipt>();
@@ -193,7 +193,7 @@ internal sealed class DatabaseCompositionReplayIntegrityTests
         db.Commit(new EnqueueMessage(Queue, Message, Link(db, First, Second)));
         var operation = Forward(db);
         db.Database.Apply(operation).Get<CommitReceipt>();
-        var key = KeySpace.Outcome("root", operation.Id);
+        var key = OutcomeStoreOracle.Key(db.Store, operation);
         var outcome = db.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;
         await Assert.That(outcome.CompositionAuthority).IsNotNull();
 

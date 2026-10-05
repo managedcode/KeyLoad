@@ -59,7 +59,7 @@ internal sealed class NativePublicElementProfileTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(command,
             NativeValidationProfile.PublicInputElements));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(database.Database.Outcome(NativeAuthorityFixture.Root, id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 
     [Test]

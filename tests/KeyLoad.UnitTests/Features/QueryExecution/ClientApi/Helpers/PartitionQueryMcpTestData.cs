@@ -59,7 +59,7 @@ internal static class PartitionQueryMcpTestData
         PartitionQueryRequestV1 request, string entityId = EntityId)
     {
         var position = fixture.Store.Position;
-        var page = new QueryEngine(fixture.Database).QueryPartitions(Root, request,
+        var page = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(Root, request,
             PartitionQueryPublicTestSupport.ExpectedOwner);
         await VerifyPageAsync(fixture, request, page, position, entityId);
         return page;

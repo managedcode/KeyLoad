@@ -32,12 +32,12 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
         Directory.CreateDirectory(root);
         CanonicalStore = Open(CanonicalDirectory);
         ReplicaStore = Open(ReplicaDirectory);
-        Database = new(CanonicalStore, new AuthorizationPolicy());
+        Database = new(CanonicalStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         if (publishSnapshot)
         { SourceCut = CreateSourceMetadataAndPointer(); }
         else
         {
-            using var log = new DurableReplicaLog(ReplicaStore, Configuration, canonicalDatabase: Database);
+            using var log = new DurableReplicaLog(ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(Configuration), canonicalDatabase: Database);
             SourceCut = CaptureCurrentCut(Database.LastApplied);
         }
     }
@@ -75,7 +75,7 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
     private StorageSnapshot CreateSourceMetadataAndPointer()
     {
         Directory.CreateDirectory(SourceSnapshots);
-        using var log = new DurableReplicaLog(ReplicaStore, Configuration, canonicalDatabase: Database);
+        using var log = new DurableReplicaLog(ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(Configuration), canonicalDatabase: Database);
         log.SaveTermAndVote(SnapshotTerm, null);
         log.Append([new ReplicaEntry(SnapshotCut, SnapshotTerm, null)]);
         log.Commit(SnapshotCut);

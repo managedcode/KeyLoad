@@ -1,10 +1,14 @@
 using System.Globalization;
+using KeyLoad;
+using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Options;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
+[ConfigurationBinding]
 internal sealed record TestSuiteSettings(
     string Suite,
     string Project,
@@ -33,7 +37,6 @@ internal sealed record TestSuiteSettings(
     private const string CoverageSettingsSetting = "KeyLoadTests:CoverageSettings";
     private const string CoverageOutputSetting = "KeyLoadTests:CoverageOutput";
     private const int MaximumFilterLength = 4096;
-    private const string IsolatedComparisonFilter = "/*/*/IsolatedNativeComparisonTests/*";
     private static readonly string[] WorkloadOverrideNames =
         ["Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
             "TopK", "TimeoutSeconds", "GraphVertices", "GraphFanOut", "GraphDepth"];
@@ -58,7 +61,7 @@ internal sealed record TestSuiteSettings(
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(VectorProfileEnvironment))
             || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ScaleProfileEnvironment))
             || args.Any(argument => argument == "--" + SuiteSetting
-                || argument.StartsWith("--" + SuiteSetting + "=", StringComparison.Ordinal)
+                || argument.StartsWith(TestSuiteProtocol.ArgumentPrefix + SuiteSetting + TestSuiteProtocol.ArgumentValueSeparator, StringComparison.Ordinal)
                 || argument == "--" + ScaleProfileSetting
                 || argument.StartsWith(scaleArgument, StringComparison.Ordinal)
                 || argument == "--" + VectorProfileSetting
@@ -66,6 +69,9 @@ internal sealed record TestSuiteSettings(
     }
 
     internal static TestSuiteSettings? Read(IConfiguration configuration)
+        => Read(configuration, AppHostOptionsRegistration.BindTestExecution(configuration));
+
+    internal static TestSuiteSettings? Read(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
     {
         var suite = configuration[SuiteSetting];
         if (string.IsNullOrWhiteSpace(suite))
@@ -83,12 +89,12 @@ internal sealed record TestSuiteSettings(
         }
         var project = suite switch
         {
-            "analyzers" => "KeyLoad.Analyzers.Tests",
-            "unit" or "unit-scalar" => "KeyLoad.UnitTests",
-            "recovery" => "KeyLoad.RecoveryTests",
-            "rf3" => "KeyLoad.IntegrationTests",
-            "comparison" => "KeyLoad.ComparisonTests",
-            "site" => "KeyLoad.SiteTests",
+            TestSuiteProtocol.AnalyzersSuite => "KeyLoad.Analyzers.Tests",
+            TestSuiteProtocol.UnitSuite or TestSuiteProtocol.ScalarUnitSuite => "KeyLoad.UnitTests",
+            TestSuiteProtocol.RecoverySuite => "KeyLoad.RecoveryTests",
+            TestSuiteProtocol.Rf3Suite => "KeyLoad.IntegrationTests",
+            TestSuiteProtocol.ComparisonSuite => "KeyLoad.ComparisonTests",
+            TestSuiteProtocol.SiteSuite => "KeyLoad.SiteTests",
             _ => throw new InvalidOperationException("The Aspire test suite is not supported.")
         };
         var comparisonTarget = configuration[ComparisonWorkerSelection.TargetSetting];
@@ -99,7 +105,7 @@ internal sealed record TestSuiteSettings(
             throw new InvalidOperationException("Scale and vector test profiles cannot be combined.");
         }
         if (configuration.GetValue<bool>(BenchmarkEnabledSetting)
-            || comparisonTarget is not null && suite != "comparison")
+            || comparisonTarget is not null && suite != TestSuiteProtocol.ComparisonSuite)
         {
             throw new InvalidOperationException("Test and benchmark modes cannot be combined.");
         }
@@ -120,10 +126,14 @@ internal sealed record TestSuiteSettings(
         {
             throw new InvalidOperationException("Coverage settings and output must be configured together.");
         }
-        var minutes = configuration.GetValue(TimeoutSetting, scaleProfile is not null || vectorProfile is not null ? 140 : suite is "rf3" or "comparison" ? 60 : 30);
-        ArgumentOutOfRangeException.ThrowIfLessThan(minutes, 1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(minutes, 180);
-        return new(suite, project, filter, TimeSpan.FromMinutes(minutes), resultsDirectory,
+        var policy = execution.Value;
+        var timeout = configuration[TimeoutSetting] is not null
+            ? TimeSpan.FromMinutes(configuration.GetValue<int>(TimeoutSetting))
+            : scaleProfile is not null || vectorProfile is not null ? policy.IntensiveTimeout
+            : suite is TestSuiteProtocol.Rf3Suite or TestSuiteProtocol.ComparisonSuite ? policy.ClusterTimeout : policy.OrdinaryTimeout;
+        if (!TestExecutionOptions.Bounded(timeout))
+        { throw new ArgumentOutOfRangeException(nameof(timeout)); }
+        return new(suite, project, filter, timeout, resultsDirectory,
             configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
             localRf3ImageEnabled, scaleProfile) { VectorProfile = vectorProfile };
     }
@@ -135,13 +145,13 @@ internal sealed record TestSuiteSettings(
         {
             return null;
         }
-        if (suite != "comparison" || target is null
+        if (suite != TestSuiteProtocol.ComparisonSuite || target is null
             || !IsolatedComparisonContract.Current.Targets.Contains(target, StringComparer.Ordinal)
             || configuration.GetValue<bool>(BenchmarkEnabledSetting)
-            || configuration[TimeoutSetting] is { } timeout && timeout != "140"
+            || configuration[TimeoutSetting] is { } timeout && timeout != TestSuiteProtocol.ProfileTimeoutMinutesText
             || configuration[ComparisonWorkerSelection.ProfileSetting] is not { } evidenceProfile
             || configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null
-            || configuration[FilterSetting] != IsolatedComparisonFilter
+            || configuration[FilterSetting] != TestSuiteProtocol.IsolatedComparisonFilter
             || !HasValidScaleWorkload(configuration)
             || HasWorkloadOverride(configuration))
         {

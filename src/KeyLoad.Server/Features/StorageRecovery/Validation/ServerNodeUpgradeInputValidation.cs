@@ -17,14 +17,14 @@ internal static class ServerNodeUpgradeInputValidation
     {
         if (entry.Directory && entry.Path is ServerNodeUpgradeProtocol.Canonical or ServerNodeUpgradeProtocol.Replica)
         { return; }
-        if (!entry.Directory && entry.Path is "database/owner.lock" or "replica/owner.lock" && entry.Length == 0)
+        if (!entry.Directory && entry.Path is ServerNodeUpgradeProtocol.CanonicalOwnerPath or ServerNodeUpgradeProtocol.ReplicaOwnerPath && entry.Length == 0)
         { return; }
         var expected = entry.Path switch
         {
-            "database/identity.json" => owner.CanonicalIdentitySha256,
-            "database/commands.wal" => owner.CanonicalJournalSha256,
-            "replica/identity.json" => owner.ReplicaIdentitySha256,
-            "replica/commands.wal" => owner.ReplicaJournalSha256,
+            ServerNodeUpgradeProtocol.CanonicalIdentityPath => owner.CanonicalIdentitySha256,
+            ServerNodeUpgradeProtocol.CanonicalJournalPath => owner.CanonicalJournalSha256,
+            ServerNodeUpgradeProtocol.ReplicaIdentityPath => owner.ReplicaIdentitySha256,
+            ServerNodeUpgradeProtocol.ReplicaJournalPath => owner.ReplicaJournalSha256,
             _ => throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid)
         };
         if (entry.Directory || !partial && entry.Sha256 != expected)

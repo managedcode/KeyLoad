@@ -4,6 +4,12 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 
 internal sealed record LocalRf3ImageRequest
 {
+    private const string EnabledValue = "true";
+    private const string DisabledValue = "false";
+    private const string LocalProvenance = "local-development";
+    private const string Rf3Suite = "rf3";
+    private const string EnabledKey = "Enabled";
+
     internal const string EnabledSetting = "KeyLoadTests:LocalRf3Image:Enabled";
     internal const string EnabledEnvironment = "KeyLoadTests__LocalRf3Image__Enabled";
     private const string ProvenanceSetting = "KEYLOAD_IMAGE_PROVENANCE";
@@ -32,11 +38,11 @@ internal sealed record LocalRf3ImageRequest
         ArgumentNullException.ThrowIfNull(configuration);
         var enabledText = ReadEnabledText(configuration);
 
-        if (enabledText is not null && enabledText is not ("true" or "false"))
+        if (enabledText is not null && enabledText is not (EnabledValue or DisabledValue))
         {
             throw new InvalidOperationException(Invalid);
         }
-        var enabled = enabledText == "true";
+        var enabled = enabledText == EnabledValue;
         ValidateLocalSection(configuration);
         var child = configuration[ChildSetting];
         if (!string.IsNullOrEmpty(child))
@@ -57,8 +63,8 @@ internal sealed record LocalRf3ImageRequest
     private static bool ValidateChildRequest(IConfiguration configuration, string child, string? enabledText,
         string? suite)
     {
-        if (child != "true" || enabledText is not null || !string.IsNullOrWhiteSpace(suite)
-            || !string.Equals(configuration[ProvenanceSetting], "local-development", StringComparison.Ordinal)
+        if (child != EnabledValue || enabledText is not null || !string.IsNullOrWhiteSpace(suite)
+            || !string.Equals(configuration[ProvenanceSetting], LocalProvenance, StringComparison.Ordinal)
             || string.IsNullOrWhiteSpace(configuration[LocalReceiptSetting])
             || string.IsNullOrWhiteSpace(configuration[ServerImageSetting])
             || HasValue(configuration, GithubReceiptSetting) || HasValue(configuration, GithubRevisionSetting)
@@ -80,7 +86,7 @@ internal sealed record LocalRf3ImageRequest
 
     private static void ValidateEnabledRequest(IConfiguration configuration, string? suite, string? filter)
     {
-        if (suite != "rf3" || string.IsNullOrWhiteSpace(filter)
+        if (suite != Rf3Suite || string.IsNullOrWhiteSpace(filter)
             || HasValue(configuration, ProvenanceSetting)
             || HasValue(configuration, LocalReceiptSetting)
             || HasValue(configuration, GithubReceiptSetting)
@@ -105,7 +111,7 @@ internal sealed record LocalRf3ImageRequest
         var localSection = configuration.GetSection(LocalSectionSetting);
         var localChildren = localSection.GetChildren().Take(2).ToArray();
         if (localSection.Value is not null || localChildren.Length > 1
-            || localChildren.Any(child => child.Key != "Enabled" || child.GetChildren().Take(1).Any())
+            || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(1).Any())
             || configuration.GetSection(EnabledSetting).GetChildren().Any())
         {
             throw new InvalidOperationException(Invalid);

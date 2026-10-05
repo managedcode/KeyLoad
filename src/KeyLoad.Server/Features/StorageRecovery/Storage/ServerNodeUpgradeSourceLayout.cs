@@ -14,7 +14,7 @@ internal static class ServerNodeUpgradeSourceLayout
         if (store is not (ServerNodeUpgradeProtocol.Canonical or ServerNodeUpgradeProtocol.Replica))
         { return; }
         var relative = entry.Path[(separator + 1)..];
-        if (relative.StartsWith(TreeDirectory + "/", StringComparison.Ordinal)
+        if (relative.StartsWith(TreeDirectory + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal)
             || relative == TreeDirectory && entry.Directory)
         { return; }
         var knownFile = relative is ServerNodeUpgradeProtocol.Identity or ServerNodeUpgradeProtocol.Journal

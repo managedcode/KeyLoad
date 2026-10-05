@@ -8,6 +8,8 @@ namespace KeyLoad.Comparisons.Targets;
 internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
     int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount) : IComparisonSession
 {
+    private const int ClaimPollMilliseconds = 1;
+
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
@@ -118,7 +120,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
                 cancellationToken)).Deliveries.SingleOrDefault();
             if (delivery is null)
             {
-                await Task.Delay(1, cancellationToken);
+                await Task.Delay(ClaimPollMilliseconds, cancellationToken);
             }
         }
         var received = Stopwatch.GetTimestamp();

@@ -179,7 +179,7 @@ internal sealed class SampleRetentionLifecycleTests
             store = null;
 
             store = new(new ZoneTreeStoreOptions(path));
-            var reopened = new DatabaseEngine(store, new AuthorizationPolicy());
+            var reopened = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
             PhysicalShardTestBootstrap.RequireExisting(reopened);
             var status = reopened.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
                 new(new("tenant", "database", "orders", CustomerId),
@@ -207,7 +207,7 @@ internal sealed class SampleRetentionLifecycleTests
 
     private static DatabaseEngine Bootstrap(ZoneTreeStore store)
     {
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
         PhysicalShardTestBootstrap.Bootstrap(database, "root");

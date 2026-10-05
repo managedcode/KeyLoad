@@ -3,21 +3,25 @@ using System.Net.Sockets;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
 /// <summary>Owns one native silo lifetime and routes public operations to uniquely keyed request actors.</summary>
 /// <param name="partition">Borrowed physical database and replica owner.</param>
-/// <param name="options">Validated fixed-voter silo settings.</param>
+/// <param name="nodeOptions">Validated fixed-voter silo settings.</param>
 /// <param name="administration">Borrowed node administration guarded by read actors.</param>
 /// <param name="loggerFactory">Shared process diagnostics, owned by the outer application.</param>
 /// <param name="membershipAuthority">Borrowed discovery authority, drained before the native silo stops.</param>
-internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, INodeAdministration administration,
-    ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority) : IAsyncDisposable
+/// <param name="runtimeOptions">Shared validated options snapshots borrowed by the native silo.</param>
+internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
+    INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
+    ServerRuntimeOptions runtimeOptions) : IAsyncDisposable
 {
+    private readonly NodeOptions options = nodeOptions.Value;
     private readonly Lock lifecycle = new();
-    private readonly NativeRequestWorkOwner requestWork = new();
+    private readonly NativeRequestWorkOwner requestWork = new(runtimeOptions.GrainRouting);
     private IHost? host;
     private IGrainFactory? grains;
     private Task? shutdown;
@@ -89,15 +93,15 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         await registered.ConfigureAwait(false);
         var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
         var built = OrleansSiloConfiguration.Build(partition, options, administration, loggerFactory, requestWork,
-            address, cancellationToken);
+            address, cancellationToken, runtimeOptions);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, 1);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
         if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
         { return; }
-        var catalog = new PhysicalShardCatalogStartup(this, partition, options,
-            built.Services.GetRequiredService<TimeProvider>());
+        var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
+            built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting);
         Volatile.Write(ref physicalShardCatalog, catalog);
         await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
@@ -136,7 +140,8 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = RuntimeServices;
         var clock = services.GetRequiredService<TimeProvider>();
-        using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
+        var executionLifetime = runtimeOptions.GrainRouting.Value.ExecutionLifetime;
+        using var deadline = new CancellationTokenSource(executionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var catalog = requireCatalogAdmission ? Volatile.Read(ref physicalShardCatalog) : null;
         if (requireCatalogAdmission && (catalog is null || !catalog.IsReady))
@@ -155,7 +160,7 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
             reply = await GrainRequestStreamConsumer.DrainAsync(
                 token => factory.GetGrain<IRequestGrain>(requestId).ExecuteStreamAsync(signedRequest, token),
                 services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId, clock, execution.Token).ConfigureAwait(false);
+                requestId, clock, execution.Token, runtimeOptions.GrainRouting).ConfigureAwait(false);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
@@ -225,7 +230,8 @@ internal sealed class OrleansNode(PartitionHost partition, NodeOptions options, 
 
     private async Task StopHostAsync(IHost stopping, List<Exception> failures)
     {
-        using var deadline = new CancellationTokenSource(OrleansNodeProtocol.ShutdownTimeout);
+        var shutdownTimeout = runtimeOptions.Membership.Value.ShutdownTimeout;
+        using var deadline = new CancellationTokenSource(shutdownTimeout);
         await ServerFailureObserver.ObserveAsync(() => stopping.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         // A failed native Start has no lifecycle rollback. Drain the endpoint while its transport still exists.
         ServerFailureObserver.Observe(() => stopping.Services.GetService<ReplicaSiloDiscoveryState>()?.StopDiscovery(), failures);

@@ -26,6 +26,52 @@ function Convert-FcCount([string] $Value) {
     $number
 }
 
+function Add-FcCount([long] $Current, [long] $Increment) {
+    $sum = [System.Numerics.BigInteger]::Add([System.Numerics.BigInteger] $Current, [System.Numerics.BigInteger] $Increment)
+    if ($Current -lt 0 -or $Increment -lt 0 -or
+        [System.Numerics.BigInteger]::Compare($sum, [System.Numerics.BigInteger] [long]::MaxValue) -gt 0) {
+        throw $script:FunctionalCoverage.ErrorInvalidCount
+    }
+    [long] $sum
+}
+
+function Get-FcPercent([long] $Covered, [long] $Total) {
+    if ($Total -eq 0) { return $null }
+    [decimal]::Round(([decimal] $Covered * 100) / [decimal] $Total, 2, [MidpointRounding]::AwayFromZero)
+}
+
+function Get-FcFileCoverage([object[]] $Lines, [object[]] $Branches, [object[]] $Sources, [bool] $IncludeBranches = $true) {
+    $rows = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    foreach ($source in $Sources) {
+        $path = [string] $source.path
+        $rows.Add($path, [ordered]@{ path = $path; linesCovered = 0L; linesValid = 0L; branchesCovered = 0L; branchesValid = 0L })
+    }
+    foreach ($line in $Lines) {
+        if (-not $rows.ContainsKey([string] $line.source)) { throw $script:FunctionalCoverage.ErrorUnexpectedSource }
+        $row = $rows[[string] $line.source]
+        $row.linesValid = Add-FcCount $row.linesValid 1L
+        $hit = if ($line.Contains('hits')) { [long] $line.hits -gt 0 } else { [bool] $line.hit }
+        if ($hit) { $row.linesCovered = Add-FcCount $row.linesCovered 1L }
+    }
+    foreach ($branch in $Branches) {
+        if (-not $rows.ContainsKey([string] $branch.source)) { throw $script:FunctionalCoverage.ErrorUnexpectedSource }
+        $row = $rows[[string] $branch.source]
+        $row.branchesCovered = Add-FcCount $row.branchesCovered ([long] $branch.covered)
+        $row.branchesValid = Add-FcCount $row.branchesValid ([long] $branch.total)
+    }
+    @($rows.Values | Sort-Object path | ForEach-Object {
+        $branchSummary = $null
+        if ($IncludeBranches) {
+            $branchSummary = [ordered]@{ covered = $_.branchesCovered; valid = $_.branchesValid; percent = Get-FcPercent $_.branchesCovered $_.branchesValid }
+        }
+        [ordered]@{
+            path = $_.path
+            lines = [ordered]@{ covered = $_.linesCovered; valid = $_.linesValid; percent = Get-FcPercent $_.linesCovered $_.linesValid }
+            nativeBranches = $branchSummary
+        }
+    })
+}
+
 function Resolve-FcReportSource([string] $Root, [string] $Filename, [string[]] $SourceRoots, [Collections.Generic.HashSet[string]] $Allowed) {
     if ([string]::IsNullOrWhiteSpace($Filename) -or $Filename.Contains(':')) { throw $script:FunctionalCoverage.ErrorUnexpectedSource }
     if ([IO.Path]::IsPathRooted($Filename)) { $candidate = [IO.Path]::GetFullPath($Filename) }
@@ -50,7 +96,7 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
     $packages = @($document.DocumentElement.SelectNodes('./packages/package'))
     if ($packages.Count -ne 1 -or $packages[0].GetAttribute('name') -cne $t.Module) { throw $t.ErrorUnexpectedModule }
     $sourceNodes = @($document.DocumentElement.SelectNodes('./sources/source'))
-    if ($sourceNodes.Count -gt 1) { throw $t.ErrorUnexpectedSource }
+    if ($sourceNodes.Count -gt 1 -or $Sources.Count -gt $t.MaxSources) { throw $t.ErrorUnexpectedSource }
     $sourceRoots = @()
     if ($sourceNodes.Count -eq 1) {
         $value = [string] $sourceNodes[0].InnerText
@@ -70,12 +116,15 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
     $lineUnion = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     $branchRecords = [Collections.Generic.List[object]]::new()
     $seenSources = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $sourcesWithLineRecords = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($class in @($packages[0].SelectNodes('./classes/class'))) {
         $className = $class.GetAttribute('name')
         if ([string]::IsNullOrWhiteSpace($className)) { throw $t.ErrorCoverage }
         $source = Resolve-FcReportSource $Root $class.GetAttribute('filename') $sourceRoots $allowed
         [void] $seenSources.Add($source)
+        if ($seenSources.Count -gt $t.MaxSources) { throw $t.ErrorUnexpectedSource }
         foreach ($line in @($class.SelectNodes('./lines/line'))) {
+            [void] $sourcesWithLineRecords.Add($source)
             $number = Convert-FcCount $line.GetAttribute('number')
             $hits = Convert-FcCount $line.GetAttribute('hits')
             if ($number -le 0 -or $number -gt $maximumLines[$source]) { throw $t.ErrorInvalidCount }
@@ -102,38 +151,93 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
             }
             else { $lineRecords.Add($identity, [ordered]@{ source = $source; line = $number; hits = $hits; branch = $branch }) }
             $unionId = ConvertTo-Json -InputObject @($source, $number) -Compress
-            if (-not $lineUnion.ContainsKey($unionId)) { $lineUnion.Add($unionId, [ordered]@{ source = $source; line = $number; hit = $false }) }
+            if (-not $lineUnion.ContainsKey($unionId)) {
+                if ($lineUnion.Count -ge $t.MaxDistinctLineLocations) { throw $t.ErrorCoverage }
+                $lineUnion.Add($unionId, [ordered]@{ source = $source; line = $number; hit = $false })
+            }
             if ($hits -gt 0) { $lineUnion[$unionId].hit = $true }
             if ($null -ne $branch -and $isNew) { $branchRecords.Add($branch) }
         }
     }
     if ($lineRecords.Count -eq 0) { throw $t.ErrorIncomplete }
-    $missing = @($Sources | Where-Object { -not $seenSources.Contains([string] $_.path) } | ForEach-Object { [string] $_.path })
-    [ordered]@{ lines = @($lineRecords.Values); lineUnion = @($lineUnion.Values); branches = @($branchRecords); sourceCount = $seenSources.Count; sourcesWithoutLines = $missing }
+    $nativeLinesValid = Convert-FcCount $document.DocumentElement.GetAttribute('lines-valid')
+    $nativeLinesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('lines-covered')
+    $nativeBranchesValid = Convert-FcCount $document.DocumentElement.GetAttribute('branches-valid')
+    $nativeBranchesCovered = Convert-FcCount $document.DocumentElement.GetAttribute('branches-covered')
+    $lineRecordCovered = @($lineRecords.Values | Where-Object { $_.hits -gt 0 }).Count
+    $branchRecordCovered = 0L; $branchRecordTotal = 0L
+    foreach ($branch in $branchRecords) {
+        $branchRecordCovered = Add-FcCount $branchRecordCovered ([long] $branch.covered)
+        $branchRecordTotal = Add-FcCount $branchRecordTotal ([long] $branch.total)
+    }
+    if ($nativeLinesValid -ne $lineRecords.Count -or $nativeLinesCovered -ne $lineRecordCovered -or
+        $nativeBranchesValid -ne $branchRecordTotal -or $nativeBranchesCovered -ne $branchRecordCovered) { throw $t.ErrorInvalidCount }
+    $missing = @($Sources | Where-Object { -not $sourcesWithLineRecords.Contains([string] $_.path) } | ForEach-Object { [string] $_.path })
+    [ordered]@{
+        lines = @($lineRecords.Values)
+        lineUnion = @($lineUnion.Values)
+        branches = @($branchRecords)
+        sourceCount = $seenSources.Count
+        sourcesWithoutLines = $missing
+        nativeLines = [ordered]@{ covered = $nativeLinesCovered; valid = $nativeLinesValid; percent = Get-FcPercent $nativeLinesCovered $nativeLinesValid }
+        nativeBranches = [ordered]@{ covered = $nativeBranchesCovered; valid = $nativeBranchesValid; percent = Get-FcPercent $nativeBranchesCovered $nativeBranchesValid }
+    }
 }
 
-function Read-FcTrx([string] $Path, [string] $Suite, [string[]] $ExpectedClasses) {
+function Read-FcTrx([string] $Path, [string] $Suite, [string] $Namespace, [string[]] $ExpectedClasses) {
     $t = $script:FunctionalCoverage
     $doc = Read-FcXml $Path 'TestRun'
-    $results = @($doc.SelectNodes('//*[local-name()="UnitTestResult"]'))
-    $matched = @($results | Where-Object { $_.GetAttribute('testName').Contains('PartitionQuery') })
-    if ($matched.Count -eq 0) { throw $t.ErrorTrx }
-    $notPassed = @($matched | Where-Object { $_.GetAttribute('outcome') -cne 'Passed' })
-    if ($notPassed.Count -gt 0) { throw $t.ErrorTrx }
-    $observed = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($test in $matched) {
-        $name = $test.GetAttribute('testName')
-        $matches = @($ExpectedClasses | Where-Object { $name.Contains($_) })
-        if ($matches.Count -ne 1) { throw $t.ErrorTrx }
-        [void] $observed.Add([string] $matches[0])
+    $definitions = @($doc.SelectNodes('//*[local-name()="TestDefinitions"]/*[local-name()="UnitTest"]'))
+    $results = @($doc.SelectNodes('//*[local-name()="Results"]/*[local-name()="UnitTestResult"]'))
+    if ($definitions.Count -eq 0 -or $definitions.Count -gt $t.MaxDistinctLineLocations -or $results.Count -ne $definitions.Count) { throw $t.ErrorTrx }
+
+    $expected = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($class in $ExpectedClasses) { [void] $expected.Add("$Namespace.$class") }
+    $definitionsById = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    $selectedDefinitions = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    $observedClasses = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($definition in $definitions) {
+        $id = $definition.GetAttribute('id')
+        $method = $definition.SelectSingleNode('./*[local-name()="TestMethod"]')
+        if ([string]::IsNullOrWhiteSpace($id) -or $null -eq $method -or $definitionsById.ContainsKey($id)) { throw $t.ErrorTrx }
+        $details = [ordered]@{ className = $method.GetAttribute('className'); methodName = $method.GetAttribute('name'); definitionName = $definition.GetAttribute('name') }
+        if ([string]::IsNullOrWhiteSpace($details.className) -or [string]::IsNullOrWhiteSpace($details.methodName)) { throw $t.ErrorTrx }
+        $definitionsById.Add($id, $details)
+        if (-not $expected.Contains($details.className)) { throw $t.ErrorTrx }
+        [void] $observedClasses.Add($details.className)
+        $selectedDefinitions.Add($id, $details)
     }
-    if (-not $observed.SetEquals($ExpectedClasses)) { throw $t.ErrorTrx }
-    [ordered]@{ suite = $Suite; testCount = $matched.Count; tests = @($matched | ForEach-Object { $_.GetAttribute('testName') } | Sort-Object -Unique) }
+    if (-not $observedClasses.SetEquals($expected)) { throw $t.ErrorTrx }
+
+    $resultsById = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    $cases = [Collections.Generic.List[object]]::new()
+    foreach ($result in $results) {
+        $id = $result.GetAttribute('testId')
+        if (-not $selectedDefinitions.ContainsKey($id) -or $resultsById.ContainsKey($id)) { throw $t.ErrorTrx }
+        if ($result.GetAttribute('outcome') -cne 'Passed') { throw $t.ErrorTrx }
+        $resultsById.Add($id, $result)
+        $definition = $selectedDefinitions[$id]
+        $testName = $result.GetAttribute('testName')
+        if ([string]::IsNullOrWhiteSpace($testName)) { throw $t.ErrorTrx }
+        $caseIdentity = "$id|$($definition.className)|$($definition.methodName)|$testName"
+        $cases.Add([ordered]@{ identity = $caseIdentity; testId = $id; className = $definition.className; methodName = $definition.methodName; testName = $testName })
+    }
+    if ($resultsById.Count -ne $selectedDefinitions.Count) { throw $t.ErrorTrx }
+
+    $counters = $doc.SelectSingleNode('//*[local-name()="ResultSummary"]/*[local-name()="Counters"]')
+    if ($null -eq $counters -or (Convert-FcCount $counters.GetAttribute('total')) -ne $definitions.Count -or
+        (Convert-FcCount $counters.GetAttribute('executed')) -ne $results.Count -or
+        (Convert-FcCount $counters.GetAttribute('passed')) -ne $results.Count) { throw $t.ErrorTrx }
+    foreach ($counterName in @('failed','error','timeout','aborted','inconclusive','notRunnable','notExecuted','disconnected','passedButRunAborted','inProgress','pending')) {
+        $value = $counters.GetAttribute($counterName)
+        if ($value.Length -gt 0 -and (Convert-FcCount $value) -ne 0) { throw $t.ErrorTrx }
+    }
+    [ordered]@{ suite = $Suite; testCount = $cases.Count; definitionsCount = $definitions.Count; resultsCount = $results.Count; cases = @($cases | Sort-Object identity) }
 }
 
-function New-FcReport([object[]] $Runs, [string] $Filter) {
-    $firstTests = @($Runs[0].trx.tests | Sort-Object -Unique) -join "`n"
-    $secondTests = @($Runs[1].trx.tests | Sort-Object -Unique) -join "`n"
+function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [object] $Manifest, [string] $ManifestPath) {
+    $firstTests = @($Runs[0].trx.cases | ForEach-Object { $_.identity } | Sort-Object -Unique) -join "`n"
+    $secondTests = @($Runs[1].trx.cases | ForEach-Object { $_.identity } | Sort-Object -Unique) -join "`n"
     if ($firstTests -cne $secondTests) { throw $script:FunctionalCoverage.ErrorTrx }
     $union = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     $unreportedSources = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -141,13 +245,41 @@ function New-FcReport([object[]] $Runs, [string] $Filter) {
         foreach ($source in $run.coverage.sourcesWithoutLines) { [void] $unreportedSources.Add([string] $source) }
         foreach ($line in $run.coverage.lineUnion) {
             $identity = ConvertTo-Json -InputObject @($line.source, $line.line) -Compress
-            if (-not $union.ContainsKey($identity)) { $union.Add($identity, [ordered]@{ source = $line.source; line = $line.line; hit = [bool] $line.hit }) }
+            if (-not $union.ContainsKey($identity)) {
+                if ($union.Count -ge $script:FunctionalCoverage.MaxDistinctLineLocations) { throw $script:FunctionalCoverage.ErrorCoverage }
+                $union.Add($identity, [ordered]@{ source = $line.source; line = $line.line; hit = [bool] $line.hit })
+            }
             elseif ($line.hit) { $union[$identity].hit = $true }
         }
     }
     $locations = @($union.Values | Where-Object { -not $_.hit } | Sort-Object source,line | ForEach-Object { [ordered]@{ path = $_.source; line = $_.line } })
     $covered = @($union.Values | Where-Object hit).Count
     $total = $union.Count
+    $unionFiles = @(Get-FcFileCoverage @($union.Values) @() $Sources $false)
+    $runReports = @($Runs | ForEach-Object {
+        $fileCoverage = @(Get-FcFileCoverage $_.coverage.lines $_.coverage.branches $Sources)
+        $distinctCovered = @($_.coverage.lineUnion | Where-Object hit).Count
+        $distinctValid = $_.coverage.lineUnion.Count
+        [ordered]@{
+            suite = $_.trx.suite
+            processExitCode = 0
+            testDefinitions = $_.trx.definitionsCount
+            testResults = $_.trx.resultsCount
+            testCases = $_.trx.cases
+            nativeReportSha256 = $_.reportHash
+            trxSha256 = $_.trxHash
+            lines = $_.coverage.nativeLines
+            distinctSourceLineLocations = [ordered]@{
+                covered = $distinctCovered
+                valid = $distinctValid
+                percent = Get-FcPercent $distinctCovered $distinctValid
+            }
+            files = $fileCoverage
+            sourceFilesWithoutLines = $_.coverage.sourcesWithoutLines
+            nativeBranchPairs = $_.coverage.branches
+        }
+    })
+    $manifestInfo = [ordered]@{ path = [IO.Path]::GetFileName($ManifestPath); sha256 = Get-FcHash $ManifestPath }
     [ordered]@{
         schemaVersion = 1
         module = 'KeyLoad.Query'
@@ -156,21 +288,17 @@ function New-FcReport([object[]] $Runs, [string] $Filter) {
         filter = $Filter
         lineHitUnion = $script:FunctionalCoverage.HitUnion
         mergedBranches = 'unmeasured; no branch-outcome identity union is available'
-        unionLineCounts = [ordered]@{ covered = $covered; total = $total }
+        sourceManifest = $manifestInfo
+        sourceIdentities = @($Manifest.sources)
+        contributorIdentities = @($Manifest.contributors)
+        moduleArtifacts = @($Manifest.deployment)
+        unionLineCounts = [ordered]@{ covered = $covered; valid = $total; percent = Get-FcPercent $covered $total }
+        files = $unionFiles
         uncoveredLocations = $locations
         sourceFilesWithoutLineRecords = @($unreportedSources | Sort-Object)
-        runs = @($Runs | ForEach-Object { [ordered]@{
-            suite = $_.trx.suite
-            processExitCode = 0
-            partitionQueryTests = $_.trx.testCount
-            testNames = $_.trx.tests
-            nativeReportSha256 = $_.reportHash
-            lines = [ordered]@{ covered = @($_.coverage.lineUnion | Where-Object hit).Count; total = $_.coverage.lineUnion.Count }
-            sourceFilesWithoutLines = $_.coverage.sourcesWithoutLines
-            nativeBranches = $_.coverage.branches
-        } })
+        runs = $runReports
         thresholds = $null
-        qualification = 'private scoped profile only; raw integer coverage data, no threshold pass; does not close AC-CQ-009 or product/RF3 coverage'
+        qualification = 'private scoped profile only; every TRX definition has one result for the caller-selected filter; no source-completeness claim or threshold pass; does not close AC-CQ-009 or product/RF3 coverage'
     }
 }
 
@@ -180,13 +308,34 @@ function Convert-FcReportToMarkdown([object] $Report) {
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine('Private `PartitionQuery*` profile through Aspire `unit` and `unit-scalar` (`unit-scalar` disables hardware intrinsics). This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('| Run | PartitionQuery tests | Lines covered | Lines reported | Native branch pairs |')
-    [void] $builder.AppendLine('|---|---:|---:|---:|---:|')
+    [void] $builder.AppendLine('| Run | TRX cases | Native lines covered | Native lines valid | Native line percent | Native branch pairs |')
+    [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|')
     foreach ($run in $Report.runs) {
-        [void] $builder.AppendLine("| $($run.suite) | $($run.partitionQueryTests) | $($run.lines.covered) | $($run.lines.total) | $($run.nativeBranches.Count) native pairs retained |")
+        [void] $builder.AppendLine("| $($run.suite) | $($run.testResults) | $($run.lines.covered) | $($run.lines.valid) | $($run.lines.percent)% | $($run.nativeBranchPairs.Count) pairs |")
     }
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine("Merged line-hit union: $($Report.unionLineCounts.covered)/$($Report.unionLineCounts.total). Merged branches: unmeasured.")
+    [void] $builder.AppendLine("Merged distinct source-line hit union: $($Report.unionLineCounts.covered)/$($Report.unionLineCounts.valid) ($($Report.unionLineCounts.percent)%). Merged branches: unmeasured.")
+    [void] $builder.AppendLine('')
+    [void] $builder.AppendLine('## Merged per-source line counts')
+    [void] $builder.AppendLine('| Source | Covered | Valid | Percent |')
+    [void] $builder.AppendLine('|---|---:|---:|---:|')
+    foreach ($file in $Report.files) {
+        $percent = if ($null -eq $file.lines.percent) { 'unmeasured' } else { "$($file.lines.percent)%" }
+        [void] $builder.AppendLine("| ``$($file.path)`` | $($file.lines.covered) | $($file.lines.valid) | $percent |")
+    }
+    foreach ($run in $Report.runs) {
+        [void] $builder.AppendLine('')
+        [void] $builder.AppendLine("## $($run.suite) native per-source counts")
+        [void] $builder.AppendLine('| Source | Native lines covered | Native lines valid | Native line percent | Native branches covered | Native branches valid | Native branch percent |')
+        [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|---:|')
+        foreach ($file in $run.files) {
+            $linePercent = if ($null -eq $file.lines.percent) { 'unmeasured' } else { "$($file.lines.percent)%" }
+            $branchCovered = if ($null -eq $file.nativeBranches) { 'unmeasured' } else { [string] $file.nativeBranches.covered }
+            $branchValid = if ($null -eq $file.nativeBranches) { 'unmeasured' } else { [string] $file.nativeBranches.valid }
+            $branchPercent = if ($null -eq $file.nativeBranches -or $null -eq $file.nativeBranches.percent) { 'unmeasured' } else { "$($file.nativeBranches.percent)%" }
+            [void] $builder.AppendLine("| ``$($file.path)`` | $($file.lines.covered) | $($file.lines.valid) | $linePercent | $branchCovered | $branchValid | $branchPercent |")
+        }
+    }
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine('Source files without line records are listed separately; they have no line location to report.')
     foreach ($source in $Report.sourceFilesWithoutLineRecords) { [void] $builder.AppendLine("- No line records: ``$source``") }

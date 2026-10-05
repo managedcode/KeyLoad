@@ -1,3 +1,6 @@
+import { compositeSuiteFiles, compositeProviderFiles } from './composite-site-contract.mjs';
+import { compositeSitePlans } from './composite-site-contract.mjs';
+import { HISTORICAL, createHistoricalPlan, isHistoricalSource } from './historical-isolated-plan.mjs';
 import { exactKeys } from './aggregate-contracts.mjs';
 
 export const SITE_GH = Object.freeze({
@@ -12,25 +15,32 @@ export const SITE_GH = Object.freeze({
   metadataState: 'metadata_verified', archiveState: 'archive_verified', publish: 'publish', validate: 'validate',
   suiteBytes: 19_327_352_832, providerBytes: 134_217_728, jsonBytes: 4_194_304,
   metadataBytes: 16_777_216, rawBytes: 67_108_864, totalRawBytes: 17_179_869_184,
-  pairs: 2000, items: 2000, files: 277, workers: 270, version: 1,
+  pairs: 2000, items: 2000, files: compositeSuiteFiles().length + compositeProviderFiles().length, workers: 1386, version: 1,
   failure: 'Isolated Pages GitHub evidence rejected.',
   steps: Object.freeze(['Verify benchmark plan',
-    'Download benchmark results', 'Check all 270 benchmark results',
-    'Save combined benchmark results', 'Save GitHub result verification']),
+    'Download benchmark results', 'Check control and complete scale accounting',
+    'Save combined benchmark results', 'Save internal scaled cohort receipt', 'Save GitHub result verification']),
   legacySteps: Object.freeze(['Verify benchmark plan',
     'Download benchmark results', 'Check all 270 benchmark results',
     'Generate website benchmark data', 'Save website benchmark data',
     'Save combined benchmark results', 'Save GitHub result verification']),
-  legacySources: Object.freeze(['aa49aa93982866b85a80e771a749d9b968ffc9f2',
-    '73aebfd3f72695357834599e813aba77b9e274ad', '77167cbca9efe8942aab869dd52ad5b0b6cc72a1',
-    'ff0af70a279b6adce653bc5fe2527fef51f9de69']),
+  legacySources: HISTORICAL.sourceRevisions,
   receiptKeys: Object.freeze(['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'repository', 'workflow', 'run',
     'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'metadataFiles', 'archives', 'inputFiles']),
   artifactKeys: Object.freeze(['id', 'name', 'sizeInBytes', 'digest', 'expired', 'createdAt']),
   fileKeys: Object.freeze(['path', 'bytes', 'sha256']),
-  providerFiles: Object.freeze(['proof.json', 'image-proof.json', 'images/image-bundle.json', 'images/image-receipt.json',
-    'images/server-manifest.json', 'images/comparisons-manifest.json']),
+  providerFiles: Object.freeze(compositeProviderFiles()),
 });
+
+const legacyProviderFiles = Object.freeze(['provider/proof.json', 'provider/image-proof.json',
+  'provider/images/image-bundle.json', 'provider/images/image-receipt.json',
+  'provider/images/server-manifest.json', 'provider/images/comparisons-manifest.json']);
+export const siteEvidencePlans = source => isHistoricalSource(source) ? [createHistoricalPlan(source)] : compositeSitePlans();
+export const siteEvidenceSuiteFiles = source => SITE_GH.legacySources.includes(source)
+  ? ['aggregate/aggregate.json', ...createHistoricalPlan(source).cells.map(cell => `aggregate/workers/${cell.id}/worker.json`)]
+  : compositeSuiteFiles().map(file => `aggregate/${file}`);
+export const siteEvidenceProviderFiles = source => SITE_GH.legacySources.includes(source) ? legacyProviderFiles : compositeProviderFiles().map(file => `provider/${file}`);
+export const siteEvidenceWorkerCount = source => siteEvidencePlans(source).reduce((count, plan) => count + plan.cells.length, 0);
 
 export const exact = exactKeys;
 export function requireSite(condition) { if (!condition) throw new Error(SITE_GH.failure); }

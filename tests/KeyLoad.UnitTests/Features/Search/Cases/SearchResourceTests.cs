@@ -113,10 +113,8 @@ internal sealed class SearchResourceTests
         var request = new SearchRequest(db.Partition, Collection, TextPath, SearchTerm);
         var expected = await new SearchEngine(db.Database).SearchAsync("root", request);
         var exactBytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization,
-            new() { MaxBatchBytes = exactBytes }));
-        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization,
-            new() { MaxBatchBytes = exactBytes - 1 }));
+        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
+        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
         var position = db.Store.Position;
 
         var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);

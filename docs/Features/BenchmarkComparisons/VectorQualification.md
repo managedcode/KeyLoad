@@ -36,7 +36,9 @@ accuracy cell a comparable performance success.
 
 `filtered` selects `number % 100 == 0` (1% selectivity) in the native query.
 `mixed` searches the stable 90% (`number % 10 != 9`) while a separately bounded
-writer applies 10,000 deterministic embedding changes to the remaining 10%.
+writer applies 10,000 distinct deterministic embedding changes spread over the
+remaining 10%. Mutable slot selection is `(1729 + ordinal * 2654435761) % (N/10)`
+using UInt64 arithmetic without wrap, with record number `9 + 10 * slot`.
 Gate the writer and readers together, verify every acknowledged update by native
 readback, and record search/update counts and their timing separately. This is
 concurrent index maintenance with stable eligible ground truth; it does not
@@ -65,8 +67,12 @@ Each applicable engine sees the same profile, corpus, filters, schedule and
 accuracy threshold. Show actual node count, read/write acknowledgment and
 effective CPU/RAM/storage limits with every comparison; compare winners only
 within compatible contracts. Native server container/process RAM is distinct
-from generator RSS. Retain original phase/resource observations and sampling
-interval; never derive server use from the client's counters. Only authenticated
+from generator RSS. Retain original native build/query timings and whole-run server-resource
+observations with the five-second sampling interval. A RAM sum is explicitly the
+sum of observed per-node RSS maxima over the entire run; it is neither an
+unsampled peak nor a simultaneous aggregate or index/query-only measurement.
+Do not attribute those samples to an unobserved phase, or derive server use from
+the client's counters. Only authenticated
 original Linux GitHub artifacts may populate website metrics.
 
 ## Requirements, acceptance and tests
@@ -76,7 +82,7 @@ original Linux GitHub artifacts may populate website metrics.
 | REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/2/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | Vector profile/corpus/plan TUnit flows; original native worker receipts |
 | REQ-VQ-002: native algorithms and quality | AC-VQ-002: exact/HNSW/IVFFlat metadata and actual PostgreSQL plans match requested method; independent expected IDs yield exact recall 1 and ANN ≥0.95; duplicate/filter/underfill failures reject | Vector oracle/recall TUnit cases; actual PostgreSQL comparison cases and plan receipts |
 | REQ-VQ-003: filters and updates | AC-VQ-003: native 1% filters and mixed stable-90% searches return only eligible IDs; 10k acknowledged updates are read back after genuinely overlapping queries/writes; failure/cancellation invalidates cell | Native filtered/mixed flow cases; timed original query/update receipts |
-| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped server RAM/resource phases and client counters are emitted with actual bounds | Measurement/phase/resource TUnit flows, original cgroup/process sidecars |
+| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped whole-run server RAM/resource observations and client counters are emitted with actual bounds | Measurement/phase/resource TUnit flows, original cgroup/process sidecars |
 | REQ-VQ-005: new native engines | AC-VQ-005: SurrealDB and HelixDB use pinned real disk-backed native servers under Aspire; CRUD/vector/graph only where truly supported; readiness, loaded data, membership, ownership and teardown verified; unsupported native topology has null metrics/reason | Native comparison TUnit flows and image/source provenance; original Actions container logs |
 | REQ-VQ-006: same-family fairness | AC-VQ-006: corpus, query schedule, metric, filters, accuracy, resources and actual ACK/read contract match before rankings; controls remain explicitly small; unsupported capabilities never become zero-valued successes | Cross-engine corpus/contract validation, fairness review and original measured settings |
 | REQ-VQ-007: website-producing delivery | AC-VQ-007: readable isolated per-database groups feed strict complete source/run/attempt/profile/index-bound aggregation; missing/duplicate/mixed/fabricated results reject; site exposes scale/method/recall/build/p95/p99/server RAM and original evidence | Isolated plan/aggregate/admission/site browser TUnit tests; authentic Linux Benchmarks and Pages receipts |
@@ -94,3 +100,26 @@ they cannot cause fallback to a different algorithm, topology or prior cohort.
 
 Status: acceptance contract established; implementation and native qualification
 are pending. No new performance result is established by this document.
+
+## Typed native execution policy join, 2026-10-06
+
+The current runtime-policy rule applies to native operation safety settings.
+Immutable corpus/profile/index identities and workload cardinalities remain
+protocol values. Native HTTP response limits, batch capacity, cleanup deadlines,
+index-build deadlines and polling intervals must instead come from centrally
+registered, validated `IOptions<NativeComparisonExecutionOptions>`. The comparison
+host composition owns binding from a source-controlled JSON section and rejects
+missing/invalid policy before target creation; target execution does not read
+configuration or the environment. Native adapters receive that typed policy,
+record effective limits with native index evidence, and await original operations
+and cleanup. Policy does not select a different corpus, algorithm, recall target
+or native topology.
+
+TASK-VQ-POLICY-001: native adapter worker owns the shared options type/validation,
+central JSON/host registration and new SurrealDB/HelixDB target injection. Root
+owns Qdrant consumption and final integration; vector worker owns PostgreSQL
+vector consumption. Join compile and native flows only after composition binding
+and every new native execution owner use the same validated policy. Existing
+unrelated runtime-policy migration stays with its owning task. AC-VQ-004/005/006
+include invalid-policy rejection, actual effective settings and unchanged
+corpus/accuracy/native algorithm, tested through the real composed host.

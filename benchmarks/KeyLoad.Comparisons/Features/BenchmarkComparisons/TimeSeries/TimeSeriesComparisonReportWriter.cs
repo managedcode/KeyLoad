@@ -6,6 +6,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonReportWriter
 {
+    private const string MillisecondsFormat = "F3";
+
     private const string JsonReportName = "timeseries-results.json";
     private const string MarkdownReportName = "timeseries-results.md";
 
@@ -47,7 +49,7 @@ internal static class TimeSeriesComparisonReportWriter
         {
             text.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "| {0} | {1} | {2} | {3} | {4} | {5} | {6} |", attempt.Target, attempt.Operation,
-                attempt.Attempt, attempt.Measured, attempt.ElapsedMilliseconds?.ToString("F3", CultureInfo.InvariantCulture) ?? "—",
+                attempt.Attempt, attempt.Measured, attempt.ElapsedMilliseconds?.ToString(MillisecondsFormat, CultureInfo.InvariantCulture) ?? "—",
                 attempt.Succeeded, attempt.ErrorCode ?? "—"));
         }
 

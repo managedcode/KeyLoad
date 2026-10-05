@@ -1159,3 +1159,53 @@ website publication are N/A.
 ### Browser lease transfer at factory return
 
 The reviewed browser session factory admits one actual browser lease before the version child, endpoint/Chrome startup and CDP/coverage setup. Its lexical `using` owns all failure paths. Immediately before a successful return it marks that same lease transferred to the returned native process owner; only the factory's scope disposal consumes this transfer marker, leaving the actual lease held until the returned owner settles its original process, CDP and HTTP resources. Existing non-browser callers never set this marker. This is an ownership-transfer marker, not a readiness, exit or coverage proof. Failed setup follows the existing resource joins and bounded pool poison rule. AC-ISO-009's real cancellation/successor/native PID regression remains the evidence; the keyboard assertion retains its exact predicate and prints only bounded observed failure diagnostics through native TUnit output.
+
+## Independent website with optional benchmarks, 2026-10-06
+
+Owner correction supersedes REQ/AC-BC-FAIL-020's newest failed aggregate blocking
+website source publication. Website changes publish independently; ready native
+metrics enrich the website, and newly ready metrics trigger another CI build.
+Unavailable metrics produce no figures, catalogs, raw aggregates or invented
+provenance. Existing measurement qualification remains mandatory for measured
+publication. ADR-112 owns the conditional artifact and qualification boundary.
+
+| Requirement | Acceptance | Tests / evidence |
+|---|---|---|
+| REQ-BC-WEB-001 independent source publication | AC-BC-WEB-001 own-main source push/manual runs website jobs without a benchmark dependency; no ready cohort yields a content-only website | workflow source TUnit regressions, genuine CI/Pages |
+| REQ-BC-WEB-002 optional authenticated metrics | AC-BC-WEB-002 select newest completed own-main producer with a successful aggregate; absence is an explicit bounded `unavailable` state; corrupt selected evidence, duplicate aggregate jobs, API failures and expired/missing selected artifacts fail without silent fallback | real retained GitHub metadata selection positive/negative TUnit cases; authenticated capture |
+| REQ-BC-WEB-003 accurate empty publication | AC-BC-WEB-003 explicit `--benchmarks=none` emits product/scene/SEO/vendor assets, no numeric data/catalog or measurement requests, plain empty state, source-bound publication receipt with benchmarks null | new SiteContent build/assets/browser/error cases using real Node, files and Chrome |
+| REQ-BC-WEB-004 automatic refresh | AC-BC-WEB-004 completed own-main Benchmarks event authenticates actual producer and rebuilds with newest ready data; predeploy reselects and rejects changed available tuple or newly available data after a no-data qualification | workflow and native selection/freshness TUnit cases; genuine workflow_run/Pages |
+| REQ-BC-WEB-005 scoped complete qualification | AC-BC-WEB-005 no-data artifact runs complete closed SiteContent tests through the same Aspire `site` entry, original TRX/no-skip checks, source/asset/vendor/Chrome and scoped native coverage thresholds; measured artifact retains full existing site/archive/numeric/browser/coverage tests | original TRX/coverage/source inventories and final build; content is never labeled full metric qualification |
+
+```mermaid
+flowchart LR
+  Source[Website source change] --> CI[Independent CI website jobs]
+  Benchmarks[Completed benchmarks] --> CI
+  CI --> Ready{Authenticated aggregate ready}
+  Ready -->|yes| Metrics[Website with verified metrics]
+  Ready -->|no| Content[Website without measurements]
+  Metrics --> Qualification[Applicable complete tests and freshness]
+  Content --> Qualification
+  Qualification --> Pages[Pages publication]
+```
+
+Execution graph: TASK-WEB-001 root records policy/criteria/ADR; TASK-WEB-002
+selection worker owns site-isolated GitHub capture/runs selection modules and
+bounded absence/freshness state; TASK-WEB-003 builder worker owns explicit
+no-metrics native builder and emitted HTML; TASK-WEB-004 qualification worker
+owns closed SiteContent TUnit tests and source/coverage hook scoping. Root owns
+workflow/composites, shared environment/source inventory joins, final integration,
+canonical Release build, format/governance, Aspire development tests and scoped
+commit/push/provider verification. Workers read local policy, preserve concurrent
+producer/engine work, never commit/push, and stop on contract ambiguity. Join only
+after each owned artifact is reviewed. No new database topology, measurement,
+dependency, DNS or release work.
+
+Baseline: Pages settings are valid; original run37349838172 has217/270 worker
+artifacts and failed aggregation. Existing website capture fails before checkout
+on this unavailable producer; this cannot be converted to authenticated metrics.
+Current checkout includes concurrent active implementation and unverified build
+changes, preserved outside this repair. Verify static syntax/governance and
+source/diff first, then final canonical build/format and Aspire-owned relevant
+TUnit suites. Genuine Linux full applicable qualification and successful provider
+deployment remain required before claiming publication restored.

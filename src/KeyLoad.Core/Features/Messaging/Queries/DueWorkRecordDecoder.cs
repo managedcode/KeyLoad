@@ -91,7 +91,7 @@ internal static class DueWorkRecordDecoder
             || record.Definition.PayloadJson is null || record.Definition.HeadersJson is null
             || record.Definition.Interval.Ticks is < DueWorkFields.MinimumIntervalTicks or > DueWorkFields.MaximumIntervalTicks
             || record.Definition.Misfire != RecurringMisfirePolicy.CatchUp
-            || record.Definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl > TimeSpan.FromDays(365));
+            || record.Definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks);
 
     private static void ValidateSaga(DatabaseEngine database, ReadOnlySpan<byte> key, SagaRecord record)
     {
@@ -120,7 +120,7 @@ internal static class DueWorkRecordDecoder
     {
         if (timeout.Queue is null || timeout.Queue.Partition is null || timeout.Queue.Partition != lane.Partition
             || timeout.PayloadJson is null || timeout.HeadersJson is null
-            || timeout.TimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl > TimeSpan.FromDays(365)))
+            || timeout.TimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks))
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }

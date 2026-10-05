@@ -2,6 +2,7 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender followers) : IDisposable
 {
+    private const int HeartbeatAdmissionWaitMilliseconds = 0;
     private readonly SemaphoreSlim rounds = new(1, 1);
 
     /// <inheritdoc />
@@ -61,7 +62,7 @@ internal sealed class ReplicaLeader(ReplicaState state, ReplicaFollowerSender fo
 
     internal async Task HeartbeatAsync(CancellationToken cancellationToken)
     {
-        if (!await rounds.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        if (!await rounds.WaitAsync(HeartbeatAdmissionWaitMilliseconds, cancellationToken).ConfigureAwait(false))
         {
             return;
         }

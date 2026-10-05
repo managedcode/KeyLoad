@@ -89,7 +89,12 @@ internal static class AnalyzerFixture
                 typeof(Orleans.Grain).Assembly.Location,
                 typeof(Orleans.GenerateSerializerAttribute).Assembly.Location,
                 typeof(Orleans.Runtime.IPersistentState<>).Assembly.Location,
-                typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location
+                typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location,
+                typeof(KeyLoad.ConfigurationOptionsAttribute).Assembly.Location,
+                typeof(Microsoft.Extensions.Options.IOptions<>).Assembly.Location,
+                typeof(Microsoft.Extensions.Configuration.IConfiguration).Assembly.Location,
+                typeof(Microsoft.Extensions.Configuration.ConfigurationBinder).Assembly.Location,
+                typeof(Microsoft.Extensions.DependencyInjection.OptionsServiceCollectionExtensions).Assembly.Location
             ])
             .Distinct(StringComparer.OrdinalIgnoreCase);
         return paths.Select(static path => (MetadataReference)MetadataReference.CreateFromFile(path))

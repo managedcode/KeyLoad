@@ -31,8 +31,8 @@ internal sealed class DocumentCommandPrincipalScopeTests
         var secondReceipt = database.Submit(OperationKind.Batch, secondCommand, SecondPrincipal, commandId).Get<CommitReceipt>();
         await AssertReceipt(firstReceipt, commandId, FirstDocument);
         await AssertReceipt(secondReceipt, commandId, SecondDocument);
-        await AssertReceipt(database.Database.Outcome(FirstPrincipal, commandId)!.Get<CommitReceipt>(), commandId, FirstDocument);
-        await AssertReceipt(database.Database.Outcome(SecondPrincipal, commandId)!.Get<CommitReceipt>(), commandId, SecondDocument);
+        await AssertReceipt(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, FirstPrincipal, commandId)!.Get<CommitReceipt>(), commandId, FirstDocument);
+        await AssertReceipt(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, SecondPrincipal, commandId)!.Get<CommitReceipt>(), commandId, SecondDocument);
         var firstOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, FirstPrincipal, commandId);
         var secondOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, SecondPrincipal, commandId);
         var committedOutbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);

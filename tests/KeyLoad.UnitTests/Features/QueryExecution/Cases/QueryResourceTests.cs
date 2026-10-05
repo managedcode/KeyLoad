@@ -22,7 +22,7 @@ internal sealed class QueryResourceTests
             new PutDocument(Collection, "m", "{}"),
             new PutDocument(Collection, "s", "{\"score\":\"high\"}"),
             new PutDocument(Collection, "b", "{\"score\":true}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var expected = engine.Execute("root", new(db.Partition, FullSql, AllowFullScan: true)).Rows
             .Select(row => row.EntityId).ToArray();
         await Assert.That(string.Join(",", expected)).IsEqualTo(ExpectedOrder);
@@ -43,7 +43,7 @@ internal sealed class QueryResourceTests
         using var db = new TestDatabase(new DatabaseLimits { MaxQueryReadBytes = 100 });
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"payload\":\"" + new string('x', 256) + "\"}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
             new(db.Partition, BudgetSql, AllowFullScan: true)));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -55,7 +55,7 @@ internal sealed class QueryResourceTests
         using var db = new TestDatabase(new DatabaseLimits { MaxScanRecords = 1 });
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"score\":{\"nested\":1}}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var explain = engine.Execute("root", new(db.Partition, ExplainSql, AllowFullScan: true));
         await Assert.That(explain.AccessPath).IsEqualTo("bounded-full-scan");
         db.Commit(new PutDocument(Collection, "b", "{\"score\":2}"));
@@ -69,7 +69,7 @@ internal sealed class QueryResourceTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute("root",

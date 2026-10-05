@@ -27,14 +27,14 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
         ReplicaMaterializer? openedMaterializer = null;
         try
         {
-            Database = new(stores.Canonical, new AuthorizationPolicy());
-            Log = openedLog = new(stores.Replica, Configuration, canonicalDatabase: Database);
+            Database = new(stores.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+            Log = openedLog = new(stores.Replica, RecoveryExecutionOptions.Configuration(Configuration), canonicalDatabase: Database);
             Database.Bootstrap(new(Principal, System, [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true }, DatabaseEngine.Credential(Principal, Principal,
                     Convert.ToHexString(RandomNumberGenerator.GetBytes(CredentialBytes))));
             RecoveryPhysicalShardBootstrap.Bootstrap(Database, Principal, Configuration.VoterIds);
-            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, Configuration));
-            Consensus = new(Materializer, Configuration, TimeProvider.System);
+            Materializer = openedMaterializer = new(Database, Log, new ReplicaSnapshotStore(stores.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration)), RecoveryExecutionOptions.Replica());
+            Consensus = new(Materializer, RecoveryExecutionOptions.Configuration(Configuration), RecoveryExecutionOptions.Replica(), TimeProvider.System);
         }
         catch (Exception error)
         {

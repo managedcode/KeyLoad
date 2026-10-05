@@ -89,11 +89,11 @@ internal sealed class ReplicaMembershipAuthorityOperations(NodeOptions options, 
     internal void VerifyCallHeaderBinding(ReplicaMembershipAuthorityCallV1 call,
         ReplicaMembershipAuthorityRequestHeaders headers)
     {
-        if (call.ClusterId != headers.Cluster || call.AuthorityPhysicalShardId.ToString("N") != headers.AuthorityPhysical
-            || call.AuthorityIncarnation.ToString("N") != headers.AuthorityIncarnation
+        if (call.ClusterId != headers.Cluster || call.AuthorityPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat) != headers.AuthorityPhysical
+            || call.AuthorityIncarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat) != headers.AuthorityIncarnation
             || call.AuthorityPhysicalShardId != options.PhysicalShardId || call.AuthorityIncarnation != options.Incarnation
-            || call.CallerPhysicalShardId.ToString("N") != headers.CallerPhysical
-            || call.CallerIncarnation.ToString("N") != headers.CallerIncarnation || call.CallerVoterId != headers.CallerVoter
+            || call.CallerPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat) != headers.CallerPhysical
+            || call.CallerIncarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat) != headers.CallerIncarnation || call.CallerVoterId != headers.CallerVoter
         || call.CallerSiloAddress != headers.CallerSilo)
         { throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaMembershipAuthorityText.InvalidIdentity); }
         VerifyOperationCaller(call);
@@ -116,8 +116,8 @@ internal sealed class ReplicaMembershipAuthorityOperations(NodeOptions options, 
     {
         var bound = reply with { RequestNonce = nonce };
         var body = ReplicaMembershipAuthorityCodec.SerializeReply(bound);
-        var signature = mac.SignReply(options.PhysicalShardId.ToString("N"), options.Incarnation.ToString("N"),
-            call.RequestId.ToString("N"), nonce, StatusCodes.Status200OK, body);
+        var signature = mac.SignReply(options.PhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), options.Incarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat),
+            call.RequestId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), nonce, StatusCodes.Status200OK, body);
         context.Response.StatusCode = StatusCodes.Status200OK;
         context.Response.ContentType = ReplicaMembershipAuthorityProtocol.ContentType;
         context.Response.Headers[ReplicaMembershipAuthorityProtocol.SignatureHeader] = signature;

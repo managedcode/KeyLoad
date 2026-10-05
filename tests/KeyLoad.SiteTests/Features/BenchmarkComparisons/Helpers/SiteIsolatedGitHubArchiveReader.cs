@@ -21,7 +21,7 @@ internal static class SiteIsolatedGitHubArchiveReader
         var suiteFiles = await SiteIsolatedGitHubArchivePreflight.InspectAsync(suite,
             SiteIsolatedGitHubArchivePaths.ExpectedSuite(metadata), provider: false, token);
         var providerFiles = await SiteIsolatedGitHubArchivePreflight.InspectAsync(provider,
-            SiteIsolatedGitHubArchivePaths.ExpectedProvider(), provider: true, token,
+            SiteIsolatedGitHubArchivePaths.ExpectedProvider(metadata), provider: true, token,
             SiteIsolatedGitHubArchivePaths.CellIds(metadata));
         RequireAvailableDisk(capture, suiteFiles, providerFiles);
         return await SiteIsolatedGitHubArchivePublication.PublishAsync(capture, receiptPath, metadata,

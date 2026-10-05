@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -7,8 +8,6 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
 internal static partial class LocalRf3OwnedProcessLifetime
 {
-    private static readonly TimeSpan TerminationGrace = TimeSpan.FromSeconds(1);
-    private static readonly TimeSpan SettlementLimit = TimeSpan.FromSeconds(5);
     private const int SignalTerminate = 15;
 
     internal static async Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
@@ -70,12 +69,13 @@ internal static partial class LocalRf3OwnedProcessLifetime
     }
 
     internal static async Task TerminateAndJoinAsync(Process process, Task exit, Task output, Task error,
-        List<Exception> failures)
+        List<Exception> failures, IOptions<TestExecutionOptions> options)
     {
+        var policy = options.Value;
         TrySendTerminate(process, failures);
         if (!HasExited(process, failures))
         {
-            await Task.WhenAny(exit, Task.Delay(TerminationGrace)).ConfigureAwait(false);
+            await Task.WhenAny(exit, Task.Delay(policy.TerminationGrace)).ConfigureAwait(false);
         }
         if (!HasExited(process, failures))
         {
@@ -83,7 +83,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         }
 
         var joined = Task.WhenAll(exit, output, error);
-        if (await Task.WhenAny(joined, Task.Delay(SettlementLimit)).ConfigureAwait(false) != joined)
+        if (await Task.WhenAny(joined, Task.Delay(policy.ProcessSettlementTimeout)).ConfigureAwait(false) != joined)
         {
             failures.Add(new TimeoutException("Local RF3 image process and original stream readers did not settle within the cleanup threshold."));
             if (!HasExited(process, failures))
@@ -95,7 +95,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         await CollectFailureAsync(exit, failures).ConfigureAwait(false);
         if (!HasExited(process, failures))
         {
-            await WaitForActualExitAsync(process, failures).ConfigureAwait(false);
+            await WaitForActualExitAsync(process, failures, policy.ProcessExitPollInterval).ConfigureAwait(false);
         }
 
         if (!output.IsCompleted)
@@ -132,7 +132,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         return exited;
     }
 
-    private static async Task WaitForActualExitAsync(Process process, List<Exception> failures)
+    private static async Task WaitForActualExitAsync(Process process, List<Exception> failures, TimeSpan pollInterval)
     {
         var observations = new List<Exception>();
         var observationFailureRecorded = false;
@@ -146,7 +146,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
                 failures.AddRange(observations);
                 observationFailureRecorded = true;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            await Task.Delay(pollInterval).ConfigureAwait(false);
         }
     }
 

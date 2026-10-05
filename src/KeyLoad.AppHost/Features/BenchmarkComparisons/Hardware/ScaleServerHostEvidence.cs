@@ -5,6 +5,9 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class ScaleServerHostEvidence
 {
+    private const string UnifiedMembershipPrefix = "0::";
+    private const string UnifiedAbsoluteMembershipPrefix = "0::/";
+
     private const string CpuInfo = "/proc/cpuinfo";
     private const string MemoryInfo = "/proc/meminfo";
     private const string CpuOnline = "/sys/devices/system/cpu/online";
@@ -78,13 +81,13 @@ internal static class ScaleServerHostEvidence
         CancellationToken token)
     {
         var membership = await BoundedText.ReadAsync("/proc/self/cgroup", ScaleServerResourceBounds.MaxFileBytes, token, budget);
-        var row = membership?.Split('\n').FirstOrDefault(line => line.StartsWith("0::", StringComparison.Ordinal));
+        var row = membership?.Split('\n').FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
             return null;
         }
 
-        if (!row.StartsWith("0::/", StringComparison.Ordinal))
+        if (!row.StartsWith(UnifiedAbsoluteMembershipPrefix, StringComparison.Ordinal))
         {
             return null;
         }

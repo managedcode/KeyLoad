@@ -45,7 +45,7 @@ internal static class EventProjectionRecoveryQueryOracle
             PayloadJson = JsonSerializer.Serialize(changedCommand, JsonDefaults.Options)
         });
         await Assert.That(conflict.Error).IsEqualTo(ErrorCode.Conflict);
-        var durable = database.Outcome(operation.PrincipalId, operation.Id)?.Get<CommitReceipt>();
+        var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var state = EventProjectionRecoveryStoreOracle.CaptureCommittedBytes(store, operation, projection);
@@ -88,8 +88,8 @@ internal static class EventProjectionRecoveryQueryOracle
         var targetAfter = store.Read(view => view.ReadOwnedValue(
             EventProjectionCrashScenario.DocumentKey(EventProjectionCrashScenario.TargetId)));
         await Assert.That(targetAfter is not null && targetAfter.AsSpan().SequenceEqual(targetBefore)).IsTrue();
-        var replayReceipt = database.Outcome(CrashFixtureValues.Principal,
-            Guid.Parse(EventProjectionCrashScenario.ProjectionCommandId))?.Get<CommitReceipt>();
+        var replayReceipt = OutcomeStoreOracle.ReadPartition(store, EventProjectionCrashScenario.Partition,
+            CrashFixtureValues.Principal, Guid.Parse(EventProjectionCrashScenario.ProjectionCommandId))?.Get<CommitReceipt>();
         await Assert.That(replayReceipt?.Token).IsEqualTo(receipt.Token);
         await EventProjectionRecoveryStoreOracle.AssertSeedBytesAsync(root, store, includeDocuments: false,
             cancellationToken);

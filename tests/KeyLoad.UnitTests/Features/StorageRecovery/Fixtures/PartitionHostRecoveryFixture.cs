@@ -83,7 +83,7 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
         source.Log.Append([new(1, SnapshotTerm, null), new(SnapshotCut, SnapshotTerm, null)]);
         source.Log.Commit(SnapshotCut);
         Pending = source.Snapshots.Create(SnapshotCut, SnapshotTerm);
-        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, target.Configuration, boundary =>
+        var incoming = new ReplicaSnapshotStore(target.Canonical, target.Log, UnitExecutionOptions.ReplicaConfiguration(target.Configuration), boundary =>
         {
             if (boundary == ReplicaCrashBoundary.SnapshotVerified)
             { throw new VerifiedSnapshotInterruption(); }
@@ -139,9 +139,9 @@ internal sealed class HostReplicaStores : IDisposable
             replica = Open(options, ReplicaProtocol.ReplicaDirectory);
             try
             {
-                Log = new(replica, Configuration);
-                Database = new(Canonical, new AuthorizationPolicy());
-                Snapshots = new(Canonical, Log, Configuration);
+                Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(Configuration));
+                Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+                Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration));
             }
             catch (Exception) { replica.Dispose(); throw; }
         }

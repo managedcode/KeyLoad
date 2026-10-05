@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
+    <Content Include="Features/BenchmarkComparisons/Configuration/native-execution.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

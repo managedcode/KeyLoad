@@ -36,7 +36,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         Complete(db, subscription, received.Deliveries[2]);
         db.Store.Dispose();
         using var store = new ZoneTreeStore(new(db.Directory));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         await Assert.That(database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         foreach (var delivery in received.Deliveries.Take(2))
         {

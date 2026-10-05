@@ -6,6 +6,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string ProjectionBatchTokenPurpose = "projection-batch";
 
     private static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition("outbox", partition, sequence);
     private static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition("projection-consumer", consumer.Partition, consumer.Name);
@@ -63,8 +64,11 @@ public sealed partial class DatabaseEngine
         { JsonData.Identifier(resource); Resource(tx, request.Consumer.Partition, resource); }
         foreach (var kind in definition.MutationKinds)
         {
-            if (kind is not ("putDocument" or "patchDocument" or "deleteDocument" or "appendEvents" or "publishTopic" or "enqueue"
-                or "upsertEdge" or "deleteEdge" or "appendSamples" or "putVector"))
+            if (kind is not (MutationDiscriminatorNames.PutDocument or MutationDiscriminatorNames.PatchDocument
+                or MutationDiscriminatorNames.DeleteDocument or MutationDiscriminatorNames.AppendEvents
+                or MutationDiscriminatorNames.PublishTopic or MutationDiscriminatorNames.EnqueueMessage
+                or MutationDiscriminatorNames.UpsertEdge or MutationDiscriminatorNames.DeleteEdge
+                or MutationDiscriminatorNames.AppendSamples or MutationDiscriminatorNames.PutVector))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, "The projection mutation kind is unsupported.");
             }
@@ -171,7 +175,7 @@ public sealed partial class DatabaseEngine
             bytes += size;
             through = entry.Sequence;
         }
-        return new(state, entries.ToImmutableArray(), through, Sign(new ProjectionBatchClaims("projection-batch", Store.Identity.Incarnation,
+        return new(state, entries.ToImmutableArray(), through, Sign(new ProjectionBatchClaims(ProjectionBatchTokenPurpose, Store.Identity.Incarnation,
             request.Consumer, state.Definition.IndexGeneration, state.Checkpoint, through, now.AddMinutes(5))), through < head.Tail);
     });
     private static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims)
@@ -180,7 +184,7 @@ public sealed partial class DatabaseEngine
     {
         var claims = Verify<ProjectionBatchClaims>(request.Token);
         var state = ProjectionConsumer(view, request.Consumer);
-        if (claims.Purpose != "projection-batch" || claims.Incarnation != Store.Identity.Incarnation || claims.Consumer != request.Consumer
+        if (claims.Purpose != ProjectionBatchTokenPurpose || claims.Incarnation != Store.Identity.Incarnation || claims.Consumer != request.Consumer
             || claims.IndexGeneration != state.Definition.IndexGeneration || state.Released || claims.Through < claims.After)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, "The projection batch belongs to a different generation or scope.");

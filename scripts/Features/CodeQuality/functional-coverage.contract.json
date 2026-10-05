@@ -164,7 +164,7 @@
   ],
   "reportMerge": {
     "lineHitUnion": "logical-or by source path and line number",
-    "branchMerge": "unmeasured; retain native per-run branch counts only"
+    "branchMerge": "unmeasured; retain each native report branch pair separately"
   },
   "thresholds": null,
   "qualification": "private functional profile only; does not close AC-CQ-009 or product/RF3 coverage",

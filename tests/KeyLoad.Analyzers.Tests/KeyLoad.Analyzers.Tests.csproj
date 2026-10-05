@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.Orleans.Server" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" ExcludeAssets="compile;runtime" PrivateAssets="all" />
     <ProjectReference Include="../../src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>

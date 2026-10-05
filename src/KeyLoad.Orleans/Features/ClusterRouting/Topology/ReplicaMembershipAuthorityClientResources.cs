@@ -1,13 +1,20 @@
+using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Orleans;
 
 internal sealed class ReplicaMembershipAuthorityClientResources : IAsyncDisposable
 {
     private readonly OwnedResources resources;
     private readonly ReplicaDiscoveryLifetime lifetime;
+    private readonly TimeSpan requestTimeout;
 
-    internal ReplicaMembershipAuthorityClientResources(ReplicaMembershipAuthorityExchangeOptions options)
+    internal ReplicaMembershipAuthorityClientResources(ReplicaMembershipAuthorityExchangeOptions options,
+        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
     {
-        resources = new(options);
+        var execution = executionOptions.Value;
+        requestTimeout = execution.CommandTimeout + execution.ReadBarrierTimeout;
+        resources = new(options, membershipOptions);
         lifetime = new(resources.Stopping, resources.Dispose);
     }
 
@@ -17,7 +24,7 @@ internal sealed class ReplicaMembershipAuthorityClientResources : IAsyncDisposab
         var operation = lifetime.TryEnter()
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaMembershipAuthorityText.Unavailable);
         using (operation)
-        using (var deadline = new CancellationTokenSource(ReplicaMembershipAuthorityProtocol.RequestTimeout, clock))
+        using (var deadline = new CancellationTokenSource(requestTimeout, clock))
         using (var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             operation.ShutdownToken, deadline.Token))
         {
@@ -48,12 +55,17 @@ internal sealed class ReplicaMembershipAuthorityClientResources : IAsyncDisposab
     private sealed class OwnedResources : IDisposable
     {
         private readonly ReplicaMembershipAuthorityExchange exchange;
-        private readonly SemaphoreSlim admission = new(ReplicaMembershipAuthorityProtocol.MaximumAdmissions,
-            ReplicaMembershipAuthorityProtocol.MaximumAdmissions);
+        private readonly SemaphoreSlim admission;
         private readonly CancellationTokenSource stopping = new();
         private int disposed;
 
-        internal OwnedResources(ReplicaMembershipAuthorityExchangeOptions options) => exchange = new(options);
+        internal OwnedResources(ReplicaMembershipAuthorityExchangeOptions options,
+            IOptions<OrleansMembershipOptions> membershipOptions)
+        {
+            var settings = membershipOptions.Value;
+            admission = new(settings.MaximumAdmissions, settings.MaximumAdmissions);
+            exchange = new(options, membershipOptions);
+        }
 
         internal ReplicaMembershipAuthorityExchange Exchange => exchange;
         internal SemaphoreSlim Admission => admission;

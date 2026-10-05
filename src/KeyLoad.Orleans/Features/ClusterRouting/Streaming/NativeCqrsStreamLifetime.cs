@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
@@ -14,22 +15,24 @@ internal static class NativeCqrsStreamLifetime
     /// <param name="clock">Runtime clock for the finite execution deadline.</param>
     /// <param name="settled">Activation cleanup to run after native producer disposal completes.</param>
     /// <param name="cancellationToken">The request RPC cancellation token.</param>
+    /// <param name="options">The same centrally validated routing snapshot used by the request owner.</param>
     /// <param name="owner">Optional silo-local owner for server request work.</param>
     /// <returns>The lazy bounded native chunk stream.</returns>
     internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Action settled, CancellationToken cancellationToken,
-        NativeRequestWorkOwner? owner = null)
-        => RunCore(createStream, serializer, requestId, clock, settled, owner, cancellationToken, CancellationToken.None);
+        IOptions<GrainRoutingOptions> options, NativeRequestWorkOwner? owner = null)
+        => RunCore(createStream, serializer, requestId, clock, settled, owner, options.Value.ExecutionLifetime,
+            cancellationToken, CancellationToken.None);
 
     private static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunCore(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner,
+        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner, TimeSpan executionLifetime,
         CancellationToken cancellationToken, [EnumeratorCancellation] CancellationToken enumerationToken)
     {
-        using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
+        using var deadline = new CancellationTokenSource(executionLifetime, clock);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
         using var ownerRequest = owner is null ? null
             : CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);

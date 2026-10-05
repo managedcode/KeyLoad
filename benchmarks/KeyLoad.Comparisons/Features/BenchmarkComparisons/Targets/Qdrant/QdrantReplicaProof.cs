@@ -7,6 +7,8 @@ internal sealed record QdrantReplicaResult(string Version, ClusterEvidence Evide
 
 internal static class QdrantReplicaProof
 {
+    private const int ReadinessTimeoutSeconds = 60;
+
     private const string ClusterPath = "/cluster";
     private const string CollectionClusterSuffix = "/cluster";
     private const string CollectionsPath = "/collections/";
@@ -14,7 +16,7 @@ internal static class QdrantReplicaProof
     private const string StatusField = "status";
     private const string DisabledState = "disabled";
     private const int PollMilliseconds = 250;
-    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(ReadinessTimeoutSeconds);
 
     public static async Task<QdrantReplicaResult> VerifyAsync(HttpClient[] clients, string collection,
         int expectedPoints, ComparisonTopology topology, CancellationToken cancellationToken)

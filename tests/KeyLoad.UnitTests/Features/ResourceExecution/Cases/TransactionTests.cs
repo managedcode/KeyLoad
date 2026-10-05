@@ -39,7 +39,7 @@ internal sealed class TransactionTests
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o2"))).IsNull();
         await Assert.That(db.Database.ReadStream("root", new(db.Partition, "events", "o2")).Events).IsEmpty();
         await Assert.That(db.Database.InspectMessage("root", new(db.Partition, "jobs"), "m2")).IsNull();
-        await Assert.That(new QueryEngine(db.Database).Execute("root", new(db.Partition, "SELECT * FROM orders WHERE number = 1")).Rows).HasSingleItem();
+        await Assert.That(new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution()).Execute("root", new(db.Partition, "SELECT * FROM orders WHERE number = 1")).Rows).HasSingleItem();
     }
     [Test]
     public async Task ConcurrentCompareAndSwapHasOneWinner()

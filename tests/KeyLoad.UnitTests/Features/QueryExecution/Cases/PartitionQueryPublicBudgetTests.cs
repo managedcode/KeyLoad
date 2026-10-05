@@ -47,7 +47,7 @@ internal sealed class PartitionQueryPublicBudgetTests
         var query = PartitionQueryPublicTestSupport.Query(1);
         var request = QueryValidation.Normalize(new AstQueryRequest(fixture.First, query, AllowFullScan: true),
             fixture.Database.Limits);
-        return new QueryEngine(fixture.Database).ExecutePartitionQuery("root", request, [fixture.First]);
+        return new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery("root", request, [fixture.First]);
     }
 
     private static long MappingBytes(int rows, int leaves)
@@ -62,6 +62,6 @@ internal sealed class PartitionQueryPublicBudgetTests
 
     private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
         PartitionQueryRequestV1 request)
-        => new QueryEngine(fixture.Database).QueryPartitions("root", request,
+        => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", request,
             PartitionQueryPublicTestSupport.ExpectedOwner);
 }

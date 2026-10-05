@@ -50,8 +50,7 @@ internal sealed class SearchReadBudgetTests
         var documentBytes = Bytes(DocumentKeySpace, Orders);
         var vectorBytes = Bytes(VectorKeySpace, Orders, EmbeddingPath);
         var lineageBytes = KeySpace.Partition(LineageKeySpace, database.Partition, Orders, EmbeddingPath, "a").LongLength;
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization,
-            new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes });
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var search = new SearchEngine(bounded);
         var token = TestContext.Current!.Execution.CancellationToken;
 

@@ -4,6 +4,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIntensiveTarget
 {
+    private const int MillisecondsPerSecond = 1000;
+
     private readonly TimescaleTimeSeriesIntensiveContext context;
     private readonly TimescaleTimeSeriesIntensiveSession session;
     private readonly System.Threading.Lock disposeGate = new();
@@ -62,7 +64,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
             await context.CloseAndDrainAsync().ConfigureAwait(false);
             if (OwnsSchema)
             {
-                using var timeout = new CancellationTokenSource(TimescaleTimeSeriesIntensiveProtocol.ConnectionTimeoutSeconds * 1000);
+                using var timeout = new CancellationTokenSource(TimescaleTimeSeriesIntensiveProtocol.ConnectionTimeoutSeconds * MillisecondsPerSecond);
                 await session.DropOwnedSchemaAsync(context, timeout.Token).ConfigureAwait(false);
             }
         }

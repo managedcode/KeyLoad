@@ -1,13 +1,14 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns target construction and each client until its target takes ownership.</summary>
-internal sealed class ComparisonTargetOwner : IAsyncDisposable
+internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
 {
     private readonly List<IComparisonTarget> targets = new(ComparisonHostConstants.TargetCount);
     private readonly List<HttpClient> unownedClients = new(ComparisonHostConstants.HttpClientCount);
@@ -31,7 +32,7 @@ internal sealed class ComparisonTargetOwner : IAsyncDisposable
         PublishPendingTarget(keyLoadClients);
         pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage);
         PublishPendingTarget();
-        pendingTarget = new QdrantTarget(qdrantClient, settings.RunId, settings.QdrantImage);
+        pendingTarget = new QdrantTarget(qdrantClient, settings.RunId, settings.QdrantImage, settings.Options.Topology, null, executionOptions);
         PublishPendingTarget(qdrantClient);
         var rabbitManagementClient = CreateClient(settings.RabbitManagementEndpoint);
         rabbitManagementClient.DefaultRequestHeaders.Authorization =

@@ -33,8 +33,8 @@ internal sealed class IsolatedPlanTests
         var matrices = plan[IsolatedPlanFields.Matrices]!;
         var crud = matrices[IsolatedPlanFields.Crud]![IsolatedPlanFields.Include]!.AsArray();
         var specialized = matrices[IsolatedPlanFields.Specialized]![IsolatedPlanFields.Include]!.AsArray();
-        await Assert.That(crud.Count).IsEqualTo(108);
-        await Assert.That(specialized.Count).IsEqualTo(162);
+        await Assert.That(crud.Count).IsEqualTo(132);
+        await Assert.That(specialized.Count).IsEqualTo(198);
         await Assert.That(crud.Count < 256 && specialized.Count < 256).IsTrue();
         var all = crud.Concat(specialized).Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).ToArray();
         await Assert.That(all.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(330);

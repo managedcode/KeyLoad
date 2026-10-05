@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -12,6 +13,8 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     private readonly TimeProvider time;
     private readonly CancellationToken startupCancellation;
     private readonly int maximumRows;
+    private readonly OrleansMembershipOptions settings;
+    private readonly TimeSpan requestTimeout;
 
     /// <summary>Creates the standard unbounded local membership provider.</summary>
     /// <param name="database">Canonical local database whose reads follow an established quorum barrier.</param>
@@ -21,13 +24,18 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <param name="internalPrincipal">Persisted trusted principal for internal membership mutations.</param>
     /// <param name="clock">System clock for bounded provider calls and cancellable startup retry delays.</param>
     /// <param name="startupCancellation">Silo startup cancellation, used only by membership initialization.</param>
+    /// <param name="membershipOptions">Centrally validated native membership scheduling and admission.</param>
+    /// <param name="executionOptions">Centrally validated quorum command and read deadlines.</param>
     public ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,
-        string clusterId, string internalPrincipal, TimeProvider clock, CancellationToken startupCancellation)
-        : this(database, coordinator, endpoint, clusterId, internalPrincipal, clock, 0, startupCancellation) { }
+        string clusterId, string internalPrincipal, TimeProvider clock, CancellationToken startupCancellation,
+        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
+        : this(database, coordinator, endpoint, clusterId, internalPrincipal, clock,
+            ReplicaMembershipProtocol.UnboundedRows, startupCancellation, membershipOptions, executionOptions) { }
 
     /// <summary>Creates a profile-bounded authority provider without changing the default provider contract.</summary>
     internal ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,
-        string clusterId, string internalPrincipal, TimeProvider clock, int maximumRows, CancellationToken startupCancellation)
+        string clusterId, string internalPrincipal, TimeProvider clock, int maximumRows, CancellationToken startupCancellation,
+        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(coordinator);
@@ -38,6 +46,9 @@ public sealed class ReplicaMembershipTable : IMembershipTable
         ArgumentOutOfRangeException.ThrowIfNegative(maximumRows);
         this.startupCancellation = startupCancellation;
         this.maximumRows = maximumRows;
+        settings = membershipOptions.Value;
+        var execution = executionOptions.Value;
+        requestTimeout = execution.CommandTimeout + execution.ReadBarrierTimeout;
         store = new(database, coordinator, endpoint, internalPrincipal, maximumRows);
     }
 
@@ -50,7 +61,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <param name="cancellationToken">Native Orleans startup cancellation.</param>
     public async Task InitializeMembershipTableAsync(bool tryInitTableVersion, CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.StartupTimeout, time);
+        using var deadline = new CancellationTokenSource(settings.StartupTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(startupCancellation, cancellationToken, deadline.Token);
         await replica.TransportReady.WaitAsync(linked.Token).ConfigureAwait(false);
         while (true)
@@ -62,9 +73,9 @@ public sealed class ReplicaMembershipTable : IMembershipTable
                 return;
             }
             catch (KeyLoadException error) when (error.Code is ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome
-                || maximumRows == 0 && error.Code == ErrorCode.ResourceExhausted)
+                || maximumRows == ReplicaMembershipProtocol.UnboundedRows && error.Code == ErrorCode.ResourceExhausted)
             {
-                await Task.Delay(ReplicaMembershipProtocol.StartupRetryDelay, time, linked.Token).ConfigureAwait(false);
+                await Task.Delay(settings.StartupRetryDelay, time, linked.Token).ConfigureAwait(false);
             }
         }
     }
@@ -76,7 +87,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <param name="cancellationToken">Bounds the provider operation and its native storage work.</param>
     public async Task<MembershipTableData> ReadAllAsync(CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         return (await store.ReadAsync(linked.Token).ConfigureAwait(false)).Data();
     }
@@ -90,7 +101,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     public async Task<MembershipTableData> ReadRowAsync(SiloAddress key, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(key);
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         return (await store.ReadAsync(linked.Token).ConfigureAwait(false)).Data(key);
     }
@@ -107,7 +118,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     {
         ReplicaMembershipProtocol.ValidateEntry(entry);
         ArgumentNullException.ThrowIfNull(tableVersion);
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var snapshot = await store.ReadAsync(linked.Token).ConfigureAwait(false);
         var updated = snapshot.Insert(entry, tableVersion, maximumRows);
@@ -128,7 +139,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     {
         ReplicaMembershipProtocol.ValidateEntry(entry);
         ArgumentNullException.ThrowIfNull(tableVersion);
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var snapshot = await store.ReadAsync(linked.Token).ConfigureAwait(false);
         var updated = snapshot.Update(entry, etag, tableVersion, maximumRows);
@@ -144,9 +155,9 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     public async Task UpdateIAmAliveAsync(MembershipEntry entry, CancellationToken cancellationToken)
     {
         ReplicaMembershipProtocol.ValidateEntry(entry);
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        for (var attempt = 0; attempt < ReplicaMembershipProtocol.HeartbeatAttempts; attempt++)
+        for (var attempt = ReplicaMembershipProtocol.FirstAttempt; attempt < settings.HeartbeatAttempts; attempt++)
         {
             var snapshot = await store.ReadAsync(linked.Token).ConfigureAwait(false);
             var updated = snapshot.Heartbeat(entry, maximumRows);
@@ -173,7 +184,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
             throw Errors.Fail(ErrorCode.PermissionDenied, ReplicaMembershipProtocol.ClusterMismatch);
         }
 
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var snapshot = await store.ReadAsync(linked.Token).ConfigureAwait(false);
         if (!await store.CompareExchangeAsync(snapshot.Delete(), linked.Token).ConfigureAwait(false))
@@ -191,7 +202,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <param name="cancellationToken">Bounds the provider operation and its native storage work.</param>
     public async Task CleanupDefunctSiloEntriesAsync(DateTimeOffset beforeDate, CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(ReplicaMembershipProtocol.RequestTimeout, time);
+        using var deadline = new CancellationTokenSource(requestTimeout, time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var snapshot = await store.ReadAsync(linked.Token).ConfigureAwait(false);
         var updated = snapshot.Cleanup(beforeDate, maximumRows);

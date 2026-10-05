@@ -4,14 +4,15 @@ namespace KeyLoad.Core;
 
 internal sealed class DuePageState
 {
-    private static readonly TimeSpan Deadline = TimeSpan.FromMilliseconds(100);
+    private readonly TimeSpan discoveryDeadline;
     private readonly long started;
     private readonly ReadExecutionBudget budget;
 
-    internal DuePageState(DatabaseLimits limits, DateTimeOffset wakeAt, long started,
+    internal DuePageState(DatabaseLimits limits, DateTimeOffset wakeAt, long started, TimeSpan discoveryDeadline,
         CancellationToken cancellationToken)
     {
         this.started = started;
+        this.discoveryDeadline = discoveryDeadline;
         WakeAt = wakeAt;
         CancellationToken = cancellationToken;
         budget = new(limits, cancellationToken: cancellationToken);
@@ -39,7 +40,7 @@ internal sealed class DuePageState
     {
         CancellationToken.ThrowIfCancellationRequested();
         budget.Check();
-        if (Stopwatch.GetElapsedTime(started) > Deadline)
+        if (Stopwatch.GetElapsedTime(started) > discoveryDeadline)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.DeadlineExceeded);
         }

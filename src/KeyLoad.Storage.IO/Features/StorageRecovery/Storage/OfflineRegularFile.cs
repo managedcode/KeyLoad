@@ -5,6 +5,10 @@ namespace KeyLoad.Storage.IO;
 
 internal static class OfflineRegularFile
 {
+    private const int FirstValidDescriptor = 0;
+    private const int NativeCallSuccess = 0;
+    private const int NoBufferBytes = 0;
+    private const char NullPathCharacter = '\0';
     private const int LinuxReadOnly = 0;
     private const int LinuxReadWrite = 0x2;
     private const int LinuxNoFollow = 0x20000;
@@ -82,7 +86,7 @@ internal static class OfflineRegularFile
         { descriptor = isMac ? OfflineMacFileSystem.Open(path, flags) : OfflineLinuxFileSystem.Open(path, flags); }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
         { throw OfflineNativeErrors.Unsupported(); }
-        if (descriptor < 0)
+        if (descriptor < FirstValidDescriptor)
         { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac); }
         SafeFileHandle? handle = new(new IntPtr(descriptor), ownsHandle: true);
         Exception? primaryFailure = null;
@@ -111,7 +115,7 @@ internal static class OfflineRegularFile
         { result = isMac ? OfflineMacFileSystem.Lock(descriptor, operation) : OfflineLinuxFileSystem.Lock(descriptor, operation); }
         catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
         { throw OfflineNativeErrors.Unsupported(); }
-        if (result != 0)
+        if (result != NativeCallSuccess)
         { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac); }
     }
 
@@ -153,13 +157,13 @@ internal static class OfflineRegularFile
         ValidatePath(path);
         if (access is not (FileAccess.Read or FileAccess.ReadWrite)
             || share is not (FileShare.Read or FileShare.None)
-            || bufferSize is <= 0 or > MaximumBufferBytes)
+            || bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
         { throw new ArgumentOutOfRangeException(nameof(access)); }
     }
 
     private static void ValidatePath(string path)
     {
-        if (string.IsNullOrWhiteSpace(path) || path.Contains('\0', StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(path) || path.Contains(NullPathCharacter, StringComparison.Ordinal))
         { throw OfflineNativeErrors.InvalidEntry(); }
         if (!BitConverter.IsLittleEndian || !IsSupportedArchitecture()
             || !OperatingSystem.IsLinux() && !OperatingSystem.IsMacOS())

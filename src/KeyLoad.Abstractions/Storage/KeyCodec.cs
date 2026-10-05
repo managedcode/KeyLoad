@@ -21,6 +21,7 @@ public static class KeyCodec
     private const int MaximumComponents = 256;
     private const string TooManyComponentsMessage = "Key component count exceeds the supported limit.";
     private const string InvalidTextMessage = "Key text is not valid Unicode.";
+    private const string GuidKeyFormat = "N";
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
     /// <summary>Encodes the supplied components into a version 1 sortable binary key.</summary>
@@ -120,7 +121,7 @@ public static class KeyCodec
                 WriteBinary(stream, bytes);
                 break;
             case Guid id:
-                Write(stream, id.ToString("N"));
+                Write(stream, id.ToString(GuidKeyFormat));
                 break;
             default:
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, "This type is not supported by key codec v1.");

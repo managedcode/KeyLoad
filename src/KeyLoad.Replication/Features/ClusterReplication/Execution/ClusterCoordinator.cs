@@ -1,6 +1,7 @@
 using System.Text;
 using KeyLoad.Core;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
@@ -10,6 +11,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     private readonly ReplicaConsensus consensus;
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
+    private readonly TimeSpan commandTimeout;
     private readonly AdmittedCommandInbox commands;
     private readonly CancellationTokenSource lifetime = new();
     private readonly Lock lifecycle = new();
@@ -22,13 +24,18 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     /// <param name="database">Node-owned canonical engine and persisted admission principals.</param>
     /// <param name="admission">Configured independent control and data admission budgets.</param>
     /// <param name="clock">Node system clock; a caller cannot choose leader evaluation time.</param>
+    /// <param name="options">Centrally validated command deadline, frozen for this admission owner.</param>
     public ClusterCoordinator(ReplicaConsensus consensus, DatabaseEngine database,
-        CommandAdmissionGovernor admission, TimeProvider clock)
+        CommandAdmissionGovernor admission, TimeProvider clock, IOptions<ReplicaExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(consensus);
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(admission);
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(options);
+        var settings = options.Value;
+        settings.Validate();
+        commandTimeout = settings.CommandTimeout;
         this.consensus = consensus;
         this.database = database;
         this.clock = clock;
@@ -131,7 +138,7 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     private async Task ExecuteAsync(AdmittedCommand pending, CancellationToken stoppingToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-        deadline.CancelAfter(ReplicaProtocol.CommandTimeout);
+        deadline.CancelAfter(commandTimeout);
         try
         {
             pending.Complete(await consensus.SubmitAsync(pending.Operation, deadline.Token).ConfigureAwait(false));

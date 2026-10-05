@@ -125,13 +125,13 @@ internal sealed class SiteBrowserSession : IAsyncDisposable
         var manifest = await JsonSerializer.DeserializeAsync<SiteCoverageSourceManifest>(stream,
             SiteCoverageTokens.JsonOptions, cancellationToken);
         if (manifest is null || manifest.SchemaVersion != SiteCoverageTokens.Schema ||
-            manifest.SourceRevision != inputs.SiteRevision || manifest.Sources.Count != SiteCoverageTokens.ProductionSources.Length ||
+            manifest.SourceRevision != inputs.SiteRevision || manifest.Sources.Count != SiteCoverageSourceInventory.ProductionSources.Length ||
             !manifest.Sources.Select(source => source.Path).SequenceEqual(
-                SiteCoverageTokens.ProductionSources.Order(StringComparer.Ordinal), StringComparer.Ordinal))
+                SiteCoverageSourceInventory.ProductionSources.Order(StringComparer.Ordinal), StringComparer.Ordinal))
         {
             throw new InvalidOperationException(SiteBrowserTokens.BrowserCoverageMismatch);
         }
-        foreach (var path in SiteCoverageTokens.ProductionSources)
+        foreach (var path in SiteCoverageSourceInventory.ProductionSources)
         {
             var entry = manifest.Sources.Single(source => source.Path == path);
             var sourcePath = Path.Combine(inputs.Repository, path.Replace('/', Path.DirectorySeparatorChar));

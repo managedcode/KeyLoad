@@ -38,10 +38,10 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         {
             openedStores = ReplicaMaterializerLifecycleStores.Open(OpenCanonicalStore, OpenReplicaStore);
             storeOwners = openedStores;
-            openedLog = new(storeOwners.Replica, Configuration);
+            openedLog = new(storeOwners.Replica, RecoveryExecutionOptions.Configuration(Configuration));
             Log = openedLog;
-            Database = new(storeOwners.Canonical, new AuthorizationPolicy());
-            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, Configuration));
+            Database = new(storeOwners.Canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+            Materializer = new(Database, Log, new ReplicaSnapshotStore(storeOwners.Canonical, Log, RecoveryExecutionOptions.Configuration(Configuration)), RecoveryExecutionOptions.Replica());
         }
         catch (Exception error)
         {
@@ -183,8 +183,8 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         ReplicaMaterializerLifecycleErrors.Throw(failures);
         using var reopenedCanonical = new ZoneTreeStore(new(CanonicalPath) { Incarnation = Configuration.Incarnation });
         using var reopenedReplica = new ZoneTreeStore(new(ReplicaPath) { Incarnation = Configuration.Incarnation });
-        using var reopenedLog = new DurableReplicaLog(reopenedReplica, Configuration);
-        var database = new DatabaseEngine(reopenedCanonical, new AuthorizationPolicy());
+        using var reopenedLog = new DurableReplicaLog(reopenedReplica, RecoveryExecutionOptions.Configuration(Configuration));
+        var database = new DatabaseEngine(reopenedCanonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         await Assert.That(database.LastApplied).IsEqualTo(cut);
         await Assert.That(reopenedLog.State.CommittedIndex).IsEqualTo(cut);
         await Assert.That(reopenedLog.State.LastIndex).IsEqualTo(cut);

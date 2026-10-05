@@ -65,7 +65,7 @@ internal sealed class NativeTextProjectionLeaseTests
     }
 
     private static SearchEngine BoundedEngine(TestDatabase database, DatabaseLimits limits, ITextProjection projection)
-        => new(new DatabaseEngine(database.Store, database.Database.Authorization, limits), projection);
+        => new(new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), projection);
 
     private static async Task<OperationCanceledException> CancelActiveVerificationAsync(TestDatabase database,
         NativeTextProjection projection)

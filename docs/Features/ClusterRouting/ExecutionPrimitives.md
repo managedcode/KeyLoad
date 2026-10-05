@@ -4,6 +4,10 @@ Status: owner-directed selection and audit contract accepted; runtime adoption a
 qualification pending. Date: 2026-10-05. Decision:
 [ADR-110](../../ADR/ADR-110-native-orleans-execution-primitives.md).
 
+The owner's follow-up broad review, including local services, messaging and
+transactions, is in [CapabilityReview](CapabilityReview.md). It owns the complete
+capability/source/priority inventory; this specification owns REQ/AC and tasks.
+
 ## Purpose and current boundary
 
 Use Orleans' native primitives to admit useful independent work without losing
@@ -33,14 +37,18 @@ the qualification entry points.
 | `ClusterRouting/Grains/DatabaseReadGrain.ExecuteAsync` | Keep independent GUID readers. Do not apply blanket ReadOnly: its multiplexed dispatch includes backup/admin lifecycle work and per-call admission/settlement. ReadOnly requires a separate, proven side-effect-free method and compatible read-cut/lease behavior. LiveQueryStart returns a snapshot/cursor; it does not create a retained session. |
 | `ClusterRouting/Grains/CommandPartitionGrain.ExecuteAsync` | Keep non-reentrant serial partition routing and an awaited reply. Neither StatelessWorker, OneWay nor broad interleaving replaces the ordered node-local apply gate or the RF3 terminal receipt. |
 | `Messaging/Grains/RecurringDueCoordinatorGrain.ProcessDueAsync` | Keep the reliable serial protocol in ADR-094, including fresh authority, canonical occurrence fences and bounded uncertainty retry. OneWay or interleaving here would silently change settlement/concurrency. |
+| `ClusterReplication/GrainServices/PartitionReplicaGrainService` and `Messaging/GrainServices/RecurringDueGrainService` | Already source-present native per-silo services. Retain authenticated replica transport and leader-fenced due discovery, bounded dispatch and joined stop; neither service is a cluster singleton or the owner of moved storage files. |
 | Future bounded pure query/search transform grain behind the request boundary | Evaluate StatelessWorker for bounded SQL parsing/tokenization, immutable chunk transformation, scoring or pre-aggregation. Reuse actual `SqlParser.Parse` / `SqlTokenizer.Lex` with fresh call-local state, or bounded copied inputs from an authorized read cut; return bounded typed results to its owner. Workers retain no authoritative data, storage handles, trusted roles, shared cursors or occurrence state. |
 | Future long-operation control methods | Prefer a narrow AlwaysInterleave status/cancel method or audited MayInterleave predicate when a long operation awaits. Status reads bounded snapshots; cancel records cooperative intent and returns an awaited outcome. Reentrant is justified only after all methods' state across awaits are audited and measured contention warrants it. |
 | Future disposable wake-up/refresh hint method | Evaluate OneWay only if loss, duplication and reordering are harmless and a canonical bounded sweep/revalidation guarantees progress without the hint. Existing revocation, lease acknowledgements, commands, due dispatch and stream terminal frames stay reliable. |
 | Future one-time expiry or saga wake-up adapter | Evaluate native Durable Jobs to trigger existing canonical due processing. It reloads current persisted policy and occurrence state, uses a fresh signed request, and commits effects through RF3. It does not replace the recurring schedule, saga watermark or command outcome records. |
 
-Paths in the first four rows are relative to
+Current grain/service paths in the first five rows are relative to
 [KeyLoad.Orleans/Features](../../../src/KeyLoad.Orleans/Features/).
-Candidates are unimplemented until their following acceptance criteria pass.
+The later candidate rows are unimplemented until their following acceptance criteria pass.
+
+Implementation authorized on 2026-10-06; concrete staged contracts are in
+[RuntimeAdoption](RuntimeAdoption.md).
 
 ## Requirements and acceptance
 
@@ -56,6 +64,8 @@ Candidates are unimplemented until their following acceptance criteria pass.
 | REQ-ORL-008: separate native messaging delivery from committed KeyLoad event/queue history and RF3 acknowledgement. | AC-ORL-008: the capability review compares RPC, Streams, broadcast, observers and native result enumeration. Before a runtime join, freeze provider/subscription persistence, ordering/replay, bounded cache/producer/consumer work, outbox handoff, authority and deduplication; actual committed-operation tests prove recovery after loss/duplicate/reorder, slow consumption, revocation and restart. | TASK-ORL-MESSAGING; explicit static source/doc-review exception now; future operation tests mirror EventStreams, Messaging, ChangeFeeds and Search under their owning provider ADR. |
 | REQ-ORL-009: assess native transactions and persistence against canonical ZoneTree/RF3 storage contracts. | AC-ORL-009: review distinguishes ITransactionalState/ITransactionalStateStorage, IPersistentState/IGrainStorage, JournaledGrain and Orleans.Journaling. No cross-partition ACID or external-store atomicity claim precedes an accepted storage/transaction adapter and real multi-grain abort, conflict, retry, crash/recovery, authorization and unknown-outcome tests through SDK/MCP. | TASK-ORL-STATE; explicit static source/doc-review exception now; provider and cross-partition implementation/tests remain separate owning decisions. |
 | REQ-ORL-010: review all official documentation capability families for useful KeyLoad applications. | AC-ORL-010: a version-aware linked inventory covers grain/runtime model, messaging, state/time, services/lifecycle, placement/directory/migration, serialization, hosting/configuration, observability, security/deployment and testing/resources. Each capability records actual source presence, concrete use, missing contract and priority or deferral; unknowns and legacy examples stay explicit. | TASK-ORL-CAPABILITY-REVIEW; primary-source/native-API review plus actual source search and static link/navigation validation are the explicit documentation-only evidence exception. No runtime or performance result is inferred. |
+| REQ-ORL-011: wake the existing native due service from canonical apply with bounded, joined disposable waiting. | AC-ORL-011: actual apply/racing registration/coalescing/cancellation/shutdown workflows settle safely; at most two scan pages per second, one page/job in flight and unchanged finite sweep/creator/quorum/restart single-effect contracts pass through actual SDK/MCP operations. | TASK-ORL-DUE-APPLY and ROOT-JOIN in RuntimeAdoption; new real-operation ClusterReplication/Messaging cases and existing DueCoordination RF3 gates. |
+| REQ-ORL-012: export native Orleans runtime telemetry with bounded fail-closed privacy. | AC-ORL-012: real signed write/read/failure/concurrent identity operations preserve state/outcome and trace parentage; exported points/spans/exemplars contain only the accepted fixed metadata, immutable privacy sentinels suppress unsafe spans, capture/providers flush and join. | TASK-ORL-TELEMETRY/ROOT-JOIN in RuntimeAdoption; new OrleansRuntimeTelemetry operation cases plus actual SDK/MCP RF3 qualification. |
 
 Native scheduling still runs one turn at a time. Interleaving admits other turns
 while a method awaits; it does not parallelize a CPU loop. AlwaysInterleave can
@@ -147,6 +157,12 @@ independent doc review resolved its test-order finding. Governance, whitespace,
 introduced local links, REQ/AC/navigation/status checks and JSON syntax passed;
 both new Mermaid diagrams rendered to SVG. No runtime tests/build or performance
 qualification was run for this documentation-only stage.
+
+Broad-review verification, 2026-10-06: state/time, messaging and runtime/lifecycle
+reviews joined without blocking findings. The CapabilityReview inventory,
+REQ/AC-ORL-007..010, native tagged links and all three Mermaid diagrams passed
+static validation. The adoption tasks and actual runtime/resource/fault gates
+remain open.
 
 Rollout stages change neither persisted formats nor request aliases by default.
 Any new control/provider contract needs an explicit versioned rollout. Disable a

@@ -20,7 +20,7 @@ internal sealed class ScaledIsolatedPlanTests
         {
             var plan = plans[index]!.AsObject();
             await Assert.That(plan[IsolatedPlanFields.Profile]!.GetValue<string>()).IsEqualTo(ProfileIds[index]);
-            await Assert.That(plan[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(108);
+            await Assert.That(plan[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(132);
             var settings = plan[IsolatedPlanFields.ProfileSettings]!.AsObject();
             await Assert.That(settings[IsolatedPlanFields.Documents]!.GetValue<int>()).IsEqualTo(RecordCounts[index]);
             await Assert.That(settings[IsolatedPlanFields.OperationsPerCell]!.GetValue<int>()).IsEqualTo(100_000);
@@ -39,11 +39,11 @@ internal sealed class ScaledIsolatedPlanTests
             await Assert.That(cells.All(cell => cell![IsolatedPlanFields.Profile]!.GetValue<string>() == ProfileIds[index]
                 && cell[IsolatedPlanFields.Family]!.GetValue<string>() == IsolatedPlanFields.CrudFamily
                 && Scenarios.Contains(cell[IsolatedPlanFields.Scenario]!.GetValue<string>(), StringComparer.Ordinal))).IsTrue();
-            await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(108);
+            await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(132);
             foreach (var scenario in Scenarios)
             {
                 await Assert.That(cells.Count(cell => cell![IsolatedPlanFields.Scenario]!.GetValue<string>() == scenario))
-                    .IsEqualTo(27);
+                    .IsEqualTo(33);
             }
         }
 

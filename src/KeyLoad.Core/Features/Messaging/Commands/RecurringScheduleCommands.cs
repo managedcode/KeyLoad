@@ -197,7 +197,7 @@ public sealed partial class DatabaseEngine
         if (definition.Lane is null || definition.ScheduleId == Guid.Empty || definition.FirstDueAt.Offset != TimeSpan.Zero
             || definition.TimeZone != RecurringSagaProtocol.UtcZone || definition.Interval.Ticks is < MinimumIntervalTicks or > MaximumIntervalTicks
             || definition.Misfire != RecurringMisfirePolicy.CatchUp
-            || definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl > TimeSpan.FromDays(365)))
+            || definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }

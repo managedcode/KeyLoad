@@ -9,6 +9,15 @@ internal static class CodeQualityDiagnosticCategories
 
 internal static class CodeQualityDiagnosticText
 {
+    public const string MagicRuntimeDurationTitle = "Runtime numeric literals must use named constants";
+    public const string MagicRuntimeDurationMessage = "Runtime numeric literal '{0}' must use a domain-named constant or configured option";
+    public const string MagicRuntimeDurationDescription = "Explicit runtime numeric literals, including zero and one, require named immutable identities or typed options; metadata identifiers and named constant declarations are preserved.";
+    public const string MagicRuntimeStringTitle = "Runtime text literals must use named identities";
+    public const string MagicRuntimeStringMessage = "Runtime text literal {0} must use a domain-named constant or nameof";
+    public const string MagicRuntimeStringDescription = "Runtime strings, characters, endpoint and method tokens, and interpolation text require named identities; existing machine-key diagnostics retain ownership.";
+    public const string TypedConfigurationTitle = "Runtime policy must use centrally validated typed options";
+    public const string TypedConfigurationMessage = "'{0}' must use centrally bound and validated IOptions<T>; raw reads and hardcoded operational policy belong only to their explicit configuration owners";
+    public const string TypedConfigurationDescription = "Actual configuration ownership metadata separates central binding/default definitions from feature execution; execution consumes IOptions<T> and never hides operational deadlines behind constants or static readonly values.";
     public const string LiteralMachineKeyTitle = "Machine keys must use named constants";
     public const string LiteralMachineKeyMessage = "Machine key '{0}' must be referenced through a named const string";
     public const string LiteralMachineKeyDescription = "Dictionary, JSON, configuration, header, query, metadata, and serialization keys must not be inline string literals.";

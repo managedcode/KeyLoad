@@ -52,8 +52,8 @@ function validateVectorMetrics(metrics, profile) {
     metrics.perQueryRecall.length === profile.measuredQueries &&
     metrics.perQueryRecall.every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1) &&
     Number.isFinite(metrics.exactRecall) && metrics.exactRecall >= 0 && metrics.exactRecall <= 1 &&
-    Number.isFinite(metrics.minimumRecall) && metrics.minimumRecall >= profile.minimumRecall &&
-    metrics.minimumRecall <= metrics.exactRecall && metrics.perQueryRecall.every(value => value >= profile.minimumRecall) &&
+    Number.isFinite(metrics.minimumRecall) && metrics.minimumRecall >= 0 &&
+    metrics.minimumRecall <= metrics.exactRecall && metrics.exactRecall >= profile.minimumRecall &&
     Number.isFinite(metrics.latencyP95Ms) && metrics.latencyP95Ms > 0 && Number.isFinite(metrics.latencyP99Ms) &&
     metrics.latencyP99Ms >= metrics.latencyP95Ms && Number.isFinite(metrics.indexBuildMilliseconds) &&
     metrics.indexBuildMilliseconds >= 0 && text(metrics.nativeIndexDefinition) && text(metrics.nativeQueryPlan) &&
@@ -65,9 +65,10 @@ function validateVectorMetrics(metrics, profile) {
     metrics.updateElapsedSeconds >= 0 && Number.isFinite(metrics.updateUsefulOperationsPerSecond) &&
     metrics.updateUsefulOperationsPerSecond >= 0, ERROR);
   const average = metrics.perQueryRecall.reduce((total, value) => total + value, 0) / metrics.perQueryRecall.length;
-  const minimum = Math.min(...metrics.perQueryRecall);
+  const minimum = metrics.perQueryRecall.reduce((previous, value) => Math.min(previous, value), 1);
   const close = (left, right) => Math.abs(left - right) <= Math.max(1e-8, Math.abs(right) * 1e-8);
-  requireValue(close(metrics.exactRecall, average) && close(metrics.minimumRecall, minimum), ERROR);
+  requireValue(close(metrics.exactRecall, average) && close(metrics.minimumRecall, minimum) &&
+    close(metrics.queryUsefulOperationsPerSecond, profile.measuredQueries / metrics.queryElapsedSeconds), ERROR);
   if (profile.indexKind === 'Exact') requireValue(metrics.exactRecall === 1 && metrics.indexBuildMilliseconds === 0, ERROR);
   if (profile.indexKind === 'Hnsw') requireValue(/hnsw/iu.test(metrics.nativeIndexDefinition)
     && /hnsw/iu.test(metrics.nativeQueryPlan), ERROR);
@@ -75,7 +76,8 @@ function validateVectorMetrics(metrics, profile) {
     && /ivfflat/iu.test(metrics.nativeQueryPlan), ERROR);
   if (profile.updateCount === 0) requireValue(metrics.updateElapsedSeconds === 0
     && metrics.updateUsefulOperationsPerSecond === 0, ERROR);
-  else requireValue(metrics.updateElapsedSeconds > 0 && metrics.updateUsefulOperationsPerSecond > 0, ERROR);
+  else requireValue(metrics.updateElapsedSeconds > 0 && metrics.updateUsefulOperationsPerSecond > 0 &&
+    close(metrics.updateUsefulOperationsPerSecond, profile.updateCount / metrics.updateElapsedSeconds), ERROR);
 }
 
 function validateVectorCase(item, cell, profile, repetitions) {

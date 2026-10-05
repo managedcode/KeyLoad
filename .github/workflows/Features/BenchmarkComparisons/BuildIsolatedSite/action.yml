@@ -10,6 +10,25 @@ runs:
         set -euo pipefail
         jq -e '.passed == true' "$EVIDENCE_DIR/analyzer-coverage/report.json"
         jq -e '.passed == true' "$KEYLOAD_SITE_COVERAGE/report.json"
+        [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured || "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]
+        jq -e --arg mode "$KEYLOAD_SITE_BENCHMARK_MODE" --arg revision "$KEYLOAD_SITE_SOURCE_REVISION" '.benchmarkMode == $mode and .sourceRevision == $revision' "$KEYLOAD_SITE_COVERAGE/report.json" > /dev/null
+        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
+          availability="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"
+          [[ -f "$availability" && ! -L "$availability" ]]
+          jq -e '.state == "unavailable"' "$availability" > /dev/null
+          availability_hash=$(sha256sum "$availability" | cut -d' ' -f1)
+          timeout 300s node site/scripts/build.mjs --benchmarks=none --output="$GITHUB_WORKSPACE/_site" --site-revision="$KEYLOAD_SITE_SOURCE_REVISION" > "$EVIDENCE_DIR/final-builder.json"
+          jq -e '.mode == "none" and .benchmarkSource == "none"' "$EVIDENCE_DIR/final-builder.json" > /dev/null
+          [[ ! -e "$GITHUB_WORKSPACE/_site/data" && ! -L "$GITHUB_WORKSPACE/_site/data" ]]
+          [[ "$(sha256sum "$availability" | cut -d' ' -f1)" == "$availability_hash" ]]
+          timeout 120s gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" > "$EVIDENCE_DIR/qualification-jobs-pages.json"
+          job_url=$(jq -er '[.[].jobs[] | select(.name == "Check website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
+          native_hash=$(sha256sum "$EVIDENCE_DIR/analyzer-coverage/report.json" | cut -d' ' -f1)
+          site_hash=$(sha256sum "$KEYLOAD_SITE_COVERAGE/report.json" | cut -d' ' -f1)
+          mkdir "$GITHUB_WORKSPACE/_site/data"
+          jq -n --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --arg website "$KEYLOAD_SITE_SOURCE_REVISION" --arg control "$KEYLOAD_SITE_CONTROL_REVISION" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg native_hash "$native_hash" --arg site_hash "$site_hash" --arg availability_hash "$availability_hash" '{schemaVersion:3,source:{website:$website,control:$control,measured:null},qualification:{scope:"content",runUrl:$run_url,jobUrl:$job_url,nativeReportSha256:$native_hash,siteReportSha256:$site_hash,availabilitySha256:$availability_hash,tests:$tests[0]},benchmarks:null}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
+          exit 0
+        fi
         readonly isolated_receipt_limit=4194304
         readonly isolated_snapshot="$EVIDENCE_DIR/final-isolated-archive-receipt.json"
         [[ "$KEYLOAD_SITE_ISOLATED_AGGREGATE" == "$KEYLOAD_SITE_ISOLATED_CAPTURE/input/aggregate" ]]
@@ -35,7 +54,7 @@ runs:
           local phase="$1"
           verify_authority
           timeout 300s node scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs verify-inputs --input="$KEYLOAD_SITE_ISOLATED_CAPTURE" --receipt="$isolated_snapshot" > "$EVIDENCE_DIR/isolated-final-$phase.json"
-          jq -e '.ok == true and .result.workers == 270 and .result.files == 277' "$EVIDENCE_DIR/isolated-final-$phase.json" > /dev/null
+          jq -e --slurpfile receipt "$isolated_snapshot" '.ok == true and .result.workers == ($receipt[0].workers | length) and .result.files == ($receipt[0].inputFiles | length)' "$EVIDENCE_DIR/isolated-final-$phase.json" > /dev/null
           verify_authority
         }
         verify_isolated_inputs before

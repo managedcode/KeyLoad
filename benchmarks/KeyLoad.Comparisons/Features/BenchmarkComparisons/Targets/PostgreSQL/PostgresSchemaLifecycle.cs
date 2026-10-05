@@ -29,16 +29,16 @@ internal static class PostgresSchemaLifecycle
     }
 
     internal static async Task DropIfOwnedAsync(NpgsqlConnection connection, PostgresSchemaIdentity identity,
-        Guid ownerGuid)
+        Guid ownerGuid, CancellationToken cancellationToken = default)
     {
-        await using var transaction = await connection.BeginTransactionAsync();
-        await SetCleanupContextAsync(connection, transaction, identity, ownerGuid);
-        await AcquireNamespaceLockAsync(connection, transaction, identity.LockKey, CancellationToken.None);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await SetCleanupContextAsync(connection, transaction, identity, ownerGuid, cancellationToken);
+        await AcquireNamespaceLockAsync(connection, transaction, identity.LockKey, cancellationToken);
         await using (var drop = new NpgsqlCommand(PostgresSchemaCommands.DropIfOwnedSchema, connection, transaction))
         {
-            await drop.ExecuteNonQueryAsync(CancellationToken.None);
+            await drop.ExecuteNonQueryAsync(cancellationToken);
         }
-        await transaction.CommitAsync();
+        await transaction.CommitAsync(cancellationToken);
     }
 
     private static void ValidateDimensions(int dimensions)
@@ -62,13 +62,13 @@ internal static class PostgresSchemaLifecycle
     }
 
     private static async Task SetCleanupContextAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
-        PostgresSchemaIdentity identity, Guid ownerGuid)
+        PostgresSchemaIdentity identity, Guid ownerGuid, CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand(PostgresSchemaCommands.SetCleanupContext, connection, transaction);
         command.Parameters.AddWithValue(NpgsqlDbType.Uuid, identity.RunGuid);
         command.Parameters.AddWithValue(NpgsqlDbType.Uuid, ownerGuid);
         command.Parameters.AddWithValue(NpgsqlDbType.Bigint, identity.LockKey);
-        await command.ExecuteNonQueryAsync();
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     private static async Task AcquireNamespaceLockAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,

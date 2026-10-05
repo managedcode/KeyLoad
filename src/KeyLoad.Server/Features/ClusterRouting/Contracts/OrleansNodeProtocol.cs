@@ -11,6 +11,4 @@ internal static class OrleansNodeProtocol
     internal const string GuidFormat = "N";
     internal const int GatewayPort = 0;
     internal const int NativeEnvelopeOverheadBytes = 65_536;
-    internal static readonly TimeSpan MembershipRefresh = TimeSpan.FromSeconds(5);
-    internal static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(30);
 }

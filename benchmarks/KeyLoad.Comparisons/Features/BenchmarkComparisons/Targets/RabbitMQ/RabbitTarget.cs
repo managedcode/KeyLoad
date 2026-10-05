@@ -14,9 +14,13 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed class RabbitTarget(string connectionString, string runId, string image,
     ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null) : IComparisonTarget
 {
+    private const string RunIdentityFormat = "N";
+    private const string TlsScheme = "amqps";
+    private const int ClaimPollMilliseconds = 1;
+
     private const string QueuePrefix = "keyload_benchmark_";
     private readonly string brokerConnectionString = connectionString;
-    private readonly string queue = QueuePrefix + Guid.Parse(runId).ToString("N");
+    private readonly string queue = QueuePrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
     private readonly string imageName = image;
     private readonly ComparisonTopology configuredTopology = topology;
     private readonly Dictionary<string, object?> queueArguments = RabbitNativePolicy.QueueArguments(topology);
@@ -58,7 +62,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
             Version = proof.Version,
             Topology = RabbitNativePolicy.TopologyLabel(configuredTopology),
             WriteAcknowledgement = $"persistent messages + tracked publisher confirms; quorum {ComparisonTopologies.NodeCount(configuredTopology) / 2 + 1} of {ComparisonTopologies.NodeCount(configuredTopology)}; quorum member online verification; manual ACK + ordered channel RPC barrier",
-            Transport = endpoint.Scheme == "amqps" ? "AMQP 0-9-1/TLS; one channel per worker" : "AMQP 0-9-1/TCP; one channel per worker",
+            Transport = endpoint.Scheme == TlsScheme ? "AMQP 0-9-1/TLS; one channel per worker" : "AMQP 0-9-1/TCP; one channel per worker",
             Image = imageName,
             Cluster = proof.Evidence
         };
@@ -67,7 +71,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     private async Task ProbeQueueAsync(CancellationToken cancellationToken)
     {
         await using var channel = await connection!.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken);
-        var probeId = Guid.NewGuid().ToString("N");
+        var probeId = Guid.NewGuid().ToString(RunIdentityFormat);
         await channel.BasicPublishAsync("", queue, mandatory: true,
             basicProperties: new BasicProperties { Persistent = true, MessageId = probeId },
             body: Encoding.UTF8.GetBytes(probeId), cancellationToken: cancellationToken);
@@ -124,7 +128,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
                 delivery = await channel.BasicGetAsync(queue, autoAck: false, cancellationToken);
                 if (delivery is null)
                 {
-                    await Task.Delay(1, cancellationToken);
+                    await Task.Delay(ClaimPollMilliseconds, cancellationToken);
                 }
             }
             var received = Stopwatch.GetTimestamp();

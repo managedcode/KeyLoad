@@ -120,7 +120,7 @@ internal static class SiteIsolatedGitHubArchivePreflight
     private static void ValidateTotal(long total, bool provider)
     {
         var maximum = provider ? SiteIsolatedGitHubTokens.ProviderBytes :
-            SiteIsolatedGitHubTokens.TotalRawBytes + SiteIsolatedGitHubTokens.JsonBytes;
+            SiteIsolatedGitHubTokens.SuiteBytes;
         if (total > maximum)
         {
             throw new InvalidDataException(SiteIsolatedGitHubTokens.Bounds);

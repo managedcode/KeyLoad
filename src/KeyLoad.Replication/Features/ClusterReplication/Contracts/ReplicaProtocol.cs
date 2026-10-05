@@ -5,10 +5,6 @@ namespace KeyLoad.Replication;
 /// <summary>Defines stable replica format, storage keys, protocol bounds and safe errors.</summary>
 public static class ReplicaProtocol
 {
-    /// <summary>Maximum foreground command deadline.</summary>
-    public static readonly TimeSpan CommandTimeout = TimeSpan.FromSeconds(20);
-    /// <summary>Maximum current-term quorum read deadline.</summary>
-    public static readonly TimeSpan ReadBarrierTimeout = TimeSpan.FromSeconds(10);
     /// <summary>Maximum encoded metadata allowance around a replica payload.</summary>
     public const int PayloadMetadataBytes = 65_536;
     /// <summary>Existing authenticated peer identity bound, in UTF16 code units.</summary>

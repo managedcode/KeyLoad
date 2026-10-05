@@ -12,7 +12,7 @@ internal sealed class SqlModelViewReadTests
     {
         using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var eventBefore = database.Database.ReadStream("root",
             new(database.Partition, SqlModelViewTestSupport.StreamSet, SqlModelViewTestSupport.StreamId, 1));
         var eventBeforeBytes = NativeSerialization.Serialize(eventBefore);
@@ -93,7 +93,7 @@ internal sealed class SqlModelViewReadTests
                 new Comparison(new FieldOperand("/payload/score"), ">", ValueOperand.Create(JsonSerializer.SerializeToElement(1))),
                 [new("/payload/score", true)], 1,
                 ModelSource: new(ModelQuerySourceKind.Events, "stream-b")), AllowFullScan: true);
-        var page = new QueryEngine(database.Database).ExecuteAst(SqlModelViewTestSupport.Reader, request);
+        var page = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecuteAst(SqlModelViewTestSupport.Reader, request);
 
         var row = await Assert.That(page.Rows).HasSingleItem();
         await Assert.That(row.EntityId).IsEqualTo("event-b");

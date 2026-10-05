@@ -5,11 +5,13 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisCopyObservation
 {
+    private const int ReplicaProbeTimeoutSeconds = 60;
+
     private const string GetCommand = "GET";
     private const string LinkDown = "down";
     private const string ErrorReplicaCopy = "RedisDirectReplicaProbeFailed";
     private const int PollMilliseconds = 200;
-    private static readonly TimeSpan ReplicaProbeTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan ReplicaProbeTimeout = TimeSpan.FromSeconds(ReplicaProbeTimeoutSeconds);
 
     internal static async Task VerifyDirectCopiesAsync(ConnectionMultiplexer[] replicas, EndPoint[] endpoints,
         int database, string key, string payload, CancellationToken token)

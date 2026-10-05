@@ -15,7 +15,7 @@ internal sealed class SiteIsolatedGitHubArchiveTests
         await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Suite, false, token);
         await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Provider, true, token);
         await Assert.That(receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedGitHubTokens.FileCount);
+            .IsEqualTo(SiteIsolatedInventory.Files(inputs.Metadata));
     }
 
     [Test]

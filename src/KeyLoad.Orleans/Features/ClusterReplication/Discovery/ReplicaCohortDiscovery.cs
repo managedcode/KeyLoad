@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -13,10 +14,11 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
     private readonly TimeProvider clock;
     private readonly IReplicaDiscoveryObservationSink? observationSink;
 
-    internal ReplicaCohortDiscovery(ReplicaConfiguration configuration, ReplicaPeerOptions options,
+    internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-        IReplicaDiscoveryObservationSink? observationSink = null)
+        IOptions<PeerDiscoveryOptions> peerOptions, IReplicaDiscoveryObservationSink? observationSink = null)
     {
+        var configuration = configurationOptions.Value;
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
         ArgumentNullException.ThrowIfNull(local);
@@ -26,7 +28,7 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         this.clock = clock;
         this.observationSink = observationSink;
         observations = new(configuration, local, clock);
-        var ownedResources = new ReplicaDiscoveryResources(configuration, options, authentication, clock);
+        var ownedResources = new ReplicaDiscoveryResources(configurationOptions, options, authentication, clock, peerOptions);
         resources = new(ownedResources);
         admission = new(configuration, observations, GetObservationAsync);
         lifetime = new(ownedResources);

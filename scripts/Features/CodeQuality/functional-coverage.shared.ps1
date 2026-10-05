@@ -14,6 +14,7 @@ $script:FunctionalCoverage = [ordered]@{
     SourceCount = 98
     ContributorSourceCount = 21
     ContributorClassCount = 10
+    TestNamespace = 'KeyLoad.UnitTests.Features.QueryExecution'
     DllName = 'KeyLoad.Query.dll'
     PdbName = 'KeyLoad.Query.pdb'
     HitUnion = 'logical-or by source path and line number across the two reports'
@@ -33,7 +34,7 @@ $script:FunctionalCoverage = [ordered]@{
     ErrorDeployment = 'Release test deployment must contain the Query DLL and matching PDB.'
     ErrorManifest = 'Prepared functional coverage manifest is missing, stale, or invalid.'
     ErrorCoverage = 'A required native Cobertura report is missing or malformed.'
-    ErrorTrx = 'A complete successful PartitionQuery TUnit result is missing.'
+    ErrorTrx = 'PartitionQuery TRX definitions and result records are missing, mismatched, or unsuccessful.'
     ErrorDrift = 'Source, module, PDB, settings, or script identity drifted during collection.'
     ErrorUnexpectedModule = 'Cobertura contains a module outside the frozen Query identity.'
     ErrorUnexpectedSource = 'Cobertura contains a source outside the frozen KeyLoad.Query inventory.'
@@ -70,9 +71,12 @@ function Get-FcHash([string] $Path) {
 }
 
 function Get-FcRevision([string] $Root) {
-    $revision = [Environment]::GetEnvironmentVariable('GITHUB_SHA')
-    if ($revision -cnotmatch $script:FunctionalCoverage.RevisionPattern) {
-        $revision = (& git -C $Root rev-parse HEAD 2>$null).Trim()
+    $revision = (& git -C $Root rev-parse HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $null -eq $revision) { throw 'Repository HEAD could not be resolved.' }
+    $revision = $revision.Trim()
+    $githubRevision = [Environment]::GetEnvironmentVariable('GITHUB_SHA')
+    if (-not [string]::IsNullOrWhiteSpace($githubRevision) -and $githubRevision -cne $revision) {
+        throw 'GITHUB_SHA differs from the selected repository HEAD.'
     }
     if ($revision -cnotmatch $script:FunctionalCoverage.RevisionPattern) {
         throw 'A lowercase 40-character source revision is required.'
@@ -140,10 +144,13 @@ function Read-FcContract([string] $Path) {
         $contract.sources.Count -ne $t.SourceCount -or
         $contract.contributors.sourceFiles.Count -ne $t.ContributorSourceCount -or
         $contract.contributors.testClasses.Count -ne $t.ContributorClassCount -or
+        $contract.contributors.testNamespace -cne $t.TestNamespace -or
         $contract.contributors.testNamePrefix -cne 'PartitionQuery' -or
         $contract.contributors.filter -cne '/*/*/PartitionQuery*/*' -or
         (@($contract.contributors.suiteNames) -join ',') -cne 'unit,unit-scalar' -or
         (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryGrantTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicBudgetTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
+        $contract.bounds.originalXmlBytes -ne 33554432 -or $contract.bounds.sources -ne 5000 -or
+        $contract.bounds.distinctLineLocations -ne 100000 -or
         $null -ne $contract.thresholds -or
         $contract.reportMerge.branchMerge -cne $t.BranchMerge) { throw $t.ErrorContract }
     $contract

@@ -13,14 +13,6 @@ const settings = Object.freeze({ operations: 100_000, warmup: 256, repetitions: 
   graphVertices: 0, graphFanOut: 0, graphDepth: 0 });
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-function scaledOptions(profile) {
-  return { seed: settings.seed, documents: profile.documents, operations: settings.operations,
-    warmup: settings.warmup, repetitions: settings.repetitions, concurrency: settings.concurrency,
-    payloadBytes: settings.payloadBytes, dimensions: settings.dimensions, topK: settings.topK,
-    graphVertices: settings.graphVertices, graphFanOut: settings.graphFanOut,
-    graphDepth: settings.graphDepth, timeoutSeconds: settings.timeoutSeconds };
-}
-
 function createCells(contract, profile) {
   const cells = contract.targets.flatMap(target => contract.nodeCounts.flatMap(nodeCount =>
     contract.crudScenarios.map(scenario => {
@@ -39,7 +31,7 @@ function createProfilePlan(contract, profile) {
   const crud = cells;
   const specialized = [];
   return { schemaVersion: 1, workerSchemaVersion: contract.workerSchemaVersion,
-    profile: profile.id, profileSettings: scaledOptions(profile), cells,
+    profile: profile.id, profileSettings: scaleProfileSettings(profile.id), cells,
     matrices: { crud: { include: crud }, specialized: { include: specialized } } };
 }
 
@@ -78,4 +70,4 @@ export function scaleProfileSettings(profileId) {
   return { ...profile, ...settings };
 }
 
-export const scaledCellCount = SCALED_PROFILES.length * 108;
+export const scaledCellCount = SCALED_PROFILES.length * 132;

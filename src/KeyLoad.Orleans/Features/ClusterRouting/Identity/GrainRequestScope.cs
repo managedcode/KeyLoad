@@ -4,10 +4,10 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainRequestScope
 {
-    internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now)
+    internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now, TimeSpan maximumFuture)
     {
         if (request.Purpose != GrainNativeContracts.RequestPurpose || request.Incarnation != incarnation
-            || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + GrainRoutingProtocol.MaximumFuture
+            || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + maximumFuture
             || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

@@ -1,27 +1,42 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
 /// <summary>Node-owned metadata persisted by the supplied checksummed atomic store; the caller owns that store.</summary>
-/// <param name="store">Node-owned store that durably commits replica entries and hard state. Its Read must check
-/// poison/disposal and hold a consistent cut. Position and Identity.NodeId, Incarnation and ReadGeneration inside the
-/// callback must fence writes, replacement and restore as specified by ADR-061.</param>
-/// <param name="configuration">Fixed voter scope and bounded log persistence settings.</param>
-/// <param name="faultObserver">Optional observer invoked after durable crash boundaries.</param>
-/// <param name="canonicalDatabase">Borrowed canonical authority required for every nonnull native operation.</param>
-public sealed class DurableReplicaLog(IAtomicStore store, ReplicaConfiguration configuration,
-    Action<ReplicaCrashBoundary>? faultObserver = null, DatabaseEngine? canonicalDatabase = null) : IDurableReplicaLog
+public sealed class DurableReplicaLog : IDurableReplicaLog
 {
+    private readonly IAtomicStore store;
+    private readonly ReplicaConfiguration configuration;
+    private readonly Action<ReplicaCrashBoundary>? faultObserver;
     private readonly Lock gate = new();
-    private ReplicaHardState state = ReplicaLogValidation.Open(store, configuration, canonicalDatabase);
+    private ReplicaHardState state;
     private ReplicaTermObservation? termObservation;
     private bool disposed;
+
+    /// <summary>Opens and validates node-owned durable state against the frozen topology-bound options.</summary>
+    /// <param name="store">Borrowed atomic store holding a consistent fenced cut for every read.</param>
+    /// <param name="configurationOptions">Centrally validated voter scope and bounded log persistence settings.</param>
+    /// <param name="faultObserver">Optional observer invoked after durable crash boundaries.</param>
+    /// <param name="canonicalDatabase">Borrowed canonical authority required for every nonnull native operation.</param>
+    public DurableReplicaLog(IAtomicStore store, IOptions<ReplicaConfiguration> configurationOptions,
+        Action<ReplicaCrashBoundary>? faultObserver = null, DatabaseEngine? canonicalDatabase = null)
+    {
+        ArgumentNullException.ThrowIfNull(store);
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        this.store = store;
+        this.faultObserver = faultObserver;
+        CanonicalDatabase = canonicalDatabase;
+        state = ReplicaLogValidation.Open(store, configuration, canonicalDatabase);
+    }
     /// <inheritdoc />
     public SemaphoreSlim ProtocolGate { get; } = new(1, 1);
     /// <summary>Gets the externally owned canonical engine used to validate operation authority and semantic retries.</summary>
-    public DatabaseEngine? CanonicalDatabase { get; } = canonicalDatabase;
+    public DatabaseEngine? CanonicalDatabase { get; }
     /// <inheritdoc />
     public ReplicaHardState State
     {

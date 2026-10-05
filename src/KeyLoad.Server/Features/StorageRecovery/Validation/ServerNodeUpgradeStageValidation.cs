@@ -24,7 +24,7 @@ internal static class ServerNodeUpgradeStageValidation
         {
             if (entry.Path is ServerNodeUpgradeProtocol.OwnerReceipt or ServerNodeUpgradeProtocol.NodeOwner
                 || entry.Path == ServerNodeUpgradeProtocol.Inputs
-                || entry.Path.StartsWith(ServerNodeUpgradeProtocol.Inputs + "/", StringComparison.Ordinal))
+                || entry.Path.StartsWith(ServerNodeUpgradeProtocol.Inputs + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal))
             { continue; }
             throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid);
         }

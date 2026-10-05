@@ -33,7 +33,7 @@ export async function collectWorkerEvidence(captureRoot, dataRoot, selected, ima
   const resourcePath = path.join(directory, 'server-resource-evidence.json');
   const resourceRaw = await extractNativeEntry(archive, 'server-resource-evidence.json', resourcePath,
     GH.serverResourceBytes, context);
-  const supported = envelope.disposition === 'measured';
+  const supported = envelope.disposition !== 'unsupportedTopology';
   const serverResource = validateServerResourceEvidence(await readJson(resourcePath, GH.serverResourceBytes),
     resourceRaw.sha256, raw.sha256, cell, context.cohort, job.id, supported);
   return projectWorkerProof(job, artifact, cell, context.cohort, raw.sha256, serverResource);

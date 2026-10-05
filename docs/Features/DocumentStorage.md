@@ -86,11 +86,10 @@ are authorized by this test stage.
 
 The2026-10-05 source audit separately found that current outcome keys bind only
 PrincipalId and CommandId, while the canonical fingerprint binds the batch's
-partition. Reusing an ID for another partition currently conflicts. This is not
-proof of ADR-002's accepted independent resolved-partition scope; that row remains
-open until an explicit format/key upgrade contract reconciles the outcome lookup
-and public resolution paths. Do not change the ADR's target or claim this partial
-matrix closes partition isolation.
+partition. The original unscoped-key baseline conflicted when an ID was reused
+for another partition. The accepted scoped-key source repair below replaces that
+path; current-source build, recovery and SDK/MCP RF3 qualification remain pending.
+The historical partial matrix does not close independent partition isolation.
 
 ## Accepted scoped outcome repair, 2026-10-05
 
@@ -101,6 +100,21 @@ for Partition, and CommandId. The canonical fingerprint, native StoredOutcome
 alias and IDs 0..7, persisted authorization, incarnation checks and ordered
 atomic apply boundary remain unchanged. A partition digest cannot reconstruct
 its full identity or physical owner.
+
+TASK-DSTORE-FULL-IDENTITY-001 supplements the scoped repair with four complete
+real-ZoneTree cases, one for each individual `PartitionRef` component. Hold the
+other three components, persisted principal and command ID fixed while changing
+only tenant, database, transaction domain or partition key. Configure two real
+collections in their actual scopes so a domain change never overwrites the first
+collection's catalog authority. Commit both commands, compare exact independent
+receipts on replay, reject changed content separately in each scope, verify both
+literal document values and unchanged outbox tails after retries/conflicts, then
+reopen the store and resolve/read both original commands. Expected keys use the
+existing independent test oracle, not the production scope/key resolver. A
+dedicated worker owns only new ClusterRouting test cases/helpers; root owns live
+integration and the ordinary/scalar/recovery/RF3 gates. Acceptance maps to
+AC-DSTORE-009 and ADR-002/011; these authored cases do not replace genuine
+prior-format migration evidence or caller-visible RF3 proof.
 
 New partition keys are `KeySpace.Partition("outcome-v2", partition, principal, id)`;
 global keys are `KeyCodec.Encode("outcome-v2", "global", principal, id)`.
@@ -156,6 +170,41 @@ old-reader rollback requires the verified pre-upgrade backup and explicit accept
 data-loss scope; otherwise recover forward. Outcome expiry and physical movement
 remain separate unimplemented contracts. No old binary is claimed to honor a
 new marker it does not read.
+
+### Authorization and retained-error ordering
+
+TASK-DSTORE-SCOPED-OUTCOMES-002 preserves the original command trust boundary.
+Normal execution and operation-aware resolution authenticate the persisted
+principal and authorize the operation before reading or decoding retained outcome
+metadata. A revoked caller receives the original authorization error, including
+when the retained bytes are corrupt; after valid authorization the same corrupt
+row fails Corruption. The already-applied replica path retains its existing
+authority and replay order rather than introducing a new caller authorization step.
+
+If normal admission fails before outcome selection, retain that original error,
+reset staged domain effects, and use only a bounded legacy-key presence check.
+An occupied legacy key suppresses a new v2 outcome write; it is not decoded,
+repaired, shadowed or used to replace the original error. Preserve the existing
+apply-watermark and monotonic-clock transaction behavior. An existing v2 row also
+cannot be overwritten by this failure. Actual rejected-operation tests verify
+both original bytes and the absence of a second outcome/locator or domain effect.
+When neither legacy nor selected v2 identity exists, preserve the original
+retention of a newly persisted denied/domain-error outcome. Suppression for an
+occupied identity must not become a blanket prohibition on retained errors.
+
+Unknown-scope retry/conflict tests must use an actual operation whose persisted
+authorization succeeds before its malformed payload fails execution. An error
+rejected by authorization cannot reveal a prior fingerprint. Exact authorized
+Unknown retries and changed-content conflicts still use their independent v2
+identity; no caller-supplied role or metadata-before-authorization shortcut is
+permitted. These flows extend AC-DSTORE-009 and its existing native unit/scalar,
+recovery and RF3 evidence, without qualifying an unexecuted gate.
+
+The scoped implementation, caller migration and authored operation flows were
+joined in the [2026-10-06 source checkpoint](../implementation/scoped-outcome-functional-flow-source-2026-10-06.json).
+It captures the current source and root corrections during the shared options
+migration. Current build, formatter, unit/scalar, process recovery, RF3 and
+functional coverage are pending; AC-DSTORE-006/009 remain open.
 
 The accepted [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md)
 assigns CRUD handlers and new matching tests to one worker, and shared

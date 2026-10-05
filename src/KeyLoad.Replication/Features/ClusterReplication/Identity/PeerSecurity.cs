@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
@@ -10,26 +11,29 @@ public sealed class PeerSecurity : IDisposable
     private readonly byte[] secret;
     private readonly TimeProvider clock;
     private readonly TimeSpan connectTimeout;
+    private readonly TimeSpan pooledConnectionLifetime;
+    private readonly long timestampWindowMilliseconds;
     private readonly PeerDiscoveryReplay replay;
     private int disposed;
 
     /// <summary>Copies the configured peer credential once and fixes the clock and bounded replay capacity.</summary>
     /// <param name="secret">The shared 32-byte peer credential.</param>
     /// <param name="clock">The production system clock.</param>
-    /// <param name="connectTimeout">A positive socket connection deadline.</param>
-    /// <param name="replayCapacity">Maximum simultaneously retained authenticated discovery nonces.</param>
-    public PeerSecurity(ReadOnlyMemory<byte> secret, TimeProvider clock, TimeSpan? connectTimeout = null,
-        int replayCapacity = PeerDiscoveryProtocol.DefaultReplayCapacity)
+    /// <param name="options">Centrally validated discovery settings, frozen for this authenticated transport owner.</param>
+    public PeerSecurity(ReadOnlyMemory<byte> secret, TimeProvider clock, IOptions<PeerDiscoveryOptions> options)
     {
         ArgumentNullException.ThrowIfNull(clock);
-        var timeout = connectTimeout ?? PeerDiscoveryProtocol.DefaultConnectTimeout;
-        if (secret.Length != PeerDiscoveryProtocol.SecretBytes || replayCapacity <= 0
-            || timeout <= TimeSpan.Zero || timeout > PeerDiscoveryProtocol.MaximumConnectTimeout)
+        ArgumentNullException.ThrowIfNull(options);
+        if (secret.Length != PeerDiscoveryProtocol.SecretBytes)
         { throw Errors.Fail(ErrorCode.Validation, PeerDiscoveryProtocol.InvalidConfiguration); }
+        var settings = options.Value;
+        settings.Validate();
         this.secret = secret.ToArray();
         this.clock = clock;
-        this.connectTimeout = timeout;
-        replay = new(replayCapacity);
+        connectTimeout = settings.ConnectTimeout;
+        pooledConnectionLifetime = settings.PooledConnectionLifetime;
+        timestampWindowMilliseconds = settings.TimestampWindow.Ticks / TimeSpan.TicksPerMillisecond;
+        replay = new(settings.ReplayCapacity, timestampWindowMilliseconds);
     }
 
     /// <summary>Signs the exact recipient, path and fresh nonce of a permitted bodyless discovery GET.</summary>
@@ -60,7 +64,7 @@ public sealed class PeerSecurity : IDisposable
         return new SignedHandler(this)
         {
             InnerHandler = new SocketsHttpHandler
-            { ConnectTimeout = connectTimeout, PooledConnectionLifetime = PeerDiscoveryProtocol.ConnectionLifetime, AllowAutoRedirect = false }
+            { ConnectTimeout = connectTimeout, PooledConnectionLifetime = pooledConnectionLifetime, AllowAutoRedirect = false }
         };
     }
 
@@ -78,7 +82,7 @@ public sealed class PeerSecurity : IDisposable
             || !PeerDiscoverySignature.Read(request, out var timestamp, out var nonce, out var nonceText, out var signature))
         { return false; }
         var now = clock.GetUtcNow().ToUnixTimeMilliseconds();
-        if (!PeerDiscoverySignature.Fresh(timestamp, now, out _))
+        if (!PeerDiscoverySignature.Fresh(timestamp, now, timestampWindowMilliseconds, out _))
         { return false; }
         var expected = PeerDiscoverySignature.Compute(secret, request.Method, request.Host.Value!,
             request.Path.Value!, timestamp, nonceText);
@@ -86,7 +90,7 @@ public sealed class PeerSecurity : IDisposable
             || !await PeerDiscoveryRequest.EmptyBodyAsync(request, cancellationToken))
         { return false; }
         now = clock.GetUtcNow().ToUnixTimeMilliseconds();
-        return PeerDiscoverySignature.Fresh(timestamp, now, out var time) && replay.Admit(nonce, time, now);
+        return PeerDiscoverySignature.Fresh(timestamp, now, timestampWindowMilliseconds, out var time) && replay.Admit(nonce, time, now);
     }
 
     private static void Set(HttpRequestMessage request, string header, string value)

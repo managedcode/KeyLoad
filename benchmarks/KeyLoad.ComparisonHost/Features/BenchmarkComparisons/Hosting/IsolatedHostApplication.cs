@@ -38,7 +38,8 @@ internal static class IsolatedHostApplication
                 await IsolatedHostReportWriter.WriteAsync(report, settings.OutputDirectory, cancellationToken);
                 return ComparisonHostConstants.SuccessfulExitCode;
             }
-            return await RunNativeAsync(settings, cancellationToken);
+            var policy = NativeComparisonExecutionRegistration.Read(configuration);
+            return await RunNativeAsync(settings, policy, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -50,24 +51,12 @@ internal static class IsolatedHostApplication
         }
     }
 
-    private static async Task<int> RunNativeAsync(IsolatedHostSettings settings, CancellationToken cancellationToken)
+    private static async Task<int> RunNativeAsync(IsolatedHostSettings settings, Microsoft.Extensions.Options.IOptions<NativeComparisonExecutionOptions> policy, CancellationToken cancellationToken)
     {
-        await using var owner = new IsolatedHostTargetOwner();
-        if (settings.Selection.VectorProfile is { } vectorProfile)
+        await using var owner = new IsolatedHostTargetOwner(policy);
+        if (settings.Selection.VectorProfile is not null)
         {
-            var vectorTarget = owner.CreateVector(settings);
-            var vectorReport = await new VectorComparisonRunner(vectorProfile)
-                .RunAsync(vectorTarget, settings.Worker.SourceRevision, settings.Storage, cancellationToken);
-            vectorReport = vectorReport with
-            {
-                Provenance = settings.Identity.Provenance,
-                LoadGeneratorImage = settings.Identity.LoadGeneratorImage
-            };
-            ValidateNativeVectorReport(vectorReport, settings);
-            var vectorEnvelope = new IsolatedComparisonReport(IsolatedComparisonContract.Current.WorkerSchemaVersion,
-                settings.Worker, IsolatedHostConstants.Measured, null, vectorReport);
-            await IsolatedHostReportWriter.WriteAsync(vectorEnvelope, settings.OutputDirectory, cancellationToken);
-            return HasFailedCases(vectorReport) ? ComparisonHostConstants.FailedExitCode : ComparisonHostConstants.SuccessfulExitCode;
+            return await IsolatedVectorHostApplication.RunAsync(owner, settings, cancellationToken);
         }
 
         var target = owner.Create(settings);
@@ -84,24 +73,10 @@ internal static class IsolatedHostApplication
         return HasFailedCases(report) ? ComparisonHostConstants.FailedExitCode : ComparisonHostConstants.SuccessfulExitCode;
     }
 
-    private static void ValidateNativeVectorReport(ComparisonReport report, IsolatedHostSettings settings)
-    {
-        var selection = settings.Selection;
-        if (selection.VectorProfile is not { } profile || report.Targets.Length != 1
-            || report.Targets[0].Name != selection.Target || report.Cases.Length != 1
-            || report.Cases[0].Target != selection.Target || report.Cases[0].VectorMetrics is null
-            || report.VectorProfile?.Id != profile.Id || report.Options is not null || report.ScaledProfile is not null
-            || report.Targets[0].Cluster is not { } cluster || cluster.Nodes != selection.NodeCount
-            || cluster.DataCopies != selection.NodeCount)
-        {
-            throw new ComparisonFailureException(IsolatedHostConstants.Failure);
-        }
-    }
-
     private static void ValidateNativeReport(ComparisonReport report, IsolatedHostSettings settings)
     {
         var selection = settings.Selection;
-        if (report.Targets.Length != 1 || report.Targets[0].Name != selection.Target
+        if (report.Targets.Length != IsolatedHostApplicationValues.SingleElementOffset || report.Targets[IsolatedHostApplicationValues.FirstIndex].Name != selection.Target
             || report.Cases.Length != (selection.ScaledProfile?.Repetitions ?? selection.Options.Repetitions)
             || report.Cases.Any(item => item.Target != selection.Target || item.Scenario != selection.Scenario))
         {
@@ -112,7 +87,7 @@ internal static class IsolatedHostApplication
         {
             throw new ComparisonFailureException(IsolatedHostConstants.Failure);
         }
-        if (!HasFailedCases(report) && (report.Targets[0].Cluster is not { } cluster
+        if (!HasFailedCases(report) && (report.Targets[IsolatedHostApplicationValues.FirstIndex].Cluster is not { } cluster
             || cluster.Nodes != selection.NodeCount || cluster.DataCopies != selection.NodeCount))
         {
             throw new ComparisonFailureException(IsolatedHostConstants.Failure);
@@ -121,5 +96,5 @@ internal static class IsolatedHostApplication
 
     private static bool HasFailedCases(ComparisonReport? report)
         => report is not null && report.Cases.Any(item => item.Status == ComparisonStatuses.Failed
-            || item.Measurement?.Failures > 0 || item.Samples.Any(sample => !sample.Success));
+            || item.Measurement?.Failures > IsolatedHostApplicationValues.FirstIndex || item.Samples.Any(sample => !sample.Success));
 }

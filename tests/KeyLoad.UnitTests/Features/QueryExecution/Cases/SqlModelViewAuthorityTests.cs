@@ -12,7 +12,7 @@ internal sealed class SqlModelViewAuthorityTests
         SqlModelViewTestSupport.Principal(database, "no-event-read", Capability.Query, Capability.None);
         SqlModelViewTestSupport.Principal(database, "no-queue-inspect", Capability.None, Capability.Query);
         SqlModelViewTestSupport.Principal(database, "no-query", Capability.EventsRead, Capability.QueueInspect);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var eventRead = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("no-event-read",
             SqlModelViewTestSupport.Request(database, "SELECT * FROM EVENTS('events', 'stream-a')")));
@@ -33,7 +33,7 @@ internal sealed class SqlModelViewAuthorityTests
         SqlModelViewTestSupport.Seed(database);
         SqlModelViewTestSupport.Principal(database, SqlModelViewTestSupport.Reader,
             Capability.Query | Capability.EventsRead, Capability.Query | Capability.QueueInspect);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var eventPage = engine.Execute(SqlModelViewTestSupport.Reader,
             SqlModelViewTestSupport.Request(database, "SELECT * FROM EVENTS('events', 'stream-a')"));
@@ -83,7 +83,7 @@ internal sealed class SqlModelViewAuthorityTests
         SqlModelViewTestSupport.Principal(database, "dead-letter-reader", Capability.None,
             Capability.Query | Capability.QueueInspect);
 
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database).Execute(
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(
             "dead-letter-reader", SqlModelViewTestSupport.Request(database,
                 "SELECT * FROM QUEUE_MESSAGES('jobs')")));
 

@@ -4,8 +4,10 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RabbitReplicaProof
 {
+    private const int ReadinessTimeoutSeconds = 60;
+
     private const int PollMilliseconds = 250;
-    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan ReadinessTimeout = TimeSpan.FromSeconds(ReadinessTimeoutSeconds);
 
     public static async Task<(string Version, ClusterEvidence Evidence)> VerifyAsync(HttpClient management,
         string queue, ComparisonTopology topology, CancellationToken cancellationToken)

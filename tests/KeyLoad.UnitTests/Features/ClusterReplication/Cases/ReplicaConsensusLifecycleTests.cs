@@ -80,16 +80,23 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     private readonly ZoneTreeStore canonical;
     private readonly ZoneTreeStore replica;
 
-    internal ReplicaLifecycleFixture()
+    internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null)
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
+        if (maximumAppendEntries is { } maximum)
+        {
+            Configuration = Configuration with { MaxAppendEntries = maximum };
+        }
         canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation });
         replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation });
-        Log = new(replica, Configuration);
-        Database = new(canonical, new AuthorizationPolicy());
-        Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, Configuration));
-        Consensus = new(Materializer, Configuration, TimeProvider.System);
+        Log = new(replica, ReplicaExecutionTestOptions.Configuration(Configuration));
+        Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
+            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
+        Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
+            ReplicaExecutionTestOptions.Configuration(Configuration)), execution);
+        Consensus = new(Materializer, ReplicaExecutionTestOptions.Configuration(Configuration), execution, TimeProvider.System);
     }
 
     internal ReplicaConfiguration Configuration { get; }

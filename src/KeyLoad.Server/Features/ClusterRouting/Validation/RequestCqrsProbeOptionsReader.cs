@@ -4,6 +4,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class RequestCqrsProbeOptionsReader
 {
+    private const string RootPath = "/";
+
     private const int MaximumConfigurationKeys = 4;
 
     internal static RequestCqrsProbeOptions Read(IConfiguration configuration, ReplicaConfiguration replica,
@@ -65,12 +67,12 @@ internal static class RequestCqrsProbeOptionsReader
 
     internal static bool IsSessionId(string? value)
         => Guid.TryParseExact(value, "N", out var session) && session != Guid.Empty
-            && string.Equals(value, session.ToString("N"), StringComparison.Ordinal);
+            && string.Equals(value, session.ToString(RequestCqrsProbeProtocol.SessionIdFormat), StringComparison.Ordinal);
 
     private static bool IsPrivateNetworkOrigin(string value)
         => Uri.TryCreate(value, UriKind.Absolute, out var origin)
             && origin.Scheme == Uri.UriSchemeHttp && !origin.IsLoopback
-            && string.IsNullOrEmpty(origin.UserInfo) && origin.AbsolutePath == "/"
+            && string.IsNullOrEmpty(origin.UserInfo) && origin.AbsolutePath == RootPath
             && string.IsNullOrEmpty(origin.Query) && string.IsNullOrEmpty(origin.Fragment);
 
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidOptions);

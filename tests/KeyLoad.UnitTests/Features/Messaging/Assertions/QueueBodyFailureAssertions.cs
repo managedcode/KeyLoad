@@ -25,6 +25,6 @@ internal static class QueueBodyFailureAssertions
         await Assert.That(actualBody is null ? body is null : body is not null && actualBody.AsSpan().SequenceEqual(body)).IsTrue();
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(readyKey)!).AsSpan().SequenceEqual(ready)).IsTrue();
         await Assert.That(db.Store.Read(view => view.GetRecord<QueueCounters>(countersKey))).IsEqualTo(counters);
-        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(KeySpace.Outcome(RootPrincipalId, operationId)))).IsNull();
+        await Assert.That(db.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(db.Partition, RootPrincipalId, operationId)))).IsNull();
     }
 }

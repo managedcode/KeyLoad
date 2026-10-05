@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -24,18 +27,29 @@ public static class KeyLoadServiceDefaultsExtensions
     /// <param name="builder">The builder to configure.</param>
     /// <returns>The same builder, for continued composition.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="builder"/> is null.</exception>
+    [KeyLoad.ConfigurationBinding]
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.AddServiceDiscovery();
         builder.Services.ConfigureHttpClientDefaults(http => http.AddServiceDiscovery());
         builder.Services.AddHealthChecks().AddCheck(SelfHealthCheckName, () => HealthCheckResult.Healthy(), [LiveHealthTag]);
+        builder.Services.AddOptions<OrleansTelemetryOptions>()
+            .Bind(builder.Configuration.GetSection(OrleansTelemetryOptions.SectionName))
+            .Validate(options => options.IsValid(), OrleansTelemetryOptions.ValidationMessage)
+            .ValidateOnStart();
         builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddRuntimeInstrumentation())
+            .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddRuntimeInstrumentation()
+                .AddMeter(OrleansTelemetryPolicy.OrleansMeterName, OrleansTelemetryPolicy.PrivacyMeterName)
+                .AddView(OrleansTelemetryPrivacyProcessor.ConfigureMetricView)
+                .SetExemplarFilter(ExemplarFilterType.AlwaysOff))
             .WithTracing(traces => traces.AddAspNetCoreInstrumentation(options => options.Filter = context =>
                 !context.Request.Path.StartsWithSegments(HealthRoutePrefix, StringComparison.OrdinalIgnoreCase)
                 && !context.Request.Path.StartsWithSegments(SiloDiscoveryRoute, StringComparison.OrdinalIgnoreCase))
-                .AddHttpClientInstrumentation());
+                .AddHttpClientInstrumentation()
+                .AddSource(OrleansTelemetryPolicy.ApplicationActivitySourceName,
+                    OrleansTelemetryPolicy.LifecycleActivitySourceName)
+                .AddProcessor(serviceProvider => ActivatorUtilities.CreateInstance<OrleansTelemetryPrivacyProcessor>(serviceProvider)));
         builder.Logging.AddOpenTelemetry(options => { options.IncludeFormattedMessage = true; options.IncludeScopes = true; });
         if (!string.IsNullOrEmpty(builder.Configuration[OtlpExporterEndpointConfigurationKey]))
         {

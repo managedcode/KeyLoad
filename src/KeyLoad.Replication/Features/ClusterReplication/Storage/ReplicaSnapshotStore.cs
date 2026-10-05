@@ -1,17 +1,36 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
 /// <summary>Bounded canonical checkpoint transfer; canonical storage and replica-log lifetime remain with the node host.</summary>
-/// <param name="canonical">Borrowed canonical store whose snapshot format is verified before installation.</param>
-/// <param name="log">Borrowed durable replica log publishing the verified snapshot cut.</param>
-/// <param name="configuration">Snapshot scope, private directory and transfer size limits.</param>
-/// <param name="faultObserver">Optional observer invoked at durable transfer and installation boundaries.</param>
-public sealed class ReplicaSnapshotStore(IAtomicStore canonical, IDurableReplicaLog log, ReplicaConfiguration configuration,
-    Action<ReplicaCrashBoundary>? faultObserver = null) : IReplicaSnapshotStore
+public sealed class ReplicaSnapshotStore : IReplicaSnapshotStore
 {
+    private readonly IAtomicStore canonical;
+    private readonly IDurableReplicaLog log;
+    private readonly ReplicaConfiguration configuration;
+    private readonly Action<ReplicaCrashBoundary>? faultObserver;
     private readonly Lock gate = new();
-    private readonly ReplicaSnapshotFiles files = new(configuration);
+    private readonly ReplicaSnapshotFiles files;
+
+    /// <summary>Creates the bounded snapshot owner from one validated topology-bound configuration snapshot.</summary>
+    /// <param name="canonical">Borrowed canonical store whose snapshot format is verified before installation.</param>
+    /// <param name="log">Borrowed durable replica log publishing the verified snapshot cut.</param>
+    /// <param name="configurationOptions">Centrally validated snapshot scope, private directory and transfer limits.</param>
+    /// <param name="faultObserver">Optional observer invoked at durable transfer and installation boundaries.</param>
+    public ReplicaSnapshotStore(IAtomicStore canonical, IDurableReplicaLog log, IOptions<ReplicaConfiguration> configurationOptions,
+        Action<ReplicaCrashBoundary>? faultObserver = null)
+    {
+        ArgumentNullException.ThrowIfNull(canonical);
+        ArgumentNullException.ThrowIfNull(log);
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        configuration = configurationOptions.Value;
+        configuration.Validate();
+        this.canonical = canonical;
+        this.log = log;
+        this.faultObserver = faultObserver;
+        files = new(configuration);
+    }
     /// <inheritdoc />
     public ReplicaSnapshot? Current => log.State.Snapshot;
     private ReplicaIncomingTransfer Incoming => new(files, configuration, faultObserver);

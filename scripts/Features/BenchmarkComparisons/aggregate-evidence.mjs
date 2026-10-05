@@ -1,3 +1,7 @@
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
+import { validateServerResourceEvidence } from './server-resource-evidence.mjs';
 import { AGGREGATE, requireValue } from './aggregate-contracts.mjs';
 import { readIsolatedContract, validateIsolatedPlan } from './isolated-plan.mjs';
 import { requireWorkerJobAgreement, validateAggregateProof, validateWorkerEnvelope } from './aggregate-validation.mjs';
@@ -22,9 +26,14 @@ function retainCommonFacts(common, report) {
 }
 
 function manifestWorker(cell, envelope, proof, hash) {
-  return { id: cell.id, target: cell.target, nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile,
+  const worker = { id: cell.id, target: cell.target, nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile,
     disposition: envelope.disposition, reason: envelope.reason, rawPath: rawPath(cell.id), rawSha256: hash,
     job: proof.job, artifact: proof.artifact };
+  if (cell.profile.startsWith('vector-')) {
+    const metrics = envelope.report?.cases?.[0]?.vectorMetrics ?? null;
+    worker.vectorMetrics = metrics === null ? null : Object.fromEntries(Object.entries(metrics).filter(([key]) => key !== 'perQueryRecall'));
+  }
+  return worker;
 }
 
 async function retainWorker(input, stage, cell, proof, cohort, contract, common) {
@@ -38,6 +47,13 @@ async function retainWorker(input, stage, cell, proof, cohort, contract, common)
   common.bytes += bytes.length;
   requireValue(common.bytes <= AGGREGATE.totalBytes, AGGREGATE.errors.input);
   await retainBytes(stage, cell.id, bytes);
+  if (proof.serverResource !== undefined) {
+    const sidecar = await readBytes(join(input, 'workers', cell.id, 'server-resource-evidence.json'), 65_536);
+    const resource = validateServerResourceEvidence(parseBytes(sidecar), hashBytes(sidecar), hash,
+      cell, cohort, proof.job.id, envelope.disposition !== 'unsupportedTopology');
+    requireValue(isDeepStrictEqual(resource, proof.serverResource), AGGREGATE.errors.proof);
+    await writeFile(join(stage, 'workers', cell.id, 'server-resource-evidence.json'), sidecar, { flag: 'wx' });
+  }
   return manifestWorker(cell, envelope, proof, hash);
 }
 

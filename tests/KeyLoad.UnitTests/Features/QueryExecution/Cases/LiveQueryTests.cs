@@ -61,7 +61,7 @@ internal sealed class LiveQueryTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var query = Query(db);
         var snapshot = engine.StartLiveQuery("root", new(query));
         var rows = snapshot.Rows.ToDictionary(row => row.EntityId, StringComparer.Ordinal);
@@ -110,7 +110,7 @@ internal sealed class LiveQueryTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var query = Query(db);
         var writer = Task.Run(() =>
         {
@@ -138,7 +138,7 @@ internal sealed class LiveQueryTests
         var reader = new PrincipalRecord("reader", "tenant", [new("database", "orders", Capability.Query | Capability.DocumentsRead | Capability.ChangesRead)], ["pii.use"]);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader)).Get<PrincipalRecord>();
         var query = Query(db);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var snapshot = engine.StartLiveQuery("reader", new(query));
         db.Commit(new PutDocument("orders", "a", "{\"number\":1,\"status\":\"open\"}"));
         var delta = engine.ReadLiveQuery("reader", new(query, snapshot.Cursor));
@@ -161,7 +161,7 @@ internal sealed class LiveQueryTests
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader)).Get<PrincipalRecord>();
         db.Commit(new PutDocument("orders", "a", "{\"status\":\"open\"}", Access: new("alice")));
         var query = Query(db);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var snapshot = engine.StartLiveQuery("reader", new(query));
         db.Commit(new PutDocument("orders", "a", "{\"status\":\"open\"}", 1, new("bob"), true));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadLiveQuery("reader", new(query, snapshot.Cursor))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -177,7 +177,7 @@ internal sealed class LiveQueryTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{\"status\":\"open\"}"), new PutDocument("orders", "b", "{\"status\":\"open\"}"));
         var query = Query(db);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query with { Query = query.Query with { Limit = 1 } }))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query with { Query = query.Query with { Order = [new("/number", false)] } }))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var snapshot = engine.StartLiveQuery("root", new(query));
@@ -189,7 +189,7 @@ internal sealed class LiveQueryTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var query = Query(db);
         var snapshot = engine.StartLiveQuery("root", new(query));
         db.Commit(new PutDocument("orders", "a", "{\"status\":\"closed\"}"));

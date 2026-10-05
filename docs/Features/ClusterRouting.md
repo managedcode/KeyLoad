@@ -13,10 +13,13 @@ Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../
 
 Owner direction 2026-10-05 adds the native Orleans per-method selection contract
 in [ExecutionPrimitives](ClusterRouting/ExecutionPrimitives.md) under
-[ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md), REQ/AC-ORL-001..006.
+[ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md), REQ/AC-ORL-001..010.
 It audits StatelessWorker, OneWay, Durable Jobs and selective interleaving against
 actual request/read/partition/due grains. Candidate runtime/provider adoption and
 real-operation RF3/resource/performance qualification remain pending.
+The [broad capability review](ClusterRouting/CapabilityReview.md) additionally maps
+native Streams/pub-sub, transactions/persistence, local services/lifecycle,
+placement, resource settings, telemetry and deployment/testing to concrete joins.
 
 TASK-PLACEMENT-DISCOVERY advances original KL-036/069/070/071/072 toward the
 freeze required by ADR-016/017 and AC-ROUTE-004/005, AC-REP-004. Luna
@@ -82,7 +85,7 @@ principal ID, TimeProvider, and startup CancellationToken in that order.
 
 | Вимога | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-ROUTE-004: atomic partition identity відокремлена від physical placement | AC-ROUTE-004: equal literal key у різних domains не створює shared transaction; server catalog resolution фіксує eligible shared resources; packing/activation placement не змінює CAS/unique/dedup scope | Existing `SameLiteralPartitionKeyCannotCrossTransactionDomains` у [TransactionTests](../../tests/KeyLoad.UnitTests/TransactionTests.cs); expanded placement fixtures PLANNED |
+| REQ-ROUTE-004: atomic partition identity відокремлена від physical placement | AC-ROUTE-004: equal literal key у різних domains не створює shared transaction; server catalog resolution фіксує eligible shared resources; packing/activation placement не змінює CAS/unique/dedup scope | Existing `SameLiteralPartitionKeyCannotCrossTransactionDomains` у [TransactionTests](../../tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs); expanded placement fixtures PLANNED |
 | REQ-ROUTE-005: physical partition movement/split має fenced restartable protocol | AC-ROUTE-005: PLANNED prepare/copy/catch-up/validate/ownership-switch/release tests з process interruption і real RF3 доводять complete cut, stable outcomes/token lineage або explicit invalidation, без old-owner write після switch | PLANNED KL-036/069–072 suites; [ADR-016](../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../ADR/ADR-017-migration-tokens.md) unresolved token translation |
 
 Distributed directory/repartitioning — required in-progress source migration. Automatic physical split/merge, broad placement balancing і migration-aware tokens не оголошені готовими. Resource packing/placement і routing contracts freeze одним integration owner за [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-007](../ADR/ADR-007-replica-consensus-bootstrap.md). Target Abstractions/Orleans/replication host/tests mirror `Features/ClusterRouting/` для routing behavior, StorageRecovery owns files, ClientApi owns caller transport. Frontend N/A; placement/operator controls потребують власного accepted API до implementation.

@@ -13,7 +13,7 @@ internal sealed class ImmutableQueryInputTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var before = db.Store.GetReadDiagnostics();
         var missingProjection = new AstQueryRequest(db.Partition,
             new SelectQuery(Collection, null, default, null, [], 1), AllowFullScan: true);

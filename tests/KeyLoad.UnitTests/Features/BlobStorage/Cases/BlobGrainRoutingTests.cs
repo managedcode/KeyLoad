@@ -71,7 +71,7 @@ internal sealed class BlobGrainRoutingTests
                     TestContext.Current!.Execution.CancellationToken)) ?? throw new InvalidOperationException();
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             }
-            await Assert.That(fixture.Database.Outcome(BlobAgentCases.Principal, BlobAgentCases.CommandId)).IsNull();
+            await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, BlobAgentCases.Principal, BlobAgentCases.CommandId)).IsNull();
         }
     }
 

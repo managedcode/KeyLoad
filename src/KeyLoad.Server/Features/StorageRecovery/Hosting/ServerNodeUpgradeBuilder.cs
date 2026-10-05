@@ -71,7 +71,7 @@ internal static class ServerNodeUpgradeBuilder
         ServerNodeUpgradeFiles.CreatePrivateDirectory(directory);
         var images = new Dictionary<string, StorageSnapshot>(StringComparer.Ordinal);
         foreach (var image in original.Entries.Where(entry => !entry.Directory
-            && entry.Path.StartsWith(ServerNodeUpgradeProtocol.Snapshots + "/", StringComparison.Ordinal)))
+            && entry.Path.StartsWith(ServerNodeUpgradeProtocol.Snapshots + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal)))
         {
             var name = Path.GetFileName(image.Path);
             images.Add(name, ZoneTreeSnapshotFormatUpgrade.Upgrade(Path.Combine(paths.Source, image.Path),

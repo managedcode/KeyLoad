@@ -202,7 +202,7 @@ internal static class NativeTextProjectionRecoveryAssertions
         using (var store = new ZoneTreeStore(new(source)))
         {
             await AssertCanonicalCutAsync(store, receipt);
-            var database = new DatabaseEngine(store, new AuthorizationPolicy());
+            var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
             var request = new SearchRequest(receipt.Partition, receipt.Collection, "/text", receipt.Query, Limit: 10);
             var oracle = await new SearchEngine(database).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
             using var projection = new NativeTextProjection(indexDirectory, database.Limits, store.Identity.NodeId);

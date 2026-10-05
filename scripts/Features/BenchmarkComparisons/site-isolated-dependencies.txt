@@ -5,8 +5,14 @@ scripts/Features/BenchmarkComparisons/aggregate-json.mjs
 scripts/Features/BenchmarkComparisons/aggregate-proof.mjs
 scripts/Features/BenchmarkComparisons/aggregate-report.mjs
 scripts/Features/BenchmarkComparisons/aggregate-validation.mjs
+scripts/Features/BenchmarkComparisons/composite-site-contract.mjs
+scripts/Features/BenchmarkComparisons/composite-site-evidence.mjs
 scripts/Features/BenchmarkComparisons/contracts.mjs
+scripts/Features/BenchmarkComparisons/finalize-resource.mjs
 scripts/Features/BenchmarkComparisons/finalize-worker.mjs
+scripts/Features/BenchmarkComparisons/historical-isolated-contract.json
+scripts/Features/BenchmarkComparisons/historical-isolated-plan.mjs
+scripts/Features/BenchmarkComparisons/historical-site-evidence.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-contract.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-files.mjs
 scripts/Features/BenchmarkComparisons/image-bundle-read.mjs
@@ -36,6 +42,9 @@ scripts/Features/BenchmarkComparisons/isolated-plan.mjs
 scripts/Features/BenchmarkComparisons/isolated-preflight.mjs
 scripts/Features/BenchmarkComparisons/prepare-images.mjs
 scripts/Features/BenchmarkComparisons/sample-metrics.mjs
+scripts/Features/BenchmarkComparisons/scaled-cohort-receipt.mjs
+scripts/Features/BenchmarkComparisons/scaled-isolated-plan.mjs
+scripts/Features/BenchmarkComparisons/server-resource-evidence.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-api.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-capture.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs
@@ -47,10 +56,13 @@ scripts/Features/BenchmarkComparisons/site-isolated-github-native-proof.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-proof.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-receipt.mjs
 scripts/Features/BenchmarkComparisons/site-isolated-github-runs.mjs
+scripts/Features/BenchmarkComparisons/vector-isolated-plan.mjs
 site/Features/BenchmarkComparisons/bootstrap.mjs
 site/Features/BenchmarkComparisons/build-site.mjs
 site/Features/BenchmarkComparisons/cluster-scene.mjs
+site/Features/BenchmarkComparisons/composite-render.mjs
 site/Features/BenchmarkComparisons/contracts.mjs
+site/Features/BenchmarkComparisons/historical-contracts.mjs
 site/Features/BenchmarkComparisons/isolated-contracts.mjs
 site/Features/BenchmarkComparisons/isolated-controls.mjs
 site/Features/BenchmarkComparisons/isolated-http.mjs
@@ -62,6 +74,7 @@ site/Features/BenchmarkComparisons/isolated-metrics-validation.mjs
 site/Features/BenchmarkComparisons/isolated-projection.mjs
 site/Features/BenchmarkComparisons/isolated-report-validation.mjs
 site/Features/BenchmarkComparisons/isolated-view.mjs
+site/Features/BenchmarkComparisons/measured-build.mjs
 site/Features/BenchmarkComparisons/measurement-loader.mjs
 site/Features/BenchmarkComparisons/measurements.mjs
 site/Features/BenchmarkComparisons/scene-geometry.mjs

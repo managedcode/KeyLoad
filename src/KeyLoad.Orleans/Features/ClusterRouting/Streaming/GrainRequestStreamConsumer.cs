@@ -1,4 +1,5 @@
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
@@ -8,12 +9,12 @@ internal static class GrainRequestStreamConsumer
     internal static async Task<GrainOperationReply> DrainAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, CancellationToken cancellationToken)
+        Guid requestId, TimeProvider clock, CancellationToken cancellationToken, IOptions<GrainRoutingOptions> options)
     {
         GrainOperationReply? terminal = null;
         var bounded = NativeCqrsStreamLifetime.Run(
             token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
-            serializer, requestId, clock, static () => { }, cancellationToken);
+            serializer, requestId, clock, static () => { }, cancellationToken, options);
         await foreach (var chunk in bounded.ConfigureAwait(false))
         {
             if (chunk.Kind == CqrsStreamChunkKind.Completed)

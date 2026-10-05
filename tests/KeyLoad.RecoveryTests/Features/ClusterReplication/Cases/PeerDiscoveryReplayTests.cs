@@ -14,7 +14,7 @@ internal sealed class PeerDiscoveryReplayTests
     {
         using var fixture = new PeerDiscoveryFixture();
         var now = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
-        var window = PeerDiscoveryProtocol.LifetimeMilliseconds + PeerDiscoveryFixture.TimeMarginMilliseconds;
+        var window = fixture.TimestampWindowMilliseconds + PeerDiscoveryFixture.TimeMarginMilliseconds;
         foreach (var timestamp in new[] { now - window, now + window, long.MinValue, long.MaxValue })
         {
             using var message = fixture.Sign();
@@ -23,10 +23,10 @@ internal sealed class PeerDiscoveryReplayTests
         }
         using var current = fixture.Sign();
         await Assert.That(await fixture.Receiver.ValidateAsync(PeerDiscoveryFixture.Incoming(current), PeerDiscoveryFixture.Cancellation)).IsTrue();
-        await Assert.That(PeerDiscoverySignature.Fresh((now - PeerDiscoveryProtocol.LifetimeMilliseconds).ToString(
-            System.Globalization.CultureInfo.InvariantCulture), now, out _)).IsTrue();
-        await Assert.That(PeerDiscoverySignature.Fresh((now + PeerDiscoveryProtocol.LifetimeMilliseconds).ToString(
-            System.Globalization.CultureInfo.InvariantCulture), now, out _)).IsTrue();
+        await Assert.That(PeerDiscoverySignature.Fresh((now - fixture.TimestampWindowMilliseconds).ToString(
+            System.Globalization.CultureInfo.InvariantCulture), now, fixture.TimestampWindowMilliseconds, out _)).IsTrue();
+        await Assert.That(PeerDiscoverySignature.Fresh((now + fixture.TimestampWindowMilliseconds).ToString(
+            System.Globalization.CultureInfo.InvariantCulture), now, fixture.TimestampWindowMilliseconds, out _)).IsTrue();
     }
 
     /// <summary>A permitted future timestamp retains its nonce through timestamp plus thirty seconds, inclusively.</summary>
@@ -36,15 +36,15 @@ internal sealed class PeerDiscoveryReplayTests
         using var fixture = new PeerDiscoveryFixture();
         using var message = fixture.Sign();
         var now = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
-        var timestamp = now + PeerDiscoveryProtocol.LifetimeMilliseconds / 2;
+        var timestamp = now + fixture.TimestampWindowMilliseconds / 2;
         fixture.Resign(message, timestamp);
         await Assert.That(await fixture.Receiver.ValidateAsync(PeerDiscoveryFixture.Incoming(message), PeerDiscoveryFixture.Cancellation)).IsTrue();
         await Assert.That(await fixture.Receiver.ValidateAsync(PeerDiscoveryFixture.Incoming(message), PeerDiscoveryFixture.Cancellation)).IsFalse();
         var nonce = Guid.ParseExact(message.Headers.GetValues(PeerDiscoveryProtocol.NonceHeader).Single(), PeerDiscoveryProtocol.NonceFormat);
-        var replay = new PeerDiscoveryReplay(PeerDiscoveryFixture.SingleCapacity);
+        var replay = new PeerDiscoveryReplay(PeerDiscoveryFixture.SingleCapacity, fixture.TimestampWindowMilliseconds);
         await Assert.That(replay.Admit(nonce, timestamp, now)).IsTrue();
-        var expiry = timestamp + PeerDiscoveryProtocol.LifetimeMilliseconds;
-        var early = now + PeerDiscoveryProtocol.LifetimeMilliseconds + 1;
+        var expiry = timestamp + fixture.TimestampWindowMilliseconds;
+        var early = now + fixture.TimestampWindowMilliseconds + 1;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => replay.Admit(Guid.NewGuid(), early, early)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(replay.Admit(nonce, expiry, expiry)).IsFalse();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => replay.Admit(Guid.NewGuid(), expiry, expiry)).Code).IsEqualTo(ErrorCode.ResourceExhausted);

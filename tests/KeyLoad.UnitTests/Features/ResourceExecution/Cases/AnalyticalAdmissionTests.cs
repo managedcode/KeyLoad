@@ -17,10 +17,8 @@ internal sealed class AnalyticalAdmissionTests
     public async Task AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits()
     {
         using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store,
-            db.Database.Authorization, new() { MaxConcurrentQueries = 0 }));
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store,
-            db.Database.Authorization, new() { MaxConcurrentQueries = -1 }));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store,             db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store,             db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = -1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
         using var reservation = db.Database.AdmitQuery(default);
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(1);
         var exhausted = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.AdmitQuery(default));
@@ -54,7 +52,7 @@ internal sealed class AnalyticalAdmissionTests
         }, static () => Task.CompletedTask, held.ReleaseAsync,
             () => tasks.AssertWorkerCompletesAsync(admitted!));
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(new QueryEngine(db.Database).Execute(Principal,
+        await Assert.That(new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution()).Execute(Principal,
             new(db.Partition, Sql, AllowFullScan: true)).Rows).IsEmpty();
     }
 
@@ -63,7 +61,7 @@ internal sealed class AnalyticalAdmissionTests
     {
         using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
         db.Configure(Collection, ResourceKind.Collection);
-        var query = new QueryEngine(db.Database);
+        var query = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchEngine(db.Database);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
@@ -120,8 +118,8 @@ internal sealed class AnalyticalAdmissionTests
     private static async Task AssertSaturatedRequests(TestDatabase db, TestDatabase independent,
         AnalyticalAdmissionTaskLifetime tasks)
     {
-        var firstQuery = new QueryEngine(db.Database);
-        var secondQuery = new QueryEngine(db.Database);
+        var firstQuery = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
+        var secondQuery = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchEngine(db.Database);
         var sql = new QueryRequest(db.Partition, InvalidSql, AllowFullScan: true);
         var ast = new AstQueryRequest(db.Partition,

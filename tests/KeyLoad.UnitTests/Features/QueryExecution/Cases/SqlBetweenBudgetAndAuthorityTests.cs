@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlBetweenBudgetAndAuthorityTests
 {
     private const string RangeSql = "SELECT * FROM orders WHERE number BETWEEN 1 AND 9";
+    private const string AuthorizedFieldBoundsSql = "SELECT * FROM orders WHERE number BETWEEN lowerBound AND upperBound";
     private const string Reader = "reader";
     private const string Tenant = "tenant";
     private const string Database = "database";
@@ -76,7 +77,8 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
         database.Commit(new PutDocument(SqlBetweenTestData.Collection, SqlBetweenTestData.RowMiddle,
             "{\"number\":5,\"lowerBound\":1,\"upperBound\":9}"));
         ConfigureReader(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var position = database.Store.Position;
         var lowerDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Reader,
             SqlBetweenTestData.Request(database,
                 "SELECT * FROM orders WHERE number BETWEEN lowerBound AND 9")));
@@ -86,13 +88,21 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
 
         await Assert.That(lowerDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(upperDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+
+        var adminControl = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,
+            AuthorizedFieldBoundsSql));
+
+        await Assert.That(SqlBetweenTestData.Ids(adminControl)).IsEqualTo(SqlBetweenTestData.RowMiddle);
+        await Assert.That(adminControl.CutPosition).IsEqualTo(position);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
     [Test]
     public async Task AcSqlc006APreCancelledRangeDoesNotPreventTheNextRequest()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var cancelled = Assert.ThrowsExactly<OperationCanceledException>(() => engine.Execute(SqlBetweenTestData.Root,

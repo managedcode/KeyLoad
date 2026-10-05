@@ -10,7 +10,6 @@ public sealed partial class DatabaseEngine
     private const string SourceCursorPurpose = "event-source-page";
     private const string SourceReadStartInvalidMessage = "The event source read budget or start position is invalid.";
     private const string SourceReadResultExceededMessage = "The event source result exceeds its byte budget.";
-    private static readonly TimeSpan SourceCursorLifetime = TimeSpan.FromHours(24);
     private static Capability SourceReadCapability(EventSourceRef source) => source.Kind == EventSourceKind.Topic ? Capability.TopicsRead : Capability.EventsRead;
     private ResourceDefinition SourceResource(IKeyValueView view, EventSourceRef source)
     {
@@ -167,7 +166,7 @@ public sealed partial class DatabaseEngine
         }
         var last = records.Count == 0 ? after : records[^1].Position;
         var token = Sign(new SourceCursor(SourceCursorPurpose, Store.Identity.Incarnation, request.Source, principal.Id, principal.PolicyEpoch,
-            resource.SchemaVersion, last, now.Add(SourceCursorLifetime)));
+            resource.SchemaVersion, last, now.Add(eventSourceCursorLifetime)));
         var page = new EventSourcePage(request.Source, head, records.ToImmutableArray(), token, Store.Position, last < head.TailPosition);
         budget.CheckResult(page);
         return page;

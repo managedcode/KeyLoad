@@ -1,13 +1,16 @@
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns only one native target and tracks partial HTTP construction until ownership transfers.</summary>
-internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
+internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions) : IAsyncDisposable
 {
+    private readonly NativeComparisonExecutionOptions policy = executionOptions.Value.Validate();
+    internal IOptions<NativeComparisonExecutionOptions> ExecutionOptions => executionOptions;
     private readonly List<HttpClient> unownedClients = [];
     private IComparisonTarget? target;
     private IVectorComparisonTarget? vectorTarget;
@@ -23,6 +26,8 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
+            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
             IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, topology),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
             IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, topology, CreateClient(native, 0)),
@@ -47,10 +52,11 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
         var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
         vectorTarget = settings.Selection.Target switch
         {
-            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image),
+            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions),
             IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, 0), settings.RunId, native.Image,
-                settings.Selection.Options.Topology, CreateClients(native)),
-            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId),
+                settings.Selection.Options.Topology, CreateClients(native), executionOptions),
+            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
+            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
@@ -67,7 +73,7 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
         var clients = CreateClients(native);
-        return new(clients[0], settings.RunId, native.Image, settings.Selection.Options.Topology, clients);
+        return new(clients[0], settings.RunId, native.Image, settings.Selection.Options.Topology, clients, executionOptions);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)
@@ -112,7 +118,7 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
             if (ownedVectorTarget is not null)
             {
                 var cleanup = ownedVectorTarget.DisposeAsync().AsTask();
-                await cleanup.WaitAsync(TimeSpan.FromSeconds(IsolatedHostConstants.CleanupTimeoutSeconds));
+                await cleanup.WaitAsync(policy.CleanupTimeout);
             }
         }
         finally
@@ -125,12 +131,12 @@ internal sealed class IsolatedHostTargetOwner : IAsyncDisposable
         }
     }
 
-    private static async Task DisposeTargetAsync(IComparisonTarget ownedTarget)
+    private async Task DisposeTargetAsync(IComparisonTarget ownedTarget)
     {
         var cleanup = ownedTarget.DisposeAsync().AsTask();
         try
         {
-            await cleanup.WaitAsync(TimeSpan.FromSeconds(IsolatedHostConstants.CleanupTimeoutSeconds));
+            await cleanup.WaitAsync(policy.CleanupTimeout);
         }
         catch (Exception)
         {

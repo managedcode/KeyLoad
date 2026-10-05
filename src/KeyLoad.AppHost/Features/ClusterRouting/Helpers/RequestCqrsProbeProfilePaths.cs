@@ -5,6 +5,9 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 /// <summary>Validates pre-created private control paths without creating, changing or deleting them.</summary>
 internal static class RequestCqrsProbeProfilePaths
 {
+    private const string CurrentDirectorySegment = ".";
+    private const string ParentDirectorySegment = "..";
+
     private const string OwnerFileName = "owner.json";
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
     private const int MaximumPathCharacters = 4_096;
@@ -94,9 +97,9 @@ internal static class RequestCqrsProbeProfilePaths
     private static bool IsWithin(string candidate, string root)
     {
         var relative = Path.GetRelativePath(root, candidate);
-        return relative == "." || (!Path.IsPathRooted(relative) && relative != ".."
-            && !relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal)
-            && !relative.StartsWith(".." + Path.AltDirectorySeparatorChar, StringComparison.Ordinal));
+        return relative == CurrentDirectorySegment || (!Path.IsPathRooted(relative) && relative != ParentDirectorySegment
+            && !relative.StartsWith(ParentDirectorySegment + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            && !relative.StartsWith(ParentDirectorySegment + Path.AltDirectorySeparatorChar, StringComparison.Ordinal));
     }
 
     private static bool IsPathOrFileFailure(Exception error)

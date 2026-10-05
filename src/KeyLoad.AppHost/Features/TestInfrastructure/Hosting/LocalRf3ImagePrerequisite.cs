@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
+using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
@@ -20,7 +21,7 @@ internal static class LocalRf3ImagePrerequisite
             throw new InvalidOperationException("Local RF3 image producer source is missing.");
         }
 
-        builder.Services.AddSingleton(new LocalRf3ImageCleanup(execution, scriptPath));
+        builder.Services.AddSingleton(new LocalRf3ImageCleanup(execution, scriptPath, AppHostOptionsRegistration.Get(builder).TestExecution));
         return builder.AddExecutable(ResourceName, "node", root, [scriptPath, "prepare", execution.Tag, execution.ReceiptPath]);
     }
 }

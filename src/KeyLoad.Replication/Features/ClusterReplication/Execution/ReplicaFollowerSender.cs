@@ -2,12 +2,13 @@ namespace KeyLoad.Replication;
 
 internal sealed class ReplicaFollowerSender(ReplicaState state, ReplicaRpcClient rpc) : IDisposable
 {
+    private const int SynchronizationAdmissionWaitMilliseconds = 0;
     private readonly Dictionary<string, SemaphoreSlim> gates = state.Configuration.VoterIds.ToDictionary(
         voter => voter, _ => new SemaphoreSlim(1, 1), StringComparer.Ordinal);
 
     internal async Task<bool> SynchronizeAsync(string voter, long term, ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
-        if (!await gates[voter].WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        if (!await gates[voter].WaitAsync(SynchronizationAdmissionWaitMilliseconds, cancellationToken).ConfigureAwait(false))
         {
             return false;
         }

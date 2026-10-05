@@ -61,6 +61,7 @@ export const SUPPORT = Object.freeze({
   'PostgreSQL + pgvector': [...CRUD, ...GRAPH, ...EVENTS, 'VectorExact', 'QueueCycle'],
   Redis: CRUD, Neo4j: [...CRUD, ...GRAPH], MongoDB: [...CRUD, ...GRAPH, ...EVENTS],
   OpenSearch: [...CRUD, 'VectorExact'], Qdrant: ['VectorExact'], RabbitMQ: ['QueueCycle'], KurrentDB: EVENTS,
+  SurrealDB: [...CRUD, ...GRAPH, 'VectorExact'], HelixDB: [...CRUD, ...GRAPH],
 });
 
 export const VECTOR_SUPPORT = Object.freeze({

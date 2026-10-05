@@ -37,7 +37,7 @@ internal sealed class NativeOperationSemanticsTests
         var changed = NativeAuthorityFixture.Wrap(operation, NativeAuthorityFixture.Read(operation) with { Value = value });
         changed = NativeAuthorityFixture.Resign(database, changed, claims);
         await Assert.That(database.Database.NativeOperationsEqual(operation, changed)).IsFalse();
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 
     [Test]

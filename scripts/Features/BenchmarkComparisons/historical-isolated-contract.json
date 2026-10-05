@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "workerSchemaVersion": 4,
+  "profile": "intensive-1k-c16",
+  "targets": ["KeyLoad", "PostgreSQL + pgvector", "Qdrant", "RabbitMQ", "Redis", "Neo4j", "MongoDB", "OpenSearch", "KurrentDB"],
+  "nodeCounts": [1, 2, 3],
+  "crudScenarios": ["PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete"],
+  "specializedScenarios": ["VectorExact", "QueueCycle", "GraphNeighbors", "GraphTraverse", "StreamAppend", "StreamRead"],
+  "options": {
+    "seed": 1729,
+    "documents": 4096,
+    "operations": 10000,
+    "warmup": 256,
+    "repetitions": 5,
+    "concurrency": 16,
+    "payloadBytes": 1024,
+    "dimensions": 128,
+    "topK": 10,
+    "graphVertices": 256,
+    "graphFanOut": 3,
+    "graphDepth": 3,
+    "timeoutSeconds": 30
+  },
+  "unsupportedTopologies": [{"target":"Neo4j","nodeCounts":[2,3],"reason":"Neo4j Community does not provide native clustering; Enterprise licensing is excluded."}]
+}

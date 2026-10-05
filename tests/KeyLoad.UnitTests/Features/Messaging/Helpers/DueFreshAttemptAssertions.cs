@@ -44,7 +44,7 @@ internal static class DueFreshAttemptAssertions
         OperationResult result)
     {
         await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        var stored = fixture.Database.Outcome(CreatorId, commandId);
+        var stored = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, CreatorId, commandId);
         await Assert.That(stored).IsNotNull();
         await Assert.That(stored!.Error).IsEqualTo(ErrorCode.PermissionDenied);
     }

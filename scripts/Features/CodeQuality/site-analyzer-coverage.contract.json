@@ -139,6 +139,22 @@
     {
       "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedSynchronizationAnalyzer.cs",
       "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/MagicRuntimeMetadataNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeDurationAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeStringAnalyzer.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -253,6 +269,20 @@
       "diagnostic": "KLD0034",
       "sources": [
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedSynchronizationAnalyzer.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0035",
+      "sources": [
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeDurationAnalyzer.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0036",
+      "sources": [
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeStringAnalyzer.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs"
       ]
     }
   ],

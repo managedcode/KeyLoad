@@ -1,5 +1,4 @@
 import { IDS, SELECTORS, CONFIG, TEXT } from './contracts.mjs';
-import { mountIsolatedLab } from './isolated-lab.mjs';
 
 const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click', change: 'change' });
 const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Static architectural illustration', delay: 100,
@@ -47,7 +46,10 @@ function start() {
   const token = ++generation;
   const isolatedRoot = document.getElementById(IDS.benchmarks);
   if (isolatedRoot?.dataset.isolatedCatalog) {
-    isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
+    import('./isolated-lab.mjs').then(({ mountIsolatedLab }) => {
+      if (token !== generation || !mounted) return;
+      isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
+    }).catch(() => {});
   }
   deferred = setTimeout(() => startScene(token), SCENE.delay);
 }

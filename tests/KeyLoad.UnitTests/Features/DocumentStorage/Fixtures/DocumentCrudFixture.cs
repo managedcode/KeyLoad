@@ -64,7 +64,7 @@ internal static class DocumentCrudFixture
     {
         var query = new QueryRequest(partition ?? database.Partition,
             $"SELECT * FROM {Collection} WHERE {field} = '{value}'");
-        var page = new QueryEngine(database.Database).Execute(Root, query);
+        var page = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(Root, query);
         await Assert.That(page.AccessPath).IsEqualTo("index:" + indexName);
         await Assert.That(page.Rows.Select(row => row.EntityId))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);

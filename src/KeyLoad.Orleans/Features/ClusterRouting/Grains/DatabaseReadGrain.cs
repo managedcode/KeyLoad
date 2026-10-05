@@ -110,7 +110,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     private void ValidateFreshRequest(DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        GrainRequestScope.Validate(request.Envelope, localDatabase.Store.Identity.Incarnation, runtimeClock.GetUtcNow());
+        codec.ValidateScope(request.Envelope);
         GrainIdentityContext.Validate(request.Envelope, requestId);
     }
 

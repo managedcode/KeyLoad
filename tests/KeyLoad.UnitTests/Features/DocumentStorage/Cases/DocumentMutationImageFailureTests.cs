@@ -34,7 +34,7 @@ internal sealed class DocumentMutationImageFailureTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var bounded = new DatabaseEngine(db.Store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 });
+        var bounded = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var failed = Apply(bounded, db, new PutDocument(Collection, FirstId, FirstJson),
             new PutDocument(Collection, SecondId, OtherJson));
 

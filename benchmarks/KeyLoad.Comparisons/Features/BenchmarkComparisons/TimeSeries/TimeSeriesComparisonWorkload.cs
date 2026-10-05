@@ -7,6 +7,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonWorkloadFactory
 {
+    private const string SampleIndexFormat = "D2";
+    private const string SampleValueFormat = "R";
+
     private const string TenantPrefix = "benchmark-ts-";
     private const string DatabaseName = "comparison";
     private const string TransactionDomain = "shared";
@@ -51,8 +54,8 @@ internal static class TimeSeriesComparisonWorkloadFactory
             {
                 var timestamp = start.AddMinutes(group * MinutesPerBucket);
                 var value = group * ValueGroupScale + (item + 1) * ValueOffsetScale;
-                samples.Add(new(SampleIdPrefix + group.ToString("D2", CultureInfo.InvariantCulture) + "-" +
-                    item.ToString("D2", CultureInfo.InvariantCulture), timestamp, value, sequence++, TagsJson));
+                samples.Add(new(SampleIdPrefix + group.ToString(SampleIndexFormat, CultureInfo.InvariantCulture) + "-" +
+                    item.ToString(SampleIndexFormat, CultureInfo.InvariantCulture), timestamp, value, sequence++, TagsJson));
             }
         }
 
@@ -88,7 +91,7 @@ internal static class TimeSeriesComparisonWorkloadFactory
         {
             content.Append(sample.EventId).Append('|')
                 .Append(sample.Timestamp.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append('|')
-                .Append(sample.Value.ToString("R", CultureInfo.InvariantCulture)).Append('|')
+                .Append(sample.Value.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append('|')
                 .Append(sample.TagsJson).Append('|')
                 .Append(sample.Sequence.ToString(CultureInfo.InvariantCulture)).Append('\n');
         }

@@ -2,6 +2,8 @@ using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
+using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -15,15 +17,23 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
     private readonly ReplicaMembershipAuthorityReplayCache replay;
     private readonly ReplicaMembershipAuthorityOperations operations;
     private readonly ReplicaMembershipAuthorityAddressPins? addressPins;
-    private readonly SemaphoreSlim admissions = new(ReplicaMembershipAuthorityProtocol.MaximumAdmissions);
+    private readonly SemaphoreSlim admissions;
+    private readonly OrleansMembershipOptions settings;
+    private readonly TimeSpan requestTimeout;
     private int disposalState;
 
-    internal ReplicaMembershipAuthorityEndpoint(NodeOptions options, ReplicaMembershipAuthorityOwner owner,
-        TimeProvider clock)
+    internal ReplicaMembershipAuthorityEndpoint(IOptions<NodeOptions> nodeOptions, ReplicaMembershipAuthorityOwner owner,
+        TimeProvider clock, IOptions<OrleansMembershipOptions> membershipOptions,
+        IOptions<ReplicaExecutionOptions> executionOptions)
     {
+        var options = nodeOptions.Value;
         this.options = options;
         this.owner = owner;
         this.clock = clock;
+        settings = membershipOptions.Value;
+        var execution = executionOptions.Value;
+        requestTimeout = execution.CommandTimeout + execution.ReadBarrierTimeout;
+        admissions = new(settings.MaximumAdmissions);
         addressPins = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
             ? new(options.MembershipAuthority.TrustedGroupSiloEndpoints) : null;
         var callerKey = Decode(options.MembershipAuthority.TrustedGroupPeerSecret);
@@ -39,7 +49,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
             CryptographicOperations.ZeroMemory(callerKey);
             CryptographicOperations.ZeroMemory(authorityKey);
         }
-        replay = new(clock);
+        replay = new(clock, membershipOptions);
     }
 
     internal bool IsDisposed => Volatile.Read(ref disposalState) == 2;
@@ -54,7 +64,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
         if (!TryTimestamp(headers.Timestamp, out var timestamp) || !FreshTimestamp(timestamp)
             || !ReplicaMembershipAuthorityValidation.ValidNonce(headers.Nonce))
         { context.Response.StatusCode = StatusCodes.Status401Unauthorized; return; }
-        if (!admissions.Wait(0))
+        if (!admissions.Wait(TimeSpan.Zero))
         { context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable; return; }
         await HandleAdmittedAsync(context, headers).ConfigureAwait(false);
     }
@@ -67,7 +77,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
             operation = owner.TryEnter();
             if (operation is null)
             { context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable; return; }
-            using var deadline = new CancellationTokenSource(ReplicaMembershipAuthorityProtocol.RequestTimeout, clock);
+            using var deadline = new CancellationTokenSource(requestTimeout, clock);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted,
                 operation.ShutdownToken, deadline.Token);
             await ExecuteAdmittedAsync(context, headers, operation, deadline, linked.Token).ConfigureAwait(false);
@@ -153,8 +163,8 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
     {
         address = IPAddress.None;
         var trusted = options.MembershipAuthority;
-        if (headers.Cluster != options.ClusterId || headers.CallerPhysical != trusted.TrustedGroupPhysicalShardId.ToString("N")
-            || headers.CallerIncarnation != trusted.TrustedGroupIncarnation.ToString("N")
+        if (headers.Cluster != options.ClusterId || headers.CallerPhysical != trusted.TrustedGroupPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat)
+            || headers.CallerIncarnation != trusted.TrustedGroupIncarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat)
             || !trusted.TrustedGroupVoterIds.Contains(headers.CallerVoter, StringComparer.Ordinal)
             || !ReplicaMembershipAuthorityValidation.CanonicalAddress(headers.CallerSilo))
         { return -1; }
@@ -166,7 +176,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
     }
 
     private bool FreshTimestamp(long ticks)
-        => Math.Abs(clock.GetUtcNow().UtcDateTime.Ticks - ticks) <= TimeSpan.FromSeconds(30).Ticks;
+        => Math.Abs(clock.GetUtcNow().UtcDateTime.Ticks - ticks) <= settings.ClockSkew.Ticks;
 
     private static bool TryTimestamp(string value, out long ticks)
         => long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out ticks)
@@ -174,7 +184,7 @@ internal sealed class ReplicaMembershipAuthorityEndpoint : IDisposable
             && ticks.ToString(CultureInfo.InvariantCulture) == value;
 
     private static bool ValidHttp(HttpRequest request)
-        => request.Method == "POST" && request.Path == ReplicaMembershipAuthorityProtocol.Path
+        => request.Method == HttpMethods.Post && request.Path == ReplicaMembershipAuthorityProtocol.Path
             && !request.QueryString.HasValue && request.ContentLength is >= 0
             && request.ContentLength <= ReplicaMembershipAuthorityProtocol.MaximumRequestBytes
             && request.Headers.TryGetValue(Microsoft.Net.Http.Headers.HeaderNames.ContentLength, out var lengths) && lengths.Count == 1

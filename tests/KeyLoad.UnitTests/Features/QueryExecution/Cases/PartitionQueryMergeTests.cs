@@ -22,7 +22,7 @@ internal sealed class PartitionQueryMergeTests
             PartitionQueryTestSupport.AddRows(database, partitions[index], seeds[index]);
         }
 
-        var actual = new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        var actual = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database), [.. partitions]);
         var expected = seeds.SelectMany((items, index) => items.Select(item => new
         { Partition = partitions[index], Seed = item }))
@@ -69,7 +69,7 @@ internal sealed class PartitionQueryMergeTests
         PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("same", 7, "private-use"));
         PartitionQueryTestSupport.AddRows(database, partitions[1], new PartitionQuerySeed("same", 7, "supplementary"));
 
-        var result = new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 2), [.. partitions]);
         var expected = partitions.OrderBy(static item => item.PartitionKey, StringComparer.Ordinal)
             .Select(item => new EntityRef(item, PartitionQueryTestSupport.Collection, "same")).ToArray();
@@ -87,7 +87,7 @@ internal sealed class PartitionQueryMergeTests
             new PartitionQuerySeed("redacted", 9, "visible", "NEVER-RETURN"));
         PartitionQueryTestSupport.ConfigureSinglePartitionReader(database);
 
-        var result = new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Reader,
+        var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Reader,
             PartitionQueryTestSupport.Request(database, 1), [database.Partition]);
         var row = result.Rows.Single().Row;
 
@@ -103,7 +103,7 @@ internal sealed class PartitionQueryMergeTests
         using var database = PartitionQueryTestSupport.Create();
         var partitions = PartitionQueryTestSupport.Partitions(database);
         PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("one", 1, "one"));
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var position = database.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecutePartitionQuery(
             PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database),

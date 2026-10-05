@@ -6,6 +6,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class PostgresQueueOperations
 {
+    private const int ClaimPollMilliseconds = 1;
+
     private const string EnqueueSql = "INSERT INTO queue(id,body) VALUES ($1,$2)";
     private const string ClaimSql = """
         WITH candidate AS (SELECT id FROM queue WHERE state='ready' OR (state='leased' AND lease_until < now())
@@ -55,7 +57,7 @@ internal static class PostgresQueueOperations
             message = await ReadClaimAsync(claim, cancellationToken);
             if (message is null)
             {
-                await Task.Delay(1, cancellationToken);
+                await Task.Delay(ClaimPollMilliseconds, cancellationToken);
             }
         }
 

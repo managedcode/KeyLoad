@@ -17,9 +17,17 @@ runs:
         revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
         [[ "$revision" == "$QUALIFIED_REVISION" ]]
         isolated_capture="$GITHUB_WORKSPACE/predeploy-isolated-capture"
-        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" > predeploy-isolated-capture-envelope.json
+        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" --optional=true > predeploy-isolated-capture-envelope.json
         jq -e '.ok == true' predeploy-isolated-capture-envelope.json > /dev/null
-        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs fresh --before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/archive-receipt.json" --after="$isolated_capture/metadata-proof.json" > predeploy-isolated-proof.json
+        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
+          before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/metadata-proof.json"
+          jq -e '.result.state == "unavailable"' predeploy-isolated-capture-envelope.json > /dev/null
+        else
+          [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]
+          before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/archive-receipt.json"
+          jq -e '.result.state != "unavailable"' predeploy-isolated-capture-envelope.json > /dev/null
+        fi
+        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs fresh --before="$before" --after="$isolated_capture/metadata-proof.json" > predeploy-isolated-proof.json
         jq -e '.ok == true' predeploy-isolated-proof.json > /dev/null
         date --utc --iso-8601=seconds > predeploy-checked-at.txt
     - name: Configure GitHub Pages

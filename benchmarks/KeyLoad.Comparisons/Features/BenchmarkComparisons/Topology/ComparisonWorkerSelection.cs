@@ -29,8 +29,8 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     private const string TimeSeriesAppHostProfile = "timeseries";
     internal const string InvalidSelection = "IsolatedComparisonSelectionInvalid";
     private static readonly string[] WorkloadOverrideNames =
-        ["Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
-            "TopK", "TimeoutSeconds", "GraphVertices", "GraphFanOut", "GraphDepth"];
+        [ComparisonWorkerSelectionValues.Documents, ComparisonWorkerSelectionValues.Operations, ComparisonWorkerSelectionValues.Warmup, ComparisonWorkerSelectionValues.Repetitions, ComparisonWorkerSelectionValues.Concurrency, ComparisonWorkerSelectionValues.PayloadBytes, ComparisonWorkerSelectionValues.Seed, ComparisonWorkerSelectionValues.Dimensions,
+            ComparisonWorkerSelectionValues.TopK, ComparisonWorkerSelectionValues.TimeoutSeconds, ComparisonWorkerSelectionValues.GraphVertices, ComparisonWorkerSelectionValues.GraphFanOut, ComparisonWorkerSelectionValues.GraphDepth];
 
     /// <summary>Gets the exact typed scaled profile when the isolated worker selects one.</summary>
     public ScaledComparisonProfile? ScaledProfile { get; init; }
@@ -89,7 +89,10 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         {
             ValidateScaledMode(configuration, scaledProfile);
         }
-        if (vectorProfile is not null) ValidateVectorMode(configuration, vectorProfile);
+        if (vectorProfile is not null)
+        {
+            ValidateVectorMode(configuration, vectorProfile);
+        }
         var result = new ComparisonWorkerSelection(configuration[TargetSetting] ?? string.Empty, nodes, scenario,
             configuration[ProfileSetting] ?? string.Empty)
         {
@@ -148,7 +151,7 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     {
         foreach (var name in WorkloadOverrideNames)
         {
-            if (configuration["Benchmarks:" + name] is not null)
+            if (configuration[ComparisonWorkerSelectionValues.Benchmarks + name] is not null)
             {
                 return true;
             }

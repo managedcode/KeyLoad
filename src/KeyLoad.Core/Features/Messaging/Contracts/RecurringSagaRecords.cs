@@ -2,6 +2,7 @@ namespace KeyLoad.Core.Features.Messaging;
 
 internal static class RecurringSagaProtocol
 {
+    internal const long MaximumMessageTimeToLiveTicks = 365L * TimeSpan.TicksPerDay;
     internal const string ScheduleSpace = "recurring-schedule";
     internal const string SagaSpace = "saga-state";
     internal const string CapacitySpace = "recurring-saga-capacity";

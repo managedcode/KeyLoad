@@ -6,12 +6,13 @@ namespace KeyLoad.Core;
 /// <summary>Provides authorized change-feed reads over the database engine.</summary>
 public sealed partial class DatabaseEngine
 {
+    private const string DocumentChangeFeedCursorPurpose = "document-change-feed";
     private static long VisibilityEpoch(IKeyValueView view, PartitionRef partition, string collection)
         => view.ReadOwnedValue(KeySpace.Partition("visibility-epoch", partition, collection)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
     private static void AdvanceVisibilityEpoch(IAtomicTransaction tx, PartitionRef partition, string collection)
         => tx.PutRecord(KeySpace.Partition("visibility-epoch", partition, collection), checked(VisibilityEpoch(tx, partition, collection) + 1));
     private string ChangeCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, long after)
-        => Sign(new ChangeFeedClaims("document-change-feed", Store.Identity.Incarnation, partition, resource.Name, principal.Id,
+        => Sign(new ChangeFeedClaims(DocumentChangeFeedCursorPurpose, Store.Identity.Incarnation, partition, resource.Name, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, VisibilityEpoch(view, partition, resource.Name), after, Clock.GetUtcNow().AddHours(24)));
     /// <summary>Captures a signed cursor at the current outbox tail for an authorized collection.</summary>
     /// <param name="view">Current gated storage view.</param>
@@ -85,7 +86,7 @@ public sealed partial class DatabaseEngine
         if (request.Cursor is { } cursor)
         {
             var claims = Verify<ChangeFeedClaims>(cursor);
-            if (claims.Purpose != "document-change-feed" || claims.Incarnation != Store.Identity.Incarnation || claims.Partition != request.Partition
+            if (claims.Purpose != DocumentChangeFeedCursorPurpose || claims.Incarnation != Store.Identity.Incarnation || claims.Partition != request.Partition
                 || claims.Collection != request.Collection || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch
                 || claims.SchemaVersion != resource.SchemaVersion || claims.VisibilityEpoch != VisibilityEpoch(view, request.Partition, request.Collection)
                 || claims.ExpiresAt <= now)

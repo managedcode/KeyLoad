@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
@@ -32,8 +33,8 @@ public static class PredicateEvaluator
     internal static object? FieldValue(string path, DocumentRecord document, JsonElement json,
         IReadOnlyDictionary<string, string[]>? paths) => path switch
         {
-            "/@id" => document.Reference.Id,
-            "/@revision" => (decimal)document.Revision,
+            SqlSyntax.MetadataIdPath => document.Reference.Id,
+            SqlSyntax.MetadataRevisionPath => (decimal)document.Revision,
             _ => paths is null ? JsonData.Scalar(json, path) : JsonData.Scalar(json, paths[path])
         };
     /// <summary>Evaluates a typed predicate with SQL-style unknown results.</summary>
@@ -52,7 +53,7 @@ public static class PredicateEvaluator
         return predicate switch
         {
             Comparison comparison => Compare(Get(comparison.Left), comparison.Operator, Get(comparison.Right)),
-            Logical { Operator: "AND" } logical => And(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths)),
+            Logical { Operator: SqlSyntax.And } logical => And(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths)),
             Logical logical => Or(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths)),
             Negation negation => !Evaluate(negation.Inner, document, json, parameters, paths),
             NullTest test => (test.Missing ? Get(test.Value) is MissingValue : Get(test.Value) is null) != test.Negated,
@@ -65,7 +66,7 @@ public static class PredicateEvaluator
         bool? found = false;
         foreach (var candidate in values)
         {
-            var match = Compare(value, "=", candidate);
+            var match = Compare(value, SqlSyntax.Equals, candidate);
             if (match is true)
             {
                 return !negated;
@@ -97,12 +98,12 @@ public static class PredicateEvaluator
         var order = KeyCodec.Encode(left).AsSpan().SequenceCompareTo(KeyCodec.Encode(right));
         return operation switch
         {
-            "=" => order == 0,
-            "!=" or "<>" => order != 0,
-            ">" => order > 0,
-            ">=" => order >= 0,
-            "<" => order < 0,
-            "<=" => order <= 0,
+            SqlSyntax.Equals => order == 0,
+            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != 0,
+            SqlSyntax.Greater => order > 0,
+            SqlSyntax.GreaterOrEqual => order >= 0,
+            SqlSyntax.Less => order < 0,
+            SqlSyntax.LessOrEqual => order <= 0,
             _ => throw Errors.Fail(ErrorCode.Validation, "The comparison operator is invalid.")
         };
     }

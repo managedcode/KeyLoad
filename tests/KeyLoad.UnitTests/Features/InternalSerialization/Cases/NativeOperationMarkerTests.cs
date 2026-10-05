@@ -20,7 +20,7 @@ internal sealed class NativeOperationMarkerTests
         var result = database.Database.Apply(verified);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(NativeCommandContract.InvalidJson);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)!.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)!.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Database.ResolveOutcome(verified).Error).IsEqualTo(ErrorCode.Validation);
     }
 
@@ -34,7 +34,7 @@ internal sealed class NativeOperationMarkerTests
             DateTimeOffset.UnixEpoch, NativeAuthorityFixture.InvalidJson));
         var result = database.Database.Apply(operation);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.ClockUncertain);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)!.Error).IsEqualTo(ErrorCode.ClockUncertain);
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)!.Error).IsEqualTo(ErrorCode.ClockUncertain);
     }
 
     [Test]
@@ -45,7 +45,7 @@ internal sealed class NativeOperationMarkerTests
             NativeAuthorityFixture.OtherPrincipal, database.Database.EvaluationClock.GetUtcNow(), NativeAuthorityFixture.InvalidJson));
         var result = database.Database.Apply(operation);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Unauthenticated);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)!.Error).IsEqualTo(ErrorCode.Unauthenticated);
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)!.Error).IsEqualTo(ErrorCode.Unauthenticated);
     }
 
     [Test]
@@ -62,7 +62,7 @@ internal sealed class NativeOperationMarkerTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Database.ResolveOutcome(verified).Error).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 
     [Test]
@@ -88,7 +88,7 @@ internal sealed class NativeOperationMarkerTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Verify(database, operation, payload,
             Encoding.UTF8.GetBytes(bool.FalseString)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 
     private static void Verify(TestDatabase database, ReplicatedOperation operation, NativeCommandPayload payload, byte[] json)

@@ -7,7 +7,7 @@ import { positive, shaPattern } from './isolated-github-contract.mjs';
 import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
 
 const repositoryRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
-const captureOptions = new Set(['input', 'mode', 'site-revision', 'workflow-revision', 'requested-run']);
+const captureOptions = new Set(['input', 'mode', 'site-revision', 'workflow-revision', 'requested-run', 'optional']);
 
 export function parseSiteIsolatedArguments(argv, allowed, required) {
   const values = {};
@@ -24,6 +24,7 @@ export function parseSiteCaptureArguments(argv) {
   const args = parseSiteIsolatedArguments(argv, captureOptions, ['input', 'mode', 'site-revision', 'workflow-revision']);
   requireSite(isAbsolute(args.input) && [SITE_GH.publish, SITE_GH.validate].includes(args.mode)
     && shaPattern.test(args['site-revision']) && shaPattern.test(args['workflow-revision']));
+  if (Object.hasOwn(args, 'optional')) requireSite(args.optional === 'true' && args.mode === SITE_GH.publish);
   if (Object.hasOwn(args, 'requested-run')) requireSite(args.mode === SITE_GH.validate && /^[1-9][0-9]*$/.test(args['requested-run']));
   return args;
 }
@@ -84,5 +85,5 @@ export async function createSiteIsolatedContext(environment, args, platform = pr
     runId: environment.GITHUB_RUN_ID, attempt: environment.GITHUB_RUN_ATTEMPT, workflow: environment.GITHUB_WORKFLOW,
     event: environment.GITHUB_EVENT_NAME },
     source: { website: args['site-revision'], control: args['workflow-revision'] }, mode: args.mode, requestedRun: args['requested-run'] ?? null,
-    trigger, producer: null };
+    optional: args.optional === 'true', trigger, producer: null };
 }

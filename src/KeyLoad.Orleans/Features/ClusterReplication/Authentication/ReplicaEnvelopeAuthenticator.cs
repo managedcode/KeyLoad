@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -17,18 +18,23 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     private readonly int maximumControlPayloadBytes;
     private readonly ReplicaReplayAdmissionDiagnostics? diagnostics;
     private readonly DatabaseEngine? canonicalDatabase;
+    private readonly ReplicaTransportOptions settings;
 
     /// <summary>Creates authentication for one node, fixed voter scope and system clock.</summary>
-    /// <param name="configuration">The node identity, voter set, incarnation and payload limits.</param>
+    /// <param name="configurationOptions">The node identity, voter set, incarnation and payload limits.</param>
     /// <param name="options">The fixed-cluster signing secret, control budget and replay capacities.</param>
     /// <param name="local">The actual local Orleans runtime generation.</param>
     /// <param name="clock">The system clock used for envelope freshness.</param>
+    /// <param name="transportOptions">Centrally validated envelope freshness and retry settings.</param>
     /// <param name="logger">Optional closed numeric replay-admission diagnostics.</param>
     /// <param name="canonicalDatabase">Optional borrowed canonical authority; required for non-null native operations.</param>
-    public ReplicaEnvelopeAuthenticator(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<ReplicaEnvelopeAuthenticator>? logger = null,
+    public ReplicaEnvelopeAuthenticator(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+        ReplicaSiloDiscoveryState local, TimeProvider clock, IOptions<ReplicaTransportOptions> transportOptions,
+        ILogger<ReplicaEnvelopeAuthenticator>? logger = null,
         DatabaseEngine? canonicalDatabase = null)
     {
+        var configuration = configurationOptions.Value;
+        settings = transportOptions.Value;
         ArgumentNullException.ThrowIfNull(options);
         options.Validate(configuration);
         ArgumentNullException.ThrowIfNull(local);
@@ -43,7 +49,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         this.canonicalDatabase = canonicalDatabase;
         voters = new(configuration.VoterIds, StringComparer.Ordinal);
         mac = new(options.Secret, options.ClusterId);
-        replay = new(configuration.VoterIds, options.ReplayLimits);
+        replay = new(configuration.VoterIds, options.ReplayLimits, transportOptions);
         maximumControlPayloadBytes = options.MaxControlPayloadBytes;
         if (logger is not null)
         {
@@ -217,7 +223,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
 
     private bool Fresh(long timestamp)
     {
-        var lifetime = checked((long)ReplicaTransportProtocol.EnvelopeLifetime.TotalMilliseconds);
+        var lifetime = checked((long)settings.EnvelopeLifetime.TotalMilliseconds);
         var now = Now();
         return timestamp >= now - lifetime && timestamp <= now + lifetime;
     }

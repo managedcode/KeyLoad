@@ -23,7 +23,7 @@ internal sealed class SqlBetweenTruthTests
     public async Task AcSqlc006AThreeValuedAndUsesFalseDominanceBeforeNot()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var unknownAndTrue = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, UnknownMiddle));
         var unknownAndFalse = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, FalseUpper));
@@ -40,7 +40,7 @@ internal sealed class SqlBetweenTruthTests
     public async Task AcSqlc006ANullAndMissingValuesRemainUnknownBeforeBoundTypeChecks()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var explicitNull = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, NullMismatch));
         var missing = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, MissingMismatch));
@@ -65,7 +65,7 @@ internal sealed class SqlBetweenTruthTests
     public async Task AcSqlc006ANonNullMismatchedBoundsFailEvenAfterOtherComparisonIsFalse()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, EagerMismatch)));
@@ -81,7 +81,7 @@ internal sealed class SqlBetweenTruthTests
     {
         using var database = SqlBetweenTestData.Create();
         database.Commit(new PutDocument(SqlBetweenTestData.Collection, "object-number", "{\"number\":{\"nested\":1}}"));
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var missingParameter = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, "SELECT * FROM orders WHERE number BETWEEN @lower AND 9")));
         var nonscalar = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,

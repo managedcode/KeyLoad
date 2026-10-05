@@ -14,5 +14,4 @@ internal static class GrainRequestStreamProtocol
     internal const int MaximumContextBytes = 256;
     internal const string ContextKey = "KeyLoad-RequestState";
     internal const string AuthenticationType = "KeyLoad.PersistedPrincipal.v1";
-    internal static readonly TimeSpan ExecutionLifetime = TimeSpan.FromMinutes(1);
 }

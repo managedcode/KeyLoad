@@ -16,8 +16,8 @@ internal sealed class SiteIsolatedGitHubProofTests
         }, token);
         await Assert.That(result.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
         await Assert.That(result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32())
-            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
+            .IsEqualTo(SiteIsolatedInventory.Workers(inputs.Metadata));
         await Assert.That(result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Files).GetInt32())
-            .IsEqualTo(SiteIsolatedGitHubTokens.FileCount);
+            .IsEqualTo(SiteIsolatedInventory.Files(inputs.Metadata));
     }
 }

@@ -23,7 +23,7 @@ internal sealed class EqualityAccessPathBudgetTests
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])]);
         db.Commit(new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.PrimaryId,
             PayloadPrefix + new string(PayloadCharacter, PayloadLength) + PayloadSuffix));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed, parameterized, reversed);
@@ -37,7 +37,7 @@ internal sealed class EqualityAccessPathBudgetTests
     public async Task AcAisql008ReversedIndexCandidatesPreserveTheSharedLimitAndPointFollowup(bool parameterized)
     {
         using var db = EqualityAccessPathSupport.Create(new() { MaxScanRecords = OneCandidate });
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed: true, parameterized, reversed);

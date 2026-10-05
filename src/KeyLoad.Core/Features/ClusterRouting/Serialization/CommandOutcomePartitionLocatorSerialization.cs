@@ -4,21 +4,33 @@ namespace KeyLoad.Core.Features.ClusterRouting.Serialization;
 
 internal static class CommandOutcomePartitionLocatorSerialization
 {
-    internal static byte[] Key(PartitionRef partition, string principalId, Guid commandId)
-        => KeySpace.OutcomeLocator(partition, principalId, commandId);
+    internal static byte[] LegacyKey(PartitionRef partition, string principalId, Guid commandId)
+        => KeySpace.OutcomeLocatorV1(partition, principalId, commandId);
 
-    internal static byte[] Value(string principalId, Guid commandId)
-        => KeySpace.Outcome(principalId, commandId);
+    internal static byte[] ScopedKey(PartitionRef partition, string principalId, Guid commandId)
+        => KeySpace.OutcomeLocatorV2(partition, principalId, commandId);
 
-    internal static void Write(IAtomicTransaction transaction, PartitionRef partition, string principalId,
+    internal static byte[] LegacyValue(string principalId, Guid commandId)
+        => KeySpace.LegacyOutcomeKey(principalId, commandId);
+
+    internal static byte[] ScopedValue(PartitionRef partition, string principalId, Guid commandId)
+        => KeySpace.PartitionOutcome(partition, principalId, commandId);
+
+    internal static void WriteScoped(IAtomicTransaction transaction, PartitionRef partition, string principalId,
         Guid commandId)
     {
-        transaction.Put(Key(partition, principalId, commandId), Value(principalId, commandId));
+        transaction.Put(ScopedKey(partition, principalId, commandId), ScopedValue(partition, principalId, commandId));
     }
 
-    internal static bool Matches(IKeyValueView view, PartitionRef partition, string principalId, Guid commandId)
+    internal static bool MatchesLegacy(IKeyValueView view, PartitionRef partition, string principalId, Guid commandId)
+        => Matches(view, LegacyKey(partition, principalId, commandId), LegacyValue(principalId, commandId));
+
+    internal static bool MatchesScoped(IKeyValueView view, PartitionRef partition, string principalId, Guid commandId)
+        => Matches(view, ScopedKey(partition, principalId, commandId), ScopedValue(partition, principalId, commandId));
+
+    private static bool Matches(IKeyValueView view, byte[] key, byte[] expected)
     {
-        var stored = view.ReadOwnedValue(Key(partition, principalId, commandId));
-        return stored is not null && stored.AsSpan().SequenceEqual(Value(principalId, commandId));
+        var stored = view.ReadOwnedValue(key);
+        return stored is not null && stored.AsSpan().SequenceEqual(expected);
     }
 }

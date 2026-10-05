@@ -4,7 +4,8 @@ internal static class ZoneTreeReadCutValidation
 {
     internal const int MaximumRecords = 5_000_000;
     internal const long MaximumExaminedBytes = 1_073_741_824;
-    internal static readonly TimeSpan MaximumElapsed = TimeSpan.FromMinutes(1);
+    private const int MaximumElapsedMinutes = 1;
+    internal static readonly TimeSpan MaximumElapsed = TimeSpan.FromMinutes(MaximumElapsedMinutes);
     private const string InvalidLimitsMessage = "The native read-cut limits are invalid.";
 
     internal static void Validate(ZoneTreeReadCutLimits limits)

@@ -21,14 +21,14 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             return;
         }
 
-        if (name.StartsWith("tmp-", StringComparison.Ordinal))
+        if (name.StartsWith(RequestCqrsProbeProtocol.TemporaryFilePrefix, StringComparison.Ordinal))
         {
             // Bounded staging is invisible until the final atomic rename.
             return;
         }
 
         var bytes = RequestCqrsProbeFiles.ReadRecord(path);
-        if (name.StartsWith("arm-", StringComparison.Ordinal))
+        if (name.StartsWith(RequestCqrsProbeProtocol.ArmFilePrefix, StringComparison.Ordinal))
         {
             var arm = RequestCqrsProbeJson.ReadArm(bytes);
             if (arm.SessionId != sessionId || name != RequestCqrsProbeFiles.ArmName(arm))
@@ -36,7 +36,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             arms.Add(new RequestCqrsProbeLoadedArm(arm, bytes));
             return;
         }
-        if (name.StartsWith("release-", StringComparison.Ordinal))
+        if (name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal))
         {
             var release = RequestCqrsProbeJson.ReadRelease(bytes);
             if (release.SessionId != sessionId || name != RequestCqrsProbeFiles.ReleaseName(release))
@@ -46,7 +46,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             releases.Add(release);
             return;
         }
-        if (name.StartsWith("marker-", StringComparison.Ordinal))
+        if (name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal))
         {
             var marker = RequestCqrsProbeJson.ReadMarker(bytes);
             if (marker.SessionId != sessionId || marker.Voter != voter || name != RequestCqrsProbeFiles.MarkerName(marker))

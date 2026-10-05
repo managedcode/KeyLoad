@@ -15,14 +15,17 @@ internal sealed class PartitionHost : IAsyncDisposable
     private Task? shutdown;
 
     /// <summary>Opens the private node directory and recovers durable state before exposing the protocol.</summary>
-    /// <param name="options">Validated fixed-voter and physical node configuration.</param>
+    /// <param name="runtimeOptions">Shared validated native options for physical ownership and execution.</param>
     /// <param name="authorization">Domain authorization against persisted principals.</param>
     /// <param name="admission">Node data and control admission budgets.</param>
     /// <param name="clock">The system clock shared by protocol and domain evaluation.</param>
     /// <param name="logger">Operational protocol diagnostics without secrets or payloads.</param>
-    public PartitionHost(NodeOptions options, IAuthorizationPolicy authorization, CommandAdmissionGovernor admission,
-        TimeProvider clock, ILogger<ReplicaConsensus> logger)
+    public PartitionHost(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
+        CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
     {
+        var options = runtimeOptions.Node.Value;
+        var replicaOptions = runtimeOptions.ReplicaConfiguration;
+        var executionOptions = runtimeOptions.ReplicaExecution;
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(authorization);
         ArgumentNullException.ThrowIfNull(admission);
@@ -30,24 +33,25 @@ internal sealed class PartitionHost : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(logger);
         options.Validate();
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
-        Configuration = options.CreateReplicaConfiguration(DirectoryPath);
+        Configuration = replicaOptions.Value;
         stores = new(options, DirectoryPath);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
         try
         {
-            Database = new(stores.Canonical, authorization);
-            log = openedLog = new(stores.Replica, Configuration, canonicalDatabase: Database);
-            var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, Configuration);
+            Database = new(stores.Canonical, authorization, runtimeOptions.Core.DatabaseLimits,
+                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource);
+            log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
+            var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
             BootstrapFreshNode(options);
             TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, "search-indexes"),
                 Database.Limits, Database.Store.Identity.NodeId);
-            Materializer = applying = new(Database, log, snapshots);
-            Consensus = new(Materializer, Configuration, clock, logger);
-            Coordinator = new(Consensus, Database, admission, clock);
+            Materializer = applying = new(Database, log, snapshots, executionOptions);
+            Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
+            Coordinator = new(Consensus, Database, admission, clock, executionOptions);
         }
         catch (Exception error)
         {

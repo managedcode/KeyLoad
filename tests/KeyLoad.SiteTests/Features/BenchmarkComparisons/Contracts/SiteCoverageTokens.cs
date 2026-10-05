@@ -5,6 +5,9 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteCoverageTokens
 {
     public const string CoverageRootEnvironment = "KEYLOAD_SITE_COVERAGE";
+    public const string BenchmarkModeEnvironment = "KEYLOAD_SITE_BENCHMARK_MODE";
+    public const string MeasuredBenchmarkMode = "measured";
+    public const string NoBenchmarkMode = "none";
     public const string NodeCoverageEnvironment = "NODE_V8_COVERAGE";
     public const string NodeVersionArgument = "--version";
     public const string NodeDirectory = "node";
@@ -73,6 +76,7 @@ internal static class SiteCoverageTokens
     public const string InvalidCoverageFailure = "A native V8 coverage receipt is malformed or inconsistent with its source.";
     public const string InvalidMetadataFailure = "Browser coverage metadata does not match the frozen protocol.";
     public const string InvalidRootFailure = "Coverage requires absolute repository and artifact roots and the exact GitHub source revision.";
+    public const string InvalidModeFailure = "Website qualification benchmark mode must be measured or none.";
     public const string ThresholdFailure = "The deterministic site coverage report did not satisfy ADR-040 thresholds.";
     public const string NodeVersionFailure = "The configured Node runtime did not return a valid version receipt.";
     public const string JsonFailure = "Coverage JSON is malformed or has unsupported fields.";
@@ -145,42 +149,6 @@ internal static class SiteCoverageTokens
     public const int AggregateBranchPercent = 70;
     public const int BytesPerMegabyte = 1_000_000;
     public const int MaximumJsonDepth = 64;
-
-    public static readonly string[] ProductionSources =
-    [
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-contracts.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-metadata.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-metrics-validation.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-report-validation.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-projection.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-http.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-loader.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-measurements.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-view.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-controls.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/isolated-lab.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/measurements.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/measurement-loader.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/contracts.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/bootstrap.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/build-site.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/cluster-scene.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/scene-geometry.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/scene-lifecycle.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/scene-observers.mjs",
-        BuildScriptSource,
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-api.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-capture.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-cli.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-context.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-contract.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-files.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-fresh.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-native-proof.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-proof.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-receipt.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}site-isolated-github-runs.mjs",
-    ];
 
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {

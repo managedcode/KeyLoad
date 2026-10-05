@@ -40,7 +40,7 @@ internal sealed class BlobFormatFailureTests
                 System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(Read(database, KeySpace.Outcome(PrincipalId, commandId))).IsNull();
+        await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();
         await Assert.That(Read(database, KeySpace.Clock.ToArray()) is { } clockAfter
             && clockBefore is not null && clockAfter.AsSpan().SequenceEqual(clockBefore)).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(positionBefore);
@@ -79,7 +79,7 @@ internal sealed class BlobFormatFailureTests
                 System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(Read(database, KeySpace.Outcome(PrincipalId, commandId))).IsNull();
+        await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();
         await Assert.That(Read(database, KeySpace.Clock.ToArray()) is { } clockAfter
             && clockBefore is not null && clockAfter.AsSpan().SequenceEqual(clockBefore)).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(positionBefore);

@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -13,13 +14,15 @@ namespace KeyLoad.Orleans;
 /// <param name="grainFactory">The Orleans factory for partition coordinator activations.</param>
 /// <param name="clock">The shared UTC clock used for due discovery and bounded polling.</param>
 /// <param name="diagnostics">Safe operational diagnostics for rejected pages and dispatch outcomes.</param>
+/// <param name="options">The centrally validated dispatch and discovery scheduling settings.</param>
 public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     Microsoft.Extensions.Logging.ILoggerFactory loggerFactory,
     DatabaseEngine database, ReplicaConsensus consensus, IGrainFactory grainFactory, TimeProvider clock,
-    Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics)
+    Microsoft.Extensions.Logging.ILogger<RecurringDueGrainService> diagnostics,
+    IOptions<DueCoordinationOptions> options)
     : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
 {
-    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
+    private readonly DueCoordinationOptions settings = options.Value;
     private Task? loop;
 
     /// <summary>Completes native per-silo grain-service initialization.</summary>
@@ -58,12 +61,30 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                var cycleStarted = clock.GetTimestamp();
+                var observedPosition = consensus.AppliedPosition;
                 cursor = await RunCycleAsync(cursor, cancellationToken).ConfigureAwait(true);
+                await RecurringDueWait.WaitForChangeOrFallbackAsync(consensus, observedPosition,
+                    settings.PollInterval, clock, cancellationToken).ConfigureAwait(true);
+                await RecurringDueWait.WaitForMinimumCadenceAsync(cycleStarted, settings.MinimumCycleCadence,
+                    clock, cancellationToken).ConfigureAwait(true);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             return;
+        }
+        catch (KeyLoadException failure)
+        {
+            RecurringDueDiagnostics.ServiceFault(diagnostics, failure.Code);
+        }
+        catch (OperationCanceledException)
+        {
+            RecurringDueDiagnostics.ServiceFault(diagnostics, ErrorCode.OwnershipLost);
+        }
+        catch (Exception failure) when (GrainBoundaryErrors.Handles(failure))
+        {
+            RecurringDueDiagnostics.ServiceFault(diagnostics, ErrorCode.OwnershipLost);
         }
     }
 
@@ -78,24 +99,20 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
             {
                 RecurringDueDiagnostics.PageRejected(diagnostics, page.Rejected.Length);
             }
-            await Task.Delay(PollInterval, clock, cancellationToken).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code == ErrorCode.Corruption
             && failure.Message == DueWorkProtocol.KeyExceedsBound)
         {
             cursor = DueWorkCursor.DeferNext(database.Store.Identity, cursor);
             RecurringDueDiagnostics.PrefixRejected(diagnostics, failure.Code);
-            await Task.Delay(PollInterval, clock, cancellationToken).ConfigureAwait(true);
         }
         catch (KeyLoadException failure)
         {
             RecurringDueDiagnostics.ServiceFault(diagnostics, failure.Code);
-            await Task.Delay(PollInterval, clock, cancellationToken).ConfigureAwait(true);
         }
         catch (Exception failure) when (GrainBoundaryErrors.Handles(failure))
         {
             RecurringDueDiagnostics.ServiceFault(diagnostics, ErrorCode.OwnershipLost);
-            await Task.Delay(PollInterval, clock, cancellationToken).ConfigureAwait(true);
         }
         return cursor;
     }
@@ -124,7 +141,8 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     private async Task Dispatch(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(DueCoordinatorFields.DispatchDeadline);
+        var dispatchDeadline = settings.DispatchDeadline;
+        deadline.CancelAfter(dispatchDeadline);
         try
         {
             var partition = hint.Lane.Partition.AtomicPartitionId;

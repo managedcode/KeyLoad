@@ -75,9 +75,9 @@ internal sealed class ReplicaMaterializerTests
             Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
             canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation });
             replica = new(new(Path.Combine(directory, LogDirectory)) { Incarnation = Configuration.Incarnation });
-            Log = new(replica, Configuration);
-            Database = new(canonical, new AuthorizationPolicy());
-            Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, Configuration));
+            Log = new(replica, RecoveryExecutionOptions.Configuration(Configuration));
+            Database = new(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+            Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log, RecoveryExecutionOptions.Configuration(Configuration)), RecoveryExecutionOptions.Replica());
         }
 
         public async ValueTask DisposeAsync()

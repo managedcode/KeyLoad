@@ -1,4 +1,5 @@
 import { sha256 } from './measurement-loader.mjs';
+import { historicalControlCells } from './historical-contracts.mjs';
 import { ISOLATED, WIRE, assertIsolated, exact, isolatedCells, matches, same } from './isolated-contracts.mjs';
 import { validateCatalog, validateCohort, validateOptions, validateWorkerMetadata } from './isolated-metadata.mjs';
 import { retainCommonFacts, validateCompactReport } from './isolated-report-validation.mjs';
@@ -16,13 +17,14 @@ export function validateIsolatedCatalog(value) {
 export function validateIsolatedProjection(value, catalog) {
   validateIsolatedCatalog(catalog);
   validateSize(value, ISOLATED.projectionBytes);
+  const cells = historicalControlCells(value?.cohort?.sourceRevision) ?? isolatedCells();
   assertIsolated(exact(value, WIRE.projection) && value.schemaVersion === ISOLATED.projectionVersion &&
     value.profile === ISOLATED.profile && (value.datasetSha256 === null || matches(ISOLATED.hash, value.datasetSha256)) &&
-    Array.isArray(value.workers) && value.workers.length === ISOLATED.workers);
+    Array.isArray(value.workers) && value.workers.length === cells.length);
   validateCohort(value.cohort);
   assertIsolated(same(value.cohort, catalog.cohort, WIRE.cohort));
   validateOptions(value.options);
-  const expected = new Map(isolatedCells().map(cell => [cell.id, cell]));
+  const expected = new Map(cells.map(cell => [cell.id, cell]));
   const identities = { jobs: new Set(), artifacts: new Set() };
   const common = { engines: new Map(), topologies: new Map() };
   for (const worker of value.workers) {

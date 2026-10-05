@@ -70,7 +70,7 @@ internal sealed class ReplicaNativeEnumHeaderTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaNativeInspection.Inspect<ReplicatedOperation>(bytes, MaximumEntries));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 
     [Test]
@@ -88,6 +88,6 @@ internal sealed class ReplicaNativeEnumHeaderTests
             bytes.AsMemory(ReplicaProtocol.PayloadPrefixBytes), 0));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 }

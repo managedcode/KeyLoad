@@ -7,6 +7,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedBenchmarkResources
 {
+    private const string DirectoryIdentityFormat = "N";
+
     private const string EnabledSetting = "Benchmarks:Enabled";
     private const string OutputSetting = "Benchmarks:Output";
     private const string RootSetting = "Benchmarks:DataRoot";
@@ -26,16 +28,20 @@ internal static class IsolatedBenchmarkResources
             throw new InvalidOperationException(Disabled);
         }
         var root = Path.GetFullPath(builder.Configuration[RootSetting]
-            ?? Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString("N")));
+            ?? Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString(DirectoryIdentityFormat)));
         var runner = BenchmarkRunnerContainer.Create(builder,
             builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory));
         Bind(runner, ComparisonWorkerSelection.TargetSetting, selection.Target);
         Bind(runner, ComparisonWorkerSelection.NodeCountSetting, selection.NodeCount.ToString(CultureInfo.InvariantCulture));
         Bind(runner, ComparisonWorkerSelection.ScenarioSetting, selection.Scenario.ToString());
         Bind(runner, ComparisonWorkerSelection.ProfileSetting, selection.Profile);
+        if (selection.VectorProfile is { } vectorProfile)
+        {
+            Bind(runner, ComparisonWorkerSelection.VectorProfileSetting, vectorProfile.Id);
+        }
         runner.WithEnvironment(StorageSetting, Storage);
         var context = new IsolatedResourceContext(builder, selection, runner, root);
-        if (selection.ScaledProfile is not null)
+        if (selection.ScaledProfile is not null || selection.VectorProfile is not null)
         {
             builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
                 builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory),
@@ -44,7 +50,7 @@ internal static class IsolatedBenchmarkResources
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))
         {
-            context.BindImage(IsolatedNeo4jResources.ImageReference);
+            context.BindImage(IsolatedUnsupportedTargetImage.For(selection.Target));
             return;
         }
         IsolatedNativeDispatcher.Add(context);

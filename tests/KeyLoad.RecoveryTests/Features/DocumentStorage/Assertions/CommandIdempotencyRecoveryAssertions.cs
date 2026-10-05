@@ -12,14 +12,14 @@ internal static class CommandIdempotencyRecoveryAssertions
     internal static async Task AssertRecoveredStoreAsync(string root, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         // This sidecar is the frozen client request only; recovered state comes solely from ZoneTree.
         var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(root,
             CommandIdempotencyCrashContract.CommandEvidenceFile, cancellationToken);
         var expected = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitReceipt>(root,
             CommandIdempotencyCrashContract.ReceiptEvidenceFile, cancellationToken);
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(root, CommandIdempotencyCrashContract.SeedTailEvidenceFile, cancellationToken);
-        var durable = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>()
+        var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>()
             ?? throw new InvalidOperationException("The authorized command outcome was not retained after restart.");
         CommandIdempotencyCrashAssertions.RequireSameReceipt(durable, expected);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(
@@ -34,7 +34,8 @@ internal static class CommandIdempotencyRecoveryAssertions
 
     private static void AssertHealthyFollowUp(DatabaseEngine database, ZoneTreeStore store, long expectedTail)
     {
-        var receipt = database.Outcome(CrashFixtureValues.Principal, CommandIdempotencyCrashContract.FollowUpCommandId)?.Get<CommitReceipt>()
+        var receipt = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
+            CommandIdempotencyCrashContract.Partition, CrashFixtureValues.Principal, CommandIdempotencyCrashContract.FollowUpCommandId)))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException("The healthy follow-up outcome was not persisted.");
         CommandIdempotencyCrashAssertions.RequireFollowUp(receipt);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, CommandIdempotencyCrashContract.Partition).Head.Tail;

@@ -15,7 +15,7 @@ internal sealed class ChangeFeedReadTests
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
-        var engine = new DatabaseEngine(db.Store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 });
+        var engine = new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         OperationResult Write(params Mutation[] mutations)
         {
             var id = Guid.NewGuid();
@@ -116,7 +116,7 @@ internal sealed class ChangeFeedReadTests
         db.Store.Compact();
         db.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(db.Directory));
-        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy());
+        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(1);
         await Assert.That(engine.ReadChangeFeed("root", new(db.Partition, "orders")).Changes).HasSingleItem();
         var id = Guid.NewGuid();

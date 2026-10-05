@@ -26,7 +26,7 @@ internal sealed class PreparedQuery
     {
         order = query.Order;
         paths = PredicateEvaluator.Fields(query.Filter).Concat(order.Select(item => item.Path))
-            .Concat(query.Projection.Where(item => item.Path != "*").Select(item => item.Path))
+            .Concat(query.Projection.Where(item => item.Path != SqlSyntax.Star).Select(item => item.Path))
             .Distinct(StringComparer.Ordinal).ToDictionary(path => path, JsonData.PathSegments, StringComparer.Ordinal);
         capacity = (int)Math.Min(maxCandidates, (long)cursorOffset + query.Limit);
         this.ordinalFullReferenceOrder = ordinalFullReferenceOrder;

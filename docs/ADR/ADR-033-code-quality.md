@@ -703,6 +703,15 @@ flowchart LR
 
 ### Accepted functional coverage implementation, 2026-10-05
 
+TASK-CQ-FUNCTIONAL-COVERAGE-001A additionally freezes the read-only compiled-source
+identity prerequisite in CodeQuality. Root first implements the new feature-local
+native PE/portable-PDB helper, checks actual current Release identities and real
+stale-source/mismatched-PDB rejection, then joins it into the existing Get-Fc
+preparation and post-settlement manifest. Preserve all original artifacts and
+separate generated/unbound documents. No product/public/persistence format or
+dependency change occurs; tooling rollback restores a coherent verifier while
+retaining reports. Neither static inspection nor unbound coverage closes any gate.
+
 REQ-CQ-009 / AC-CQ-018..021 in CodeQuality implement the owner's mandatory
 functional-only coverage and complete-operation testing correction. Preserve every
 existing analyzer/site contract, native test gate and 80/70/90/no-decrease rule.

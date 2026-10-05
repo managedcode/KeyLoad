@@ -8,7 +8,12 @@ public static class KeySpace
     private const string CatalogSpace = "catalog";
     private const string PrincipalSpace = "principal";
     private const string ApiKeySpace = "api-key";
-    private const string OutcomeSpace = "outcome";
+    private const string LegacyOutcomeSpace = "outcome";
+    private const string ScopedOutcomeSpace = "outcome-v2";
+    private const string GlobalOutcomeScope = "global";
+    private const string UnknownOutcomeScope = "unknown";
+    private const string LegacyOutcomeLocatorSpace = "outcome-locator-v1";
+    private const string ScopedOutcomeLocatorSpace = "outcome-locator-v2";
     private const string SystemSpace = "system";
     private const string AppliedName = "last-applied";
     private const string ClockName = "clock";
@@ -52,13 +57,21 @@ public static class KeySpace
     /// <returns>The canonical independent credential key.</returns>
     public static byte[] ApiKey(string id) => KeyCodec.Encode(ApiKeySpace, id);
 
-    /// <summary>Creates an owned idempotent-outcome key scoped to its principal.</summary>
-    /// <param name="principal">Verified principal identifier.</param>
-    /// <param name="id">Stable operation identifier.</param>
-    /// <returns>The canonical independent outcome key.</returns>
-    public static byte[] Outcome(string principal, Guid id) => KeyCodec.Encode(OutcomeSpace, principal, id);
+    internal static byte[] LegacyOutcomeKey(string principal, Guid id)
+        => KeyCodec.Encode(LegacyOutcomeSpace, principal, id);
 
-    /// <summary>Creates a partition-scoped locator for a globally keyed command outcome.</summary>
-    internal static byte[] OutcomeLocator(PartitionRef partition, string principal, Guid id)
-        => Partition("outcome-locator-v1", partition, principal, id);
+    internal static byte[] PartitionOutcome(PartitionRef partition, string principal, Guid id)
+        => Partition(ScopedOutcomeSpace, partition, principal, id);
+
+    internal static byte[] GlobalOutcome(string principal, Guid id)
+        => KeyCodec.Encode(ScopedOutcomeSpace, GlobalOutcomeScope, principal, id);
+
+    internal static byte[] UnknownOutcome(string principal, Guid id)
+        => KeyCodec.Encode(ScopedOutcomeSpace, UnknownOutcomeScope, principal, id);
+
+    internal static byte[] OutcomeLocatorV1(PartitionRef partition, string principal, Guid id)
+        => Partition(LegacyOutcomeLocatorSpace, partition, principal, id);
+
+    internal static byte[] OutcomeLocatorV2(PartitionRef partition, string principal, Guid id)
+        => Partition(ScopedOutcomeLocatorSpace, partition, principal, id);
 }

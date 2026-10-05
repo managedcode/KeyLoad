@@ -91,7 +91,7 @@ internal sealed class PhysicalShardCatalogFixture : IDisposable
     {
         var opened = new ZoneTreeStore(new(directory));
         store = opened;
-        Database = new(opened, new AuthorizationPolicy());
+        Database = new(opened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
     }
 
     public void Dispose()

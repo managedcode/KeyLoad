@@ -1,6 +1,6 @@
 namespace KeyLoad.Replication;
 
-internal sealed class PeerDiscoveryReplay(int capacity)
+internal sealed class PeerDiscoveryReplay(int capacity, long timestampWindowMilliseconds)
 {
     private readonly Lock gate = new();
     private readonly HashSet<Guid> nonces = [];
@@ -19,7 +19,7 @@ internal sealed class PeerDiscoveryReplay(int capacity)
             { return false; }
             if (nonces.Count >= capacity)
             { throw Errors.Fail(ErrorCode.ResourceExhausted, PeerDiscoveryProtocol.ReplayCapacityExceeded); }
-            var expires = checked(timestamp + PeerDiscoveryProtocol.LifetimeMilliseconds);
+            var expires = checked(timestamp + timestampWindowMilliseconds);
             nonces.Add(nonce);
             expirations.Enqueue(nonce, expires);
             return true;

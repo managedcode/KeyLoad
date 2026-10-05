@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;
@@ -8,13 +9,17 @@ namespace KeyLoad.Orleans;
 [global::Orleans.GrainType(DueCoordinatorAliases.Coordinator), global::Orleans.Placement.PreferLocalPlacement]
 internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, DatabaseEngine database,
     ICommitCoordinator coordinator, IServiceProvider services, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer)
+    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
+    IOptions<DueCoordinationOptions> options, IOptions<GrainRoutingOptions> routingOptions)
     : Grain, IRecurringDueCoordinatorGrain
 {
+    private readonly DueCoordinationOptions settings = options.Value;
+
     public async Task<DueDispatchResult> ProcessDueAsync(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(DueCoordinatorFields.DispatchDeadline);
+        var dispatchDeadline = settings.DispatchDeadline;
+        deadline.CancelAfter(dispatchDeadline);
         var token = deadline.Token;
         ValidateHint(hint);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
@@ -32,7 +37,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     {
         var requestId = Guid.NewGuid();
         var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
-        if (first.Error != ErrorCode.UnknownWriteOutcome)
+        if (first.Error != ErrorCode.UnknownWriteOutcome
+            || settings.UncertaintyRetryCount == DueCoordinationOptions.NoUncertaintyRetries)
         {
             return first;
         }
@@ -49,7 +55,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         var request = GrainFactory.GetGrain<IRequestGrain>(requestId);
         return await GrainRequestStreamConsumer.DrainAsync(
             token => request.ExecuteStreamAsync(signed, token), chunkSerializer, requestId, clock,
-            cancellationToken).ConfigureAwait(true);
+            cancellationToken, routingOptions).ConfigureAwait(true);
     }
 
     private void ValidateHint(DueWorkHint hint)
@@ -57,9 +63,11 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         if (hint is null || hint.Lane is null || hint.Lane.Partition is null
             || hint.Lane.Partition.AtomicPartitionId != this.GetPrimaryKeyString()
             || hint.Id == Guid.Empty || string.IsNullOrWhiteSpace(hint.CreatorPrincipalId)
-            || hint.Revision < 1 || hint.Generation < 0 || hint.Ordinal < 0
-            || !Enum.IsDefined(hint.Kind) || hint.Kind == DueWorkKind.Schedule && hint.Generation < 1
-            || hint.Kind == DueWorkKind.Saga && hint.Generation != 0)
+            || hint.Revision < DueCoordinatorFields.FirstRevision
+            || hint.Generation < DueCoordinatorFields.NoGeneration || hint.Ordinal < DueCoordinatorFields.FirstOrdinal
+            || !Enum.IsDefined(hint.Kind)
+            || hint.Kind == DueWorkKind.Schedule && hint.Generation < DueCoordinatorFields.FirstScheduleGeneration
+            || hint.Kind == DueWorkKind.Saga && hint.Generation != DueCoordinatorFields.NoGeneration)
         {
             throw Errors.Fail(ErrorCode.Validation, DueCoordinatorFields.InvalidHint);
         }

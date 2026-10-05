@@ -7,6 +7,7 @@ using ManagedCode.Orleans.Identity.Core.Serializations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Metadata;
+using Orleans.Hosting;
 using Orleans.Serialization;
 using Orleans.TestingHost;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
@@ -186,6 +187,7 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
     public void Configure(ISiloBuilder siloBuilder)
     {
         var fixture = RequestCqrsClusterFixture.Current;
+        siloBuilder.AddActivityPropagation();
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)

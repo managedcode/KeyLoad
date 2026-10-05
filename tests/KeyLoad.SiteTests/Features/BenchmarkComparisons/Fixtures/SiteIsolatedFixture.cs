@@ -29,7 +29,7 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
             input = inputs.Aggregate,
             output = projectionPath,
         }, token);
-        if (!result.GetProperty(SiteIsolatedFields.Ok).GetBoolean() || result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32() != 270)
+        if (!result.GetProperty(SiteIsolatedFields.Ok).GetBoolean() || result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32() != SiteIsolatedInventory.ControlWorkers(inputs.Site.MeasuredRevision))
         {
             throw new InvalidOperationException(SiteIsolatedInputs.MissingEvidence);
         }

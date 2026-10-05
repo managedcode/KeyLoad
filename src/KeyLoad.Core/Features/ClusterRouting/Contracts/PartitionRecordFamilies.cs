@@ -31,6 +31,8 @@ internal static class PartitionRecordFamilies
     internal const string Outbox = "outbox";
     internal const string OutboxHead = "outbox-head";
     internal const string OutcomeLocator = "outcome-locator-v1";
+    internal const string OutcomeV2 = "outcome-v2";
+    internal const string OutcomeLocatorV2 = "outcome-locator-v2";
     internal const string ProjectionConsumer = "projection-consumer";
     internal const string ProjectionReceipt = "projection-receipt";
     internal const string QueueCounters = "queue-counters";
@@ -89,6 +91,8 @@ internal static class PartitionRecordFamilies
         Outbox,
         OutboxHead,
         OutcomeLocator,
+        OutcomeLocatorV2,
+        OutcomeV2,
         ProjectionConsumer,
         ProjectionReceipt,
         QueueCounters,

@@ -24,7 +24,7 @@ internal sealed class ResourceProtocolFailureTests
         var failure = database.Database.Apply(operation);
 
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(database.Database.Outcome(RootPrincipal, operation.Id)).IsEqualTo(failure);
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsEqualTo(failure);
         var absent = database.Store.Read(view => view.GetRecord<ResourceDefinition>(
             KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, CollectionName)));
         await Assert.That(absent).IsNull();

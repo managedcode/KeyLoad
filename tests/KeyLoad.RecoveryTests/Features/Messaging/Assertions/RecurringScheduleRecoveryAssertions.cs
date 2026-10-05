@@ -12,7 +12,7 @@ internal static class RecurringScheduleRecoveryAssertions
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = await ReadOperationAsync(root, cancellationToken);
         var seedTail = await ReadSeedTailAsync(root, cancellationToken);
         var inspection = Inspect(database);
@@ -53,7 +53,7 @@ internal static class RecurringScheduleRecoveryAssertions
         var message = database.InspectMessage(CrashFixtureValues.Principal, lane,
             RecurringScheduleCrashScenario.OccurrenceId(RecurringScheduleCrashScenario.Generation,
                 RecurringScheduleCrashScenario.FirstOrdinal));
-        var outcome = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>();
+        var outcome = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         var entry = ReadEntry(store, seedTail + 1);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, RecurringScheduleCrashScenario.Partition).Head.Tail;
         var committed = inspection.NextOrdinal == 1;

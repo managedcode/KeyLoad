@@ -69,13 +69,13 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
     private static async Task AssertRecoveredAndRetriedAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var tail = long.Parse(await File.ReadAllTextAsync(Path.Combine(root,
             DatabaseCompositionCrashScenario.SeedOutboxTailFile), cancellationToken), CultureInfo.InvariantCulture);
         var operation = JsonDefaults.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, DatabaseCompositionCrashScenario.CommandFile), cancellationToken));
         var committed = await AssertAtomicRecoveredCutAsync(store, database, tail, operation, stage);
-        var recoveredReceipt = database.Outcome(DatabaseCompositionCrashScenario.Principal, operation.Id)?.Get<CommitReceipt>();
+        var recoveredReceipt = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         var first = database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(first.Mutations.Length).IsEqualTo(2);
         if (committed)
@@ -97,7 +97,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
             new(partition, DatabaseCompositionCrashScenario.TargetQueue),
             DatabaseCompositionCrashScenario.MessagePrefix + DatabaseCompositionCrashScenario.EdgePrefix
             + DatabaseCompositionCrashScenario.SourceMessage);
-        var outcome = database.Outcome(DatabaseCompositionCrashScenario.Principal, operation.Id);
+        var outcome = OutcomeStoreOracle.Read(database.Store, operation);
         var observedTail = database.GetOutboxStatus(DatabaseCompositionCrashScenario.Principal, partition).Head.Tail;
         var outbox = store.Read(view => new[]
         {

@@ -203,7 +203,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     private void Open(DatabaseLimits? limits, TimeProvider? timeProvider)
     {
         store = new(new(directory));
-        database = new(store, new AuthorizationPolicy(), limits, timeProvider);
+        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), timeProvider);
     }
 
     private void Submit<T>(OperationKind kind, T payload)

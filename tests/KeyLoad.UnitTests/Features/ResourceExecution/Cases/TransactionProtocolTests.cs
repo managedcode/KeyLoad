@@ -38,7 +38,7 @@ internal sealed class TransactionProtocolTests
         var id = Guid.NewGuid();
         var result = db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), id: id);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(db.Database.Outcome("root", id)!.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, "root", id)!.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument("orders", "valid-after-rejection", "{}", 0));
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "valid-after-rejection"))).IsNotNull();
@@ -52,7 +52,7 @@ internal sealed class TransactionProtocolTests
             Guid rejectedId;
             using (var store = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 }))
             {
-                var database = new DatabaseEngine(store, new AuthorizationPolicy());
+                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
                 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
                     DatabaseEngine.Credential("root", "root", "root.frame-test-credential-32-characters"));
                 PhysicalShardTestBootstrap.Bootstrap(database, "root");
@@ -74,10 +74,10 @@ internal sealed class TransactionProtocolTests
                 await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(1);
             }
             using var reopened = new ZoneTreeStore(new(root) { MaxFrameBytes = 4_096 });
-            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy());
+            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
             PhysicalShardTestBootstrap.RequireExisting(recovered);
             await Assert.That(recovered.LastApplied).IsEqualTo(4);
-            await Assert.That(recovered.Outcome("root", rejectedId)!.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(OutcomeStoreOracle.ReadPartition(reopened, new PartitionRef("tenant", "database", "orders", PartitionId), "root", rejectedId)!.Error).IsEqualTo(ErrorCode.ResourceExhausted);
         }
         finally
         {

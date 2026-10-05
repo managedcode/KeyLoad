@@ -22,14 +22,14 @@ internal sealed class ReplicaNativeSnapshotTests
         using var sourceFiles = new ReplicaNativeFiles();
         using var targetFiles = new ReplicaNativeFiles(sourceFiles.Configuration.Incarnation, sourceFiles.SigningKey);
         using var sourceLogStore = sourceFiles.Open();
-        using var sourceLog = new DurableReplicaLog(sourceLogStore, sourceFiles.Configuration);
+        using var sourceLog = new DurableReplicaLog(sourceLogStore, UnitExecutionOptions.ReplicaConfiguration(sourceFiles.Configuration));
         using var targetLogStore = targetFiles.Open();
-        using var targetLog = new DurableReplicaLog(targetLogStore, targetFiles.Configuration);
+        using var targetLog = new DurableReplicaLog(targetLogStore, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration));
         using var source = sourceFiles.Open(CanonicalDirectory);
         using var target = targetFiles.Open(CanonicalDirectory);
         var (sender, image) = CreateNativeSnapshot(source, sourceLog, sourceFiles.Configuration);
         target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        var receiver = new ReplicaSnapshotStore(target, targetLog, targetFiles.Configuration);
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(targetFiles.Configuration));
         await Assert.That(receiver.Begin(image)).IsEqualTo(0);
         var first = sender.ReadChunk(image.TransferId, 0, FirstChunkBytes);
         await Assert.That(receiver.Append(image.TransferId, 0, first)).IsEqualTo(first.LongLength);
@@ -51,7 +51,7 @@ internal sealed class ReplicaNativeSnapshotTests
     private static async Task ResumeAndCompleteAsync(ReplicaSnapshotStore sender, ReplicaSnapshot image,
         IAtomicStore target, IDurableReplicaLog targetLog, ReplicaConfiguration configuration, long expectedOffset)
     {
-        var receiver = new ReplicaSnapshotStore(target, targetLog, configuration);
+        var receiver = new ReplicaSnapshotStore(target, targetLog, UnitExecutionOptions.ReplicaConfiguration(configuration));
         receiver.Recover();
         var offset = receiver.Begin(image);
         await Assert.That(offset).IsEqualTo(expectedOffset);
@@ -74,7 +74,7 @@ internal sealed class ReplicaNativeSnapshotTests
             tx.PutRecord(KeyCodec.Encode(ValueKey), NewValue);
             return true;
         });
-        var sender = new ReplicaSnapshotStore(source, log, configuration);
+        var sender = new ReplicaSnapshotStore(source, log, UnitExecutionOptions.ReplicaConfiguration(configuration));
         return (sender, sender.Create(1, 1));
     }
 

@@ -7,6 +7,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload workload, TimeProvider timeProvider)
 {
+    private const string SampleValueFormat = "R";
+
     private const string LibraryName = "ManagedCode.TimeSeries";
     private const string LibraryStorage = "in-memory bucket aggregation";
     private const string LibraryPersistence = "none; no persistence, recovery, or replication";
@@ -83,7 +85,7 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
         {
             content.Append(sample.EventId).Append('|')
                 .Append(sample.Timestamp.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append('|')
-                .Append(sample.Value.ToString("R", CultureInfo.InvariantCulture)).Append('|')
+                .Append(sample.Value.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append('|')
                 .Append(TimeSeriesJsonCanonicalizer.Canonicalize(sample.TagsJson)).Append('\n');
         }
 
@@ -96,7 +98,7 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
         foreach (var bucket in buckets.OrderBy(item => item.TimestampUtc.UtcTicks))
         {
             content.Append(bucket.TimestampUtc.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append('|')
-                .Append(bucket.Sum.ToString("R", CultureInfo.InvariantCulture)).Append('\n');
+                .Append(bucket.Sum.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append('\n');
         }
 
         return Hash(content);

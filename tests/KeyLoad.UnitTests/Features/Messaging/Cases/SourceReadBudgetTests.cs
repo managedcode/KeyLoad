@@ -21,10 +21,8 @@ internal sealed class SourceReadBudgetTests
     {
         using var database = CreateTopicDatabase();
         var requiredBytes = TopicReadBytes(database);
-        var exact = new DatabaseEngine(database.Store, database.Database.Authorization,
-            new() { MaxQueryReadBytes = requiredBytes });
-        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization,
-            new() { MaxQueryReadBytes = requiredBytes - 1 });
+        var exact = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = requiredBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = requiredBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
 
         var before = database.Store.GetReadDiagnostics();
@@ -81,7 +79,7 @@ internal sealed class SourceReadBudgetTests
 
         using var empty = new TestDatabase();
         ConfigureTopic(empty, TopicName);
-        var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, new() { MaxBatchBytes = TooSmallBatchByteLimit });
+        var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = TooSmallBatchByteLimit }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var envelopeError = Assert.ThrowsExactly<KeyLoadException>(() => limited.ReadEventSource("root",
             new(new(empty.Partition, TopicName, EventSourceKind.Topic))));
         await Assert.That(envelopeError.Code).IsEqualTo(ErrorCode.BudgetExceeded);

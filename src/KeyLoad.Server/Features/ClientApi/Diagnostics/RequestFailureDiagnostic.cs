@@ -38,7 +38,7 @@ internal static class RequestFailureDiagnostic
             ? knownPhase
             : RequestFailurePhase.None;
         RequestFailureDiagnosticLog.Failure(logger, phase, Category(error), OperationResponseHeaders.RequestId(context),
-            TimeProvider.System.GetUtcNow().ToString("O", CultureInfo.InvariantCulture));
+            TimeProvider.System.GetUtcNow().ToString(FailureUtcFormat, CultureInfo.InvariantCulture));
     }
 
     private static RequestFailureCategory Category(Exception error) => error switch
@@ -97,6 +97,8 @@ internal enum RequestFailureCategory
 /// <summary>Owns the stable event ID and strongly typed, bounded failure log template.</summary>
 internal static class RequestFailureDiagnosticLog
 {
+    private const string FailureUtcFormat = "O";
+
     private const string FailureLog = "Database request failed at {FailurePhase} with {FailureCategory} for operation {OperationId} at {FailureUtc}.";
     private const int FailureEventId = 1001;
 

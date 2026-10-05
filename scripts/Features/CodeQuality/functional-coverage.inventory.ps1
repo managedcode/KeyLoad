@@ -129,7 +129,7 @@ function Invoke-FcVerify([string] $Root, [string] $EvidenceRoot, [string] $Contr
     if ($UnitExitCode -ne 0 -or $ScalarExitCode -ne 0) { throw $t.ErrorIncomplete }
     $contract = Read-FcContract $ContractPath
     if ($Filter -cne $contract.contributors.filter) { throw $t.ErrorIncomplete }
-    [void] (Assert-FcManifest $Root $EvidenceRoot $ContractPath)
+    $manifest = Assert-FcManifest $Root $EvidenceRoot $ContractPath
     $sourceInventory = @(Get-FcSourceInventory $Root $contract)
     $runInputs = @(
         [ordered]@{ suite = 'unit'; coverage = $UnitCobertura; trx = $UnitTrx },
@@ -142,11 +142,12 @@ function Invoke-FcVerify([string] $Root, [string] $EvidenceRoot, [string] $Contr
         $coveragePath = Resolve-FcEvidenceFile $EvidenceRoot $input.coverage
         $trxPath = Resolve-FcEvidenceFile $EvidenceRoot $input.trx
         $coverage = Read-FcCobertura $Root $coveragePath $sourceInventory
-        $trx = Read-FcTrx $trxPath $input.suite @($contract.contributors.testClasses)
+        $trx = Read-FcTrx $trxPath $input.suite $contract.contributors.testNamespace @($contract.contributors.testClasses)
         $runs.Add([ordered]@{ trx = $trx; coverage = $coverage; reportHash = Get-FcHash $coveragePath; trxHash = Get-FcHash $trxPath })
     }
-    $report = New-FcReport @($runs) $Filter
+    $manifestPath = Join-Path $EvidenceRoot $t.ManifestName
+    $report = New-FcReport @($runs) $Filter $sourceInventory $manifest $manifestPath
     Write-FcJson (Join-Path $EvidenceRoot $t.ReportJsonName) $report
     [IO.File]::WriteAllText((Join-Path $EvidenceRoot $t.ReportMarkdownName), (Convert-FcReportToMarkdown $report), [Text.UTF8Encoding]::new($false))
-    if ($report.unionLineCounts.total -le 0) { throw $t.ErrorIncomplete }
+    if ($report.unionLineCounts.valid -le 0) { throw $t.ErrorIncomplete }
 }

@@ -4,9 +4,11 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadFailureDiagnostics
 {
+    private const int ObservationDeadlineSeconds = 2;
+
     private const string FailureCode = "KeyLoad:ResourceExhausted";
     private const string SetupPrefix = "setup:";
-    private static readonly TimeSpan ObservationDeadline = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan ObservationDeadline = TimeSpan.FromSeconds(ObservationDeadlineSeconds);
 
     internal static bool IsEligible(ComparisonCase failed)
     {

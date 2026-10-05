@@ -206,6 +206,7 @@ jobs:
       KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
       KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
       KEYLOAD_SCALE_PROFILE: ${{ matrix.scaleProfile }}
+      KEYLOAD_VECTOR_PROFILE: ${{ matrix.vectorProfile }}
       Benchmarks__Target: ${{ matrix.target }}
       Benchmarks__NodeCount: ${{ matrix.nodeCount }}
       Benchmarks__Scenario: ${{ matrix.scenario }}

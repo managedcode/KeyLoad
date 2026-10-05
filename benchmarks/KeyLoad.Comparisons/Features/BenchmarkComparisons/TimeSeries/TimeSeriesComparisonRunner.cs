@@ -2,6 +2,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonRunner
 {
+    private const string RunIdentityFormat = "N";
+
     private const string LibraryName = "ManagedCode.TimeSeries";
 
     internal static async Task<int> RunAsync(ITimeSeriesPersistentTarget[] targets, string sourceRevision,
@@ -11,7 +13,7 @@ internal static class TimeSeriesComparisonRunner
         ArgumentNullException.ThrowIfNull(targets);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceRevision);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputDirectory);
-        var workload = TimeSeriesComparisonWorkloadFactory.Create(Guid.NewGuid().ToString("N"));
+        var workload = TimeSeriesComparisonWorkloadFactory.Create(Guid.NewGuid().ToString(RunIdentityFormat));
         var recorder = new TimeSeriesComparisonRecorder(workload, TimeProvider.System);
         foreach (var target in targets)
         {

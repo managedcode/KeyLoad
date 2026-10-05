@@ -4,6 +4,9 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextValidation
 {
+    private const string GenerationIdentityFormat = "N";
+    private const string ParentDirectorySegment = "..";
+
     internal static void ValidateManifest(NativeTextManifest manifest, TextProjectionScope scope, int maximumRecords)
     {
         if (manifest is null || manifest.FormatVersion != NativeTextProtocol.FormatVersion || manifest.Scope != scope
@@ -36,9 +39,9 @@ internal static class NativeTextValidation
     internal static bool IsGenerationLeaf(string leaf)
         => leaf.StartsWith(NativeTextProtocol.GenerationPrefix, StringComparison.Ordinal)
             && Guid.TryParseExact(leaf[NativeTextProtocol.GenerationPrefix.Length..], "N", out var id)
-            && string.Equals(leaf, NativeTextProtocol.GenerationPrefix + id.ToString("N"), StringComparison.Ordinal);
+            && string.Equals(leaf, NativeTextProtocol.GenerationPrefix + id.ToString(GenerationIdentityFormat), StringComparison.Ordinal);
 
-    internal static string GenerationLeaf() => NativeTextProtocol.GenerationPrefix + Guid.NewGuid().ToString("N");
+    internal static string GenerationLeaf() => NativeTextProtocol.GenerationPrefix + Guid.NewGuid().ToString(GenerationIdentityFormat);
 
     internal static void ValidateOwnedPaths(NativeTextOwnedPath[] paths)
     {
@@ -53,7 +56,7 @@ internal static class NativeTextValidation
         {
             if (path is null || string.IsNullOrWhiteSpace(path.RelativePath)
                 || path.RelativePath.StartsWith('/')
-                || path.RelativePath.Contains("..", StringComparison.Ordinal)
+                || path.RelativePath.Contains(ParentDirectorySegment, StringComparison.Ordinal)
                 || path.RelativePath.Contains('\\', StringComparison.Ordinal)
                 || previous is not null && StringComparer.Ordinal.Compare(previous, path.RelativePath) >= 0)
             {
@@ -92,7 +95,7 @@ internal static class NativeTextValidation
         foreach (var file in files)
         {
             if (file is null || string.IsNullOrWhiteSpace(file.RelativePath) || file.RelativePath.StartsWith('/')
-                || file.RelativePath.Contains("..", StringComparison.Ordinal)
+                || file.RelativePath.Contains(ParentDirectorySegment, StringComparison.Ordinal)
                 || file.RelativePath.Contains('\\', StringComparison.Ordinal) || file.Length < 0
                 || file.Sha256 is null || file.Sha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes
                 || previous is not null && StringComparer.Ordinal.Compare(previous, file.RelativePath) >= 0

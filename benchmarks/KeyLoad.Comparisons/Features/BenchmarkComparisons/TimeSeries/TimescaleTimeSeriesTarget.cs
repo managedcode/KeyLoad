@@ -6,11 +6,13 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 internal sealed class TimescaleTimeSeriesTarget(string connectionString, string? image = null)
     : ITimeSeriesPersistentTarget, ITimeSeriesAggregationTarget
 {
+    private const int CleanupTimeoutSeconds = 15;
+
     private const string TargetName = "TimescaleDB TimeSeries";
     private const string StorageGuarantee =
         "Container-lifetime single-node TimescaleDB hypertable; no cross-run volume and no replica guarantee";
     private const string AcknowledgementGuarantee = "PostgreSQL transaction commit acknowledged by one server";
-    private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(CleanupTimeoutSeconds);
     private readonly Guid ownerId = Guid.NewGuid();
     private string schemaName = string.Empty;
     private int ownsSchema;

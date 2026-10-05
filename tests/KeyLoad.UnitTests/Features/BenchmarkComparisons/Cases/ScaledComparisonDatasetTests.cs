@@ -55,8 +55,7 @@ internal sealed class ScaledComparisonDatasetTests
         foreach (var (id, count) in new[]
         {
             ("scaled-100k-c16", 100_000),
-            ("scaled-1m-c16", 1_000_000),
-            ("scaled-5m-c16", 5_000_000)
+            ("scaled-1m-c16", 1_000_000)
         })
         {
             var profile = ScaledComparisonProfileParser.Parse(id);

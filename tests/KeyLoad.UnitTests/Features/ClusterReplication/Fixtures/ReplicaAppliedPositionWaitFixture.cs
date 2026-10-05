@@ -1,0 +1,94 @@
+using System.Text.Json;
+using KeyLoad.Core;
+using KeyLoad.Core.Features.DocumentStorage;
+using KeyLoad.Replication;
+using KeyLoad.Storage.ZoneTree;
+
+namespace KeyLoad.UnitTests;
+
+internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
+{
+    private const string RootPrincipal = "root";
+    private const string ReplicaKey = "replica";
+    private const string BodyFormat = "{{\"value\":\"{0}\"}}";
+    private readonly ZoneTreeStore replica;
+
+    internal ReplicaAppliedPositionWaitFixture()
+    {
+        Canonical = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
+            Canonical.Store.Identity.Incarnation) { BenchmarkTopology = true };
+        replica = new(new(Configuration.Directory)
+        {
+            Incarnation = Configuration.Incarnation,
+            SigningKey = Canonical.Store.Identity.SigningKey
+        });
+        var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
+        var execution = ReplicaExecutionTestOptions.Execution();
+        Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(configuration), canonicalDatabase: Canonical.Database);
+        Materializer = new(Canonical.Database, Log,
+            new ReplicaSnapshotStore(Canonical.Store, Log, UnitExecutionOptions.ReplicaConfiguration(configuration)), execution);
+        Consensus = new(Materializer, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution(), execution, TimeProvider.System);
+    }
+
+    internal TestDatabase Canonical { get; }
+    internal ReplicaConfiguration Configuration { get; }
+    internal DurableReplicaLog Log { get; }
+    internal ReplicaMaterializer Materializer { get; }
+    internal ReplicaConsensus Consensus { get; }
+
+    internal void ConfigureResource()
+    {
+        Canonical.Configure(ReplicaAppliedPositionWaitTests.Resource, ResourceKind.Collection);
+    }
+
+    internal void Commit(params string[] documentIds)
+    {
+        var entries = new List<ReplicaEntry>(documentIds.Length);
+        var nextIndex = checked(Log.State.LastIndex + 1);
+        if (Log.State.Term == 0)
+        {
+            Log.SaveTermAndVote(1, RootPrincipal);
+        }
+        foreach (var documentId in documentIds)
+        {
+            var commandId = Guid.NewGuid();
+            var request = new CommandRequest(commandId, Canonical.Partition,
+                [new PutDocument(ReplicaAppliedPositionWaitTests.Resource, documentId,
+                    string.Format(System.Globalization.CultureInfo.InvariantCulture, BodyFormat, documentId))]);
+            var operation = new ReplicatedOperation(commandId, OperationKind.Batch, RootPrincipal,
+                TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
+            entries.Add(new(nextIndex++, 1, Canonical.Database.NormalizeOperation(operation)));
+        }
+        Log.Append(entries);
+        Materializer.Commit(nextIndex - 1);
+    }
+
+    internal async Task AssertDocument(string documentId)
+    {
+        var record = Canonical.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(
+            Canonical.Partition, ReplicaAppliedPositionWaitTests.Resource, documentId)));
+        await Assert.That(record).IsNotNull();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Consensus.DisposeAsync();
+        }
+        finally
+        {
+            try
+            {
+                await Materializer.DisposeAsync();
+            }
+            finally
+            {
+                Log.Dispose();
+                replica.Dispose();
+                Canonical.Dispose();
+            }
+        }
+    }
+}

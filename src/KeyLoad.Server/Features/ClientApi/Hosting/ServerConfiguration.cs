@@ -6,22 +6,29 @@ using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.ServiceDefaults;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
+[ConfigurationBinding]
 internal static class ServerConfiguration
 {
     internal static WebApplication Build(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
-        var node = ReadNode(builder.Configuration);
-        builder.WebHost.ConfigureKestrel(server => server.Limits.MaxRequestBodySize = ServerProtocol.KestrelMaximumBodyBytes);
+        builder.Services.AddRuntimeOptions(builder.Configuration);
+        builder.Services.AddOptions<KestrelServerOptions>().Configure<IOptions<ServerExecutionOptions>>(
+            (server, configured) => server.Limits.MaxRequestBodySize = configured.Value.MaximumBodyBytes);
         builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
-        builder.Services.ConfigureHttpJsonOptions(options => ConfigureJson(options.SerializerOptions));
-        Register(builder.Services, node);
-        McpServerComposition.Register(builder, node);
+        builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()
+            .Configure<IOptions<ServerExecutionOptions>>((options, configured) =>
+                ConfigureJson(options.SerializerOptions, configured.Value.MaximumJsonDepth));
+        Register(builder.Services);
+        McpServerComposition.Register(builder);
         var app = builder.Build();
+        _ = app.Services.GetRequiredService<IOptions<NodeOptions>>().Value;
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>()).InvokeAsync);
@@ -39,36 +46,19 @@ internal static class ServerConfiguration
     internal static NodeOptions ReadOfflineNode(string destination)
     {
         var builder = WebApplication.CreateBuilder([]);
-        var section = builder.Configuration.GetSection(ServerProtocol.ConfigurationSection);
-        var node = (section.Get<NodeOptions>() ?? new())
-            with
-        { DataDirectory = destination };
-        MembershipAuthoritySettingsValidator.ValidateSection(section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
-        node.Validate();
-        return ReadRequestProbes(node, builder.Configuration);
+        builder.Configuration[string.Join(ConfigurationPath.KeyDelimiter,
+            ServerProtocol.ConfigurationSection, nameof(NodeOptions.DataDirectory))] = destination;
+        var services = new ServiceCollection();
+        services.AddRuntimeOptions(builder.Configuration);
+        using var provider = services.BuildServiceProvider();
+        return provider.GetRequiredService<IOptions<NodeOptions>>().Value;
     }
 
-    private static NodeOptions ReadNode(ConfigurationManager configuration)
-    {
-        var section = configuration.GetSection(ServerProtocol.ConfigurationSection);
-        var node = section.Get<NodeOptions>() ?? new();
-        MembershipAuthoritySettingsValidator.ValidateSection(section.GetSection(MembershipAuthoritySettingsProtocol.Section), node.MembershipAuthority);
-        node.Validate();
-        return ReadRequestProbes(node, configuration);
-    }
-
-    private static NodeOptions ReadRequestProbes(NodeOptions node, IConfiguration configuration)
-        => node with
-        {
-            RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
-                node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp)
-        };
-
-    private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options)
+    private static void ConfigureJson(System.Text.Json.JsonSerializerOptions options, int maximumDepth)
     {
         options.PropertyNameCaseInsensitive = false;
         options.UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow;
-        options.MaxDepth = ServerProtocol.MaximumJsonDepth;
+        options.MaxDepth = maximumDepth;
         options.RespectNullableAnnotations = true;
         options.RespectRequiredConstructorParameters = true;
         foreach (var converter in JsonDefaults.Options.Converters)
@@ -77,32 +67,38 @@ internal static class ServerConfiguration
         }
     }
 
-    private static void Register(IServiceCollection services, NodeOptions options)
+    private static void Register(IServiceCollection services)
     {
-        services.AddSingleton(options);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<AdminHttpMetrics>();
         services.AddSingleton<AdminNodeObserver>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
-        services.AddSingleton(new CommandAdmissionGovernor(options.CommandAdmission));
-        services.AddSingleton(new HttpAdmissionGovernor(options.HttpAdmission));
+        services.AddSingleton(provider => new CommandAdmissionGovernor(
+            provider.GetRequiredService<IOptions<NodeOptions>>().Value.CommandAdmission));
+        services.AddSingleton(provider => new HttpAdmissionGovernor(
+            provider.GetRequiredService<IOptions<NodeOptions>>().Value.HttpAdmission));
         services.AddSingleton<PartitionHost>();
         services.AddSingleton(provider => provider.GetRequiredService<PartitionHost>().Database);
         services.AddSingleton<INodeAdministration, NodeAdministration>();
         services.AddSingleton<OrleansNode>();
         services.AddSingleton<ReplicaMembershipAuthorityOwner>(static _ => new());
-        services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(options,
+        services.AddSingleton<ReplicaMembershipAuthorityEndpoint>(provider => new(
+            provider.GetRequiredService<IOptions<NodeOptions>>(),
             provider.GetRequiredService<ReplicaMembershipAuthorityOwner>(),
-            provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>()));
         services.AddSingleton<GrainRequestCodec>();
-        services.AddSingleton(provider => CreatePeerSecurity(options, provider.GetRequiredService<TimeProvider>()));
+        services.AddSingleton(provider => CreatePeerSecurity(
+            provider.GetRequiredService<IOptions<NodeOptions>>().Value, provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>()));
     }
 
-    private static PeerSecurity CreatePeerSecurity(NodeOptions options, TimeProvider clock)
+    private static PeerSecurity CreatePeerSecurity(NodeOptions options, TimeProvider clock, IOptions<PeerDiscoveryOptions> discovery)
     {
         var credential = Convert.FromBase64String(options.PeerSecret);
         try
-        { return new(credential, clock, TimeSpan.FromMilliseconds(options.PeerConnectTimeoutMilliseconds)); }
+        { return new(credential, clock, discovery); }
         finally
         { CryptographicOperations.ZeroMemory(credential); }
     }

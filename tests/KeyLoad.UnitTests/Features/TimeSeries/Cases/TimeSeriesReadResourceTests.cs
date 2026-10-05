@@ -37,7 +37,7 @@ internal sealed class TimeSeriesReadResourceTests
         var later = Enumerable.Range(1, LaterSamples)
             .Select(index => new SampleData(LaterIdPrefix + index, Timestamp.AddTicks(index), index)).ToImmutableArray();
         db.Commit(new AppendSamples(SetName, Series, later, tags));
-        var bounded = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxQueryReadBytes = 4_096 });
+        var bounded = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 4_096 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         bounded.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
 
         var before = GC.GetAllocatedBytesForCurrentThread();
@@ -79,8 +79,8 @@ internal sealed class TimeSeriesReadResourceTests
         db.Commit(new AppendSamples(SetName, Series, [new(SelectedId, Timestamp, 1)]));
         var expected = db.Database.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
         var length = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxBatchBytes = length });
-        var shortBudget = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxBatchBytes = length - 1 });
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = length }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var shortBudget = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = length - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
 
         var actual = exact.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp));

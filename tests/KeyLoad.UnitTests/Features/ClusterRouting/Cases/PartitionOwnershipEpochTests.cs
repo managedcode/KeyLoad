@@ -55,9 +55,9 @@ internal sealed class PartitionOwnershipEpochTests
         var outboxAfter = database.Store.Read(view => view.ReadOwnedValue(outboxKey));
         await Assert.That(outboxBefore is null && outboxAfter is null
             || outboxBefore is not null && outboxAfter is not null && outboxBefore.SequenceEqual(outboxAfter)).IsTrue();
-        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.Outcome("root", staleId))?.ScopeKind))
+        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(database.Partition, "root", staleId))?.ScopeKind))
             .IsEqualTo(CommandOutcomeScopeKind.Partition);
-        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.Outcome("root", futureId))?.ScopeKind))
+        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(database.Partition, "root", futureId))?.ScopeKind))
             .IsEqualTo(CommandOutcomeScopeKind.Partition);
     }
 
@@ -77,7 +77,7 @@ internal sealed class PartitionOwnershipEpochTests
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome("root", commandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNull();
     }
 
     [Test]
@@ -101,7 +101,7 @@ internal sealed class PartitionOwnershipEpochTests
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome("root", commandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNull();
         await Assert.That(database.Store.Read(view => view.GetRecord<DocumentRecord>(
             DocumentStorageKeys.RecordKey(database.Partition, Resource, "future")))).IsNull();
     }

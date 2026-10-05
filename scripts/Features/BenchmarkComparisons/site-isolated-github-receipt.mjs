@@ -1,8 +1,9 @@
 import { isDeepStrictEqual } from 'node:util';
 import { KEYS, validateCohort } from './aggregate-contracts.mjs';
 import { createIsolatedPlan } from './isolated-plan.mjs';
-import { GH, digestPattern, hashPattern, matchesIsolatedJobName, positive, shaPattern, timestamp } from './isolated-github-contract.mjs';
-import { SITE_GH, artifactLimit, exact, requireSite, safeRelative, siteAggregateSteps } from './site-isolated-github-contract.mjs';
+import { GH, digestPattern, hashPattern, matchesIsolatedJobName, isolatedEvidenceJobName, positive, shaPattern, timestamp } from './isolated-github-contract.mjs';
+import { SITE_GH, artifactLimit, exact, requireSite, safeRelative, siteAggregateSteps,
+  siteEvidencePlans, siteEvidenceSuiteFiles, siteEvidenceProviderFiles, siteEvidenceWorkerCount } from './site-isolated-github-contract.mjs';
 
 function validateArtifact(value, name, limit) {
   requireSite(exact(value, SITE_GH.artifactKeys) && value.name === name && positive(value.id)
@@ -46,12 +47,14 @@ function validateArchiveFields(receipt, plan) {
     requireSite(exact(archive, SITE_GH.fileKeys) && archive.path === `archives/${artifact.name}.zip`
       && archive.bytes === artifact.sizeInBytes && `sha256:${archive.sha256}` === artifact.digest);
   }
-  const files = validateFiles(receipt.inputFiles, SITE_GH.files, 'input/');
-  const expected = ['input/aggregate/aggregate.json', ...plan.cells.map(cell => `input/aggregate/workers/${cell.id}/worker.json`),
-    ...SITE_GH.providerFiles.map(file => 'input/provider/' + file)];
+  const source = receipt.source.measured;
+  const expected = [...siteEvidenceSuiteFiles(source).map(file => 'input/' + file),
+    ...siteEvidenceProviderFiles(source).map(file => 'input/' + file)];
+  const files = validateFiles(receipt.inputFiles, expected.length, 'input/');
   requireSite(expected.every(file => files.has(file.toLowerCase())));
   requireSite(receipt.inputFiles.every(file => file.bytes <= (file.path.endsWith('/worker.json') ? SITE_GH.rawBytes : SITE_GH.jsonBytes)));
-  requireSite(receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).reduce((sum, file) => sum + file.bytes, 0) <= SITE_GH.totalRawBytes);
+  requireSite(receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).length === siteEvidenceWorkerCount(source)
+    && receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).reduce((sum, file) => sum + file.bytes, 0) <= SITE_GH.totalRawBytes);
 }
 
 function validateProjectedJob(job, cohort, name, requiredSteps, worker = false) {
@@ -63,12 +66,16 @@ function validateProjectedJob(job, cohort, name, requiredSteps, worker = false) 
 }
 
 function validateWorkers(receipt, plan) {
-  const expected = new Set(plan.cells.map(cell => cell.id));
-  const cells = new Map(plan.cells.map(cell => [cell.id, cell]));
+  const legacy = SITE_GH.legacySources.includes(receipt.source.measured);
+  const cells = new Map(siteEvidencePlans(receipt.source.measured).flatMap(item => item.cells).map(cell => [cell.id, cell]));
+  const expected = new Set(cells.keys());
   requireSite(Array.isArray(receipt.workers) && receipt.workers.length === expected.size);
   for (const worker of receipt.workers) {
-    requireSite(exact(worker, ['id', 'job', 'artifact']) && expected.delete(worker.id));
-    requireSite(matchesIsolatedJobName(worker.job?.name, cells.get(worker.id)));
+    requireSite(exact(worker, legacy ? ['id', 'job', 'artifact'] : ['id', 'profile', 'job', 'artifact']) && expected.delete(worker.id)
+      && (legacy || worker.profile === cells.get(worker.id).profile));
+    requireSite(legacy ? matchesIsolatedJobName(worker.job?.name, cells.get(worker.id))
+      : worker.profile === plan.profile ? matchesIsolatedJobName(worker.job?.name, cells.get(worker.id))
+        : worker.job?.name === isolatedEvidenceJobName(cells.get(worker.id)));
     validateProjectedJob(worker.job, receipt.cohort, worker.job.name, GH.workerSteps, true);
     validateArtifact(worker.artifact, GH.artifactPrefix + worker.id, GH.workerZipBytes);
   }

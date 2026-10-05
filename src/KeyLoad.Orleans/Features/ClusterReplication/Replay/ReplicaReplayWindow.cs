@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -8,12 +9,13 @@ internal sealed class ReplicaReplayWindow
     private readonly Dictionary<string, ReplicaVoterReplayWindow> voters;
     private readonly int nodeMaximum;
 
-    internal ReplicaReplayWindow(IReadOnlyList<string> voterIds, ReplicaReplayLimits limits)
+    internal ReplicaReplayWindow(IReadOnlyList<string> voterIds, ReplicaReplayLimits limits,
+        IOptions<ReplicaTransportOptions> transportOptions)
     {
         limits.Validate(voterIds.Count);
         nodeMaximum = limits.MaximumRetainedNonces(voterIds.Count);
         voters = voterIds.Select((voter, index) => (voter, index)).ToDictionary(item => item.voter,
-            item => new ReplicaVoterReplayWindow(limits, item.index), StringComparer.Ordinal);
+            item => new ReplicaVoterReplayWindow(limits, item.index, transportOptions.Value.EnvelopeLifetime), StringComparer.Ordinal);
     }
 
     internal void Admit(string sender, Guid nonce, long timestamp, long now, ReplicaReplayPool pool)
@@ -53,7 +55,7 @@ internal sealed class ReplicaReplayWindow
     }
 }
 
-internal sealed class ReplicaVoterReplayWindow(ReplicaReplayLimits limits, int senderIndex)
+internal sealed class ReplicaVoterReplayWindow(ReplicaReplayLimits limits, int senderIndex, TimeSpan envelopeLifetime)
 {
     private readonly Dictionary<Guid, ReplicaReplayPool> nonces = [];
     private readonly PriorityQueue<Guid, long> expirations = new();
@@ -72,7 +74,7 @@ internal sealed class ReplicaVoterReplayWindow(ReplicaReplayLimits limits, int s
             return false;
         }
 
-        var lifetime = checked((long)ReplicaTransportProtocol.EnvelopeLifetime.TotalMilliseconds);
+        var lifetime = checked((long)envelopeLifetime.TotalMilliseconds);
         var deadline = checked(timestamp + lifetime);
         nonces.Add(nonce, pool);
         expirations.Enqueue(nonce, deadline);

@@ -1,3 +1,6 @@
+using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Orleans;
 
 internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, IAsyncDisposable
@@ -5,13 +8,16 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
     private readonly ReplicaMembershipAuthorityClientResources resources;
     private readonly ReplicaMembershipAuthorityExchangeOptions options;
     private readonly TimeProvider clock;
+    private readonly OrleansMembershipOptions settings;
 
-    internal ReplicaMembershipAuthorityClientTable(ReplicaMembershipAuthorityExchangeOptions options)
+    internal ReplicaMembershipAuthorityClientTable(ReplicaMembershipAuthorityExchangeOptions options,
+        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(options);
         this.options = options;
         clock = options.Clock;
-        resources = new(options);
+        settings = membershipOptions.Value;
+        resources = new(options, membershipOptions, executionOptions);
     }
 
     public Task InitializeMembershipTable(bool tryInitTableVersion)
@@ -19,7 +25,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
 
     public async Task InitializeMembershipTableAsync(bool tryInitTableVersion, CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(ReplicaMembershipAuthorityProtocol.StartupTimeout, clock);
+        using var deadline = new CancellationTokenSource(settings.StartupTimeout, clock);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         while (true)
         {
@@ -27,7 +33,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
             try
             { _ = await ReadAllAsync(linked.Token).ConfigureAwait(false); return; }
             catch (KeyLoadException error) when (error.Code is ErrorCode.OwnershipLost or ErrorCode.UnknownWriteOutcome)
-            { await Task.Delay(ReplicaMembershipProtocol.StartupRetryDelay, clock, linked.Token).ConfigureAwait(false); }
+            { await Task.Delay(settings.StartupRetryDelay, clock, linked.Token).ConfigureAwait(false); }
         }
     }
 
@@ -77,7 +83,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
         ArgumentNullException.ThrowIfNull(tableVersion);
         var call = NewCall(ReplicaMembershipAuthorityOperation.InsertRow) with
         {
-            CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, "0"),
+            CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, ReplicaMembershipAuthorityProtocol.InitialRowETag),
             ExpectedTableVersion = tableVersion.Version,
             ExpectedTableVersionETag = tableVersion.VersionEtag
         };
@@ -111,7 +117,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
     {
         ReplicaMembershipProtocol.ValidateEntry(entry);
         var call = NewCall(ReplicaMembershipAuthorityOperation.UpdateIAmAlive) with
-        { CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, "0") };
+        { CandidateEntry = ReplicaMembershipAuthorityMapping.ToWire(entry, ReplicaMembershipAuthorityProtocol.InitialRowETag) };
         _ = await SendAsync(call, cancellationToken).ConfigureAwait(false);
     }
 

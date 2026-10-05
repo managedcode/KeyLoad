@@ -133,7 +133,7 @@ internal sealed class PeerDiscoverySecurityTests
         var signed = (DelegatingHandler)handler;
         var sockets = (SocketsHttpHandler)signed.InnerHandler!;
         await Assert.That(sockets.AllowAutoRedirect).IsFalse();
-        await Assert.That(sockets.ConnectTimeout).IsEqualTo(PeerDiscoveryProtocol.DefaultConnectTimeout);
+        await Assert.That(sockets.ConnectTimeout).IsEqualTo(new PeerDiscoveryOptions().ConnectTimeout);
     }
 
     /// <summary>Invalid credentials and replay limits fail before a discovery handler can be created.</summary>
@@ -145,18 +145,20 @@ internal sealed class PeerDiscoverySecurityTests
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             {
-                using var invalid = new PeerSecurity(new byte[length], TimeProvider.System);
+                using var invalid = new PeerSecurity(new byte[length], TimeProvider.System, RecoveryExecutionOptions.PeerDiscovery());
                 using var invalidHandler = invalid.CreateHandler();
             }).Code).IsEqualTo(ErrorCode.Validation);
         }
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System, replayCapacity: 0);
+            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System,
+                Microsoft.Extensions.Options.Options.Create(new PeerDiscoveryOptions { ReplayCapacity = 0 }));
             using var invalidHandler = invalid.CreateHandler();
         }).Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System, TimeSpan.Zero);
+            using var invalid = new PeerSecurity(fixture.Secret, TimeProvider.System,
+                Microsoft.Extensions.Options.Options.Create(new PeerDiscoveryOptions { ConnectTimeout = TimeSpan.Zero }));
             using var invalidHandler = invalid.CreateHandler();
         }).Code).IsEqualTo(ErrorCode.Validation);
     }

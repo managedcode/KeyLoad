@@ -7,8 +7,22 @@ namespace KeyLoad.Security;
 /// <summary>Enforces persisted resource, row, and sensitive-field access policy.</summary>
 public sealed class AuthorizationPolicy : IAuthorizationPolicy
 {
+    private const string AuthorizationWildcard = "*";
+    private const string ScopeDeniedMessage = "The principal cannot perform this operation in this scope.";
+    private const string RowWriteDeniedMessage = "The principal cannot write this row scope.";
+    private const string FieldUseDeniedMessage = "The query requires a protected field-use grant.";
+    private const string FieldWriteDeniedMessage = "The mutation requires a protected field-write grant.";
+    private const string SensitiveReplacementGrant = "document.replaceSensitive";
+    private const string ReplacementDeniedMessage = "Replacing a redacted document requires an explicit replacement grant. Use a field patch.";
+    private const string WorkerInputDeniedMessage = "Required worker input is protected by a missing raw-read grant.";
+    private const string EmptyObjectJson = "{}";
+    private const string NullValueJson = "null";
+    private const int EmptySequenceLength = 0;
+    private const int FirstElementIndex = 0;
+    private const int PathSegmentWidth = 1;
+
     internal static bool Grant(PrincipalRecord principal, string grant) => principal.ClusterAdministrator
-        || principal.FieldGrants.Contains(grant, StringComparer.Ordinal) || principal.FieldGrants.Contains("*", StringComparer.Ordinal);
+        || principal.FieldGrants.Contains(grant, StringComparer.Ordinal) || principal.FieldGrants.Contains(AuthorizationWildcard, StringComparer.Ordinal);
     /// <inheritdoc />
     public void Require(PrincipalRecord principal, PartitionRef partition, string resource, Capability capability)
     {
@@ -19,10 +33,10 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
             return;
         }
 
-        if (principal.TenantId != partition.TenantId || !principal.Grants.Any(g => (g.Database == "*" || g.Database == partition.DatabaseId)
-            && (g.Resource == "*" || g.Resource == resource) && (g.Capabilities & capability) == capability))
+        if (principal.TenantId != partition.TenantId || !principal.Grants.Any(g => (g.Database == AuthorizationWildcard || g.Database == partition.DatabaseId)
+            && (g.Resource == AuthorizationWildcard || g.Resource == resource) && (g.Capabilities & capability) == capability))
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, "The principal cannot perform this operation in this scope.");
+            throw Errors.Fail(ErrorCode.PermissionDenied, ScopeDeniedMessage);
         }
     }
     /// <inheritdoc />
@@ -39,7 +53,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     {
         if (!CanReadRow(principal, access))
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, "The principal cannot write this row scope.");
+            throw Errors.Fail(ErrorCode.PermissionDenied, RowWriteDeniedMessage);
         }
     }
     /// <inheritdoc />
@@ -51,7 +65,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         {
             if (Overlaps(policy.Path, path) && !Grant(principal, policy.RawUseGrant))
             {
-                throw Errors.Fail(ErrorCode.PermissionDenied, "The query requires a protected field-use grant.");
+                throw Errors.Fail(ErrorCode.PermissionDenied, FieldUseDeniedMessage);
             }
         }
     }
@@ -64,7 +78,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         {
             if (Overlaps(policy.Path, path) && !Grant(principal, policy.WriteGrant))
             {
-                throw Errors.Fail(ErrorCode.PermissionDenied, "The mutation requires a protected field-write grant.");
+                throw Errors.Fail(ErrorCode.PermissionDenied, FieldWriteDeniedMessage);
             }
         }
     }
@@ -81,9 +95,9 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(resource);
         if (resource.FieldPolicies.Any(p => !Grant(principal, p.RawReadGrant))
-            && (!explicitReplacement || !Grant(principal, "document.replaceSensitive")))
+            && (!explicitReplacement || !Grant(principal, SensitiveReplacementGrant)))
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, "Replacing a redacted document requires an explicit replacement grant. Use a field patch.");
+            throw Errors.Fail(ErrorCode.PermissionDenied, ReplacementDeniedMessage);
         }
     }
     /// <inheritdoc />
@@ -93,7 +107,7 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
         ArgumentNullException.ThrowIfNull(resource);
         if (resource.FieldPolicies.Concat(resource.HeaderPolicies).Any(p => p.RequiredForProcessing && !Grant(principal, p.RawReadGrant)))
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, "Required worker input is protected by a missing raw-read grant.");
+            throw Errors.Fail(ErrorCode.PermissionDenied, WorkerInputDeniedMessage);
         }
     }
     /// <inheritdoc />
@@ -104,23 +118,23 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     {
         var hidden = policies.Where(p => !Grant(principal, p.RawReadGrant)).ToArray();
         omitted = hidden.Select(p => p.Path).ToArray();
-        if (hidden.Length == 0)
+        if (hidden.Length == EmptySequenceLength)
         {
             return json;
         }
 
-        if (hidden.Any(p => p.Path.Length == 0))
+        if (hidden.Any(p => p.Path.Length == EmptySequenceLength))
         {
-            return "{}";
+            return EmptyObjectJson;
         }
 
         var root = JsonNode.Parse(json);
         foreach (var policy in hidden)
         {
-            Remove(root, JsonData.PathSegments(policy.Path), 0);
+            Remove(root, JsonData.PathSegments(policy.Path), FirstElementIndex);
         }
 
-        return root?.ToJsonString() ?? "null";
+        return root?.ToJsonString() ?? NullValueJson;
     }
     private static void Remove(JsonNode? node, string[] path, int position)
     {
@@ -131,15 +145,15 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
 
         if (node is JsonObject obj)
         {
-            foreach (var key in (path[position] == "*" ? obj.Select(p => p.Key).ToArray() : [path[position]]))
+            foreach (var key in (path[position] == AuthorizationWildcard ? obj.Select(p => p.Key).ToArray() : [path[position]]))
             {
-                if (position == path.Length - 1)
+                if (position == path.Length - PathSegmentWidth)
                 {
                     obj.Remove(key);
                     continue;
                 }
 
-                Remove(obj[key], path, position + 1);
+                Remove(obj[key], path, position + PathSegmentWidth);
             }
             return;
         }
@@ -149,16 +163,16 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
             return;
         }
 
-        if (path[position] != "*")
+        if (path[position] != AuthorizationWildcard)
         {
-            if (int.TryParse(path[position], out var index) && index >= 0 && index < array.Count)
+            if (int.TryParse(path[position], out var index) && index >= FirstElementIndex && index < array.Count)
             {
                 RemoveArrayEntry(array, index, path, position);
             }
             return;
         }
 
-        for (var index = 0; index < array.Count; index++)
+        for (var index = FirstElementIndex; index < array.Count; index++)
         {
             RemoveArrayEntry(array, index, path, position);
         }
@@ -166,13 +180,13 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
 
     private static void RemoveArrayEntry(JsonArray array, int index, string[] path, int position)
     {
-        if (position == path.Length - 1)
+        if (position == path.Length - PathSegmentWidth)
         {
             array[index] = null;
             return;
         }
 
-        Remove(array[index], path, position + 1);
+        Remove(array[index], path, position + PathSegmentWidth);
     }
     /// <summary>Reports whether two JSON field paths cover any of the same fields.</summary>
     /// <param name="protectedPath">Persisted sensitive-field path.</param>
@@ -182,9 +196,9 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     {
         var left = JsonData.PathSegments(protectedPath);
         var right = JsonData.PathSegments(path);
-        for (var i = 0; i < Math.Min(left.Length, right.Length); i++)
+        for (var i = FirstElementIndex; i < Math.Min(left.Length, right.Length); i++)
         {
-            if (left[i] != "*" && right[i] != "*" && left[i] != right[i])
+            if (left[i] != AuthorizationWildcard && right[i] != AuthorizationWildcard && left[i] != right[i])
             {
                 return false;
             }

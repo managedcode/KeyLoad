@@ -1,10 +1,12 @@
 using KeyLoad.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null)
+    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null)
 {
+    private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
         CancellationToken cancellationToken, IGrainContext? context = null)
     {
@@ -76,7 +78,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     private void ValidateFreshRequest(DecodedGrainRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        GrainRequestScope.Validate(request.Envelope, database.Store.Identity.Incarnation, clock.GetUtcNow());
+        GrainRequestScope.Validate(request.Envelope, database.Store.Identity.Incarnation, clock.GetUtcNow(), settings.MaximumFuture);
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
     }
 

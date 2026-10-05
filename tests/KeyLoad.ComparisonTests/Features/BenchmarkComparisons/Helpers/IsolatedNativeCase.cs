@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -42,7 +43,7 @@ internal static class IsolatedNativeCase
                 .Resources.OfType<ContainerResource>().ToArray();
             capture = new ComparisonTestLogCapture(app, containers.Select(container => container.Name),
                 ComparisonProgressLine.PathForEvidenceDirectory(evidence));
-            await RunOwnedCaseAsync(app, containers, selection, work, timeout.Token);
+            await RunOwnedCaseAsync(app, containers, selection, root, work, timeout.Token);
         }
         catch (Exception failure)
         {
@@ -59,13 +60,15 @@ internal static class IsolatedNativeCase
             arguments.Add(ScaleArgument + scaleProfile.Id);
         }
         if (selection.VectorProfile is { } vectorProfile)
-        { arguments.Add(VectorArgument + vectorProfile.Id); }
+        {
+            arguments.Add(VectorArgument + vectorProfile.Id);
+        }
 
         return arguments.ToArray();
     }
 
     private static async Task RunOwnedCaseAsync(DistributedApplication app, ContainerResource[] containers,
-        ComparisonWorkerSelection selection, IsolatedNativeOwnedWork work,
+        ComparisonWorkerSelection selection, string root, IsolatedNativeOwnedWork work,
         CancellationToken token)
     {
         await IsolatedNativeReportAssertions.VerifyModelAsync(containers, selection, token);

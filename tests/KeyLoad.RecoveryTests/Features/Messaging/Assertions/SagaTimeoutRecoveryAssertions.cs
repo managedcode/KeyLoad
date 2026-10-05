@@ -14,7 +14,7 @@ internal static class SagaTimeoutRecoveryAssertions
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = await ReadOperationAsync(root, cancellationToken);
         var seedTail = await ReadSeedTailAsync(root, cancellationToken);
         var recoveredState = Inspect(database);
@@ -55,7 +55,7 @@ internal static class SagaTimeoutRecoveryAssertions
         var timeoutLane = new QueueLaneRef(SagaTimeoutCrashScenario.Partition, SagaTimeoutCrashScenario.TimeoutQueue);
         var message = database.InspectMessage(CrashFixtureValues.Principal, timeoutLane,
             SagaTimeoutCrashScenario.TimeoutMessageId());
-        var outcome = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>();
+        var outcome = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         var entry = ReadEntry(store, seedTail + 1);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, SagaTimeoutCrashScenario.Partition).Head.Tail;
         var recovered = Inspect(database);

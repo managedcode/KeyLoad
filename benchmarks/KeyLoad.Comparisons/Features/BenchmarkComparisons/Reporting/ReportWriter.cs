@@ -8,6 +8,7 @@ namespace KeyLoad.Comparisons;
 /// <summary>Writes the comparison report files and formats the existing Markdown summary.</summary>
 public static class ReportWriter
 {
+    private const string MetricFormat = "F3";
     private const string JsonFileName = "results.json";
     private const string MarkdownFileName = "results.md";
     private const string CsvFileName = "samples.csv";
@@ -47,64 +48,84 @@ public static class ReportWriter
     {
         ArgumentNullException.ThrowIfNull(report);
         report.ValidateConfiguration();
-        var text = new StringBuilder("# KeyLoad comparison results\n\n");
+        var text = new StringBuilder(ReportWriterValues.KeyLoadComparisonResults);
         if (report.Options is { } options)
         {
-            text.AppendLine(CultureInfo.CurrentCulture, $"Run: {report.RunId}. Seed: {options.Seed}. Corpus SHA256: `{report.DatasetSha256}`.");
-            text.AppendLine(CultureInfo.CurrentCulture, $"\n{options.Documents} documents, {options.PayloadBytes} UTF-8 bytes/document, {options.Dimensions} float32 dimensions, top-{options.TopK}, {options.Operations} attempts/case, concurrency {options.Concurrency}, {options.Warmup} warmup requests, {options.Repetitions} repetitions.");
-            text.AppendLine(CultureInfo.CurrentCulture, $"Graph: {Math.Min(options.Documents, options.GraphVertices)} vertices in two disconnected cyclic components; fan-out up to {options.GraphFanOut}; traversal depth {options.GraphDepth}. Neighbors/traversal return sorted distinct reachable IDs, excluding the start vertex.");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Run}{report.RunId}{ReportWriterValues.Seed}{options.Seed}{ReportWriterValues.CorpusSHA256}{report.DatasetSha256}{ReportWriterValues.DigestCodeEnd}");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{options.Documents}{ReportWriterValues.Documents}{options.PayloadBytes}{ReportWriterValues.UTF8BytesDocument}{options.Dimensions}{ReportWriterValues.Float32DimensionsTop}{options.TopK}{ReportWriterValues.ListSeparator}{options.Operations}{ReportWriterValues.AttemptsCaseConcurrency}{options.Concurrency}{ReportWriterValues.ListSeparator}{options.Warmup}{ReportWriterValues.WarmupRequests}{options.Repetitions}{ReportWriterValues.Repetitions}");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Graph}{Math.Min(options.Documents, options.GraphVertices)}{ReportWriterValues.VerticesInTwoDisconnectedCyclicComponents}{options.GraphFanOut}{ReportWriterValues.TraversalDepth}{options.GraphDepth}{ReportWriterValues.NeighborsTraversalReturnSortedDistinctReachable}");
         }
         else if (report.ScaledProfile is { } scaled)
         {
-            text.AppendLine(CultureInfo.CurrentCulture, $"Run: {report.RunId}. Profile: {scaled.Id}. Seed: {scaled.Seed}. Corpus SHA256: `{report.DatasetSha256}`.");
-            text.AppendLine(CultureInfo.CurrentCulture, $"\n{scaled.Documents} native documents, {scaled.PayloadBytes} UTF-8 bytes/document, {scaled.Operations} measured operations/case, concurrency {scaled.Concurrency}; closed-loop S1.");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Run}{report.RunId}{ReportWriterValues.Profile}{scaled.Id}{ReportWriterValues.Seed}{scaled.Seed}{ReportWriterValues.CorpusSHA256}{report.DatasetSha256}{ReportWriterValues.DigestCodeEnd}");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{scaled.Documents}{ReportWriterValues.NativeDocuments}{scaled.PayloadBytes}{ReportWriterValues.UTF8BytesDocument}{scaled.Operations}{ReportWriterValues.MeasuredOperationsCaseConcurrency}{scaled.Concurrency}{ReportWriterValues.ClosedLoopS1}");
         }
         else if (report.VectorProfile is { } vector)
         {
-            text.AppendLine(CultureInfo.CurrentCulture, $"Run: {report.RunId}. Vector profile: {vector.Id}. Seed: {vector.Seed}. Corpus SHA256: `{report.DatasetSha256}`.");
-            text.AppendLine(CultureInfo.CurrentCulture, $"\n{vector.RecordCount} vectors, {vector.Dimensions} float32 dimensions, cosine top-{vector.TopK}, {vector.MeasuredQueries} measured queries, concurrency {vector.Concurrency}; {vector.IndexKind}/{vector.QueryMode}; {vector.MinimumRecall:P0} minimum recall.");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Run}{report.RunId}{ReportWriterValues.VectorProfile}{vector.Id}{ReportWriterValues.Seed}{vector.Seed}{ReportWriterValues.CorpusSHA256}{report.DatasetSha256}{ReportWriterValues.DigestCodeEnd}");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{vector.RecordCount}{ReportWriterValues.Vectors}{vector.Dimensions}{ReportWriterValues.Float32DimensionsCosineTop}{vector.TopK}{ReportWriterValues.ListSeparator}{vector.MeasuredQueries}{ReportWriterValues.MeasuredQueriesConcurrency}{vector.Concurrency}{ReportWriterValues.ClauseSeparator}{vector.IndexKind}{ReportWriterValues.AlgorithmModeSeparator}{vector.QueryMode}{ReportWriterValues.ClauseSeparator}{(vector.MinimumRecall).ToString(ReportWriterValues.P0Format,global::System.Globalization.CultureInfo.CurrentCulture)}{ReportWriterValues.MinimumRecall}");
         }
         else
         {
-            throw new InvalidOperationException("A comparison report must carry exactly one configuration.");
+            throw new InvalidOperationException(ReportWriterValues.AComparisonReportMustCarryExactly);
         }
-        text.AppendLine(CultureInfo.CurrentCulture, $"\nHost: {report.HostOs}; {report.Architecture}; {report.LogicalProcessors} logical processors; {report.Runtime}. Load: {report.LoadModel}. Storage: {report.Storage}. Source revision: {report.SourceRevision ?? "unrecorded"}.");
-        text.AppendLine("\nExploratory development run. Engine topology, resource allocation, authorization, transports and write guarantees differ. These rows show observed speed, not an equal-durability or production winner. External engines run in containers; Docker Desktop adds VM overhead where used. KeyLoad voters run as host processes. Same-host voters do not represent independent failure domains. No primary performance target has been qualified.\n");
-        text.AppendLine("| Engine | Version | Topology | Write acknowledgement | Read / transport / policy | Image |\n|---|---|---|---|---|---|");
+        text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.Host}{report.HostOs}{ReportWriterValues.ClauseSeparator}{report.Architecture}{ReportWriterValues.ClauseSeparator}{report.LogicalProcessors}{ReportWriterValues.LogicalProcessors}{report.Runtime}{ReportWriterValues.Load}{report.LoadModel}{ReportWriterValues.Storage}{report.Storage}{ReportWriterValues.SourceRevision}{report.SourceRevision ?? ReportWriterValues.Unrecorded}{ReportWriterValues.SentencePeriod}");
+        text.AppendLine(ReportWriterValues.ExploratoryDevelopmentRunEngineTopologyResource);
+        text.AppendLine(ReportWriterValues.EngineVersionTopologyWriteAcknowledgementRead);
         foreach (var target in report.Targets)
         {
-            text.AppendLine(CultureInfo.CurrentCulture, $"| {target.Name} | {target.Version} | {target.Topology} | {target.WriteAcknowledgement} | {target.ReadContract}; {target.Transport}; {target.Authorization} | {target.Image ?? "source checkout"} |");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.MarkdownCellStart}{target.Name}{ReportWriterValues.MarkdownCellSeparator}{target.Version}{ReportWriterValues.MarkdownCellSeparator}{target.Topology}{ReportWriterValues.MarkdownCellSeparator}{target.WriteAcknowledgement}{ReportWriterValues.MarkdownCellSeparator}{target.ReadContract}{ReportWriterValues.ClauseSeparator}{target.Transport}{ReportWriterValues.ClauseSeparator}{target.Authorization}{ReportWriterValues.MarkdownCellSeparator}{target.Image ?? ReportWriterValues.SourceCheckout}{ReportWriterValues.MarkdownCellEnd}");
         }
-        text.AppendLine("\nCases are ordered by verified useful operations/s within each scenario and repetition. Latency includes failed attempts. Setup, warmup and correctness checks are excluded from timings; writes are read back and vectors must match the exhaustive oracle, including JSON projection. QueueCycle counts unique completions and includes enqueue, receive and ACK.\n");
-        var latencyColumns = report.ScaledProfile is null ? "p50 ms | p95 ms | p99 ms" : "p50 sample estimate ms | p95 sample estimate ms | p99 sample estimate ms";
+        text.AppendLine(ReportWriterValues.CasesAreOrderedByVerifiedUseful);
+        var latencyColumns = report.ScaledProfile is null ? ReportWriterValues.P50MsP95MsP99Ms : ReportWriterValues.P50SampleEstimateMsP95Sample;
         text.AppendLine(CultureInfo.CurrentCulture,
-            $"| Scenario | Run | Engine | Status | Successful / attempts | Useful ops/s | {latencyColumns} | Unique completed |\n|---|---|---|---|---:|---:|---:|---:|---:|---:|");
-        foreach (var item in report.Cases.OrderBy(item => item.Scenario).ThenBy(item => item.Repetition).ThenByDescending(item => item.Measurement?.UsefulOperationsPerSecond ?? -1))
+            $"{ReportWriterValues.ScenarioRunEngineStatusSuccessfulAttempts}{latencyColumns}{ReportWriterValues.UniqueCompleted}");
+        foreach (var item in report.Cases.OrderBy(item => item.Scenario).ThenBy(item => item.Repetition).ThenByDescending(item => item.Measurement?.UsefulOperationsPerSecond ?? -ReportWriterValues.SingleElementOffset))
         {
             var m = item.Measurement;
-            text.AppendLine(CultureInfo.CurrentCulture, $"| {item.Scenario} | {item.Repetition + 1} | {item.Target} | {item.Status} | {(m is null ? "—" : $"{m.Successes} / {m.Attempts}")} | {Number(m?.UsefulOperationsPerSecond)} | {Number(m?.Latency.P50Ms)} | {Number(m?.Latency.P95Ms)} | {Number(m?.Latency.P99Ms)} | {m?.UniqueCompletedMessages.ToString(CultureInfo.InvariantCulture) ?? "—"} |");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.MarkdownCellStart}{item.Scenario}{ReportWriterValues.MarkdownCellSeparator}{item.Repetition + ReportWriterValues.SingleElementOffset}{ReportWriterValues.MarkdownCellSeparator}{item.Target}{ReportWriterValues.MarkdownCellSeparator}{item.Status}{ReportWriterValues.MarkdownCellSeparator}{(m is null ? ReportWriterValues.UnavailableMeasurement : $"{m.Successes}{ReportWriterValues.PathSeparator}{m.Attempts}")}{ReportWriterValues.MarkdownCellSeparator}{Number(m?.UsefulOperationsPerSecond)}{ReportWriterValues.MarkdownCellSeparator}{Number(m?.Latency.P50Ms)}{ReportWriterValues.MarkdownCellSeparator}{Number(m?.Latency.P95Ms)}{ReportWriterValues.MarkdownCellSeparator}{Number(m?.Latency.P99Ms)}{ReportWriterValues.MarkdownCellSeparator}{m?.UniqueCompletedMessages.ToString(CultureInfo.InvariantCulture) ?? ReportWriterValues.UnavailableMeasurement}{ReportWriterValues.MarkdownCellEnd}");
         }
-        foreach (var item in report.Cases.Where(item => item.Status == "failed" && item.Detail is not null))
-        {
-            text.AppendLine(CultureInfo.CurrentCulture, $"\n{item.Target} / {item.Scenario} / repetition {item.Repetition + 1}: {item.Detail}");
-        }
-        text.AppendLine("\nQueue enqueue/receive/ACK percentiles and raw attempt samples are in results.json and samples.csv. Unsupported operations have null measurements. Repetitions remain separate; no best-run-only aggregate is selected.\n");
-        text.AppendLine("Client resource measurements cover the load generator process, drivers and sampler during requests, excluding setup/warmup/validation. CPU and allocation deltas are per case; RSS is observed every 50 ms and at the boundaries. These values do not measure database CPU/RAM and are not additive per-engine resource budgets.\n");
+        AppendVectorTable(text, report);
+        AppendFailureDetails(text, report);
+        text.AppendLine(ReportWriterValues.QueueEnqueueReceiveACKPercentilesAnd);
+        text.AppendLine(ReportWriterValues.ClientResourceMeasurementsCoverTheLoad);
         AppendClientResourceTable(text, report);
-        text.AppendLine("Remaining qualification: matched synchronous RF3 baselines and hardware budgets, common application transport/policy, open-loop offered load, larger-than-RAM data, ANN/filtered recall, Marten/Wolverine combined workflows, endurance and fault injection. Smoke runs check adapter correctness; their short timings are not performance qualification.");
+        text.AppendLine(ReportWriterValues.RemainingQualificationMatchedSynchronousRF3Baselines);
         return text.ToString();
+    }
+
+    private static void AppendVectorTable(StringBuilder text, ComparisonReport report)
+    {
+        if (report.VectorProfile is null)
+        {
+            return;
+        }
+        text.AppendLine(ReportWriterValues.EngineRecordsQueriesUsefulQueriesS);
+        foreach (var item in report.Cases.Where(item => item.VectorMetrics is not null))
+        {
+            var vector = item.VectorMetrics!;
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.MarkdownCellStart}{item.Target}{ReportWriterValues.MarkdownCellSeparator}{vector.LoadedRecordCount}{ReportWriterValues.MarkdownCellSeparator}{vector.QuerySuccesses}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.QueryUsefulOperationsPerSecond)}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.LatencyP95Ms)}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.LatencyP99Ms)}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.ExactRecall)}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.MinimumRecall)}{ReportWriterValues.MarkdownCellSeparator}{Number(vector.IndexBuildMilliseconds)}{ReportWriterValues.MarkdownCellEnd}");
+        }
+    }
+
+    private static void AppendFailureDetails(StringBuilder text, ComparisonReport report)
+    {
+        foreach (var item in report.Cases.Where(item => item.Status == ComparisonStatuses.Failed && item.Detail is not null))
+        {
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.LineBreak}{item.Target}{ReportWriterValues.PathSeparator}{item.Scenario}{ReportWriterValues.Repetition}{item.Repetition + ReportWriterValues.SingleElementOffset}{ReportWriterValues.LabelSeparator}{item.Detail}");
+        }
     }
 
     private static void AppendClientResourceTable(StringBuilder text, ComparisonReport report)
     {
-        text.AppendLine("| Scenario | Run | Engine | Generator CPU seconds | Generator allocated MiB | Generator observed peak RSS MiB |\n|---|---|---|---:|---:|---:|");
+        text.AppendLine(ReportWriterValues.ScenarioRunEngineGeneratorCPUSeconds);
         foreach (var item in report.Cases.Where(item => item.Measurement?.ClientResources is not null))
         {
             var resource = item.Measurement!.ClientResources!;
-            text.AppendLine(CultureInfo.CurrentCulture, $"| {item.Scenario} | {item.Repetition + 1} | {item.Target} | {Number(resource.CpuSeconds)} | {Number(resource.AllocatedBytes / 1048576d)} | {Number(resource.PeakObservedWorkingSetBytes / 1048576d)} |");
+            text.AppendLine(CultureInfo.CurrentCulture, $"{ReportWriterValues.MarkdownCellStart}{item.Scenario}{ReportWriterValues.MarkdownCellSeparator}{item.Repetition + ReportWriterValues.SingleElementOffset}{ReportWriterValues.MarkdownCellSeparator}{item.Target}{ReportWriterValues.MarkdownCellSeparator}{Number(resource.CpuSeconds)}{ReportWriterValues.MarkdownCellSeparator}{Number(resource.AllocatedBytes / ReportWriterValues.BytesPerMebibyte)}{ReportWriterValues.MarkdownCellSeparator}{Number(resource.PeakObservedWorkingSetBytes / ReportWriterValues.BytesPerMebibyte)}{ReportWriterValues.MarkdownCellEnd}");
         }
     }
-    private static string Number(double? number) => number?.ToString("F3", CultureInfo.InvariantCulture) ?? "";
+    private static string Number(double? number) => number?.ToString(MetricFormat, CultureInfo.InvariantCulture) ?? ReportWriterValues.EmptyText;
 
     private static JsonSerializerOptions CreateJsonOptions()
     {

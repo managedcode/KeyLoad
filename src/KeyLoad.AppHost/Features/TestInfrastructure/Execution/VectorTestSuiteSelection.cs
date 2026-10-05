@@ -9,25 +9,35 @@ internal static class VectorTestSuiteSelection
     internal static VectorComparisonProfile? Read(IConfiguration configuration, string suite, string? target, bool overrides)
     {
         var value = configuration[TestSuiteSettings.VectorProfileSetting];
-        if (string.IsNullOrEmpty(value)) return null;
-        if (suite != "comparison" || target is null
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        if (suite != TestSuiteProtocol.ComparisonSuite || target is null
             || !IsolatedComparisonContract.Current.Targets.Contains(target, StringComparer.Ordinal)
             || configuration.GetValue<bool>("Benchmarks:Enabled")
-            || configuration["KeyLoadTests:TimeoutMinutes"] is { } timeout && timeout != "140"
+            || configuration["KeyLoadTests:TimeoutMinutes"] is { } timeout && timeout != TestSuiteProtocol.ProfileTimeoutMinutesText
             || configuration[TestSuiteSettings.ScaleProfileSetting] is not null
             || configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null
             || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null
-            || configuration["KeyLoadTests:Filter"] != "/*/*/IsolatedNativeComparisonTests/*"
+            || configuration["KeyLoadTests:Filter"] != TestSuiteProtocol.IsolatedComparisonFilter
             || configuration[ComparisonWorkerSelection.ScenarioSetting] != nameof(Scenario.VectorExact)
             || !int.TryParse(configuration[ComparisonWorkerSelection.NodeCountSetting], NumberStyles.None,
                 CultureInfo.InvariantCulture, out var nodes) || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodes)
             || overrides)
+        {
             throw new InvalidOperationException("The vector-profile test selection is invalid.");
+        }
+
         try
         {
             var profile = VectorComparisonProfile.Parse(value);
             if (configuration[ComparisonWorkerSelection.ProfileSetting] != profile.Id)
+            {
                 throw new InvalidOperationException("The vector-profile test selection is invalid.");
+            }
+
             return profile;
         }
         catch (ArgumentException)

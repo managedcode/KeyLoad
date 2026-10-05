@@ -143,3 +143,36 @@ its cancelled predecessor supplied no executed cases.
 Coverage collector/thresholds, complete native comparisons, full SQL and native
 sessions remain open. The benchmark run has a genuine Kurrentn2 setup failure;
 it cannot qualify scale or website performance. ADR065 remains Accepted.
+
+## Functional contributor strengthening, 2026-10-06
+
+TASK-SQLC-BETWEEN-FLOW-001 strengthens three actual caller workflows under
+REQ-SQLC-003/004/006, AC-SQLC-006A-T/B/C and AC-CQ-020. A dedicated Luna worker
+owns a guarded private packet for the existing `SqlBetweenRangeQueryTests.cs`
+and `SqlBetweenBudgetAndAuthorityTests.cs`; root reviews, joins, builds and runs
+the Aspire-owned normal/scalar suite and retains original reports. No production
+contract, parser, storage format, dependency, fixture or shared policy changes.
+ADR065 supplies the unchanged compiler/read/authorization boundaries.
+
+- Parameterized BETWEEN executes against the existing real ZoneTree fixture;
+  compare literal ordered IDs and complete rows/read cut against an independently
+  authored equivalent AST. Capture committed position before both reads, require
+  the actual page cut to match it and preserve position afterward. Keep the
+  existing string/boolean ordering assertions.
+- Malformed BETWEEN delimiter reaches the actual `QueryEngine.Execute` entry,
+  fails with exact Validation and preserves committed position. A following
+  valid parameterized request on the same engine returns the expected rows and
+  cut. A rejected call must not return a page.
+- Persisted lower/upper field-use denial reaches the real executor for both
+  bounds, returns PermissionDenied and preserves position. The same SQL as the
+  already persisted administrator returns the seeded row; persisted data and
+  position remain intact. Caller-supplied roles are not introduced.
+
+These are complete functional operation contributors; property/reflection-only
+or parser-shape checks cannot establish this evidence. A position comparison
+proves no committed write, not absence of reads. Historical Stage89
+PartitionQuery-only reports contain no BETWEEN IDs and therefore cannot answer
+coverage of this compiler flow. The fresh source/test/helper/DLL/PDB manifest and
+native measured profile must name actual contributors. Broader functional
+coverage, RF3 server coverage and current-source complete gates remain open;
+strengthening these tests does not retroactively qualify their new source.

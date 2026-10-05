@@ -93,7 +93,7 @@ internal sealed class OutboxPurgeTests
 
         database.Store.Dispose();
         using var reopenedStore = new ZoneTreeStore(new(database.Directory));
-        var reopenedDatabase = new DatabaseEngine(reopenedStore, new AuthorizationPolicy());
+        var reopenedDatabase = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var recovered = reopenedDatabase.GetOutboxStatus("root", database.Partition).Head;
         await Assert.That(recovered).IsEqualTo(purged);
         var commandId = Guid.NewGuid();
@@ -159,7 +159,7 @@ internal sealed class OutboxPurgeTests
             new PurgeOutboxRequest(commandId, database.Partition, through), id: commandId).Get<OutboxHead>();
         await Assert.That(actual).IsEqualTo(expectedHead);
         await Assert.That(database.Store.Position).IsEqualTo(positionBeforeNoOp + 1);
-        await Assert.That(database.Database.Outcome("root", commandId)).IsNotNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNotNull();
     }
 
     private static void RestoreEntry(TestDatabase database, byte[] key, byte[] value)

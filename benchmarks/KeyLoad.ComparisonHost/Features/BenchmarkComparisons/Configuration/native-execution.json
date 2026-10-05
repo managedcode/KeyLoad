@@ -1,0 +1,15 @@
+{
+  "NativeComparisonExecution": {
+    "OperationTimeout": "00:00:30",
+    "PostgresMaxPoolSize": 24,
+    "PostgresMaxAutoPrepare": 32,
+    "PostgresAutoPrepareMinUsages": 1,
+    "ReadBufferBytes": 8192,
+    "MaxResponseBytes": 8388608,
+    "WriteBatchCapacity": 24,
+    "ReadbackBatchCapacity": 256,
+    "CleanupTimeout": "00:00:30",
+    "IndexBuildTimeout": "00:20:00",
+    "IndexPollInterval": "00:00:00.200"
+  }
+}

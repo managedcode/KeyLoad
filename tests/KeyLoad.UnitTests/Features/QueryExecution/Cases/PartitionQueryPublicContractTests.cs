@@ -60,6 +60,6 @@ internal sealed class PartitionQueryPublicContractTests
 
     private static PartitionQueryPageV1 Run(PartitionQueryPublicTestSupport fixture,
         PartitionQueryRequestV1 request, string principalId = "root")
-        => new QueryEngine(fixture.Database).QueryPartitions(principalId, request,
+        => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(principalId, request,
             PartitionQueryPublicTestSupport.ExpectedOwner);
 }

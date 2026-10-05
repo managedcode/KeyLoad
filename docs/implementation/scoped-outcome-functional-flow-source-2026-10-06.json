@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "recordedUtc": "2026-10-05T22:37:44.803876+00:00",
+  "stages": [
+    "TASK-DSTORE-SCOPED-OUTCOMES-002",
+    "TASK-DSTORE-SCOPED-OUTCOMES-003",
+    "TASK-SQLC-BETWEEN-FLOW-001"
+  ],
+  "sourceBase": "cf103b0b45e90e9238738f351a6207e14361f1d4",
+  "sourceReviewScope": "The accepted scoped-outcome packet and root corrective changes were reviewed. Shared IOptions changes are retained and captured; this receipt does not qualify those changes.",
+  "requirements": [
+    "REQ-DSTORE-006",
+    "REQ-DSTORE-009",
+    "REQ-SQLC-003",
+    "REQ-SQLC-004",
+    "REQ-SQLC-006",
+    "REQ-CQ-009"
+  ],
+  "acceptance": [
+    "AC-DSTORE-006",
+    "AC-DSTORE-009",
+    "AC-SQLC-006A-T",
+    "AC-SQLC-006A-B",
+    "AC-SQLC-006A-C",
+    "AC-CQ-020"
+  ],
+  "originalPacketManifestSha256": "615fadb0b1902fefafe04a519c10847f6b0a51e6d2317101d323e26db4fb38ba",
+  "sourceFiles": [
+    {
+      "path": "src/KeyLoad.Core/AtomicCommandCommit.cs",
+      "packetPostSha256": "bd3f12c0970773beac6e841d721d9d6dce964c165847ea04cd5862aab16c297d",
+      "currentSha256": "265d98b196ff460ff4e1e48191caa75301ad1aa35a1e340728e29061f77bd2ae"
+    },
+    {
+      "path": "src/KeyLoad.Core/CommandOutcomes.cs",
+      "packetPostSha256": "0d115ad83b1437043196ecfd931ca3c10a8b252c3a70a51fe35489f62942d440",
+      "currentSha256": "0d115ad83b1437043196ecfd931ca3c10a8b252c3a70a51fe35489f62942d440"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/ClusterRouting/Contracts/PartitionRecordFamilies.cs",
+      "packetPostSha256": "46708613a13ba8bbe9e6a2ec64702c289fa26318401655d5cd66ce5c01b0932a",
+      "currentSha256": "46708613a13ba8bbe9e6a2ec64702c289fa26318401655d5cd66ce5c01b0932a"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/ClusterRouting/Execution/CommandOutcomeKeyResolver.cs",
+      "packetPostSha256": "74da446b076ca9a088309a4c8ad7da0c91b7eea28c629d581954d97ae527fe3e",
+      "currentSha256": "74da446b076ca9a088309a4c8ad7da0c91b7eea28c629d581954d97ae527fe3e"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs",
+      "packetPostSha256": "a3e741fd559c1a54919b70291f980be08e7e1d771a8d443bc84b62f1f6e9dd84",
+      "currentSha256": "a3e741fd559c1a54919b70291f980be08e7e1d771a8d443bc84b62f1f6e9dd84"
+    },
+    {
+      "path": "src/KeyLoad.Core/KeySpace.cs",
+      "packetPostSha256": "e6d3911481c998fa940416a7b53d4f820bed13fdf5af3bc03e3063c27f6fa6b4",
+      "currentSha256": "8530082253a27896bdaa3682e92a7f55766ef22774eea3cb2f8081dd9322423a"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Helpers/C1OutcomeInspectionOperation.cs",
+      "packetPostSha256": "b507e8a80f1b4b17e826827b79e684c279dabd3c462b4df613b114385b36e301",
+      "currentSha256": "1a54b8e5d06dc439e61d4370be5dd1ebf58f2fb27afb2ba9290f301761186c88"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Assertions/CommandIdempotencyCrashAssertions.cs",
+      "packetPostSha256": "0562e2c52ca5f62388a77daf000ebbe9e80f04b39a201ccc16f13dcba8260b45",
+      "currentSha256": "0562e2c52ca5f62388a77daf000ebbe9e80f04b39a201ccc16f13dcba8260b45"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/DocumentStorage/Helpers/CommandIdempotencyCrashScenario.cs",
+      "packetPostSha256": "78363b41147ec125045d4ef8e94696c86973dc0165d75641b556ed845840db35",
+      "currentSha256": "3ef60140965ca3072ca2f3d84ebc80c3dd7b617a72939e843644238cab4d6dca"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/StorageRecovery/Fixtures/EpochUpgradeFixture.cs",
+      "packetPostSha256": "474547ff805d3661b821ccfbf16521f724819af6f59b2934a4d4597def587ae4",
+      "currentSha256": "272dc21fdcce7f1c5913f0df4af78310774e72a458f24e3429dd503b602789bc"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Assertions/ScopedCommandIdentityRf3Assertions.cs",
+      "packetPostSha256": "446eda094e185330770a9502871e20b04c1f14dde697d652fecaf4e13783d6a2",
+      "currentSha256": "80df66533f97879761e6ce76dc71864833d3d4eff7232033c5bb8aa311063948"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/ScopedCommandIdentityRf3Tests.cs",
+      "packetPostSha256": "fdca021514cb619638b6cd5fb843a7d76a14b06df1067a2ab962e560f3570e76",
+      "currentSha256": "fdca021514cb619638b6cd5fb843a7d76a14b06df1067a2ab962e560f3570e76"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Helpers/ScopedCommandIdentityRf3Scenario.cs",
+      "packetPostSha256": "d43eb7ed7c82ee31f0e2ec8b074fe30b40c40bf336eba9cc99a258aeef72c48d",
+      "currentSha256": "d43eb7ed7c82ee31f0e2ec8b074fe30b40c40bf336eba9cc99a258aeef72c48d"
+    },
+    {
+      "path": "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Helpers/ScopedCommandIdentityRf3Workflow.cs",
+      "packetPostSha256": "7e8c1609b139fd07cb84863599b28e3fa6b7bd8808508bb18920a35621626414",
+      "currentSha256": "7e8c1609b139fd07cb84863599b28e3fa6b7bd8808508bb18920a35621626414"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ChangeFeeds/Cases/SubscriptionRecoveryTests.cs",
+      "packetPostSha256": "b79383282b2bb7d8ca50cc8aa4b84217e5bd9b6dadfc1ab15567a148dd8d72be",
+      "currentSha256": "f4d39a828842272bb621e5d5a9d1af7884c01411f2767caae9cb0419cdd9c6bd"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Assertions/ReplicaProcessAssertions.cs",
+      "packetPostSha256": "df697bbf0469cfe206423910a6420f9b804b32d7bd52788ff299aab7d87b0e40",
+      "currentSha256": "df697bbf0469cfe206423910a6420f9b804b32d7bd52788ff299aab7d87b0e40"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReadRoundProtocolTests.cs",
+      "packetPostSha256": "937003d9338d594c5c4516a7f43917243886a9b916a50125ac991bb77de0c06b",
+      "currentSha256": "937003d9338d594c5c4516a7f43917243886a9b916a50125ac991bb77de0c06b"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs",
+      "packetPostSha256": "c2da06a115751265288531985381b2e4bb75f0de52ebe4246786e1a82899b70d",
+      "currentSha256": "d4828713c35085aa928b25d4a7230e0ec332273a13a1b87640bcb09f97e10267"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterReplication/Cases/ReplicaTransferProcessRecoveryTests.cs",
+      "packetPostSha256": "ddf4389945df9e3f3211a62b9cd0d6674ce2a41c3d97c64177ba447a6c3a218b",
+      "currentSha256": "f17db118f39948a68994f2cbeaf7c5c161311de4506329508f8912f89f0e92be"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterRouting/Assertions/GenuineStoredOutcomeFrameAssertions.cs",
+      "packetPostSha256": "0d7e66148428ecf0a114f487d5fe4064d7a2e432a93e27160c682499c2a9090e",
+      "currentSha256": "c03ae39af51d128c573dae1d76b6fa884c52730621f9f43f1ae5378ed33bc3da"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/ClusterRouting/Helpers/GenuineStoredOutcomeFrameTestSupport.cs",
+      "packetPostSha256": "556400975738bbb2839aa74b141cae4eca3a041276dd54f4ff0e69e07876fce1",
+      "currentSha256": "832ee74226b27edef25ce82b8b79b0d8a325ebe684114de8fc2c28059a5dac96"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/DatabaseComposition/Cases/DatabaseCompositionProcessRecoveryTests.cs",
+      "packetPostSha256": "613ff366ed768c75f0bc67178321be7396b04f83ac4a896667f83a1e44e4f7c8",
+      "currentSha256": "e5251b1c473e0ec0a20286b24429e3e419ecbc2f656863686cc365ffbf8d6a16"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/DocumentStorage/Assertions/CommandIdempotencyRecoveryAssertions.cs",
+      "packetPostSha256": "6cbdf9df9d2de0a199de48b7d3d331b79b9da002f1e4624714623a0af22f60cb",
+      "currentSha256": "06220bfdfb18f343e4f65e4a205031fc9f1a75b488ba0df5280b8733a30d3dc6"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/AggregateReplayProcessRecoveryTests.cs",
+      "packetPostSha256": "b69be198aec9d8d6f67803d08c50a5a3db01808915d32dfcc238a8b5f0d88a90",
+      "currentSha256": "021ce29f7eac5169cb6fc43be7ad8de5d18470f9cf650b4f11ad8bd04f7d2620"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/EventStreams/Cases/ProjectionRecoveryTests.cs",
+      "packetPostSha256": "3b9850ff9d464b6c8d0bf1a577c08c77330f3f4417cab0a611110b81218682fa",
+      "currentSha256": "f5250208ffd60843fd062c5c7b12889b549485e2fe392fd291504dbe8ceb425c"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/Messaging/Assertions/RecurringScheduleRecoveryAssertions.cs",
+      "packetPostSha256": "3be03990ddd0f82ca32ca9c2e77cfe3ee70b43f1fa9023e773ffd1a23f252653",
+      "currentSha256": "c9441b10e8caea1c685f9392cab573db06b75677288f8e4d1a1c7f0e2110d34e"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/Messaging/Assertions/SagaTimeoutRecoveryAssertions.cs",
+      "packetPostSha256": "d7f4a2491a0330517d799883609dc0f47368ef57b37aa230461d4fe0228c03d4",
+      "currentSha256": "193e0be4e2c8e3cdb5ddd1e33c15413042189fa137fcb0784154329dbcf9f64d"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/EventProjectionProcessRecoveryAssertions.cs",
+      "packetPostSha256": "154a3d8635ac8f2225703ee2068a571a24593e5c39fdab58a4e6b98f04a15722",
+      "currentSha256": "4721ea6e694214af9a03c723371ecbeff9ccff84bf21474161c1760077b0b684"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/EventProjectionRecoveryQueryOracle.cs",
+      "packetPostSha256": "95f1e0fbe8a40a4d1d6bacdf79b3a7c8a61436f980b74ba094c52896f0b14984",
+      "currentSha256": "95f1e0fbe8a40a4d1d6bacdf79b3a7c8a61436f980b74ba094c52896f0b14984"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/Search/Assertions/EventProjectionRecoveryStoreOracle.cs",
+      "packetPostSha256": "20da362cf2522bf8fdbfd41c8b5608b00ffd135221c241ee603ad1e1a33d8eb5",
+      "currentSha256": "20da362cf2522bf8fdbfd41c8b5608b00ffd135221c241ee603ad1e1a33d8eb5"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/Features/TimeSeries/Assertions/SampleRetentionRecoveryAssertions.cs",
+      "packetPostSha256": "1bc0733be654ff4dceccd3a4df9454aa4378c6aa8c0c40166f4dc9e497f670c4",
+      "currentSha256": "53398a14315397bff2d72d297a2586efdc3b191f128efb58b9a4bd407378bf54"
+    },
+    {
+      "path": "tests/KeyLoad.RecoveryTests/OutcomeStoreOracle.cs",
+      "packetPostSha256": "2ae7a8d0e040367be514015baa8f172dd15b79189e969ccb4a633ffc41c08c60",
+      "currentSha256": "c9d5acc42f433a874ba1264038f28dac3af4c31fd2431482cfc35e69b6603f38"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Authorization/Helpers/ResourcePolicyUpdateFixture.cs",
+      "packetPostSha256": "360b55294cb200d1c585d16ee7193c315fd70f9678946f0b23d847d438a2b7e7",
+      "currentSha256": "79ee2116e11d5c2fc170677e0b50647d896fb60b4c7280ef495f408e99f44575"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BlobStorage/Cases/BlobFormatFailureTests.cs",
+      "packetPostSha256": "cdcc774d72ad65336f20e358c5e8d1c89528768535b412c689e1037b40a9af62",
+      "currentSha256": "cdcc774d72ad65336f20e358c5e8d1c89528768535b412c689e1037b40a9af62"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BlobStorage/Cases/BlobGrainRoutingTests.cs",
+      "packetPostSha256": "ee3ae55c7346409c9f0247fa98f7a5b362ebd8418e92950b4a8fb0db4c54505f",
+      "currentSha256": "ee3ae55c7346409c9f0247fa98f7a5b362ebd8418e92950b4a8fb0db4c54505f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BlobStorage/Cases/BlobMissingCurrentVersionTests.cs",
+      "packetPostSha256": "b254bc47b3d57c7c4f58ce5b4a089010b329d963b8e7042757ebe17dd1c9392d",
+      "currentSha256": "b254bc47b3d57c7c4f58ce5b4a089010b329d963b8e7042757ebe17dd1c9392d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BlobStorage/Helpers/BlobPersistedCorruptionAssertions.cs",
+      "packetPostSha256": "32c15af4841ab4f72be8b94771602624df535905b0caad5f54c990c38471c587",
+      "currentSha256": "32c15af4841ab4f72be8b94771602624df535905b0caad5f54c990c38471c587"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ChangeFeeds/Cases/OutboxPurgeTests.cs",
+      "packetPostSha256": "24047a7e85b1e3c15cb7e395d973b7377f97086f38ed6efd08a7624b8e21efcc",
+      "currentSha256": "8b3988b4480176ba9c844e212dc9d70beaf5c96277299f958d40e6547e6333bd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Assertions/CommandOutcomePartitionScopeTestData.cs",
+      "packetPostSha256": "46f77415bb491ae32eb1f6424d7e9066e3a989c98146f7e34e5d64de33dcae5c",
+      "currentSha256": "46f77415bb491ae32eb1f6424d7e9066e3a989c98146f7e34e5d64de33dcae5c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/C1OutcomeInspectionAbsentTests.cs",
+      "packetPostSha256": "86fe0ebd9d1c5fa4fc98e49165d8ceaa2c87f24e6e4e74692c198b3cd5881ba2",
+      "currentSha256": "86fe0ebd9d1c5fa4fc98e49165d8ceaa2c87f24e6e4e74692c198b3cd5881ba2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/CommandOutcomeAuthorizationOrderTests.cs",
+      "packetPostSha256": "fd7f81882f5b2b98acb66715036738a2d837a01d3a47f54612add06ef9087924",
+      "currentSha256": "fd7f81882f5b2b98acb66715036738a2d837a01d3a47f54612add06ef9087924"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/CommandOutcomePartitionScopeFailureTests.cs",
+      "packetPostSha256": "e33b971509466f3c195120643c83b5fe86f669d99323a5cae070ddc2f6c7c17a",
+      "currentSha256": "e33b971509466f3c195120643c83b5fe86f669d99323a5cae070ddc2f6c7c17a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/CommandOutcomePartitionScopeLegacyTests.cs",
+      "packetPostSha256": "e5125c6044a3a5c8d21aa8cdd84f0c1687da142312c120aea0ed49eb437c536f",
+      "currentSha256": "e5125c6044a3a5c8d21aa8cdd84f0c1687da142312c120aea0ed49eb437c536f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/CommandOutcomePartitionScopeTests.cs",
+      "packetPostSha256": "e973e384277299170eaa5f6f30437f09190d6cd3eec69b13a2bedaf00e8479a5",
+      "currentSha256": "4ff5a75b611d9240857ff5c775510bb6edeeed28c4dfa04692d58f149e5ab6a3"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/GrainRoutingAuthorizationTests.cs",
+      "packetPostSha256": "a9ce2934d6414dd3879b3c11a52efd1d45a655b3ce6582a3faa848a263e81b0f",
+      "currentSha256": "a9ce2934d6414dd3879b3c11a52efd1d45a655b3ce6582a3faa848a263e81b0f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionOwnershipEpochTests.cs",
+      "packetPostSha256": "a6c4a1030d6b8732e5319a1f6b4d86bae6a8b1abaebec5cdfe7c56e1c117be8b",
+      "currentSha256": "a6c4a1030d6b8732e5319a1f6b4d86bae6a8b1abaebec5cdfe7c56e1c117be8b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/PartitionRecordInventoryTests.cs",
+      "packetPostSha256": "d183b69e95ba166df0df35fc7571bd373b5ba04cb5bf238a198cef347cb27092",
+      "currentSha256": "d183b69e95ba166df0df35fc7571bd373b5ba04cb5bf238a198cef347cb27092"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/C1OutcomeInspectionFixture.cs",
+      "packetPostSha256": "8983eb9550186b5bb0b7dcf52c9996f7f69472626d3b695f6f2d6f594d6a203f",
+      "currentSha256": "01821b15f7dab6ec333690c54c5e5bd21fa2d5a3fe4be4cf206a4666a1fae03d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/CommandOutcomeAuthorizationOrderScenario.cs",
+      "packetPostSha256": "0a381c406cc229e67eaa7bb0bc02144172f13d0dae9ee8d9272b4bd6e8ff7a12",
+      "currentSha256": "0a381c406cc229e67eaa7bb0bc02144172f13d0dae9ee8d9272b4bd6e8ff7a12"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/RequestCqrsRoutingSupport.cs",
+      "packetPostSha256": "1abef1de5acd5807f7edf8d2f8ce5e5a024011f2ab73fe7058c8c1be09adc633",
+      "currentSha256": "1abef1de5acd5807f7edf8d2f8ce5e5a024011f2ab73fe7058c8c1be09adc633"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DatabaseComposition/Cases/DatabaseCompositionReplayTests.cs",
+      "packetPostSha256": "5d3f26915262c52247955b71243afd2dd16120373fc78f6748faeb99aa987fb6",
+      "currentSha256": "11456efa7c7628aa2b74060387d62f18c6c3c257f196560a8cb82651daeb813f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentCommandOutcomeReplayTests.cs",
+      "packetPostSha256": "6c0c59153b8663f3068b2651281de5d310d24967da7f546040b9931487a396fa",
+      "currentSha256": "6c0c59153b8663f3068b2651281de5d310d24967da7f546040b9931487a396fa"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/DocumentCommandPrincipalScopeTests.cs",
+      "packetPostSha256": "9e42c9651517857d3e4ee112618b84bc11305fe28d5f9bd0f89acc9a9c4b3907",
+      "currentSha256": "9e42c9651517857d3e4ee112618b84bc11305fe28d5f9bd0f89acc9a9c4b3907"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Cases/ReadOnlyCoreContractTests.cs",
+      "packetPostSha256": "e94e627baf1c67018061aa1b77ce67226414f53fbd42c91a1034db74210c3926",
+      "currentSha256": "3256a5cd87006fcfd9a01673ae0d4f92082d2d9f2829fc0232bcb86beab7bbb1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/DocumentStorage/Helpers/DocumentCommandOutcomeTestSupport.cs",
+      "packetPostSha256": "f1ac5b0db9c8eba3d7c6f0b42806ff1b95529adb1ec5412b37139b58ec4ec0f0",
+      "currentSha256": "f1ac5b0db9c8eba3d7c6f0b42806ff1b95529adb1ec5412b37139b58ec4ec0f0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationMarkerTests.cs",
+      "packetPostSha256": "805b52cb17091a3be3967c443e78b7a4ca2a5c75fefa8ba6bf190b9efe9bf671",
+      "currentSha256": "805b52cb17091a3be3967c443e78b7a4ca2a5c75fefa8ba6bf190b9efe9bf671"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativeOperationSemanticsTests.cs",
+      "packetPostSha256": "55d57acbbcaa603add719964b49163b62e821475b3093f725355772c6ee31ad0",
+      "currentSha256": "55d57acbbcaa603add719964b49163b62e821475b3093f725355772c6ee31ad0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativePublicElementProfileTests.cs",
+      "packetPostSha256": "f9eb28247b4cc2405b06c669b119bb10b0e7646ccdf377f131d57583d53e94ef",
+      "currentSha256": "f9eb28247b4cc2405b06c669b119bb10b0e7646ccdf377f131d57583d53e94ef"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/NativePublicNormalizationTests.cs",
+      "packetPostSha256": "8cdf667d392149366988800f71a4ee9024aa3b19bef2cf9621a762fc2c6fef02",
+      "currentSha256": "8cdf667d392149366988800f71a4ee9024aa3b19bef2cf9621a762fc2c6fef02"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Cases/ReplicaNativeEnumHeaderTests.cs",
+      "packetPostSha256": "1c9d1080a9c264bd7784b806ecc901144ef0bb8f9b6fd5a3267a59ec9f97facb",
+      "currentSha256": "1c9d1080a9c264bd7784b806ecc901144ef0bb8f9b6fd5a3267a59ec9f97facb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Fixtures/NativeAuthorityFixture.cs",
+      "packetPostSha256": "520d9ee7442516e0f5f5eacafa77e25b98bc832646f0c0c888f8ed05216455e0",
+      "currentSha256": "520d9ee7442516e0f5f5eacafa77e25b98bc832646f0c0c888f8ed05216455e0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/InternalSerialization/Fixtures/NativePublicNormalizationFixture.cs",
+      "packetPostSha256": "5581892aedc14293cd4c0a62b9ed0b18714bce1d0e5e251bb658fda7a4be214b",
+      "currentSha256": "5581892aedc14293cd4c0a62b9ed0b18714bce1d0e5e251bb658fda7a4be214b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Messaging/Assertions/QueueBodyFailureAssertions.cs",
+      "packetPostSha256": "c339657a78b971e80d0bbda56ca5888f76e92ce89ce72653d85009938dbd158c",
+      "currentSha256": "c339657a78b971e80d0bbda56ca5888f76e92ce89ce72653d85009938dbd158c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Messaging/Cases/DueAttemptSafetyTests.cs",
+      "packetPostSha256": "eaeb7540c35fff73dc202b2d2777b78d7d7154bf4fb2b36d9dcf7e00341deac6",
+      "currentSha256": "eaeb7540c35fff73dc202b2d2777b78d7d7154bf4fb2b36d9dcf7e00341deac6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/Messaging/Helpers/DueFreshAttemptAssertions.cs",
+      "packetPostSha256": "8e076a39f41455d230406b299cb33bbcc599d5d90c54a7e0fb4edcbc820d2024",
+      "currentSha256": "8e076a39f41455d230406b299cb33bbcc599d5d90c54a7e0fb4edcbc820d2024"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/ResourceProtocolFailureTests.cs",
+      "packetPostSha256": "8a25655956a833654f4debaa960858592df39d8c34ee3b948574c0508fc2d9f1",
+      "currentSha256": "8a25655956a833654f4debaa960858592df39d8c34ee3b948574c0508fc2d9f1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionProtocolTests.cs",
+      "packetPostSha256": "ea3319f70e190f0ea98e510ffa86bede471e428353b51c2706544ae9da44d946",
+      "currentSha256": "964023f5039477b36fbb266bf82d3b9f32fea6279d920555db17f6cc6d0470f6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/OutcomeStoreOracle.cs",
+      "packetPostSha256": "03f347103aabd48a6231e47069b9b6340c06d6fd0a8ab92f462c2380536377d1",
+      "currentSha256": "aea098e3884ecc5eb7925a0b570f00dd6ae18102660d144396bc7da9f3503472"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlBetweenRangeQueryTests.cs",
+      "packetPostSha256": "151fdc1b479a40b8495ccd653be6600966c6afa4a6e465024d777c37978a4db9",
+      "currentSha256": "b87b370d2a3d09d362be99b3609a1602c069cec9ad5717d8e3c64cf493b56ab6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlBetweenBudgetAndAuthorityTests.cs",
+      "packetPostSha256": "fe5d9cc57153d2074c418fcd586e2317e63613bc2ab80c0d73074b0e3bca3291",
+      "currentSha256": "c9369a1f4af7be2058eafe5b401d270097b26906a7ac231e6a5c88192fa10895"
+    }
+  ],
+  "changes": [
+    "Full partition, principal and command identity select canonical v2 outcomes and locators; retained legacy bytes remain read-only.",
+    "Persisted authentication and operation authorization precede retained metadata decode; denied or invalid admission cannot overwrite an occupied outcome.",
+    "The ambiguous unscoped Core result accessor is removed; actual callers use their original operation or an independent forensic store oracle.",
+    "Actual-operation unit, genuine prior-frame, process-recovery and SDK/official-MCP RF3 scenarios are authored; their current-source native runs remain pending.",
+    "SQL BETWEEN parameters now compare complete results with an independently authored AST; malformed delimiter recovery and persisted field-access denial verify unchanged store state.",
+    "Root review corrected a two-mutation RF3 conflict selector, actual bootstrap position accounting, helper imports and native storage extension imports."
+  ],
+  "verification": {
+    "sourceIntakeCompleted": true,
+    "currentSolutionBuildPassed": false,
+    "currentFormatterPassed": false,
+    "currentNormalTestsExecuted": false,
+    "currentScalarTestsExecuted": false,
+    "currentProcessRecoveryExecuted": false,
+    "currentRf3Executed": false,
+    "currentFunctionalCoverageCollected": false,
+    "note": "This source checkpoint was captured during the shared central-IOptions/analyzer migration. No old build, test or coverage receipt qualifies the current source."
+  },
+  "coverage": {
+    "solution": null,
+    "rf3Server": null,
+    "loadStressPerformanceComparisonContributors": "excluded; complete contributor selection and three-server native collection remain pending"
+  },
+  "qualified": false,
+  "acceptanceClosed": false
+}

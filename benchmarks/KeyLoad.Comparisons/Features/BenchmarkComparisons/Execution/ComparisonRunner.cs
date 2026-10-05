@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 
@@ -9,6 +10,7 @@ public sealed class ComparisonRunner
     private readonly ComparisonOptions options = null!;
     private readonly ScaledComparisonProfile? scaledProfile;
     private readonly VectorComparisonProfile? vectorProfile;
+    private readonly IOptions<NativeComparisonExecutionOptions>? vectorExecution;
     private readonly Action<string>? progress;
 
     /// <summary>Creates a runner for the unchanged materialized control workload.</summary>
@@ -26,9 +28,10 @@ public sealed class ComparisonRunner
         this.progress = progress;
     }
 
-    private ComparisonRunner(VectorComparisonProfile vectorProfile, Action<string>? progress)
+    private ComparisonRunner(VectorComparisonProfile vectorProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
     {
         this.vectorProfile = vectorProfile;
+        vectorExecution = executionOptions;
         this.progress = progress;
     }
 
@@ -40,16 +43,27 @@ public sealed class ComparisonRunner
         => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
 
     /// <summary>Creates a runner for one exact native vector profile.</summary>
-    public static ComparisonRunner ForVector(VectorComparisonProfile profile, Action<string>? progress = null)
-        => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
+    /// <param name="profile">The immutable bounded vector profile.</param>
+    /// <param name="executionOptions">The explicitly configured native execution limits.</param>
+    /// <param name="progress">The optional progress observer.</param>
+    /// <returns>The native vector workload runner.</returns>
+    public static ComparisonRunner ForVector(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), progress);
 
     /// <summary>Runs the vector-specific workload against its already Aspire-owned native target.</summary>
+    /// <param name="target">The actual native vector target.</param>
+    /// <param name="sourceRevision">The measured source revision.</param>
+    /// <param name="cancellationToken">Cancels native execution.</param>
+    /// <param name="storage">The observed storage profile.</param>
+    /// <returns>The measured native vector report.</returns>
     public Task<ComparisonReport> RunAsync(IVectorComparisonTarget target, string? sourceRevision,
         CancellationToken cancellationToken, string storage = UnrecordedStorage)
     {
         if (vectorProfile is null || scaledProfile is not null || options is not null)
-            throw new InvalidOperationException("A vector profile must be selected to run a native vector target.");
-        return new VectorComparisonRunner(vectorProfile).RunAsync(target, sourceRevision, storage, cancellationToken);
+        {
+            throw new InvalidOperationException(ComparisonRunnerValues.AVectorProfileMustBeSelected);
+        }
+        return new VectorComparisonRunner(vectorProfile, vectorExecution!).RunAsync(target, sourceRevision, storage, cancellationToken);
     }
 
     private const string SetupPrefix = "setup:";
@@ -69,7 +83,9 @@ public sealed class ComparisonRunner
         string storage = UnrecordedStorage, Scenario? scenario = null)
     {
         if (vectorProfile is not null)
-            throw new InvalidOperationException("A vector profile requires the native vector target interface.");
+        {
+            throw new InvalidOperationException(ComparisonRunnerValues.AVectorProfileRequiresTheNative);
+        }
         if (scaledProfile is { } profile)
         {
             return await new ScaledComparisonRunner(profile, progress).RunAsync(targets, sourceRevision,
@@ -79,12 +95,12 @@ public sealed class ComparisonRunner
 
         var started = TimeProvider.System.GetUtcNow();
         await using var observer = new ComparisonProgressObserver(progress);
-        observer.Begin(ComparisonProgressPhase.Oracle, 0);
+        observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex);
         cancellationToken.ThrowIfCancellationRequested();
         var dataset = new BenchmarkDataset(options);
         var cases = new List<ComparisonCase>();
         PrepareOracle(dataset, scenario, observer, cancellationToken);
-        for (var repetition = 0; repetition < options.Repetitions; repetition++)
+        for (var repetition = ComparisonRunnerValues.FirstIndex; repetition < options.Repetitions; repetition++)
         {
             var offset = repetition % targets.Length;
             foreach (var target in targets.Skip(offset).Concat(targets.Take(offset)))
@@ -93,7 +109,7 @@ public sealed class ComparisonRunner
             }
         }
         observer.Complete();
-        return new(3, Guid.NewGuid(), started, options, dataset.Sha256, LoadModel,
+        return new(ComparisonRunnerValues.ReportSchemaVersion, Guid.NewGuid(), started, options, dataset.Sha256, LoadModel,
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
             RuntimeInformation.FrameworkDescription, storage, sourceRevision,
             targets.Select(target => target.Profile).ToImmutableArray(), cases.ToImmutableArray());
@@ -106,13 +122,13 @@ public sealed class ComparisonRunner
         {
             throw new ArgumentOutOfRangeException(nameof(scenario));
         }
-        if (scenario is not null && targets.Length != 1)
+        if (scenario is not null && targets.Length != ComparisonRunnerValues.SingleElementOffset)
         {
             throw new ArgumentException(IsolatedTargetRequired, nameof(targets));
         }
-        if (targets.Length == 0)
+        if (targets.Length == ComparisonRunnerValues.FirstIndex)
         {
-            throw new ArgumentException("At least one target is required.", nameof(targets));
+            throw new ArgumentException(ComparisonRunnerValues.AtLeastOneTargetIsRequired, nameof(targets));
         }
     }
 
@@ -120,20 +136,20 @@ public sealed class ComparisonRunner
         ComparisonProgressObserver observer, CancellationToken cancellationToken)
     {
         var operations = selectedScenario is null or Scenario.VectorExact or Scenario.GraphNeighbors or Scenario.GraphTraverse
-            ? Math.Max(options.Operations, options.Warmup) : 0;
-        observer.Begin(ComparisonProgressPhase.Oracle, 0, operations);
+            ? Math.Max(options.Operations, options.Warmup) : ComparisonRunnerValues.FirstIndex;
+        observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex, operations);
         cancellationToken.ThrowIfCancellationRequested();
-        for (var operation = 0; operation < operations; operation++)
+        for (var operation = ComparisonRunnerValues.FirstIndex; operation < operations; operation++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (selectedScenario is null or Scenario.VectorExact)
             {
-                dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, 0, operation, false));
+                dataset.ExactNeighbors(dataset.Input(Scenario.VectorExact, ComparisonRunnerValues.FirstIndex, operation, false));
             }
             if (selectedScenario is null or Scenario.GraphNeighbors or Scenario.GraphTraverse)
             {
-                var root = dataset.Input(Scenario.GraphTraverse, 0, operation, false);
-                dataset.Reachable(root, 1);
+                var root = dataset.Input(Scenario.GraphTraverse, ComparisonRunnerValues.FirstIndex, operation, false);
+                dataset.Reachable(root, ComparisonRunnerValues.SingleElementOffset);
                 cancellationToken.ThrowIfCancellationRequested();
                 dataset.Reachable(root, options.GraphDepth);
             }
@@ -146,9 +162,9 @@ public sealed class ComparisonRunner
     {
         var scenarios = selectedScenario is { } selected ? [selected] : Enum.GetValues<Scenario>();
         string? failure = null;
-        if (repetition == 0)
+        if (repetition == ComparisonRunnerValues.FirstIndex)
         {
-            observer.Begin(ComparisonProgressPhase.Initialize, repetition + 1);
+            observer.Begin(ComparisonProgressPhase.Initialize, repetition + ComparisonRunnerValues.SingleElementOffset);
             try
             {
                 await target.InitializeAsync(dataset, cancellationToken);

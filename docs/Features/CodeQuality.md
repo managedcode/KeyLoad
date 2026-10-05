@@ -108,6 +108,8 @@ the build; never disable these rules merely to declare a green migration.
 | KLD0032 | Executable unit code lines at most50 | Error |
 | KLD0033 | Executable control-flow nesting at most3 | Error |
 | KLD0034 | Typed synchronization outside Orleans activation-owned state | Error |
+| KLD0035 | Named constants for runtime durations and timeout arguments | Error |
+| KLD0036 | Named constants for runtime string comparisons and format tokens | Error |
 
 Excluded Prostir-specific rules: ProductCommandContract and ServerOwnedIdentity
 assume Prostir's typed product command/Studio lifecycle; EfCoreCosmosTopLevelAny
@@ -253,6 +255,24 @@ then format, build, run the mapped tests through Aspire, collect functional
 coverage and repeat metrics. Run complete unit/scalar/recovery/RF3 gates and retain
 actual outcomes. No source repair closes an unexecuted or failed acceptance gate.
 
+Continuation 2026-10-06 retains the same TASK-CQ-REPAIR-001 acceptance contract.
+First capture the current strict solution-build failures and preserve the earlier
+140/144 analyzer result. A disjoint test-fixture worker owns the remaining real
+PowerShell copied-repository failures and current-inventory threshold oracle;
+the lead owns build integration, Blob corruption regressions, formatting,
+Aspire-owned suite execution, native coverage/complexity and final evidence.
+The bounded worker also owns `Assert-CoveragePathHasNoLinks` in the existing
+site-analyzer-coverage shared helper after profiling the real copied-repository
+process. Native .NET metadata inspection may replace repeated PowerShell provider
+calls only while preserving rejection of linked path segments, missing-input
+failures and the original source/hash contract; verify real symlink negatives and
+complete copied Prepare processes under the unchanged budget before joining.
+Repair the demonstrated cause without increasing process budgets, removing
+assertions or suppressing diagnostics. Review the joined diff, run analyzers and
+the existing complete unit/scalar/recovery/RF3 gates, then retain a final canonical
+build after all edits and formatting. Report source drift and missing coverage
+explicitly; concurrent unrelated feature implementation is preserved.
+
 - AC-CQ-018: the first contributor profile is exactly the functional
   `PartitionQuery*` TUnit cases in `unit` and `unit-scalar`, through the existing
   Aspire-owned entry and native MTP CodeCoverage 18.11.2. The profile includes
@@ -312,6 +332,45 @@ because the first scoped profile exists. No persistence or public API migration
 occurs; rollback restores a coherent tooling profile and retains original reports
 without disabling required quality or functional test gates.
 
+### Compiled-source identity prerequisite
+
+TASK-CQ-FUNCTIONAL-COVERAGE-001A extends AC-CQ-018/020 with a native read-only
+identity helper under `scripts/Features/CodeQuality/functional-coverage.compiled-identity.ps1`.
+Use the installed .NET System.Reflection.Metadata and PEReader APIs; do not load
+or execute inspected assemblies or install another parser dependency. Root owns
+this new helper and its canonical Get-Fc integration, without replacing the
+existing coverage scripts or reports. ADR-033 owns its ordered verification.
+
+Bind each actual production/test DLL to its module MVID, DLL/PDB SHA-256 and
+portable-PDB debug identity, including the PE CodeView GUID/stamp correspondence.
+Match every inventoried compiled source to its PDB document's native SHA-256
+checksum and the actual source bytes. A current filesystem hash alone cannot
+establish that the DLL compiled those bytes. Reject mismatched, duplicate, absent
+or unsupported identities, links, paths outside the owned checkout and drift of
+the original inputs during inspection. Bound each DLL/PDB to64 MiB and each
+document/inventory enumeration to5000 entries before retaining the next entry.
+Retain generated PDB documents separately with their actual checksums and explicit
+unmeasured/source-binding disposition; never silently count them as inventoried
+product source or infer coverage for them. Missing inventory source documents
+keep compiled-source binding incomplete.
+
+Verify through actual Release DLL/PDB/source inspection, then a real source change
+against the unchanged compiled image and restoration, an actually mismatched
+existing PDB, missing/duplicate inventory and bounded rejected inputs. Inspection
+and rejection controls are static evidence, not functional coverage or a passing
+build. Fresh complete-flow TUnit runs still execute only through Aspire; native
+pre/post source/module identities and original reports remain mandatory.
+
+For inspection of relocated original artifacts, an optional explicit original
+compilation root maps PDB document names to the owned current checkout by exact
+root-relative path. It is retained in the receipt, never inferred from arbitrary
+suffix matching, and never followed as a filesystem location. Validate each
+mapped relative path against the same confined inventory and native checksum;
+unknown or escaping document roots are rejected. This also permits real
+stale-source controls in an owned copy without modifying another writer's live
+source. Unmapped non-executable declarations remain explicitly unmeasured rather
+than invented PDB bindings.
+
 ```mermaid
 flowchart LR
     Functional[Explicit functional contributors] --> Aspire[Aspire-owned tests and RF3 nodes]
@@ -322,3 +381,122 @@ flowchart LR
     Gaps --> Flows[Complete operation regressions]
     Flows --> Functional
 ```
+
+
+## Magic runtime values, 2026-10-05
+
+[ADR-111](../ADR/ADR-111-magic-runtime-values.md) owns REQ-CQ-011 and
+TASK-CQ-LITERALS-001..004. The owner authorizes source-owned rules for recurring
+quality defects, including magic strings and numbers. Existing const policy and
+KLD0001 remain mandatory. This executable extension covers semantic runtime
+policy contexts; it does not claim to implement every possible literal context.
+
+- REQ-CQ-011 / AC-CQ-029: KLD0035 emits an enabled Error at each numeric literal
+  passed, directly or through arithmetic/conversions, to native TimeSpan
+  construction/factories, Task delay/timeout waits, SemaphoreSlim timed waits,
+  CancellationTokenSource construction or CancelAfter. Values zero and one are
+  checked too: a one-second deadline is policy, not an arithmetic identity.
+  Named constant references remain valid. Application methods sharing framework
+  names, implicit optional arguments and generated code do not produce findings.
+- AC-CQ-030: KLD0036 emits an enabled Error at runtime string literals used in
+  native string equality, string switch/constant patterns, native comparison
+  methods, or native primitive/Guid/date/time ToString/TryFormat format arguments.
+  Named constants remain valid; ordinary caller text, dynamic interpolations,
+  unrelated APIs and existing KLD0001 key diagnostics retain their contracts.
+- AC-CQ-031: real compiler-valid TUnit flows assert rejected inline expressions,
+  corrected constant references, exact IDs/severity/spans, aliases/overloads,
+  generated-code and external/test-data boundaries. Runtime-facing KeyLoad
+  assemblies include infrastructure and benchmarks. Test-data assemblies are
+  outside these two new runtime-policy rules; their existing rules remain active.
+- AC-CQ-032: migrate all findings in these supported contexts with domain-named
+  constants while preserving exact values, overload binding, formats, persisted
+  bytes, timing and public behavior. Complete Release build and Aspire analyzer
+  suite must pass; retain broader required runtime gates and original artifacts.
+
+Scope choice: inspect source first, then add exact semantic rules and repair their
+findings. A general ban would currently report hundreds of runtime values and
+thousands of input-data literals; it requires a separately explicit complete
+migration. Do not introduce mass numeric exemptions, suppress diagnostics, lower
+severity or convert test fixtures into fabricated runtime evidence. Uncovered
+literal contexts remain subject to the existing root const policy and review.
+The pending owner scope clarification may expand this contract before that work.
+
+| Task | Owner / permissions | Dependencies / start | Artifact / join |
+|---|---|---|---|
+| TASK-CQ-LITERALS-001 | Read-only source inventory worker | Root/local policy | Original SDK Roslyn inventory, context counts and examples |
+| TASK-CQ-LITERALS-002 | Lead: semantic rules and shared contracts/docs | This acceptance contract | Compiler rules, stable catalog and source-bound coverage inventory |
+| TASK-CQ-LITERALS-003 | Test worker: new MagicRuntime-prefixed files only | Frozen 029–031 | Compiler-valid positive/negative/edge flows; no shared fixture changes |
+| TASK-CQ-LITERALS-004 | Migration workers on disjoint project paths, lead integration | Actual diagnostics from 002 | Preserving named constants; inspected diff; complete verification |
+
+The SDK Roslyn baseline found 3,478 nongenerated files. Existing full analyzer
+suite/build blockers are recorded in the typed-synchronization development receipt;
+coverage process fixture repairs are concurrently owned elsewhere. New failures
+caused by these rules belong to this task. Finish implementation and review, then
+build, run focused and complete Aspire analyzers, format, final solution build and
+required unit/scalar/recovery/RF3 checks. No local or source result proves delivered
+Linux qualification or numeric coverage; retain original reports and precise blocks.
+
+
+## General literal and centralized options correction, 2026-10-06
+
+The owner's explicit answer selects the complete runtime migration. This
+supersedes the narrower context boundaries of AC-CQ-029/030/032 above; preserve
+those native API regressions and extend their expected findings. Operational
+policy is configuration, so moving deadlines into per-class constants is rejected.
+[ADR-112](../ADR/ADR-112-centralized-runtime-options.md) owns REQ-CQ-012/013 and
+TASK-CQ-GENERAL-001..005. Runtime scope is every nongenerated KeyLoad C# product,
+CLI, infrastructure and benchmark project. Test input/expected-data assemblies
+remain distinct; their configuration helpers follow the same native options path.
+
+- REQ-CQ-012 / AC-CQ-033: enabled Error diagnostics reject all runtime string,
+  numeric and character literal expressions outside named const declarations,
+  enum definitions and attribute metadata. Check initializer/parameter defaults,
+  endpoints, reflection/function tokens, switch branches and interpolation text.
+  No blanket numeric0/1/-1 exemption and no suppression baseline. Preserve native
+  generated-code exclusion. Use `nameof` for an existing actual symbol; immutable
+  protocol/format/corpus identities and mathematical structure use meaningful
+  feature-owned constants. Metadata endpoint/alias/property strings still require
+  constants through the existing KLD0001 contract and general string checks.
+- REQ-CQ-013 / AC-CQ-034: operational timeouts, deadlines, retries, capacities and
+  admission/resource limits are declared by scenario in typed options, centrally
+  registered/bound/validated, and injected through real IOptions<T>. The selected
+  frozen lifetime is IOptions<T>; dynamic monitor/snapshot adoption requires its
+  operation/lifecycle contract. Remove arbitrary per-class policy const/static
+  fields. Named defaults belong only to canonical options definitions. Never
+  configure stable serializer field IDs, protocol bytes or qualification corpus
+  criteria as deployment policy.
+- AC-CQ-035: existing NodeOptions and AppHost selectors use options at execution
+  boundaries. Raw IConfiguration/environment access is restricted to explicit
+  central binding/composition code; feature execution and constructors consume
+  IOptions. Preserve exact section/env/CLI names, unknown/malformed-value rejection,
+  RF3 membership selection, signed authority, cancellation and default behavior.
+- AC-CQ-036: DueCoordination dispatch deadline and poll interval come from one
+  centrally bound/validated options type used by coordinator grain and grain
+  service. A nondefault configured value reaches both actual callers; invalid
+  nonpositive/out-of-bound values fail startup before admitted work. Real operation
+  regressions preserve joined stop and no dispatch after cancellation.
+- AC-CQ-037: exact native Roslyn fixtures reject a timeout hidden behind const or
+  static readonly, reject direct runtime configuration reads and bare configuration
+  object injection, permit centrally registered options/defaults and const/nameof
+  identities, and cover all general-literal spans/assemblies/generated boundaries.
+- AC-CQ-038: complete preserving migration has no introduced literal/options
+  diagnostics in the canonical full Release build; native Aspire full analyzers,
+  unit/scalar/recovery/RF3 suites, format and source-bound coverage retain all gates.
+  Original narrow-stage findings and test artifacts remain historical evidence.
+
+| Task | Owner / exact scope | Dependency / join |
+|---|---|---|
+| TASK-CQ-GENERAL-001 | Lead: contracts, central configuration markers/options registry integration, AppHost configuration, shared config/docs | Freeze034/035 and disjoint joins before worker writes |
+| TASK-CQ-GENERAL-002 | Analyzer worker: Analyzers, AnalyzerTests; independent temporary extraction tooling | This contract; general literal/options semantics and native regressions; no product writes |
+| TASK-CQ-GENERAL-003 | Runtime worker: Abstractions/Core/Query/Replication/Storage*/Security plus new owning regression files | Central marker/options contract; all immutable literals and actual operational options; source-value parity |
+| TASK-CQ-GENERAL-004 | Runtime worker: Orleans/Server/Client/Cli/benchmarks, excluding AppHost configuration and central registry files | Central contract; DueCoordination first, then remaining options/immutable tokens; actual callers/tests |
+| TASK-CQ-GENERAL-005 | Lead: complete diff review, AppHost general literal migration, integrated gates and checkpoint |002..004 stable source; complete source-bound evidence, no skipped gate |
+
+Implementation order: central ownership and options marker/registration contract;
+DueCoordination screenshot regression and options path; native compiler general
+literal/configuration rules; disjoint complete migrations with reviewed domain
+classification; integration and complete verification. Temporary Roslyn extraction
+utilities may help preserve exact tokens/types but every resulting symbol has a
+meaningful owner; do not introduce Literal1/value-per-number dumping or rewrite
+protocol bytes. Existing record options used as public request data are not
+application configuration merely because their name contains Options.

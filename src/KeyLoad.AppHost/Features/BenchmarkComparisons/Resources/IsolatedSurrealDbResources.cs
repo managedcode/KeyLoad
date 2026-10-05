@@ -6,7 +6,7 @@ internal static class IsolatedSurrealDbResources
     private const string Name = "isolated-surrealdb";
     private const string Image = "surrealdb/surrealdb";
     private const string ImageTag = "v3.2.4";
-    private const string ImageReference = "docker.io/surrealdb/surrealdb:v3.2.4@";
+    internal const string ImageReference = "docker.io/surrealdb/surrealdb:v3.2.4@";
     private const string DataMount = "/data";
     private const string Endpoint = "http";
     private const int Port = 8000;
@@ -42,6 +42,8 @@ internal static class IsolatedSurrealDbResources
             node.WithContainerRuntimeArgs("--user", user);
         }
 
+        context.BindSetting("User", User);
+        context.BindSetting("Password", password);
         context.BindEndpoint(0, node, Endpoint);
         context.BindImage(ImageReference + BenchmarkResources.SurrealDbDigest);
     }

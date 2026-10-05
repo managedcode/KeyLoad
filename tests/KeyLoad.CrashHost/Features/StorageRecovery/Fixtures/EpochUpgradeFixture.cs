@@ -34,7 +34,7 @@ internal static class EpochUpgradeFixture
     internal static byte[] CreateOutcomeFrame(ZoneTreeStore store, Guid commandId)
     {
         ArgumentNullException.ThrowIfNull(store);
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
         store.Commit((transaction, _) =>
         {
             transaction.PutRecord(AppliedKey, 0L);
@@ -50,7 +50,7 @@ internal static class EpochUpgradeFixture
         {
             throw Errors.Fail(result.Error.Value, OutcomeCreateFailure);
         }
-        var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.Outcome(OutcomePrincipal, commandId)))
+        var bytes = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode("outcome", OutcomePrincipal, commandId)))
             ?? throw Errors.Fail(ErrorCode.Corruption, OutcomeCreateFailure);
         return bytes;
     }
@@ -91,11 +91,11 @@ internal static class EpochUpgradeFixture
         { Incarnation = profile.Incarnation, SigningKey = signing });
         using var replica = new ZoneTreeStore(new(Path.Combine(directory, "replica"))
         { Incarnation = profile.Incarnation, SigningKey = signing });
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
         BootstrapNode(database, profile.AdminKey);
-        using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: database);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, configuration);
-        await using var materializer = new ReplicaMaterializer(database, log, snapshots);
+        using var log = new DurableReplicaLog(replica, CrashExecutionOptions.Configuration(configuration), canonicalDatabase: database);
+        var snapshots = new ReplicaSnapshotStore(canonical, log, CrashExecutionOptions.Configuration(configuration));
+        await using var materializer = new ReplicaMaterializer(database, log, snapshots, CrashExecutionOptions.Replica());
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         log.SaveTermAndVote(1, profile.LocalId);
         for (var index = 1; index <= 3; index++)

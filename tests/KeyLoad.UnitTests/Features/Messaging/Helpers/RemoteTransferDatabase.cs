@@ -43,7 +43,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
         limits = databaseLimits ?? new();
         directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         store = new(new(directory));
-        Database = new(store, new AuthorizationPolicy(), limits);
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"]) { ClusterAdministrator = true },
             DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
         PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
@@ -107,7 +107,7 @@ internal sealed class RemoteTransferDatabase : IDisposable
     {
         store.Dispose();
         store = new(new(directory));
-        Database = new(store, new AuthorizationPolicy(), replacementLimits ?? limits);
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(replacementLimits ?? limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 

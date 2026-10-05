@@ -16,7 +16,7 @@ internal sealed class PartitionQueryContractTests
         var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 2), limits);
         var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], limits);
         var planRoundTrip = NativeSerialization.Deserialize<PartitionQueryPlanV1>(NativeSerialization.Serialize(plan));
-        var result = new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 2), [.. partitions]);
         var resultRoundTrip = NativeSerialization.Deserialize<PartitionQueryResultV1>(NativeSerialization.Serialize(result));
 

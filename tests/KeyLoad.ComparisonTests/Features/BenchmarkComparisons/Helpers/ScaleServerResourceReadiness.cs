@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;

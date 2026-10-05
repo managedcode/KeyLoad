@@ -1,5 +1,6 @@
 using System.Net;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -14,9 +15,10 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
     private readonly PeerSecurity security;
     private readonly HttpClient http;
 
-    internal ReplicaDiscoveryExchange(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
+    internal ReplicaDiscoveryExchange(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
+        var configuration = configurationOptions.Value;
         ArgumentNullException.ThrowIfNull(configuration);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(authentication);
@@ -26,7 +28,7 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
         this.authentication = authentication;
         this.clock = clock;
         endpoints = new(options.Endpoints, StringComparer.Ordinal);
-        security = new PeerSecurity(options.Secret, clock, options.ConnectTimeout);
+        security = new PeerSecurity(options.Secret, clock, peerOptions);
         http = new HttpClient(security.CreateHandler(), disposeHandler: true) { Timeout = Timeout.InfiniteTimeSpan };
     }
 

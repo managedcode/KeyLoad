@@ -6,6 +6,8 @@ namespace KeyLoad.AppHost.Features.ClusterReplication;
 /// <summary>Reads the explicit local-development image identity without weakening GitHub image parsing.</summary>
 internal sealed partial record LocalDevelopmentContainerImage(string Reference, string Tag, string ReceiptPath)
 {
+    private const string EnabledValue = "true";
+
     private const string GithubReceiptSetting = "KEYLOAD_IMAGE_RECEIPT";
     private const string GithubRevisionSetting = "GITHUB_SHA";
     private const string GithubActionsSetting = "GITHUB_ACTIONS";
@@ -62,7 +64,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
 
     private static bool HasInvalidImageIdentity(string? provenance, string? reference, string? receiptPath, string? child)
         => provenance != LocalRf3ImageExecution.Provenance || reference is null || receiptPath is null
-            || child != "true"
+            || child != EnabledValue
             || reference!.Length > 256 || !ImageReference().IsMatch(reference)
             || receiptPath!.Length is 0 or > MaximumReceiptPathCharacters
             || Path.IsPathRooted(receiptPath) || receiptPath.Contains('\\', StringComparison.Ordinal);

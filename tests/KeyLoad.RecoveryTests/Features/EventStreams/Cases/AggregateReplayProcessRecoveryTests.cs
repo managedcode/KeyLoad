@@ -63,11 +63,11 @@ internal sealed class AggregateReplayProcessRecoveryTests
         CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, AggregateReplayCrashScenario.OperationFile), cancellationToken));
         var before = ReadReplay(database);
-        var recoveredOutcome = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>();
+        var recoveredOutcome = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         var observedCommitted = before.Snapshot is not null;
         await Assert.That(recoveredOutcome is not null).IsEqualTo(observedCommitted);
         if (stage >= CommitStage.JournalFlushed)
@@ -102,7 +102,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
 
         var position = store.Position;
         var second = database.Apply(operation).Get<CommitReceipt>();
-        var durable = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>();
+        var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(second).AsSpan().SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();
         await Assert.That(durable).IsNotNull();
         await Assert.That(JsonDefaults.Serialize(durable!).AsSpan().SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();

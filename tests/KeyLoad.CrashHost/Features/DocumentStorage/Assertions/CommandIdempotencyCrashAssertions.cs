@@ -30,7 +30,8 @@ internal static class CommandIdempotencyCrashAssertions
     internal static void AssertCanonicalEffects(DatabaseEngine database, ZoneTreeStore store,
         CommitReceipt expectedReceipt, long expectedTail, long seedTail)
     {
-        var durable = database.Outcome(CrashFixtureValues.Principal, CommandIdempotencyCrashContract.CommandId)?.Get<CommitReceipt>()
+        var durable = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
+            CommandIdempotencyCrashContract.Partition, CrashFixtureValues.Principal, CommandIdempotencyCrashContract.CommandId)))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException("The command outcome disappeared.");
         RequireSameReceipt(durable, expectedReceipt);
         RequireDocument(database.GetDocument(CrashFixtureValues.Principal,

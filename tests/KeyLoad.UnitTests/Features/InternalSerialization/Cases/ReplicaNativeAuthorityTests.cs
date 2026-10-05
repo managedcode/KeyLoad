@@ -18,7 +18,7 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var original = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         var callerBytes = original.NativePayload.ToArray();
@@ -29,7 +29,7 @@ internal sealed class ReplicaNativeAuthorityTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.VerifyOperationAuthority(callerOperation)).Code)
             .IsEqualTo(ErrorCode.Corruption);
         using var store = files.Open();
-        using var log = new DurableReplicaLog(store, files.Configuration, canonicalDatabase: database);
+        using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database);
         log.SaveTermAndVote(1, null);
         log.Append([owned]);
         await Assert.That(database.NativeOperationsEqual(log.ReadEntry(1)!.Operation!, original)).IsTrue();
@@ -40,13 +40,13 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         var decoded = ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(ReplicaProtocolCodec.Serialize(operation));
         await Assert.That(decoded.NativePayload.Span.SequenceEqual(operation.NativePayload.Span)).IsTrue();
         using var store = files.Open();
-        using var log = new DurableReplicaLog(store, files.Configuration, canonicalDatabase: database);
+        using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database);
         log.SaveTermAndVote(1, null);
         log.Append([new(1, 1, operation)]);
         log.Commit(1);
@@ -61,11 +61,11 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.SetDispatch, Principal,
             DateTimeOffset.UnixEpoch, BooleanPayload));
         using var store = files.Open();
-        using (var metadataOnly = new DurableReplicaLog(store, files.Configuration))
+        using (var metadataOnly = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration)))
         {
             metadataOnly.SaveTermAndVote(1, null);
             var journal = await File.ReadAllBytesAsync(files.JournalPath);
@@ -75,7 +75,7 @@ internal sealed class ReplicaNativeAuthorityTests
             await Assert.That(metadataOnly.ReadEntry(1)).IsNull();
             await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journal, CollectionOrdering.Matching);
         }
-        using (var accepted = new DurableReplicaLog(store, files.Configuration, canonicalDatabase: database))
+        using (var accepted = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database))
         {
             accepted.Append([new(1, 1, operation)]);
             accepted.Commit(1);
@@ -83,7 +83,7 @@ internal sealed class ReplicaNativeAuthorityTests
         var persisted = await File.ReadAllBytesAsync(files.JournalPath);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new DurableReplicaLog(store, files.Configuration);
+            using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
         }).Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(persisted, CollectionOrdering.Matching);
     }
@@ -93,9 +93,9 @@ internal sealed class ReplicaNativeAuthorityTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         using var store = files.Open();
-        using var log = new DurableReplicaLog(store, files.Configuration, canonicalDatabase: database);
+        using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database);
         log.SaveTermAndVote(1, null);
         var journal = await File.ReadAllBytesAsync(files.JournalPath);
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.SetDispatch, Principal,

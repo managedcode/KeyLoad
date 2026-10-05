@@ -13,9 +13,10 @@ internal static class ComparisonApplication
     {
         ArgumentNullException.ThrowIfNull(arguments);
         using var configuration = new ConfigurationManager();
+        configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);
         configuration.AddEnvironmentVariables();
         configuration.AddCommandLine(arguments);
-        var owner = new ComparisonTargetOwner();
+        var owner = new ComparisonTargetOwner(NativeComparisonExecutionRegistration.Read(configuration));
         ComparisonCancellationLifetime? cancellationLifetime = null;
         try
         {

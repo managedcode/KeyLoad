@@ -49,7 +49,7 @@ internal sealed class BenchmarkMembershipUnknownMetadataNoEffectsTests
         long position;
         using (var store = fixture.Open())
         {
-            using (var log = new DurableReplicaLog(store, configuration))
+            using (var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration)))
             {
                 await Assert.That(log.State.Incarnation).IsEqualTo(fixture.Incarnation);
                 await Assert.That(log.State.Term).IsEqualTo(0L);
@@ -65,7 +65,7 @@ internal sealed class BenchmarkMembershipUnknownMetadataNoEffectsTests
             position = store.Position;
         }
         using var reopened = fixture.Open();
-        using var recovered = new DurableReplicaLog(reopened, configuration);
+        using var recovered = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(configuration));
         await Assert.That(reopened.Position).IsEqualTo(position);
         await Assert.That(BenchmarkTopologyMembershipFixture.Membership(reopened)!.AsSpan().SequenceEqual(membership)).IsTrue();
         await Assert.That(BenchmarkTopologyMembershipFixture.HardState(reopened)!.AsSpan().SequenceEqual(hardState)).IsTrue();

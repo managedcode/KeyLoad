@@ -10,7 +10,7 @@ internal sealed class SqlModelViewAstTests
         using var database = SqlModelViewTestSupport.Create();
         var query = new SelectQuery(SqlModelViewTestSupport.Queue, null, [new("*", "*")], null, [], 10,
             ModelSource: new(ModelQuerySourceKind.QueueMessages, SqlModelViewTestSupport.Queue));
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var noConsent = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
             new(database.Partition, query)));
         var cursor = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
@@ -36,7 +36,7 @@ internal sealed class SqlModelViewAstTests
     {
         using var database = SqlModelViewTestSupport.Create();
         SqlModelViewTestSupport.Seed(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var queue = engine.Execute("root", SqlModelViewTestSupport.Request(database,
             "EXPLAIN SELECT * FROM QUEUE_MESSAGES('jobs')"));
         var events = engine.Execute("root", SqlModelViewTestSupport.Request(database,

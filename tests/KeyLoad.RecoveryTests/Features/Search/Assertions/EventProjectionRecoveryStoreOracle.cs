@@ -14,7 +14,7 @@ internal static class EventProjectionRecoveryStoreOracle
             view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId)),
             view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey()),
             view.ReadOwnedValue(EventProjectionCrashScenario.EffectKey(projection)),
-            view.ReadOwnedValue(KeySpace.Outcome(operation.PrincipalId, operation.Id)),
+            view.ReadOwnedValue(OutcomeStoreOracle.Key(store, operation)),
             view.ReadOwnedValue(EventProjectionCrashScenario.OutboxHeadKey()),
             view.ReadOwnedValue(EventProjectionCrashScenario.OutboxEntryKey(priorOutboxTail + 1))));
 
@@ -88,7 +88,7 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(receipt.Mutations[0].Id).IsEqualTo(EventProjectionCrashScenario.TargetId);
         await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(EventProjectionCrashScenario.DocumentRevision);
         await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
-        var durable = database.Outcome(operation.PrincipalId, operation.Id)?.Get<CommitReceipt>();
+        var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var outbox = ReadOutbox(store, beforeTail + 1);
@@ -135,7 +135,7 @@ internal static class EventProjectionRecoveryStoreOracle
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId))),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey())),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.EffectKey(projection))),
-            Required(view.ReadOwnedValue(KeySpace.Outcome(operation.PrincipalId, operation.Id))),
+            Required(view.ReadOwnedValue(OutcomeStoreOracle.Key(store, operation))),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.OutboxHeadKey())),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.OutboxEntryKey(
                 view.GetRecord<OutboxHead>(EventProjectionCrashScenario.OutboxHeadKey())!.Tail)))));

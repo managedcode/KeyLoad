@@ -19,7 +19,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task InvalidVersionCursorAndFullScanFlagRejectBeforeRead()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly) with { Version = 2 });
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, cursor: "cursor"));
@@ -30,7 +30,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task DuplicateUnknownReorderedAndMissingGraphOperatorsReject()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, DuplicateRetriever));
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition,
@@ -44,7 +44,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task WrongParameterKindsAndVectorDimensionsReject()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
         const string vectorSql = SearchPrefix + " VECTOR embedding MATCH @vector "
             + "SPACE (\"graph-sql-space\",2,Cosine,\"graph-sql-model\",\"graphsqlversion\") "
@@ -73,7 +73,7 @@ internal sealed class SqlGraphSearchRejectionTests
             + "RETRIEVE GRAPH \"graph-search-links\" SEEDS ((\"graph-search-projects\",'root-node')) "
             + "DEPTH 4 VERTICES 20 EDGES 40";
 
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new QueryEngine(database.Database).SearchSqlAsync(
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync(
             GraphSearchTestSupport.Reader, SqlGraphSearchTestSupport.Request(database.Partition, sql),
             TestContext.Current!.Execution.CancellationToken)))!;
 
@@ -84,8 +84,7 @@ internal sealed class SqlGraphSearchRejectionTests
     public async Task ParameterCountAndCompleteRequestBoundsAreEnforced()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,
-            new KeyLoad.Security.AuthorizationPolicy(), new() { MaxQueryBytes = 512 }));
+        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store,             new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 512 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()), UnitExecutionOptions.QueryExecution());
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
         const string textSql = SearchPrefix + " TEXT text MATCH @text " + GraphTail;
@@ -109,7 +108,7 @@ internal sealed class SqlGraphSearchRejectionTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
 

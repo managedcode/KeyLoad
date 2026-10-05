@@ -16,8 +16,8 @@ internal static class ReplicaMembershipAuthorityProtocol
     internal const string TimestampHeader = "X-KeyLoad-Membership-TimestampTicks";
     internal const string NonceHeader = "X-KeyLoad-Membership-Nonce";
     internal const string SignatureHeader = "X-KeyLoad-Membership-Signature";
-    internal static TimeSpan RequestTimeout { get; } = ReplicaMembershipProtocol.RequestTimeout;
-    internal static TimeSpan StartupTimeout { get; } = ReplicaMembershipProtocol.StartupTimeout;
+    internal const string IdentityFormat = "N";
+    internal const string InitialRowETag = "0";
     internal const int Version = 1;
     internal const int MaximumRequestBytes = 65_536;
     internal const int MaximumReplyBytes = 262_144;

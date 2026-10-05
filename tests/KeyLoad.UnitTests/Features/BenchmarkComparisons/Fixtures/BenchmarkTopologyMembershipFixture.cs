@@ -42,7 +42,7 @@ internal sealed class BenchmarkTopologyMembershipFixture : IDisposable
         => store.Read(view => view.ReadOwnedValue(HardStateKey));
 
     internal static KeyLoadException Reject(ZoneTreeStore store, ReplicaConfiguration configuration)
-        => Assert.ThrowsExactly<KeyLoadException>(() => { using var log = new DurableReplicaLog(store, configuration); });
+        => Assert.ThrowsExactly<KeyLoadException>(() => { using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration)); });
 
     private static string Resolve(DirectoryInfo directory)
     {

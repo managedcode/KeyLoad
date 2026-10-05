@@ -188,8 +188,8 @@ internal sealed class RequestCqrsProbeFiles
 
     private static bool KnownName(string name) => name == RequestCqrsProbeProtocol.OwnerFile
         || IsGuidName(name, "arm-", ".json") || IsGuidName(name, "tmp-", ".tmp")
-        || name.StartsWith("release-", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal)
-        || name.StartsWith("marker-", StringComparison.Ordinal) && name.EndsWith(".json", StringComparison.Ordinal)
+        || name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
+        || name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
         || name is RequestCqrsProbeProtocol.DiscoveryFileZero or RequestCqrsProbeProtocol.DiscoveryFileOne;
 
     private static bool IsGuidName(string name, string prefix, string suffix)
@@ -197,7 +197,7 @@ internal sealed class RequestCqrsProbeFiles
         if (!name.StartsWith(prefix, StringComparison.Ordinal) || !name.EndsWith(suffix, StringComparison.Ordinal)
             || !Guid.TryParseExact(name.AsSpan(prefix.Length, name.Length - prefix.Length - suffix.Length), "N", out var value))
         { return false; }
-        return name.AsSpan(prefix.Length, 32).SequenceEqual(value.ToString("N"));
+        return name.AsSpan(prefix.Length, 32).SequenceEqual(value.ToString(RequestCqrsProbeProtocol.SessionIdFormat));
     }
 
     internal static string ArmName(RequestCqrsProbeArmRecord arm) => $"arm-{arm.ArmId:N}.json";

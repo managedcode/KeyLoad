@@ -1,17 +1,22 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 using Orleans.Runtime.Services;
 
 namespace KeyLoad.Orleans;
 
 /// <summary>Direct-address Orleans RPC transport with bounded generation rediscovery.</summary>
 /// <param name="services">The active Orleans service provider used by the grain-service client.</param>
-/// <param name="configuration">The local voter identity and bounded RPC timeout.</param>
+/// <param name="configurationOptions">The local voter identity and bounded RPC timeout.</param>
 /// <param name="discovery">The authenticated fixed-voter runtime-address resolver.</param>
 /// <param name="authentication">The request/reply envelope signer and verifier.</param>
-public sealed class ReplicaGrainServiceClient(IServiceProvider services, ReplicaConfiguration configuration,
-    ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication)
+/// <param name="transportOptions">Centrally validated attempt and envelope bounds.</param>
+public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOptions<ReplicaConfiguration> configurationOptions,
+    ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication,
+    IOptions<ReplicaTransportOptions> transportOptions)
     : GrainServiceClient<IPartitionReplicaGrainService>(services), IReplicaTransport
 {
+    private readonly ReplicaConfiguration configuration = configurationOptions.Value;
+    private readonly ReplicaTransportOptions settings = transportOptions.Value;
     /// <summary>Transports exact native bytes and retries only fenced/unavailable generation failures.</summary>
     /// <param name="voterId">The configured destination voter.</param>
     /// <param name="method">The replica operation to send.</param>
@@ -25,13 +30,14 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, Replica
         deadline.CancelAfter(configuration.RpcTimeout);
         try
         {
-            for (var attempt = 0; attempt < ReplicaTransportProtocol.MaximumAttempts; attempt++)
+            var maximumAttempts = settings.MaximumAttempts;
+            for (var attempt = 0; attempt < maximumAttempts; attempt++)
             {
                 try
                 {
                     return await ExchangeAsync(voterId, method, payload, attempt != 0, deadline.Token).ConfigureAwait(false);
                 }
-                catch (OrleansMessageRejectionException) when (attempt + 1 < ReplicaTransportProtocol.MaximumAttempts)
+                catch (OrleansMessageRejectionException) when (attempt + 1 < maximumAttempts)
                 {
                     // Rediscover the generation once; operation bytes and stable command IDs remain identical.
                 }

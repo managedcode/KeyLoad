@@ -11,6 +11,8 @@ namespace KeyLoad.Comparisons;
 /// <remarks>Inference and exhaustive oracle work are outside measured requests.</remarks>
 public sealed class BenchmarkDataset : IComparisonCorpus
 {
+    private const string DocumentNumberFormat = "D9";
+
     private const string MutationTextProperty = "text";
     private const string InitialMutationText = "KeyLoad initial value";
     private readonly ComparisonOptions options;
@@ -60,7 +62,7 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns>The generated document, serialized payload, and vector.</returns>
     public BenchmarkDocument CreateDocument(int number)
     {
-        var id = "d" + number.ToString("D9", System.Globalization.CultureInfo.InvariantCulture);
+        var id = "d" + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
         var empty = JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = "" });
         var json = JsonSerializer.Serialize(new
         {

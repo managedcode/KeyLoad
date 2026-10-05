@@ -184,7 +184,7 @@ internal static class QueryExpressions
         {
             if (Nullable.GetUnderlyingType(member.Expression.Type) is not null)
             {
-                return member.Member.Name == "Value"
+                return member.Member.Name == QueryPredicateTokens.NullableValueMemberName
                     && WalkFieldPath(member.Expression, parameter, depth + 1, parts);
             }
 
@@ -284,7 +284,7 @@ internal static class QueryExpressions
                 ? new Selection(Field(assignment.Expression, parameter), Name(binding.Member)) : throw Unsupported())];
         }
         var path = Field(expression, parameter);
-        return [new(path, path == "/@id" ? "id" : path == "/@revision" ? "revision"
+        return [new(path, path == QueryPredicateTokens.IdentifierPath ? "id" : path == QueryPredicateTokens.RevisionPath ? "revision"
             : path[(path.LastIndexOf('/') + 1)..].Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal))];
     }
 }

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -11,7 +12,8 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
     private readonly ReplicaMembershipAuthorityMac replyMac;
     private readonly HttpClient http;
 
-    internal ReplicaMembershipAuthorityExchange(ReplicaMembershipAuthorityExchangeOptions options)
+    internal ReplicaMembershipAuthorityExchange(ReplicaMembershipAuthorityExchangeOptions options,
+        IOptions<OrleansMembershipOptions> membershipOptions)
     {
         ArgumentNullException.ThrowIfNull(options);
         ValidateOptions(options);
@@ -21,7 +23,7 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
         SocketsHttpHandler? handler = new()
         {
             AllowAutoRedirect = false,
-            ConnectTimeout = ReplicaTransportProtocol.DefaultConnectTimeout,
+            ConnectTimeout = membershipOptions.Value.ConnectTimeout,
             UseCookies = false
         };
         try
@@ -63,10 +65,10 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
         var nonce = Convert.ToBase64String(nonceBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         CryptographicOperations.ZeroMemory(nonceBytes);
         var cluster = options.ClusterId;
-        var authorityPhysical = options.AuthorityPhysicalShardId.ToString("N");
-        var authorityIncarnation = options.AuthorityIncarnation.ToString("N");
-        var callerPhysical = options.CallerPhysicalShardId.ToString("N");
-        var callerIncarnation = options.CallerIncarnation.ToString("N");
+        var authorityPhysical = options.AuthorityPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat);
+        var authorityIncarnation = options.AuthorityIncarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat);
+        var callerPhysical = options.CallerPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat);
+        var callerIncarnation = options.CallerIncarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat);
         var signature = requestMac.SignRequest(cluster, authorityPhysical, authorityIncarnation,
             callerPhysical, callerIncarnation, options.CallerVoterId, options.CallerSiloAddress,
             timestamp, nonce, body);
@@ -82,7 +84,7 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
         { throw new HttpRequestException(); }
         var responseBytes = await ReadBoundedAsync(response, cancellationToken).ConfigureAwait(false);
         if (replySignature is null || !replyMac.VerifyReply(authorityPhysical, authorityIncarnation,
-                call.RequestId.ToString("N"), nonce, (int)response.StatusCode, responseBytes, replySignature))
+                call.RequestId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), nonce, (int)response.StatusCode, responseBytes, replySignature))
         { throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaMembershipAuthorityText.InvalidSignature); }
         var reply = ReplicaMembershipAuthorityCodec.DeserializeReply(responseBytes);
         ValidateReply(call, nonce, reply);

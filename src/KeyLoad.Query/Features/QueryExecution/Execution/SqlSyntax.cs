@@ -41,6 +41,8 @@ internal static class SqlSyntax
     internal const string MetadataId = "id";
     internal const string MetadataRevision = "revision";
     internal const string MetadataPrefix = "/@";
+    internal const string MetadataIdPath = MetadataPrefix + MetadataId;
+    internal const string MetadataRevisionPath = MetadataPrefix + MetadataRevision;
     internal const string ByteBudgetDetail = "The SQL byte budget is exceeded.";
     internal const string TokenBudgetDetail = "The SQL token budget is exceeded.";
     internal const string DepthBudgetDetail = "The SQL depth budget is exceeded.";

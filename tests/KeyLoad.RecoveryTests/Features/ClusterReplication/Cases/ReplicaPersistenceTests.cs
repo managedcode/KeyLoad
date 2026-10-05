@@ -22,14 +22,14 @@ internal sealed class ReplicaPersistenceTests
         try
         {
             using (var store = Store(directory, configuration.Incarnation))
-            using (var log = new DurableReplicaLog(store, configuration))
+            using (var log = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration)))
             {
                 log.SaveTermAndVote(2, VoterA);
                 log.Append([new(1, 2, null), new(2, 2, null), new(3, 2, null)]);
                 log.Commit(2);
             }
             using var reopened = Store(directory, configuration.Incarnation);
-            using var recovered = new DurableReplicaLog(reopened, configuration);
+            using var recovered = new DurableReplicaLog(reopened, RecoveryExecutionOptions.Configuration(configuration));
             await Assert.That(recovered.State.VotedFor).IsEqualTo(VoterA);
             await Assert.That(recovered.State.CommittedIndex).IsEqualTo(2);
             recovered.SaveTermAndVote(3, null);
@@ -53,7 +53,7 @@ internal sealed class ReplicaPersistenceTests
         try
         {
             using var store = Store(directory, configuration.Incarnation);
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration));
             log.SaveTermAndVote(1, VoterA);
             log.SaveTermAndVote(1, null);
             await Assert.That(log.State.VotedFor).IsEqualTo(VoterA);
@@ -74,7 +74,7 @@ internal sealed class ReplicaPersistenceTests
         try
         {
             using var store = Store(directory, configuration.Incarnation);
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration));
             log.SaveTermAndVote(1, null);
             log.Append([new(1, 1, null), new(2, 1, null), new(3, 1, null)]);
             log.Commit(1);
@@ -100,8 +100,8 @@ internal sealed class ReplicaPersistenceTests
         {
             using var store = Store(directory, configuration.Incarnation);
             using var canonical = Store(Path.Combine(directory, CanonicalDirectory), configuration.Incarnation);
-            var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
-            using var log = new DurableReplicaLog(store, configuration, canonicalDatabase: database);
+            var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+            using var log = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
             log.SaveTermAndVote(1, null);
             var payload = ReplicaMaximumPayload.Create(token, MaximumCommandBytes);
             using var parsed = JsonDocument.Parse(payload);
@@ -133,7 +133,7 @@ internal sealed class ReplicaPersistenceTests
         try
         {
             using var store = Store(directory, configuration.Incarnation);
-            using (var log = new DurableReplicaLog(store, configuration))
+            using (var log = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration)))
             {
                 log.SaveTermAndVote(1, null);
                 log.Append([new(1, 1, null)]);
@@ -141,7 +141,7 @@ internal sealed class ReplicaPersistenceTests
             store.Commit((tx, _) => { tx.Put(ReplicaProtocol.EntryStorageKey(1), ReplicaProtocolCodec.Serialize(new ReplicaEntry(2, 1, null))); return true; });
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
             {
-                using var rejected = new DurableReplicaLog(store, configuration);
+                using var rejected = new DurableReplicaLog(store, RecoveryExecutionOptions.Configuration(configuration));
             }).Code).IsEqualTo(ErrorCode.Corruption);
         }
         finally { Directory.Delete(directory, true); }
@@ -340,8 +340,8 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
         Target = Store(TargetDirectory);
         sourceLogStore = Store(SourceLogDirectory);
         targetLogStore = Store(TargetLogDirectory);
-        sourceLog = new(sourceLogStore, Configuration);
-        TargetLog = new(targetLogStore, Configuration);
+        sourceLog = new(sourceLogStore, RecoveryExecutionOptions.Configuration(Configuration));
+        TargetLog = new(targetLogStore, RecoveryExecutionOptions.Configuration(Configuration));
         sourceLog.SaveTermAndVote(1, null);
         sourceLog.Append([new(1, 1, null)]);
         sourceLog.Commit(1);
@@ -352,13 +352,13 @@ internal sealed class ReplicaSnapshotTrial : IDisposable
             return true;
         });
         Target.Commit((tx, _) => { tx.PutRecord(KeyCodec.Encode(ValueKey), OldValue); return true; });
-        Sender = new(source, sourceLog, Configuration with { Directory = Path.Combine(directory, SourceDirectory) });
+        Sender = new(source, sourceLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, SourceDirectory) }));
         Image = Sender.Create(1, 1);
     }
 
     private ZoneTreeStore Store(string name) => new(new(Path.Combine(directory, name)) { Incarnation = Configuration.Incarnation });
     internal ReplicaSnapshotStore Receiver(Action<ReplicaCrashBoundary>? observer = null)
-        => new(Target, TargetLog, Configuration with { Directory = Path.Combine(directory, TargetDirectory) }, observer);
+        => new(Target, TargetLog, RecoveryExecutionOptions.Configuration(Configuration with { Directory = Path.Combine(directory, TargetDirectory) }), observer);
     internal void Transfer(ReplicaSnapshotStore receiver, ReplicaSnapshot? image = null)
     {
         var snapshot = image ?? Image;

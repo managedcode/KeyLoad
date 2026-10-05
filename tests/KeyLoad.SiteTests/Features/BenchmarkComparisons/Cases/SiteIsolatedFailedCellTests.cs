@@ -24,7 +24,7 @@ internal sealed class SiteIsolatedFailedCellTests
         await File.WriteAllTextAsync(path, projection.ToJsonString(), token);
         var validation = await ValidateAsync(fixture, path, token);
         await Assert.That(validation.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
-        await Assert.That(validation.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(270);
+        await Assert.That(validation.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers(fixture.Inputs.Site.MeasuredRevision));
         if (!all)
         {
             var workers = projection[SiteIsolatedFields.Workers]!.AsArray();

@@ -1,5 +1,6 @@
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -18,7 +19,7 @@ internal static class McpServerComposition
         + "Cancellation does not prove rollback. Paginate bounded database reads using their returned cursors.";
 
     /// <summary>Registers fresh per-request native handlers and independent retained-memory ownership.</summary>
-    internal static void Register(WebApplicationBuilder builder, NodeOptions node)
+    internal static void Register(WebApplicationBuilder builder)
     {
         builder.Logging.AddFilter(SdkLoggerPrefix, LogLevel.None);
         builder.Services.AddHttpContextAccessor();
@@ -27,8 +28,11 @@ internal static class McpServerComposition
             services.GetRequiredService<IMcpGatewayFactory>(), services.GetRequiredService<IHttpContextAccessor>()));
         builder.Services.AddHostedService(services => new McpGatewayCatalogWarmup(
             services.GetRequiredService<McpGatewayCatalogOwner>()));
-        builder.Services.AddSingleton(new McpMemoryBudget(node.McpMemory.DataBytes,
-            node.McpMemory.ControlBytes, node.McpMemory.IngressBytes));
+        builder.Services.AddSingleton(provider =>
+        {
+            var memory = provider.GetRequiredService<IOptions<NodeOptions>>().Value.McpMemory;
+            return new McpMemoryBudget(memory.DataBytes, memory.ControlBytes, memory.IngressBytes);
+        });
         builder.Services.AddMcpServer(options =>
         {
             options.ProtocolVersion = McpTransportProtocol.Revision;

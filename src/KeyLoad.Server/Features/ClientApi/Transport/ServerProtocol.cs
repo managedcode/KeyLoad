@@ -23,6 +23,4 @@ internal static class ServerProtocol
     internal const int KestrelMaximumBodyBytes = 33_554_432;
     internal const int MaximumJsonDepth = 64;
     internal static readonly byte[] NullPayload = "null"u8.ToArray();
-    internal static readonly TimeSpan ReadyTimeout = TimeSpan.FromSeconds(10);
-    internal static readonly TimeSpan ShutdownTimeout = TimeSpan.FromSeconds(30);
 }

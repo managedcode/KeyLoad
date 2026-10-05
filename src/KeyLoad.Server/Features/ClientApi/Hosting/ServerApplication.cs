@@ -1,4 +1,5 @@
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -44,7 +45,8 @@ internal static class ServerApplication
     private static async Task ShutdownAsync(WebApplication app, OrleansNode? silo, INodeAdministration? administration,
         PartitionHost? partition, List<Exception> failures)
     {
-        using var deadline = new CancellationTokenSource(ServerProtocol.ShutdownTimeout);
+        var settings = app.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value;
+        using var deadline = new CancellationTokenSource(settings.ShutdownTimeout);
         if (silo is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => silo.StopAsync(deadline.Token), failures).ConfigureAwait(false);

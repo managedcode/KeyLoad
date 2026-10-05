@@ -20,6 +20,12 @@ internal static class RequestCqrsProbeProtocol
     internal const string ArmKind = "Arm";
     internal const string ReleaseKind = "Release";
     internal const string MarkerKind = "Marker";
+    internal const string TemporaryFilePrefix = "tmp-";
+    internal const string ArmFilePrefix = "arm-";
+    internal const string ReleaseFilePrefix = "release-";
+    internal const string MarkerFilePrefix = "marker-";
+    internal const string JsonFileSuffix = ".json";
+    internal const string SessionIdFormat = "N";
     internal const string PrincipalPrefix = "c1-probe-";
     internal const string InvalidOptions = "The private request probe configuration is invalid.";
     internal const string InvalidRecord = "The private request probe record is invalid.";

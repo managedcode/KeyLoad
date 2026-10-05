@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -8,21 +9,23 @@ public sealed class ReplicaSiloDiscoveryClient : IDisposable, IAsyncDisposable
     private readonly ReplicaCohortDiscovery cohort;
 
     /// <summary>Creates discovery without a private observation sink.</summary>
-    /// <param name="configuration">The local voter set, incarnation and cache freshness bound.</param>
+    /// <param name="configurationOptions">The local voter set, incarnation and cache freshness bound.</param>
     /// <param name="options">The fixed HTTP peer endpoints and cluster signing settings.</param>
     /// <param name="local">The local actual runtime generation used for self-resolution.</param>
     /// <param name="authentication">The shared request/reply and discovery verifier.</param>
     /// <param name="clock">The system clock and monotonic cache timer.</param>
-    public ReplicaSiloDiscoveryClient(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
-        : this(configuration, options, local, authentication, clock, null)
+    /// <param name="peerOptions">The centrally validated discovery timing and replay limits.</param>
+    public ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+        ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
+        IOptions<PeerDiscoveryOptions> peerOptions)
+        : this(configurationOptions, options, local, authentication, clock, peerOptions, null)
     { }
 
-    internal ReplicaSiloDiscoveryClient(ReplicaConfiguration configuration, ReplicaPeerOptions options,
+    internal ReplicaSiloDiscoveryClient(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-        IReplicaDiscoveryObservationSink? observationSink)
+        IOptions<PeerDiscoveryOptions> peerOptions, IReplicaDiscoveryObservationSink? observationSink)
     {
-        cohort = new(configuration, options, local, authentication, clock, observationSink);
+        cohort = new(configurationOptions, options, local, authentication, clock, peerOptions, observationSink);
     }
 
     /// <summary>Returns a current compatible silo generation, refreshing once under the caller's bounded deadline.</summary>

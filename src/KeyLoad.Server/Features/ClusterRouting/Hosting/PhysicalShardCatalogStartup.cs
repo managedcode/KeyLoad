@@ -1,11 +1,13 @@
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHost partition, NodeOptions options,
-    TimeProvider clock)
+internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHost partition, IOptions<NodeOptions> nodeOptions,
+    TimeProvider clock, IOptions<GrainRoutingOptions> routingOptions)
 {
+    private readonly NodeOptions options = nodeOptions.Value;
     private string? administratorId;
     private int ready;
 
@@ -13,7 +15,8 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
 
     internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(GrainRequestStreamProtocol.ExecutionLifetime, clock);
+        var executionLifetime = routingOptions.Value.ExecutionLifetime;
+        using var deadline = new CancellationTokenSource(executionLifetime, clock);
         using var operation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var token = operation.Token;
         var administrator = await AuthenticateAdministratorAsync(token).ConfigureAwait(false);

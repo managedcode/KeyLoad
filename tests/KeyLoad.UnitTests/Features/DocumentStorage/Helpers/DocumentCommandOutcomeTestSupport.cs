@@ -23,7 +23,7 @@ internal static class DocumentCommandOutcomeTestSupport
     }
 
     internal static byte[] OutcomeBytes(TestDatabase database, string principal, Guid commandId)
-        => database.Store.Read(view => view.ReadOwnedValue(KeySpace.Outcome(principal, commandId)))
+        => database.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(database.Partition, principal, commandId)))
             ?? throw new InvalidOperationException("The command outcome was not persisted.");
 
     internal static OutboxSnapshot CaptureOutbox(TestDatabase database)

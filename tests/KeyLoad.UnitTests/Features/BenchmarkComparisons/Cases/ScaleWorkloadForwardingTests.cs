@@ -7,6 +7,7 @@ internal sealed class ScaleWorkloadForwardingTests
     [Test]
     [Arguments("control")]
     [Arguments("scale")]
+    [Arguments("vector")]
     [Arguments("invalid")]
     public async Task AcScale014RunWorkloadPinsProfileArgumentAndTimeout(string scenario)
     {

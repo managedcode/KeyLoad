@@ -19,7 +19,7 @@ internal sealed class SqlGraphPathParameterBoundaryTests
     public async Task SignedInt32BoundariesParseBeforeOperationCapsReject()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
         foreach (var boundary in new[] { int.MinValue, int.MaxValue })
         {
@@ -34,7 +34,7 @@ internal sealed class SqlGraphPathParameterBoundaryTests
     public async Task FractionalAndOutOfRangeNumericFormsFailValidation()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
         foreach (var depth in new[] { "2.5", "2e0", "2147483648", "-2147483649" })
         {
@@ -52,7 +52,7 @@ internal sealed class SqlGraphPathParameterBoundaryTests
     public async Task SixtyFourUniqueTrailingLabelsAdmitTheSameOrderedPathAndSixtyFiveReject()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
         var maximumLabels = SqlGraphPathTestSupport.LiteralSql;
         var labels = Enumerable.Range(0, 64)
@@ -77,7 +77,7 @@ internal sealed class SqlGraphPathParameterBoundaryTests
     public async Task OneTerminalSemicolonIsAllowedButASecondTerminatorRejects()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
         var terminated = engine.ShortestPathSql(SqlGraphPathTestSupport.Principal,
             SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql + ";"),

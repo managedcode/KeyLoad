@@ -35,7 +35,7 @@ internal sealed class QueryAdapterTests
         db.Commit(documents);
         await QueryWorkloadCoverageAssertions.AssertDocumentCoverage(documentCoverage, StatusCount, NumericValueCount);
 
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var thresholds = new bool[NumericValueCount];
         var queriedStatuses = new bool[StatusCount];
         var reachedPageLimit = false;

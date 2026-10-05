@@ -89,7 +89,7 @@ internal static class ReplicaMembershipAuthorityValidation
         if (!valid)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
         if ((operation is ReplicaMembershipAuthorityOperation.InsertRow or ReplicaMembershipAuthorityOperation.UpdateIAmAlive)
-            && call.CandidateEntry!.RowETag != "0")
+            && call.CandidateEntry!.RowETag != ReplicaMembershipAuthorityProtocol.InitialRowETag)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
     }
 

@@ -27,14 +27,14 @@ internal sealed class ReplicaTransferProcessRecoveryTests
             await ReplicaProcessAssertions.SnapshotAsync(node, trial, 4);
             await Assert.That(node.Log.State.CommittedIndex).IsEqualTo(4);
             await ReplicaProcessAssertions.ReceiptAsync(node, 4);
-            await using var materializer = new ReplicaMaterializer(node.Database, node.Log, node.Snapshots);
+            await using var materializer = new ReplicaMaterializer(node.Database, node.Log, node.Snapshots, RecoveryExecutionOptions.Replica());
             materializer.Commit(5);
             await ReplicaProcessAssertions.WaitAsync(materializer, 5, cancellationToken);
             await ReplicaProcessAssertions.DocumentAsync(node, 5);
             await ReplicaProcessAssertions.ReceiptAsync(node, 5);
         }
         using var reopened = ReplicaCrashNode.OpenTarget(trial.DirectoryPath, trial.Incarnation);
-        await using var recovered = new ReplicaMaterializer(reopened.Database, reopened.Log, reopened.Snapshots);
+        await using var recovered = new ReplicaMaterializer(reopened.Database, reopened.Log, reopened.Snapshots, RecoveryExecutionOptions.Replica());
         await ReplicaProcessAssertions.WaitAsync(recovered, 5, cancellationToken);
         await ReplicaProcessAssertions.SnapshotAsync(reopened, trial, 5);
         await ReplicaProcessAssertions.ReceiptAsync(reopened, 4);
@@ -58,10 +58,10 @@ internal sealed class ReplicaTransferProcessRecoveryTests
             node.Snapshots.Recover();
             await ReplicaProcessAssertions.SnapshotAsync(node, trial, 4);
             await ReplicaProcessAssertions.ReceiptAsync(node, 4);
-            await Assert.That(node.Database.Outcome(ReplicaCrashModel.PrincipalId, ReplicaCrashModel.Operation(5).Id)).IsNull();
+            await Assert.That(OutcomeStoreOracle.Read(node.Store, ReplicaCrashModel.Operation(5))).IsNull();
         }
         using var reopened = ReplicaCrashNode.OpenTarget(trial.DirectoryPath, trial.Incarnation);
-        await using var recovered = new ReplicaMaterializer(reopened.Database, reopened.Log, reopened.Snapshots);
+        await using var recovered = new ReplicaMaterializer(reopened.Database, reopened.Log, reopened.Snapshots, RecoveryExecutionOptions.Replica());
         await ReplicaProcessAssertions.SnapshotAsync(reopened, trial, 4);
         await Assert.That(reopened.Snapshots.Current).IsEqualTo(published);
         recovered.Commit(5);

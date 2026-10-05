@@ -22,7 +22,7 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         var configuration = fixture.Configuration(3);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             store.Commit((transaction, _) =>
             {
                 var body = System.Text.Encoding.UTF8.GetBytes(json);
@@ -49,7 +49,7 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         var configuration = fixture.Configuration(3);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(BenchmarkTopologyMembershipFixture.Membership(store)!);
             var malformed = Mutate(record, field);
             store.Commit((transaction, _) =>
@@ -71,7 +71,7 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         var configuration = fixture.Configuration(3);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             store.Commit((transaction, _) => { transaction.Delete(BenchmarkTopologyMembershipFixture.HardStateKey); return true; });
         }
         using var reopened = fixture.Open();
@@ -89,7 +89,7 @@ internal sealed class BenchmarkTopologyMembershipCorruptionTests
         var configuration = fixture.Configuration(3);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(BenchmarkTopologyMembershipFixture.Membership(store)!);
             var malformed = BenchmarkTopologyMembershipNativeCodec.Encode(record, BenchmarkMembershipDefect.Duplicate);
             await Assert.That(malformed.AsSpan().SequenceEqual(BenchmarkTopologyMembershipFixture.Membership(store))).IsFalse();

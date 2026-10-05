@@ -34,7 +34,7 @@ internal sealed class BenchmarkTopologyMembershipVersionTests
         byte[] hardState;
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             log.SaveTermAndVote(RetainedTerm, configuration.LocalId);
             var record = ReplicaProtocolCodec.Deserialize<ReplicaBenchmarkMembershipRecord>(BenchmarkTopologyMembershipFixture.Membership(store)!);
             await Assert.That(record.Version).IsEqualTo(CurrentMembershipVersion);

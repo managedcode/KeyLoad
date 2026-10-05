@@ -10,9 +10,11 @@ import { readJson, writeJson } from './isolated-github-files.mjs';
 import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
 import { createSiteIsolatedContext, parseSiteCaptureArguments } from './site-isolated-github-context.mjs';
 import { captureSitePages } from './site-isolated-github-api.mjs';
-import { flattenSiteRuns, selectLatestSiteProducer, selectSiteIsolatedEvidence, validateSiteRun } from './site-isolated-github-runs.mjs';
+import { flattenSiteRuns, listSiteProducers, selectLatestSiteProducer, selectSiteIsolatedEvidence,
+  validateSiteRun, validateSiteWorkflow } from './site-isolated-github-runs.mjs';
 import { proveSiteIsolatedEvidence } from './site-isolated-github-proof.mjs';
 import { siteMetadataFiles } from './site-isolated-github-files.mjs';
+import { captureHistoricalContract } from './historical-site-evidence.mjs';
 
 async function captureSelectionRuns(directory, context, workflow) {
   if (context.trigger !== null) {
@@ -32,12 +34,43 @@ async function captureSelectionRuns(directory, context, workflow) {
 async function captureSelection(input, context) {
   const directory = path.join(input, SITE_GH.metadata);
   const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
+  validateSiteWorkflow(workflow);
   await captureSelectionRuns(directory, context, workflow);
-  if (context.mode === SITE_GH.publish) {
+  if (context.mode === SITE_GH.publish && !context.optional) {
     const runs = flattenSiteRuns(await readJson(path.join(directory, 'workflow_runs-pages.json')));
     context.producer = selectLatestSiteProducer(runs, workflow);
   }
   const attempts = await createDirectory(path.join(directory, 'attempts'));
+  if (context.optional) {
+    const runs = flattenSiteRuns(await readJson(path.join(directory, 'workflow_runs-pages.json')));
+    for (const run of listSiteProducers(runs, workflow)) {
+      context.producer = { runId: run.id, attempt: run.run_attempt, sourceRevision: run.head_sha,
+        event: run.event, conclusion: run.conclusion };
+      let selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, producer: context.producer, optional: true });
+      if (selected.state === 'selected') {
+        await captureSitePages(`${GH.api}/runs/${selected.run.id}/artifacts`, directory, 'artifacts', context);
+        return selected;
+      }
+      if (selected.state === 'unavailable') continue;
+      requireSite(selected.state === 'needs_attempt');
+      const runRoot = path.join(attempts, String(selected.runId));
+      try { await existingPath(runRoot, true); } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+        await createDirectory(runRoot);
+      }
+      const root = await createDirectory(path.join(runRoot, String(selected.attempt)));
+      const route = `${GH.api}/runs/${selected.runId}/attempts/${selected.attempt}`;
+      await captureApi(route, path.join(root, 'run-attempt.json'), false, context);
+      await captureSitePages(`${route}/jobs`, root, 'jobs', context);
+      selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, producer: context.producer, optional: true });
+      if (selected.state === 'selected') {
+        await captureSitePages(`${GH.api}/runs/${selected.run.id}/artifacts`, directory, 'artifacts', context);
+        return selected;
+      }
+      requireSite(selected.state === 'unavailable');
+    }
+    return { state: 'unavailable' };
+  }
   for (let pair = 0; pair <= SITE_GH.pairs; pair += 1) {
     const selected = await selectSiteIsolatedEvidence({ input, mode: context.mode, requestedRun: context.requestedRun,
       producer: context.producer });
@@ -67,6 +100,16 @@ async function capture({ environment = process.env, args = process.argv.slice(3)
   const directory = await createDirectory(path.join(input, SITE_GH.metadata));
   await initializeTransport(context, input, directory);
   const selected = await captureSelection(input, context);
+  if (selected.state === 'unavailable') {
+    const receipt = { schemaVersion: SITE_GH.version, state: 'unavailable', mode: context.mode,
+      publishEligible: true, source: context.source, producer: null, metadataFiles: await siteMetadataFiles(input) };
+    requireSite(Buffer.byteLength(`${JSON.stringify(receipt, null, 2)}\n`) <= SITE_GH.jsonBytes);
+    await writeJson(path.join(input, SITE_GH.metadataProof), receipt);
+    return receipt;
+  }
+  if (SITE_GH.legacySources.includes(selected.run.head_sha)) {
+    await captureHistoricalContract(path.join(input, SITE_GH.metadata), context, selected.run.head_sha);
+  }
   const receipt = await proveSiteIsolatedEvidence({ input, selection: selected, source: context.source, mode: context.mode });
   if (download) {
     await createDirectory(path.join(input, SITE_GH.archives));

@@ -13,7 +13,7 @@ internal sealed record ServerNodeUpgradeInventory(string Sha256, IReadOnlyList<S
             ?? throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid);
 
     internal int BackupCount => Entries.Count(entry => entry.Directory
-        && entry.Path.StartsWith(ServerNodeUpgradeProtocol.Backups + "/", StringComparison.Ordinal)
+        && entry.Path.StartsWith(ServerNodeUpgradeProtocol.Backups + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal)
         && entry.Path.Count(character => character == '/') == 1);
 
     internal static ServerNodeUpgradeInventory Capture(string directory,

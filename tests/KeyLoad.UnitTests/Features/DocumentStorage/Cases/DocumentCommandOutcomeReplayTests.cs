@@ -23,7 +23,7 @@ internal sealed class DocumentCommandOutcomeReplayTests
         await Assert.That(failed.Error).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(failed.SafeDetail).IsEqualTo(RevisionConflictDetail);
         var failedOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId);
-        await Assert.That(database.Database.Outcome(Writer, failedId)!.SafeDetail).IsEqualTo(RevisionConflictDetail);
+        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Writer, failedId)!.SafeDetail).IsEqualTo(RevisionConflictDetail);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(initialOutbox,
             DocumentCommandOutcomeTestSupport.CaptureOutbox(database))).IsTrue();
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, Collection, DocumentId))).IsNull();

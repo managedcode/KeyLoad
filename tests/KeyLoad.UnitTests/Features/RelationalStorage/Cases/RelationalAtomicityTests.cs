@@ -44,7 +44,7 @@ internal sealed class RelationalAtomicityTests
         await Assert.That(database.Database.ReadStream(RelationalTestData.Root, new(database.Partition, Events, RelationalTestData.Second)).Events).IsEmpty();
         await Assert.That(database.Database.InspectMessage(RelationalTestData.Root, new(database.Partition, Queue), RelationalTestData.Second)).IsNull();
         await Assert.That(database.Database.GetOutboxStatus(RelationalTestData.Root, database.Partition).Head.Tail).IsEqualTo(1);
-        var query = new QueryEngine(database.Database).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
+        var query = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
         await Assert.That(query.Rows).HasSingleItem();
         await Assert.That(query.AccessPath).IsEqualTo(IndexAccess);
     }
@@ -64,7 +64,7 @@ internal sealed class RelationalAtomicityTests
         await Assert.That(stale.Error).IsEqualTo(ErrorCode.RevisionConflict);
         database.Commit(new DeleteDocument(RelationalTestData.Table, RelationalTestData.First, 1));
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.Second, RelationalTestData.Row(RelationalTestData.Second), 1));
-        var rows = new QueryEngine(database.Database).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
+        var rows = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
         await Assert.That(rows.Rows[0].EntityId).IsEqualTo(RelationalTestData.Second);
         await Assert.That(rows.Rows[0].Revision).IsEqualTo(2);
     }
@@ -77,7 +77,7 @@ internal sealed class RelationalAtomicityTests
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.First, RelationalTestData.Row()));
         database.Store.Dispose();
         using var reopened = new ZoneTreeStore(new(database.Directory));
-        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy());
+        var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var configured = reopened.Read(view => engine.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(configured.RelationalSchema!.PrimaryKey).IsEqualTo(RelationalTestData.Key);
         var id = Guid.NewGuid();

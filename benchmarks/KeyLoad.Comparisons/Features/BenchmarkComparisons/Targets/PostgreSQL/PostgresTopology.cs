@@ -4,6 +4,9 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class PostgresTopology
 {
+    private const int ReadinessTimeoutSeconds = 60;
+    private const int ReadinessPollMilliseconds = 200;
+
     private const string ConfigureQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")'";
     private const string ConfigureTwoNodeQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\")'";
     private const string ReloadConfiguration = "SELECT pg_reload_conf()";
@@ -39,7 +42,7 @@ internal static class PostgresTopology
         }
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(60));
+        deadline.CancelAfter(TimeSpan.FromSeconds(ReadinessTimeoutSeconds));
         await WaitForMembersAsync(connection, topology, false, deadline.Token);
         await ConfigureQuorumAsync(connection, topology, deadline.Token);
         await ReloadAsync(connection, deadline.Token);
@@ -87,7 +90,7 @@ internal static class PostgresTopology
                 return observation;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(ReadinessPollMilliseconds), cancellationToken);
         }
     }
 
@@ -154,7 +157,7 @@ internal static class PostgresTopology
         await using var current = new NpgsqlCommand(CurrentWal, connection);
         var wal = (string)(await current.ExecuteScalarAsync(cancellationToken))!;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(60));
+        deadline.CancelAfter(TimeSpan.FromSeconds(ReadinessTimeoutSeconds));
         await WaitForCopiesAsync(connection, topology, wal, deadline.Token);
         var members = await WaitForMembersAsync(connection, topology, true, deadline.Token);
         await VerifyQuorumConfigurationAsync(connection, topology, deadline.Token);
@@ -191,7 +194,7 @@ internal static class PostgresTopology
                 return;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200), cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(ReadinessPollMilliseconds), cancellationToken);
         }
     }
 

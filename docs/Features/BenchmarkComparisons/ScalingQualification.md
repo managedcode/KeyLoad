@@ -315,3 +315,102 @@ then the existing collector, app and owned-file teardown settle as usual. Failur
 objects, cleanup failures and fatal precedence retain SCALE-017. Root owns shared
 settings/host/collector joins; private feature-local lifetime, case and assertion
 helpers may be authored against this frozen contract before those joins.
+
+### Exact cancellation-proof evidence fields
+
+TASK-SCALE-OPENLOOP-CANCEL-001 freezes the separate JSON version1 proof below.
+Use the existing comparison JSON naming/enum conventions, strict typed decoding,
+a maximum4 MiB file, create-only atomic publication, and the original worker
+identity. No field may be set true before its original operation settles.
+
+| Field | Exact meaning and oracle |
+| --- | --- |
+| Version | Integer1; reject other versions. |
+| Worker | Actual existing IsolatedComparisonWorker, including source/run/attempt/job/repository/ref/workflow, KeyLoad/3/PointRead and the selected profile. |
+| ProfileId, Rate, Scenario | Exact selected immutable100k/1m profile,250/1000/4000 rate and PointRead, equal to Worker and Milestone. |
+| DatasetRecords, DatasetSha256 | Actual loaded profile cardinality and canonical generated-corpus digest, validated by native initialization. |
+| Milestone | Actual OpenLoopProgressV1 snapshot, Completed >=1024 and Completed <= Started <= Planned=100000, observed after setup and before caller cancellation. |
+| Accounting | Original runner's disjoint frozen counters satisfying AC-SCALE-019, including actual completed and unfinished dispositions; never fabricated cancellation totals. |
+| CallerCancelled | Exact runner caller CTS was cancelled by the validated parent control. |
+| ProducerSettled, NativeCallsSettled, SessionsClosed | Original producer, original native-call tasks and every acquired runner session disposal completed before follow-up; failures remain failures. |
+| HealthyReadVerified, HealthyReadRevision, HealthyReadSha256 | Genuine SDK GetAsync succeeds on the still-live target; its actual DocumentResult.Reference, Revision and literal corpus JSON match the seeded record. Record actual positive revision and SHA-256 of actual UTF-8 JSON, never raw document or credentials. |
+| HealthyReadSessionClosed | Original follow-up SDK session disposal completed; runner SessionsClosed alone does not establish it. |
+
+The exact bounded ASCII completion marker is
+`OpenLoopNativeCompletionV1|ProfileId|Scenario|Rate|Completed|Started|Planned`.
+Use invariant unsigned decimal text for counters/rate and the exact closed
+profile/scenario identifiers, at most192 bytes. The parent accepts only seven
+fields, the fixed marker, its own selected profile/scenario/rate and the bounded
+counter relations above from its owned comparisons resource. Only the first
+accepted native milestone triggers cancellation. Malformed marker/control/proof,
+original task failure, unsuccessful follow-up or unclosed session fails the case.
+
+The child cannot attest to parent collector/AppHost teardown before it exits.
+Parent-owned original child completion, collector settlement, node cleanup and
+proof-file hash are verified separately by IsolatedNativeCase and its retained
+evidence. This proof does not publish a performance cell or establish AC-SCALE-021
+latency percentiles.
+
+TASK-SCALE-OPENLOOP-SELECT-001 permits a dedicated Luna worker to prepare a
+guarded private AppHost test-selector packet; root still owns live joins,
+composition, collector/host dispatch and every native gate. The only new outer
+selector is `KeyLoadTests:OpenLoopRate`, requiring an exact scaled profile and
+either the measured-cell filter or the separate cancellation-proof filter above.
+The proof filter additionally requires KeyLoad/3/PointRead. Blank, leading-zero,
+unsupported rate, absent suite/profile, direct native rate in outer test mode,
+vector/control/local-RF3/override mixtures and mismatched filter fail before
+resource acquisition. Forward the validated rate as `Benchmarks__OpenLoopRate`,
+clear `KeyLoadTests__OpenLoopRate` in the test child alongside the existing suite
+and scale selectors, and preserve all current vector/closed-loop behavior.
+No new outer proof boolean or user-selected signal path is introduced.
+
+The worker owns only new feature-local selection helpers and guarded minimal
+TestSuiteSettings/TestSuiteResources/VectorTestSuiteSelection hunks, plus actual
+configuration-to-resource-plan success/rejection flows. Tests construct and
+dispose the real owned Aspire resource plan, assert the resulting native child
+arguments/environment or rejection with unchanged resources, and never substitute
+property-construction checks for that operation. Existing tests and complete suites
+remain mandatory; source preparation does not establish native RF3 completion.
+
+### Central native options join for open-loop execution
+
+TASK-SCALE-OPENLOOP-OPTIONS-001 applies the owner correction in
+[ADR-112](../../ADR/ADR-112-centralized-runtime-options.md) before the private
+open-loop packet enters live execution. A dedicated worker owns new
+`KeyLoad.Comparisons/Features/BenchmarkComparisons/Configuration/` option and
+native-validator files, the feature-local execution consumers and typed evidence
+snapshot; root owns the ComparisonHost composition registration and shared joins.
+Use native `IOptions<OpenLoopExecutionOptions>` and `IValidateOptions<T>`; capture
+one validated snapshot, never read configuration in the runner or construct a
+fallback options object. Mark the actual options shape with the existing
+`ConfigurationOptions` metadata. Root binds the options section
+`Benchmarks:OpenLoopExecution` in the owned host composition and disposes its
+native service provider. No new package or parallel configuration framework is
+needed. Positive and rejected configuration flows remain real owned-plan tests.
+
+The canonical option definition owns defaults for queue capacity64, concurrent
+sessions16, admitted nodes3, per-arrival deadline30 seconds, final drain30
+seconds, control polling100 milliseconds and timeline spin window200
+microseconds. Execution classes cannot retain their own defaults or policy
+constants. Validate before target/session acquisition. These exact effective
+values are required by the current v1 measurement/proof cohort; a differing or
+invalid configured value fails admission rather than being silently replaced.
+Changes require an explicit profile/qualification contract update. Record the
+actual consumed values in mandatory `ExecutionPolicy` fields on both separate
+version1 artifacts: `QueueCapacity`, `ConcurrentSessions`, `MaximumNodes`,
+`OperationDeadlineMilliseconds`, `DrainMilliseconds`,
+`ControlPollMilliseconds`, and `SpinWindowMicroseconds`. Native validators check
+the snapshot against the selected cohort. This is an execution-policy receipt,
+not authority for production database configuration.
+
+Keep the planned100000 positions, closed rates,4096 samples,1024-completion
+milestones and supported three-node proof identity as immutable measurement
+contracts. The fixed10/11-byte control framing,192-byte marker ceiling and4MiB
+artifact ceiling are versioned protocol/format limits and stay named constants.
+Every operational wait, queue, session limit and deadline consumes the options
+snapshot while preserving original cancellation/failure ordering and joined
+cleanup. Root verifies all runtime entry points pass the centrally resolved
+options; ordinary control/vector/closed-loop selection and their schemas remain
+unchanged. Acceptance maps to AC-SCALE-018/019/021 and AC-CQ-034/038. The worker
+returns a guarded source packet; required native Aspire cells, cancellation proof
+and exact-source Linux qualification remain open until actually executed.

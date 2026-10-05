@@ -1,10 +1,13 @@
 {
   "ORLEANS-PRIMITIVES-001": {
-    "title": "Native Orleans workers, advisory signals, interleaving and one-time jobs",
+    "title": "Native Orleans capability review, services, messaging, transactions and jobs",
     "status": "in_progress",
     "feature": "docs/Features/ClusterRouting/ExecutionPrimitives.md",
     "decision": "docs/ADR/ADR-110-native-orleans-execution-primitives.md",
-    "sourceStage": "per_method_audit_and_selection_contract_runtime_unchanged",
+    "sourceStage": "per_method_and_broad_capability_review_contract_runtime_unchanged",
+    "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
+    "capabilityReviewCompleted": true,
+    "documentationVerifiedOn": "2026-10-06",
     "contractValidated": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
@@ -12,6 +15,8 @@
       "Freeze concrete interchangeable computation and bounded worker keys/quotas before native worker adoption",
       "Freeze actual long-operation control and disposable hint methods before selective interleaving or OneWay adoption",
       "Resolve versioned native Durable Jobs persistent provider and atomic enqueue/reconciliation contract",
+      "Freeze concrete native Streams outbox/provider/subscription and transaction-storage/visibility contracts before adoption",
+      "Qualify per-silo lifecycle, native telemetry and measured collection/queue/repartitioner resource contracts",
       "Real operation Aspire unit/scalar/recovery/RF3 and exact-source Linux fault/resource/performance evidence"
     ]
   },
@@ -828,7 +833,8 @@
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
-      "docs/implementation/command-outcome-pin-development-2026-10-05.json"
+      "docs/implementation/command-outcome-pin-development-2026-10-05.json",
+      "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json"
     ],
     "runtimeQualified": false,
     "allAcceptanceClosed": false,
@@ -837,9 +843,11 @@
       "normal": "2_of2",
       "scalar": "2_of2",
       "receipt": "docs/implementation/command-outcome-pin-development-2026-10-05.json",
-      "partitionScopedOutcomeContract": "pending",
+      "partitionScopedOutcomeContract": "source_joined_native_unit_scalar_recovery_RF3_and_coverage_pending",
       "qualified": false
-    }
+    },
+    "sourceStage": "full_partition_scoped_v2_outcomes_authorization_order_and_actual_operation_flows_joined_current_native_gates_pending",
+    "scopedOutcomeSourceReceipt": "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json"
   },
   "KL-013": {
     "title": "Query AST, planner і cursors",
@@ -2192,7 +2200,7 @@
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs"
     ],
-    "sourceStage": "closed_loop_S1_three_dataset_profiles_native_1_2_3_topologies_resource_evidence_and_original_teardown_joined_compiler_repair_in_progress",
+    "sourceStage": "closed_loop_S1_two_active_dataset_profiles_retained_open_loop_private_R5_packet_and_validated_IOptions_cancellation_AppHost_integration_in_progress",
     "qualification": {
       "allAcceptanceClosed": false,
       "nativeCohortQualified": false,
@@ -2204,6 +2212,18 @@
         "replica_recovery_and_activation_owner_movement",
         "full_exact_source_unit_scalar_recovery_RF3_coverage_endurance_and_fault_gates"
       ]
+    },
+    "activeRecordCounts": [
+      100000,
+      1000000
+    ],
+    "openLoopDevelopment": {
+      "sourcePacket": "R5_private_reviewed_not_yet_integrated",
+      "executionOptions": "native_validated_IOptions_amendment_in_progress",
+      "aspireSelection": "private_real_AppHost_model_flows_in_progress",
+      "originalCancellationProof": "authored_private_no_actual_native_run",
+      "sourceQualified": false,
+      "runtimeQualified": false
     }
   },
   "KL-076": {
@@ -4676,13 +4696,30 @@
         "REQ-BC-FAIL-020",
         "REQ-BC-FAIL-021"
       ],
-      "ownerCorrection": "Independent static build action may follow JSON or run through CI; no benchmark Chrome/site tests; every site build uses latest completed authenticated benchmark",
+      "ownerCorrection": "2026-10-06: Independent source-triggered CI publication uses newest completed own-main Benchmarks with ready authenticated aggregate; no ready aggregate publishes the qualified product website without metrics; ready JSON triggers refresh",
       "implementation": "source_implemented_and_development_verified",
       "benchmarkNativeSourceAndEngineUnchanged": true,
       "websiteConsumer": "independent CI own-main push/manual and completed Benchmarks workflow_run",
       "runtimeQualified": false,
       "publicationQualified": false,
-      "selection": "newest_completed_own_main_push_or_workflow_dispatch_Benchmarks; invalid_latest_no_older_fallback; fresh_latest_tuple_before_deploy",
+      "selection": "newest_completed_own_main_push_or_workflow_dispatch_Benchmarks_with_successful_authenticated_aggregate; valid_failed_or_absent_aggregate_not_available; corrupt_selected_ready_evidence_fails; fresh_ready_tuple_or_null_before_deploy",
+      "independentWebsitePublication": {
+        "adr": "docs/ADR/ADR-112-independent-website-publication.md",
+        "requirements": [
+          "REQ-BC-WEB-001",
+          "REQ-BC-WEB-002",
+          "REQ-BC-WEB-003",
+          "REQ-BC-WEB-004",
+          "REQ-BC-WEB-005"
+        ],
+        "implementation": "in_progress",
+        "noDataArtifact": "explicit_benchmarks_none; no_numeric_catalog_or_measurement_requests; publication_benchmarks_null",
+        "qualification": "complete_content_assets_browser_source_coverage_for_none; original_full_metric_archive_suite_for_measured",
+        "finalBuild": "pending",
+        "focusedAspireTests": "pending",
+        "deliveredSourceLinuxCi": "pending",
+        "pagesDeployment": "pending"
+      },
       "genuineCompletedCohort": {
         "sourceRevision": "73aebfd3f72695357834599e813aba77b9e274ad",
         "runId": 37184989107,
@@ -4770,6 +4807,25 @@
       "Resolve concurrent source prerequisites in their owning chats, then canonical build and formatter",
       "Complete Aspire unit/scalar/recovery/RF3 and full analyzer/coverage gates",
       "Exact delivered-source Linux qualification"
+    ]
+  },
+  "NATIVE-VECTOR-COMPARISONS-001": {
+    "title": "Native vector comparisons, SurrealDB and HelixDB",
+    "status": "in_progress",
+    "feature": "docs/Features/BenchmarkComparisons/VectorQualification.md",
+    "decision": "docs/ADR/ADR-109-native-vector-comparisons.md",
+    "activeRecordCounts": [
+      100000,
+      1000000
+    ],
+    "sourceStage": "native_adapters_vector_runner_and_website_pipeline_in_implementation",
+    "canonicalBuildPassed": false,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Finish strict native workload/report/resource/website joins and all focused regressions",
+      "Pass final canonical build, formatting and Aspire-owned required suites",
+      "Retain actual complete authenticated Linux Benchmarks originals and website publication evidence"
     ]
   }
 }

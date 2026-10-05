@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using KeyLoad.Core;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -42,7 +44,7 @@ internal sealed class ReadOnlyCoreContractTests
             TimeProvider.System.GetUtcNow(), payload));
 
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(database.Database.Outcome(RootPrincipal, id)!.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.UnknownOutcome(RootPrincipal, id)))!.Result.Error).IsEqualTo(ErrorCode.Validation);
         database.Commit(new PutDocument(DocumentCollection, HealthyDocumentId, EmptyDocumentJson));
         await Assert.That(database.Database.GetDocument(RootPrincipal,
             new(database.Partition, DocumentCollection, HealthyDocumentId))).IsNotNull();

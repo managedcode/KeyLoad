@@ -3,13 +3,13 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcClient rpc, ReplicaLeader leader,
-    ReplicaActivityTracker activity, Task transportReady, CancellationToken lifetime)
+    ReplicaActivityTracker activity, Task transportReady, CancellationToken lifetime, TimeSpan readBarrierTimeout)
 {
     internal async Task ExecuteAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime);
-        request.CancelAfter(ReplicaProtocol.ReadBarrierTimeout);
+        request.CancelAfter(readBarrierTimeout);
         var transportReadyStarted = DatabasePhaseTelemetry.Begin();
         var transportReadyOutcome = DatabasePhaseOutcome.Faulted;
         try

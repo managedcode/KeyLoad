@@ -11,6 +11,7 @@ using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Orleans.Configuration;
 using Orleans.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -18,12 +19,13 @@ internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
-        CancellationToken startupCancellation)
+        CancellationToken startupCancellation, ServerRuntimeOptions runtimeOptions)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
+        runtimeOptions.RegisterBorrowed(builder.Services);
         RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation);
-        builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address));
+        builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value));
         return builder.Build();
     }
 
@@ -41,7 +43,6 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);
-        services.AddSingleton(partition.Configuration);
         services.AddSingleton(peers);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(requestWork);
@@ -54,12 +55,14 @@ internal static class OrleansSiloConfiguration
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         services.AddSingleton<ReplicaSiloDiscoveryState>();
-        services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(partition.Configuration, peers,
+        services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), peers,
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
+            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
         services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
-            partition.Configuration, peers, provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), peers, provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), TimeProvider.System,
+            provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>(),
             options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture
                 ? provider.GetRequiredService<IReplicaDiscoveryObservationSink>() : null));
         services.AddSingleton<ReplicaGrainServiceClient>();
@@ -77,9 +80,10 @@ internal static class OrleansSiloConfiguration
         }
         var boundedRows = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
             ? ReplicaMembershipAuthorityProtocol.MaximumRows : 0;
-        services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(partition.Database, partition.Coordinator,
+        services.AddSingleton<IMembershipTable>(provider => new ReplicaMembershipTable(partition.Database, partition.Coordinator,
             partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
-            boundedRows, startupCancellation));
+            boundedRows, startupCancellation, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>()));
     }
 
     private static ReplicaMembershipAuthorityClientTable CreateMembershipProxy(IServiceProvider provider, NodeOptions options)
@@ -95,7 +99,8 @@ internal static class OrleansSiloConfiguration
                 options.Incarnation, options.PublicEndpoint, local.SiloAddress.ToParsableString(),
                 authority.AuthorityEndpoints.Select(endpoint => new Uri(endpoint)).ToArray(), callerSecret,
                 authoritySecret, TimeProvider.System);
-            return new(settings);
+            return new(settings, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+                provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>());
         }
         finally
         {
@@ -116,13 +121,15 @@ internal static class OrleansSiloConfiguration
             if (options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture)
             { services.AddSingleton<IReplicaDiscoveryObservationSink>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()); }
         }
-        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, TimeProvider.System)
+        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, TimeProvider.System,
+            provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
         {
             PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>()
         });
     }
 
-    private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address)
+    private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
+        OrleansMembershipOptions membershipOptions)
     {
         silo.Configure<ClusterOptions>(cluster =>
         {
@@ -132,8 +139,8 @@ internal static class OrleansSiloConfiguration
         silo.ConfigureEndpoints(address, options.SiloPort, OrleansNodeProtocol.GatewayPort);
         silo.Configure<ClusterMembershipOptions>(membership =>
         {
-            membership.IAmAliveTablePublishTimeout = OrleansNodeProtocol.MembershipRefresh;
-            membership.TableRefreshTimeout = OrleansNodeProtocol.MembershipRefresh;
+            membership.IAmAliveTablePublishTimeout = membershipOptions.MembershipRefresh;
+            membership.TableRefreshTimeout = membershipOptions.MembershipRefresh;
         });
         silo.Configure<SiloMessagingOptions>(messaging => messaging.MaxMessageBodySize = Math.Max(
             checked(replica.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
@@ -141,6 +148,7 @@ internal static class OrleansSiloConfiguration
             checked(GrainRequestStreamProtocol.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
         silo.AddGrainService<PartitionReplicaGrainService>();
         silo.AddGrainService<RecurringDueGrainService>();
+        silo.AddActivityPropagation();
         // ADR-036: owner explicitly requires these two native experimental services.
 #pragma warning disable ORLEANSEXP003
         silo.AddDistributedGrainDirectory();

@@ -78,7 +78,7 @@ internal sealed class BlobMissingCurrentVersionTests
             JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options))));
 
         await Assert.That(exception.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Read(database, KeySpace.Outcome(PrincipalId, commandId))).IsNull();
+        await Assert.That(Read(database, OutcomeStoreOracle.PartitionKey(blob.Partition, PrincipalId, commandId))).IsNull();
         await AssertSnapshotUnchanged(database, blob, missingUploadId, newUploadId, before);
     }
 

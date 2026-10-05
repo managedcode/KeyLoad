@@ -20,7 +20,8 @@ internal static class DueWorkDiscovery
             throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant);
         }
 
-        var state = new DuePageState(database.Limits, wakeAt, Stopwatch.GetTimestamp(), cancellationToken);
+        var state = new DuePageState(database.Limits, wakeAt, Stopwatch.GetTimestamp(), database.DueDiscoveryDeadline,
+            cancellationToken);
         var page = database.Store.Read(view =>
         {
             var cursor = DueWorkCursor.Match(database.Store.Identity, supplied);

@@ -137,7 +137,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private void Open(DatabaseLimits limits)
     {
         store = new(new(directory));
-        database = new(store, new AuthorizationPolicy(), limits);
+        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
     }
 
     private void ConfigureResource(bool protectedFields)

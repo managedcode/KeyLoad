@@ -23,7 +23,7 @@ internal sealed class ReplicaTermMetadataSnapshotTests
             {
                 Incarnation = fixture.Configuration.Incarnation
             }));
-            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, fixture.Configuration with { Directory = sourceDirectory }));
+            var sourceLog = fixture.Own(new DurableReplicaLog(sourceStore, RecoveryExecutionOptions.Configuration(fixture.Configuration with { Directory = sourceDirectory })));
             ReplicaTermMetadataFixture.PrepareLog(fixture.Log, OldEntryTerm, LogTerm);
             ReplicaTermMetadataFixture.PrepareLog(sourceLog, NewEntryTerm, LogTerm);
             ReplicaTermMetadataFixture.WriteAppliedCut(fixture.Store, AppliedCut);

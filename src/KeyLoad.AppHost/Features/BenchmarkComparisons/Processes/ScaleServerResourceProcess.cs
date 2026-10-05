@@ -8,6 +8,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static partial class ScaleServerResourceProcess
 {
+    private const int ProcessSettlementSeconds = 1;
+
     private const string Docker = "docker";
     private const string InspectFormat = "{{.Id}}|{{.Image}}|{{.State.Pid}}|{{.State.StartedAt}}|{{.State.Status}}|{{range .Mounts}}{{if .RW}}{{.Source}}~{{.Destination}}~{{.Type}};{{end}}{{end}}";
     private const string Separator = "|";
@@ -109,7 +111,7 @@ internal static partial class ScaleServerResourceProcess
             }
 
             var exited = process.WaitForExitAsync(CancellationToken.None);
-            if (await Task.WhenAny(exited, Task.Delay(TimeSpan.FromSeconds(1))) != exited)
+            if (await Task.WhenAny(exited, Task.Delay(TimeSpan.FromSeconds(ProcessSettlementSeconds))) != exited)
             {
                 try
                 { process.Kill(entireProcessTree: true); }

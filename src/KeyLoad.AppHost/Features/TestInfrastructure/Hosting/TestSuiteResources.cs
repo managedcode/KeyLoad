@@ -42,7 +42,7 @@ internal static class TestSuiteResources
             }
             runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
         }
-        if (settings.Suite == "comparison" && settings.ComparisonTarget is not null)
+        if (settings.Suite == TestSuiteProtocol.ComparisonSuite && settings.ComparisonTarget is not null)
         {
             runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);
         }
@@ -54,7 +54,7 @@ internal static class TestSuiteResources
         {
             runner.WithEnvironment("Benchmarks__VectorProfile", settings.VectorProfile.Id);
         }
-        if (settings.Suite == "unit-scalar")
+        if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)
         {
             runner.WithEnvironment("DOTNET_EnableHWIntrinsic", "0");
         }

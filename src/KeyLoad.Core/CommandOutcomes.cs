@@ -1,7 +1,5 @@
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
+using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -13,20 +11,6 @@ public sealed partial class DatabaseEngine
     private const string ChangedOutcomePrincipalPolicyMessage = "The principal policy changed since this command was evaluated.";
     private const string EarlierSubscriptionGenerationMessage = "The cached receive belongs to an earlier subscription generation.";
 
-    /// <summary>Reads a stored operation outcome scoped to its verified principal.</summary>
-    /// <param name="principal">Verified principal identifier.</param>
-    /// <param name="id">Stable operation identifier.</param>
-    /// <returns>The stored result, or null when no outcome is present.</returns>
-    public OperationResult? Outcome(string principal, Guid id) => Store.Read(view =>
-    {
-        var outcome = view.GetRecord<StoredOutcome>(KeySpace.Outcome(principal, id));
-        if (outcome is null)
-        {
-            return null;
-        }
-        ValidateStoredOutcomeLocator(view, principal, id, outcome);
-        return outcome.Result;
-    });
     /// <summary>Resolves a replicated outcome and rechecks current authorization and content identity.</summary>
     /// <param name="operation">Operation whose persisted result is requested.</param>
     /// <returns>The reauthorized stored result or a safe domain failure.</returns>
@@ -41,7 +25,9 @@ public sealed partial class DatabaseEngine
         {
             var principal = Principal(view, operation.PrincipalId, Clock.GetUtcNow());
             AuthorizeOperation(view, principal, operation);
-            var outcome = view.GetRecord<StoredOutcome>(KeySpace.Outcome(operation.PrincipalId, operation.Id))
+            var scope = CommandOutcomePartitionIdentity.Resolve(operation);
+            var selection = CommandOutcomeKeyResolver.Select(view, operation.PrincipalId, operation.Id, scope);
+            var outcome = selection.Outcome
                 ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
             if (outcome.Incarnation != Store.Identity.Incarnation)
             {
@@ -53,47 +39,12 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.Conflict, CommandContentConflictMessage);
             }
 
-            ValidateOutcomePartitionScope(view, operation, outcome);
+            CommandOutcomeKeyResolver.ValidateSelectedScope(view, operation, selection);
             ValidateCachedResult(view, principal, operation with { EvaluatedAt = Clock.GetUtcNow() }, outcome);
             return outcome.Result;
         }
         catch (KeyLoadException exception) { return new OperationResult(null, exception.Code, exception.Message); }
     });
-    private static void ValidateStoredOutcomeLocator(IKeyValueView view, string principalId, Guid commandId,
-        StoredOutcome outcome)
-    {
-        var valid = outcome.ScopeKind switch
-        {
-            CommandOutcomeScopeKind.Unknown or CommandOutcomeScopeKind.Global => outcome.Partition is null,
-            CommandOutcomeScopeKind.Partition => outcome.Partition is not null
-                && CommandOutcomePartitionLocatorSerialization.Matches(view, outcome.Partition, principalId, commandId),
-            _ => false
-        };
-        if (!valid)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, "The command outcome partition locator is inconsistent.");
-        }
-    }
-
-    private static void ValidateOutcomePartitionScope(IKeyValueView view, ReplicatedOperation operation, StoredOutcome outcome)
-    {
-        ValidateStoredOutcomeLocator(view, operation.PrincipalId, operation.Id, outcome);
-        var scope = CommandOutcomePartitionIdentity.Resolve(operation);
-        switch (outcome.ScopeKind)
-        {
-            case CommandOutcomeScopeKind.Unknown when outcome.Partition is null:
-                return;
-            case CommandOutcomeScopeKind.Global when outcome.Partition is null
-                && scope.Kind == CommandOutcomeScopeKind.Global:
-                return;
-            case CommandOutcomeScopeKind.Partition when outcome.Partition is not null
-                && scope.Kind == CommandOutcomeScopeKind.Partition && outcome.Partition == scope.Partition:
-                return;
-            default:
-                throw Errors.Fail(ErrorCode.Corruption, "The command outcome partition scope or locator is inconsistent.");
-        }
-    }
-
     private void ValidateCachedResult(IKeyValueView view, PrincipalRecord principal, ReplicatedOperation operation, StoredOutcome previous)
     {
         if (previous.PolicyEpoch != principal.PolicyEpoch)

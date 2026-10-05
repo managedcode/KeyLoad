@@ -10,6 +10,8 @@ namespace KeyLoad.Comparisons;
 /// <summary>Generates a scaled corpus by index without retaining per-record objects.</summary>
 public sealed class ScaledComparisonCorpus : IComparisonCorpus
 {
+    private const string DocumentNumberFormat = "D9";
+
     private readonly ScaledComparisonProfile profile;
     private readonly DocumentView documents;
     private readonly EmptyEdgeView edges = new();
@@ -126,7 +128,7 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
 
     internal static string EmptyJson(string id, int number) => JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = string.Empty });
 
-    internal static string Id(int number) => "d" + number.ToString("D9", System.Globalization.CultureInfo.InvariantCulture);
+    internal static string Id(int number) => "d" + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
 
     private sealed class DocumentView(ScaledComparisonCorpus owner) : IReadOnlyList<BenchmarkDocument>
     {

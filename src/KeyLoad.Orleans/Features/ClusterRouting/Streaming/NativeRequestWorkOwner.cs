@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Orleans;
 
 /// <summary>Owns bounded active native request producers and verified capability frames for one silo.</summary>
@@ -13,9 +15,15 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     private int requestProducers;
     private bool admissionClosed;
     private int isJoined;
+    private readonly GrainRoutingOptions settings;
 
     /// <summary>Creates an empty silo-local work registry.</summary>
-    public NativeRequestWorkOwner() => shutdownToken = shutdown.Token;
+    /// <param name="options">The centrally validated request and capability admission limits.</param>
+    public NativeRequestWorkOwner(IOptions<GrainRoutingOptions> options)
+    {
+        settings = options.Value;
+        shutdownToken = shutdown.Token;
+    }
 
     /// <summary>Gets the owner cancellation token linked by admitted work.</summary>
     internal CancellationToken ShutdownToken => shutdownToken;
@@ -42,9 +50,9 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
             }
 
             var key = (requestId, kind);
-            if (active.ContainsKey(key) || active.Count >= NativeRequestWorkLimits.MaximumTotalFrames
+            if (active.ContainsKey(key) || active.Count >= settings.MaximumTotalFrames
                 || kind == NativeRequestWorkKind.RequestProducer
-                && requestProducers >= NativeRequestWorkLimits.MaximumRequestProducers)
+                && requestProducers >= settings.MaximumRequestProducers)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, NativeRequestWorkLimits.CapacityMessage);
             }

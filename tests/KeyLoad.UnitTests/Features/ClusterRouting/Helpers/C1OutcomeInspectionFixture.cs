@@ -101,7 +101,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         { }
         var nativeStore = new ZoneTreeStore(new ZoneTreeStoreOptions(DirectoryPath) { Incarnation = Incarnation });
         store = nativeStore;
-        var engine = new DatabaseEngine(nativeStore, new AuthorizationPolicy());
+        var engine = new DatabaseEngine(nativeStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         InitializedDatabase = engine;
         engine.Bootstrap(new(AdminId, TenantId, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(AdminId, AdminId, AdminSecret));
@@ -110,7 +110,7 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         var operation = new ReplicatedOperation(CommandId, OperationKind.ConfigureResource, AdminId,
             TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         var result = engine.Apply(operation);
-        if (result.Error is not null || engine.Outcome(AdminId, CommandId) is null)
+        if (result.Error is not null || engine.ResolveOutcome(operation).Error is not null)
         { throw new InvalidOperationException(SuccessMessage); }
         Position = nativeStore.Position;
     }

@@ -14,7 +14,7 @@ internal static class SampleRetentionRecoveryAssertions
         CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, SampleRetentionCrashScenario.OperationFile), cancellationToken));
         var recoveredStatus = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
@@ -23,7 +23,7 @@ internal static class SampleRetentionRecoveryAssertions
         {
             await Assert.That(committed).IsTrue();
         }
-        var oldOutcome = database.Outcome(Principal, operation.Id);
+        var oldOutcome = OutcomeStoreOracle.Read(database.Store, operation);
         await Assert.That(oldOutcome is not null).IsEqualTo(committed);
         await VerifyPersistedBytesAsync(store, root, committed, cancellationToken);
         await VerifyStatusAndReadsAsync(database, committed, committed ?

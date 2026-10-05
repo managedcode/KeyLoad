@@ -33,11 +33,28 @@ internal static class GenuineStoredOutcomeFrameAssertions
     internal static async Task AssertCurrentReadAsync(ZoneTreeStore store, StoredOutcome prior, byte[] frame,
         string principalId, Guid commandId)
     {
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+        database.Bootstrap(new(principalId, "system", [new("*", "*", Capability.All)], ["*"])
+        { ClusterAdministrator = true }, DatabaseEngine.Credential("outcome-probe-key", principalId,
+            "epoch-outcome-probe-owned-admin-key-2026"));
         var position = store.Position;
-        var actual = new DatabaseEngine(store, new AuthorizationPolicy()).Outcome(principalId, commandId);
+        var request = new ConfigureResourceRequest("epoch-outcome-tenant", "epoch-outcome-database",
+            new ResourceDefinition("epoch-outcome-resource", ResourceKind.Collection, "epoch-outcome-domain"));
+        var operation = database.CreateNativeOperation(OperationKind.ConfigureResource, commandId, principalId,
+            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var actual = database.ResolveOutcome(operation);
         await Assert.That(actual).IsEqualTo(prior.Result);
+        var changedRequest = request with
+        { Definition = request.Definition with { Name = "epoch-outcome-changed-resource" } };
+        var changed = database.CreateNativeOperation(OperationKind.ConfigureResource, commandId, principalId,
+            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(changedRequest));
+        await Assert.That(database.ResolveOutcome(changed).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(store.Position).IsEqualTo(position);
-        var raw = store.Read(view => view.ReadOwnedValue(KeySpace.Outcome(principalId, commandId)))
+        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.GlobalOutcome(principalId, commandId))))
+            .IsNull();
+        await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.UnknownOutcome(principalId, commandId))))
+            .IsNull();
+        var raw = store.Read(view => view.ReadOwnedValue(KeySpace.LegacyOutcomeKey(principalId, commandId)))
             ?? throw new InvalidOperationException("The canonical outcome disappeared during its read.");
         await Assert.That(raw.AsSpan().SequenceEqual(frame)).IsTrue();
         var locators = store.Read(view => view.VisitRange(KeyCodec.Encode(PartitionRecordFamilies.OutcomeLocator),

@@ -4,6 +4,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
 {
+    private const string RunningContainerState = "running";
+
     private const string CgroupRoot = "/sys/fs/cgroup";
     private const string CgroupFile = "cgroup.procs";
     private const string CpuLimitFile = "cpu.max";
@@ -61,7 +63,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         _imageId = fields[1];
         _startedAt = fields[3];
         _state = fields[4];
-        if (_state != "running")
+        if (_state != RunningContainerState)
         {
             return InvalidateAfterStart();
         }

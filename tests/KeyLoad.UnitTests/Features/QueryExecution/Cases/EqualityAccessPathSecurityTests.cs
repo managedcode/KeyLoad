@@ -19,7 +19,7 @@ internal sealed class EqualityAccessPathSecurityTests
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])],
             fields: [new(EqualityAccessPathSupport.StatusPath, SensitiveLabel)]);
         ConfigureReader(db, EqualityAccessPathSupport.Reader);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed: true, parameterized, reversed);
@@ -43,7 +43,7 @@ internal sealed class EqualityAccessPathSecurityTests
             new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.SecondaryId,
                 EqualityAccessPathSupport.SecondaryJson, Access: new(Owner)));
         ConfigureReader(db, Owner, restrictRows: true);
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var ordinary = engine.Execute(Owner, EqualityAccessPathSupport.Request(db, indexed, parameterized, reversed: false));
         var reversed = engine.Execute(Owner, EqualityAccessPathSupport.Request(db, indexed, parameterized, reversed: true));
 
@@ -65,7 +65,7 @@ internal sealed class EqualityAccessPathSecurityTests
     public async Task AcAisql008MissingReversedParameterIsRejectedBeforeCandidateSelection(bool indexed)
     {
         using var db = EqualityAccessPathSupport.Create(new() { MaxQueryReadBytes = MinimumReadBudgetBytes });
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed, parameterized: true, reversed) with { Parameters = null };

@@ -4,6 +4,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class ScaleServerCgroupHierarchy
 {
+    private const string MountInfoSeparator = " - ";
+
     private const string MountInfoPath = "/proc/self/mountinfo";
     private const string ControllerFile = "cgroup.controllers";
     private const string CpuController = "cpu";
@@ -39,7 +41,7 @@ internal static class ScaleServerCgroupHierarchy
         var count = 0;
         foreach (var line in mountInfo.Split('\n'))
         {
-            var separator = line.IndexOf(" - ", StringComparison.Ordinal);
+            var separator = line.IndexOf(MountInfoSeparator, StringComparison.Ordinal);
             if (separator < 0)
             {
                 continue;

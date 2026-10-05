@@ -254,6 +254,7 @@ jobs:
     outputs:
       mode: ${{ steps.qualification.outputs.mode }}
       site_revision: ${{ steps.qualification.outputs.site_revision }}
+      benchmark_mode: ${{ steps.qualification.outputs.benchmark_mode }}
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -283,6 +284,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       QUALIFIED_REVISION: ${{ needs.qualify.outputs.site_revision }}
       CONTROL_REVISION: ${{ github.workflow_sha }}
+      KEYLOAD_SITE_BENCHMARK_MODE: ${{ needs.qualify.outputs.benchmark_mode }}
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

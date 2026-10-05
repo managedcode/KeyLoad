@@ -1,26 +1,55 @@
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
 
 /// <summary>Applies authorized database commands and reads through one node-owned atomic store.</summary>
-/// <param name="store">The externally owned node-local atomic store.</param>
-/// <param name="authorization">Evaluator for persisted operation, row and field policy.</param>
-/// <param name="limits">Optional bounded operation limits.</param>
-/// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
-public sealed partial class DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, DatabaseLimits? limits = null,
-    TimeProvider? timeProvider = null)
+public sealed partial class DatabaseEngine
 {
-    private TimeProvider Clock { get; } = timeProvider ?? TimeProvider.System;
+    /// <summary>Creates a node-owned engine with centrally validated operation policy snapshots.</summary>
+    /// <param name="store">The externally owned node-local atomic store.</param>
+    /// <param name="authorization">Evaluator for persisted operation, row and field policy.</param>
+    /// <param name="limits">Centrally validated operation resource limits.</param>
+    /// <param name="dueWorkOptions">Centrally validated node-local due discovery policy.</param>
+    /// <param name="eventSourceOptions">Centrally validated event continuation policy.</param>
+    /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
+    public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
+        IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
+        TimeProvider? timeProvider = null)
+    {
+        ArgumentNullException.ThrowIfNull(store);
+        ArgumentNullException.ThrowIfNull(authorization);
+        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(dueWorkOptions);
+        ArgumentNullException.ThrowIfNull(eventSourceOptions);
+        var operationLimits = limits.Value;
+        var dueSettings = dueWorkOptions.Value;
+        var eventSettings = eventSourceOptions.Value;
+        operationLimits.Validate();
+        dueSettings.Validate();
+        eventSettings.Validate();
+        Store = store;
+        Authorization = authorization;
+        Limits = operationLimits;
+        DueDiscoveryDeadline = dueSettings.DiscoveryDeadline;
+        eventSourceCursorLifetime = eventSettings.CursorLifetime;
+        Clock = timeProvider ?? TimeProvider.System;
+        Durability = store.Identity.Durability;
+    }
+
+    private readonly TimeSpan eventSourceCursorLifetime;
+    private TimeProvider Clock { get; }
+    internal TimeSpan DueDiscoveryDeadline { get; }
     /// <summary>Gets the borrowed business clock for consistent persisted read authority.</summary>
     public TimeProvider EvaluationClock => Clock;
     /// <summary>Gets the externally owned atomic store used by this engine.</summary>
-    public IAtomicStore Store { get; } = store;
+    public IAtomicStore Store { get; }
     /// <summary>Gets the evaluator for persisted authorization policy.</summary>
-    public IAuthorizationPolicy Authorization { get; } = authorization;
+    public IAuthorizationPolicy Authorization { get; }
     /// <summary>Gets the configured operation resource limits.</summary>
-    public DatabaseLimits Limits { get; } = limits ?? new();
+    public DatabaseLimits Limits { get; }
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
-    public DurabilityProfile Durability { get; set; } = store.Identity.Durability;
+    public DurabilityProfile Durability { get; set; }
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
     public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0);
 

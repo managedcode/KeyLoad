@@ -7,6 +7,9 @@ namespace KeyLoad.Features.InternalSerialization;
 // Official native headers/scalars are inspected before generated decoding allocates values.
 internal static class NativePayloadSyntax
 {
+    private const string ReaderInsufficientDataMessage = "Insufficient data present in buffer.";
+    private const string ReaderInsufficientDataMethod = "ThrowInsufficientData";
+
     // Orleans 10.3.1 Reader uses this distinct throw site for exhausted/truncated buffers.
     // Other InvalidOperationException failures, including session/codec invariants, must escape.
     internal static bool IsReaderBufferFailure(Exception exception)
@@ -16,8 +19,8 @@ internal static class NativePayloadSyntax
             return false;
         }
         var method = exception.TargetSite;
-        return exception.Message == "Insufficient data present in buffer."
-            && method?.Name == "ThrowInsufficientData"
+        return exception.Message == ReaderInsufficientDataMessage
+            && method?.Name == ReaderInsufficientDataMethod
             && method.DeclaringType is { IsGenericType: true } declaring
             && declaring.GetGenericTypeDefinition() == typeof(Reader<>);
     }

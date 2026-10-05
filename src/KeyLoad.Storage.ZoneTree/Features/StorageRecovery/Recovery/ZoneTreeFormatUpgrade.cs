@@ -3,6 +3,8 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Copies one stopped native5 or native6 store into a separately published native7 store.</summary>
 public static class ZoneTreeFormatUpgrade
 {
+    private const string CurrentDirectorySegment = ".";
+    private const string ParentDirectorySegment = "..";
     /// <summary>Validates a private stopped native5 or native6 authority copy without opening or rebuilding its tree.</summary>
     /// <param name="sourceOptions">Private copied source and exact configured authority and finite budgets.</param>
     /// <returns>The actual verified source identity; signing credentials remain private to the caller.</returns>
@@ -157,9 +159,9 @@ public static class ZoneTreeFormatUpgrade
         var comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         var relative = Path.GetRelativePath(parent, candidate);
-        return relative == "." || !Path.IsPathRooted(relative)
-            && relative != ".." && !relative.StartsWith(".." + Path.DirectorySeparatorChar, comparison)
-            && !relative.StartsWith(".." + Path.AltDirectorySeparatorChar, comparison);
+        return relative == CurrentDirectorySegment || !Path.IsPathRooted(relative)
+            && relative != ParentDirectorySegment && !relative.StartsWith(ParentDirectorySegment + Path.DirectorySeparatorChar, comparison)
+            && !relative.StartsWith(ParentDirectorySegment + Path.AltDirectorySeparatorChar, comparison);
     }
 
     private const string UpgradePathAmbiguous = "Offline format upgrade paths are not separate, empty and unambiguous directories.";

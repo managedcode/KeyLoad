@@ -79,3 +79,11 @@ mismatch, missing/corrupt artifacts or incomplete cleanup fail the affected cell
 
 Completion requires all mapped criteria and final verification, including actual
 native workload artifacts. Until then this ADR remains Accepted.
+
+## Typed native execution policy
+
+The 2026-10-06 general configuration correction requires the bounded execution
+policy join specified in VectorQualification TASK-VQ-POLICY-001. The comparison
+host centrally binds and validates IOptions; adapters consume typed policy and
+retain effective limits. Immutable profile/corpus/index identities stay frozen.
+No unrelated product configuration or protocol migration is authorized here.

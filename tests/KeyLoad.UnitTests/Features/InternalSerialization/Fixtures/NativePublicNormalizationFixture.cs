@@ -56,7 +56,7 @@ internal static class NativePublicNormalizationFixture
             : Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(JsonDefaults.Deserialize<ConfigurePrincipalRequest>(operation.PayloadJson)));
 
     internal static StoredOutcome Stored(TestDatabase database, ReplicatedOperation operation)
-        => database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.Outcome(operation.PrincipalId, operation.Id)))!;
+        => database.Store.Read(view => view.GetRecord<StoredOutcome>(OutcomeStoreOracle.Key(database.Store, operation)))!;
 
     internal static string Fingerprint(ReplicatedOperation operation)
         => JsonData.Fingerprint(new { operation.Id, operation.Kind, operation.PrincipalId, operation.PayloadJson });

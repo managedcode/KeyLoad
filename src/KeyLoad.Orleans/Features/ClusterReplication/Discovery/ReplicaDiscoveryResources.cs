@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -22,10 +23,10 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
     private readonly CancellationTokenSource stopping;
     private int disposed;
 
-    internal ReplicaDiscoveryResources(ReplicaConfiguration configuration, ReplicaPeerOptions options,
-        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock)
+    internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, ReplicaPeerOptions options,
+        ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
-        exchange = new(configuration, options, authentication, clock);
+        exchange = new(configurationOptions, options, authentication, clock, peerOptions);
         discoveryGate = new(1, 1);
         stopping = new();
     }

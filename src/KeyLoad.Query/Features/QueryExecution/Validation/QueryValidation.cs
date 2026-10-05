@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.Query;
 
@@ -92,7 +93,7 @@ internal static class QueryValidation
             return selection with { };
         }).ToImmutableArray();
         if (projection.Select(s => s.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Length
-            || projection.Length > 1 && projection.Any(s => s.Path == "*"))
+            || projection.Length > 1 && projection.Any(s => s.Path == SqlSyntax.Star))
         {
             throw Errors.Fail(ErrorCode.Validation, "The query projection has duplicate aliases or an invalid star.");
         }
@@ -119,7 +120,7 @@ internal static class QueryValidation
 
     private static void Path(string path, DatabaseLimits limits, bool star = false)
     {
-        if (star && path == "*")
+        if (star && path == SqlSyntax.Star)
         {
             return;
         }
@@ -184,17 +185,19 @@ internal static class QueryValidation
 
         private Comparison NormalizeComparison(Comparison comparison, int depth)
         {
-            if (comparison.Operator is not ("=" or "!=" or "<>" or ">" or ">=" or "<" or "<="))
+            if (comparison.Operator is not (SqlSyntax.Equals or SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals
+                or SqlSyntax.Greater or SqlSyntax.GreaterOrEqual or SqlSyntax.Less or SqlSyntax.LessOrEqual))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query comparison is unsupported.");
             }
             return new Comparison(NormalizeOperand(comparison.Left, depth + 1),
-                comparison.Operator == "<>" ? "!=" : comparison.Operator, NormalizeOperand(comparison.Right, depth + 1));
+                comparison.Operator == SqlSyntax.AlternateNotEquals ? SqlSyntax.NotEquals : comparison.Operator,
+                NormalizeOperand(comparison.Right, depth + 1));
         }
 
         private Logical NormalizeLogical(Logical logical, int depth)
         {
-            if (logical.Operator is not ("AND" or "OR"))
+            if (logical.Operator is not (SqlSyntax.And or SqlSyntax.Or))
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query logical operator is unsupported.");
             }

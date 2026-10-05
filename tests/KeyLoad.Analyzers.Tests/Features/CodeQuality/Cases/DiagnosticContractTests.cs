@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
-/// <summary>AC-CQ-004: verifies all thirteen diagnostic contracts with real compiler fixtures.</summary>
+/// <summary>AC-CQ-004: verifies all sixteen diagnostic contracts with real compiler fixtures.</summary>
 internal sealed class DiagnosticContractTests
 {
     private const string MachineKeyId = "KLD0001";
@@ -19,10 +19,13 @@ internal sealed class DiagnosticContractTests
     private const string ExecutableUnitCodeLineCountId = "KLD0032";
     private const string ControlFlowNestingId = "KLD0033";
     private const string TypedSynchronizationId = "KLD0034";
+    private const string MagicRuntimeDurationId = "KLD0035";
+    private const string MagicRuntimeStringId = "KLD0036";
+    private const string TypedConfigurationId = "KLD0037";
 
-    /// <summary>Verifies all thirteen rules have unique enabled ids and expected severities.</summary>
+    /// <summary>Verifies all sixteen rules have unique enabled ids and expected severities.</summary>
     [Test]
-    public async Task AllThirteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
+    public async Task AllSixteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
     {
         // AC-CQ-004: public rule inventory is stable for compiler and SARIF consumers.
         var expected = new Dictionary<string, DiagnosticSeverity>(StringComparer.Ordinal)
@@ -39,7 +42,10 @@ internal sealed class DiagnosticContractTests
             [AggregateTypeCodeLineCountId] = DiagnosticSeverity.Error,
             [ExecutableUnitCodeLineCountId] = DiagnosticSeverity.Error,
             [ControlFlowNestingId] = DiagnosticSeverity.Error,
-            [TypedSynchronizationId] = DiagnosticSeverity.Error
+            [TypedSynchronizationId] = DiagnosticSeverity.Error,
+            [MagicRuntimeDurationId] = DiagnosticSeverity.Error,
+            [MagicRuntimeStringId] = DiagnosticSeverity.Error,
+            [TypedConfigurationId] = DiagnosticSeverity.Error
         };
         var analyzers = typeof(LiteralMachineKeyAnalyzer).Assembly.GetTypes()
             .Where(static type => !type.IsAbstract &&

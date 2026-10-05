@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using Microsoft.Extensions.Options;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +10,7 @@ internal static class TestSuiteApplication
 {
     internal static async Task<int> RunAsync(DistributedApplication app, TestSuiteSettings settings)
     {
+        var policy = app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value;
         var failures = new List<Exception>();
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
             app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
@@ -22,11 +24,11 @@ internal static class TestSuiteApplication
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var cleanup = new CancellationTokenSource(policy.ApplicationCleanupTimeout);
             await CollectAsync(() => app.StopAsync(cleanup.Token), failures).ConfigureAwait(false);
             if (settings.LocalRf3ImageEnabled)
             {
-                using var imageCleanup = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout);
                 await CollectAsync(() => app.Services.GetRequiredService<LocalRf3ImageCleanup>()
                     .CleanupAsync(imageCleanup.Token), failures).ConfigureAwait(false);
             }

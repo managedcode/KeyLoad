@@ -22,11 +22,11 @@ internal static class PeerDiscoverySignature
             && signature.Length == PeerDiscoveryProtocol.HashCharacters && signature.All(Uri.IsHexDigit);
     }
 
-    internal static bool Fresh(string timestamp, long now, out long time)
+    internal static bool Fresh(string timestamp, long now, long timestampWindowMilliseconds, out long time)
     {
         return long.TryParse(timestamp, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out time)
             && timestamp == time.ToString(CultureInfo.InvariantCulture)
-            && time >= now - PeerDiscoveryProtocol.LifetimeMilliseconds && time <= now + PeerDiscoveryProtocol.LifetimeMilliseconds;
+            && time >= now - timestampWindowMilliseconds && time <= now + timestampWindowMilliseconds;
     }
 
     private static string Single(HttpRequest request, string header, int maximum)

@@ -8,6 +8,8 @@ namespace KeyLoad.Features.InternalSerialization;
 internal static class NativeWireMemberScopes
 {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+    private const string RecordCloneMethodName = "<Clone>$";
+    private const string RecordPrintMembersMethodName = "PrintMembers";
 
     internal static IEnumerable<IReadOnlyDictionary<uint, Type>> Create(Type type)
     {
@@ -68,7 +70,8 @@ internal static class NativeWireMemberScopes
     }
 
     private static bool IsRecord(Type type)
-        => type.GetMethods(Flags).Any(method => method.Name == "<Clone>$" || method.Name == "PrintMembers" && IsGenerated(method));
+        => type.GetMethods(Flags).Any(method => method.Name == RecordCloneMethodName
+            || method.Name == RecordPrintMembersMethodName && IsGenerated(method));
 
     private static bool IsGenerated(MemberInfo? member)
         => member?.IsDefined(typeof(CompilerGeneratedAttribute), false) == true;

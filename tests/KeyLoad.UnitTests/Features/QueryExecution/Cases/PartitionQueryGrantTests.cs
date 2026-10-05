@@ -99,15 +99,15 @@ internal sealed class PartitionQueryGrantTests
         => [new("budget-a", 2, "alpha"), new("budget-b", 1, "beta")];
 
     private static PartitionQueryResultV1 Run(TestDatabase database)
-        => new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, SeedCount), [database.Partition]);
 
     private static PartitionQueryResultV1 Run(TestDatabase database, PartitionRef[] partitions)
-        => new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, SeedCount), [.. partitions]);
 
     private static PartitionQueryResultV1 RunIndexed(TestDatabase database)
-        => new QueryEngine(database.Database).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+        => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.IndexedRequest(database, 2), [database.Partition]);
 
     private static async Task AssertBudgetExceeded(int maxScanRecords, long maxReadBytes, int partitionCount)

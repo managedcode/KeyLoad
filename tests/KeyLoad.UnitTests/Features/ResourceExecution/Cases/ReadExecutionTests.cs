@@ -29,7 +29,7 @@ internal sealed class ReadExecutionTests
         database.Configure(Orders, ResourceKind.Collection);
         database.Configure(Links, ResourceKind.Graph);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha\"}"));
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, new() { MaxBatchBytes = MaximumBatchBytes });
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = MaximumBatchBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SearchEngine(bounded)
             .Search(RootIdentity, new(database.Partition, Orders, FieldTextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);

@@ -93,7 +93,7 @@ internal sealed class GrainRoutingAuthorizationTests
             fixture.Partition.AtomicPartitionId, CancellationToken.None))
             ?? throw new InvalidOperationException();
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
-        await Assert.That(fixture.Database.Outcome(Root, commandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, Root, commandId)).IsNull();
     }
 
     /// <summary>AC-ROUTE-001: envelope and embedded command IDs cannot disagree, even with a genuine signature.</summary>
@@ -111,7 +111,7 @@ internal sealed class GrainRoutingAuthorizationTests
         var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, valid,
             fixture.Partition.AtomicPartitionId, cancellation.Token));
-        await Assert.That(fixture.Database.Outcome(Root, command.CommandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, Root, command.CommandId)).IsNull();
     }
 
     /// <summary>AC-ROUTE-001: no-DTO requests use the exact native zero marker and replies enforce actual encoded byte bounds.</summary>

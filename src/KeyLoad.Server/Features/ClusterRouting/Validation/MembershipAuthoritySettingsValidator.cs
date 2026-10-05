@@ -4,6 +4,8 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class MembershipAuthoritySettingsValidator
 {
+    private const string RootPath = "/";
+
 
     internal static void Validate(MembershipAuthoritySettings settings, NodeOptions node)
     {
@@ -95,7 +97,7 @@ internal static class MembershipAuthoritySettingsValidator
             && Uri.TryCreate(value, UriKind.Absolute, out var uri)
             && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
             && string.IsNullOrEmpty(uri.UserInfo) && string.IsNullOrEmpty(uri.Query)
-            && string.IsNullOrEmpty(uri.Fragment) && uri.AbsolutePath == "/";
+            && string.IsNullOrEmpty(uri.Fragment) && uri.AbsolutePath == RootPath;
 
     private static bool ValidSiloEndpoint(string value)
     {

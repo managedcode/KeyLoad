@@ -33,7 +33,7 @@ internal sealed class ProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, timeout.Token);
             using var store = new ZoneTreeStore(new(root));
-            var database = new DatabaseEngine(store, new AuthorizationPolicy(), new() { MaxOutboxRecords = 1 });
+            var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);
         }
@@ -68,7 +68,8 @@ internal sealed class ProjectionProcessRecoveryTests
         await Assert.That(checkpoint is 0 or 1).IsTrue();
         await Assert.That(effect is null).IsEqualTo(checkpoint == 0);
         await Assert.That(status.Head.Tail).IsEqualTo(checkpoint + 1);
-        await Assert.That(database.Outcome("root", ProjectionCrashScenario.CommandId) is null).IsEqualTo(checkpoint == 0);
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(ProjectionCrashScenario.Partition,
+            "root", ProjectionCrashScenario.CommandId))) is null).IsEqualTo(checkpoint == 0);
         await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(checkpoint == 0 ? -1 : 1);
         if (stage >= CommitStage.JournalFlushed)
         {

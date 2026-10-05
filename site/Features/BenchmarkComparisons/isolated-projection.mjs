@@ -1,4 +1,6 @@
 import { readdir } from 'node:fs/promises';
+import { isHistoricalSource, HISTORICAL } from '../../../scripts/Features/BenchmarkComparisons/historical-isolated-plan.mjs';
+import { produceHistoricalProjection } from '../../../scripts/Features/BenchmarkComparisons/historical-site-evidence.mjs';
 import { join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { AGGREGATE, SUPPORT as NATIVE_SUPPORT } from '../../../scripts/Features/BenchmarkComparisons/aggregate-contracts.mjs';
@@ -43,7 +45,7 @@ function validateManifest(value, plan) {
 async function validateInputInventory(input, cells) {
   await existingPath(input, true);
   const roots = await readdir(input);
-  assertIsolated(roots.length === 2 && roots.includes(AGGREGATE.manifest) && roots.includes(AGGREGATE.workers));
+  assertIsolated(roots.includes(AGGREGATE.manifest) && roots.includes(AGGREGATE.workers) && roots.every(name => ['aggregate.json', 'workers', 'scaled', 'vector', 'cohort-receipt.json'].includes(name)));
   const workers = join(input, AGGREGATE.workers);
   await existingPath(workers, true);
   const expected = new Set(cells.map(cell => cell.id));
@@ -77,6 +79,15 @@ async function projectWorker(input, metadata, cell, manifest, contract, common) 
 
 // Authentication belongs to the workflow; this rechecks its unchanged aggregate and raw contract inputs.
 export async function produceIsolatedProjection({ input }) {
+  const supplied = parseBytes(await readBytes(join(input, AGGREGATE.manifest), AGGREGATE.metadataBytes));
+  if (isHistoricalSource(supplied?.cohort?.sourceRevision)) {
+    const contractCapture = parseBytes(await readBytes(join(input, '..', '..', 'metadata', HISTORICAL.capture), AGGREGATE.metadataBytes));
+    const proof = parseBytes(await readBytes(join(input, '..', 'provider', 'proof.json'), AGGREGATE.metadataBytes));
+    const projection = await produceHistoricalProjection({ input, sourceRevision: supplied.cohort.sourceRevision, contractCapture, proof });
+    await validateInputInventory(input, projection.workers);
+    assertIsolated(Buffer.byteLength(JSON.stringify(projection)) <= ISOLATED.projectionBytes);
+    return projection;
+  }
   const contract = readIsolatedContract();
   const plan = createIsolatedPlan(contract);
   verifyBrowserContract(contract, plan);

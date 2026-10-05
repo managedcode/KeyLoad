@@ -5,6 +5,14 @@ namespace KeyLoad.Storage.IO;
 
 internal static partial class OfflineLinuxFileSystem
 {
+    private const string NativeLibrary = "libc";
+    private const string OpenEntryPoint = "open";
+    private const string FileLockEntryPoint = "flock";
+    private const uint NoCreationPermissions = 0;
+    private const int NativeCallSuccess = 0;
+    private const string StatxEntryPoint = "statx";
+    private const int DeviceComponentBitWidth = 32;
+
     private const int AtCurrentDirectory = -100;
     private const int AtSymlinkNoFollow = 0x100;
     private const int AtEmptyPath = 0x1000;
@@ -16,31 +24,31 @@ internal static partial class OfflineLinuxFileSystem
     internal static OfflineFileMetadata InspectHandle(SafeFileHandle handle) => Read(string.Empty, AtEmptyPath,
         handle.DangerousGetHandle().ToInt32());
 
-    internal static int Open(string path, int flags) => OpenPath(path, flags, 0);
+    internal static int Open(string path, int flags) => OpenPath(path, flags, NoCreationPermissions);
 
     internal static int Lock(int descriptor, int operation) => Flock(descriptor, operation);
 
     private static OfflineFileMetadata Read(string path, int flags, int directory = AtCurrentDirectory)
     {
-        if (Statx(directory, path, flags, RequiredMask, out var value) != 0)
+        if (Statx(directory, path, flags, RequiredMask, out var value) != NativeCallSuccess)
         { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac: false); }
         if ((value.Mask & RequiredMask) != RequiredMask || value.Size > long.MaxValue)
         { throw OfflineNativeErrors.Unsupported(); }
 
-        var device = ((ulong)value.DeviceMajor << 32) | value.DeviceMinor;
+        var device = ((ulong)value.DeviceMajor << DeviceComponentBitWidth) | value.DeviceMinor;
         return new(new(device, value.Inode, (long)value.Size), (uint)(value.Mode & TypeMask));
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("libc", EntryPoint = "statx", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(NativeLibrary, EntryPoint = StatxEntryPoint, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
     private static partial int Statx(int directory, string path, int flags, uint mask, out LinuxStatx value);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("libc", EntryPoint = "open", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(NativeLibrary, EntryPoint = OpenEntryPoint, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
     private static partial int OpenPath(string path, int flags, uint mode);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("libc", EntryPoint = "flock", SetLastError = true)]
+    [LibraryImport(NativeLibrary, EntryPoint = FileLockEntryPoint, SetLastError = true)]
     private static partial int Flock(int descriptor, int operation);
 
     [StructLayout(LayoutKind.Explicit, Size = 256)]

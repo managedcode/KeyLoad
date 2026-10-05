@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Security;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.CrashHost.Features.DocumentStorage;
@@ -23,7 +24,7 @@ internal static class CommandIdempotencyCrashScenario
 
     internal static async Task RunReplayAsync(string directory, ZoneTreeStore store)
     {
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
         // Evidence supplies the original caller request only; recovered state is read exclusively from ZoneTree.
         var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(directory,
             CommandIdempotencyCrashContract.CommandEvidenceFile);
@@ -31,7 +32,8 @@ internal static class CommandIdempotencyCrashScenario
             CommandIdempotencyCrashContract.ReceiptEvidenceFile);
         var seedTail = await CommandIdempotencyCrashData.ReadEvidenceAsync<long>(directory,
             CommandIdempotencyCrashContract.SeedTailEvidenceFile);
-        var recovered = database.Outcome(CrashFixtureValues.Principal, operation.Id)?.Get<CommitReceipt>()
+        var recovered = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
+            CommandIdempotencyCrashContract.Partition, CrashFixtureValues.Principal, operation.Id)))?.Result.Get<CommitReceipt>()
             ?? throw new InvalidOperationException("The retained command outcome was missing after process restart.");
         CommandIdempotencyCrashAssertions.RequireSameReceipt(recovered, expected);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(

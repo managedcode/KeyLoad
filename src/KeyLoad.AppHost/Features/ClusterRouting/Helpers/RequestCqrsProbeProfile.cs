@@ -6,6 +6,8 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 /// <summary>Admits the private per-voter phase-control mount only for an ephemeral RF3 host.</summary>
 internal sealed class RequestCqrsProbeProfile
 {
+    private const string DiscoveryCaptureVoter = "node1";
+
     internal const string Section = "KeyLoadTests:RequestCqrsProbe";
     private const string MountRoot = "/request-probes";
     private const string EnabledEnvironment = "KeyLoad__RequestCqrsProbe__Enabled";
@@ -52,7 +54,7 @@ internal sealed class RequestCqrsProbeProfile
             .WithEnvironment(EnabledEnvironment, EnabledValue)
             .WithEnvironment(RootEnvironment, MountRoot)
             .WithEnvironment(SessionEnvironment, SessionId);
-        if (node == "node1" && discoveryCaptureMode == MixedMode)
+        if (node == DiscoveryCaptureVoter && discoveryCaptureMode == MixedMode)
         { resource.WithEnvironment(DiscoveryModeEnvironment, MixedMode); }
     }
 

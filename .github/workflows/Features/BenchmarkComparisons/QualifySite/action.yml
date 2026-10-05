@@ -5,6 +5,8 @@ outputs:
     value: ${{ steps.source.outputs.mode }}
   site_revision:
     value: ${{ steps.source.outputs.revision }}
+  benchmark_mode:
+    value: ${{ steps.source.outputs.benchmark_mode }}
 runs:
   using: composite
   steps:
@@ -38,12 +40,19 @@ runs:
         printf 'mode=%s\nrevision=%s\n' "$mode" "$revision" >> "$GITHUB_OUTPUT"
         printf 'KEYLOAD_SITE_SOURCE_REVISION=%s\n' "$revision" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_CONTROL_REVISION=%s\n' "$CONTROL_REVISION" >> "$GITHUB_ENV"
-        isolated_args=("--input=$KEYLOAD_SITE_ISOLATED_CAPTURE" "--mode=$mode" "--site-revision=$revision" "--workflow-revision=$CONTROL_REVISION")
+        isolated_args=("--input=$KEYLOAD_SITE_ISOLATED_CAPTURE" "--mode=$mode" "--site-revision=$revision" "--workflow-revision=$CONTROL_REVISION" "--optional=true")
         node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture "${isolated_args[@]}" > "$EVIDENCE_DIR/isolated-capture-envelope.json"
         jq -e '.ok == true' "$EVIDENCE_DIR/isolated-capture-envelope.json" > /dev/null
         isolated_proof="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"
-        printf 'KEYLOAD_SITE_ISOLATED_MEASURED_REVISION=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_ENV"
-        printf 'isolated_measured_revision=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_OUTPUT"
+        benchmark_mode=measured
+        if jq -e '.result.state == "unavailable"' "$EVIDENCE_DIR/isolated-capture-envelope.json" > /dev/null; then
+          benchmark_mode=none
+        else
+          printf 'KEYLOAD_SITE_ISOLATED_MEASURED_REVISION=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_ENV"
+          printf 'isolated_measured_revision=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_OUTPUT"
+        fi
+        printf 'KEYLOAD_SITE_BENCHMARK_MODE=%s\n' "$benchmark_mode" >> "$GITHUB_ENV"
+        printf 'benchmark_mode=%s\n' "$benchmark_mode" >> "$GITHUB_OUTPUT"
     - name: Download website source
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
@@ -51,6 +60,7 @@ runs:
         path: website
         persist-credentials: false
     - name: Download current benchmark source
+      if: steps.source.outputs.benchmark_mode == 'measured'
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ steps.source.outputs.isolated_measured_revision }}
@@ -60,19 +70,24 @@ runs:
       shell: bash
       run: |
         [[ "$(git -C website rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
-        [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
-        test -f measured-isolated/.github/workflows/benchmarks.yml
+        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]; then
+          [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
+          test -f measured-isolated/.github/workflows/benchmarks.yml
+          git -C measured-isolated rev-parse HEAD > "$EVIDENCE_DIR/isolated-measured-revision.txt"
+          cp measured-isolated/.github/workflows/benchmarks.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
+        else
+          [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]
+        fi
         git -C website rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
         git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
-        git -C measured-isolated rev-parse HEAD > "$EVIDENCE_DIR/isolated-measured-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
         cmp "control/$closure" "website/$closure"
-        [[ "$(wc -l < "control/$closure")" == 70 ]]
+        [[ "$(wc -l < "control/$closure")" == 83 ]]
         LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
         sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
         while IFS= read -r relative; do
-          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/[^/]+\.mjs|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract\.json)$ ]]
+          [[ "$relative" =~ ^(scripts/Features/BenchmarkComparisons/([^/]+\.mjs|historical-isolated-contract\.json)|site/Features/BenchmarkComparisons/[^/]+\.mjs|site/scripts/build\.mjs|benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract\.json)$ ]]
           for root in control website; do
             [[ -f "$root/$relative" && ! -L "$root/$relative" ]]
             [[ "$(realpath -e "$root/$relative")" == "$GITHUB_WORKSPACE/$root/$relative" ]]
@@ -87,7 +102,6 @@ runs:
             sha256sum "website/$relative" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"
           done
         done
-        cp measured-isolated/.github/workflows/benchmarks.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
         node --version > "$EVIDENCE_DIR/node-version.txt"
         chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
         test -n "$chrome" && test -x "$chrome"
@@ -101,6 +115,7 @@ runs:
       with:
         global-json-file: website/global.json
     - name: Build and test code analyzers
+      id: analyzers
       working-directory: website
       shell: bash
       run: |
@@ -110,13 +125,14 @@ runs:
         dotnet build src/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
         dotnet build tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-restore --configuration Release
         dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
+        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/SiteOptionalBenchmarkSelectionTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
         dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
         pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
         dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/analyzer-tests" "--KeyLoadTests:CoverageSettings=$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
     - name: Check analyzer test coverage
-      if: success() || failure()
+      if: (success() || failure()) && steps.analyzers.outcome != 'skipped'
       working-directory: website
       shell: pwsh
       run: ./scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Verify -Repository "$env:KEYLOAD_SITE_REPOSITORY" -Contract "$env:KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$env:EVIDENCE_DIR/analyzer-coverage" -CoverageReport "$env:EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
@@ -139,11 +155,18 @@ runs:
       shell: bash
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
-      run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=site --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests"
+      run: |
+        site_args=(--KeyLoadTests:Suite=site --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
+        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
+          site_args+=('--KeyLoadTests:Filter=/*/*/SiteContent*/*')
+        else
+          [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]
+        fi
+        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- "${site_args[@]}"
     - name: Check every required test passed
       shell: pwsh
       run: |
-        $receipts = foreach ($suite in @('startup-tests', 'analyzer-tests', 'site-tests')) {
+        $receipts = foreach ($suite in @('startup-tests', 'selection-tests', 'analyzer-tests', 'site-tests')) {
           $files = @(Get-ChildItem -LiteralPath "$env:EVIDENCE_DIR/$suite" -Filter '*.trx' -File)
           if ($files.Count -ne 1) { throw "Expected exactly one $suite TRX receipt" }
           [xml]$document = Get-Content -LiteralPath $files[0].FullName -Raw

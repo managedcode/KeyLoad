@@ -17,10 +17,5 @@ internal static class PeerDiscoveryProtocol
     internal const int NonceCharacters = 32;
     internal const int MaximumTimestampCharacters = 20;
     internal const int MaximumAuthorityCharacters = 2048;
-    internal const int DefaultReplayCapacity = 8192;
     internal const int BodyProbeBytes = 1;
-    internal const long LifetimeMilliseconds = 30000;
-    internal static readonly TimeSpan DefaultConnectTimeout = TimeSpan.FromMilliseconds(500);
-    internal static readonly TimeSpan MaximumConnectTimeout = TimeSpan.FromMilliseconds(int.MaxValue);
-    internal static readonly TimeSpan ConnectionLifetime = TimeSpan.FromMinutes(5);
 }

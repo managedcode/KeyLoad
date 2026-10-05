@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -10,28 +12,27 @@ internal static class ClusterContainerUser
     private const string GroupArgument = "-g";
     private const string Separator = ":";
     private const string LookupError = "Cannot determine the host container uid:gid. Configure KeyLoad:ContainerUser explicitly.";
-    private const int MaximumOutputCharacters = 32;
-    private static readonly TimeSpan LookupTimeout = TimeSpan.FromSeconds(5);
 
     internal static string? Resolve(IDistributedApplicationBuilder builder)
     {
-        if (builder.Configuration[ConfigurationKey] is { } configured && !string.IsNullOrWhiteSpace(configured))
+        var options = AppHostOptionsRegistration.Get(builder).Startup;
+        if (options.Value.ContainerUser is { } configured && !string.IsNullOrWhiteSpace(configured))
         { return configured; }
         if (OperatingSystem.IsWindows())
         { return null; }
-        return Task.Run(ReadUnixIdentityAsync).GetAwaiter().GetResult();
+        return Task.Run(() => ReadUnixIdentityAsync(options)).GetAwaiter().GetResult();
     }
 
-    private static async Task<string> ReadUnixIdentityAsync()
+    private static async Task<string> ReadUnixIdentityAsync(IOptions<AppHostStartupOptions> options)
     {
-        var user = await ReadIdAsync(UserArgument);
-        var group = await ReadIdAsync(GroupArgument);
+        var user = await ReadIdAsync(UserArgument, options.Value);
+        var group = await ReadIdAsync(GroupArgument, options.Value);
         return user + Separator + group;
     }
 
-    private static async Task<string> ReadIdAsync(string argument)
+    private static async Task<string> ReadIdAsync(string argument, AppHostStartupOptions policy)
     {
-        using var deadline = new CancellationTokenSource(LookupTimeout, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(policy.ContainerIdentityLookupTimeout, TimeProvider.System);
         using var process = new Process
         {
             StartInfo = new(IdExecutable)
@@ -42,7 +43,7 @@ internal static class ClusterContainerUser
         {
             if (!process.Start())
             { throw new InvalidOperationException(LookupError); }
-            var output = await ReadOutputAsync(process.StandardOutput, deadline.Token);
+            var output = await ReadOutputAsync(process.StandardOutput, policy.ContainerIdentityOutputCharacters, deadline.Token);
             await process.WaitForExitAsync(deadline.Token);
             if (process.ExitCode != 0 || !uint.TryParse(output.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var id))
             { throw new InvalidOperationException(LookupError); }
@@ -53,9 +54,9 @@ internal static class ClusterContainerUser
         finally { KillRemaining(process); }
     }
 
-    private static async Task<string> ReadOutputAsync(StreamReader reader, CancellationToken cancellationToken)
+    private static async Task<string> ReadOutputAsync(StreamReader reader, int maximumCharacters, CancellationToken cancellationToken)
     {
-        var output = new char[MaximumOutputCharacters];
+        var output = new char[maximumCharacters];
         var length = 0;
         while (length < output.Length)
         {

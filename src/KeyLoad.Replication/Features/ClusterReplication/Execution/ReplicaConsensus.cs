@@ -1,5 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
@@ -21,20 +22,28 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     private readonly CancellationToken stoppingToken;
     private readonly ReplicaRequestDispatcher dispatcher;
     private readonly ReplicaReadRoundExecutor reads;
+    private readonly TimeSpan commandTimeout;
     private Task? worker;
     private Task? shutdown;
     private Task? disposal;
 
     /// <summary>Recovers node-owned state without resolving Orleans clients or waiting for quorum.</summary>
     /// <param name="materializer">Node-owned ordered canonical apply and checkpoint worker.</param>
-    /// <param name="configuration">Fixed voter scope, quorum and bounded protocol settings.</param>
+    /// <param name="configurationOptions">Centrally validated fixed voter scope, quorum and bounded protocol settings.</param>
+    /// <param name="options">Centrally validated command and read deadlines, frozen for this protocol owner.</param>
     /// <param name="clock">Injected runtime clock, defaulting to the system clock.</param>
     /// <param name="logger">Optional logger for fenced maintenance failures.</param>
-    public ReplicaConsensus(ReplicaMaterializer materializer, ReplicaConfiguration configuration, TimeProvider? clock = null,
+    public ReplicaConsensus(ReplicaMaterializer materializer, IOptions<ReplicaConfiguration> configurationOptions,
+        IOptions<ReplicaExecutionOptions> options, TimeProvider? clock = null,
         ILogger<ReplicaConsensus>? logger = null)
     {
         ArgumentNullException.ThrowIfNull(materializer);
-        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        var configuration = configurationOptions.Value;
+        ArgumentNullException.ThrowIfNull(options);
+        var settings = options.Value;
+        settings.Validate();
+        commandTimeout = settings.CommandTimeout;
         configuration.Validate();
         stoppingToken = lifetime.Token;
         state = new(materializer, configuration, clock ?? TimeProvider.System);
@@ -46,7 +55,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         snapshots = new(state);
         maintenance = new(state, election, leader, logger);
         dispatcher = new(election, appends, leader, snapshots, configuration);
-        reads = new(state, rpc, leader, activity, transportReady.Task, stoppingToken);
+        reads = new(state, rpc, leader, activity, transportReady.Task, stoppingToken, settings.ReadBarrierTimeout);
     }
 
     /// <inheritdoc />
@@ -104,7 +113,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         using var active = activity.Enter();
         operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
-        request.CancelAfter(ReplicaProtocol.CommandTimeout);
+        request.CancelAfter(commandTimeout);
         await TransportReady.WaitAsync(request.Token).ConfigureAwait(false);
         var route = await state.LockedAsync(() => (state.Role, state.LeaderId), request.Token).ConfigureAwait(false);
         if (route.Role == ReplicaRole.Leader)
@@ -123,6 +132,20 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     /// <returns>Completion after the authenticated quorum cut is applied locally.</returns>
     public Task ReadBarrierAsync(CancellationToken cancellationToken)
         => reads.ExecuteAsync(ReplicaReadRoundPurpose.Application, cancellationToken);
+
+    /// <summary>Returns the node's current canonical position for change-wait registration.</summary>
+    public long AppliedPosition => state.Materializer.AppliedPosition;
+
+    /// <summary>Waits for a canonical apply change without retaining a store view or handle.</summary>
+    /// <param name="observedPosition">The last applied position observed by the caller.</param>
+    /// <param name="cancellationToken">Cancellation of this caller's wait.</param>
+    /// <returns>The changed canonical position.</returns>
+    public async Task<long> WaitForAppliedPositionChangeAsync(long observedPosition, CancellationToken cancellationToken)
+    {
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken);
+        return await state.Materializer.WaitForAppliedPositionChangeAsync(observedPosition, request.Token)
+            .ConfigureAwait(false);
+    }
 
     /// <summary>Acquires a quorum-backed cut for trusted native membership without spending application read admission.</summary>
     /// <param name="cancellationToken">Native membership caller cancellation within the unchanged read deadline.</param>
@@ -144,7 +167,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     {
         using var active = activity.Enter();
         using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
-        request.CancelAfter(ReplicaProtocol.CommandTimeout);
+        request.CancelAfter(commandTimeout);
         request.Token.ThrowIfCancellationRequested();
         if (!state.Ready)
         {

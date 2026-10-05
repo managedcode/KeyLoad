@@ -9,7 +9,9 @@ export const ISOLATED = Object.freeze({
   options: Object.freeze({ seed: 1729, documents: 4096, operations: 10000, warmup: 256, repetitions: 5, concurrency: 16,
     payloadBytes: 1024, dimensions: 128, topK: 10, graphVertices: 256, graphFanOut: 3, graphDepth: 3, timeoutSeconds: 30 }),
   unsupportedTopologies: Object.freeze([{ target: 'Neo4j', nodeCounts: [2, 3],
-    reason: 'Neo4j Community does not provide native clustering; Enterprise licensing is excluded.' }]),
+    reason: 'Neo4j Community does not provide native clustering; Enterprise licensing is excluded.' },
+    { target: 'SurrealDB', nodeCounts: [2, 3], reason: "SurrealDB Community's experimental TiKV clustering is outside the qualified native topology; only the persistent standalone server is measured." },
+    { target: 'HelixDB', nodeCounts: [2, 3], reason: 'The self-hosted HelixDB server is standalone; managed cloud high availability is outside this native comparison.' }]),
   topology: Object.freeze({ 1: 'Single', 2: 'TwoNode', 3: 'Replicated' }),
   steps: Object.freeze(['Run database workload', 'Save benchmark results']),
   catalogBytes: 65_536, projectionBytes: 4_194_304, workers: 330,
@@ -105,6 +107,8 @@ export function isolatedJobLabel(cell, preflight = false) {
 }
 
 export const isolatedJobName = (cell, preflight = false) => `${cell.target} / ${isolatedJobLabel(cell, preflight)}`;
+export const isolatedEvidenceJobName = cell => isolatedJobName(cell) +
+  (cell.profile === ISOLATED.profile ? '' : ` / ${cell.profile}`);
 // Original authenticated archives retain their exact historical display names.
 export const matchesIsolatedJobName = (name, cell) =>
   name === isolatedJobName(cell) || name === HISTORICAL_JOB_PREFIX + cell.id;

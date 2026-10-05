@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -33,12 +34,14 @@ internal static class ReplicaDiscoveryEndpoints
         return Results.Bytes(payload, ServerProtocol.BinaryContentType);
     }
 
-    private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node, CancellationToken cancellationToken)
+    private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node,
+        IOptions<ServerExecutionOptions> options, CancellationToken cancellationToken)
     {
         if (!node.DatabaseReady)
         { return Results.StatusCode(StatusCodes.Status503ServiceUnavailable); }
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(ServerProtocol.ReadyTimeout);
+        var readyTimeout = options.Value.ReadyTimeout;
+        deadline.CancelAfter(readyTimeout);
         try
         {
             await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);

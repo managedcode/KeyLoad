@@ -13,7 +13,7 @@ internal sealed class SqlGraphPathParityTests
         var direct = database.Database.ShortestPath(SqlGraphPathTestSupport.Principal,
             SqlGraphPathTestSupport.Direct(database),
             cancellationToken: cancellationToken);
-        var actual = new QueryEngine(database.Database).ShortestPathSql(SqlGraphPathTestSupport.Principal,
+        var actual = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ShortestPathSql(SqlGraphPathTestSupport.Principal,
             SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql),
             cancellationToken: cancellationToken);
 
@@ -42,7 +42,7 @@ internal sealed class SqlGraphPathParityTests
         var direct = database.Database.ShortestPath(SqlGraphPathTestSupport.Principal,
             SqlGraphPathTestSupport.Direct(database, ImmutableArray.Create(SqlGraphPathTestSupport.Label)),
             cancellationToken: cancellationToken);
-        var actual = new QueryEngine(database.Database).ShortestPathSql(SqlGraphPathTestSupport.Principal,
+        var actual = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ShortestPathSql(SqlGraphPathTestSupport.Principal,
             SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.ParameterSql, parameters),
             cancellationToken: cancellationToken);
 

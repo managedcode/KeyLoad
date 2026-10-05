@@ -25,7 +25,7 @@ internal sealed class EqualityAccessPathTests
     public async Task AcAisql008ReversedLiteralAndParameterEqualityUsesTheSameNativePathAndOrderedRows(bool indexed, bool parameterized)
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var ordinary = engine.Execute(EqualityAccessPathSupport.Root,
             EqualityAccessPathSupport.Request(db, indexed, parameterized, reversed: false));
         var reversed = engine.Execute(EqualityAccessPathSupport.Root,
@@ -45,7 +45,7 @@ internal sealed class EqualityAccessPathTests
     public async Task AcAisql008NativeEqualityCandidatesStillEvaluateContradictoryAndUnknownResiduals(bool indexed, bool nullResidual)
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var queries = (indexed, nullResidual) switch
         {
             (false, false) => (Ordinary: ContradictoryPoint, Reversed: ReversedContradictoryPoint),
@@ -68,7 +68,7 @@ internal sealed class EqualityAccessPathTests
     public async Task AcAisql008NullEqualityNeverUsesTheIndexOrMatchesNullAndMissingRows(bool parameterized)
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         foreach (var reversed in new[] { false, true })
         {
             var request = parameterized
@@ -86,7 +86,7 @@ internal sealed class EqualityAccessPathTests
     public async Task AcAisql008DisjunctiveEqualitiesCannotSelectOnlyOneNativePoint()
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(db.Partition, Disjunction);
         await Assert.That(EqualityAccessPathSupport.Failure(engine, request).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var page = engine.Execute(EqualityAccessPathSupport.Root, request with { AllowFullScan = true });

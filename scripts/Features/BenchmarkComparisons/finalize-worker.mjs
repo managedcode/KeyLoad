@@ -1,3 +1,5 @@
+import { createVectorPlans, validateVectorPlan } from './vector-isolated-plan.mjs';
+import { finalizeFailedResource } from './finalize-resource.mjs';
 import { lstat, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -29,8 +31,9 @@ async function ensureDirectory(root, components) {
 // A parser/filesystem contract; authentic job agreement is checked by the GitHub collector.
 export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }) {
   const contract = readIsolatedContract();
-  const plan = cell?.profile === contract.profile ? createIsolatedPlan() : validateScaledPlan(
-    createScaledPlans().find(item => item.profile === cell?.profile));
+  const plan = cell?.profile === contract.profile ? createIsolatedPlan() : cell?.profile?.startsWith('vector-')
+    ? validateVectorPlan(createVectorPlans().find(item => item.profile === cell?.profile))
+    : validateScaledPlan(createScaledPlans().find(item => item.profile === cell?.profile));
   requireValue(cell !== undefined && isDeepStrictEqual(plan.cells.find(item => item.id === cell.id), cell), AGGREGATE.errors.envelope);
   requireValue(positive(jobId) && [AGGREGATE.success, AGGREGATE.failure].includes(outcome), AGGREGATE.errors.envelope);
   validateCohort(cohort, cell.profile);
@@ -57,13 +60,15 @@ export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }
     await rename(target, backup);
   }
   await writeJson(target, value);
+  const retained = await ensureDirectory(workspace, [...FINAL.failures, cell.id]);
+  await finalizeFailedResource({ directory, retained, cell, cohort, jobId });
   return value;
 }
 
 export async function finalizeCurrentWorker(environment = process.env, argv = process.argv.slice(2)) {
   requireGitHub(argv.length === 0);
   const context = createGitHubContext(environment, process.platform);
-  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells)];
+  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells), ...context.vectorPlans.flatMap(profile => profile.cells)];
   const cell = cells.find(item => item.id === environment[FINAL.cell]);
   requireGitHub(cell !== undefined && cell.profile === environment.Benchmarks__EvidenceProfile &&
     isolatedEvidenceJobName(cell) === environment.KEYLOAD_COMPARISON_JOB_NAME);

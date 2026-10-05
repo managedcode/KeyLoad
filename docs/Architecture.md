@@ -1,5 +1,15 @@
 # KeyLoad architecture and ownership map
 
+[ADR-112](ADR/ADR-112-centralized-runtime-options.md) requires the complete runtime
+literal migration and centralized validated native IOptions for operational policy.
+Immutable endpoint/method/format identities use constants/nameof; timeout and
+resource policies flow to their actual execution owners through typed options.
+
+[ADR-111](ADR/ADR-111-magic-runtime-values.md) extends the source-owned CodeQuality
+rules with enabled errors for native runtime durations, timeout arguments, string
+comparisons and format tokens. Domain-named constants preserve the exact values;
+broader literal-policy and whole-solution qualification remain separately tracked.
+
 [ADR-108](ADR/ADR-108-typed-synchronization.md) and CodeQuality REQ-CQ-010 require
 native Orleans turn scheduling for activation state and System.Threading.Lock for
 necessary synchronous node-local/service gates. Awaited exclusion uses
@@ -132,6 +142,11 @@ interchangeable workers, advisory OneWay hints, selective operation-control
 interleaving and persistent one-time jobs are candidate joins; existing unique
 request grains and reliable serial partition/due paths remain the current source.
 Runtime/provider/fault and matched performance evidence are pending.
+The owner's broad [Orleans capability review](Features/ClusterRouting/CapabilityReview.md)
+maps Streams/pub-sub, native transactional storage, durable state/jobs, per-silo
+services/lifecycle and operational controls against current source. Native
+messaging remains a candidate post-commit delivery path; native transactions need
+an explicit ZoneTree/RF3 prepare/commit/read-visibility adapter contract.
 
 Owner direction2026-10-05 accepts [ClientApi ToolDiscovery](Features/ClientApi/ToolDiscovery.md)
 under [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md). The official MCP host
@@ -1110,3 +1125,28 @@ flowchart LR
   Aggregate --> Qualification[Site tests browser coverage freshness]
   Qualification --> Site[Values or no data and original job links]
 ```
+
+## Independent optional benchmark website publication
+
+[ADR-112](ADR/ADR-112-independent-website-publication.md) and
+[REQ/AC-BC-WEB-001..005](Features/BenchmarkComparisons.md) let CI publish website
+source independently. The latest ready authenticated benchmark aggregate enriches
+the website when available; absence emits no metric catalog or figures. Content
+and measured artifacts have distinct complete applicable qualification, and
+predeploy rechecks actual website/control source plus ready-data identity or null.
+Completed own-main benchmarks trigger another independent CI website consumer.
+
+```mermaid
+flowchart LR
+  Source[Website source] --> CI[Independent CI website qualification]
+  Producer[Ready Benchmarks JSON] --> CI
+  CI --> Content[Product site without metrics]
+  CI --> Measured[Product site with authenticated metrics]
+  Content --> Fresh[Recheck source and available data]
+  Measured --> Fresh
+  Fresh --> Pages[Pages]
+```
+
+Source implementation and actual qualification/publication evidence are tracked
+in the feature specification. This architecture contract alone is not deployment
+proof. Existing benchmark/db/RF3 gates remain separate and mandatory.

@@ -198,7 +198,7 @@ internal static class VectorProjectionEligibility
     {
         if (effect is null || effect.Fingerprint is null || effect.Fingerprint.Length != 64
             || effect.Fingerprint.Any(character => character is not (>= '0' and <= '9' or >= 'a' and <= 'f'))
-            || effect.Receipt is null || effect.Receipt.Kind != "applyVectorProjection"
+            || effect.Receipt is null || effect.Receipt.Kind != MutationDiscriminatorNames.ApplyVectorProjection
             || effect.Receipt.Resource != lineage.TargetCollection || effect.Receipt.Id != lineage.TargetId
             || effect.Receipt.Revision != vector.DocumentRevision)
         {

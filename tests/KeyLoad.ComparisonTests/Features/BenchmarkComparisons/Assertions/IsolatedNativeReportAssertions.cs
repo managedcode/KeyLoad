@@ -90,7 +90,9 @@ internal static partial class IsolatedNativeReportAssertions
         if (selection.VectorProfile is { } vector && !SupportsVector(selection.Target, vector.IndexKind))
         {
             await Assert.That(envelope.Disposition).IsEqualTo(Unsupported);
-            await Assert.That(envelope.Reason).IsEqualTo($"{selection.Target} does not implement {vector.IndexKind}/{vector.QueryMode} natively.");
+            await Assert.That(envelope.Reason).IsEqualTo(selection.Target == KeyLoad
+                ? "KeyLoad SDK does not expose persisted vector readback or native numeric predicates required for scaled vector qualification."
+                : $"{selection.Target} does not implement {vector.IndexKind}/{vector.QueryMode} natively.");
             await Assert.That(envelope.Report).IsNull();
             return;
         }
@@ -103,47 +105,19 @@ internal static partial class IsolatedNativeReportAssertions
     {
         if (selection.VectorProfile is { } vector)
         {
-            await Assert.That(report.Options).IsNull();
-            await Assert.That(report.ScaledProfile).IsNull();
-            await Assert.That(report.VectorProfile).IsEqualTo(vector);
-            await Assert.That(Regex.IsMatch(report.DatasetSha256, "^[a-f0-9]{64}$", RegexOptions.CultureInvariant)).IsTrue();
-            var vectorTarget = report.Targets.Single();
-            await Assert.That(vectorTarget.Name).IsEqualTo(selection.Target);
-            await Assert.That(vectorTarget.Cluster!.Nodes).IsEqualTo(selection.NodeCount);
-            await Assert.That(vectorTarget.Cluster.DataCopies).IsEqualTo(selection.NodeCount);
-            await Assert.That(vectorTarget.Cluster.Observations.IsDefaultOrEmpty).IsFalse();
-            var vectorCase = report.Cases.Single();
-            await Assert.That(vectorCase.Repetition).IsEqualTo(0);
-            await Assert.That(vectorCase.Target).IsEqualTo(selection.Target);
-            await Assert.That(vectorCase.Scenario).IsEqualTo(Scenario.VectorExact);
-            await Assert.That(vectorCase.Status).IsEqualTo(ComparisonStatuses.Measured);
-            await Assert.That(vectorCase.Measurement).IsNull();
-            await Assert.That(vectorCase.Samples).IsEmpty();
-            var vectorMetrics = vectorCase.VectorMetrics!;
-            await Assert.That(vectorMetrics.RecordCount).IsEqualTo(vector.RecordCount);
-            await Assert.That(vectorMetrics.LoadedRecordCount).IsEqualTo(vector.RecordCount);
-            await Assert.That(vectorMetrics.QueryAttempts).IsEqualTo(vector.MeasuredQueries);
-            await Assert.That(vectorMetrics.QuerySuccesses).IsEqualTo(vector.MeasuredQueries);
-            await Assert.That(vectorMetrics.UpdateAttempts).IsEqualTo(vector.UpdateCount);
-            await Assert.That(vectorMetrics.UpdateSuccesses).IsEqualTo(vector.UpdateCount);
-            await Assert.That(vectorMetrics.RecallSamples).IsEqualTo(vector.MeasuredQueries);
-            await Assert.That(vectorMetrics.PerQueryRecall.Length).IsEqualTo(vector.MeasuredQueries);
-            await Assert.That(vectorMetrics.MinimumRecall).IsGreaterThanOrEqualTo(vector.MinimumRecall);
-            await Assert.That(vectorMetrics.LatencyP99Ms).IsGreaterThanOrEqualTo(vectorMetrics.LatencyP95Ms);
-            await Assert.That(vectorMetrics.IndexKind).IsEqualTo(vector.IndexKind.ToString());
-            await Assert.That(vectorMetrics.ServerMemoryBytes).IsNull();
-            await Assert.That(vectorMetrics.ServerMemorySamplingIntervalMs).IsNull();
+            await IsolatedNativeVectorAssertions.VerifyAsync(report, selection, vector);
             return;
         }
-        await Assert.That(report.Options).IsEqualTo(selection.Options);
-        await Assert.That(report.DatasetSha256).IsEqualTo(new BenchmarkDataset(selection.Options).Sha256);
+        await Assert.That(report.Options).IsEqualTo(selection.ScaledProfile is null ? selection.Options : null);
+        await Assert.That(report.ScaledProfile).IsEqualTo(selection.ScaledProfile);
+        await Assert.That(report.DatasetSha256).IsEqualTo(selection.ScaledProfile is { } scale ? new ScaledComparisonCorpus(scale).Sha256 : new BenchmarkDataset(selection.Options).Sha256);
         var target = report.Targets.Single();
         await Assert.That(target.Name).IsEqualTo(selection.Target);
         await Assert.That(target.Cluster!.Nodes).IsEqualTo(selection.NodeCount);
         await Assert.That(target.Cluster.DataCopies).IsEqualTo(selection.NodeCount);
         await Assert.That(target.Cluster.Observations.IsDefaultOrEmpty).IsFalse();
         await Assert.That(report.Cases.Select(item => item.Repetition).Order().SequenceEqual(
-            Enumerable.Range(0, selection.Options.Repetitions))).IsTrue();
+            Enumerable.Range(0, selection.ScaledProfile?.Repetitions ?? selection.Options.Repetitions))).IsTrue();
         foreach (var item in report.Cases)
         {
             await Assert.That(item.Scenario).IsEqualTo(selection.Scenario);
@@ -151,10 +125,10 @@ internal static partial class IsolatedNativeReportAssertions
             await Assert.That(item.Status is ComparisonStatuses.Measured or ComparisonStatuses.Unsupported).IsTrue();
             if (item.Status == ComparisonStatuses.Measured)
             {
-                await Assert.That(item.Measurement!.Attempts).IsEqualTo(selection.Options.Operations);
-                await Assert.That(item.Measurement.Successes).IsEqualTo(selection.Options.Operations);
+                await Assert.That(item.Measurement!.Attempts).IsEqualTo(selection.ScaledProfile?.Operations ?? selection.Options.Operations);
+                await Assert.That(item.Measurement.Successes).IsEqualTo(selection.ScaledProfile?.Operations ?? selection.Options.Operations);
                 await Assert.That(item.Measurement.Failures).IsEqualTo(0);
-                await Assert.That(item.Samples.Length).IsEqualTo(selection.Options.Operations);
+                await Assert.That(item.Samples.Length).IsEqualTo(selection.ScaledProfile is null ? selection.Options.Operations : 4_096);
                 await Assert.That(item.Samples.All(sample => sample.Success)).IsTrue();
             }
         }

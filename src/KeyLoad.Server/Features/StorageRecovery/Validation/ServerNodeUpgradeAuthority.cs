@@ -8,7 +8,7 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
     internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original,
         NodeOptions options)
     {
-        if (original.Entries.Any(entry => entry.Path is "database/identity.json" or "replica/identity.json"
+        if (original.Entries.Any(entry => entry.Path is ServerNodeUpgradeProtocol.CanonicalIdentityPath or ServerNodeUpgradeProtocol.ReplicaIdentityPath
             && entry.Length > 4_096))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         var authority = ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(paths.Destination)!, directory =>

@@ -1,4 +1,4 @@
-export { isolatedJobName, matchesIsolatedJobName } from '../../../site/Features/BenchmarkComparisons/isolated-contracts.mjs';
+export { isolatedEvidenceJobName, isolatedJobName, matchesIsolatedJobName } from '../../../site/Features/BenchmarkComparisons/isolated-contracts.mjs';
 
 export const GH = Object.freeze({
   repository: 'managedcode/KeyLoad', workflow: 'Benchmarks', workflowPath: '.github/workflows/benchmarks.yml',

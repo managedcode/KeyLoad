@@ -27,7 +27,7 @@ internal sealed class DatabaseCompositionBudgetTests
         using var db = NewDatabase();
         var payload = JsonSerializer.Serialize(new QueueGraphLink(Vertex(db, From), Vertex(db, To), Label), JsonDefaults.Options);
         db.Commit(new EnqueueMessage(Queue, Message, payload));
-        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxQueryReadBytes = TinyByteBudget });
+        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TinyByteBudget }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var request = new CommandRequest(Guid.NewGuid(), db.Partition, [new QueueToGraph(Graph, Queue, Prefix)]);
         var operation = new ReplicatedOperation(request.CommandId, OperationKind.Batch, "root", TimeProvider.System.GetUtcNow(),
             JsonSerializer.Serialize(request, JsonDefaults.Options));
@@ -44,8 +44,8 @@ internal sealed class DatabaseCompositionBudgetTests
         var payload = JsonSerializer.Serialize(new QueueGraphLink(Vertex(db, From), Vertex(db, To), Label), JsonDefaults.Options);
         db.Commit(new EnqueueMessage(Queue, Message, payload));
         var single = SingleProjectionReadBytes(db);
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxQueryReadBytes = 2 * single });
-        var shortBudget = new DatabaseEngine(db.Store, db.Database.Authorization, new() { MaxQueryReadBytes = 2 * single - 1 });
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 2 * single }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var shortBudget = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = 2 * single - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
 
         CommitReceipt Send(DatabaseEngine engine, string prefix)
         {

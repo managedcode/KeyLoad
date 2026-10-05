@@ -98,4 +98,34 @@ internal sealed class SiteAnalyzerCoverageInventoryTests
         var unexpected = await unexpectedScope.RunAsync(SiteAnalyzerCoverageTokens.ModePrepare);
         await Assert.That(unexpected.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
     }
+
+    [Test]
+    public async Task SourceInventoryRejectsFileDirectoryAndDanglingLinksAsync()
+    {
+        using var fileLinkScope = new SiteAnalyzerCoverageTestScope(copyRepository: true);
+        var filePath = Path.Combine(fileLinkScope.Repository, SiteAnalyzerCoverageTokens.HashFileRelativePath);
+        var linkTarget = Path.Combine(fileLinkScope.Repository, SiteAnalyzerCoverageTokens.CriticalPipelineSource);
+        File.Delete(filePath);
+        File.CreateSymbolicLink(filePath, linkTarget);
+        var fileLink = await fileLinkScope.RunAsync(SiteAnalyzerCoverageTokens.ModePrepare);
+        await Assert.That(fileLink.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
+        await Assert.That(fileLink.StandardError.Contains(SiteAnalyzerCoverageTokens.UnsafePathError, StringComparison.Ordinal)).IsTrue();
+
+        using var directoryLinkScope = new SiteAnalyzerCoverageTestScope(copyRepository: true);
+        var analysisPath = Path.Combine(directoryLinkScope.Repository, SiteAnalyzerCoverageTokens.AnalysisDirectoryRelativePath);
+        Directory.Delete(analysisPath, recursive: true);
+        var analyzerDirectory = Path.Combine(directoryLinkScope.Repository, SiteAnalyzerCoverageTokens.AnalyzerDirectoryRelativePath);
+        Directory.CreateSymbolicLink(analysisPath, analyzerDirectory);
+        var directoryLink = await directoryLinkScope.RunAsync(SiteAnalyzerCoverageTokens.ModePrepare);
+        await Assert.That(directoryLink.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
+        await Assert.That(directoryLink.StandardError.Contains(SiteAnalyzerCoverageTokens.UnsafePathError, StringComparison.Ordinal)).IsTrue();
+
+        using var danglingLinkScope = new SiteAnalyzerCoverageTestScope(copyRepository: true);
+        var danglingPath = Path.Combine(danglingLinkScope.Repository, SiteAnalyzerCoverageTokens.HashFileRelativePath);
+        File.Delete(danglingPath);
+        File.CreateSymbolicLink(danglingPath, Path.Combine(danglingLinkScope.Repository, SiteAnalyzerCoverageTokens.MissingLinkTargetRelativePath));
+        var danglingLink = await danglingLinkScope.RunAsync(SiteAnalyzerCoverageTokens.ModePrepare);
+        await Assert.That(danglingLink.ExitCode).IsNotEqualTo(SiteAnalyzerCoverageTokens.SuccessExitCode);
+        await Assert.That(danglingLink.StandardError.Contains(SiteAnalyzerCoverageTokens.UnsafePathError, StringComparison.Ordinal)).IsTrue();
+    }
 }

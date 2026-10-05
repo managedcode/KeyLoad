@@ -21,6 +21,4 @@ internal static class GrainRoutingProtocol
     internal const int CapabilityInterfaceVersion = 1;
     internal const int EnvelopeMetadataBytes = 65_536;
     internal const int MaximumReplyBytes = 16_777_216;
-    internal static readonly TimeSpan RequestLifetime = TimeSpan.FromMinutes(1);
-    internal static readonly TimeSpan MaximumFuture = TimeSpan.FromMinutes(2);
 }

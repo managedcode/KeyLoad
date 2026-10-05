@@ -33,7 +33,7 @@ internal sealed class NativeQueryCursorTests
     public async Task NativeCursorContinuesRealIndexedRecordsAndRetainsEveryClaim()
     {
         using var fixture = Fixture();
-        var engine = new QueryEngine(fixture.Database);
+        var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(fixture.Partition, PageSql);
         var first = engine.Execute(Root, request);
         var cursor = first.Cursor!;
@@ -63,7 +63,7 @@ internal sealed class NativeQueryCursorTests
     public async Task TamperedLegacyAndWrongQueryNativePageTokensAllRetainCursorExpiredContract()
     {
         using var fixture = Fixture();
-        var engine = new QueryEngine(fixture.Database);
+        var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(fixture.Partition, PageSql);
         var cursor = engine.Execute(Root, request).Cursor!;
         var claims = fixture.Database.Verify<QueryCursorClaims>(cursor);
@@ -80,7 +80,7 @@ internal sealed class NativeQueryCursorTests
     public async Task NativeLiveCursorRetainsNestedChangeTokenAndTamperOrLegacyStillFailClosed()
     {
         using var fixture = Fixture();
-        var engine = new QueryEngine(fixture.Database);
+        var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         var query = new AstQueryRequest(fixture.Partition, new SqlParser(LiveSql, fixture.Database.Limits).Parse());
         var snapshot = engine.StartLiveQuery(Root, new(query));
         var claims = fixture.Database.Verify<LiveCursorClaims>(snapshot.Cursor);

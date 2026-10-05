@@ -14,10 +14,20 @@ exact versions і pure SDK upcasting. Implementation/runtime qualification pendi
 
 ## Decision inventory
 
+[ADR-112 centralized runtime options](ADR-112-centralized-runtime-options.md)
+supersedes ADR-111's selected-context scope with general literal enforcement and
+typed, centrally validated operational configuration.
+
+[ADR-111 semantic magic runtime values](ADR-111-magic-runtime-values.md) defines
+KLD0035/KLD0036, preserving constant migration and actual compiler regressions.
+
 [ADR-110 native Orleans execution and scheduling primitives](ADR-110-native-orleans-execution-primitives.md)
 records the per-method audit, bounded worker/advisory/control/job candidates and
 required real-operation tests. Selection is Accepted; runtime/provider adoption
 and qualification remain pending.
+Its [broad capability review](../Features/ClusterRouting/CapabilityReview.md)
+includes native pub-sub, transactions, state, per-silo services/lifecycle and
+cluster operating controls, with source-present/candidate distinctions.
 
 [ADR-107 Elastic License 2.0](ADR-107-elastic-license.md) records
 the owner's hosted-database-service restriction and distribution metadata contract.
@@ -192,3 +202,5 @@ notification regressions and delivered-source qualification remain pending.
 [ADR-108](ADR-108-typed-synchronization.md) accepts typed .NET Lock gates for
 necessary shared-service synchronization, native Orleans scheduling for activation
 state and source-owned KLD0034 enforcement. Full verification remains pending.
+
+- [ADR-112: Independent website publication with optional benchmarks](ADR-112-independent-website-publication.md) — Accepted; conditional content/metric qualification and independent CI/Pages.

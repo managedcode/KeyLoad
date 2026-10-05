@@ -1,12 +1,13 @@
 using System.Threading.Channels;
 using KeyLoad.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 
 /// <summary>Node-owned ordered apply worker; protocol RPCs do not await canonical snapshot IO under their term gate.</summary>
 public sealed class ReplicaMaterializer : IAsyncDisposable
 {
-    private const int ApplyBatchSize = 64;
+    private readonly int applyBatchSize;
     private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(1)
     { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
     private readonly SemaphoreSlim applyGate = new(1, 1);
@@ -21,11 +22,17 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     /// <param name="database">Borrowed canonical engine owned by the physical partition host.</param>
     /// <param name="log">Borrowed durable log supplying the committed prefix.</param>
     /// <param name="snapshots">Borrowed checkpoint store that recovers verified pending installations.</param>
-    public ReplicaMaterializer(DatabaseEngine database, IDurableReplicaLog log, IReplicaSnapshotStore snapshots)
+    /// <param name="options">Centrally validated ordered apply budgets, frozen for this physical owner.</param>
+    public ReplicaMaterializer(DatabaseEngine database, IDurableReplicaLog log, IReplicaSnapshotStore snapshots,
+        IOptions<ReplicaExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(log);
         ArgumentNullException.ThrowIfNull(snapshots);
+        ArgumentNullException.ThrowIfNull(options);
+        var settings = options.Value;
+        settings.Validate();
+        applyBatchSize = settings.ApplyBatchSize;
         Database = database;
         Log = log;
         Snapshots = snapshots;
@@ -41,6 +48,19 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     /// <summary>The node's verified checkpoint transfer store.</summary>
     public IReplicaSnapshotStore Snapshots { get; }
     internal SemaphoreSlim ProtocolGate => Log.ProtocolGate;
+
+    /// <summary>Returns the current canonical cut under the same registration lock used by applied-position waiters.</summary>
+    public long AppliedPosition
+    {
+        get
+        {
+            lock (signals)
+            {
+                Check();
+                return Database.LastApplied;
+            }
+        }
+    }
 
     /// <summary>Rejects unsupported canonical cuts and completes verified interrupted snapshot installs.</summary>
     public void Recover()
@@ -84,6 +104,29 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         }
     }
 
+    /// <summary>Waits until canonical apply changes from the caller's observed cut.</summary>
+    /// <param name="observedPosition">The cut observed before registering the wait.</param>
+    /// <param name="cancellationToken">Cancellation of this caller's wait only.</param>
+    /// <returns>The changed canonical cut.</returns>
+    public async Task<long> WaitForAppliedPositionChangeAsync(long observedPosition, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            Task signal;
+            lock (signals)
+            {
+                Check();
+                var current = Database.LastApplied;
+                if (current != observedPosition)
+                {
+                    return current;
+                }
+                signal = changed.Task;
+            }
+            await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     private async Task ApplyWorkerAsync()
     {
         try
@@ -92,7 +135,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
             {
                 await applyGate.WaitAsync(lifetime.Token).ConfigureAwait(false);
                 try
-                { ReplicaCanonicalApply.ApplyBatch(Database, Log, ApplyBatchSize); }
+                { ReplicaCanonicalApply.ApplyBatch(Database, Log, applyBatchSize); }
                 finally { applyGate.Release(); }
                 PublishChange();
                 if (Database.LastApplied < Log.State.CommittedIndex)
@@ -158,15 +201,16 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     public async Task<ReplicaSnapshot> InstallCheckpointAsync(Guid transferId, CancellationToken cancellationToken)
     {
         await applyGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        ReplicaSnapshot snapshot;
         try
         {
             Check();
-            var snapshot = await Task.Run(() => Snapshots.Complete(transferId), cancellationToken).ConfigureAwait(false);
+            snapshot = await Task.Run(() => Snapshots.Complete(transferId), cancellationToken).ConfigureAwait(false);
             work.Writer.TryWrite(true);
-            PublishChange();
-            return snapshot;
         }
         finally { applyGate.Release(); }
+        PublishChange();
+        return snapshot;
     }
 
     private void Check()

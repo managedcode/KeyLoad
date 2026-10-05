@@ -54,7 +54,7 @@ internal sealed class WorkflowLayoutAspireEntryTests
         await AssertAnalyzerEvidenceAsync(analyzer);
         await AssertSiteEvidenceAsync(site);
         var receipts = steps.Single(step => step.Contains("Check every required test passed", StringComparison.Ordinal));
-        await Assert.That(receipts.Contains("@('startup-tests', 'analyzer-tests', 'site-tests')", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(receipts.Contains("@('startup-tests', 'selection-tests', 'analyzer-tests', 'site-tests')", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("$env:EVIDENCE_DIR/$suite", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("[int]$counts.executed -ne [int]$counts.total", StringComparison.Ordinal)).IsTrue();
         await Assert.That(receipts.Contains("[int]$counts.passed -ne [int]$counts.total", StringComparison.Ordinal)).IsTrue();

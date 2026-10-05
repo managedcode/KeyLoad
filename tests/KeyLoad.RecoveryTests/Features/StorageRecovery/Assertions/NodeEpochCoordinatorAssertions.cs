@@ -45,12 +45,12 @@ internal static class NodeEpochCoordinatorAssertions
         var replicaPath = Path.Combine(destination, ServerNodeUpgradeProtocol.Replica);
         using var canonical = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, canonicalPath));
         using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, replicaPath));
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
-        using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: database);
-        var snapshots = new ReplicaSnapshotStore(canonical, log, configuration);
-        await using var materializer = new ReplicaMaterializer(database, log, snapshots);
+        using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
+        var snapshots = new ReplicaSnapshotStore(canonical, log, RecoveryExecutionOptions.Configuration(configuration));
+        await using var materializer = new ReplicaMaterializer(database, log, snapshots, RecoveryExecutionOptions.Replica());
         var resource = new ResourceDefinition(LaterResource, ResourceKind.Collection, LaterDomain);
         var request = new ConfigureResourceRequest(LaterTenant, LaterDatabase, resource);
         var operation = database.CreateNativeOperation(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal,
@@ -68,10 +68,10 @@ internal static class NodeEpochCoordinatorAssertions
             Path.Combine(destination, ServerNodeUpgradeProtocol.Canonical)));
         using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile,
             Path.Combine(destination, ServerNodeUpgradeProtocol.Replica)));
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
-        using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: database);
+        using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
         var partition = new PartitionRef(LaterTenant, LaterDatabase, LaterDomain, LaterPartition);
         var actual = canonical.Read(view => database.Resource(view, partition, LaterResource, ResourceKind.Collection));
         await Assert.That(actual.Name).IsEqualTo(LaterResource);

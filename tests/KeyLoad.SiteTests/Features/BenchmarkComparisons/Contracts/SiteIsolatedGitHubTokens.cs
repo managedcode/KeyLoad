@@ -76,12 +76,12 @@ internal static class SiteIsolatedGitHubTokens
     public const string SourceRevision = "sourceRevision";
     public const string Extra = "controlledExtra";
     public const string WrongSha = "0000000000000000000000000000000000000000";
-    public const int WorkerCount = 270;
-    public const int FileCount = 277;
+    public const int WorkerCount = 1386;
+    public const int FileCount = 2530;
     public const int Zero = 0;
     public const int One = 1;
     public const int BufferBytes = 65_536;
-    public const int MaximumEntries = 4096;
+    public const int MaximumEntries = 8192;
     public const int DeadlineSeconds = 300;
     public const int NativeDeadlineMinutes = 120;
     public const long JsonBytes = 4_194_304;

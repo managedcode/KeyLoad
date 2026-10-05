@@ -13,9 +13,11 @@ internal sealed class ScaledCohortReceiptTests
         const planner = await load(process.argv[1]);
         const scale = await load(process.argv[2]);
         const receiptModule = await load(process.argv[3]);
+        const vectorsModule = await import(new URL('./vector-isolated-plan.mjs',pathToFileURL(process.argv[2])).href);
         const contract = planner.readIsolatedContract();
         const control = planner.createIsolatedPlan(contract);
         const scales = scale.createScaledPlans(contract);
+        const vectors = vectorsModule.createVectorPlans(contract);
         const common = {sourceRevision:'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',runId:37111111111,attempt:1,
           repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'Benchmarks'};
         const missingEvidence = ['effectiveServerResources','hardwareClass','serverCpuRss','storageEnvelope'];
@@ -25,31 +27,54 @@ internal sealed class ScaledCohortReceiptTests
           id:cell.id,job:{id:next,name:'job',url:'job',conclusion:'success',steps:[]},
           artifact:{id:next++,name:'comparison-worker-'+cell.id,sizeInBytes:1,digest:'sha256:'+'b'.repeat(64),expired:false},
           workerSha256:'c'.repeat(64),serverResource:missingResource()}))});
-        const proofs = [control,...scales].map(proof);
-        const manifests = [control,...scales].map((plan,index)=>({profile:plan.profile,
+        const proofs = [control,...scales,...vectors].map(proof);
+        const manifests = [control,...scales,...vectors].map((plan,index)=>({profile:plan.profile,
           cohort:{...common,profile:plan.profile},workers:plan.cells.map((cell,cellIndex)=>({
           id:cell.id,target:cell.target,nodeCount:cell.nodeCount,scenario:cell.scenario,profile:cell.profile,
-          disposition:cell.target==='Neo4j' && cell.nodeCount>1?'unsupportedTopology':'measured',
-          reason:cell.target==='Neo4j' && cell.nodeCount>1?contract.unsupportedTopologies[0].reason:null,
+          disposition:contract.unsupportedTopologies.some(item=>item.target===cell.target&&item.nodeCounts.includes(cell.nodeCount))?'unsupportedTopology':'measured',
+          reason:contract.unsupportedTopologies.find(item=>item.target===cell.target&&item.nodeCounts.includes(cell.nodeCount))?.reason??null,
           rawSha256:'c'.repeat(64)}))}));
+        const vectorSupport={'PostgreSQL + pgvector':['Exact','Hnsw','IvfFlat'],Qdrant:['Exact','Hnsw'],SurrealDB:['Exact','Hnsw'],HelixDB:['NativeAnn']};
+        for(let index=3;index<manifests.length;index++) {
+          const settings=vectors[index-3].profileSettings;
+          for(const worker of manifests[index].workers) {
+            worker.vectorMetrics=null;
+            if(worker.disposition==='unsupportedTopology') continue;
+            if(worker.target==='KeyLoad') {
+              worker.disposition='unsupported';
+              worker.reason='KeyLoad SDK does not expose persisted vector readback or native numeric predicates required for scaled vector qualification.';
+            } else if(!(vectorSupport[worker.target]??[]).includes(settings.indexKind)) {
+              worker.disposition='unsupported';
+              worker.reason=worker.target+' does not implement '+settings.indexKind+'/'+settings.queryMode+' natively.';
+            } else {
+              worker.disposition='failed';
+              proofs[index].cells.find(item=>item.id===worker.id).job.conclusion='failure';
+            }
+          }
+        }
+        const vectorArguments={vectorPlans:vectors,vectorManifests:manifests.slice(3),vectorProofs:proofs.slice(3)};
         const failedId='keyload-n1-point-read-scaled-100k-c16';
         const failedWorker=manifests[1].workers.find(item=>item.id===failedId);
         failedWorker.disposition='failed';
         proofs[1].cells.find(item=>item.id===failedId).job.conclusion='failure';
         const result=receiptModule.createScaleCohortReceipt({control:manifests[0],controlProof:proofs[0],
-          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1),proofs:proofs.slice(1),contract});
+          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1,3),proofs:proofs.slice(1,3),...vectorArguments,contract});
         let rejectsDuplicateGlobalIdentity=false;
         const duplicateProof=structuredClone(proofs[1]);
         duplicateProof.cells[0].artifact.id=proofs[0].cells[0].artifact.id;
         try { receiptModule.createScaleCohortReceipt({control:manifests[0],controlProof:proofs[0],
-          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1),proofs:[duplicateProof,...proofs.slice(2)],contract}); }
+          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1,3),proofs:[duplicateProof,proofs[2]],...vectorArguments,contract}); }
         catch { rejectsDuplicateGlobalIdentity=true; }
         let rejectsTamper=false;
         proofs[1].cells[0].artifact.digest='invalid';
         try { receiptModule.createScaleCohortReceipt({control:manifests[0],controlProof:proofs[0],
-          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1),proofs:proofs.slice(1),contract}); }
+          controlHash:'d'.repeat(64),plans:scales,manifests:manifests.slice(1,3),proofs:proofs.slice(1,3),...vectorArguments,contract}); }
         catch { rejectsTamper=true; }
-        process.stdout.write(JSON.stringify({result,rejectsTamper,rejectsDuplicateGlobalIdentity}));
+        const allScaleCellsMissingResources=result.scaledProfiles.every(profile=>profile.cells.every(cell=>cell.resourceEquivalence===null));
+        result.control.cells=[];
+        result.scaledProfiles=result.scaledProfiles.map(profile=>({...profile,cells:profile.cells.filter(cell=>cell.target==='Neo4j'&&cell.nodeCount===2)}));
+        result.vectorProfiles=result.vectorProfiles.map(({cells,...profile})=>profile);
+        process.stdout.write(JSON.stringify({result,allScaleCellsMissingResources,rejectsTamper,rejectsDuplicateGlobalIdentity}));
         """;
 
     [Test]
@@ -64,10 +89,10 @@ internal sealed class ScaledCohortReceiptTests
         using var result = JsonDocument.Parse(response.Output);
         var receipt = result.RootElement.GetProperty("result");
         await Assert.That(receipt.GetProperty("schemaVersion").GetInt32()).IsEqualTo(1);
-        await Assert.That(receipt.GetProperty("control").GetProperty("cellCount").GetInt32()).IsEqualTo(270);
-        await Assert.That(receipt.GetProperty("scaledProfiles").GetArrayLength()).IsEqualTo(3);
+        await Assert.That(receipt.GetProperty("control").GetProperty("cellCount").GetInt32()).IsEqualTo(330);
+        await Assert.That(receipt.GetProperty("scaledProfiles").GetArrayLength()).IsEqualTo(2);
         await Assert.That(receipt.GetProperty("scaledProfiles").EnumerateArray()
-            .All(item => item.GetProperty("cellCount").GetInt32() == 108)).IsTrue();
+            .All(item => item.GetProperty("cellCount").GetInt32() == 132)).IsTrue();
         await Assert.That(receipt.GetProperty("scaledProfiles").EnumerateArray()
             .SelectMany(item => item.GetProperty("cells").EnumerateArray())
             .All(item => item.GetProperty("resourceEquivalence").ValueKind == JsonValueKind.Null)).IsTrue();
@@ -77,9 +102,12 @@ internal sealed class ScaledCohortReceiptTests
         await Assert.That(unsupported.GetProperty("disposition").GetString()).IsEqualTo("unsupportedTopology");
         await Assert.That(unsupported.GetProperty("serverResourceQualified").GetBoolean()).IsFalse();
         await Assert.That(receipt.GetProperty("qualified").GetBoolean()).IsFalse();
-        await Assert.That(receipt.GetProperty("failedIds")[0].GetString()).IsEqualTo("keyload-n1-point-read-scaled-100k-c16");
+        await Assert.That(receipt.GetProperty("vectorProfiles").GetArrayLength()).IsEqualTo(24);
+        await Assert.That(receipt.GetProperty("vectorProfiles").EnumerateArray().All(profile => profile.GetProperty("cellCount").GetInt32() == 33)).IsTrue();
+        await Assert.That(receipt.GetProperty("failedIds").EnumerateArray().Select(item => item.GetString())).Contains("keyload-n1-point-read-scaled-100k-c16");
         await Assert.That(receipt.GetProperty("missingEvidence").EnumerateArray().Select(item => item.GetString())
             .SequenceEqual(["effectiveServerResources", "hardwareClass", "serverCpuRss", "storageEnvelope"], StringComparer.Ordinal)).IsTrue();
+        await Assert.That(result.RootElement.GetProperty("allScaleCellsMissingResources").GetBoolean()).IsTrue();
         await Assert.That(result.RootElement.GetProperty("rejectsTamper").GetBoolean()).IsTrue();
         await Assert.That(result.RootElement.GetProperty("rejectsDuplicateGlobalIdentity").GetBoolean()).IsTrue();
     }

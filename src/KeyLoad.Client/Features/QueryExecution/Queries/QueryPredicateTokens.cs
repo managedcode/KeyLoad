@@ -14,6 +14,9 @@ internal static class QueryPredicateTokens
     internal const string InListBudgetExceededMessage = "The C# IN list exceeds its budget.";
 
     internal const string ImplicitConversionOperatorName = "op_Implicit";
+    internal const string NullableValueMemberName = nameof(Nullable<int>.Value);
+    internal const string IdentifierPath = "/@id";
+    internal const string RevisionPath = "/@revision";
 
     internal const string Equal = "=";
     internal const string NotEqual = "!=";

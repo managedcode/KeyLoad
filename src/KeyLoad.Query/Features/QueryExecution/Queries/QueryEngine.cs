@@ -6,6 +6,7 @@ using KeyLoad.Core;
 using KeyLoad.Query.Features.ChangeFeeds;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 
@@ -15,7 +16,7 @@ public sealed partial class QueryEngine
     private const string CursorPurpose = "query-page";
     internal const string ExplainId = "explain";
     internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
-    private static readonly TimeSpan CursorLifetime = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan cursorLifetime;
     private readonly record struct CursorState(int Offset, long Cut, long SourceEpoch);
     private readonly DatabaseEngine database;
     internal DatabaseEngine PartitionQueryOwner => database;
@@ -25,10 +26,15 @@ public sealed partial class QueryEngine
 
     /// <summary>Creates a query engine over one node-local database.</summary>
     /// <param name="database">Database owning query reads and admission.</param>
+    /// <param name="options">Centrally validated continuation settings, frozen for this execution owner.</param>
     /// <param name="searchEngine">The shared authorized search executor.</param>
-    public QueryEngine(DatabaseEngine database, SearchEngine? searchEngine = null)
+    public QueryEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options, SearchEngine? searchEngine = null)
     {
         ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(options);
+        var settings = options.Value;
+        settings.Validate();
+        cursorLifetime = settings.CursorLifetime;
         this.database = database;
         graphSearch = searchEngine ?? new SearchEngine(database);
         liveQueries = new(database, this);
@@ -173,7 +179,7 @@ public sealed partial class QueryEngine
         var token = next < prepared.EligibleCount ? database.Sign(new QueryCursorClaims(CursorPurpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
-            clock.GetUtcNow().Add(CursorLifetime))) : null;
+            clock.GetUtcNow().Add(cursorLifetime))) : null;
         var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
         budget.CheckResult(result);
         return result;
@@ -183,7 +189,7 @@ public sealed partial class QueryEngine
         IReadOnlyDictionary<string, string[]>? paths = null)
     {
         var safe = database.Project(principal, resource, document);
-        if (selections.Length == 1 && selections[0].Path == "*")
+        if (selections.Length == 1 && selections[0].Path == SqlSyntax.Star)
         {
             return new(document.Reference.Id, document.Revision, safe.Json, safe.Redacted, safe.RedactedFields);
         }

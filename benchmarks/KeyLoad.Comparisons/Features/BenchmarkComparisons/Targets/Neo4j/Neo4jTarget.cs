@@ -11,12 +11,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Neo4j image reference recorded in the target profile.</param>
 public sealed class Neo4jTarget(HttpClient http, string runId, string image) : IComparisonTarget
 {
+    private const string RunIdentityFormat = "N";
+    private const int CleanupTimeoutSeconds = 15;
+
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
     private const string CommunityEdition = "community";
     private const string CommunityRequired = "Neo4jCommunityEditionRequired";
     private const string SingleCommunityState = "single native Community node";
-    private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString("N");
+    private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString(RunIdentityFormat);
     private bool ownsConstraint;
     private int depth;
     private int corpusCount;
@@ -109,7 +112,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image) : I
     /// <returns>A value task that completes after cleanup.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
         try
         {
             if (ownsConstraint)

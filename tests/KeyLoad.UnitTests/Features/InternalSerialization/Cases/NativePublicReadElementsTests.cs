@@ -19,7 +19,7 @@ internal sealed class NativePublicReadElementsTests
         var query = NativePublicReadFixture.Query(database, shape);
         var json = JsonDefaults.Serialize(query);
         var decoded = JsonDefaults.Deserialize<AstQueryRequest>(json);
-        var original = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database)
+        var original = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution())
             .ExecuteAst(NativeAuthorityFixture.Root, decoded));
         var payload = NativePublicReadFixture.Encode(query, kind, database);
         var request = NativePublicReadFixture.Signed(database, payload, kind);

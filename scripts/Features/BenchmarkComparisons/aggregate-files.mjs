@@ -81,7 +81,7 @@ async function validateTree(path, depth, budget) {
 
 export async function validateInventory(input, cells) {
   const roots = await readdir(input);
-  requireValue(roots.length === 1 && roots[0] === AGGREGATE.workers, INPUT);
+  requireValue(roots.includes(AGGREGATE.workers) && roots.every(name => ['workers', 'scaled', 'vector'].includes(name)), INPUT);
   const root = join(input, AGGREGATE.workers);
   await existingPath(root, true);
   const expected = new Set(cells.map(cell => cell.id));

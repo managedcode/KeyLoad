@@ -7,15 +7,14 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class ScaledComparisonProfileTests
 {
     [Test]
-    public async Task OnlyThreeExactProfilesCarryTheFrozenS1Settings()
+    public async Task OnlyTwoExactProfilesCarryTheFrozenS1Settings()
     {
         var profiles = new[]
         {
             ScaledComparisonProfileParser.Parse("scaled-100k-c16"),
-            ScaledComparisonProfileParser.Parse("scaled-1m-c16"),
-            ScaledComparisonProfileParser.Parse("scaled-5m-c16")
+            ScaledComparisonProfileParser.Parse("scaled-1m-c16")
         };
-        await Assert.That(profiles.Select(profile => profile.Documents)).IsEquivalentTo(new[] { 100_000, 1_000_000, 5_000_000 });
+        await Assert.That(profiles.Select(profile => profile.Documents)).IsEquivalentTo(new[] { 100_000, 1_000_000 });
         foreach (var profile in profiles)
         {
             await Assert.That(profile.Operations).IsEqualTo(100_000);
@@ -26,20 +25,20 @@ internal sealed class ScaledComparisonProfileTests
             await Assert.That(profile.Seed).IsEqualTo(1_729);
         }
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ScaledComparisonProfileParser.Parse("scaled-5000000-c16"));
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ScaledComparisonProfileParser.Parse("Scaled-5m-c16"));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ScaledComparisonProfileParser.Parse("scaled-5m-c16"));
     }
     [Test]
     public async Task ProfileJsonRoundTripIsClosedOverTheParsedIdentityAndSettings()
     {
-        var profile = ScaledComparisonProfileParser.Parse("scaled-5m-c16");
+        var profile = ScaledComparisonProfileParser.Parse("scaled-1m-c16");
         var json = JsonSerializer.Serialize(profile);
         var restored = JsonSerializer.Deserialize<ScaledComparisonProfile>(json)!;
         await Assert.That(restored).IsEqualTo(profile);
         using var document = JsonDocument.Parse(json);
         await Assert.That(document.RootElement.EnumerateObject().Count()).IsEqualTo(14);
         await Assert.That(document.RootElement.GetProperty("id").GetString()).IsEqualTo(profile.Id);
-        await Assert.That(document.RootElement.GetProperty("documents").GetInt32()).IsEqualTo(5_000_000);
-        var altered = json.Replace("5000000", "1000000", StringComparison.Ordinal);
+        await Assert.That(document.RootElement.GetProperty("documents").GetInt32()).IsEqualTo(1_000_000);
+        var altered = json.Replace("1000000", "5000000", StringComparison.Ordinal);
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ScaledComparisonProfile>(altered));
         var extra = json[..^1] + ",\"Other\":1}";
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ScaledComparisonProfile>(extra));

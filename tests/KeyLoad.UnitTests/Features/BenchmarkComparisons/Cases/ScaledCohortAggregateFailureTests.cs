@@ -26,7 +26,7 @@ internal sealed class ScaledCohortAggregateFailureTests
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             [ModuleMode, IsolatedAggregateNodeProcess.Module(Script), InputArgument + input,
                 PlanArgument + directory.PathFor("missing-plan.json"), ScalePlanArgument + directory.PathFor("missing-scale.json"),
-                CompositePlanArgument + directory.PathFor("missing-composite.json"), ProofRootArgument + directory.PathFor("proof"),
+                "--vector-plan=" + directory.PathFor("missing-vectors.json"), CompositePlanArgument + directory.PathFor("missing-composite.json"), ProofRootArgument + directory.PathFor("proof"),
                 OutputArgument + directory.PathFor("aggregate"), ScaleOutputArgument + scaleOutput], token);
 
         await Assert.That(result.ExitCode).IsEqualTo(1);

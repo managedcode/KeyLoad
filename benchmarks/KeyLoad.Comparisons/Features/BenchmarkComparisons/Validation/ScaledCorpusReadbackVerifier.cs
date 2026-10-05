@@ -7,6 +7,8 @@ namespace KeyLoad.Comparisons;
 
 internal static class ScaledCorpusReadbackVerifier
 {
+    private const string ExpectedDocumentText = "KeyLoad shared corpus";
+
     private const string IdProperty = "id";
     private const string NumberProperty = "number";
     private const string PaddingProperty = "padding";
@@ -63,7 +65,7 @@ internal static class ScaledCorpusReadbackVerifier
         if (root.ValueKind != JsonValueKind.Object || root.EnumerateObject().Count() != 4
             || !root.TryGetProperty(IdProperty, out var id) || id.GetString() != expected.Id
             || !root.TryGetProperty(NumberProperty, out var number) || number.GetInt32() != expected.Number
-            || !root.TryGetProperty(TextProperty, out var text) || text.GetString() != "KeyLoad shared corpus"
+            || !root.TryGetProperty(TextProperty, out var text) || text.GetString() != ExpectedDocumentText
             || !root.TryGetProperty(PaddingProperty, out var padding) || padding.GetString() is not { } paddingValue
             || paddingValue.Length != 1_024 - Encoding.UTF8.GetByteCount(ScaledComparisonCorpus.EmptyJson(expected.Id, expected.Number)))
         {
@@ -78,7 +80,7 @@ internal static class ScaledCorpusReadbackVerifier
             }
         }
 
-        return JsonSerializer.Serialize(new { id = expected.Id, number = expected.Number, text = "KeyLoad shared corpus", padding = paddingValue });
+        return JsonSerializer.Serialize(new { id = expected.Id, number = expected.Number, text = ExpectedDocumentText, padding = paddingValue });
     }
 
     private static void Append(IncrementalHash hash, byte[] length, string value)

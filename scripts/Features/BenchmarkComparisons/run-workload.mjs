@@ -13,7 +13,8 @@ const marker = /^KeyLoadBenchmarkProgress phase=(oracle|initialize|warmup|prepar
 const missingFile = 'ENOENT';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const controlProfile = 'intensive-1k-c16';
-const scaleProfiles = new Set(['scaled-100k-c16', 'scaled-1m-c16', 'scaled-5m-c16']);
+const scaleProfiles = new Set(['scaled-100k-c16', 'scaled-1m-c16']);
+const vectorProfilePattern = /^vector-(?:100k|1m)-(?:exact|hnsw|ivfflat|native)-(?:plain|filtered|mixed)-c16$/u;
 
 export function validProgress(line) {
   if (line.length > maximumProgressBytes) return false;
@@ -24,8 +25,12 @@ export function validProgress(line) {
     && Number.isFinite(elapsed) && failed <= completed && completed <= total;
 }
 
-export function selectedScaleProfile(environment) {
+export function selectedScaleProfile(environment, vectorProfile) {
   const scaleProfile = environment.KEYLOAD_SCALE_PROFILE;
+  if (vectorProfile !== undefined) {
+    if ((scaleProfile ?? '') !== '') throw new Error('The native comparison profile identity is invalid.');
+    return undefined;
+  }
   if (scaleProfile !== undefined && scaleProfile !== '') {
     if (!scaleProfiles.has(scaleProfile) || environment.Benchmarks__EvidenceProfile !== scaleProfile) {
       throw new Error('The native comparison profile identity is invalid.');
@@ -38,14 +43,32 @@ export function selectedScaleProfile(environment) {
   return undefined;
 }
 
-export function workloadArguments(scaleProfile) {
+export function selectedVectorProfile(environment) {
+  const vectorProfile = environment.KEYLOAD_VECTOR_PROFILE;
+  if (vectorProfile !== undefined && vectorProfile !== '') {
+    if (!vectorProfilePattern.test(vectorProfile) || environment.Benchmarks__VectorProfile !== vectorProfile
+      || environment.Benchmarks__EvidenceProfile !== vectorProfile || (environment.KEYLOAD_SCALE_PROFILE ?? '') !== '') {
+      throw new Error('The native comparison profile identity is invalid.');
+    }
+    return vectorProfile;
+  }
+  if ((environment.Benchmarks__VectorProfile ?? '') !== '') {
+    throw new Error('The native comparison profile identity is invalid.');
+  }
+  return undefined;
+}
+
+export function workloadArguments(scaleProfile, vectorProfile) {
+  if (scaleProfile !== undefined && vectorProfile !== undefined) throw new Error('The native comparison profile identity is invalid.');
   const scaled = scaleProfile !== undefined;
+  const vector = vectorProfile !== undefined;
   const arguments_ = [
     'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
     '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*',
-    `--KeyLoadTests:TimeoutMinutes=${scaled ? 140 : 60}`
+    `--KeyLoadTests:TimeoutMinutes=${vector || scaled ? 140 : 60}`
   ];
   if (scaled) arguments_.push(`--KeyLoadTests:ScaleProfile=${scaleProfile}`);
+  if (vector) arguments_.push(`--KeyLoadTests:VectorProfile=${vectorProfile}`);
   return arguments_;
 }
 
@@ -131,7 +154,9 @@ async function writeProgress(line) {
 // The production entry below always runs the repository's closed Aspire command.
 export async function runProgressProcess(command, arguments_, workingDirectory, progressFile, period = intervalMilliseconds) {
   if (!Number.isInteger(period) || period < 1 || period > intervalMilliseconds) throw new Error('Invalid progress interval.');
-  const child = spawn(command, arguments_, { cwd: workingDirectory, stdio: 'inherit', detached: process.platform !== 'win32' });
+  const environment = { ...process.env };
+  delete environment.Benchmarks__VectorProfile;
+  const child = spawn(command, arguments_, { env: environment, cwd: workingDirectory, stdio: 'inherit', detached: process.platform !== 'win32' });
   const signals = ownSignals(child);
   const outputError = () => {};
   process.stdout.on('error', outputError);
@@ -153,9 +178,10 @@ export async function runWorkload() {
   if (typeof cell !== 'string' || cell.length > 256 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cell)) {
     throw new Error('The native comparison cell identity is invalid.');
   }
-  const scaleProfile = selectedScaleProfile(process.env);
+  const vectorProfile = selectedVectorProfile(process.env);
+  const scaleProfile = selectedScaleProfile(process.env, vectorProfile);
   const progress = path.join(root, 'artifacts/comparisons/isolated/failures', cell, 'progress.log');
-  const arguments_ = workloadArguments(scaleProfile);
+  const arguments_ = workloadArguments(scaleProfile, vectorProfile);
   return await runProgressProcess('dotnet', arguments_, root, progress);
 }
 

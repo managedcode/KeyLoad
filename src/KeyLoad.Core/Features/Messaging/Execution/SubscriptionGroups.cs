@@ -5,6 +5,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string SubscriptionDeliveryTokenPurpose = "subscription-delivery";
 
     private static byte[] GroupKey(string space, SubscriptionRef subscription, params object?[] suffix)
     {
@@ -254,7 +255,7 @@ public sealed partial class DatabaseEngine
         tx.PutRecord(key, delivery);
         issuedState = state with { IssuedPosition = long.Max(state.IssuedPosition, sequence) };
         var subscription = request.Subscription;
-        var token = Sign(new GroupClaims("subscription-delivery", Store.Identity.Incarnation, subscription, state.Generation, state.OwnershipEpoch,
+        var token = Sign(new GroupClaims(SubscriptionDeliveryTokenPurpose, Store.Identity.Incarnation, subscription, state.Generation, state.OwnershipEpoch,
             sequence, delivery.LeaseVersion, principal.Id, principal.PolicyEpoch, dataPrincipal.PolicyEpoch));
         result.Add(new(projected, token, delivery.LeaseVersion, delivery.LeaseUntil.Value, delivery.Attempts));
         return true;
@@ -263,7 +264,7 @@ public sealed partial class DatabaseEngine
     {
         var claims = Verify<GroupClaims>(token);
         var state = Group(view, subscription);
-        if (claims.Purpose != "subscription-delivery" || claims.Incarnation != Store.Identity.Incarnation || claims.Subscription != subscription
+        if (claims.Purpose != SubscriptionDeliveryTokenPurpose || claims.Incarnation != Store.Identity.Incarnation || claims.Subscription != subscription
             || claims.PrincipalId != principal.Id || claims.Generation != state.Generation || claims.OwnershipEpoch != state.OwnershipEpoch || claims.Position < 1)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, "The subscription token scope or generation is invalid.");

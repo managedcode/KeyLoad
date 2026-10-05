@@ -5,12 +5,14 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3Profile
 {
+    private const string ProfileSetting = "Profile";
+
     internal static bool ValidateAndRead(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var section = configuration.GetSection(TwoRf3ProfileProtocol.Section);
         var children = section.GetChildren().ToArray();
-        if (children.Any(child => child.Key != "Profile") || children.Length > 1)
+        if (children.Any(child => child.Key != ProfileSetting) || children.Length > 1)
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
         var selected = configuration[TwoRf3ProfileProtocol.Setting];
         if (selected is null)

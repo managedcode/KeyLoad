@@ -1,5 +1,6 @@
 using System.Buffers.Text;
 using KeyLoad.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -11,6 +12,7 @@ public sealed class GrainRequestCodec
     private readonly DatabaseEngine database;
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
+    private readonly GrainRoutingOptions settings;
 
     internal IGrainRequestPhaseObserver? PhaseObserver { get; init; }
 
@@ -19,12 +21,14 @@ public sealed class GrainRequestCodec
     /// <summary>Uses the shared durable signing key and incarnation, with the runtime system clock.</summary>
     /// <param name="database">Borrowed canonical database with immutable cluster signing scope.</param>
     /// <param name="clock">System clock for issuance and expiry checks.</param>
-    public GrainRequestCodec(DatabaseEngine database, TimeProvider clock)
+    /// <param name="options">The centrally validated signed request and execution lifetimes.</param>
+    public GrainRequestCodec(DatabaseEngine database, TimeProvider clock, IOptions<GrainRoutingOptions> options)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(clock);
         this.database = database;
         this.clock = clock;
+        settings = options.Value;
         var envelopeBytes = checked(database.Limits.MaxBatchBytes + GrainRoutingProtocol.EnvelopeMetadataBytes);
         maximumTokenCharacters = checked(Base64Url.GetEncodedLength(envelopeBytes)
             + GrainNativeContracts.SignedTokenPrefix.Length + SeparatorCharacters + Base64Url.GetEncodedLength(SignatureBytes));
@@ -45,7 +49,7 @@ public sealed class GrainRequestCodec
             PrincipalId = principalId,
             ReadKind = kind,
             Payload = Encode(payload),
-            ExpiresAt = clock.GetUtcNow() + GrainRoutingProtocol.RequestLifetime
+            ExpiresAt = clock.GetUtcNow() + settings.RequestLifetime
         });
 
     /// <summary>Signs one independently keyed request without changing the write's durable deduplication ID.</summary>
@@ -65,7 +69,7 @@ public sealed class GrainRequestCodec
             CommandKind = kind,
             CommandId = commandId,
             Payload = Encode(payload),
-            ExpiresAt = clock.GetUtcNow() + GrainRoutingProtocol.RequestLifetime
+            ExpiresAt = clock.GetUtcNow() + settings.RequestLifetime
         });
 
     internal DecodedGrainRequest Verify(string signedRequest)
@@ -76,7 +80,7 @@ public sealed class GrainRequestCodec
         }
 
         var request = database.Verify<GrainRequestEnvelope>(signedRequest, maximumTokenCharacters);
-        GrainRequestScope.Validate(request, database.Store.Identity.Incarnation, clock.GetUtcNow());
+        ValidateScope(request);
         if (request.Payload.Length > database.Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
@@ -146,9 +150,12 @@ public sealed class GrainRequestCodec
 
     private string Issue(GrainRequestEnvelope request)
     {
-        GrainRequestScope.Validate(request, database.Store.Identity.Incarnation, clock.GetUtcNow());
+        ValidateScope(request);
         return database.Sign(request);
     }
+
+    internal void ValidateScope(GrainRequestEnvelope request)
+        => GrainRequestScope.Validate(request, database.Store.Identity.Incarnation, clock.GetUtcNow(), settings.MaximumFuture);
 }
 
 internal readonly record struct DecodedGrainRequest(GrainRequestEnvelope Envelope, ReadOnlyMemory<byte> Payload);

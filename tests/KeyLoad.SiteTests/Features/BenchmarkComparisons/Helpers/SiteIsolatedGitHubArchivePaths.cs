@@ -6,6 +6,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteIsolatedGitHubArchivePaths
 {
+    private const string ProfileField = "profile";
     private const string PagePattern = "^(jobs|artifacts)-page-([0-9]{2})\\.json$";
     private const string RequestPattern = "^requests/request-[0-9]{5}\\.(headers|json|body|wait\\.json)$";
     private static readonly string[] ProviderFiles =
@@ -20,17 +21,63 @@ internal static class SiteIsolatedGitHubArchivePaths
 
     public static HashSet<string> ExpectedSuite(JsonObject metadata)
     {
+        var historical = SiteIsolatedInventory.IsHistorical(metadata);
         var result = new HashSet<string>(StringComparer.Ordinal) { SiteIsolatedGitHubTokens.Manifest };
+        if (!historical)
+        {
+            result.Add("cohort-receipt.json");
+            foreach (var profile in Profiles())
+            {
+                result.Add(FamilyRoot(profile) + SiteIsolatedGitHubTokens.Manifest);
+            }
+        }
         foreach (var worker in metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray())
         {
-            result.Add(string.Join(SiteIsolatedGitHubTokens.Slash, SiteIsolatedGitHubTokens.Workers,
-                worker![SiteIsolatedGitHubTokens.Id]!.GetValue<string>(), SiteIsolatedGitHubTokens.Raw));
+            var entry = worker ?? throw new InvalidDataException(SiteIsolatedGitHubTokens.InvalidReceipt);
+            var root = historical ? string.Empty : FamilyRoot(entry[ProfileField]!.GetValue<string>());
+            var directory = root + "workers/" + entry[SiteIsolatedGitHubTokens.Id]!.GetValue<string>() + "/";
+            result.Add(directory + SiteIsolatedGitHubTokens.Raw);
+            if (root.Length > 0)
+            {
+                result.Add(directory + "server-resource-evidence.json");
+            }
         }
 
         return result;
     }
 
-    public static HashSet<string> ExpectedProvider() => new(ProviderFiles, StringComparer.Ordinal);
+    public static HashSet<string> ExpectedProvider(JsonObject? metadata = null)
+    {
+        if (metadata is not null && SiteIsolatedInventory.IsHistorical(metadata))
+        {
+            return new(ProviderFiles, StringComparer.Ordinal);
+        }
+        var result = new HashSet<string>(ProviderFiles, StringComparer.Ordinal) { "composite-plan.json", "plans/intensive-1k-c16.json" };
+        foreach (var profile in Profiles())
+        {
+            result.Add("plans/" + profile + ".json");
+            result.Add(FamilyRoot(profile) + "proof.json");
+        }
+        return result;
+    }
+
+    private static IEnumerable<string> Profiles()
+    {
+        foreach (var scale in new[] { "100k", "1m" })
+        {
+            yield return "scaled-" + scale + "-c16";
+            foreach (var method in new[] { "exact", "hnsw", "ivfflat", "native" })
+            {
+                foreach (var mode in new[] { "plain", "filtered", "mixed" })
+                {
+                    yield return "vector-" + scale + "-" + method + "-" + mode + "-c16";
+                }
+            }
+        }
+    }
+
+    private static string FamilyRoot(string profile) => profile == "intensive-1k-c16" ? string.Empty
+        : (profile.StartsWith("vector-", StringComparison.Ordinal) ? "vector/" : "scaled/") + profile + "/";
 
     public static HashSet<string> ParentDirectories(IEnumerable<string> files)
     {

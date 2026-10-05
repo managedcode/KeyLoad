@@ -6,6 +6,8 @@ namespace KeyLoad.Orleans;
 /// <summary>Stable wire identities and bounded transport metadata.</summary>
 public static class ReplicaTransportProtocol
 {
+    private const int DefaultConnectTimeoutMilliseconds = 500;
+
     /// <summary>Authenticated envelope format version.</summary>
     public const int Version = 3;
     /// <summary>Unchanged discovery MAC version, independent of application peer envelopes.</summary>
@@ -42,8 +44,6 @@ public static class ReplicaTransportProtocol
     public const int DefaultDataAppendReplayCapacity = 32_768;
     /// <summary>Absolute aggregate retained nonce ceiling across all fixed voters and pools.</summary>
     public const int MaximumRetainedReplayNonces = 1_048_576;
-    /// <summary>Initial RPC plus one generation rediscovery within one overall deadline.</summary>
-    public const int MaximumAttempts = 2;
     /// <summary>MAC encoding for a successful response.</summary>
     public const int NoError = -1;
     /// <summary>Stable Orleans request type identity.</summary>
@@ -90,10 +90,8 @@ public static class ReplicaTransportProtocol
     public const string TransportUnavailable = "The Orleans replica transport is unavailable. Retry the same command ID.";
     /// <summary>Lifecycle observer diagnostic identity.</summary>
     public const string LifecycleName = "KeyLoadReplicaTransport";
-    /// <summary>Maximum accepted peer clock skew and envelope lifetime.</summary>
-    public static TimeSpan EnvelopeLifetime { get; } = TimeSpan.FromSeconds(30);
     /// <summary>Default bounded HTTP discovery connection timeout.</summary>
-    public static TimeSpan DefaultConnectTimeout { get; } = TimeSpan.FromMilliseconds(500);
+    public static TimeSpan DefaultConnectTimeout { get; } = TimeSpan.FromMilliseconds(DefaultConnectTimeoutMilliseconds);
     /// <summary>Exact UTF8 without a BOM, rejecting malformed characters and bytes.</summary>
     public static UTF8Encoding Utf8 { get; } = new(false, true);
 }

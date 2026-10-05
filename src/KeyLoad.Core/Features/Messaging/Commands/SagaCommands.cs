@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const long MaximumTimeoutTtlTicks = 365L * TimeSpan.TicksPerDay;
+    private const long MaximumTimeoutTtlTicks = RecurringSagaProtocol.MaximumMessageTimeToLiveTicks;
 
     internal MutationReceipt ApplyCompareExchangeSaga(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, CompareExchangeSaga request, DateTimeOffset now)

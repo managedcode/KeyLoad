@@ -11,7 +11,7 @@ internal static class EventProjectionProcessRecoveryAssertions
         CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var operation = NativeSerialization.Deserialize<ReplicatedOperation>(await File.ReadAllBytesAsync(
             Path.Combine(root, EventProjectionCrashScenario.OperationFile), cancellationToken));
         var projection = EventProjectionRecoveryStoreOracle.ReadProjection(operation);
@@ -28,7 +28,7 @@ internal static class EventProjectionProcessRecoveryAssertions
             cancellationToken);
         await EventProjectionRecoveryQueryOracle.AssertSearchAsync(database, committed, cancellationToken);
 
-        var recoveredReceipt = database.Outcome(operation.PrincipalId, operation.Id)?.Get<CommitReceipt>();
+        var recoveredReceipt = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(recoveredReceipt is not null).IsEqualTo(committed);
         var firstReceipt = database.Apply(operation).Get<CommitReceipt>();
         if (recoveredReceipt is not null)

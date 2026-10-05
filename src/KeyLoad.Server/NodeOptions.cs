@@ -6,6 +6,7 @@ using KeyLoad.Server.Features.ClusterRouting;
 namespace KeyLoad.Server;
 
 /// <summary>Fixed cluster configuration and private physical node settings.</summary>
+[ConfigurationOptions]
 internal sealed record NodeOptions
 {
     /// <summary>Directory owned exclusively by one process, independent of grain placement.</summary>
@@ -54,7 +55,7 @@ internal sealed record NodeOptions
     public McpMemoryLimits McpMemory { get; init; } = new();
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
-    internal RequestCqrsProbeOptions RequestCqrsProbe { get; init; } = new(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
+    internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
     /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
     public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
 

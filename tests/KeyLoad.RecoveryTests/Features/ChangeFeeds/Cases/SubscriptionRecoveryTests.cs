@@ -73,13 +73,14 @@ internal sealed class SubscriptionProcessRecoveryTests
         CancellationToken cancellationToken)
     {
         using var store = new ZoneTreeStore(new(root));
-        var database = new DatabaseEngine(store, new AuthorizationPolicy());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
         var subscription = SubscriptionCrashScenario.Subscription;
         var checkpoint = database.GetSubscription("root", subscription).Checkpoint;
         var document = database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"));
         await Assert.That(checkpoint is 0 or 1).IsTrue();
         await Assert.That(document is null).IsEqualTo(checkpoint == 0);
-        var outcome = database.Outcome("root", SubscriptionCrashScenario.CommandId);
+        var outcome = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(SubscriptionCrashScenario.Partition,
+            "root", SubscriptionCrashScenario.CommandId)));
         await Assert.That(outcome is null).IsEqualTo(checkpoint == 0);
         if (stage >= CommitStage.JournalFlushed)
         {

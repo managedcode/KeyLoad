@@ -21,7 +21,7 @@ internal sealed class BenchmarkTopologyMembershipTests
         byte[] membership;
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, configuration);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
             await Assert.That(store.Position).IsEqualTo(1L);
             await Assert.That(BenchmarkTopologyMembershipFixture.HardState(store)).IsNotNull();
             membership = BenchmarkTopologyMembershipFixture.Membership(store)!;
@@ -34,7 +34,7 @@ internal sealed class BenchmarkTopologyMembershipTests
             log.SaveTermAndVote(1, configuration.LocalId);
         }
         using var reopened = fixture.Open();
-        using var recovered = new DurableReplicaLog(reopened, configuration);
+        using var recovered = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(configuration));
         await Assert.That(recovered.State.Term).IsEqualTo(1L);
         await Assert.That(recovered.State.VotedFor).IsEqualTo(configuration.LocalId);
         await Assert.That(BenchmarkTopologyMembershipFixture.Membership(reopened)).IsEquivalentTo(membership, CollectionOrdering.Matching);
@@ -59,7 +59,7 @@ internal sealed class BenchmarkTopologyMembershipTests
             await Assert.That(failure.Message).DoesNotContain(BenchmarkTopologyMembershipFixture.PrivateCanary);
         }
         using var reopened = fixture.Open();
-        using var log = new DurableReplicaLog(reopened, configuration);
+        using var log = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(configuration));
         await Assert.That(reopened.Position).IsEqualTo(1L);
         await Assert.That(BenchmarkTopologyMembershipFixture.Membership(reopened)).IsNotNull();
         await Assert.That(BenchmarkTopologyMembershipFixture.HardState(reopened)).IsNotNull();
@@ -73,11 +73,11 @@ internal sealed class BenchmarkTopologyMembershipTests
         var production = fixture.Configuration(3, benchmark: false);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, production);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(production));
             await Assert.That(BenchmarkTopologyMembershipFixture.Membership(store)).IsNull();
         }
         using var reopened = fixture.Open();
-        using var ordinary = new DurableReplicaLog(reopened, production);
+        using var ordinary = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(production));
         var position = reopened.Position;
         var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, production with { BenchmarkTopology = true });
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -92,10 +92,10 @@ internal sealed class BenchmarkTopologyMembershipTests
         var original = fixture.Configuration(3);
         using (var store = fixture.Open())
         {
-            using var log = new DurableReplicaLog(store, original);
+            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(original));
         }
         using var reopened = fixture.Open();
-        using var same = new DurableReplicaLog(reopened, original with { BenchmarkTopology = false });
+        using var same = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(original with { BenchmarkTopology = false }));
         var position = reopened.Position;
         var reordered = original with { VoterIds = original.VoterIds.Reverse().ToImmutableArray() };
         var reduced = fixture.Configuration(1);

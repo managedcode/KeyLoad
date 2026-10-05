@@ -7,6 +7,7 @@ internal sealed class SqlBetweenRangeQueryTests
     private const string InclusiveSql = "SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id";
     private const string ReversedSql = "SELECT * FROM orders WHERE number BETWEEN 9 AND 1 ORDER BY id";
     private const string ParameterSql = "SELECT * FROM orders WHERE number BETWEEN @lower AND @upper ORDER BY id";
+    private const string MalformedDelimiterSql = "SELECT * FROM orders WHERE number BETWEEN 1 9 ORDER BY id";
     private const string StringSql = "SELECT * FROM orders WHERE label BETWEEN 'amber' AND 'moss' ORDER BY id";
     private const string BooleanSql = "SELECT * FROM orders WHERE flag BETWEEN FALSE AND TRUE ORDER BY id";
     private const string FieldBoundSql = "SELECT * FROM orders WHERE number BETWEEN lowerBound AND upperBound ORDER BY id";
@@ -16,7 +17,7 @@ internal sealed class SqlBetweenRangeQueryTests
     public async Task AcSqlc006ARealZoneTreeQueryIncludesBothBoundsAndUsesIndependentAst()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sqlPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, InclusiveSql));
         var expected = new AstQueryRequest(database.Partition,
             new(SqlBetweenTestData.Collection, null, [new("*", "*")], Range(new FieldOperand(SqlBetweenTestData.NumberPath),
@@ -31,7 +32,7 @@ internal sealed class SqlBetweenRangeQueryTests
     public async Task AcSqlc006AReversedBoundsAreValidAndMatchNoNumericRows()
     {
         using var database = SqlBetweenTestData.Create();
-        var page = new QueryEngine(database.Database).Execute(SqlBetweenTestData.Root,
+        var page = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, ReversedSql));
 
         await Assert.That(page.Rows).IsEmpty();
@@ -44,7 +45,7 @@ internal sealed class SqlBetweenRangeQueryTests
         using var database = SqlBetweenTestData.Create();
         database.Commit(new PutDocument(SqlBetweenTestData.Collection, SqlBetweenTestData.RowQuotedField,
             "{\"odd.name\":5}"));
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,
             new(database.Partition, QuotedFieldSql)));
         var optedIn = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, QuotedFieldSql));
@@ -57,15 +58,44 @@ internal sealed class SqlBetweenRangeQueryTests
     public async Task AcSqlc006AParametersStringAndBooleanBoundsUseExistingScalarOrdering()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var position = database.Store.Position;
         var parameterPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, ParameterSql,
             SqlBetweenTestData.Bounds(1, 9)));
+        var expectedAst = new AstQueryRequest(database.Partition,
+            new(SqlBetweenTestData.Collection, null, [new("*", "*")],
+                Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(9m)),
+                [new(SqlBetweenTestData.IdPath, false)], 100), AllowFullScan: true);
+        var astPage = engine.ExecuteAst(SqlBetweenTestData.Root, expectedAst);
         var stringPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, StringSql));
         var booleanPage = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, BooleanSql));
 
         await Assert.That(SqlBetweenTestData.Ids(parameterPage)).IsEqualTo("high,low,middle");
+        await SqlBetweenTestData.SameRows(astPage, parameterPage);
+        await Assert.That(parameterPage.CutPosition).IsEqualTo(position);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(SqlBetweenTestData.Ids(stringPage)).IsEqualTo("label-row,low,middle");
         await Assert.That(SqlBetweenTestData.Ids(booleanPage)).IsEqualTo("flag-row,high,low,middle");
+    }
+
+    [Test]
+    public async Task AcSqlc006AMalformedDelimiterDoesNotAdvanceAndValidRetryUsesSameEngine()
+    {
+        using var database = SqlBetweenTestData.Create();
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var position = database.Store.Position;
+        var malformed = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlBetweenTestData.Root,
+            SqlBetweenTestData.Request(database, MalformedDelimiterSql)));
+
+        await Assert.That(malformed.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+
+        var recovered = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database, ParameterSql,
+            SqlBetweenTestData.Bounds(1, 9)));
+
+        await Assert.That(SqlBetweenTestData.Ids(recovered)).IsEqualTo("high,low,middle");
+        await Assert.That(recovered.CutPosition).IsEqualTo(position);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
     [Test]
@@ -74,7 +104,7 @@ internal sealed class SqlBetweenRangeQueryTests
         using var database = SqlBetweenTestData.Create();
         database.Commit(new PutDocument(SqlBetweenTestData.Collection, SqlBetweenTestData.RowFieldBounds,
             SqlBetweenTestData.FieldBoundsDocument));
-        var page = new QueryEngine(database.Database).Execute(SqlBetweenTestData.Root,
+        var page = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, FieldBoundSql));
 
         await Assert.That(SqlBetweenTestData.Ids(page)).IsEqualTo(SqlBetweenTestData.RowFieldBounds);
@@ -84,7 +114,7 @@ internal sealed class SqlBetweenRangeQueryTests
     public async Task AcSqlc006ASqlAndAstKeepCursorAccessPathAndExplainEquivalent()
     {
         using var database = SqlBetweenTestData.Create();
-        var engine = new QueryEngine(database.Database);
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sql = engine.Execute(SqlBetweenTestData.Root,
             SqlBetweenTestData.Request(database, "SELECT * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id LIMIT 2"));
         var sqlNext = engine.Execute(SqlBetweenTestData.Root, SqlBetweenTestData.Request(database,

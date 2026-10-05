@@ -13,7 +13,7 @@ internal sealed class QueryAdapterContractTests
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{\"number\":2}"), new PutDocument("orders", "b", "{\"number\":3}"), new PutDocument("orders", "c", "{\"number\":4}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         const string sql = "SELECT d.id, d.number FROM orders d WHERE d.number >= 2.00 ORDER BY d.id LIMIT 1";
         var first = engine.Execute("root", new(db.Partition, sql, AllowFullScan: true));
         await Assert.That(System.Linq.Enumerable.Single(first.Rows).EntityId).IsEqualTo("a");
@@ -36,7 +36,7 @@ internal sealed class QueryAdapterContractTests
         db.Commit(new PutDocument("orders", "a", "{\"odd.name\":\"CANARY\",\"number\":1,\"status\":\"open\"}"));
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("reader", "tenant",
             [new("database", "orders", Capability.Query | Capability.DocumentsRead)], []))).Get<PrincipalRecord>();
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var filter = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").Where(row => row.Secret == "CANARY").ToRequest(true);
         var sort = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders").OrderBy(row => row.Secret).ToRequest(true);
         foreach (var query in new[] { filter, sort })
@@ -56,7 +56,7 @@ internal sealed class QueryAdapterContractTests
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "null", "{\"n\":null,\"status\":\"open\"}"), new PutDocument("orders", "missing", "{\"status\":\"hold\"}"),
             new PutDocument("orders", "value", "{\"n\":2,\"status\":\"closed\"}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var set = new[] { "open", "hold" };
         Expression<Func<QueryAdapterOrder, bool>> filter = row => set.Contains(row.Status)
             && (QueryFunctions.IsMissing(row.Optional) || QueryFunctions.IsNull(row.Optional));

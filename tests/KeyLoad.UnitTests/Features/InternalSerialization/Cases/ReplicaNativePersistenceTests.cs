@@ -33,7 +33,7 @@ internal sealed class ReplicaNativePersistenceTests
         var journal = await File.ReadAllBytesAsync(files.JournalPath);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new DurableReplicaLog(store, files.Configuration);
+            using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
         }).Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsEquivalentTo(bytes, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journal, CollectionOrdering.Matching);
@@ -44,11 +44,11 @@ internal sealed class ReplicaNativePersistenceTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.Batch, Principal,
             DateTimeOffset.UnixEpoch, Payload));
         using (var store = files.Open())
-        using (var log = new DurableReplicaLog(store, files.Configuration, canonicalDatabase: database))
+        using (var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database))
         {
             log.SaveTermAndVote(2, files.Configuration.LocalId);
             log.Append([new(1, 2, operation), new(2, 2, operation)]);
@@ -58,7 +58,7 @@ internal sealed class ReplicaNativePersistenceTests
             await Assert.That(log.State.LastIndex).IsEqualTo(2);
         }
         using var reopened = files.Open();
-        using var recovered = new DurableReplicaLog(reopened, files.Configuration, canonicalDatabase: database);
+        using var recovered = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(files.Configuration), canonicalDatabase: database);
         await Assert.That(recovered.State.Version).IsEqualTo(ReplicaProtocol.FormatVersion);
         await Assert.That(recovered.State.VotedFor).IsEqualTo(files.Configuration.LocalId);
         await Assert.That(recovered.State.CommittedIndex).IsEqualTo(1);
@@ -85,7 +85,7 @@ internal sealed class ReplicaNativePersistenceTests
         var bytes = checked((int)ReplicaProtocolCodec.MeasureEntries(entries));
         var configuration = files.Configuration with { MaxAppendBytes = bytes };
         using var store = files.Open();
-        using var log = new DurableReplicaLog(store, configuration);
+        using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration));
         log.SaveTermAndVote(1, null);
         log.Append(entries);
         var read = log.Read(1, entries.Length, bytes);
@@ -97,7 +97,7 @@ internal sealed class ReplicaNativePersistenceTests
             .IsEqualTo(ErrorCode.ResourceExhausted);
         using var rejectedFiles = new ReplicaNativeFiles();
         using var rejectedStore = rejectedFiles.Open();
-        using var rejected = new DurableReplicaLog(rejectedStore, rejectedFiles.Configuration with { MaxAppendBytes = bytes - 1 });
+        using var rejected = new DurableReplicaLog(rejectedStore, UnitExecutionOptions.ReplicaConfiguration(rejectedFiles.Configuration with { MaxAppendBytes = bytes - 1 }));
         rejected.SaveTermAndVote(1, null);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => rejected.Append(entries)).Code)
             .IsEqualTo(ErrorCode.ResourceExhausted);
@@ -119,7 +119,7 @@ internal sealed class ReplicaNativePersistenceTests
         var journal = await File.ReadAllBytesAsync(files.JournalPath);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new DurableReplicaLog(store, files.Configuration);
+            using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
         }).Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsEquivalentTo(bytes, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journal, CollectionOrdering.Matching);
@@ -131,19 +131,19 @@ internal sealed class ReplicaNativePersistenceTests
         using var files = new ReplicaNativeFiles();
         var configuration = files.Configuration with { BenchmarkTopology = true };
         using (var store = files.Open())
-        using (var log = new DurableReplicaLog(store, configuration))
+        using (var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(configuration)))
         {
             log.SaveTermAndVote(1, configuration.LocalId);
         }
         using var reopened = files.Open();
-        using (var accepted = new DurableReplicaLog(reopened, configuration))
+        using (var accepted = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(configuration)))
         {
             await Assert.That(accepted.State.Term).IsEqualTo(1);
         }
         var other = configuration with { VoterIds = [configuration.VoterIds[0], configuration.VoterIds[2], configuration.VoterIds[1]] };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var rejected = new DurableReplicaLog(reopened, other);
+            using var rejected = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(other));
         }).Code).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 }

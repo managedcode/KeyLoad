@@ -12,6 +12,8 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed class RedisTarget(string connectionString, string runId, string image,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
+    private const string RunIdentityFormat = "N";
+
     private const string Prefix = "keyload-benchmark:";
     private const string TargetName = "Redis";
     private const string InitialVersion = "unverified";
@@ -26,7 +28,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
     private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
     private readonly string connectionSettings = connectionString;
-    private readonly string prefix = Prefix + Guid.Parse(runId).ToString("N") + ":";
+    private readonly string prefix = Prefix + Guid.Parse(runId).ToString(RunIdentityFormat) + ":";
     private readonly string imageName = image;
     private readonly ComparisonTopology configuredTopology = topology;
     private readonly string[] replicaEndpoints = replicas ?? [];
@@ -76,7 +78,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
             }
         }
 
-        var probeKey = prefix + Guid.NewGuid().ToString("N");
+        var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
         var evidence = await RedisReplicaProof.VerifyAsync(connection, replicaEndpoints, configuredTopology, primaryIdentity, probeKey,
             dataset.Documents[0].Json, cancellationToken);
         Profile = Profile with

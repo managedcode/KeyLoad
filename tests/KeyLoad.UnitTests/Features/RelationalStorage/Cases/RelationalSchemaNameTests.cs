@@ -48,7 +48,7 @@ internal sealed class RelationalSchemaNameTests
             RelationalTestData.Row().Replace(QuotedKey, QuotedId, StringComparison.Ordinal)));
         var document = database.Database.GetDocument(RelationalTestData.Root,
             new(database.Partition, RelationalTestData.Table, RelationalTestData.First))!;
-        var query = new QueryEngine(database.Database).Execute(RelationalTestData.Root, new(database.Partition, QueryByPrimary));
+        var query = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByPrimary));
         await Assert.That(query.Rows).HasSingleItem();
         await Assert.That(query.AccessPath).IsEqualTo(PointAccess);
         await Assert.That(query.Rows[0].EntityId).IsEqualTo(document.Reference.Id);

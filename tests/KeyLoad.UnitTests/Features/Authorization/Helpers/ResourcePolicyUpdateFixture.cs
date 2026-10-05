@@ -54,7 +54,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(Partition, Collection, DocumentId)));
 
     internal byte[]? OutcomeBytes(Guid operationId) => Store.Read(view => view.ReadOwnedValue(
-        KeySpace.Outcome(RootId, operationId)));
+        KeySpace.GlobalOutcome(RootId, operationId)));
 
     internal ReplicatedOperation ConfigureResource(ResourceDefinition definition, long? expectedSchemaVersion = null,
         Guid? operationId = null, string principalId = RootId)
@@ -123,7 +123,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
             throw new InvalidOperationException("The resource policy fixture must own a fresh directory.");
         }
         Store = new(new(DirectoryPath));
-        Database = new(Store, new AuthorizationPolicy());
+        Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
         opened = true;
     }
 }

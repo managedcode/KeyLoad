@@ -9,6 +9,8 @@ namespace KeyLoad.Features.InternalSerialization;
 // Other Orleans codecs/surrogates require their own schema and qualification before admission.
 internal static class NativeWireSupported
 {
+    private const string OwnedAssemblyPrefix = "KeyLoad.";
+
     internal static void Require(Type? type)
     {
         if (type is null)
@@ -82,7 +84,7 @@ internal static class NativeWireSupported
         }
         for (var current = type; current is not null && current != typeof(object) && current != typeof(ValueType); current = current.BaseType)
         {
-            if (current.Assembly.GetName().Name?.StartsWith("KeyLoad.", StringComparison.Ordinal) != true
+            if (current.Assembly.GetName().Name?.StartsWith(OwnedAssemblyPrefix, StringComparison.Ordinal) != true
                 || current.GetCustomAttribute<Orleans.GenerateSerializerAttribute>(false) is null)
             {
                 return false;

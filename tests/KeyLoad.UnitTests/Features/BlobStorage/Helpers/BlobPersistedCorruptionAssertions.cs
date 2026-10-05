@@ -88,7 +88,7 @@ internal static class BlobPersistedCorruptionAssertions
         await Assert.That(BlobPersistedSnapshotReader.SameBytes(after.Clock, before.Clock)).IsTrue();
         await Assert.That(after.Position).IsEqualTo(before.Position);
         await Assert.That(after.LastApplied).IsEqualTo(before.LastApplied);
-        await Assert.That(BlobPersistedSnapshotReader.Read(database, KeySpace.Outcome(PrincipalId, commandId))).IsNull();
+        await Assert.That(BlobPersistedSnapshotReader.Read(database, OutcomeStoreOracle.PartitionKey(fixture.Blob.Partition, PrincipalId, commandId))).IsNull();
     }
 
     private static async Task AssertHealthyBlobAsync(BlobStorageOperations operations,

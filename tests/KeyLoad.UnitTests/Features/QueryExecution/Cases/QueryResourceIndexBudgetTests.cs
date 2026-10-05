@@ -20,7 +20,7 @@ internal sealed class QueryResourceIndexBudgetTests
         db.Configure(Collection, ResourceKind.Collection, indexes: [new(IndexName, [StatusPath])]);
         db.Commit(new PutDocument(Collection, DocumentId,
             "{\"status\":\"open\",\"payload\":\"" + new string('x', PayloadLength) + "\"}"));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var point = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", new(db.Partition, PointSql)));
         var index = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", new(db.Partition, IndexSql)));
         await Assert.That(point.Code).IsEqualTo(ErrorCode.BudgetExceeded);

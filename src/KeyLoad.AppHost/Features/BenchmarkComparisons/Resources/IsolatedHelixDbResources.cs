@@ -6,7 +6,7 @@ internal static class IsolatedHelixDbResources
     private const string Name = "isolated-helixdb";
     private const string Image = "ghcr.io/helixdb/helixdb";
     private const string ImageTag = "v0.0.10";
-    private const string ImageReference = "ghcr.io/helixdb/helixdb:v0.0.10@";
+    internal const string ImageReference = "ghcr.io/helixdb/helixdb:v0.0.10@";
     private const string DataMount = "/var/lib/helix";
     private const string DataDirectorySetting = "HELIX_DATA_DIR";
     private const string Endpoint = "http";

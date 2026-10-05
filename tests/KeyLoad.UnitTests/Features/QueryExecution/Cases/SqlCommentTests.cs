@@ -17,7 +17,7 @@ internal sealed class SqlCommentTests
                 SqlCommentTestData.OpenDocumentJson),
             new PutDocument(SqlCommentTestData.Collection, SqlCommentTestData.DocumentB,
                 SqlCommentTestData.ClosedDocumentJson));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
 
         var plain = engine.Execute(SqlCommentTestData.Principal,
             new(db.Partition, SqlCommentTestData.PlainSelect));
@@ -46,7 +46,7 @@ internal sealed class SqlCommentTests
         db.Configure(SqlCommentTestData.Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(SqlCommentTestData.Collection, SqlCommentTestData.DocumentA,
             SqlCommentTestData.QuotedDocumentJson));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
 
         var result = engine.Execute(SqlCommentTestData.Principal,
             new(db.Partition, SqlCommentTestData.QuotedSql, AllowFullScan: true));
@@ -66,7 +66,7 @@ internal sealed class SqlCommentTests
         db.Commit(new PutDocument(SqlCommentTestData.Collection, SqlCommentTestData.DocumentA,
             SqlCommentTestData.NumericDocumentPrefix + SqlCommentTestData.NumberValue
             + SqlCommentTestData.NumericDocumentSuffix));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
 
         var result = engine.Execute(SqlCommentTestData.Principal,
             new(db.Partition, SqlCommentTestData.NumericLineCommentSql));
@@ -120,7 +120,7 @@ internal sealed class SqlCommentTests
             indexes: [new(SqlCommentTestData.Status, [SqlCommentTestData.StatusPath])]);
         db.Commit(new PutDocument(SqlCommentTestData.Collection, SqlCommentTestData.DocumentA,
             SqlCommentTestData.OpenDocumentJson));
-        var engine = new QueryEngine(db.Database);
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         using var preCancelled = new CancellationTokenSource();
         await preCancelled.CancelAsync();
         await Assert.That(() => engine.Execute(SqlCommentTestData.Principal,

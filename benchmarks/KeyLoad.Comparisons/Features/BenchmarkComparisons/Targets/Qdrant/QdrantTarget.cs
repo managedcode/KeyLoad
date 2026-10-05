@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -7,6 +8,9 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Compares exact vector search against a run-specific Qdrant collection and verifies its configured native peers.</summary>
 public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
 {
+    private const string RunIdentityFormat = "N";
+    private const int CleanupTimeoutSeconds = 10;
+
     private const string CollectionPrefix = "keyload_benchmark_";
     private const string ResultProperty = "result";
     private const string PointsProperty = "points";
@@ -24,8 +28,10 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     private bool collectionCreationAttempted;
     private int topK;
     private QdrantVectorOperations? vectorOperations;
+    private readonly IOptions<NativeComparisonExecutionOptions>? executionOptions;
 
-    private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology);
+    private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology,
+        executionOptions ?? throw new InvalidOperationException(QdrantVectorProtocol.MissingExecutionPolicy));
     string IVectorComparisonTarget.Name => "Qdrant";
     bool IVectorComparisonTarget.Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
         => indexKind is VectorIndexKind.Exact or VectorIndexKind.Hnsw && Enum.IsDefined(queryMode);
@@ -64,13 +70,27 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         this.topology = topology;
         seedSuffix = QdrantNativePolicy.SeedSuffix(topology);
         querySuffix = QdrantNativePolicy.QuerySuffix(topology);
-        collection = CollectionPrefix + Guid.Parse(runId).ToString("N");
+        collection = CollectionPrefix + Guid.Parse(runId).ToString(RunIdentityFormat);
         this.nodeClients = nodeClients ?? [http];
         ownedClients = this.nodeClients.Prepend(http).Distinct<HttpClient>(ReferenceEqualityComparer.Instance).ToArray();
         if (ownedClients.Length != this.nodeClients.Length + (this.nodeClients.Contains(http) ? 0 : 1))
         {
             throw new ComparisonFailureException("QdrantDuplicateClientOwnership");
         }
+    }
+
+    /// <summary>Creates a native target with centrally validated execution limits.</summary>
+    /// <param name="http">The collection HTTP client transferred to this target.</param>
+    /// <param name="runId">The isolated run identity.</param>
+    /// <param name="image">The pinned native image.</param>
+    /// <param name="topology">The actual native member topology.</param>
+    /// <param name="nodeClients">Clients for each configured native member.</param>
+    /// <param name="executionOptions">The centrally registered and validated execution policy.</param>
+    public QdrantTarget(HttpClient http, string runId, string image, ComparisonTopology topology,
+        HttpClient[]? nodeClients, IOptions<NativeComparisonExecutionOptions> executionOptions)
+        : this(http, runId, image, topology, nodeClients)
+    {
+        this.executionOptions = executionOptions ?? throw new ArgumentNullException(nameof(executionOptions));
     }
 
     /// <summary>Gets the server version, native topology, write acknowledgement, exact-read, transport, and replica evidence.</summary>
@@ -140,7 +160,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <returns>A value task that completes after collection cleanup and client disposal.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
         try
         {
             if (vectorOperations is not null)

@@ -42,6 +42,6 @@ internal static class NativeAuthorityFixture
         await Assert.That(apply.Code).IsEqualTo(code);
         await Assert.That(resolve.Code).IsEqualTo(code);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Database.Outcome(operation.PrincipalId, operation.Id)).IsNull();
+        await Assert.That(OutcomeStoreOracle.Read(database.Store, operation)).IsNull();
     }
 }

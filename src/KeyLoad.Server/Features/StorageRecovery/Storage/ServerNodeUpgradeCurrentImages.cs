@@ -59,7 +59,7 @@ internal static class ServerNodeUpgradeCurrentImages
     private static void ValidateImageEntry(ServerNodeUpgradeEntry image)
     {
         if (image.Directory || image.Path.Contains('/', StringComparison.Ordinal)
-            || !image.Path.EndsWith(".snapshot", StringComparison.Ordinal)
+            || !image.Path.EndsWith(ServerNodeUpgradeProtocol.SnapshotSuffix, StringComparison.Ordinal)
             || !Guid.TryParseExact(image.Path[..^".snapshot".Length], "N", out _))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
     }

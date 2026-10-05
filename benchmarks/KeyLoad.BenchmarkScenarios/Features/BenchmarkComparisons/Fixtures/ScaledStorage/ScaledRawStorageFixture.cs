@@ -5,7 +5,8 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageFixture : IDisposable
 {
-    internal static readonly TimeSpan PreparationLimit = TimeSpan.FromMinutes(20);
+    private const int PreparationLimitMinutes = 20;
+    internal static readonly TimeSpan PreparationLimit = TimeSpan.FromMinutes(PreparationLimitMinutes);
     private readonly CancellationTokenSource _lifetime;
     private ScaledRawStorageFixtureCore? _core;
     private bool _closing;

@@ -26,6 +26,11 @@ export function validateWorkerEnvelope(value, cell, cohort, contract) {
       requireValue(value.disposition === AGGREGATE.unsupportedTopology && value.reason === topology.reason && value.report === null, error);
       return value;
     }
+    if (cell.target === 'KeyLoad') {
+      requireValue(value.disposition === AGGREGATE.unsupported && value.reason ===
+        'KeyLoad SDK does not expose persisted vector readback or native numeric predicates required for scaled vector qualification.' && value.report === null, error);
+      return value;
+    }
     if (!VECTOR_SUPPORT[cell.target].includes(profile.indexKind)) {
       requireValue(value.disposition === AGGREGATE.unsupported && value.reason ===
         `${cell.target} does not implement ${profile.indexKind}/${profile.queryMode} natively.` && value.report === null, error);

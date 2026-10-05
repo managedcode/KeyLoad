@@ -1,3 +1,4 @@
+using KeyLoad;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication.Commands;
 using KeyLoad.AppHost.Features.ClusterRouting;
@@ -6,6 +7,7 @@ using KeyLoad.AppHost.Features.TestInfrastructure;
 namespace KeyLoad.AppHost.Hosting;
 
 /// <summary>Owns complete Aspire resource composition for the KeyLoad AppHost.</summary>
+[ConfigurationBinding]
 internal static class KeyLoadAppHostApplication
 {
     internal static async Task<int> RunAsync(string[] args)
@@ -18,7 +20,8 @@ internal static class KeyLoadAppHostApplication
             Args = args,
             DisableDashboard = requested
         });
-        var tests = TestSuiteSettings.Read(builder.Configuration);
+        var runtimeOptions = AppHostOptionsRegistration.Get(builder);
+        var tests = TestSuiteSettings.Read(builder.Configuration, runtimeOptions.TestExecution);
         if (requested && tests is null)
         {
             throw new InvalidOperationException("An explicitly selected test suite must not be empty.");
@@ -43,7 +46,8 @@ internal static class KeyLoadAppHostApplication
         var twoRf3 = TwoRf3Profile.ValidateAndRead(builder.Configuration);
         ProtocolCohortImages.ValidateMode(builder.Configuration);
         RequestCqrsProbeProfile.ValidateMode(builder.Configuration);
-        var tests = TestSuiteSettings.Read(builder.Configuration);
+        var runtimeOptions = AppHostOptionsRegistration.Get(builder);
+        var tests = TestSuiteSettings.Read(builder.Configuration, runtimeOptions.TestExecution);
         var scaleSelected = builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.ScaleProfileSetting] is not null;
         if (scaleSelected && (tests is not null
             || builder.Configuration[KeyLoad.Comparisons.ComparisonWorkerSelection.TargetSetting] is null))

@@ -7,6 +7,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal static class NativeSerializationBenchmarkManifest
 {
     internal const string DirectoryVariable = "KEYLOAD_NATIVE_SERIALIZATION_CORPUS_DIRECTORY";
+    private const string TemporaryIdentityFormat = "N";
 
     internal static void Write<T>(string fixture, int payloadBytes, NativeSerializationBenchmarkState<T> state)
     {
@@ -33,7 +34,7 @@ internal static class NativeSerializationBenchmarkManifest
 
     private static void WriteConsistent(string path, byte[] receipt)
     {
-        var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        var temporary = path + "." + Guid.NewGuid().ToString(TemporaryIdentityFormat) + ".tmp";
         try
         {
             File.WriteAllBytes(temporary, receipt);

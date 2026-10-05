@@ -33,12 +33,12 @@ internal sealed record ComparisonExecutionIdentity(
 
     private static readonly string[] EvidenceProfiles =
     [
-        "smoke-single",
-        "json-1k-c8-single",
-        "json-16k-c4-single",
-        "smoke-replicated",
-        "json-1k-c8-replicated",
-        "json-16k-c4-replicated"
+        ComparisonExecutionIdentityValues.SmokeSingle,
+        ComparisonExecutionIdentityValues.Json1kC8Single,
+        ComparisonExecutionIdentityValues.Json16kC4Single,
+        ComparisonExecutionIdentityValues.SmokeReplicated,
+        ComparisonExecutionIdentityValues.Json1kC8Replicated,
+        ComparisonExecutionIdentityValues.Json16kC4Replicated
     ];
 
     /// <summary>Reads and validates container provenance after ordinary host settings have been validated.</summary>
@@ -62,6 +62,7 @@ internal sealed record ComparisonExecutionIdentity(
     /// <param name="sourceRevision">The measured source revision.</param>
     /// <param name="topology">The selected native topology.</param>
     /// <param name="scaledProfileId">The exact scaled profile identity, or null for the existing control.</param>
+    /// <param name="vectorProfileId">The exact native vector profile identity, or null.</param>
     /// <returns>The validated native image and GitHub provenance.</returns>
     internal static ComparisonExecutionIdentity? ReadIsolated(IConfiguration configuration, string sourceRevision,
         ComparisonTopology topology, string? scaledProfileId = null, string? vectorProfileId = null)
@@ -120,15 +121,30 @@ internal sealed record ComparisonExecutionIdentity(
     private static bool IsAcceptedExecutionProfile(string profile, ComparisonTopology? topology,
         bool isTimeSeries, bool isIsolated, bool isIntensiveTimeSeries, string? isolatedScaleProfileId,
         string? isolatedVectorProfileId)
-        => isIntensiveTimeSeries
-            ? profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile
-            : isIsolated ? topology is { } selected && Enum.IsDefined(selected)
-                && (isolatedScaleProfileId is not null
-                    ? profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId)
-                    : isolatedVectorProfileId is not null
-                        ? profile == isolatedVectorProfileId && IsExactVectorProfile(isolatedVectorProfileId)
-                        : profile == IsolatedComparisonContract.Current.Profile)
-                : IsAcceptedProfile(profile, topology, isTimeSeries);
+    {
+        if (isIntensiveTimeSeries)
+        {
+            return profile == TimeSeriesIntensiveFamilyContract.Current.EvidenceProfile;
+        }
+        if (!isIsolated)
+        {
+            return IsAcceptedProfile(profile, topology, isTimeSeries);
+        }
+        if (topology is not { } selected || !Enum.IsDefined(selected)
+            || (isolatedScaleProfileId is not null && isolatedVectorProfileId is not null))
+        {
+            return false;
+        }
+        if (isolatedScaleProfileId is not null)
+        {
+            return profile == isolatedScaleProfileId && IsExactScaledProfile(isolatedScaleProfileId);
+        }
+        if (isolatedVectorProfileId is not null)
+        {
+            return profile == isolatedVectorProfileId && IsExactVectorProfile(isolatedVectorProfileId);
+        }
+        return profile == IsolatedComparisonContract.Current.Profile;
+    }
 
     private static bool IsExactVectorProfile(string profile)
     {
@@ -161,18 +177,18 @@ internal sealed record ComparisonExecutionIdentity(
         => string.IsNullOrWhiteSpace(value) ? throw InvalidIdentity() : value;
 
     private static long PositiveInt64(string value)
-        => long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > 0
+        => long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > ComparisonExecutionIdentityValues.FirstIndex
             ? parsed
             : throw InvalidIdentity();
 
     private static int PositiveInt32(string value)
-        => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > 0
+        => int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed > ComparisonExecutionIdentityValues.FirstIndex
             ? parsed
             : throw InvalidIdentity();
 
     private static bool IsRevision(string? value)
         => value is { Length: RevisionLength }
-            && value.All(static character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
+            && value.All(static character => character is >= ComparisonExecutionIdentityValues.FirstDecimalDigit and <= ComparisonExecutionIdentityValues.LastDecimalDigit or >= ComparisonExecutionIdentityValues.ACharacter and <= ComparisonExecutionIdentityValues.FCharacter);
 
     private static bool IsAcceptedProfile(string profile, ComparisonTopology? topology, bool isTimeSeries)
         => isTimeSeries

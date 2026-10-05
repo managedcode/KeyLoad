@@ -2,7 +2,7 @@
 
 Status: Accepted for per-method selection and audit; runtime/provider adoption
 pending. Date: 2026-10-05. Integration owner: KeyLoad lead.
-Requirements and acceptance: REQ/AC-ORL-001..010 in
+Requirements and acceptance: REQ/AC-ORL-001..012 in
 [ClusterRouting ExecutionPrimitives](../Features/ClusterRouting/ExecutionPrimitives.md).
 
 ## Context and decision
@@ -18,6 +18,8 @@ The owner's follow-up explicitly includes local Orleans services and a broad
 documentation review, including messaging/pub-sub and transactions. Extend the
 selection inventory before choosing new providers or contracts; preserve the
 existing native replica/due GrainServices and silo-local storage/lifecycle owners.
+The canonical reviewed capability inventory and proposed priorities are in
+[CapabilityReview](../Features/ClusterRouting/CapabilityReview.md).
 
 Adopt a per-grain/method selection contract rather than enabling attributes
 globally. The owning feature contains the canonical source audit, candidate
@@ -39,6 +41,15 @@ package and persistent journal/catalog provider, atomic enqueue/reconciliation,
 privacy, retry/admission and homogeneous rollout contracts must be frozen before
 integration. This ADR accepts their evaluation; it does not choose a provider or
 authorize replacing canonical ZoneTree schedule/saga state with a volatile queue.
+
+Retain native GrainServices for per-silo/partitioned runtime support, borrowed
+silo-local DI owners and precise silo/activation lifecycle hooks. New loops
+require explicit ownership, readiness/admission and joined shutdown; registration
+alone never establishes a cluster singleton. Evaluate native Streams as a bounded
+post-commit delivery path with canonical outbox/catch-up, and native transactions
+through a dedicated ZoneTree/RF3 transactional storage/visibility contract.
+Provider selection, distributed transaction guarantees and new runtime settings
+remain separate implementation joins; the review does not enable them.
 
 ## Alternatives and consequences
 
@@ -75,6 +86,13 @@ flowchart TD
     Audit --> Ordered[Ordered effect or durable receipt]
     Ordered --> Serial[Serial reliable canonical path]
 ```
+
+Owner implementation approval, 2026-10-06: [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md)
+freezes the first concrete native-service and telemetry stages, REQ/AC-ORL-011/012. Reuse the
+coalesced node-local post-apply notification with a bounded clock fallback;
+retain known-target awaited due RPC. Root owns shared contracts/gates and Luna
+owns the disjoint runtime/test files; native provider/transaction stages remain
+subject to their exact storage and trust joins.
 
 ## Implementation contract
 
