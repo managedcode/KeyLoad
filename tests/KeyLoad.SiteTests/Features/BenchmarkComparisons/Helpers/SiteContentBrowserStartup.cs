@@ -30,6 +30,13 @@ internal static class SiteContentBrowserStartup
             SiteBrowserTokens.BrowserSessionPrefix + Guid.NewGuid().ToString("N"));
         var metadata = SiteBrowserCoverageMetadata.Create(inputs.SiteRevision, chrome.Version,
             startup.Host.BaseUrl, manifest);
+        await chrome.Cdp.CommandAsync(SiteBrowserTokens.SetDeviceMetrics, new Dictionary<string, object?>
+        {
+            [SiteBrowserTokens.WidthField] = SiteBrowserUiTokens.ViewportDesktopWidth,
+            [SiteBrowserTokens.HeightField] = SiteBrowserUiTokens.ViewportMobileHeight,
+            [SiteBrowserTokens.DeviceScaleFactorField] = SiteBrowserTokens.One,
+            [SiteBrowserTokens.MobileField] = false,
+        }, token);
         await chrome.NavigateAsync(startup.Host.BaseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, token);
         return startup.Transfer(session, metadata);
     }
@@ -63,7 +70,8 @@ internal static class SiteContentBrowserStartup
         var path = Path.Combine(Path.GetFullPath(coverageRoot), SiteCoverageTokens.SourceManifestFile);
         var bytes = await File.ReadAllBytesAsync(path, token);
         var manifest = JsonSerializer.Deserialize<SiteCoverageSourceManifest>(bytes, SiteCoverageTokens.JsonOptions);
-        var expected = SiteCoverageSourceInventory.ContentSources.Order(StringComparer.Ordinal).ToArray();
+        var expected = SiteCoverageModeSelector.Sources(SiteCoverageModeSelector.Current)
+            .Order(StringComparer.Ordinal).ToArray();
         if (manifest is null || manifest.SchemaVersion != SiteCoverageTokens.Schema ||
             manifest.SourceRevision != inputs.SiteRevision || manifest.Sources.Count != expected.Length ||
             !manifest.Sources.Select(source => source.Path).SequenceEqual(expected, StringComparer.Ordinal))

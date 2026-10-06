@@ -51,7 +51,7 @@ internal sealed class SiteContentBuilderTests
         await Assert.That(mixed.StandardError.Contains(SiteContentTokens.InvalidArgumentError, StringComparison.Ordinal)).IsTrue();
         await Assert.That(Directory.Exists(mixedScope.Output)).IsFalse();
 
-        var unsafeOutput = Path.Combine(inputs.Repository,
+        var unsafeOutput = Path.Combine(inputs.Repository, SiteAssetTokens.SiteRootDirectory,
             SiteContentTokens.UnsafeOutputName + SiteContentTokens.UniqueSuffix + Guid.NewGuid().ToString("N"));
         try
         {

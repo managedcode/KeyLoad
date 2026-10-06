@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml/badge.svg" alt="Build and Tests"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Elastic%202.0-black" alt="Elastic License 2.0"></a>
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <img src="https://img.shields.io/badge/built%20on-Orleans-0b5cad" alt="Built on Orleans">

@@ -15,10 +15,12 @@ from pathlib import Path
 REPOSITORY = "managedcode/KeyLoad"
 RELEASE_PATH = ".github/workflows/release.yml"
 CI_PATH = ".github/workflows/ci.yml"
+BUILD_TESTS_NAME = "Build and Tests"
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_ITEMS = 10_000
 MAX_PAGES = 100
-REQUIRED_CI_JOBS = {"Repository checks", "analyzer-rules", "Build and tests", "docker-rf3"}
+BUILD_TESTS_JOB = "Build and test KeyLoad"
+REQUIRED_CI_JOBS = {"Check repository rules", "Test code analyzers", BUILD_TESTS_JOB, "Test three-node database"}
 REPOSITORY_ID = None
 
 
@@ -237,7 +239,7 @@ def version_input(context, run, workflow_id, reservation_path):
 
 
 def validate_ci_run(run, workflow_id, source_revision):
-    expected = {"workflow_id": workflow_id, "path": CI_PATH, "name": "CI", "head_branch": "main",
+    expected = {"workflow_id": workflow_id, "path": CI_PATH, "name": BUILD_TESTS_NAME, "head_branch": "main",
                 "head_sha": source_revision}
     if any(run.get(key) != value for key, value in expected.items()) \
             or run.get("repository", {}).get("full_name") != REPOSITORY \
@@ -265,7 +267,7 @@ def ci_jobs(run):
         if not isinstance(name, str) or not name or name in names or not isinstance(job.get("id"), int):
             fail("Exact-source CI job inventory has invalid or duplicate identities.")
         names.add(name)
-        normalized = "Build and tests" if name in ("Build and tests", "Build and tests (ubuntu-latest)") else name
+        normalized = BUILD_TESTS_JOB if name == f"{BUILD_TESTS_JOB} (ubuntu-latest)" else name
         if normalized in REQUIRED_CI_JOBS:
             if normalized in mandatory_names:
                 fail("Exact-source CI contains duplicate mandatory job identities.")
@@ -280,7 +282,7 @@ def ci_jobs(run):
 
 
 def ci_receipt(context):
-    workflow_id = find_workflow(CI_PATH, "CI")
+    workflow_id = find_workflow(CI_PATH, BUILD_TESTS_NAME)
     runs_route = f"repos/{REPOSITORY}/actions/workflows/{workflow_id}/runs?branch=main&head_sha={context['sourceRevision']}"
     runs = paginated_items(runs_route, "workflow_runs")
     candidates = [run for run in runs if isinstance(run, dict) and validate_ci_run(run, workflow_id, context["sourceRevision"])]

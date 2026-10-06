@@ -1134,20 +1134,20 @@ flowchart LR
 
 ## Independent optional benchmark website publication
 
-[ADR-113](ADR/ADR-112-independent-website-publication.md) and
-[REQ/AC-BC-WEB-001..005](Features/BenchmarkComparisons.md) let CI publish website
+[ADR-112](ADR/ADR-112-independent-website-publication.md) and
+[REQ/AC-BC-WEB-001..006](Features/BenchmarkComparisons.md) let Website publish website
 source independently. The latest ready authenticated benchmark aggregate enriches
 the website when available; absence emits no metric catalog or figures. Content
 and measured artifacts have distinct complete applicable qualification, and
 predeploy rechecks actual website/control source plus ready-data identity or null.
-Completed own-main benchmarks trigger another independent CI website consumer.
+Completed own-main benchmarks trigger another independent Website consumer.
 
 ```mermaid
 flowchart LR
-  Source[Website source] --> CI[Independent CI website qualification]
-  Producer[Ready Benchmarks JSON] --> CI
-  CI --> Content[Product site without metrics]
-  CI --> Measured[Product site with authenticated metrics]
+  Source[Website source] --> Website[Separate Website qualification]
+  Producer[Ready Benchmarks JSON] --> Website
+  Website --> Content[Product site without metrics]
+  Website --> Measured[Product site with authenticated metrics]
   Content --> Fresh[Recheck source and available data]
   Measured --> Fresh
   Fresh --> Pages[Pages]
@@ -1156,3 +1156,8 @@ flowchart LR
 Source implementation and actual qualification/publication evidence are tracked
 in the feature specification. This architecture contract alone is not deployment
 proof. Existing benchmark/db/RF3 gates remain separate and mandatory.
+
+Build and Tests (`ci.yml`) retains solution build and ordinary tests. Website
+(`website.yml`) has no build/test workflow dependency; Benchmarks produces JSON
+and Release remains manual. This four-workflow correction supersedes the earlier
+three-workflow map without changing database qualification.

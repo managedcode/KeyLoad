@@ -53,6 +53,71 @@ internal static class SiteIsolatedGitHubNodeProgram
             'fresh','--before='+request.arguments.before,'--after='+request.arguments.after]);
           else if (request.operation === 'cli') result = await (await load('cli')).runSiteIsolatedGitHub(request.arguments);
           else if (request.operation === 'producer-event') result = await (await load('context')).readSiteProducerEvent(request.arguments.path);
+          else if (request.operation === 'executor-admission') {
+            const { SITE_GH } = await load('contract');
+            const { createSiteIsolatedContext } = await load('context');
+            const revision = 'a'.repeat(40);
+            const makeFixture = () => ({
+              environment: {
+                GITHUB_REPOSITORY: SITE_GH.repository, GH_REPO: SITE_GH.repository,
+                GITHUB_REPOSITORY_ID: String(SITE_GH.repositoryId), GITHUB_ACTIONS: 'true', RUNNER_OS: 'Linux',
+                GITHUB_WORKFLOW: SITE_GH.executor, GITHUB_WORKFLOW_SHA: revision,
+                GITHUB_WORKFLOW_REF: `${SITE_GH.repository}/${SITE_GH.executorPath}@refs/heads/main`,
+                GITHUB_JOB: SITE_GH.executorJobs[0], GITHUB_EVENT_NAME: 'push', GITHUB_SHA: revision,
+                GH_TOKEN: 'controlled-test-token', GITHUB_RUN_ID: '1', GITHUB_RUN_ATTEMPT: '1',
+                GITHUB_WORKSPACE: '/tmp/keyload-site-tests', GITHUB_REF: 'refs/heads/main',
+              },
+              args: { mode: SITE_GH.publish, 'workflow-revision': revision, 'site-revision': revision },
+            });
+            const candidate = makeFixture();
+            if (request.arguments.identity === 'legacy-ci') {
+              candidate.environment.GITHUB_WORKFLOW = 'CI';
+              candidate.environment.GITHUB_WORKFLOW_REF = `${SITE_GH.repository}/.github/workflows/ci.yml@refs/heads/main`;
+            } else if (request.arguments.identity === 'wrong-path') {
+              candidate.environment.GITHUB_WORKFLOW_REF = `${SITE_GH.repository}/.github/workflows/ci.yml@refs/heads/main`;
+            }
+            const before = JSON.stringify(candidate);
+            let candidateAccepted = true;
+            try { await createSiteIsolatedContext(candidate.environment, candidate.args, 'linux'); }
+            catch { candidateAccepted = false; }
+            const inputsPreserved = JSON.stringify(candidate) === before;
+            const followup = makeFixture();
+            const healthy = await createSiteIsolatedContext(followup.environment, followup.args, 'linux');
+            result = { candidateAccepted, inputsPreserved, followupAccepted: healthy.executor.workflow === SITE_GH.executor
+              && healthy.executor.sourceRevision === revision && healthy.executor.event === 'push' };
+          }
+          else if (request.operation === 'unavailable-producer-generation') {
+            const runs = await load('runs');
+            const fixture = request.arguments.fixture;
+            const original = JSON.stringify(fixture);
+            const validate = value => {
+              const workflow = runs.validateSiteWorkflow(value.workflow);
+              const run = runs.validateSiteRun(value.run, workflow);
+              return runs.selectSiteAggregateJob(run, [value.aggregateJob]);
+            };
+            const candidate = structuredClone(fixture);
+            if (request.arguments.mutation === 'changed-step') {
+              const generation = (await load('contract')).SITE_GH.unavailableProducerGenerations
+                .find(item => item.sourceRevision === candidate.run.head_sha);
+              const changed = candidate.aggregateJob.steps.find(step => step.name === generation.ownedSteps[2]);
+              changed.name += ' changed';
+            } else if (request.arguments.mutation === 'changed-source') {
+              candidate.run.head_sha = request.arguments.changedSource;
+              candidate.aggregateJob.head_sha = request.arguments.changedSource;
+            } else if (request.arguments.mutation === 'changed-repository') {
+              candidate.run.repository.id += 1;
+              candidate.run.repository.full_name = 'foreign/KeyLoad';
+            }
+            const candidateSnapshot = JSON.stringify(candidate);
+            let candidateAccepted = true;
+            let unavailable = false;
+            try { unavailable = !validate(candidate).successful; }
+            catch { candidateAccepted = false; }
+            const followup = validate(structuredClone(fixture));
+            result = { candidateAccepted, unavailable, inputsPreserved: JSON.stringify(fixture) === original,
+              candidatePreserved: JSON.stringify(candidate) === candidateSnapshot,
+              followupUnavailable: !followup.successful };
+          }
           else if (request.operation === 'latest-selection') {
             const runs = await load('runs');
             const metadata = path.join(request.arguments.input,'metadata');

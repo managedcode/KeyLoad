@@ -4786,10 +4786,10 @@
         "REQ-BC-FAIL-020",
         "REQ-BC-FAIL-021"
       ],
-      "ownerCorrection": "2026-10-06: Independent source-triggered CI publication uses newest completed own-main Benchmarks with ready authenticated aggregate; no ready aggregate publishes the qualified product website without metrics; ready JSON triggers refresh",
+      "ownerCorrection": "2026-10-06: Website is a separate fourth workflow; Build and Tests owns full solution build and ordinary tests; ready authenticated Benchmarks data is optional; absent data still publishes the qualified content-only site",
       "implementation": "source_implemented_and_development_verified",
       "benchmarkNativeSourceAndEngineUnchanged": true,
-      "websiteConsumer": "independent CI own-main push/manual and completed Benchmarks workflow_run",
+      "websiteConsumer": "standalone Website own-main push/manual and completed Benchmarks workflow_run",
       "runtimeQualified": false,
       "publicationQualified": false,
       "selection": "newest_completed_own_main_push_or_workflow_dispatch_Benchmarks_with_successful_authenticated_aggregate; valid_failed_or_absent_aggregate_not_available; corrupt_selected_ready_evidence_fails; fresh_ready_tuple_or_null_before_deploy",
@@ -4869,6 +4869,44 @@
           "trxSha256": "a078f3f0777130176bffe71592a59ce398c4b039e4ff9c32983ac1525fb6e6c6"
         },
         "nativeReverification": "pending next scoped push"
+      },
+      "standaloneWebsite": {
+        "requirement": "REQ-BC-WEB-006",
+        "workflow": ".github/workflows/website.yml",
+        "buildAndTestsWorkflow": ".github/workflows/ci.yml",
+        "buildAndTestsName": "Build and Tests",
+        "implementation": "source_implemented_scoped_development_verified_provider_pending",
+        "buildAndTestsDependency": false,
+        "benchmarkSuccessDependency": false,
+        "qualification": "existing_content_only_or_complete_measured_qualification_and_freshness_preserved",
+        "providerPublication": "pending",
+        "siteTestsBuild": "passed_zero_warnings_zero_errors",
+        "siteTestsFormat": "passed",
+        "canonicalBuild": "passed_zero_warnings_zero_errors_final_source",
+        "canonicalFormat": "failed_unrelated_BackupRestore_AtomicPartitionRosterFixture_whitespace",
+        "staticWorkflowGovernance": "passed",
+        "contentOnlyAspire": {
+          "status": "passed_development_only",
+          "tests": 5,
+          "passed": 5,
+          "skipped": 0,
+          "linePercent": 93,
+          "branchPercent": 78,
+          "criticalBuilderPercent": 96,
+          "criticalBootstrapPercent": 92,
+          "trxSha256": "547b76e922d5e52f534275325aca0ca826ad0d7b6f648dcaceac2acc96b609f0",
+          "coverageSha256": "e156963cd87ea4599bd2bee3cadb97c3f1efd98c5c48d89e87331a6bdd835403",
+          "qualification": "actual_Aspire_owned_content_route_real_Node_Chrome_unchanged_80_70_90_thresholds; not_GitHub_or_Pages_proof"
+        },
+        "alwaysRunExecutorRegressions": {
+          "status": "passed_development_only",
+          "suite": "Aspire_unit_SiteOptionalBenchmarkSelectionTests",
+          "tests": 21,
+          "passed": 21,
+          "skipped": 0,
+          "executorCases": 3,
+          "trxSha256": "9432e030119757663722244c78d40215a87cdb149e8d89cc338c469ab8620452"
+        }
       }
     }
   },

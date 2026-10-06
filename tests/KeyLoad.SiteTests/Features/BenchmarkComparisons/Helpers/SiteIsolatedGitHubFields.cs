@@ -67,6 +67,14 @@ internal static class SiteIsolatedGitHubFields
     public const string UnknownCellInventory = "controlled-unknown-n1-create-zip-inventory.txt";
     public const string CloneOperation = "clone";
     public const string DetachOperation = "detach";
+    public const string ExecutorAdmissionOperation = "executor-admission";
+    public const string UnavailableProducerGenerationOperation = "unavailable-producer-generation";
+    public const string WebsiteExecutorIdentity = "website";
+    public const string LegacyCiIdentity = "legacy-ci";
+    public const string WrongWorkflowPathIdentity = "wrong-path";
+    public const string CandidateAccepted = "candidateAccepted";
+    public const string InputsPreserved = "inputsPreserved";
+    public const string FollowupAccepted = "followupAccepted";
     public const string NativeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubNativeFixture";
     public const string Repository = "repository";
     public const string WorkflowKey = "workflow";

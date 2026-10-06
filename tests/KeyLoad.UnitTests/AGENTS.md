@@ -42,3 +42,6 @@
 - Place every feature-owned source file under `Features/<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
 - Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
 - Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.
+
+## Standalone Website qualification
+- BenchmarkComparisons' Aspire-owned `SiteOptionalBenchmarkSelectionTests` preparation gate MUST verify native Website executor admission, rejection of CI and a wrong workflow path, unchanged controlled inputs and a healthy follow-up on every Website run, including the no-metrics mode. Use the actual production context API; controlled context properties are test data and never provider/publication evidence. Keep the closed content artifact/browser source inventory and complete measured provenance coverage distinct and mandatory.

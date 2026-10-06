@@ -27,7 +27,8 @@ flowchart LR
     License --> Commercial[Separate authorization for hosted database services]
 ```
 
-The owner requires three pipelines and a real dated database release. The immutable
+The owner requires four workflows (Build and Tests, Benchmarks, Website and Release)
+and a real dated database release. ADR-112 owns the separate Website boundary. The immutable
 version/tag is `v<major>.<minor>.<yyMMdd>.<daily-build>`; major/minor come from central
 source configuration, UTC defines the date, and the positive daily sequence is
 frozen to the authenticated release run. Example: `v0.1.261003.1` for the current
@@ -52,20 +53,22 @@ permissions, version identity, deployment artifacts and current-producer handoff
 
 ```mermaid
 flowchart LR
-    PR[PR or main source] --> CI[CI build rules ordinary tests RF3]
+    PR[PR or main source] --> CI[Build and Tests solution rules tests RF3]
     Main[Own main push or manual] --> Benchmarks[All native load comparisons]
     Benchmarks --> Aggregate[Complete authenticated JSON aggregate]
-    Aggregate --> Qualify[Full site tests browser coverage]
-    Qualify --> Deploy[Publish same-run metrics]
+    WebSource[Trusted main source or manual] --> Website[Separate Website workflow]
+    Aggregate --> Website
+    Website --> Qualify[Applicable site tests browser coverage]
+    Qualify --> Deploy[Publish with ready metrics or without figures]
     Manual[Manual own-main Release] --> Version[UTC dated reservation]
     Version --> Build[Full build packages database images]
-    CI --> SourceGate[Successful exact-source CI proof]
+    CI --> SourceGate[Successful exact-source Build and Tests proof]
     Build --> Publish[Versioned GHCR assets tag GitHub Release]
     SourceGate --> Publish
 ```
 
 Canonical ownership:
-- shared infrastructure: `.github/workflows/ci.yml`, `benchmarks.yml`, `release.yml`,
+- shared infrastructure: `.github/workflows/ci.yml`, `benchmarks.yml`, `website.yml`, `release.yml`,
   root Dockerfile, the existing comparison Dockerfile and `Directory.Build.props`;
 - tooling: `scripts/Features/ReleaseDelivery/` version/asset helpers and distribution;
 - focused contracts/tests: `tests/KeyLoad.UnitTests/Features/ReleaseDelivery/`;

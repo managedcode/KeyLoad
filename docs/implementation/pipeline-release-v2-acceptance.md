@@ -1,6 +1,6 @@
 # Pipeline and release acceptance
 
-Goal: exactly CI, Benchmarks and Release appear in Actions. Build/tests are together;
+Goal: Build and Tests, Benchmarks, Website and Release appear in Actions. Build/tests are together;
 complete measured load/comparison JSON drives the downstream site, and a release
 build delivers the real database and immutable dated release tag.
 
@@ -14,13 +14,13 @@ at publication. UTC is the daily counter boundary; configured source major/minor
 remain owner controlled. All qualification executes in Linux GitHub Actions.
 
 Owner correction 2026-10-03: the product is not ready for packaging. Current scope
-is the prepared three-pipeline implementation and CI verification. Actual Release
+is the prepared pipeline implementation and build/test verification. Actual Release
 dispatch, package/image builds, tag creation and provider publication are deferred
 until a later explicit release/readiness instruction. Retain the future release
 requirements and report their provider qualification as deferred, never passing.
 
-- AC-PIPE-001 / REQ-PIPE-001: exactly ci.yml, benchmarks.yml and release.yml remain;
-  names are CI, Benchmarks and Release. CI runs push(main), pull_request and manual;
+- AC-PIPE-001 / REQ-PIPE-001: exactly ci.yml, benchmarks.yml, website.yml and release.yml remain;
+  names are Build and Tests, Benchmarks, Website and Release. Build and Tests runs push(main), pull_request and manual;
   preserve full build/format/rules/analyzer/unit/scalar/recovery/real SDK/MCP RF3.
   Failure is failure; no omitted suite or separate governance/Tests workflow.
 - AC-PIPE-002 / REQ-PIPE-002: Benchmarks retains every native image/preflight/CRUD/
@@ -76,3 +76,5 @@ legacy website evidence blocks site tests/publication and must be reported. Test
 of release metadata use controlled data, never fabricated benchmark measurements.
 Rollback reverts scoped workflow/adapters/tooling; published immutable tags/assets
 are never removed or moved. No newly installed tools/skills or consumer workarounds.
+
+Owner correction 2026-10-06: ADR-112 / AC-BC-WEB-006 moves complete website qualification/publication to standalone Website and removes its benchmark trigger/jobs from Build and Tests. The prepared Release source-success validator uses the current Build and Tests name while retaining the ci.yml path, mandatory job identities and exact-source success/permission gates. Historical CI measurement identities remain unchanged. Product Release stays manual and is not dispatched by this correction.

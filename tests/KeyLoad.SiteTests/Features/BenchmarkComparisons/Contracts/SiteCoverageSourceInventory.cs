@@ -2,6 +2,8 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal static class SiteCoverageSourceInventory
 {
+    private const string BenchmarkAggregateEntryPoint = "scaled-cohort-aggregate-cli.mjs";
+
     public static readonly string[] ProductionSources =
     [
         .. SiteCompositeCoverageSources.Entries,
@@ -101,6 +103,7 @@ internal static class SiteCoverageSourceInventory
     ];
 
     public static bool IsTrackedEvidenceModule(string path) =>
+        System.IO.Path.GetFileName(path) != BenchmarkAggregateEntryPoint &&
         TrackedEvidenceModulePrefixes.Any(prefix => System.IO.Path.GetFileName(path)
             .StartsWith(prefix, StringComparison.Ordinal));
 }

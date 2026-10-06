@@ -5,7 +5,7 @@ import { exactKeys } from './aggregate-contracts.mjs';
 
 export const SITE_GH = Object.freeze({
   repository: 'managedcode/KeyLoad', repositoryId: 477801965,
-  executor: 'CI', executorPath: '.github/workflows/ci.yml',
+  executor: 'Website', executorPath: '.github/workflows/website.yml',
   executorEvents: Object.freeze(['push', 'workflow_dispatch', 'workflow_run']),
   executorJobs: Object.freeze(['qualify', 'deploy']), producerEvents: Object.freeze(['push', 'workflow_dispatch']),
   producerKeys: Object.freeze(['runId', 'attempt', 'sourceRevision', 'event', 'conclusion']),
@@ -25,13 +25,22 @@ export const SITE_GH = Object.freeze({
     'Generate website benchmark data', 'Save website benchmark data',
     'Save combined benchmark results', 'Save GitHub result verification']),
   legacySources: HISTORICAL.sourceRevisions,
-  unavailableProducerGenerations: Object.freeze([Object.freeze({
-    sourceRevision: 'c16a1d928d7d6941db74403e47f3dbcea206d86a',
+  unavailableProducerGenerations: Object.freeze([
+    'c16a1d928d7d6941db74403e47f3dbcea206d86a',
+    'ce2eace916b3660a4c7fe2976a012637600c3b28',
+    '55fb4e3704bd30b5e57b8173953e6e017c0f8333',
+    '1e8833c027cf232e35fe012cd3eed41c61a17f89',
+    '5fa61f27a34b5c573579fca3a84b8e5201dbd82e',
+    'bb16152827b38dc4533a1d7830e664b4ecd11267',
+    '377886f35928866f083806062b446056d64539e3',
+    '873cd1a36ad14ab966065c924c71a292ea681083',
+  ].map(sourceRevision => Object.freeze({
+    sourceRevision,
     ownedSteps: Object.freeze(['Verify benchmark plan', 'Download benchmark results',
       'Check all 270 benchmark results', 'Save combined benchmark results', 'Save GitHub result verification']),
     leadingNativeSteps: Object.freeze(['Set up job', 'Download source code']),
     trailingNativeSteps: Object.freeze(['Post Download source code', 'Complete job']),
-  })]),
+  }))),
   receiptKeys: Object.freeze(['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'repository', 'workflow', 'run',
     'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'metadataFiles', 'archives', 'inputFiles']),
   artifactKeys: Object.freeze(['id', 'name', 'sizeInBytes', 'digest', 'expired', 'createdAt']),

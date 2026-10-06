@@ -23,11 +23,12 @@ internal sealed class SiteContentBrowserTests
         var desktopRequests = await AssertLocalRequestsAsync(browser.Chrome.Cdp, browser.BaseUrl, token);
         await Assert.That(desktopRequests.Any(url => url.EndsWith(SiteContentTokens.DesktopPosterSuffix,
             StringComparison.Ordinal))).IsTrue();
-        await Assert.That(desktopRequests.Any(url => url.EndsWith(SiteAssetTokens.SceneModule,
-            StringComparison.Ordinal))).IsTrue();
         await Assert.That(desktopRequests.Any(url => url.EndsWith(SiteAssetTokens.IndexHtml,
             StringComparison.Ordinal))).IsTrue();
         await AssertSceneLifecycleAsync(browser.Chrome, browser.BaseUrl, token);
+        var sceneRequests = await AssertLocalRequestsAsync(cdp, browser.BaseUrl, token);
+        await Assert.That(sceneRequests.Any(url => url.EndsWith(SiteAssetTokens.SceneModule,
+            StringComparison.Ordinal))).IsTrue();
 
         await browser.Chrome.Cdp.CommandAsync(SiteBrowserTokens.SetDeviceMetrics, new Dictionary<string, object?>
         {
@@ -43,6 +44,8 @@ internal sealed class SiteContentBrowserTests
         var mobileRequests = await AssertLocalRequestsAsync(browser.Chrome.Cdp, browser.BaseUrl, token);
         await Assert.That(mobileRequests.Any(url => url.EndsWith(SiteContentTokens.MobilePosterSuffix,
             StringComparison.Ordinal))).IsTrue();
+        await SiteContentInteractionAssertions.AssertNavigationAsync(cdp, token);
+        await SiteContentInteractionAssertions.AssertClipboardUnavailableAsync(cdp, browser.BaseUrl, token);
         await browser.CompleteAsync(token);
     }
 

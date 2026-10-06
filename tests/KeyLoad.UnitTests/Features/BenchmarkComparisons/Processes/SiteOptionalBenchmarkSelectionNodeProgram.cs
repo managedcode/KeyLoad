@@ -23,8 +23,11 @@ internal static class SiteOptionalBenchmarkSelectionNodeProgram
         const unavailableRun = await read('SiteOptionalRetainedUnreadyRun.json');
         const unavailableJob = await read('SiteOptionalRetainedUnreadyAggregate.json');
         const assert = condition => { if (!condition) throw new Error('selection assertion failed'); };
+        """ + SiteWebsiteAdmissionNodeProgram.Source + """
         try {
-          if (scenario === 'retained-success') {
+          if (scenario.startsWith('website-executor-')) {
+            await assertWebsiteExecutor(scenario);
+          } else if (scenario === 'retained-success') {
             const result = runs.selectSiteAggregateJob(readyRun, [readyJob]);
             assert(result.successful && result.job.id === 111403286924);
             assert(contract.siteAggregateSteps(readyRun.head_sha).join('|') === contract.SITE_GH.legacySteps.join('|'));
