@@ -6,6 +6,8 @@ internal static class SiteBrowserVectorAssetAssertions
 {
     public static async Task AssertReadyMarkAsync(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
     {
+        await Assert.That(await cdp.WaitForExpressionAsync(SiteBrowserSceneTokens.GraphReadyPredicate,
+            cancellationToken)).IsTrue();
         var state = await ReadMarkAsync(cdp, cancellationToken);
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.CountField).GetInt32()).IsEqualTo(SiteTokens.One);
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.LoadedField).GetBoolean()).IsTrue();

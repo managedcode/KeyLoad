@@ -13,6 +13,7 @@ internal static class SiteBrowserSceneTokens
     public const string VisibleField = "visible";
     public const string ContainedField = "contained";
     public const string LabelsHiddenField = "labelsHidden";
+    public const string GraphReadyPredicate = "document.querySelector('#cluster-scene')?.dataset.sceneState === 'ready' && document.querySelectorAll('#cluster-scene [data-silo-label]').length === 3 && [...document.querySelectorAll('#cluster-scene [data-silo-label]')].every(label => {const style=getComputedStyle(label);return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity)>0;})";
     public const string ClusterGraphScript = """
         (() => {
           const host = document.querySelector('#cluster-scene');

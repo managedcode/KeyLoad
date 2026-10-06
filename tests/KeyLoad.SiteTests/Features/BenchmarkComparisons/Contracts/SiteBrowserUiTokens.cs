@@ -52,7 +52,7 @@ internal static class SiteBrowserUiTokens
     public const string TrianglesField = "triangles";
     public const string NoScriptSelector = "noscript";
     public const string OverflowScript = "document.documentElement.scrollWidth>window.innerWidth";
-    public const string SceneScrollScript = "document.querySelector('#cluster-scene')?.scrollIntoView({block:'center'})";
+    public const string SceneScrollScript = "document.querySelector('#cluster-scene')?.scrollIntoView({block:'center',behavior:'instant'})";
     public const string SceneSnapshotScript = "({backend:document.querySelector('#cluster-scene')?.getAttribute('data-graphics-backend'),status:document.querySelector('" + SelectorSceneStatus + "')?.textContent,frame:document.querySelector('#cluster-scene')?.getAttribute('data-frame-state'),canvasCount:document.querySelectorAll('#cluster-scene canvas').length,bufferPixels:Number(document.querySelector('#cluster-scene')?.getAttribute('data-buffer-pixels')??0),drawCalls:Number(document.querySelector('#cluster-scene')?.getAttribute('data-draw-calls')??0),triangles:Number(document.querySelector('#cluster-scene')?.getAttribute('data-triangles')??0)})";
     public const string MotionEnableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')!=='true')e.click();return e.getAttribute('aria-pressed')==='true'})()";
     public const string MotionDisableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')==='true')e.click();return e.getAttribute('aria-pressed')==='false'})()";

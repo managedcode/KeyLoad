@@ -1,7 +1,7 @@
 export const SCENE = Object.freeze({
   limits: Object.freeze({ maxDevicePixelRatio: 1.5, maxBufferPixels: 1_000_000, maxDrawCalls: 30, maxTriangles: 5_000,
     settleMilliseconds: 500, settleRenderMilliseconds: 450, maxSpinStepMilliseconds: 50 }),
-  world: Object.freeze({ coreSize: 1.05, coreY: 1.9, cameraFov: 24, cameraNear: 0.1, cameraFar: 60,
+  world: Object.freeze({ coreSize: 0.8, coreY: 2.0, cameraFov: 24, cameraNear: 0.1, cameraFar: 60,
     cameraX: 0, cameraY: 2.5, cameraZ: 11.2, cameraLookY: 0.15, cameraAspect: 1,
     pointerYaw: 0.12, pointerPitch: 0.05, smoothingDivisor: 115, millisecondsPerSecond: 1000 }),
   core: Object.freeze({ selector: '.cluster-core', perspectiveScaleIndex: 5, matrixPrefix: 'matrix3d(', matrixSuffix: ')',
@@ -53,28 +53,35 @@ export function createSceneGraph(THREE) {
   const root = new THREE.Group();
   const resources = new Set();
   const own = value => (resources.add(value), value);
-  scene.add(root, new THREE.AmbientLight(0xffffff, 2));
+  scene.add(root, new THREE.AmbientLight(0xffffff, 1.8));
   const light = new THREE.DirectionalLight(0xffffff, 3);
   light.position.set(-3, 6, 5);
   scene.add(light);
   const nodes = SILOS.map((position, index) => createSilo(THREE, own, root, position, COLORS[index]));
   const positions = SILOS.flatMap(silo => GRAINS.map(grain => new THREE.Vector3(...grain).add(new THREE.Vector3(...silo))));
   const grains = new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.12, 12, 8)),
-    own(new THREE.MeshStandardNodeMaterial({ roughness: 0.3, metalness: 0.12 })), positions.length);
+    own(new THREE.MeshStandardNodeMaterial({ roughness: 0.22, metalness: 0.16 })), positions.length);
   own(grains);
   const matrix = new THREE.Matrix4();
-  positions.forEach((position, index) => {
-    grains.setMatrixAt(index, matrix.makeTranslation(position.x, position.y, position.z));
-    grains.setColorAt(index, new THREE.Color(COLORS[Math.floor(index / GRAINS.length)]));
-  });
+  const color = new THREE.Color();
+  const white = new THREE.Color(0xffffff);
   root.add(grains);
   const links = SILOS.flatMap((_, silo) => EDGES.map(([a, b]) => [silo * GRAINS.length + a, silo * GRAINS.length + b]));
   links.push([1, 13], [7, 16], [5, 11]);
-  const vertices = links.flatMap(([a, b]) => [...positions[a].toArray(), ...positions[b].toArray()]);
   const geometry = own(new THREE.BufferGeometry());
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-  const lineMaterial = own(new THREE.LineBasicNodeMaterial({ color: 0x777486, transparent: true, opacity: 0.48 }));
-  root.add(new THREE.LineSegments(geometry, lineMaterial));
+  const lines = new THREE.Float32BufferAttribute(new Float32Array((27 + 3 * 24) * 6), 3);
+  geometry.setAttribute('position', lines);
+  root.add(new THREE.LineSegments(geometry,
+    own(new THREE.LineBasicNodeMaterial({ color: 0x8b8299, transparent: true, opacity: 0.5 }))));
+  const packets = new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.085, 6, 4)),
+    own(new THREE.MeshBasicNodeMaterial({ color: 0xffffff })), 24);
+  own(packets);
+  for (let index = 0; index < packets.count; index++) {
+    color.setHex(0x8f7baa).lerp(white, (index % 8) / 9);
+    packets.setColorAt(index, color);
+  }
+  root.add(packets);
+  const point = new THREE.Vector3();
   const projectLabels = createLabelProjection(THREE, root, camera);
   const projectCore = createCoreProjection(THREE, root, camera);
   const resize = aspect => {
@@ -83,37 +90,91 @@ export function createSceneGraph(THREE) {
     camera.lookAt(0, SCENE.world.cameraLookY, 0);
     camera.updateProjectionMatrix();
   };
+  const animate = seconds => {
+    animateGrains(seconds, positions, grains, matrix, color, white);
+    updateLinks(links, positions, lines, point);
+    animatePackets(seconds, links, positions, packets, matrix, point);
+    nodes.forEach((node, index) => {
+      node.emissiveIntensity = Math.pow(Math.max(0, Math.sin(seconds * 2.1 - index * 0.35)), 8) * 0.7;
+    });
+  };
   resize(1);
+  animate(0);
   return {
-    scene, camera, root, projectCore, projectLabels, resize,
+    scene, camera, root, projectCore, projectLabels, resize, animate,
     counts: { silos: nodes.length, grains: positions.length, links: links.length },
-    animate: seconds => {
-      positions.forEach((position, index) => {
-        const scale = 1 + Math.sin(seconds * 1.7 + index * 0.9) * 0.12;
-        matrix.makeScale(scale, scale, scale).setPosition(position);
-        grains.setMatrixAt(index, matrix);
-      });
-      grains.instanceMatrix.needsUpdate = true;
-      lineMaterial.opacity = 0.42 + Math.sin(seconds * 0.7) * 0.06;
-    },
     dispose: () => { for (const value of resources) value.dispose(); resources.clear(); },
   };
+}
+
+function animateGrains(seconds, positions, grains, matrix, color, white) {
+  positions.forEach((position, index) => {
+    const silo = Math.floor(index / GRAINS.length);
+    const local = GRAINS[index % GRAINS.length];
+    const angle = seconds * (silo === 1 ? -0.28 : 0.23) + silo * 0.18;
+    position.set(SILOS[silo][0] + local[0] * Math.cos(angle) - local[2] * Math.sin(angle),
+      SILOS[silo][1] + local[1] + Math.sin(seconds * 1.2 + index) * 0.045,
+      SILOS[silo][2] + local[0] * Math.sin(angle) + local[2] * Math.cos(angle));
+    const activity = Math.pow(Math.max(0, Math.sin(seconds * 2.1 - index * 0.45)), 6);
+    const scale = 1 + activity * 0.45;
+    matrix.makeScale(scale, scale, scale).setPosition(position);
+    grains.setMatrixAt(index, matrix);
+    color.setHex(COLORS[silo]).lerp(white, activity * 0.35);
+    grains.setColorAt(index, color);
+  });
+  grains.instanceMatrix.needsUpdate = true;
+  grains.instanceColor.needsUpdate = true;
+}
+
+function routePoint(link, positions, progress, index, point) {
+  point.copy(positions[link[0]]).lerp(positions[link[1]], progress);
+  if (index >= 27) point.y += Math.sin(progress * Math.PI) * 0.8;
+  return point;
+}
+
+function updateLinks(links, positions, attribute, point) {
+  let vertex = 0;
+  links.forEach((link, index) => {
+    const segments = index < 27 ? 1 : 24;
+    for (let segment = 0; segment < segments; segment++) {
+      routePoint(link, positions, segment / segments, index, point);
+      attribute.setXYZ(vertex++, point.x, point.y, point.z);
+      routePoint(link, positions, (segment + 1) / segments, index, point);
+      attribute.setXYZ(vertex++, point.x, point.y, point.z);
+    }
+  });
+  attribute.needsUpdate = true;
+}
+
+function animatePackets(seconds, links, positions, packets, matrix, point) {
+  for (let index = 0; index < packets.count; index++) {
+    const route = Math.floor(index / 8);
+    const trail = index % 8;
+    const progress = ((seconds * 0.34 + route / 3 - trail * 0.016) % 1 + 1) % 1;
+    const linkIndex = 27 + route;
+    routePoint(links[linkIndex], positions, progress, linkIndex, point);
+    const scale = 1 - trail * 0.115;
+    matrix.makeScale(scale, scale, scale).setPosition(point);
+    packets.setMatrixAt(index, matrix);
+  }
+  packets.instanceMatrix.needsUpdate = true;
 }
 
 function createSilo(THREE, own, root, position, color) {
   const group = new THREE.Group();
   group.position.set(...position);
-  const glass = new THREE.Mesh(own(new THREE.BoxGeometry(1.7, 1.65, 0.95)),
+  const glass = new THREE.Mesh(own(new THREE.CylinderGeometry(0.9, 0.9, 1.65, 24)),
     own(new THREE.MeshBasicNodeMaterial({ color, transparent: true, opacity: 0.13, depthWrite: false })));
   glass.position.y = 0.82;
-  const outline = new THREE.LineSegments(own(new THREE.EdgesGeometry(glass.geometry)),
-    own(new THREE.LineBasicNodeMaterial({ color, transparent: true, opacity: 0.55 })));
+  const outline = new THREE.LineSegments(own(new THREE.EdgesGeometry(glass.geometry, 20)),
+    own(new THREE.LineBasicNodeMaterial({ color, transparent: true, opacity: 0.65 })));
   outline.position.copy(glass.position);
-  const base = new THREE.Mesh(own(new THREE.BoxGeometry(1.85, 0.12, 1.1)),
-    own(new THREE.MeshStandardNodeMaterial({ color: 0x34343b, roughness: 0.6, metalness: 0.2 })));
+  const material = own(new THREE.MeshStandardNodeMaterial({ color: 0x34343b, roughness: 0.5, metalness: 0.25,
+    emissive: 0xa28ebc, emissiveIntensity: 0 }));
+  const base = new THREE.Mesh(own(new THREE.CylinderGeometry(0.98, 0.98, 0.16, 24)), material);
   group.add(glass, outline, base);
   root.add(group);
-  return group;
+  return material;
 }
 
 function createLabelProjection(THREE, root, camera) {
