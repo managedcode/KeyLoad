@@ -5,11 +5,12 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 internal static class NativeCoverageImageNodeOutput
 {
     private const string OutputFailure = "The native coverage image materializer exceeded its captured output bound.";
+    private const int MinimumReadLength = 1;
 
     internal static async Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
     {
         var builder = new StringBuilder(Math.Min(maximumCharacters, NativeCoverageImageConstants.InitialOutputCapacity));
-        var buffer = new char[maximumCharacters];
+        var buffer = new char[Math.Max(MinimumReadLength, maximumCharacters)];
         var exceeded = false;
         while (true)
         {

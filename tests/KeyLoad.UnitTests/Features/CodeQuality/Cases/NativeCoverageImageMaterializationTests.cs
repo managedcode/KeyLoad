@@ -13,11 +13,12 @@ internal sealed class NativeCoverageImageMaterializationTests
         {
             var limits = fixture.Options.Coverage.Value;
             var original = NativeCoverageImageSourceSnapshot.Capture(NativeCoverageImageFixture.ServerOutput,
-                limits.MaximumFiles, limits.MaximumFileBytes, limits.MaximumTotalBytes);
+                limits.MaximumFiles, limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.ReadBufferBytes);
             await RejectsAlteredCopyAsync(fixture).ConfigureAwait(false);
             await RejectsExistingDestinationAsync(fixture).ConfigureAwait(false);
             await MaterializesFreshContextAsync(fixture).ConfigureAwait(false);
-            original.VerifyUnchanged(NativeCoverageImageFixture.ServerOutput, limits.MaximumFiles, limits.MaximumFileBytes, limits.MaximumTotalBytes);
+            original.VerifyUnchanged(NativeCoverageImageFixture.ServerOutput, limits.MaximumFiles,
+                limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.ReadBufferBytes);
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         NativeCoverageImageNodeSettlement.ThrowFailures(failures);

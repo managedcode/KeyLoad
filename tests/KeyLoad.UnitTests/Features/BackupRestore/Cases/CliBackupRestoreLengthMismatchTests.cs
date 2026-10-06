@@ -26,9 +26,12 @@ internal sealed class CliBackupRestoreLengthMismatchTests
     private const string BackupManifestFileName = "backup.json";
     private const string IdentityFileName = "identity.json";
     private const string CorruptionCode = "Corruption";
+    private const string FormatUnsupportedCode = "FormatUnsupported";
     private const string UnpackLengthMismatchDetail = "The artifact length does not match its catalog.";
+    private const string MissingManifestDetail = "The backup manifest is unsupported.";
     private const string ErrorCodeProperty = "errorCode";
     private const string DetailProperty = "detail";
+    private const int FailedOperationExitCode = 1;
 
     [Test]
     public async Task AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup()
@@ -92,7 +95,7 @@ internal sealed class CliBackupRestoreLengthMismatchTests
 
         var restore = await RunAsync(options, [RestoreCommand, unpackedDirectory, destination], cancellationToken);
         await AssertProcessJoinedAsync(restore);
-        var destinationExists = Directory.Exists(destination);
+        var destinationExists = Directory.Exists(destination) || File.Exists(destination);
         await AssertFailedUnpackDestinationAsync(unpackedDirectory, lastEntry, destinationMode);
         await AssertNoStagingResidueAsync(fixture.Root);
         await AssertArchiveUnchangedAsync(artifactPath, artifactBytes, cancellationToken);
@@ -152,6 +155,9 @@ internal sealed class CliBackupRestoreLengthMismatchTests
     {
         await Assert.That(attempt.DestinationExists).IsFalse();
         await CliBackupRestoreAssertions.RejectedProcessAsync(attempt.Process);
+        await Assert.That(attempt.Process.ExitCode).IsEqualTo(FailedOperationExitCode);
+        await Assert.That(attempt.Process.StandardOutput).IsEmpty();
+        await AssertProblemAsync(attempt.Process.StandardError, FormatUnsupportedCode, MissingManifestDetail);
     }
 
     private static async Task AssertProblemAsync(string standardError, string expectedCode, string expectedDetail)

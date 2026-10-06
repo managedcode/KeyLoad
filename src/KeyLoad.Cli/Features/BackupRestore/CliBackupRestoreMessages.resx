@@ -9,4 +9,5 @@
   <data name="ArchiveTransferFailed" xml:space="preserve"><value>Archive transfer failed.</value></data>
   <data name="ArchiveCopied" xml:space="preserve"><value>Archive copied through ManagedCode.Storage.</value></data>
   <data name="BackupExtracted" xml:space="preserve"><value>Backup extracted; restore verifies its canonical checksums.</value></data>
+  <data name="BackupMissingRequiredFile" xml:space="preserve"><value>The backup is missing a required file.</value></data>
 </root>

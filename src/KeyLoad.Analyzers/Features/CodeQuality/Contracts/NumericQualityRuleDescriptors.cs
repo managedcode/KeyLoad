@@ -12,8 +12,8 @@ internal static class NumericQualityRuleDescriptors
     private const string TypeMessage = "Type '{0}' contains {1} code lines; the maximum is 200";
     private const string TypeDescription = "A type across all partial declarations may contain at most 200 code lines.";
     private const string UnitTitle = "Executable unit exceeds its code line limit";
-    private const string UnitMessage = "Executable unit contains {0} code lines; the maximum is 50";
-    private const string UnitDescription = "An executable unit may contain at most 50 code lines.";
+    private const string UnitMessage = "Executable unit contains {0} code lines; the maximum is 64";
+    private const string UnitDescription = "An executable unit may contain at most 64 code lines.";
     private const string NestingTitle = "Control-flow nesting exceeds its limit";
     private const string NestingMessage = "Control-flow nesting is {0}; the maximum is 3";
     private const string NestingDescription = "An executable unit may nest at most three control-flow constructs.";

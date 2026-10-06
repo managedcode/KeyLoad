@@ -131,7 +131,7 @@ Root reviews every diff, joins source, executes the actual Aspire normal/scalar
 caller with frozen pre/post inventories, retains originals, then commits all
 visible work. No test hooks, fake stores/principals/clocks, source changes to
 consumer/seed implementations, shared fixtures, packages, CI, other model slices
-or Git writes are delegated. Keep400/200/50 numeric limits and preserve exact
+or Git writes are delegated. Keep400/200/64 numeric limits and preserve exact
 primary/cleanup/fatal failures in all genuine concurrent work and cleanup.
 
 ADR-019 accepts this ordered prerequisite without a new wire/storage migration.

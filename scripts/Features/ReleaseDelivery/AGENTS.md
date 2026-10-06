@@ -16,4 +16,4 @@
 
 ## Skills and protected risks
 - No applicable installed skills for this bounded release metadata tooling; install none.
-- Functions <=50 lines, files <=400 lines, bounded inputs/output, explicit error cases; no consumer-side dependency workarounds.
+- Functions <=64 lines, files <=400 lines, bounded inputs/output, explicit error cases; no consumer-side dependency workarounds.

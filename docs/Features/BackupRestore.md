@@ -74,7 +74,7 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | REQ-BACKUP-003: fence old identity and pause delivery after restore | AC-BACKUP-003 passes when restore produces a different incarnation, sets dispatch paused, and invalidates old cursor/lease identities until explicit operator reconciliation. | Existing `VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`; planned auth/feed/lease token invalidation and explicit resume integration cases. |
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
 | REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
-| REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | TASK-BACKUP-UNPACK-PUBLICATION-001, `CliBackupRestoreLengthMismatchTests`, [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source identifies the validation/publication ordering hazard; actual execution and all required qualification remain pending. |
+| REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | TASK-BACKUP-UNPACK-PUBLICATION-001, TASK-BACKUP-CLI-MISSING-INPUT-002, `CliBackupRestoreLengthMismatchTests`, [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source identifies the validation/publication ordering hazard; actual execution and all required qualification remain pending. |
 
 ### Functional CLI operation coverage
 
@@ -148,6 +148,46 @@ records under a new incarnation with dispatch paused. These existing API contrac
 need no new ADR; ADR-033 owns functional collection and ADR-046/048 own verified
 restore. The case is unqualified until its actual Aspire execution and original
 native coverage establish the operation results and source-bound hits.
+
+### Bounded missing-input errors in the offline restore CLI
+
+TASK-BACKUP-CLI-MISSING-INPUT-002 continues REQ-BACKUP-002/006 and
+AC-BACKUP-002/006 under [ADR-114](../ADR/ADR-114-verified-artifact-publication.md).
+The real rejected-output restore from the interrupted development run failed
+its stderr-retention bound before returning the process result. The retained
+log proves that overflow, while its actual emitted bytes are unavailable.
+Current native restore also exposes expected FileNotFoundException and
+DirectoryNotFoundException for missing required backup inputs; the existing
+embedded missing-file regression explicitly verifies that native contract.
+
+At the offline CLI restore adapter, translate those two expected missing-input
+exception types into the existing KeyLoad Problem JSON with `Corruption`,
+detail `The backup is missing a required file.`, and exit code1. Keep the
+native embedded storage API and all other exception contracts. Emit no source
+path, raw exception, credentials or caller data. Do not add a blanket catch,
+prevalidation substitute, fabricated process result or larger output budget.
+
+The shared manifest reader already rejects a missing manifest/directory as
+native `FormatUnsupported` with detail `The backup manifest is unsupported.`.
+Preserve that existing KeyLoadException without remapping it. Consequently both
+failed-unpack restore attempts and the missing-manifest case expect that native
+Problem; missing identity/journal inputs exercise the CLI Corruption mapping.
+
+The real first/last length-mismatch workflow must execute both rejected restore
+attempts, assert the native FormatUnsupported Problem and actual joined process, retain the
+absent/preserved-empty and byte-preservation oracles, then restore the healthy
+archive and reopen its exact data/new identity/paused dispatch. A real CLI
+missing-input workflow additionally covers each required manifest, identity and
+journal file: remove one actual file, execute the rejected restore, verify no
+published destination and preserved remaining inputs, replace the original file,
+then execute and verify a healthy restore in the same fixture. Exact stderr and
+native exits distinguish this intended error contract from the earlier overflow
+hypothesis; runtime proof is required before claiming that failure repaired.
+
+Root freezes contracts, reviews the guarded packet and owns integration/tests;
+Luna owns only CLI BackupRestore command/message and its complete operation-test
+joins. Canonical format/build, Aspire normal/scalar BackupRestore regressions,
+functional coverage and required recovery/RF3/Linux gates remain mandatory.
 
 ## Negative and boundary flows
 

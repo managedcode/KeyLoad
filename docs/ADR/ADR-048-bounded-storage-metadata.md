@@ -48,7 +48,7 @@ Implementation contract:
    destination, owner-lock release and managed allocation. Static proof is an
    explicit supplement for deterministic growth bounds and single-owned-region
    read; no fake stream/seam or racy test substitutes for actual runtime evidence.
-5. Normal strict storage/UnitTests/full builds,400/200/50/3, canonical formatter,
+5. Normal strict storage/UnitTests/full builds,400/200/64/3, canonical formatter,
    governance/import/diff, then stable exact-SHA GitHub TUnit/recovery/RF3 SDK/MCP
    and all required gates. Collector/raw numeric coverage remains separately
    unfinished until configured and verified. Record source versus executed proof

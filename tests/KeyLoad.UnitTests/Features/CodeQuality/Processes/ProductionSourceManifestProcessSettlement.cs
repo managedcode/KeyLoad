@@ -13,23 +13,54 @@ internal static class ProductionSourceManifestProcessSettlement
         if (!original.IsCompleted)
         {
             ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-            await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures)
-                .ConfigureAwait(false);
-            if (!original.IsCompleted)
+            if (!await WaitWithinDeadlineAsync(original, settlementTimeout, failures).ConfigureAwait(false))
             {
-                failures.Add(new TimeoutException(SettlementFailure));
                 ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
                 ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
                 ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
-                await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures)
-                    .ConfigureAwait(false);
-                if (original.IsCompleted)
-                {
-                    await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
-                }
+                await WaitWithinDeadlineAsync(original, settlementTimeout, failures).ConfigureAwait(false);
+            }
+        }
+        await ObserveOriginalAsync(original, failures).ConfigureAwait(false);
+    }
+
+    private static async Task<bool> WaitWithinDeadlineAsync(Task original, TimeSpan settlementTimeout,
+        List<Exception> failures)
+    {
+        var waiter = original.WaitAsync(settlementTimeout, TimeProvider.System);
+        await waiter.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        if (waiter.Exception?.InnerExceptions is [TimeoutException timeout] &&
+            original.Exception?.InnerExceptions.Any(failure => ReferenceEquals(failure, timeout)) != true)
+        {
+            failures.Add(new TimeoutException(SettlementFailure, timeout));
+            return false;
+        }
+        return true;
+    }
+
+    private static async Task ObserveOriginalAsync(Task original, List<Exception> failures)
+    {
+        var observed = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => original, observed).ConfigureAwait(false);
+        var alreadyRetained = new List<Exception>(failures);
+        foreach (var failure in observed)
+        {
+            var index = alreadyRetained.FindIndex(retained => IsSameFailure(retained, failure));
+            if (index >= 0)
+            {
+                alreadyRetained.RemoveAt(index);
+            }
+            else
+            {
+                failures.Add(failure);
             }
         }
     }
+
+    private static bool IsSameFailure(Exception retained, Exception failure)
+        => ReferenceEquals(retained, failure) ||
+            (retained is TaskCanceledException first && failure is TaskCanceledException second &&
+             first.Task is not null && ReferenceEquals(first.Task, second.Task));
 
     private static void KillIfRunning(Process process)
     {

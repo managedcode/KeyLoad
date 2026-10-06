@@ -620,7 +620,7 @@ Rate wait is the approved identical-route actual403/429 protocol,3700s accumulat
 this wait without changing operation clocks.
 
 gates_audit owns ONLY NEW scripts site-isolated-github-*.mjs (contract,context,
-runs,proof,capture,fresh,CLI, plus narrowly split private helpers if400/200/50
+runs,proof,capture,fresh,CLI, plus narrowly split private helpers if400/200/64
 requires) and NEW SiteIsolatedGitHub*.cs (archive setup/reader/receipt/file operations,
 selection/proof/archive/freshness/native capture tests and bounded Node helper).
 Root alone owns shared hooks/workflows/coverage inventories/source joins/docs.
@@ -1370,7 +1370,7 @@ if needed, KurrentOwnedStreamAppend. NEW ComparisonTests KurrentStreamOwnershipT
 and IsolatedKurrentOwnershipRegression* only; root owns native selector and
 in-container qualification join/docs/Git/gates. No other cleanup file, public
 contract, shared corpus/EventId, deadlines, request count/ACK/native identity/TLS
-change. Limits400/200/50/depth3; escalate missing contract/overlap/SDK defect.
+change. Limits400/200/64/depth3; escalate missing contract/overlap/SDK defect.
 
 Tests first: pure finite ledger reserved/negative/unknown exclusion, positive
 transition, duplicate/mismatched descriptor, capacity/checked overflow, independent

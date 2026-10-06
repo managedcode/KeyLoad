@@ -223,6 +223,7 @@ internal sealed class RequestCqrsClientConfigurator : IClientBuilderConfigurator
 
     public void Configure(IConfiguration configuration, IClientBuilder clientBuilder)
     {
+        clientBuilder.AddActivityPropagation();
         clientBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)

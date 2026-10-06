@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -12,7 +13,7 @@ internal sealed class ExecutableUnitSpanAndTriviaAnalyzerTests
     [Test]
     public async Task MultilineLiteralLinesCountWithinTheExecutableUnitAsync()
     {
-        var literalLines = Enumerable.Range(0, 52)
+        var literalLines = Enumerable.Range(0, 60)
             .Select(static index => index == 10
                 ? "            value { 1 + 2 }"
                 : $"            line{index}");
@@ -28,7 +29,7 @@ internal sealed class ExecutableUnitSpanAndTriviaAnalyzerTests
     [Test]
     public async Task ExpressionBodiedPropertyAndIndexerAreMeasuredAsUnitsAsync()
     {
-        var literalLines = string.Join("\n", Enumerable.Range(0, 52)
+        var literalLines = string.Join("\n", Enumerable.Range(0, 63)
             .Select(static index => $"        value{index}"));
         var source = "internal sealed class Subject\n{\n" +
             "    internal string Value => \"\"\"\n" + literalLines + "\n    \"\"\";\n" +
@@ -44,14 +45,14 @@ internal sealed class ExecutableUnitSpanAndTriviaAnalyzerTests
             .ToArray();
         await Assert.That(locations[0].Line).IsEqualTo(2);
         await Assert.That(locations[0].Character).IsEqualTo(4);
-        await Assert.That(locations[1].Line).IsEqualTo(56);
+        await Assert.That(locations[1].Line).IsEqualTo(67);
         await Assert.That(locations[1].Character).IsEqualTo(4);
     }
 
     [Test]
     public async Task DisabledTextInsideExecutableUnitContributesToItsTotalAsync()
     {
-        var statements = CreateStatements(43, "        ");
+        var statements = CreateStatements(57, "        ");
         var disabled = string.Join("\n", Enumerable.Range(0, 7)
             .Select(static index => $"disabled line {index}"));
         var source = "internal sealed class Subject\n{\n    internal static void Run()\n    {\n" +
@@ -64,12 +65,14 @@ internal sealed class ExecutableUnitSpanAndTriviaAnalyzerTests
         await NumericAnalyzerFixture.AssertSingleFindingAsync(
             findings, Id, DiagnosticSeverity.Error, Path, line: 2, column: 4,
             span: TextSpan.FromBounds(methodStart, methodEnd));
+        await Assert.That(findings[0].GetMessage(CultureInfo.InvariantCulture))
+            .IsEqualTo("Executable unit contains 69 code lines; the maximum is 64");
     }
 
     [Test]
     public async Task MultilineCommentInsideExecutableUnitAddsNoCodeLinesAsync()
     {
-        var statements = CreateStatements(47, "        ");
+        var statements = CreateStatements(61, "        ");
         var source = "internal sealed class Subject\n{\n    internal static void Run()\n    {\n" +
             statements + "\n        /*\n            comment line one\n            comment line two\n" +
             "            comment line three\n        */\n    }\n}";

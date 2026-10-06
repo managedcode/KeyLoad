@@ -7,13 +7,14 @@ function Test-FcProductionSnapshotBytesEqual([byte[]] $Left, [byte[]] $Right) {
 }
 
 function Assert-FcProductionSnapshotEqual([byte[]] $OriginalManifestBytes, [byte[]] $CurrentManifestBytes,
-    [System.Collections.IDictionary] $OriginalFiles, [System.Collections.IDictionary] $CurrentFiles) {
+    [Collections.Generic.Dictionary[string, byte[]]] $OriginalFiles,
+    [Collections.Generic.Dictionary[string, byte[]]] $CurrentFiles) {
     if (-not (Test-FcProductionSnapshotBytesEqual $OriginalManifestBytes $CurrentManifestBytes) -or
         $OriginalFiles.Count -ne $CurrentFiles.Count) {
         throw [InvalidOperationException]::new('The production identity cohort changed during capture.')
     }
     foreach ($name in $OriginalFiles.Keys) {
-        if (-not $CurrentFiles.Contains($name) -or
+        if (-not $CurrentFiles.ContainsKey($name) -or
             -not (Test-FcProductionSnapshotBytesEqual $OriginalFiles[$name] $CurrentFiles[$name])) {
             throw [InvalidOperationException]::new('The production identity cohort changed during capture.')
         }

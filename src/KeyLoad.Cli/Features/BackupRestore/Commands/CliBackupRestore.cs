@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Resources;
 using System.Text.Json;
 using KeyLoad.Artifacts;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
@@ -19,6 +20,7 @@ internal static class CliBackupRestore
     private const string ArchiveTransferFailedMessageKey = "ArchiveTransferFailed";
     private const string ArchiveCopiedMessageKey = "ArchiveCopied";
     private const string BackupExtractedMessageKey = "BackupExtracted";
+    private const string BackupMissingRequiredFileMessageKey = "BackupMissingRequiredFile";
     private static readonly ResourceManager Messages = new(
         MessagesBaseName,
         typeof(CliBackupRestore).Assembly);
@@ -76,7 +78,21 @@ internal static class CliBackupRestore
 
     private static void Restore(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
     {
-        var identity = ZoneTreeStore.Restore(Path.GetFullPath(args[SourceArgumentIndex]), Path.GetFullPath(args[DestinationArgumentIndex]), storageOptions);
+        var backup = Path.GetFullPath(args[SourceArgumentIndex]);
+        var destination = Path.GetFullPath(args[DestinationArgumentIndex]);
+        StoreIdentity identity;
+        try
+        {
+            identity = ZoneTreeStore.Restore(backup, destination, storageOptions);
+        }
+        catch (FileNotFoundException)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
+        }
+        catch (DirectoryNotFoundException)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
+        }
         Console.WriteLine(JsonSerializer.Serialize(
             new { identity.NodeId, identity.Incarnation, identity.DispatchPaused },
             JsonDefaults.Options));

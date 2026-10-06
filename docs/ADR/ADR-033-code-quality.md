@@ -174,11 +174,32 @@ expansion. CI, numeric coverage/complexity and production proof remain pending.
 
 ### Accepted numeric source analysis extension
 
+TASK-CQ-UNIT64-010 applies the explicit owner correction of2026-10-06 to
+REQ-CQ-006 / AC-CQ-008: the current executable-unit cutoff is64 code lines.
+This supersedes earlier active50-line limits in feature implementation contracts;
+original historical measurements and diagnostics retain their original cutoff.
+Counting, KLD0032 Error severity/identity, source locations, file400, aggregate
+type200 and nesting3 remain mandatory. No storage, runtime protocol, dependency
+or deployment format changes.
+
+Ordered delivery: root updates root/local policy and active requirement text;
+Luna prepares the guarded threshold/descriptor and real compiler regression
+changes; root reviews the complete diff, joins it, builds the full solution,
+runs the Aspire analyzer suite and formatter, and commits/pushes the complete
+authorized checkpoint. Owned files are ExecutableUnitCodeLineCountAnalyzer.cs,
+NumericQualityRuleDescriptors.cs, ExecutableUnitCodeLineCountAnalyzerTests.cs
+and ExecutableUnitSpanAndTriviaAnalyzerTests.cs in the existing CodeQuality
+roles. Verify63/64 pass,65 rejects with exact diagnostic/message/span, every
+existing oversized unit still rejects, and generated/trivia cases still pass.
+Rollback may replace a defective implementation with a validated one preserving
+the authorized64-line policy; restoring the old50-line rule requires owner
+direction. Build/source review alone does not establish runtime test coverage.
+
 REQ-CQ-006 / AC-CQ-008/009 and
 [CodeQuality](../Features/CodeQuality.md) define the exact
 token-LOC, aggregate partial-type, executable-unit and control-flow-depth metrics.
 The [execution contract](../Features/CodeQuality.md) owns task graph, test-first sequence
-and join. Add KLD0030/31/32/33 as enabled errors at400/200/50/3 respectively, preserving
+and join. Add KLD0030/31/32/33 as enabled errors at400/200/64/3 respectively, preserving
 all eight imported rules and the exact copied EditorConfig. Only the exact existing
 KeyLoad.Core / KeyLoad.Core.DatabaseEngine aggregate type exception applies before
 UTC2026-11-01; file/function/depth stay mandatory and no generalized bypass is added.
@@ -306,7 +327,7 @@ restored metadata and primary driver sources before writes.
 No public type/constructor/interface/enum or report-schema renaming, new package,
 engine registration, invented topology, softened checks or dependency workaround.
 Remove only replaced/dead private code; helpers use the same canonical slice.
-Keep <=400 files, <=200 types and <=50 functions; stop if a fix needs a public
+Keep <=400 files, <=200 types and <=64 functions; stop if a fix needs a public
 contract or topology decision. Existing accepted real-engine correctness/replica
 cases remain the behavior proof: this compile prerequisite adds no artificial
 implementation-mirroring or fake test. Actual new behavior requires first real
@@ -404,7 +425,7 @@ adapter, authorization, budget, cursor and live oracle/replay assertions. Added
 workload extent/tie/cap and actual transition assertions prevent empty or reduced
 fixtures from appearing equivalent. The complete three legacy test files migrate
 to ADR032's canonical QueryExecution ownership; cohesive internal test/fixture
-types obey400/200/50/3 without partial aggregation loopholes or duplicate cases.
+types obey400/200/64/3 without partial aggregation loopholes or duplicate cases.
 Shared TestDatabase, production source and public/data/security contracts remain
 outside this scope. Ordered tests-first source work, disjoint ownership, original
 method/assertion and registration review, rollback and exact-SHA GitHub proof are
@@ -983,3 +1004,31 @@ database format, public API, raised cap or relaxed admission is introduced.
 Rollback restores the coherent test-only invocation/snapshot join and preserves
 immutable prior evidence; this stage remains Accepted until its runtime gates
 pass.
+
+TASK-CQ-NATIVE-CLI-STATIC-007 (REQ-CQ-009; AC-CQ-039/040/045) supplies the
+existing standalone CLI flow with native static instrumentation in an owned
+deployment copy. The retained interrupted local run has empty native CLI inputs;
+neither its collector exit nor a coarse rate is a passing coverage result.
+
+1. Root freezes the CodeQuality contract and the actual18.11.2 command surface.
+   Luna owns feature-local NativeCoverageMergeProcess/Scenario and native image
+   copy/source-snapshot helpers only, through a guarded private packet. Reuse
+   the complete real Release CLI closure with existing validated resource bounds,
+   independent copied files and original pre/post source hashes. Reject unsafe,
+   missing, changed or oversized inputs; preserve existing Server image flows.
+2. Invoke the same pinned native collector with the canonical original settings
+   and `--include-files` scoped solely to the owned copied product assemblies.
+   Execute the copied actual CLI; retain all original coverage/merge reports.
+   Original shared assemblies and PDBs remain unchanged. Instrumentation may
+   mutate the owned workspace; never label that workspace as unchanged source.
+3. Root reviews and joins the packet, runs the complete real CLI workflow through
+   Aspire and preserves the negative, healthy, identity/state, source-preservation,
+   repeated-input and independent line-union oracles. Require actual executable
+   coverage rows. Then complete the normal/scalar, recovery/RF3 and Linux cohort
+   gates before admitting contributors or claiming numeric qualification.
+
+No alternate collector, dependency, public database contract, raised limit,
+shared-output mutation or weakened coverage/quality gate is introduced. Rollback
+removes the coherent test-only owned-image join and preserves every prior native
+report. This stage remains Accepted until its implementation and runtime proof
+are complete.

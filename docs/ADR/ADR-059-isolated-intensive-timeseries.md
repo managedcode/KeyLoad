@@ -50,7 +50,7 @@ private mode/classes/constructor and retains ordinary opens. Provider recovery i
 explicitly permitted to replay/modify derived WAL, not claimed forensic immutability
 or power-loss durability. Guard source/lifetime review covers exceptional partial
 provider open and cleanup/handoff/fatal failure until genuine process fault tests;
-no doubles and no invented executed gate. All source limits50/200/400/depth3 apply.
+no doubles and no invented executed gate. All source limits64/200/400/depth3 apply.
 
 ```mermaid
 flowchart LR
@@ -121,7 +121,7 @@ Both positional records override ToString to the fixed type name, preventing
 auto-generated private credential diagnostic echoes. Normalize expected selection,
 shared identity and parser input exceptions to the fixed settings code without
 private inner exceptions. Test safe ToString and both normalized boundaries.
-Use named constants/helpers,400/200/50/depth3 limits and genuine TUnit inputs.
+Use named constants/helpers,400/200/64/depth3 limits and genuine TUnit inputs.
 
 Stages: tests first temporary candidates; root every diff integration; development
 build/scoped formatter/governance; exact-source GitHub normal/scalar/models; later
@@ -948,7 +948,7 @@ public contracts, legacy RF3 target, production defaults and dependencies remain
     Reads, Writes, Receipt, Result, ProblemException, ReplyException, Topology,
     Protocol under Comparisons/TimeSeries/Intensive; matching NEW UnitTests
     ReceiptTests/ResultTests/SeedTests/TopologyTests and narrowly cohesive prefixed
-    actual-input helpers. Limits400/200/50/depth3; stop on missing contract/overlap/
+    actual-input helpers. Limits400/200/64/depth3; stop on missing contract/overlap/
     owning dependency defect. Root owns all existing files/docs/Git/workflows.
 
 Root reviews complete diffs and joins before source build/format/governance and

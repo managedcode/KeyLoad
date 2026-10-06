@@ -1726,10 +1726,27 @@
     "title": "Cluster backup і restore drills",
     "status": "in_progress",
     "evidence": [
+      "docs/Features/BackupRestore.md",
+      "docs/ADR/ADR-008-backup-log-retention.md",
+      "docs/ADR/ADR-030-retention-paused-restore.md",
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
       "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
-    ]
+    ],
+    "sourceStage": "local_backup_prerequisites_present_cluster_cut_capture_and_restore_not_implemented_contract_decomposition_in_progress",
+    "qualification": {
+      "allAcceptanceClosed": false,
+      "clusterCaptureImplemented": false,
+      "clusterRestoreImplemented": false,
+      "rf3RestoreQualified": false,
+      "remaining": [
+        "Freeze catalog epoch, per-partition cut vector and complete authoritative capability-state inventory",
+        "Implement coordinated retention pins, verified off-node artifact and interruption cleanup",
+        "Implement new-incarnation paused cluster restore, stale-token fencing and explicit reconciliation",
+        "Run complete Aspire-owned RF3 restore and fault flows through real .NET and official MCP clients",
+        "Measure RPO/RTO and obtain exact-source Linux recovery, functional coverage and fault evidence"
+      ]
+    }
   },
   "KL-043": {
     "title": "Upgrade і format compatibility",
@@ -4908,13 +4925,13 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "runtime_options_literals_locks_phase_health_semantics_native_test_admission_and_manifest_input_fix_complete_runtime_gates_in_progress",
-    "canonicalBuildPassed": true,
+    "sourceStage": "runtime_options_literals_locks_and_admission_implemented_native_pdb_and_process_settlement_prerequisite_repairs_in_progress",
+    "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
       "Pass full Aspire unit/scalar/recovery and native RF3 suites with completed original reports",
-      "Pass required source-bound functional coverage and exact delivered-source Linux qualification"
+      "Pass required source-bound product functional coverage and exact delivered-source Linux runtime qualification"
     ],
     "canonicalFormatterPassed": false,
     "developmentEvidence": {
@@ -5396,8 +5413,174 @@
         "originalTrxReceiptCheck": "passed_against_retained_original_Linux702_receipt_total388_executed388_passed388_SHA256b464ebaedff25a6e59c2bb3db74864afa01ecee858a450422339811b67261800",
         "review": "read_only_reviewer_verified_native_settings_source_SHA_binding_failure_paths_original_upload_and_no_skip_receipt_join",
         "qualification": "new_workflow_requires_actual_exact_source_Linux_collection_and_80_70_90_verification_no_coverage_pass_claim"
+      },
+      "deliveredLinuxC8AnalyzerCoverage": {
+        "headSha": "c8e948ab72d80e11ed58940836d3e34c376a944f",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37450680516",
+        "job": "https://github.com/managedcode/KeyLoad/actions/runs/37450680516/job/112226223755",
+        "suite": {
+          "total": 388,
+          "passed": 388,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        },
+        "nativeDurationMs": 168159.4627,
+        "sourceInventory": {
+          "sources": 54,
+          "executable": 45,
+          "declarationOnly": 9
+        },
+        "nativeModuleCounters": {
+          "linesCovered": 1696,
+          "linesValid": 1790,
+          "branchesCovered": 1489,
+          "branchesValid": 1792
+        },
+        "thresholds": {
+          "moduleLinePercent": 80,
+          "moduleBranchPercent": 70,
+          "criticalPipelineLinePercent": 90
+        },
+        "criticalPipelines": [
+          {
+            "diagnostic": "KLD0001",
+            "linesCovered": 246,
+            "linesValid": 263,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0013",
+            "linesCovered": 36,
+            "linesValid": 38,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0014",
+            "linesCovered": 48,
+            "linesValid": 48,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0020",
+            "linesCovered": 64,
+            "linesValid": 69,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0021",
+            "linesCovered": 44,
+            "linesValid": 45,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0022",
+            "linesCovered": 53,
+            "linesValid": 53,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0023",
+            "linesCovered": 185,
+            "linesValid": 200,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0024",
+            "linesCovered": 18,
+            "linesValid": 18,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0030",
+            "linesCovered": 70,
+            "linesValid": 71,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0031",
+            "linesCovered": 130,
+            "linesValid": 132,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0032",
+            "linesCovered": 128,
+            "linesValid": 132,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0033",
+            "linesCovered": 128,
+            "linesValid": 131,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0034",
+            "linesCovered": 59,
+            "linesValid": 60,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0035",
+            "linesCovered": 85,
+            "linesValid": 85,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0036",
+            "linesCovered": 317,
+            "linesValid": 334,
+            "passed": true
+          },
+          {
+            "diagnostic": "KLD0037",
+            "linesCovered": 631,
+            "linesValid": 679,
+            "passed": true
+          }
+        ],
+        "coveragePassed": true,
+        "coverageFailures": [],
+        "nativeReportSha256": "b9defd664a067384a7760093252c53807057ba3c1aff6a7894cbf556abce27d3",
+        "derivedReportSha256": "c51f1fbcee6930e2aa1d133d1f19c02d4e08419d615d4373db9872454c023d0d",
+        "originalTestReportSha256": "e687e2d8357d7ad1e70c4de738499f0584d7f70e2eaaf8e7a602437241cd266d",
+        "directory": "linux-cic8-analyzers",
+        "qualification": "actual original exact_source_Linux_full_analyzer_tests_no_skips_and_native_source_bound_80_70_90_gate_pass; complete_product_functional_coverage_and_unit_scalar_recovery_RF3_remain_required"
+      },
+      "canonicalReleaseV44": {
+        "log": "keyload-general-options-full-release-v44.log",
+        "nativeExit": 1,
+        "passed": false,
+        "warnings": 0,
+        "errors": 1,
+        "duration": "00:02:11.52",
+        "qualification": "actual full native Release build rejected CA2000 in the concurrently revised native coverage source snapshot; final current-source build and new PathMap regressions remain pending"
+      },
+      "compiledInventoryAuditV45": {
+        "log": "keyload-general-options-compiled-inventory-audit-v45.log",
+        "nativeExit": 1,
+        "projects": 19,
+        "compiledSources": 3197,
+        "qualification": "actual PE metadata compared with current source; peer full Release r67 passed0/0 but three newly written settlement regression files were absent from evaluated compilation; fresh complete source build required",
+        "missingFromCompile": [
+          "tests/KeyLoad.UnitTests/Features/CodeQuality/Cases/NativeSourceManifestChildSettlementTests.cs",
+          "tests/KeyLoad.UnitTests/Features/CodeQuality/Cases/ProductionSourceManifestSettlementTests.cs",
+          "tests/KeyLoad.UnitTests/Features/CodeQuality/Helpers/NativeSourceManifestChildSettlement.cs"
+        ]
+      },
+      "canonicalReleaseV46": {
+        "log": "keyload-general-options-full-release-v46.log",
+        "nativeExit": 1,
+        "passed": false,
+        "warnings": 0,
+        "errors": 3,
+        "duration": "00:02:14.42",
+        "qualification": "actual full native Release build rejected CA2016/CA2025/CA1068 in new native child settlement fixture; narrow repair under review; new regression execution remains pending"
       }
     },
-    "verificationStage": "Linuxa130_full_Release_builds_pass_RF3_stopped_at_native_PDB_source_binding_independent_complete_analyzer_CI_coverage_join_reviewed_and_static_checked_remaining_exact_source_full_runtime_and_numeric_coverage_gates_open"
+    "verificationStage": "Linuxc8_complete388_analyzers_and_source_bound_54file_native_80_70_90_coverage_pass_full_build_formatter_pass_RF3_native_PDB_mapping_prerequisite_repair_in_progress_remaining_complete_runtime_product_coverage_gates_open"
   }
 }

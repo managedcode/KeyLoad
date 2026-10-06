@@ -623,3 +623,56 @@ storage migration, threshold, source inventory or required runtime suite changes
 Rollback restores this workflow join together with its documentation. Only a
 completed successful original collector report and source-bound verification
 qualify coverage; unit/scalar/recovery/RF3 acceptance remains separately required.
+
+### Native deterministic PDB qualification repair
+
+TASK-CQ-PDB-PATHMAP-008 joins REQ-CQ-009 and AC-CQ-043/044 under ADR-033 after
+the delivered Linux RF3 prerequisite rejected all120 Abstractions sources.
+Native .NET CI builds map source roots through PathMap; the owning compiled
+identity resolver currently treats the mapped `/_/` root as an external physical
+directory. Recognize only that exact deterministic prefix and validate its suffix
+through the existing confined source-path resolver. Preserve physical/original
+compilation roots, digest-redacted unknown external paths, complete inventory,
+SHA256 checksums, PE/PDB GUID/stamp checks, artifact/document/path bounds and drift
+checks. No unbound source becomes measured and no fallback mapping is introduced.
+
+Root owns the specification, script integration, evidence and final Linux gates.
+The script contributor owns only functional-coverage.compiled-identity.ps1; the
+test contributor owns feature-local deterministic compiler fixtures, native TUnit
+cases and reuse of the existing bounded ProductionSourceManifestProcess lifecycle.
+Before implementation, freeze the stage order: this contract; narrow mapping;
+real native compiler fixtures with matched DLL/PDB/source bytes; focused Aspire
+regressions; exact-source Linux preparation and complete recovery/RF3 qualification.
+
+Compile fixture sources with the actual installed SDK compiler in an owned
+temporary directory, using its native PathMap and portable PDB emission. Verify
+canonical mapped sources bind and retain their real checksum; altered source
+bytes fail against the original PDB, restored bytes succeed, and unknown or
+escaping mapped roots fail binding without exposing their original path. Preserve
+the existing native full production manifest/tamper/healthy-follow-up regression,
+every original child/reader/disposal join and centrally admitted test deadlines.
+Rollback restores the resolver and its fixture joins; storage/public format and
+dependency migration are N/A. Builds, source review and fixture results alone do
+not qualify runtime suites or numeric coverage.
+
+The fixture join also repairs the inherited native process settlement path:
+always observe the original task, including a fault completed between deadline
+and cleanup; retain the complete primary/cleanup aggregate, including fatal
+members; and join every original child and reader before process disposal or
+owned-root deletion. The process contributor owns
+ProductionSourceManifestProcessSettlement and the existing failure projection in
+NativeCoverageImageNodeSettlement, with feature-local native child/cancellation
+and aggregate-retention regressions. Existing centrally admitted operation and
+settlement deadlines remain unchanged; an exceeded cleanup deadline stays a
+failure and does not authorize detached cleanup or success. Shared coverage-copy
+implementation remains with its current owner. Root reviews this independent
+join before a fresh canonical build and focused Aspire execution.
+
+Root also owns the matching Linux CI integration: execute the ten native source
+ownership cases through the existing Aspire unit entry before the full unit suite,
+require their original TRX to contain exactly ten executed/passed cases, and
+retain it through the existing always-uploaded TestResults artifact. This gives
+the repaired prerequisite an independent completed receipt while full
+unit/scalar/recovery/RF3 and product coverage remain mandatory and keep their
+actual failure status. No suite, timeout, coverage threshold or source inventory
+is weakened; rollback removes only this additional focused CI join.

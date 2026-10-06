@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -12,12 +13,12 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
     [Test]
     public async Task ExecutableUnitLinesAtLimitPassAndOneOverReportsAsync()
     {
-        foreach (var count in new[] { 49, 50, 51 })
+        foreach (var count in new[] { 63, 64, 65 })
         {
             var source = CreateMethod(count);
             var findings = await NumericAnalyzerFixture.AnalyzeAsync(
                 new ExecutableUnitCodeLineCountAnalyzer(), (Path, source));
-            if (count <= 50)
+            if (count <= 64)
             {
                 await Assert.That(findings).IsEmpty();
             }
@@ -26,6 +27,8 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
                 await NumericAnalyzerFixture.AssertSingleFindingAsync(
                     findings, Id, DiagnosticSeverity.Error, Path, line: 2, column: 4,
                     span: MethodSpan(source));
+                await Assert.That(findings[0].GetMessage(CultureInfo.InvariantCulture))
+                    .IsEqualTo("Executable unit contains 65 code lines; the maximum is 64");
             }
         }
     }
@@ -72,7 +75,7 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
             finding.Location.GetLineSpan().StartLinePosition.Line).ToArray();
         await Assert.That(lines.Contains(4)).IsTrue();
         await Assert.That(lines.Contains(6)).IsTrue();
-        await Assert.That(lines.Contains(58)).IsTrue();
+        await Assert.That(lines.Contains(72)).IsTrue();
     }
 
     [Test]
@@ -104,7 +107,7 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
     [Test]
     public async Task GeneratedExecutableUnitIsIgnoredByRoslynPolicyAsync()
     {
-        var source = CreateMethod(51);
+        var source = CreateMethod(65);
         var findings = await NumericAnalyzerFixture.AnalyzeAsync(
             new ExecutableUnitCodeLineCountAnalyzer(), ("/repo/src/Generated.g.cs", source));
         await Assert.That(findings).IsEmpty();
@@ -127,8 +130,8 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
 
     private static string CreateOversizedNestedUnits()
     {
-        var localStatements = CreateStatements(48);
-        var lambdaStatements = CreateStatements(48);
+        var localStatements = CreateStatements(62);
+        var lambdaStatements = CreateStatements(62);
         return "internal sealed class Subject\n{\n    internal int Value\n    {\n        get\n" +
             "        {\n            int Local()\n            {\n" + localStatements +
             "\n                return 0;\n            }\n" +
@@ -139,7 +142,7 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
 
     private static string CreateOversizedNonMethodUnits()
     {
-        var body = CreateStatements(48, "        ");
+        var body = CreateStatements(62, "        ");
         return "internal sealed class Subject\n{\n    public Subject()\n    {\n" + body +
             "\n    }\n    static Subject()\n    {\n" + body +
             "\n    }\n    ~Subject()\n    {\n" + body +
@@ -150,7 +153,7 @@ internal sealed class ExecutableUnitCodeLineCountAnalyzerTests
 
     private static string CreateOversizedAnonymousMethod()
     {
-        var statements = CreateStatements(48);
+        var statements = CreateStatements(62);
         return "internal sealed class Subject\n{\n    internal static void Run()\n    {\n" +
             "        System.Func<int> callback = delegate\n        {\n" + statements +
             "\n            return 0;\n        };\n        callback();\n    }\n}";

@@ -1,5 +1,32 @@
 # CodeQuality
 
+TASK-CQ-UNIT64-010 implements the owner's 2026-10-06 rule-specific correction:
+REQ-CQ-006 / AC-CQ-008 now require KLD0032 at an executable-unit boundary of64
+code lines. File400, aggregate type200, nesting3, token/trivia counting,
+generated-source exclusions, cancellation, diagnostic ID/severity and precise
+source spans stay governed by their existing contracts. The actual compiler
+flow must accept63/64 and emit the same located Error for65, with diagnostic
+text naming64. Oversized accessor, local-function, lambda, constructor,
+destructor, operator, anonymous-method, raw-literal and disabled-text fixtures
+must continue exercising rejected code; generated oversized and comment/trivia
+cases must still prove their existing positive contracts. Root owns policy,
+ADR/docs and integration. Luna owns the threshold/descriptors and the two
+existing executable-unit compiler fixture files. Required verification is the
+canonical solution build, Aspire-owned analyzer suite, formatter and exact-source
+Linux qualification. Historical50-line diagnostics remain historical evidence.
+
+TASK-CQ-NATIVE-STDOUT-009 preserves REQ-CQ-009 and AC-CQ-044/045 for
+the genuine source-manifest cancellation child. Its captured stdout limit
+includes the readiness line and newline; reserve that prefix before reading
+the remainder, reject a prefix which cannot fit, and still detect an extra
+character when the remaining allowance is zero. Run the actual native child
+at the exact prefix bound and one character below it, verify original
+exit/readers, safe output failure and owned cleanup, then complete the healthy
+default-bound child flow. Reuse centrally validated test execution options.
+This tooling operation is not a product coverage contributor. Root owns its
+helper/output-reader/test join; existing one-watchdog fail-stop, original
+failure preservation and required Aspire/Linux gates remain mandatory.
+
 ## Behavioural test cleanup, owner correction 2026-10-06
 
 - REQ-CQ-014: functional tests execute an actual operation and verify its observable
@@ -51,7 +78,7 @@ new Linux RF3/recovery or product qualification.
 REQ-CQ-006 maps to AC-CQ-008/009 in
 this Feature and the ADR-033 execution contract,
 under the accepted ADR-033 numeric extension. Four source-editable enabled error
-rules enforce file/type/function/nesting400/200/50/3 with real Roslyn boundary
+rules enforce file/type/function/nesting400/200/64/3 with real Roslyn boundary
 fixtures. Actual numeric coverage, RF3 container collection and a matched numeric
 baseline remain pending; restored collector presence is not coverage proof.
 
@@ -153,7 +180,7 @@ the build; never disable these rules merely to declare a green migration.
 | KLD0024 | Typed catch clauses | Warning, promoted to error by the build |
 | KLD0030 | Nongenerated file code lines at most400 | Error |
 | KLD0031 | Nongenerated aggregate type code lines at most200 | Error |
-| KLD0032 | Executable unit code lines at most50 | Error |
+| KLD0032 | Executable unit code lines at most64 | Error |
 | KLD0033 | Executable control-flow nesting at most3 | Error |
 | KLD0034 | Typed synchronization outside Orleans activation-owned state | Error |
 | KLD0035 | Named constants for all runtime numeric literals, including zero and one | Error |
@@ -975,7 +1002,7 @@ and bounded by the one native options definition. Both hashing and copy readers
 consume that exact captured buffer; they do not embed a second operational
 buffer in Node format constants. Image tooling is split by descriptor contract,
 bounded filesystem, native tool closure and context/CLI responsibilities under
-the existing400-file/50-function/three-level limits. Linux-x64 collection covers
+the existing400-file/64-function/three-level limits. Linux-x64 collection covers
 all original KeyLoad runtime assemblies in the selected server closure, with
 AppHost/Analyzers still separately qualified infrastructure. Dynamic managed
 instrumentation preserves admitted DLL/PDB bytes. The wrapper cannot publish a
@@ -1350,6 +1377,41 @@ coverage. This tooling proof does not itself admit a product contributor or
 satisfy a numeric threshold. Complete source-bound Linux functional cohorts,
 RF3, recovery and every existing no-decrease/80/70/90 gate remain mandatory.
 
+### Owned native CLI static collection
+
+TASK-CQ-NATIVE-CLI-STATIC-007 continues REQ-CQ-009 and AC-CQ-039/040/045
+under [ADR-033](../ADR/ADR-033-code-quality.md). The retained standalone CLI
+reports from the interrupted local full-Unit development run are empty native
+reports, not coverage qualification. Native tool18.11.2 exposes `collect
+--include-files`; [its official contract](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-coverage)
+supports static managed instrumentation on this machine without dynamic support.
+
+Materialize the complete actual Release CLI deployment closure as independent
+regular files in the already owned fixture, using the existing validated file,
+total-byte, file-count and path bounds. Reuse the native image copy and source
+snapshot primitives; do not hardlink, rebuild, instrument or otherwise mutate
+shared Release outputs. Capture the complete original closure before copying,
+verify exact copied inputs before collection, and revalidate the original source
+closure after every settled child and during failure cleanup. A changed original
+input fails the operation and supplies no coverage evidence.
+
+Pass only the owned copied KeyLoad product assembly pattern to the existing
+native `collect --include-files` option, retain the unchanged canonical production
+settings and fourteen-module allowlist, and execute the copied real CLI. Keep
+the same backup/pack/inspect/restore, reopened records, identity/dispatch state,
+original report retention, repeated-input invariant and independent executable
+line-union oracle. Owned copies are instrumentation workspace, never admitted
+as unchanged original source or as a new product contributor. Every original
+process, reader and cleanup joins within the unchanged admitted bounds.
+
+Root owns this contract, guarded integration and final review; Luna owns only
+the CodeQuality image/copy/snapshot and standalone CLI collection joins. Then
+root runs the actual mapped test through Aspire, normal/scalar functional
+collection and complete exact-source Linux gates. Missing executable rows remain
+failure; full-suite completion, source identity, functional-only classification,
+coverage thresholds, RF3 and recovery stay required. This stage remains pending
+runtime proof and does not produce a current numeric coverage baseline.
+
 ## Controlled time ownership, 2026-10-06
 
 [ResourceExecution TimeProvider](ResourceExecution/TimeProvider.md) and [ADR-115](../ADR/ADR-115-time-provider.md) extend KLD0022 to native Stopwatch timing and Environment.TickCount/TickCount64, with exact-span real-compiler positive/negative/generated fixtures. Explicit provider/default composition boundaries remain allowed. Native provider timers and real clock-controlled engine/replica workflows are required; source migration alone is not qualification.
@@ -1371,3 +1433,27 @@ website gate and every unit/scalar/recovery/RF3 qualification requirement.
 Require exactly one original analyzer TRX, a positive total, executed equal to
 total and passed equal to total. Preserve those counters, source SHA and original
 TRX hash in the retained receipt; missing, skipped or failed tests fail the job.
+
+### Deterministic portable PDB source ownership
+
+TASK-CQ-PDB-PATHMAP-008 under ADR-113/ADR-033 preserves REQ-CQ-009 and
+AC-CQ-043/044 while accepting the native CI compiler's exact `/_/` source root.
+Its suffix must satisfy the existing confined relative-path rules; original
+physical roots and all source/checksum/PE/PDB/drift/resource checks remain required.
+Unknown external paths remain digest-redacted and unbound. Real SDK compiler
+fixtures cover complete canonical mapping, source-byte tampering and healthy
+restoration, plus unknown/escaping root rejection. The existing complete native
+production manifest/tamper case and exact-source Linux preparation, recovery and
+RF3 remain required; missing binding continues to fail qualification.
+
+The three `NativePathMapCompilerTests.AcCq044Native*` cases map AC-CQ-044 to
+actual portable-PDB canonical, changed/restored, unknown and escaping-source
+evidence. Reused process settlement must observe already completed native faults,
+retain primary/cleanup aggregates and join every original child and reader before
+disposal or fixture deletion. A cleanup deadline failure remains a failure; it
+does not permit detached work, loss of fatal-containing aggregate members or a
+success claim. TASK-CQ-PDB-PATHMAP-008 adds native lifecycle and failure-retention
+regressions alongside the existing complete production-manifest operation case.
+Linux CI additionally runs those ten cases before the full unit suite, requires
+exactly ten executed/passed original TRX cases and retains the original reports.
+The additional receipt does not replace full unit/scalar/recovery/RF3 or coverage.

@@ -7,6 +7,7 @@ $script:FcCompiledIdentity = [ordered]@{
     InvalidPdb = 'The portable PDB does not belong to the inspected PE image.'
     InvalidDocument = 'A compiled source document is duplicated, unsupported or outside the owned checkout.'
     SourceDrift = 'Compiled source bytes do not match the current source inventory.'
+    DeterministicPathMapPrefix = '/_/'
     GeneratedDisposition = 'generated; retained native checksum, excluded from inventoried product-source binding'
     MissingDisposition = 'unmeasured; no portable-PDB document binds this source'
     UninventoriedDisposition = 'unmeasured; native document is outside the declared source inventory'
@@ -64,6 +65,12 @@ function Assert-FcPdbDebugIdentity([object] $Reader, [object] $PeIdentity) {
 function Get-FcPdbSourcePath([string] $Root, [string] $Name, [string] $CompilationRoot) {
     if ([string]::IsNullOrWhiteSpace($Name) -or $Name.Length -gt $script:FcCompiledIdentity.MaximumPathCharacters) {
         throw $script:FcCompiledIdentity.InvalidDocument
+    }
+    $pathMapPrefix = [string] $script:FcCompiledIdentity.DeterministicPathMapPrefix
+    if ($Name.StartsWith($pathMapPrefix, [StringComparison]::Ordinal)) {
+        $mappedRelative = $Name.Substring($pathMapPrefix.Length)
+        $mappedPath = Resolve-FcPath $Root $mappedRelative
+        return [IO.Path]::GetRelativePath($Root, $mappedPath).Replace([IO.Path]::DirectorySeparatorChar, '/')
     }
     $foreignRooted = $Name -match '\A[A-Za-z]:[\\/]' -or $Name.StartsWith('\\', [StringComparison]::Ordinal)
     if ($foreignRooted -and -not [IO.Path]::IsPathRooted($Name)) {

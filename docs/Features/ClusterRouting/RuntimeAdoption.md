@@ -90,6 +90,33 @@ into an actual operation span to prove fail-closed suppression while the operati
 still has its correct outcome. Bound capture and flush/join every provider.
 Native mechanism fixtures remain unit evidence; SDK/MCP RF3 is still mandatory.
 
+### Native streamed-request telemetry join
+
+TASK-ORL-TELEMETRY-STREAM-002 keeps REQ/AC-ORL-012 and every existing
+operation, parentage, state, privacy and resource assertion. Register the native
+client AddActivityPropagation alongside the existing silo registration in the
+real RequestCqrs fixture. The pinned Orleans10.4.0 filter reports method tags as
+interface/method and routes IAsyncEnumerableGrainExtension calls to its native
+Application source. The current KeyLoad grain inventory has one native
+IAsyncEnumerable entry point, IRequestGrain.ExecuteStreamAsync. Normalize only
+the exact native Orleans.Runtime.IAsyncEnumerableGrainExtension/StartEnumeration<T>
+RPC to the existing request.execute value; MoveNext, DisposeAsync and unknown
+methods retain their generic closed classification. This does not make extension
+calls separate database requests or change native stream lifetime/authority.
+
+The original local ClusterRouting cohort executed230 cases, passed228 and failed
+the request-method label assertion before later telemetry checks. It retained no
+raw method tags, so its failure alone does not prove the proposed classification.
+Root must verify the whole actual signed-operation test through Aspire after the
+guarded join, with all original parentage/privacy/metric assertions intact. No
+synthetic activity, raw-tag export, relaxed assertion, new provider or higher
+limit is permitted. Own source paths are the ServiceDefaults ClusterRouting
+policy constants and tag sanitizer plus RequestCqrsFixture client registration;
+Luna produces a private guarded patch and root owns native build/format,
+source identity, normal/scalar tests and Linux/RF3 qualification. Rollback removes
+only this closed mapping/client registration after admission and capture settle;
+no public API, persisted data, signed identity or RF3 contract changes.
+
 ## Execution and verification contract
 
 | Task / owner / permissions | Dependencies and join | Artifacts and proof |

@@ -203,7 +203,7 @@ lead, affected existing DatabaseEngine partial declarations only, removal target
 handlers under their canonical slices with the same node-local atomic transaction
 and persisted authorization boundary. Do not expand this deviation with new
 behavior or claim the aggregate type limit passes. In this prerequisite stage,
-split shared responsibilities, enforce <=400 files and <=50 functions, and retain
+split shared responsibilities, enforce <=400 files and <=64 functions, and retain
 the aggregate-type migration as open complexity evidence. Verification requires
 the real numeric gate plus full real-store/recovery/RF3 behavior after extraction.
 

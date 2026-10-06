@@ -258,11 +258,13 @@ The explicit owner instruction to enable Orleans distributed directory and activ
 These limits are repo-configured policy values. They live here so the solution can tune them over time.
 - `file_max_loc`: `400`
 - `type_max_loc`: `200`
-- `function_max_loc`: `50`
+- `function_max_loc`: `64`
 - `max_nesting_depth`: `3`
 - `exception_policy`: `Document any justified exception in the nearest ADR, feature doc, or local AGENTS.md with the reason, scope, and removal/refactor plan.`
 
 Local `AGENTS.md` files may tighten these values, but they must not loosen them without an explicit root-level exception.
+
+- Owner correction 2026-10-06 sets the solution-wide executable-unit limit to 64 code lines, replacing the earlier 50-line limit. Keep file400, aggregate type200 and nesting3 limits; verify the exact boundary through real compiler/analyzer operations at64 and65 lines.
 
 ### Task Delivery
 - Start from `docs/Architecture.md` and the nearest local `AGENTS.md`.

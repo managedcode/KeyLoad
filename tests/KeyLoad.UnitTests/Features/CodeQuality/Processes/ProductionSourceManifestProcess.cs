@@ -35,7 +35,7 @@ internal static class ProductionSourceManifestProcess
         return AppHostOptionsRegistration.BindTestExecution(configuration);
     }
 
-    internal static async Task<ProductionSourceManifestProcessResult> RunAsync(
+    internal static Task<ProductionSourceManifestProcessResult> RunAsync(
         IOptions<TestExecutionOptions> executionOptions, string mode, string evidenceRoot,
         CancellationToken cancellationToken)
     {
@@ -43,8 +43,18 @@ internal static class ProductionSourceManifestProcess
         ArgumentNullException.ThrowIfNull(mode);
         ArgumentNullException.ThrowIfNull(evidenceRoot);
         cancellationToken.ThrowIfCancellationRequested();
+        return RunAsync(executionOptions, CreateStartInfo(mode, evidenceRoot), cancellationToken);
+    }
+
+    internal static async Task<ProductionSourceManifestProcessResult> RunAsync(
+        IOptions<TestExecutionOptions> executionOptions, ProcessStartInfo startInfo,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(startInfo);
+        cancellationToken.ThrowIfCancellationRequested();
         var options = executionOptions.Value;
-        using var process = new Process { StartInfo = CreateStartInfo(mode, evidenceRoot) };
+        using var process = new Process { StartInfo = startInfo };
         using var deadlineTimeout = new CancellationTokenSource(options.OrdinaryTimeout, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();

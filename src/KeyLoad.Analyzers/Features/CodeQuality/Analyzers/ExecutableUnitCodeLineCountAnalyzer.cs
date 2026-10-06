@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace KeyLoad.Analyzers.Features.CodeQuality;
 
-/// <summary>Reports executable units whose code line count exceeds 50.</summary>
+/// <summary>Reports executable units whose code line count exceeds 64.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ExecutableUnitCodeLineCountAnalyzer : DiagnosticAnalyzer
 {
-    private const int MaximumExecutableUnitCodeLines = 50;
+    private const int MaximumExecutableUnitCodeLines = 64;
     private static readonly ImmutableArray<DiagnosticDescriptor> Rules =
         [NumericQualityRuleDescriptors.ExecutableUnitCodeLines];
 

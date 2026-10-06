@@ -54,7 +54,7 @@ Implementation contract, accepted before writes:
    explicit supplemental evidence, not a fake deterministic runtime test.
 3. Lead joins every diff, adds real references/inventory only after files exist,
    verifies25-project strict policy and23 custom consumers, normal Release builds,
-   generated registration,400/200/50/3, formatter/governance/import/diff and source
+   generated registration,400/200/64/3, formatter/governance/import/diff and source
    provenance. Coverage and other source prerequisites stay explicitly pending.
 4. Exact-SHA GitHub TUnit invokes actual executable with Dry/full JSON. The pinned
    [exporter](https://raw.githubusercontent.com/dotnet/BenchmarkDotNet/v0.15.8/src/BenchmarkDotNet/Exporters/Json/JsonExporterBase.cs)

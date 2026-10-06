@@ -158,7 +158,30 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-entry --KeyLoadTests:ReportTrx=true
       - name: Test benchmark phase and attempt counters
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-counters --KeyLoadTests:ReportTrx=true
+      - name: Test native coverage source ownership
+        id: source-ownership
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true
+      - name: Verify original source ownership test receipt
+        if: ${{ !cancelled() && steps.source-ownership.outcome != 'skipped' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Set-StrictMode -Version Latest
+          $reports = @(Get-ChildItem TestResults/native-source-ownership -Filter '*.trx' -Recurse -File)
+          if ($reports.Count -ne 1) { throw 'Exactly one original source ownership TRX is required.' }
+          [xml] $trx = Get-Content -LiteralPath $reports[0].FullName -Raw
+          $counters = $trx.TestRun.ResultSummary.Counters
+          if ([int] $counters.total -ne 10 -or [int] $counters.executed -ne 10 -or
+              [int] $counters.passed -ne 10 -or [int] $counters.failed -ne 0) {
+            throw 'Every native source ownership case must execute and pass.'
+          }
+          $receipt = [ordered]@{
+            source = $env:GITHUB_SHA; total = 10; executed = 10; passed = 10
+            originalTrxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          }
+          $receipt | ConvertTo-Json | Set-Content TestResults/native-source-ownership/test-receipt.json
       - name: Run unit tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
       - name: Run unit tests without CPU intrinsics
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}

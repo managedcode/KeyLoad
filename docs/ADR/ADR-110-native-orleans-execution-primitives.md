@@ -152,3 +152,17 @@ native manager starts background work without awaiting its catalog at silo start
 provider async calls wait on a separately canceled readiness gate until signed
 RF3 bootstrap and verification complete. The legacy epoch7 reader compatibility
 gate must be implemented and qualified before first journal admission.
+
+Native streamed-request telemetry join, 2026-10-06: TASK-ORL-TELEMETRY-STREAM-002
+in [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md) freezes the
+REQ/AC-ORL-012 client propagation and exact native stream-start classification
+contract before code. Stage1 is a private Luna patch for ServiceDefaults
+ClusterRouting Contracts/OrleansTelemetryPolicy.cs,
+Diagnostics/OrleansTelemetryTagSanitizer.cs and the actual RequestCqrsFixture
+client registration. Stage2 is root guard/source review and native format/build;
+stage3 runs the unchanged real signed-operation, parentage, metrics and privacy
+workflow through Aspire normal/scalar before Linux/RF3 qualification. No pins,
+provider replacement, synthetic telemetry, raw metadata or bound changes apply.
+Rollback and source-inventory constraints are in the owning feature contract.
+The original228/230 local result leaves the label and later assertions open;
+source reasoning is not runtime proof and this ADR is not fully implemented.

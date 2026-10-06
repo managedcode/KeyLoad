@@ -19,7 +19,7 @@
 
 ## Skills and protected risks
 - Applicable skills: none installed; do not install skills/tools or change global configuration.
-- All file/type/unit/depth400/200/50/3 limits apply; no partial-type loophole or analyzer severity/threshold weakening.
+- All file/type/unit/depth400/200/64/3 limits apply; no partial-type loophole or analyzer severity/threshold weakening.
 - Preserve unrelated shared-checkout source. No local tests/recovery/runtime probes/load benchmarks, secrets, ignored failures, skipped suites or invented resource/performance numbers.
 - Dry/generated-runner qualification establishes execution only; never report RF3, power-loss, matched performance, coverage, endurance or production readiness from it.
 

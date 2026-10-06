@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
 using KeyLoad.Server;
-using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
@@ -46,18 +44,7 @@ internal static class NativeCoverageImageNodeSettlement
     }
 
     internal static void ThrowFailures(List<Exception> failures)
-    {
-        if (failures.Count == 0)
-        {
-            return;
-        }
-        var fatal = CqrsRuntimeFailures.FindFatal(new AggregateException(failures));
-        if (fatal is not null)
-        {
-            ExceptionDispatchInfo.Capture(fatal).Throw();
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
+        => ServerFailureObserver.ThrowIfAny(failures);
 
     private static async Task<(string Text, bool Joined)> ObserveTextAsync(Task<string>? original,
         List<Exception> failures)

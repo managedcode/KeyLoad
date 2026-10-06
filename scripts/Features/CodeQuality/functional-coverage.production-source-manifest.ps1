@@ -72,7 +72,7 @@ function Resolve-PsmRoot([string] $Path) {
 
 function Get-PsmCompiledSources([string] $Root, [string] $ProjectName, [bool] $IsTest, [string] $DllRelative) {
     $tree = if ($IsTest) { 'tests/' + $ProjectName } else { 'src/' + $ProjectName }
-    $dllPath = Resolve-FcPath $Root $DllRelative
+    $dllPath = Resolve-FcCompiledFile $Root $DllRelative
     $stream = [IO.File]::OpenRead($dllPath)
     $pe = $null
     try {

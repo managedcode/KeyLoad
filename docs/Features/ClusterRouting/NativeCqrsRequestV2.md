@@ -284,7 +284,7 @@ Cases/Helpers/Assertions as required, in a private patch against the reviewed
 AppHost R3 packet. Root owns its shared references/friend/composition joins,
 strict build, actual Aspire unit/scalar execution and all-code commit. Reuse
 production validation instead of a parser copy; preserve typed primary/cleanup
-errors, owned cleanup and400/200/50 limits. Existing ADR-082 controls suffice:
+errors, owned cleanup and400/200/64 limits. Existing ADR-082 controls suffice:
 no new public/data/wire contract or deployment mode is added. This stage cannot
 qualify actual armed RF3 phases or replace their mandatory both-client cases.
 

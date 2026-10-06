@@ -4,6 +4,46 @@ Configuration and rule contract: [CodeQuality](../Features/CodeQuality.md).
 Implementation decision: [ADR-033](../ADR/ADR-033-code-quality.md).
 Working verification: [plan](../Features/CodeQuality.md).
 
+## Executable-unit64 development checkpoint, 2026-10-06
+
+TASK-CQ-UNIT64-010 implements the explicit owner correction in REQ-CQ-006 /
+AC-CQ-008: KLD0032 now accepts64 counted code lines and rejects65. File400,
+aggregate type200, nesting3, Error severity, generated-source exclusion, counting
+and exact diagnostic spans remain unchanged. Active root/local policy, feature
+contracts and ADR-033 use64; historical receipts retain their original limits.
+
+The local macOS arm64 R72 canonical complete Release build passed with0 warnings
+and0 errors and no changes among4221 captured compile inputs. Original build log
+SHA256: `e1f842aff8492c3c95f2758d2918f4ebf3ba57c9650a05bce82b27adc1e8532f`.
+The actual Aspire-owned complete `analyzers` suite executed388/388 cases,
+all passing; original TRX SHA256:
+`a42d04102deff97fc6b83fe8099ca315270202a9a2962780c893987db2863e42`.
+Its before/after guards found no drift among4272 source inputs or84 DLL/PDB
+inputs. Exact63/64/65 compiler outcomes, precise Error/message/span, oversized
+accessor/lambda/nonmethod bodies, raw strings, disabled text, comments and
+Roslyn generated-code handling all executed. Two actual initial CA1305 findings
+were repaired with invariant diagnostic formatting; no analyzer was suppressed.
+
+The same source cohort's genuine cancellation and inclusive stdout boundary
+flows passed3/3 through Aspire, including rejected output plus healthy following
+child operations. Original TRX SHA256:
+`78be0c61611cac07a0a4168220a69f299771c33e701c290584247d391baf3707`.
+Canonical complete `dotnet format KeyLoad.slnx --verify-no-changes --no-restore`
+returned0. Repository governance and whitespace checks also passed.
+
+These are bounded local development results. The separate unchanged native
+Orleans telemetry flow executed1 case and failed its late-baggage privacy oracle;
+original failed TRX SHA256:
+`7c93d4056304cb30d910ff4df7052d23792df794ed952dfbb75a5c7e2368a534`.
+The original c8 push CI37450680516 failed full unit/scalar/recovery and RF3 source
+preparation; no RF3 case executed after that preparation failure. Global
+functional coverage, CRAP and delivered-source Linux acceptance remain
+unqualified. No original104 task or overall CodeQuality acceptance is closed by
+this checkpoint. Pending bounded cleanup and prior-format composition packets
+have not been integrated and are not evidence of passing operations.
+
+## Historical initial analyzer baseline, 2026-10-02
+
 The owner-selected Prostir EditorConfig was imported byte for byte on 2026-10-01;
 the final byte comparison passed on 2026-10-02. SHA256:
 `b624db78d435290ba2633a71c901797ff3d66449f76ffd91b4b81724b379b6fb`.

@@ -78,7 +78,7 @@ flowchart LR
 2. One Luna worker authors a private guarded packet for
    `src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs`
    and cohesive populated `Staging/` and, if needed, `Execution/` helpers.
-   Each file/type/method obeys the existing 400/200/50/3 limits. The worker
+   Each file/type/method obeys the existing 400/200/64/3 limits. The worker
    owns no shared contracts, docs, configuration, builds or live checkout writes.
 3. The same bounded packet updates only
    `tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreLengthMismatchTests.cs`.
@@ -97,6 +97,38 @@ flowchart LR
    reports and method/source coverage; unmeasured branches and CRAP stay unmeasured.
 
 ## Migration, rollback and evidence
+
+TASK-BACKUP-CLI-MISSING-INPUT-002 adds the offline restore error join needed by
+REQ-BACKUP-002/006 and AC-BACKUP-002/006. The retained original run confirms
+bounded CLI output overflow but lacks the actual stderr bytes. Source and the
+embedded missing-file regression establish the expected native missing-input
+exceptions; the CLI owns their user-facing serialization.
+
+1. Root freezes the CLI-only mapping of FileNotFoundException and
+   DirectoryNotFoundException to the existing Corruption Problem, fixed safe
+   detail `The backup is missing a required file.`, and native exit code1.
+   Embedded storage exception behavior, archive/metadata formats and resource
+   bounds remain unchanged. Preserve the concurrently joined native missing
+   manifest/directory FormatUnsupported Problem with its fixed detail
+   `The backup manifest is unsupported.`. Length-mismatch rejected restores
+   and missing-manifest cases assert that native Problem; missing identity or
+   journal cases exercise the CLI mapping. Other failures retain their contracts.
+2. Luna writes a guarded private packet for the BackupRestore CLI command and
+   its existing message resources, plus CliBackupRestoreLengthMismatchTests and
+   a complete missing-required-file CLI workflow under the same test slice.
+   No shared builds, live checkout mutations, global catch or consumer-side
+   prevalidation is allowed. Preserve every actual operation/state/byte and
+   healthy-follow-up assertion; every child and reader settles within its bounds.
+3. Root joins and reviews the packet, runs both rejected-output cases and each
+   missing manifest/identity/journal case through Aspire, retains actual bounded
+   Problem JSON/native exits, and verifies the complete healthy restore/reopen.
+   Then run scalar/functional coverage, required recovery/RF3 and exact-source
+   Linux gates. The prior overflow cause stays unproven until this native flow
+   demonstrates the intended behavior; no authored mapping is acceptance proof.
+
+Rollback removes this coherent CLI/test join before delivery and preserves
+original evidence. There is no database or archive migration. This extension
+remains Accepted until its implementation and mandatory runtime gates pass.
 
 No archive format or persisted-data migration exists. The same public method
 uses the verified publication path for new calls. Owned staging is disposable
