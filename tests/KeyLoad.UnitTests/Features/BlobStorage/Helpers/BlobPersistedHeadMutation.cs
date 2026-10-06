@@ -7,6 +7,7 @@ internal static class BlobPersistedHeadMutation
     private const int UnsupportedFormatVersion = 99;
     private const long ExcessiveLength = long.MaxValue;
     private const string InvalidHash = "not-a-sha256-chain";
+    private const string InvalidOwnerId = "owner\u0001";
 
     internal static BlobHead Apply(BlobHead head, BlobPersistedHeadCase testCase, Guid incarnation)
     {
@@ -24,7 +25,7 @@ internal static class BlobPersistedHeadMutation
             BlobPersistedHeadCase.PublishedMissingHash => metadata with { IntegrityHash = null },
             BlobPersistedHeadCase.PublishedInvalidHash => metadata with { IntegrityHash = InvalidHash },
             BlobPersistedHeadCase.MissingAccess => metadata with { Access = null! },
-            BlobPersistedHeadCase.InvalidAccess => metadata with { Access = new("invalid owner!", null) },
+            BlobPersistedHeadCase.InvalidAccess => metadata with { Access = new(InvalidOwnerId, null) },
             BlobPersistedHeadCase.UnpublishedLength => metadata with { Length = 1, PartCount = 1 },
             BlobPersistedHeadCase.UnpublishedPartCount => metadata with { PartCount = 1 },
             BlobPersistedHeadCase.UnpublishedHash => metadata with { IntegrityHash = InvalidHash },

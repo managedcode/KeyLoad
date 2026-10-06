@@ -535,6 +535,14 @@ native adapter bounds and invalid-value matrices),
 are authored and await the rebuilt Aspire-owned suite; they do not qualify
 comparative performance.
 
+`NativeComparisonMongoPolicyTests` additionally covers configured native Mongo
+pool settings and invalid operational policy before client construction. Replica
+probe/copy deadlines must consume the target's native OperationTimeout; probe
+cleanup consumes CleanupTimeout independently of caller cancellation. Preserve
+fixed qualification-profile identity, defaults 30 seconds and pool margin/minimum
+4/16; configured lower values must reach these execution owners. Real replicated
+Mongo behavior requires the original exact-source comparison suite.
+
 `NativeComparisonReportPolicyTests` compares original and configured lower native
 CSV buffers against independent golden bytes. `VectorExecutionCadenceTests`
 compares configured cancellation/yield policy with unchanged corpus payload,
@@ -560,6 +568,12 @@ external generated benchmark consumers verify that omitted environment settings
 preserve canonical typed defaults. Invalid standalone configuration is rejected
 at composition before allocation; valid target validation still precedes corpus
 construction. The rebuilt complete Aspire suite remains the acceptance gate.
+
+`NativeCorpusPagingRegression` maps native KeyLoad/Redis readback to AC-CQ-034:
+the existing options group's lower ReadbackBatchCapacity reaches actual SQL pages
+and Redis SCAN/MGET, with observed native request/page counts and independent
+original order/bytes/cancellation/following-read assertions. Its native selected
+Aspire topology is mandatory; a source or total-only check is not execution proof.
 
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
@@ -914,3 +928,183 @@ Rollback removes the coherent new tooling/joins and preserves every original
 report and v2 scoped record; database data, public protocols and replica topology
 are unchanged by this tooling stage. ADR-033 remains Accepted until these gates
 have their required evidence.
+
+TASK-CQ-RF3-ORIGINAL-004 freezes the test-only RF3 preparation and artifact join
+before implementation. The closed optional selector is
+`KeyLoadTests:NativeCoverage:ServerMode=rf3-original-node-v1`; only the RF3 suite,
+an explicit reviewed v3 contributor filter, original production manifest,
+paired coverage paths and binary coverage format may select it. Other modes,
+missing contributors, mixed sources and unknown selections fail before resources.
+The required input selector is KeyLoadTests:NativeCoverage:SourceManifest, an
+absolute original functional-coverage.production-source-manifest.json path.
+The Query schemaVersion2 contract is never an RF3 admission source. Read the exact
+v3 fields and contributor tuples frozen by TASK-CQ-PRODUCTION-IDENTITY-003; require
+at least one reviewed rf3 contributor and that suite's actual native compiled
+test-image manifest before preparation. Missing admission remains an open gate.
+AppHost creates one original run ID before preparation and retains its create-only
+run manifest through preparation, native runner completion and cleanup. That
+manifest has only schemaVersion, runId, suite, sourceRevision,
+sourceManifestSha256, testImageManifestSha256, filter, caseIdentities and
+executionPolicy. Case identities have only className, methodName and instanceName
+and match actual native TUnit/TRX identities; the manifest is admission, not proof
+of execution. executionPolicy captures the existing validated native coverage and
+test execution options, with no copied operational defaults. The captured
+executionPolicy has only coverage and tests: coverage is the exact twelve-key
+NativeCoverageExecutionOptions snapshot listed below; tests has exactly
+ordinaryTimeout, clusterTimeout, intensiveTimeout, nativeControlTimeout,
+nativeScaledTimeout, nativeVectorTimeout, applicationCleanupTimeout,
+imageCleanupTimeout, terminationGrace, processSettlementTimeout,
+processExitPollInterval, cleanupOutputCharacters, maximumFilterCharacters and
+maximumPathCharacters from native TestExecutionOptions. Timeout/interval strings
+use native invariant TimeSpan c serialization and all options retain their native
+validators plus the stated startup/poll relationship. runId and fixtureId are
+canonical lowercase Guid D strings, created once by their original owner.
+The original MTP settings sibling is `functional-coverage.production.settings.xml`; its original
+bytes bind settingsSha256 and all four MTP invocations. Native server settings
+bind their own context and source-script inventory independently.
+
+- AC-CQ-046: AppHost owns materialization, original source/server/tool validation,
+  derived image build/inspection, native runner dependency and final image/context
+  cleanup. Exactly three existing RF3 resources retain their original storage,
+  membership, readiness and real SDK/official MCP callers. The coverage verifier
+  first reuses ReadVerifiedReferenceAsync for the original production image and
+  source receipt. Only the incompatible production-image annotation equality is
+  replaced in this explicit mode by a derived-image proof binding the original
+  receipt, unchanged Server DLL/PDB/MVID, context/tool/settings and the actual
+  inspected immutable image used by each node. Ordinary RF3 verification remains
+  mandatory and unchanged. Docker projections must omit credentials and payloads.
+- AC-CQ-047: each actual fixture writes a separate create-only
+  `functional-coverage.rf3-fixture.v1.json` after its original Aspire application
+  stops/disposes and all original collectors/children/readers settle, before owned
+  input cleanup. Its exact top fields are schemaVersion, fixtureId,
+  functionalRunId, suite, sourceRevision, sourceManifestSha256, caseIdentities,
+  sourceImage, coverageImage, server, collector and nodes. sourceImage has only
+  reference, manifestDigest and sourceReceiptSha256. coverageImage has only
+  reference, imageId, contextManifestSha256, dockerfileSha256,
+  materializerReceipt and inspectReceipt. These two references bind the original
+  native materializer result and safe native Docker inspect output with path,
+  length and sha256, under the original evidence root; hash-only metadata cannot
+  replace either original result. The image inspect result is the unchanged UTF-8
+  stdout from native docker image inspect with --format '{{json .Id}}': one JSON
+  string matching the actual immutable sha256 image ID, with native exit zero.
+  coverageImage.reference is the owned unique local
+  keyload/functional-coverage:<runId-in-lowercase-Guid-N> tag, bound before/after
+  by the actual inspected immutable imageId and all three container image IDs.
+  A local config image ID must not be relabelled as a registry manifest digest.
+  No environment, credentials or payload projection is retained. The original
+  materializer result retains its five native contextDirectory, manifestPath,
+  manifestSha256, fileCount and totalBytes fields. server has only assemblyName,
+  mvid, dllSha256, pdbSha256 and sourceReceiptSha256. collector has only
+  packageId, version, closureDigest, settingsSha256 and bounds, capturing the
+  actual validated coverage snapshot. bounds has exactly maximumDescriptorBytes,
+  maximumFiles, readBufferBytes, maximumTotalBytes, maximumFileBytes,
+  maximumPathCharacters, maximumManifestBytes, maximumReportBytes,
+  shutdownTimeout, settlementTimeout, containerStopTimeout and
+  applicationCleanupTimeout, equal to the original native merge descriptor
+  policy; timeout strings use native invariant TimeSpan c serialization.
+  The node context keeps its existing separately checked projected bounds.
+  Exactly node1/node2/node3 have only node,
+  containerId, imageId, session, serverPid, serverStartTicks, terminal, coverage
+  and contextManifest. Referenced files have only path, length and sha256,
+  confined below the original evidence root. Test code registers its actual native
+  case identity with the fixture during execution; selected-case metadata alone
+  cannot prove that a fixture executed that case. Each fixture ID is created once
+  when that original fixture is constructed. No later replacement run/fixture ID,
+  synthetic outcome or rewritten native TUnit JSON is accepted.
+- Native merge rf3Fixtures adds exactly one required fixtureReceipt file reference
+  to the existing fixtureId, sourceRevision, sourceManifestSha256, functionalRunId,
+  caseIdentities and nodes fields. It reads that original separate receipt and
+  requires all identities and exactly three original node references to agree.
+  Each RF3 contributor maps once to an actual fixture; unit, scalar and recovery
+  reports do not acquire server rosters. An absent or unsettled fixture is failure.
+- AC-CQ-048: original-child exec witness acquisition reuses the validated native
+  coverage ShutdownTimeout as its startup bound and the validated test execution
+  ProcessExitPollInterval as its polling policy. The captured launch policy binds
+  this positive whole-millisecond interval, no greater than the startup bound,
+  and passes it explicitly to each node. Read the original PID/start ticks before
+  accepting its post-exec command; a retry never starts another Server. On failed
+  witness, cancellation or timeout, signal only that owned original child and
+  join its real exit/readers under captured settlement bounds. Bounded cleanup
+  failure publishes no successful terminal and preserves original inputs and
+  outstanding ownership for the original Aspire teardown under the captured
+  ApplicationCleanupTimeout. No unbounded wait, detached reader, late successful
+  snapshot, replaced target or invented exit may qualify collection or export.
+
+Root owns selector/fixture joins and reviewed contributor admission. The Luna RF3
+worker owns guarded preparation, derived-image verification, original witness and
+fixture exporter source packets. The merge worker consumes the exact original
+fixtureReceipt; the producer worker supplies native compile identity and captured
+settings. Verify preparation rejection, changed/occupied input preservation,
+healthy follow-up, actual Linux three-node collection and cleanup, SDK/MCP outcomes
+and exact-source binary merge. This additive test instrumentation changes no
+database format or production topology. Rollback removes its coherent test-only
+selection and joins while preserving all original results. ADR-033 remains
+Accepted, and missing native execution remains an open acceptance gate.
+
+
+TASK-CQ-IMAGE-OPERATION-005 covers AC-CQ-039/042 through one real materializer
+operation: altered copied Server bytes are rejected before context publication;
+an occupied destination and sentinel bytes/modes are preserved; a fresh valid
+invocation creates the complete source-bound context. An independent C# oracle
+checks actual Release Server DLL/PDB/MVID, restored native package/dependency/
+Linux/license closure, source templates, exact files/hashes/modes, original
+receipts and captured bounds. Original Server inputs remain byte-identical and
+all original child/reader results are observed before fixture cleanup.
+NativeCoverageImageMaterializationTests and its role-local NativeCoverageImage
+helpers are tooling-operation evidence, explicitly excluded product coverage.
+Test-generated local-test-observed-inputs receipts authenticate no GitHub build,
+Docker image or RF3 collection. Source integration is not a runtime gate pass;
+the bounded error-path lifecycle remains separately governed by AC-CQ-048.
+
+TASK-CQ-RF3-ORIGINAL-004 admits the unchanged Release Server closure named by the
+original v3 compiledProducts KeyLoad.Server DLL/PDB identity. Its parent directory
+is serverPublishDirectory; preparation must copy that actual native closure and
+must not run another publish or rebuild. server.sourceReceiptPath names the
+original v3 production source manifest, and context/fixture
+server.sourceReceiptSha256 binds that original file. The distinct
+fixture.sourceImage.sourceReceiptSha256 binds the original verified GitHub Docker
+image receipt; its source revision must agree with the v3 manifest. Neither file
+can substitute for the other's identity proof.
+
+The AppHost preparation owner creates one original
+functional-coverage.base-image.v1.json with exactly schemaVersion1,
+sourceRevision, sourcePath, sourceSha256 and imageReference. sourcePath is Dockerfile;
+sourceSha256 binds its actually observed bounded bytes, and imageReference is its
+single digest-pinned ASP.NET runtime FROM. The original Dockerfile bytes and
+revision are checked before and after context materialization. The baseImage
+invocation consumes this create-only original sidecar and its hash. This observed
+preparation receipt authenticates source inputs and supplies no test, image-build
+or collection qualification by itself. AC-CQ-046/047 and ADR-033 govern the join.
+
+Native TUnit RF3 reports display the two admitted constructor-data classes as
+`PartitionQueryPublicRf3Tests(ClusterFixture)` and
+`McpDocumentCrudParityTests(ClusterFixture)`. Their contributor and original TRX
+TestMethod identities retain the exact plain CLR class names. The merge reader
+maps only these two exact native display aliases to their compiled CLR classes,
+requires each test class to agree with its native group, and checks the original
+native test ID against that class and the actual
+`KeyLoad.IntegrationTests.ClusterFixture` constructor identity. No generic suffix
+stripping or inferred fixture is accepted. Unit, scalar, recovery and RF3 reports
+must name their exact original suite assembly; every original outcome must pass.
+Historical failing reports provide identity evidence only. AC-CQ-046/047 and the
+original compiled-test manifest continue to govern source and execution proof.
+
+The original context sourceTemplates binds original source-template hashes.
+The files inventory and fixture coverageImage.dockerfileSha256 separately bind
+the rendered Dockerfile that contains the admitted ASP.NET digest. Original
+materializer paths identify the preparation context; node-local copied evidence
+paths preserve its exact bytes without being relabelled as the preparation path.
+Validate the actual Server dependency closure against its native .deps.json and
+the v3 product identities. Every owned assembly in that closure requires its
+matching DLL/PDB; modules executed only by the CLI or SDK client do not become
+fabricated Server dependencies. Recheck original compilation/source identities,
+contract bytes and revision after all native merge children settle.
+
+The native tooling regression passes one create-only ToolingInputDescriptor file
+with exactly schemaVersion1 and inputs, containing exactly three original
+coverage-file references with path, length and sha256. Captured native bounds
+govern descriptor bytes, paths, files and hashing. Check the original files
+before and after merge; preserve their bytes and resulting CLI storage state.
+This tooling-only envelope neither changes the product merge descriptor nor
+admits the regression as a product coverage contributor. AC-CQ-043/045/047 and
+the original-child settlement contract apply; no unbounded waits qualify proof.

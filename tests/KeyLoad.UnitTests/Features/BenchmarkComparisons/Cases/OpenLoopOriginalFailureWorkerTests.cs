@@ -14,7 +14,7 @@ internal sealed class OpenLoopOriginalFailureWorkerTests
     {
         var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(NativeFatalSibling);
-        var operation = new AggregateException(new InvalidOperationException(NativeFatalWrapper, fatal), sibling);
+        var operation = new AggregateException(new AggregateException(NativeFatalWrapper, fatal), sibling);
         var observer = new IOException(ProgressFailure);
         var cancellationFailure = new InvalidOperationException(CancellationFailure);
         using var lifetime = new CancellationTokenSource();
@@ -57,7 +57,7 @@ internal sealed class OpenLoopOriginalFailureWorkerTests
     {
         var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(NativeFatalSibling);
-        var operation = new AggregateException(new InvalidOperationException(NativeFatalWrapper, fatal), sibling);
+        var operation = new AggregateException(new AggregateException(NativeFatalWrapper, fatal), sibling);
         using var lifetime = new CancellationTokenSource();
         var callbackCount = 0;
         using var registration = lifetime.Token.Register(() => Interlocked.Increment(ref callbackCount));

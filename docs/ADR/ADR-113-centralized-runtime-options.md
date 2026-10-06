@@ -148,6 +148,24 @@ ceiling 8 and every existing admission Id/JSON contract; central server binding,
 borrowed silo registration and physical coordinator construction share the same
 validated wrapper. Configured lower-burst tests verify actual dequeue ordering.
 
+MongoDB replica-probe and seeded-copy verification consume the same centrally
+bound NativeComparisonExecutionOptions.OperationTimeout as their native target;
+probe deletion has its independent CleanupTimeout. Frozen scaled-profile timeout
+metadata cannot supply either execution deadline. The native Mongo connection
+pool also consumes MongoPoolSessionMargin 1..4 and MongoPoolMinimumSize 1..16 from
+that group, retaining defaults 4/16 and the original Max(concurrency + margin,
+minimum) formula. Validate those options before client creation and preserve the
+actual native majority/journal concerns. NativeComparisonMongoPolicyTests maps
+these configured-owner and invalid-policy checks to AC-CQ-034; genuine replicated
+Mongo execution remains an exact-source comparison qualification requirement.
+
+Native KeyLoad and Redis corpus readback sessions consume the target's existing
+NativeComparisonExecutionOptions.ReadbackBatchCapacity instead of separate fixed
+256-record pages. Preserve default paging, exact corpus order/bytes, cancellation,
+native continuation and SCAN/MGET validation. Configured lower-cap regression
+uses the genuine already selected Aspire comparison topology and observes actual
+native requests/pages; a total-only assertion cannot prove the policy join.
+
 Storage stream buffering is distinct from transfer/chunk buffering. The native
 storage options group owns StreamBufferBytes 1..4096, default 4096, for metadata,
 backup and checkpoint FileStream owners, including former implicit OpenRead

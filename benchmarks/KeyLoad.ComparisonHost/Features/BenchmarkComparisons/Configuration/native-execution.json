@@ -4,6 +4,8 @@
     "PostgresMaxPoolSize": 24,
     "PostgresMaxAutoPrepare": 32,
     "PostgresAutoPrepareMinUsages": 1,
+    "MongoPoolSessionMargin": 4,
+    "MongoPoolMinimumSize": 16,
     "ReadBufferBytes": 8192,
     "MaxResponseBytes": 8388608,
     "WriteBatchCapacity": 24,

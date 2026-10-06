@@ -24,7 +24,7 @@ internal static class IsolatedOpenLoopHostAssertions
         await Assert.That((exit.Stdout + exit.Stderr).Contains(IsolatedHostFixture.Canary,
             StringComparison.Ordinal)).IsFalse();
         var report = await ReadAsync(fixture);
-        await Assert.That(report.SchemaVersion).IsEqualTo(4);
+        await Assert.That(report.SchemaVersion).IsEqualTo(5);
         await Assert.That(report.Disposition).IsEqualTo("unsupportedTopology");
         await Assert.That(report.Reason).IsEqualTo(UnsupportedReason);
         await Assert.That(report.Report).IsNull();

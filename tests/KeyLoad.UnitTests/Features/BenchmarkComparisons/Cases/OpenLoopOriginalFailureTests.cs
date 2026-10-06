@@ -1,4 +1,5 @@
 using KeyLoad.Comparisons;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -79,7 +80,7 @@ internal sealed class OpenLoopOriginalFailureTests
     {
         var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(FatalReadSibling);
-        var wrapped = new AggregateException(new InvalidOperationException(ReadFailure, fatal), sibling);
+        var wrapped = new AggregateException(new AggregateException(ReadFailure, fatal), sibling);
         var ordinary = new IOException(DisposalFailure);
         Exception primary = fatalInDisposal ? ordinary : wrapped;
         Exception cleanup = fatalInDisposal ? wrapped : ordinary;
@@ -95,6 +96,27 @@ internal sealed class OpenLoopOriginalFailureTests
         await Assert.That(failure.InnerExceptions[1]).IsSameReferenceAs(primary);
         await Assert.That(failure.InnerExceptions[2]).IsSameReferenceAs(cleanup);
         await Assert.That(wrapped.InnerExceptions[1]).IsSameReferenceAs(sibling);
+        await AssertSettledAsync(owner);
+    }
+
+    [Test]
+    public async Task OrdinaryInnerExceptionWrapperRetainsOriginalFailuresWithoutNativeFatalElevation()
+    {
+        var inner = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
+        var primary = new InvalidOperationException(ReadFailure, inner);
+        var cleanup = new IOException(DisposalFailure);
+        await Assert.That(CqrsRuntimeFailures.FindFatal(primary)).IsNull();
+        await using var owner = new OpenLoopOriginalFailureReadFixture();
+        owner.FailRead(primary);
+        await owner.DisposalStarted.WaitAsync(TestContext.Current!.Execution.CancellationToken);
+        await Assert.That(owner.Completion.IsCompleted).IsFalse();
+        owner.FailDisposal(cleanup);
+
+        var failure = (await Assert.ThrowsExactlyAsync<AggregateException>(() => owner.Completion))!;
+        await Assert.That(failure.InnerExceptions.Count).IsEqualTo(2);
+        await Assert.That(failure.InnerExceptions[0]).IsSameReferenceAs(primary);
+        await Assert.That(failure.InnerExceptions[1]).IsSameReferenceAs(cleanup);
+        await Assert.That(primary.InnerException).IsSameReferenceAs(inner);
         await AssertSettledAsync(owner);
     }
 

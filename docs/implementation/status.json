@@ -2734,7 +2734,8 @@
       "Directory.Build.targets",
       "docs/implementation/runtime-qualification-37060131271.json",
       "docs/implementation/performance-source-r11.json",
-      "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
+      "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json",
+      "docs/implementation/functional-coverage-materializer-sql-native-execution-2026-10-06-r7.json"
     ],
     "codeQuality": {
       "status": "in_progress",
@@ -3682,11 +3683,16 @@
       "sourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
       "exactCaseCount": 25,
       "inventoriedQuerySourceFiles": 103,
-      "currentSourceReceipt": "docs/implementation/functional-coverage-operation-results-2026-10-06-r5.json",
+      "currentSourceReceipt": "docs/implementation/functional-coverage-materializer-sql-native-execution-2026-10-06-r7.json",
       "cliBackupRestoreFlows": "three_actual_Release_CLI_ZoneTree_complete_operation_flows_passed_3_of_3_through_Aspire_R20",
       "nativeServerCollector": "source_bound_test_only_image_materializer_and_original_server_connect_collector_wrapper_joined_actual_Aspire_RF3_collection_and_merge_pending",
-      "queryNormalAttempt": "original_native_partial_collection_24_of_25_passed_one_invalid_MCP_fixture_repaired_retry_pending",
-      "latestBuildAttempt": "R21_rejected_native_compilation_source_drift_7_inputs_previous_R20_full_build_passed_0_drift"
+      "queryNormalAttempt": "25_of_25_actual_complete_Query_flows_passed_Aspire_R22",
+      "latestBuildAttempt": "R25_native_full_Release_passed_0_errors_0_warnings_0_build_source_drift_later_shared_Mongo_edits_require_fresh_build",
+      "queryScalarAttempt": "25_of_25_same_complete_Query_flows_passed_Aspire_R22",
+      "currentSourceVerification": "rejected_shared_checkout_HEAD_changed_during_execution_preserved_all_originals",
+      "nativeImageToolingOperation": "actual_complete_altered_occupied_healthy_materialization_flow_passed_Aspire_R25_original_inputs_and_native_exit_readers_verified_excluded_product_coverage",
+      "sqlGraphPathOperation": "actual_extra_statement_rejection_unchanged_position_healthy_same_engine_retry_full_path_and_cut_passed_normal_and_scalar_R25",
+      "recoveryContributorAttempt": "Aspire_prepare_native5_probe_failed_original_exit1_before_requested_recovery_runner_no_test_report_no_pass"
     }
   },
   "AdminDashboard": {
@@ -4873,16 +4879,17 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "runtime_repairs_complete_canonical_release_and_format_v5_passed_full_Aspire_unit_v3_running",
-    "canonicalBuildPassed": true,
+    "sourceStage": "full_Release_v8_and_formatter_v8_passed_fresh_prerequisite_2_passed_remaining_operational_sink_audit_and_full_runtime_gates_in_progress",
+    "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
+      "Join final audited Mongo pool/deadline, KeyLoad/Redis paging and cancellation cadence policies, then repeat canonical build/format",
       "Pass full Aspire-owned unit/scalar/recovery and native RF3 execution, retaining original reports",
       "Pass required source-bound coverage and delivered-source Linux qualification",
       "Review any actual runtime failures without weakening diagnostics, contracts or assertions"
     ],
-    "canonicalFormatterPassed": true,
+    "canonicalFormatterPassed": false,
     "developmentEvidence": {
       "directory": "artifacts/code-quality/general-runtime-options-development-20261006",
       "canonicalRelease": "keyload-general-options-full-release-v5.log",
@@ -4909,10 +4916,58 @@
       },
       "unitV2": {
         "nativeExit": 134,
-        "status": "AppHost_received_stop_request_original_native_suite_report_not_produced_no_pass_claim",
-        "log": "keyload-general-options-aspire-unit-v2.log"
+        "status": "concurrent_same_project_PartitionQuery_coverage_Aspire_CLI_stopped_previous_AppHost_original_suite_report_not_produced_no_pass_claim",
+        "log": "keyload-general-options-aspire-unit-v2.log",
+        "replacementCliLog": "unit-v2-replacement-native-aspire-cli.log"
       },
-      "qualification": "local development evidence; complete native runtime and delivered Linux qualification pending"
+      "unitV3": {
+        "nativeExit": 134,
+        "status": "concurrent_same_project_PartitionQuery_coverage_Aspire_CLI_stopped_previous_AppHost_original_suite_report_not_produced_no_pass_claim",
+        "log": "keyload-general-options-aspire-unit-v3.log",
+        "replacementCliLog": "unit-v3-replacement-native-aspire-cli.log"
+      },
+      "deliveredLinux": {
+        "headSha": "660cd9b99d7ba9d1099381fbff6aaccdabecdcd4",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37405439973",
+        "status": "analyzers_governance_build_format_passed_RF3_image_missing_LICENSE_and_site_evidence_admission_failed_prerequisite_failed_scalar_recovery_pending"
+      },
+      "qualification": "local development evidence; complete native runtime and delivered Linux qualification pending",
+      "canonicalReleaseV6": {
+        "log": "keyload-general-options-full-release-v6.log",
+        "passed": false,
+        "errors": 30,
+        "warnings": 0,
+        "diagnostics": "keyload-general-options-full-release-v6-diagnostics.json",
+        "scope": "tests/KeyLoad.UnitTests/Features/CodeQuality newly authored native coverage fixtures",
+        "sourceChangedDuringRun": true
+      },
+      "canonicalReleaseV8": {
+        "log": "keyload-general-options-full-release-v8.log",
+        "passed": true,
+        "warnings": 0,
+        "errors": 0,
+        "sourceChangedDuringRun": true,
+        "concurrentSourceChanges": [
+          "tests/KeyLoad.UnitTests/Features/CodeQuality/Assertions/NativeCoverageImageIdentityAssertions.cs",
+          "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SqlGraphPathOperationFlowTests.cs"
+        ],
+        "qualification": "built development snapshot; final current-source build required after remaining edits"
+      },
+      "canonicalFormatV8": {
+        "log": "keyload-general-options-canonical-format-v8.log",
+        "passed": true
+      },
+      "prerequisiteV8": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "nativeExit": 0,
+        "report": "prerequisite-v8/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json"
+      },
+      "unitV8": {
+        "status": "actual_full_Aspire_run_in_progress_no_pass_claim",
+        "log": "keyload-general-options-aspire-unit-v8.log"
+      }
     }
   }
 }

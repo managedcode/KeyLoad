@@ -45,8 +45,29 @@ internal sealed class ScaledComparisonDatasetTests
         var deleteMeasured = corpus.Input(Scenario.DocumentDelete, 0, 0, false);
         await Assert.That(new[] { writeWarmup.Number, writeMeasured.Number, updateMeasured.Number, deleteMeasured.Number }.Distinct().Count()).IsEqualTo(4);
         await Assert.That(writeMeasured.Number).IsEqualTo(100_256);
-        await Assert.That(updateMeasured.Number).IsEqualTo(100_512);
-        await Assert.That(deleteMeasured.Number).IsEqualTo(200_768);
+        await Assert.That(updateMeasured.Number).IsEqualTo(200_512);
+        await Assert.That(deleteMeasured.Number).IsEqualTo(300_768);
+        // ADR-103 fixes three separate Operations + Warmup blocks after the seeded corpus.
+        foreach (var item in new[]
+        {
+            (Scenario: Scenario.DocumentWrite, Warmup: true, Operation: 0, Expected: 100_000),
+            (Scenario: Scenario.DocumentWrite, Warmup: true, Operation: 255, Expected: 100_255),
+            (Scenario: Scenario.DocumentWrite, Warmup: false, Operation: 0, Expected: 100_256),
+            (Scenario: Scenario.DocumentWrite, Warmup: false, Operation: 99_999, Expected: 200_255),
+            (Scenario: Scenario.DocumentUpdate, Warmup: true, Operation: 0, Expected: 200_256),
+            (Scenario: Scenario.DocumentUpdate, Warmup: true, Operation: 255, Expected: 200_511),
+            (Scenario: Scenario.DocumentUpdate, Warmup: false, Operation: 0, Expected: 200_512),
+            (Scenario: Scenario.DocumentUpdate, Warmup: false, Operation: 99_999, Expected: 300_511),
+            (Scenario: Scenario.DocumentDelete, Warmup: true, Operation: 0, Expected: 300_512),
+            (Scenario: Scenario.DocumentDelete, Warmup: true, Operation: 255, Expected: 300_767),
+            (Scenario: Scenario.DocumentDelete, Warmup: false, Operation: 0, Expected: 300_768),
+            (Scenario: Scenario.DocumentDelete, Warmup: false, Operation: 99_999, Expected: 400_767)
+        })
+        {
+            var actual = corpus.Input(item.Scenario, 0, item.Operation, item.Warmup);
+            await Assert.That(actual.Number).IsEqualTo(item.Expected);
+            await Assert.That(actual.Id).IsEqualTo("d" + item.Expected.ToString("D9", System.Globalization.CultureInfo.InvariantCulture));
+        }
     }
 
     [Test]

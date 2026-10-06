@@ -125,7 +125,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         try
         { await RedisReplicaProof.VerifyWorkerPrimaryAsync(workerConnection, configuredTopology, cancellationToken); }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
-        return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount, lifecycleOptions);
+        return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount, lifecycleOptions, executionOptions);
     }
 
     /// <summary>Closes and disposes the target-owned Redis connection.</summary>

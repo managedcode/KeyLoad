@@ -52,7 +52,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
             Profile = Profile with { ReadContract = DocumentOnlyMajorityReadContract };
         }
         corpusCount = dataset.Documents.Count;
-        var settings = CreateSettings(connectionString, dataset.Settings.Concurrency);
+        var settings = CreateSettings(connectionString, dataset.Settings.Concurrency, executionOptions);
         primaryClient = new MongoClient(settings);
         ownedClients.Add(primaryClient);
         database = primaryClient.GetDatabase(databaseName);
@@ -72,7 +72,8 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
                 adminDatabase: primaryClient.GetDatabase(MongoSchema.AdminDatabase), database: database, documents: documents,
-                topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
+                topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions,
+                executionOptions: executionOptions);
             ownedClients.AddRange(proof.SecondaryClients);
             profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
         }
@@ -133,15 +134,19 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     internal string StreamName(BenchmarkDocument document)
         => MongoSchema.DatabasePrefix + databaseName + MongoSchema.DatabaseSeparator + document.Id;
 
-    internal static MongoClientSettings CreateSettings(string connectionString, int concurrency)
+    internal static MongoClientSettings CreateSettings(string connectionString, int concurrency,
+        IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(concurrency);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(concurrency, int.MaxValue - execution.MongoPoolSessionMargin);
         var settings = MongoClientSettings.FromConnectionString(connectionString);
         settings.WriteConcern = MongoSchema.MajorityJournalWriteConcern;
         settings.ReadConcern = ReadConcern.Majority;
         settings.ReadPreference = ReadPreference.Primary;
         settings.RetryWrites = false;
         settings.RetryReads = false;
-        settings.MaxConnectionPoolSize = Math.Max(concurrency + MongoPool.SessionMargin, MongoPool.MinimumSize);
+        settings.MaxConnectionPoolSize = Math.Max(concurrency + execution.MongoPoolSessionMargin, execution.MongoPoolMinimumSize);
         return settings;
     }
 
@@ -216,12 +221,6 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     private static T Require<T>(T? value) where T : class
         => value ?? throw new ComparisonFailureException(MongoSchema.FailureNotInitialized);
 
-}
-
-internal static class MongoPool
-{
-    public const int SessionMargin = 4;
-    public const int MinimumSize = 16;
 }
 
 internal static class MongoProbe

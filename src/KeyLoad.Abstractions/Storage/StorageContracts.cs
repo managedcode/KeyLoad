@@ -105,7 +105,7 @@ public interface IAtomicTransaction : IKeyValueView
 [Orleans.Alias(NativeContractAliases.StoreIdentity)]
 public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
     [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = StoreIdentity.DefaultReadGeneration,
-    [property: Orleans.Id(8)] int MinimumReaderContract = StoreReaderContract.Legacy)
+    [property: Orleans.Id(8), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] int MinimumReaderContract = StoreReaderContract.Legacy)
 {
     private const int DefaultReadGeneration = 0;
 }

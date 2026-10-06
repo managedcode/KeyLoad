@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0.401@sha256:e70cdb7f80b0348f5cb85f19a8f670fca061f033d57eed12fa003d58b0e06317 AS build
 WORKDIR /source
-COPY global.json Directory.Build.props Directory.Build.targets Directory.Packages.props NuGet.Config .editorconfig ./
+COPY global.json Directory.Build.props Directory.Build.targets Directory.Packages.props NuGet.Config .editorconfig LICENSE ./
 COPY src/ ./src/
 RUN dotnet restore src/KeyLoad.Server/KeyLoad.Server.csproj --disable-parallel
 ARG KEYLOAD_RELEASE_VERSION

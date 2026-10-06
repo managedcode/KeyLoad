@@ -82,7 +82,7 @@ internal sealed class NativeDocumentTopologyMongoTests
     [Test]
     public async Task AC_ISO_005_NativeMajorityJournalSettingsDisableHiddenRetries()
     {
-        var settings = MongoTarget.CreateSettings(Connection, 16);
+        var settings = MongoTarget.CreateSettings(Connection, 16, UnitBenchmarkOptions.Native());
         await Assert.That(settings.RetryWrites).IsFalse();
         await Assert.That(settings.RetryReads).IsFalse();
         await Assert.That(settings.WriteConcern.Journal).IsTrue();

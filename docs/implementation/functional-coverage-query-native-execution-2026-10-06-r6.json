@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "kind": "local_complete_operation_execution_with_current_source_verification_rejected",
+  "parentSourceReceipt": "docs/implementation/functional-coverage-operation-results-2026-10-06-r5.json",
+  "preparedRevision": "a9e104a148d8eb270d7c88f87f5b83bb68300543",
+  "observedVerificationRevision": "660cd9b99d7ba9d1099381fbff6aaccdabecdcd4",
+  "originalSourceManifest": {
+    "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/functional-coverage.source-manifest.json",
+    "length": 63097,
+    "sha256": "3f2bf96e3375413a32c00d8c4ef8673af968cce9e903649b4b0dc13f5c72f4e2"
+  },
+  "originalTestImageManifest": {
+    "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/functional-coverage.test-image-manifest.json",
+    "length": 1043005,
+    "sha256": "5efe9d3754409bdaf13c40c8752afb95e0f730585379ad83146aa70ec59b0243"
+  },
+  "originalCapturedSettings": {
+    "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/functional-coverage.settings.xml",
+    "length": 875,
+    "sha256": "fa45e4875901e40511151a8b41b0dc49695abd0c70d40113eb13ef8acd2ab639"
+  },
+  "nativeFullBuild": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+    "nativeExitCode": 0,
+    "buildCompletedSuccessfully": true,
+    "elapsedSeconds": 152.695,
+    "log": "/private/tmp/keyload-stage91i-r22-native-build-fresh-20261006.log",
+    "logSha256": "84123937b46515b1c75b55d6df0335deb5b1c89739dec59285191d6f1ffba172",
+    "inputCount": 4032,
+    "inputDrift": [],
+    "uniqueErrors": [],
+    "qualification": "local development; source drift invalidates exact-current-source qualification",
+    "originalDiagnostics": {
+      "path": "/private/tmp/keyload-stage91i-r22-native-build-fresh-20261006-diagnostics.json",
+      "length": 541,
+      "sha256": "d3bda9127447ec6bfeb5634666329407a5cfdb3605cd4739fa2c3a17831b0b78"
+    }
+  },
+  "runs": [
+    {
+      "suite": "unit",
+      "nativeAspireExitCode": 0,
+      "originalTUnitSummary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "originalTUnitReport": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "length": 77418,
+        "sha256": "13da903b2858d8725ddf81ec7415b2f81b8a777e670f67a7c065cad61b14ed0d"
+      },
+      "originalTrx": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "length": 35581,
+        "sha256": "72e0b560c66d9028f8644fea4af9b9900b662101cf07bb1ed06e9d53a221b7b0"
+      },
+      "originalCoverage": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit/query.cobertura.xml",
+        "length": 1012636,
+        "sha256": "09c0a1ff6daed17e1e87ab7e60ee5134da557ff29d5387696e00de588ca1eaa6"
+      },
+      "aspireLog": {
+        "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T024205_9501d6c8.log",
+        "length": 34279,
+        "sha256": "8ff0b847d182f7e0e553efd680eb441a74f1d87db937b89139ed33d7a9bbe680"
+      },
+      "rawNativeCounts": {
+        "lines-covered": 822,
+        "lines-valid": 3631,
+        "branches-covered": 468,
+        "branches-valid": 2394
+      }
+    },
+    {
+      "suite": "unit-scalar",
+      "nativeAspireExitCode": 0,
+      "originalTUnitSummary": {
+        "total": 25,
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "originalTUnitReport": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit-scalar/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "length": 77422,
+        "sha256": "aac6409f30d502301c8a49b11acfb2463addf6fa60b06f886cc75322fdd40596"
+      },
+      "originalTrx": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit-scalar/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "length": 35581,
+        "sha256": "27c19bc20a642f72d57415f605af3fcce72f2efbc662dc1a27ab575d5778d392"
+      },
+      "originalCoverage": {
+        "path": "/private/tmp/keyload-query-functional-coverage-20261006-r22/unit-scalar/query.cobertura.xml",
+        "length": 1012636,
+        "sha256": "b309c340e7d619441c6232f808a74300cb80aa4f33dbdb6cd5c36f221cc2206a"
+      },
+      "aspireLog": {
+        "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T024313_6fb025cb.log",
+        "length": 33838,
+        "sha256": "2fbcb0cd394568c19048741320b3177bb9de8394027575faea02f80f80f2914f"
+      },
+      "rawNativeCounts": {
+        "lines-covered": 822,
+        "lines-valid": 3631,
+        "branches-covered": 468,
+        "branches-valid": 2394
+      }
+    }
+  ],
+  "currentSourceVerification": {
+    "nativeExitCode": 1,
+    "diagnostic": "Prepared functional coverage manifest is missing, stale, or invalid.",
+    "observedPrimaryMismatch": "Current HEAD changed from the original prepared revision during shared-checkout operation execution.",
+    "preparedQuerySourceContributorDeploymentScriptInventoriesUnchanged": true,
+    "verifiedCurrentSourceCoverage": false
+  },
+  "coverage": {
+    "loadAndPerformanceTestsExcluded": true,
+    "wholeOperationTestsRequired": true,
+    "globalPercent": null,
+    "currentSourceQualified": false,
+    "rawPartialQueryLinePercent": 22.6384,
+    "rawPartialQueryBranchPercent": 19.5489,
+    "nativeFourSuiteBinaryUnionQualified": false
+  },
+  "joinedImageToolingPacket": {
+    "manifestSha256": "1da31d3935733132de4537e77d3314e662b32d326cc15b0647aebab69a4a47a7",
+    "newSources": 16,
+    "actualOperationExecutionPassed": false,
+    "productCoverageContributor": false
+  },
+  "all104AcceptanceClosed": false,
+  "remaining": [
+    "Build and execute new native image materializer whole-operation flow through Aspire.",
+    "Join native sixteen-module compilation identity, captured production settings and binary merger packets.",
+    "Fresh same-cohort original normal/scalar/recovery/RF3 execution and actual Linux three-node collector settlement/export.",
+    "Root-reviewed full operation contributor inventory and original native binary merge, uncovered code analysis and full coverage gates."
+  ]
+}

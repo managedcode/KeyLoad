@@ -12,6 +12,7 @@ internal sealed class ReadOnlyCollectionContractTests
     private const string TombstoneJson = "{\"key\":\"AQID\",\"value\":null}";
     private const string EmptyValueJson = "{\"key\":\"AQID\",\"value\":\"\"}";
     private const string IdentityJson = "{\"formatVersion\":1,\"keyCodecVersion\":2,\"nodeId\":\"00000000-0000-0000-0000-000000000001\",\"incarnation\":\"00000000-0000-0000-0000-000000000002\",\"signingKey\":\"AQID\",\"durability\":\"ProcessDurable\",\"dispatchPaused\":false,\"readGeneration\":0}";
+    private const string JournalIdentityJson = "{\"formatVersion\":1,\"keyCodecVersion\":2,\"nodeId\":\"00000000-0000-0000-0000-000000000001\",\"incarnation\":\"00000000-0000-0000-0000-000000000002\",\"signingKey\":\"AQID\",\"durability\":\"ProcessDurable\",\"dispatchPaused\":false,\"readGeneration\":0,\"minimumReaderContract\":1}";
 
     [Test]
     public async Task AcRoc001ExportedAbstractionsPropertiesNeverExposeArrays()
@@ -61,5 +62,22 @@ internal sealed class ReadOnlyCollectionContractTests
             .IsEqualTo(EmptyValueJson);
         await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(JsonDefaults.Deserialize<StoreIdentity>(Encoding.UTF8.GetBytes(IdentityJson)))))
             .IsEqualTo(IdentityJson);
+    }
+
+    [Test]
+    public async Task AcRoc002NativeJournalReaderFenceIsRetainedInPublicIdentityJson()
+    {
+        var identity = new StoreIdentity(1, 2,
+            Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            Guid.Parse("00000000-0000-0000-0000-000000000002"),
+            new byte[] { 1, 2, 3 }, DurabilityProfile.ProcessDurable,
+            MinimumReaderContract: 1);
+
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(identity))).IsEqualTo(JournalIdentityJson);
+        var restored = JsonDefaults.Deserialize<StoreIdentity>(Encoding.UTF8.GetBytes(JournalIdentityJson));
+        await Assert.That(restored.MinimumReaderContract).IsEqualTo(1);
+        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(restored))).IsEqualTo(JournalIdentityJson);
+        await Assert.That(JsonDefaults.Deserialize<StoreIdentity>(Encoding.UTF8.GetBytes(IdentityJson)).MinimumReaderContract)
+            .IsEqualTo(0);
     }
 }

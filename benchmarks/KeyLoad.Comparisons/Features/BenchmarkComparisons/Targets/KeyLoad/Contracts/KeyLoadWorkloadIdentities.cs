@@ -5,7 +5,6 @@ internal static class KeyLoadWorkloadIdentities
     internal const string GraphName = "links";
     internal const string VectorEmbeddingField = "/embedding";
     internal const string QueueName = "jobs";
-    internal const int CorpusReadbackPageSize = 256;
     internal const int NeighborTraversalDepth = 1;
     internal const int InitialDocumentRevision = 0;
     internal const int CreatedDocumentRevision = 1;

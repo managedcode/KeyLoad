@@ -20,7 +20,7 @@ internal sealed class IsolatedHostOutputTests
         await Assert.That(exit.ExitCode).IsEqualTo(0);
         await Assert.That(exit.Stderr).IsEqualTo(string.Empty);
         var report = await ReadAsync(fixture);
-        await Assert.That(report.SchemaVersion).IsEqualTo(4);
+        await Assert.That(report.SchemaVersion).IsEqualTo(5);
         await Assert.That(report.Disposition).IsEqualTo("unsupportedTopology");
         await Assert.That(report.Reason).IsEqualTo(IsolatedComparisonContract.Current.UnsupportedTopologies.Single().Reason);
         await Assert.That(report.Report).IsNull();

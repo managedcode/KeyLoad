@@ -41,8 +41,10 @@ internal static class OpenLoopPlanNodeProgram
             const callerContract = source.readIsolatedContract();
             const plan = planner.createOpenLoopPlan(callerContract);
             if (plan.measurementCells.length === 0) throw new Error('The canonical plan is empty.');
+            const inputEnded = new Promise(resolve => process.stdin.once('end', resolve));
+            process.stdin.resume();
             process.stdout.write(`${readyMarker}\n`);
-            await new Promise(resolve => process.stdin.once('end', resolve));
+            await inputEnded;
             const canonical = planner.validateOpenLoopPlan(plan);
             await writeFile(process.env.KEYLOAD_OPEN_LOOP_PLAN_OUTPUT, JSON.stringify(canonical) + '\n', { flag: 'wx' });
           } else if (operation === 'validate') {

@@ -8,6 +8,7 @@ internal static class BlobPersistedStateMutation
     private const int InvalidStatus = int.MaxValue;
     private const long ExcessiveLength = long.MaxValue;
     private const string InvalidHash = "not-a-sha256-chain";
+    private const string InvalidOwnerId = "owner\u0001";
 
     internal static BlobState Apply(BlobState state, BlobPersistedStateCase testCase, BlobRef blob,
         Guid uploadId, Guid incarnation)
@@ -20,7 +21,7 @@ internal static class BlobPersistedStateMutation
             BlobPersistedStateCase.EmptyIntegrityIncarnation => state with { IntegrityIncarnation = Guid.Empty },
             BlobPersistedStateCase.EmptyCreator => state with { CreatorPrincipalId = string.Empty },
             BlobPersistedStateCase.MissingAccess => state with { Access = null! },
-            BlobPersistedStateCase.InvalidAccess => state with { Access = new("invalid owner!", null) },
+            BlobPersistedStateCase.InvalidAccess => state with { Access = new(InvalidOwnerId, null) },
             BlobPersistedStateCase.NegativeLength => state with { DeclaredLength = -1 },
             BlobPersistedStateCase.ExcessiveLength => state with { DeclaredLength = ExcessiveLength },
             BlobPersistedStateCase.NegativeRevision => state with { ExpectedRevision = -1 },

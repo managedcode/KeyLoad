@@ -11,16 +11,18 @@ internal static class MongoReplicaVerifier
 {
     public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database,
         IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        CancellationToken cancellationToken)
     {
         const int SingleItemCount = 1;
         const int FirstElementIndex = 0;
         const int NoObservedItems = 0;
 
+        _ = NativeComparisonExecutionOptions.Require(executionOptions);
         var status = await adminDatabase.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.ReplicaSetStatusCommand, MongoSchema.CommandEnabledValue),
             ReadPreference.Primary, cancellationToken);
-        var settings = MongoTarget.CreateSettings(connectionString, SingleItemCount);
+        var settings = MongoTarget.CreateSettings(connectionString, SingleItemCount, executionOptions);
         var members = ValidateMembers(status, topology, settings.ReplicaSetName);
         var secondaries = members.Where(MongoReplicaMembers.IsSecondary).ToArray();
 
@@ -43,10 +45,10 @@ internal static class MongoReplicaVerifier
 
             ValidateConcerns(settings);
             await VerifyCopiedProbeAsync(primary: documents, secondaries: clients.ToArray(),
-                databaseName: database.DatabaseNamespace.DatabaseName, timeoutSeconds: dataset.Settings.TimeoutSeconds,
+                databaseName: database.DatabaseNamespace.DatabaseName, executionOptions: executionOptions,
                 cancellationToken: cancellationToken, pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval);
             await MongoSeededCopies.VerifyAsync(clients: clients, databaseName: database.DatabaseNamespace.DatabaseName, dataset: dataset,
-                cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
+                cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions, executionOptions: executionOptions);
             var observations = BuildObservations(status, members, versions[FirstElementIndex], settings);
             return new(new ClusterEvidence(members.Length, members.Length, MongoSchema.HealthyState, observations), versions[FirstElementIndex], clients.ToArray());
         }
@@ -116,15 +118,14 @@ internal static class MongoReplicaVerifier
     }
 
     private static async Task VerifyCopiedProbeAsync(IMongoCollection<BsonDocument> primary, IMongoClient[] secondaries, string databaseName,
-        int timeoutSeconds, TimeSpan pollInterval, CancellationToken cancellationToken)
+        IOptions<NativeComparisonExecutionOptions> executionOptions, TimeSpan pollInterval, CancellationToken cancellationToken)
     {
         var probeId = MongoSchema.CollectionProbePrefix + Guid.NewGuid().ToString(MongoSchema.GuidFormat);
         var body = MongoSchema.ProbeJsonPrefix + probeId + MongoSchema.ProbeJsonSuffix;
         await primary.InsertOneAsync(new BsonDocument { [MongoSchema.IdField] = probeId, [MongoSchema.BodyField] = body }, cancellationToken: cancellationToken);
         try
         {
-            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            deadline.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+            using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken);
             foreach (var secondary in secondaries)
             {
                 await WaitForSecondaryCopyAsync(collection: secondary.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
@@ -137,7 +138,7 @@ internal static class MongoReplicaVerifier
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            using var cleanup = MongoReplicaDeadline.CreateCleanup(executionOptions);
             await primary.DeleteOneAsync(new BsonDocument(MongoSchema.IdField, probeId), cancellationToken: cleanup.Token);
         }
     }

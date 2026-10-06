@@ -6,9 +6,10 @@ import { localImage, messages } from './local-image-contracts.mjs';
 
 const expectedCopies = Object.freeze([
   Object.freeze({ sources: Object.freeze(['global.json', 'Directory.Build.props', 'Directory.Build.targets',
-    'Directory.Packages.props', 'NuGet.Config', '.editorconfig']), destination: './' }),
+    'Directory.Packages.props', 'NuGet.Config', '.editorconfig', 'LICENSE']), destination: './' }),
   Object.freeze({ sources: Object.freeze(['src/']), destination: './src/' }),
 ]);
+const expectedRuntimeCopy = 'COPY --from=build /app/publish/ ./';
 const pinnedBasePattern = /^FROM (\S+@sha256:[a-f0-9]{64})(?: AS [a-z0-9_-]+)?$/;
 
 export async function readBuildInputs(root) {
@@ -101,14 +102,20 @@ async function addFile(root, relative, ignored, selected) {
 
 function parseCopies(dockerfile) {
   const copies = [];
+  let runtimeCopySeen = false;
   for (const line of dockerfile.split(/\r?\n/u)) {
-    if (!/^COPY\s/u.test(line)) continue;
+    if (!/^\s*COPY\b/iu.test(line)) continue;
+    if (line === expectedRuntimeCopy) {
+      if (runtimeCopySeen) throw new Error(messages.invalidContext);
+      runtimeCopySeen = true;
+      continue;
+    }
     const match = /^COPY\s+(.+?)\s+([^\s]+)\s*$/u.exec(line);
     if (!match || match[1].includes('--') || match[1].includes('*')) throw new Error(messages.invalidContext);
     const sources = match[1].split(/\s+/u);
     copies.push({ sources, destination: match[2] });
   }
-  if (copies.length !== expectedCopies.length || copies.some((copy, index) =>
+  if (!runtimeCopySeen || copies.length !== expectedCopies.length || copies.some((copy, index) =>
     copy.destination !== expectedCopies[index].destination
     || copy.sources.length !== expectedCopies[index].sources.length
     || copy.sources.some((source, sourceIndex) => source !== expectedCopies[index].sources[sourceIndex]))) {

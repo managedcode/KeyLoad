@@ -1,6 +1,8 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using TUnit.Assertions.Enums;
@@ -100,6 +102,11 @@ internal sealed class PriorProbePrerequisiteTests
             ProjectDirectory = Path.Combine(RepositoryRoot(), "src", "KeyLoad.AppHost"),
             Args = [RecoveryArgument, ResultsArgument]
         });
+        // The parent runner clears its own selector with an empty environment value.
+        // This independently composed recovery model has no open-loop selection.
+        builder.Configuration[TestSuiteSelectionValidator.OpenLoopRateSetting] = null;
+        builder.Configuration[ComparisonWorkerSelection.OpenLoopRateSetting] = null;
+        builder.Configuration[TestSuiteSelectionValidator.OpenLoopCancellationProofSetting] = null;
         KeyLoadAppHostApplication.AddKeyLoad(builder);
         return builder.Build();
     }

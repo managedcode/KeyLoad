@@ -54,6 +54,12 @@ old-binary snapshot import is unsupported, and is not established safe by an
 identity fence. A fresh authenticated all-voter reader1/transport-ready gate must
 precede first bootstrap; later RF3 quorum recovery preserves its one-fault contract.
 
+The public JSON identity omits `MinimumReaderContract` only when its value is the
+legacy default0, preserving ADR-041's exact existing identity bytes. Contract1 is
+serialized and retained on JSON round-trip. Native Orleans Id8, binary identity
+fences and backup/checkpoint/reopen requirements are unchanged. The independent
+`ReadOnlyCollectionContractTests` legacy and contract1 goldens enforce both cases.
+
 Native startup begins background catalog discovery without awaiting it; async
 provider calls await a separate cancellable readiness gate. After silo and physical
 catalog startup, a dedicated signed request bootstraps and verifies journal identity

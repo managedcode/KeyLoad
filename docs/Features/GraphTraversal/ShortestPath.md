@@ -70,6 +70,24 @@ foreign endpoint, which fails UnsupportedCapability.
 
 ## Execution and bounds
 
+`SqlGraphPathOperationFlowTests.ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath`
+maps REQ-GRAPH-010 / AC-GRAPH-009 to one complete real-ZoneTree flow: reject an
+extra statement, preserve committed position, then retry valid SQL on the same
+engine and compare the independently expected ordered path and read cut with
+the direct typed operation. Native normal/scalar execution and compiled-source
+coverage binding remain required before this case contributes to coverage.
+
+REQ-GRAPH-010 / AC-GRAPH-009 also replace the existing combined version/cursor/
+full-scan rejection-only case with three complete operation flows in
+`SqlGraphPathRejectionTests`. Each invalid input must return Validation without
+changing committed position, then a valid SQL retry on that same engine must
+match the direct typed result, independently expected ordered vertices/edges,
+and the original read cut. The alternate-projection and malformed-parameter
+cases retain every existing invalid input and require the same unchanged-state
+and healthy-retry assertions after each rejection. Keep the two positive parity
+cases and the separate extra-statement complete flow. Remove the replaced
+rejection-only methods; admit replacements only after native normal/scalar runs.
+
 Expand one explicit depth frontier and collect only the next. Visit each native
 adjacency prefix in ordinal order without materializing high-degree pages.
 Visited identity is the complete EntityRef. Keep only first predecessor edge

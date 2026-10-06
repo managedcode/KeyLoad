@@ -7,12 +7,12 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class MongoSeededCopies
 {
     internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(dataset.Settings.TimeoutSeconds));
+        using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken);
         try
         {
             foreach (var client in clients)

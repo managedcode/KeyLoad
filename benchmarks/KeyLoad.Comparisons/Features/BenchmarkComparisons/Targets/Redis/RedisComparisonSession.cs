@@ -5,7 +5,7 @@ using StackExchange.Redis;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions)
     : IComparisonSession
 {
     private const string ClientCommand = "CLIENT";
@@ -16,6 +16,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     private const string WaitAofFailed = "RedisWaitAofFailed";
     private const int RequiredLocalFsync = 1;
     private const int RequiredReplicaFsync = 1;
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
     private readonly IDatabase database = connection.GetDatabase();
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -28,7 +29,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         const string ScaledCorpusReadbackCountMismatchDetail = "ScaledCorpusReadbackCountMismatch";
         const int FirstElementIndex = 0;
 
-        const int pageSize = 256;
+        var pageSize = execution.ReadbackBatchCapacity;
         var endpoint = connection.GetEndPoints(configuredOnly: true).Single();
         var server = connection.GetServer(endpoint);
         var observed = NoObservedItems;

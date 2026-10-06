@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "kind": "local_complete_image_materialization_and_sql_operation_flows",
+  "parentSourceReceipt": "docs/implementation/functional-coverage-query-native-execution-2026-10-06-r6.json",
+  "observedRevision": "660cd9b99d7ba9d1099381fbff6aaccdabecdcd4",
+  "nativeFullBuild": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+    "nativeExitCode": 0,
+    "buildCompletedSuccessfully": true,
+    "elapsedSeconds": 93.306,
+    "log": "/private/tmp/keyload-stage91i-r25-native-build-fresh-20261006.log",
+    "logSha256": "09e8585e62b7dc4edb6526a53c60106da813a650458aa810f11de9dd4f527dab",
+    "inputCount": 4050,
+    "inputDrift": [],
+    "uniqueErrors": [],
+    "qualification": "local development; source drift invalidates exact-current-source qualification",
+    "originalDiagnostics": {
+      "path": "/private/tmp/keyload-stage91i-r25-native-build-fresh-20261006-diagnostics.json",
+      "length": 540,
+      "sha256": "00eeffdf049ea85bfa97d46ec420a4faf32fc51a5d0036bc342070dc244ac332"
+    }
+  },
+  "runs": [
+    {
+      "suite": "unit",
+      "nativeAspireExitCode": 0,
+      "originalTUnitSummary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "originalTUnitReport": {
+        "path": "/private/tmp/keyload-stage91i-image-sql-flows-r25-20261006/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "length": 8834,
+        "sha256": "01b2bdff1ab98fcf90873ac5ed4ff2ff89fa63f661bff77d22f9ec32d830949a"
+      },
+      "originalTrx": {
+        "path": "/private/tmp/keyload-stage91i-image-sql-flows-r25-20261006/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "length": 4375,
+        "sha256": "5cac3fc32fcb9157fbe341e2c61b6e030b46232a74dd7aaa658c24e61f0c2d5c"
+      },
+      "originalAspireLog": {
+        "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T031719_2e18606c.log",
+        "length": 33084,
+        "sha256": "84abbe44e44a5c65d125a26f4a57b52b5e93fb62c3bec62a08fd30756c8fd3e1"
+      },
+      "cases": [
+        {
+          "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlGraphPathOperationFlowTests",
+          "methodName": "ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath",
+          "instanceName": "ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath",
+          "originalNativeId": "KeyLoad.UnitTests.Features.QueryExecution.SqlGraphPathOperationFlowTests.1.1.ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath.1.1.0",
+          "status": "passed"
+        },
+        {
+          "className": "KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageMaterializationTests",
+          "methodName": "RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure",
+          "instanceName": "RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure",
+          "originalNativeId": "KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageMaterializationTests.1.1.RealMaterializerRejectsAlteredAndOccupiedInputsThenCopiesTheObservedReleaseClosure.1.1.0",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "unit-scalar",
+      "nativeAspireExitCode": 0,
+      "originalTUnitSummary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "originalTUnitReport": {
+        "path": "/private/tmp/keyload-stage91i-sql-flow-scalar-r25-20261006/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "length": 5090,
+        "sha256": "6b19bdcb483174367e6cd8df724127e7c24dceac2319c67d6c87b7ed2b462a34"
+      },
+      "originalTrx": {
+        "path": "/private/tmp/keyload-stage91i-sql-flow-scalar-r25-20261006/KeyLoad.UnitTests_net10.0_arm64.trx",
+        "length": 2957,
+        "sha256": "3dea17a1182121f1b17bbd175898a3fb46de12849d65980f76d0b5dcb63314d4"
+      },
+      "originalAspireLog": {
+        "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T031759_8715898e.log",
+        "length": 33589,
+        "sha256": "100d9d36714644a5e022eaa05fdd8a204d4afd38c31cde019a9b558139bfa60b"
+      },
+      "cases": [
+        {
+          "className": "KeyLoad.UnitTests.Features.QueryExecution.SqlGraphPathOperationFlowTests",
+          "methodName": "ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath",
+          "instanceName": "ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath",
+          "originalNativeId": "KeyLoad.UnitTests.Features.QueryExecution.SqlGraphPathOperationFlowTests.1.1.ExtraStatementsRejectWithoutReadsAndHealthySqlRetryMatchesDirectPath.1.1.0",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "postBuildSharedSourceDrift": [
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Configuration/NativeComparisonExecutionOptions.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/Contracts/KeyLoadWorkloadIdentities.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadComparisonSession.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadTarget.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/MongoDB/MongoReplicaProof.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/MongoDB/MongoSeededCopies.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/MongoDB/MongoTarget.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Redis/RedisComparisonSession.cs",
+    "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Redis/RedisTarget.cs",
+    "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyMongoTests.cs"
+  ],
+  "qualification": "Native runtime evidence for the R25 build; later shared source edits require a fresh full build and all required delivered-source gates.",
+  "imageMaterialization": {
+    "alteredDllRejectedBeforePublication": true,
+    "occupiedDestinationBytesAndModesPreserved": true,
+    "healthyCompleteNativeClosureVerified": true,
+    "originalInputsPreserved": true,
+    "originalExitAndReadersJoined": true,
+    "productCoverageContributor": false
+  },
+  "sqlGraphPath": {
+    "requirements": [
+      "REQ-GRAPH-010"
+    ],
+    "acceptance": [
+      "AC-GRAPH-009"
+    ],
+    "rejectionPreservesCommittedPosition": true,
+    "healthySameEngineRetryMatchesIndependentPathAndTypedResult": true,
+    "normalAndScalarPassed": true,
+    "globalCoverageAdmission": "pending fresh compiled-source cohort"
+  },
+  "preservedEarlierImageFailures": [
+    {
+      "resultsDirectory": "/private/tmp/keyload-stage91i-image-flow-r24-20261006",
+      "cause": "Existing pinned NuGet cache sidecar SHA512 disagreed with archive."
+    },
+    {
+      "resultsDirectory": "/private/tmp/keyload-stage91i-image-flow-r24-native-cache-repaired-20261006",
+      "cause": "Independent source-template oracle incorrectly compared original template receipt to rendered Dockerfile hash; fixed while preserving exact rendered-file inventory verification."
+    }
+  ],
+  "nativeToolCacheRepair": {
+    "packageId": "dotnet-coverage",
+    "version": "18.11.2",
+    "officialFeedArchive": {
+      "path": "/private/tmp/keyload-native-pinned-package-feed-20261006-r1/feed-dotnet-coverage.18.11.2.nupkg",
+      "length": 21597654,
+      "sha256": "2ef09f1fdc3855dfd36df2f55f5d5639da370ee3bab212ea2856b830b86afc1c"
+    },
+    "originalCachePreservedAt": "/private/tmp/keyload-native-pinned-package-feed-20261006-r1/original-nuget-cache-18.11.2",
+    "originalSidecar": {
+      "path": "/private/tmp/keyload-native-pinned-package-feed-20261006-r1/original-nuget-cache-18.11.2/dotnet-coverage.18.11.2.nupkg.sha512",
+      "length": 88,
+      "sha256": "5534e250c6a653a72f766f64b6487ad395f606e95ea3aeb7c045b6379841b391"
+    },
+    "canonicalRestoreLog": {
+      "path": "/private/tmp/keyload-native-pinned-package-feed-20261006-r1/native-restore.log",
+      "length": 152,
+      "sha256": "288da996e89534b98254ba3143b3aa9826141ecd7ceb5b2f96e32db5d6b861f0"
+    },
+    "nativeRestoreExitCode": 0,
+    "newSidecarMatchesRawArchive": true,
+    "nativeToolClosureBytesUnchanged": true,
+    "integrityChecksPreserved": true
+  },
+  "recoveryAttempt": {
+    "nativeAspireExitCode": 134,
+    "requestedFilter": "/*/*/CommandIdempotencyProcessRecoveryTests/*",
+    "originalAspireLog": {
+      "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T031843_a19d94af.log",
+      "length": 53752,
+      "sha256": "01a8860a0df079c369c16a9a95d15bd6bc15265d3f57f0d0d63fab67e9e06258"
+    },
+    "originalFailedPrerequisite": "prepare-native5-probe",
+    "originalPrerequisiteExitCode": 1,
+    "testRunnerStarted": false,
+    "tunitReportProduced": false,
+    "passed": false
+  },
+  "coverage": {
+    "loadAndPerformanceTestsExcluded": true,
+    "wholeOperationTestsRequired": true,
+    "globalPercent": null,
+    "currentSourceQualified": false,
+    "nativeFourSuiteBinaryUnionQualified": false
+  },
+  "all104AcceptanceClosed": false,
+  "remaining": [
+    "Join and execute native sixteen-module production source identity and captured-settings producer.",
+    "Join and execute the bounded native binary merger and original RF3 fixture exporter.",
+    "Resolve original recovery preparation failure and execute actual recovery contributor.",
+    "Fresh same-cohort normal/scalar/recovery/RF3 original collection, native binary union and uncovered production-code analysis.",
+    "Complete required exact-source Linux CI qualification; no focused run closes the full acceptance plan."
+  ]
+}

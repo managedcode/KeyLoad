@@ -71,6 +71,7 @@ public sealed partial class NativeComparisonExecutionOptions
         }
 
         ValidateAdapterPolicy();
+        ValidateMongoPolicy();
         ValidateReportPolicy();
         ValidateVectorPolicy();
         var seedValidation = NativeComparisonSeedExecutionOptionsValidator.Instance.Validate(Options.DefaultName, this);
@@ -99,6 +100,7 @@ public sealed partial class NativeComparisonExecutionOptions
         parameters[nameof(IndexBuildTimeout)] = IndexBuildTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
         parameters[nameof(IndexPollInterval)] = IndexPollInterval.ToString(DurationFormat, CultureInfo.InvariantCulture);
         RecordAdapterEvidence(parameters);
+        RecordMongoEvidence(parameters);
         RecordVectorEvidence(parameters);
         RecordSeedEvidence(parameters);
     }

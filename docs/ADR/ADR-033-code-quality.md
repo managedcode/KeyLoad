@@ -917,3 +917,21 @@ Linux qualification and the unchanged80/70/90/no-decrease gates. This is a new
 versioned test-evidence format, with no persisted database/public-wire migration;
 rollback retains all originals and restores one coherent previous tooling route.
 The schema and implementation are not collected coverage. Status stays Accepted.
+
+TASK-CQ-RF3-ORIGINAL-004 implements REQ-CQ-009 and AC-CQ-046..048 with the exact
+pre-implementation selector, original run/fixture schemas and lifecycle policy in
+CodeQuality. Order is original run admission, AppHost-owned preparation and image
+inspection, the existing three-node fixture/readiness and SDK/MCP operations,
+original process settlement, separate create-only fixture export, native merge
+and delivered-source Linux qualification. The explicit test-only derived-image
+verifier reuses original production source-image verification and adds unchanged
+Server PE/PDB/context/tool and actual immutable derived-image proof; ordinary RF3
+verification is unchanged. Root owns shared selector/fixture joins; the RF3 Luna
+worker owns feature-local preparation, witness and export packets; the merge and
+producer workers consume the frozen joins. Startup witness uses validated native
+shutdown and native test polling options. Failed bounded settlement preserves
+original evidence and ownership for Aspire teardown and qualifies no terminal.
+Related files, rollback, positive/negative/error tests and the exact join shapes
+are frozen in CodeQuality. No production topology, authority, wire or database
+format is changed, no load/tooling case contributes, and status stays Accepted
+until actual collector, cleanup, report and required qualification gates pass.

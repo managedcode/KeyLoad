@@ -8,9 +8,11 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
     int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<QueryTranslationOptions> translationOptions)
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
+    IOptions<QueryTranslationOptions> translationOptions)
     : IComparisonSession, IOpenLoopCancellationHealthSession, IOpenLoopComparisonSession
 {
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
 
     public async Task<OpenLoopSessionResult> ExecuteOpenLoopAsync(Scenario scenario,
@@ -72,7 +74,7 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
             var query = KeyLoadQuery.From<CorpusQueryMarker>(partition,
                 OpenLoopProtocolIdentities.DocumentsCollection, translationOptions)
                 .OrderBy(row => QueryFunctions.DocumentId(row))
-                .Take(KeyLoadWorkloadIdentities.CorpusReadbackPageSize);
+                .Take(execution.ReadbackBatchCapacity);
             var page = KeyLoadClientResults.Success(await client.QueryAsync(query, allowFullScan: true,
                 cursor: cursor, cancellationToken: cancellationToken), ScaledCorpusReadbackFailureCodes.Operation);
             foreach (var row in page.Rows)

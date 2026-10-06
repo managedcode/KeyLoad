@@ -150,7 +150,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
         => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
-            graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, translationOptions));
+            graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, nativeExecutionOptions, translationOptions));
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
     public ValueTask DisposeAsync()

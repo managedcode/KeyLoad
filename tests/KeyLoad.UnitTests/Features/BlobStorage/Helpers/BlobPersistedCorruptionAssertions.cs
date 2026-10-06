@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.BlobStorage;
+using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.BlobStorage;
 
@@ -9,6 +10,7 @@ internal static class BlobPersistedCorruptionAssertions
     private const int ReclaimLimit = 1;
     private const long InitialRevision = 0;
     private const int PayloadLength = 4;
+    private const string CorruptionInjectionFailed = "The intentional persisted blob corruption was not stored exactly.";
 
     internal static void CorruptState(TestDatabase database, BlobPersistedCorruptionFixture fixture,
         BlobPersistedStateCase testCase)
@@ -110,11 +112,17 @@ internal static class BlobPersistedCorruptionAssertions
 
     private static void Replace<T>(TestDatabase database, byte[] key, T record)
     {
-        var bytes = NativeSerialization.Serialize(record);
+        // Invoke the generated native codec directly to seed intentionally malformed persisted state.
+        var bytes = NativeSerializerProviders.Get(typeof(T)).Serializer.SerializeToArray(
+            new NativePayload { Version = NativePayloadVersion.Current, Value = record });
         database.Store.Commit((transaction, _) =>
         {
             transaction.Put(key, bytes);
             return true;
         });
+        if (!BlobPersistedSnapshotReader.SameBytes(BlobPersistedSnapshotReader.Read(database, key), bytes))
+        {
+            throw new InvalidOperationException(CorruptionInjectionFailed);
+        }
     }
 }
