@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace KeyLoad.Artifacts;
 
 /// <summary>Claims and publishes a fully validated sibling extraction stage.</summary>
@@ -8,6 +6,8 @@ internal sealed class BackupArtifactPublication
     private const string StagePrefix = ".keyload-unpack-";
     private const string EmptySuffix = ".empty";
     private const string ClaimSuffix = ".claim";
+    private const int EmptyFailureCount = 0;
+    private const int PrimaryFailureIndex = 0;
 
     private readonly BackupArtifactDestinationState destinationState;
     private readonly BackupArtifactStagePaths paths;
@@ -64,9 +64,9 @@ internal sealed class BackupArtifactPublication
         catch (Exception failure)
         {
             var cleanupFailures = CleanupFailedClaim(paths, stageCreated);
-            if (cleanupFailures.Count > 0)
+            if (cleanupFailures.Count > EmptyFailureCount)
             {
-                cleanupFailures.Insert(0, failure);
+                cleanupFailures.Insert(PrimaryFailureIndex, failure);
                 throw new AggregateException(cleanupFailures);
             }
             throw;

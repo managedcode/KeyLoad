@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using Cartograph.Catalog;
-using Cartograph.Format;
 
 namespace KeyLoad.Artifacts;
 

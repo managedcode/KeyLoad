@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-
 namespace KeyLoad.Artifacts;
 
 /// <summary>Owns exact payload files written during one archive extraction.</summary>
 internal sealed class BackupArtifactStaging
 {
     private const int CanonicalPayloadCount = 3;
+    private const int PrimaryFailureCount = 1;
+    private const int EmptyCollectionCount = 0;
 
     private readonly BackupArtifactPublication publication;
     private readonly List<string> ownedFiles = new(CanonicalPayloadCount);
@@ -51,7 +51,7 @@ internal sealed class BackupArtifactStaging
             {
                 cleanupFailures.Add(deleteFailure);
             }
-            if (cleanupFailures.Count > 1)
+            if (cleanupFailures.Count > PrimaryFailureCount)
             {
                 throw new AggregateException(cleanupFailures);
             }
@@ -93,7 +93,7 @@ internal sealed class BackupArtifactStaging
         var failures = new List<Exception>();
         RemoveOwnedFiles(failures);
         publication.Cleanup(failures);
-        if (failures.Count > 0)
+        if (failures.Count > EmptyCollectionCount)
         {
             throw new AggregateException(failures);
         }
@@ -101,7 +101,7 @@ internal sealed class BackupArtifactStaging
 
     private void RemoveOwnedFiles(List<Exception> failures)
     {
-        if (ownedFiles.Count == 0)
+        if (ownedFiles.Count == EmptyCollectionCount)
         {
             return;
         }

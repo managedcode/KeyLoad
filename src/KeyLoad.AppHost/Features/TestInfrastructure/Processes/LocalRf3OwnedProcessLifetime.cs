@@ -34,7 +34,7 @@ internal static class LocalRf3OwnedProcessLifetime
             failures.Add(new TimeoutException(MessageText));
             if (!HasExited(process, failures))
             {
-                TryKill(process, failures);
+                LocalRf3OwnedProcessSignals.TryKill(process, failures);
             }
         }
 

@@ -10,7 +10,11 @@
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "verificationStage": "owned_analyzer_release_build_passed_other_gates_pending",
-    "remaining": ["Final canonical solution build and format", "Aspire analyzer, unit, process recovery and Docker RF3 client suites", "Source-bound functional coverage and Linux qualification"]
+    "remaining": [
+      "Final canonical solution build and format",
+      "Aspire analyzer, unit, process recovery and Docker RF3 client suites",
+      "Source-bound functional coverage and Linux qualification"
+    ]
   },
   "ORLEANS-PRIMITIVES-001": {
     "title": "Native Orleans capability review, services, messaging, transactions and jobs",
@@ -4902,7 +4906,7 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "full_options_and_literal_migration_checkpointed_final_public_phase_bank_and_native_analyzer_semantic_gap_joins_in_progress_current_source_build_and_runtime_gates_pending",
+    "sourceStage": "all_runtime_options_literals_and_phase_bank_semantic_analyzer_joins_checkpointed_current_source_native_verification_pending",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
@@ -5139,6 +5143,17 @@
         "nativeExit": 2,
         "passed": false,
         "qualification": "native aggregate type checks found options202 and adapter tests231 above200; seed validation joined its existing validator and OpenSearch cases split coherently; full current-source rerun pending"
+      },
+      "canonicalReleaseV33": {
+        "log": "keyload-general-options-full-release-v33.log",
+        "nativeExit": 1,
+        "passed": false,
+        "warnings": 0,
+        "errors": 36,
+        "duration": "00:02:18.11",
+        "sourceChangedDuringRun": true,
+        "concurrentSourceChanges": 29,
+        "qualification": "native full Release build failed new backup staging analyzer/disposal diagnostics and concurrent TimeProvider signature joins; literal/import hygiene repaired; owning chats are repairing behavioral joins; final current-source canonical build required"
       }
     }
   }

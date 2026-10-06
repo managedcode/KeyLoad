@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace KeyLoad.Artifacts;
 
 /// <summary>Temporarily preserves an initially empty caller destination during publication.</summary>
