@@ -151,7 +151,7 @@ source correction preserves all genuine original/empty-key assertions and produc
 validation. Every current identity failure and the historical byte case must pass
 on the next exact source. Seven R81 owner-observation cases pass in normal mode,
 with no full-ready, signer/controller, scalar or coverage qualification. The
-[original native receipt](../implementation/runtime-qualification-37097831105.json)
+original native receipt (report removed from repository)
 is the canonical result and artifact join.
 
 R93 delivered sourced45d7f253d309610d7cce66684f155170277252a/run37098964980
@@ -160,11 +160,11 @@ with identical complete ID/status sets and no skips. All17 R86 identity failures
 and the historical byte77 oracle pass in both modes. Recovery164/164 plus1000
 seeded rows, analyzer118/118 and actual SDK/MCP RF363/63 pass. Root joined the
 original API/run/SHA/ZIP digests, every native ID,20 seed files and four genuine
-container restart receipts in the [R93 source-gates receipt](../implementation/cache-native-source-r93.json).
+container restart receipts in the R93 source-gates receipt (report removed from repository).
 The comparison workflow concluded failure:24/27 preflight jobs succeeded,3 failed
 (MongoDB n2 image import, MongoDB n3 NotPrimary reads, KurrentDB n2 cleanup).
 Two successful Neo4j Community jobs report unsupported topology; the270-cell
-matrix and aggregate did not execute. The [R100 wire source receipt](../implementation/cache-wire-source-r100.json)
+matrix and aggregate did not execute. The R100 wire source receipt (report removed from repository)
 binds the independent34-product/26-test review and root's complete hash comparison.
 This source is absent from d45 and requires fresh integrated gates and its own
 delivered native codec/crypto/lifetime qualification. Full-ready control, coverage, matched
@@ -172,7 +172,7 @@ cache profiles, endurance and power-loss gates remain open; RF3 caches stay off.
 
 The later ALL186-file5bb checkpoint/run37104211481 passes actual RF363/63 and
 analyzer118/118, with exact native reports, six original ZIP digests and four
-new-container restart receipts in the [R104 terminal receipt](../implementation/cache-checkpoint-native-r104.json).
+new-container restart receipts in the [R104 terminal receipt](https://github.com/managedcode/KeyLoad/actions/runs/37104211481).
 Full solution verify fails20 Node test-helper diagnostics; normal/scalar units,
 recovery and comparison lanes are skipped. AC-CACHE-014 wire tests were not
 executed. Current preserving helper corrections, complete development gates and

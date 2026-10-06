@@ -251,7 +251,7 @@ fixture, requires validator failure, removes it and requires success. This enfor
 REQ-MCAF-010 without changing runtime contracts; role meaning still requires code review.
 
 Whole-solution source checkpoint: `ebe6f1a`; import-only cleanup: `594173a`.
-[Development receipt](../implementation/vertical-slice-layout-2026-10-04.json) binds
+Development receipt (report removed from repository) binds
 structural reference tree `7e5dc117ec315105b4f1bc237653e07e929e8772` to the base
 `37a9da0`, excluding concurrent feature bodies. Complete reference inventory, original
 GraphAndSeries member text and original HEAD query declarations verified; Release

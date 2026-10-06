@@ -201,7 +201,7 @@ permitted. These flows extend AC-DSTORE-009 and its existing native unit/scalar,
 recovery and RF3 evidence, without qualifying an unexecuted gate.
 
 The scoped implementation, caller migration and authored operation flows were
-joined in the [2026-10-06 source checkpoint](../implementation/scoped-outcome-functional-flow-source-2026-10-06.json).
+joined in the 2026-10-06 source checkpoint (report removed from repository).
 It captures the current source and root corrections during the shared options
 migration. Current build, formatter, unit/scalar, process recovery, RF3 and
 functional coverage are pending; AC-DSTORE-006/009 remain open.
@@ -260,7 +260,7 @@ flowchart LR
     Commit --> Read[Authorized projected read or bounded query]
 ```
 
-The [2026-10-04 development receipt](../implementation/keycodec-crud-development-2026-10-04.json) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. Local development verification is authorized through unified Aspire; delivered-source qualification still requires complete Linux GitHub original build/TUnit/recovery/Docker RF3 artifacts. Required official MCP parity through Aspire RF3 remains pending. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
+The 2026-10-04 development receipt (report removed from repository) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. Local development verification is authorized through unified Aspire; delivered-source qualification still requires complete Linux GitHub original build/TUnit/recovery/Docker RF3 artifacts. Required official MCP parity through Aspire RF3 remains pending. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
 
 ## RF3 CRUD public-client completion (2026-10-04 accepted test scope)
 

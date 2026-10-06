@@ -187,7 +187,7 @@ build passes with zero warnings/errors, and native ClientApi passes347/347 in
 normal and scalar modes through Aspire. These are filtered local development
 results; official SDK resource/prompt RF3 and complete Linux gates remain open.
 The original reports and dependency delivery are bound in
-[the stage85 receipt](../../implementation/mcp-guidance-graph-development-2026-10-05.json).
+the stage85 receipt (report removed from repository).
 
 Ordered stages: freeze this contract and ADR; implement code and mapped tests;
 root reviews both packets and removes replaced paths; restore/build the combined

@@ -100,7 +100,7 @@ restores prior validation while preserving valid durable keys; its malformed
 exception leaks remain explicitly unqualified. SDK/MCP/frontend changes N/A:
 unchanged database operations. Dependency repair N/A: the defect is KeyLoad-owned.
 
-The [2026-10-04 local receipt](../implementation/keycodec-crud-development-2026-10-04.json)
+The 2026-10-04 local receipt (report removed from repository)
 records14 new KeyCodec cases and4 original cases in unchanged full Aspire
 normal/scalar suites at2889/2889 each, recovery228/228 and1000 unique actual
 atomic process cuts. Literal fractional decimal goldens pass under invariant

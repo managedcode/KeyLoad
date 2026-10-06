@@ -246,7 +246,7 @@ and Comparisons; canonical formatting failed with1117 diagnostics in the shared
 checkout. Neither check reported a finding in the104 explicitly reviewed stage
 paths, which stayed unchanged during those gates. Dependent test compilation and
 runtime acceptance still require a passing complete solution build.
-[The development receipt](../../implementation/native-orleans-development-2026-10-06.json)
+The development receipt (report removed from repository)
 records the commands, original local logs and open gates. Restore succeeded;
 no runtime test, coverage result or successful final build is claimed.
 No source-only result closes a runtime criterion.

@@ -104,4 +104,4 @@ qualification remains open. These per-operation allocations do not establish tot
 RAM usage or global maximum speed. Final five-source normal/scalar/recovery and
 delivered-source Linux RF3 CI remain distinct from historical image evidence.
 Current original receipts, failures and scope limitations live in
-[stage004](../../implementation/native-serialization-repair-stage-004.json).
+stage004 (report removed from repository).

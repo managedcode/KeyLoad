@@ -3,7 +3,7 @@
 TASK-NGR-D1R / REQ-NGR-005 / AC-NGR-005 is read-only source diagnosis.
 [The genuine failed job](https://github.com/managedcode/KeyLoad/actions/runs/37132491118/job/111232263528)
 uses source `7d1196db51f682f64ffcf4560e7b3f12b49b499b`; its
-[original receipt](native-keyload-failures-7d1196.json) retains provider/upload,
+original receipt (report removed from repository) retains provider/upload,
 ZIP/report/raw hashes, all case counts and the redacted numeric observation.
 No implementation, quota, retention or measurement change is delivered here.
 

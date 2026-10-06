@@ -823,7 +823,7 @@ transport/error join stays with the lead to serialize contract and evidence edit
 
 REQ-STORAGE-014 / AC-RC-001..004 / TASK-REC-ADMIT-002 confines the repair to
 test infrastructure. The exact c486 Windows cancellation baseline is recorded in
-[the complete native receipt](../implementation/runtime-qualification-37060131271.json).
+[the complete native receipt](https://github.com/managedcode/KeyLoad/actions/runs/37060131271).
 Ordered implementation: freeze acceptance; one bounded four-slot shared storage
 trial owner; acquire before each original15s/20s deadline; retain every real
 CrashHost stage and recovered-cut/retry/metadata assertion; release after cleanup;

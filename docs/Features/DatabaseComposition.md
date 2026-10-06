@@ -127,9 +127,9 @@ lease/ACK composition requires a separate inbox saved-authority replay contract.
 
 ## Evidence and remaining delivery gates
 
-The [source-stage receipt](../implementation/database-composition-source-stage-001.json)
+The source-stage receipt (report removed from repository)
 retains the initial source packet and historical development/Actions results. The
-[latest integrated receipt](../implementation/database-composition-integrated-stage-004.json)
+latest integrated receipt (report removed from repository)
 records original Linux Actions for `ca7e22d9c201304f0b81f59f3a0ae18e4125be37`:
 32/32 composition unit cases, 7/7 composition process-recovery cases and both
 SQL/.NET/official MCP RF3 composition cases pass. The complete process-recovery

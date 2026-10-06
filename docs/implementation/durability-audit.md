@@ -1,6 +1,6 @@
 # Kernel durability boundary
 
-This audit describes the initial format, not power-loss qualification. Package versions, source commits and license identifiers are recorded in `dependency-survey.json`. The server uses RF3 from its first implementation; the embedded adapter is used for local testing, administrative tools and benchmarks.
+This audit describes the initial format, not power-loss qualification. Package versions, source commits and license identifiers are recorded in `Historical intermediate report removed from repository; no current qualification inferred`. The server uses RF3 from its first implementation; the embedded adapter is used for local testing, administrative tools and benchmarks.
 
 ## Canonical storage
 
@@ -42,6 +42,6 @@ Orleans membership is a replicated catalog record, bootstrapped through consensu
 
 Local tests run on macOS arm64 with .NET SDK 10.0.401. The recovery suite executes 1000 seeded real-process kills before/after journal flush and at partial materialization points, verifies atomic recovery, rejects complete-frame corruption and restores a verified backup. The RF3 Aspire suite owns three independent node processes, kills the leader, retries a committed command, checks inbox/effects/ACK, rejects minority operations and restarts voters.
 
-The local result and crash-stage distribution are recorded in `kernel-qualification.json`. Each trial writes its seed, fault stage, mutation index, recovered values and platform to `artifacts/qualification/crash-trials-*.jsonl`; CI retains these as run artifacts.
+The local result and crash-stage distribution are recorded in `Historical intermediate report removed from repository; no current qualification inferred`. Each trial writes its seed, fault stage, mutation index, recovered values and platform to `artifacts/qualification/crash-trials-*.jsonl`; CI retains these as run artifacts.
 
 The advertised profiles remain `ProcessDurable` and `QuorumProcessDurable`. These tests do not establish filesystem directory-entry persistence, storage-controller guarantees, real power-cut behavior or every operating system/filesystem combination. Linux/macOS/Windows CI and broader network faults are tracked separately. Large snapshots under transport deadlines, automatic canonical compaction, power-loss qualification, network partitions, long histories, shard movement and the 72-hour endurance gate remain required for the broader architecture's durable release profile.

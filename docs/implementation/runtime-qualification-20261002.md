@@ -13,7 +13,7 @@ at MutationApplied3 reports TaskCanceledException; retained evidence does not
 establish its cause. Each OS still has1000 unique successful seeded atomic
 process-trial rows; those rows do not erase the separate failed projection case.
 All118 analyzer cases pass in each OS report and in the standalone analyzer job.
-[The exact receipt](runtime-qualification-37074392471.json) retains all archives,
+The exact receipt (report removed from repository) retains all archives,
 jobs, report hashes and failed case identities.
 
 Both image jobs again fail at native context-inspect before client/runtime/load
@@ -34,13 +34,13 @@ Normal units pass1021/1022 on Linux/macOS and1016/1022 on Windows. All136 recove
 and118 analyzer cases pass on each OS; each OS retains1000 unique process-trial
 rows within four concurrent storage trials. No native report contains skipped,
 cancelled, timed-out or flaky cases. Scalar invocation was skipped after the
-normal unit failure. [Exact jobs, reports and archive receipts](runtime-qualification-37073331174.json)
+normal unit failure. Exact jobs, reports and archive receipts (report removed from repository)
 preserve these boundaries.
 
 RF3 and comparison preparation both fail before restore/build/client/workload
 execution: native context-show exits0, then context-inspect exits1. The exact
 source reads `dockerArgument.format` but never defines it. The
-[byte-verified image receipt](image-preflight-failure-37073331174.json) preserves
+[byte-verified image receipt](https://github.com/managedcode/KeyLoad/actions/runs/37073331174) preserves
 both command sequences. Add the named `--format` value without weakening Engine,
 image, cleanup or ownership checks. The Linux/macOS metadata regression reads
 `configId` from a parser that returns `configImageId`; its source correction
@@ -62,7 +62,7 @@ timed-out/flaky/in-progress cases. Full solution build, formatter, governance an
 118analyzer cases pass on each OS; unit suites pass **871/871 each OS**. Recovery
 passes **136/136 Linux/macOS** and fails **116/136 Windows**. Genuine Docker/Aspire
 RF3 passes **46/46**, including additive series SDK/MCP and Chrome cases.
-[Exact jobs, native byte hashes, case identities and process receipts](runtime-qualification-37060131271.json)
+[Exact jobs, native byte hashes, case identities and process receipts](https://github.com/managedcode/KeyLoad/actions/runs/37060131271)
 retain this source's evidence; later candidate code inherits no qualification.
 
 Windows19 seeded batches (0..18) and one subscription MutationApplied3 case
@@ -79,7 +79,7 @@ not qualify the failed harness. The separate series raw report has48samples,
 20attempts/checks and only one timed attempt per operation; RF3 KeyLoad and one
 Timescale server have distinct acknowledgement/topology contracts. No throughput,
 p99, statistical performance winner or server-resource claim follows.
-[The byte-verified diagnostic receipt](performance-diagnosis-37060131271.json)
+The byte-verified diagnostic receipt (report removed from repository)
 records these observations and their limits.
 
 The exact comparisons parent remains Waiting with no terminal exit observation;
@@ -108,7 +108,7 @@ build, formatter, governance and118 analyzer cases pass on all three OSes. Units
 are **868/870 on each OS**, process recovery passes **136/136 on each OS**, and
 native Docker/Aspire RF3 is **44/46**, including the real Chrome administration
 flow. Comparison remains **2/4** with both measured profiles skipped.
-[Exact report hashes, case failures and six terminal job receipts](runtime-qualification-37057708780.json)
+[Exact report hashes, case failures and six terminal job receipts](https://github.com/managedcode/KeyLoad/actions/runs/37057708780)
 retain3540 outcomes:3530passed,10errors and zero native skipped/cancelled/timed-out/
 flaky/in-progress cases. Successful step conclusions are preserved; absent literal
 process exit integers remain null.
@@ -117,7 +117,7 @@ The new valid aggregate fixture accidentally reused sample ID5 with changed
 content; the real deduplication gate correctly rejected it. Two catalog constants
 still expected50 after the three accepted series tools raised the exact catalog
 to53. The RF3 cancellation fixture expected a CLR exception while the existing
-SDK returns a failed Cancelled Result. [The R9 source repair](qualification-source-r9.json)
+SDK returns a failed Cancelled Result. The R9 source repair (report removed from repository)
 adds a changed-content Conflict/unchanged-state/healthy-append regression, repairs
 the valid corpus, updates only the frozen catalog counts, and asserts all three
 SDK cancellation results plus a successful following read. These source repairs
@@ -127,7 +127,7 @@ delivered-SHA GitHub tests remain pending.
 The d186/run37056851814 workflow was cancelled after retaining seven native
 reports, including these real failures and one Chrome cancellation. The following
 2fc0/run37057526531 was cancelled before jobs/artifacts existed. Neither is a full
-qualification. [The partial d186 receipt](runtime-qualification-37056851814.json)
+qualification. [The partial d186 receipt](https://github.com/managedcode/KeyLoad/actions/runs/37056851814)
 preserves its actual source and scope. The later f627 Chrome pass does not prove
 the cause of the earlier cancellation.
 
@@ -147,7 +147,7 @@ each OS**, process recovery passes **136/136 on each OS**, and native
 Docker/Aspire RF3 passes **41/41** through the real .NET/MCP clients. The complete
 workflow still fails: comparison is **2/4**, both native runner-completion
 predicates remain Waiting, and both measurement profiles are skipped.
-[Exact native hashes, case transitions, jobs and artifact metadata](runtime-qualification-37049469093.json)
+[Exact native hashes, case transitions, jobs and artifact metadata](https://github.com/managedcode/KeyLoad/actions/runs/37049469093)
 retain3352 outcomes:3350passed,2errors and zero native skipped/cancelled/timed-out/
 flaky/in-progress cases. Successful GitHub step conclusions are retained; their
 literal process exit integers were not logged. Comparison records literal exit2.
@@ -173,7 +173,7 @@ is pending; e8d1a9eb1 does not qualify this later source.
 
 ## Previous main runtime baseline: 323d60499
 
-[Run37044499074](https://github.com/managedcode/KeyLoad/actions/runs/37044499074) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on all three OSes; units are **805/805 on each OS**. **Native Docker/Aspire RF3 passes41/41**, including real .NET/MCP clients, Chrome and five new safe-diagnostic regressions. Recovery is **136/136 Linux**,125/136 macOS and134/136 Windows. [Exact native hashes, failures, previous-case transitions, job URLs and artifact metadata](runtime-qualification-37044499074.json) retain the complete scope.
+[Run37044499074](https://github.com/managedcode/KeyLoad/actions/runs/37044499074) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on all three OSes; units are **805/805 on each OS**. **Native Docker/Aspire RF3 passes41/41**, including real .NET/MCP clients, Chrome and five new safe-diagnostic regressions. Recovery is **136/136 Linux**,125/136 macOS and134/136 Windows. Exact native hashes, failures, previous-case transitions, job URLs and artifact metadata (report removed from repository) retain the complete scope.
 
 Prior checkpoint stages7/8 and Windows target-WAL reopening now pass. All11 new macOS replica-readiness cases fail during fixture construction at ReplicaSnapshotFiles.RejectLinks; two Windows missing-required-file cases exceed the preserved6s observation cap. These remain real failed gates, with fixture path and scheduling review required before a preserving repair. The four prior Windows startup timeouts pass without a demonstrated source-cause repair; the additive startup diagnostic still requires its own delivered-SHA CI.
 
@@ -181,17 +181,17 @@ Both comparison completion predicates still fail with the runner in Waiting; ret
 
 ## W5/W6 source follow-up
 
-[Source join](runtime-source-w5-w6.json) retains all six source hashes, accepted feature/task ownership, native red baseline and authored source chronology. It reuses the existing physical-temp resolver for the macOS readiness fixture, isolates only two Windows intrinsic missing-file timing cases, and adds closed bounded startup exit/drain diagnostics. All25 projects pass an enabled Release development build with0warnings/0errors; canonical formatter and static governance pass. No local runtime tests ran. The subsequent exact e8d1a9eb1 run above qualifies all12 new startup outcomes and the full recovery suites on three OSes. Comparison remains failed and unexecuted environmental branches remain open; the full goal stays in progress.
+Source join (report removed from repository) retains all six source hashes, accepted feature/task ownership, native red baseline and authored source chronology. It reuses the existing physical-temp resolver for the macOS readiness fixture, isolates only two Windows intrinsic missing-file timing cases, and adds closed bounded startup exit/drain diagnostics. All25 projects pass an enabled Release development build with0warnings/0errors; canonical formatter and static governance pass. No local runtime tests ran. The subsequent exact e8d1a9eb1 run above qualifies all12 new startup outcomes and the full recovery suites on three OSes. Comparison remains failed and unexecuted environmental branches remain open; the full goal stays in progress.
 
 ## Previous main runtime baseline: 8b475d4
 
-[Run37042082081](https://github.com/managedcode/KeyLoad/actions/runs/37042082081) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on each OS. Units are805/805 on Linux/macOS and801/805 on Windows: four real comparison-host startup cases reach their unchanged20-second deadline. Recovery remains119/121 Linux/macOS and118/121 Windows. **Native Docker/Aspire RF3 passes36/36**, including real .NET/MCP SDK calls and Chrome administration. Comparison remains2/4 with measured profiles skipped. [Exact reports, failure identities, job URLs and artifact hashes](runtime-qualification-37042082081.json) are retained.
+[Run37042082081](https://github.com/managedcode/KeyLoad/actions/runs/37042082081) retains all12 source-checked native reports. Full build, formatter, governance and118 analyzer cases pass on each OS. Units are805/805 on Linux/macOS and801/805 on Windows: four real comparison-host startup cases reach their unchanged20-second deadline. Recovery remains119/121 Linux/macOS and118/121 Windows. **Native Docker/Aspire RF3 passes36/36**, including real .NET/MCP SDK calls and Chrome administration. Comparison remains2/4 with measured profiles skipped. Exact reports, failure identities, job URLs and artifact hashes (report removed from repository) are retained.
 
-W4 source repairs optional-metadata absence and expected source/target file readiness, and adds safe restart failure receipts. [The source join](runtime-source-w4.json) records source hashes, preserved bounds, an all25-project development build with0warnings/0errors, full canonical formatter exit0 and static governance pass; its new136 recovery and41 RF3 case inventory is unexecuted until the delivered-SHA CI. Four Windows startup failures still need diagnostics to distinguish process exit wait from redirected-reader drain; no cause, timeout increase or configuration change is inferred. Coverage, actual activation movement, server-resource costs, endurance and power-loss gates remain open.
+W4 source repairs optional-metadata absence and expected source/target file readiness, and adds safe restart failure receipts. The source join (report removed from repository) records source hashes, preserved bounds, an all25-project development build with0warnings/0errors, full canonical formatter exit0 and static governance pass; its new136 recovery and41 RF3 case inventory is unexecuted until the delivered-SHA CI. Four Windows startup failures still need diagnostics to distinguish process exit wait from redirected-reader drain; no cause, timeout increase or configuration change is inferred. Coverage, actual activation movement, server-resource costs, endurance and power-loss gates remain open.
 
 ## Previous main runtime baseline: aed338c6
 
-[Run37038422388](https://github.com/managedcode/KeyLoad/actions/runs/37038422388) completes with failed recovery, native restart and comparison gates. All three OSes pass full build, formatter, governance,118/118 analyzer cases and805/805 units. Recovery is119/121 Linux/macOS and118/121 Windows. **RF3 is35/36: all EventStreams SDK/MCP data assertions and the real Chrome admin browsing case pass.** The native node2 leader-loss/minority restart fails again. Comparison remains2/4, with measured profiles skipped. [Complete native hashes, failures, job URLs and archive metadata](runtime-qualification-37038422388.json) retain the exact source.
+[Run37038422388](https://github.com/managedcode/KeyLoad/actions/runs/37038422388) completes with failed recovery, native restart and comparison gates. All three OSes pass full build, formatter, governance,118/118 analyzer cases and805/805 units. Recovery is119/121 Linux/macOS and118/121 Windows. **RF3 is35/36: all EventStreams SDK/MCP data assertions and the real Chrome admin browsing case pass.** The native node2 leader-loss/minority restart fails again. Comparison remains2/4, with measured profiles skipped. Complete native hashes, failures, job URLs and archive metadata (report removed from repository) retain the exact source.
 
 Recovery still fails absent checkpoint metadata stages7/8 on every OS and a target metadata-WAL reopen after snapshot publication on Windows. All20 parameterized50-trial seeded crash cases and all6 W3 readiness cases pass on every OS. The prior Windows source-store and elapsed-bound cases pass without a source repair; this does not establish stability or remove their W4 regression/fix obligations. No skipped native suite counts as passing.
 
@@ -199,7 +199,7 @@ Root W4 handles sanctioned metadata absence, all expected source/target ownershi
 
 ## Previous main runtime baseline: 1bee2609
 
-[Run37036628601](https://github.com/managedcode/KeyLoad/actions/runs/37036628601) completes with failed recovery, RF3 and comparison gates. The full solution build, formatter, governance, 118/118 analyzer cases and **805/805 unit cases pass on each of Linux, macOS and Windows**. Recovery is119/121 on Linux/macOS and116/121 on Windows; RF3 is32/36; comparison is2/4. All native suites ran with zero skipped cases. [Exact native report hashes, failures, job URLs and artifact receipts](runtime-qualification-37036628601.json) retain the complete source scope.
+[Run37036628601](https://github.com/managedcode/KeyLoad/actions/runs/37036628601) completes with failed recovery, RF3 and comparison gates. The full solution build, formatter, governance, 118/118 analyzer cases and **805/805 unit cases pass on each of Linux, macOS and Windows**. Recovery is119/121 on Linux/macOS and116/121 on Windows; RF3 is32/36; comparison is2/4. All native suites ran with zero skipped cases. Exact native report hashes, failures, job URLs and artifact receipts (report removed from repository) retain the complete source scope.
 
 The prior admin unit, catalog cursor, discovery schema and native logging cases pass. RF3 still fails three EventStreams expected-data assertions and the real Chrome admin browse case; aed338c carries a later independent admin-owned source correction pending its own CI. Native leader-loss/minority passes this run, without a demonstrated root-cause repair or stability claim.
 
@@ -209,7 +209,7 @@ Both native comparison completion predicates still fail with the runner in Waiti
 
 ## Previous main runtime baseline: b533c80
 
-[Run37032546228](https://github.com/managedcode/KeyLoad/actions/runs/37032546228) completes with failed runtime gates. Full solution build, formatter, governance and118/118 analyzer cases pass on Ubuntu, macOS and Windows. Unit suites are800/804 on each OS; recovery is119/121 on Linux/macOS and118/121 on Windows; Docker/Aspire RF3 is27/36 and comparison2/4, with no skipped native cases. [The exact native reports, case identities, SHA-256 hashes, jobs and artifact receipts](runtime-qualification-37032546228.json) preserve the complete scope.
+[Run37032546228](https://github.com/managedcode/KeyLoad/actions/runs/37032546228) completes with failed runtime gates. Full solution build, formatter, governance and118/118 analyzer cases pass on Ubuntu, macOS and Windows. Unit suites are800/804 on each OS; recovery is119/121 on Linux/macOS and118/121 on Windows; Docker/Aspire RF3 is27/36 and comparison2/4, with no skipped native cases. The exact native reports, case identities, SHA-256 hashes, jobs and artifact receipts (report removed from repository) preserve the complete scope.
 
 The W3 search-byte and exact raw-read-budget cases pass across all three OSes. Official MCP initialization succeeds and thirteen of the prior seventeen failing MCP cases now pass; the other four reach existing catalog or event-byte assertions. Six real-file readiness cases and all twenty parameterized seeded process-crash cases pass on every OS. The complete recovery gate still fails: checkpoint stages7/8 have no live tree/0.meta.wal, and a separate Windows replica-snapshot caller still reopens before the WAL becomes available. Native diagnostic capture still misses ToolsCall; the two new admin unit cases and one catalog cursor argument also fail on every OS. Each failure remains in the task plan; none is reclassified as passing.
 
@@ -217,13 +217,13 @@ The RF3 failures are one discovery-schema assertion, three event-byte assertions
 
 ## Main build baseline:49a5b605
 
-[Run37029344985](https://github.com/managedcode/KeyLoad/actions/runs/37029344985) completed failed at the matrix/RF3/comparison build gates after the all-source main checkpoint. The standalone analyzer suite passes; unit, process-recovery, RF3 and comparison suites were not executed. [Native reports, compiler diagnostics and artifact receipts](runtime-qualification-37029344985.json) retain the exact source and job scope. This does not supersede the prior full runtime evidence below.
+[Run37029344985](https://github.com/managedcode/KeyLoad/actions/runs/37029344985) completed failed at the matrix/RF3/comparison build gates after the all-source main checkpoint. The standalone analyzer suite passes; unit, process-recovery, RF3 and comparison suites were not executed. Native reports, compiler diagnostics and artifact receipts (report removed from repository) retain the exact source and job scope. This does not supersede the prior full runtime evidence below.
 
-The joined correction preserves the admin dashboard clock/comparison/async policy and adds the real metadata-WAL readiness probe under [REQ/AC-STORAGE-012](../Features/StorageRecovery.md). Six real-file cases cover all three holder paths, cancellation, pre-cancellation and the unchanged five-second permanent-lock bound. Every original recovery caller,50 trials and15-second deadline remains. [The tests-first source receipt](recovery-readiness-w3.json) records the hashes and source join. All25 projects compile with0warnings/0errors in a development build; full corrected-source GitHub qualification remains pending.
+The joined correction preserves the admin dashboard clock/comparison/async policy and adds the real metadata-WAL readiness probe under [REQ/AC-STORAGE-012](../Features/StorageRecovery.md). Six real-file cases cover all three holder paths, cancellation, pre-cancellation and the unchanged five-second permanent-lock bound. Every original recovery caller,50 trials and15-second deadline remains. The tests-first source receipt (report removed from repository) records the hashes and source join. All25 projects compile with0warnings/0errors in a development build; full corrected-source GitHub qualification remains pending.
 
 ## Previous completed candidate: fa80c701
 
-[Run37021991878](https://github.com/managedcode/KeyLoad/actions/runs/37021991878) completed with required failures. Full solution build/format/governance and118/118 analyzer regressions pass on all three OSes. Unit suites are787/788 each; all four prior W2 failures now pass. Ubuntu search stored bytes, macOS exact topic-read bytes and Windows concurrent native logging capture fail independently. [Complete native reports, hashes, jobs and archive receipts](runtime-qualification-37021991878.json) retain precise cases. The historical53-case ledger now has52 exact cases passing on all OSes and one corrected fixture method with all current cases passing; the retired argument is not claimed executed.
+[Run37021991878](https://github.com/managedcode/KeyLoad/actions/runs/37021991878) completed with required failures. Full solution build/format/governance and118/118 analyzer regressions pass on all three OSes. Unit suites are787/788 each; all four prior W2 failures now pass. Ubuntu search stored bytes, macOS exact topic-read bytes and Windows concurrent native logging capture fail independently. Complete native reports, hashes, jobs and archive receipts (report removed from repository) retain precise cases. The historical53-case ledger now has52 exact cases passing on all OSes and one corrected fixture method with all current cases passing; the retired argument is not claimed executed.
 
 Recovery executes after every successful build even if unit tests fail:115/115 on Linux/macOS and104/115 on Windows. Eleven Windows errors involve metadata-WAL sharing or per-trial cancellation. The readiness probe omits that WAL; the holder is unknown. Preserve all seeds, deadlines and assertions, and do not claim a product/dependency cause without evidence.
 
@@ -249,7 +249,7 @@ Previous completed canonical workflow: [run37015193756](https://github.com/manag
 | Docker/Aspire RF3 real SDKs |8 passed/18 failed/0 skipped, total26 |[RF3](https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228001)|
 | Comparison suite |2 passed/2 failed/0 skipped; later measured profiles not run |[comparison](https://github.com/managedcode/KeyLoad/actions/runs/37015193756/job/110864228402)|
 
-Counts qualify only the recorded source and scope. Five vector finite/golden/real-store tests pass on every native OS run; no software-fallback invocation or new SIMD validation optimization is qualified. All12 artifacts were downloaded; actual report hashes and GitHub archive metadata are in [the complete receipt](runtime-qualification-37015193756.json). Extracted-report hashes are verified; raw downloaded ZIP digests were not verified. No local tests, recovery, AppHost or load qualification ran.
+Counts qualify only the recorded source and scope. Five vector finite/golden/real-store tests pass on every native OS run; no software-fallback invocation or new SIMD validation optimization is qualified. All12 artifacts were downloaded; actual report hashes and GitHub archive metadata are in the complete receipt (report removed from repository). Extracted-report hashes are verified; raw downloaded ZIP digests were not verified. No local tests, recovery, AppHost or load qualification ran.
 
 ## Remaining failures and W2 source packets
 
@@ -269,7 +269,7 @@ Official Aspire source at13.6.0 awaits the watch response under a one-minute tim
 
 ## Historical baseline
 
-[Run37005805424](https://github.com/managedcode/KeyLoad/actions/runs/37005805424) at6949fa0 previously failed51/53/50 of770 unit cases,20 of26 RF3 cases and2 of4 comparison cases. At ad594642,48 of those exact unit cases pass on all OSes and one corrected catalog fixture method passes all current cases. Four distinct cases remain; the retired catalog argument is not reported as executed. [The full53-case attribution and new per-OS proof](runtime-unit-repairs-37005805424.json) retain the original symptoms.
+[Run37005805424](https://github.com/managedcode/KeyLoad/actions/runs/37005805424) at6949fa0 previously failed51/53/50 of770 unit cases,20 of26 RF3 cases and2 of4 comparison cases. At ad594642,48 of those exact unit cases pass on all OSes and one corrected catalog fixture method passes all current cases. Four distinct cases remain; the retired catalog argument is not reported as executed. The full53-case attribution and new per-OS proof (report removed from repository) retain the original symptoms.
 
 ## Scope and evidence
 
@@ -286,4 +286,4 @@ flowchart LR
 
 ## Unit and artifact traceability
 
-The [complete run receipt](runtime-qualification-37015193756.json) retains native summaries, the four-case union, every exact job, all12 GitHub archive receipts and downloaded report hashes. The [historical repair ledger](runtime-unit-repairs-37005805424.json) maps each prior case to its actual new proof or remaining failure. Production readiness, coverage, software fallback, server-resource budgets, activation movement, fault/endurance and power-loss gates remain open.
+The complete run receipt (report removed from repository) retains native summaries, the four-case union, every exact job, all12 GitHub archive receipts and downloaded report hashes. The historical repair ledger (report removed from repository) maps each prior case to its actual new proof or remaining failure. Production readiness, coverage, software fallback, server-resource budgets, activation movement, fault/endurance and power-loss gates remain open.

@@ -97,7 +97,7 @@ Release run
 passes and retains nine actual `0.1.0-dev` NuGet packages. Downloaded package
 versions, sizes and SHA256 values agree with its source/run-bound `packages.json`.
 Artifact `packages-0.1.0-dev` has authenticated id `11271266373`.
-The [qualification receipt](workflow-layout-qualification.json) retains the exact
+The qualification receipt (report removed from repository) retains the exact
 run/job/artifact identities, verified package manifest and real image test summary.
 
 Benchmarks run

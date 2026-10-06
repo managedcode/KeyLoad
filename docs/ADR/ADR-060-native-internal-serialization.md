@@ -508,7 +508,7 @@ exact delivered-source Linux qualification remains separate. Rollback restores
 only the test helper/warmup shape. No persisted/public format or product boundary
 changes, so the existing ADR is sufficient.
 
-The [2026-10-04 development receipt](../implementation/keycodec-crud-development-2026-10-04.json)
+The 2026-10-04 development receipt (report removed from repository)
 retains the failed nullable allocation control and the same-body warmup repair.
 Both original exact controls pass in full Aspire normal/scalar2889/2889 suites;
 recovery228/228 passes with unchanged complete source/runtime inventories.

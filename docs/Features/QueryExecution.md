@@ -27,7 +27,7 @@ REQ-SQLC-006 / AC-SQLC-006A / TASK-SQLC-BETWEEN adds the bounded typed
 scalar/null/eager-error semantics, expanded AST budgets, field authority and
 cursors remain canonical. First-authored real ZoneTree and genuine RF3 SDK/MCP
 tests qualify the new syntax at source7d1196 with44 original execution rows;
-[the receipt](../implementation/sql-client-qualification-7d1196.json) retains
+the receipt (report removed from repository) retains
 full exact-source CI. Coverage, full SQL/native protocol and measured performance
 remain unfinished.
 

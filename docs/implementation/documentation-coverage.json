@@ -7598,7 +7598,7 @@
     "existingRequirementsRefined": [
       "REQ-STORAGE-014"
     ],
-    "qualifiedPartialReceipt": "docs/implementation/ai-sql-qualification-37070004864.json"
+    "qualifiedPartialReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
   },
   "ownerCompletionWave20261003": {
     "date": "2026-10-03",
@@ -8291,7 +8291,7 @@
         ],
         "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -8314,7 +8314,7 @@
         ],
         "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -8338,7 +8338,7 @@
         ],
         "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -8361,7 +8361,7 @@
         ],
         "evidenceState": "local_codec_development_acceptance_passed_full_task_and_Linux_pending",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -8921,7 +8921,7 @@
         "state": "source_reviewed_prior_binary_and_all14_epoch_cases_with_full_Aspire_recovery228_passed_exact_Linux_and_homogeneous_cold_RF3_pending",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -8971,7 +8971,7 @@
         "state": "source_reviewed_prior_binary_and_all14_epoch_cases_with_full_Aspire_recovery228_passed_exact_Linux_and_homogeneous_cold_RF3_pending",
         "joinCondition": "root_diff_review_all_mapped_acceptance_and_original_qualification",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9018,7 +9018,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9065,7 +9065,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9112,7 +9112,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9160,7 +9160,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_inspects_each_diff_and_mapped_acceptance",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9201,7 +9201,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_full_resource_ownership_and_original_process_gates",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9242,7 +9242,7 @@
         "state": "source_reviewed_full_build_formatter_passed_actual_Linux_Docker_RF3_runtime_pending",
         "joinCondition": "root_diff_review_and_complete_original_real_cluster_gates",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9280,7 +9280,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_exact_failures_and_preserved_owned_unknown_files",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9318,7 +9318,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9356,7 +9356,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9394,7 +9394,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "root_diff_review_mapped_acceptance_and_actual_original_runtime_artifacts",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9436,7 +9436,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "same_preserved_contract_and_original_healthy_runtime_regression",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9474,7 +9474,7 @@
         "state": "source_reviewed_full_build_formatter_and_local_Aspire_native_unit_process_passed_Linux_RF3_pending",
         "joinCondition": "same_preserved_contract_and_original_healthy_runtime_regression",
         "developmentEvidence": [
-          "docs/implementation/native-full-text-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9520,7 +9520,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "no_mock_skip_tolerance_or_product_authority_weakening_and_original_complete_pass_report",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9560,7 +9560,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "no_mock_skip_tolerance_or_product_authority_weakening_and_original_complete_pass_report",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9601,7 +9601,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "no_mock_skip_tolerance_or_product_authority_weakening_and_original_complete_pass_report",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9643,7 +9643,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "no_mock_skip_tolerance_or_product_authority_weakening_and_original_complete_pass_report",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9673,7 +9673,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "preserve_all_negative_failure_deadline_and_lifecycle_assertions_no_test_retries_skips_or_product_changes",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9705,7 +9705,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "preserve_all_negative_failure_deadline_and_lifecycle_assertions_no_test_retries_skips_or_product_changes",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9737,7 +9737,7 @@
         "state": "source_reviewed_full_build_formatter_governance_and_Aspire_full_unit2800_passed_exact_source_Linux_pending",
         "joinCondition": "preserve_all_negative_failure_deadline_and_lifecycle_assertions_no_test_retries_skips_or_product_changes",
         "developmentEvidence": [
-          "docs/implementation/full-unit-repair-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9781,7 +9781,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9825,7 +9825,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9869,7 +9869,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9912,7 +9912,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9954,7 +9954,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -9993,7 +9993,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all36_original_cells_and9_actual_corpora_match_unchanged_source_and_DLL_inventories_no_public_qualification",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10044,7 +10044,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "all_mapped_oracles_and_bounds_pass_without_canonical_storage_public_format_or_other_workers_changes",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10117,7 +10117,7 @@
         "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
         "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10158,7 +10158,7 @@
         "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
         "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10239,7 +10239,7 @@
         "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
         "joinCondition": "awaited_admitted_complete_settlement_and_exact_public_liveness_no_authority_test_or_bound_weakening",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10276,7 +10276,7 @@
         "state": "source_reviewed_full_build_formatter_governance_Aspire_normal_scalar2852_and_actual_BDN36_development_stage_passed_exact_source_Linux_and_canonical_integration_pending",
         "joinCondition": "every_corrupted_copy_rejected_and_original_complete_evidence_still_valid_no_fabricated_measurements",
         "developmentEvidence": [
-          "docs/implementation/sample-chunk-codec-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10323,7 +10323,7 @@
         "state": "source_reviewed_actual_75_file_two_driver_prior_probe_verified_and_full_Aspire_recovery228_passed_exact_Linux_pending",
         "joinCondition": "13_original_upgrade_failures_and_all_required_recovery_cases_pass_with_truthful_immutable_prior_source_binding",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10372,7 +10372,7 @@
         "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
         "joinCondition": "all_existing_correctness_fault_scope_budget_and_allocation_assertions_preserved_and_actual_required_gates_pass",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10421,7 +10421,7 @@
         "state": "source_reviewed_full_Release_formatter_and_Aspire_normal_scalar2866_recovery228_development_passed_exact_Linux_and_public_RF3_pending",
         "joinCondition": "all_existing_correctness_fault_scope_budget_and_allocation_assertions_preserved_and_actual_required_gates_pass",
         "developmentEvidence": [
-          "docs/implementation/native-async-search-development-2026-10-03.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ]
       },
       {
@@ -10504,7 +10504,7 @@
         ],
         "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
         "joinCondition": "all_valid_v1_keys_roundtrip_and_no_new_format_copy_suppression_or_exception_payload_leak",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-KEYCODEC-ORACLES",
@@ -10547,7 +10547,7 @@
         ],
         "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
         "joinCondition": "existing_goldens_unchanged_independent_oracles_real_store_no_mock_skip_or_deep_CLR_immutability_claim",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-DSTORE-MUTATION-MATRIX",
@@ -10591,7 +10591,7 @@
         ],
         "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
         "joinCondition": "unchanged_product_errors_authority_and_atomicity_no_duplicate_existing_CAS_or_weakened_assertions",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-DEPENDENCY-CLOSURE-DISCOVERY",
@@ -10611,7 +10611,7 @@
         "startCondition": "root_verified_current39_pins_and_fresh_restore_all26_graphs_unchanged_no_dependency_defect_claim",
         "artifacts": [
           "actual_resolved_transitive_native_compression_license_source_inventory_draft",
-          "docs/implementation/dependency-closure-2026-10-04.json"
+          "Historical intermediate report removed from repository; no current qualification inferred"
         ],
         "verification": [
           "all26_actual_resolved_graphs_exact_cache_metadata_paths_and_hashes",
@@ -10712,7 +10712,7 @@
         ],
         "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
         "joinCondition": "no_scope_expansion_clock_double_tolerance_timeout_retry_skip_or_production_change",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-IS-ALLOCATION-WARM-BODY",
@@ -10747,7 +10747,7 @@
         ],
         "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
         "joinCondition": "no_tolerance_inequality_min_retry_GC_runtime_switch_skip_or_product_cache_change",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "modelTier": "cost_efficient_bounded_coding",
@@ -10784,7 +10784,7 @@
           "literal_positive_negative_fractional_decimal_custom_culture_oracle"
         ],
         "joinCondition": "no_writer_byte_or_native_alias_change_no_global_default_culture_mutation_restore_CurrentCulture_in_finally",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "modelTier": "cost_efficient_bounded_coding",
@@ -10824,7 +10824,7 @@
           "Delete_isolated_missing_index_use_denial_then_valid_control_without_field_write"
         ],
         "joinCondition": "real_persisted_principals_ZoneTree_and_exact_revision_JSON_index_oracles_no_new_Delete_field_write_semantics",
-        "developmentEvidence": "docs/implementation/keycodec-crud-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -10869,7 +10869,7 @@
         "dependencies": [
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -10916,7 +10916,7 @@
           "TASK-NODE-EPOCH-IMAGE",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -10971,7 +10971,7 @@
           "TASK-NODE-EPOCH-COORDINATOR",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -11030,7 +11030,7 @@
           "TASK-NODE-EPOCH-REPLICA",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -11118,7 +11118,7 @@
         ],
         "state": "source_reviewed_build_formatter_passed_current_RF3_execution_pending",
         "joinCondition": "no_bound_increase_no_swallowed_error_no_new_command_id_original_passed_reports",
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-NODE-EPOCH-REGULAR-FILE",
@@ -11161,7 +11161,7 @@
         ],
         "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
         "joinCondition": "all_migration_inputs_guarded_actual_FIFO_no_hang_lock_interop_and_exact_original_preservation",
-        "developmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-DSTORE-RF3-PARITY",
@@ -11388,8 +11388,8 @@
           "original source-bound results"
         ],
         "repairContract": "Reuse tested ServerFailureObserver for actual cleanup observation; preserve synchronous Flush(true) through root OfflineFiles.FlushToDisk; preserve caps/ownership/oracles; root takes ColdScenario and CurrentWaveRunner disposal/order joins.",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
-        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "contracts": [
@@ -11444,8 +11444,8 @@
           "original source-bound results"
         ],
         "cleanupContract": "Await-using owns each wave; observe body and disposal faults into the same scenario failure list, do not advance waves after any fault; retained-wave final settlement preserves every failure and keeps private roots on errors.",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
-        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-NODE-EPOCH-OFFLINE-CLI-REGRESSION",
@@ -11556,8 +11556,8 @@
         ],
         "state": "original_thresholds_pass_complete_normal_scalar_delivered_0d78_Linux_reports_no_global_CI_completion_claim",
         "joinCondition": "retain every original expiry/renewal assertion and real TimeProvider.System timestamp; no fake clock, threshold relaxation, skipped test or CI pass claim",
-        "developmentEvidence": "docs/implementation/node-epoch-cold-rf3-development-2026-10-04.json",
-        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "requirements": [
@@ -12364,7 +12364,7 @@
             "annSourceCohortUnchanged": true,
             "runtimeCohortUnchanged": true,
             "changedSourcePaths": [
-              "docs/implementation/benchmark-json-ci-development-2026-10-04.json"
+              "Historical intermediate report removed from repository; no current qualification inferred"
             ],
             "originalManifest": "artifacts/qualification/managed-ann-r1-development-20261004/focused05-originals/manifest.json",
             "remainingFailure": "One optimized real search completed before the actual one-second deadline; regression must charge repeated searches to one shared request budget without slowing product code.",
@@ -12479,7 +12479,7 @@
         ],
         "state": "canonical_sample_Conflict_oracle_source_corrected_runtime_pending",
         "joinCondition": "every_original_no_mutation_retention_revocation_current_write_follower_recovery_snapshot_and_prior_source_integrity_assertion_executes_no_partial_acceptance",
-        "deliveredEvidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json"
+        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       {
         "id": "TASK-NEXT-JOBS-ACCEPTANCE-ASSESSMENT",
@@ -14025,15 +14025,15 @@
     "qualificationRule": "Neither presence of source nor a local development result closes a full task. Preserve exact-source Linux fault/endurance and publication gates.",
     "historicalBaselinePreserved": true,
     "localDevelopmentEvidence": [
-      "docs/implementation/owner-wave-001-development-2026-10-03.json",
-      "docs/implementation/epoch-upgrade-development-2026-10-03.json",
-      "docs/implementation/native-full-text-development-2026-10-03.json",
-      "docs/implementation/full-unit-repair-development-2026-10-03.json",
-      "docs/implementation/sample-chunk-codec-development-2026-10-03.json",
-      "docs/implementation/native-async-search-development-2026-10-03.json",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "Historical intermediate report removed from repository; no current qualification inferred",
       {
         "scope": "KeyCodec_native_DocumentStorage_CRUD_and_oracle_completion",
-        "receipt": "docs/implementation/keycodec-crud-development-2026-10-04.json",
+        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "newKeyCodecCases": 14,
         "newCrudCases": 8,
         "normalUnit": 2889,
@@ -14045,8 +14045,8 @@
         "dockerAspireRf3Qualified": false
       }
     ],
-    "nodeEpochDevelopmentEvidence": "docs/implementation/node-epoch-development-2026-10-04.json",
-    "nodeEpochDelivered0d78Evidence": "docs/implementation/node-epoch-linux-0d78-2026-10-04.json",
+    "nodeEpochDevelopmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+    "nodeEpochDelivered0d78Evidence": "Historical intermediate report removed from repository; no current qualification inferred",
     "annR1Checkpoint": {
       "commit": "eca51325477d22aeb5fc12677860d0d22eb3968a",
       "branch": "main",

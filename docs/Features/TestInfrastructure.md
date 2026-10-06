@@ -445,7 +445,7 @@ exact expected cancellation exception. CQ016's accepted B3 contract and graph
 govern source review and genuine GitHub admission/cancellation regressions;
 environmental error branches retain the explicit full-source audit supplement.
 
-Актори: contributor, CI runner, release owner і evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/ci.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), [dependency survey](../implementation/dependency-survey.json), [qualification status](../implementation/status.json). Product runtime N/A: infrastructure запускає та перевіряє справжній продукт, не підміняє його demo engine.
+Актори: contributor, CI runner, release owner і evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/ci.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), dependency survey (report removed from repository), [qualification status](../implementation/status.json). Product runtime N/A: infrastructure запускає та перевіряє справжній продукт, не підміняє його demo engine.
 
 | Вимога | Acceptance / flows | Test / evidence mapping |
 |---|---|---|

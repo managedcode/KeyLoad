@@ -23,14 +23,14 @@
       "name": "lexical comments, quoting, identifiers, literals, parameters",
       "syntax": "Q1 subset plus line and nested block comments",
       "execution": "Q1 subset",
-      "evidence": "Original full CI baseline7d9852 and existing lexical/RF3 cases; docs/implementation/sql-client-qualification-7d985.json; full PostgreSQL lexical conformance pending"
+      "evidence": "Original full CI baseline7d9852 and existing lexical/RF3 cases; Historical intermediate report removed from repository; no current qualification inferred; full PostgreSQL lexical conformance pending"
     },
     {
       "id": "SQLC-READ",
       "name": "SELECT expressions, types, casts, nulls, collations, scalar functions",
       "syntax": "Q1 fields and predicates plus bounded BETWEEN/NOT BETWEEN qualified at source7d1196",
       "execution": "Qualified bounded Q1 only; full PostgreSQL18 typed expressions pending",
-      "evidence": "AC-SQLC-006A original21unit cases in each normal/scalar mode and2genuine RF3cases pass; docs/implementation/sql-client-qualification-7d1196.json; complete AC-SQLC-006 remains pending"
+      "evidence": "AC-SQLC-006A original21unit cases in each normal/scalar mode and2genuine RF3cases pass; Historical intermediate report removed from repository; no current qualification inferred; complete AC-SQLC-006 remains pending"
     },
     {
       "id": "SQLC-JOIN",
@@ -137,7 +137,7 @@
     "coverage": "collector unavailable; pending",
     "fullNativeClientEvidence": null,
     "completePerformanceCohort": null,
-    "latestQualifiedBaseline": "docs/implementation/sql-client-qualification-7d1196.json",
+    "latestQualifiedBaseline": "Historical intermediate report removed from repository; no current qualification inferred",
     "currentBetween": {
       "sourceRevision": "be2e8918d9636c2507af26588279035e7183c918",
       "sourceRunConclusion": "cancelled_no_steps_or_original_reports",
@@ -153,7 +153,7 @@
         "scalar": 21,
         "rf3": 2
       },
-      "qualificationReceipt": "docs/implementation/sql-client-qualification-7d1196.json",
+      "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "coverageQualified": false,
       "performanceQualified": false
     }

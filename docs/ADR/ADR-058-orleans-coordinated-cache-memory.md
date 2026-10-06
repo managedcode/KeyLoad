@@ -481,7 +481,7 @@ flowchart LR
 
 REQ-CACHE-002/003/007 / AC-CACHE-015. Exact native baseline, original ZIP
 digests,17 unit failure IDs and the distinct RF3 failure are retained in
-[run37093992229](../implementation/runtime-qualification-37093992229.json).
+run37093992229 (report removed from repository).
 This test-only repair preserves existing provider identity/copy/error contracts.
 
 1. Root freezes AC015 before delegated writes; the existing native failures

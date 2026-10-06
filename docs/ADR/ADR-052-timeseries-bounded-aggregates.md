@@ -21,14 +21,14 @@ Temporal rounding defects were subsequently repaired in the owning repository;
 published10.0.2 source2c9118b6fbd45a5170682d345d66cba4ad6e8f2d passed1104/1104
 native tests and90% coverage in each module. The lead independently verified the
 release/tag, actual package contents, NuGet signatures and duplicate-publication
-fence in the [delivery receipt](../implementation/timeseries-dependency-10.0.2.json).
+fence in the delivery receipt (report removed from repository).
 The following summer allocation patch is published10.0.3 at source
 de44e91ecf38779b61fe79a51153ce7b7b4db0ea. Its owning Release run37077860613
 passes1107/1107 tests, Core687/725 and Orleans205/212 covered lines. The lead
 independently verifies the annotated tag, actual GitHub assets and both signed
 NuGet payloads before the new central pin. Four native repeated normal/scalar
 profiles complete16 cases each, with20 result iterations per case; the
-[10.0.3 receipt](../implementation/timeseries-dependency-10.0.3.json) keeps
+10.0.3 receipt (report removed from repository) keeps
 source, package and measurement proof separate. The private static generic-state
 callbacks preserve the public accumulator contract and add no consumer
 workaround. The KeyLoad10.0.3 consumer change requires a new exact-SHA GitHub

@@ -280,7 +280,7 @@ KLD0022fails25/30. Changed production needs fresh native source hashes and
 denominators. SiteTests and final qualification remain pending; source repair
 alone cannot close AC-CQ-009 or AC-BC-027. Exact failed artifacts and joins live
 in the [site plan](../ADR/ADR-040-static-site-threejs-evidence.md) and
-[site status](../implementation/site-design.json).
+site status (report removed from repository).
 
 ## Owner functional coverage contract, 2026-10-05
 

@@ -352,7 +352,7 @@ a concrete boundary/failure-contract review.
 
 Current state: the reviewed source is joined. Fresh full Release r7 passed with
 zero warnings/errors; genuine local normal54/54 and scalar54/54 passed without
-skips, source drift or unsettled owned process groups. [Original evidence](../../implementation/scaled-native-local-2026-10-03.json)
+skips, source drift or unsettled owned process groups. Original evidence (report removed from repository)
 records the exact source/assembly hashes and original TRX. Actual100K BDN is
 running; broader tests, formatter, delivered-source Linux CI and all24 scale
 cells remain open. Strict report tests remain stopped private candidates; the

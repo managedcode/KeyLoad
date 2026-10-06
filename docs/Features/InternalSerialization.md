@@ -23,7 +23,7 @@ REQ-IS-001 through REQ-IS-009 respectively require the complete attributed DTO c
 
 Tests mirror InternalSerialization and the affected existing slices. Generated codecs and small real-file fixtures cover type/null/default/empty/byte/DOM/enum/polymorphism boundaries. Real process fault cuts and genuine Docker RF3 SDK/MCP prove recovery/runtime behavior only at the qualified SHA. The explicit owner correction on 2026-10-03 authorizes local TUnit development tests and bounded recovery/performance experiments; label their actual source and machine. Required Linux GitHub fault/topology and publication qualification remains separate. Compiler, formatter and governance checks are static evidence.
 
-Historical static preview: attributes were partly applied and dependent runtime changes remained under the executed source hold. The fully joined temporary snapshot passed 25-project Release compilation with real analyzers, zero warnings/errors, and the required full formatter. Its 106 affected/new native test files contain 296 test declarations and 301 Arguments attributes; these are unexecuted source counts. [Static receipt](../implementation/native-internal-static-preview.json) records exact source/patch/log hashes and excluded moving owner work. That snapshot requires fresh rebase and checks before installation; it does not qualify latest owner source or runtime behavior.
+Historical static preview: attributes were partly applied and dependent runtime changes remained under the executed source hold. The fully joined temporary snapshot passed 25-project Release compilation with real analyzers, zero warnings/errors, and the required full formatter. Its 106 affected/new native test files contain 296 test declarations and 301 Arguments attributes; these are unexecuted source counts. Static receipt (report removed from repository) records exact source/patch/log hashes and excluded moving owner work. That snapshot requires fresh rebase and checks before installation; it does not qualify latest owner source or runtime behavior.
 
 The final candidate includes attributed ChangeFeedClaims and native grain-to-HTTP/MCP principal binding, retaining existing admission/accounting and narrow strict grammar checks. Known ungenerated enum headers follow the official backing integer codec. An internal public-input profile permits only null reference collection elements so existing command/query validators and valid traversal-label behavior remain intact; required roots/members/initialized arrays, dictionaries, persisted records, claims and outputs stay strict. Public HTTP/MCP/CLI JSON, user JSON content, frozen identity material and the explicitly user-selected local-profile.json configuration file retain their concrete external boundaries.
 
@@ -56,7 +56,7 @@ ReplicaReadProbeHeader/SecurityTests, NativeReplayResultAssertions, the blob/sea
 readers and ChangeFeeds/Messaging/ClusterRouting quota/provider cases own the
 positive/negative assertions. All current formats and trust/error boundaries stay
 unchanged. R15 under AC-IS010 retains strict authentic step success while saving
-bounded API-visibility inspections. [Source/evidence stage](../implementation/native-serialization-repair-stage-002.json)
+bounded API-visibility inspections. Source/evidence stage (report removed from repository)
 records actual preceding failed jobs and separate current-source qualification.
 Source repair, a complete compiler build and raw measurements from a failed
 diagnostic job do not qualify runtime, acceleration, RF3 or durability.
@@ -83,7 +83,7 @@ originals and independent review; two local command-decode cells cannot satisfy
 this full criterion. Internal microbenchmarks follow the latest root policy and
 must not be dispatched through the end-to-end database comparison workflow.
 
-The [stage004 evidence](../implementation/native-serialization-repair-stage-004.json)
+The stage004 evidence (report removed from repository)
 binds the complete successful normal/scalar/recovery/analyzer/RF3 CI and protected
 24-cell diagnostic baseline to delivered commit3ae408fe. The pending shortcut's
 full local24cell experiment preserves all six corpora and native/JSON bytes.

@@ -69,6 +69,6 @@ ZoneTreePointCacheLifecycle, plus Monitor wait/pulse disposal coordination in
 NativeTextProjection. Typed-gate refactoring covers 64 fields and two helper parameters;
 the new real native-reader disposal/reopen regression is authored. Local compiler,
 Aspire analyzer and blocker evidence is retained in the
-[development receipt](../implementation/typed-synchronization-2026-10-05.json).
+development receipt (report removed from repository).
 Full solution build/formatter and runtime gates remain open because unrelated
 concurrent source prerequisites fail; this decision remains Accepted.

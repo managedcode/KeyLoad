@@ -26,8 +26,8 @@ instead request rediscovery. The
 faults the original pending append and replaces its appender for later calls.
 No transparent replay of that same failed append was found.
 
-The [7d985 n3 original](sql-client-qualification-7d985.json) and
-[7d1196 n2 original](native-kurrent-preflight-failure-7d1196.json) both retain
+The 7d985 n3 original (report removed from repository) and
+7d1196 n2 original (report removed from repository) both retain
 NoStreamSemantics/NotLeaderException, all five null measurements and clean
 teardown. Identical stage/type does not prove identical causes. Their sanitized
 exports omit the selected destination, reported LeaderEndpoint value, gRPC

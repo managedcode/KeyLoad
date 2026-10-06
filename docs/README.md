@@ -62,9 +62,11 @@ flowchart LR
 
 - [ADR index](ADR/README.md) описує рішення та їхню ідентичність. Accepted означає рішення/контракт; Implemented вимагає implementation/migration/tests/docs та verification evidence.
 - [104-task tracker](implementation/status.json) є canonical джерелом implementation status; [coverage catalog](implementation/documentation-coverage.json) мапить кожну KL-задачу на Feature та ADR і не підміняє tracker.
-- [Durability audit](implementation/durability-audit.md), [kernel qualification](implementation/kernel-qualification.json), [comparison contract](implementation/comparative-benchmarks.md) та [joined benchmark source review](implementation/benchmark-source-review.json) пояснюють конкретні докази й pending gates.
+- [Durability audit](implementation/durability-audit.md) та [comparison contract](implementation/comparative-benchmarks.md) визначають вимоги до перевірок і незакриті qualification gates.
 - Детальні existing designs: [Q1](design/query-q1.md), [admission](design/command-admission.md), [bounded reads](design/bounded-reads.md), [replica snapshots](design/replica-snapshots.md), [feeds](design/change-feeds.md). Feature/ADR links визначають owning acceptance; ці матеріали не оголошують майбутні протоколи готовими.
 
 У code є data/auth/feed/backup, public BlobStorage та official MCP/agent можливості з Accepted contracts; current shared source та Orleans/Docker/MCP міграція потребують delivered-source qualification. Нові SQL/typed-row joins мають окремий [реєстр доказів](implementation/central-sql.md). [Історичний CI 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) на `9c570f8c33a7a9667507a8e1c0ca68860de3be45` не кваліфікує пізніші зміни.
 
 Product qualification і всі load/test results беруться лише з GitHub Actions; graphs — тільки з raw successful JSON із SHA/run/profile/topology/guarantees. Документальний/static review не доводить швидкість, power-loss durability, numeric coverage/complexity або production readiness. Метод цієї документаційної роботи: [ADR-037](ADR/ADR-037-documentation-coverage.md).
+
+Проміжні JSON-звіти агентів, development checkpoints і копії результатів окремих CI-запусків видалено. У `implementation/` залишено п’ять канонічних JSON: статус, карту документаційної traceability, запис перевірки структури репозиторію та два SQL-інвентарі. Оригінальні результати перевірок належать GitHub Actions та його артефактам; історичні твердження у Feature/ADR не кваліфікують поточний checkout.

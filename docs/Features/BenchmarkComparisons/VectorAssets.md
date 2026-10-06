@@ -49,5 +49,5 @@ presentation source, never archived reports or database formats.
 | AC-VEC-005 | The real builder emits both posters and canonical assets with unchanged brand parity and benchmark provenance. | Complete SiteTests, source/output byte parity, native coverage and Pages gates in GitHub at the exact source revision. |
 
 GitHub-only TUnit/MTP qualification remains required for every automated criterion.
-The [implementation evidence](../../implementation/vector-assets.json) records
+The implementation evidence (report removed from repository) records
 development checks and manual preview separately from the blocked publication.

@@ -85,7 +85,7 @@ exact-SHA GitHub jobs/artifacts qualify this repair; local source checks do not.
 
 REQ-BC059/061/064 and AC-TH009-001..004 under ADR-059 now have additive strict
 private Host settings and one-selected-family Aspire composition source. The
-[source receipt](../implementation/isolated-timeseries-input-source-041.json)
+source receipt (report removed from repository)
 binds10 files and126 authored unit/model parameterizations; scoped development
 builds/formatter pass. Exact-source GitHub reports, dispatch/original lifecycle,
 physical copies/ACK, native6/30 and complete cohort/site remain pending. Existing
@@ -104,10 +104,10 @@ settled-run JSON writer under ADR059. The writer retains every planned slot and
 original observed ACK/count/failure; unstarted attempts carry no invented timing.
 Its workloadSucceeded field preserves the original DTO predicate and cannot
 certify native copies or publication. Source review/development evidence is in
-[repair039](../implementation/isolated-source-repairs-039.json); exact-source
+repair039 (report removed from repository); exact-source
 TUnit/native host/envelope/copy/coverage/30-cell/site joins remain required.
 
-The [035 source-only repair receipt](../implementation/isolated-source-repairs-035.json)
+The 035 source-only repair receipt (report removed from repository)
 records reviewed HTTP deadline ownership, observed Kurrent fatal precedence,
 closed TimeSeries selection/physical-resource models and17 separate original
 TUnit report destinations. Development source checks pass in a scoped projection;
@@ -266,7 +266,7 @@ Least expensive capable coding tiers must be chosen per SDK/protocol risk; ambig
 
 ## Current source evidence
 
-[Joined review record](../implementation/benchmark-source-review.json) records COMPLETE source packets for Redis-006, Kurrent-009 and Symbols-011, the highest-capability REVIEW-010, exact source manifests and the lead's integrated static/data checks. All 29 generated files match the original historical output and all three successful GitHub raw JSON files are preserved byte-for-byte. This closes the listed source findings only. Every required real-engine, Docker, delivered-source CI, publication, UI and performance acceptance gate remains explicit and pending in that record.
+Joined review record (report removed from repository) records COMPLETE source packets for Redis-006, Kurrent-009 and Symbols-011, the highest-capability REVIEW-010, exact source manifests and the lead's integrated static/data checks. All 29 generated files match the original historical output and all three successful GitHub raw JSON files are preserved byte-for-byte. This closes the listed source findings only. Every required real-engine, Docker, delivered-source CI, publication, UI and performance acceptance gate remains explicit and pending in that record.
 
 ## Actual caller composition repair (2026-10-02)
 
@@ -444,7 +444,7 @@ real Chrome evidence is required, with every existing oracle and numeric gate.
 
 ## Qualified website delivery, 2026-10-02
 
-**Website scope only: REQ/AC-BC-011–018/024/025/027/028.** Exact H `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub validation37011817610 and both separate automatic Pages publications: site-path push37013009381 and producer-completion workflow_run37014111869. Full118 analyzer and70 site tests pass without skips, together with all required native/JavaScript thresholds and source inventories. [Canonical immutable evidence](../implementation/site-design.json), [design closure](../ADR/ADR-040-static-site-threejs-evidence.md) and [publication closure](../ADR/ADR-040-static-site-threejs-evidence.md) map criteria, tasks, exact artifacts and actual provider/live proof; strongest TASK-SITE-REVIEW-007 documentation/evidence review is COMPLETE.
+**Website scope only: REQ/AC-BC-011–018/024/025/027/028.** Exact H `6a82c86d0113270335368bbfbff0080ea1c1800a` passed complete GitHub validation37011817610 and both separate automatic Pages publications: site-path push37013009381 and producer-completion workflow_run37014111869. Full118 analyzer and70 site tests pass without skips, together with all required native/JavaScript thresholds and source inventories. Canonical immutable evidence (report removed from repository), [design closure](../ADR/ADR-040-static-site-threejs-evidence.md) and [publication closure](../ADR/ADR-040-static-site-threejs-evidence.md) map criteria, tasks, exact artifacts and actual provider/live proof; strongest TASK-SITE-REVIEW-007 documentation/evidence review is COMPLETE.
 
 The live responsive product page includes the bounded independent Three.js scene, accessible charts/tables, workload/metric/repetition controls and exact JSON/CSV/Markdown downloads. Current published measurements are the authentic successful comparison36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45; failed current producer37013008931 supplies no new results. Website/control/measured revisions and run/job/artifact hashes remain distinct. Every performance number is derived from these raw reports; unsupported values stay unavailable.
 
@@ -594,12 +594,12 @@ Native baseline repair traceability is frozen in ADR056 TASK-ISO-026K/R/PG/M:
 REQ-BC-052/053/055 map to AC-ISO-002/003/004/005/006, original failing GitHub
 jobs and new genuine per-engine SDK/Redis-copy/PostgreSQL-slot/Mongo-auth
 regressions. Root joins these only in each selected engine's isolated topology
-job. The [exact2f source/native receipt](../implementation/isolated-source-qualification-37093197474.json)
+job. The exact2f source/native receipt (report removed from repository)
 distinguishes passing source gates from11 failed native jobs and skipped270.
 Repairs are source implementation until same-SHA real native reruns pass; no
 site metrics or performance verdict follow from incomplete measurements.
 Current-main original baseline is separately retained in
-[run37093992229 receipt](../implementation/isolated-current-main-baseline-37093992229.json).
+run37093992229 receipt (report removed from repository).
 Exact2ec normal units have17 failures and RF3 has one queue-receive
 UnknownWriteOutcome; scalar and native comparisons are skipped. This does not
 erase the successful exact2f source gate or qualify the new repairs. Fixture
@@ -613,7 +613,7 @@ SDK/MCP/cancellation/membership/fault proof remains a separate6/30 family gate.
 The026/TS007B-D source checkpoint is main397a89c; actual run37097831105
 fails17 normal fixture cases. Its RF363/recovery164/analyzer118 and pure runner36
 pass; scalar/native comparisons are skipped. The original receipt is
-[retained separately](../implementation/isolated-current-main-baseline-37097831105.json).
+retained separately (report removed from repository).
 A source checkpoint or development build does not establish measured performance.
 
 TASK-ISO-030K maps REQ-BC-054/055 and AC-ISO-005/006 to AC-KC-030-001/002/003 in the root acceptance and ADR-056 accepted canonical teardown contract. The native1/2/3 full-volume fixture independently derives55378 real acknowledged streams, retains a foreign native event, applies120s/180s untimed production cleanup at concurrency16 and reads every actual tombstone. Root owns shared selector/evidence/workflow joins. Source/budget approval does not qualify the existing failed/deferred drain branch; genuine026KF process-boundary/fault proof remains pending. Exact delivered-source GitHub tests and authenticated complete workload artifacts are required.
@@ -627,7 +627,7 @@ ADR056 TASK-ISO-032H/AC-HT-032-001..003 retains one referenced original HTTP lif
 
 REQ-BC059/061/063/064 and AC-TSI001/003/006/007/008 now map staged
 AC-TB009-001/AC-TH009-001..004 to ADR059 TASK-ISO-TS009B/H-A/H-S/H-I. The
-[TS009B source receipt](../implementation/isolated-timeseries-identity-source-040.json)
+TS009B source receipt (report removed from repository)
 records the actual incarnation parameter and canonical voter bindings, all three
 original model cases, development build/formatter and explicit native limitations.
 H-A owns one selected native composition and original family hash/cell identity;
@@ -685,7 +685,7 @@ its Dry execution proves interoperability rather than performance.
 actual child execution, all36 original BDN cases and9 corpus manifests to unchanged
 source and Release dependency inventories. Its development receipt retains the
 original settings and explicitly rejects public or database-scale qualification.
-The [codec development receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+The codec development receipt (report removed from repository)
 retains the actual normal/scalar Aspire reports, two Dry consumers with copied
 negative cases and the ordinary36-cell matched codec control. Canonical storage,
 rewrite/recovery, representative database scale and Linux/RF3 gates remain open.
@@ -751,7 +751,7 @@ checks, scoped commit/push, genuine benchmark JSON and independent CI publicatio
 Root owns action policies, dependency/source inventory and shared docs. No worker
 may alter engines, raw measurements, authorization, topology or numerical gates.
 
-The independent source-stage [development receipt](../implementation/benchmark-json-ci-development-2026-10-04.json) binds the full0-warning/0-error build, format/governance and34/34 real Aspire/TUnit workflow/startup regressions to the actual source candidate. The six native context modules pass syntax checks; delivered-source native CI, full site coverage and publication remain pending. The genuine73 cohort independently completed all270 cells and authenticated JSON aggregation despite16 failed/null KeyLoad workloads; successful-job counts include explicitly unsupported cells and are not measurement counts.
+The independent source-stage development receipt (report removed from repository) binds the full0-warning/0-error build, format/governance and34/34 real Aspire/TUnit workflow/startup regressions to the actual source candidate. The six native context modules pass syntax checks; delivered-source native CI, full site coverage and publication remain pending. The genuine73 cohort independently completed all270 cells and authenticated JSON aggregation despite16 failed/null KeyLoad workloads; successful-job counts include explicitly unsupported cells and are not measurement counts.
 
 [ADR-080](../ADR/ADR-080-benchmark-failure-isolation.md) owns the boundary change.
 The site follow-up is FAIL-SITE-PROBES (native worker, four test-helper files and
@@ -796,7 +796,7 @@ The filtered run retained its actual exit10 and one synthetic after-session
 coverage failure; it does not qualify the full site or publication. A separate
 actual main73 candidate passed the full Release build, formatter and governance.
 Exact source, native-input, runner and TRX identities are recorded in
-[the development receipt](../implementation/benchmark-site-harness-development-2026-10-04.json).
+the development receipt (report removed from repository).
 Ordered task graph: FAIL-CONTRACT (root, complete) -> FAIL-SITE (site worker),
 FAIL-PRODUCER (tooling worker), FAIL-PREP (root/diagnostic worker) -> FAIL-JOIN
 (root review/build/format/governance/Aspire tests) -> FAIL-DELIVERY (scoped commit,

@@ -32,7 +32,7 @@ publish/reuse/new-cut result parity), `NativeTextAsyncAdmissionTests` (pre-cance
 real native posting pause, saturation and joined cancellation cleanup), and
 `NativeTextAsyncRf3Tests` (actual SDK/official MCP freshness, persisted policy
 epochs, credential revocation and healthy three-node status). Their source is
-reviewed. The [awaited-execution development receipt](../../implementation/native-async-search-development-2026-10-03.json)
+reviewed. The awaited-execution development receipt (report removed from repository)
 records normal/scalar2866 tests each with identical identities, recovery228 and
 unchanged source/runtime inventories. All three new native unit oracles and10
 native-text process cuts pass. Genuine public RF3 liveness and exact delivered-source

@@ -124,13 +124,13 @@ those imports; no assertion, diagnostic severity or execution contract changes.
 Full Release, formatter and static checks passed before delivery. Original
 runtime proof is retained below separately from those development checks.
 
-The [source-stage receipt](../../implementation/sql-client-source-stage-003.json)
+The source-stage receipt (report removed from repository)
 binds all eleven owned files to frozen7d985 base, full26project Release with
 0warnings/0errors, canonical formatter and static26project/4module governance.
 The final import/whitespace corrections preserve all assertions and non-whitespace
 bytes. No runtime, coverage or measured gain is inferred from development checks.
 
-[Original CI proof](../../implementation/sql-client-qualification-7d1196.json)
+Original CI proof (report removed from repository)
 now closes the runtime gate at source7d1196/run37132491153/attempt1: all21 new
 unit cases pass in each normal/scalar mode, and both RF3 SDK/official MCP cases
 pass. Root independently verifies original ZIP/report/source/job/upload hashes,

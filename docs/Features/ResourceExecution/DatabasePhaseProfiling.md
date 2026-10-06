@@ -102,7 +102,7 @@ The primitive bank, arithmetic and immutable process-mode facade are now
 implemented in source with19 acceptance-derived TUnit cases. The reviewed
 Replication-A/provider joins add12 actual boundaries:05,15..19 and26..31.
 Their full development build and formatter pass with all analyzers enabled;
-the [source receipt](../../implementation/database-phase-producer-source-r134.json)
+the source receipt (report removed from repository)
 binds the exact inputs and preservation review. This does not
 establish actual phase counts, allocations or performance. Default mode remains
 off. The newly independently reviewed public/request joins add00..04, bringing

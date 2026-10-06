@@ -189,7 +189,7 @@ database performance and complete KL-078 acceptance are not inferred from them.
 
 ## Development evidence
 
-The [2026-10-03 receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+The 2026-10-03 receipt (report removed from repository)
 retains the complete frozen source/runtime inventories, full Release and formatter
 results, Aspire normal/scalar2852/2852 reports, two real36-case Dry consumers and
 12 copied-report rejection cases per consumer. The ordinary36-case BenchmarkDotNet

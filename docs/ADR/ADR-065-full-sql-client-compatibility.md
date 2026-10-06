@@ -227,7 +227,7 @@ REQ-SQLC-006 / AC-SQLC-006A / TASK-SQLC-BETWEEN is the next additive Q1
 expression stage under [SqlBetween](../Features/QueryExecution/SqlBetween.md).
 The owning feature fixes the complete truth/error/budget/test and ordered
 execution contract; strongest TASK-SQLC-R23 review joins before delegated code.
-Status remains Accepted. [Original7d1196 CI](../implementation/sql-client-qualification-7d1196.json)
+Status remains Accepted. Original7d1196 CI (report removed from repository)
 qualifies the bounded stage's44 execution rows and complete ordinary CI;
 coverage, full SQL/native transport and complete performance gates remain open.
 

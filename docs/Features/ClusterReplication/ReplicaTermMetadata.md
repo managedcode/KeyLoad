@@ -105,12 +105,12 @@ retained entry solely for its term. Benchmark replay capacity196608 entry slots
 per voter differs from default16384; capacity
 arithmetic alone does not attribute native throughput.
 
-The [d45 native baseline](../../implementation/database-hotpath-baseline-d45-r115.json)
+The [d45 native baseline](https://github.com/managedcode/KeyLoad/actions/runs/37098964980)
 independently joins original artifacts and all15 PointRead repetitions, including
-the original failed complete270 cohort. The [source receipt](../../implementation/database-term-metadata-source-r119.json)
+the original failed complete270 cohort. The source receipt (report removed from repository)
 binds the two product files, seven real-store test files and independent review.
 That source inventory is16 methods/18 cases. The independently authenticated
-[40f native receipt](../../implementation/database-term-metadata-native-40f-r122.json)
+40f native receipt (report removed from repository)
 discovers all18 and passes17, including cold/warm, corruption and authority
 oracles. One real failed-install case discovers repeated disposal of an already
 retired ZoneTree maintainer. Full normal units pass1737/1739; recovery181/182;

@@ -48,7 +48,7 @@ target data and every existing ownership/foreign/cleanup assertion remain. Empty
 caller tracing characterization and n2 routing stay pending. New source is not
 native qualification; all1/2/3 originals must join before this stage is proven.
 
-The [source-stage receipt](../../implementation/native-benchmark-gates-source-stage-001.json)
+The source-stage receipt (report removed from repository)
 binds the integrated d500 prerequisite and reviewed files to the full Release,
 formatter and static governance checks. At source-stage delivery all nineteen policy cases and native
 metadata/readback/current-job transport behavior were GitHub-unqualified.
@@ -63,11 +63,11 @@ callsite and full leader-routing qualification remain pending; an earlier
 verifier cleanup may still mask the original primary exception.
 
 Original ca22 CI now proves nineteen policy-record cases passed, while its full
-CI gate failed; [the exact receipt](../../implementation/sql-client-qualification-ca22.json)
+CI gate failed; the exact receipt (report removed from repository)
 keeps normal/recovery/RF3 failures and skipped scalar explicit. Original f403
 Kurrent1/2/3 native preflights each passed one selected TUnit flow, with full
 metadata volume assertions on the existing path and observed native copies;
-[the preflight receipt](../../implementation/native-kurrent-preflight-f403.json)
+the preflight receipt (report removed from repository)
 binds provider uploads, original ZIP/report/worker/teardown hashes. This does not
 qualify the new setup diagnostic, refresh exhaustion, routing cause, full270
 cohort, website publication or all fault/resource gates.
@@ -79,28 +79,28 @@ case/timing/sample preservation. Pure classifier/typed formatter tests and
 actual native1/2/3 original runner/worker JSON form its trace. Source accounting
 is a hypothesis until real counters exist; no quota or retention policy change.
 
-The [f403 failure receipt](../../implementation/native-benchmark-failures-f403.json)
+The f403 failure receipt (report removed from repository)
 retains seven genuine failed jobs and the terminal cancellation after originals
 were preserved. The cohort never aggregated or published. OwnershipLost,
 UnknownWriteOutcome and ResourceExhausted remain failures with all original
 samples; outbox accounting and membership diagnostics are hypotheses until
 actual cause evidence joins.
 
-The [ca7 CI receipt](../../implementation/sql-client-qualification-ca7.json)
+The ca7 CI receipt (report removed from repository)
 proves the two genuine same-instance native writer cases, five D1 formatter
 cases, and all67 RF3 cases, with194/194 recovery and118/118 unique analyzer
 cases. Normal is2573/2576 and scalar is skipped, so the whole CI fails. These
 selected successes do not qualify stageE observation or its native failure
 path, full SQL/protocol, FullTextSearch, complete comparison or publication.
 
-StageE [source-stage receipt](../../implementation/native-benchmark-gates-source-stage-003.json)
+StageE source-stage receipt (report removed from repository)
 binds all seven source/test files to complete26-project Release/format/static
 checks and final independent review. At that delivery, thirteen new pure cases
 awaited GitHub execution; no native failure counters or acceleration were qualified. Initial
 270cell reports do not satisfy the additional mandatory100k/1m/5m dataset and
 at least100k measured-operation scale gates; those remain open.
 
-The [ca7 failure receipt](../../implementation/native-benchmark-failures-ca7.json)
+The ca7 failure receipt (report removed from repository)
 retains all eight actual failed KeyLoad cells across1/2/3nodes, with16 original
 ZIPs independently bound to source/run/attempt/job/upload/digest and exact reports,
 worker JSON and teardown. The126success/8failure/169cancelled/3skipped terminal
@@ -110,7 +110,7 @@ delete final preparation ResourceExhausted has no invented samples/timing; multi
 node OwnershipLost/UnknownWriteOutcome retain every actual failed sample. Cause
 and numeric quota counters remain unproven. This source predates stageE observation.
 
-The [3ae original CI receipt](../../implementation/sql-client-qualification-3ae.json)
+The 3ae original CI receipt (report removed from repository)
 now binds2637/2637 normal and2637/2637 scalar,194/194 process recovery,67/67 RF3
 and118/118 unique analyzer cases, with no nonpass cases. All thirteen stageE
 classifier/formatter cases pass in each mode. Root independently rehashed the
@@ -144,7 +144,7 @@ original omits RPC status, selected destination and redirect details. Cause
 remains unknown, with no proven consumer or pinned-SDK defect. No implementation
 is justified by that packet. Root reviewed analysis SHA-256
 `da2be25c51d66e5b242554ced508c58715732a94fc7ae74888b4439c8ed741de`.
-[The original7d985 receipt](../../implementation/sql-client-qualification-7d985.json)
+The original7d985 receipt (report removed from repository)
 retains the green CI baseline and cancelled native cohort:26/27 preflight jobs
 have provider success, one genuine Kurrent setup failure;19/270 scenario jobs
 have provider success and251 are cancelled. These metadata counts do not prove
@@ -152,7 +152,7 @@ complete case or measurement success. Nineteen cancelled jobs have failed result
 upload steps; no workload failure is inferred from upload failure. Full cohort,
 scale and website qualification remain open.
 
-The successor [7d1196 n2 preflight original](../../implementation/native-kurrent-preflight-failure-7d1196.json)
+The successor 7d1196 n2 preflight original (report removed from repository)
 also fails NoStreamSemantics with NotLeaderException and no measurements. Root
 independently verifies both original ZIPs; the repeated stage/type does not
 establish a shared cause. [Pinned SDK source review](../../implementation/kurrent-sdk-routing-source-review.md)
@@ -160,7 +160,7 @@ confirms supported multi-seed settings and future-call route updates while the
 original failed append is surfaced. Selected destination/status/leader snapshot
 remain absent; no repair or replay is approved from this source review.
 
-The [7d1196 KeyLoad failure originals](../../implementation/native-keyload-failures-7d1196.json)
+The 7d1196 KeyLoad failure originals (report removed from repository)
 retain three later genuine failures from the same live run. The n1 delete's first
 four repetitions each complete10k operations; final preparation rejects with
 ResourceExhausted and the stageE SDK observation records100000 retained outbox

@@ -542,7 +542,7 @@ DDL and source compilation alone cannot authorize native performance claims.
 
 TS007F actual pinned-image feasibility passes at890047996, run37086903497/
 job111098989273,1/1 with no skips. The exact native evidence is
-[image receipt](../implementation/timeseries-image-qualification-37086903497.json).
+image receipt (report removed from repository).
 Observed image: Linux/amd64 Alpine3.23.6, PostgreSQL18.6, gosu at
 /usr/local/bin/gosu, postgres UID70 and actual writable PGDATA18/docker. Owned
 container removal and retained command hashes pass. This resolves the native

@@ -213,7 +213,7 @@ No production readiness, power-loss guarantee or performance winner is claimed.
 
 ## Development evidence
 
-[Original local receipt](../implementation/native-full-text-development-2026-10-03.json)
+Original local receipt (report removed from repository)
 records the full Release build and formatter, actual Aspire native unit26/26 and
 process-recovery10/10 results, source/binary/report hashes, and the real package
 signature check. These bounded filtered development suites do not qualify the

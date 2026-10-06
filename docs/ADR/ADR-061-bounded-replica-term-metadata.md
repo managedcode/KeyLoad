@@ -110,7 +110,7 @@ flowchart LR
 
 Native run37109874881 at40f87fc3c486718f4e4e3f916dc209e42e32a0ca exposed
 post-install repeated maintainer disposal; preserve that error in the
-[original receipt](../implementation/database-term-metadata-native-40f-r122.json).
+original receipt (report removed from repository).
 REQ-STORAGE-020 / AC-DBHP-009 repair belongs to ADR-046 and its two existing
 storage owners, not the term observation or a dependency workaround. AC-DBHP-010
 only repairs the real-clock regression wait without changing the permit.

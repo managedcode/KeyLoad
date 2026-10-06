@@ -98,7 +98,7 @@ ADR-035 TASK-MP-006D validation stage is now executed under
 run37060131271 has all five first-authored public/real-ZoneTree metric regressions
 passing on every OS (normal units871/871 each), and RF3 SDK/MCP46/46. Root independently
 verified all native report byte/source/count identities in
-[the exact receipt](../implementation/runtime-qualification-37060131271.json).
+[the exact receipt](https://github.com/managedcode/KeyLoad/actions/runs/37060131271).
 The run still fails Windows recovery and native comparison completion; it is not
 full product qualification. Full-block finite validation uses portable .NET JIT
 intrinsics; metric Vector.Widen/Vector.Dot/scalar grouping stays unchanged. Same-SHA

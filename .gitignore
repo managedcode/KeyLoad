@@ -679,3 +679,11 @@ output/playwright/
 *.plan.md
 *.brainstorm.md
 *.acceptance.md
+
+# Canonical documentation records only; intermediate reports belong in CI artifacts.
+/docs/implementation/*.json
+!/docs/implementation/documentation-coverage.json
+!/docs/implementation/mcaf-installation.json
+!/docs/implementation/sql-client-commands-postgresql18.json
+!/docs/implementation/sql-client-conformance.json
+!/docs/implementation/status.json

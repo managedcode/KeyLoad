@@ -186,7 +186,7 @@ adapter, startup/reader fencing, selective lifecycle join and native saga-handle
 sources/tests are joined and unqualified. The final canonical build failed with456
 shared CrashHost/Comparisons diagnostics, and canonical formatting with1117;
 the104 reviewed stage paths had no reported finding in either check.
-[The development receipt](../../implementation/native-orleans-development-2026-10-06.json)
+The development receipt (report removed from repository)
 preserves the exact commands and distinguishes source review from acceptance.
 No native test execution or final successful build is claimed. A frozen
 old-binary reader rejection probe and all Aspire RF3/fault/resource gates remain open.

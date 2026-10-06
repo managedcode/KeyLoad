@@ -75,7 +75,7 @@ The profile exercises KeyLoad's existing persisted RF3 sample API, a real
 TimescaleDB hypertable, and the published `ManagedCode.TimeSeries` 10.0.0 library
 for in-memory bucket aggregation at the original baseline. The current central
 pin is published10.0.3 after the owning temporal and summer-allocation repairs;
-its [delivery receipt](../implementation/timeseries-dependency-10.0.3.json)
+its delivery receipt (report removed from repository)
 verifies1107/1107 tests, module coverage, release/tag and actual signed NuGet
 content before consumption. Four16-case native normal/scalar profiles qualify
 the owning allocation change; they do not measure KeyLoad database throughput. REQ-SERIES-007/009/010/011 and AC-SERIES-007/009/010/011 retain their
@@ -178,7 +178,7 @@ identity6 remain unchanged. Codec qualification does not close KL-078:
 correction generations, storage migration, rewrite cost and process/RF3 recovery
 still need their separate layout contract and original evidence.
 
-The [codec development receipt](../implementation/sample-chunk-codec-development-2026-10-03.json)
+The codec development receipt (report removed from repository)
 records full Aspire normal/scalar2852/2852 verification and36 matched ordinary
 BenchmarkDotNet cases with exact source/runtime/corpus binding. Canonical samples
 still use their existing per-record ZoneTree representation. The measured controls

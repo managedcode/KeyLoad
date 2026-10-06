@@ -78,6 +78,6 @@ Primary sources: [dotnet10 ProcessManager.OSX](https://github.com/dotnet/runtime
 
 Current state: the repaired full Release build passed with zero warnings/errors;
 actual local normal54/54 and scalar54/54 passed with no skips, unchanged source
-hashes and settled owned process groups. [Original evidence](../../implementation/scaled-native-local-2026-10-03.json)
+hashes and settled owned process groups. Original evidence (report removed from repository)
 retains the earlier51-case failure. Broader tests, exact-source Linux delivery,
 native errno/platform faults and all-scale measurement qualification remain open.
