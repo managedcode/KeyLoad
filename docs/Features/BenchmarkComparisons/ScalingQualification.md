@@ -612,3 +612,107 @@ rows/output and rejection/create-only preservation. The CI workflow does not
 select the new flag until workload routing and separate artifact/fairness/admission
 contracts are implemented together. Planning metadata alone does not qualify any
 performance cell or refresh published evidence.
+
+### Original open-loop terminal and cohort delivery
+
+REQ-SCALE-022 / AC-SCALE-022 / TASK-SCALE-OPENLOOP-DELIVERY-001 require original
+native open-loop artifacts to travel through the same eleven named isolated
+Linux database jobs to a separate authenticated cohort receipt. Acceptance
+requires exact workload selection, original terminal publication, hash-bound
+archive admission, complete identity accounting and fairness validation. A plan
+is never a result. ADR-103 stage13 owns ordered implementation and agent joins.
+
+The per-cell file is `open-loop-cell-terminal.v1.json`. Its closed JSON keys are
+schemaVersion (1), kind (`open-loop-cell-terminal.v1`), cell, worker, disposition,
+reason and artifacts. Cell is exactly the canonical plan's eight-field row.
+Worker has exactly the existing eleven isolated-worker keys: target, nodeCount,
+scenario, profile, sourceRevision, runId, attempt, repository, ref, workflow and
+jobId. Require agreement with the selected row and actual own-main Benchmarks
+source/run/attempt/current job. Artifact IDs and ZIP digests are authenticated
+after upload by GitHub intake; the producer cannot invent future upload metadata.
+
+Each descriptor has exactly name, sizeInBytes and sha256, with positive bounded
+size and lowercase SHA-256 of the original regular file. Descriptors and ZIP
+entries are filename-sorted, unique and closed to these exact sets:
+
+| Disposition | Original files beside the terminal | Reason and eligibility |
+| --- | --- | --- |
+| measured | open-loop-evidence.v1.json, open-loop-server-resource-evidence.v1.json | null reason; original native report and sidecar bound to its exact bytes |
+| cancellationProof | open-loop-cancellation-proof.v1.json, open-loop-server-resource-evidence.v1.json | null reason; only the six canonical KeyLoad RF3 PointRead proof cells |
+| unsupportedTopology | worker.json, server-resource-evidence.json | existing canonical native unsupported reason; validate the original generic pair using its own schema, with no open-loop metrics |
+| failed | no success-input files | existing fixed safe failed-cell reason, empty descriptors; original partial files remain in the independent owned failures artifact |
+
+Do not put an open-loop hash in WorkerSha256 or change generic/control/scaled/
+vector/site/resource-v2 schemas. Successful workloads require their exact
+original artifact pair and qualified resource evidence. Missing, ambiguous or
+mismatched output fails the job. Failed workloads retain a cell-bound failed
+terminal and cleanup evidence on always(), plus their actual failed conclusion;
+they are never converted to unsupported or a successful measurement.
+
+Bound terminals to64KiB, native measured/proof files to their existing4MiB limit
+and sidecars to the existing64KiB admission limit. Reuse existing original ZIP/
+file readers, total-cohort limits, plain-parent and atomic create-only output
+primitives. Reject links, duplicate/unexpected entries, expiry and byte/size/
+identity mismatch before admission. Original server/native-client resources,
+execution policy, images and membership cannot be reconstructed from logs/YAML.
+Tooling parser fixtures cannot authenticate GitHub or become measurements.
+
+The workflow archives open-loop-isolated-plan.v1.json beside existing plans and
+supplies the optional fourth plan to the same eleven matrices only after all
+delivery joins exist. Each new row carries canonical ID, rate, proof boolean and
+existing scaled profile. run-workload.mjs recomputes and admits the exact row
+before Aspire starts: measured rows use
+`/*/*/IsolatedNativeOpenLoopComparisonTests/*`, proofs use
+`/*/*/IsolatedNativeOpenLoopCancellationTests/*`; both pass the admitted rate
+via KeyLoadTests:OpenLoopRate and the existing ScaleProfile. Reject mixed vector/
+control/rate/proof selectors before resource acquisition. The outer
+Benchmarks__OpenLoopRate key is not a substitute for the test entry. Absent-plan
+arguments and original129 matrix rows stay unchanged.
+
+Keep comparison-open-loop-worker- / comparison-open-loop-proof- archive prefixes
+and their separate comparison-open-loop-case-qualification- /
+comparison-open-loop-proof-qualification- prefixes. Authenticate actual job
+name/ID/URL/conclusion/workload/upload steps independently from original GitHub
+artifact name/ID/digest/size/expiry; both identities must match the plan/run/attempt.
+
+The separate open-loop-cohort-receipt.v1.json has exactly schemaVersion (1),
+kind (`open-loop-cohort-receipt.v1`), cohort, planSha256, cells, counts,
+failedCellIds and qualified. Cohort has exactly sourceRevision, runId, attempt,
+repository, ref and workflow; each actual profile belongs to its cell. Cells
+follow canonical measurement order then proof order. Each has exactly cell,
+disposition, reason, job, artifact, terminalSha256 and artifacts. Job/artifact use
+the existing authenticated metadata schemas. Counts have exactly
+plannedMeasurements, plannedProofs, measured, cancellationProof,
+unsupportedTopology and failed. failedCellIds is sorted/unique. Retain original
+archives/raw files; publish atomically only after complete validation settles.
+
+Account for exactly792 measurement identities and six proofs. A fully successful
+qualified receipt contains648 measured,144 canonical unsupported and six accepted
+proof cells. A complete authenticated cohort with actual failed workloads may
+retain their terminal identities and emit qualified=false plus sorted failed IDs;
+it cannot qualify open-loop performance. Missing, duplicate, unplanned, corrupt,
+expired, skipped, canceled or mixed-run/attempt evidence rejects the cohort with
+no synthetic filling or historical fallback. Preserve the owner's failed-cell
+publication contract and original control/scaled/vector outputs.
+
+Fairness groups compare the same nodeCount/scenario/rate/profile/dataset and
+equivalent acknowledgement/durability/authorization/read, arrival/deadline/drain/
+accounting, effective CPU/memory/storage, hardware-class and native-client
+policies. Bind actual target images/membership per target; different engines
+need not share image digests. Never average rates or count proofs as measured
+operations. Require qualified resources, complete denominators and original
+policy snapshots. Proofs separately verify the actual1024-completion milestone,
+original producer/calls/session/cancellation settlement and persisted healthy SDK
+read. Six-node/physical-owner movement/endurance/power-loss gates remain open.
+
+New terminal/validation/receipt modules and a separate aggregate command belong
+to scripts/Features/BenchmarkComparisons. Root owns existing workflow/dispatch/
+finalizer/authenticated collector and eleven matrix joins. A Luna worker owns
+guarded new modules and complete Node-process tooling flows: publish actual
+tooling output and independently verify it; reject invalid operations while
+preserving original output, then perform a corrected successful follow-up.
+Native positive measured/proof evidence requires genuine Aspire-owned workloads;
+tooling fixtures are not database or GitHub qualification or product functional
+coverage. Retain full unit/scalar/recovery/RF3/comparison and exact-source Linux
+logs/TRX/archives/job URLs before closing AC-SCALE-022. This contract enables no
+new website open-loop metric projection.

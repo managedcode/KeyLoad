@@ -40,17 +40,7 @@ internal static class OpenLoopProducer
         }
         catch (Exception error)
         {
-            failure = error;
-            try
-            {
-                failure = RecordFailedProduction(state, next, error);
-            }
-            catch (Exception accountingFailure)
-            {
-                failure = OpenLoopFailure.Combine(error, [accountingFailure])!;
-                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
-                throw;
-            }
+            RecordFailedProduction(state, next, error, ref failure);
             throw;
         }
         finally
@@ -67,9 +57,19 @@ internal static class OpenLoopProducer
         }
     }
 
-    private static Exception RecordFailedProduction(OpenLoopRunState state, int next, Exception failure)
+    private static void RecordFailedProduction(OpenLoopRunState state, int next, Exception primary,
+        ref Exception? completionFailure)
     {
-        RecordUnofferedRemainder(state, next);
-        return failure;
+        completionFailure = primary;
+        try
+        {
+            RecordUnofferedRemainder(state, next);
+        }
+        catch (Exception accountingFailure)
+        {
+            completionFailure = OpenLoopFailure.Combine(primary, [accountingFailure])!;
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(completionFailure).Throw();
+            throw;
+        }
     }
 }

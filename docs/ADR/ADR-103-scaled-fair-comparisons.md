@@ -232,3 +232,35 @@ The selected open-loop output follows the same caller-owned create-only path
 semantics as the existing CLI outputs: bounded resolved paths and plain parents,
 with no new confinement to a test temp root. Absolute/normalized paths remain
 valid; an actual linked-parent escape fails before any linked target is changed.
+
+## Accepted stage13: original open-loop delivery and separate receipt
+
+REQ-SCALE-022 / AC-SCALE-022 / TASK-SCALE-OPENLOOP-DELIVERY-001 freeze the exact
+terminal/artifact/completeness/fairness contracts in ScalingQualification before
+implementation. The source audit found no workflow selection or authenticated
+aggregation route for existing native measured/proof outputs. This stage joins
+that route without widening WorkerSha256 or existing site schemas.
+
+Ordered stages: freeze the closed original terminal and cohort receipt; add new
+feature-local modules with real Node-process tooling flows; root joins canonical
+dispatch/finalizer/original GitHub ZIP admission and all eleven workflow groups
+together; retain and authenticate every measured/proof/unsupported/failed planned
+identity; run full Aspire-owned native gates and the exact-source Linux cohort.
+A complete authenticated failed cohort remains explicitly unqualified; missing
+or corrupt evidence fails closed without fallback.
+
+Ownership: scripts/Features/BenchmarkComparisons holds new colocated executable
+artifacts; tests/KeyLoad.UnitTests/Features/BenchmarkComparisons holds applicable
+Cases/Helpers/Assertions/Models/Configuration. A dedicated Luna worker owns only
+guarded private new modules/tests. Root owns existing scripts/workflow joins,
+full review, gates, evidence and all-scope checkpoints. Dependencies are the
+canonical792/six plan, native measured/proof writers, artifact-bound sidecars
+and original bounded GitHub archive/metadata primitives. Tooling fixtures never
+count as authentic measurements or product functional-coverage contributors.
+
+Migration is additive/internal; original control/scaled/vector/publication and
+native topologies remain mandatory. CI selects the new plan only after the
+coherent dispatch-to-intake route exists. Rollback removes only this new route
+and preserves original immutable evidence. No new website open-loop projection
+is enabled. This ADR remains Accepted with native and delivered-source gates
+pending until the complete required evidence exists.
