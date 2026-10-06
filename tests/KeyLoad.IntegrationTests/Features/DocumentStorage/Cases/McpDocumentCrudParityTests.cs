@@ -22,6 +22,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
             identity.Secret, deadline.Token);
 
         await RunCrudLifecycleAsync(sdk, mcp, scenario, sdkCreates: true, deadline.Token);
+        fixture.RegisterNativeCoverageCase<McpDocumentCrudParityTests>(nameof(AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle));
     }
 
     [Test]
@@ -38,6 +39,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
             identity.Secret, deadline.Token);
 
         await RunCrudLifecycleAsync(sdk, mcp, scenario, sdkCreates: false, deadline.Token);
+        fixture.RegisterNativeCoverageCase<McpDocumentCrudParityTests>(nameof(AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle));
     }
 
     [Test]
@@ -63,6 +65,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
         await Assert.That(sdkRejected.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.RevisionConflict));
         await McpDocumentCrudParityAssertions.AssertDocumentAsync(sdk, mcp, scenario,
             McpDocumentCrudParityScenario.ReplacedRevision, McpDocumentCrudParityScenario.ReplacedJson, deadline.Token);
+        fixture.RegisterNativeCoverageCase<McpDocumentCrudParityTests>(nameof(AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo));
     }
 
     private static async Task RunCrudLifecycleAsync(KeyLoadClient sdk, McpOfficialClient mcp,

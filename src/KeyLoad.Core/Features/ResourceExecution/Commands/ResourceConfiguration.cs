@@ -26,7 +26,8 @@ public sealed partial class DatabaseEngine
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
-        BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation);
+        BlobStorageOperations.ConfigureResource(transaction, request, previous is null, Store.Identity.Incarnation,
+            BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
     }

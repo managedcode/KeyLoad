@@ -31,7 +31,7 @@ internal static class CommandIdempotencyCrashScenario
         const int FollowUpOutboxTail = 4;
         const int InitialRevision = 1;
 
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
         // Evidence supplies the original caller request only; recovered state is read exclusively from ZoneTree.
         var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(directory,
             CommandIdempotencyCrashContract.CommandEvidenceFile);

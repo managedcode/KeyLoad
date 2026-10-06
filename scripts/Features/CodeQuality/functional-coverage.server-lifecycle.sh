@@ -83,6 +83,13 @@ coverage_read_proc_identity() {
     esac
 }
 
+coverage_read_proc_generation() {
+    coverage_current_start_ticks=$(awk '{print $22}' "/proc/$coverage_server_pid/stat" 2>/dev/null) || return 1
+    [ "$coverage_current_start_ticks" = "$coverage_server_start_ticks" ] || return 1
+    coverage_process_state=$(awk '$1 == "State:" { print $2 }' "/proc/$coverage_server_pid/status" 2>/dev/null) || return 1
+    [ "$coverage_process_state" != Z ]
+}
+
 coverage_same_server_instance_is_live() {
     coverage_current_start_ticks=$(awk '{print $22}' "/proc/$coverage_server_pid/stat" 2>/dev/null) || return 1
     [ "$coverage_current_start_ticks" = "$coverage_server_start_ticks" ] || return 1
@@ -92,7 +99,7 @@ coverage_same_server_instance_is_live() {
 
 coverage_signal_original_server() {
     coverage_read_server_identity || return 1
-    if coverage_read_proc_identity; then
+    if coverage_read_proc_generation; then
         kill -TERM "$coverage_server_pid" || return 1
         coverage_server_term_sent=1
     fi

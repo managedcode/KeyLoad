@@ -10,6 +10,7 @@ internal static class TimeSeriesComparisonApplication
         var settings = TimeSeriesHostSettings.Read(configuration).Value;
 
         await using var owner = new TimeSeriesComparisonTargetOwner(NativeComparisonExecutionRegistration.ReadClient(configuration),
+            NativeComparisonExecutionRegistration.Read(configuration),
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration));
         var targets = owner.CreateTargets(settings.Endpoint, settings.AdminKey, settings.ConnectionString,
             settings.Image, settings.KeyLoadBuildIdentity);

@@ -22,7 +22,8 @@ internal sealed class IsolatedHostOutputTests
         var report = await ReadAsync(fixture);
         await Assert.That(report.SchemaVersion).IsEqualTo(5);
         await Assert.That(report.Disposition).IsEqualTo("unsupportedTopology");
-        await Assert.That(report.Reason).IsEqualTo(IsolatedComparisonContract.Current.UnsupportedTopologies.Single().Reason);
+        await Assert.That(report.Reason).IsEqualTo(IsolatedComparisonContract.Current.UnsupportedTopologies.Single(topology =>
+                topology.Target == "Neo4j" && topology.NodeCounts.Contains(nodes)).Reason);
         await Assert.That(report.Report).IsNull();
         await Assert.That(report.Worker).IsEqualTo(new IsolatedComparisonWorker("Neo4j", nodes, Scenario.PointRead,
             "intensive-1k-c16", ComparisonExecutionIdentitySupport.Revision, 37070000000, 2,

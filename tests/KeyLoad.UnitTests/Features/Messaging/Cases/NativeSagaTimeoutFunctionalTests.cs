@@ -14,8 +14,18 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
     public async Task NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout()
     {
         var saga = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        _ = await fixture.DispatchAsync(saga.Hint, CancellationToken.None);
-        _ = await fixture.DispatchAsync(saga.Hint, CancellationToken.None);
+        using var deadline = new CancellationTokenSource(fixture.TestProfile.CompletionTimeout, TimeProvider.System);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        var remaining = saga.Deadline - TimeProvider.System.GetUtcNow();
+        while (remaining > TimeSpan.Zero)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(Math.Ceiling(remaining.TotalMilliseconds)),
+                TimeProvider.System, linked.Token);
+            remaining = saga.Deadline - TimeProvider.System.GetUtcNow();
+        }
+        _ = await fixture.DispatchAsync(saga.Hint, linked.Token);
+        _ = await fixture.DispatchAsync(saga.Hint, linked.Token);
 
         var expired = await WaitForTimedOutSagaAsync(saga.Lane, saga.Id);
         await Assert.That(expired.Revision).IsEqualTo(RevisionAfterTimeout);

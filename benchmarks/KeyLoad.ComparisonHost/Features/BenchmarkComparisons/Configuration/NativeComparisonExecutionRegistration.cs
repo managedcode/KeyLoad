@@ -11,6 +11,28 @@ internal static class NativeComparisonExecutionRegistration
 {
     internal const string ConfigurationPath = "Features/BenchmarkComparisons/Configuration/native-execution.json";
 
+    internal static IOptions<NativeComparisonSerializationOptions> ReadSerialization(IConfiguration configuration)
+    {
+        var options = new OptionsManager<NativeComparisonSerializationOptions>(
+            new OptionsFactory<NativeComparisonSerializationOptions>(
+                [new ConfigureFromConfigurationOptions<NativeComparisonSerializationOptions>(
+                    configuration.GetRequiredSection(NativeComparisonSerializationOptions.SectionName))], [],
+                [new NativeComparisonSerializationOptionsValidator()]));
+        _ = options.Value;
+        return options;
+    }
+
+    internal static IOptions<NativeComparisonDiagnosticOptions> ReadDiagnostics(IConfiguration configuration)
+    {
+        var options = new OptionsManager<NativeComparisonDiagnosticOptions>(
+            new OptionsFactory<NativeComparisonDiagnosticOptions>(
+                [new ConfigureFromConfigurationOptions<NativeComparisonDiagnosticOptions>(
+                    configuration.GetRequiredSection(NativeComparisonDiagnosticOptions.SectionName))], [],
+                [new NativeComparisonDiagnosticOptionsValidator()]));
+        _ = options.Value;
+        return options;
+    }
+
     internal static IOptions<NativeComparisonExecutionOptions> Read(IConfiguration configuration)
     {
         var options = new OptionsManager<NativeComparisonExecutionOptions>(

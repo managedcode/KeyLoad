@@ -9,6 +9,8 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed class KurrentTarget : IComparisonTarget
 {
     private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
+    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions;
+    private readonly KurrentSetupDiagnostics setupDiagnostics;
     private readonly string connectionString;
     private readonly HttpClient[] nodeHttpClients;
     private readonly string runId;
@@ -29,14 +31,18 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <param name="runId">Guid-formatted run identifier used to isolate benchmark stream names.</param>
     /// <param name="image">Pinned server image reference recorded in the target profile.</param>
     /// <param name="lifecycleOptions">The validated native lifecycle policy.</param>
+    /// <param name="diagnosticOptions">The centrally validated native diagnostic bounds.</param>
     /// <param name="topology">The one, two or three native members that cluster verification must establish.</param>
     public KurrentTarget(string connectionString, HttpClient[] nodeClients, string runId, string image,
-        ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+        ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions)
     {
         ArgumentNullException.ThrowIfNull(image);
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
         this.lifecycleOptions = lifecycleOptions;
+        this.diagnosticOptions = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
+        setupDiagnostics = new(diagnosticOptions);
         this.connectionString = connectionString;
         nodeHttpClients = nodeClients;
         this.runId = Guid.Parse(runId).ToString(KurrentConstants.GuidFormat);
@@ -101,7 +107,7 @@ public sealed class KurrentTarget : IComparisonTarget
         }
         catch (Exception failure)
         {
-            KurrentSetupDiagnostics.TryWrite(setupStage, failure);
+            setupDiagnostics.TryWrite(setupStage, failure);
             throw;
         }
     }
@@ -124,7 +130,7 @@ public sealed class KurrentTarget : IComparisonTarget
     public async ValueTask DisposeAsync()
     {
         using var cleanup = new KurrentCleanupOperation(streams: ownership?.SnapshotAcknowledged() ?? [], token: CancellationToken.None,
-            options: lifecycleOptions);
+            options: lifecycleOptions, diagnosticOptions: diagnosticOptions);
         try
         {
             await cleanup.DeleteAsync(writer);

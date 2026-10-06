@@ -1,18 +1,18 @@
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal static class KeyLoadOutboxDiagnosticLine
+internal sealed class KeyLoadOutboxDiagnosticLine(IOptions<NativeComparisonDiagnosticOptions> options)
 {
+    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
     private const int NoObservedItems = 0;
     private const int SingleItemCount = 1;
     private const int AdjacentElementOffset = 1;
     private const char SpaceSeparator = ' ';
     private const char EmptyIdentityMarker = '~';
 
-    private const int MaximumBytes = 512;
-    private const int MaximumConsumers = 64;
     private const string Prefix = "KeyLoadOutboxDiagnostic ";
     private const string InvalidStatus = "The outbox diagnostic status is invalid.";
     private const string InvalidConsumer = "The outbox diagnostic consumer is invalid.";
@@ -23,7 +23,7 @@ internal static class KeyLoadOutboxDiagnosticLine
     private static readonly CompositeFormat ParsedFormat = CompositeFormat.Parse(FormatTemplate);
     internal const string UnavailableLine = Prefix + "observation=unavailable";
 
-    internal static string Format(ComparisonCase failed, OutboxStatus status)
+    internal string Format(ComparisonCase failed, OutboxStatus status)
     {
         const int FirstElementIndex = 0;
         const int MissingItemIndex = -1;
@@ -32,7 +32,7 @@ internal static class KeyLoadOutboxDiagnosticLine
         ArgumentNullException.ThrowIfNull(failed);
         ArgumentNullException.ThrowIfNull(status);
         ValidateCase(failed);
-        if (status.Head is null || status.Consumers.IsDefault || status.Consumers.Length > MaximumConsumers || !ValidHead(status.Head))
+        if (status.Head is null || status.Consumers.IsDefault || status.Consumers.Length > settings.KeyLoadOutboxMaximumConsumers || !ValidHead(status.Head))
         {
             throw new ArgumentException(InvalidStatus, nameof(status));
         }
@@ -70,9 +70,9 @@ internal static class KeyLoadOutboxDiagnosticLine
         => head.Tail >= NoObservedItems && head.FirstAvailable >= SingleItemCount && head.FirstAvailable - AdjacentElementOffset <= head.Tail
             && head.StoredRecords == head.Tail - (head.FirstAvailable - AdjacentElementOffset) && head.StoredBytes >= NoObservedItems;
 
-    private static string Bound(string line)
+    private string Bound(string line)
         => line.All(character => character is >= SpaceSeparator and <= EmptyIdentityMarker)
-            && Encoding.ASCII.GetByteCount(line) <= MaximumBytes
+            && Encoding.ASCII.GetByteCount(line) <= settings.KeyLoadOutboxMaximumBytes
             ? line
             : throw new ArgumentException(InvalidOutput, nameof(line));
 }

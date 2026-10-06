@@ -54,13 +54,13 @@ internal static class PostgresNativeVectorIndex
 
     internal static async Task<IReadOnlyList<VectorNeighbor>> SearchAsync(NpgsqlDataSource source,
         VectorComparisonProfile profile, ReadOnlyMemory<float> query, int topK, VectorQueryMode mode,
-        CancellationToken cancellationToken)
+        int vectorComponentBuilderCapacity, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await ConfigureSearchAsync(connection, profile, cancellationToken).ConfigureAwait(false);
         await using var command = connection.CreateCommand();
         PostgresNativeVectorQueries.SelectSearch(command, profile.IndexKind, mode);
-        command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span));
+        command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span, vectorComponentBuilderCapacity));
         command.Parameters.AddWithValue(NpgsqlDbType.Integer, topK);
         var results = new List<VectorNeighbor>(topK);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
@@ -72,7 +72,7 @@ internal static class PostgresNativeVectorIndex
     }
 
     internal static async Task<string> ExplainAsync(NpgsqlDataSource source, VectorComparisonProfile profile,
-        ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken cancellationToken)
+        ReadOnlyMemory<float> query, VectorQueryMode mode, int vectorComponentBuilderCapacity, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await ConfigureSearchAsync(connection, profile, cancellationToken).ConfigureAwait(false);
@@ -84,7 +84,7 @@ internal static class PostgresNativeVectorIndex
         }
         await using var command = connection.CreateCommand();
         PostgresNativeVectorQueries.SelectExplain(command, profile.IndexKind, mode);
-        command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span));
+        command.Parameters.AddWithValue(PostgresNativeVectorStorage.VectorLiteral(query.Span, vectorComponentBuilderCapacity));
         var lines = new List<string>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
         while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))

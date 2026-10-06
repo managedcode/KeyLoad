@@ -9,9 +9,11 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns target construction and each client until its target takes ownership.</summary>
 internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
 {
+    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private readonly List<IComparisonTarget> targets = new(ComparisonHostConstants.TargetCount);
     private readonly List<HttpClient> unownedClients = new(ComparisonHostConstants.HttpClientCount);
     private IComparisonTarget? pendingTarget;
@@ -31,7 +33,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
         neo4jClient.DefaultRequestHeaders.Authorization = CreateNeo4jAuthorization(settings.Neo4jPassword);
 
-        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, lifecycleOptions, executionOptions, admissionOptions, clientOptions, translationOptions,
+        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, lifecycleOptions, executionOptions, diagnostics, admissionOptions, clientOptions, translationOptions,
             image: settings.ExecutionIdentity?.KeyLoadImage, peers: keyLoadClients);
         PublishPendingTarget(keyLoadClients);
         pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage, executionOptions, lifecycleOptions);
@@ -44,7 +46,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage, lifecycleOptions,
             management: rabbitManagementClient);
         PublishPendingTarget(rabbitManagementClient);
-        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions, executionOptions);
+        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions, executionOptions, diagnostics);
         PublishPendingTarget();
         pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage, lifecycleOptions, executionOptions);
         PublishPendingTarget(neo4jClient);

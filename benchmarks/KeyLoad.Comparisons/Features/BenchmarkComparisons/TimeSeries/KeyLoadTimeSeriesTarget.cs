@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
-internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, string? image = null)
+internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, string? image = null)
     : ITimeSeriesPersistentTarget
 {
     private const string PersistedRF3TimeSeriesToken = "Persisted RF3 time-series";
@@ -15,9 +15,9 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
     private const string TargetName = "KeyLoad TimeSeries";
     private const string StorageGuarantee = "RF3 process-durable storage; power-loss durability unqualified";
     private const string AcknowledgementGuarantee = "Quorum acknowledgement through the public .NET SDK";
-    private const int ReadLimit = 1_000;
     private const string ConfigureCommandPurpose = "configure-resource";
     private const string SeedCommandPurpose = "seed-samples";
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
     private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
 
     public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, PersistedRF3TimeSeriesToken,
@@ -75,7 +75,7 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
         }
 
         var request = new ReadSamplesRequest(workload.Partition, workload.SetName, workload.SeriesId,
-            range.From, range.Until, ReadLimit);
+            range.From, range.Until, execution.KeyLoadTimeSeriesReadLimit);
         var result = await client.ReadSamplesAsync(request, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess)
         {

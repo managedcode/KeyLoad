@@ -5,6 +5,8 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class KurrentSetupDiagnosticFormatterTests
 {
+    private readonly KurrentSetupDiagnostics diagnostics = new(UnitBenchmarkOptions.Diagnostics());
+
     private const string PayloadCanary = "USER_PAYLOAD_MUST_NOT_APPEAR";
     private const string PathCanary = "ENDPOINT_SECRET_MUST_NOT_APPEAR";
 
@@ -14,7 +16,7 @@ internal sealed class KurrentSetupDiagnosticFormatterTests
         var missingPath = Path.Combine(Path.GetTempPath(), PathCanary + Guid.NewGuid().ToString("N"));
         var failure = Capture(() => File.ReadAllText(missingPath));
 
-        var diagnostic = KurrentSetupDiagnostics.Format(KurrentSetupStage.MemberVerification, failure);
+        var diagnostic = diagnostics.Format(KurrentSetupStage.MemberVerification, failure);
 
         await Assert.That(diagnostic).Contains("stage=MemberVerification");
         await Assert.That(diagnostic).Contains("FileNotFoundException");
@@ -27,7 +29,7 @@ internal sealed class KurrentSetupDiagnosticFormatterTests
     {
         var failure = Capture(() => Divide(0));
 
-        var diagnostic = KurrentSetupDiagnostics.Format(KurrentSetupStage.NoStreamSemantics, failure);
+        var diagnostic = diagnostics.Format(KurrentSetupStage.NoStreamSemantics, failure);
 
         await Assert.That(diagnostic).Contains("DivideByZeroException");
         await Assert.That(diagnostic.Contains("Message", StringComparison.Ordinal)).IsFalse();
@@ -40,7 +42,7 @@ internal sealed class KurrentSetupDiagnosticFormatterTests
         await cancellation.CancelAsync();
         var failure = Capture(cancellation.Token.ThrowIfCancellationRequested);
 
-        var diagnostic = KurrentSetupDiagnostics.Format(KurrentSetupStage.CorpusSeeding, failure);
+        var diagnostic = diagnostics.Format(KurrentSetupStage.CorpusSeeding, failure);
 
         await Assert.That(diagnostic).Contains("OperationCanceledException");
         await Assert.That(diagnostic.Contains("Message", StringComparison.Ordinal)).IsFalse();
@@ -51,7 +53,7 @@ internal sealed class KurrentSetupDiagnosticFormatterTests
     {
         var failure = Capture(() => ThrowNested(12));
 
-        var diagnostic = KurrentSetupDiagnostics.Format(KurrentSetupStage.ReplicaCopy, failure);
+        var diagnostic = diagnostics.Format(KurrentSetupStage.ReplicaCopy, failure);
         var causes = diagnostic.Split("|cause[", StringSplitOptions.None).Skip(1).ToArray();
 
         await Assert.That(causes.Length).IsEqualTo(3);
@@ -68,7 +70,7 @@ internal sealed class KurrentSetupDiagnosticFormatterTests
     [Test]
     public async Task MetadataIdentifiersAreAsciiAndCappedAtSixtyFourCharacters()
     {
-        var identifier = KurrentSetupDiagnostics.SafeIdentifier("é\n" + new string('x', 80));
+        var identifier = diagnostics.SafeIdentifier("é\n" + new string('x', 80));
 
         await Assert.That(identifier.Length).IsEqualTo(64);
         await Assert.That(identifier.StartsWith("__", StringComparison.Ordinal)).IsTrue();

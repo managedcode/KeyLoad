@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.ClusterRouting;
+using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
@@ -18,13 +19,14 @@ internal static class AppHostControlOptionsRegistration
     private const string BenchmarkNodes = "Benchmarks:NodeCount";
     private const int SectionPresenceCount = 1;
 
-    internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
+    internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution,
+        IOptions<NativeCoverageExecutionOptions> coverage)
     {
         var options = new OptionsManager<AppHostControlOptions>(
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
                 value.RequestProbe = RequestCqrsProbeProfileSettingsReader.Read(configuration);
-                value.Tests = TestSuiteSettings.Read(configuration, execution);
+                value.Tests = TestSuiteSettings.Read(configuration, execution, coverage);
                 value.TwoRf3 = TwoRf3Profile.ValidateAndRead(configuration);
                 ProtocolCohortImages.ValidateMode(configuration);
                 value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);

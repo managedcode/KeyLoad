@@ -27,7 +27,9 @@ internal sealed class BlobRestorePageNormalizationTests
     private const long ReservedLength = 1;
 
     [Test]
-    public async Task AcBlob004NormalizationReopensAcrossMoreThanOneStateAndHeadPage()
+    [Arguments(128)]
+    [Arguments(1)]
+    public async Task AcBlob004NormalizationReopensAcrossMoreThanOneStateAndHeadPage(int pageSize)
     {
         var root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         Directory.CreateDirectory(root);
@@ -38,12 +40,21 @@ internal sealed class BlobRestorePageNormalizationTests
             var restoredPath = Path.Combine(root, RestoredDirectoryName);
             var restoredIdentity = ZoneTreeStore.Restore(backup.BackupPath, restoredPath, UnitExecutionOptions.StorageExecution(), targetIncarnation);
             using var restoredStore = new ZoneTreeStore(new(restoredPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var database = new DatabaseEngine(restoredStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var database = new DatabaseEngine(restoredStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { MetadataPageSize = pageSize }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
             var operations = new BlobStorageOperations(database);
 
             await Assert.That(restoredIdentity.Incarnation).IsEqualTo(targetIncarnation);
             await Assert.That(restoredIdentity.Incarnation).IsNotEqualTo(backup.SourceIncarnation);
+            var before = restoredStore.Position;
             operations.NormalizeRestoredStore();
+            if (pageSize == 1)
+            {
+                await Assert.That(restoredStore.Position - before > RecordCount).IsTrue();
+            }
+            else
+            {
+                await Assert.That(restoredStore.Position - before < RecordCount).IsTrue();
+            }
             await AssertBoundaryUploadsAreAborted(operations);
             await AssertQuotaCounters(restoredStore);
         }
@@ -53,6 +64,40 @@ internal sealed class BlobRestorePageNormalizationTests
             {
                 Directory.Delete(root, recursive: true);
             }
+        }
+    }
+
+    [Test]
+    public async Task ConfiguredRestoreByteBudgetPreservesFenceAndHealthyRetryCompletes()
+    {
+        var root = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var backup = CreateBackup(root);
+            var restoredPath = Path.Combine(root, RestoredDirectoryName);
+            var identity = ZoneTreeStore.Restore(backup.BackupPath, restoredPath,
+                UnitExecutionOptions.StorageExecution(), Guid.NewGuid());
+            using var store = new ZoneTreeStore(new(restoredPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            var bounded = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(new() { RestorePageBytes = 1 }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var rejected = Assert.ThrowsExactly<KeyLoadException>(() => new BlobStorageOperations(bounded).NormalizeRestoredStore());
+            await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            var fence = store.Read(view => view.ReadOwnedValue(BlobRestoreFence.MarkerKey));
+            await Assert.That(fence).IsNotNull();
+            var marker = NativeSerialization.Deserialize<BlobRestoreMarker>(fence!);
+            await Assert.That(marker.TargetIncarnation).IsEqualTo(identity.Incarnation);
+            await Assert.That(marker.Phase).IsEqualTo(BlobRestorePhase.States);
+            await Assert.That(marker.ExclusiveCursor).IsNull();
+            var healthy = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            var operations = new BlobStorageOperations(healthy);
+            operations.NormalizeRestoredStore();
+            await AssertBoundaryUploadsAreAborted(operations);
+            await AssertQuotaCounters(store);
+            await Assert.That(store.Read(view => view.ReadOwnedValue(BlobRestoreFence.MarkerKey))).IsNull();
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
         }
     }
 

@@ -40,6 +40,20 @@ internal static class RecoveryExecutionOptions
         return Options.Create(settings);
     }
 
+    internal static IOptions<BlobExecutionOptions> BlobExecution()
+    {
+        var settings = new BlobExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution(NativeClaimsExecutionOptions? configured = null)
+    {
+        var value = configured ?? new NativeClaimsExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution()
     {
         var settings = new TimeSeriesExecutionOptions();

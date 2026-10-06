@@ -2,6 +2,9 @@
   <PropertyGroup>
     <_KeyLoadCompileIdentityRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../..'))</_KeyLoadCompileIdentityRoot>
     <_KeyLoadCompileIdentityMaximumSources>5000</_KeyLoadCompileIdentityMaximumSources>
+    <_KeyLoadCompileIdentityProjectPrefix Condition="'$(MSBuildProjectName)' == 'KeyLoad.UnitTests' or '$(MSBuildProjectName)' == 'KeyLoad.RecoveryTests' or '$(MSBuildProjectName)' == 'KeyLoad.IntegrationTests'">tests/$(MSBuildProjectName)/</_KeyLoadCompileIdentityProjectPrefix>
+    <_KeyLoadCompileIdentityProjectPrefix Condition="'$(_KeyLoadCompileIdentityProjectPrefix)' == ''">src/$(MSBuildProjectName)/</_KeyLoadCompileIdentityProjectPrefix>
+    <_KeyLoadCompileIdentityProjectPath>$([System.IO.Path]::GetRelativePath('$(_KeyLoadCompileIdentityRoot)', '$(MSBuildProjectFullPath)').Replace('\','/'))</_KeyLoadCompileIdentityProjectPath>
   </PropertyGroup>
 
   <Target Name="CaptureKeyLoadFunctionalCompilationIdentity" BeforeTargets="CoreCompile"
@@ -31,7 +34,7 @@
         <Path>%(RepositoryPath)</Path>
       </_KeyLoadCompileIdentityUserCandidate>
       <_KeyLoadCompileIdentitySource Include="@(_KeyLoadCompileIdentityUserCandidate)"
-          Condition="$([System.String]::Copy('%(RepositoryPath)').StartsWith('tests/KeyLoad.UnitTests/'))">
+          Condition="$([System.String]::Copy('%(RepositoryPath)').StartsWith('$(_KeyLoadCompileIdentityProjectPrefix)'))">
         <Path>%(RepositoryPath)</Path>
       </_KeyLoadCompileIdentitySource>
       <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../global.json"><Path>global.json</Path></_KeyLoadCompileIdentityCentral>
@@ -39,18 +42,18 @@
       <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../Directory.Build.targets"><Path>Directory.Build.targets</Path></_KeyLoadCompileIdentityCentral>
       <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../Directory.Packages.props"><Path>Directory.Packages.props</Path></_KeyLoadCompileIdentityCentral>
       <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../KeyLoad.slnx"><Path>KeyLoad.slnx</Path></_KeyLoadCompileIdentityCentral>
-      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectFullPath)"><Path>tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj</Path></_KeyLoadCompileIdentityCentral>
-      <_KeyLoadCompileIdentityProducer Include="$(MSBuildProjectDirectory)/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets"><Path>tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets</Path></_KeyLoadCompileIdentityProducer>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectFullPath)"><Path>$(_KeyLoadCompileIdentityProjectPath)</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityProducer Include="$(_KeyLoadCompileIdentityRoot)/tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets"><Path>tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets</Path></_KeyLoadCompileIdentityProducer>
     </ItemGroup>
 
     <Error Condition="'@(_KeyLoadCompileIdentitySource-&gt;Count())' == '0' or '@(_KeyLoadCompileIdentitySource-&gt;Count())' &gt; '$(_KeyLoadCompileIdentityMaximumSources)'"
-           Text="The UnitTests compilation source inventory is absent or oversized." />
+           Text="The project compilation source inventory is absent or oversized." />
     <Error Condition="'@(_KeyLoadCompileIdentityCandidate-&gt;AnyHaveMetadataValue('PathTooLong','true'))' == 'true'"
-           Text="A UnitTests compilation source path exceeds the identity bound." />
+           Text="A project compilation source path exceeds the identity bound." />
     <Error Condition="'@(_KeyLoadCompileIdentityUserCandidate-&gt;Count())' != '@(_KeyLoadCompileIdentitySource-&gt;Count())'"
-           Text="A non-generated UnitTests compile source is outside the owned project tree or uses an unsupported path." />
+           Text="A non-generated project compile source is outside the owned project tree or uses an unsupported path." />
     <Error Condition="'@(_KeyLoadCompileIdentityCentral-&gt;Count())' != '6'"
-           Text="The UnitTests central compilation inputs are incomplete." />
+           Text="The project central compilation inputs are incomplete." />
 
     <GetFileHash Files="@(_KeyLoadCompileIdentitySource)" Algorithm="SHA256">
       <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityHashedSource" />
@@ -128,10 +131,10 @@
       </_KeyLoadCompileIdentityVerifiedProducer>
     </ItemGroup>
     <Error Condition="'@(_KeyLoadCompileIdentityHashedSource->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedSource->'%(Path)|%(CanonicalHash)', ';')'"
-           Text="UnitTests sources changed during compilation; the embedded identity is not authoritative." />
+           Text="Project sources changed during compilation; the embedded identity is not authoritative." />
     <Error Condition="'@(_KeyLoadCompileIdentityHashedCentral->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedCentral->'%(Path)|%(CanonicalHash)', ';')'"
-           Text="Central UnitTests build inputs changed during compilation; the embedded identity is not authoritative." />
+           Text="Central project build inputs changed during compilation; the embedded identity is not authoritative." />
     <Error Condition="'@(_KeyLoadCompileIdentityHashedProducer->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedProducer->'%(Path)|%(CanonicalHash)', ';')'"
-           Text="The UnitTests compile-identity producer changed during compilation; the embedded identity is not authoritative." />
+           Text="The project compile-identity producer changed during compilation; the embedded identity is not authoritative." />
   </Target>
 </Project>

@@ -22,7 +22,7 @@ internal sealed class ZoneTreePointCacheAuthorizationTests
     {
         using var fixture = new ZoneTreePointCacheFileFixture();
         var store = fixture.OpenStore(maxValueBytes: 4096);
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var root = new PrincipalRecord(RootId, RootTenant,
             [new ScopeGrant("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true };

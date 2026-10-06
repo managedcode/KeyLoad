@@ -6,7 +6,6 @@ namespace KeyLoad.Core.Features.InternalSerialization;
 internal static class CoreNativeClaims
 {
     internal const string Prefix = "KLT2.";
-    internal const int DefaultMaximumCharacters = 8_192;
     private const string InvalidToken = "The signed token is invalid.";
     private const char Separator = '.';
     private const char Padding = '=';

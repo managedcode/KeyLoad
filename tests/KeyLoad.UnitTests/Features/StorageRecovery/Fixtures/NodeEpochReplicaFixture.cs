@@ -32,7 +32,7 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
         Directory.CreateDirectory(root);
         CanonicalStore = Open(CanonicalDirectory);
         ReplicaStore = Open(ReplicaDirectory);
-        Database = new(CanonicalStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        Database = new(CanonicalStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         if (publishSnapshot)
         { SourceCut = CreateSourceMetadataAndPointer(); }
         else

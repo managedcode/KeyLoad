@@ -8,7 +8,11 @@ internal sealed class DocumentMutationImageReadTests
     private const string UpdatedJson = "{\"value\":\"updated\"}";
     private const int LargeValueLength = 65_536;
     private const long MetadataByteTolerance = 2_048;
-    private const long SingleMutationBorrowedPoints = 9;
+    private const long OriginalMutationBorrowedPoints = 6;
+    private const long PlacementAuthorityBorrowedPoints = 3;
+    private const long RetainedLegacyOutcomeAuthorityBorrowedPoints = 1;
+    private const long SingleMutationBorrowedPoints = OriginalMutationBorrowedPoints
+        + PlacementAuthorityBorrowedPoints + RetainedLegacyOutcomeAuthorityBorrowedPoints;
 
     [Test]
     public async Task AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead()

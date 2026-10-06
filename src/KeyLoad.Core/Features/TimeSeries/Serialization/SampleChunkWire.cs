@@ -15,7 +15,6 @@ internal static class SampleChunkWire
     internal const int MaximumRecords = 256;
     internal const int MaximumEncodedBytes = 8_388_608;
     internal const int ChecksumBytes = 32;
-    internal const int HashChunkBytes = 65_536;
     internal const string InvalidMaximum = "The sample chunk byte limit is outside its supported bounds.";
     internal const string InvalidContent = "The sample chunk contains invalid sample content.";
     internal const string InvalidShape = "The sample chunk payload is malformed.";

@@ -2213,7 +2213,7 @@
       "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json",
       "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     ],
-    "sourceStage": "canonical792_measurements_six_proofs_optional201_207_matrix_original_awaited_lifetimes_joined_REQ_SCALE_022_delivery_contract_frozen_actual_native_workflow_artifacts_and_Linux_cohort_pending",
+    "sourceStage": "canonical792_measurements_six_proofs_native_open_loop_matrix_terminalization_and_authenticated_GitHub_intake_joined_actual_Linux_workflow_cohort_pending",
     "qualification": {
       "allAcceptanceClosed": false,
       "nativeCohortQualified": false,
@@ -2243,7 +2243,17 @@
       "canonicalProofCells": 6,
       "workflowDelivery": "terminal_and_complete_cohort_modules_joined_actual_798_receipt_operation_cases_joined_native_execution_workflow_and_authenticated_intake_joins_pending",
       "currentSourceReceipt": "docs/implementation/functional-coverage-flow-image-source-2026-10-06-r4.json",
-      "nativeFatalRegression": "synthetic_OOM_case_removed_authentic_runtime_fatal_evidence_pending"
+      "nativeFatalRegression": "synthetic_OOM_case_removed_authentic_runtime_fatal_evidence_pending",
+      "delivery": {
+        "planActivated": true,
+        "canonicalCellCount": 798,
+        "parentProofNativeFlag": "omitted_from_outer_test_AppHost; inner_native_AppHost_owned_by_official_case_intent",
+        "terminalizer": "scripts/Features/BenchmarkComparisons/open-loop-worker-finalize.mjs",
+        "authenticatedIntake": "scripts/Features/BenchmarkComparisons/open-loop-github-collect.mjs",
+        "cohortAggregator": "scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate-cli.mjs",
+        "qualification": "source_implementation_joined; whole_operation_regressions_and_actual_authenticated_Linux_cohort_pending",
+        "runtimeQualified": false
+      }
     }
   },
   "KL-076": {
@@ -4879,15 +4889,15 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "full_Release_v8_and_formatter_v8_passed_fresh_prerequisite_2_passed_remaining_operational_sink_audit_and_full_runtime_gates_in_progress",
+    "sourceStage": "native_operational_options_and_consumer_joins_authored_full_unit_v24_completed_4047_pass_12_fail_fresh_current_source_build_format_and_remaining_regressions_pending",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Join final audited Mongo pool/deadline, KeyLoad/Redis paging and cancellation cadence policies, then repeat canonical build/format",
+      "Pass fresh final canonical build and formatter after all current native options and required regression joins",
+      "Resolve actual full Aspire unit failures without weakening options, identity, version, lifecycle or negative assertions",
       "Pass full Aspire-owned unit/scalar/recovery and native RF3 execution, retaining original reports",
-      "Pass required source-bound coverage and delivered-source Linux qualification",
-      "Review any actual runtime failures without weakening diagnostics, contracts or assertions"
+      "Pass required source-bound coverage and delivered-source Linux qualification"
     ],
     "canonicalFormatterPassed": false,
     "developmentEvidence": {
@@ -4929,7 +4939,7 @@
       "deliveredLinux": {
         "headSha": "660cd9b99d7ba9d1099381fbff6aaccdabecdcd4",
         "run": "https://github.com/managedcode/KeyLoad/actions/runs/37405439973",
-        "status": "analyzers_governance_build_format_passed_RF3_image_missing_LICENSE_and_site_evidence_admission_failed_prerequisite_failed_scalar_recovery_pending"
+        "status": "completed_failed_analyzers_governance_build_format_passed_RF3_image_missing_LICENSE_and_site_evidence_admission_failed_prerequisite_failed_normal_unit_skipped_scalar_aborted_134_after_30_minutes_recovery_aborted_134_no_complete_original_reports"
       },
       "qualification": "local development evidence; complete native runtime and delivered Linux qualification pending",
       "canonicalReleaseV6": {
@@ -4965,8 +4975,68 @@
         "report": "prerequisite-v8/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json"
       },
       "unitV8": {
-        "status": "actual_full_Aspire_run_in_progress_no_pass_claim",
-        "log": "keyload-general-options-aspire-unit-v8.log"
+        "nativeExit": 2,
+        "passed": 3834,
+        "failed": 25,
+        "skipped": 0,
+        "total": 3859,
+        "report": "unit-v8/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "log": "keyload-general-options-aspire-unit-v8.log",
+        "status": "actual_full_Aspire_native_run_completed_failed_remaining_failures_under_review"
+      },
+      "canonicalReleaseV9": {
+        "log": "keyload-general-options-full-release-v9.log",
+        "passed": false,
+        "warnings": 0,
+        "errors": 13,
+        "qualification": "preliminary changing source snapshot; named fixture keys, CLI binding ownership, executable size and late native capacity join repaired; final current-source build pending"
+      },
+      "canonicalReleaseV10": {
+        "log": "keyload-general-options-full-release-v10.log",
+        "passed": false,
+        "warnings": 0,
+        "errors": 10,
+        "qualification": "one AtomicCommandCommit executable-size diagnostic repaired after this run; nine concurrently authored SiteUnsupportedProducer fixture diagnostics remain outside the options implementation; final current-source solution build required"
+      },
+      "canonicalReleaseV23": {
+        "log": "keyload-general-options-full-release-v23.log",
+        "passed": false,
+        "warnings": 0,
+        "errors": 2,
+        "qualification": "CA1031 and CA2213 in newly joined RF3 fixture; repaired through original task settlement and direct diagnostics disposal; current-source full build pending"
+      },
+      "integrationPreviewV24": {
+        "log": "keyload-general-options-integration-preview-v24.log",
+        "passed": true,
+        "warnings": 0,
+        "errors": 0,
+        "qualification": "focused compilation with BuildProjectReferences=false; not final solution qualification"
+      },
+      "canonicalFormatV24": {
+        "log": "keyload-general-options-format-verify-v24.log",
+        "passed": false,
+        "qualification": "two native coverage assertion files needed whitespace formatting; later concurrent TryAdd repair superseded two stale diagnostics; final verify pending"
+      },
+      "unitV24": {
+        "nativeExit": 2,
+        "passed": 4047,
+        "failed": 12,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "total": 4059,
+        "durationMs": 651549.676,
+        "report": "unit-v24/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "log": "keyload-general-options-aspire-unit-v24.log",
+        "failureInventory": "keyload-general-options-unit-v24-failures.json",
+        "status": "actual_full_Aspire_native_run_completed_failed; Release Unit DLL predated paired JS test changes and one additional source file; exact current-source rebuild and rerun required"
+      },
+      "offlineLockOwnershipV24": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "report": "unit-v24/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "qualification": "actual native local duplicate/sync/async/early-close/failed-transfer regressions; not recovery, RF3 or power-loss qualification"
       }
     }
   }

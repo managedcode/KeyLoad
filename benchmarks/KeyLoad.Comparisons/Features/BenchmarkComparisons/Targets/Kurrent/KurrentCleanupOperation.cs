@@ -3,9 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupOperation(string[] streams, IOptions<ComparisonLifecycleOptions> options, CancellationToken token) : IDisposable
+internal sealed class KurrentCleanupOperation(string[] streams, IOptions<ComparisonLifecycleOptions> options,
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken token) : IDisposable
 {
-    private readonly KurrentCleanupState state = new(streams.Length, options);
+    private readonly KurrentCleanupState state = new(streams.Length, options, diagnosticOptions);
+    private readonly KurrentCleanupDiagnostics diagnostics = new(diagnosticOptions);
     private readonly KurrentCleanupCancellation cancellation = new(token: token, options: options);
     private readonly ComparisonLifecycleOptions settings = options.Value;
     private Task[] workers = [];
@@ -52,7 +54,7 @@ internal sealed class KurrentCleanupOperation(string[] streams, IOptions<Compari
         {
             try
             {
-                KurrentCleanupDiagnostics.WriteFinal(state.Snapshot());
+                diagnostics.WriteFinal(state.Snapshot());
             }
             finally
             {

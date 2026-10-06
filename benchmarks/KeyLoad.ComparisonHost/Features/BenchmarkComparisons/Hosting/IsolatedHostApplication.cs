@@ -42,6 +42,8 @@ internal static class IsolatedHostApplication
             }
             var policy = NativeComparisonExecutionRegistration.Read(configuration);
             return await RunNativeAsync(settings, policy,
+                NativeComparisonExecutionRegistration.ReadDiagnostics(configuration),
+                NativeComparisonExecutionRegistration.ReadSerialization(configuration),
                 NativeComparisonExecutionRegistration.ReadIsolatedAdmission(configuration),
                 NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
                 NativeComparisonExecutionRegistration.ReadClient(configuration),
@@ -63,13 +65,15 @@ internal static class IsolatedHostApplication
 
     private static async Task<int> RunNativeAsync(IsolatedHostSettings settings,
         Microsoft.Extensions.Options.IOptions<NativeComparisonExecutionOptions> policy,
+        Microsoft.Extensions.Options.IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
+        Microsoft.Extensions.Options.IOptions<NativeComparisonSerializationOptions> serializationOptions,
         Microsoft.Extensions.Options.IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
         Microsoft.Extensions.Options.IOptions<ComparisonLifecycleOptions> lifecycleOptions,
         Microsoft.Extensions.Options.IOptions<KeyLoad.Client.KeyLoadClientExecutionOptions> clientOptions,
         Microsoft.Extensions.Options.IOptions<KeyLoad.Client.QueryTranslationOptions> translationOptions,
         IsolatedOpenLoopSettings? openLoop, CancellationToken cancellationToken)
     {
-        await using var owner = new IsolatedHostTargetOwner(policy, admissionOptions, lifecycleOptions, clientOptions, translationOptions);
+        await using var owner = new IsolatedHostTargetOwner(policy, diagnosticOptions, serializationOptions, admissionOptions, lifecycleOptions, clientOptions, translationOptions);
         if (openLoop is not null)
         {
             return await IsolatedOpenLoopHostApplication.RunAsync(owner, settings, openLoop, cancellationToken);

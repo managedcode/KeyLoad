@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeVerifier
 {
-    private const string Path2Text = "prior";
+    private const string PriorInputsDirectoryName = "prior";
 
     private const string VerifiedImagesDirectory = "verified-images";
 
@@ -15,7 +15,7 @@ internal static class ServerNodeUpgradeVerifier
         {
             ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Canonical, executionOptions: options.NodeUpgrade);
             ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Replica, executionOptions: options.NodeUpgrade);
-            var oldCopies = Path.Combine(verifier, Path2Text);
+            var oldCopies = Path.Combine(verifier, PriorInputsDirectoryName);
             ServerNodeUpgradeAuthority.CopyInputs(receipt.OriginalSource, oldCopies, executionOptions: options.NodeUpgrade);
             var authority = ServerNodeUpgradeAuthority.VerifyCopies(oldCopies, options);
             return VerifyCopies(directory, verifier, receipt, options, authority, published);
@@ -25,7 +25,7 @@ internal static class ServerNodeUpgradeVerifier
         ServerRuntimeOptions options, ServerNodeUpgradeAuthority authority, bool published)
         => ServerNodeUpgradeStores.Run(verifier, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.BlobExecution, options.Core.NativeClaimsExecution, options.Core.TimeSeriesExecution);
             var configuration = ServerNodeUpgradeConfiguration.Replica(options, verifier);
             ServerNodeUpgradeCurrentState.VerifyPersisted(stores.Replica);
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);

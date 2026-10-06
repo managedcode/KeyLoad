@@ -6,5 +6,8 @@ namespace KeyLoad.Benchmarks.Hosting;
 internal static class BenchmarkApplication
 {
     internal static void Run(string[] arguments)
-        => BenchmarkComparisonRunner.Run(arguments);
+    {
+        _ = SerializationExecutionRegistration.Process.Value;
+        BenchmarkComparisonRunner.Run(arguments);
+    }
 }

@@ -72,6 +72,20 @@ internal static class UnitExecutionOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<KeyLoad.Core.BlobExecutionOptions> BlobExecution(KeyLoad.Core.BlobExecutionOptions? configured = null)
+    {
+        var value = configured ?? new KeyLoad.Core.BlobExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
+    internal static IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution(NativeClaimsExecutionOptions? configured = null)
+    {
+        var value = configured ?? new NativeClaimsExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<KeyLoad.Core.TimeSeriesExecutionOptions> TimeSeriesExecution(KeyLoad.Core.TimeSeriesExecutionOptions? configured = null)
     {
         var value = configured ?? new KeyLoad.Core.TimeSeriesExecutionOptions();

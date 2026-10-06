@@ -123,6 +123,8 @@ coverage_validate_environment() {
     : "${KEYLOAD_NATIVE_COVERAGE_SHUTDOWN_SECONDS:?}"
     : "${KEYLOAD_NATIVE_COVERAGE_SETTLEMENT_SECONDS:?}"
     : "${KEYLOAD_NATIVE_COVERAGE_MAX_REPORT_BYTES:?}"
+    : "${KEYLOAD_NATIVE_COVERAGE_STARTUP_POLL_MILLISECONDS:?}"
+    : "${KEYLOAD_NATIVE_COVERAGE_STARTUP_TIMEOUT_MILLISECONDS:?}"
 
     coverage_is_label "$KEYLOAD_NATIVE_COVERAGE_NODE" || coverage_fail
     coverage_is_label "$KEYLOAD_NATIVE_COVERAGE_SESSION" || coverage_fail
@@ -139,6 +141,10 @@ coverage_validate_environment() {
     coverage_is_decimal "$KEYLOAD_NATIVE_COVERAGE_SHUTDOWN_SECONDS" || coverage_fail
     coverage_is_decimal "$KEYLOAD_NATIVE_COVERAGE_SETTLEMENT_SECONDS" || coverage_fail
     coverage_is_decimal "$KEYLOAD_NATIVE_COVERAGE_MAX_REPORT_BYTES" || coverage_fail
+    coverage_is_decimal "$KEYLOAD_NATIVE_COVERAGE_STARTUP_POLL_MILLISECONDS" || coverage_fail
+    coverage_is_decimal "$KEYLOAD_NATIVE_COVERAGE_STARTUP_TIMEOUT_MILLISECONDS" || coverage_fail
+    [ "$KEYLOAD_NATIVE_COVERAGE_STARTUP_POLL_MILLISECONDS" -le "$KEYLOAD_NATIVE_COVERAGE_STARTUP_TIMEOUT_MILLISECONDS" ] || coverage_fail
+    [ "$KEYLOAD_NATIVE_COVERAGE_STARTUP_TIMEOUT_MILLISECONDS" -le "$((KEYLOAD_NATIVE_COVERAGE_SHUTDOWN_SECONDS * 1000))" ] || coverage_fail
     [ -d "$KEYLOAD_NATIVE_COVERAGE_OUTPUT_DIRECTORY" ] && [ ! -L "$KEYLOAD_NATIVE_COVERAGE_OUTPUT_DIRECTORY" ] || coverage_fail
     [ ! -e "$KEYLOAD_NATIVE_COVERAGE_OUTPUT_DIRECTORY/$coverage_report_name" ] || coverage_fail
     [ ! -e "$KEYLOAD_NATIVE_COVERAGE_OUTPUT_DIRECTORY/$coverage_receipt_name" ] || coverage_fail

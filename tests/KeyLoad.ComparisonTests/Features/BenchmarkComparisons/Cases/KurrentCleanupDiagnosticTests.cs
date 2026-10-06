@@ -6,6 +6,8 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class KurrentCleanupDiagnosticTests
 {
+    private readonly KurrentCleanupDiagnostics diagnostics = new(NativeExecutionPolicyFixture.ReadDiagnostics());
+
     private const string Secret = "credential-marker";
     private const int NativeDeadlineStatus = 4;
 
@@ -43,12 +45,12 @@ internal sealed class KurrentCleanupDiagnosticTests
     public async Task ClosedProjectionRetainsActualNumericStatusAndNeverNativeText()
     {
         var error = new AggregateException(new RpcException(new Status(StatusCode.DeadlineExceeded, Secret)));
-        var classified = KurrentCleanupDiagnostics.Classify(error);
+        var classified = diagnostics.Classify(error);
         var diagnostic = Failure(classified.Reason, classified.GrpcStatus);
-        var text = KurrentCleanupDiagnostics.Project(diagnostic);
+        var text = diagnostics.Project(diagnostic);
         using var document = JsonDocument.Parse(text);
         await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Length <= KurrentCleanupDiagnostics.MaximumCharacters).IsTrue();
+        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.KurrentCleanupMaximumCharacters).IsTrue();
         await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.GrpcStatus)).GetInt32()).IsEqualTo(NativeDeadlineStatus);
         await Assert.That(classified.Reason).IsEqualTo(KurrentCleanupFailureReason.NativeRpc);
     }
@@ -61,8 +63,8 @@ internal sealed class KurrentCleanupDiagnosticTests
             new InvalidOperationException(Secret), new RpcException(new Status((StatusCode)99, Secret)),
         })
         {
-            var classified = KurrentCleanupDiagnostics.Classify(error);
-            var text = KurrentCleanupDiagnostics.Project(Failure(classified.Reason, classified.GrpcStatus));
+            var classified = diagnostics.Classify(error);
+            var text = diagnostics.Project(Failure(classified.Reason, classified.GrpcStatus));
             using var document = JsonDocument.Parse(text);
             await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.GrpcStatus)).ValueKind).IsEqualTo(JsonValueKind.Null);
             await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();
@@ -72,9 +74,9 @@ internal sealed class KurrentCleanupDiagnosticTests
     [Test]
     public async Task CancellationAndUnknownAcknowledgementRemainFailureFacts()
     {
-        var classified = KurrentCleanupDiagnostics.Classify(new OperationCanceledException(Secret));
+        var classified = diagnostics.Classify(new OperationCanceledException(Secret));
         var diagnostic = Failure(classified.Reason, classified.GrpcStatus) with { CancellationRequested = true, DeadlineExpired = true };
-        using var document = JsonDocument.Parse(KurrentCleanupDiagnostics.Project(diagnostic));
+        using var document = JsonDocument.Parse(diagnostics.Project(diagnostic));
         await Assert.That(classified.Reason).IsEqualTo(KurrentCleanupFailureReason.Cancelled);
         await Assert.That(document.RootElement.GetProperty(nameof(KurrentCleanupDiagnostic.Outcome)).GetInt32()).IsEqualTo((int)KurrentCleanupOutcome.Failed);
         await Assert.That(diagnostic.Counts.IsComplete).IsFalse();
@@ -84,7 +86,7 @@ internal sealed class KurrentCleanupDiagnosticTests
     [Test]
     public async Task FirstNativeFailureStopsAdmissionAndSurvivesLaterDisposalFailure()
     {
-        var state = new KurrentCleanupState(3, NativeExecutionPolicyFixture.Lifecycle());
+        var state = new KurrentCleanupState(3, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics());
         var first = new RpcException(new Status(StatusCode.DeadlineExceeded, Secret));
         await Assert.That(state.TrySubmit(CancellationToken.None, out var index)).IsTrue();
         await Assert.That(index).IsEqualTo(0);
@@ -125,7 +127,7 @@ internal sealed class KurrentCleanupDiagnosticTests
             ArgumentException? failure = null;
             try
             {
-                _ = KurrentCleanupDiagnostics.Project(diagnostic);
+                _ = diagnostics.Project(diagnostic);
             }
             catch (ArgumentException error)
             {
@@ -143,7 +145,7 @@ internal sealed class KurrentCleanupDiagnosticTests
         ArgumentException? failure = null;
         try
         {
-            _ = KurrentCleanupDiagnostics.Project(Failure(KurrentCleanupFailureReason.Unknown, null) with { SchemaVersion = version });
+            _ = diagnostics.Project(Failure(KurrentCleanupFailureReason.Unknown, null) with { SchemaVersion = version });
         }
         catch (ArgumentException error)
         {

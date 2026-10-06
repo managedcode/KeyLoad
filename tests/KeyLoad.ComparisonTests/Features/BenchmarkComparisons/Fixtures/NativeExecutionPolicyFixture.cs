@@ -10,6 +10,36 @@ internal static class NativeExecutionPolicyFixture
     private const string ConfigurationFile = "native-execution.json";
     private static readonly Lazy<IOptions<NativeComparisonHarnessOptions>> harness = new(CreateHarness);
 
+    internal static IOptions<NativeComparisonSerializationOptions> ReadSerialization()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(AppContext.BaseDirectory, ConfigurationFile), optional: false)
+            .AddEnvironmentVariables().Build();
+        using var configurationLifetime = configuration as IDisposable;
+        var options = new OptionsManager<NativeComparisonSerializationOptions>(
+            new OptionsFactory<NativeComparisonSerializationOptions>(
+                [new ConfigureFromConfigurationOptions<NativeComparisonSerializationOptions>(
+                    configuration.GetRequiredSection(NativeComparisonSerializationOptions.SectionName))], [],
+                [new NativeComparisonSerializationOptionsValidator()]));
+        _ = options.Value;
+        return options;
+    }
+
+    internal static IOptions<NativeComparisonDiagnosticOptions> ReadDiagnostics()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(AppContext.BaseDirectory, ConfigurationFile), optional: false)
+            .AddEnvironmentVariables().Build();
+        using var configurationLifetime = configuration as IDisposable;
+        var options = new OptionsManager<NativeComparisonDiagnosticOptions>(
+            new OptionsFactory<NativeComparisonDiagnosticOptions>(
+                [new ConfigureFromConfigurationOptions<NativeComparisonDiagnosticOptions>(
+                    configuration.GetRequiredSection(NativeComparisonDiagnosticOptions.SectionName))], [],
+                [new NativeComparisonDiagnosticOptionsValidator()]));
+        _ = options.Value;
+        return options;
+    }
+
     internal static IOptions<NativeComparisonHarnessOptions> Harness() => harness.Value;
 
     private static OptionsManager<NativeComparisonHarnessOptions> CreateHarness()

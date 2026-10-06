@@ -33,9 +33,25 @@ internal static class OpenLoopPlanNodeProcess
         => RunOwnedAsync(executionOptions, CreateStartInfo(operation, outputPath), input, keepStandardInputOpen, ready,
             cancellationToken);
 
-    internal static async Task<OpenLoopPlanNodeResult> RunOwnedAsync(
+    internal static Task<OpenLoopPlanNodeResult> RunOwnedAsync(
         IOptions<OpenLoopPlanProcessOptions> executionOptions, ProcessStartInfo startInfo, string? input,
         bool keepStandardInputOpen, TaskCompletionSource? ready, CancellationToken cancellationToken)
+        => RunCoreAsync(executionOptions, startInfo, input, keepStandardInputOpen, ready,
+            observeSettlement: null, cancellationToken);
+
+    internal static Task<OpenLoopPlanNodeResult> RunObservedAsync(
+        IOptions<OpenLoopPlanProcessOptions> executionOptions, ProcessStartInfo startInfo,
+        OpenLoopCohortStageEvidence evidence, OpenLoopCohortStage stage, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(evidence);
+        return RunCoreAsync(executionOptions, startInfo, input: null, keepStandardInputOpen: false, ready: null,
+            actual => evidence.RecordAsync(stage, actual), cancellationToken);
+    }
+
+    private static async Task<OpenLoopPlanNodeResult> RunCoreAsync(
+        IOptions<OpenLoopPlanProcessOptions> executionOptions, ProcessStartInfo startInfo, string? input,
+        bool keepStandardInputOpen, TaskCompletionSource? ready,
+        Func<OpenLoopPlanStageObservation, Task>? observeSettlement, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(startInfo);
@@ -49,10 +65,39 @@ internal static class OpenLoopPlanNodeProcess
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(processOptions.ProcessTimeout);
         var failures = new List<Exception>();
-        var started = false;
+        var clock = Stopwatch.StartNew();
+        var outputCapture = new OpenLoopPlanOutputCapture(executionOptions);
+        var errorCapture = new OpenLoopPlanOutputCapture(executionOptions);
+        var started = StartProcess(process, failures);
         Task<string>? output = null;
         Task<string>? error = null;
-        OpenLoopPlanNodeResult? result = null;
+        if (started)
+        {
+            output = outputCapture.ReadAsync(process.StandardOutput, ready);
+            error = errorCapture.ReadAsync(process.StandardError, ready: null);
+            await ServerFailureObserver.ObserveAsync(
+                () => WriteAndWaitAsync(process, input, keepStandardInputOpen, deadline.Token), failures).ConfigureAwait(false);
+        }
+        var executionMilliseconds = clock.Elapsed.TotalMilliseconds;
+        var callerCancelledAtExecutionCompletion = cancellationToken.IsCancellationRequested;
+        var deadlineCancelledAtExecutionCompletion = deadline.IsCancellationRequested;
+        await OpenLoopPlanProcessSettlement.ObserveAsync(process, started, output, error, failures)
+            .ConfigureAwait(false);
+        var settlementMilliseconds = clock.Elapsed.TotalMilliseconds - executionMilliseconds;
+        await OpenLoopPlanProcessSettlement.RecordObservationAsync(process, started, output, error,
+            executionMilliseconds, settlementMilliseconds, callerCancelledAtExecutionCompletion,
+            deadlineCancelledAtExecutionCompletion, outputCapture, errorCapture, observeSettlement, failures)
+            .ConfigureAwait(false);
+        var result = await OpenLoopPlanProcessSettlement.CaptureResultAsync(process, started, output, error, failures)
+            .ConfigureAwait(false);
+        ServerFailureObserver.Observe(process.Dispose, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return result ?? throw new InvalidOperationException(FailureMessage);
+    }
+
+    private static bool StartProcess(Process process, List<Exception> failures)
+    {
+        var started = false;
         ServerFailureObserver.Observe(() =>
         {
             started = process.Start();
@@ -61,27 +106,7 @@ internal static class OpenLoopPlanNodeProcess
                 throw new InvalidOperationException(FailureMessage);
             }
         }, failures);
-        if (started)
-        {
-            output = ReadBoundedAsync(process.StandardOutput, processOptions, ready);
-            error = ReadBoundedAsync(process.StandardError, processOptions, ready: null);
-            await ServerFailureObserver.ObserveAsync(
-                () => WriteAndWaitAsync(process, input, keepStandardInputOpen, deadline.Token), failures).ConfigureAwait(false);
-        }
-        await OpenLoopPlanProcessSettlement.ObserveAsync(process, started, output, error, failures)
-            .ConfigureAwait(false);
-        if (started && failures.Count == 0)
-        {
-            async Task CaptureResultAsync()
-            {
-                var captured = await Task.WhenAll(output!, error!).ConfigureAwait(false);
-                result = new(process.ExitCode, captured[0], captured[1]);
-            }
-            await ServerFailureObserver.ObserveAsync(CaptureResultAsync, failures).ConfigureAwait(false);
-        }
-        ServerFailureObserver.Observe(process.Dispose, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw new InvalidOperationException(FailureMessage);
+        return started;
     }
 
     private static async Task WriteAndWaitAsync(Process process, string? input, bool keepStandardInputOpen,
@@ -127,41 +152,6 @@ internal static class OpenLoopPlanNodeProcess
             start.Environment[OpenLoopPlanNodeProgram.OutputEnvironment] = outputPath;
         }
         return start;
-    }
-
-    private static async Task<string> ReadBoundedAsync(StreamReader reader, OpenLoopPlanProcessOptions processOptions,
-        TaskCompletionSource? ready)
-    {
-        var output = new StringBuilder();
-        var buffer = new char[processOptions.StreamBufferCharacters];
-        var readyObserved = false;
-        var exceededBound = false;
-        while (true)
-        {
-            var count = await reader.ReadAsync(buffer.AsMemory()).ConfigureAwait(false);
-            if (count == 0)
-            {
-                if (exceededBound)
-                {
-                    throw new InvalidOperationException(FailureMessage);
-                }
-                return output.ToString();
-            }
-            if (output.Length + count > processOptions.MaximumOutputCharacters)
-            {
-                exceededBound = true;
-            }
-            else if (!exceededBound)
-            {
-                output.Append(buffer, 0, count);
-            }
-            if (ready is not null && !readyObserved
-                && output.ToString().Contains(OpenLoopPlanNodeProgram.ReadyMarker, StringComparison.Ordinal))
-            {
-                readyObserved = true;
-                ready.TrySetResult();
-            }
-        }
     }
 
     private static string FindRepositoryRoot()

@@ -14,6 +14,7 @@ public sealed class KeyLoadClientExecutionOptions
     private const int MinimumProblemBodyBytes = 1;
     private const int DefaultSqlInspectionBytes = 65_536;
     private const int DefaultSqlInspectionDepth = 32;
+    private const int DefaultSqlBudgetCheckInterval = 256;
 
     /// <summary>The maximum UTF-8 bytes retained when decoding one HTTP problem.</summary>
     public int MaximumProblemBodyBytes { get; set; } = DefaultProblemBodyBytes;
@@ -21,12 +22,15 @@ public sealed class KeyLoadClientExecutionOptions
     public int MaximumSqlInspectionBytes { get; set; } = DefaultSqlInspectionBytes;
     /// <summary>The nesting ceiling for conservative local SQL trivia inspection.</summary>
     public int MaximumSqlInspectionDepth { get; set; } = DefaultSqlInspectionDepth;
+    /// <summary>The SQL trivia work cadence and conservative pre-cancellation prefix width.</summary>
+    public int SqlBudgetCheckInterval { get; set; } = DefaultSqlBudgetCheckInterval;
 
     /// <summary>Checks the positive budget against its existing protocol ceiling.</summary>
     /// <returns>Whether the SDK can consume this budget.</returns>
     public bool IsValid() => MaximumProblemBodyBytes is >= MinimumProblemBodyBytes and <= DefaultProblemBodyBytes
         && MaximumSqlInspectionBytes is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionBytes
-        && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth;
+        && MaximumSqlInspectionDepth is >= MinimumProblemBodyBytes and <= DefaultSqlInspectionDepth
+        && SqlBudgetCheckInterval is >= MinimumProblemBodyBytes and <= DefaultSqlBudgetCheckInterval;
 
     /// <summary>Rejects invalid standalone composition before the client can send a request.</summary>
     public void Validate()

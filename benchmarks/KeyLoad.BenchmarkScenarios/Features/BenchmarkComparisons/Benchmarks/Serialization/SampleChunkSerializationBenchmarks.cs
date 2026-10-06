@@ -37,8 +37,9 @@ public class SampleChunkSerializationBenchmarks
         {
             throw new InvalidOperationException(SetupFailureMessage);
         }
+        var runtime = EmbeddedBenchmarkRuntimeRegistration.Read();
         var candidate = new SampleChunkBenchmarkState(SampleChunkBenchmarkCorpus.Create(RecordCount, Corpus),
-            EmbeddedBenchmarkRuntimeRegistration.Read().Database);
+            runtime.Database, runtime.TimeSeriesExecution);
         SampleChunkBenchmarkManifest.Write(RecordCount, Corpus, candidate, BenchmarkArtifactRegistration.ReadSampleChunk());
         state = candidate;
     }

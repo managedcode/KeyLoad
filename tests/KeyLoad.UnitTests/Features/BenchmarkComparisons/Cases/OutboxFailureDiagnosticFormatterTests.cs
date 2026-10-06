@@ -8,6 +8,8 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class OutboxFailureDiagnosticFormatterTests
 {
+    private readonly KeyLoadOutboxDiagnosticLine diagnostics = new(UnitBenchmarkOptions.Diagnostics());
+
     private const string ConsumerCanary = "CONSUMER_NAME_PRIVATE_CANARY";
     private const string DefinitionCanary = "DEFINITION_PRIVATE_CANARY";
     private const string PartitionKey = "partition";
@@ -22,7 +24,7 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
             Consumer("second-active", "second-definition", checkpoint: 5, released: false)
         ]);
 
-        var line = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.DocumentUpdate, 3), status);
+        var line = diagnostics.Format(Failed(Scenario.DocumentUpdate, 3), status);
 
         await Assert.That(line).Contains("scenario=DocumentUpdate");
         await Assert.That(line).Contains("repetition=3");
@@ -42,7 +44,7 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
     [Test]
     public async Task EmptyStatusUsesNoActiveConsumerSentinel()
     {
-        var line = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.QueueCycle, 0),
+        var line = diagnostics.Format(Failed(Scenario.QueueCycle, 0),
             Status(new OutboxHead(0, 1, 0, 0), ImmutableArray<ProjectionConsumerInfo>.Empty));
 
         await Assert.That(line).Contains("activeConsumerCount=0");
@@ -55,19 +57,19 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
         await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
         {
             await Task.CompletedTask;
-            _ = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.PointRead, 0),
+            _ = diagnostics.Format(Failed(Scenario.PointRead, 0),
                 Status(new OutboxHead(-1, 0, 0, 0), ImmutableArray<ProjectionConsumerInfo>.Empty));
         });
         await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
         {
             await Task.CompletedTask;
-            _ = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.PointRead, -1),
+            _ = diagnostics.Format(Failed(Scenario.PointRead, -1),
                 Status(new OutboxHead(0, 0, 0, 0), ImmutableArray<ProjectionConsumerInfo>.Empty));
         });
         await Assert.ThrowsExactlyAsync<ArgumentException>(async () =>
         {
             await Task.CompletedTask;
-            _ = KeyLoadOutboxDiagnosticLine.Format(Failed((Scenario)int.MaxValue, 0),
+            _ = diagnostics.Format(Failed((Scenario)int.MaxValue, 0),
                 Status(new OutboxHead(0, 0, 0, 0), ImmutableArray<ProjectionConsumerInfo>.Empty));
         });
     }
@@ -75,7 +77,7 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
     [Test]
     public async Task MaximumPublicCounterValuesStillFitTheOutputBudget()
     {
-        var line = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.DocumentDelete, int.MaxValue),
+        var line = diagnostics.Format(Failed(Scenario.DocumentDelete, int.MaxValue),
             Status(new OutboxHead(long.MaxValue, 1, long.MaxValue, long.MaxValue),
                 ImmutableArray<ProjectionConsumerInfo>.Empty));
 
@@ -91,7 +93,7 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
             var customCulture = (CultureInfo)CultureInfo.GetCultureInfo("fr-FR").Clone();
             customCulture.NumberFormat.NegativeSign = "NEG";
             CultureInfo.CurrentCulture = customCulture;
-            var line = KeyLoadOutboxDiagnosticLine.Format(Failed(Scenario.DocumentDelete, 12),
+            var line = diagnostics.Format(Failed(Scenario.DocumentDelete, 12),
                 Status(new OutboxHead(13, 4, 10, 8192), ImmutableArray<ProjectionConsumerInfo>.Empty));
 
             await Assert.That(line).Contains("repetition=12");
@@ -131,9 +133,9 @@ internal sealed class OutboxFailureDiagnosticFormatterTests
             .IsEqualTo("KeyLoadOutboxDiagnostic observation=unavailable");
     }
 
-    private static Task FormatAsync(ComparisonCase failed, OutboxStatus status)
+    private Task FormatAsync(ComparisonCase failed, OutboxStatus status)
     {
-        _ = KeyLoadOutboxDiagnosticLine.Format(failed, status);
+        _ = diagnostics.Format(failed, status);
         return Task.CompletedTask;
     }
 

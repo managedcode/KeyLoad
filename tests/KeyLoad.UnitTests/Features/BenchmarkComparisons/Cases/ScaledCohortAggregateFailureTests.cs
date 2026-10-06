@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 /// <summary>AC-SCALE-015: incomplete scale accounting remains an uploaded diagnostic, never a success receipt.</summary>
 internal sealed class ScaledCohortAggregateFailureTests
 {
-    private const string ModuleMode = "--input-type=module";
     private const string Script = "scaled-cohort-aggregate-cli.mjs";
     private const string InputArgument = "--input=";
     private const string PlanArgument = "--plan=";
@@ -24,7 +23,7 @@ internal sealed class ScaledCohortAggregateFailureTests
         var scaleOutput = directory.PathFor("scale-cohort");
         var token = TestContext.Current!.Execution.CancellationToken;
         var result = await IsolatedAggregateNodeProcess.RunAsync(
-            [ModuleMode, IsolatedAggregateNodeProcess.Module(Script), InputArgument + input,
+            [IsolatedAggregateNodeProcess.Module(Script), InputArgument + input,
                 PlanArgument + directory.PathFor("missing-plan.json"), ScalePlanArgument + directory.PathFor("missing-scale.json"),
                 "--vector-plan=" + directory.PathFor("missing-vectors.json"), CompositePlanArgument + directory.PathFor("missing-composite.json"), ProofRootArgument + directory.PathFor("proof"),
                 OutputArgument + directory.PathFor("aggregate"), ScaleOutputArgument + scaleOutput], token);

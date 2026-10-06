@@ -25,6 +25,7 @@ internal static class KeyLoadCliApplication
     {
         try
         {
+            _ = SerializationExecutionRegistration.Process.Value;
             if (args.Length == NoArguments)
             {
                 CliClientApi.Help();
@@ -84,7 +85,7 @@ internal static class KeyLoadCliApplication
     private static Task RunBackupRestoreAsync(CliCommand command, string[] args)
     {
         var options = CliStorageConfiguration.Read();
-        return CliBackupRestore.RunAsync(command, args, options.Storage, options.PointCache);
+        return CliBackupRestore.RunAsync(command, args, options.Storage, options.PointCache, options.Backup);
     }
 
     internal enum CliCommand

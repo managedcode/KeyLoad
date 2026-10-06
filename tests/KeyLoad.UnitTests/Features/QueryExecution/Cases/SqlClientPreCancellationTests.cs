@@ -1,5 +1,4 @@
 using KeyLoad.Client;
-using KeyLoad.Features.QueryExecution;
 using KeyLoad.UnitTests.Features.ClientApi;
 using Microsoft.AspNetCore.Http;
 
@@ -24,6 +23,7 @@ internal sealed class SqlClientPreCancellationTests
     private const char Padding = 'x';
     private const char Whitespace = ' ';
     private const int GapCharacters = 200;
+    private const int OriginalInspectionCharacters = 256;
 
     [Test]
     public async Task AC_SQLC_005_PreCancelledKnownReadsKeepOriginalSdkOutcomes()
@@ -31,11 +31,11 @@ internal sealed class SqlClientPreCancellationTests
         await VerifyAsync(Select, ErrorCode.Cancelled);
         await VerifyAsync(Explain, ErrorCode.Cancelled);
         await VerifyAsync(Call, ErrorCode.UnknownWriteOutcome);
-        var longPrefix = Open + new string(Padding, SqlTriviaReader.MaximumChunkCharacters) + Close + Select;
+        var longPrefix = Open + new string(Padding, OriginalInspectionCharacters) + Close + Select;
         await VerifyAsync(longPrefix, ErrorCode.UnknownWriteOutcome);
         var gap = new string(Whitespace, GapCharacters);
         await VerifyAsync(gap + ExplainKeyword + gap + Select, ErrorCode.UnknownWriteOutcome);
-        var edge = new string(Whitespace, SqlTriviaReader.MaximumChunkCharacters - SelectKeyword.Length);
+        var edge = new string(Whitespace, OriginalInspectionCharacters - SelectKeyword.Length);
         await VerifyAsync(edge + Select, ErrorCode.UnknownWriteOutcome);
         await VerifyAsync(edge[1..] + Select, ErrorCode.Cancelled);
     }

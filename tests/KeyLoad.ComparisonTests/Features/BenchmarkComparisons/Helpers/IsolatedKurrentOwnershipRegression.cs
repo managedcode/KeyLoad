@@ -64,7 +64,7 @@ internal static class IsolatedKurrentOwnershipRegression
         owner.PrivateDeletionStarted = true;
         owner.Clients.Remove(writer);
         // Transfer only ACKed candidate names and this original writer to the frozen production cleanup.
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), token);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), token);
         await IsolatedKurrentCleanupRegressionNative.RequireCompleteAsync(diagnostic, streams.Length);
         await IsolatedKurrentCleanupRegressionNative.RequireDeletedAsync(owner.CreateClient(), streams, token);
         var after = await IsolatedKurrentOwnershipRegressionNative.ReadOriginalAsync(owner.CreateClient(), owner.Foreign, token);
@@ -92,7 +92,7 @@ internal static class IsolatedKurrentOwnershipRegression
             owner.Clients.Clear();
             try
             {
-                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
             }
             finally
             {
@@ -104,7 +104,7 @@ internal static class IsolatedKurrentOwnershipRegression
         owner.Clients.Clear();
         try
         {
-            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
         }
         catch (Exception)
         {

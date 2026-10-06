@@ -9,6 +9,7 @@ internal static class CoreRuntimeOptionsRegistration
 {
     internal static void AddCoreRuntimeOptions(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton(SerializationExecutionRegistration.Process);
         services.AddOptions<DatabaseLimits>().Bind(configuration.GetSection(DatabaseLimits.SectionName))
             .Validate(options => options.IsValid(), DatabaseLimits.ValidationMessage).ValidateOnStart();
         services.AddOptions<DueWorkExecutionOptions>().Bind(configuration.GetSection(DueWorkExecutionOptions.SectionName))
@@ -33,6 +34,10 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ChangeFeedExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<TimeSeriesExecutionOptions>().Bind(configuration.GetSection(TimeSeriesExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), TimeSeriesExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<BlobExecutionOptions>().Bind(configuration.GetSection(BlobExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), BlobExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<NativeClaimsExecutionOptions>().Bind(configuration.GetSection(NativeClaimsExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), NativeClaimsExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<KeyLoad.Core.Features.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Features.Search.AnnSeedOptions.SectionName))

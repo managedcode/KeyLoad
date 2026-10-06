@@ -15,6 +15,7 @@ public sealed class ScaledStorageExecutionOptions
     private const long DefaultRequiredHeadroomBytes = 2_147_483_648;
     private const long DefaultQualificationCapacityBytes = 15_032_385_536;
     private const int DefaultMutableSegmentRecords = 1000;
+    private const int DefaultMutableSegmentSlackRecords = 2;
     private const int MaximumCancellationCheckInterval = 256;
     private const int MaximumRecordsPerValueChunk = 4096;
     private const int MaximumPreparationHours = 24;
@@ -31,6 +32,8 @@ public sealed class ScaledStorageExecutionOptions
     public long MinimumQualificationCapacityBytes { get; set; } = DefaultQualificationCapacityBytes;
     /// <summary>The minimum native mutable-segment capacity before corpus-based sizing.</summary>
     public int MinimumMutableSegmentRecords { get; set; } = DefaultMutableSegmentRecords;
+    /// <summary>The extra native mutable-segment records retained beyond the corpus.</summary>
+    public int MutableSegmentSlackRecords { get; set; } = DefaultMutableSegmentSlackRecords;
     /// <summary>The maximum operations between preparation cancellation checks.</summary>
     public int CancellationCheckInterval { get; set; } = MaximumCancellationCheckInterval;
     /// <summary>The bounded number of values retained in one contiguous allocation.</summary>
@@ -44,6 +47,7 @@ public sealed class ScaledStorageExecutionOptions
         && MaximumProcessBytes <= long.MaxValue - RequiredHeadroomBytes
         && MinimumQualificationCapacityBytes >= MaximumProcessBytes + RequiredHeadroomBytes
         && MinimumMutableSegmentRecords > MinimumPositiveBudget
+        && MutableSegmentSlackRecords > MinimumPositiveBudget && MutableSegmentSlackRecords <= DefaultMutableSegmentSlackRecords
         && CancellationCheckInterval > MinimumPositiveBudget && CancellationCheckInterval <= MaximumCancellationCheckInterval
         && RecordsPerValueChunk > MinimumPositiveBudget && RecordsPerValueChunk <= MaximumRecordsPerValueChunk;
 

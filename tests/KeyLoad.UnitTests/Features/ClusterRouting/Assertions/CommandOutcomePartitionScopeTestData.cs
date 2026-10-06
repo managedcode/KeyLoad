@@ -24,7 +24,7 @@ internal static class CommandOutcomePartitionScopeTestData
     internal static async Task AssertCorruptionWithoutMutationAsync(TestDatabase database,
         ReplicatedOperation operation)
     {
-        var scope = CommandOutcomePartitionIdentity.Resolve(operation);
+        var scope = CommandOutcomePartitionIdentity.Resolve(database.Database.NormalizeOperation(operation));
         var partition = scope.Partition ?? throw new InvalidOperationException("The corruption oracle requires a partition operation.");
         var outcomeKey = OutcomeStoreOracle.Key(database.Store, operation);
         var locatorKey = KeySpace.OutcomeLocatorV2(partition, operation.PrincipalId, operation.Id);

@@ -7,6 +7,28 @@ namespace KeyLoad.UnitTests;
 
 internal static class UnitBenchmarkOptions
 {
+    private const string SolutionFile = "KeyLoad.slnx";
+    private const string NativePolicyFile = "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json";
+    private const string MissingCheckout = "The native comparison policy requires the actual KeyLoad checkout.";
+
+    internal static IOptions<NativeComparisonDiagnosticOptions> Diagnostics()
+    {
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, SolutionFile)))
+        { root = root.Parent; }
+        if (root is null)
+        { throw new DirectoryNotFoundException(MissingCheckout); }
+        var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
+            .AddJsonFile(NativePolicyFile, optional: false).Build();
+        using var configurationLifetime = configuration as IDisposable;
+        var options = new OptionsManager<NativeComparisonDiagnosticOptions>(
+            new OptionsFactory<NativeComparisonDiagnosticOptions>(
+                [new ConfigureFromConfigurationOptions<NativeComparisonDiagnosticOptions>(
+                    configuration.GetRequiredSection(NativeComparisonDiagnosticOptions.SectionName))], [],
+                [new NativeComparisonDiagnosticOptionsValidator()]));
+        _ = options.Value;
+        return options;
+    }
     internal static IOptions<ComparisonLifecycleOptions> Lifecycle(ComparisonLifecycleOptions? configured = null)
     {
         var value = configured ?? new ComparisonLifecycleOptions();

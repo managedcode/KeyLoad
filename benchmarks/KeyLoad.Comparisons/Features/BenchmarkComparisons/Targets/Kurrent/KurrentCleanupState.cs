@@ -4,8 +4,10 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecycleOptions> options)
+internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecycleOptions> options,
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions)
 {
+    private readonly KurrentCleanupDiagnostics diagnostics = new(diagnosticOptions);
     private readonly ComparisonLifecycleOptions settings = options.Value;
     private readonly System.Threading.Lock gate = new();
     private readonly Stopwatch clock = Stopwatch.StartNew();
@@ -141,7 +143,7 @@ internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecy
         {
             firstFatal = KurrentCleanupFatalCause.Find(error);
         }
-        var classified = KurrentCleanupDiagnostics.Classify(error);
+        var classified = diagnostics.Classify(error);
         if (primary is not null)
         {
             if (failedStage == stage)

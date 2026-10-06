@@ -11,7 +11,6 @@ internal static class PostgresNativeVectorStorageValues
     internal const int FirstIndex = 0;
     internal const int SingleElementOffset = 1;
     internal const string PostgreSQLDidNotUpdateExactlyOne = "PostgreSQL did not update exactly one vector row.";
-    internal const int FloatTextCapacityEstimate = 14;
     internal const int VectorDelimiterCharacterCount = 2;
     internal const char VectorOpenCharacter = '[';
     internal const char ItemSeparatorCharacter = ',';

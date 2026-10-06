@@ -11,6 +11,7 @@ internal sealed class NativeComparisonAdapterPolicyTests
     [Arguments(nameof(NativeComparisonExecutionOptions.Neo4jSeedBatchSize), 256)]
     [Arguments(nameof(NativeComparisonExecutionOptions.Neo4jMaximumExecutionTimeSeconds), 30)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimeSeriesInitialReadCapacity), 16)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.KeyLoadTimeSeriesReadLimit), 1000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.ReportFileBufferBytes), 65_536)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleCancellationTimeoutMilliseconds), 2000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize), 16)]
@@ -126,6 +127,9 @@ internal sealed class NativeComparisonAdapterPolicyTests
                 break;
             case nameof(NativeComparisonExecutionOptions.TimeSeriesInitialReadCapacity):
                 options.TimeSeriesInitialReadCapacity = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.KeyLoadTimeSeriesReadLimit):
+                options.KeyLoadTimeSeriesReadLimit = value;
                 break;
             case nameof(NativeComparisonExecutionOptions.ReportFileBufferBytes):
                 options.ReportFileBufferBytes = value;

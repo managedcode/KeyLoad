@@ -7,12 +7,12 @@ internal static class KurrentOwnedStreamCleanup
 {
     internal static async Task<KurrentCleanupDiagnostic> RunAsync(KurrentDBClient? writer, string[] streams,
         IReadOnlyList<KurrentDBClient> nativeClients, IReadOnlyList<HttpClient> httpClients, IOptions<ComparisonLifecycleOptions> options,
-        CancellationToken token)
+        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(streams);
         ArgumentNullException.ThrowIfNull(nativeClients);
         ArgumentNullException.ThrowIfNull(httpClients);
-        using var cleanup = new KurrentCleanupOperation(streams: streams, token: token, options: options);
+        using var cleanup = new KurrentCleanupOperation(streams: streams, token: token, options: options, diagnosticOptions: diagnosticOptions);
         KurrentCleanupDiagnostic diagnostic;
         try
         {

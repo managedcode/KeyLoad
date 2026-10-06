@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
@@ -7,8 +8,10 @@ namespace KeyLoad.AppHost.Features.ClusterReplication;
 internal sealed record ClusterDeploymentOptions
 {
     private const int DefaultSnapshotThreshold = 1024;
+    private const int DefaultFirstPublicPort = 5101;
     private const int MinimumPositive = 1;
     private const string SnapshotKey = "KeyLoad:SnapshotThreshold";
+    internal const string FirstPublicPortKey = "KeyLoad:FirstPublicPort";
     private const string LoggingKey = "Logging:LogLevel:Default";
     private const string DefaultLoggingLevel = "Warning";
     internal const string ReplaySection = "KeyLoad:ReplayAdmission";
@@ -16,7 +19,11 @@ internal sealed record ClusterDeploymentOptions
     internal const string ValidationMessage = "Cluster deployment settings are invalid.";
     [ConfigurationKeyName(SnapshotKey)]
     public int SnapshotThreshold { get; init; } = DefaultSnapshotThreshold;
+    [ConfigurationKeyName(FirstPublicPortKey)]
+    public int FirstPublicPort { get; init; } = DefaultFirstPublicPort;
     [ConfigurationKeyName(LoggingKey)]
     public string LoggingLevel { get; init; } = DefaultLoggingLevel;
-    internal bool IsValid() => SnapshotThreshold >= MinimumPositive && !string.IsNullOrWhiteSpace(LoggingLevel);
+    internal bool IsValid() => SnapshotThreshold >= MinimumPositive && !string.IsNullOrWhiteSpace(LoggingLevel)
+        && FirstPublicPort >= MinimumPositive
+        && FirstPublicPort <= IPEndPoint.MaxPort - VoterCount + MinimumPositive;
 }

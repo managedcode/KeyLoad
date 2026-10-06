@@ -15,6 +15,47 @@ locking/error contract, database formats, stopped upgrade protocol and required
 Linux qualification remain unchanged. Rollback removes the private-control
 consumer after owned AppHost resources and readers have joined, never user data.
 
+TASK-OFFLINE-OWNER-UNLOCK-001 clarifies the existing REQ-STORAGE-025/026 and
+AC-EPOCH-012 owner-release contract. A manually acquired native `flock` requires
+explicit `LOCK_UN` after owned IO and before descriptor close, including a failed
+pre-transfer open. A descriptor supplied to ordinary FileStream does not enter
+the .NET native file-open lock initialization path. An outstanding dup/fork
+reference must not extend the finished owner's lock lifetime. Preserve no-follow,
+nonblocking open/lock, close-on-exec, regular type/identity, original error mapping
+and stopped-operation authority. No retries, broader shares or lock bypass.
+
+Root owns the frozen native ABI/lifecycle join. The IO worker owns
+OfflineRegularFile, OfflineNativeHandleLease and a cohesive retained FileStream
+lifecycle owner under StorageRecovery/Lifecycle. Sync and async disposal must
+flush before unlock, close the original descriptor even after flush/unlock
+failure, retain every original failure and be idempotent under the existing
+ownership rules. Caller paths retain the same FileStream API and lifecycle joins;
+no stream may unlock while its owned operation is still running. Do not bind
+internal System.Native exports or alter private SafeFileHandle runtime fields.
+
+The retained derived FileStream joins one actual disposal task. The pinned BCL
+routes its base DisposeAsync through virtual Dispose(bool); a private per-owner
+AsyncLocal reentry scope must allow only this lexical base cleanup to close the
+borrowed view directly, avoiding a wait on its own completion. Restore that scope
+in finally. External disposal still joins the actual owner task. Publish that task
+under a short native Lock and start IO after releasing it. A closed original
+descriptor invalidates the borrowed view before any buffered cleanup. The
+pre-transfer lease directly disposes its retained field in exception-preserving
+finally; transferred ownership belongs solely to the stream. These private joins
+preserve the public FileStream API and every native failure/closure assertion.
+
+The deterministic genuine-kernel regression duplicates the original retained
+descriptor, proves a live owner excludes an independent opener, disposes the
+owner, then requires immediate reopen while the duplicate is still alive. Test
+sync/async disposal, shared/exclusive locks, original bytes and actual handle
+closure; close every test-owned descriptor/library in finally. Public POSIX
+interfaces suffice and no unsafe managed fork, delay, simulated provider or
+production test-only capacity getter is allowed. This proves owner-release
+semantics; it does not identify an original failed run's pre-exec process. The
+existing C1 phases/original failures remain unchanged and must pass with all
+Aspire normal/scalar/recovery/RF3 and final build/format/Linux gates. Rollback
+reverts the coherent lifecycle repair without changing data or lock authority.
+
 ## Problem and supported formats
 
 The exact previous executable at

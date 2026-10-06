@@ -7,6 +7,9 @@ import { localImage, messages } from './local-image-contracts.mjs';
 const expectedCopies = Object.freeze([
   Object.freeze({ sources: Object.freeze(['global.json', 'Directory.Build.props', 'Directory.Build.targets',
     'Directory.Packages.props', 'NuGet.Config', '.editorconfig', 'LICENSE']), destination: './' }),
+  Object.freeze({ sources: Object.freeze(['KeyLoad.slnx']), destination: './KeyLoad.slnx' }),
+  Object.freeze({ sources: Object.freeze(['tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets']),
+    destination: './tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets' }),
   Object.freeze({ sources: Object.freeze(['src/']), destination: './src/' }),
 ]);
 const expectedRuntimeCopy = 'COPY --from=build /app/publish/ ./';

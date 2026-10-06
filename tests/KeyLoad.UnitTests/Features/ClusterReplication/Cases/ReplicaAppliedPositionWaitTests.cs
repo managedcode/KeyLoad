@@ -67,7 +67,8 @@ internal sealed class ReplicaAppliedPositionWaitTests
         var activeWait = fixture.Materializer.WaitForAppliedPositionChangeAsync(0, linked.Token);
         await canceled.CancelAsync();
 
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => canceledWait);
+        var cancellation = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => canceledWait);
+        await Assert.That(cancellation!.CancellationToken).IsEqualTo(canceled.Token);
         fixture.Commit(FirstDocument);
 
         await Assert.That(await activeWait.WaitAsync(linked.Token)).IsEqualTo(1L);

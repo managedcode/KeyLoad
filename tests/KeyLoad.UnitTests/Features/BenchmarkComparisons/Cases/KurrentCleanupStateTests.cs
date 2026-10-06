@@ -10,7 +10,7 @@ internal sealed class KurrentCleanupStateTests
     [Test]
     public async Task NestedFatalCleanupOverridesPrimaryWhileDiagnosticKeepsFirstFailure()
     {
-        var state = new KurrentCleanupState(2, UnitBenchmarkOptions.Lifecycle());
+        var state = new KurrentCleanupState(2, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         var primary = new RpcException(new Status(StatusCode.DeadlineExceeded, "primary"));
         await Assert.That(state.TrySubmit(CancellationToken.None, out var index)).IsTrue();
         await Assert.That(index).IsEqualTo(0);
@@ -35,7 +35,7 @@ internal sealed class KurrentCleanupStateTests
     [Test]
     public async Task FirstFatalInAggregateOrderWinsOverSiblingAndLaterFailure()
     {
-        var state = new KurrentCleanupState(0, UnitBenchmarkOptions.Lifecycle());
+        var state = new KurrentCleanupState(0, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         var firstFatal = RuntimeOversizeFailure();
         var siblingFatal = RuntimeOversizeFailure();
         var laterFatal = RuntimeOversizeFailure();
@@ -53,7 +53,7 @@ internal sealed class KurrentCleanupStateTests
     [Test]
     public async Task FirstOrdinaryFailureAndDiagnosticsSurviveLaterDisposalFailure()
     {
-        var state = new KurrentCleanupState(1, UnitBenchmarkOptions.Lifecycle());
+        var state = new KurrentCleanupState(1, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         var first = new IOException("first ordinary cleanup failure");
         state.RecordFailure(first, KurrentCleanupStage.HttpDispose);
         state.RecordFailure(new InvalidOperationException("later ordinary disposal failure"),
@@ -70,7 +70,7 @@ internal sealed class KurrentCleanupStateTests
     [Test]
     public async Task FatalBeyondSixteenOrdinaryInnerLinksStillOverridesEarlierPrimary()
     {
-        var state = new KurrentCleanupState(1, UnitBenchmarkOptions.Lifecycle());
+        var state = new KurrentCleanupState(1, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         var primary = new RpcException(new Status(StatusCode.DeadlineExceeded, "primary"));
         state.RecordFailure(primary, KurrentCleanupStage.Delete);
         var fatal = RuntimeOversizeFailure();
@@ -92,7 +92,7 @@ internal sealed class KurrentCleanupStateTests
     [Test]
     public async Task EmptyCleanupRemainsSuccessful()
     {
-        var state = new KurrentCleanupState(0, UnitBenchmarkOptions.Lifecycle());
+        var state = new KurrentCleanupState(0, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         state.FinishDeletion(cancellationRequested: false, expired: false);
 
         var diagnostic = state.Snapshot();

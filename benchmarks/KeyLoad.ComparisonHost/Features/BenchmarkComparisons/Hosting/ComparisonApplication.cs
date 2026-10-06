@@ -14,6 +14,7 @@ internal static class ComparisonApplication
     internal static async Task<int> RunAsync(string[] arguments)
     {
         ArgumentNullException.ThrowIfNull(arguments);
+        _ = SerializationExecutionRegistration.Process.Value;
         using var configuration = new ConfigurationManager();
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);
         configuration.AddEnvironmentVariables();
@@ -21,6 +22,7 @@ internal static class ComparisonApplication
         var startup = ComparisonStartupRegistration.Read(configuration).Value;
         var executionOptions = NativeComparisonExecutionRegistration.Read(configuration);
         var owner = new ComparisonTargetOwner(executionOptions,
+            NativeComparisonExecutionRegistration.ReadDiagnostics(configuration),
             NativeComparisonExecutionRegistration.ReadIsolatedAdmission(configuration),
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
             NativeComparisonExecutionRegistration.ReadClient(configuration),

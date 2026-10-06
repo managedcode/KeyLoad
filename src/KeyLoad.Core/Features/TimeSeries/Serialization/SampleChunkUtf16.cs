@@ -6,28 +6,30 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkUtf16
 {
-    internal static void Write(string value, Span<byte> destination, ReadExecutionBudget budget)
+    private const int MinimumCodeUnitStride = 1;
+
+    internal static void Write(string value, Span<byte> destination, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
-        const int CharacterCancellationStrideMask = 0x7FFF;
-        const int CancellationStrideStart = 0;
+
+        var checkStride = Math.Max(MinimumCodeUnitStride, hashChunkBytes / sizeof(char));
+        var nextCheck = IndexInitialValue;
 
         for (var index = IndexInitialValue; index < value.Length; index++)
         {
-            if ((index & CharacterCancellationStrideMask) == CancellationStrideStart)
+            if (index >= nextCheck)
             {
                 budget.Check();
+                nextCheck = index + checkStride;
             }
             BinaryPrimitives.WriteUInt16LittleEndian(destination.Slice(index * sizeof(char)), value[index]);
         }
         budget.Check();
     }
 
-    internal static string Decode(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget)
+    internal static string Decode(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
-        const int CharacterCancellationStrideMask = 0x7FFF;
-        const int CancellationStrideStart = 0;
         const int StartEmptyCount = 0;
 
         if (BitConverter.IsLittleEndian)
@@ -36,13 +38,16 @@ internal static class SampleChunkUtf16
         }
         var characterCount = bytes.Length / sizeof(char);
         var characters = ArrayPool<char>.Shared.Rent(characterCount);
+        var checkStride = Math.Max(MinimumCodeUnitStride, hashChunkBytes / sizeof(char));
+        var nextCheck = IndexInitialValue;
         try
         {
             for (var index = IndexInitialValue; index < characterCount; index++)
             {
-                if ((index & CharacterCancellationStrideMask) == CancellationStrideStart)
+                if (index >= nextCheck)
                 {
                     budget.Check();
+                    nextCheck = index + checkStride;
                 }
                 characters[index] = (char)BinaryPrimitives.ReadUInt16LittleEndian(bytes[(index * sizeof(char))..]);
             }
@@ -54,22 +59,23 @@ internal static class SampleChunkUtf16
         }
     }
 
-    internal static void ValidateFallback(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget)
+    internal static void ValidateFallback(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int EmptyTextBytes = 0;
         const int OddByteLengthMask = 1;
         const int OffsetInitialValue = 0;
-        const int ByteCancellationStrideMask = 0xFFFF;
-        const int CancellationStrideStart = 0;
 
         SampleChunkWire.Require(bytes.Length > EmptyTextBytes && (bytes.Length & OddByteLengthMask) == EmptyTextBytes);
         var pendingHigh = false;
         var hasUnpaired = false;
+        var checkStride = Math.Max(MinimumCodeUnitStride, hashChunkBytes / sizeof(char)) * sizeof(char);
+        var nextCheck = OffsetInitialValue;
         for (var offset = OffsetInitialValue; offset < bytes.Length; offset += sizeof(char))
         {
-            if ((offset & ByteCancellationStrideMask) == CancellationStrideStart)
+            if (offset >= nextCheck)
             {
                 budget.Check();
+                nextCheck = offset + checkStride;
             }
             var current = (char)BinaryPrimitives.ReadUInt16LittleEndian(bytes[offset..]);
             if (pendingHigh)

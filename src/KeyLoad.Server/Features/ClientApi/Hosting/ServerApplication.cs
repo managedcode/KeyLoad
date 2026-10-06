@@ -7,6 +7,7 @@ internal static class ServerApplication
 {
     internal static async Task RunAsync(string[] args)
     {
+        _ = SerializationExecutionRegistration.Process.Value;
         if (await ServerOfflineFormatUpgrade.TryRunAsync(args).ConfigureAwait(false))
         {
             return;

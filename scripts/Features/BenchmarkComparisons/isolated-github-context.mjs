@@ -4,6 +4,8 @@ import { validateCohort } from './aggregate-contracts.mjs';
 import { GH, isolatedEvidenceJobName, isolatedJobName, positive, requireGitHub } from './isolated-github-contract.mjs';
 import { createScaledPlans } from './scaled-isolated-plan.mjs';
 import { createVectorPlans } from './vector-isolated-plan.mjs';
+import { createOpenLoopPlan } from './open-loop-isolated-plan.mjs';
+import { createDatabaseMatrices } from './isolated-preflight.mjs';
 
 export function createGitHubContext(environment, platform) {
   const native = createRunContext(environment, platform);
@@ -12,11 +14,12 @@ export function createGitHubContext(environment, platform) {
   const plan = validateIsolatedPlan(createIsolatedPlan());
   const scaledPlans = createScaledPlans();
   const vectorPlans = createVectorPlans();
+  const openLoopPlan = createOpenLoopPlan();
   const cohort = { sourceRevision: native.sourceSha, runId: Number(native.runId), attempt: Number(native.runAttempt),
     repository: native.repository, ref: native.ref, workflow: GH.workflow, profile: plan.profile };
   requireGitHub(positive(cohort.runId) && positive(cohort.attempt));
   validateCohort(cohort, plan.profile);
-  return { native, cohort, plan, scaledPlans, vectorPlans };
+  return { native, cohort, plan, scaledPlans, vectorPlans, openLoopPlan };
 }
 
 export function requireCurrentJobName(name, context) {
@@ -24,7 +27,12 @@ export function requireCurrentJobName(name, context) {
   if (name === GH.imageJob) return name;
   const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells),
     ...context.vectorPlans.flatMap(profile => profile.cells)];
-  requireGitHub(cells.some(cell => isolatedEvidenceJobName(cell) === name || isolatedJobName(cell, true) === name));
+  const matrices = createDatabaseMatrices(context.plan, context.scaledPlans, context.vectorPlans,
+    context.openLoopPlan);
+  const openLoopRows = Object.values(matrices).flatMap(matrix => matrix.include)
+    .filter(row => row.openLoopRate !== undefined);
+  requireGitHub(cells.some(cell => isolatedEvidenceJobName(cell) === name || isolatedJobName(cell, true) === name)
+    || openLoopRows.some(row => row.jobName === name));
   return name;
 }
 

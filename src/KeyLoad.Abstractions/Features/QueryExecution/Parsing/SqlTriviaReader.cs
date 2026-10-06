@@ -3,14 +3,17 @@ namespace KeyLoad.Features.QueryExecution;
 /// <summary>Consumes only SQL trivia in allocation-free bounded chunks.</summary>
 internal static class SqlTriviaReader
 {
-    internal const int MaximumChunkCharacters = 256;
     private const int LastPairCharacterOffset = 1;
     private const int NoOpenBlocks = 0;
     private const int InitialBlockDepth = 1;
 
-    internal static SqlTriviaStatus Read(ReadOnlySpan<char> sql, ref int offset, ref SqlTriviaState state, int maximumDepth)
+    internal static SqlTriviaStatus Read(ReadOnlySpan<char> sql, ref int offset, ref SqlTriviaState state,
+        int maximumDepth, int maximumChunkCharacters)
     {
-        var end = offset + Math.Min(sql.Length - offset, MaximumChunkCharacters);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumChunkCharacters);
+        // Comment delimiters are indivisible grammar atoms, even at a configured single-character cadence.
+        var width = Math.Max(maximumChunkCharacters, SqlTriviaSyntax.PairCharacters);
+        var end = offset + Math.Min(sql.Length - offset, width);
         while (offset < end)
         {
             if (state.InLineComment)

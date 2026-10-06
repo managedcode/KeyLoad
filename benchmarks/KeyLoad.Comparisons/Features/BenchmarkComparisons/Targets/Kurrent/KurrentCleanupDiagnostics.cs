@@ -1,18 +1,19 @@
 using System.Text.Json;
 using Grpc.Core;
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal static class KurrentCleanupDiagnostics
+internal sealed class KurrentCleanupDiagnostics(IOptions<NativeComparisonDiagnosticOptions> options)
 {
+    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
     private const int NoObservedItems = 0;
 
-    internal const int MaximumCharacters = 4096;
-    private const int MaximumExceptionDepth = 8, MaximumGrpcStatus = 16;
+    private const int MaximumGrpcStatus = 16;
     private const string Prefix = "KurrentCleanupDiagnostic ";
 
-    internal static string Project(KurrentCleanupDiagnostic diagnostic)
+    internal string Project(KurrentCleanupDiagnostic diagnostic)
     {
         const int ComparisonSchemaVersion = 1;
         const int NoItems = 0;
@@ -26,7 +27,7 @@ internal static class KurrentCleanupDiagnostics
             throw new ArgumentException(KurrentConstants.CleanupInvalidDiagnostic, nameof(diagnostic));
         }
         var json = JsonSerializer.Serialize(diagnostic);
-        return json.Length + Prefix.Length + Environment.NewLine.Length <= MaximumCharacters
+        return json.Length + Prefix.Length + Environment.NewLine.Length <= settings.KurrentCleanupMaximumCharacters
             ? json : throw new InvalidOperationException(KurrentConstants.CleanupInvalidDiagnostic);
     }
 
@@ -35,12 +36,12 @@ internal static class KurrentCleanupDiagnostics
             || diagnostic.Stage != KurrentCleanupStage.Complete || diagnostic.Reason != KurrentCleanupFailureReason.None
             || diagnostic.GrpcStatus is not null || diagnostic.LaterDisposalFailures != NoObservedItems || diagnostic.DeadlineExpired);
 
-    internal static (KurrentCleanupFailureReason Reason, int? GrpcStatus) Classify(Exception error)
+    internal (KurrentCleanupFailureReason Reason, int? GrpcStatus) Classify(Exception error)
     {
         const int RootTraversalDepth = 0;
 
         ArgumentNullException.ThrowIfNull(error);
-        for (var depth = RootTraversalDepth; depth < MaximumExceptionDepth; depth++)
+        for (var depth = RootTraversalDepth; depth < settings.KurrentCleanupMaximumExceptionDepth; depth++)
         {
             if (error is RpcException rpc)
             {
@@ -72,7 +73,7 @@ internal static class KurrentCleanupDiagnostics
         return status is >= NoObservedItems and <= MaximumGrpcStatus ? status : null;
     }
 
-    internal static void WriteFinal(KurrentCleanupDiagnostic diagnostic)
+    internal void WriteFinal(KurrentCleanupDiagnostic diagnostic)
     {
         try
         {

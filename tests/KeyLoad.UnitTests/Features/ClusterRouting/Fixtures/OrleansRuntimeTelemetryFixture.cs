@@ -69,7 +69,9 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
     }
 
     internal Activity? StartParentActivity()
-        => parentSource.StartActivity(OrleansRuntimeTelemetryTokens.ParentOperation);
+        // Each real caller owns an independent trace even when TUnit has an ambient activity.
+        => parentSource.StartActivity(OrleansRuntimeTelemetryTokens.ParentOperation,
+            ActivityKind.Internal, parentId: string.Empty);
 
     internal void Flush()
     {

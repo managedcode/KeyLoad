@@ -11,13 +11,35 @@ flowchart LR
     Plan[Closed cell plan] --> Linux[Separate Linux VM per cell]
     Linux --> Native[Selected native engine group]
     Native --> Oracle[Shared corpus and correctness]
-    Oracle --> Raw[Per worker schema4 raw JSON]
+    Oracle --> Raw[Current worker schema5 raw JSON]
     Raw --> Join[Authenticated complete aggregation]
     Join --> Site[Independent site qualification and generation]
     Site --> Pages[Freshness recheck and Pages deployment]
 ```
 
 Worker selection/envelope/paths/intensity are frozen in acceptance. Preserve every raw nested report and real per-host runtime facts. The aggregate owns only complete plan/provenance/raw hash references, never synthesized one-host measurements or summed independent throughput/percentiles. All actual worker jobs/artifacts must succeed and correspond to the same run/attempt/source/plan/corpus/options. Unsupported capability is explicit and null; failed proof/timeout is failed evidence. Missing data never becomes a zero or invented winner.
+
+### Canonical worker-version admission repair, 2026-10-06
+
+REQ-BC-055 / AC-ISO-006 require the worker envelope version from the supplied,
+validated isolated contract. The current contract and native worker reader already
+declare worker schema5; aggregate schema4 is a separate unchanged format.
+`aggregate-validation.mjs` must admit exactly `contract.workerSchemaVersion`,
+and `finalize-worker.mjs` must obtain failed-envelope versions from that same
+canonical contract. Active `IsolatedAggregateData` acceptance inputs derive their
+version from the actual current contract. Immutable historical contracts retain
+worker schema4 and admit only4; preserve original bytes, hashes, aggregate/site
+versions, complete-cell and authenticated provenance gates. No numeric version
+fallback or mixed-cohort admission is permitted.
+
+Root owns this minimal join and its current/historical negative regression review.
+The existing VectorAggregateAdmission, IsolatedAggregate and failed-worker cases
+must preserve null unsupported reports and reject wrong versions, fake metrics,
+unknown reasons and mixed profiles. ScaledCohortReceipt must inspect all four
+retained Neo4j/node2 CRUD cells rather than treating their target/node pair as a
+unique cell identity. Source repair, canonical build/format, Aspire tests and
+exact-source Linux evidence remain separate stages. Rollback reverts this
+consumer join; it never rewrites historical evidence or changes native formats.
 
 ## Fixed-membership benchmark topology contract
 

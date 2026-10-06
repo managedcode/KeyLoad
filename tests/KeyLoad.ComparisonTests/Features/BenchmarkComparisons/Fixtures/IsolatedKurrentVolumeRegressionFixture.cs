@@ -63,7 +63,7 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
         cleanupAttempted = true;
         var cleanupWriter = writer;
         writer = null;
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
         await IsolatedKurrentVolumeRegressionNative.RequireCompleteAsync(diagnostic, ownership.Capacity);
         writer = null;
         var reader = CreateClient();
@@ -117,7 +117,7 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
     {
         var ownedClients = clients.ToArray();
         clients.Clear();
-        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
     }
 
     private async Task SeedOneAsync(int index, CancellationToken token)

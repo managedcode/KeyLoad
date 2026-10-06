@@ -8,6 +8,7 @@ namespace KeyLoad.Server;
 internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, int maximumDepth,
     IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
 {
+    private readonly int budgetCheckInterval = queryOptions.Value.SqlBudgetCheckInterval;
     private int offset;
     private int tokens;
 
@@ -53,7 +54,7 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, in
         do
         {
             cancellationToken.ThrowIfCancellationRequested();
-            status = SqlTriviaReader.Read(sql.AsSpan(), ref offset, ref state, maximumDepth);
+            status = SqlTriviaReader.Read(sql.AsSpan(), ref offset, ref state, maximumDepth, budgetCheckInterval);
         }
         while (status == SqlTriviaStatus.More);
         cancellationToken.ThrowIfCancellationRequested();
@@ -68,7 +69,7 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, in
         const int EmptyOffsetSqlOperationSyntaxCheckInterval = 0;
 
         offset++;
-        if (offset % queryOptions.Value.SqlBudgetCheckInterval == EmptyOffsetSqlOperationSyntaxCheckInterval)
+        if (offset % budgetCheckInterval == EmptyOffsetSqlOperationSyntaxCheckInterval)
         { cancellationToken.ThrowIfCancellationRequested(); }
     }
 

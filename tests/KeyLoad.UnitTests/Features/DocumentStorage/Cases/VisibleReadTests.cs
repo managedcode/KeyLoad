@@ -19,7 +19,7 @@ internal sealed class VisibleReadTests
         db.Commit(new PutDocument(Collection, "a", "{}"), new PutDocument(Collection, "b", "{}"));
         var acceptedBytes = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, Collection), 1)
             .Records.Sum(record => (long)record.Key.Length + record.Value.Length));
-        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = acceptedBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = acceptedBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limited.Limits), cancellationToken: TestContext.Current!.Execution.CancellationToken);
         var visited = new List<string>();
         var position = db.Store.Position;

@@ -5,8 +5,8 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedRedisResources
 {
-    private const string NodeNamesResultText = "replica1";
-    private const string NodeNamesNodeNamesResultText = "replica2";
+    private const string FirstReplicaName = "replica1";
+    private const string SecondReplicaName = "replica2";
 
     private const string Target = "Redis";
     private const string Version = "8.4.0";
@@ -26,7 +26,7 @@ internal static class IsolatedRedisResources
     private const string InvalidSelection = "IsolatedRedisSelectionInvalid";
     private const string MissingBootstrap = "IsolatedRedisBootstrapMissing";
     private const int SecretBytes = 32;
-    private static readonly string[] NodeNames = [Primary, NodeNamesResultText, NodeNamesNodeNamesResultText];
+    private static readonly string[] NodeNames = [Primary, FirstReplicaName, SecondReplicaName];
 
     internal static void Add(IsolatedResourceContext context)
     {

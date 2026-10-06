@@ -16,6 +16,7 @@ internal static class CrashHostApplication
         const int ArgsLengthValidationBoundary = 3;
         const int RunAsyncArgsComponentIndex = 3;
 
+        _ = SerializationExecutionRegistration.Process.Value;
         if (await EpochPriorSourceProbe.TryRunAsync(args) || await EpochUpgradeCrashScenario.TryRunAsync(args))
         {
             return;

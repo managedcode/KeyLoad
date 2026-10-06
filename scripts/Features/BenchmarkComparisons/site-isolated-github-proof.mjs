@@ -5,6 +5,7 @@ import { readJson } from './isolated-github-files.mjs';
 import { GH, hashPattern, positive } from './isolated-github-contract.mjs';
 import { flattenPages, projectJob, uniqueNamed, validateArtifact } from './isolated-github-validation.mjs';
 import { selectCompletedEvidence } from './isolated-github-selection.mjs';
+import { createOpenLoopPlan } from './open-loop-isolated-plan.mjs';
 import { validateAggregateProof } from './aggregate-proof.mjs';
 import { readPreparedImages } from './image-bundle-read.mjs';
 import { requireWorkerImages } from './isolated-github-images.mjs';
@@ -26,7 +27,9 @@ export async function proveSiteIsolatedEvidence({ input, selection, source, mode
   }
   const artifacts = flattenPages(await readJson(path.join(input, SITE_GH.metadata, 'artifacts-pages.json')), 'artifacts');
   const plans = siteEvidencePlans(run.head_sha);
-  const selected = selectCompletedEvidence({ run, jobs, artifacts }, { cohort }, plans[0],
+  const selectionContext = SITE_GH.legacySources.includes(run.head_sha) ? { cohort }
+    : { cohort, openLoopPlan: createOpenLoopPlan() };
+  const selected = selectCompletedEvidence({ run, jobs, artifacts }, selectionContext, plans[0],
     plans.slice(1).filter(plan => plan.profile.startsWith('scaled-')), plans.slice(1).filter(plan => plan.profile.startsWith('vector-')));
   const projectedArtifacts = {};
   for (const name of ['suite', 'provider']) {

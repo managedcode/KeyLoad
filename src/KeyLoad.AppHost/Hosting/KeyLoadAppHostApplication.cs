@@ -14,6 +14,7 @@ internal static class KeyLoadAppHostApplication
         const string MessageText = "An explicitly selected test suite must not be empty.";
         const int EmptyResult = 0;
 
+        _ = SerializationExecutionRegistration.Process.Value;
         if (ClusterProfileUpgradeCommand.Dispatch(args) is { } upgradeExitCode)
         { return upgradeExitCode; }
         var requested = TestSuiteSettings.Requested(args);

@@ -28,7 +28,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         eventIds = new(capacity, StringComparer.Ordinal);
     }
 
-    internal void Add(SampleRecord? record, int index, ReadExecutionBudget budget)
+    internal void Add(SampleRecord? record, int index, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyIndex = 0;
         const int RecordCountSingleItemCount = 1;
@@ -39,7 +39,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         seriesId ??= ownedRecord.SeriesId;
         if (index == EmptyIndex)
         {
-            seriesBytes = SampleChunkText.FramedSize(seriesId, budget);
+            seriesBytes = SampleChunkText.FramedSize(seriesId, budget, textCancellationCheckIntervalCodeUnits);
         }
         if (!string.Equals(seriesId, ownedRecord.SeriesId, StringComparison.Ordinal))
         {
@@ -50,7 +50,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
             throw Errors.Fail(ErrorCode.Validation, DuplicateEvent);
         }
         ValidateOrdering(ownedRecord, index);
-        AddColumnLengths(ownedRecord, index, budget);
+        AddColumnLengths(ownedRecord, index, budget, textCancellationCheckIntervalCodeUnits);
         CheckCumulativeSize(index + RecordCountSingleItemCount);
         previousTicks = sample.Timestamp.UtcTicks;
         previousSequence = ownedRecord.Sequence;
@@ -115,7 +115,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         }
     }
 
-    private void AddColumnLengths(SampleRecord record, int index, ReadExecutionBudget budget)
+    private void AddColumnLengths(SampleRecord record, int index, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyIndex = 0;
         const int FirstValueRecordIndex = 0;
@@ -128,13 +128,13 @@ internal sealed class SampleChunkEncodingPlanBuilder
         ticksBytes += SampleChunkWire.VarUIntLength(tickValue);
         sequencesBytes += SampleChunkWire.VarUIntLength(sequenceValue);
         valuesBytes += SampleChunkWire.VarUIntLength(index == FirstValueRecordIndex ? valueBits : valueBits ^ previousValueBits);
-        eventIdsBytes += SampleChunkText.FramedSize(record.Sample.EventId, budget);
+        eventIdsBytes += SampleChunkText.FramedSize(record.Sample.EventId, budget, textCancellationCheckIntervalCodeUnits);
         if (!tagIndexes.TryGetValue(record.TagsJson, out var tagIndex))
         {
             tagIndex = tagDictionary.Count;
             tagIndexes.Add(record.TagsJson, tagIndex);
             tagDictionary.Add(record.TagsJson);
-            tagTextAndIndexesBytes += SampleChunkText.FramedSize(record.TagsJson, budget);
+            tagTextAndIndexesBytes += SampleChunkText.FramedSize(record.TagsJson, budget, textCancellationCheckIntervalCodeUnits);
         }
         tagTextAndIndexesBytes += SampleChunkWire.VarUIntLength((ulong)tagIndex);
     }

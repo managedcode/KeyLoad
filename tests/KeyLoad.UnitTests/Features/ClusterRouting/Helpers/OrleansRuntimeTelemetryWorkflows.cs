@@ -67,7 +67,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
                 OrleansRuntimeTelemetryTokens.Collection, documentId))));
         var reply = await ReadAsync(fixture, principal, requestId, signed);
         await Assert.That(reply.Payload.IsEmpty).IsFalse();
-        var record = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentRecord;
+        var record = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
         await Assert.That(record).IsNotNull();
         await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
         await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);

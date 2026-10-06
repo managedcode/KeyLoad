@@ -11,24 +11,30 @@ internal static class CliStorageConfiguration
 {
     private const string EnvironmentPrefix = "KEYLOAD_STORAGE__";
     private const string CacheEnvironmentPrefix = "KEYLOAD_POINTCACHE__";
-    internal static CliStorageRuntimeOptions Read() => new(
-        Bind<ZoneTreeStorageExecutionOptions>(EnvironmentPrefix,
+    private const string BackupEnvironmentPrefix = "KEYLOAD_BACKUP__";
+    internal static CliStorageRuntimeOptions Read()
+    {
+        _ = SerializationExecutionRegistration.Process.Value;
+        return new(
+        Bind(EnvironmentPrefix, static () => new ZoneTreeStorageExecutionOptions(),
             options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
-        Bind<ZoneTreePointCacheExecutionOptions>(CacheEnvironmentPrefix,
-            options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage));
+        Bind(CacheEnvironmentPrefix, static () => new ZoneTreePointCacheExecutionOptions(),
+            options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage),
+        Bind(BackupEnvironmentPrefix, static () => new CliBackupExecutionOptions(),
+            options => options.IsValid(), CliBackupExecutionOptions.ValidationMessage));
+    }
 
-    private static OptionsManager<T> Bind<T>(string prefix, Func<T, bool> validate, string message)
+    private static OptionsManager<T> Bind<T>(string prefix, Func<T> initialize, Func<T, bool> validate, string message)
         where T : class
     {
         var configuration = new ConfigurationBuilder().AddEnvironmentVariables(prefix).Build();
         using var configurationLifetime = configuration as IDisposable;
-        var options = new OptionsManager<T>(new OptionsFactory<T>(
-            [new ConfigureFromConfigurationOptions<T>(configuration)], [],
-            [new ValidateOptions<T>(Options.DefaultName, validate, message)]));
+        var options = new OptionsManager<T>(new CliStorageOptionsFactory<T>(initialize, configuration, validate, message));
         _ = options.Value;
         return options;
     }
 }
 
 internal sealed record CliStorageRuntimeOptions(
-    IOptions<ZoneTreeStorageExecutionOptions> Storage, IOptions<ZoneTreePointCacheExecutionOptions> PointCache);
+    IOptions<ZoneTreeStorageExecutionOptions> Storage, IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
+    IOptions<CliBackupExecutionOptions> Backup);

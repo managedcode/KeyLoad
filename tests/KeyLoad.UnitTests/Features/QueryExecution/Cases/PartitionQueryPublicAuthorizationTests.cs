@@ -33,10 +33,16 @@ internal sealed class PartitionQueryPublicAuthorizationTests
     {
         using var ownerFixture = new PartitionQueryPublicTestSupport();
         ownerFixture.AddRows(ownerFixture.First, new PartitionQueryPublicSeed("one", 1, "visible"));
+        var ownerPosition = ownerFixture.Position;
         var wrongOwner = PartitionQueryPublicTestSupport.ExpectedOwner with { PhysicalShardId = Guid.NewGuid() };
         var ownerFailure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(ownerFixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions("root", PartitionQueryPublicTestSupport.Request([ownerFixture.First]), wrongOwner));
         await Assert.That(ownerFailure.Code).IsEqualTo(ErrorCode.OwnershipLost);
+        await Assert.That(ownerFixture.Position).IsEqualTo(ownerPosition);
+        var ownerRetry = new QueryEngine(ownerFixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(
+            "root", PartitionQueryPublicTestSupport.Request([ownerFixture.First]), PartitionQueryPublicTestSupport.ExpectedOwner);
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(ownerRetry, ownerFixture.First, "one", "visible");
+        await Assert.That(ownerFixture.Position).IsEqualTo(ownerPosition);
 
         using var protectedFixture = new PartitionQueryPublicTestSupport(fields:
             [new(RestrictedPath, "sensitive")]);
@@ -44,9 +50,18 @@ internal sealed class PartitionQueryPublicAuthorizationTests
         protectedFixture.AddReader(protectedFixture.First);
         var query = PartitionQueryPublicTestSupport.Query(1) with { Order = [new(RestrictedPath, false)] };
         var request = PartitionQueryPublicTestSupport.Request([protectedFixture.First], 1, query);
+        var fieldPosition = protectedFixture.Position;
         var fieldFailure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions(PartitionQueryPublicTestSupport.ReaderId, request,
                 PartitionQueryPublicTestSupport.ExpectedOwner));
         await Assert.That(fieldFailure.Code).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(protectedFixture.Position).IsEqualTo(fieldPosition);
+        var healthyQuery = PartitionQueryPublicTestSupport.Request([protectedFixture.First], 1);
+        var healthy = new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())
+            .QueryPartitions(PartitionQueryPublicTestSupport.ReaderId, healthyQuery, PartitionQueryPublicTestSupport.ExpectedOwner);
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, protectedFixture.First, "secret-row", "visible");
+        await Assert.That(healthy.Rows[0].Row.Redacted).IsTrue();
+        await Assert.That(healthy.Rows[0].Row.RedactedFields!.Value.SequenceEqual([RestrictedPath])).IsTrue();
+        await Assert.That(protectedFixture.Position).IsEqualTo(fieldPosition);
     }
 }

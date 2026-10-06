@@ -95,7 +95,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         var core = runtimeOptions.Core;
         RuntimeJournalStorePreparation.Prepare(stores, core.RuntimeJournal, runtimeOptions.StorageExecution);
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
-            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.TimeSeriesExecution);
+            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);
         return database;
     }

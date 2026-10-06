@@ -2,19 +2,31 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensiveDigestWriter : IDisposable
 {
-    private const int Utf8StackBytes = 256;
     private const byte AbsentMarker = 0;
     private const byte PresentMarker = 1;
     private static readonly Encoding Utf8 = new UTF8Encoding(false, true);
-    private readonly IncrementalHash hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+    private readonly int utf8StackBytes;
+    private readonly IncrementalHash hash;
 
     internal TimeSeriesIntensiveDigestWriter(string domain)
+        : this(domain, SerializationExecutionRegistration.Process)
     {
+    }
+
+    internal TimeSeriesIntensiveDigestWriter(string domain, IOptions<SerializationExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(domain);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var configured = executionOptions.Value;
+        configured.Validate();
+        utf8StackBytes = configured.DigestUtf8StackBytes;
+        hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Field(TimeSeriesIntensiveFrameLabels.Domain, domain);
         Field(TimeSeriesIntensiveFrameLabels.Version, TimeSeriesIntensiveFrameLabels.VersionValue);
     }
@@ -26,9 +38,9 @@ internal sealed class TimeSeriesIntensiveDigestWriter : IDisposable
         ArgumentNullException.ThrowIfNull(value);
         var length = Utf8.GetByteCount(value);
         Count(length);
-        if (length <= Utf8StackBytes)
+        if (length <= utf8StackBytes)
         {
-            Span<byte> buffer = stackalloc byte[Utf8StackBytes];
+            Span<byte> buffer = stackalloc byte[utf8StackBytes];
             var written = Utf8.GetBytes(value, buffer);
             hash.AppendData(buffer[..written]);
             return;

@@ -592,7 +592,7 @@ flowchart LR
     Selection --> Aspire[Selected native resources only]
     Aspire --> Target[One native adapter]
     Target --> Runner[One selected scenario and common oracle]
-    Runner --> Envelope[Raw worker schema4]
+    Runner --> Envelope[Current raw worker schema5]
     Envelope --> Aggregate[Complete authenticated cohort]
     Aggregate --> Site[Independent site generation]
 ```

@@ -5,15 +5,16 @@ namespace KeyLoad.Comparisons;
 /// <summary>Adapter policies consumed from the same validated native execution group.</summary>
 public sealed partial class NativeComparisonExecutionOptions
 {
-    private const int DefaultTimescaleConnectionTimeoutSeconds = 30;
-    private const int DefaultTimescaleCommandTimeoutSeconds = 30;
-    private const int DefaultKeyLoadGraphSeedBatchSize = 100;
-    private const int DefaultNeo4jSeedBatchSize = 256;
-    private const int DefaultNeo4jMaximumExecutionTimeSeconds = 30;
-    private const int DefaultTimeSeriesInitialReadCapacity = 16;
-    private const int DefaultReportFileBufferBytes = 65_536;
-    private const int DefaultTimescaleCancellationTimeoutMilliseconds = 2000;
-    private const int DefaultTimescaleMaximumPoolSize = 16;
+    internal const int DefaultTimescaleConnectionTimeoutSeconds = 30;
+    internal const int DefaultTimescaleCommandTimeoutSeconds = 30;
+    internal const int DefaultKeyLoadGraphSeedBatchSize = 100;
+    internal const int DefaultNeo4jSeedBatchSize = 256;
+    internal const int DefaultNeo4jMaximumExecutionTimeSeconds = 30;
+    internal const int DefaultTimeSeriesInitialReadCapacity = 16;
+    internal const int DefaultKeyLoadTimeSeriesReadLimit = 1000;
+    internal const int DefaultReportFileBufferBytes = 65_536;
+    internal const int DefaultTimescaleCancellationTimeoutMilliseconds = 2000;
+    internal const int DefaultTimescaleMaximumPoolSize = 16;
     /// <summary>The maximum graph vertices seeded in one KeyLoad request.</summary>
     public int KeyLoadGraphSeedBatchSize { get; set; } = DefaultKeyLoadGraphSeedBatchSize;
     /// <summary>The maximum native documents or edges in one Neo4j seed transaction.</summary>
@@ -22,6 +23,8 @@ public sealed partial class NativeComparisonExecutionOptions
     public int Neo4jMaximumExecutionTimeSeconds { get; set; } = DefaultNeo4jMaximumExecutionTimeSeconds;
     /// <summary>The initial capacity of retained time-series read results.</summary>
     public int TimeSeriesInitialReadCapacity { get; set; } = DefaultTimeSeriesInitialReadCapacity;
+    /// <summary>The maximum samples requested by the ordinary KeyLoad TimeSeries adapter.</summary>
+    public int KeyLoadTimeSeriesReadLimit { get; set; } = DefaultKeyLoadTimeSeriesReadLimit;
     /// <summary>The native asynchronous report file buffer capacity.</summary>
     public int ReportFileBufferBytes { get; set; } = DefaultReportFileBufferBytes;
     /// <summary>The native Timescale connection establishment deadline.</summary>
@@ -35,34 +38,13 @@ public sealed partial class NativeComparisonExecutionOptions
     /// <summary>The maximum native Timescale connection pool capacity.</summary>
     public int TimescaleMaximumPoolSize { get; set; } = DefaultTimescaleMaximumPoolSize;
 
-    private void ValidateAdapterPolicy()
-    {
-        if (KeyLoadGraphSeedBatchSize is <= MinimumPositiveLimit or > DefaultKeyLoadGraphSeedBatchSize
-            || Neo4jSeedBatchSize is <= MinimumPositiveLimit or > DefaultNeo4jSeedBatchSize
-            || Neo4jMaximumExecutionTimeSeconds is <= MinimumPositiveLimit or > DefaultNeo4jMaximumExecutionTimeSeconds
-            || TimeSeriesInitialReadCapacity is <= MinimumPositiveLimit or > DefaultTimeSeriesInitialReadCapacity
-            || ReportFileBufferBytes is <= MinimumPositiveLimit or > DefaultReportFileBufferBytes
-            || !IsNativeSecondsTimeout(TimescaleConnectionTimeout, DefaultTimescaleConnectionTimeoutSeconds)
-            || !IsNativeSecondsTimeout(TimescaleCommandTimeout, DefaultTimescaleCommandTimeoutSeconds)
-            || TimescaleCancellationTimeoutMilliseconds is <= MinimumPositiveLimit or > DefaultTimescaleCancellationTimeoutMilliseconds || TimescaleMinimumPoolSize < MinimumPositiveLimit
-            || TimescaleMaximumPoolSize <= MinimumPositiveLimit || TimescaleMaximumPoolSize > DefaultTimescaleMaximumPoolSize
-            || TimescaleMinimumPoolSize > TimescaleMaximumPoolSize)
-        {
-            throw new Microsoft.Extensions.Options.OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions),
-                [NativeComparisonOperationalLimitsMustBePresentPositive]);
-        }
-    }
-
-    private static bool IsNativeSecondsTimeout(TimeSpan timeout, int maximumSeconds)
-        => timeout > TimeSpan.Zero && timeout.TotalSeconds <= maximumSeconds
-            && timeout.Ticks % TimeSpan.TicksPerSecond == MinimumPositiveLimit;
-
     private void RecordAdapterEvidence(IDictionary<string, string> parameters)
     {
         parameters[nameof(KeyLoadGraphSeedBatchSize)] = KeyLoadGraphSeedBatchSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(Neo4jSeedBatchSize)] = Neo4jSeedBatchSize.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(Neo4jMaximumExecutionTimeSeconds)] = Neo4jMaximumExecutionTimeSeconds.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(TimeSeriesInitialReadCapacity)] = TimeSeriesInitialReadCapacity.ToString(CultureInfo.InvariantCulture);
+        parameters[nameof(KeyLoadTimeSeriesReadLimit)] = KeyLoadTimeSeriesReadLimit.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(ReportFileBufferBytes)] = ReportFileBufferBytes.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(TimescaleConnectionTimeout)] = TimescaleConnectionTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
         parameters[nameof(TimescaleCommandTimeout)] = TimescaleCommandTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);

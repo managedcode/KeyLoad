@@ -33,7 +33,7 @@ internal sealed class KurrentGossipVersionTests
         await Assert.That(versions.Length).IsEqualTo(count);
         await Assert.That(versions.All(value => value == KurrentConstants.ObservationVersion + PinnedGossipVersion)).IsTrue();
         using var client = new HttpClient();
-        await using var target = new KurrentTarget(Connection, [client], RunId, ImagePrefix + PinnedImageVersion + DigestSuffix, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle());
+        await using var target = new KurrentTarget(Connection, [client], RunId, ImagePrefix + PinnedImageVersion + DigestSuffix, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         await Assert.That(target.Profile.Version).IsEqualTo(PinnedImageVersion);
         await Assert.That(target.Profile.Image).IsEqualTo(ImagePrefix + PinnedImageVersion + DigestSuffix);
     }
@@ -97,7 +97,7 @@ internal sealed class KurrentGossipVersionTests
 
     private static async Task CreateProfileAsync(HttpClient client, string imageVersion)
     {
-        var target = new KurrentTarget(Connection, [client], RunId, ImagePrefix + imageVersion + DigestSuffix, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle());
+        var target = new KurrentTarget(Connection, [client], RunId, ImagePrefix + imageVersion + DigestSuffix, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Diagnostics());
         await target.DisposeAsync();
     }
 

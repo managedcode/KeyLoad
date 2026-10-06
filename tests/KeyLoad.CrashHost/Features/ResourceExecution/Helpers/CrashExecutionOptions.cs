@@ -42,6 +42,20 @@ internal static class CrashExecutionOptions
         return Compose(settings, static value => value.Validate());
     }
 
+    internal static IOptions<BlobExecutionOptions> BlobExecution()
+    {
+        var settings = new BlobExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution(NativeClaimsExecutionOptions? configured = null)
+    {
+        var value = configured ?? new NativeClaimsExecutionOptions();
+        value.Validate();
+        return Compose(value, static settings => settings.Validate());
+    }
+
     internal static IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution()
     {
         var settings = new TimeSeriesExecutionOptions();

@@ -11,6 +11,7 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     private const string FlushRequired = "PostgresFlushRequired";
     private readonly NpgsqlDataSource source;
     private readonly IOptions<NativeComparisonExecutionOptions> execution;
+    private readonly NativeComparisonSerializationOptions serialization;
     private NativeComparisonExecutionOptions Policy => execution.Value;
     private readonly PostgresSchemaIdentity identity;
     private readonly Guid ownerGuid = Guid.NewGuid();
@@ -25,14 +26,16 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     /// <param name="image">The immutable native image reference.</param>
     /// <param name="topology">The actual native PostgreSQL topology.</param>
     /// <param name="executionOptions">The validated native execution limits.</param>
+    /// <param name="serializationOptions">The centrally validated native SQL builder reservations.</param>
     /// <param name="lifecycleOptions">The centrally validated native replication lifecycle limits.</param>
     public PostgresNativeVectorTarget(string connectionString, string runId, string image,
         ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+        IOptions<NativeComparisonSerializationOptions> serializationOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentNullException.ThrowIfNull(executionOptions);
         execution = NativeComparisonExecutionOptions.Require(executionOptions);
+        serialization = NativeComparisonSerializationOptions.Require(serializationOptions).Value;
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
         identity = PostgresSchemaIdentity.FromRunId(runId);
@@ -65,7 +68,7 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     {
         ArgumentNullException.ThrowIfNull(documents);
         await InitializeAsync(cancellationToken).ConfigureAwait(false);
-        var inserted = await PostgresNativeVectorStorage.IngestAsync(source, documents, Policy, cancellationToken).ConfigureAwait(false);
+        var inserted = await PostgresNativeVectorStorage.IngestAsync(source, documents, Policy, serialization.PostgresVectorComponentBuilderCapacity, cancellationToken).ConfigureAwait(false);
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         Profile = await nativeTopology.ObserveCopiesAsync(connection, topology, Profile, cancellationToken).ConfigureAwait(false);
         return inserted;
@@ -76,7 +79,10 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     {
         ArgumentNullException.ThrowIfNull(selected);
         profile = selected;
-        return await PostgresNativeVectorIndex.BuildAsync(source, selected, Policy, cancellationToken).ConfigureAwait(false);
+        var receipt = await PostgresNativeVectorIndex.BuildAsync(source, selected, Policy, cancellationToken).ConfigureAwait(false);
+        var parameters = new Dictionary<string, string>(receipt.Parameters, StringComparer.Ordinal);
+        serialization.RecordEvidence(parameters);
+        return receipt with { Parameters = parameters };
     }
 
     /// <inheritdoc />
@@ -86,17 +92,17 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     /// <inheritdoc />
     public Task<IReadOnlyList<VectorNeighbor>> SearchAsync(ReadOnlyMemory<float> query, int topK,
         VectorQueryMode mode, CancellationToken cancellationToken)
-        => PostgresNativeVectorIndex.SearchAsync(source, RequireProfile(), query, topK, mode, cancellationToken);
+        => PostgresNativeVectorIndex.SearchAsync(source, RequireProfile(), query, topK, mode, serialization.PostgresVectorComponentBuilderCapacity, cancellationToken);
 
     /// <inheritdoc />
     public Task<string> ExplainAsync(ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken cancellationToken)
-        => PostgresNativeVectorIndex.ExplainAsync(source, RequireProfile(), query, mode, cancellationToken);
+        => PostgresNativeVectorIndex.ExplainAsync(source, RequireProfile(), query, mode, serialization.PostgresVectorComponentBuilderCapacity, cancellationToken);
 
     /// <inheritdoc />
     public Task UpdateAsync(VectorUpdate update, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(update);
-        return PostgresNativeVectorStorage.UpdateAsync(source, update, cancellationToken);
+        return PostgresNativeVectorStorage.UpdateAsync(source, update, serialization.PostgresVectorComponentBuilderCapacity, cancellationToken);
     }
 
     /// <inheritdoc />

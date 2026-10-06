@@ -105,9 +105,9 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
             return true;
         });
         var before = database.Store.Position;
-        var result = database.Database.Apply(operation);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(operation));
 
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.PartitionOutcome(database.Partition, "root", commandId)))).IsNull();
@@ -138,6 +138,7 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
             new CommandRequest(commandId, database.Partition,
                 [new PutDocument(CommandOutcomePartitionScopeTestData.Resource,
                     CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.FirstJson)]));
+        var originalLegacy = database.Store.Read(view => view.ReadOwnedValue(legacyKey))!;
         var beforeReplay = database.Store.Position;
         var replay = database.Database.Apply(malformed);
         var changed = database.Database.Apply(malformed with { PayloadJson = "[" });
@@ -149,6 +150,8 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         await Assert.That(changed.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(blockedScopedWrite.Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Store.Position).IsEqualTo(beforeReplay);
+        await Assert.That(originalLegacy.AsSpan().SequenceEqual(
+            database.Store.Read(view => view.ReadOwnedValue(legacyKey)))).IsTrue();
         await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(legacyKey)?.ScopeKind))
             .IsEqualTo(CommandOutcomeScopeKind.Unknown);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(unknownKey))).IsNull();

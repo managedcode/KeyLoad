@@ -21,32 +21,32 @@ internal static class TimeSeriesBenchmarkResources
     internal static void Add(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource>[] nodes,
         IResourceBuilder<ParameterResource> admin, string benchmarkRoot)
     {
-        const string ResultText = "-c";
-        const string AddResultText = "synchronous_commit=on";
-        const string ComparisonText = "docker.io/";
-        const string AddComparisonText = ":";
-        const string NameText = "Benchmarks__Profile";
-        const string AddNameText = "Benchmarks__EvidenceProfile";
+        const string PostgresConfigurationArgument = "-c";
+        const string SynchronousCommitConfiguration = "synchronous_commit=on";
+        const string DockerRegistryPrefix = "docker.io/";
+        const string ImageTagSeparator = ":";
+        const string BenchmarkProfileEnvironment = "Benchmarks__Profile";
+        const string EvidenceProfileEnvironment = "Benchmarks__EvidenceProfile";
         const int FirstIndex = 0;
-        const string ValueText = "TimescaleDB single-node container; no cross-run persistent volume";
+        const string TimescaleStorageDescription = "TimescaleDB single-node container; no cross-run persistent volume";
 
         var database = builder.AddPostgres(TimescaleName)
             .WithImage(TimescaleImage)
             .WithImageTag(TimescaleImageTag)
             .WithImageSHA256(TimescaleDigest[DigestPrefixLength..])
-            .WithArgs(ResultText, AddResultText)
+            .WithArgs(PostgresConfigurationArgument, SynchronousCommitConfiguration)
             .AddDatabase(DatabaseName);
-        var imageReference = ComparisonText + TimescaleImage + AddComparisonText + TimescaleImageTag + DigestSeparator + TimescaleDigest;
+        var imageReference = DockerRegistryPrefix + TimescaleImage + ImageTagSeparator + TimescaleImageTag + DigestSeparator + TimescaleDigest;
         var output = Path.GetFullPath(AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput
             ?? Path.Combine(benchmarkRoot, DefaultOutputDirectory));
         var runner = BenchmarkRunnerContainer.Create(builder, output)
             .WithReference(database)
             .WaitFor(database)
-            .WithEnvironment(NameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
-            .WithEnvironment(AddNameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
+            .WithEnvironment(BenchmarkProfileEnvironment, AppHostConfiguration.TimeSeriesBenchmarkProfile)
+            .WithEnvironment(EvidenceProfileEnvironment, AppHostConfiguration.TimeSeriesBenchmarkProfile)
             .WithEnvironment(KeyLoadEndpointEnvironment, nodes[FirstIndex].GetEndpoint(HttpEndpointName))
             .WithEnvironment(AdminKeyEnvironment, admin)
-            .WithEnvironment(StorageEnvironment, ValueText)
+            .WithEnvironment(StorageEnvironment, TimescaleStorageDescription)
             .WithEnvironment(TimescaleImageSetting, imageReference);
         foreach (var node in nodes)
         {

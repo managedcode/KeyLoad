@@ -1,0 +1,922 @@
+{
+  "schemaVersion": 1,
+  "contributors": [
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
+      "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+      "instanceName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "later-leaf persisted denial produces PermissionDenied, unchanged store position and healthy allowed-leaf read"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
+      "methodName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "instanceName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "cancels after observed actual native bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+      "instanceName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+      "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "The invalid leaf/request partition is rejected as Validation before native reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+      "instanceName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "Empty, over-eight and null leaf sets remain Validation with unchanged position; an actual valid QueryEngine request on the seeded same database returns the expected full reference, projected JSON/revision, with position preserved."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "instanceName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "measured ZoneTree observer charges exact bytes/records; exact allowances pass and each one-under bound returns BudgetExceeded"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+      "instanceName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "independent serialization/retention bound admits a complete real merge at exact bytes and rejects one byte less"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "instanceName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+      "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "independent seeded oracle compares full ordered references and projected values/revisions/read-cut witnesses and independently sizes retained result"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+      "instanceName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "actual rows and JSON follow independent ordinal ordering for Unicode partition ties"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+      "instanceName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+      "requirements": [
+        "REQ-PQUERY-002"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real persisted field policy removes the secret, exposes exact redaction metadata and matches independent retained-size oracle"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+      "instanceName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "duplicate real partition request returns Validation with unchanged position, then healthy query returns seeded row"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+      "instanceName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+      "requirements": [
+        "REQ-PQUERY-002"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "later persisted denial returns no page, preserves store position and a healthy authorized page follows"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+      "instanceName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+      "requirements": [
+        "REQ-PQUERY-002",
+        "REQ-PQUERY-003"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002",
+        "AC-PQUERY-003"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "A wrong server-owned physical tuple returns OwnershipLost with unchanged position, then the correct owner reads the exact row. A protected sort-field denial returns PermissionDenied with unchanged position; a valid same-reader query returns the visible projection and exact persisted-redaction metadata."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicBudgetTests",
+      "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+      "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "oversized request fails before store reads; exact complete public retention succeeds and one byte under fails"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+      "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+      "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real query page round-trips through native codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+      "methodName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+      "instanceName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "Default/empty/duplicate/over-eight/unsupported/version/AST inputs retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicMergeTests",
+      "methodName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+      "instanceName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real multi-partition rows match independent expected JSON/order; equal IDs retain distinct partition identity and both witnesses"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+      "instanceName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "executes and independently verifies full real page state before generated alias/field-ID contract assertions"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+      "instanceName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+      "requirements": [
+        "REQ-PQUERY-005"
+      ],
+      "acceptance": [
+        "AC-PQUERY-005"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "decodes actual catalog request, executes and verifies complete query page, then checks exact local schema/hints"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+      "instanceName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+      "instanceName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+      "requirements": [
+        "REQ-PQUERY-005"
+      ],
+      "acceptance": [
+        "AC-PQUERY-005"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real page is decoded both ways and each result is checked against persisted row and cut witness"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+      "instanceName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "official-catalog descriptor decodes actual generated request; forbidden mode returns no-read error and allowed request executes with full page verification"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
+      "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero native read calls with unchanged position"
+    },
+    {
+      "suite": "unit",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
+      "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
+      "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+      "instanceName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "later-leaf persisted denial produces PermissionDenied, unchanged store position and healthy allowed-leaf read"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
+      "methodName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "instanceName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "cancels after observed actual native bytes with original caller token; no page is returned and a subsequent one-row query succeeds"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+      "instanceName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+      "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "The invalid leaf/request partition is rejected as Validation before native reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+      "methodName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+      "instanceName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "Empty, over-eight and null leaf sets remain Validation with unchanged position; an actual valid QueryEngine request on the seeded same database returns the expected full reference, projected JSON/revision, with position preserved."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "instanceName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "measured ZoneTree observer charges exact bytes/records; exact allowances pass and each one-under bound returns BudgetExceeded"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+      "instanceName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "independent serialization/retention bound admits a complete real merge at exact bytes and rejects one byte less"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+      "methodName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "instanceName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+      "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "independent seeded oracle compares full ordered references and projected values/revisions/read-cut witnesses and independently sizes retained result"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+      "instanceName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "actual rows and JSON follow independent ordinal ordering for Unicode partition ties"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+      "instanceName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+      "requirements": [
+        "REQ-PQUERY-002"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real persisted field policy removes the secret, exposes exact redaction metadata and matches independent retained-size oracle"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+      "methodName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+      "instanceName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "duplicate real partition request returns Validation with unchanged position, then healthy query returns seeded row"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+      "instanceName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+      "requirements": [
+        "REQ-PQUERY-002"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "later persisted denial returns no page, preserves store position and a healthy authorized page follows"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+      "instanceName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+      "requirements": [
+        "REQ-PQUERY-002",
+        "REQ-PQUERY-003"
+      ],
+      "acceptance": [
+        "AC-PQUERY-002",
+        "AC-PQUERY-003"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "A wrong server-owned physical tuple returns OwnershipLost with unchanged position, then the correct owner reads the exact row. A protected sort-field denial returns PermissionDenied with unchanged position; a valid same-reader query returns the visible projection and exact persisted-redaction metadata."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicBudgetTests",
+      "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+      "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "oversized request fails before store reads; exact complete public retention succeeds and one byte under fails"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+      "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+      "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real query page round-trips through native codec; full references, per-leaf cuts/policy/schema/path and exact bytes are checked"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+      "methodName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+      "instanceName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "Default/empty/duplicate/over-eight/unsupported/version/AST inputs retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicMergeTests",
+      "methodName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+      "instanceName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+      "requirements": [
+        "REQ-PQUERY-004"
+      ],
+      "acceptance": [
+        "AC-PQUERY-004"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real multi-partition rows match independent expected JSON/order; equal IDs retain distinct partition identity and both witnesses"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+      "instanceName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "executes and independently verifies full real page state before generated alias/field-ID contract assertions"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+      "instanceName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+      "requirements": [
+        "REQ-PQUERY-005"
+      ],
+      "acceptance": [
+        "AC-PQUERY-005"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "decodes actual catalog request, executes and verifies complete query page, then checks exact local schema/hints"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+      "instanceName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "native and public request codecs preserve typed values; each decoded request executes and equal pages are checked"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+      "instanceName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+      "requirements": [
+        "REQ-PQUERY-005"
+      ],
+      "acceptance": [
+        "AC-PQUERY-005"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "real page is decoded both ways and each result is checked against persisted row and cut witness"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+      "instanceName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "official-catalog descriptor decodes actual generated request; forbidden mode returns no-read error and allowed request executes with full page verification"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
+      "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero native read calls with unchanged position"
+    },
+    {
+      "suite": "unit-scalar",
+      "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+      "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
+      "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
+      "requirements": [
+        "REQ-PQUERY-001"
+      ],
+      "acceptance": [
+        "AC-PQUERY-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Query"
+      ],
+      "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero native read calls with unchanged position"
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests",
+      "methodName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
+      "instanceName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
+      "requirements": [
+        "REQ-PQUERY-006"
+      ],
+      "acceptance": [
+        "AC-PQUERY-006"
+      ],
+      "executedModules": [
+        "KeyLoad.Client",
+        "KeyLoad.Server",
+        "KeyLoad.Query",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Replication",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Real AppHost RF3 SDK and official MCP return the same independently ordered full references across explicit, fallback and empty partitions, including equal text IDs in separate partitions, hidden sort fields and ties."
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
+      "methodName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
+      "instanceName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "The actual SDK and official MCP clients commit mirrored create, replace, patch and delete operations; each terminal receipt and independently read document revision/content (including deletion) matches the expected lifecycle."
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
+      "methodName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
+      "instanceName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "The actual official MCP and SDK clients run the inverse mirrored mutation order; each terminal receipt and independently read document revision/content matches, then the final document is absent."
+    },
+    {
+      "suite": "rf3",
+      "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
+      "methodName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
+      "instanceName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
+      "requirements": [
+        "REQ-DSTORE-001"
+      ],
+      "acceptance": [
+        "AC-DSTORE-001"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Client",
+        "KeyLoad.Core",
+        "KeyLoad.Orleans",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Server",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "SDK and official MCP establish revisions one and two, reject a stale explicit replacement as RevisionConflict without changing persisted revision-two content, then successfully read that same state."
+    },
+    {
+      "suite": "recovery",
+      "className": "KeyLoad.RecoveryTests.Features.DocumentStorage.CommandIdempotencyProcessRecoveryTests",
+      "methodName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
+      "instanceName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
+      "requirements": [
+        "REQ-DSTORE-006"
+      ],
+      "acceptance": [
+        "AC-DSTORE-006"
+      ],
+      "executedModules": [
+        "KeyLoad.Abstractions",
+        "KeyLoad.Core",
+        "KeyLoad.Diagnostics",
+        "KeyLoad.Replication",
+        "KeyLoad.Security",
+        "KeyLoad.Storage.IO",
+        "KeyLoad.Storage.ZoneTree"
+      ],
+      "operationOutcomeAndState": "Two distinct actual CrashHost processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."
+    }
+  ]
+}

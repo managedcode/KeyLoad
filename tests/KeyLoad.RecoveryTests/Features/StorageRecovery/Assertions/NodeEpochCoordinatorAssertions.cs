@@ -45,7 +45,7 @@ internal static class NodeEpochCoordinatorAssertions
         var replicaPath = Path.Combine(destination, ServerNodeUpgradeProtocol.Replica);
         using var canonical = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, canonicalPath), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile, replicaPath), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
         using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);
@@ -68,7 +68,7 @@ internal static class NodeEpochCoordinatorAssertions
             Path.Combine(destination, ServerNodeUpgradeProtocol.Canonical)), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(NodeEpochComponentProfile.CanonicalStoreOptions(profile,
             Path.Combine(destination, ServerNodeUpgradeProtocol.Replica)), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var configuration = new ReplicaConfiguration(profile.LocalId, [.. profile.Voters], destination,
             profile.Incarnation);
         using var log = new DurableReplicaLog(replica, RecoveryExecutionOptions.Configuration(configuration), canonicalDatabase: database);

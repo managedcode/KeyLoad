@@ -200,10 +200,87 @@ jobs:
           printf 'KEYLOAD_ADMIN_CHROME_PATH=%s\n' "$admin_chrome" >> "$GITHUB_ENV"
       - name: Restore .NET packages
         run: dotnet restore KeyLoad.slnx
-      - name: Build three-node database tests
-        run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release
+      - name: Build the complete native coverage cohort
+        run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Prepare original source and test-image receipts
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'TestResults/functional-coverage/rf3'
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode prepare -Root $root -EvidenceRoot $evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST=$evidence/functional-coverage.production-source-manifest.json" | Add-Content $env:GITHUB_ENV
       - name: Test three-node database with .NET and MCP clients
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3 --KeyLoadTests:ReportTrx=true
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
+      - name: Collect four native functional coverage cohorts
+        id: functional-coverage
+        shell: pwsh
+        run: |
+          $common = @(
+            'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
+            '--KeyLoadTests:ReportTrx=true',
+            '--KeyLoadTests:CoverageSettings=scripts/Features/CodeQuality/functional-coverage.production.settings.xml',
+            '--KeyLoadTests:CoverageFormat=coverage')
+          & dotnet @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit' `
+            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit/coverage.coverage'
+          $unitExitCode = $LASTEXITCODE
+          "unit_exit_code=$unitExitCode" | Add-Content $env:GITHUB_OUTPUT
+          & dotnet @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit-scalar' `
+            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit-scalar/coverage.coverage'
+          $scalarExitCode = $LASTEXITCODE
+          "scalar_exit_code=$scalarExitCode" | Add-Content $env:GITHUB_OUTPUT
+          & dotnet @common '--KeyLoadTests:Suite=recovery' `
+            '--KeyLoadTests:Filter=/*/*/CommandIdempotencyProcessRecoveryTests/*' `
+            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/recovery' `
+            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/recovery/coverage.coverage'
+          $recoveryExitCode = $LASTEXITCODE
+          "recovery_exit_code=$recoveryExitCode" | Add-Content $env:GITHUB_OUTPUT
+          & dotnet @common '--KeyLoadTests:Suite=rf3' `
+            '--KeyLoadTests:Filter=/*/*/(PartitionQueryPublicRf3Tests)|(McpDocumentCrudParityTests)/*' `
+            '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3' `
+            '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/coverage.coverage' `
+            '--KeyLoadTests:NativeCoverage:ServerMode=rf3-original-node-v1' `
+            "--KeyLoadTests:NativeCoverage:SourceManifest=$env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST"
+          $rf3ExitCode = $LASTEXITCODE
+          "rf3_exit_code=$rf3ExitCode" | Add-Content $env:GITHUB_OUTPUT
+          if ($unitExitCode -ne 0 -or $scalarExitCode -ne 0 -or $recoveryExitCode -ne 0 -or $rf3ExitCode -ne 0) {
+            exit 1
+          }
+      - name: Assemble product descriptor from original reports
+        id: product-descriptor
+        if: ${{ success() }}
+        shell: pwsh
+        env:
+          UNIT_EXIT_CODE: ${{ steps.functional-coverage.outputs.unit_exit_code }}
+          SCALAR_EXIT_CODE: ${{ steps.functional-coverage.outputs.scalar_exit_code }}
+          RECOVERY_EXIT_CODE: ${{ steps.functional-coverage.outputs.recovery_exit_code }}
+          RF3_EXIT_CODE: ${{ steps.functional-coverage.outputs.rf3_exit_code }}
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.native-product-descriptor.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST `
+            -ResultsRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3') `
+            -UnitExitCode ([int]$env:UNIT_EXIT_CODE) -ScalarExitCode ([int]$env:SCALAR_EXIT_CODE) `
+            -RecoveryExitCode ([int]$env:RECOVERY_EXIT_CODE) -Rf3ExitCode ([int]$env:RF3_EXIT_CODE)
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validate and merge native product coverage
+        if: ${{ success() }}
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'TestResults/functional-coverage/rf3'
+          $descriptorPath = Join-Path $evidence 'functional-coverage.native-product-descriptor.v1.json'
+          $boundsPath = Join-Path $evidence 'functional-coverage.native-options.v1.json'
+          $descriptor = Get-Content -LiteralPath $descriptorPath -Raw | ConvertFrom-Json
+          $nativeOptions = Get-Content -LiteralPath $boundsPath -Raw
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.native-merge.ps1 `
+            -Mode Product -Repository $root -EvidenceRoot $evidence -DescriptorPath $descriptorPath `
+            -ToolPackageRoot $descriptor.tool.packageRoot -ToolVersion $descriptor.tool.version `
+            -NativeOptionsJson $nativeOptions
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Clean up Docker registry
         if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
         run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs

@@ -54,7 +54,7 @@ internal static class ServerNodeUpgradeBuilder
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, int sourceDataEpoch)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.BlobExecution, options.Core.NativeClaimsExecution, options.Core.TimeSeriesExecution);
             var configuration = ServerNodeUpgradeConfiguration.Replica(options, paths.Stage);
             var plan = ReplicaSnapshotFormatUpgrade.Preflight(database, stores.Replica, configuration,
                 Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Snapshots),
@@ -85,7 +85,7 @@ internal static class ServerNodeUpgradeBuilder
         Dictionary<string, StorageSnapshot> images)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.BlobExecution, options.Core.NativeClaimsExecution, options.Core.TimeSeriesExecution);
             ReplicaSnapshotFormatUpgrade.Upgrade(plan, database, stores.Replica,
                 ServerNodeUpgradeConfiguration.Replica(options, paths.Stage), Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Snapshots),
                 (source, destination) =>

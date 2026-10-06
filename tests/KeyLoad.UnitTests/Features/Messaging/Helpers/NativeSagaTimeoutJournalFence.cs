@@ -1,4 +1,5 @@
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
@@ -18,7 +19,8 @@ internal static class NativeSagaTimeoutJournalFence
         // ADR-110 authorizes this native journal fence API while it is experimental.
 #pragma warning disable ORLEANSEXP005
         var journalId = JournalId.Create(JobRootSegment, JobShardsSegment, job.ShardId);
-        var storage = services.GetRequiredService<IJournalStorageProvider>().CreateStorage(journalId);
+        var storage = services.GetRequiredKeyedService<IJournalStorageProvider>(NativeRuntimeJournalRegistration.ProviderName)
+            .CreateStorage(journalId);
         var metadata = await storage.GetMetadataAsync(cancellationToken);
         var header = await services.GetRequiredService<RuntimeJournalClient>()
             .GetHeaderAsync(journalId.Value, cancellationToken);

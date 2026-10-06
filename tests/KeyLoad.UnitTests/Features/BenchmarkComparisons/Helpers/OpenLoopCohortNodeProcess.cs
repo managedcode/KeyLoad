@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -13,7 +12,7 @@ internal static class OpenLoopCohortNodeProcess
     private const string PlanEntry = "scripts/Features/BenchmarkComparisons/open-loop-isolated-plan.mjs";
 
     internal static Task<OpenLoopPlanNodeResult> SeedFailedCohortAsync(
-        IOptions<OpenLoopPlanProcessOptions> options, string root, CancellationToken cancellationToken)
+        OpenLoopCohortStageEvidence evidence, string root, CancellationToken cancellationToken)
     {
         var start = CreateStartInfo();
         start.ArgumentList.Add(InputTypeArgument);
@@ -22,23 +21,22 @@ internal static class OpenLoopCohortNodeProcess
         start.Environment[OpenLoopCohortNodeProgram.RootEnvironment] = root;
         start.Environment[OpenLoopCohortNodeProgram.ModuleEnvironment] = Path.Combine(
             OpenLoopPlanNodeProcess.RepositoryRoot, PlanEntry);
-        return RunAsync(options, start, cancellationToken);
+        return RunAsync(evidence, start, OpenLoopCohortStage.SeedFailedCohort, cancellationToken);
     }
 
-    internal static Task<OpenLoopPlanNodeResult> AggregateAsync(IOptions<OpenLoopPlanProcessOptions> options,
-        string input, string output, CancellationToken cancellationToken)
+    internal static Task<OpenLoopPlanNodeResult> AggregateAsync(OpenLoopCohortStageEvidence evidence,
+        string input, string output, OpenLoopCohortStage stage, CancellationToken cancellationToken)
     {
         var start = CreateStartInfo();
         start.ArgumentList.Add(Path.Combine(OpenLoopPlanNodeProcess.RepositoryRoot, CliEntry));
         start.ArgumentList.Add("--input=" + input);
         start.ArgumentList.Add("--output=" + output);
-        return RunAsync(options, start, cancellationToken);
+        return RunAsync(evidence, start, stage, cancellationToken);
     }
 
-    private static Task<OpenLoopPlanNodeResult> RunAsync(IOptions<OpenLoopPlanProcessOptions> options,
-        ProcessStartInfo start, CancellationToken cancellationToken)
-        => OpenLoopPlanNodeProcess.RunOwnedAsync(options, start, input: null,
-            keepStandardInputOpen: false, ready: null, cancellationToken: cancellationToken);
+    private static Task<OpenLoopPlanNodeResult> RunAsync(OpenLoopCohortStageEvidence evidence,
+        ProcessStartInfo start, OpenLoopCohortStage stage, CancellationToken cancellationToken)
+        => OpenLoopPlanNodeProcess.RunObservedAsync(evidence.ExecutionOptions, start, evidence, stage, cancellationToken);
 
     private static ProcessStartInfo CreateStartInfo()
     {

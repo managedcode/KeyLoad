@@ -111,9 +111,15 @@ public sealed partial class DatabaseEngine
     /// <summary>Verifies a signed token and restores its native claims.</summary>
     /// <typeparam name="T">Claim type.</typeparam>
     /// <param name="token">Signed token.</param>
+    /// <returns>Verified claims admitted by the captured native execution policy.</returns>
+    public T Verify<T>(string token) => Verify<T>(token, ClaimsExecution.MaximumTokenCharacters);
+
+    /// <summary>Verifies a signed token using an explicitly bounded operand limit.</summary>
+    /// <typeparam name="T">Claim type.</typeparam>
+    /// <param name="token">Signed token.</param>
     /// <param name="maximumCharacters">Maximum accepted token length.</param>
     /// <returns>Verified claims.</returns>
-    public T Verify<T>(string token, int maximumCharacters = CoreNativeClaims.DefaultMaximumCharacters)
+    public T Verify<T>(string token, int maximumCharacters)
         => CoreNativeClaims.Verify<T>(Store.Identity.SigningKey.Span, token, maximumCharacters);
     private ValidatedQueueLease Lease(IKeyValueView view, PrincipalRecord principal,
         QueueLaneRef lane, string token, DateTimeOffset now)

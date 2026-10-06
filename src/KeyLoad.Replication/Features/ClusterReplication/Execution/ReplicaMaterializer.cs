@@ -154,6 +154,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         {
             lock (signals)
             { failure = error; }
+            throw;
         }
         catch (Exception error)
         {

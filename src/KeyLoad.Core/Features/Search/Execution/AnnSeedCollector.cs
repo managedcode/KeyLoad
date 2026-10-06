@@ -40,7 +40,8 @@ internal static class AnnSeedCollector
         const int CaptureCutAbsentCount = 0;
         const int AppliedValidationBoundary = 0;
 
-        var buffer = new AnnSeedBuffer(options.MaxRecords, options.MaxOwnedBytes, options.MaxPeakBytes, options.InitialRecordCapacity, budget, work);
+        var buffer = new AnnSeedBuffer(options.MaxRecords, options.MaxOwnedBytes, options.MaxPeakBytes, options.InitialRecordCapacity,
+            options.HashScratchBytes, budget, work);
         var now = database.EvaluationClock.GetUtcNow();
         var metadata = budget.CreateView(view);
         var principal = database.Principal(metadata, principalId, now);

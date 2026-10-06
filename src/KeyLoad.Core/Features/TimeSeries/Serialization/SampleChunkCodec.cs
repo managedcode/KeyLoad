@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkCodec
@@ -5,18 +7,21 @@ internal static class SampleChunkCodec
     internal const int MaximumEncodedBytes = SampleChunkWire.MaximumEncodedBytes;
 
     internal static byte[] Encode(ReadOnlySpan<SampleRecord> records, ReadExecutionBudget budget,
+        IOptions<TimeSeriesExecutionOptions> executionOptions,
         int maximumBytes = MaximumEncodedBytes)
     {
+        var execution = ReadExecution(executionOptions);
         ArgumentNullException.ThrowIfNull(budget);
         SampleChunkWire.ValidateMaximum(maximumBytes);
         budget.Check();
-        var plan = SampleChunkEncodingPlan.Create(records, budget);
+        var plan = SampleChunkEncodingPlan.Create(records, budget, execution.TextCancellationCheckIntervalCodeUnits);
         if (plan.ColumnsBytes > maximumBytes - SampleChunkWire.ChecksumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkWire.ExcessBytes);
         }
-        var unsealed = SampleChunkColumnEncoder.CreatePayload(records, plan, budget);
-        var payload = unsealed with { Checksum = SampleChunkChecksum.Compute(unsealed, budget) };
+        var unsealed = SampleChunkColumnEncoder.CreatePayload(records, plan, budget, execution.HashChunkBytes,
+            execution.TextCancellationCheckIntervalCodeUnits);
+        var payload = unsealed with { Checksum = SampleChunkChecksum.Compute(unsealed, budget, execution.HashChunkBytes) };
         budget.Check();
         var measured = NativeSerialization.Measure(payload);
         budget.Check();
@@ -35,8 +40,10 @@ internal static class SampleChunkCodec
     }
 
     internal static SampleRecord[] Decode(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget,
+        IOptions<TimeSeriesExecutionOptions> executionOptions,
         int maximumBytes = MaximumEncodedBytes)
     {
+        var execution = ReadExecution(executionOptions);
         ArgumentNullException.ThrowIfNull(budget);
         SampleChunkWire.ValidateMaximum(maximumBytes);
         if (bytes.Length > maximumBytes)
@@ -51,13 +58,21 @@ internal static class SampleChunkCodec
             throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkWire.UnsupportedVersion);
         }
         ValidatePayloadShape(payload);
-        SampleChunkChecksum.Verify(payload, budget);
+        SampleChunkChecksum.Verify(payload, budget, execution.HashChunkBytes);
         SampleChunkNumericValidator.Validate(payload, budget);
-        SampleChunkTextValidator.Validate(payload, budget);
-        var text = SampleChunkTextDecoder.Decode(payload, budget);
+        SampleChunkTextValidator.Validate(payload, budget, execution.HashChunkBytes);
+        var text = SampleChunkTextDecoder.Decode(payload, budget, execution.HashChunkBytes);
         var records = SampleChunkRecordDecoder.Decode(payload, text, budget);
         budget.Check();
         return records;
+    }
+
+    private static TimeSeriesExecutionOptions ReadExecution(IOptions<TimeSeriesExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var execution = executionOptions.Value;
+        execution.Validate();
+        return execution;
     }
 
     private static void ValidatePayloadShape(SampleChunkPayload payload)

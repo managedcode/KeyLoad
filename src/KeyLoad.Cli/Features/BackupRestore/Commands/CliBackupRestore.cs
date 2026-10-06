@@ -24,7 +24,8 @@ internal static class CliBackupRestore
         typeof(CliBackupRestore).Assembly);
 
     public static Task RunAsync(KeyLoadCliApplication.CliCommand command, string[] args,
-        IOptions<ZoneTreeStorageExecutionOptions> storageOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
+        IOptions<ZoneTreeStorageExecutionOptions> storageOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions,
+        IOptions<CliBackupExecutionOptions> backupOptions)
     {
         switch (command)
         {
@@ -38,7 +39,7 @@ internal static class CliBackupRestore
                 Restore(args, storageOptions);
                 break;
             case KeyLoadCliApplication.CliCommand.PackBackup:
-                PackBackup(args);
+                PackBackup(args, backupOptions);
                 break;
             case KeyLoadCliApplication.CliCommand.InspectArtifact:
                 InspectArtifact(args);
@@ -81,9 +82,9 @@ internal static class CliBackupRestore
             JsonDefaults.Options));
     }
 
-    private static void PackBackup(string[] args)
+    private static void PackBackup(string[] args, IOptions<CliBackupExecutionOptions> backupOptions)
     {
-        BackupArtifact.Pack(args[SourceArgumentIndex], args[DestinationArgumentIndex]);
+        BackupArtifact.Pack(args[SourceArgumentIndex], args[DestinationArgumentIndex], backupOptions.Value.PieceBytes);
         Console.WriteLine(GetMessage(ArchiveCreatedMessageKey));
     }
 

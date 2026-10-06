@@ -54,7 +54,7 @@ internal static class EpochUpgradeFixture
         const string OutcomeNamespace = "outcome";
 
         ArgumentNullException.ThrowIfNull(store);
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
         store.Commit((transaction, _) =>
         {
             transaction.PutRecord(AppliedKey, EmptyAppliedPosition);
@@ -118,7 +118,7 @@ internal static class EpochUpgradeFixture
         { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(new(Path.Combine(directory, ReplicaDirectory))
         { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
         BootstrapNode(database, profile.AdminKey);
         using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: database);
         var snapshots = new ReplicaSnapshotStore(canonical, log, configuration, CrashExecutionOptions.Replica());

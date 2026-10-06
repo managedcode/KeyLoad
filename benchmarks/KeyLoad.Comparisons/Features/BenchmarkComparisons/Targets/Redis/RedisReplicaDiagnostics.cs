@@ -1,11 +1,13 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal static class RedisReplicaDiagnostics
+internal sealed class RedisReplicaDiagnostics(IOptions<NativeComparisonDiagnosticOptions> options)
 {
+    private readonly NativeComparisonDiagnosticOptions settings = NativeComparisonDiagnosticOptions.Require(options).Value;
     private const string KnownHostsLocalhostText = "localhost";
     private const string KnownStatesUnknownText = "unknown";
 
@@ -24,15 +26,14 @@ internal static class RedisReplicaDiagnostics
     private const string NoneToken = "none";
     private const int NoItems = 0;
 
-    internal const int MaximumCharacters = 4096;
     private const int MaximumHostLength = 253, MinimumPort = 1, MaximumPort = 65535, RoleStateIndex = 3;
     private const string Prefix = "RedisReplicaDiagnostic ";
-    private const string Overflow = "{\"Predicate\":\"ProjectionOverflow\"}";
+    internal const string Overflow = "{\"Predicate\":\"ProjectionOverflow\"}";
     private const string LinkDown = "down";
     private static readonly string[] KnownHosts = [PrimaryToken, PrimaryDevInternalToken, Replica1Token, Replica1DevInternalToken, KnownHostsResultText, KnownHostsKnownHostsResultText, KnownHostsLocalhostText];
     private static readonly string[] KnownStates = [HandshakeToken, NoneToken, ConnectToken, ConnectingToken, KnownStatesResultText, KnownStatesKnownStatesResultText, KnownStatesUnknownText];
 
-    internal static void WriteFailure(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
+    internal void WriteFailure(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
     {
         try
         {
@@ -48,7 +49,7 @@ internal static class RedisReplicaDiagnostics
         }
     }
 
-    internal static string Project(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
+    internal string Project(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
     {
         const int MissingItemIndex = -1;
 
@@ -62,7 +63,7 @@ internal static class RedisReplicaDiagnostics
             ValidPort(int.TryParse(RoleText(role, RedisNativeProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
             KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null);
         var json = JsonSerializer.Serialize(projection);
-        return json.Length <= MaximumCharacters ? json : Overflow;
+        return json.Length <= settings.RedisReplicaMaximumCharacters ? json : Overflow;
     }
 
     private static RedisReplicaFailedPredicate FailedPredicate(EndPoint primary, Dictionary<string, string> info, RedisResult[] role)

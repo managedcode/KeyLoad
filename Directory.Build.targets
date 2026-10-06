@@ -14,4 +14,24 @@
            Text="KeyLoad requires XML documentation generation so IDE0005 runs during builds." />
     <MakeDir Directories="$(KeyLoadCodeQualityDirectory)" />
   </Target>
+  <Import Project="$(MSBuildThisFileDirectory)tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets"
+          Condition="'$(MSBuildProjectName)' == 'KeyLoad.Abstractions' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Analyzers' or
+              '$(MSBuildProjectName)' == 'KeyLoad.AppHost' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Artifacts' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Cli' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Client' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Core' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Diagnostics' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Orleans' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Query' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Replication' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Security' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Server' or
+              '$(MSBuildProjectName)' == 'KeyLoad.ServiceDefaults' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Storage.IO' or
+              '$(MSBuildProjectName)' == 'KeyLoad.Storage.ZoneTree' or
+              '$(MSBuildProjectName)' == 'KeyLoad.UnitTests' or
+              '$(MSBuildProjectName)' == 'KeyLoad.RecoveryTests' or
+              '$(MSBuildProjectName)' == 'KeyLoad.IntegrationTests'" />
 </Project>

@@ -521,6 +521,13 @@ qualification of the new matrix. Source and full GitHub/publication gates are pe
 | REQ-BC-057 site metrics derived from isolated raw JSON | AC-ISO-008 | TASK-ISO-011; full site validators/oracles/browser/native coverage |
 | REQ-BC-058 publish only fresh complete successful cohort | AC-ISO-009 | TASK-ISO-011/012; authenticated aggregate/worker/archive freshness + provider/live proof |
 
+AC-ISO-006 admits worker envelopes using the supplied verified contract's
+`workerSchemaVersion`: current workers use5, immutable historical workers use4,
+and aggregate schema4 remains independent. Failed-worker output and active parser
+inputs use the actual current contract. Current/historical wrong-version rejection,
+original raw hashes, null unsupported reports and complete provenance remain
+mandatory under ADR-056's canonical worker-version admission repair.
+
 Canonical slice map: BenchmarkComparisons in Comparisons library, ComparisonHost,
 AppHost/Features, UnitTests/ComparisonTests/SiteTests/Features, scripts/Features,
 site/Features and this durable feature doc; shared workflow/architecture remain
@@ -1209,6 +1216,26 @@ remain errors. It never admits that source's metrics or adds its revision to the
 historical allowlist. SiteUnsupportedProducerSelectionTests maps this real Node
 selection/rejection/healthy follow-up flow and the actual GitHub optional-capture
 child to AC-BC-WEB-002. Source review is not native site or publication evidence.
+
+The observed native producer generation at
+`c16a1d928d7d6941db74403e47f3dbcea206d86a` has five ordered owned steps:
+`Verify benchmark plan`, `Download benchmark results`,
+`Check all 270 benchmark results`, `Save combined benchmark results`, and
+`Save GitHub result verification`. Its completed successful native wrappers are
+exactly `Set up job`, `Download source code` before those steps, then
+`Post Download source code`, `Complete job`. Authenticate the original run,
+attempt, repository, branch, source, URL and successful aggregate job before
+classifying this exact generation as unavailable. Original run37371251640
+has a failed whole workflow and successful aggregate job112020779863; it
+supplies no admitted archives or metrics. This source is not a historical
+measurement allowlist entry. Unknown sources, failed or malformed owned/native
+steps, changed order, duplicate aggregate jobs and authentication/provider errors
+remain errors. The operation regressions must preserve the rejected input bytes,
+restore their owned controlled copies, and prove a healthy selection of the exact
+current run after each negative input. Unknown-source controls must change all
+three original summary/run/job identities consistently before the real Node
+operation; a mismatched identity rejection does not prove unknown-generation
+classification. Root maps these cases to REQ/AC-BC-WEB-002 before integration.
 
 Baseline: Pages settings are valid; original run37349838172 has217/270 worker
 artifacts and failed aggregation. Existing website capture fails before checkout

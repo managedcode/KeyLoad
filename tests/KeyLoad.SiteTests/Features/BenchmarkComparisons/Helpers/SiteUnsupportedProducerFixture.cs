@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
@@ -11,10 +10,12 @@ internal static class SiteUnsupportedProducerFixture
     private const string VerifyPlan = "Verify benchmark plan";
     private const string DownloadResults = "Download benchmark results";
     private const string LegacyCheck = "Check all 270 benchmark results";
-    private const string LegacyGenerate = "Generate website benchmark data";
-    private const string LegacySave = "Save website benchmark data";
     private const string SaveCombined = "Save combined benchmark results";
     private const string SaveVerification = "Save GitHub result verification";
+    private const string SetupJob = "Set up job";
+    private const string DownloadSource = "Download source code";
+    private const string PostDownloadSource = "Post Download source code";
+    private const string CompleteJob = "Complete job";
     private const string RunUrl = "https://github.com/managedcode/KeyLoad/actions/runs/";
     private const string JobUrl = "/job/";
     private const string Completed = "completed";
@@ -24,18 +25,18 @@ internal static class SiteUnsupportedProducerFixture
     private const int CandidateRunCount = 2;
     private const int SingleAggregateJob = 1;
     private const long NextIdentity = 1;
-    private const long InvalidRepositoryIdentity = 0;
 
     private static readonly string[] LegacySteps =
     [
         VerifyPlan,
         DownloadResults,
         LegacyCheck,
-        LegacyGenerate,
-        LegacySave,
         SaveCombined,
         SaveVerification,
     ];
+
+    private static readonly string[] LeadingNativeSteps = [SetupJob, DownloadSource];
+    private static readonly string[] TrailingNativeSteps = [PostDownloadSource, CompleteJob];
 
     internal static async Task<(SiteUnsupportedProducerCandidate Older, SiteUnsupportedProducerCandidate Current)> InstallIncompatibleCandidateAsync(
         SiteIsolatedGitHubScope scope, CancellationToken token)
@@ -76,7 +77,7 @@ internal static class SiteUnsupportedProducerFixture
         run[HeadSha] = IncompatibleRevision;
         run[SiteIsolatedGitHubFields.NativeHtmlUrl] = RunUrl + id.ToString(CultureInfo.InvariantCulture);
         run[SiteIsolatedGitHubFields.Status] = Completed;
-        run[SiteIsolatedGitHubTokens.Conclusion] = SiteIsolatedGitHubTokens.Success;
+        run[SiteIsolatedGitHubTokens.Conclusion] = SiteIsolatedGitHubFields.Failure;
         return run;
     }
 
@@ -131,12 +132,13 @@ internal static class SiteUnsupportedProducerFixture
     private static JsonArray CreateSuccessfulLegacySteps()
     {
         var steps = new JsonArray();
-        for (var index = 0; index < LegacySteps.Length; index++)
+        var nativeSteps = LeadingNativeSteps.Concat(LegacySteps).Concat(TrailingNativeSteps).ToArray();
+        for (var index = 0; index < nativeSteps.Length; index++)
         {
             steps.Add(new JsonObject
             {
                 [SiteIsolatedGitHubTokens.Number] = index + FirstSequenceNumber,
-                [SiteIsolatedGitHubFields.Name] = LegacySteps[index],
+                [SiteIsolatedGitHubFields.Name] = nativeSteps[index],
                 [SiteIsolatedGitHubFields.Status] = Completed,
                 [SiteIsolatedGitHubTokens.Conclusion] = SiteIsolatedGitHubTokens.Success,
             });
@@ -152,58 +154,7 @@ internal static class SiteUnsupportedProducerFixture
         run[SiteIsolatedGitHubFields.Event]!.GetValue<string>(),
         run[SiteIsolatedGitHubTokens.Conclusion]!.GetValue<string>());
 
-    internal static Task<JsonElement> SelectAsync(SiteIsolatedGitHubScope scope, SiteUnsupportedProducerCandidate producer,
-        CancellationToken token, bool optional = true) => SiteIsolatedGitHubScope.RunAsync(SiteIsolatedGitHubFields.SelectionOperation,
-        new
-        {
-            input = scope.Capture,
-            mode = SiteIsolatedGitHubTokens.Publish,
-            requestedRun = (string?)null,
-            producer = new
-            {
-                runId = producer.RunId,
-                attempt = producer.Attempt,
-                sourceRevision = producer.SourceRevision,
-                @event = producer.Event,
-                conclusion = producer.Conclusion,
-            },
-            legacyArchive = false,
-            optional,
-        }, token);
-
     private static async Task<JsonArray> ReadArrayAsync(string path, CancellationToken token) =>
-        JsonNode.Parse(await File.ReadAllBytesAsync(path, token))!.AsArray();
+        JsonNode.Parse(await File.ReadAllTextAsync(path, token))!.AsArray();
 
-    internal static async Task RejectMalformedLegacyCandidateAsync(SiteIsolatedGitHubScope scope,
-        SiteUnsupportedProducerCandidate producer, CancellationToken token)
-    {
-        var path = OlderJobsPath(scope, producer);
-        var pages = await ReadArrayAsync(path, token);
-        var job = pages[0]![SiteIsolatedGitHubFields.NativeJobs]![0]!.AsObject();
-        job[SiteIsolatedGitHubFields.Steps]![0]![SiteIsolatedGitHubTokens.Conclusion] = SiteIsolatedGitHubFields.Failure;
-        await File.WriteAllTextAsync(path, pages.ToJsonString(), token);
-        var response = await SelectAsync(scope, producer, token);
-        await Assert.That(response.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
-    }
-
-    internal static async Task RejectUnauthenticatedLegacyCandidateAsync(SiteIsolatedGitHubScope scope,
-        SiteUnsupportedProducerCandidate producer, CancellationToken token)
-    {
-        var path = OlderRunPath(scope, producer);
-        var run = JsonNode.Parse(await File.ReadAllBytesAsync(path, token))!.AsObject();
-        run[SiteIsolatedGitHubFields.NativeHeadRepository]![SiteIsolatedGitHubTokens.Id] = InvalidRepositoryIdentity;
-        await File.WriteAllTextAsync(path, run.ToJsonString(), token);
-        var response = await SelectAsync(scope, producer, token);
-        await Assert.That(response.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
-    }
-
-    private static string OlderJobsPath(SiteIsolatedGitHubScope scope, SiteUnsupportedProducerCandidate producer) =>
-        Path.Combine(OlderAttemptDirectory(scope, producer), SiteIsolatedGitHubFields.Jobs);
-
-    private static string OlderRunPath(SiteIsolatedGitHubScope scope, SiteUnsupportedProducerCandidate producer) =>
-        Path.Combine(OlderAttemptDirectory(scope, producer), SiteIsolatedGitHubFields.NativeRun);
-
-    private static string OlderAttemptDirectory(SiteIsolatedGitHubScope scope, SiteUnsupportedProducerCandidate producer) =>
-        Path.Combine(scope.Capture, SiteIsolatedGitHubFields.MetadataDirectory, SiteIsolatedGitHubFields.Attempts,
-            producer.RunId.ToString(CultureInfo.InvariantCulture), producer.Attempt.ToString(CultureInfo.InvariantCulture));
 }

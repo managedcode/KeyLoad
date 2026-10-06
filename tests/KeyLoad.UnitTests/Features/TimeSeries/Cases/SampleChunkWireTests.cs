@@ -161,10 +161,10 @@ internal sealed class SampleChunkWireTests
     }
 
     private static byte[] Encoded(SampleRecord[] records)
-        => SampleChunkCodec.Encode(records, SampleChunkTestData.Budget());
+        => SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
 
     private static KeyLoadException DecodeFailure(byte[] bytes)
         => Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(bytes,
-            SampleChunkTestData.ChargedDecodeBudget(bytes)));
+            SampleChunkTestData.ChargedDecodeBudget(bytes), UnitExecutionOptions.TimeSeriesExecution()));
 
 }

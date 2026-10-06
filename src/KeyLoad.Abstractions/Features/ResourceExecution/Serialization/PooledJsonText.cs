@@ -1,32 +1,46 @@
 using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Features.ResourceExecution;
 
 /// <summary>Owns a bounded reusable UTF-8 input loan for canonical JSON text decoding.</summary>
 internal static class PooledJsonText
 {
-    private const int MaximumRetainedArrayBytes = 262_144;
-    private const int MaximumArraysPerBucket = 2;
-    private const int FirstWrittenByte = 0;
-    private static readonly ArrayPool<byte> Buffers = ArrayPool<byte>.Create(
-        MaximumRetainedArrayBytes, MaximumArraysPerBucket);
+    private static readonly Lazy<Owner> Shared = new(() => new(SerializationExecutionRegistration.Process));
 
-    public static T Deserialize<T>(string value)
+    public static T Deserialize<T>(string value) => Shared.Value.Deserialize<T>(value);
+
+    internal sealed class Owner
     {
-        ArgumentNullException.ThrowIfNull(value);
-        var byteCount = Encoding.UTF8.GetByteCount(value);
-        var buffer = Buffers.Rent(byteCount);
-        try
+        private const int FirstWrittenByte = 0;
+        private readonly ArrayPool<byte> buffers;
+
+        internal Owner(IOptions<SerializationExecutionOptions> executionOptions)
         {
-            var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
-            return JsonDefaults.Deserialize<T>(buffer.AsSpan(FirstWrittenByte, written));
+            ArgumentNullException.ThrowIfNull(executionOptions);
+            var configured = executionOptions.Value;
+            configured.Validate();
+            buffers = ArrayPool<byte>.Create(configured.JsonTextMaximumRetainedArrayBytes,
+                configured.JsonTextMaximumArraysPerBucket);
         }
-        finally
+
+        internal T Deserialize<T>(string value)
         {
-            CryptographicOperations.ZeroMemory(buffer);
-            Buffers.Return(buffer);
+            ArgumentNullException.ThrowIfNull(value);
+            var byteCount = Encoding.UTF8.GetByteCount(value);
+            var buffer = buffers.Rent(byteCount);
+            try
+            {
+                var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
+                return JsonDefaults.Deserialize<T>(buffer.AsSpan(FirstWrittenByte, written));
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(buffer);
+                buffers.Return(buffer);
+            }
         }
     }
 }

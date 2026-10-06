@@ -5,18 +5,18 @@ internal sealed record SampleChunkDecodedText(string SeriesId, string[] EventIds
 
 internal static class SampleChunkTextDecoder
 {
-    internal static SampleChunkDecodedText Decode(SampleChunkPayload payload, ReadExecutionBudget budget)
+    internal static SampleChunkDecodedText Decode(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
     {
         var seriesReader = new SampleChunkReader(payload.Series.Span);
-        var seriesId = SampleChunkText.ReadFramed(ref seriesReader, budget);
+        var seriesId = SampleChunkText.ReadFramed(ref seriesReader, budget, hashChunkBytes);
         seriesReader.RequireEnd();
 
-        var eventIds = DecodeEventIds(payload, budget);
-        var (dictionary, indexes) = DecodeTags(payload, budget);
+        var eventIds = DecodeEventIds(payload, budget, hashChunkBytes);
+        var (dictionary, indexes) = DecodeTags(payload, budget, hashChunkBytes);
         return new(seriesId, eventIds, dictionary, indexes);
     }
 
-    private static string[] DecodeEventIds(SampleChunkPayload payload, ReadExecutionBudget budget)
+    private static string[] DecodeEventIds(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
 
@@ -26,7 +26,7 @@ internal static class SampleChunkTextDecoder
         for (var index = IndexInitialValue; index < result.Length; index++)
         {
             budget.Check();
-            var eventId = SampleChunkText.ReadFramed(ref reader, budget);
+            var eventId = SampleChunkText.ReadFramed(ref reader, budget, hashChunkBytes);
             SampleChunkWire.Require(unique.Add(eventId));
             result[index] = eventId;
         }
@@ -35,7 +35,7 @@ internal static class SampleChunkTextDecoder
     }
 
     private static (string[] Dictionary, int[] Indexes) DecodeTags(SampleChunkPayload payload,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int IndexInitialValue = 0;
 
@@ -46,7 +46,7 @@ internal static class SampleChunkTextDecoder
         for (var index = IndexInitialValue; index < dictionary.Length; index++)
         {
             budget.Check();
-            var text = SampleChunkText.ReadFramed(ref reader, budget);
+            var text = SampleChunkText.ReadFramed(ref reader, budget, hashChunkBytes);
             SampleChunkWire.Require(unique.Add(text));
             dictionary[index] = text;
         }

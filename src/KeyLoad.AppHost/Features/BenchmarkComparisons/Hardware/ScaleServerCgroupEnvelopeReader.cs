@@ -67,7 +67,7 @@ internal static class ScaleServerCgroupEnvelopeReader
     private static async Task<(string Cpu, string Memory, string CpuSet)?> ReadAncestorInputsAsync(
         string directory, bool isRoot, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        const string Path2Text = "cpuset.cpus.effective";
+        const string EffectiveCpuSetFileName = "cpuset.cpus.effective";
 
         var cpuPath = Path.Combine(directory, CpuMaximum);
         var memoryPath = Path.Combine(directory, MemoryMaximum);
@@ -77,7 +77,7 @@ internal static class ScaleServerCgroupEnvelopeReader
         var memoryText = isRoot
             ? ScaleServerCgroupHierarchy.ReadRootLimit(memoryPath)
             : await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, budget, token);
-        var setText = await BoundedText.ReadAsync(Path.Combine(directory, Path2Text),
+        var setText = await BoundedText.ReadAsync(Path.Combine(directory, EffectiveCpuSetFileName),
             budget.Settings.MaxFileBytes, budget, token);
         return cpuText is null || memoryText is null || string.IsNullOrWhiteSpace(setText)
             ? null : (cpuText, memoryText, setText);

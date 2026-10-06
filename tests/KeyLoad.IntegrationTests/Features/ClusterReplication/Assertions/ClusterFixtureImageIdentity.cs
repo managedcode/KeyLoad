@@ -37,27 +37,44 @@ internal static class ClusterFixtureImageIdentity
         await VerifyResourcesAsync(app, reference, digest);
     }
 
-    /// <summary>Verifies the original current manifest and source-bound receipt without creating resources.</summary>
+    internal static Task<ClusterFixtureSourceImage> ReadVerifiedImageAsync(CancellationToken cancellationToken)
+        => ReadVerifiedReceiptAsync(cancellationToken);
+
+    /// <summary>Verifies the original receipt and returns the identity from the same bytes.</summary>
     internal static async Task<string> ReadVerifiedReferenceAsync(CancellationToken cancellationToken)
+    {
+        var image = await ReadVerifiedReceiptAsync(cancellationToken).ConfigureAwait(false);
+        return image.Reference;
+    }
+
+    private static async Task<ClusterFixtureSourceImage> ReadVerifiedReceiptAsync(CancellationToken cancellationToken)
     {
         var path = Path.GetFullPath(Environment.GetEnvironmentVariable(ReceiptEnvironment)
             ?? throw new InvalidOperationException(MissingIdentity));
         var source = Environment.GetEnvironmentVariable(SourceEnvironment)
             ?? throw new InvalidOperationException(MissingIdentity);
-        using var receipt = JsonDocument.Parse(await ReadBoundedAsync(path, MaximumReceiptBytes, cancellationToken));
+        var bytes = await ReadBoundedAsync(path, MaximumReceiptBytes, cancellationToken).ConfigureAwait(false);
+        using var receipt = JsonDocument.Parse(bytes);
         await Assert.That(receipt.RootElement.GetProperty(ReceiptSchema).GetInt32()).IsEqualTo(SchemaVersion);
         await Assert.That(receipt.RootElement.GetProperty(SourceProperty).GetString()).IsEqualTo(source);
         var image = receipt.RootElement.GetProperty(ImagesProperty).GetProperty(ServerProperty);
+        var digest = image.GetProperty(DigestProperty).GetString();
         await Assert.That(image.GetProperty(ManifestProperty).GetString()).IsEqualTo(ManifestName);
-        var bytes = await ReadBoundedAsync(Path.Combine(Path.GetDirectoryName(path)!, ManifestName),
-            MaximumManifestBytes, cancellationToken);
-        var digest = DigestPrefix + Convert.ToHexStringLower(SHA256.HashData(bytes));
-        await Assert.That(image.GetProperty(DigestProperty).GetString()).IsEqualTo(digest);
-        await Assert.That(image.GetProperty(RegistryDigestProperty).GetString()).IsEqualTo(digest);
+        if (string.IsNullOrWhiteSpace(digest))
+        {
+            throw new InvalidOperationException(MissingIdentity);
+        }
+        var manifestPath = Path.Combine(Path.GetDirectoryName(path)!, ManifestName);
+        var manifestBytes = await ReadBoundedAsync(manifestPath, MaximumManifestBytes, cancellationToken)
+            .ConfigureAwait(false);
+        var expectedDigest = DigestPrefix + Convert.ToHexStringLower(SHA256.HashData(manifestBytes));
+        await Assert.That(digest).IsEqualTo(expectedDigest);
+        await Assert.That(image.GetProperty(RegistryDigestProperty).GetString()).IsEqualTo(expectedDigest);
         await Assert.That(image.GetProperty(RevisionProperty).GetString()).IsEqualTo(source);
         var reference = image.GetProperty(ReferenceProperty).GetString()!;
-        await Assert.That(reference.EndsWith(ReferenceDigestPrefix + digest[DigestPrefix.Length..], StringComparison.Ordinal)).IsTrue();
-        return reference;
+        await Assert.That(reference.EndsWith(ReferenceDigestPrefix + expectedDigest[DigestPrefix.Length..],
+            StringComparison.Ordinal)).IsTrue();
+        return new(reference, digest, Convert.ToHexStringLower(SHA256.HashData(bytes)));
     }
 
     private static async Task VerifyResourcesAsync(DistributedApplication app, string reference, string digest)
@@ -87,3 +104,5 @@ internal static class ClusterFixtureImageIdentity
         return bytes;
     }
 }
+
+internal sealed record ClusterFixtureSourceImage(string Reference, string ManifestDigest, string ReceiptSha256);

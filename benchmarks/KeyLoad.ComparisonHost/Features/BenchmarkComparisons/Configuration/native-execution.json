@@ -10,8 +10,25 @@
     "MaxResponseBytes": 8388608,
     "WriteBatchCapacity": 24,
     "ReadbackBatchCapacity": 256,
+    "KeyLoadTimeSeriesReadLimit": 1000,
     "CleanupTimeout": "00:00:30",
     "IndexBuildTimeout": "00:20:00",
     "IndexPollInterval": "00:00:00.200"
+  },
+  "NativeComparisonSerialization": {
+    "SurrealDbBatchRecordBuilderCapacity": 12000,
+    "SurrealDbVectorComponentBuilderCapacity": 12,
+    "PostgresVectorComponentBuilderCapacity": 14
+  },
+  "NativeComparisonDiagnostics": {
+    "KurrentSetupMaximumCauses": 3,
+    "KurrentSetupMaximumFramesPerCause": 8,
+    "KurrentSetupMaximumIdentifierCharacters": 64,
+    "KurrentSetupBuilderCapacity": 4096,
+    "KurrentCleanupMaximumExceptionDepth": 8,
+    "KurrentCleanupMaximumCharacters": 4096,
+    "RedisReplicaMaximumCharacters": 4096,
+    "KeyLoadOutboxMaximumBytes": 512,
+    "KeyLoadOutboxMaximumConsumers": 64
   }
 }

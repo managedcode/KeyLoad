@@ -302,6 +302,10 @@ contract, with a strict project build and final solution integration by the lead
   cannot establish a branch union. Until then retain per-run branch counts and
   mark the merged branch result unmeasured. Preserve the mandatory 80/70/90 and
   module/no-decrease gates; an unqualified partial report cannot close AC-CQ-009.
+  A native report which omits both integer branch-count attributes retains null
+  aggregate counts; `branch-rate="1"` alone is not branch evidence. Reject a
+  one-sided or malformed root pair. When both counts exist, validate them against
+  every actual native per-line condition pair without modifying the original XML.
 - AC-CQ-020: complete coverage has an explicit functional contributor inventory
   and classification of every production project. Exclude all load, stress,
   performance and comparison contributors, including such cases inside an
@@ -340,6 +344,15 @@ flows and the complete original acceptance/gates. Neither later task is complete
 because the first scoped profile exists. No persistence or public API migration
 occurs; rollback restores a coherent tooling profile and retains original reports
 without disabling required quality or functional test gates.
+
+The production settings explicitly collect native child processes and enable
+dynamic managed instrumentation on supported platforms while retaining static
+managed instrumentation for platforms which require it. CLI backup/pack/restore
+contributors require actual CLI and Artifacts module hits from their real child
+processes. Passing host tests or naming those modules in the contributor registry
+does not establish their coverage. CI collects the four owned profiles after one
+Release build, preserves the separate complete suites and always uploads raw
+reports before module-completeness admission. Missing modules remain unqualified.
 
 ### Compiled-source identity prerequisite
 
@@ -526,6 +539,22 @@ they are not marked passing until the Aspire-owned suite runs against the rebuil
 source. Existing byte preservation, atomic publication, authentication and RF3
 assertions remain mandatory when required constructor arguments are joined.
 
+`ClusterPublishedPortPolicyTests` extends AC-CQ-034/035 with centrally configured
+RF3 published ports. The genuine Aspire resource model must retain three distinct
+configured endpoint annotations and a frozen options snapshot; ephemeral ports
+remain Aspire-assigned. Invalid first ports, including an overflowing third-voter
+port, must fail before resources or data directories exist. Internal container
+ports remain immutable image identities.
+
+`NativeCoverageOptionsEnvironmentTests` maps the selected RF3 fixture IO join to
+AC-CQ-034/035: evaluate genuine Aspire environment callbacks with all12 nondefault
+native settings, rebind that emitted environment through the native options
+boundary, and require the exact configured snapshot and coherent existing mode/
+source aliases. The fixture's real file IO then consumes the original retained
+wrapper and rejects admitted-run policy mismatches. Schema/hash/format-fence and
+process-settlement assertions remain unchanged; this development bridge test
+does not substitute for original RF3 coverage execution.
+
 Additional AC-CQ-034 checks are `NativeComparisonAdapterPolicyTests` (inclusive
 native adapter bounds and invalid-value matrices),
 `TimeSeriesIntensiveDigestTests.AcCq034ConfiguredOperationTimeoutChangesOnlyItsIndependentWorkloadFrameAsync`
@@ -574,6 +603,40 @@ the existing options group's lower ReadbackBatchCapacity reaches actual SQL page
 and Redis SCAN/MGET, with observed native request/page counts and independent
 original order/bytes/cancellation/following-read assertions. Its native selected
 Aspire topology is mandatory; a source or total-only check is not execution proof.
+
+`SqlTriviaExecutionPolicyTests` maps AC-CQ-034/035 to configured work chunks in
+the shared trivia reader, Query/Server owners and SDK conservative classification,
+including interval1 with immutable two-character comment atoms and exact
+default/custom known-read/unknown-write cancellation behavior.
+`SampleChunkExecutionPolicyTests` maps AC-CQ-034 to explicit native TimeSeries
+codec options, configured hash/text cancellation cadences, preserved complete
+envelopes and independent checksum/record goldens, and rejection before work.
+
+`BlobExecutionPolicyTests` maps AC-CQ-034 to the separate native blob restore/proof
+options, genuine ZoneTree paging, configured budget rejection before effects and
+preserved fenced retry/cursor/metadata contracts. `ScaledRawStorageExecutionPolicyTests`
+maps native mutable segment slack to the existing scaled fixture options and
+genuine native capacity/residence observations, preserving original corpus bytes.
+
+`NativeComparisonDiagnosticPolicyTests` maps AC-CQ-034 to actual native comparison
+diagnostic projections: configured traversal/output/identifier/reservation limits,
+invalid policy before execution, immutable overflow/unavailable projections,
+unchanged default goldens and existing privacy assertions.
+
+`SerializationExecutionPolicyTests` maps AC-CQ-034/035 to the one native
+process-options wrapper and independently configured genuine serializer owners:
+bounded retained UTF8 pool, required zeroing, fingerprint/DOM chunk overrides,
+surrogate boundaries, exact original envelopes/fingerprints and invalid native
+binding before owner creation. Startup and standalone first use share the same
+typed source boundary; per-call pools and hidden fallback wrappers are forbidden.
+
+`CliBackupExecutionPolicyTests` maps AC-CQ-034/035 to the actual CLI process:
+native `KEYLOAD_BACKUP__` binding supplies archive piece size, independently
+checked catalog piece counts and byte-exact unpack/restore. Invalid policy creates
+no archive, preserves the verified backup and precedes a healthy configured retry.
+The primitive archive API requires explicit piece size and has no static runtime
+default. `BlobRestorePageNormalizationTests` adds actual default/one-record page
+flows and a lower byte-budget fence followed by complete healthy normalization.
 
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
@@ -1108,3 +1171,69 @@ before and after merge; preserve their bytes and resulting CLI storage state.
 This tooling-only envelope neither changes the product merge descriptor nor
 admits the regression as a product coverage contributor. AC-CQ-043/045/047 and
 the original-child settlement contract apply; no unbounded waits qualify proof.
+
+For AC-CQ-043/044, the independent C# operation oracle reads each original
+DLL/PDB and verifies actual SHA256, module name, MVID and the native CodeView
+GUID/stamp against the produced identity. This applies to all16 original
+compiled products and all three original test images, within the same complete
+prepare, tamper/rejection, preserved-input, restore and healthy verification
+workflow; a property-format assertion alone is not native identity proof.
+
+The AC-CQ-045/047 original-child settlement uses one captured absolute cleanup
+watchdog. On timeout or overflow, kill the owned child tree and close its two
+original redirected readers, then join the original exit/readers within the
+remaining admitted bound. Do not reset the timer, create a replacement waiter
+or await without a bound. If the original tasks still cannot settle, fail-stop
+the native merger owner with a fixed safe fatal message, preserve every original
+input, and publish no successful merge output or receipt. Its original parent
+observes that native failure and retains Aspire/TUnit ownership of tree cleanup;
+an unsettled process is never labelled joined or converted into coverage proof.
+
+Native R26/R27 baseline exposed KLD0031 on the216-code-line combined
+NativeComparisonExecutionOptions type. The unchanged adapter conditions now
+belong to its feature-local NativeComparisonAdapterOptionsValidator; the bound
+options properties, defaults, source profile limits and evidence fields remain
+identical. R27 no longer reports that violation. Final complete build, existing
+options operation flows, format and delivery gates remain required.
+
+The schema-v3 product contributor authority is the source-controlled
+`scripts/Features/CodeQuality/functional-coverage.product-contributors.json`.
+Its exact schema is `{schemaVersion:1,contributors:[...]}`, with each row using
+the existing eight-field AC-CQ-044 contract. It explicitly names all four
+functional suites; unit and unit-scalar reference the same original test image.
+The producer snapshots and hashes this original registry with its complete
+script inventory before and after capture. Reject duplicate keys/identities,
+unknown suites/modules, empty or malformed REQ/AC labels and oversized input.
+The earlier Query-only contract remains a separate partial development profile.
+An authored row selects a future full operation flow; it supplies no pass,
+coverage hit or current-source qualification. Original successful suite exits,
+TUnit/TRX identities and native image/source bindings remain mandatory for merge.
+
+Aspire test-output capture follows both native identity phases for each selected
+unreplicated one-shot executable: the initial model resource ID and its one
+observed DCP instance ID. Keep observing notifications, deduplicate by the exact
+native ID and retain/join every original log task. The closed topology admits
+at most two distinct streams per selected executable; an unexpected third
+instance fails instead of silently losing output. Forward original stderr and
+stdout without adding an unbounded retention buffer or inventing DCP suffixes.
+
+The final AC-CQ-034/035 completeness join includes the operational reservations
+found by manual review of actual consumers, beyond the native analyzer sinks:
+
+| Actual configured consumer | Native regression and unchanged oracle |
+| --- | --- |
+| Canonical JSON flush and digest UTF-8 stack scratch | SerializationBufferPolicyTests: real Utf8JsonWriter flush, independently frozen JSON bytes and digest frames |
+| ANN allocated hash scratch and memory admission | AnnSeedHashScratchPolicyTests: actual ZoneTree corpus, maximum valid identifier, independent digest, configured modeled reservation and exact/one-under budget |
+| SurrealDB and PostgreSQL native SQL builder reservations | NativeComparisonSerializationPolicyTests and NativeComparisonSerializationProjectionTests: native binding/rejection, actual StringBuilder capacity and independent complete SQL/float goldens |
+| Ordinary KeyLoad time-series request cap | NativeComparisonAdapterPolicyTests and NativeConfiguredTimeSeriesReadRegression on existing Aspire RF3: exact SDK rows, cancellation and healthy reuse |
+| Native signed-claim decode admission | SignedClaimsExecutionPolicyTests and its actual leased-message flow: original claim/MAC bytes, exact preserved message state and healthy same-store retry |
+
+These settings retain their prior defaults, accept only validated bounded values,
+and reach execution through native options at their documented composition owner.
+The required wrappers are joined in production, genuine embedded owners and all
+actual fixtures; no per-class fallback or optional literal restores a policy.
+Persisted/public request operands, stable protocol/format identities, fixed
+qualified workload criteria and the bounded CAS arithmetic contract in ADR063
+retain their existing ownership. This source inventory supplies no passing test,
+coverage, performance or delivered-source claim: final formatter/build and the
+complete original Aspire/native Linux reports remain mandatory.

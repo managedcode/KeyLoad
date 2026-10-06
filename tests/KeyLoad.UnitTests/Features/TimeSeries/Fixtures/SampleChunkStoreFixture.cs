@@ -53,9 +53,10 @@ internal sealed class SampleChunkStoreFixture : IDisposable
             var budget = NewBudget(database);
             var before = CaptureCanonicalState(store, database, view);
             var source = ReadSamples(partition, view, budget);
-            var encoded = SampleChunkCodec.Encode(source.AsSpan(), budget);
+            var executionOptions = UnitExecutionOptions.TimeSeriesExecution();
+            var encoded = SampleChunkCodec.Encode(source.AsSpan(), budget, executionOptions);
             budget.ChargeBytes(encoded.Length);
-            var decoded = SampleChunkCodec.Decode(encoded, budget);
+            var decoded = SampleChunkCodec.Decode(encoded, budget, executionOptions);
             var readers = ReadAllFour(database, partition, view);
             return new SampleChunkStoreSourceCut(source, decoded, encoded, readers, before);
         });

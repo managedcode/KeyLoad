@@ -15,9 +15,6 @@ internal static class BlobKeys
     internal const int ScopeComponents = 7;
     internal const int StateComponents = ScopeComponents + 1;
     internal const int PartComponents = StateComponents + 1;
-    internal const int MetadataPageSize = BlobLimits.MaxReclaimParts;
-    internal const int InitialCatalogProofRecords = 10_000;
-    internal const long RestorePageBytes = 4_194_304;
     internal static byte[] Global => KeyCodec.Encode(GlobalSpace);
     internal static byte[] Head(BlobRef blob) => KeySpace.Partition(HeadSpace, blob.Partition, blob.Resource, blob.Id);
     internal static byte[] Heads(PartitionRef partition, string resource) => KeySpace.Partition(HeadSpace, partition, resource);
@@ -70,6 +67,7 @@ internal static class BlobErrors
     internal const string Conflict = "The blob upload conflicts with its current state.";
     internal const string Missing = "The published blob is unavailable.";
     internal const string CatalogProofBudget = "The initial blob catalog proof exceeds its bounded work limit.";
+    internal const string RestoreWorkBudget = "The blob restore record exceeds the configured page byte budget.";
     internal static KeyLoadException Corruption() => Errors.Fail(ErrorCode.Corruption, Damaged);
     internal static KeyLoadException Validation() => Errors.Fail(ErrorCode.Validation, Invalid);
     internal static KeyLoadException Token() => Errors.Fail(ErrorCode.TokenInvalidated, Lifetime);

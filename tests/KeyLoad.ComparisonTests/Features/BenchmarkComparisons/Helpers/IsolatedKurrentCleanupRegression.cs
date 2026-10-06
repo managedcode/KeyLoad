@@ -53,7 +53,7 @@ internal static class IsolatedKurrentCleanupRegression
         owner.PrivateDeletionStarted = true;
         owner.Clients.Remove(writer);
         // Ownership transfers to the actual production cleanup, even when native deletion fails.
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), token);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), token);
         await IsolatedKurrentCleanupRegressionNative.RequireCompleteAsync(diagnostic, streams.Length);
         var reader = owner.CreateClient();
         await IsolatedKurrentCleanupRegressionNative.RequireDeletedAsync(reader, streams, token);
@@ -80,7 +80,7 @@ internal static class IsolatedKurrentCleanupRegression
             owner.Clients.Clear();
             try
             {
-                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
             }
             finally
             {
@@ -92,7 +92,7 @@ internal static class IsolatedKurrentCleanupRegression
         owner.Clients.Clear();
         try
         {
-            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
+            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
         }
         catch (Exception)
         {

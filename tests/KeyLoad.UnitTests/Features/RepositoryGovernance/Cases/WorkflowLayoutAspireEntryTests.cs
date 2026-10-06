@@ -125,9 +125,9 @@ internal sealed class WorkflowLayoutAspireEntryTests
         await Assert.That(runner).IsGreaterThan(-1);
         await Assert.That(scalarCondition).IsGreaterThan(runner);
         await Assert.That(source.Contains("private const string IntrinsicsEnvironment = \"DOTNET_EnableHWIntrinsic\"", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(source.Contains("const string AddValueText = \"0\"", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(source.Contains("const string DisabledIntrinsicsValue = \"0\"", StringComparison.Ordinal)).IsTrue();
         await Assert.That(source[scalarCondition..].Contains(
-            "runner.WithEnvironment(IntrinsicsEnvironment, AddValueText)", StringComparison.Ordinal)).IsTrue();
+            "runner.WithEnvironment(IntrinsicsEnvironment, DisabledIntrinsicsValue)", StringComparison.Ordinal)).IsTrue();
     }
 
     private static async Task AssertSuiteProjectsAsync()

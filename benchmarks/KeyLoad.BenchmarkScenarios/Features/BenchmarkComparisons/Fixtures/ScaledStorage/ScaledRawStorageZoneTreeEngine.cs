@@ -11,7 +11,6 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
 {
     private const string DirectoryPrefix = "keyload-scaled-zonetree-";
     private const string GuidFormat = "N";
-    private const int MutableSegmentSlackRecords = 2;
     private const string LengthMessage = "ZoneTree returned a value with an unexpected length.";
     private const string SeedLengthMessage = "The generated seed length differs from the immutable value arena.";
     private const string DeadlineMessage = "The scaled preparation deadline expired.";
@@ -28,7 +27,9 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     internal ScaledRawStorageZoneTreeEngine(ScaledRawStorageCorpus corpus, ScaledRawStorageValueArena arena,
         byte[] readScratch, long deadlineStart, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
     {
+        ArgumentNullException.ThrowIfNull(executionOptions);
         settings = executionOptions.Value;
+        settings.Validate();
         _corpus = corpus;
         _arena = arena;
         _readScratch = readScratch;
@@ -42,11 +43,14 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
         _directory = directory;
         CheckPreparation();
         var mutableBound = Math.Max(settings.MinimumMutableSegmentRecords,
-            checked(_corpus.RecordCount + MutableSegmentSlackRecords));
+            checked(_corpus.RecordCount + settings.MutableSegmentSlackRecords));
         _tree = CreateTree(directory, mutableBound).OpenOrCreate();
     }
 
     public string? Directory => _directory;
+
+    internal ZoneTreeOptions<Memory<byte>, Memory<byte>> CloneNativeOptions()
+        => _tree!.Maintenance.CloneOptions();
 
     public bool TryRead(int index, out ReadOnlyMemory<byte> value)
     {

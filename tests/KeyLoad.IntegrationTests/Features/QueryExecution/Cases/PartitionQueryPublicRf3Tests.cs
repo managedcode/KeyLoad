@@ -27,5 +27,6 @@ internal sealed class PartitionQueryPublicRf3Tests(ClusterFixture fixture)
         await PartitionQueryRf3Assertions.AssertOracleAsync(receipt.Value, scenario, scenario.Partitions)
             .ConfigureAwait(false);
         await PartitionQueryRf3Assertions.AssertSameLogicalRowsAsync(sdkPage!, receipt.Value).ConfigureAwait(false);
+        fixture.RegisterNativeCoverageCase<PartitionQueryPublicRf3Tests>(nameof(AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder));
     }
 }

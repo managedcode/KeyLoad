@@ -39,17 +39,14 @@ internal static class IsolatedNativeRegressions
         switch (selection.Target)
         {
             case KeyLoad:
-                var admin = await ParameterAsync(resources, Admin, cancellationToken);
-                await KeyLoadStreamPublicRegression.VerifyAsync(app, admin, cancellationToken, selection.NodeCount);
-                await IsolatedKeyLoadPublicRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
-                await IsolatedKeyLoadFaultRegression.VerifyAsync(app, selection.NodeCount,
-                    IsolatedNativeReportAssertions.EvidenceDirectory(), cancellationToken);
+                await VerifyKeyLoadAsync(app, resources, selection.NodeCount, cancellationToken);
                 break;
             case Postgres:
                 await VerifyPostgresAsync(app, resources, selection.NodeCount, cancellationToken);
                 break;
             case Redis:
                 await RedisNativeReadinessRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
+                await NativeCorpusPagingRegression.VerifyRedisAsync(app, selection.NodeCount, cancellationToken);
                 break;
             case OpenSearch:
                 await OpenSearchNativeVectorRegression.VerifyAsync(app, selection.NodeCount, cancellationToken);
@@ -66,6 +63,21 @@ internal static class IsolatedNativeRegressions
                 await Neo4jHarnessMismatchRegression.VerifyAsync(endpoint, password, IsolatedNeo4jResources.ImageReference, cancellationToken);
                 break;
         }
+    }
+
+    private static async Task VerifyKeyLoadAsync(DistributedApplication app, IEnumerable<IResource> resources,
+        int nodeCount, CancellationToken token)
+    {
+        var admin = await ParameterAsync(resources, Admin, token);
+        await KeyLoadStreamPublicRegression.VerifyAsync(app, admin, token, nodeCount);
+        await IsolatedKeyLoadPublicRegression.VerifyAsync(app, nodeCount, token);
+        await NativeCorpusPagingRegression.VerifyKeyLoadAsync(app, admin, nodeCount, token);
+        if (nodeCount == 3)
+        {
+            await TimeSeries.NativeConfiguredTimeSeriesReadRegression.VerifyAsync(app, admin, token);
+        }
+        await IsolatedKeyLoadFaultRegression.VerifyAsync(app, nodeCount,
+            IsolatedNativeReportAssertions.EvidenceDirectory(), token);
     }
 
     private static async Task VerifyPostgresAsync(DistributedApplication app, IEnumerable<IResource> resources,

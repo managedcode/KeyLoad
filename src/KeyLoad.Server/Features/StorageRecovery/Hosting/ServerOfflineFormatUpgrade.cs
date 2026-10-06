@@ -45,8 +45,8 @@ internal static class ServerOfflineFormatUpgrade
 
     private static async Task ExecuteAsync(string operation, string source, string destination)
     {
-        const string ExecuteAsyncValueText = "Node prepared. Prepare and verify every stopped RF3 node before publishing any node.";
-        const string ExecuteAsyncExecuteAsyncValueText = "Node verified. Verify all three current nodes before starting compatible voters.";
+        const string NodePreparedNotice = "Node prepared. Prepare and verify every stopped RF3 node before publishing any node.";
+        const string NodeVerifiedNotice = "Node verified. Verify all three current nodes before starting compatible voters.";
 
         if (operation == Command)
         {
@@ -63,8 +63,8 @@ internal static class ServerOfflineFormatUpgrade
         };
         await Console.Out.WriteLineAsync(operation switch
         {
-            PrepareNode => ExecuteAsyncValueText,
-            VerifyNode => ExecuteAsyncExecuteAsyncValueText,
+            PrepareNode => NodePreparedNotice,
+            VerifyNode => NodeVerifiedNotice,
             _ => NodePublishedNotice
         }).ConfigureAwait(false);
     }

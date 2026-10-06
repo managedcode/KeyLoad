@@ -7,6 +7,8 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class RedisReplicaDiagnosticTests
 {
+    private readonly RedisReplicaDiagnostics diagnostics = new(NativeExecutionPolicyFixture.ReadDiagnostics());
+
     private const string PrimaryHost = "primary";
     private const string ReplicaHost = "replica1";
     private const string NativeHost = "primary.dev.internal";
@@ -33,7 +35,7 @@ internal sealed class RedisReplicaDiagnosticTests
     public async Task ProjectsEachOriginalIdentityPredicate(string predicate)
     {
         var (info, role, primary) = MutatePredicate(predicate);
-        using var projection = JsonDocument.Parse(RedisReplicaDiagnostics.Project(new DnsEndPoint(ReplicaHost, Port), primary, info, role));
+        using var projection = JsonDocument.Parse(diagnostics.Project(new DnsEndPoint(ReplicaHost, Port), primary, info, role));
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo(predicate);
         await Assert.That(projection.RootElement.GetProperty(RoleCountField).GetInt32()).IsEqualTo(role.Length);
     }
@@ -82,7 +84,7 @@ internal sealed class RedisReplicaDiagnosticTests
     [Test]
     public async Task RetainsNativeAliasAndPortsWithoutNormalizingConfiguredIdentity()
     {
-        using var projection = JsonDocument.Parse(RedisReplicaDiagnostics.Project(
+        using var projection = JsonDocument.Parse(diagnostics.Project(
             new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), Info(), Role()));
         var root = projection.RootElement;
         await Assert.That(root.GetProperty(PredicateField).GetString()).IsEqualTo("ConfiguredPrimary");
@@ -109,10 +111,10 @@ internal sealed class RedisReplicaDiagnosticTests
         role[0] = RedisResult.Create((RedisValue)unsafeValue);
         role[1] = RedisResult.Create((RedisValue)unsafeValue);
         role[3] = RedisResult.Create((RedisValue)unsafeValue);
-        var text = RedisReplicaDiagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
+        var text = diagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
         using var projection = JsonDocument.Parse(text);
         await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Length <= RedisReplicaDiagnostics.MaximumCharacters).IsTrue();
+        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
         await Assert.That(projection.RootElement.GetProperty(InfoHostField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(RoleStateField).ValueKind).IsEqualTo(JsonValueKind.Null);
     }
@@ -126,9 +128,9 @@ internal sealed class RedisReplicaDiagnosticTests
         var role = Role();
         role[1] = RedisResult.Create((RedisValue)new string('x', 8192));
         role[2] = RedisResult.Create((RedisValue)65536);
-        var text = RedisReplicaDiagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
+        var text = diagnostics.Project(new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(PrimaryHost, Port), info, role);
         using var projection = JsonDocument.Parse(text);
-        await Assert.That(text.Length <= RedisReplicaDiagnostics.MaximumCharacters).IsTrue();
+        await Assert.That(text.Length <= NativeExecutionPolicyFixture.ReadDiagnostics().Value.RedisReplicaMaximumCharacters).IsTrue();
         await Assert.That(projection.RootElement.GetProperty(InfoPortField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(RolePortField).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("ConfiguredPrimary");
@@ -139,7 +141,7 @@ internal sealed class RedisReplicaDiagnosticTests
     {
         var info = Info();
         info[RedisNativeProtocol.MasterHostField] = NativeHost.ToUpperInvariant();
-        using var projection = JsonDocument.Parse(RedisReplicaDiagnostics.Project(
+        using var projection = JsonDocument.Parse(diagnostics.Project(
             new DnsEndPoint(ReplicaHost, Port), new DnsEndPoint(NativeHost, Port), info, Role()));
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("None");
     }
@@ -152,7 +154,7 @@ internal sealed class RedisReplicaDiagnosticTests
     [Arguments(4)]
     public async Task IncompleteRoleArrayNeverReadsMissingEntries(int count)
     {
-        using var projection = JsonDocument.Parse(RedisReplicaDiagnostics.Project(new DnsEndPoint(ReplicaHost, Port),
+        using var projection = JsonDocument.Parse(diagnostics.Project(new DnsEndPoint(ReplicaHost, Port),
             new DnsEndPoint(PrimaryHost, Port), Info(), Role()[..count]));
         await Assert.That(projection.RootElement.GetProperty(PredicateField).GetString()).IsEqualTo("RoleCardinality");
         await Assert.That(projection.RootElement.GetProperty(RoleCountField).GetInt32()).IsEqualTo(count);
@@ -161,7 +163,7 @@ internal sealed class RedisReplicaDiagnosticTests
     [Test]
     public async Task InvalidConfiguredEndpointTextIsRedacted()
     {
-        var text = RedisReplicaDiagnostics.Project(new DnsEndPoint(ReplicaHost, Port),
+        var text = diagnostics.Project(new DnsEndPoint(ReplicaHost, Port),
             new DnsEndPoint("redis://user:credential-marker@primary", Port), Info(), Role());
         using var projection = JsonDocument.Parse(text);
         await Assert.That(text.Contains(Secret, StringComparison.Ordinal)).IsFalse();

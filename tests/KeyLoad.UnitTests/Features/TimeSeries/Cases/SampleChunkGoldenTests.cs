@@ -10,7 +10,7 @@ internal sealed class SampleChunkGoldenTests
     public async Task AcChunk004FrozenColumnsAndChecksumMatchIndependentOneRowFixture()
     {
         SampleRecord[] source = [new("chunk-series", new("golden", DateTimeOffset.UnixEpoch, -0d), 1, "{}")];
-        var encoded = SampleChunkCodec.Encode(source, SampleChunkTestData.Budget());
+        var encoded = SampleChunkCodec.Encode(source, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
         var payload = NativeSerialization.Deserialize<SampleChunkPayload>(encoded);
         await Assert.That(payload.FormatVersion).IsEqualTo(1);
         await Assert.That(payload.RecordCount).IsEqualTo(1);
@@ -25,7 +25,7 @@ internal sealed class SampleChunkGoldenTests
         await Assert.That(Convert.ToBase64String(encoded)).IsEqualTo(NativeEnvelope);
         var frozen = Convert.FromBase64String(NativeEnvelope);
         await SampleChunkTestData.AssertRecordsExact(source,
-            SampleChunkCodec.Decode(frozen, SampleChunkTestData.ChargedDecodeBudget(frozen)));
+            SampleChunkCodec.Decode(frozen, SampleChunkTestData.ChargedDecodeBudget(frozen), UnitExecutionOptions.TimeSeriesExecution()));
     }
 
     private static async Task Hex(ReadOnlyMemory<byte> actual, string expected)

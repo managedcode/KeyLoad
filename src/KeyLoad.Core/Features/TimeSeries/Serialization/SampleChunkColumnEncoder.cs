@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 internal static class SampleChunkColumnEncoder
 {
     internal static SampleChunkPayload CreatePayload(ReadOnlySpan<SampleRecord> records,
-        SampleChunkEncodingPlan plan, ReadExecutionBudget budget)
+        SampleChunkEncodingPlan plan, ReadExecutionBudget budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
     {
         const int EmptyEncodedColumnBytes = 0;
 
@@ -17,7 +17,7 @@ internal static class SampleChunkColumnEncoder
         var eventIds = new byte[plan.EventIdsBytes];
         var tags = new byte[plan.TagsBytes];
         WriteNumericColumns(records, utcTicks, offsets, sequences, values, budget);
-        WriteTextColumns(records, plan, series, eventIds, tags, budget);
+        WriteTextColumns(records, plan, series, eventIds, tags, budget, hashChunkBytes, textCancellationCheckIntervalCodeUnits);
         SampleChunkWire.Require(utcTicks.Length > EmptyEncodedColumnBytes && offsets.Length > EmptyEncodedColumnBytes && sequences.Length > EmptyEncodedColumnBytes
             && values.Length > EmptyEncodedColumnBytes && series.Length > EmptyEncodedColumnBytes && eventIds.Length > EmptyEncodedColumnBytes && tags.Length > EmptyEncodedColumnBytes);
         return new(SampleChunkWire.CurrentVersion, records.Length, utcTicks, offsets, sequences,
@@ -70,7 +70,8 @@ internal static class SampleChunkColumnEncoder
     }
 
     private static void WriteTextColumns(ReadOnlySpan<SampleRecord> records, SampleChunkEncodingPlan plan,
-        byte[] series, byte[] eventIds, byte[] tags, ReadExecutionBudget budget)
+        byte[] series, byte[] eventIds, byte[] tags, ReadExecutionBudget budget, int hashChunkBytes,
+        int textCancellationCheckIntervalCodeUnits)
     {
         const int SeriesPositionInitialValue = 0;
         const int EventPositionInitialValue = 0;
@@ -81,17 +82,19 @@ internal static class SampleChunkColumnEncoder
         var seriesPosition = SeriesPositionInitialValue;
         var eventPosition = EventPositionInitialValue;
         var tagPosition = TagPositionInitialValue;
-        SampleChunkText.WriteFramed(records[FirstSeriesRecordIndex].SeriesId, series, ref seriesPosition, budget);
+        SampleChunkText.WriteFramed(records[FirstSeriesRecordIndex].SeriesId, series, ref seriesPosition, budget,
+            hashChunkBytes, textCancellationCheckIntervalCodeUnits);
         for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
-            SampleChunkText.WriteFramed(records[index].Sample.EventId, eventIds, ref eventPosition, budget);
+            SampleChunkText.WriteFramed(records[index].Sample.EventId, eventIds, ref eventPosition, budget,
+                hashChunkBytes, textCancellationCheckIntervalCodeUnits);
         }
         SampleChunkWire.WriteVarUInt(tags, ref tagPosition, (ulong)plan.TagDictionary.Length);
         foreach (var text in plan.TagDictionary)
         {
             budget.Check();
-            SampleChunkText.WriteFramed(text, tags, ref tagPosition, budget);
+            SampleChunkText.WriteFramed(text, tags, ref tagPosition, budget, hashChunkBytes, textCancellationCheckIntervalCodeUnits);
         }
         foreach (var record in records)
         {

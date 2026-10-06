@@ -51,7 +51,8 @@ internal static class KeyLoadFailureDiagnostics
         => error is IOException or InvalidOperationException or ArgumentException or NotSupportedException;
 
     internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition,
-        ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
+        ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(partition);
@@ -61,6 +62,7 @@ internal static class KeyLoadFailureDiagnostics
             return;
         }
 
+        var diagnostics = new KeyLoadOutboxDiagnosticLine(diagnosticOptions);
         var line = KeyLoadOutboxDiagnosticLine.UnavailableLine;
         if (!cancellationToken.IsCancellationRequested)
         {
@@ -71,7 +73,7 @@ internal static class KeyLoadFailureDiagnostics
                 var result = await client.OutboxStatusAsync(partition, deadline.Token).ConfigureAwait(false);
                 if (result.IsSuccess && result.Value is { } status)
                 {
-                    line = KeyLoadOutboxDiagnosticLine.Format(failed, status);
+                    line = diagnostics.Format(failed, status);
                 }
             }
             catch (Exception error) when (IsRecoverableObservationFailure(error))
@@ -86,8 +88,9 @@ internal static class KeyLoadFailureDiagnostics
 
 public sealed partial class KeyLoadTarget : IComparisonFailureDiagnostics
 {
+    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     /// <inheritdoc />
     Task IComparisonFailureDiagnostics.ObserveFailureAsync(ComparisonCase failed, CancellationToken cancellationToken)
         => KeyLoadFailureDiagnostics.ObserveAsync(client: client, partition: partition, failed: failed, cancellationToken: cancellationToken,
-            lifecycleOptions: lifecycleOptions);
+            lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics);
 }

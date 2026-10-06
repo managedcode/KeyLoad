@@ -24,11 +24,14 @@ public sealed class BlobStorageOperations(DatabaseEngine database, TimeProvider?
     /// <param name="request">The configured resource and scope.</param>
     /// <param name="isNew">Whether the resource catalog entry is absent.</param>
     /// <param name="incarnation">The current native store authority.</param>
-    public static void ConfigureResource(IAtomicTransaction transaction, ConfigureResourceRequest request, bool isNew, Guid incarnation)
+    /// <param name="maximumCatalogProofRecords">The captured native catalog proof work budget.</param>
+    public static void ConfigureResource(IAtomicTransaction transaction, ConfigureResourceRequest request, bool isNew, Guid incarnation,
+        int maximumCatalogProofRecords)
     {
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(request);
-        BlobQuotaOperations.Configure(transaction, request, isNew, incarnation);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumCatalogProofRecords);
+        BlobQuotaOperations.Configure(transaction, request, isNew, incarnation, maximumCatalogProofRecords);
     }
 
     /// <summary>Checks current persisted scope, row and creator authority before effects or replay.</summary>

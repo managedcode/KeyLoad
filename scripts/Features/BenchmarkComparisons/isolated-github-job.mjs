@@ -12,6 +12,7 @@ import { captureFreshCurrentJob } from './isolated-current-job.mjs';
 import { validateJobIdentity } from './isolated-github-validation.mjs';
 import { writeJson } from './isolated-github-files.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
+import { createDatabaseMatrices } from './isolated-preflight.mjs';
 
 async function appendJobEnvironment(target, id) {
   await requireOutputFile(target);
@@ -25,7 +26,11 @@ async function appendJobEnvironment(target, id) {
 export async function captureCurrentJob(environment = process.env, argv = process.argv.slice(2), finalizing = false) {
   validateEntryArguments(argv);
   const context = createGitHubContext(environment, process.platform);
-  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells)];
+  const openLoopRows = Object.values(createDatabaseMatrices(context.plan, context.scaledPlans,
+    context.vectorPlans, context.openLoopPlan)).flatMap(matrix => matrix.include)
+    .filter(row => row.openLoopRate !== undefined);
+  const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells),
+    ...context.vectorPlans.flatMap(profile => profile.cells), ...openLoopRows];
   const cell = cells.find(item => item.id === environment.KEYLOAD_COMPARISON_CELL_ID);
   requireGitHub(cell !== undefined && cell.profile === environment.Benchmarks__EvidenceProfile);
   const profileContext = contextForProfile(context, cell.profile);

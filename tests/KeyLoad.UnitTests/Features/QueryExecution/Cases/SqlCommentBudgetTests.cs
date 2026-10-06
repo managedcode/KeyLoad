@@ -15,11 +15,12 @@ internal sealed class SqlCommentBudgetTests
             + SqlCommentTestData.LongCommentSuffix;
         var offset = 0;
         var state = default(SqlTriviaState);
+        var chunkCharacters = UnitExecutionOptions.QueryExecution().Value.SqlBudgetCheckInterval;
 
-        var status = SqlTriviaReader.Read(sql, ref offset, ref state, SqlCommentTestData.MaximumCommentDepth);
+        var status = SqlTriviaReader.Read(sql, ref offset, ref state, SqlCommentTestData.MaximumCommentDepth, chunkCharacters);
         await Assert.That(status).IsEqualTo(SqlTriviaStatus.More);
         await Assert.That(offset).IsGreaterThan(0);
-        await Assert.That(offset).IsLessThanOrEqualTo(SqlTriviaReader.MaximumChunkCharacters);
+        await Assert.That(offset).IsLessThanOrEqualTo(chunkCharacters);
         await cancellation.CancelAsync();
         var error = Assert.ThrowsExactly<OperationCanceledException>(budget.Check);
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);

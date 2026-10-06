@@ -10,10 +10,10 @@ internal sealed class ScaledCohortReceiptTests
     private const string Probe = """
         import {pathToFileURL} from 'node:url';
         const load = async name => import(pathToFileURL(name).href);
-        const planner = await load(process.argv[1]);
-        const scale = await load(process.argv[2]);
-        const receiptModule = await load(process.argv[3]);
-        const vectorsModule = await import(new URL('./vector-isolated-plan.mjs',pathToFileURL(process.argv[2])).href);
+        const planner = await load(process.argv[2]);
+        const scale = await load(process.argv[3]);
+        const receiptModule = await load(process.argv[4]);
+        const vectorsModule = await import(new URL('./vector-isolated-plan.mjs',pathToFileURL(process.argv[3])).href);
         const contract = planner.readIsolatedContract();
         const control = planner.createIsolatedPlan(contract);
         const scales = scale.createScaledPlans(contract);
@@ -81,7 +81,7 @@ internal sealed class ScaledCohortReceiptTests
     public async Task AcScale015ReceiptRetainsFailedIdsAndNeverClaimsAbsentServerEvidence()
     {
         var response = await IsolatedAggregateNodeProcess.RunAsync(
-            [ModuleMode, EvaluationMode, Probe, IsolatedAggregateNodeProcess.Module("isolated-plan.mjs"),
+            [ModuleMode, EvaluationMode, Probe, nameof(ScaledCohortReceiptTests), IsolatedAggregateNodeProcess.Module("isolated-plan.mjs"),
                 IsolatedAggregateNodeProcess.Module("scaled-isolated-plan.mjs"),
                 IsolatedAggregateNodeProcess.Module("scaled-cohort-receipt.mjs")],
             TestContext.Current!.Execution.CancellationToken);
@@ -97,10 +97,17 @@ internal sealed class ScaledCohortReceiptTests
             .SelectMany(item => item.GetProperty(IsolatedPlanFields.Cells).EnumerateArray())
             .All(item => item.GetProperty(IsolatedPlanFields.ResourceEquivalence).ValueKind == JsonValueKind.Null)).IsTrue();
         var unsupported = receipt.GetProperty(IsolatedPlanFields.ScaledProfiles)[0].GetProperty(IsolatedPlanFields.Cells).EnumerateArray()
-            .Single(item => item.GetProperty(IsolatedPlanFields.Target).GetString() == "Neo4j"
-                && item.GetProperty(IsolatedPlanFields.NodeCount).GetInt32() == 2);
-        await Assert.That(unsupported.GetProperty(IsolatedPlanFields.Disposition).GetString()).IsEqualTo("unsupportedTopology");
-        await Assert.That(unsupported.GetProperty(IsolatedPlanFields.ServerResourceQualified).GetBoolean()).IsFalse();
+            .Where(item => item.GetProperty(IsolatedPlanFields.Target).GetString() == "Neo4j"
+                && item.GetProperty(IsolatedPlanFields.NodeCount).GetInt32() == 2).ToArray();
+        await Assert.That(unsupported.Length).IsEqualTo(4);
+        string?[] expectedScenarios = ["PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete"];
+        await Assert.That(unsupported.Select(item => item.GetProperty(IsolatedPlanFields.Scenario).GetString()))
+            .IsEquivalentTo(expectedScenarios);
+        foreach (var cell in unsupported)
+        {
+            await Assert.That(cell.GetProperty(IsolatedPlanFields.Disposition).GetString()).IsEqualTo("unsupportedTopology");
+            await Assert.That(cell.GetProperty(IsolatedPlanFields.ServerResourceQualified).GetBoolean()).IsFalse();
+        }
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.Qualified).GetBoolean()).IsFalse();
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.VectorProfiles).GetArrayLength()).IsEqualTo(24);
         await Assert.That(receipt.GetProperty(IsolatedPlanFields.VectorProfiles).EnumerateArray().All(profile => profile.GetProperty(IsolatedPlanFields.CellCount).GetInt32() == 33)).IsTrue();

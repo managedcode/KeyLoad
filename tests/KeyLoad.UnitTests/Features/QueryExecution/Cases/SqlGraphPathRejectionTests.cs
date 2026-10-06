@@ -14,39 +14,62 @@ internal sealed class SqlGraphPathRejectionTests
     private const string SelectAll = "SELECT *";
     private const string SelectId = "SELECT id";
     private const string SqlGraphWithNestedComment = "/* outer /* nested */ outer */ ";
-    private const string Principal = SqlGraphPathTestSupport.Principal;
     private const string ExistingCollection = "orders";
 
     [Test]
-    public async Task InvalidVersionCursorAndFullScanFlagRejectBeforeReturningAPath()
+    public async Task UnsupportedVersionRejectsWithoutReadThenRetriesOnSameEngine()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
-            version: UnsupportedVersion));
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
-            cursor: CursorToken));
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql, allowFullScan: false));
+        var engine = CreateEngine(database);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
+                version: UnsupportedVersion), token);
     }
 
     [Test]
-    public async Task ExtraStatementsAndAlternateProjectionGrammarReject()
+    public async Task NonNullCursorRejectsWithoutReadThenRetriesOnSameEngine()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var engine = CreateEngine(database);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
+                cursor: CursorToken), token);
+    }
+
+    [Test]
+    public async Task MissingFullScanConsentRejectsWithoutReadThenRetriesOnSameEngine()
+    {
+        using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
+        var engine = CreateEngine(database);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
+                allowFullScan: false), token);
+    }
+
+    [Test]
+    public async Task ExtraStatementsAndAlternateProjectionGrammarRejectThenRetry()
+    {
+        using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
+        var engine = CreateEngine(database);
+        var token = TestContext.Current!.Execution.CancellationToken;
         var extra = SqlGraphPathTestSupport.LiteralSql + "; SELECT * FROM " + ExistingCollection;
         var alternate = SqlGraphPathTestSupport.LiteralSql.Replace(SelectAll, SelectId, StringComparison.Ordinal);
 
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, extra));
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, alternate));
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, extra), token);
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, alternate), token);
     }
 
     [Test]
-    public async Task MissingAndWrongScalarParametersReject()
+    public async Task MissingAndWrongScalarParametersRejectThenRetry()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var engine = CreateEngine(database);
+        var token = TestContext.Current!.Execution.CancellationToken;
         var missing = SqlGraphPathTestSupport.Parameters((GraphParameter, SqlGraphPathTestSupport.Graph));
         var wrongString = SqlGraphPathTestSupport.Parameters((GraphParameter, new[] { SqlGraphPathTestSupport.Graph }));
         var wrongInteger = SqlGraphPathTestSupport.Parameters(
@@ -56,18 +79,21 @@ internal sealed class SqlGraphPathRejectionTests
             ("vertices", SqlGraphPathTestSupport.MaximumVertices),
             ("edges", SqlGraphPathTestSupport.MaximumEdges), ("label", SqlGraphPathTestSupport.Label));
 
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, ValidSql, missing));
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, ValidSql, wrongString));
-        await AssertRejected(engine, SqlGraphPathTestSupport.Request(database, ValidSql, wrongInteger));
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, ValidSql, missing), token);
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, ValidSql, wrongString), token);
+        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
+            SqlGraphPathTestSupport.Request(database, ValidSql, wrongInteger), token);
     }
 
     [Test]
     public async Task CompleteRequestBytesTokensAndParameterCountAreBounded()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var smallRequestEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 32 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var tokenEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryTokens = 8 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var depthEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var smallRequestEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryBytes = 32 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var tokenEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryTokens = 8 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var depthEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Security.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var tooMany = Enumerable.Range(0, MaximumParameters).ToDictionary(index => "p" + index,
             index => JsonSerializer.SerializeToElement(index), StringComparer.Ordinal);
         var byteFailure = Failure(smallRequestEngine, SqlGraphPathTestSupport.Request(database,
@@ -85,10 +111,10 @@ internal sealed class SqlGraphPathRejectionTests
         await Assert.That(parameterFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
-    private static async Task AssertRejected(QueryEngine engine, SqlGraphPathRequest request)
-        => await Assert.That(Failure(engine, request).Code).IsEqualTo(ErrorCode.Validation);
+    private static QueryEngine CreateEngine(TestDatabase database)
+        => new(database.Database, UnitExecutionOptions.QueryExecution());
 
     private static KeyLoadException Failure(QueryEngine engine, SqlGraphPathRequest request)
-        => Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPathSql(Principal, request,
+        => Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPathSql(SqlGraphPathTestSupport.Principal, request,
             cancellationToken: TestContext.Current!.Execution.CancellationToken));
 }

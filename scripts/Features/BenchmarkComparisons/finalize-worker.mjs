@@ -13,6 +13,8 @@ import { GH, isolatedEvidenceJobName, positive, requireGitHub } from './isolated
 import { contextForProfile, createGitHubContext } from './isolated-github-context.mjs';
 import { createScaledPlans, validateScaledPlan } from './scaled-isolated-plan.mjs';
 import { hashRegularFile, readJson, writeJson } from './isolated-github-files.mjs';
+import { createOpenLoopPlan } from './open-loop-isolated-plan.mjs';
+import { finalizeCurrentOpenLoopWorker } from './open-loop-worker-finalize.mjs';
 
 const FINAL = Object.freeze({ workers: ['artifacts', 'comparisons', 'isolated', 'workers'],
   failures: ['artifacts', 'comparisons', 'isolated', 'failures'], raw: 'worker.json', retained: 'failed-worker.json',
@@ -45,7 +47,7 @@ export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }
     requireValue(value.worker.jobId === jobId && value.disposition !== AGGREGATE.failed, AGGREGATE.errors.envelope);
     return value;
   }
-  const value = { schemaVersion: AGGREGATE.version, worker: {
+  const value = { schemaVersion: contract.workerSchemaVersion, worker: {
     target: cell.target, nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, ...cohort, jobId },
     disposition: AGGREGATE.failed, reason: AGGREGATE.failureReason, report: null };
   validateWorkerEnvelope(value, cell, cohort,
@@ -68,6 +70,16 @@ export async function finalizeWorker({ workspace, cell, cohort, jobId, outcome }
 export async function finalizeCurrentWorker(environment = process.env, argv = process.argv.slice(2)) {
   requireGitHub(argv.length === 0);
   const context = createGitHubContext(environment, process.platform);
+  const openLoopPlan = context.openLoopPlan ?? createOpenLoopPlan();
+  const openLoopCell = [...openLoopPlan.measurementCells, ...openLoopPlan.cancellationProofCells]
+    .find(item => item.id === environment[FINAL.cell]);
+  if (openLoopCell !== undefined) {
+    const suppliedJobId = Number(environment[FINAL.identity]);
+    const actualJob = await captureCurrentJob(environment, [], true);
+    requireGitHub(!positive(suppliedJobId) || suppliedJobId === actualJob.id);
+    return await finalizeCurrentOpenLoopWorker({ workspace: context.native.workspace, context,
+      environment, job: actualJob, outcome: environment[FINAL.outcome] });
+  }
   const cells = [...context.plan.cells, ...context.scaledPlans.flatMap(profile => profile.cells), ...context.vectorPlans.flatMap(profile => profile.cells)];
   const cell = cells.find(item => item.id === environment[FINAL.cell]);
   requireGitHub(cell !== undefined && cell.profile === environment.Benchmarks__EvidenceProfile &&

@@ -81,14 +81,15 @@ export function selectSiteAggregateJob(run, jobs) {
   if (matches[0].status !== 'completed' || matches[0].conclusion !== 'success') return { successful: false, run, jobs };
   const cohort = siteCohort(run);
   const aggregate = matches[0];
+  const unavailableGeneration = SITE_GH.unavailableProducerGenerations.find(candidate => candidate.sourceRevision === run.head_sha);
+  if (unavailableGeneration !== undefined) {
+    requireSite(matchUnavailableProducerGeneration(run, aggregate) !== undefined);
+    validateSuccessfulJob(aggregate, cohort, SITE_GH.aggregateJob, unavailableGeneration.ownedSteps);
+    return { successful: false, run, jobs };
+  }
   const steps = siteAggregateSteps(run.head_sha);
   const inventory = aggregate.steps?.filter(step => steps.includes(step.name));
   if (inventory?.length !== steps.length || !inventory.every((step, index) => step.name === steps[index])) {
-    if (isUnsupportedHistoricalAggregate(run, aggregate)) {
-      validateSuccessfulJob(aggregate, cohort, SITE_GH.aggregateJob, SITE_GH.legacySteps);
-      return { successful: false, run, jobs };
-    }
-
     requireSite(false);
   }
 
@@ -96,10 +97,13 @@ export function selectSiteAggregateJob(run, jobs) {
     job: validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), cohort, SITE_GH.aggregateJob, steps) };
 }
 
-function isUnsupportedHistoricalAggregate(run, job) {
-  return !SITE_GH.legacySources.includes(run.head_sha) && Array.isArray(job.steps)
-    && job.steps.length === SITE_GH.legacySteps.length
-    && job.steps.every((step, index) => step?.name === SITE_GH.legacySteps[index]);
+function matchUnavailableProducerGeneration(run, job) {
+  const generation = SITE_GH.unavailableProducerGenerations.find(candidate => candidate.sourceRevision === run.head_sha);
+  if (generation === undefined || !Array.isArray(job.steps)) return undefined;
+  const expected = [...generation.leadingNativeSteps, ...generation.ownedSteps, ...generation.trailingNativeSteps];
+  if (job.steps.length !== expected.length || !job.steps.every((step, index) => step?.name === expected[index])) return undefined;
+  const wrappers = [...job.steps.slice(0, generation.leadingNativeSteps.length), ...job.steps.slice(-generation.trailingNativeSteps.length)];
+  return wrappers.every(step => step.status === 'completed' && step.conclusion === 'success') ? generation : undefined;
 }
 
 async function selectCurrentSiteEvidence(input, workflow, runs, producer, legacyArchive, optional) {

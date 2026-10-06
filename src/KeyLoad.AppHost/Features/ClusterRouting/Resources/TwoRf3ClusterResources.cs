@@ -25,9 +25,9 @@ internal static class TwoRf3ClusterResources
     private const string AuthorityPeerSecretEnvironment = "AuthorityPeerSecret";
     private const string AuthorityEndpointsEnvironment = "AuthorityEndpoints";
 
-    private const string OriginFormatFormatText = "http://{0}:8080";
-    private const string NodesResultText = "node1";
-    private const string NodesNodesResultText = "node2";
+    private const string PublicOriginTemplate = "http://{0}:8080";
+    private const string FirstVoterName = "node1";
+    private const string SecondVoterName = "node2";
 
     private const string ParameterIdentityFormat = "D";
     private const string ResourceIdentityFormat = "N";
@@ -35,7 +35,7 @@ internal static class TwoRf3ClusterResources
     private const string Data = "/data";
     private const string Http = "http";
     private const string Silo = "silo";
-    private static readonly CompositeFormat OriginFormat = CompositeFormat.Parse(OriginFormatFormatText);
+    private static readonly CompositeFormat OriginFormat = CompositeFormat.Parse(PublicOriginTemplate);
     private const string ClusterPrefix = "keyload-";
     private const string ParameterPrefix = "membership-";
     private const string DataRootEnvironment = "KeyLoad__DataDirectory";
@@ -53,13 +53,13 @@ internal static class TwoRf3ClusterResources
     private const string AuthorityHealth = "/health/membership-authority";
     private const string MembershipHealth = "/health/membership-ready";
     private const string True = "true";
-    private static readonly string[] Nodes = [NodesResultText, NodesNodesResultText, ThirdVoterName, FourthVoterName, FifthVoterName, SixthVoterName];
+    private static readonly string[] Nodes = [FirstVoterName, SecondVoterName, ThirdVoterName, FourthVoterName, FifthVoterName, SixthVoterName];
 
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
         LocalProfile profile, string dataRoot)
     {
-        const string NameText = "physical-b";
-        const string AddNameText = "incarnation-b";
+        const string SecondPhysicalShardParameterSuffix = "physical-b";
+        const string SecondIncarnationParameterSuffix = "incarnation-b";
 
         ValidateMode(builder, profile);
         var root = Path.GetFullPath(dataRoot);
@@ -68,8 +68,8 @@ internal static class TwoRf3ClusterResources
         var secondPhysical = Guid.NewGuid();
         var secondIncarnation = Guid.NewGuid();
         var secondPeerSecret = RandomSecret();
-        var physicalB = builder.AddParameter(ParameterPrefix + NameText, secondPhysical.ToString(ParameterIdentityFormat));
-        var incarnationB = builder.AddParameter(ParameterPrefix + AddNameText, secondIncarnation.ToString(ParameterIdentityFormat));
+        var physicalB = builder.AddParameter(ParameterPrefix + SecondPhysicalShardParameterSuffix, secondPhysical.ToString(ParameterIdentityFormat));
+        var incarnationB = builder.AddParameter(ParameterPrefix + SecondIncarnationParameterSuffix, secondIncarnation.ToString(ParameterIdentityFormat));
         var signing = builder.AddParameter(SigningKeyParameterName, profile.SigningKey, secret: true);
         var admin = builder.AddParameter(AdminKeyParameterName, profile.AdminKey, secret: true);
         var firstPeer = builder.AddParameter(MembershipPeerParameterName, profile.PeerSecret, secret: true);
@@ -91,9 +91,9 @@ internal static class TwoRf3ClusterResources
         string? containerUser, string[] firstGroup, string[] secondGroup, string clusterId)
     {
         const int IndexInitialValue = 0;
-        const string NameText = "keyload-";
-        const string AddNodesNameText = "-";
-        const string SchemeText = "tcp";
+        const string ContainerNamePrefix = "keyload-";
+        const string ContainerNameSeparator = "-";
+        const string SiloTransportScheme = "tcp";
 
         var resources = new IResourceBuilder<ContainerResource>[TwoRf3ProfileProtocol.TotalNodes];
         for (var index = IndexInitialValue; index < Nodes.Length; index++)
@@ -107,11 +107,11 @@ internal static class TwoRf3ClusterResources
             var directory = Path.Combine(root, name);
             ClusterProfileStore.PrepareDirectory(directory);
             var resource = image.Add(builder, name)
-                .WithContainerName(NameText + incarnation.ToString(ResourceIdentityFormat) + AddNodesNameText + name)
+                .WithContainerName(ContainerNamePrefix + incarnation.ToString(ResourceIdentityFormat) + ContainerNameSeparator + name)
                 .WithContainerNetworkAlias(name)
                 .WithBindMount(directory, Data)
                 .WithHttpEndpoint(targetPort: TwoRf3ProfileProtocol.HttpPort, name: Http, isProxied: false)
-                .WithEndpoint(targetPort: TwoRf3ProfileProtocol.SiloPort, name: Silo, scheme: SchemeText,
+                .WithEndpoint(targetPort: TwoRf3ProfileProtocol.SiloPort, name: Silo, scheme: SiloTransportScheme,
                     isExternal: false, isProxied: false)
                 .WithEnvironment(DataRootEnvironment, Data)
                 .WithEnvironment(ClusterEnvironment, clusterId);
@@ -151,20 +151,20 @@ internal static class TwoRf3ClusterResources
         IResourceBuilder<ParameterResource> secondSecret,
         string[] firstGroup, string[] secondGroup)
     {
-        const string NameText = "Mode";
-        const string ValueText = "authority";
-        const string ApplyAuthoritySettingsValueText = "proxy";
-        const string ApplyAuthoritySettingsNameText = "TrustedGroup__PhysicalShardId";
-        const string SelectorText = ":11111";
+        const string AuthorityModeSetting = "Mode";
+        const string AuthorityMode = "authority";
+        const string ProxyMode = "proxy";
+        const string TrustedPhysicalShardSetting = "TrustedGroup__PhysicalShardId";
+        const string SiloPortSuffix = ":11111";
 
-        resource.WithEnvironment(AuthorityPrefix + NameText, groupA ? ValueText : ApplyAuthoritySettingsValueText);
+        resource.WithEnvironment(AuthorityPrefix + AuthorityModeSetting, groupA ? AuthorityMode : ProxyMode);
         if (groupA)
         {
-            resource.WithEnvironment(AuthorityPrefix + ApplyAuthoritySettingsNameText, secondPhysical)
+            resource.WithEnvironment(AuthorityPrefix + TrustedPhysicalShardSetting, secondPhysical)
                 .WithEnvironment(AuthorityPrefix + TrustedGroupIncarnationEnvironment, secondIncarnation)
                 .WithEnvironment(AuthorityPrefix + TrustedGroupPeerSecretEnvironment, secondSecret);
             AddVector(resource, TrustedGroupVotersEnvironment, secondGroup.Select(Origin).ToArray());
-            AddVector(resource, TrustedGroupSiloEndpointsEnvironment, secondGroup.Select(name => name + SelectorText).ToArray());
+            AddVector(resource, TrustedGroupSiloEndpointsEnvironment, secondGroup.Select(name => name + SiloPortSuffix).ToArray());
         }
         else
         {
@@ -178,10 +178,10 @@ internal static class TwoRf3ClusterResources
     private static void AddVector(IResourceBuilder<ContainerResource> resource, string name, string[] values)
     {
         const int IndexInitialValue = 0;
-        const string NameText = "__";
+        const string EnvironmentIndexSeparator = "__";
 
         for (var index = IndexInitialValue; index < values.Length; index++)
-        { resource.WithEnvironment(AuthorityPrefix + name + NameText + index.ToString(CultureInfo.InvariantCulture), values[index]); }
+        { resource.WithEnvironment(AuthorityPrefix + name + EnvironmentIndexSeparator + index.ToString(CultureInfo.InvariantCulture), values[index]); }
     }
 
     private static void ValidateMode(IDistributedApplicationBuilder builder, LocalProfile profile)

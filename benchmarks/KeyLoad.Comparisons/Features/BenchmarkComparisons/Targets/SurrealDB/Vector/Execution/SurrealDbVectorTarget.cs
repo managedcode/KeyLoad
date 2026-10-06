@@ -7,7 +7,8 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name = "image">The immutable native server image.</param>
 /// <param name = "runId">Unique corpus scope.</param>
 /// <param name = "executionOptions">The required operational Policy.</param>
-public sealed class SurrealDbVectorTarget(HttpClient http, string image, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions) : IVectorComparisonTarget
+/// <param name="serializationOptions">The required native SQL builder reservations.</param>
+public sealed class SurrealDbVectorTarget(HttpClient http, string image, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<NativeComparisonSerializationOptions> serializationOptions) : IVectorComparisonTarget
 {
     private const string SurrealDBCommunityOnePersistentRocksDBNode = "SurrealDB Community; one persistent RocksDB node";
     private const string SingleNodeAcknowledgedWriteCommitDurabilityNotFault = "single-node acknowledged write; commit durability not fault-qualified";
@@ -31,6 +32,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     private static readonly System.Text.CompositeFormat NativeDELETEFROMREMOVETABLEFormat = System.Text.CompositeFormat.Parse(NativeDELETEFROMREMOVETABLEFormatTemplate);
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
     private NativeComparisonExecutionOptions Policy => execution.Value;
+    private readonly NativeComparisonSerializationOptions serialization = NativeComparisonSerializationOptions.Require(serializationOptions).Value;
     private const string RunIdentityFormat = "N";
     private const string Table = "vector_doc";
     private const string InvalidResponse = "SurrealDbInvalidResponse";
@@ -109,6 +111,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         {
             var exactParameters = new Dictionary<string, string>();
             Policy.RecordEvidence(exactParameters);
+            serialization.RecordEvidence(exactParameters);
             exactParameters[ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse);
             return new(VectorIndexKind.Exact, NoANNIndexSurrealDBBruteForceKNN, exactParameters, EmptyResultCount);
         }
@@ -124,13 +127,14 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
         {
             [ReadbackIndexEvidence] = readbackIndexDefinition ?? throw new InvalidOperationException(InvalidResponse)
         };
+        serialization.RecordEvidence(parameters);
         return receipt with { Parameters = parameters };
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<VectorNeighbor>> SearchAsync(ReadOnlyMemory<float> query, int topK, VectorQueryMode mode, CancellationToken cancellationToken)
     {
-        var sql = SurrealDbVectorProtocol.SearchSql(table, query.Span, topK, mode, ProfileIndex, HnswEf);
+        var sql = SurrealDbVectorProtocol.SearchSql(table, query.Span, topK, mode, ProfileIndex, HnswEf, serialization.SurrealDbVectorComponentBuilderCapacity);
         using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (result.ValueKind != JsonValueKind.Array)
@@ -144,7 +148,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     /// <inheritdoc/>
     public async Task<string> ExplainAsync(ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken cancellationToken)
     {
-        var sql = SurrealDbVectorProtocol.ExplainSql(table, query.Span, mode, ProfileIndex, HnswEf);
+        var sql = SurrealDbVectorProtocol.ExplainSql(table, query.Span, mode, ProfileIndex, HnswEf, serialization.SurrealDbVectorComponentBuilderCapacity);
         using var response = await SurrealDbSqlTransport.QueryAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
         var nativePlan = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (ProfileIndex == VectorIndexKind.Hnsw)
@@ -159,7 +163,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     {
         ArgumentNullException.ThrowIfNull(update);
         using var response = await SurrealDbSqlTransport.QueryAsync(http,
-            SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span), Policy, cancellationToken).ConfigureAwait(false);
+            SurrealDbVectorProtocol.UpdateSql(table, update.Id, update.Embedding.Span, serialization.SurrealDbVectorComponentBuilderCapacity), Policy, cancellationToken).ConfigureAwait(false);
         var updated = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (updated.ValueKind != JsonValueKind.Array || updated.GetArrayLength() != SingleResultCardinality)
         {
@@ -198,7 +202,7 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
 
     private async Task IngestBatchAsync(List<VectorDocument> batch, CancellationToken cancellationToken)
     {
-        var sql = SurrealDbVectorProtocol.CreateBatchSql(table, batch);
+        var sql = SurrealDbVectorProtocol.CreateBatchSql(table, batch, serialization.SurrealDbBatchRecordBuilderCapacity, serialization.SurrealDbVectorComponentBuilderCapacity);
         await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
     }
 

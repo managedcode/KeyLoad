@@ -25,7 +25,8 @@ internal sealed class TestDatabase : IDisposable
     public DatabaseEngine Database { get; }
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
-        bool bootstrapPhysicalShardCatalog = true)
+        bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
+        NativeClaimsExecutionOptions? claimsExecution = null)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
@@ -33,10 +34,12 @@ internal sealed class TestDatabase : IDisposable
             throw new ArgumentException(FreshDirectoryRequired, nameof(directory));
         }
         ZoneTreeStore? acquired = null;
+        var blobOptions = UnitExecutionOptions.BlobExecution(blobExecution);
+        var claimsOptions = UnitExecutionOptions.NativeClaimsExecution(claimsExecution);
         try
         {
             Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution());
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)

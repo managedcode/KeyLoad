@@ -10,13 +10,16 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Redis image reference recorded after initialization and replica verification.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
 public sealed class RedisTarget(string connectionString, string runId, string image,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+    private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private const string FieldSeparator = ":";
 
     private const string RunIdentityFormat = "N";
@@ -92,7 +95,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
         var evidence = await RedisReplicaProof.VerifyAsync(primary: connection, replicaStrings: replicaEndpoints,
             topology: configuredTopology, primaryIdentity: primaryIdentity, probeKey: probeKey,
-            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions);
+            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,

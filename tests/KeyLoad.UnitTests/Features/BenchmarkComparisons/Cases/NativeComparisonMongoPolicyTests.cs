@@ -92,7 +92,8 @@ internal sealed class NativeComparisonMongoPolicyTests
         var pending = Task.Delay(Timeout.InfiniteTimeSpan, deadline.Token);
         var failure = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending.WaitAsync(
             TimeSpan.FromSeconds(5), TestContext.Current!.Execution.CancellationToken));
-        await Assert.That(failure.CancellationToken).IsEqualTo(deadline.Token);
+        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure!.CancellationToken).IsEqualTo(deadline.Token);
         await Assert.That(deadline.IsCancellationRequested).IsTrue();
     }
 
@@ -106,7 +107,8 @@ internal sealed class NativeComparisonMongoPolicyTests
         var pending = Task.Delay(Timeout.InfiniteTimeSpan, operation.Token);
         await caller.CancelAsync();
         var failure = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending);
-        await Assert.That(failure.CancellationToken).IsEqualTo(operation.Token);
+        await Assert.That(failure).IsNotNull();
+        await Assert.That(failure!.CancellationToken).IsEqualTo(operation.Token);
         await Task.Delay(TimeSpan.FromMilliseconds(1), cleanup.Token);
         await Assert.That(cleanup.IsCancellationRequested).IsFalse();
     }
@@ -137,19 +139,20 @@ internal sealed class NativeComparisonMongoPolicyTests
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(NativeComparisonExecutionOptions));
     }
 
-    private static IOptions<NativeComparisonExecutionOptions> BindPoolPolicy(string margin, string minimum)
+    private static OptionsManager<NativeComparisonExecutionOptions> BindPoolPolicy(string margin, string minimum)
     {
         var source = new Dictionary<string, NativeComparisonExecutionOptions>
         {
             [NativeComparisonExecutionOptions.SectionName] = UnitBenchmarkOptions.Native().Value
         };
         using var stream = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes(source));
-        using var configuration = new ConfigurationBuilder().AddJsonStream(stream).AddInMemoryCollection(
+        using var configuration = new ConfigurationManager();
+        configuration.AddJsonStream(stream).AddInMemoryCollection(
             new Dictionary<string, string?>
             {
                 [NativeComparisonExecutionOptions.SectionName + ":" + nameof(NativeComparisonExecutionOptions.MongoPoolSessionMargin)] = margin,
                 [NativeComparisonExecutionOptions.SectionName + ":" + nameof(NativeComparisonExecutionOptions.MongoPoolMinimumSize)] = minimum
-            }).Build();
+            });
         var options = new OptionsManager<NativeComparisonExecutionOptions>(
             new OptionsFactory<NativeComparisonExecutionOptions>(
                 [new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(

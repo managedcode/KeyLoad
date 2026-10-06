@@ -116,10 +116,8 @@ public sealed partial class DatabaseEngine
             replayed = false;
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
-        if (!authorized && CommandOutcomeKeyResolver.HasLegacyOutcome(transaction, operation.PrincipalId, operation.Id))
-        {
-            persistOutcome = false;
-        }
+        persistOutcome = selection.Outcome is null
+            && (authorized || !CommandOutcomeKeyResolver.HasLegacyOutcome(transaction, operation.PrincipalId, operation.Id));
         return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope);
     }
 
@@ -189,6 +187,10 @@ public sealed partial class DatabaseEngine
         if (replicationIndex > AtomicCommandCommitInitialSequence)
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
+        }
+        if (!persistOutcome)
+        {
+            return;
         }
         if (transaction.ReadOwnedValue(KeySpace.ClockBytes) is not { } clock
             || operation.EvaluatedAt >= NativeSerialization.Deserialize<DateTimeOffset>(clock))

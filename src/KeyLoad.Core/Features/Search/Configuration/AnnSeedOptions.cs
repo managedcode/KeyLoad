@@ -13,6 +13,8 @@ public sealed record AnnSeedOptions
     internal const long DefaultMaxPeakBytes = 536_870_912;
     internal const long DefaultMaxWorkUnits = 1_000_000_000;
     private const int DefaultInitialRecordCapacity = 32;
+    private const int DefaultHashScratchBytes = 4_096;
+    private const int MinimumHashScratchBytes = 256;
     private const int MinimumCount = 1;
     private const long MinimumMemoryBytes = 1_024;
     private const long MaximumOwnedBytes = 8_589_934_592;
@@ -29,6 +31,8 @@ public sealed record AnnSeedOptions
     public long MaxWorkUnits { get; init; } = DefaultMaxWorkUnits;
     /// <summary>Initial source record allocation target, clamped to MaxRecords.</summary>
     public int InitialRecordCapacity { get; init; } = DefaultInitialRecordCapacity;
+    /// <summary>The retained hash scratch, fitting every valid identifier and complete floating-point atoms.</summary>
+    public int HashScratchBytes { get; init; } = DefaultHashScratchBytes;
 
     /// <summary>Whether configured bounds preserve the current source-snapshot contract.</summary>
     public bool IsValid() => MaxRecords is >= MinimumCount and <= DefaultMaxRecords
@@ -36,7 +40,8 @@ public sealed record AnnSeedOptions
         && MaxPeakBytes is >= MinimumMemoryBytes and <= MaximumPeakBytes
         && MaxWorkUnits is >= MinimumCount and <= MaximumWorkUnits
         && MaxPeakBytes >= MaxOwnedBytes
-        && InitialRecordCapacity is >= MinimumCount and <= DefaultInitialRecordCapacity;
+        && InitialRecordCapacity is >= MinimumCount and <= DefaultInitialRecordCapacity
+        && HashScratchBytes is >= MinimumHashScratchBytes and <= DefaultHashScratchBytes;
 
     /// <summary>Rejects invalid settings using the existing ANN domain error.</summary>
     public void Validate()

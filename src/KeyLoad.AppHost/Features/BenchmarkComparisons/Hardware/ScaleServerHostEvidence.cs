@@ -19,7 +19,7 @@ internal static class ScaleServerHostEvidence
     internal static async Task<(ScaleServerHardware? Hardware, ScaleServerEnvelope? Envelope)> ReadAsync(
         IOptions<ScaleServerResourceOptions> settings, IOptions<BenchmarkProvenanceOptions> provenance, CancellationToken token)
     {
-        const string ArgumentsText = "-r";
+        const string KernelReleaseArgument = "-r";
         const int BoundaryValue = 1;
         const char SeparatorCharacter = ',';
 
@@ -44,7 +44,7 @@ internal static class ScaleServerHostEvidence
             return (null, null);
         }
 
-        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, [ArgumentsText], budget, token);
+        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, [KernelReleaseArgument], budget, token);
         if (string.IsNullOrWhiteSpace(kernel))
         {
             return (null, null);
@@ -70,14 +70,14 @@ internal static class ScaleServerHostEvidence
         const int EmptyValue = 0;
         const int IndexValue = 0;
         const char SlashCharacter = '/';
-        const string PathText = "/sys/fs/cgroup";
+        const string UnifiedCgroupMountPath = "/sys/fs/cgroup";
 
         if (!OperatingSystem.IsLinux() || cgroupPath.Length == EmptyValue || cgroupPath[IndexValue] != SlashCharacter)
         {
             return null;
         }
 
-        var root = Path.GetFullPath(PathText);
+        var root = Path.GetFullPath(UnifiedCgroupMountPath);
         var current = Path.GetFullPath(Path.Combine(root, cgroupPath.TrimStart(SlashCharacter)));
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
@@ -90,14 +90,14 @@ internal static class ScaleServerHostEvidence
     private static async Task<ScaleServerEnvelope?> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
-        const string PathText = "/proc/self/cgroup";
+        const string ProcessCgroupMembershipPath = "/proc/self/cgroup";
         const char LineFeedCharacter = '\n';
-        const string Path1Text = "/sys/fs/cgroup";
+        const string CgroupDirectoryMountPath = "/sys/fs/cgroup";
         const int ElementIndex = 3;
         const char SlashCharacter = '/';
-        const string ReadEnvelopeAsyncPathText = "/sys/fs/cgroup";
+        const string CgroupHierarchyRootPath = "/sys/fs/cgroup";
 
-        var membership = await BoundedText.ReadAsync(PathText, budget.Settings.MaxFileBytes, budget, token);
+        var membership = await BoundedText.ReadAsync(ProcessCgroupMembershipPath, budget.Settings.MaxFileBytes, budget, token);
         var row = membership?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
@@ -109,8 +109,8 @@ internal static class ScaleServerHostEvidence
             return null;
         }
 
-        var current = Path.GetFullPath(Path.Combine(Path1Text, row[ElementIndex..].TrimStart(SlashCharacter)));
-        var root = Path.GetFullPath(ReadEnvelopeAsyncPathText);
+        var current = Path.GetFullPath(Path.Combine(CgroupDirectoryMountPath, row[ElementIndex..].TrimStart(SlashCharacter)));
+        var root = Path.GetFullPath(CgroupHierarchyRootPath);
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
             return null;

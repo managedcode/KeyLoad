@@ -6,7 +6,6 @@ namespace KeyLoad.Storage.IO;
 internal static class OfflineRegularFile
 {
     private const int FirstValidDescriptor = 0;
-    private const int NativeCallSuccess = 0;
     private const int NoBufferBytes = 0;
     private const char NullPathCharacter = '\0';
     private const int LinuxReadOnly = 0;
@@ -17,9 +16,6 @@ internal static class OfflineRegularFile
     private const int MacReadWrite = 0x2;
     private const int MacNoFollow = 0x100;
     private const int MacCloseOnExec = 0x1000000;
-    private const int LockShared = 1;
-    private const int LockExclusive = 2;
-    private const int LockNonBlocking = 4;
     private const uint RegularType = 0x8000;
     private const int MaximumBufferBytes = 65536;
 
@@ -49,7 +45,7 @@ internal static class OfflineRegularFile
         try
         {
             VerifyDescriptor(lease.Handle, expected);
-            AcquireLock(lease.Handle, share);
+            lease.AcquireLock(share);
             VerifyPath(path, expected);
             return lease.TransferToStream(access, bufferSize);
         }
@@ -103,20 +99,6 @@ internal static class OfflineRegularFile
         }
         finally
         { OfflineNativeHandleLease.DisposeUntransferred(ref handle, primaryFailure); }
-    }
-
-    private static void AcquireLock(SafeFileHandle handle, FileShare share)
-    {
-        var isMac = OperatingSystem.IsMacOS();
-        var descriptor = handle.DangerousGetHandle().ToInt32();
-        var operation = (share == FileShare.Read ? LockShared : LockExclusive) | LockNonBlocking;
-        int result;
-        try
-        { result = isMac ? OfflineMacFileSystem.Lock(descriptor, operation) : OfflineLinuxFileSystem.Lock(descriptor, operation); }
-        catch (Exception error) when (OfflineNativeErrors.IsUnavailable(error))
-        { throw OfflineNativeErrors.Unsupported(); }
-        if (result != NativeCallSuccess)
-        { throw OfflineNativeErrors.FromErrno(Marshal.GetLastPInvokeError(), isMac); }
     }
 
     private static OfflineFileMetadata InspectNativePath(string path)

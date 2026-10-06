@@ -28,13 +28,15 @@ internal static class RedisReplicaProof
 
     public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings,
         ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken token)
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
+        CancellationToken token)
     {
         const int AdjacentElementOffset = 1;
         const int NoObservedItems = 0;
         const int SingleItemCount = 1;
         const int FirstElementIndex = 0;
 
+        var diagnostics = new RedisReplicaDiagnostics(diagnosticOptions);
         var requiredReplicas = ComparisonTopologies.NodeCount(topology) - AdjacentElementOffset;
         var replicated = requiredReplicas > NoObservedItems;
         if (replicaStrings.Length != requiredReplicas)
@@ -64,7 +66,7 @@ internal static class RedisReplicaProof
                 database: primary.GetDatabase().Database, key: probeKey, payload: payload, token: token, lifecycleOptions: lifecycleOptions);
             for (var index = FirstElementIndex; index < replicas.Length; index++)
             {
-                await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, token);
+                await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, diagnostics, token);
             }
 
             await VerifyIdentitiesUnchangedAsync(primaryServer, primaryIdentity, replicas, endpoints, identities, token);
@@ -195,7 +197,8 @@ internal static class RedisReplicaProof
             primaryIdentity, replicas.Length + SingleItemCount);
     }
 
-    private static async Task VerifyReplicaAsync(IServer server, EndPoint endpoint, EndPoint primary, CancellationToken token)
+    private static async Task VerifyReplicaAsync(IServer server, EndPoint endpoint, EndPoint primary,
+        RedisReplicaDiagnostics diagnostics, CancellationToken token)
     {
         const int SingleItemCount = 1;
 
@@ -216,7 +219,7 @@ internal static class RedisReplicaProof
             !int.TryParse(role[RedisNativeProtocol.RolePortIndex].ToString(), out var rolePort) || rolePort != port ||
             !RedisNativeProtocol.EndpointMatches(primary, host, port))
         {
-            RedisReplicaDiagnostics.WriteFailure(endpoint, primary, info, role);
+            diagnostics.WriteFailure(endpoint, primary, info, role);
             throw new ComparisonFailureException(ErrorReplicaIdentity);
         }
     }

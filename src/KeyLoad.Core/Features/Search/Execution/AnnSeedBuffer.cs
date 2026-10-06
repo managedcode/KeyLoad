@@ -26,7 +26,7 @@ internal sealed class AnnSeedBuffer
     private AnnSeedCut cut;
     private bool hasCut;
 
-    internal AnnSeedBuffer(int maximumRecords, long maximumOwnedBytes, long maximumPeakBytes, int initialRecordCapacity,
+    internal AnnSeedBuffer(int maximumRecords, long maximumOwnedBytes, long maximumPeakBytes, int initialRecordCapacity, int hashScratchBytes,
         ReadExecutionBudget budget, AnnSeedWork work)
     {
         const int LengthEmptyCount = 0;
@@ -37,10 +37,10 @@ internal sealed class AnnSeedBuffer
         this.initialRecordCapacity = initialRecordCapacity;
         this.budget = budget;
         this.work = work;
-        owned = checked(AnnSeedAccounting.FixedBytes + AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, LengthEmptyCount));
+        owned = checked(AnnSeedAccounting.FixedBytes(hashScratchBytes) + AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, LengthEmptyCount));
         peak = owned;
         Admit(owned, owned);
-        HashScratch = new byte[AnnSeedAccounting.HashScratchBytes];
+        HashScratch = new byte[hashScratchBytes];
         records = Array.Empty<VectorRecord>();
     }
 

@@ -15,17 +15,20 @@ internal sealed record OpenLoopPlanProcessOptions
     private const int MinimumStreamBufferCharacters = 1_024;
     private const int MaximumStreamBufferCharacters = 16_384;
     private const int MinimumPositiveLimit = 1;
+    private const int DefaultStageEvidenceFileBufferBytes = 4_096;
 
     internal TimeSpan ProcessTimeout { get; init; } = TimeSpan.FromSeconds(DefaultProcessTimeoutSeconds);
     internal int MaximumInputBytes { get; init; } = MaximumInputByteLimit;
     internal int MaximumOutputCharacters { get; init; } = MaximumOutputCharacterLimit;
     internal int StreamBufferCharacters { get; init; } = DefaultStreamBufferCharacters;
+    internal int StageEvidenceFileBufferBytes { get; init; } = DefaultStageEvidenceFileBufferBytes;
 
     internal bool IsValid() => ProcessTimeout > TimeSpan.Zero
         && ProcessTimeout <= TimeSpan.FromSeconds(MaximumProcessTimeoutSeconds)
         && MaximumInputBytes is >= MinimumPositiveLimit and <= MaximumInputByteLimit
         && MaximumOutputCharacters is >= MinimumPositiveLimit and <= MaximumOutputCharacterLimit
-        && StreamBufferCharacters is >= MinimumStreamBufferCharacters and <= MaximumStreamBufferCharacters;
+        && StreamBufferCharacters is >= MinimumStreamBufferCharacters and <= MaximumStreamBufferCharacters
+        && StageEvidenceFileBufferBytes is >= MinimumPositiveLimit and <= DefaultStageEvidenceFileBufferBytes;
 
     internal void Validate()
     {

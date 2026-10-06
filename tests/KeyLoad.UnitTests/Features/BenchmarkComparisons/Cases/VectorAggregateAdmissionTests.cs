@@ -16,14 +16,14 @@ internal sealed class VectorAggregateAdmissionTests
     private const string Probe = """
         import {pathToFileURL} from 'node:url';
         const load=async file=>import(pathToFileURL(file).href);
-        const {readIsolatedContract}=await load(process.argv[1]);
-        const {createVectorPlans}=await load(process.argv[2]);
-        const {validateWorkerEnvelope}=await load(process.argv[3]);
+        const {readIsolatedContract}=await load(process.argv[2]);
+        const {createVectorPlans}=await load(process.argv[3]);
+        const {validateWorkerEnvelope}=await load(process.argv[4]);
         const plan=createVectorPlans()[0];
         const contract={...readIsolatedContract(),profile:plan.profile,options:plan.profileSettings};
         const cohort={sourceRevision:'a'.repeat(40),runId:37,attempt:1,repository:'managedcode/KeyLoad',ref:'refs/heads/main',workflow:'Benchmarks',profile:plan.profile};
         const cell=plan.cells.find(cell=>cell.target==='KeyLoad'&&cell.nodeCount===1);
-        const envelope={schemaVersion:4,worker:{...cohort,target:cell.target,nodeCount:1,scenario:'VectorExact',jobId:2},
+        const envelope={schemaVersion:5,worker:{...cohort,target:cell.target,nodeCount:1,scenario:'VectorExact',jobId:2},
           disposition:'unsupported',reason:'KeyLoad SDK does not expose persisted vector readback or native numeric predicates required for scaled vector qualification.',report:null};
         const accepts=value=>{try{validateWorkerEnvelope(value,cell,cohort,contract);return true;}catch{return false;}};
         const accepted=accepts(envelope);
@@ -48,7 +48,7 @@ internal sealed class VectorAggregateAdmissionTests
     [Test]
     public async Task KeyLoadMissingNativeReadbackCannotBecomeAScaleVectorMeasurement()
     {
-        var response = await IsolatedAggregateNodeProcess.RunAsync(["--input-type=module", "-e", Probe,
+        var response = await IsolatedAggregateNodeProcess.RunAsync(["--input-type=module", "-e", Probe, nameof(VectorAggregateAdmissionTests),
             IsolatedAggregateNodeProcess.Module("isolated-plan.mjs"),
             IsolatedAggregateNodeProcess.Module("vector-isolated-plan.mjs"),
             IsolatedAggregateNodeProcess.Module("aggregate-validation.mjs")], TestContext.Current!.Execution.CancellationToken);

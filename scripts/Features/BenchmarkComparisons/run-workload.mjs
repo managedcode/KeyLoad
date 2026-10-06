@@ -14,6 +14,7 @@ const marker = /^KeyLoadBenchmarkProgress phase=(oracle|initialize|warmup|prepar
 const missingFile = 'ENOENT';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const controlProfile = 'intensive-1k-c16';
+const openLoopOutputArgument = '--Benchmarks:Output=artifacts/comparisons/isolated/workers/';
 const scaleProfiles = new Set(['scaled-100k-c16', 'scaled-1m-c16']);
 const vectorProfilePattern = /^vector-(?:100k|1m)-(?:exact|hnsw|ivfflat|native)-(?:plain|filtered|mixed)-c16$/u;
 
@@ -75,7 +76,10 @@ export function workloadArguments(scaleProfile, vectorProfile, openLoopCell) {
   ];
   if (scaled) arguments_.push(`--KeyLoadTests:ScaleProfile=${scaleProfile}`);
   if (vector) arguments_.push(`--KeyLoadTests:VectorProfile=${vectorProfile}`);
-  if (openLoop !== undefined) arguments_.push(openLoop.rateArgument);
+  if (openLoop !== undefined) {
+    arguments_.push(openLoop.rateArgument);
+    arguments_.push(openLoopOutputArgument + openLoopCell.id);
+  }
   return arguments_;
 }
 

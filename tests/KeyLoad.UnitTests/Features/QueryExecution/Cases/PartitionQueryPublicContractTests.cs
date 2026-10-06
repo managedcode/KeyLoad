@@ -31,6 +31,7 @@ internal sealed class PartitionQueryPublicContractTests
     public async Task DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead()
     {
         using var fixture = new PartitionQueryPublicTestSupport();
+        fixture.AddRows(fixture.First, new PartitionQueryPublicSeed("valid-leaf", 1, "healthy"));
         var valid = PartitionQueryPublicTestSupport.Request([fixture.First], 1);
         var position = fixture.Position;
         var empty = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Partitions = [] }));
@@ -55,6 +56,9 @@ internal sealed class PartitionQueryPublicContractTests
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(badAst.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(badVersion.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(fixture.Position).IsEqualTo(position);
+        var healthy = Run(fixture, valid);
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, fixture.First, "valid-leaf", "healthy");
         await Assert.That(fixture.Position).IsEqualTo(position);
     }
 

@@ -16,7 +16,8 @@ internal sealed class NativeDatabaseVectorFlowTests
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
         using var client = await fixture.ClientAsync(token);
         await using IVectorComparisonTarget target = name == "SurrealDB"
-            ? new SurrealDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions)
+            ? new SurrealDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions,
+                NativeExecutionPolicyFixture.ReadSerialization())
             : new HelixDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions);
         var profile = VectorComparisonProfile.Parse("vector-100k-" + method + "-plain-c16");
         var corpus = new VectorComparisonCorpus(profile, NativeDatabaseFlowFixture.ExecutionOptions);

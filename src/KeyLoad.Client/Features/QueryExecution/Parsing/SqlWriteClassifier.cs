@@ -18,26 +18,29 @@ internal static class SqlWriteClassifier
         if (sql is null || sql.Length > bounds.MaximumSqlInspectionBytes
             || Encoding.UTF8.GetByteCount(sql) > bounds.MaximumSqlInspectionBytes)
         { return true; }
+        var budgetCheckInterval = bounds.SqlBudgetCheckInterval;
         var offset = SqlStartOffset;
-        if (!SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, cancellationToken))
+        if (!SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, budgetCheckInterval, cancellationToken))
         { return true; }
-        if (Keyword(sql, ref offset, Select, cancellationToken))
+        if (Keyword(sql, ref offset, Select, budgetCheckInterval, cancellationToken))
         { return false; }
-        return !Keyword(sql, ref offset, Explain, cancellationToken) || !SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, cancellationToken)
-            || !Keyword(sql, ref offset, Select, cancellationToken);
+        return !Keyword(sql, ref offset, Explain, budgetCheckInterval, cancellationToken)
+            || !SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, budgetCheckInterval, cancellationToken)
+            || !Keyword(sql, ref offset, Select, budgetCheckInterval, cancellationToken);
     }
 
-    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, int maximumDepth, CancellationToken cancellationToken)
+    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, int maximumDepth,
+        int budgetCheckInterval, CancellationToken cancellationToken)
     {
         var state = new SqlTriviaState();
         var end = cancellationToken.IsCancellationRequested
-            ? Math.Min(sql.Length, SqlTriviaReader.MaximumChunkCharacters) : sql.Length;
+            ? Math.Min(sql.Length, budgetCheckInterval) : sql.Length;
         if (offset > end)
         { return false; }
         SqlTriviaStatus status;
         do
         {
-            status = SqlTriviaReader.Read(sql[..end], ref offset, ref state, maximumDepth);
+            status = SqlTriviaReader.Read(sql[..end], ref offset, ref state, maximumDepth, budgetCheckInterval);
             if (status == SqlTriviaStatus.More && cancellationToken.IsCancellationRequested)
             { return false; }
         } while (status == SqlTriviaStatus.More);
@@ -45,12 +48,12 @@ internal static class SqlWriteClassifier
     }
 
     private static bool Keyword(ReadOnlySpan<char> sql, ref int offset, ReadOnlySpan<char> keyword,
-        CancellationToken cancellationToken)
+        int budgetCheckInterval, CancellationToken cancellationToken)
     {
         var boundary = offset + keyword.Length;
         if (cancellationToken.IsCancellationRequested
-            && (boundary > SqlTriviaReader.MaximumChunkCharacters
-                || boundary == SqlTriviaReader.MaximumChunkCharacters && boundary < sql.Length))
+            && (boundary > budgetCheckInterval
+                || boundary == budgetCheckInterval && boundary < sql.Length))
         { return false; }
         var remaining = sql[offset..];
         if (!remaining.StartsWith(keyword, StringComparison.OrdinalIgnoreCase)

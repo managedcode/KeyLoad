@@ -10,6 +10,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
 /// <param name="admissionOptions">Centrally validated isolated node and observer admission profile.</param>
 /// <param name="clientOptions">Centrally validated SDK transport budget.</param>
 /// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
@@ -18,6 +19,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
     HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault) : IComparisonTarget

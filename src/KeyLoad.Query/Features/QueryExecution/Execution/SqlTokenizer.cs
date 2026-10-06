@@ -39,7 +39,7 @@ internal static class SqlTokenizer
         for (var index = FirstElementIndex; index < sql.Length;)
         {
             budget?.Check();
-            var status = ReadTrivia(sql, ref index, ref triviaState, maximumDepth, budget);
+            var status = ReadTrivia(sql, ref index, ref triviaState, maximumDepth, budgetCheckInterval, budget);
             if (status == SqlTriviaStatus.UnterminatedComment)
             {
                 throw Errors.Fail(ErrorCode.Validation, SqlCommentSyntax.UnterminatedBlockDetail);
@@ -71,12 +71,12 @@ internal static class SqlTokenizer
     }
 
     private static SqlTriviaStatus ReadTrivia(string sql, ref int index, ref SqlTriviaState state,
-        int maximumDepth, ReadExecutionBudget? budget)
+        int maximumDepth, int budgetCheckInterval, ReadExecutionBudget? budget)
     {
         SqlTriviaStatus status;
         do
         {
-            status = SqlTriviaReader.Read(sql.AsSpan(), ref index, ref state, maximumDepth);
+            status = SqlTriviaReader.Read(sql.AsSpan(), ref index, ref state, maximumDepth, budgetCheckInterval);
             if (status == SqlTriviaStatus.More)
             {
                 budget?.Check();

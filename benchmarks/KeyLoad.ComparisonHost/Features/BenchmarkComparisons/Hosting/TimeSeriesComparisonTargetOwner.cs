@@ -8,6 +8,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns the TimeSeries target and HTTP client lifetimes while the comparison runs.</summary>
 internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExecutionOptions> clientOptions,
+    IOptions<NativeComparisonExecutionOptions> executionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IAsyncDisposable
 {
     private readonly List<ITimeSeriesPersistentTarget> targets = [];
@@ -20,7 +21,7 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
         pendingTarget = new TimescaleTimeSeriesTarget(connectionString, lifecycleOptions, timescaleImage);
         PublishPendingTarget();
         var client = CreateClient(endpoint);
-        pendingTarget = new KeyLoadTimeSeriesTarget(client, adminKey, clientOptions, keyLoadBuildIdentity);
+        pendingTarget = new KeyLoadTimeSeriesTarget(client, adminKey, clientOptions, executionOptions, keyLoadBuildIdentity);
         PublishPendingTarget(client);
         return [.. targets];
     }

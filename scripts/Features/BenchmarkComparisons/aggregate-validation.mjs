@@ -11,7 +11,7 @@ export function validateWorkerEnvelope(value, cell, cohort, contract) {
     (cell.profile.startsWith('vector-') ? cell.scenario === 'VectorExact'
       : [...contract.crudScenarios, ...contract.specializedScenarios].includes(cell.scenario)) &&
     cell.profile === contract.profile && Object.hasOwn(SUPPORT, cell.target), error);
-  requireValue(exactKeys(value, KEYS.envelope) && value.schemaVersion === AGGREGATE.version &&
+  requireValue(exactKeys(value, KEYS.envelope) && value.schemaVersion === contract.workerSchemaVersion &&
     exactKeys(value.worker, KEYS.worker), error);
   requireValue(['target', 'nodeCount', 'scenario', 'profile'].every(key => value.worker[key] === cell[key]) &&
     KEYS.cohort.every(key => value.worker[key] === cohort[key]) && positive(value.worker.jobId), error);

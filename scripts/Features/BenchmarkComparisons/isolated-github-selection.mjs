@@ -4,6 +4,7 @@ import { uniqueNamed, validateArtifact, validateSuccessfulJob, validateWorkerJob
 import { contextForProfile } from './isolated-github-context.mjs';
 import { createScaledPlans } from './scaled-isolated-plan.mjs';
 import { createVectorPlans } from './vector-isolated-plan.mjs';
+import { createDatabaseMatrices } from './isolated-preflight.mjs';
 
 export function selectCompletedEvidence(capture, context, plan, scaledPlans = [], vectorPlans = []) {
   const { jobs, artifacts, run } = capture;
@@ -15,6 +16,13 @@ export function selectCompletedEvidence(capture, context, plan, scaledPlans = []
   const verifiedVectors = vectorPlans.length > 0 ? vectorPlans : hasVectorEvidence ? createVectorPlans() : [];
   const profilePlans = [plan, ...verifiedScales, ...verifiedVectors];
   const cells = profilePlans.flatMap(item => item.cells);
+  const openLoopRows = context.openLoopPlan === undefined ? []
+    : Object.values(createDatabaseMatrices(plan, verifiedScales, verifiedVectors, context.openLoopPlan))
+      .flatMap(matrix => matrix.include).filter(row => row.openLoopRate !== undefined);
+  const openLoopJobNames = new Set(openLoopRows.map(row => row.jobName));
+  const openLoopArtifactNames = new Set(openLoopRows.map(row => row.artifactPrefix + row.id));
+  const regularJobs = jobs.filter(job => !openLoopJobNames.has(job.name));
+  const regularArtifacts = artifacts.filter(item => !openLoopArtifactNames.has(item.name));
   const groupedNames = new Set(cells.map(cell => isolatedEvidenceJobName(cell)));
   const grouped = jobs.some(job => groupedNames.has(job.name));
   const jobName = cell => grouped ? isolatedEvidenceJobName(cell) : GH.casePrefix + cell.id;
@@ -23,15 +31,15 @@ export function selectCompletedEvidence(capture, context, plan, scaledPlans = []
     job.name.startsWith(target + ' / ') && !job.name.startsWith(target + ' / Check / '));
   const expectedJobs = new Set(cells.map(jobName));
   const expectedArtifacts = new Set(cells.map(cell => GH.artifactPrefix + cell.id));
-  requireGitHub(jobs.filter(isWorker).length === cells.length
-    && jobs.every(job => !isWorker(job) || expectedJobs.has(job.name)));
-  requireGitHub(artifacts.filter(item => item.name.startsWith(GH.artifactPrefix)).length === cells.length
-    && artifacts.every(item => !item.name.startsWith(GH.artifactPrefix) || expectedArtifacts.has(item.name)));
+  requireGitHub(regularJobs.filter(isWorker).length === cells.length
+    && regularJobs.every(job => !isWorker(job) || expectedJobs.has(job.name)));
+  requireGitHub(regularArtifacts.filter(item => item.name.startsWith(GH.artifactPrefix)).length === cells.length
+    && regularArtifacts.every(item => !item.name.startsWith(GH.artifactPrefix) || expectedArtifacts.has(item.name)));
   const selectedCells = cells.map(cell => {
     const profileContext = contextForProfile(context, cell.profile);
-    const job = validateWorkerJob(uniqueNamed(jobs, jobName(cell)), profileContext.cohort, jobName(cell));
+    const job = validateWorkerJob(uniqueNamed(regularJobs, jobName(cell)), profileContext.cohort, jobName(cell));
     requireGitHub(timestamp(job.started_at) >= timestamp(run.run_started_at));
-    const artifact = validateArtifact(uniqueNamed(artifacts, GH.artifactPrefix + cell.id), run, job,
+    const artifact = validateArtifact(uniqueNamed(regularArtifacts, GH.artifactPrefix + cell.id), run, job,
       GH.artifactPrefix + cell.id, GH.workerZipBytes);
     return { cell, job, artifact, context: profileContext };
   });

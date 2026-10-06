@@ -72,8 +72,8 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         ReplicatedOperation operation, byte[] legacyKey, byte[] original, Guid commandId)
     {
         var before = database.Store.Position;
-        var result = database.Database.Apply(operation);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.Corruption);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Apply(operation));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
         await AssertOutcomeAndDocumentUnchangedAsync(database, legacyKey, original, commandId);
     }

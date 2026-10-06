@@ -32,7 +32,7 @@ internal sealed class SampleChunkEncodingPlan
     internal long ColumnsBytes { get; }
 
     internal static SampleChunkEncodingPlan Create(ReadOnlySpan<SampleRecord> records,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int IndexInitialValue = 0;
 
@@ -49,7 +49,7 @@ internal sealed class SampleChunkEncodingPlan
         for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
-            builder.Add(records[index], index, budget);
+            builder.Add(records[index], index, budget, textCancellationCheckIntervalCodeUnits);
         }
         return builder.Complete(budget);
     }

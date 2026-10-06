@@ -1,7 +1,9 @@
 using System.Globalization;
+using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
+using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
@@ -25,20 +27,24 @@ internal static class TestSuiteResources
 
     internal static void Add(IDistributedApplicationBuilder builder, TestSuiteSettings settings)
     {
-        const string Path2Text = "../..";
-        const string AddPath2Text = "KeyLoad.slnx";
-        const string MessageText = "The test AppHost must run from the KeyLoad source checkout.";
-        const string Path1Text = "TestResults";
-        const string AddValueText = "0";
+        const string SourceRootRelativePath = "../..";
+        const string SolutionFileName = "KeyLoad.slnx";
+        const string SourceCheckoutRequired = "The test AppHost must run from the KeyLoad source checkout.";
+        const string DefaultResultsDirectoryName = "TestResults";
+        const string DisabledIntrinsicsValue = "0";
 
-        var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, Path2Text));
-        if (!File.Exists(Path.Combine(root, AddPath2Text)))
+        var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, SourceRootRelativePath));
+        if (!File.Exists(Path.Combine(root, SolutionFileName)))
         {
-            throw new InvalidOperationException(MessageText);
+            throw new InvalidOperationException(SourceCheckoutRequired);
         }
-        var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine(Path1Text, settings.Suite));
+        var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine(DefaultResultsDirectoryName, settings.Suite));
         var arguments = BuildArguments(root, settings, resultsDirectory);
         var runner = CreateRunner(builder, settings.ResourceName, root, arguments);
+        if (settings.NativeCoverageRf3 is not null)
+        {
+            ConfigureNativeCoverage(builder, runner, settings, root, resultsDirectory);
+        }
         if (settings.LocalRf3ImageEnabled)
         {
             ConfigureLocalImage(builder, runner, root);
@@ -66,7 +72,7 @@ internal static class TestSuiteResources
         }
         if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)
         {
-            runner.WithEnvironment(IntrinsicsEnvironment, AddValueText);
+            runner.WithEnvironment(IntrinsicsEnvironment, DisabledIntrinsicsValue);
         }
     }
 
@@ -111,27 +117,59 @@ internal static class TestSuiteResources
             .WithEnvironment(GithubActionsEnvironment, string.Empty);
     }
 
+    private static void ConfigureNativeCoverage(IDistributedApplicationBuilder builder,
+        IResourceBuilder<ExecutableResource> runner, TestSuiteSettings settings, string root,
+        string resultsDirectory)
+    {
+        const long TicksPerMillisecond = TimeSpan.TicksPerMillisecond;
+        const long NoElapsedTicks = 0;
+        var selected = settings.NativeCoverageRf3
+            ?? throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+        var runtime = AppHostOptionsRegistration.Get(builder);
+        var coverage = runtime.NativeCoverage.Value;
+        var execution = runtime.TestExecution.Value;
+        var pollTicks = execution.ProcessExitPollInterval.Ticks;
+        if (pollTicks <= NoElapsedTicks || pollTicks % TicksPerMillisecond != NoElapsedTicks
+            || execution.ProcessExitPollInterval > coverage.ShutdownTimeout)
+        {
+            throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+        }
+        var preparation = NativeCoverageRf3Prerequisite.Add(builder, settings, root, resultsDirectory,
+            out var run);
+        runner.WaitForCompletion(preparation);
+        NativeCoverageRf3ExecutionEnvironment.Apply(runner, runtime.NativeCoverage,
+            selected.Admission.SourceManifestPath);
+        runner.WithEnvironment(NativeCoverageRf3Protocol.ServerModeEnvironment, NativeCoverageRf3Protocol.Mode)
+            .WithEnvironment(NativeCoverageRf3Protocol.SourceManifestEnvironment,
+                selected.Admission.SourceManifestPath)
+            .WithEnvironment(NativeCoverageRf3Protocol.RunIdEnvironment, run.RunId)
+            .WithEnvironment(NativeCoverageRf3Protocol.RunManifestEnvironment, run.ManifestPath)
+            .WithEnvironment(NativeCoverageRf3Protocol.ImageReferenceEnvironment, run.ImageReference)
+            .WithEnvironment(NativeCoverageRf3Protocol.StartupPollEnvironment,
+                (pollTicks / TicksPerMillisecond).ToString(CultureInfo.InvariantCulture));
+    }
+
     private static string[] BuildArguments(string root, TestSuiteSettings settings, string resultsDirectory)
     {
-        const string ResultText = "test";
-        const string BuildArgumentsResultText = "--project";
-        const string Path2Text = "tests";
-        const string ItemText = "--report-trx";
-        const string BuildArgumentsItemText = "--coverage";
+        const string TestCommand = "test";
+        const string ProjectArgument = "--project";
+        const string TestsDirectoryName = "tests";
+        const string TrxReportArgument = "--report-trx";
+        const string EnableCoverageArgument = "--coverage";
 
         var arguments = new List<string>
         {
-            ResultText, BuildArgumentsResultText, Path.Combine(root, Path2Text, settings.Project),
+            TestCommand, ProjectArgument, Path.Combine(root, TestsDirectoryName, settings.Project),
             NoBuildArgument, NoRestoreArgument, ConfigurationArgument, ReleaseConfiguration,
             ResultsDirectoryArgument, resultsDirectory
         };
         if (settings.ReportTrx)
         {
-            arguments.Add(ItemText);
+            arguments.Add(TrxReportArgument);
         }
         if (settings.CoverageSettings is not null && settings.CoverageOutput is not null)
         {
-            arguments.Add(BuildArgumentsItemText);
+            arguments.Add(EnableCoverageArgument);
             arguments.Add(CoverageSettingsArgument);
             arguments.Add(ResolvePath(root, settings.CoverageSettings));
             arguments.Add(CoverageFormatArgument);

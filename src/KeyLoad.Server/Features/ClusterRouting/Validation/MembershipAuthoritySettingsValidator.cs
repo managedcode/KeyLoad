@@ -33,27 +33,22 @@ internal static class MembershipAuthoritySettingsValidator
 
     internal static void ValidateSection(IConfigurationSection section, MembershipAuthoritySettings settings)
     {
-        const string ValidateSectionResultText = "Mode";
-        const string ValidateSectionValidateSectionResultText = "TrustedGroupPhysicalShardId";
-        const string ValidateSectionNameText = nameof(MembershipAuthoritySettings.AuthorityEndpoints);
-        const string ValidateSectionValidateSectionNameText = nameof(MembershipAuthoritySettings.TrustedGroupVoterIds);
-
         ArgumentNullException.ThrowIfNull(section);
         var children = section.GetChildren().ToArray();
         var allowed = settings.Mode switch
         {
-            MembershipAuthoritySettingsProtocol.Local => new[] { ValidateSectionResultText },
+            MembershipAuthoritySettingsProtocol.Local => new[] { nameof(MembershipAuthoritySettings.Mode) },
             MembershipAuthoritySettingsProtocol.Authority => new[]
-            { ValidateSectionResultText, ValidateSectionValidateSectionResultText, nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.TrustedGroupPhysicalShardId), nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
             MembershipAuthoritySettingsProtocol.Proxy => new[]
-            { ValidateSectionResultText, nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
+            { nameof(MembershipAuthoritySettings.Mode), nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
             _ => []
         };
         if (children.Any(child => !allowed.Contains(child.Key, StringComparer.Ordinal))
             || children.Any(child => child.Value is not null && child.GetChildren().Any()))
         { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
-        ValidateArray(section, ValidateSectionNameText, settings.Mode == MembershipAuthoritySettingsProtocol.Proxy);
-        ValidateArray(section, ValidateSectionValidateSectionNameText, settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
+        ValidateArray(section, nameof(MembershipAuthoritySettings.AuthorityEndpoints), settings.Mode == MembershipAuthoritySettingsProtocol.Proxy);
+        ValidateArray(section, nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
         ValidateArray(section, nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
     }
 

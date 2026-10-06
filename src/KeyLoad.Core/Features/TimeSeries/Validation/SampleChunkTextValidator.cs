@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleChunkTextValidator
 {
-    internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget)
+    internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const long TextBytesInitialValue = 0L;
         const int EmptySeriesBytes = 0;
@@ -10,7 +10,7 @@ internal static class SampleChunkTextValidator
 
         var textBytes = TextBytesInitialValue;
         var series = new SampleChunkReader(payload.Series.Span);
-        var seriesBytes = SampleChunkText.ValidateFramed(ref series, budget);
+        var seriesBytes = SampleChunkText.ValidateFramed(ref series, budget, hashChunkBytes);
         SampleChunkWire.Require(seriesBytes > EmptySeriesBytes);
         textBytes += seriesBytes;
         series.RequireEnd();
@@ -19,7 +19,7 @@ internal static class SampleChunkTextValidator
         for (var index = IndexInitialValue; index < payload.RecordCount; index++)
         {
             budget.Check();
-            var eventBytes = SampleChunkText.ValidateFramed(ref events, budget);
+            var eventBytes = SampleChunkText.ValidateFramed(ref events, budget, hashChunkBytes);
             SampleChunkWire.Require(eventBytes > EmptySeriesBytes);
             textBytes += eventBytes;
         }
@@ -33,7 +33,7 @@ internal static class SampleChunkTextValidator
         for (var index = IndexInitialValue; index < count; index++)
         {
             budget.Check();
-            var tagBytes = SampleChunkText.ValidateFramed(ref tags, budget);
+            var tagBytes = SampleChunkText.ValidateFramed(ref tags, budget, hashChunkBytes);
             SampleChunkWire.Require(tagBytes > EmptySeriesBytes);
             textBytes += tagBytes;
         }

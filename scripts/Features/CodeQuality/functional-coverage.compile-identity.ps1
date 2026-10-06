@@ -8,14 +8,16 @@ $script:FcCompileIdentity = [ordered]@{
     CentralKey = 'KeyLoad.FunctionalCompileIdentity.Central'
     Version = '1'
     MaximumAttributes = 5012
+    MaximumSourceRecords = 5000
     MaximumValueCharacters = 8192
     MaximumReceiptCharacters = 33554432
-    InvalidReceipt = 'The native UnitTests compilation receipt is missing, duplicated, malformed or unsupported.'
+    InvalidReceipt = 'The native project compilation receipt is missing, duplicated, malformed or unsupported.'
 }
 
 function Read-FcAssemblyMetadataStrings([object] $Reader) {
     $records = [Collections.Generic.List[object]]::new()
     $totalCharacters = 0L
+    $sourceRecordCount = 0
     foreach ($handle in $Reader.CustomAttributes) {
         $attribute = $Reader.GetCustomAttribute($handle)
         if ($attribute.Parent.Kind -ne [Reflection.Metadata.HandleKind]::AssemblyDefinition -or
@@ -50,6 +52,12 @@ function Read-FcAssemblyMetadataStrings([object] $Reader) {
                 throw $script:FcCompileIdentity.InvalidReceipt
             }
             $totalCharacters += $key.Length + $value.Length
+            if ($key -ceq $script:FcCompileIdentity.SourceKey) {
+                if ($sourceRecordCount -ge $script:FcCompileIdentity.MaximumSourceRecords) {
+                    throw $script:FcCompileIdentity.InvalidReceipt
+                }
+                $sourceRecordCount++
+            }
             $records.Add([ordered]@{ key = $key; value = $value })
         }
     }
@@ -85,7 +93,7 @@ function Assert-FcCompileReceiptEntries([object[]] $Actual, [object[]] $Expected
     }
 }
 
-function Read-FcUnitCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
+function Read-FcNativeCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
     [object] $ExpectedProducer) {
     $stream = [IO.File]::OpenRead($DllPath)
     $pe = $null
@@ -133,4 +141,9 @@ function Read-FcUnitCompileReceipt([string] $DllPath, [object[]] $ExpectedSource
         if ($null -ne $pe) { $pe.Dispose() }
         $stream.Dispose()
     }
+}
+
+function Read-FcUnitCompileReceipt([string] $DllPath, [object[]] $ExpectedSources, [object[]] $ExpectedCentralInputs,
+    [object] $ExpectedProducer) {
+    Read-FcNativeCompileReceipt $DllPath $ExpectedSources $ExpectedCentralInputs $ExpectedProducer
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <IncludeTestAssembly>False</IncludeTestAssembly>
+  <ExcludeAssembliesWithoutSources>None</ExcludeAssembliesWithoutSources>
+  <DoesNotReturnAttribute>None</DoesNotReturnAttribute>
+  <CodeCoverage>
+    <ModulePaths>
+      <Include>
+        <ModulePath>^.*[/\\]KeyLoad\.Abstractions\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Artifacts\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Cli\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Client\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Core\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Diagnostics\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Orleans\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Query\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Replication\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Security\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Server\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.ServiceDefaults\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Storage\.IO\.dll$</ModulePath>
+        <ModulePath>^.*[/\\]KeyLoad\.Storage\.ZoneTree\.dll$</ModulePath>
+      </Include>
+    </ModulePaths>
+    <SkipAutoProperties>False</SkipAutoProperties>
+    <CollectFromChildProcesses>True</CollectFromChildProcesses>
+    <EnableDynamicManagedInstrumentation>True</EnableDynamicManagedInstrumentation>
+    <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
+    <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
+    <EnableStaticNativeInstrumentation>False</EnableStaticNativeInstrumentation>
+  </CodeCoverage>
+</Configuration>

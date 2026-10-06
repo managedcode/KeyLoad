@@ -9,28 +9,28 @@ internal static class SampleChunkText
     private const byte Utf16Encoding = 1;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
-    internal static long FramedSize(string value, ReadExecutionBudget budget)
+    internal static long FramedSize(string value, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits)
     {
         const int EncodingFlagBits = 1;
 
-        var byteLength = MeasureText(value, budget, out var encoding);
+        var byteLength = MeasureText(value, budget, textCancellationCheckIntervalCodeUnits, out var encoding);
         var prefix = checked(((ulong)byteLength << EncodingFlagBits) | encoding);
         return SampleChunkWire.VarUIntLength(prefix) + byteLength;
     }
 
     internal static void WriteFramed(string value, Span<byte> destination, ref int position,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, int hashChunkBytes, int textCancellationCheckIntervalCodeUnits)
     {
         const int EncodingFlagBits = 1;
 
-        var byteLength = MeasureText(value, budget, out var encoding);
+        var byteLength = MeasureText(value, budget, textCancellationCheckIntervalCodeUnits, out var encoding);
         var prefix = checked(((ulong)byteLength << EncodingFlagBits) | encoding);
         SampleChunkWire.WriteVarUInt(destination, ref position, prefix);
         var target = destination.Slice(position, byteLength);
         budget.Check();
         if (encoding == Utf16Encoding)
         {
-            SampleChunkUtf16.Write(value, target, budget);
+            SampleChunkUtf16.Write(value, target, budget, hashChunkBytes);
         }
         else
         {
@@ -40,7 +40,7 @@ internal static class SampleChunkText
         position += byteLength;
     }
 
-    internal static long ValidateFramed(ref SampleChunkReader reader, ReadExecutionBudget budget)
+    internal static long ValidateFramed(ref SampleChunkReader reader, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int EncodingFlagMask = 1;
         const int PrefixBitOffset = 1;
@@ -50,11 +50,11 @@ internal static class SampleChunkText
         var byteLength = prefix >> PrefixBitOffset;
         SampleChunkWire.Require(byteLength <= int.MaxValue);
         var bytes = reader.ReadSpan((int)byteLength);
-        ValidateBytes(bytes, encoding, budget);
+        ValidateBytes(bytes, encoding, budget, hashChunkBytes);
         return checked((long)byteLength);
     }
 
-    internal static string ReadFramed(ref SampleChunkReader reader, ReadExecutionBudget budget)
+    internal static string ReadFramed(ref SampleChunkReader reader, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int EncodingFlagMask = 1;
         const int PrefixBitOffset = 1;
@@ -64,19 +64,19 @@ internal static class SampleChunkText
         var byteLength = prefix >> PrefixBitOffset;
         SampleChunkWire.Require(byteLength <= int.MaxValue);
         var bytes = reader.ReadSpan((int)byteLength);
-        ValidateBytes(bytes, encoding, budget);
+        ValidateBytes(bytes, encoding, budget, hashChunkBytes);
         budget.Check();
-        var result = encoding == Utf8Encoding ? StrictUtf8.GetString(bytes) : SampleChunkUtf16.Decode(bytes, budget);
+        var result = encoding == Utf8Encoding ? StrictUtf8.GetString(bytes) : SampleChunkUtf16.Decode(bytes, budget, hashChunkBytes);
         budget.Check();
         return result;
     }
 
-    private static int MeasureText(string value, ReadExecutionBudget budget, out byte encoding)
+    private static int MeasureText(string value, ReadExecutionBudget budget, int textCancellationCheckIntervalCodeUnits,
+        out byte encoding)
     {
         const int Utf8LengthInitialValue = 0;
         const int NextCheckInitialValue = 0;
         const int IndexInitialValue = 0;
-        const int CancellationCheckStrideMask = 0x3FFF;
 
         if (value.Length > SampleChunkWire.MaximumEncodedBytes)
         {
@@ -90,7 +90,7 @@ internal static class SampleChunkText
             if (index >= nextCheck)
             {
                 budget.Check();
-                nextCheck = index + CancellationCheckStrideMask;
+                nextCheck = index + textCancellationCheckIntervalCodeUnits;
             }
             utf8Length += MeasureCodeUnit(value, ref index, ref hasUnpairedSurrogate);
         }
@@ -125,32 +125,34 @@ internal static class SampleChunkText
         return current <= OneByteUtf8MaximumCodeUnit ? OneByteUtf8Length : current <= TwoByteUtf8MaximumCodeUnit ? TwoByteUtf8Length : ThreeByteUtf8Length;
     }
 
-    private static void ValidateBytes(ReadOnlySpan<byte> bytes, byte encoding, ReadExecutionBudget budget)
+    private static void ValidateBytes(ReadOnlySpan<byte> bytes, byte encoding, ReadExecutionBudget budget, int hashChunkBytes)
     {
         if (encoding == Utf8Encoding)
         {
-            ValidateUtf8(bytes, budget);
+            ValidateUtf8(bytes, budget, hashChunkBytes);
         }
         else
         {
-            SampleChunkUtf16.ValidateFallback(bytes, budget);
+            SampleChunkUtf16.ValidateFallback(bytes, budget, hashChunkBytes);
         }
     }
 
-    private static void ValidateUtf8(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget)
+    private static void ValidateUtf8(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget, int hashChunkBytes)
     {
         const int OffsetInitialValue = 0;
         const int Utf16CodeUnitBytes = 2;
         const int NoConsumedUtf8Bytes = 0;
+        const int MinimumCodeUnitStride = 1;
 
         var offset = OffsetInitialValue;
-        var nextCheck = SampleChunkWire.HashChunkBytes / Utf16CodeUnitBytes;
+        var checkStride = Math.Max(MinimumCodeUnitStride, hashChunkBytes / Utf16CodeUnitBytes);
+        var nextCheck = checkStride;
         while (offset < bytes.Length)
         {
             if (offset >= nextCheck)
             {
                 budget.Check();
-                nextCheck = offset + SampleChunkWire.HashChunkBytes / Utf16CodeUnitBytes;
+                nextCheck = offset + checkStride;
             }
             var status = Rune.DecodeFromUtf8(bytes[offset..], out _, out var consumed);
             SampleChunkWire.Require(status == OperationStatus.Done && consumed > NoConsumedUtf8Bytes);

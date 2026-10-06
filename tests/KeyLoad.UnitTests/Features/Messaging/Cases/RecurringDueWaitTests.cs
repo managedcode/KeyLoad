@@ -55,7 +55,9 @@ internal sealed class RecurringDueWaitTests
             TimeSpan.FromSeconds(10), TimeProvider.System, linked.Token);
         await canceled.CancelAsync();
 
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => canceledWait);
+        var cancellation = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => canceledWait);
+        await Assert.That(canceled.IsCancellationRequested).IsTrue();
+        await Assert.That(cancellation!.CancellationToken.IsCancellationRequested).IsTrue();
         fixture.Commit(ReplicaAppliedPositionWaitTests.FirstDocument);
         await activeWait.WaitAsync(linked.Token);
 

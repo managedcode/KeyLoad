@@ -16,7 +16,6 @@ public static class BackupArtifact
     private const long CatalogRecordOffset = 1L;
     private const long EmptyFileBytes = 0;
     private const long FirstFileOffset = 0;
-    private const int DefaultPieceBytes = 268_435_456;
     private const int MinimumPieceBytes = 1_024;
     private const int MaximumPieceBytes = 1_073_741_824;
     private const string ManifestFileName = "backup.json";
@@ -35,7 +34,7 @@ public static class BackupArtifact
     /// <param name="backupDirectory">Directory containing the verified backup files.</param>
     /// <param name="artifactPath">New archive path.</param>
     /// <param name="pieceBytes">Maximum bytes in each file-backed archive piece.</param>
-    public static void Pack(string backupDirectory, string artifactPath, int pieceBytes = DefaultPieceBytes)
+    public static void Pack(string backupDirectory, string artifactPath, int pieceBytes)
     {
         if (pieceBytes < MinimumPieceBytes || pieceBytes > MaximumPieceBytes)
         {

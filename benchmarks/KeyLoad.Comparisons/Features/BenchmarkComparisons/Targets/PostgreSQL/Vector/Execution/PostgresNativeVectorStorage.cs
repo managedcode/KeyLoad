@@ -26,7 +26,7 @@ internal static class PostgresNativeVectorStorage
     }
 
     internal static async Task<int> IngestAsync(NpgsqlDataSource source, IAsyncEnumerable<VectorDocument> documents, NativeComparisonExecutionOptions execution,
-        CancellationToken cancellationToken)
+        int vectorComponentBuilderCapacity, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
@@ -37,13 +37,13 @@ internal static class PostgresNativeVectorStorage
             batch.Add(document);
             if (batch.Count == execution.WriteBatchCapacity)
             {
-                inserted += await InsertBatchAsync(connection, transaction, batch, cancellationToken).ConfigureAwait(false);
+                inserted += await InsertBatchAsync(connection, transaction, batch, vectorComponentBuilderCapacity, cancellationToken).ConfigureAwait(false);
                 batch.Clear();
             }
         }
         if (batch.Count > PostgresNativeVectorStorageValues.FirstIndex)
         {
-            inserted += await InsertBatchAsync(connection, transaction, batch, cancellationToken).ConfigureAwait(false);
+            inserted += await InsertBatchAsync(connection, transaction, batch, vectorComponentBuilderCapacity, cancellationToken).ConfigureAwait(false);
         }
 
         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -82,13 +82,13 @@ internal static class PostgresNativeVectorStorage
         }
     }
 
-    internal static async Task UpdateAsync(NpgsqlDataSource source, VectorUpdate update, CancellationToken cancellationToken)
+    internal static async Task UpdateAsync(NpgsqlDataSource source, VectorUpdate update, int vectorComponentBuilderCapacity, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var command = connection.CreateCommand();
         command.CommandText = UpdateSql;
         command.Parameters.AddWithValue(update.Id);
-        command.Parameters.AddWithValue(VectorLiteral(update.Embedding.Span));
+        command.Parameters.AddWithValue(VectorLiteral(update.Embedding.Span, vectorComponentBuilderCapacity));
         if (await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false) != PostgresNativeVectorStorageValues.SingleElementOffset)
         {
             throw new InvalidDataException(PostgresNativeVectorStorageValues.PostgreSQLDidNotUpdateExactlyOne);
@@ -105,9 +105,9 @@ internal static class PostgresNativeVectorStorage
         return await reader.ReadAsync(cancellationToken).ConfigureAwait(false) ? ToReadback(reader) : null;
     }
 
-    internal static string VectorLiteral(ReadOnlySpan<float> vector)
+    internal static string VectorLiteral(ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity)
     {
-        var builder = new StringBuilder(vector.Length * PostgresNativeVectorStorageValues.FloatTextCapacityEstimate + PostgresNativeVectorStorageValues.VectorDelimiterCharacterCount).Append(PostgresNativeVectorStorageValues.VectorOpenCharacter);
+        var builder = CreateVectorBuilder(vector.Length, vectorComponentBuilderCapacity).Append(PostgresNativeVectorStorageValues.VectorOpenCharacter);
         for (var index = PostgresNativeVectorStorageValues.FirstIndex; index < vector.Length; index++)
         {
             if (index != PostgresNativeVectorStorageValues.FirstIndex)
@@ -120,8 +120,11 @@ internal static class PostgresNativeVectorStorage
         return builder.Append(PostgresNativeVectorStorageValues.VectorCloseCharacter).ToString();
     }
 
+    internal static StringBuilder CreateVectorBuilder(int componentCount, int vectorComponentBuilderCapacity)
+        => new(componentCount * vectorComponentBuilderCapacity + PostgresNativeVectorStorageValues.VectorDelimiterCharacterCount);
+
     private static async Task<int> InsertBatchAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
-        List<VectorDocument> batch, CancellationToken cancellationToken)
+        List<VectorDocument> batch, int vectorComponentBuilderCapacity, CancellationToken cancellationToken)
     {
         var ids = new string[batch.Count];
         var payloads = new string[batch.Count];
@@ -137,7 +140,7 @@ internal static class PostgresNativeVectorStorage
 
             ids[index] = document.Id;
             payloads[index] = document.Payload;
-            vectors[index] = VectorLiteral(document.Embedding.Span);
+            vectors[index] = VectorLiteral(document.Embedding.Span, vectorComponentBuilderCapacity);
             numbers[index] = document.Number;
         }
         await using var command = connection.CreateCommand();

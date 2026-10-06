@@ -70,7 +70,7 @@ public sealed partial class NativeComparisonExecutionOptions
             throw new OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions), [NativeComparisonOperationalLimitsMustBePresentPositive]);
         }
 
-        ValidateAdapterPolicy();
+        NativeComparisonAdapterOptionsValidator.Validate(this);
         ValidateMongoPolicy();
         ValidateReportPolicy();
         ValidateVectorPolicy();

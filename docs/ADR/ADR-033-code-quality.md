@@ -886,12 +886,25 @@ source identity, complete tests and exact-source Linux qualification exist.
    and all originals. Native repeated-input merging must leave line/branch
    denominators and outcomes unchanged; coarse Cobertura fractions cannot prove
    union. Keep branches unmeasured until actual native outcome merging qualifies.
+   Native exports may omit both root integer branch attributes. Retain their
+   aggregate as null, reject a one-sided or malformed pair, and independently
+   recount real per-line condition pairs when root counts are present. A native
+   `branch-rate="1"` without integer outcome evidence cannot satisfy a threshold.
 8. Review uncovered operations per module, add complete positive/negative/edge
    regressions and remeasure the same new source cohort. Preserve80/70/90,
    module/no-decrease policy, CRAP same-cohort requirements and complete mandatory
    tests. This stage introduces no database format or public-contract migration;
    rollback removes the coherent test-only collector/resource joins, restores
    the previous invocation route and preserves all original evidence.
+
+The native production collector settings explicitly retain child-process
+collection and dynamic managed instrumentation on supported platforms alongside
+static managed instrumentation. Qualify CLI/Artifacts child hits with the original
+whole backup/pack/restore operation reports before enrolling those contributors;
+host-only coverage and authored module lists remain insufficient. The CI producer
+runs four sequential Aspire profiles after one Release build and preserves both
+the complete required suites and unconditional raw-artifact upload. Module
+completeness, original identities and native merge admission remain mandatory.
 
 Canonical file ownership and join points are CodeQuality's feature-local scripts,
 AppHost configuration/resources and IntegrationTests scoped fixture/export
@@ -935,3 +948,21 @@ Related files, rollback, positive/negative/error tests and the exact join shapes
 are frozen in CodeQuality. No production topology, authority, wire or database
 format is changed, no load/tooling case contributes, and status stays Accepted
 until actual collector, cleanup, report and required qualification gates pass.
+
+AC-CQ-043/044 adds independent original native PE/PDB hash, module, MVID and
+CodeView GUID/stamp validation to the complete producer operation oracle.
+AC-CQ-045/047 retains one absolute native merger cleanup watchdog: kill and close
+owned original child/readers on failure and join only within its remaining bound.
+An owner whose originals still cannot settle must fail-stop with a fixed safe
+message and no successful artifact; its original parent retains Aspire/TUnit tree
+cleanup. No unbounded join, replacement exit/readers or fabricated terminal is
+permitted. This exceptional error path preserves inputs, keeps qualification
+failed and adds no production database, wire, dependency or policy option.
+
+The schema-v3 producer reads the source-controlled product contributor registry
+at `scripts/Features/CodeQuality/functional-coverage.product-contributors.json`,
+using exact schema1 `schemaVersion`/`contributors` and the unchanged eight-field
+AC-CQ-044 rows. This explicitly covers unit, scalar, recovery and RF3; the
+Query-only development profile remains separate. Registry bytes are part of
+the complete pre/post source inventory. Admission never substitutes for native
+pass, TRX identity, original image/cohort binding or actual coverage evidence.

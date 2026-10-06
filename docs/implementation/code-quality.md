@@ -14,6 +14,42 @@ enforce file400, aggregate partial type200, executable unit50 and nesting3 limit
 under the precise metric and bounded exception contract in ADR-033. These authored
 tests have compiled but have not executed for this source.
 
+## Functional coverage development checkpoint, 2026-10-06
+
+The current implementation collects four functional profiles through Aspire after
+one Release build, with the complete required suites retained separately. Load,
+stress, performance and comparison contributors are excluded. CI preserves raw
+coverage, TRX, TUnit and RF3 process receipts before descriptor/merge admission.
+The production roster is14 modules; the canonical source inventory additionally
+classifies AppHost and Analyzers as infrastructure. Global coverage remains
+unqualified while contributor/module and native Linux RF3 evidence is incomplete.
+
+The local macOS arm64 R42 run executed all three `CliBackupRestoreFlowTests`
+successfully through Aspire: backup/pack/restore of a committed ZoneTree store,
+rejection of a nonempty destination with both stores preserved, and invalid-budget
+rejection followed by healthy restore. Original TRX SHA256 is
+`fdd1723677de1c26f3c6415025246e7922fbed4a8428ac121e8da57565e27d50`;
+original native binary coverage SHA256 is
+`64b88c64e6d8e651a76bd8b4fa13726330388f16e8cd984333332d9b1ac13b10`.
+The pinned18.11.2 native export reported1007/36703 raw lines across nine modules,
+with CLI/Artifacts child modules absent. These scoped host counts cannot qualify
+the complete roster or become a whole-solution percentage. Explicit child-process
+collection and supported dynamic managed instrumentation are now configured;
+fresh child hits and source-bound Linux qualification remain required.
+
+The native Cobertura export omits both integer branch attributes and contains no
+branch outcomes. Its `branch-rate="1"` is not100% proof. Native readers preserve
+unavailable aggregate counts as null and merged branches as unmeasured. The
+complete backup/restore/native-merge regression remains pending after the child
+lifetime and native-schema fixes; earlier failures are retained as failures.
+No load measurement, CRAP result, RF3 coverage percentage or acceptance closure is
+claimed from this development checkpoint.
+
+The canonical formatter, whitespace check and repository-governance inventory
+passed locally before the final native-schema join. Required final build, focused
+runtime checks, complete Linux suites, coverage and fault/endurance gates remain
+independent of this source checkpoint.
+
 ## Observed gates on 2026-10-02
 
 | Gate | Actual evidence | Result |

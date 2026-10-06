@@ -9,7 +9,6 @@ internal static class SurrealDbVectorProtocol
     private const int SingleResultCardinality = 1;
     private const int EmptyResultCount = 0;
     private const char RecordSeparator = ':';
-    private const int NativeConstant12000 = 12_000;
     private const string CREATEONLY = "CREATE ONLY ";
     private const string SETNumber = " SET number = ";
     private const string Embedding = ", embedding = ";
@@ -33,7 +32,6 @@ internal static class SurrealDbVectorProtocol
     private static readonly System.Text.CompositeFormat NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat = System.Text.CompositeFormat.Parse(NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormatTemplate);
     private const string ANDNumber = " AND number % 100 = 0";
     private const string ANDNumber2 = " AND number % 10 != 9";
-    private const int VectorComponentTextCapacity = 12;
     private const int VectorArrayDelimiterWidth = 2;
     private const char VectorArrayStart = '[';
     private const char VectorComponentSeparator = ',';
@@ -96,27 +94,32 @@ internal static class SurrealDbVectorProtocol
         return value[(separator + SingleResultCardinality)..];
     }
 
-    internal static string CreateBatchSql(string table, List<VectorDocument> batch)
+    internal static string CreateBatchSql(string table, List<VectorDocument> batch, int recordBuilderCapacity, int vectorComponentBuilderCapacity)
     {
-        var sql = new StringBuilder(batch.Count * NativeConstant12000);
+        var sql = CreateBatchBuilder(batch.Count, recordBuilderCapacity);
         foreach (var document in batch)
         {
-            sql.Append(CREATEONLY).Append(table).Append(RecordSeparator).Append(RecordKey(document.Id)).Append(SETNumber).Append(document.Number.ToString(CultureInfo.InvariantCulture)).Append(Embedding).Append(FormatVector(document.Embedding.Span)).Append(Payload).Append(JsonSerializer.Serialize(document.Payload)).Append(NativeCharacter59);
+            sql.Append(CREATEONLY).Append(table).Append(RecordSeparator).Append(RecordKey(document.Id)).Append(SETNumber).Append(document.Number.ToString(CultureInfo.InvariantCulture)).Append(Embedding).Append(FormatVector(document.Embedding.Span, vectorComponentBuilderCapacity)).Append(Payload).Append(JsonSerializer.Serialize(document.Payload)).Append(NativeCharacter59);
         }
 
         return sql.ToString();
     }
 
+    internal static StringBuilder CreateBatchBuilder(int recordCount, int recordBuilderCapacity)
+        => new(recordCount * recordBuilderCapacity);
+    internal static StringBuilder CreateVectorBuilder(int componentCount, int vectorComponentBuilderCapacity)
+        => new(componentCount * vectorComponentBuilderCapacity + VectorArrayDelimiterWidth);
+
     internal static string ReadbackSql(string table, int after, int limit) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMWHERENumberFormat, table, after, limit, SurrealDbReadbackIndex.Name(table));
     internal static string ReadOneSql(string table, string id) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTNumberIdEmbeddingPayloadFROMFormat, table, RecordKey(id));
-    internal static string UpdateSql(string table, string id, ReadOnlySpan<float> vector) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeUPDATESETEmbeddingFormat, table, RecordKey(id), FormatVector(vector));
-    internal static string SearchSql(string table, ReadOnlySpan<float> vector, int topK, VectorQueryMode mode, VectorIndexKind index, int ef)
+    internal static string UpdateSql(string table, string id, ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeUPDATESETEmbeddingFormat, table, RecordKey(id), FormatVector(vector, vectorComponentBuilderCapacity));
+    internal static string SearchSql(string table, ReadOnlySpan<float> vector, int topK, VectorQueryMode mode, VectorIndexKind index, int ef, int vectorComponentBuilderCapacity)
     {
         var operatorParameters = index == VectorIndexKind.Hnsw ? string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeEmptyTextFormat, topK, ef) : string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeCOSINEFormat, topK);
-        return string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTIdVectorDistanceKnnASDistanceFROMFormat, table, operatorParameters, FormatVector(vector), FilterClause(mode), topK);
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTIdVectorDistanceKnnASDistanceFROMFormat, table, operatorParameters, FormatVector(vector, vectorComponentBuilderCapacity), FilterClause(mode), topK);
     }
 
-    internal static string ExplainSql(string table, ReadOnlySpan<float> vector, VectorQueryMode mode, VectorIndexKind index, int ef) => EXPLAIN + SearchSql(table, vector, CanonicalTopK, mode, index, ef);
+    internal static string ExplainSql(string table, ReadOnlySpan<float> vector, VectorQueryMode mode, VectorIndexKind index, int ef, int vectorComponentBuilderCapacity) => EXPLAIN + SearchSql(table, vector, CanonicalTopK, mode, index, ef, vectorComponentBuilderCapacity);
     internal static string HnswIndex(string index, string table, int dimensions, int efConstruction, int neighbors) => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINEINDEXONTABLEFIELDSEmbeddingHNSWDIMENSIONFormat, index, table, dimensions, efConstruction, neighbors);
     private static string FilterClause(VectorQueryMode mode) => mode switch
     {
@@ -125,9 +128,9 @@ internal static class SurrealDbVectorProtocol
         VectorQueryMode.Mixed => ANDNumber2,
         _ => throw new ArgumentOutOfRangeException(nameof(mode))
     };
-    private static string FormatVector(ReadOnlySpan<float> vector)
+    private static string FormatVector(ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity)
     {
-        var result = new StringBuilder(vector.Length * VectorComponentTextCapacity + VectorArrayDelimiterWidth).Append(VectorArrayStart);
+        var result = CreateVectorBuilder(vector.Length, vectorComponentBuilderCapacity).Append(VectorArrayStart);
         for (var index = EmptyResultCount; index < vector.Length; index++)
         {
             if (!float.IsFinite(vector[index]))

@@ -15,6 +15,7 @@ internal sealed class SqlTriviaReaderTests
     private const int DepthLimit = 2;
     private const int ShallowDepth = 1;
     private const int LongCommentLength = 4_096;
+    private const int OriginalChunkCharacters = 256;
     private const char CommentCharacter = 'x';
     private const string OpenComment = "/*";
     private const string CloseComment = "*/";
@@ -53,8 +54,8 @@ internal sealed class SqlTriviaReaderTests
         do
         {
             var before = offset;
-            status = SqlTriviaReader.Read(sql, ref offset, ref state, DepthLimit);
-            await Assert.That(offset - before).IsLessThanOrEqualTo(SqlTriviaReader.MaximumChunkCharacters);
+            status = SqlTriviaReader.Read(sql, ref offset, ref state, DepthLimit, OriginalChunkCharacters);
+            await Assert.That(offset - before).IsLessThanOrEqualTo(OriginalChunkCharacters);
             if (status == SqlTriviaStatus.More)
             {
                 await Assert.That(offset).IsGreaterThan(before);
@@ -67,7 +68,7 @@ internal sealed class SqlTriviaReaderTests
     [Test]
     public async Task AC_SQLC_004_CommentDelimitersAcrossChunkBoundariesRemainTrivia()
     {
-        var prefix = new string(Whitespace, SqlTriviaReader.MaximumChunkCharacters - 1);
+        var prefix = new string(Whitespace, OriginalChunkCharacters - 1);
         var sql = prefix + OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + Select;
         var (status, offset) = Drain(sql, DepthLimit);
         await Assert.That(status).IsEqualTo(SqlTriviaStatus.Complete);
@@ -81,7 +82,7 @@ internal sealed class SqlTriviaReaderTests
         SqlTriviaStatus status;
         do
         {
-            status = SqlTriviaReader.Read(sql, ref offset, ref state, maximumDepth);
+            status = SqlTriviaReader.Read(sql, ref offset, ref state, maximumDepth, OriginalChunkCharacters);
         } while (status == SqlTriviaStatus.More);
         return (status, offset);
     }

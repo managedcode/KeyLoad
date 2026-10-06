@@ -15,7 +15,7 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
 
     internal ReplicaAppliedPositionWaitFixture()
     {
-        Canonical = new TestDatabase(bootstrapPhysicalShardCatalog: false);
+        Canonical = new TestDatabase();
         Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
             Canonical.Store.Identity.Incarnation)
         { BenchmarkTopology = true };

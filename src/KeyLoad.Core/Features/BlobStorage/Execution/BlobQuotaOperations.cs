@@ -32,7 +32,8 @@ internal static class BlobQuotaOperations
         { throw BlobErrors.Validation(); }
     }
 
-    internal static void Configure(IAtomicTransaction tx, ConfigureResourceRequest request, bool isNew, Guid incarnation)
+    internal static void Configure(IAtomicTransaction tx, ConfigureResourceRequest request, bool isNew, Guid incarnation,
+        int maximumCatalogProofRecords)
     {
         ValidatePolicy(request.Definition);
         if (request.Definition.Kind != ResourceKind.BlobStore)
@@ -41,7 +42,7 @@ internal static class BlobQuotaOperations
         var global = BlobRecordReader.Get<BlobQuota>(tx, BlobKeys.Global);
         if (global is null)
         {
-            ProveEmpty(tx);
+            ProveEmpty(tx, maximumCatalogProofRecords);
             global = BlobQuota.Empty(incarnation);
             tx.PutRecord(BlobKeys.Global, global);
         }
@@ -56,7 +57,7 @@ internal static class BlobQuotaOperations
         { Validate(quota, incarnation); }
     }
 
-    internal static void ProveEmpty(IKeyValueView view)
+    internal static void ProveEmpty(IKeyValueView view, int maximumCatalogProofRecords)
     {
         const int MaxRecordsSingleItemCount = 1;
         const int EmptyRecords = 0;
@@ -67,7 +68,7 @@ internal static class BlobQuotaOperations
             { throw BlobErrors.Corruption(); }
         }
         var existing = false;
-        var scan = view.VisitRange(KeyCodec.Encode(CatalogSpace), BlobKeys.InitialCatalogProofRecords, (_, value) =>
+        var scan = view.VisitRange(KeyCodec.Encode(CatalogSpace), maximumCatalogProofRecords, (_, value) =>
         {
             if (BlobRecordReader.Decode<ResourceDefinition>(value).Kind == ResourceKind.BlobStore)
             { existing = true; return false; }

@@ -22,6 +22,17 @@ internal static class OpenLoopPlanJoinAssertions
     private const string ProofQualification = "comparison-open-loop-proof-qualification-";
     private const string GithubSeed = "retained=sentinel";
     private const string GithubMatrixPrefix = "database_matrices=";
+    private const string ScaleProfilePrefix = "scaled-";
+    private const string VectorProfilePrefix = "vector-";
+    private static readonly string[] ExpectedAppendedFields =
+    [
+        IsolatedPlanFields.Id, IsolatedPlanFields.Target, IsolatedPlanFields.NodeCount,
+        IsolatedPlanFields.Scenario, IsolatedPlanFields.Profile, IsolatedPlanFields.Family,
+        PreflightProperty, LabelProperty, JobNameProperty, IsolatedPlanFields.ScaleProfile,
+        IsolatedPlanFields.VectorProfile, IsolatedPlanFields.ArtifactPrefix, IsolatedPlanFields.QualificationPrefix,
+        OpenLoopPlanExpectedInventory.OfferedRateProperty, OpenLoopPlanExpectedInventory.CancellationProofProperty,
+        OpenLoopRateProperty, OpenLoopProofProperty
+    ];
 
     internal static async Task VerifyDefaultPreservedAsync(OpenLoopPlanCliSnapshot baseline,
         OpenLoopPlanCliSnapshot expanded, JsonElement contract)
@@ -151,29 +162,34 @@ internal static class OpenLoopPlanJoinAssertions
             + expectedCell.OfferedRatePerSecond.ToString(CultureInfo.InvariantCulture) + LabelRateSuffix;
         var expectedJob = source[JobNameProperty]!.GetValue<string>() + kindLabel
             + expectedCell.OfferedRatePerSecond.ToString(CultureInfo.InvariantCulture) + LabelRateSuffix;
-        var expected = ExpectedNewRow(source, expectedCell, expectedLabel, expectedJob, isProof);
-        await Assert.That(actual.Count).IsEqualTo(15);
+        var expected = ExpectedNewRow(expectedCell, expectedLabel, expectedJob, isProof);
+        await Assert.That(actual.Select(static property => property.Key))
+            .IsEquivalentTo(ExpectedAppendedFields);
         await Assert.That(JsonNode.DeepEquals(actual, expected)).IsTrue();
     }
 
-    private static JsonObject ExpectedNewRow(JsonObject source, OpenLoopPlanExpectedCell cell,
+    private static JsonObject ExpectedNewRow(OpenLoopPlanExpectedCell cell,
         string label, string jobName, bool isProof)
-    {
-        var expected = (JsonObject)source.DeepClone();
-        expected[IsolatedPlanFields.Id] = cell.Id;
-        expected[IsolatedPlanFields.Target] = cell.Target;
-        expected[IsolatedPlanFields.NodeCount] = cell.NodeCount;
-        expected[IsolatedPlanFields.Scenario] = cell.Scenario;
-        expected[IsolatedPlanFields.Profile] = cell.Profile;
-        expected[IsolatedPlanFields.Family] = cell.Family;
-        expected[OpenLoopPlanExpectedInventory.OfferedRateProperty] = cell.OfferedRatePerSecond;
-        expected[OpenLoopPlanExpectedInventory.CancellationProofProperty] = cell.CancellationProof;
-        expected[LabelProperty] = label;
-        expected[JobNameProperty] = jobName;
-        expected[OpenLoopRateProperty] = cell.OfferedRatePerSecond;
-        expected[OpenLoopProofProperty] = cell.CancellationProof;
-        expected[IsolatedPlanFields.ArtifactPrefix] = isProof ? ProofArtifact : MeasurementArtifact;
-        expected[IsolatedPlanFields.QualificationPrefix] = isProof ? ProofQualification : MeasurementQualification;
-        return expected;
-    }
+        => new()
+        {
+            [IsolatedPlanFields.Id] = cell.Id,
+            [IsolatedPlanFields.Target] = cell.Target,
+            [IsolatedPlanFields.NodeCount] = cell.NodeCount,
+            [IsolatedPlanFields.Scenario] = cell.Scenario,
+            [IsolatedPlanFields.Profile] = cell.Profile,
+            [IsolatedPlanFields.Family] = cell.Family,
+            [PreflightProperty] = false,
+            [LabelProperty] = label,
+            [JobNameProperty] = jobName,
+            [IsolatedPlanFields.ScaleProfile] = cell.Profile.StartsWith(ScaleProfilePrefix, StringComparison.Ordinal)
+                ? cell.Profile : null,
+            [IsolatedPlanFields.VectorProfile] = cell.Profile.StartsWith(VectorProfilePrefix, StringComparison.Ordinal)
+                ? cell.Profile : null,
+            [IsolatedPlanFields.ArtifactPrefix] = isProof ? ProofArtifact : MeasurementArtifact,
+            [IsolatedPlanFields.QualificationPrefix] = isProof ? ProofQualification : MeasurementQualification,
+            [OpenLoopPlanExpectedInventory.OfferedRateProperty] = cell.OfferedRatePerSecond,
+            [OpenLoopPlanExpectedInventory.CancellationProofProperty] = cell.CancellationProof,
+            [OpenLoopRateProperty] = cell.OfferedRatePerSecond,
+            [OpenLoopProofProperty] = cell.CancellationProof
+        };
 }

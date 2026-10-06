@@ -25,6 +25,13 @@ export const SITE_GH = Object.freeze({
     'Generate website benchmark data', 'Save website benchmark data',
     'Save combined benchmark results', 'Save GitHub result verification']),
   legacySources: HISTORICAL.sourceRevisions,
+  unavailableProducerGenerations: Object.freeze([Object.freeze({
+    sourceRevision: 'c16a1d928d7d6941db74403e47f3dbcea206d86a',
+    ownedSteps: Object.freeze(['Verify benchmark plan', 'Download benchmark results',
+      'Check all 270 benchmark results', 'Save combined benchmark results', 'Save GitHub result verification']),
+    leadingNativeSteps: Object.freeze(['Set up job', 'Download source code']),
+    trailingNativeSteps: Object.freeze(['Post Download source code', 'Complete job']),
+  })]),
   receiptKeys: Object.freeze(['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'repository', 'workflow', 'run',
     'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'metadataFiles', 'archives', 'inputFiles']),
   artifactKeys: Object.freeze(['id', 'name', 'sizeInBytes', 'digest', 'expired', 'createdAt']),

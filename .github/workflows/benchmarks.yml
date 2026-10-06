@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Plan all benchmark scenarios
         id: plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --github-output="$GITHUB_OUTPUT"
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json" --github-output="$GITHUB_OUTPUT"
       - name: Save benchmark plan
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -56,6 +56,7 @@ jobs:
             ${{ runner.temp }}/scaled-plan.json
             ${{ runner.temp }}/vector-plan.json
             ${{ runner.temp }}/composite-plan.json
+            ${{ runner.temp }}/open-loop-plan.json
           if-no-files-found: error
           retention-days: 90
   comparison-images:
@@ -207,6 +208,8 @@ jobs:
       KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
       KEYLOAD_SCALE_PROFILE: ${{ matrix.scaleProfile }}
       KEYLOAD_VECTOR_PROFILE: ${{ matrix.vectorProfile }}
+      KEYLOAD_OPEN_LOOP_RATE: ${{ matrix.openLoopRate }}
+      KEYLOAD_OPEN_LOOP_CANCELLATION_PROOF: ${{ matrix.openLoopCancellationProof }}
       Benchmarks__Target: ${{ matrix.target }}
       Benchmarks__NodeCount: ${{ matrix.nodeCount }}
       Benchmarks__Scenario: ${{ matrix.scenario }}
@@ -379,7 +382,8 @@ jobs:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Verify benchmark plan
-        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json"
+        id: plan
+        run: node scripts/Features/BenchmarkComparisons/isolated-plan.mjs --output="$RUNNER_TEMP/isolated-plan.json" --scale-output="$RUNNER_TEMP/scaled-plan.json" --vector-output="$RUNNER_TEMP/vector-plan.json" --composite-output="$RUNNER_TEMP/composite-plan.json" --open-loop-output="$RUNNER_TEMP/open-loop-plan.json"
       - name: Download benchmark results
         run: node scripts/Features/BenchmarkComparisons/isolated-github-collect.mjs --plan="$RUNNER_TEMP/isolated-plan.json" --scale-plan="$RUNNER_TEMP/scaled-plan.json" --vector-plan="$RUNNER_TEMP/vector-plan.json" --input="$RUNNER_TEMP/isolated-capture"
       - name: Check control and complete scale accounting
@@ -408,4 +412,28 @@ jobs:
           name: comparison-isolated-provider-evidence
           path: ${{ runner.temp }}/isolated-capture/github/**
           if-no-files-found: error
+          retention-days: 90
+      - name: Download authenticated open-loop worker results
+        id: open-loop-intake
+        if: ${{ always() && !cancelled() && steps.plan.outcome == 'success' }}
+        run: node scripts/Features/BenchmarkComparisons/open-loop-github-collect.mjs --capture="$RUNNER_TEMP/isolated-capture/github" --plan="$RUNNER_TEMP/open-loop-plan.json" --output="$RUNNER_TEMP/open-loop-intake"
+      - name: Aggregate open-loop cohort
+        id: open-loop-aggregate
+        if: ${{ always() && !cancelled() && steps.open-loop-intake.outcome == 'success' }}
+        run: node scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate-cli.mjs --input="$RUNNER_TEMP/open-loop-intake" --output="$RUNNER_TEMP/open-loop-aggregate"
+      - name: Save original open-loop worker inputs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-open-loop-intake
+          path: ${{ runner.temp }}/open-loop-intake/**
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Save open-loop cohort disposition
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: comparison-open-loop-cohort
+          path: ${{ runner.temp }}/open-loop-aggregate/**
+          if-no-files-found: warn
           retention-days: 90

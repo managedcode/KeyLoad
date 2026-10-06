@@ -48,7 +48,7 @@ internal sealed class ArtifactTests
             await File.WriteAllTextAsync(Path.Combine(root, "backup.json"), "{}");
             await File.WriteAllTextAsync(Path.Combine(root, "commands.wal"), string.Empty);
             var artifact = Path.Combine(root, "missing.ctg");
-            var error = Assert.ThrowsExactly<KeyLoadException>(() => BackupArtifact.Pack(root, artifact));
+            var error = Assert.ThrowsExactly<KeyLoadException>(() => BackupArtifact.Pack(root, artifact, pieceBytes: 1_024));
             await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
             await Assert.That(File.Exists(artifact)).IsFalse();
         }
