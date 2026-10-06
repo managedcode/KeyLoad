@@ -52,11 +52,11 @@ internal sealed class TimeProviderOperationTests
         var before = fixture.Store.Position;
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         clock.TimestampStep = TimeSpan.FromSeconds(DeadlineSeconds + 1);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Root, new(fixture.Partition, Sql)));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Root, new(fixture.Partition, Sql, AllowFullScan: true)));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(fixture.Store.Position).IsEqualTo(before);
         clock.TimestampStep = TimeSpan.Zero;
-        var page = engine.Execute(Root, new(fixture.Partition, Sql));
+        var page = engine.Execute(Root, new(fixture.Partition, Sql, AllowFullScan: true));
         await Assert.That(page.Rows.Select(row => row.EntityId)).IsEquivalentTo(new[] { Entity });
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
     }

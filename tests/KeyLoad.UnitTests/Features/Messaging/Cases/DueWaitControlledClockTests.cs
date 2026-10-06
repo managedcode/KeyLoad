@@ -56,8 +56,11 @@ internal sealed class DueWaitControlledClockTests
             await Assert.That(fixture.Consensus.AppliedPosition).IsEqualTo(0L);
             deadline.Dispose();
             await Assert.That(clock.ActiveTimers).IsEqualTo(0);
+            var following = scope.Track(RecurringDueWait.WaitForChangeOrFallbackAsync(fixture.Consensus, 0, Fallback, clock, token));
             fixture.Commit(ReplicaAppliedPositionWaitTests.FirstDocument);
+            await following.WaitAsync(Guard, TimeProvider.System, token);
             await fixture.AssertDocument(ReplicaAppliedPositionWaitTests.FirstDocument);
+            await Assert.That(clock.ActiveTimers).IsEqualTo(0);
         });
     }
 }

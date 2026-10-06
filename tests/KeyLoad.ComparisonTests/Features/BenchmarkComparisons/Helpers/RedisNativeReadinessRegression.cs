@@ -18,7 +18,10 @@ internal static class RedisNativeReadinessRegression
     private static readonly string[] NodeNames = [Primary, "replica1", "replica2"];
 
     /// <summary>AC-ISO-002/003/006 and AC-BC-FAIL-009: prove native authenticated TCP, external copies and cancellation.</summary>
-    internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
+    internal static Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
+        => VerifyAsync(app, nodeCount, TimeProvider.System, token);
+
+    internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, TimeProvider clock, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(app);
         ArgumentOutOfRangeException.ThrowIfLessThan(nodeCount, MinimumNodes);
@@ -39,11 +42,11 @@ internal static class RedisNativeReadinessRegression
             created = await database.StringSetAsync(probe, payload, policy.RedisReadinessProbeExpiry, when: When.NotExists, flags: CommandFlags.DemandMaster);
             token.ThrowIfCancellationRequested();
             await Assert.That(created).IsTrue();
-            await VerifyCopiesAsync(clients, database, probe, payload, token);
+            await VerifyCopiesAsync(clients, database, probe, payload, clock, token);
             if (nodeCount > MinimumNodes)
             {
-                await VerifyAbsentProbeCancellationAsync(clients, database, policy.RedisReadinessCancellationDelay, token);
-                await VerifyCopiesAsync(clients, database, probe, payload, token);
+                await VerifyAbsentProbeCancellationAsync(clients, database, policy.RedisReadinessCancellationDelay, clock, token);
+                await VerifyCopiesAsync(clients, database, probe, payload, clock, token);
             }
         }
         finally
@@ -73,26 +76,26 @@ internal static class RedisNativeReadinessRegression
     }
 
     private static async Task VerifyCopiesAsync(RedisNativeReadinessRegressionConnections clients, IDatabase database,
-        string probe, string payload, CancellationToken token)
+        string probe, string payload, TimeProvider clock, CancellationToken token)
     {
         await RedisCopyObservation.VerifyDirectCopiesAsync(clients.Replicas, clients.ReplicaEndpoints,
-            database.Database, probe, payload, NativeExecutionPolicyFixture.Lifecycle(), token);
+            database.Database, probe, payload, NativeExecutionPolicyFixture.Lifecycle(), clock, token);
         var stored = await database.StringGetAsync(probe, CommandFlags.DemandMaster);
         token.ThrowIfCancellationRequested();
         await Assert.That(stored.ToString()).IsEqualTo(payload);
     }
 
     private static async Task VerifyAbsentProbeCancellationAsync(RedisNativeReadinessRegressionConnections clients,
-        IDatabase database, TimeSpan cancellationDelay, CancellationToken token)
+        IDatabase database, TimeSpan cancellationDelay, TimeProvider clock, CancellationToken token)
     {
         var absent = ProbePrefix + Guid.NewGuid().ToString(GuidFormat);
         var payload = Guid.NewGuid().ToString(GuidFormat);
         await Assert.That(await database.KeyExistsAsync(absent, CommandFlags.DemandMaster)).IsFalse();
         token.ThrowIfCancellationRequested();
-        using var cancellationTimeout = new CancellationTokenSource(cancellationDelay, TimeProvider.System);
+        using var cancellationTimeout = new CancellationTokenSource(cancellationDelay, clock);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, cancellationTimeout.Token);
         var original = RedisCopyObservation.VerifyDirectCopiesAsync(clients.Replicas, clients.ReplicaEndpoints,
-            database.Database, absent, payload, NativeExecutionPolicyFixture.Lifecycle(), cancellation.Token);
+            database.Database, absent, payload, NativeExecutionPolicyFixture.Lifecycle(), clock, cancellation.Token);
         await Assert.That(async () => await original).Throws<OperationCanceledException>();
         await Assert.That(cancellation.IsCancellationRequested).IsTrue();
         await Assert.That(original.IsCanceled).IsTrue();

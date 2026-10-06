@@ -3,10 +3,10 @@
   "scope": "TimeProvider local development; not Linux qualification",
   "feature": "docs/Features/ResourceExecution/TimeProvider.md",
   "decision": "docs/ADR/ADR-115-time-provider.md",
-  "sourceRevisionObserved": "51ce19cfbb086b316d41cd959e98946d78cc26e3",
+  "sourceRevisionObserved": "7e218a1f8e161d1107457f5b035759b8af2cafdd",
   "concurrentSourceChangesExcluded": true,
-  "canonicalBuildPassed": false,
-  "canonicalFormatterPassed": false,
+  "canonicalBuildPassed": true,
+  "canonicalFormatterPassed": true,
   "runtimeQualified": false,
   "fullTaskComplete": false,
   "analyzers": {
@@ -67,8 +67,8 @@
     ]
   },
   "builds": {
-    "canonical": "failed: 33 parallel BackupRestore artifact diagnostics and one AppHost signal join; join subsequently repaired and scoped AppHost build passed",
-    "canonicalLog": "/tmp/keyload-time-solution-build-final.log",
+    "canonical": "passed complete Release solution build after final storage-policy controlled-clock fixture edit: 0 warnings/errors; 6m22.24s; local shared checkout with unrelated source changes",
+    "canonicalLog": "/tmp/keyload-time-solution-after-readcut-fixture.log",
     "compiledModules": [
       "Core",
       "Query",
@@ -87,13 +87,29 @@
       "Server",
       "Analyzers.Tests",
       "CrashHost",
-      "RecoveryTests"
+      "RecoveryTests",
+      "AppHost",
+      "IntegrationTests",
+      "ComparisonTests",
+      "Artifacts",
+      "Cli",
+      "UnitTests",
+      "SiteTests"
     ],
     "scopedAppHost": "passed 0 warnings/errors, current product references; no replacement for solution gate",
-    "unitSource": "blocked by 8 parallel cancellation-flow and BackupRestore diagnostics; controlled operation cases not executed",
-    "unitLog": "/tmp/keyload-time-unit-source-final-r2.log",
+    "unitSource": "passed in complete solution build, including final controlled operation fixtures",
+    "unitLog": "/tmp/keyload-time-solution-after-readcut-fixture.log",
     "integrationSource": "passed 0 warnings/errors after async deadline ownership and disposal join repair",
-    "integrationLog": "/private/tmp/keyload-time-runtime-integration-source-build.log"
+    "integrationLog": "/private/tmp/keyload-time-runtime-integration-source-build.log",
+    "comparisonTestsSource": "passed 0 warnings/errors; current provider-taking Redis fixture overload also compiled in final canonical attempt",
+    "comparisonTestsLog": "/tmp/keyload-time-comparison-tests-final.log",
+    "lastIntermediateCanonical": "failed26 errors:24 parallel BackupRestore diagnostics and2 Redis joins, latter subsequently repaired",
+    "lastIntermediateCanonicalLog": "/tmp/keyload-time-solution-after-ownership-fix.log",
+    "canonicalErrors": 0,
+    "canonicalWarnings": 0,
+    "canonicalCommand": "dotnet build KeyLoad.slnx --no-restore --configuration Release --disable-build-servers -m:1",
+    "postReadCutFixtureVerification": "passed complete solution build and canonical formatter after final controlled-clock storage fixture edit",
+    "lastIntermediateCanonicalPassedLog": "/tmp/keyload-time-solution-latest.log"
   },
   "recovery": {
     "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery",
@@ -103,17 +119,17 @@
   },
   "format": {
     "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
-    "exitCode": 2,
-    "status": "parallel BackupRestore and cancellation-flow diagnostics; scoped clock formatting passed",
-    "log": "/tmp/keyload-time-format-final.log"
+    "exitCode": 0,
+    "status": "passed canonical verifier after final controlled-clock storage fixture edit",
+    "log": "/tmp/keyload-time-format-after-readcut-fixture.log",
+    "lastIntermediatePassedLog": "/tmp/keyload-time-format-post-repairs.log"
   },
   "governance": "passed 27 projects and 4 modules",
   "performance": "unmeasured; no acceleration claim",
   "coverageAndCrap": "unmeasured",
   "remaining": [
-    "Fresh passing complete solution build and canonical formatting",
-    "Execute controlled engine/read-cut/replica tests through freshly compiled Aspire unit runner",
-    "Complete unit/scalar/recovery/RF3 and exact-source Linux gates"
+    "Complete unit/scalar/recovery/RF3 and exact-source Linux gates",
+    "Functional coverage and source-bound CRAP remain unmeasured"
   ],
   "rf3": {
     "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3",
@@ -131,5 +147,121 @@
     "nativeReportSha256": "98fa6f4065dab9fa6fd13af1dd0232305ffcdc5cf1d204f9d16876bd40b9e54d",
     "status": "failed local development: cluster profile rejects macOS reparse temp paths; genuine prior-server proof unavailable; no passing Docker RF3 claim",
     "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T083253_a37d4221.log"
+  },
+  "controlledOperationTests": [
+    {
+      "className": "TimeProviderOperationTests",
+      "command": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/TimeProviderOperationTests/*' --KeyLoadTests:ResultsDirectory=TestResults/time-provider-engine-final --KeyLoadTests:ReportTrx=true",
+      "exitCode": 0,
+      "summary": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "TestResults/time-provider-engine-final/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "f68d4a18103727b0d00ec835c5f02fc0de30896b1298df7eaf4b0cb171414fd3",
+      "publicationGeneration": "50eca46d107a47fa979b219f0a42c4a2",
+      "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T085629_5dc2449b.log"
+    },
+    {
+      "className": "NativeReadCutClockTests",
+      "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeReadCutClockTests/*' --KeyLoadTests:ResultsDirectory=TestResults/time-provider-read-cut --KeyLoadTests:ReportTrx=true",
+      "exitCode": 0,
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "TestResults/time-provider-read-cut/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "4a760d73666ac0271aa4d5d8452ce7f3c95a68c7727af0ae5d39c345553ffd3d",
+      "publicationGeneration": "d54fcca10db64f859f4436e5c0bfc312",
+      "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T084815_8cf7b840.log"
+    },
+    {
+      "className": "DueWaitControlledClockTests",
+      "command": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/DueWaitControlledClockTests/*' --KeyLoadTests:ResultsDirectory=TestResults/time-provider-due-wait-final --KeyLoadTests:ReportTrx=true",
+      "exitCode": 0,
+      "summary": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "TestResults/time-provider-due-wait-final/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "f12f68246c9bd0e47836531c987cbda2119bc124743df10d3a8c2cc1cec4cf56",
+      "publicationGeneration": "5290d16876d14fe09a133251d03ec640",
+      "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T085657_fda40946.log"
+    },
+    {
+      "className": "ReadExecutionTests",
+      "command": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ReadExecutionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/time-provider-read-execution --KeyLoadTests:ReportTrx=true",
+      "exitCode": 0,
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "TestResults/time-provider-read-execution/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "dd268415510a88abda207e1afad9ae4eef2ab8a9d51bf6acfa7cc28e61a9e4f0",
+      "publicationGeneration": "c6928f27f23047e19a737d6694d0f555",
+      "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T085721_1e1b70d9.log"
+    },
+    {
+      "className": "ZoneTreeStorageExecutionOptionsTests",
+      "command": "TMPDIR=/private/tmp ASPIRE_SUPPRESS_CLI_RUN_HOOK=true dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ZoneTreeStorageExecutionOptionsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/time-provider-storage-policy-final --KeyLoadTests:ReportTrx=true",
+      "exitCode": 0,
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0
+      },
+      "nativeReport": "TestResults/time-provider-storage-policy-final/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "nativeReportSha256": "66558f2ffa0afb61954cb835f42a4aac58f8cad81f5c10be7dc308bdfed29201",
+      "publicationGeneration": "e9d624d8386849a9816b4232139df344",
+      "log": "/tmp/keyload-time-storage-policy-final-run.log",
+      "entryPoint": "native Aspire AppHost with its SDK CLI run hook suppressed; actual AppHost still owns runner readiness, execution, exit and shutdown; isolated storage-only cases avoid replacing the other full-suite AppHost"
+    }
+  ],
+  "controlledOperationTestsNote": "8 new controlled-clock cases, 3 existing read-budget cases and 6 storage-policy cases passed. The storage record-budget case now uses the controlled clock while keeping its 1-second policy and real store. First query fixture needed explicit full-scan consent; cancellation fixture joins real apply before asserting state. Native temp avoids macOS system-temp aliases without changing filesystem guards.",
+  "fullUnitAttempt": {
+    "command": "TMPDIR=/private/tmp dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ResultsDirectory=TestResults/time-provider-unit-full --KeyLoadTests:ReportTrx=true",
+    "cliExitCode": 0,
+    "status": "interrupted deliberately with native Aspire SIGINT because a second shared whole-unit run was active; CLI shutdown exit0 is not a test pass; every owned host/test PID was observed terminated",
+    "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T085852_7183a28a.log",
+    "observedFailedCasesBeforeInterruption": 11,
+    "observedFailureAreas": [
+      "CLI output retention",
+      "native benchmark child settlement",
+      "coverage CLI workflow",
+      "Orleans test-cluster startup cancellation",
+      "wall-time storage budget fixture now changed to injected controlled clock"
+    ],
+    "nativeSummaryAvailable": false,
+    "nativeCompleteReportAvailable": false
+  },
+  "focusedOperationTestsPassed": 17,
+  "fullUnitSharedFollowup": {
+    "status": "the other authorized chat owns a complete unit run; it has observed failures and source-inventory drift; no completed passing report was available at this checkpoint",
+    "resultsDirectory": "TestResults/general-options-unit-v34",
+    "log": "/private/tmp/keyload-general-options-aspire-unit-v34.log"
   }
 }

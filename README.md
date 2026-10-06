@@ -378,8 +378,8 @@ For detailed status, see the [implementation tracker](docs/implementation/status
 
 The [TimeProvider migration](docs/Features/ResourceExecution/TimeProvider.md)
 supplies explicit clocks for timestamps, elapsed budgets and managed timers.
-Its local Aspire analyzer suite passes 388 tests; controlled real-operation
-test sources are joined, while full build and runtime qualification remain open.
+Controlled-time regressions and the remaining runtime qualification gates
+are tracked in the feature specification.
 
 Website publication runs independently in CI when source changes. It uses the newest completed benchmark run with a verified aggregate when available; otherwise it publishes the product site without performance figures. A completed benchmark run triggers a fresh website build. [ADR-112](docs/ADR/ADR-112-independent-website-publication.md) records the source, artifact and publication checks; the revised route still needs delivered-source Linux CI and Pages verification.
 

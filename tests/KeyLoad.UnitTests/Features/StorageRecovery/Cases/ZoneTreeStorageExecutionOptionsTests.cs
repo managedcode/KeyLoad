@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Text;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -23,7 +24,8 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
             MaximumReadCutExaminedBytes = 32,
             MaximumReadCutElapsed = TimeSpan.FromSeconds(1)
         };
-        using var fixture = new StorageExecutionFixture(settings);
+        var clock = new ControlledReadClock(new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        using var fixture = new StorageExecutionFixture(settings, clock);
         Seed(fixture.Store);
         var delivered = 0;
         var bounded = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view =>
@@ -147,16 +149,20 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
 
     private sealed class StorageExecutionFixture : IDisposable
     {
+        private readonly TimeProvider clock;
         internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         internal ZoneTreeStore Store { get; private set; }
 
-        internal StorageExecutionFixture(ZoneTreeStorageExecutionOptions settings)
-            => Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(settings), UnitExecutionOptions.PointCacheExecution());
+        internal StorageExecutionFixture(ZoneTreeStorageExecutionOptions settings, TimeProvider? timeProvider = null)
+        {
+            clock = timeProvider ?? TimeProvider.System;
+            Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(settings), UnitExecutionOptions.PointCacheExecution(), clock);
+        }
 
         internal void Reopen(ZoneTreeStorageExecutionOptions settings)
         {
             Store.Dispose();
-            Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(settings), UnitExecutionOptions.PointCacheExecution());
+            Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(settings), UnitExecutionOptions.PointCacheExecution(), clock);
         }
 
         public void Dispose()

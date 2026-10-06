@@ -5,18 +5,18 @@
     "feature": "docs/Features/ResourceExecution/TimeProvider.md",
     "decision": "docs/ADR/ADR-115-time-provider.md",
     "sourceStage": "clock_migration_and_deterministic_real_operation_regressions_joined",
-    "canonicalBuildPassed": false,
-    "canonicalFormatterPassed": false,
+    "canonicalBuildPassed": true,
+    "canonicalFormatterPassed": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "verificationStage": "Aspire_analyzers_388_passed_shared_build_and_runtime_gates_blocked",
+    "verificationStage": "local_canonical_build_and_format_passed_Aspire_analyzers388_and_focused_operation_tests17_passed_runtime_qualification_open",
     "analyzerTestsPassed": 388,
     "localDevelopmentReceipt": "docs/implementation/time-provider-development-2026-10-06.json",
     "remaining": [
-      "Fresh passing complete solution build and canonical formatting",
-      "Execute controlled engine/read-cut/replica tests through freshly compiled Aspire unit runner",
-      "Complete unit/scalar/recovery/RF3 and exact-source Linux gates"
-    ]
+      "Complete unit/scalar/recovery/RF3 and exact-source Linux gates",
+      "Functional coverage and source-bound CRAP remain unmeasured"
+    ],
+    "focusedOperationTestsPassed": 17
   },
   "ORLEANS-PRIMITIVES-001": {
     "title": "Native Orleans capability review, services, messaging, transactions and jobs",
