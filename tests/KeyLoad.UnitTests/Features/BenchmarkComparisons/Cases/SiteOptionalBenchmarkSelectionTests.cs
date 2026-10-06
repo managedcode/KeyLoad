@@ -5,6 +5,12 @@ internal sealed class SiteOptionalBenchmarkSelectionTests
 {
     [Test]
     [Arguments("retained-success", true)]
+    [Arguments("retained-live-control-unavailable", true)]
+    [Arguments("retained-explicit-validation", true)]
+    [Arguments("retained-52-control-unavailable", true)]
+    [Arguments("retained-48-control-unavailable", true)]
+    [Arguments("retained-52-changed-source", true)]
+    [Arguments("retained-48-changed-step", true)]
     [Arguments("retained-unready", true)]
     [Arguments("retained-fb-unready", true)]
     [Arguments("failed-aggregate", true)]

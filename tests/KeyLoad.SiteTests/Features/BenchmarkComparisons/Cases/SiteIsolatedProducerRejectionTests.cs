@@ -22,7 +22,7 @@ internal sealed class SiteIsolatedProducerRejectionTests
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var temporary = SiteTempDirectory.Create();
-        var input = Path.Combine(temporary.Path, "validation-input");
+        var input = Path.Combine(temporary.Path, "validation-input", "input", "aggregate");
         var measured = await SiteIsolatedProducerFixture.CreateAsync(fixture, input, corruption, token);
         if (!measured && corruption is "failed" or "unixHost" or "mixedDataset")
         {

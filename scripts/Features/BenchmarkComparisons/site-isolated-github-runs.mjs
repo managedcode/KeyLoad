@@ -123,6 +123,8 @@ async function selectCurrentSiteEvidence(input, workflow, runs, producer, legacy
     requireSite(false);
   }
   requireSite(pair.run?.conclusion === producer.conclusion && completedProducer(pair.run, legacy));
+  // Frozen microbenchmark controls remain historical validation inputs, not the current composite cohort.
+  if (optional && SITE_GH.legacySources.includes(pair.run.head_sha)) return { state: 'unavailable', producer };
   return { state: 'selected', workflow, ...pair };
 }
 

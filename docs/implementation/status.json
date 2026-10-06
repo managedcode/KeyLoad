@@ -4879,11 +4879,11 @@
         "buildAndTestsDependency": false,
         "benchmarkSuccessDependency": false,
         "qualification": "existing_content_only_or_complete_measured_qualification_and_freshness_preserved",
-        "providerPublication": "second_standalone_run_failed_stale_dependency_count_repair_prepared_native_reverification_pending",
+        "providerPublication": "third_standalone_run_failed_17_real_site_assertions_and_critical_coverage; final_Benchmarks_dispatch_and_authenticated_wait_passed; Pages_unpublished",
         "siteTestsBuild": "passed_zero_warnings_zero_errors",
         "siteTestsFormat": "passed",
-        "canonicalBuild": "passed_zero_warnings_zero_errors_final_source",
-        "canonicalFormat": "failed_unrelated_BackupRestore_AtomicPartitionRosterFixture_whitespace",
+        "canonicalBuild": "failed_current_shared_source_unrelated_StorageRecovery_and_RF3_test_references; own_fresh_Unit_and_AppHost_build_passed_zero_warnings_zero_errors",
+        "canonicalFormat": "scoped_Unit_and_Site_verify_passed; not_full_current_repository_format",
         "staticWorkflowGovernance": "workflow_graph_actionlint_passed; working_tree_governance_failed_unrelated_owner_migration_rule_changed_preserved_root_prefix; scoped_index_prefix_unchanged",
         "contentOnlyAspire": {
           "status": "passed_development_only",
@@ -4901,11 +4901,11 @@
         "alwaysRunExecutorRegressions": {
           "status": "passed_development_only",
           "suite": "Aspire_unit_SiteOptionalBenchmarkSelectionTests",
-          "tests": 24,
-          "passed": 24,
+          "tests": 30,
+          "passed": 30,
           "skipped": 0,
           "executorCases": 5,
-          "trxSha256": "2ed45090c82db5fd2748973794b574932d54ee062f9bc5a013b60054b9516206"
+          "trxSha256": "36890550e4196c227cf359a692ec142a9c4f1b1d91d5e98e8f0cf9f7652303f6"
         },
         "firstNativeRun": {
           "source": "6c20cf4fba946afc123fd2fd29960d7995c248f4",
@@ -4915,7 +4915,7 @@
           "independentWorkflowStarted": true,
           "pagesPublished": false
         },
-        "unavailableProducerGenerations": 13,
+        "unavailableProducerGenerations": 15,
         "secondNativeRun": {
           "source": "f2dd44e57395cb8096fbe0ae1b7a736b4c81e7ab",
           "runId": 37482351429,
@@ -4948,7 +4948,94 @@
           "stepTimeoutMinutes": 5,
           "staticContract": "passed",
           "nativeManualAdmissionAndRetiredEventRejection": "passed_Aspire_unit",
-          "provider": "pending_genuine_final_dispatch_and_separate_Pages_run"
+          "provider": "native_final_dispatch_and_authenticated_wait_passed_Pages_pending",
+          "nativeProducer": {
+            "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
+            "runId": 37486656353,
+            "conclusion": "failure",
+            "aggregate": "skipped",
+            "triggerJobId": 112353758570,
+            "triggerConclusion": "success",
+            "onlyEffect": "POST_website_workflow_dispatch_main",
+            "originalJobLogSha256": "bd8c9e7dc273a606516c9c7ea5700ad8ffb01b89dca75e22d9b8a3f78fccce05"
+          },
+          "nativeConsumer": {
+            "runId": 37488242682,
+            "event": "workflow_dispatch",
+            "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
+            "benchmarkRunId": 37486656353,
+            "authenticatedWait": "success",
+            "qualification": "in_progress",
+            "pagesPublished": false
+          }
+        },
+        "thirdNativeRun": {
+          "source": "b58fab11bc126e5f7349f5adc0c276d1759c46e3",
+          "runId": 37484236243,
+          "conclusion": "failure",
+          "stage": "complete_measured_site_TUnit_and_critical_coverage",
+          "startupTests": {
+            "total": 6,
+            "passed": 6
+          },
+          "selectionTests": {
+            "total": 22,
+            "passed": 22
+          },
+          "analyzerTests": {
+            "total": 388,
+            "passed": 388
+          },
+          "analyzerCoveragePassed": true,
+          "siteTests": {
+            "total": 220,
+            "executed": 220,
+            "passed": 203,
+            "failed": 17,
+            "skipped": 0,
+            "timeouts": 0,
+            "trxSha256": "c76016ebe2e4d8543250a080604706a25043cf2ab45d5ac35a9098759a87965c"
+          },
+          "siteCoverage": {
+            "passed": false,
+            "aggregateLinePercent": 81,
+            "aggregateBranchPercent": 84,
+            "criticalSourcesBelow90": 9,
+            "sha256": "cd48c07348a2beb09932f41529e7622a3194398e6d7deaaa3f9c81ae531c81d3"
+          },
+          "qualification": "failed_original_evidence_retained_no_gate_bypass_no_Pages_success_claim",
+          "repair": "optional_native_capture_and_generation_aware_archive_control_and_observed_native_popup_alignment_prepared_remaining_failures_unqualified",
+          "pagesPublished": false
+        },
+        "compatibleReadinessRepair": {
+          "status": "source_implemented_30_Aspire_regressions_and_scoped_build_format_passed_native_Website_Pages_pending",
+          "requiredSelectorCases": 30,
+          "incompatibleHistoricalSourceBehavior": "authenticate_exact_run_job_step_contract_then_unavailable_for_live_metrics; explicit_frozen_historical_validation_preserved",
+          "originalNativeFixtures": {
+            "SiteOptionalRetained52Run.json": "15f5e7b69e95a3cb9c184d8d3c7160debd5a52742b4f5ef81a7fb03062c073e0",
+            "SiteOptionalRetained52Aggregate.json": "fcc72479e8d42598a97437730545e42a93c45c8f9be3559914e71cb92d0b8949",
+            "SiteOptionalRetained48Run.json": "bc06a618349c8a0b7dd40b177fdef7a4b72253dc63d02fb86b99c5a661f856e3",
+            "SiteOptionalRetained48Aggregate.json": "cc497c9ec425b37fda7a01055e6bc2cfe429eab7e30f4f9298634ff254d61199"
+          },
+          "canonicalBuildBlocker": "unrelated_current_concurrent_recovery_NodeEpochFileReadiness_removed_and_RF3_ZoneTreePersistenceFormat_inaccessible; full_solution_attempt_retained_no_legacy_reintroduction",
+          "aspireRegressions": {
+            "total": 30,
+            "passed": 30,
+            "skipped": 0,
+            "trxSha256": "36890550e4196c227cf359a692ec142a9c4f1b1d91d5e98e8f0cf9f7652303f6",
+            "source": "current_scoped_files_with_concurrent_checkout_changes",
+            "qualification": "development_only_actual_Aspire_owned_native_process"
+          },
+          "currentCompositeMeasuredQualification": "pending_authentic_complete_current_cohort; historical_controls_do_not_qualify_current_scale",
+          "pagesPublished": false,
+          "owningUnitBuild": "passed_zero_warnings_zero_errors_with_AppHost_after_final_helper_extraction"
+        },
+        "nativeCanonicalBuildAndFormat": {
+          "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
+          "runId": 37486656353,
+          "jobId": 112348359009,
+          "conclusion": "success",
+          "scope": "Build and check KeyLoad only; not_all_Benchmarks_or_database_acceptance"
         }
       }
     }

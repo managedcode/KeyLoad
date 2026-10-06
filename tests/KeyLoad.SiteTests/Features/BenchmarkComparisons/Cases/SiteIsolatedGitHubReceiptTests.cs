@@ -42,34 +42,31 @@ internal sealed class SiteIsolatedGitHubReceiptTests
     }
 
     [Test]
-    public async Task AC_BC_FAIL_019_NewSourceRequiresExactlyFiveDatabaseAggregateSteps()
+    public async Task AC_BC_FAIL_019_ActualSourceRequiresItsExactAggregateStepContract()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var original = inputs.Metadata.DeepClone();
-        var copy = DatabaseOnlyParserReceipt(inputs.Metadata);
+        var copy = inputs.Metadata.DeepClone().AsObject();
         await Assert.That(await ProbeAsync(copy, token)).IsTrue();
         var steps = copy[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]!.AsArray();
-        steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Generate website benchmark data", [SiteIsolatedGitHubTokens.Number] = 1000, [SiteIsolatedGitHubTokens.Conclusion] = "success" });
-        steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Save website benchmark data", [SiteIsolatedGitHubTokens.Number] = 1001, [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+        if (SiteIsolatedInventory.IsHistorical(inputs.Metadata))
+        {
+            await Assert.That(steps.Count).IsEqualTo(7);
+            foreach (var step in steps.Where(item => item![SiteIsolatedGitHubFields.Name]!.GetValue<string>()
+                is "Generate website benchmark data" or "Save website benchmark data").ToArray())
+            {
+                steps.Remove(step);
+            }
+        }
+        else
+        {
+            await Assert.That(steps.Count).IsEqualTo(6);
+            steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Generate website benchmark data", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+            steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Save website benchmark data", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+        }
         await Assert.That(await ProbeAsync(copy, token)).IsFalse();
         await Assert.That(JsonNode.DeepEquals(inputs.Metadata, original)).IsTrue();
-    }
-
-    private static JsonObject DatabaseOnlyParserReceipt(JsonObject actual)
-    {
-        // A controlled parser projection tests only the step contract; its changed source cannot authenticate GitHub.
-        var copy = actual.DeepClone().AsObject();
-        copy[SiteIsolatedGitHubTokens.Source]![SiteIsolatedGitHubTokens.Measured] = SiteIsolatedGitHubTokens.WrongSha;
-        copy[SiteIsolatedGitHubTokens.Cohort]![SiteIsolatedGitHubTokens.SourceRevision] = SiteIsolatedGitHubTokens.WrongSha;
-        var steps = copy[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]!.AsArray();
-        foreach (var step in steps.Where(item => item![SiteIsolatedGitHubFields.Name]!.GetValue<string>()
-            is "Generate website benchmark data" or "Save website benchmark data").ToArray())
-        {
-            steps.Remove(step);
-        }
-
-        return copy;
     }
 
     /// <summary>AC-BC-FAIL-003: a controlled receipt keeps the actual worker identity and permits only workload failure.</summary>

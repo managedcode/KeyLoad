@@ -33,7 +33,7 @@ internal sealed class SiteIsolatedGitHubArchiveTests
     {
         await using var stream = File.OpenRead(Path.Combine(inputs.Capture, SiteIsolatedGitHubTokens.Archives, name));
         using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
-        var expected = provider ? SiteIsolatedGitHubArchivePaths.ExpectedProvider() :
+        var expected = provider ? SiteIsolatedGitHubArchivePaths.ExpectedProvider(inputs.Metadata) :
             SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata);
         var selected = await SiteIsolatedGitHubArchivePreflight.InspectAsync(archive, expected, provider, token,
             SiteIsolatedGitHubArchivePaths.CellIds(inputs.Metadata));

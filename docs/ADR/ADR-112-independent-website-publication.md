@@ -42,7 +42,7 @@ no-skip TRX and least-privilege needs-gated Pages remain mandatory.
    changes on the current branch, preserve concurrent work and protections.
 
 Dependencies: existing official Pages actions, TUnit/MTP, Aspire entry, actual
-GitHub REST evidence, Node and Chrome. No new package/version/storage migration.
+GitHub REST evidence, Node and Chrome. No package or persisted-format change.
 Rollout producer/consumer/builder/tests atomically. Root owns integration/join
 points and deployment; workers do not commit or mutate other scopes. Rollback
 reverts this coherent slice to metric-required publication, honestly restoring
@@ -139,3 +139,65 @@ Website/Pages evidence. Preserve unrelated checkout work. No package/data change
 rollback reverts this coherent dispatch contract to the earlier completion hook
 without rewriting evidence or metric archives. Remain Accepted until original
 required qualification/provider gates have passed.
+
+## Original provider join and qualification failures (2026-10-06)
+
+The original cfe3833c Benchmarks run 37486656353 failed its Docker-image gate and
+skipped aggregation. Its final Trigger Website job 112353758570 nevertheless
+succeeded using only actions:write and created the separate Website
+workflow_dispatch run 37488242682 on the same source. This is actual dispatch
+proof, not Website/Pages publication proof.
+
+The preceding b58fab11 Website run 37484236243 passed source/tool, startup,
+optional-selection, analyzer and format/governance gates. Its original full
+Site TRX records 203/220 passed, 17 failed, 0 skipped, 0 timeouts; native coverage
+failed unchanged critical90 thresholds. Retain that failure. TASK-WEB-SEPARATE-005
+must align the instrumented native capture with the production optional-ready
+selector and the archive positive control with the actual generation-aware
+provider inventory, preserving original ZIP hashes, negative assertions and
+all required qualification gates. The original native keyboard receipt shows
+Linux Chrome opened the select popup on the first ArrowUp while retaining value3;
+use an additional native ArrowUp only after that observed popup state, then Enter,
+and retain the exact value2/row assertions. No scripted select/change replacement.
+Other failures and current composite coverage
+remain unqualified until authentic evidence supports their complete repair.
+
+### Current-compatible readiness
+
+Apply the existing QualifySite and BuildIsolatedSite current-cohort and
+no-historical-publication-fallback boundaries. The frozen intensive historical
+sources have original 4,096-document/10,000-operation controls and cannot supply
+the active 100k/1m composite cohort. Optional live selection MUST authenticate
+their native run, attempt, repository, workflow, successful aggregate and exact
+source-bound steps, then return unavailable for that source. Strict historical
+selection/archives and explicit validate mode remain intact. Older ready
+current-composite cohorts remain eligible. Never skip unknown malformed selected
+evidence, waive critical90, rewrite an archive or manufacture current measurements.
+
+REQ/AC-BC-WEB-002 covers this compatible-absence route: add actual production
+selector regression controls containing the unchanged retained native objects,
+prove live historical-unavailable plus explicit historical-selected behavior,
+and preserve every existing controlled rejection and current step contract.
+TASK-WEB-SEPARATE-005 joins source checks, Aspire unit regressions, canonical
+build/format and genuine content-only Website/Pages/freshness evidence. The
+current-composite measured gates remain mandatory and explicitly unqualified
+until their real producer evidence and full suite pass.
+
+The complete original pre-#53 job-page audit found two additional successful
+seven-step historical producers: run 37179484718/job 111384783112/source
+`0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3` and run 37166698745/job
+111347065594/source `fabff69193f41c784f0b36b85c1f34d82fa9903d`.
+Retain exact native run/job fixtures and classify only these source-bound,
+successful native-wrapper/seven-owned-step generations unavailable. Do not
+extend the frozen historical archive parser or admit their metrics. Other
+pre-#53 producers have no successful aggregate; the existing aa49 historical
+generation stays under its exact existing contract. Unknown step/source changes
+continue to reject rather than masquerade as absent data.
+
+The final compatible-readiness development checkpoint passed30/30 native
+Aspire-owned preparation cases, 0 skipped; original TRX SHA256
+`36890550e4196c227cf359a692ec142a9c4f1b1d91d5e98e8f0cf9f7652303f6`. Scoped Unit/AppHost build and Unit/Site
+format verification passed. The full shared solution attempt failed unrelated
+concurrent StorageRecovery recovery/RF3 references; no legacy implementation
+was restored. Exact committed-source Linux build, Website freshness/coverage
+and Pages remain pending and are not inferred from this development checkpoint.

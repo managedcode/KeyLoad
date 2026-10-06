@@ -23,7 +23,7 @@ internal static class SiteOptionalBenchmarkSelectionNodeProgram
         const unavailableRun = await read('SiteOptionalRetainedUnreadyRun.json');
         const unavailableJob = await read('SiteOptionalRetainedUnreadyAggregate.json');
         const assert = condition => { if (!condition) throw new Error('selection assertion failed'); };
-        """ + SiteWebsiteAdmissionNodeProgram.Source + """
+        """ + SiteWebsiteAdmissionNodeProgram.Source + SiteHistoricalEligibilityNodeProgram.Source + """
         try {
           if (scenario.startsWith('website-executor-')) {
             await assertWebsiteExecutor(scenario);
@@ -31,6 +31,10 @@ internal static class SiteOptionalBenchmarkSelectionNodeProgram
             const result = runs.selectSiteAggregateJob(readyRun, [readyJob]);
             assert(result.successful && result.job.id === 111403286924);
             assert(contract.siteAggregateSteps(readyRun.head_sha).join('|') === contract.SITE_GH.legacySteps.join('|'));
+          } else if (scenario === 'retained-live-control-unavailable' || scenario === 'retained-explicit-validation') {
+            await assertHistoricalPublicationEligibility(scenario);
+          } else if (scenario.startsWith('retained-52-') || scenario.startsWith('retained-48-')) {
+            await assertUnavailableGeneration(scenario);
           } else if (scenario === 'retained-unready') {
             const result = runs.selectSiteAggregateJob(unavailableRun, [unavailableJob]);
             assert(!result.successful && result.run.id === unavailableRun.id);

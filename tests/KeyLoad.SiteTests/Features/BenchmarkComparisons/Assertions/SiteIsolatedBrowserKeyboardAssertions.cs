@@ -21,11 +21,17 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         const string focus = "(()=>{const e=document.querySelector('#isolated-node-count');e.focus();return document.activeElement===e;})()";
         await Assert.That((await cdp.EvaluateAsync(focus, false, token)).GetBoolean()).IsTrue();
         var arrowUp = await KeyAsync(cdp, ArrowUpKey, 38, token);
+        KeyboardObservation? popupArrowUp = null;
+        if (!arrowUp.Active && arrowUp.Value == "3" && arrowUp.Index == 2)
+        {
+            // Linux Chrome opens the native select popup before moving its highlighted option.
+            popupArrowUp = await KeyAsync(cdp, ArrowUpKey, 38, token);
+        }
         var enter = await KeyAsync(cdp, EnterKey, 13, token);
         const string selected = "document.querySelector('#isolated-node-count').value==='2'";
         var selectedExpectedValue = await cdp.WaitForExpressionAsync(selected, token);
         if (!selectedExpectedValue)
-        { TestContext.Current!.Output.WriteLine(FailureEvidence(arrowUp, enter)); }
+        { TestContext.Current!.Output.WriteLine(FailureEvidence(arrowUp, enter, popupArrowUp)); }
         await Assert.That(selectedExpectedValue).IsTrue();
         await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("PointRead", 2, "all", "throughput", "all"), token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 3, token);
@@ -52,9 +58,11 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
             state.GetProperty(IndexField).GetInt32());
     }
 
-    private static string FailureEvidence(KeyboardObservation arrowUp, KeyboardObservation enter)
+    private static string FailureEvidence(KeyboardObservation arrowUp, KeyboardObservation enter,
+        KeyboardObservation? popupArrowUp)
     {
-        var detail = $"Native keyboard select failed; expected=2; {Format(arrowUp)}; {Format(enter)}";
+        var popup = popupArrowUp is null ? string.Empty : $"; popup:{Format(popupArrowUp)}";
+        var detail = $"Native keyboard select failed; expected=2; {Format(arrowUp)}{popup}; {Format(enter)}";
         return detail[..Math.Min(detail.Length, MaximumFailureEvidenceCharacters)];
     }
 

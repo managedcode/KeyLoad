@@ -1,0 +1,116 @@
+{
+  "id": 111347065594,
+  "run_id": 37166698745,
+  "workflow_name": "Benchmarks",
+  "head_branch": "main",
+  "run_url": "https://api.github.com/repos/managedcode/KeyLoad/actions/runs/37166698745",
+  "run_attempt": 1,
+  "node_id": "CR_kwDOHHqt7c8AAAAZ7M1i-g",
+  "head_sha": "fabff69193f41c784f0b36b85c1f34d82fa9903d",
+  "url": "https://api.github.com/repos/managedcode/KeyLoad/actions/jobs/111347065594",
+  "html_url": "https://github.com/managedcode/KeyLoad/actions/runs/37166698745/job/111347065594",
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-10-04T02:47:33Z",
+  "started_at": "2026-10-04T02:47:35Z",
+  "completed_at": "2026-10-04T02:54:59Z",
+  "name": "Combine benchmark results",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-10-04T02:47:36Z",
+      "completed_at": "2026-10-04T02:47:37Z"
+    },
+    {
+      "name": "Download source code",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-10-04T02:47:37Z",
+      "completed_at": "2026-10-04T02:47:39Z"
+    },
+    {
+      "name": "Verify benchmark plan",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-04T02:47:39Z",
+      "completed_at": "2026-10-04T02:47:41Z"
+    },
+    {
+      "name": "Download benchmark results",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-10-04T02:47:41Z",
+      "completed_at": "2026-10-04T02:53:05Z"
+    },
+    {
+      "name": "Check all 270 benchmark results",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-04T02:53:05Z",
+      "completed_at": "2026-10-04T02:53:50Z"
+    },
+    {
+      "name": "Generate website benchmark data",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-04T02:53:50Z",
+      "completed_at": "2026-10-04T02:54:33Z"
+    },
+    {
+      "name": "Save website benchmark data",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-04T02:54:33Z",
+      "completed_at": "2026-10-04T02:54:35Z"
+    },
+    {
+      "name": "Save combined benchmark results",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-04T02:54:35Z",
+      "completed_at": "2026-10-04T02:54:54Z"
+    },
+    {
+      "name": "Save GitHub result verification",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-04T02:54:54Z",
+      "completed_at": "2026-10-04T02:54:56Z"
+    },
+    {
+      "name": "Post Download source code",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 18,
+      "started_at": "2026-10-04T02:54:56Z",
+      "completed_at": "2026-10-04T02:54:56Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 19,
+      "started_at": "2026-10-04T02:54:56Z",
+      "completed_at": "2026-10-04T02:54:56Z"
+    }
+  ],
+  "check_run_url": "https://api.github.com/repos/managedcode/KeyLoad/check-runs/111347065594",
+  "labels": [
+    "ubuntu-latest"
+  ],
+  "runner_id": 1000017124,
+  "runner_name": "GitHub Actions 1000017124",
+  "runner_group_id": 0,
+  "runner_group_name": "GitHub Actions"
+}

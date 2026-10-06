@@ -1302,11 +1302,27 @@ for the current website rather than a newly admitted measurement source.
 | 37206566979/1 | 111478923031 | 377886f35928866f083806062b446056d64539e3 |
 | 37192832037/1 | 111425227628 | 873cd1a36ad14ab966065c924c71a292ea681083 |
 
-Supported immutable producer formats remain subject to all existing archive and
-provenance gates when selected automatically as newest ready own-main JSON.
-Explicit historical run pins and legacy incomplete-run overrides remain
-validation-only. An older compatible measured revision is distinct from current
-website/database source and is never proof of current database qualification.
+The additional native producer audits retain run37179484718/job111384783112
+(source0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3) and
+run37166698745/job111347065594 (sourcefabff69193f41c784f0b36b85c1f34d82fa9903d)
+as exact metadata fixtures. Their seven original aggregate steps authenticate
+unavailability; changed source or step contracts reject. The preparation gate
+now owns30 cases in `SiteOptionalBenchmarkSelectionTests`, with executable
+JavaScript helpers in `Processes/SiteOptionalBenchmarkSelectionNodeProgram.cs`,
+`SiteWebsiteAdmissionNodeProgram.cs` and `SiteHistoricalEligibilityNodeProgram.cs`.
+These controlled parser inputs do not claim provider capture or measured evidence.
+
+Automatic publication requires the complete current composite cohort and all
+existing archive/provenance gates. Frozen historical intensive microbenchmark
+sources remain validation-only under QualifySite/BuildIsolatedSite's existing
+no-historical-publication-fallback rule; authenticate their original run/job and
+exact source-bound aggregate steps before classifying them unavailable to live
+Website metrics. They do not supply the active 100k/1m dataset and minimum100k
+operation contract. Historical pins and incomplete-run overrides remain
+validation-only. An older ready current-composite revision remains eligible and
+distinct from current website/database source; it is never proof of current
+database qualification. If no compatible ready producer exists, use the complete
+content-only route. Unknown/malformed evidence and provider errors still reject.
 
 Local Aspire content-only execution exposed an existing before-session failure:
 `The authored production JavaScript inventory differs from the frozen site and

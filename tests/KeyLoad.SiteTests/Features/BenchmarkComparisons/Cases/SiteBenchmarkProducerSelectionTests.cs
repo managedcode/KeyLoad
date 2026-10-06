@@ -7,6 +7,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal sealed class SiteBenchmarkProducerSelectionTests
 {
     private const string MetadataCaptureDirectory = "instrumented-current-publish";
+    private const string OptionalArgument = "--optional=true";
     private const string BenchmarksWorkflowPath = ".github/workflows/benchmarks.yml";
     private const string SelectionAttempt = SiteIsolatedGitHubTokens.Attempt;
 
@@ -32,6 +33,7 @@ internal sealed class SiteBenchmarkProducerSelectionTests
         start.ArgumentList.Add(SiteIsolatedGitHubFields.ModeArgument + SiteIsolatedGitHubTokens.Publish);
         start.ArgumentList.Add(SiteIsolatedGitHubFields.SiteArgument + siteRevision);
         start.ArgumentList.Add(SiteIsolatedGitHubFields.ControlArgument + workflowRevision);
+        start.ArgumentList.Add(OptionalArgument);
         var process = await SiteIsolatedGitHubNativeProcess.RunAsync(start, token);
 
         await Assert.That(process.ExitCode).IsEqualTo(SiteIsolatedGitHubTokens.Zero);

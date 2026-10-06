@@ -25,7 +25,7 @@ export const SITE_GH = Object.freeze({
     'Generate website benchmark data', 'Save website benchmark data',
     'Save combined benchmark results', 'Save GitHub result verification']),
   legacySources: HISTORICAL.sourceRevisions,
-  unavailableProducerGenerations: Object.freeze([
+  unavailableProducerGenerations: Object.freeze([...[
     'c16a1d928d7d6941db74403e47f3dbcea206d86a',
     'ce2eace916b3660a4c7fe2976a012637600c3b28',
     'fb586bfcf05c18e79f892c5ecaf5c1092811aaf8',
@@ -45,7 +45,17 @@ export const SITE_GH = Object.freeze({
       'Check all 270 benchmark results', 'Save combined benchmark results', 'Save GitHub result verification']),
     leadingNativeSteps: Object.freeze(['Set up job', 'Download source code']),
     trailingNativeSteps: Object.freeze(['Post Download source code', 'Complete job']),
-  }))),
+  })), ...[
+    '0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3',
+    'fabff69193f41c784f0b36b85c1f34d82fa9903d',
+  ].map(sourceRevision => Object.freeze({
+    sourceRevision,
+    ownedSteps: Object.freeze(['Verify benchmark plan', 'Download benchmark results',
+      'Check all 270 benchmark results', 'Generate website benchmark data', 'Save website benchmark data',
+      'Save combined benchmark results', 'Save GitHub result verification']),
+    leadingNativeSteps: Object.freeze(['Set up job', 'Download source code']),
+    trailingNativeSteps: Object.freeze(['Post Download source code', 'Complete job']),
+  }))]),
   receiptKeys: Object.freeze(['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'repository', 'workflow', 'run',
     'cohort', 'aggregateJob', 'artifacts', 'workers', 'image', 'metadataFiles', 'archives', 'inputFiles']),
   artifactKeys: Object.freeze(['id', 'name', 'sizeInBytes', 'digest', 'expired', 'createdAt']),
