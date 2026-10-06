@@ -4875,15 +4875,15 @@
         "workflow": ".github/workflows/website.yml",
         "buildAndTestsWorkflow": ".github/workflows/ci.yml",
         "buildAndTestsName": "Build and Tests",
-        "implementation": "source_implemented_scoped_development_verified_provider_pending",
+        "implementation": "source_implemented_native_content_only_qualified_and_published_current_complete_measured_cohort_still_required",
         "buildAndTestsDependency": false,
         "benchmarkSuccessDependency": false,
         "qualification": "existing_content_only_or_complete_measured_qualification_and_freshness_preserved",
-        "providerPublication": "third_standalone_run_failed_17_real_site_assertions_and_critical_coverage; final_Benchmarks_dispatch_and_authenticated_wait_passed; Pages_unpublished",
+        "providerPublication": "native_Website_37492665298_Check_and_Publish_success_live_HTML_and_publication_match_original_qualified_artifact",
         "siteTestsBuild": "passed_zero_warnings_zero_errors",
         "siteTestsFormat": "passed",
-        "canonicalBuild": "failed_current_shared_source_unrelated_StorageRecovery_and_RF3_test_references; own_fresh_Unit_and_AppHost_build_passed_zero_warnings_zero_errors",
-        "canonicalFormat": "scoped_Unit_and_Site_verify_passed; not_full_current_repository_format",
+        "canonicalBuild": "native_ec2_Linux_full_solution_build_passed_zero_warnings_zero_errors; concurrent_local_full_solution_failure_preserved_separately",
+        "canonicalFormat": "native_ec2_full_solution_format_passed; scoped_local_Unit_and_Site_verify_passed",
         "staticWorkflowGovernance": "workflow_graph_actionlint_passed; working_tree_governance_failed_unrelated_owner_migration_rule_changed_preserved_root_prefix; scoped_index_prefix_unchanged",
         "contentOnlyAspire": {
           "status": "passed_development_only",
@@ -4905,7 +4905,15 @@
           "passed": 30,
           "skipped": 0,
           "executorCases": 5,
-          "trxSha256": "36890550e4196c227cf359a692ec142a9c4f1b1d91d5e98e8f0cf9f7652303f6"
+          "trxSha256": "36890550e4196c227cf359a692ec142a9c4f1b1d91d5e98e8f0cf9f7652303f6",
+          "nativeLinux": {
+            "runId": 37492665298,
+            "jobId": 112369118969,
+            "total": 30,
+            "passed": 30,
+            "skipped": 0,
+            "trxSha256": "1577b938e0bd846d843463904c052a6b020cb519f749f934d98957a9c72abda1"
+          }
         },
         "firstNativeRun": {
           "source": "6c20cf4fba946afc123fd2fd29960d7995c248f4",
@@ -4948,7 +4956,7 @@
           "stepTimeoutMinutes": 5,
           "staticContract": "passed",
           "nativeManualAdmissionAndRetiredEventRejection": "passed_Aspire_unit",
-          "provider": "native_final_dispatch_and_authenticated_wait_passed_Pages_pending",
+          "provider": "native_ec2_final_dispatch_and_authenticated_manual_wait_passed; independent_push_Website_Pages_published",
           "nativeProducer": {
             "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
             "runId": 37486656353,
@@ -4965,7 +4973,26 @@
             "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
             "benchmarkRunId": 37486656353,
             "authenticatedWait": "success",
-            "qualification": "in_progress",
+            "qualification": "failure_original_CFE_Site_test_gate_no_Pages_publication",
+            "pagesPublished": false
+          },
+          "currentNativeProducer": {
+            "source": "ec2c70f11efb0092b842458240e0f047a3735f77",
+            "runId": 37492665238,
+            "conclusion": "failure",
+            "aggregate": "skipped",
+            "triggerJobId": 112374043959,
+            "triggerConclusion": "success",
+            "originalJobLogSha256": "2b8f1ca91394b4a3cc2515f6e665e34e1f47f3a1f3f11bffacd86c22110c03bd"
+          },
+          "currentNativeManualConsumer": {
+            "runId": 37494106149,
+            "jobId": 112374089228,
+            "event": "workflow_dispatch",
+            "source": "ec2c70f11efb0092b842458240e0f047a3735f77",
+            "benchmarkRunId": 37492665238,
+            "authenticatedWait": "success",
+            "qualification": "in_progress_at_recording_not_inferred_from_push_run",
             "pagesPublished": false
           }
         },
@@ -5008,7 +5035,7 @@
           "pagesPublished": false
         },
         "compatibleReadinessRepair": {
-          "status": "source_implemented_30_Aspire_regressions_and_scoped_build_format_passed_native_Website_Pages_pending",
+          "status": "native_content_only_qualification_freshness_and_Pages_passed; complete_current_measured_qualification_pending",
           "requiredSelectorCases": 30,
           "incompatibleHistoricalSourceBehavior": "authenticate_exact_run_job_step_contract_then_unavailable_for_live_metrics; explicit_frozen_historical_validation_preserved",
           "originalNativeFixtures": {
@@ -5027,15 +5054,98 @@
             "qualification": "development_only_actual_Aspire_owned_native_process"
           },
           "currentCompositeMeasuredQualification": "pending_authentic_complete_current_cohort; historical_controls_do_not_qualify_current_scale",
-          "pagesPublished": false,
+          "pagesPublished": true,
           "owningUnitBuild": "passed_zero_warnings_zero_errors_with_AppHost_after_final_helper_extraction"
         },
         "nativeCanonicalBuildAndFormat": {
-          "source": "cfe3833c678ddbb3cedd67e772cf64210402cd36",
-          "runId": 37486656353,
-          "jobId": 112348359009,
+          "source": "ec2c70f11efb0092b842458240e0f047a3735f77",
+          "runId": 37492665238,
+          "jobId": 112369117434,
           "conclusion": "success",
-          "scope": "Build and check KeyLoad only; not_all_Benchmarks_or_database_acceptance"
+          "warnings": 0,
+          "errors": 0,
+          "originalJobMetadataSha256": "9e9cec57b927d0a3caf8597eb102f5ce7ccefa3b22891efced623bac91c80d21",
+          "originalJobLogSha256": "bd849c9ae9d21170e0b5ecfc1b8072ff9a32ead20202ac931e09f828fa06d7e8",
+          "scope": "full_solution_build_and_format_only; not_all_Benchmarks_or_database_acceptance"
+        },
+        "nativeContentOnlyPublication": {
+          "source": "ec2c70f11efb0092b842458240e0f047a3735f77",
+          "runId": 37492665298,
+          "event": "push",
+          "qualificationJobId": 112369118969,
+          "publicationJobId": 112377731260,
+          "conclusion": "success",
+          "benchmarkMode": "none",
+          "measuredSource": null,
+          "benchmarks": null,
+          "tests": [
+            {
+              "suite": "startup-tests",
+              "total": 6,
+              "executed": 6,
+              "passed": 6,
+              "sha256": "0f6926f45cd9e870be0de1c50ea972399e65455b6efa04a701e8838721cece5e"
+            },
+            {
+              "suite": "selection-tests",
+              "total": 30,
+              "executed": 30,
+              "passed": 30,
+              "sha256": "1577b938e0bd846d843463904c052a6b020cb519f749f934d98957a9c72abda1"
+            },
+            {
+              "suite": "analyzer-tests",
+              "total": 388,
+              "executed": 388,
+              "passed": 388,
+              "sha256": "02a607fb3de4c81bbca62bdd12e9d40b9f4ba4aa79e689e4f12be3bdca2da458"
+            },
+            {
+              "suite": "site-tests",
+              "total": 5,
+              "executed": 5,
+              "passed": 5,
+              "sha256": "21a08e267fc452c58a66ca2013c05a4be5d302af58c7cc1570ff0c454ded7689"
+            }
+          ],
+          "coverage": {
+            "linePercent": 93,
+            "branchPercent": 78,
+            "criticalBuilderPercent": 96,
+            "criticalBootstrapPercent": 92,
+            "thresholds": {
+              "lines": 80,
+              "branches": 70,
+              "critical": 90
+            },
+            "sha256": "c0e783127b991e6256ae9c9d1e1d6cfac65b3de95bfc29a9eb855290f452bb3e"
+          },
+          "qualificationArtifact": {
+            "id": 11426727717,
+            "bytes": 5228773,
+            "sha256": "0e1bfc93b669224799803b219b5b7be6f131be3d7cda6fab651918c521220c4e"
+          },
+          "publicationArtifact": {
+            "id": 11426714932,
+            "bytes": 2656179,
+            "sha256": "0325a5af84eb1f467ecebd8d9b4b58c5315ec950842022bfb796f695b056207a"
+          },
+          "freshness": {
+            "passed": true,
+            "state": "unavailable",
+            "producer": null,
+            "sha256": "31ff632d8e4e8a491fea1aecb6747d441527254409e61b147be59199b8630199",
+            "checkedAtUtc": "2026-10-06T16:30:19+00:00"
+          },
+          "deploymentReceiptSha256": "a43cb60d19d1447f62bffdc81b6261e0c03af315dc10c2f3ecbee6c3c1ae0855",
+          "live": {
+            "url": "https://www.keyload.cloud/",
+            "verified": true,
+            "htmlByteIdenticalToQualifiedArtifact": true,
+            "htmlSha256": "3f1b719e86f1a700b016367881f1cc597af2acb7a07f167d01b24737ea08fff6",
+            "publicationSha256": "7637a00e70384b7cdfba1ad24cae9d98af8537b5c22028bd4111a7129152904a"
+          },
+          "qualificationScope": "content_and_website_pipeline_only; complete_current_measured_cohort_and_global_database_acceptance_remain_pending"
         }
       }
     }

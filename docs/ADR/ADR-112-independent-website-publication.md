@@ -1,8 +1,34 @@
 # ADR-112: Independent website publication with optional benchmarks
 
-Status: Accepted
+Status: Accepted; content-only qualification and Pages passed; complete measured qualification pending.
 Date: 2026-10-06
-Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..006
+Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..007
+
+## Qualified current content publication (2026-10-06)
+
+Exact source ec2c70f11efb0092b842458240e0f047a3735f77 passed the Linux full
+solution build/format in Benchmarks run37492665238/job112369117434, 0 warnings/errors.
+Its Docker-image gate failed and aggregation skipped; final Trigger Website
+job112374043959 succeeded, creating the separate manual Website run37494106149.
+That consumer's authenticated completion wait passed; remaining qualification
+was still running at recording, so its Pages result is not inferred.
+
+Independent push Website run37492665298 completed Check website job112369118969
+and Publish website job112377731260 successfully. Original Aspire receipts prove
+startup6/6, selection30/30, analyzers388/388 and content Site5/5, zero skipped.
+Native Node/Chrome coverage passed unchanged80/70/90 thresholds: lines93, branches78,
+critical builder96 and bootstrap92. Original qualification artifact11426727717
+SHA2560e1bfc93b669224799803b219b5b7be6f131be3d7cda6fab651918c521220c4e was verified.
+
+Predeploy source/absence freshness passed at2026-10-06T16:30:19Z. Original
+publication artifact11426714932, SHA2560325a5af84eb1f467ecebd8d9b4b58c5315ec950842022bfb796f695b056207a,
+records actual Pages success. Public https://www.keyload.cloud/ HTML matched the
+qualified original byte for byte, SHA2563f1b719e86f1a700b016367881f1cc597af2acb7a07f167d01b24737ea08fff6.
+Its schema3 publication receipt records website/control ec2c70f1, measured:null,
+benchmarks:null and content scope; SHA2567637a00e70384b7cdfba1ad24cae9d98af8537b5c22028bd4111a7129152904a.
+This qualifies current content-only pipeline delivery. Complete current measured
+cohort and global database recovery/RF3/endurance gates retain their actual status.
+Keep Accepted until every required measured gate also passes.
 
 ## Decision and boundaries
 
