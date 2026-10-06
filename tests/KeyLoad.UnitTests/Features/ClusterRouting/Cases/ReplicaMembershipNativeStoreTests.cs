@@ -6,6 +6,7 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 
 namespace KeyLoad.UnitTests;
@@ -83,7 +84,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
             ReplicaExecutionTestOptions.Configuration(configuration), ReplicaExecutionTestOptions.Execution()), ReplicaExecutionTestOptions.Execution());
         await using var consensus = new ReplicaConsensus(materializer, ReplicaExecutionTestOptions.Configuration(configuration),
             ReplicaExecutionTestOptions.Execution(), TimeProvider.System);
-        await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(UnitExecutionOptions.Validated(new CommandAdmissionLimits(), static settings => settings.Validate())), TimeProvider.System,
+        await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), TimeProvider.System,
             ReplicaExecutionTestOptions.Execution());
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
@@ -93,17 +94,16 @@ internal sealed class ReplicaMembershipNativeStoreTests
             { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; });
             silo.Services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(fixture.Database, coordinator,
                 consensus, ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
-                UnitExecutionOptions.Validated(new OrleansMembershipOptions(), static settings =>
-                { if (!settings.IsValid()) throw new InvalidOperationException(OrleansMembershipOptions.ValidationMessage); }),
+                UnitRoutingOptions.Membership(),
                 ReplicaExecutionTestOptions.Execution(), linked.Token));
         }).Build();
         var configurationOptions = ReplicaExecutionTestOptions.Configuration(configuration);
-        var discoveryOptions = UnitExecutionOptions.Validated(new PeerDiscoveryOptions(), static settings => settings.Validate());
+        var discoveryOptions = UnitRoutingOptions.Discovery();
         var peers = new ReplicaPeerOptions(new() { [Voter] = new(Voter) }, fixture.Store.Identity.SigningKey, ClusterId)
         { ConnectTimeout = discoveryOptions.Value.ConnectTimeout };
-        var peerOptions = UnitExecutionOptions.Validated(peers, settings => settings.Validate(configuration));
-        var transportOptions = UnitExecutionOptions.Validated(new ReplicaTransportOptions(), static settings =>
-        { if (!settings.IsValid()) throw new InvalidOperationException(ReplicaTransportOptions.ValidationMessage); });
+        peers.Validate(configuration);
+        var peerOptions = Options.Create(peers);
+        var transportOptions = UnitRoutingOptions.Transport();
         var local = new ReplicaSiloDiscoveryState(configurationOptions, peerOptions, host.Services.GetRequiredService<ILocalSiloDetails>());
         using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System,             transportOptions, UnitRoutingOptions.Replay(),             canonicalDatabase: fixture.Database);
         using var discovery = new ReplicaSiloDiscoveryClient(configurationOptions, peerOptions, local, authentication, TimeProvider.System,

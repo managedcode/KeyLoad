@@ -36,6 +36,34 @@ implicit execution defaults and timing/admission/cache budgets still require the
 actual native options owner. Immutable RF3 membership cardinality and required
 qualification sample counts remain contract identities.
 
+Fixed temporal corpus data uses named constants in genuine static readonly native
+TimeSpan fields marked with the field-only `ImmutableTemporalDataAttribute` owned
+by KeyLoad.Abstractions. KLD0037 permits only the native TimeSpan construction in
+that exact immutable declaration, with constant arguments; it does not exempt a
+class, method, mutable field, counterfeit marker or execution owner. Policy sinks
+such as Task.Delay, CancellationTokenSource, HTTP timeouts and semaphore waits
+still inspect the initializer recursively and reject the same field as hardcoded
+execution policy. Corpus bucket widths and timestamp offsets keep their original
+digest bytes and remain distinct from the native execution deadline options.
+
+Public JSON report and manifest records retain their existing option metadata as
+data. The property-only `SerializedOptionsSnapshotAttribute` identifies an actual
+immutable record's automatic get/init snapshot property; the analyzer validates
+the genuine owning attribute and declaration shape and permits only that property
+and its matching positional data parameter. Mutable properties, ordinary service
+classes and counterfeit markers still fail. This boundary does not excuse raw
+configuration reads, policy sinks or execution owner injection, and adds no JSON
+field or serializer behavior. Calculated workload selections instead expose the
+actual native factory's IOptions.Value; their execution path consumes that wrapper.
+
+Benchmark composition also binds the isolated HTTP admission scenario and its
+native replay pools before container creation. The same configured HTTP scenario
+values are forwarded to the runner and derived into node and observer options;
+replay pools are bound independently from ordinary production defaults. Existing
+32-slot/2-GiB HTTP and 835,584-nonce RF3 defaults remain unchanged. Actual configured
+values must reach the generated resource environments and matching runtime
+observers; the real admission/replay regressions cover rejection and cleanup.
+
 AppHost resource observation binds native ScaleServerResourceOptions before graph
 composition and shares the same wrapper through collector/process/helper joins.
 Configured sampling, cleanup, file/output and work budgets must retain their actual

@@ -39,33 +39,16 @@ internal static class OpenLoopWorker
         OpenLoopWorkItem item, Scenario scenario, BenchmarkDocument document,
         CancellationTokenSource lifetime, OpenLoopExecutionPolicy policy)
     {
-        using var deadline = CreateDeadline(item, lifetime.Token, policy);
-        OpenLoopOutcome outcome;
-        Exception? fatal = null;
-        long finished;
+        using var deadline = CreateDeadline(item, policy, lifetime.Token);
+        var original = ExecuteAndObserveAsync(session, item, scenario, document, deadline.Token);
         try
         {
-            var result = await ExecuteAsync(session, scenario, document, deadline.Token).ConfigureAwait(false);
-            finished = System.Diagnostics.Stopwatch.GetTimestamp();
-            if (finished >= item.DeadlineTimestamp)
-            {
-                outcome = OpenLoopOutcome.TimedOutAfterStart;
-            }
-            else if (result.Disposition == OpenLoopSessionDisposition.TargetRejected)
-            {
-                outcome = OpenLoopOutcome.TargetRejected;
-            }
-            else
-            {
-                ScaledComparisonMeasurementExecutor.ValidatePointRead(scenario, result.Result!, document);
-                outcome = OpenLoopOutcome.Succeeded;
-            }
+            return await original.ConfigureAwait(false);
         }
         catch (OperationCanceledException error) when (deadline.IsCancellationRequested
             && !lifetime.IsCancellationRequested && error.CancellationToken == deadline.Token)
         {
-            outcome = OpenLoopOutcome.TimedOutAfterStart;
-            finished = System.Diagnostics.Stopwatch.GetTimestamp();
+            return new(OpenLoopOutcome.TimedOutAfterStart, System.Diagnostics.Stopwatch.GetTimestamp(), null);
         }
         catch (OperationCanceledException error) when (lifetime.IsCancellationRequested
             && error.CancellationToken == deadline.Token)
@@ -76,19 +59,40 @@ internal static class OpenLoopWorker
         {
             throw;
         }
-        catch (Exception error)
+        catch (Exception error) when (original.IsFaulted)
         {
-            outcome = OpenLoopOutcome.Failed;
-            finished = System.Diagnostics.Stopwatch.GetTimestamp();
-            fatal = CqrsRuntimeFailures.FindFatal(error);
+            var finished = System.Diagnostics.Stopwatch.GetTimestamp();
+            var fatal = CqrsRuntimeFailures.FindFatal(error) is null ? null : error;
+            return new(OpenLoopOutcome.Failed, finished, fatal);
         }
-        return new(outcome, finished, fatal);
+    }
+
+    private static async Task<OpenLoopNativeObservation> ExecuteAndObserveAsync(IComparisonSession session,
+        OpenLoopWorkItem item, Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
+    {
+        var result = await ExecuteAsync(session, scenario, document, cancellationToken).ConfigureAwait(false);
+        var finished = System.Diagnostics.Stopwatch.GetTimestamp();
+        return ObserveResult(item, scenario, document, result, finished);
+    }
+
+    private static OpenLoopNativeObservation ObserveResult(OpenLoopWorkItem item, Scenario scenario,
+        BenchmarkDocument document, OpenLoopSessionResult result, long finished)
+    {
+        if (finished >= item.DeadlineTimestamp)
+        {
+            return new(OpenLoopOutcome.TimedOutAfterStart, finished, null);
+        }
+        if (result.Disposition == OpenLoopSessionDisposition.TargetRejected)
+        {
+            return new(OpenLoopOutcome.TargetRejected, finished, null);
+        }
+        ScaledComparisonMeasurementExecutor.ValidatePointRead(scenario, result.Result!, document);
+        return new(OpenLoopOutcome.Succeeded, finished, null);
     }
 
     private static async Task PublishProgressAsync(OpenLoopProgressV1? progress,
         Action<OpenLoopProgressV1>? nativeProgress, Exception? fatal, CancellationTokenSource lifetime)
     {
-        Exception? observerFailure = null;
         try
         {
             if (progress is not null)
@@ -96,26 +100,28 @@ internal static class OpenLoopWorker
                 nativeProgress?.Invoke(progress);
             }
         }
-        catch (Exception error)
-        {
-            observerFailure = error;
-        }
-
-        if (fatal is not null)
+        catch (Exception observerFailure)
         {
             var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(lifetime).ConfigureAwait(false);
             var failures = ImmutableArray.CreateBuilder<Exception>();
-            if (observerFailure is not null) failures.Add(observerFailure);
-            if (cancellationFailure is not null) failures.Add(cancellationFailure);
-            ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(fatal, failures.ToImmutable())!).Throw();
+            if (fatal is not null)
+            {
+                failures.Add(observerFailure);
+            }
+            if (cancellationFailure is not null)
+            {
+                failures.Add(cancellationFailure);
+            }
+            ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(fatal ?? observerFailure, failures.ToImmutable())!).Throw();
+            throw;
         }
-        if (observerFailure is not null)
+        if (fatal is not null)
         {
             var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(lifetime).ConfigureAwait(false);
             var failures = cancellationFailure is null
-                ? ImmutableArray.Create(observerFailure)
-                : ImmutableArray.Create(observerFailure, cancellationFailure);
-            ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(observerFailure, failures)!).Throw();
+                ? ImmutableArray<Exception>.Empty
+                : ImmutableArray.Create(cancellationFailure);
+            ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(fatal, failures)!).Throw();
         }
     }
 
@@ -133,8 +139,8 @@ internal static class OpenLoopWorker
         return new(OpenLoopSessionDisposition.Succeeded, result);
     }
 
-    private static CancellationTokenSource CreateDeadline(OpenLoopWorkItem item, CancellationToken token,
-        OpenLoopExecutionPolicy policy)
+    private static CancellationTokenSource CreateDeadline(OpenLoopWorkItem item, OpenLoopExecutionPolicy policy,
+        CancellationToken token)
     {
         var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         var remaining = System.Diagnostics.Stopwatch.GetElapsedTime(

@@ -38,12 +38,12 @@ internal sealed class McpTransportDiagnosticsTests
     {
         var headers = McpTransportGuardTestData.Headers(MethodCanary + "\n" + HeaderCanary, HeaderCanary);
         headers[PrivateHeader] = HeaderCanary;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.ReadHeaders(headers));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution()));
         using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new McpTransportEventSourceCapture();
         var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
         await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
-        McpTransportDiagnostics.Log(logger, error, headers);
+        McpTransportDiagnostics.Log(logger, error, headers, UnitMcpOptions.Execution());
 
         await Assert.That(McpTransportDiagnostics.HasStage(error)).IsTrue();
         await Assert.That(capture.Text).Contains(nameof(McpTransportStage.MethodHeaderEncoding));
@@ -66,7 +66,7 @@ internal sealed class McpTransportDiagnosticsTests
         using var capture = new McpTransportEventSourceCapture();
         var logger = factory.CreateLogger(nameof(McpTransportDiagnosticsTests));
         await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
-        McpTransportDiagnostics.Log(logger, error, headers);
+        McpTransportDiagnostics.Log(logger, error, headers, UnitMcpOptions.Execution());
 
         await Assert.That(McpTransportDiagnostics.HasStage(error)).IsFalse();
         await Assert.That(capture.Text).Contains(nameof(McpTransportStage.Unknown));
@@ -80,7 +80,7 @@ internal sealed class McpTransportDiagnosticsTests
     [Test]
     public async Task MissingTargetHasItsOwnStage()
     {
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers());
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(), UnitMcpOptions.Execution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(
             McpTransportGuardTestData.Frame(RequestMethods.ToolsCall, new()), headers));
 
@@ -104,7 +104,7 @@ internal sealed class McpTransportDiagnosticsTests
             "server/discover", "initialize", RequestMethods.ToolsCall, "tools/list", MethodCanary
         })
         {
-            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(method, null));
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(method, null), UnitMcpOptions.Execution());
         }
 
         await Assert.That(capture.Text).Contains(CategoryToolsCall);
@@ -155,11 +155,11 @@ internal sealed class McpTransportDiagnosticsTests
         {
             if (body is null)
             {
-                _ = McpTransportGuard.ReadHeaders(headers);
+                _ = McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution());
             }
             else
             {
-                McpTransportGuard.Inspect(body, McpTransportGuard.ReadHeaders(headers));
+                McpTransportGuard.Inspect(body, McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution()));
             }
         });
         if (!McpTransportDiagnostics.HasStage(error)
@@ -195,8 +195,8 @@ internal sealed class McpTransportCaptureLifecycleTests
             await Assert.That(logger.IsEnabled(LogLevel.Warning)).IsTrue();
             var error = Errors.Fail(ErrorCode.Validation, McpTransportProtocol.InvalidTransport);
             error.Data[McpTransportDiagnostics.StageMetadataKey] = McpTransportStage.BodyMethodMismatch;
-            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(RequestMethods.ToolsCall, null));
-            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(MethodCanary, null));
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(RequestMethods.ToolsCall, null), UnitMcpOptions.Execution());
+            McpTransportDiagnostics.Log(logger, error, McpTransportGuardTestData.Headers(MethodCanary, null), UnitMcpOptions.Execution());
             await Assert.That(capture.Text).Contains(nameof(McpTransportMethodCategory.ToolsCall));
             await Assert.That(capture.Text).Contains(nameof(McpTransportMethodCategory.Other));
             await Assert.That(capture.Text).Contains(nameof(McpTransportStage.BodyMethodMismatch));

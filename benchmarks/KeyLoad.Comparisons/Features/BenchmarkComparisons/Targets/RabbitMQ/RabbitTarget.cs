@@ -17,6 +17,17 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null) : IComparisonTarget
 {
+    private const string InitializeAsyncPersistentMessagesTrackedPublisherConfirmsQuorumText = "persistent messages + tracked publisher confirms; quorum ";
+    private const string InitializeAsyncOfText = " of ";
+    private const string InitializeAsyncQuorumMemberOnlineVerificationManualACKOrderedChannelRPCBarrierText = "; quorum member online verification; manual ACK + ordered channel RPC barrier";
+
+    private const string UnverifiedToken = "unverified";
+    private const string UnverifiedNativeTopologyToken = "unverified native topology";
+    private const string PublisherConfirmAndConsumerAcknowledgementContract = "persistent messages + tracked publisher confirms; manual consumer ACK + channel RPC barrier";
+    private const string BasicGetManualAcknowledgementsAtLeastOnceToken = "basic.get manual acknowledgements; at least once";
+    private const string AMQPTCPOneChannelPerWorkerToken = "AMQP 0-9-1/TCP; one channel per worker";
+    private const string AspireUserNoFieldPolicyToken = "Aspire user; no field policy";
+
     private const string RunIdentityFormat = "N";
     private const string TlsScheme = "amqps";
 
@@ -30,9 +41,9 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     private IConnection? connection;
 
     /// <summary>Gets the observed broker version and topology plus publisher-confirm and manual-acknowledgement profile.</summary>
-    public TargetProfile Profile { get; private set; } = new("RabbitMQ", "unverified", "unverified native topology",
-        "persistent messages + tracked publisher confirms; manual consumer ACK + channel RPC barrier",
-        "basic.get manual acknowledgements; at least once", "AMQP 0-9-1/TCP; one channel per worker", "Aspire user; no field policy", null);
+    public TargetProfile Profile { get; private set; } = new(nameof(RabbitMQ), UnverifiedToken, UnverifiedNativeTopologyToken,
+        PublisherConfirmAndConsumerAcknowledgementContract,
+        BasicGetManualAcknowledgementsAtLeastOnceToken, AMQPTCPOneChannelPerWorkerToken, AspireUserNoFieldPolicyToken, null);
     /// <summary>Reports support only for the queue-cycle scenario.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> only when <paramref name="scenario"/> is queue cycle.</returns>
@@ -44,6 +55,12 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     /// <returns>A task that completes after queue semantics and cluster evidence are verified.</returns>
     public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
+        const string RabbitManagementClientRequiredDetail = "RabbitManagementClientRequired";
+        const int ClusterNodeCountMultiplier = 2;
+        const int AdjacentElementOffset = 1;
+        const string AMQPTLSOneChannelPerWorkerToken = "AMQP 0-9-1/TLS; one channel per worker";
+        const string AMQPTCPOneChannelPerWorkerToken = "AMQP 0-9-1/TCP; one channel per worker";
+
         var endpoint = new Uri(brokerConnectionString);
         var factory = new ConnectionFactory { Uri = endpoint, AutomaticRecoveryEnabled = false };
         connection = await factory.CreateConnectionAsync(cancellationToken);
@@ -54,17 +71,18 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
         }
         if (managementClient is null)
         {
-            throw new ComparisonFailureException("RabbitManagementClientRequired");
+            throw new ComparisonFailureException(RabbitManagementClientRequiredDetail);
         }
 
-        var proof = await RabbitReplicaProof.VerifyAsync(managementClient, queue, configuredTopology, cancellationToken, lifecycleOptions);
+        var proof = await RabbitReplicaProof.VerifyAsync(management: managementClient, queue: queue, topology: configuredTopology,
+            cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
         await ProbeQueueAsync(cancellationToken);
         Profile = Profile with
         {
             Version = proof.Version,
             Topology = RabbitNativePolicy.TopologyLabel(configuredTopology),
-            WriteAcknowledgement = $"persistent messages + tracked publisher confirms; quorum {ComparisonTopologies.NodeCount(configuredTopology) / 2 + 1} of {ComparisonTopologies.NodeCount(configuredTopology)}; quorum member online verification; manual ACK + ordered channel RPC barrier",
-            Transport = endpoint.Scheme == TlsScheme ? "AMQP 0-9-1/TLS; one channel per worker" : "AMQP 0-9-1/TCP; one channel per worker",
+            WriteAcknowledgement = $"{InitializeAsyncPersistentMessagesTrackedPublisherConfirmsQuorumText}{ComparisonTopologies.NodeCount(configuredTopology) / ClusterNodeCountMultiplier + AdjacentElementOffset}{InitializeAsyncOfText}{ComparisonTopologies.NodeCount(configuredTopology)}{InitializeAsyncQuorumMemberOnlineVerificationManualACKOrderedChannelRPCBarrierText}",
+            Transport = endpoint.Scheme == TlsScheme ? AMQPTLSOneChannelPerWorkerToken : AMQPTCPOneChannelPerWorkerToken,
             Image = imageName,
             Cluster = proof.Evidence
         };
@@ -72,15 +90,18 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
 
     private async Task ProbeQueueAsync(CancellationToken cancellationToken)
     {
+        const string EmptyText = "";
+        const string RabbitConfirmedQueueProbeFailedDetail = "RabbitConfirmedQueueProbeFailed";
+
         await using var channel = await connection!.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken);
         var probeId = Guid.NewGuid().ToString(RunIdentityFormat);
-        await channel.BasicPublishAsync("", queue, mandatory: true,
+        await channel.BasicPublishAsync(EmptyText, queue, mandatory: true,
             basicProperties: new BasicProperties { Persistent = true, MessageId = probeId },
             body: Encoding.UTF8.GetBytes(probeId), cancellationToken: cancellationToken);
         var delivery = await channel.BasicGetAsync(queue, autoAck: false, cancellationToken);
         if (delivery is null || delivery.BasicProperties.MessageId != probeId || Encoding.UTF8.GetString(delivery.Body.Span) != probeId)
         {
-            throw new ComparisonFailureException("RabbitConfirmedQueueProbeFailed");
+            throw new ComparisonFailureException(RabbitConfirmedQueueProbeFailedDetail);
         }
 
         await channel.BasicAckAsync(delivery.DeliveryTag, multiple: false, cancellationToken);
@@ -115,14 +136,17 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
 
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {
+            const string EmptyText = "";
+            const string ApplicationJsonToken = "application/json";
+
             if (scenario != Scenario.QueueCycle)
             {
                 throw new NotSupportedException();
             }
 
             var begin = Stopwatch.GetTimestamp();
-            await channel.BasicPublishAsync("", queue, mandatory: true,
-                basicProperties: new BasicProperties { Persistent = true, MessageId = document.Id, ContentType = "application/json" },
+            await channel.BasicPublishAsync(EmptyText, queue, mandatory: true,
+                basicProperties: new BasicProperties { Persistent = true, MessageId = document.Id, ContentType = ApplicationJsonToken },
                 body: Encoding.UTF8.GetBytes(document.Json), cancellationToken: cancellationToken);
             var enqueued = Stopwatch.GetTimestamp();
             BasicGetResult? delivery = null;

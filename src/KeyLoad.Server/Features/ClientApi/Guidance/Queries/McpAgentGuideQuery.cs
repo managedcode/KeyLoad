@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 using ModelContextProtocol;
@@ -8,10 +9,10 @@ namespace KeyLoad.Server;
 /// <summary>Validates requests and creates fresh official MCP resource and prompt DTOs.</summary>
 internal static class McpAgentGuideQuery
 {
-    internal static ListResourcesResult ListResources(string? cursor, CancellationToken cancellationToken)
+    internal static ListResourcesResult ListResources(string? cursor, IOptions<McpExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         ValidateCursor(cursor, cancellationToken);
-        ValidateContent();
+        ValidateContent(executionOptions: executionOptions);
         return new ListResourcesResult
         {
             Resources = [new Resource
@@ -25,10 +26,10 @@ internal static class McpAgentGuideQuery
         };
     }
 
-    internal static ReadResourceResult ReadResource(string? uri, CancellationToken cancellationToken)
+    internal static ReadResourceResult ReadResource(string? uri, IOptions<McpExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ValidateContent();
+        ValidateContent(executionOptions: executionOptions);
         if (!string.Equals(uri, McpAgentGuideContract.ResourceUri, StringComparison.Ordinal))
         { throw Protocol(McpAgentGuideContract.UnknownResource); }
         return new ReadResourceResult
@@ -42,10 +43,10 @@ internal static class McpAgentGuideQuery
         };
     }
 
-    internal static ListPromptsResult ListPrompts(string? cursor, CancellationToken cancellationToken)
+    internal static ListPromptsResult ListPrompts(string? cursor, IOptions<McpExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         ValidateCursor(cursor, cancellationToken);
-        ValidateContent();
+        ValidateContent(executionOptions: executionOptions);
         return new ListPromptsResult
         {
             Prompts = [new Prompt
@@ -58,13 +59,12 @@ internal static class McpAgentGuideQuery
         };
     }
 
-    internal static GetPromptResult GetPrompt(string? name, IDictionary<string, JsonElement>? arguments,
-        CancellationToken cancellationToken)
+    internal static GetPromptResult GetPrompt(string? name, IDictionary<string, JsonElement>? arguments, IOptions<McpExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         const int ArgumentsEmptyCount = 0;
 
         cancellationToken.ThrowIfCancellationRequested();
-        ValidateContent();
+        ValidateContent(executionOptions: executionOptions);
         if (!string.Equals(name, McpAgentGuideContract.PromptName, StringComparison.Ordinal))
         { throw Protocol(McpAgentGuideContract.UnknownPrompt); }
         if (arguments is { Count: > ArgumentsEmptyCount })
@@ -83,9 +83,9 @@ internal static class McpAgentGuideQuery
         { throw Protocol(McpAgentGuideContract.InvalidCursor); }
     }
 
-    private static void ValidateContent()
+    private static void ValidateContent(IOptions<McpExecutionOptions> executionOptions)
     {
-        if (Encoding.UTF8.GetByteCount(McpAgentGuideMarkdown.Text) > McpAgentGuideContract.MaximumUtf8Bytes)
+        if (Encoding.UTF8.GetByteCount(McpAgentGuideMarkdown.Text) > executionOptions.Value.MaximumAgentGuideBytes)
         { throw new InvalidOperationException(McpAgentGuideContract.Description); }
     }
 

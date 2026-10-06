@@ -8,10 +8,12 @@ internal static class OpenLoopSessionAcquisition
     internal static async Task<List<IComparisonSession>> OpenAsync(IComparisonTarget target,
         OpenLoopExecutionPolicy policy, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         var sessions = new List<IComparisonSession>(policy.ConcurrentSessions);
         try
         {
-            for (var index = 0; index < policy.ConcurrentSessions; index++)
+            for (var index = FirstElementIndex; index < policy.ConcurrentSessions; index++)
             {
                 sessions.Add(await target.OpenSessionAsync(cancellationToken).ConfigureAwait(false));
             }
@@ -28,15 +30,16 @@ internal static class OpenLoopSessionAcquisition
     private static async Task<ImmutableArray<Exception>> SettlePartialSessionsAsync(
         List<IComparisonSession> sessions, OpenLoopExecutionPolicy policy)
     {
+        var original = ComparisonSessionCleanup.CloseAndJoinAsync(sessions,
+            TimeSpan.FromMilliseconds(policy.DrainMilliseconds));
         try
         {
-            var close = await ComparisonSessionCleanup.CloseAndJoinAsync(sessions,
-                TimeSpan.FromMilliseconds(policy.DrainMilliseconds)).ConfigureAwait(false);
+            var close = await original.ConfigureAwait(false);
             return close.ThresholdExpired
                 ? close.Failures.Add(new ComparisonFailureException(ComparisonSessionCleanup.Failure))
                 : close.Failures;
         }
-        catch (Exception failure)
+        catch (Exception failure) when (original.IsFaulted || original.IsCanceled)
         {
             return [failure];
         }

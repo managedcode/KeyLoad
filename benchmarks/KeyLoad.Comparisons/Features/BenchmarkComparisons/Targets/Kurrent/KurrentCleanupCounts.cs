@@ -2,12 +2,15 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal readonly record struct KurrentCleanupCounts(int Tracked, int Submitted, int Acknowledged, int Faulted, int Pending, int PeakConcurrency)
 {
-    internal bool IsValid => Tracked >= 0 && Submitted >= 0 && Submitted <= Tracked && Acknowledged >= 0 && Faulted >= 0 && Pending >= 0
-        && (long)Acknowledged + Faulted + Pending == Submitted && Pending <= KurrentConstants.CleanupConcurrency
-        && PeakConcurrency >= Pending && PeakConcurrency <= KurrentConstants.CleanupConcurrency && PeakConcurrency <= Submitted
-        && (Submitted == 0 ? PeakConcurrency == 0 : PeakConcurrency > 0);
+    private const int NoObservedItems = 0;
+    private const int MaximumEncodedCleanupConcurrency = 16;
 
-    internal bool IsComplete => IsValid && Submitted == Tracked && Acknowledged == Tracked && Faulted == 0 && Pending == 0;
+    internal bool IsValid => Tracked >= NoObservedItems && Submitted >= NoObservedItems && Submitted <= Tracked && Acknowledged >= NoObservedItems && Faulted >= NoObservedItems && Pending >= NoObservedItems
+        && (long)Acknowledged + Faulted + Pending == Submitted && Pending <= MaximumEncodedCleanupConcurrency
+        && PeakConcurrency >= Pending && PeakConcurrency <= MaximumEncodedCleanupConcurrency && PeakConcurrency <= Submitted
+        && (Submitted == NoObservedItems ? PeakConcurrency == NoObservedItems : PeakConcurrency > NoObservedItems);
+
+    internal bool IsComplete => IsValid && Submitted == Tracked && Acknowledged == Tracked && Faulted == NoObservedItems && Pending == NoObservedItems;
 }
 
 internal enum KurrentCleanupStage { Delete, NativeDispose, HttpDispose, Drain, Complete }

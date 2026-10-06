@@ -68,17 +68,21 @@ internal static class TimescaleTimeSeriesIntensiveSetup
 
     internal static Guid SeedCommandId(string runId, int batch)
     {
+        const string SeedBToken = "seed:b";
+
         ArgumentException.ThrowIfNullOrWhiteSpace(runId);
         ArgumentOutOfRangeException.ThrowIfNegative(batch);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(batch, TimeSeriesIntensiveProfile.SeedBatchCount);
         return TimeSeriesIntensivePlans.CommandId(runId,
-            "seed:b" + batch.ToString(CultureInfo.InvariantCulture));
+            SeedBToken + batch.ToString(CultureInfo.InvariantCulture));
     }
 
     private static void ValidateAndReserve(TimescaleTimeSeriesIntensiveTarget target, int batch, string seriesId,
         ImmutableArray<SampleData> samples)
     {
-        if (batch < 0 || batch >= TimeSeriesIntensiveProfile.SeedBatchCount
+        const int NoObservedItems = 0;
+
+        if (batch < NoObservedItems || batch >= TimeSeriesIntensiveProfile.SeedBatchCount
             || seriesId != TimeSeriesIntensiveProfile.SeedSeries || samples.IsDefault
             || samples.Length != TimeSeriesIntensiveProfile.SeedBatchSize
             || !target.TryReserveSeedOrdinal(batch))
@@ -127,10 +131,12 @@ internal static class TimescaleTimeSeriesIntensiveSetup
     private static void AddSeedParameters(TimescaleTimeSeriesIntensiveCommand command, string seriesId,
         Guid commandId, ImmutableArray<SampleData> samples, string tagsJson)
     {
+        const int FirstElementIndex = 0;
+
         var events = new string[samples.Length];
         var timestamps = new DateTime[samples.Length];
         var values = new double[samples.Length];
-        for (var index = 0; index < samples.Length; index++)
+        for (var index = FirstElementIndex; index < samples.Length; index++)
         {
             events[index] = samples[index].EventId;
             timestamps[index] = samples[index].Timestamp.UtcDateTime;

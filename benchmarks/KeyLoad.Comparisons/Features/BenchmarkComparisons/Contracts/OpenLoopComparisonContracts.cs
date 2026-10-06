@@ -52,8 +52,10 @@ public sealed record OpenLoopProgressV1
     public OpenLoopProgressV1(long completed, long planned, long started, int offeredRatePerSecond,
         Scenario scenario)
     {
-        if (completed is <= 0 or > OpenLoopRateContract.PlannedOperations
-            || completed % OpenLoopRateContract.ProgressInterval != 0
+        const int NoMeasuredRate = 0;
+
+        if (completed is <= NoMeasuredRate or > OpenLoopRateContract.PlannedOperations
+            || completed % OpenLoopRateContract.ProgressInterval != NoMeasuredRate
             || planned != OpenLoopRateContract.PlannedOperations || started < completed || started > planned
             || !OpenLoopRateContract.AcceptedRates.Contains(offeredRatePerSecond)
             || scenario is not (Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate

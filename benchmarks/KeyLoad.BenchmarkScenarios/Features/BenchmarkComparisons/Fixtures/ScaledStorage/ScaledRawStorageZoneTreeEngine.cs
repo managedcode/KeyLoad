@@ -26,7 +26,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private IZoneTree<Memory<byte>, Memory<byte>>? _tree;
 
     internal ScaledRawStorageZoneTreeEngine(ScaledRawStorageCorpus corpus, ScaledRawStorageValueArena arena,
-        byte[] readScratch, long deadlineStart, CancellationToken token, IOptions<ScaledStorageExecutionOptions> executionOptions)
+        byte[] readScratch, long deadlineStart, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
     {
         settings = executionOptions.Value;
         _corpus = corpus;

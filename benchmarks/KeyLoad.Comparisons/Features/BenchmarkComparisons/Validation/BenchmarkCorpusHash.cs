@@ -10,8 +10,10 @@ internal static class BenchmarkCorpusHash
 {
     internal static string Compute(ImmutableArray<BenchmarkDocument> documents, ImmutableArray<BenchmarkEdge> edges)
     {
+        const int EncodedLengthBytes = 4;
+
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        Span<byte> bytes = stackalloc byte[4];
+        Span<byte> bytes = stackalloc byte[EncodedLengthBytes];
         foreach (var document in documents)
         {
             hash.AppendData(Encoding.UTF8.GetBytes(document.Json));

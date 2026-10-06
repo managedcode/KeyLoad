@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupCancellation(CancellationToken token, IOptions<ComparisonLifecycleOptions> options) : IDisposable
+internal sealed class KurrentCleanupCancellation(IOptions<ComparisonLifecycleOptions> options, CancellationToken token) : IDisposable
 {
     private Task originalCompletion = Task.CompletedTask;
 

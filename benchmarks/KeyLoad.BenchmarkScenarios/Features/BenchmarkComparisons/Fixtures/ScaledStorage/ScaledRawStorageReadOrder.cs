@@ -1,6 +1,8 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Retains one deterministic shuffled permutation and independent wrapping cursors.</summary>
@@ -8,7 +10,7 @@ internal sealed class ScaledRawStorageReadOrder
 {
     private const int MinimumRecordCount = 1;
     private const int MaximumRecordCount = 1_000_000;
-    private const int CancellationCheckStride = 256;
+    private readonly int cancellationCheckInterval;
     private const int EncodedIndexBytes = sizeof(int);
     private const ulong InitialState = 1729;
     private const ulong StateIncrement = 0x9e3779b97f4a7c15;
@@ -19,13 +21,16 @@ internal sealed class ScaledRawStorageReadOrder
     private int randomCursor;
 
     /// <summary>Builds the scale-v1 SplitMix64 Fisher-Yates order within the supplied cancellation scope.</summary>
-    public ScaledRawStorageReadOrder(int recordCount, CancellationToken cancellationToken = default)
+    public ScaledRawStorageReadOrder(int recordCount, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         if (recordCount is < MinimumRecordCount or > MaximumRecordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }
 
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        cancellationCheckInterval = executionOptions.Value.CancellationCheckInterval;
         cancellationToken.ThrowIfCancellationRequested();
         RecordCount = recordCount;
         permutation = new int[recordCount];
@@ -115,11 +120,11 @@ internal sealed class ScaledRawStorageReadOrder
         return Convert.ToHexStringLower(digest.GetHashAndReset());
     }
 
-    private static void CheckCancellationAtBoundary(int operation, CancellationToken cancellationToken)
+    private void CheckCancellationAtBoundary(int operation, CancellationToken cancellationToken)
     {
         const int EmptyOperationCancellationCheckStride = 0;
 
-        if (operation % CancellationCheckStride == EmptyOperationCancellationCheckStride)
+        if (operation % cancellationCheckInterval == EmptyOperationCancellationCheckStride)
         {
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -134,6 +139,7 @@ internal sealed class ScaledRawStorageReadOrder
         var value = state;
         value = unchecked((value ^ (value >> ValueBitOffset)) * FirstMultiplier);
         value = unchecked((value ^ (value >> NextSplitMix64ValueBitOffset)) * SecondMultiplier);
-        return value ^ (value >> 31);
+        const int FinalMixBitOffset = 31;
+        return value ^ (value >> FinalMixBitOffset);
     }
 }

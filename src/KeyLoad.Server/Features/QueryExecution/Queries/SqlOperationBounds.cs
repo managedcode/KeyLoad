@@ -1,3 +1,4 @@
+using KeyLoad.Query;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -8,10 +9,12 @@ namespace KeyLoad.Server;
 internal static class SqlOperationBounds
 {
     internal static void Validate(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions, int maximumPayloadBytes,
-        CancellationToken cancellationToken)
+        IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(limitsOptions);
+        ArgumentNullException.ThrowIfNull(queryOptions);
+        queryOptions.Value.Validate();
         var limits = limitsOptions.Value;
         limits.Validate();
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumPayloadBytes);
@@ -23,7 +26,7 @@ internal static class SqlOperationBounds
         { throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.TextExceeded); }
         if (string.IsNullOrWhiteSpace(request.Sql))
         { throw SqlOperationSyntax.InvalidInput(); }
-        if (request.Parameters?.Count > SqlOperationSyntax.MaximumParameters)
+        if (request.Parameters?.Count > queryOptions.Value.MaximumParameters)
         { throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.StructureExceeded); }
         using var counter = new SqlOperationByteCounter(maximumPayloadBytes, cancellationToken);
         try

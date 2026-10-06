@@ -2,6 +2,10 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RabbitNativePolicy
 {
+    private const string TopologyLabelConnectedNativeBrokerNodesText = " connected native broker nodes; ";
+    private const string TopologyLabelMemberQuorumQueueQuorumText = "-member quorum queue; quorum ";
+    private const string TopologyLabelOfText = " of ";
+
     private const string QueueTypeArgument = "x-queue-type";
     private const string InitialGroupSizeArgument = "x-quorum-initial-group-size";
     private const string QuorumType = "quorum";
@@ -14,13 +18,20 @@ internal static class RabbitNativePolicy
 
     internal static string TopologyLabel(ComparisonTopology topology)
     {
+        const int SingleItemCount = 1;
+        const string NoReplicaFaultToleranceToken = "; no replica fault tolerance";
+        const int TwoNodeReplicaCount = 2;
+        const string NoSingleNodeLossAvailabilityToken = "; no single-node-loss availability";
+        const int MajorityDivisor = 2;
+        const int MajorityVoteOffset = 1;
+
         var nodes = ComparisonTopologies.NodeCount(topology);
         var availability = nodes switch
         {
-            1 => "; no replica fault tolerance",
-            2 => "; no single-node-loss availability",
+            SingleItemCount => NoReplicaFaultToleranceToken,
+            TwoNodeReplicaCount => NoSingleNodeLossAvailabilityToken,
             _ => string.Empty
         };
-        return $"{nodes} connected native broker nodes; {nodes}-member quorum queue; quorum {nodes / 2 + 1} of {nodes}{availability}";
+        return $"{nodes}{TopologyLabelConnectedNativeBrokerNodesText}{nodes}{TopologyLabelMemberQuorumQueueQuorumText}{nodes / MajorityDivisor + MajorityVoteOffset}{TopologyLabelOfText}{nodes}{availability}";
     }
 }

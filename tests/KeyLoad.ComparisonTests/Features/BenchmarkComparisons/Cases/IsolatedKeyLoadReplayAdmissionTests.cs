@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -22,20 +23,22 @@ internal sealed class IsolatedKeyLoadReplayAdmissionTests
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(KeyLoad, count);
+        using var configuration = new ConfigurationManager();
+        var expected = IsolatedKeyLoadReplayOptionsRegistration.Bind(configuration).Value;
         foreach (var node in resources.Where(resource => resource.Name != IsolatedResourceTopologyFixture.RunnerName))
         {
             var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
             await Assert.That(long.Parse(environment[Critical], System.Globalization.CultureInfo.InvariantCulture))
-                .IsEqualTo((long)IsolatedKeyLoadReplayProfile.CriticalPerVoter);
+                .IsEqualTo((long)expected.CriticalPerVoter);
             await Assert.That(long.Parse(environment[Forward], System.Globalization.CultureInfo.InvariantCulture))
-                .IsEqualTo((long)IsolatedKeyLoadReplayProfile.ForwardPerVoter);
+                .IsEqualTo((long)expected.ForwardPerVoter);
             await Assert.That(long.Parse(environment[Read], System.Globalization.CultureInfo.InvariantCulture))
-                .IsEqualTo((long)IsolatedKeyLoadReplayProfile.ReadBarrierPerVoter);
+                .IsEqualTo((long)expected.ReadBarrierPerVoter);
             await Assert.That(long.Parse(environment[Data], System.Globalization.CultureInfo.InvariantCulture))
-                .IsEqualTo((long)IsolatedKeyLoadReplayProfile.DataAppendPerVoter);
+                .IsEqualTo((long)expected.DataAppendPerVoter);
         }
-        var total = (long)IsolatedKeyLoadReplayProfile.CriticalPerVoter + IsolatedKeyLoadReplayProfile.ForwardPerVoter
-            + IsolatedKeyLoadReplayProfile.ReadBarrierPerVoter + IsolatedKeyLoadReplayProfile.DataAppendPerVoter;
+        var total = (long)expected.CriticalPerVoter + expected.ForwardPerVoter
+            + expected.ReadBarrierPerVoter + expected.DataAppendPerVoter;
         await Assert.That(total * count).IsLessThan(Maximum);
         await Assert.That(total * 3).IsEqualTo(Rf3Bound);
     }
@@ -48,7 +51,23 @@ internal sealed class IsolatedKeyLoadReplayAdmissionTests
         foreach (var node in await model.BuildAsync(null, 3))
         {
             var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-            await Assert.That(environment.Keys.Any(key => key.StartsWith(Prefix, StringComparison.Ordinal))).IsFalse();
+            await Assert.That(long.Parse(environment[Critical], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(16_384);
+            await Assert.That(long.Parse(environment[Forward], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(32_768);
+            await Assert.That(long.Parse(environment[Read], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(16_384);
+            await Assert.That(long.Parse(environment[Data], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(32_768);
+        }
+    }
+
+    [Test]
+    public async Task ConfiguredReadBarrierQuotaReachesEveryNativeNode()
+    {
+        await using var model = new IsolatedResourceTopologyApplication();
+        var resources = await model.BuildAsync(KeyLoad, 3,
+            IsolatedKeyLoadReplayOptionsRegistration.SectionName + ":ReadBarrierPerVoter", "512");
+        foreach (var node in resources.Where(resource => resource.Name != IsolatedResourceTopologyFixture.RunnerName))
+        {
+            var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
+            await Assert.That(long.Parse(environment[Read], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(512);
         }
     }
 }

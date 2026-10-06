@@ -88,7 +88,8 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
         lock (sync)
         {
             stopAdmission = true;
-            return activeCallbacks == 0 ? Task.CompletedTask : drained.Task;
+            const int NoActiveCallbacks = 0;
+            return activeCallbacks == NoActiveCallbacks ? Task.CompletedTask : drained.Task;
         }
     }
 

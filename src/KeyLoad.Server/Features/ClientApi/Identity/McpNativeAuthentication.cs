@@ -13,19 +13,18 @@ internal static class McpNativeAuthentication
     internal const string InvalidReply = "The native authentication reply is invalid.";
     private static readonly Lazy<NativeSerializerContext> Context = new(() => NativeSerializerProviders.Get(typeof(GrainValue)));
 
-    internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, CancellationToken cancellationToken,
-        IOptions<McpExecutionOptions> options)
+    internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
         => InspectCore(payload, options, enforceMcpBounds: true, cancellationToken: cancellationToken);
 
     private static McpFrameShape InspectCore(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options,
         bool enforceMcpBounds, CancellationToken cancellationToken)
     {
-        RequireBytes(payload.Length, cancellationToken, options);
+        RequireBytes(bytes: payload.Length, cancellationToken: cancellationToken, options: options);
         using var session = Context.Value.Sessions.GetSession();
         try
         {
             var reader = Reader.Create(payload, session);
-            var inspection = new McpNativeAuthenticationReader(enforceMcpBounds, cancellationToken, options);
+            var inspection = new McpNativeAuthenticationReader(enforceMcpBounds: enforceMcpBounds, cancellationToken: cancellationToken, options: options);
             return inspection.Read(ref reader);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
@@ -38,24 +37,22 @@ internal static class McpNativeAuthentication
         }
     }
 
-    internal static PrincipalRecord ReadPrincipal(ReadOnlySpan<byte> payload, CancellationToken cancellationToken,
-        IOptions<McpExecutionOptions> options)
+    internal static PrincipalRecord ReadPrincipal(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
     {
         // HTTP retains only its existing wire ceiling, while sharing the strict native grammar.
         _ = InspectCore(payload, options, enforceMcpBounds: false, cancellationToken: cancellationToken);
-        return ReadAdmittedPrincipal(payload, cancellationToken, options);
+        return ReadAdmittedPrincipal(payload: payload, cancellationToken: cancellationToken, options: options);
     }
 
     // MCP calls only after its bounded scan and CoverAuthentication reservation have succeeded.
-    internal static PrincipalRecord ReadAdmittedPrincipal(ReadOnlySpan<byte> payload, CancellationToken cancellationToken,
-        IOptions<McpExecutionOptions> options)
+    internal static PrincipalRecord ReadAdmittedPrincipal(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
     {
-        RequireBytes(payload.Length, cancellationToken, options);
+        RequireBytes(bytes: payload.Length, cancellationToken: cancellationToken, options: options);
         var value = NativeSerialization.Deserialize<GrainValue>(payload).Value;
         return value as PrincipalRecord ?? throw Errors.Fail(ErrorCode.Corruption, InvalidReply);
     }
 
-    private static void RequireBytes(int bytes, CancellationToken cancellationToken, IOptions<McpExecutionOptions> options)
+    private static void RequireBytes(int bytes, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();

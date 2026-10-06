@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -5,15 +6,21 @@ using MongoDB.Driver;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocument> documents,
-    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount) : IComparisonSession
+    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        const int NoObservedItems = 0;
+        const string ScaledCorpusReadbackExtraRecordDetail = "ScaledCorpusReadbackExtraRecord";
+        const string ScaledCorpusReadbackCountMismatchDetail = "ScaledCorpusReadbackCountMismatch";
+
         var find = documents.Find(FilterDefinition<BsonDocument>.Empty,
-                new FindOptions { BatchSize = 256 })
+                new FindOptions { BatchSize = execution.ReadbackBatchCapacity })
             .Sort(Builders<BsonDocument>.Sort.Ascending(MongoSchema.IdField));
         using var cursor = await find.ToCursorAsync(cancellationToken);
-        var seen = 0;
+        var seen = NoObservedItems;
         while (await cursor.MoveNextAsync(cancellationToken))
         {
             foreach (var stored in cursor.Current)
@@ -21,7 +28,7 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
                 cancellationToken.ThrowIfCancellationRequested();
                 if (seen >= corpusCount)
                 {
-                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                    throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
                 }
                 yield return new(stored.GetValue(MongoSchema.IdField).AsString,
                     stored.GetValue(MongoSchema.BodyField).AsString);
@@ -30,7 +37,7 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
         }
         if (seen != corpusCount)
         {
-            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+            throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }
     }
 
@@ -42,15 +49,17 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
 
     public async Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         var stored = await events.Find(IdFilter(target.StreamName(document))).Limit(MongoSchema.DuplicateProbeCount)
             .ToListAsync(cancellationToken);
         if (stored.Count != MongoSchema.SingleEventCount)
         {
             throw new ComparisonFailureException(MongoSchema.FailureReadCardinality);
         }
-        var result = new FoundEvent(Guid.Parse(stored[0].GetValue(MongoSchema.EventIdField).AsString),
-            checked((ulong)stored[0].GetValue(MongoSchema.RevisionField).ToInt64()),
-            stored[0].GetValue(MongoSchema.JsonField).AsString);
+        var result = new FoundEvent(Guid.Parse(stored[FirstElementIndex].GetValue(MongoSchema.EventIdField).AsString),
+            checked((ulong)stored[FirstElementIndex].GetValue(MongoSchema.RevisionField).ToInt64()),
+            stored[FirstElementIndex].GetValue(MongoSchema.JsonField).AsString);
         return result;
     }
 
@@ -103,15 +112,18 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
 
     internal static void ValidateUpdateResult(UpdateResult result)
     {
+        const int NoObservedItems = 0;
+        const int SingleItemCount = 1;
+
         if (!result.IsAcknowledged || !result.IsModifiedCountAvailable || result.UpsertedId is not null)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }
-        if (result.MatchedCount == 0 && result.ModifiedCount == 0)
+        if (result.MatchedCount == NoObservedItems && result.ModifiedCount == NoObservedItems)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.UpdateMissing);
         }
-        if (result.MatchedCount != 1 || result.ModifiedCount != 1)
+        if (result.MatchedCount != SingleItemCount || result.ModifiedCount != SingleItemCount)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }
@@ -119,11 +131,15 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
 
     internal static void ValidateDeleteResult(DeleteResult result)
     {
-        if (!result.IsAcknowledged || result.DeletedCount > 1 || result.DeletedCount < 0)
+        const int SingleItemCount = 1;
+        const int NoItems = 0;
+        const int NoObservedItems = 0;
+
+        if (!result.IsAcknowledged || result.DeletedCount > SingleItemCount || result.DeletedCount < NoItems)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }
-        if (result.DeletedCount == 0)
+        if (result.DeletedCount == NoObservedItems)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.DeleteMissing);
         }

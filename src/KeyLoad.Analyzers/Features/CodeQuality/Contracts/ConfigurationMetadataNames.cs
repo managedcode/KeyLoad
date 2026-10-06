@@ -8,6 +8,8 @@ internal static class ConfigurationMetadataNames
     internal const int SingleSnapshotAssignment = 1;
     internal const string OptionsOwner = "KeyLoad.ConfigurationOptionsAttribute";
     internal const string BindingOwner = "KeyLoad.ConfigurationBindingAttribute";
+    internal const string ImmutableTemporalData = "KeyLoad.ImmutableTemporalDataAttribute";
+    internal const string SerializedOptionsSnapshot = "KeyLoad.SerializedOptionsSnapshotAttribute";
     internal const string Options = "Microsoft.Extensions.Options.IOptions`1";
     internal const string OptionsFactory = "Microsoft.Extensions.Options.OptionsFactory`1";
     internal const string OptionsManager = "Microsoft.Extensions.Options.OptionsManager`1";

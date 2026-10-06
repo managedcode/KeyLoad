@@ -26,12 +26,18 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
 
     internal void RecordSetup(string target, string operation, bool succeeded, string? errorCode = null)
     {
-        attempts.Add(new(target, operation, 1, false, null, succeeded, null, errorCode));
-        checks.Add(new(target, operation, succeeded, 1, succeeded ? 1 : 0, HashCount(1), HashCount(succeeded ? 1 : 0), errorCode));
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
+        attempts.Add(new(target, operation, SingleItemCount, false, null, succeeded, null, errorCode));
+        checks.Add(new(target, operation, succeeded, SingleItemCount, succeeded ? SingleItemCount : NoObservedItems, HashCount(SingleItemCount), HashCount(succeeded ? SingleItemCount : NoObservedItems), errorCode));
     }
 
     internal void RecordRead(string target, TimeSeriesReadRange range, TimeSeriesReadResult result, double? elapsedMs)
     {
+        const int UpdateIdentityBlock = 1;
+        const int NoItems = 0;
+
         var expected = workload.Samples.Where(sample => InRange(sample, range)).ToImmutableArray();
         var expectedHash = HashSamples(expected);
         var actualHash = result.Succeeded ? HashSamples(result.Samples) : null;
@@ -39,33 +45,43 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
             ? result.Succeeded && result.Samples.Length == range.ExpectedCount && expectedHash == actualHash
             : !result.Succeeded && result.ErrorCode == range.ExpectedErrorCode;
         var attemptSuccess = passed;
-        attempts.Add(new(target, range.Name, 1, elapsedMs.HasValue, elapsedMs, attemptSuccess,
-            result.Succeeded ? result.Samples.Length : 0, result.ErrorCode));
+        attempts.Add(new(target, range.Name, UpdateIdentityBlock, elapsedMs.HasValue, elapsedMs, attemptSuccess,
+            result.Succeeded ? result.Samples.Length : NoItems, result.ErrorCode));
         checks.Add(new(target, range.Name, passed, range.ExpectedCount,
-            result.Succeeded ? result.Samples.Length : 0, expectedHash, actualHash, result.ErrorCode));
+            result.Succeeded ? result.Samples.Length : NoItems, expectedHash, actualHash, result.ErrorCode));
     }
 
     internal void RecordTargetFailure(string target, string operation, string errorCode, double? elapsedMs = null)
     {
-        attempts.Add(new(target, operation, 1, elapsedMs.HasValue, elapsedMs, false, null, errorCode));
-        checks.Add(new(target, operation, false, 1, 0, HashCount(1), HashCount(0), errorCode));
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
+        attempts.Add(new(target, operation, SingleItemCount, elapsedMs.HasValue, elapsedMs, false, null, errorCode));
+        checks.Add(new(target, operation, false, SingleItemCount, NoObservedItems, HashCount(SingleItemCount), HashCount(NoObservedItems), errorCode));
     }
 
     internal void RecordBuckets(string target, ImmutableArray<TimeSeriesBucketValue> actual, double elapsedMs)
     {
+        const string BucketSumOracleToken = "bucket-sum-oracle";
+        const int SingleItemCount = 1;
+
         var expectedHash = HashBuckets(workload.ExpectedBuckets);
         var actualHash = HashBuckets(actual);
         var passed = workload.ExpectedBuckets.Length == actual.Length && expectedHash == actualHash;
-        attempts.Add(new(target, "bucket-sum-oracle", 1, true, elapsedMs, passed, actual.Length, null));
-        checks.Add(new(target, "bucket-sum-oracle", passed, workload.ExpectedBuckets.Length,
+        attempts.Add(new(target, BucketSumOracleToken, SingleItemCount, true, elapsedMs, passed, actual.Length, null));
+        checks.Add(new(target, BucketSumOracleToken, passed, workload.ExpectedBuckets.Length,
             actual.Length, expectedHash, actualHash, null));
     }
 
     internal void RecordCleanup(string target, bool succeeded, string? errorCode = null)
     {
-        attempts.Add(new(target, "cleanup", 1, false, null, succeeded, null, errorCode));
-        checks.Add(new(target, "cleanup", succeeded, 1, succeeded ? 1 : 0,
-            HashCount(1), HashCount(succeeded ? 1 : 0), errorCode));
+        const string CleanupToken = "cleanup";
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
+        attempts.Add(new(target, CleanupToken, SingleItemCount, false, null, succeeded, null, errorCode));
+        checks.Add(new(target, CleanupToken, succeeded, SingleItemCount, succeeded ? SingleItemCount : NoObservedItems,
+            HashCount(SingleItemCount), HashCount(succeeded ? SingleItemCount : NoObservedItems), errorCode));
     }
 
     internal TimeSeriesComparisonReport CreateReport(string sourceRevision)
@@ -80,13 +96,16 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
 
     private static string HashSamples(IEnumerable<TimeSeriesSamplePoint> samples)
     {
+        const char ComponentSeparator = '|';
+        const char LineFeed = '\n';
+
         var content = new StringBuilder();
         foreach (var sample in samples.OrderBy(item => item.Timestamp.UtcTicks).ThenBy(item => item.EventId, StringComparer.Ordinal))
         {
-            content.Append(sample.EventId).Append('|')
-                .Append(sample.Timestamp.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append('|')
-                .Append(sample.Value.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append('|')
-                .Append(TimeSeriesJsonCanonicalizer.Canonicalize(sample.TagsJson)).Append('\n');
+            content.Append(sample.EventId).Append(ComponentSeparator)
+                .Append(sample.Timestamp.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append(ComponentSeparator)
+                .Append(sample.Value.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append(ComponentSeparator)
+                .Append(TimeSeriesJsonCanonicalizer.Canonicalize(sample.TagsJson)).Append(LineFeed);
         }
 
         return Hash(content);
@@ -94,11 +113,14 @@ internal sealed class TimeSeriesComparisonRecorder(TimeSeriesComparisonWorkload 
 
     private static string HashBuckets(IEnumerable<TimeSeriesBucketValue> buckets)
     {
+        const char ComponentSeparator = '|';
+        const char LineFeed = '\n';
+
         var content = new StringBuilder();
         foreach (var bucket in buckets.OrderBy(item => item.TimestampUtc.UtcTicks))
         {
-            content.Append(bucket.TimestampUtc.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append('|')
-                .Append(bucket.Sum.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append('\n');
+            content.Append(bucket.TimestampUtc.UtcTicks.ToString(CultureInfo.InvariantCulture)).Append(ComponentSeparator)
+                .Append(bucket.Sum.ToString(SampleValueFormat, CultureInfo.InvariantCulture)).Append(LineFeed);
         }
 
         return Hash(content);

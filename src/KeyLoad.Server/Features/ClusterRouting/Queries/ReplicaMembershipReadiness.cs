@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
@@ -10,18 +11,16 @@ internal static class ReplicaMembershipReadiness
     private const string EndpointKeyComparisonText = ":";
 
     private const int ExpectedActiveSilos = 6;
-    private const int MaximumRows = 48;
-    private const int MaximumAddressBytes = 256;
-
     internal static async Task<MembershipReadinessSnapshot?> ReadNodeAsync(bool siloJoined, IHost? host,
-        NodeOptions options, CancellationToken token)
+        IOptions<NodeOptions> nodeOptions, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
+        var options = nodeOptions.Value;
         if (!siloJoined || host is null || options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local)
         { return null; }
         try
         {
-            return await ReadAsync(host.Services.GetRequiredService<IMembershipTable>(), options,
-                host.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress, token).ConfigureAwait(false);
+            return await ReadAsync(host.Services.GetRequiredService<IMembershipTable>(), nodeOptions,
+                host.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress, membershipOptions, token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         { throw; }
@@ -29,19 +28,21 @@ internal static class ReplicaMembershipReadiness
         { return null; }
     }
 
-    internal static async Task<MembershipReadinessSnapshot?> ReadAsync(IMembershipTable table, NodeOptions options,
-        SiloAddress localAddress, CancellationToken token)
+    internal static async Task<MembershipReadinessSnapshot?> ReadAsync(IMembershipTable table, IOptions<NodeOptions> nodeOptions,
+        SiloAddress localAddress, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken token)
     {
         const int IndexInitialValue = 0;
         const int EmptyCanonicalLength = 0;
         const int VersionSingleItemCount = 1;
 
-        var expected = await ExpectedEndpointsAsync(options, token).ConfigureAwait(false);
+        var bounds = membershipOptions.Value;
+        bounds.Validate();
+        var expected = await ExpectedEndpointsAsync(nodeOptions.Value, token).ConfigureAwait(false);
         if (expected.Count != ExpectedActiveSilos)
         { return null; }
         var view = await table.ReadAllAsync(token).ConfigureAwait(false);
         var active = view.Members.Where(member => member.Item1.Status == SiloStatus.Active).ToArray();
-        if (view.Members.Count is < ExpectedActiveSilos or > MaximumRows
+        if (view.Members.Count < ExpectedActiveSilos || view.Members.Count > bounds.MaximumRows
             || active.Length != ExpectedActiveSilos || active.All(member => member.Item1.SiloAddress != localAddress))
         { return null; }
         var addresses = new string[ExpectedActiveSilos];
@@ -52,7 +53,7 @@ internal static class ReplicaMembershipReadiness
             var canonical = address.ToParsableString();
             if (SiloAddress.FromParsableString(canonical).ToParsableString() != canonical)
             { return null; }
-            if (canonical.Length == EmptyCanonicalLength || Encoding.UTF8.GetByteCount(canonical) > MaximumAddressBytes
+            if (canonical.Length == EmptyCanonicalLength || Encoding.UTF8.GetByteCount(canonical) > bounds.MaximumAddressBytes
                 || !expected.Contains(EndpointKey(address.Endpoint.Address, address.Endpoint.Port))
                 || !observedEndpoints.Add(EndpointKey(address.Endpoint.Address, address.Endpoint.Port)))
             { return null; }

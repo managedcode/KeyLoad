@@ -134,6 +134,7 @@ internal sealed record NodeOptions
 
     /// <summary>Creates the immutable replica scope without storage or an Orleans client.</summary>
     /// <param name="directory">The full physical node directory.</param>
+    [ConfigurationBinding]
     public ReplicaConfiguration CreateReplicaConfiguration(string directory) => new(PublicEndpoint, [.. Peers], directory, Incarnation)
     {
         BenchmarkTopology = BenchmarkTopology,
@@ -144,6 +145,7 @@ internal sealed record NodeOptions
     };
 
     /// <summary>Creates fixed discovery endpoints and bounded HMAC replay limits.</summary>
+    [ConfigurationBinding]
     public ReplicaPeerOptions CreatePeerOptions() => new(Peers.ToDictionary(peer => peer, peer => new Uri(peer), StringComparer.Ordinal),
         Convert.FromBase64String(PeerSecret), ClusterId)
     {

@@ -31,15 +31,19 @@ internal static class ImmutableArrayAsyncView
     private sealed class Enumerator<TSource, TResult>(ImmutableArray<TSource> values, Func<TSource, TResult> project,
         CancellationToken cancellationToken) : IAsyncEnumerator<TResult>
     {
-        private int _index = -1;
+        private const int MissingItemIndex = -1;
+
+        private int _index = MissingItemIndex;
         private TResult? _current;
 
         public TResult Current => _current!;
 
         public ValueTask<bool> MoveNextAsync()
         {
+            const int AdjacentElementOffset = 1;
+
             cancellationToken.ThrowIfCancellationRequested();
-            var next = _index + 1;
+            var next = _index + AdjacentElementOffset;
             if (next >= values.Length)
             {
                 return ValueTask.FromResult(false);

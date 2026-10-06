@@ -11,6 +11,7 @@ internal static class McpNativeOutput
     /// <summary>Serializes into one bounded private capacity and inspects only its borrowed written range.</summary>
     /// <param name="message">The genuine native response with any already injected metadata.</param>
     /// <param name="maximumBytes">The inclusive native frame ceiling, fully reserved by the caller before allocation.</param>
+    /// <param name="options">The centrally validated native MCP output framing policy.</param>
     /// <exception cref="KeyLoadException">The native message exceeds its byte or structural capacity.</exception>
     internal static void Validate(JsonRpcMessage message, int maximumBytes, IOptions<McpExecutionOptions> options)
     {

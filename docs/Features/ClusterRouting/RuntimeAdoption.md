@@ -100,10 +100,15 @@ Native mechanism fixtures remain unit evidence; SDK/MCP RF3 is still mandatory.
 
 Implement and author tests together, then run runtime validation after the
 coherent implementation/self-review, as required by the latest root correction.
-The 2026-10-06 canonical join build failed. Introduced compiler/analyzer repairs
-and the concurrent repository-wide literal/options migration remain open.
-Restore succeeded, but no runtime test, coverage result or successful final build
-is claimed for this joined source. No source-only result closes a runtime criterion.
+The final 2026-10-06 canonical join build failed with456 diagnostics in CrashHost
+and Comparisons; canonical formatting failed with1117 diagnostics in the shared
+checkout. Neither check reported a finding in the104 explicitly reviewed stage
+paths, which stayed unchanged during those gates. Dependent test compilation and
+runtime acceptance still require a passing complete solution build.
+[The development receipt](../../implementation/native-orleans-development-2026-10-06.json)
+records the commands, original local logs and open gates. Restore succeeded;
+no runtime test, coverage result or successful final build is claimed.
+No source-only result closes a runtime criterion.
 After code joins: `dotnet build KeyLoad.slnx --no-restore --configuration Release`,
 `dotnet format KeyLoad.slnx --verify-no-changes --no-restore`, and the root
 Aspire-owned entry for unit, unit-scalar, recovery and rf3. Focused filters are

@@ -41,8 +41,8 @@ internal sealed class GrainReplyCancellationTests
     public async Task AcRoute010MissingIncomingTokenCannotClaimCallerCancellation()
     {
         var error = await NativeCancellationAsync();
-        var missing = GrainReplyFactory.Failure(error, false, null);
-        var inactive = GrainReplyFactory.Failure(error, false, null, cancellationToken: CancellationToken.None);
+        var missing = GrainReplyFactory.Failure(error, false, null, UnitRoutingOptions.Routing());
+        var inactive = GrainReplyFactory.Failure(error, false, null, UnitRoutingOptions.Routing(), cancellationToken: CancellationToken.None);
 
         await Assert.That(missing.Error).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(missing.SafeDetail).IsEqualTo(UnavailableDetail);
@@ -116,7 +116,7 @@ internal sealed class GrainReplyCancellationTests
         using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
         {
             reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)),
-                requestId, GrainFailureStage.QuorumRead, cancellationToken);
+                UnitRoutingOptions.Routing(), requestId, GrainFailureStage.QuorumRead, cancellationToken);
         }
         return (reply, capture.Text);
     }

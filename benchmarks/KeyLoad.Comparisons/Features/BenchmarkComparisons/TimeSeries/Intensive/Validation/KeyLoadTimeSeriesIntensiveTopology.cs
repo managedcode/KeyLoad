@@ -7,6 +7,8 @@ internal static class KeyLoadTimeSeriesIntensiveTopology
     internal static void ValidateStatuses(ImmutableArray<NodeStatus> statuses,
         ImmutableArray<string> expectedVoters, Guid expectedIncarnation)
     {
+        const int FirstElementIndex = 0;
+
         if (statuses.IsDefaultOrEmpty || expectedVoters.IsDefaultOrEmpty
             || statuses.Length != expectedVoters.Length
             || statuses.Length is < KeyLoadTimeSeriesIntensiveProtocol.MinimumNodeCount
@@ -23,7 +25,7 @@ internal static class KeyLoadTimeSeriesIntensiveTopology
         }
 
         var leader = statuses[KeyLoadTimeSeriesIntensiveProtocol.FirstStatusIndex]?.Leader;
-        for (var index = 0; index < statuses.Length; index++)
+        for (var index = FirstElementIndex; index < statuses.Length; index++)
         {
             var status = statuses[index];
             if (status is null || string.IsNullOrWhiteSpace(status.NodeId)

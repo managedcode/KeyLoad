@@ -35,15 +35,19 @@ internal static class TimeSeriesIntensivePlans
 
     internal static Guid CommandId(string runId, string purpose)
     {
+        const int FirstElementIndex = 0;
+
         ArgumentException.ThrowIfNullOrWhiteSpace(runId);
         ArgumentException.ThrowIfNullOrWhiteSpace(purpose);
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(runId + TimeSeriesIntensiveProfile.CommandSeparator + purpose));
-        return new(hash.AsSpan(0, TimeSeriesIntensiveProfile.CommandIdBytes));
+        return new(hash.AsSpan(FirstElementIndex, TimeSeriesIntensiveProfile.CommandIdBytes));
     }
 
     internal static IEnumerable<TimeSeriesIntensiveReadback> SeedReadbacks()
     {
-        for (var chunk = 0; chunk < TimeSeriesIntensiveProfile.SeedBatchCount; chunk++)
+        const int NoObservedItems = 0;
+
+        for (var chunk = NoObservedItems; chunk < TimeSeriesIntensiveProfile.SeedBatchCount; chunk++)
         {
             yield return new(TimeSeriesIntensiveProfile.SeedSeries,
                 TimeSeriesIntensiveProfile.Epoch.AddMinutes(chunk * TimeSeriesIntensiveProfile.SeedReadbackMinutes),
@@ -53,24 +57,29 @@ internal static class TimeSeriesIntensivePlans
 
     internal static IEnumerable<TimeSeriesIntensiveReadback> AppendReadbacks(int repetition, bool warmup)
     {
+        const int NoObservedItems = 0;
+        const int SingleItemCount = 1;
+
         var series = PhaseSeries(repetition, warmup);
         var count = warmup ? TimeSeriesIntensiveProfile.WarmupCount : TimeSeriesIntensiveProfile.OperationCount;
-        for (var first = 0; first < count; first += TimeSeriesIntensiveProfile.RawLimit)
+        for (var first = NoObservedItems; first < count; first += TimeSeriesIntensiveProfile.RawLimit)
         {
             var size = Math.Min(TimeSeriesIntensiveProfile.RawLimit, count - first);
             yield return new(series, TimeSeriesIntensiveProfile.Epoch.AddDays(TimeSeriesIntensiveProfile.AppendEpochDays).AddMilliseconds(first),
-                TimeSeriesIntensiveProfile.Epoch.AddDays(TimeSeriesIntensiveProfile.AppendEpochDays).AddMilliseconds(first + size - 1), size);
+                TimeSeriesIntensiveProfile.Epoch.AddDays(TimeSeriesIntensiveProfile.AppendEpochDays).AddMilliseconds(first + size - SingleItemCount), size);
         }
     }
 
     internal static int WholeSeriesCount(string seriesId)
     {
+        const int NoObservedItems = 0;
+
         if (string.Equals(seriesId, TimeSeriesIntensiveProfile.SeedSeries, StringComparison.Ordinal))
         {
             return TimeSeriesIntensiveProfile.SampleCount;
         }
 
-        for (var repetition = 0; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
+        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             if (string.Equals(seriesId, PhaseSeries(repetition, true), StringComparison.Ordinal))
             {

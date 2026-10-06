@@ -9,6 +9,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadNativeCoverageToolVersion)]" />
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../KeyLoad.Server/KeyLoad.Server.csproj" />

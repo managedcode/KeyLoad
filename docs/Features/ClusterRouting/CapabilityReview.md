@@ -5,6 +5,11 @@ changes or qualification. Owner: KeyLoad lead. Related contract:
 [ExecutionPrimitives](ExecutionPrimitives.md), REQ/AC-ORL-001..010 and
 [ADR-110](../../ADR/ADR-110-native-orleans-execution-primitives.md).
 
+This inventory records the review snapshot before implementation approval.
+The current, unqualified native-service, telemetry and journal-backed jobs
+integration is tracked in [RuntimeAdoption](RuntimeAdoption.md) and
+[RuntimeJournal](RuntimeJournal.md); their source does not close runtime gates.
+
 ## Coverage and decision method
 
 The owner requested a broad review of Orleans documentation, explicitly including

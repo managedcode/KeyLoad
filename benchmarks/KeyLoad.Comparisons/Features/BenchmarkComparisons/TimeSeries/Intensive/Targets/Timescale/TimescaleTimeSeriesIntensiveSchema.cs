@@ -71,8 +71,10 @@ internal static class TimescaleTimeSeriesIntensiveSchema
 
     private static string[] CounterSeries()
     {
+        const int NoObservedItems = 0;
+
         var names = new List<string> { TimeSeriesIntensiveProfile.SeedSeries };
-        for (var repetition = 0; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
+        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             var suffix = repetition.ToString(CultureInfo.InvariantCulture);
             names.Add(TimeSeriesIntensiveProfile.WarmSeriesPrefix + suffix);

@@ -16,6 +16,7 @@ internal sealed class ServerNodeUpgradeExecutionOptions
     private const int MaximumPathCharacterCeiling = 4_194_304;
     private const long MaximumSourceByteCeiling = 549_755_813_888;
     private const int MaximumFileBufferByteCeiling = 65_536;
+    private const int MaximumReceiptByteCeiling = 1_048_576;
 
     public int MaximumEntries { get; set; } = MaximumEntryCeiling;
     public int MaximumFiles { get; set; } = MaximumFileCeiling;
@@ -24,6 +25,7 @@ internal sealed class ServerNodeUpgradeExecutionOptions
     public int MaximumTotalPathCharacters { get; set; } = MaximumPathCharacterCeiling;
     public long MaximumSourceBytes { get; set; } = MaximumSourceByteCeiling;
     public int FileBufferBytes { get; set; } = MaximumFileBufferByteCeiling;
+    public int MaximumReceiptBytes { get; set; } = MaximumReceiptByteCeiling;
 
     internal bool IsValid() => MaximumEntries is >= MinimumPositiveBudget and <= MaximumEntryCeiling
         && MaximumFiles is >= MinimumPositiveBudget and <= MaximumFileCeiling
@@ -32,7 +34,8 @@ internal sealed class ServerNodeUpgradeExecutionOptions
         && MaximumDepth is >= MinimumPositiveBudget and <= MaximumDepthCeiling
         && MaximumTotalPathCharacters is >= MinimumPositiveBudget and <= MaximumPathCharacterCeiling
         && MaximumSourceBytes is >= MinimumPositiveBudget and <= MaximumSourceByteCeiling
-        && FileBufferBytes is >= MinimumPositiveBudget and <= MaximumFileBufferByteCeiling;
+        && FileBufferBytes is >= MinimumPositiveBudget and <= MaximumFileBufferByteCeiling
+        && MaximumReceiptBytes is >= MinimumPositiveBudget and <= MaximumReceiptByteCeiling;
 
     internal void Validate()
     {

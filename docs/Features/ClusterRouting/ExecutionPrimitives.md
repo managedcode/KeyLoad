@@ -16,18 +16,19 @@ the authenticated SDK/SQL/MCP caller, its unique request grain, capability grain
 partition due coordinator and node-local RF3 storage owner. Public operations
 continue through the existing signed native CQRS path.
 
-The inspected source pins Orleans 10.4.0 in
-[Directory.Packages.props](../../../Directory.Packages.props). It has no production
-StatelessWorker, OneWay or interleaving attributes and no configured Durable Jobs
-provider. Request and read grains already have independent GUID identities.
-Native durable jobs are a separate prerelease package, not a facility enabled by
-referencing Microsoft.Orleans.Server. Package/provider integration remains open.
+The source pins Orleans 10.4.0 and matching Journaling/DurableJobs
+10.4.0-alpha.1 in [Directory.Packages.props](../../../Directory.Packages.props).
+The approved implementation now registers a bounded RF3-backed native journal
+provider and already-due saga jobs under [RuntimeJournal](RuntimeJournal.md),
+plus native local-service wake and telemetry under [RuntimeAdoption](RuntimeAdoption.md).
+These sources remain unqualified. Request and read grains retain their independent
+GUID identities; production StatelessWorker, OneWay and blanket interleaving
+attributes remain unselected for the inspected methods.
 
-This stage owns the durable policy, method audit and adoption/test contract.
-Runtime attributes, new dependencies, provider storage, public methods, data
-migration and performance changes are subsequent stages. Frontend: N/A, no new
-UI. Client schemas: N/A at this stage; existing SDK/MCP operation contracts remain
-the qualification entry points.
+This specification owns the durable policy, method audit and REQ/AC inventory.
+The linked adoption contracts own executable stages and reader rollout.
+Frontend: N/A, no new UI. Client schemas: N/A for these stages; existing SDK/MCP
+operation contracts remain the qualification entry points.
 
 ## Per-grain and method selection
 
@@ -41,11 +42,12 @@ the qualification entry points.
 | Future bounded pure query/search transform grain behind the request boundary | Evaluate StatelessWorker for bounded SQL parsing/tokenization, immutable chunk transformation, scoring or pre-aggregation. Reuse actual `SqlParser.Parse` / `SqlTokenizer.Lex` with fresh call-local state, or bounded copied inputs from an authorized read cut; return bounded typed results to its owner. Workers retain no authoritative data, storage handles, trusted roles, shared cursors or occurrence state. |
 | Future long-operation control methods | Prefer a narrow AlwaysInterleave status/cancel method or audited MayInterleave predicate when a long operation awaits. Status reads bounded snapshots; cancel records cooperative intent and returns an awaited outcome. Reentrant is justified only after all methods' state across awaits are audited and measured contention warrants it. |
 | Future disposable wake-up/refresh hint method | Evaluate OneWay only if loss, duplication and reordering are harmless and a canonical bounded sweep/revalidation guarantees progress without the hint. Existing revocation, lease acknowledgements, commands, due dispatch and stream terminal frames stay reliable. |
-| Future one-time expiry or saga wake-up adapter | Evaluate native Durable Jobs to trigger existing canonical due processing. It reloads current persisted policy and occurrence state, uses a fresh signed request, and commits effects through RF3. It does not replace the recurring schedule, saga watermark or command outcome records. |
+| `RecurringDueCoordinatorGrain.ExecuteJobAsync` and native saga wake-up adapter | Approved source integration under RuntimeJournal, pending qualification. Native Durable Jobs trigger canonical due processing after reloading current persisted creator and saga state, with a fresh signed request and RF3 effect. Canonical schedule, saga watermark and command outcomes retain their authority. |
 
 Current grain/service paths in the first five rows are relative to
 [KeyLoad.Orleans/Features](../../../src/KeyLoad.Orleans/Features/).
-The later candidate rows are unimplemented until their following acceptance criteria pass.
+Worker, control and advisory-hint candidates remain unimplemented; native jobs
+source integration does not close its acceptance criteria.
 
 Implementation authorized on 2026-10-06; concrete staged contracts are in
 [RuntimeAdoption](RuntimeAdoption.md).
@@ -100,7 +102,9 @@ retry classification and dispatch-lag limits. In-memory scheduling cannot prove
 durability. No Azure/provider dependency is selected by this contract. KeyLoad
 canonical job/schedule/authorization state stays in ZoneTree; any new persisted
 KeyLoad-owned scheduler model requires the same storage and recovery contract.
-Provider choice and its atomic enqueue/reconciliation protocol remain unresolved.
+The accepted named RF3 journal/provider contract is in RuntimeJournal. Its
+already-due reconciliation and fault proof remain open; immediate future-job
+registration still needs its own atomic wake-intent and uncertainty contract.
 Native job ID is delivery identity; canonical occurrence/generation fences decide
 idempotency. Do not reuse a permanently rejected command receipt for a new
 attempt; retain the ADR-094 fresh-attempt/unknown-result retry rule.
@@ -115,7 +119,7 @@ flowchart LR
     Request --> Worker[Bounded interchangeable computation]
     Worker --> Request
     Request --> Capability[Authorized capability grain]
-    Job[Future persistent one-time job] --> Due[Canonical due coordinator]
+    Job[Native persistent one-time job] --> Due[Canonical due coordinator]
     Due --> Fresh[Fresh signed request grain]
     Fresh --> Capability
     Capability --> Host[Node-local ordered ZoneTree RF3 owner]

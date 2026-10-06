@@ -25,12 +25,15 @@ internal static class KeyLoadTimeSeriesIntensiveReceipt
     private static MutationReceipt? MatchingMutation(CommitReceipt? actual, string expectedSet,
         string expectedSeries)
     {
-        if (actual is null || actual.Mutations.IsDefault || actual.Mutations.Length != 1)
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
+        if (actual is null || actual.Mutations.IsDefault || actual.Mutations.Length != SingleItemCount)
         {
             return null;
         }
 
-        var mutation = actual.Mutations[0];
+        var mutation = actual.Mutations[FirstElementIndex];
         return mutation is not null && mutation.Kind == KeyLoadTimeSeriesIntensiveProtocol.AppendSamplesKind
             && mutation.Resource == expectedSet && mutation.Id == expectedSeries
             ? mutation : null;

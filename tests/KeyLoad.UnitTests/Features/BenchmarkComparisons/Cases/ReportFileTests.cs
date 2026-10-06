@@ -19,7 +19,7 @@ internal sealed class ReportFileTests
         };
         try
         {
-            await ReportWriter.WriteAsync(report, directory, TestContext.Current!.Execution.CancellationToken);
+            await ReportWriter.WriteAsync(report, directory, UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken);
 
             var json = await File.ReadAllTextAsync(Path.Combine(directory, "results.json"));
             await Assert.That(json).IsEqualTo(JsonSerializer.Serialize(report, ReportWriter.JsonOptions));
@@ -63,13 +63,13 @@ internal sealed class ReportFileTests
         try
         {
             var casesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
-                ReportWriter.WriteAsync(report with { Cases = default }, directory, TestContext.Current!.Execution.CancellationToken))
+                ReportWriter.WriteAsync(report with { Cases = default }, directory, UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException("The default case array was not rejected.");
             await Assert.That(casesError.Message).IsEqualTo(detail);
 
             var samplesError = await Assert.ThrowsExactlyAsync<JsonException>(() =>
                 ReportWriter.WriteAsync(report with { Cases = [report.Cases[0] with { Samples = default }] }, directory,
-                    TestContext.Current!.Execution.CancellationToken))
+                    UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken))
                 ?? throw new InvalidOperationException("The default sample array was not rejected.");
             await Assert.That(samplesError.Message).IsEqualTo(detail);
         }
@@ -88,7 +88,7 @@ internal sealed class ReportFileTests
         var directory = Path.Combine(Path.GetTempPath(), "keyload-report-cancel-" + Guid.NewGuid().ToString("N"));
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ReportWriter.WriteAsync(Report(), directory, cancellation.Token));
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ReportWriter.WriteAsync(Report(), directory, UnitBenchmarkOptions.Native(), cancellation.Token));
         await Assert.That(Directory.Exists(directory)).IsFalse();
     }
 
@@ -113,7 +113,7 @@ internal sealed class ReportFileTests
             var jsonPath = Path.Combine(directory, "results.json");
             observer = await RealFileGrowthObserver.StartAsync(jsonPath, cancellation.Cancel, observation.Token);
             growth = observer.WaitForGrowthAsync(observation.Token);
-            writing = ReportWriter.WriteAsync(report, directory, cancellation.Token);
+            writing = ReportWriter.WriteAsync(report, directory, UnitBenchmarkOptions.Native(), cancellation.Token);
             await growth;
             // A write that finishes before observed file growth fails this assertion instead of passing spuriously.
             var stopped = false;

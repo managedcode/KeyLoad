@@ -47,6 +47,7 @@ internal sealed class McpFrameBody : IDisposable
     /// <param name="source">The actual request body stream; ownership stays with the caller.</param>
     /// <param name="declaredLength">The optional transport declaration, checked against actual bytes.</param>
     /// <param name="maximumBytes">The inclusive positive wire-byte ceiling.</param>
+    /// <param name="options">The centrally validated native MCP ingress and framing policy.</param>
     /// <param name="cancellationToken">Cancels the read without converting cancellation to a protocol failure.</param>
     /// <returns>A private owner that clears its bytes after the native request and response drain.</returns>
     internal static async Task<McpFrameBody> ReadAsync(Stream source, long? declaredLength,
@@ -149,7 +150,8 @@ internal sealed class McpFrameBody : IDisposable
         {
             if (!mayGrow)
             { throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation); }
-            var doubledCapacity = (long)retained.Capacity * 2;
+            const int CapacityDoublingFactor = 2;
+            var doubledCapacity = (long)retained.Capacity * CapacityDoublingFactor;
             var precedingBuffer = retained.GetBuffer();
             retained.Capacity = checked((int)Math.Min(maximumBytes,
                 Math.Max(requiredCapacity, doubledCapacity)));

@@ -8,6 +8,9 @@ internal static class OpenSearchSearchResponse
 {
     internal static ImmutableArray<FoundDocument> Read(JsonElement response, int topK)
     {
+        const int FirstElementIndex = 0;
+        const int NoObservedItems = 0;
+
         Verify(response);
         var aggregation = OpenSearchJson.RequiredPath(response, OpenSearchNames.Aggregations, OpenSearchNames.ExactNeighborsAggregation);
         var rows = OpenSearchJson.RequiredArray(aggregation, OpenSearchNames.AggregationValue);
@@ -20,7 +23,7 @@ internal static class OpenSearchSearchResponse
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var previousScore = double.PositiveInfinity;
         string? previousId = null;
-        var index = 0;
+        var index = FirstElementIndex;
         foreach (var row in rows.EnumerateArray())
         {
             if (row.ValueKind != JsonValueKind.Object)
@@ -30,7 +33,7 @@ internal static class OpenSearchSearchResponse
             var score = RequiredScore(row);
             var document = OpenSearchDocument.Read(row);
             if (!seen.Add(document.Id) || score > previousScore
-                || (score == previousScore && previousId is not null && StringComparer.Ordinal.Compare(previousId, document.Id) >= 0))
+                || (score == previousScore && previousId is not null && StringComparer.Ordinal.Compare(previousId, document.Id) >= NoObservedItems))
             {
                 throw new ComparisonFailureException(OpenSearchNames.VectorResponseMismatch);
             }
@@ -43,14 +46,16 @@ internal static class OpenSearchSearchResponse
 
     internal static void Verify(JsonElement response)
     {
+        const int NoObservedItems = 0;
+
         if (OpenSearchJson.RequiredBoolean(response, OpenSearchNames.SearchTimedOut))
         {
             throw new ComparisonFailureException(OpenSearchNames.SearchShardFailure);
         }
 
         var shardInfo = OpenSearchJson.RequiredObject(response, OpenSearchNames.ShardsObject);
-        if (OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Failed) != 0
-            || OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Successful) <= 0)
+        if (OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Failed) != NoObservedItems
+            || OpenSearchJson.RequiredInt32(shardInfo, OpenSearchNames.Successful) <= NoObservedItems)
         {
             throw new ComparisonFailureException(OpenSearchNames.SearchShardFailure);
         }

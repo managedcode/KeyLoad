@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
 using Microsoft.Extensions.AI;
@@ -11,12 +12,16 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
     private const string SourceId = "keyload";
     private const string IndexFailure = "The canonical MCP metadata index could not be initialized.";
     private const string InvocationFailure = "The canonical MCP operation did not produce a native result.";
+    private readonly IOptions<McpExecutionOptions> executionOptions;
     private readonly IMcpGatewayFactory _factory;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly McpGatewayCatalogLifetime _lifetime;
 
-    internal McpGatewayCatalogOwner(IMcpGatewayFactory factory, IHttpContextAccessor httpContextAccessor)
+    internal McpGatewayCatalogOwner(IMcpGatewayFactory factory, IHttpContextAccessor httpContextAccessor, IOptions<McpExecutionOptions> executionOptions)
     {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        this.executionOptions = executionOptions;
         ArgumentNullException.ThrowIfNull(factory);
         ArgumentNullException.ThrowIfNull(httpContextAccessor);
         _factory = factory;
@@ -31,8 +36,8 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         int maxResults,
         CancellationToken cancellationToken)
     {
-        McpGatewayCatalogRequestValidation.ValidateQuery(query);
-        McpGatewayCatalogRequestValidation.ValidateSearchLimit(maxResults);
+        McpGatewayCatalogRequestValidation.ValidateQuery(query: query, executionOptions: executionOptions);
+        McpGatewayCatalogRequestValidation.ValidateSearchLimit(limit: maxResults, executionOptions: executionOptions);
         using var lease = _lifetime.Acquire();
         var result = await lease.Instance.Gateway.SearchAsync(
             new McpGatewaySearchRequest(Query: query, MaxResults: maxResults), cancellationToken)
@@ -48,8 +53,8 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         bool? preferReadOnly,
         CancellationToken cancellationToken)
     {
-        McpGatewayCatalogRequestValidation.ValidateQuery(query);
-        McpGatewayCatalogRequestValidation.ValidateRouteLimits(maxCategories, maxToolsPerCategory);
+        McpGatewayCatalogRequestValidation.ValidateQuery(query: query, executionOptions: executionOptions);
+        McpGatewayCatalogRequestValidation.ValidateRouteLimits(categories: maxCategories, toolsPerCategory: maxToolsPerCategory, executionOptions: executionOptions);
         using var lease = _lifetime.Acquire();
         var result = await lease.Instance.Gateway.RouteToolsAsync(
             new McpGatewayToolRouteRequest(
@@ -92,7 +97,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
     {
         const int EmptyGraphNodeCount = 0;
 
-        var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries);
+        var entries = McpGatewayCatalogValidation.CreateEntries(operations: McpOperationCatalog.Entries, executionOptions: executionOptions);
         cancellationToken.ThrowIfCancellationRequested();
         var instance = _factory.Create(CreateOptions(entries));
         try
@@ -130,9 +135,9 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
             MarkdownLdGraphSearchMode = McpGatewayMarkdownLdGraphSearchMode.SchemaAware,
             MarkdownLdGraphSource = McpGatewayMarkdownLdGraphSource.GeneratedToolGraph,
             SearchQueryNormalization = McpGatewaySearchQueryNormalization.Disabled,
-            DefaultSearchLimit = McpGatewayCatalogValidation.DefaultSearchResults,
-            MaxSearchResults = McpGatewayCatalogValidation.NativeMaximumResults,
-            MaxDescriptorLength = McpGatewayCatalogValidation.MaximumDescriptorTextLength,
+            DefaultSearchLimit = executionOptions.Value.DefaultSearchResults,
+            MaxSearchResults = executionOptions.Value.MaximumSearchResults,
+            MaxDescriptorLength = executionOptions.Value.MaximumDescriptorCharacters,
             MarkdownLdGraphSchemaSearchProfile = null
         };
 

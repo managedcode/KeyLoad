@@ -59,7 +59,9 @@ internal static class OpenLoopCancellationRequestWatcher
 
     private static void ValidateRequestAttributes(string path, FileAttributes attributes)
     {
-        if ((attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0
+        const int NoObservedItems = 0;
+
+        if ((attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoObservedItems
             || new FileInfo(path).LinkTarget is not null)
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationControlInvalid);
@@ -68,6 +70,9 @@ internal static class OpenLoopCancellationRequestWatcher
 
     private static async Task ValidateRequestAsync(string path, CancellationToken cancellationToken)
     {
+        const int NoObservedItems = 0;
+        const int FirstElementIndex = 0;
+
         var info = new FileInfo(path);
         if (info.Length != OpenLoopCancellationProofContract.RequestBytes)
         {
@@ -76,15 +81,18 @@ internal static class OpenLoopCancellationRequestWatcher
         var bytes = new byte[OpenLoopCancellationProofContract.RequestReadBufferBytes];
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             OpenLoopCancellationProofContract.RequestReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
-        var read = 0;
+        var read = NoObservedItems;
         while (read < bytes.Length)
         {
             var count = await stream.ReadAsync(bytes.AsMemory(read), cancellationToken).ConfigureAwait(false);
-            if (count == 0) break;
+            if (count == NoObservedItems)
+            {
+                break;
+            }
             read += count;
         }
         var expected = Encoding.UTF8.GetBytes(OpenLoopCancellationProofContract.RequestText);
-        if (read != OpenLoopCancellationProofContract.RequestBytes || !bytes.AsSpan(0, OpenLoopCancellationProofContract.RequestBytes).SequenceEqual(expected))
+        if (read != OpenLoopCancellationProofContract.RequestBytes || !bytes.AsSpan(FirstElementIndex, OpenLoopCancellationProofContract.RequestBytes).SequenceEqual(expected))
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationControlInvalid);
         }

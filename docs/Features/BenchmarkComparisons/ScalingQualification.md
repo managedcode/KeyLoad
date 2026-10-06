@@ -577,3 +577,38 @@ host callers through IsolatedHostTargetOwner.ExecutionOptions, already captured
 by the canonical native registration. A Luna worker owns guarded private runner
 and proof-entry repairs; root owns the two host-call joins, existing real host
 and native operation flows, current-source build and Aspire qualification.
+
+The inventory's Node-process test helper obeys the same native operational
+configuration contract (REQ-CQ-013/AC-CQ-034/038). Its deadline, input/output
+bounds and stream-buffer size belong to one validated feature-local test options
+definition and centralized native IOptions binding, captured once by each case
+and passed to the actual process owner. Keep mathematical inventory/expected-data
+constants separate. No raw configuration reads or parallel deadline/cap defaults
+remain in the execution helper. Preserve original process/stdout/stderr joins and
+create-only output. Add a complete owned-child cancellation/deadline failure
+flow that proves no output publication and joined child settlement, followed by
+a successful corrected native Node planning operation. That flow qualifies only
+tooling behavior, not a database measurement or published comparison evidence.
+
+TASK-SCALE-OPENLOOP-PLAN-JOINS-001 connects the canonical inventory to the
+existing CLI and per-database matrix module. The optional closed CLI flag is
+`--open-loop-output=<owned path>`; it creates the separate canonical plan with
+the existing create-only, bounded-path and plain-parent rules. Ownership refers
+to the caller-selected fixture/CI artifact; absolute paths and normalized parent
+segments retain the existing output semantics. Linked parents are rejected,
+including links outside a test's owned fixture, without changing their targets.
+Without that flag,
+all original output bytes, composite/control/scaled/vector shapes and129 rows per
+database remain unchanged. With it, the matrix receives a separately validated
+fourth plan argument: preserve each original129 rows, then append that target's
+72 measurements, then the six KeyLoad proofs. Counts are201 per comparator and
+207 for KeyLoad, within the existing256 bound and same11 readable job groups.
+Every new row carries its canonical ID/family/rate/proof selection, scale profile,
+unique readable rate/proof job label and distinct open-loop worker/proof artifact
+and qualification prefixes. A proof is never a measurement row. No new nullable
+members are added to original rows. Root owns these two existing module joins;
+mapped real CLI/matrix process flows prove exact identities, unchanged original
+rows/output and rejection/create-only preservation. The CI workflow does not
+select the new flag until workload routing and separate artifact/fairness/admission
+contracts are implemented together. Planning metadata alone does not qualify any
+performance cell or refresh published evidence.

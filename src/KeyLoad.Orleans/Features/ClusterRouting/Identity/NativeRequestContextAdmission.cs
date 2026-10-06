@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -9,6 +10,7 @@ internal static class NativeRequestContextAdmission
     internal static void Admit(IServiceProvider services, ClaimsPrincipal? principal,
         GrainRequestContextState state, CancellationToken cancellationToken)
     {
+        var options = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         cancellationToken.ThrowIfCancellationRequested();
         if (state.RequestId == Guid.Empty)
         {
@@ -20,11 +22,11 @@ internal static class NativeRequestContextAdmission
             var subject = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
             GrainIdentityContext.ValidatePrincipal(principal, subject);
-            GrainNativeByteCounter.Measure(services.GetRequiredService<Serializer<ClaimsPrincipal>>(), principal,
-                GrainRequestStreamProtocol.MaximumPrincipalBytes, cancellationToken);
+            GrainNativeByteCounter.Measure(serializer: services.GetRequiredService<Serializer<ClaimsPrincipal>>(), value: principal,
+                maximumBytes: options.Value.MaximumPrincipalBytes, cancellationToken: cancellationToken, options: options);
         }
 
-        GrainNativeByteCounter.Measure(services.GetRequiredService<Serializer<GrainRequestContextState>>(), state,
-            GrainRequestStreamProtocol.MaximumContextBytes, cancellationToken);
+        GrainNativeByteCounter.Measure(serializer: services.GetRequiredService<Serializer<GrainRequestContextState>>(), value: state,
+            maximumBytes: options.Value.MaximumContextBytes, cancellationToken: cancellationToken, options: options);
     }
 }

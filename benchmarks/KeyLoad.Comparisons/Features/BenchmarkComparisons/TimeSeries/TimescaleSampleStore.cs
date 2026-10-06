@@ -21,6 +21,8 @@ internal static class TimescaleSampleStore
     internal static async Task SeedAsync(string connectionString, string schemaName,
         TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)
     {
+        const string TimescaleSeedFailedDetail = "TimescaleSeedFailed";
+
         try
         {
             await using var connection = await TimescaleSchemaLifecycle.OpenConfiguredAsync(connectionString,
@@ -44,25 +46,33 @@ internal static class TimescaleSampleStore
         }
         catch (NpgsqlException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleSeedFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleSeedFailedDetail, error);
         }
         catch (TimeoutException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleSeedFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleSeedFailedDetail, error);
         }
         catch (ArgumentException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleSeedFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleSeedFailedDetail, error);
         }
         catch (InvalidOperationException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleSeedFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleSeedFailedDetail, error);
         }
     }
 
     internal static async Task<TimeSeriesReadResult> ReadAsync(string connectionString, string schemaName,
         TimeSeriesComparisonWorkload workload, TimeSeriesReadRange range, CancellationToken cancellationToken)
     {
+        const int FifthColumnIndex = 4;
+
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FourthColumnIndex = 3;
+        const string TimescaleReadFailedToken = "TimescaleReadFailed";
+
         if (range.ExpectedErrorCode is not null || range.From > range.Until)
         {
             return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty,
@@ -79,8 +89,8 @@ internal static class TimescaleSampleStore
             var samples = ImmutableArray.CreateBuilder<TimeSeriesSamplePoint>();
             while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
-                samples.Add(new(reader.GetString(0), Utc(reader.GetDateTime(1)), reader.GetDouble(2),
-                    reader.GetInt64(3), reader.GetString(4)));
+                samples.Add(new(reader.GetString(FirstColumnIndex), Utc(reader.GetDateTime(SecondColumnIndex)), reader.GetDouble(ThirdColumnIndex),
+                    reader.GetInt64(FourthColumnIndex), reader.GetString(FifthColumnIndex)));
             }
 
             return new(true, samples.ToImmutable(), null);
@@ -91,25 +101,29 @@ internal static class TimescaleSampleStore
         }
         catch (NpgsqlException)
         {
-            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, "TimescaleReadFailed");
+            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, TimescaleReadFailedToken);
         }
         catch (TimeoutException)
         {
-            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, "TimescaleReadFailed");
+            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, TimescaleReadFailedToken);
         }
         catch (ArgumentException)
         {
-            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, "TimescaleReadFailed");
+            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, TimescaleReadFailedToken);
         }
         catch (InvalidOperationException)
         {
-            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, "TimescaleReadFailed");
+            return new(false, ImmutableArray<TimeSeriesSamplePoint>.Empty, TimescaleReadFailedToken);
         }
     }
 
     internal static async Task<ImmutableArray<TimeSeriesBucketValue>> AggregateAsync(string connectionString,
         string schemaName, TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const string TimescaleAggregateFailedDetail = "TimescaleAggregateFailed";
+
         try
         {
             await using var connection = await TimescaleSchemaLifecycle.OpenConfiguredAsync(connectionString,
@@ -122,7 +136,7 @@ internal static class TimescaleSampleStore
             var buckets = ImmutableArray.CreateBuilder<TimeSeriesBucketValue>();
             while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
-                buckets.Add(new(Utc(reader.GetDateTime(0)), reader.GetDouble(1)));
+                buckets.Add(new(Utc(reader.GetDateTime(FirstColumnIndex)), reader.GetDouble(SecondColumnIndex)));
             }
 
             return buckets.ToImmutable();
@@ -137,19 +151,19 @@ internal static class TimescaleSampleStore
         }
         catch (NpgsqlException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleAggregateFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleAggregateFailedDetail, error);
         }
         catch (TimeoutException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleAggregateFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleAggregateFailedDetail, error);
         }
         catch (ArgumentException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleAggregateFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleAggregateFailedDetail, error);
         }
         catch (InvalidOperationException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleAggregateFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleAggregateFailedDetail, error);
         }
     }
 
@@ -164,13 +178,18 @@ internal static class TimescaleSampleStore
     private static async Task VerifySampleAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
         TimeSeriesComparisonWorkload workload, TimeSeriesSamplePoint sample, CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+        const int SingleItemCount = 1;
+        const int SecondColumnIndex = 1;
+        const string TimescaleSeedIdentityConflictDetail = "TimescaleSeedIdentityConflict";
+
         await using var command = new NpgsqlCommand(VerifySampleSql, connection, transaction);
         AddSampleParameters(command, workload, sample);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false) || reader.GetInt64(0) != 1 ||
-            reader.GetInt64(1) != 1)
+        if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false) || reader.GetInt64(FirstColumnIndex) != SingleItemCount ||
+            reader.GetInt64(SecondColumnIndex) != SingleItemCount)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleSeedIdentityConflict");
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleSeedIdentityConflictDetail);
         }
     }
 

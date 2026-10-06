@@ -1,3 +1,4 @@
+using KeyLoad.Query;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
@@ -18,9 +19,9 @@ internal static class SqlMcpCatalog
         null, adapter: true);
 
     internal static McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments, int maximumPayloadBytes,
-        IOptions<DatabaseLimits> limitsOptions, CancellationToken cancellationToken)
+        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
     {
         var request = McpArgumentDecoder.Request<SqlOperationRequest>(arguments, false);
-        return SqlOperationCompiler.Compile(request, limitsOptions, maximumPayloadBytes, cancellationToken);
+        return SqlOperationCompiler.Compile(request, limitsOptions, maximumPayloadBytes, queryOptions, cancellationToken);
     }
 }

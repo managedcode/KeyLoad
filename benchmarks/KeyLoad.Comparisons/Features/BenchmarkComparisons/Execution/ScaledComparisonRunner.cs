@@ -6,18 +6,23 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
 {
+    private const int EmptyCount = 0;
+
     private const int RequiredLatencySampleCount = 4_096;
     private static readonly Scenario[] Scenarios = [Scenario.PointRead, Scenario.DocumentWrite, Scenario.DocumentUpdate, Scenario.DocumentDelete];
 
     internal async Task<ComparisonReport> RunAsync(IComparisonTarget[] targets, string? sourceRevision,
         string storage, Scenario? selectedScenario, CancellationToken cancellationToken)
     {
+        const int ThirdContractOrdinal = 3;
+        const string ClosedLoopScaledS1BoundedNativeReadbackBeforeTimedOperationsContractText = "closed-loop scaled S1; bounded native readback before timed operations";
+
         ScaledComparisonRunnerValidation.Validate(targets, selectedScenario);
         var started = TimeProvider.System.GetUtcNow();
         var corpus = new ScaledComparisonCorpus(profile);
         var cases = await RunTargetsAsync(targets, corpus, selectedScenario, cancellationToken).ConfigureAwait(false);
-        return new ComparisonReport(3, Guid.NewGuid(), started, null, corpus.Sha256,
-            "closed-loop scaled S1; bounded native readback before timed operations",
+        return new ComparisonReport(ThirdContractOrdinal, Guid.NewGuid(), started, null, corpus.Sha256,
+            ClosedLoopScaledS1BoundedNativeReadbackBeforeTimedOperationsContractText,
             RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(), Environment.ProcessorCount,
             RuntimeInformation.FrameworkDescription, storage, sourceRevision,
             targets.Select(target => target.Profile).ToImmutableArray(), cases.ToImmutableArray())
@@ -29,6 +34,9 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
     private async Task<List<ComparisonCase>> RunTargetsAsync(IComparisonTarget[] targets, IComparisonCorpus corpus,
         Scenario? selectedScenario, CancellationToken cancellationToken)
     {
+        const int NoItems = 0;
+        const int NoObservedItems = 0;
+
         var cases = new List<ComparisonCase>();
         foreach (var target in targets)
         {
@@ -39,9 +47,9 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
                 cases.AddRange(selected.Select(scenario => Cancelled(target, scenario, profile)));
                 continue;
             }
-            if (supported.Length == 0 || selected.All(scenario => !target.Supports(scenario)))
+            if (supported.Length == NoItems || selected.All(scenario => !target.Supports(scenario)))
             {
-                cases.AddRange(selected.Select(scenario => new ComparisonCase(target.Profile.Name, scenario, 0,
+                cases.AddRange(selected.Select(scenario => new ComparisonCase(target.Profile.Name, scenario, NoObservedItems,
                     ComparisonStatuses.Unsupported, target.UnsupportedReason, null, [])));
                 continue;
             }
@@ -62,8 +70,8 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
                     cases.Add(Cancelled(target, scenario, profile));
                     continue;
                 }
-                cases.Add(await ScaledComparisonCaseRunner.RunAsync(target, corpus, scenario, failure,
-                    progress, cancellationToken, executionOptions).ConfigureAwait(false));
+                cases.Add(await ScaledComparisonCaseRunner.RunAsync(target: target, corpus: corpus, scenario: scenario,
+                    setupFailure: failure, progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions).ConfigureAwait(false));
             }
         }
         return cases;
@@ -71,9 +79,13 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
 
     private static ComparisonCase Cancelled(IComparisonTarget target, Scenario scenario, ScaledComparisonProfile profile)
     {
-        var accounting = new ScaledOperationAccounting(profile.Operations, 0, 0, 0, 0, 0,
-            profile.Operations, "evenly-spaced-operation-indices.v1", RequiredLatencySampleCount, 0, RequiredLatencySampleCount);
-        return new(target.Profile.Name, scenario, 0, ComparisonStatuses.Failed, "Cancelled before this case started.", null, [])
+        const int NoObservedItems = 0;
+        const string EvenlySpacedOperationIndicesV1Token = "evenly-spaced-operation-indices.v1";
+        const string CancelledBeforeThisCaseStartedDetail = "Cancelled before this case started.";
+
+        var accounting = new ScaledOperationAccounting(profile.Operations, NoObservedItems, NoObservedItems, NoObservedItems, EmptyCount, NoObservedItems,
+            profile.Operations, EvenlySpacedOperationIndicesV1Token, RequiredLatencySampleCount, NoObservedItems, RequiredLatencySampleCount);
+        return new(target.Profile.Name, scenario, NoObservedItems, ComparisonStatuses.Failed, CancelledBeforeThisCaseStartedDetail, null, [])
         {
             Scaled = accounting
         };
@@ -100,19 +112,24 @@ internal static class ScaledComparisonRunnerValidation
 {
     internal static void Validate(IComparisonTarget[] targets, Scenario? scenario)
     {
+        const string ScaledNativeComparisonRequiresLinuxDetail = "Scaled native comparison requires Linux.";
+        const int NoItems = 0;
+        const string AtLeastOneNonNullTargetIsRequiredDetail = "At least one non-null target is required.";
+        const string ValidateMessageText = "The S1 profile permits point read and document CRUD only.";
+
         if (!OperatingSystem.IsLinux())
         {
-            throw new PlatformNotSupportedException("Scaled native comparison requires Linux.");
+            throw new PlatformNotSupportedException(ScaledNativeComparisonRequiresLinuxDetail);
         }
         ArgumentNullException.ThrowIfNull(targets);
-        if (targets.Length == 0 || targets.Any(target => target is null))
+        if (targets.Length == NoItems || targets.Any(target => target is null))
         {
-            throw new ArgumentException("At least one non-null target is required.", nameof(targets));
+            throw new ArgumentException(AtLeastOneNonNullTargetIsRequiredDetail, nameof(targets));
         }
         if (scenario is { } selected && selected is not (Scenario.PointRead or Scenario.DocumentWrite
             or Scenario.DocumentUpdate or Scenario.DocumentDelete))
         {
-            throw new ArgumentOutOfRangeException(nameof(scenario), "The S1 profile permits point read and document CRUD only.");
+            throw new ArgumentOutOfRangeException(nameof(scenario), ValidateMessageText);
         }
     }
 }

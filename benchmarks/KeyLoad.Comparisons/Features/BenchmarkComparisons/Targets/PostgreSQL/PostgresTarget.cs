@@ -14,6 +14,14 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone) : IComparisonTarget
 {
+    private const string PostgreSQLPgvectorToken = "PostgreSQL + pgvector";
+    private const string UnverifiedToken = "unverified";
+    private const string SinglePrimaryNoReplicasToken = "single primary, no replicas";
+    private const string FsyncOnSynchronousCommitOnLocalWALFlushToken = "fsync=on, synchronous_commit=on; local WAL flush";
+    private const string READCOMMITTEDOnPrimaryStreamsEmulateTheNarrowAtomicOneEventContractContractText = "READ COMMITTED on primary; streams emulate the narrow atomic one-event contract";
+    private const string PooledPreparedSQLTCPToken = "pooled prepared SQL/TCP";
+    private const string DatabaseOwnerNoRLSMaskingToken = "database owner; no RLS/masking";
+
     private readonly PostgresSchemaIdentity schemaIdentity = PostgresSchemaIdentity.FromRunId(runId);
     private readonly Guid ownerGuid = Guid.NewGuid();
     private string schema => schemaIdentity.Name;
@@ -24,8 +32,8 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     private int corpusCount;
 
     /// <summary>Gets the observed PostgreSQL and topology profile.</summary>
-    public TargetProfile Profile { get; private set; } = new("PostgreSQL + pgvector", "unverified", "single primary, no replicas",
-        "fsync=on, synchronous_commit=on; local WAL flush", "READ COMMITTED on primary; streams emulate the narrow atomic one-event contract", "pooled prepared SQL/TCP", "database owner; no RLS/masking", image);
+    public TargetProfile Profile { get; private set; } = new(PostgreSQLPgvectorToken, UnverifiedToken, SinglePrimaryNoReplicasToken,
+        FsyncOnSynchronousCommitOnLocalWALFlushToken, READCOMMITTEDOnPrimaryStreamsEmulateTheNarrowAtomicOneEventContractContractText, PooledPreparedSQLTCPToken, DatabaseOwnerNoRLSMaskingToken, image);
 
     /// <summary>Reports support for the target's document, vector, queue, graph, and stream scenarios.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
@@ -39,12 +47,15 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <returns>A task that completes after schema creation, seeding, and copy observation.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
+        const string DocumentOnlyReadCommittedContract = "READ COMMITTED primary document reads; S1 keeps the native nullable embedding column NULL";
+        const string PublicToken = ",public";
+
         ArgumentNullException.ThrowIfNull(dataset);
         topK = dataset.Settings.TopK;
         graphDepth = dataset.Settings.GraphDepth;
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            Profile = Profile with { ReadContract = "READ COMMITTED primary document reads; S1 keeps the native nullable embedding column NULL" };
+            Profile = Profile with { ReadContract = DocumentOnlyReadCommittedContract };
         }
         corpusCount = dataset.Documents.Count;
         var execution = executionOptions.Value;
@@ -53,14 +64,16 @@ public sealed class PostgresTarget(string connectionString, string runId, string
             MaxAutoPrepare = execution.PostgresMaxAutoPrepare,
             AutoPrepareMinUsages = execution.PostgresAutoPrepareMinUsages,
             MaxPoolSize = Math.Max(execution.PostgresMinimumPoolSize, dataset.Settings.Concurrency),
-            SearchPath = schema + ",public"
+            SearchPath = schema + PublicToken
         };
         source = NpgsqlDataSource.Create(settings.ConnectionString);
         try
         {
             await using var connection = await source.OpenConnectionAsync(cancellationToken);
-            await PostgresSchemaInitialization.InitializeAsync(connection, dataset, schemaIdentity, ownerGuid,
-                topology, Profile, profile => Profile = profile, () => schemaCommitAttempted = true, cancellationToken, lifecycleOptions);
+            await PostgresSchemaInitialization.InitializeAsync(connection: connection, dataset: dataset, identity: schemaIdentity,
+                ownerGuid: ownerGuid, topology: topology, initialProfile: Profile, updateProfile: profile => Profile = profile,
+                markCommitAttempted: () => schemaCommitAttempted = true, cancellationToken: cancellationToken,
+                lifecycleOptions: lifecycleOptions);
         }
         catch (Exception)
         {

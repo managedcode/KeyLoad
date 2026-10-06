@@ -7,15 +7,14 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, CancellationToken cancellationToken,
-    IOptions<McpExecutionOptions> options)
+internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
 {
     private const uint FirstField = 0;
     private const uint NextField = 1;
     private const uint NativePayloadValueDelta = 1;
     // Explicit property Ids belong to one body scope after the empty constructor scope.
     private readonly McpAuthenticationProjection projection = new(enforceMcpBounds, options);
-    private readonly McpNativeAuthenticationCollections collections = new(enforceMcpBounds, cancellationToken, options);
+    private readonly McpNativeAuthenticationCollections collections = new(enforceMcpBounds: enforceMcpBounds, cancellationToken: cancellationToken, options: options);
 
     internal McpFrameShape Read<TInput>(ref Reader<TInput> reader)
     {

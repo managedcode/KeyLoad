@@ -13,7 +13,8 @@ internal static class TimeSeriesComparisonApplication
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration));
         var targets = owner.CreateTargets(settings.Endpoint, settings.AdminKey, settings.ConnectionString,
             settings.Image, settings.KeyLoadBuildIdentity);
-        return await TimeSeriesComparisonRunner.RunAsync(targets, settings.SourceRevision, settings.OutputDirectory, cancellationToken,
+        return await TimeSeriesComparisonRunner.RunAsync(targets, settings.SourceRevision, settings.OutputDirectory,
+            NativeComparisonExecutionRegistration.Read(configuration), cancellationToken,
             settings.Identity?.Provenance, settings.Identity?.LoadGeneratorImage);
     }
 

@@ -38,8 +38,11 @@ internal static class TimeSeriesIntensiveCorpus
 
     private static ImmutableArray<SampleRecord> CreateInsertion()
     {
+        const int AdjacentElementOffset = 1;
+        const int NoObservedItems = 0;
+
         var builder = ImmutableArray.CreateBuilder<SampleRecord>(TimeSeriesIntensiveProfile.SampleCount);
-        for (var original = TimeSeriesIntensiveProfile.SampleCount - 1; original >= 0; original--)
+        for (var original = TimeSeriesIntensiveProfile.SampleCount - AdjacentElementOffset; original >= NoObservedItems; original--)
         {
             builder.Add(Seed(original));
         }
@@ -49,13 +52,17 @@ internal static class TimeSeriesIntensiveCorpus
 
     private static ImmutableArray<SampleRecord> CreateOrdered()
     {
+        const int NoObservedItems = 0;
+        const int AdjacentElementOffset = 1;
+        const int SingleItemCount = 1;
+
         var builder = ImmutableArray.CreateBuilder<SampleRecord>(TimeSeriesIntensiveProfile.SampleCount);
-        for (var timestamp = 0; timestamp < TimeSeriesIntensiveProfile.TimestampCount; timestamp++)
+        for (var timestamp = NoObservedItems; timestamp < TimeSeriesIntensiveProfile.TimestampCount; timestamp++)
         {
             var first = timestamp * TimeSeriesIntensiveProfile.TiedItems;
-            for (var original = first + TimeSeriesIntensiveProfile.TiedItems - 1; original >= first; original--)
+            for (var original = first + TimeSeriesIntensiveProfile.TiedItems - AdjacentElementOffset; original >= first; original--)
             {
-                builder.Add(SeedInsertion[TimeSeriesIntensiveProfile.SampleCount - 1 - original]);
+                builder.Add(SeedInsertion[TimeSeriesIntensiveProfile.SampleCount - SingleItemCount - original]);
             }
         }
 

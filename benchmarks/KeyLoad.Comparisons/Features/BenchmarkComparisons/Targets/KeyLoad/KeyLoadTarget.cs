@@ -9,32 +9,55 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="apiKey">The credential passed to the KeyLoad SDK client for authenticated operations.</param>
 /// <param name="runId">Run identifier used to derive the isolated benchmark partition.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="admissionOptions">Centrally validated isolated node and observer admission profile.</param>
 /// <param name="clientOptions">Centrally validated SDK transport budget.</param>
 /// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
 /// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
+    IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
-    HttpClient[]? peers = null, int expectedNodes = 3) : IComparisonTarget
+    HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault) : IComparisonTarget
 {
+    private const int ExpectedNodesDefault = 3;
+    private const string BenchmarkTenantPrefix = "benchmark-";
+    private const string ComparisonDatabaseName = "comparison";
+    private const string WorkloadPartitionName = "workload";
+    private const string InitializeAsyncStatusText = "Status";
+    private const string ConfigureCorpusAuthenticatedPrimaryDocumentReadsS1SeedsDocumentsOnlyWithNoVectorText = "authenticated primary document reads; S1 seeds documents only, with no vector, queue, graph or event records";
+    private const string SeededVectorModel = "seeded-float32";
+    private const string VectorModelVersion = "1";
+    private const int EmptyCount = 0;
+    private const string DocumentsCollectionName = "documents";
+    private const string JobsQueueName = "jobs";
+    private const string LinksGraphName = "links";
+    private const string ConfigureResourcesAsyncConfigureText = "Configure:";
+    private const string EmbeddingJsonPointer = "/embedding";
+    private const string SeedDocumentsAsyncSeedDocumentsText = "SeedDocuments";
+    private const string SeedGraphAsyncSeedGraphText = "SeedGraph";
+
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+
+    private readonly IOptions<HttpAdmissionLimits> httpAdmissionOptions = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(admissionOptions);
     private const string TransactionDomainId = "shared";
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
-    private readonly int expectedNodeCount = ValidateExpectedNodes(expectedNodes);
+    private readonly int expectedNodeCount = KeyLoadTopologyProfile.ValidateExpectedNodes(expectedNodes);
     private readonly KeyLoadClient client = new(http, apiKey, clientOptions);
     private readonly HttpClient[] peerClients = peers is null
         ? [http]
         : peers.Contains(http, ReferenceEqualityComparer.Instance) ? peers : [.. peers, http];
     private readonly string credential = apiKey;
-    private readonly PartitionRef partition = new("benchmark-" + runId, "comparison", "workload", TransactionDomainId);
+    private readonly PartitionRef partition = new(BenchmarkTenantPrefix + runId, ComparisonDatabaseName, WorkloadPartitionName, TransactionDomainId);
     private VectorSpace space = null!;
     private int topK;
     private int graphDepth, graphVertices, graphEdges, expectedCorpusCount;
     private string[] admissionObservations = [];
     internal bool RequireIsolatedAdmission { get; init; }
     /// <summary>Gets the declared quorum, durability, API and authorization contract before actual cluster observation.</summary>
-    public TargetProfile Profile { get; private set; } = CreateProfile(expectedNodes, image);
+    public TargetProfile Profile { get; private set; } = KeyLoadTopologyProfile.CreateProfile(expectedNodes, image);
     /// <summary>Reports support for document, vector, queue, graph, and event-stream comparison scenarios.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for a scenario implemented by this target; otherwise <see langword="false"/>.</returns>
@@ -49,11 +72,11 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         ArgumentNullException.ThrowIfNull(dataset);
         admissionObservations = await KeyLoadAdmissionObserver.ObserveAsync(RequireIsolatedAdmission,
-            peerClients, credential, cancellationToken, clientOptions).ConfigureAwait(false);
-        var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), "Status");
+            peerClients, credential, clientOptions, httpAdmissionOptions, cancellationToken).ConfigureAwait(false);
+        var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), InitializeAsyncStatusText);
         if (status.Voters != expectedNodeCount || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {
-            throw new ComparisonFailureException(expectedNodeCount == 3 ? Rf3Required : BenchmarkTopologyMismatch);
+            throw new ComparisonFailureException(expectedNodeCount == ExpectedNodesDefault ? Rf3Required : BenchmarkTopologyMismatch);
         }
 
         var scaled = dataset.Settings is ScaledComparisonProfile;
@@ -72,25 +95,25 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         if (scaled)
         {
-            Profile = Profile with { ReadContract = "authenticated primary document reads; S1 seeds documents only, with no vector, queue, graph or event records" };
+            Profile = Profile with { ReadContract = ConfigureCorpusAuthenticatedPrimaryDocumentReadsS1SeedsDocumentsOnlyWithNoVectorText };
         }
         expectedCorpusCount = dataset.Documents.Count;
-        space = scaled ? null! : new("comparison", dataset.Settings.Dimensions, DistanceMetric.Cosine, "seeded-float32", "1");
+        space = scaled ? null! : new(ComparisonDatabaseName, dataset.Settings.Dimensions, DistanceMetric.Cosine, SeededVectorModel, VectorModelVersion);
         topK = dataset.Settings.TopK;
         graphDepth = dataset.Settings.GraphDepth;
         graphVertices = dataset.GraphVertexCount;
-        graphEdges = scaled ? 0 : Math.Max(1, dataset.Edges.Count);
+        graphEdges = scaled ? EmptyCount : Math.Max(SingleItemCount, dataset.Edges.Count);
     }
 
     private async Task ConfigureResourcesAsync(bool scaled, CancellationToken cancellationToken)
     {
-        var resources = scaled ? new[] { ("documents", ResourceKind.Collection) }
-            : new[] { ("documents", ResourceKind.Collection), ("jobs", ResourceKind.WorkQueue), ("links", ResourceKind.Graph),
+        var resources = scaled ? new[] { (DocumentsCollectionName, ResourceKind.Collection) }
+            : new[] { (DocumentsCollectionName, ResourceKind.Collection), (JobsQueueName, ResourceKind.WorkQueue), (LinksGraphName, ResourceKind.Graph),
                 (KeyLoadEventOperations.EventsName, ResourceKind.StreamSet) };
         foreach (var (name, kind) in resources)
         {
             KeyLoadClientResults.Success(await client.ConfigureResourceAsync(Guid.NewGuid(),
-                new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken), "Configure:" + name);
+                new(partition.TenantId, partition.DatabaseId, new(name, kind, partition.TransactionDomainId)), cancellationToken), ConfigureResourcesAsyncConfigureText + name);
         }
     }
 
@@ -103,9 +126,9 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
         }
         foreach (var document in dataset.Documents)
         {
-            ImmutableArray<Mutation> mutations = [new PutDocument("documents", document.Id, document.Json, 0),
-                new PutVector("documents", document.Id, "/embedding", document.Vector, space, 1)];
-            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition, mutations), cancellationToken), "SeedDocuments");
+            ImmutableArray<Mutation> mutations = [new PutDocument(DocumentsCollectionName, document.Id, document.Json, EmptyCount),
+                new PutVector(DocumentsCollectionName, document.Id, EmbeddingJsonPointer, document.Vector, space, SingleItemCount)];
+            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition, mutations), cancellationToken), SeedDocumentsAsyncSeedDocumentsText);
         }
     }
 
@@ -115,11 +138,11 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
         {
             return;
         }
-        foreach (var batch in dataset.Edges.Chunk(100))
+        foreach (var batch in dataset.Edges.Chunk(execution.KeyLoadGraphSeedBatchSize))
         {
-            var mutations = batch.Select(edge => (Mutation)new UpsertEdge("links", edge.Id,
-                new(partition, "documents", edge.From), new(partition, "documents", edge.To), "links", ExpectedRevision: 0));
-            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition, [.. mutations]), cancellationToken), "SeedGraph");
+            var mutations = batch.Select(edge => (Mutation)new UpsertEdge(LinksGraphName, edge.Id,
+                new(partition, DocumentsCollectionName, edge.From), new(partition, DocumentsCollectionName, edge.To), LinksGraphName, ExpectedRevision: EmptyCount));
+            KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition, [.. mutations]), cancellationToken), SeedGraphAsyncSeedGraphText);
         }
     }
     /// <summary>Opens a session that executes supported operations through the SDK client.</summary>

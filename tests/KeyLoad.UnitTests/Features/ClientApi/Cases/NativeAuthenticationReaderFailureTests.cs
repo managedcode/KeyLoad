@@ -17,8 +17,8 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var principal = McpNativeAuthenticationTests.Principal(database) with { Id = PrivateMarker };
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
 
-        var shape = McpNativeAuthentication.Inspect(payload, CancellationToken.None, UnitMcpOptions.Execution());
-        var actual = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution());
+        var shape = McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None);
+        var actual = McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None);
 
         await Assert.That(shape.TokenCount).IsGreaterThan(0);
         await Assert.That(actual.Id).IsEqualTo(principal.Id);
@@ -42,8 +42,8 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var valid = NativeSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^TruncatedByteCount];
 
-        await AssertSafeValidationAsync(() => McpNativeAuthentication.Inspect(truncated, CancellationToken.None, UnitMcpOptions.Execution()));
-        await AssertSafeValidationAsync(() => McpNativeAuthentication.ReadPrincipal(truncated, CancellationToken.None, UnitMcpOptions.Execution()));
+        await AssertSafeValidationAsync(() => McpNativeAuthentication.Inspect(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertSafeValidationAsync(() => McpNativeAuthentication.ReadPrincipal(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
     }
 
     [Test]
@@ -56,7 +56,7 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
         }
@@ -74,9 +74,9 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
-        await AssertCancelledAsync(() => McpNativeAuthentication.Inspect(payload, cancelled.Token, UnitMcpOptions.Execution()));
-        await AssertCancelledAsync(() => McpNativeAuthentication.ReadPrincipal(payload, cancelled.Token, UnitMcpOptions.Execution()));
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+        await AssertCancelledAsync(() => McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), cancelled.Token));
+        await AssertCancelledAsync(() => McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), cancelled.Token));
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             await AssertCancelledAsync(() => state.Authenticate(payload, cancelled.Token));
         }

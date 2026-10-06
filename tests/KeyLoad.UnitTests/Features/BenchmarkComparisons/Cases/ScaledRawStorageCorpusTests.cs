@@ -1,10 +1,13 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 /// <summary>Checks compact scale-v1 keys and complete binary value headers against literals.</summary>
 internal sealed class ScaledRawStorageCorpusTests
 {
+    private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;
+
     private const int CorpusRecordCount = 100_000;
     private const int ReservedMissIndex = CorpusRecordCount;
     private const int FirstAliasIndex = 1;
@@ -48,7 +51,7 @@ internal sealed class ScaledRawStorageCorpusTests
     [Test]
     public async Task AcScale001KeysAreIndependentBigEndianIndexEncodings()
     {
-        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes);
+        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, ExecutionOptions);
 
         await Assert.That(Convert.ToHexString(corpus.Key(0).Span)).IsEqualTo(KeyZeroHex);
         await Assert.That(Convert.ToHexString(corpus.Key(1).Span)).IsEqualTo(KeyOneHex);
@@ -70,7 +73,7 @@ internal sealed class ScaledRawStorageCorpusTests
     [Test]
     public async Task AcScale001First256IndicesHaveNoLowByteKeyOrValueAliases()
     {
-        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes);
+        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, ExecutionOptions);
         var firstValue = new byte[SmallPayloadBytes];
         var secondValue = new byte[SmallPayloadBytes];
         var collisions = 0;
@@ -96,8 +99,8 @@ internal sealed class ScaledRawStorageCorpusTests
     public async Task AcScale001ValuesMatchIndependentCompleteKeyAndHeaderGoldens(
         int index, string expectedKey, string expected32, string expected1024, int expectedTail32, int expectedTail1023)
     {
-        var small = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes);
-        var large = new ScaledRawStorageCorpus(CorpusRecordCount, LargePayloadBytes);
+        var small = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, ExecutionOptions);
+        var large = new ScaledRawStorageCorpus(CorpusRecordCount, LargePayloadBytes, ExecutionOptions);
         await Assert.That(Convert.ToHexString(small.Key(index).Span)).IsEqualTo(expectedKey);
         var smallValue = new byte[SmallPayloadBytes];
         var largeValue = new byte[LargePayloadBytes];
@@ -114,19 +117,19 @@ internal sealed class ScaledRawStorageCorpusTests
     [Test]
     public async Task AcScale001RejectsInvalidBoundsAndWrongDestinationLengthsBeforeWriting()
     {
-        await Assert.That(() => new ScaledRawStorageCorpus(0, SmallPayloadBytes))
+        await Assert.That(() => new ScaledRawStorageCorpus(0, SmallPayloadBytes, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageCorpus(InvalidCorpusRecordCount, SmallPayloadBytes))
+        await Assert.That(() => new ScaledRawStorageCorpus(InvalidCorpusRecordCount, SmallPayloadBytes, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageReadOrder(0)).Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageReadOrder(InvalidCorpusRecordCount))
+        await Assert.That(() => new ScaledRawStorageReadOrder(0, ExecutionOptions)).Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => new ScaledRawStorageReadOrder(InvalidCorpusRecordCount, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, InvalidSmallPayloadBytes))
+        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, InvalidSmallPayloadBytes, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, InvalidLargePayloadBytes))
+        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, InvalidLargePayloadBytes, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
 
-        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes);
+        var corpus = new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, ExecutionOptions);
         await Assert.That(() => corpus.Key(InvalidIndex)).Throws<ArgumentOutOfRangeException>();
         await Assert.That(() => corpus.Key(ReservedMissIndex + 1)).Throws<ArgumentOutOfRangeException>();
         await Assert.That(() => corpus.WriteValue(InvalidIndex, new byte[SmallPayloadBytes]))
@@ -145,8 +148,8 @@ internal sealed class ScaledRawStorageCorpusTests
     [Test]
     public async Task AcScale001ValueArenaRetainsOnlySeededValuesAndDoesNotAliasGeneratorScratch()
     {
-        var corpus = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes);
-        var arena = new ScaledRawStorageValueArena(corpus);
+        var corpus = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes, ExecutionOptions);
+        var arena = new ScaledRawStorageValueArena(corpus, ExecutionOptions);
         var retained = arena.Value(SecondArenaIndex).ToArray();
         var scratch = new byte[SmallPayloadBytes];
 
@@ -161,8 +164,8 @@ internal sealed class ScaledRawStorageCorpusTests
     [Test]
     public async Task AcScale001RejectsCrossSupportedPayloadDestinationsWithoutWriting()
     {
-        var small = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes);
-        var large = new ScaledRawStorageCorpus(SmallArenaRecordCount, LargePayloadBytes);
+        var small = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes, ExecutionOptions);
+        var large = new ScaledRawStorageCorpus(SmallArenaRecordCount, LargePayloadBytes, ExecutionOptions);
         var smallDestination = Enumerable.Repeat((byte)FillByte, SmallPayloadBytes).ToArray();
         var largeDestination = Enumerable.Repeat((byte)FillByte, LargePayloadBytes).ToArray();
 
@@ -177,13 +180,13 @@ internal sealed class ScaledRawStorageCorpusTests
     {
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var corpus = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes);
+        var corpus = new ScaledRawStorageCorpus(SmallArenaRecordCount, SmallPayloadBytes, ExecutionOptions);
 
-        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, cancellation.Token))
+        await Assert.That(() => new ScaledRawStorageCorpus(CorpusRecordCount, SmallPayloadBytes, ExecutionOptions, cancellation.Token))
             .Throws<OperationCanceledException>();
-        await Assert.That(() => new ScaledRawStorageReadOrder(CorpusRecordCount, cancellation.Token))
+        await Assert.That(() => new ScaledRawStorageReadOrder(CorpusRecordCount, ExecutionOptions, cancellation.Token))
             .Throws<OperationCanceledException>();
-        await Assert.That(() => new ScaledRawStorageValueArena(corpus, cancellation.Token))
+        await Assert.That(() => new ScaledRawStorageValueArena(corpus, ExecutionOptions, cancellation.Token))
             .Throws<OperationCanceledException>();
     }
 }

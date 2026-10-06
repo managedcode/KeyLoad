@@ -8,9 +8,12 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Pinned OpenSearch image reference checked during initialization and recorded in the profile.</param>
 /// <param name="topology">The expected one, two or three native nodes verified against the created index.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
 {
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.Parse(runId).ToString(OpenSearchNames.GuidFormat);
     private readonly int expectedCopies = ComparisonTopologies.NodeCount(topology);
     private bool indexCreated;
@@ -36,6 +39,10 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
     /// <returns>A task that completes after index and cluster evidence have been collected.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
+        const string RealTimeDocumentGETS1SourceContainsNoVectorValuesToken = "real-time document GET; S1 source contains no vector values";
+        const int AdjacentElementOffset = 1;
+        const int FirstElementIndex = 0;
+
         ArgumentNullException.ThrowIfNull(dataset);
         if (image != OpenSearchNames.ExpectedImage)
         {
@@ -45,7 +52,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
         topK = dataset.Settings.TopK;
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            Profile = Profile with { ReadContract = "real-time document GET; S1 source contains no vector values" };
+            Profile = Profile with { ReadContract = RealTimeDocumentGETS1SourceContainsNoVectorValuesToken };
         }
         corpusCount = dataset.Documents.Count;
         using var root = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get, OpenSearchNames.PathSeparator, null, cancellationToken);
@@ -55,20 +62,20 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             throw new ComparisonFailureException(OpenSearchNames.ServerVersionMismatch);
         }
 
-        await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - 1, cancellationToken);
+        await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);
         indexCreated = true;
         var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
         await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, cancellationToken);
         if (dataset.Settings is not ScaledComparisonProfile)
         {
-            await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[0].Vector, expectedCopies, cancellationToken);
+            await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[FirstElementIndex].Vector, expectedCopies, cancellationToken);
         }
         using (var refresh = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
             OpenSearchNames.PathSeparator + index + OpenSearchNames.RefreshSuffix, null, cancellationToken))
         {
             _ = refresh.RootElement;
         }
-        var settings = await OpenSearchIndex.VerifySettingsAsync(client, index, expectedCopies - 1, cancellationToken);
+        var settings = await OpenSearchIndex.VerifySettingsAsync(client, index, expectedCopies - AdjacentElementOffset, cancellationToken);
         var afterSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
         Profile = Profile with
         {
@@ -82,7 +89,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
     /// <param name="cancellationToken">A token accepted for the common target contract; session creation itself does not perform I/O.</param>
     /// <returns>A comparison session backed by this target’s HTTP client and index.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IComparisonSession>(new OpenSearchSession(client, index, topK, expectedCopies, corpusCount));
+        => Task.FromResult<IComparisonSession>(new OpenSearchSession(client, index, topK, expectedCopies, corpusCount, executionOptions));
 
     /// <summary>Deletes the run-specific index when created and disposes the target-owned HTTP client.</summary>
     /// <returns>A value task that completes after index cleanup and client disposal.</returns>

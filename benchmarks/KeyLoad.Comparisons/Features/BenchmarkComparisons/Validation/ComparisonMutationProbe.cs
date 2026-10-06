@@ -4,13 +4,19 @@ internal static class ComparisonMutationProbe
 {
     internal static async Task VerifyAsync(IComparisonTarget target, BenchmarkDataset dataset, CancellationToken token)
     {
+        const int MutationIdentityBlockCount = 3;
+        const int AbsentDocumentIdentityOffset = 17;
+        const int SingleItemCount = 1;
+        const int AbsentReadbackIdentityOffset = 2;
+        const int FirstElementIndex = 0;
+
         await using var session = await target.OpenSessionAsync(token);
         using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, token);
-        var number = dataset.Options.Documents + 3 * dataset.Options.Repetitions
-            * (dataset.Options.Operations + dataset.Options.Warmup) + 17;
+        var number = dataset.Options.Documents + MutationIdentityBlockCount * dataset.Options.Repetitions
+            * (dataset.Options.Operations + dataset.Options.Warmup) + AbsentDocumentIdentityOffset;
         var updated = dataset.CreateDocument(number);
-        var deleted = dataset.CreateDocument(number + 1);
-        var missing = dataset.CreateDocument(number + 2);
+        var deleted = dataset.CreateDocument(number + SingleItemCount);
+        var missing = dataset.CreateDocument(number + AbsentReadbackIdentityOffset);
         var initial = BenchmarkDataset.InitialMutationState(Scenario.DocumentUpdate, updated);
         await RequireAbsentAsync(session, updated, deadline.Token);
         await session.ExecuteAsync(Scenario.DocumentWrite, initial, deadline.Token);
@@ -29,7 +35,7 @@ internal static class ComparisonMutationProbe
         await session.ExecuteAsync(Scenario.DocumentDelete, deleted, deadline.Token);
         await RequireAbsentAsync(session, deleted, deadline.Token);
         await RequireExactAsync(session, updated, deadline.Token);
-        await RequireExactAsync(session, dataset.Documents[0], deadline.Token);
+        await RequireExactAsync(session, dataset.Documents[FirstElementIndex], deadline.Token);
     }
 
     private static async Task RequireFailureAsync(IComparisonSession session, Scenario scenario,

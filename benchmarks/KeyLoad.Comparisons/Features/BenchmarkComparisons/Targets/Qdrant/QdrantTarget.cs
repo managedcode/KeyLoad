@@ -121,7 +121,9 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         }
 
         await SeedAsync(dataset, cancellationToken);
-        var proof = await QdrantReplicaProof.VerifyAsync(nodeClients, collection, dataset.Documents.Length, topology, cancellationToken, lifecycleOptions);
+        var proof = await QdrantReplicaProof.VerifyAsync(clients: nodeClients, collection: collection,
+            expectedPoints: dataset.Documents.Length, topology: topology, cancellationToken: cancellationToken,
+            lifecycleOptions: lifecycleOptions);
         Profile = Profile with
         {
             Version = proof.Version,

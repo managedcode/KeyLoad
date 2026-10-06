@@ -48,8 +48,8 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
             work.PrimaryError = error;
             try
             {
-                return GrainReplyFactory.Failure(error, false, diagnostics, work.RequestId, work.Stage,
-                    work.Token);
+                return GrainReplyFactory.Failure(error: error, command: false, diagnostics: diagnostics, requestId: work.RequestId, stage: work.Stage,
+                    cancellationToken: work.Token, options: codec.ExecutionOptions);
             }
             catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
             {
@@ -105,7 +105,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         var result = await ReadAsync(request, work.RequestId, work.Token).ConfigureAwait(true);
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
-        return GrainReplyFactory.Value(result, work.Token);
+        return GrainReplyFactory.Value(value: result, cancellationToken: work.Token, options: codec.ExecutionOptions);
     }
 
     private void ValidateFreshRequest(DecodedGrainRequest request, Guid requestId, CancellationToken cancellationToken)

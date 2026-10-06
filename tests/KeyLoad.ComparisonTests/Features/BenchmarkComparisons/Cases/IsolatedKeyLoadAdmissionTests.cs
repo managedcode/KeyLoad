@@ -12,8 +12,9 @@ internal sealed class IsolatedKeyLoadAdmissionTests
     [Test]
     public async Task IntensiveAdmissionAcceptsSixteenVerifiedClientsAndRejectsCapacityOverflow()
     {
-        var limits = IsolatedKeyLoadAdmissionProfile.Limits;
-        var governor = new HttpAdmissionGovernor(limits);
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission());
+        var limits = options.Value;
+        var governor = new HttpAdmissionGovernor(options);
         var leases = new List<HttpAdmissionLease>();
         try
         {
@@ -45,15 +46,38 @@ internal sealed class IsolatedKeyLoadAdmissionTests
     [Test]
     public async Task ActualMemberAdmissionMustMatchEveryDeclaredLimit()
     {
-        var limits = IsolatedKeyLoadAdmissionProfile.Limits;
-        var status = new HttpAdmissionGovernor(limits).Status();
-        IsolatedKeyLoadAdmissionProfile.Verify(status);
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission());
+        var limits = options.Value;
+        var status = new HttpAdmissionGovernor(options).Status();
+        IsolatedKeyLoadAdmissionProfile.Verify(status, options);
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
-            () => IsolatedKeyLoadAdmissionProfile.Verify(null))).IsNotNull();
+            () => IsolatedKeyLoadAdmissionProfile.Verify(null, options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
-            () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor().Status()))).IsNotNull();
+            () => IsolatedKeyLoadAdmissionProfile.Verify(new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http()).Status(), options))).IsNotNull();
         await Assert.That(Assert.ThrowsExactly<ComparisonFailureException>(
-            () => IsolatedKeyLoadAdmissionProfile.Verify(status with
-            { Limits = limits with { MaxBodyBytes = 1_024 } }))).IsNotNull();
+            () => IsolatedKeyLoadAdmissionProfile.Verify(
+                new HttpAdmissionGovernor(NativeExecutionPolicyFixture.Http(limits with { MaxBodyBytes = 1_024 })).Status(), options))).IsNotNull();
+    }
+
+    [Test]
+    public async Task ConfiguredSlotsReachActualAdmissionAndReleaseOnDisposal()
+    {
+        var options = IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(NativeExecutionPolicyFixture.Admission(
+            new IsolatedKeyLoadAdmissionOptions { RequestsPerScope = 2 }));
+        var governor = new HttpAdmissionGovernor(options);
+        using (var first = governor.Begin(ReadPath, 0))
+        using (var second = governor.Begin(ReadPath, 0))
+        {
+            first.Bind(new(PrincipalId, TenantId, [], []));
+            second.Bind(new(PrincipalId, TenantId, [], []));
+            IsolatedKeyLoadAdmissionProfile.Verify(governor.Status(), options);
+            await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(2);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(
+                () => governor.Begin(ReadPath, 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        }
+        await Assert.That(governor.Status().Node.Commands).IsEqualTo(0);
+        using var replacement = governor.Begin(ReadPath, 0);
+        replacement.Bind(new(PrincipalId, TenantId, [], []));
+        await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(1);
     }
 }

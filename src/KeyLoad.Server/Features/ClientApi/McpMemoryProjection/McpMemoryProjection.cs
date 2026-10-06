@@ -262,7 +262,8 @@ internal static class McpMemoryProjectionComponents
         if (bytes <= MinimumCapacity)
         { return MinimumCapacity; }
         var rounded = System.Numerics.BitOperations.RoundUpToPowerOf2((ulong)bytes);
-        if (rounded == 0 || rounded > (ulong)long.MaxValue)
+        const ulong PowerOfTwoOverflow = 0;
+        if (rounded == PowerOfTwoOverflow || rounded > (ulong)long.MaxValue)
         { throw new OverflowException(); }
         return (long)rounded;
     }

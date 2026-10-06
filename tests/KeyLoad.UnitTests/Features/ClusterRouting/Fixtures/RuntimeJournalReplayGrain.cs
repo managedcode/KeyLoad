@@ -31,6 +31,7 @@ internal interface IRuntimeJournalReplayGrain : IGrainWithStringKey
 }
 
 /// <summary>Runtime activation used by the native journal replay integration test.</summary>
+[GrainType(RuntimeJournalReplayProtocol.InterfaceAlias)]
 internal sealed class RuntimeJournalReplayGrain : DurableGrain, IRuntimeJournalReplayGrain
 {
     private const string StateName = "payload";

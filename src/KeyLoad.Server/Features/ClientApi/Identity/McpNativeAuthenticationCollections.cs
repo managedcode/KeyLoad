@@ -8,8 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, CancellationToken cancellationToken,
-    IOptions<McpExecutionOptions> options)
+internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
 {
     private const uint FirstField = 0;
     private const uint NextField = 1;

@@ -4,9 +4,11 @@ internal static class TimeSeriesIntensivePhaseFrames
 {
     internal static void Write(TimeSeriesIntensiveDigestWriter frame)
     {
+        const int NoObservedItems = 0;
+
         frame.String(TimeSeriesIntensiveFrameLabels.PhasePlans);
         frame.Count(TimeSeriesIntensiveProfile.RepetitionCount * (TimeSeriesIntensiveProfile.WarmupCount + TimeSeriesIntensiveProfile.OperationCount));
-        for (var repetition = 0; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
+        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             Phase(frame, repetition, true);
             Phase(frame, repetition, false);
@@ -15,9 +17,11 @@ internal static class TimeSeriesIntensivePhaseFrames
 
     private static void Phase(TimeSeriesIntensiveDigestWriter frame, int repetition, bool warmup)
     {
+        const int FirstElementIndex = 0;
+
         var count = warmup ? TimeSeriesIntensiveProfile.WarmupCount : TimeSeriesIntensiveProfile.OperationCount;
         var series = TimeSeriesIntensivePlans.PhaseSeries(repetition, warmup);
-        for (var index = 0; index < count; index++)
+        for (var index = FirstElementIndex; index < count; index++)
         {
             frame.Field(TimeSeriesIntensiveFrameLabels.Repetition, repetition);
             frame.Field(TimeSeriesIntensiveFrameLabels.Phase, warmup ? TimeSeriesIntensiveProfile.WarmupPhase : TimeSeriesIntensiveProfile.MeasuredPhase);

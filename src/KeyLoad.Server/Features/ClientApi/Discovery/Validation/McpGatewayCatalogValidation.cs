@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using ManagedCode.MCPGateway;
 
@@ -6,14 +7,6 @@ namespace KeyLoad.Server;
 /// <summary>Validates only trusted static catalog metadata before constructing the graph.</summary>
 internal static class McpGatewayCatalogValidation
 {
-    internal const int MaximumOperations = 256;
-    internal const int MaximumMetadataBytes = 4 * 1024 * 1024;
-    internal const int MaximumDescriptorTextLength = 4096;
-    internal const int MaximumOperationNameLength = 64;
-    internal const int MaximumAliasLength = 128;
-    internal const int MaximumAliasesPerOperation = 4;
-    internal const int NativeMaximumResults = 4;
-    internal const int DefaultSearchResults = 3;
     internal const string MetadataBoundFailure = "The canonical MCP tool catalog exceeds its configured bound.";
     private const string AdminPrefix = "admin";
     private const string OperationPrefix = "keyload_";
@@ -41,13 +34,12 @@ internal static class McpGatewayCatalogValidation
     private const string TimeSeriesCategory = "time-series";
     private const string EventStreamsCategory = "event-streams";
 
-    internal static ImmutableArray<McpGatewayCatalogEntry> CreateEntries(
-        IReadOnlyList<McpOperationDescriptor> operations)
+    internal static ImmutableArray<McpGatewayCatalogEntry> CreateEntries(IReadOnlyList<McpOperationDescriptor> operations, IOptions<McpExecutionOptions> executionOptions)
     {
         const int OperationsCountEmptyCount = 0;
 
         ArgumentNullException.ThrowIfNull(operations);
-        if (operations.Count is OperationsCountEmptyCount or > MaximumOperations)
+        if (operations.Count == OperationsCountEmptyCount || operations.Count > executionOptions.Value.MaximumCatalogOperations)
         {
             throw new InvalidOperationException(MetadataBoundFailure);
         }
@@ -56,23 +48,23 @@ internal static class McpGatewayCatalogValidation
         var names = new HashSet<string>(StringComparer.Ordinal);
         foreach (var operation in operations)
         {
-            if (!names.Add(operation.Name) || operation.Name.Length > MaximumOperationNameLength
-                || operation.Description.Length > MaximumDescriptorTextLength
+            if (!names.Add(operation.Name) || operation.Name.Length > executionOptions.Value.MaximumOperationNameCharacters
+                || operation.Description.Length > executionOptions.Value.MaximumDescriptorCharacters
                 || operation.InputSchema.ValueKind != System.Text.Json.JsonValueKind.Object
                 || operation.OutputSchema.ValueKind != System.Text.Json.JsonValueKind.Object)
             {
                 throw new InvalidOperationException(MetadataBoundFailure);
             }
 
-            entries.Add(new McpGatewayCatalogEntry(operation, CreateHints(operation)));
+            entries.Add(new McpGatewayCatalogEntry(operation, CreateHints(operation: operation, executionOptions: executionOptions)));
         }
 
         var result = entries.MoveToImmutable();
-        McpGatewayMetadataSizer.Validate(result, MaximumMetadataBytes);
+        McpGatewayMetadataSizer.Validate(result, executionOptions);
         return result;
     }
 
-    private static McpGatewayToolSearchHints CreateHints(McpOperationDescriptor operation)
+    private static McpGatewayToolSearchHints CreateHints(McpOperationDescriptor operation, IOptions<McpExecutionOptions> executionOptions)
     {
         const char UnderscoreCharacter = '_';
         const char SpaceCharacter = ' ';
@@ -85,9 +77,9 @@ internal static class McpGatewayCatalogValidation
             operation.Name.Replace(UnderscoreCharacter, SpaceCharacter),
             operation.Route.Trim(SlashCharacter).Replace(SlashCharacter, SpaceCharacter),
             category
-        }.Where(static value => value.Length is > ValueLengthEmptyCount and <= MaximumAliasLength)
+        }.Where(value => value.Length > ValueLengthEmptyCount && value.Length <= executionOptions.Value.MaximumAliasCharacters)
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Take(MaximumAliasesPerOperation)
+            .Take(executionOptions.Value.MaximumAliasesPerOperation)
             .ToArray();
 
         return new McpGatewayToolSearchHints(

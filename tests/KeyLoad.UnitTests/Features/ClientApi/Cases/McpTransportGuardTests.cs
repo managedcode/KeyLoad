@@ -16,7 +16,7 @@ internal sealed class McpTransportGuardTests
         var headers = McpTransportGuardTestData.Headers(
             McpTransportGuardTestData.Whitespace + RequestMethods.ToolsCall + McpTransportGuardTestData.Whitespace,
             McpTransportGuardTestData.Whitespace + McpTransportGuardTestData.Target + McpTransportGuardTestData.Whitespace);
-        var result = McpTransportGuard.ReadHeaders(headers);
+        var result = McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution());
         await Assert.That(result.Method).IsEqualTo(RequestMethods.ToolsCall);
         await Assert.That(result.Name).IsEqualTo(McpTransportGuardTestData.Target);
         await Assert.That(headers[McpTransportGuardTestData.RevisionHeader].ToString()).IsEqualTo(McpTransportGuardTestData.Revision);
@@ -26,7 +26,7 @@ internal sealed class McpTransportGuardTests
     [Test]
     public async Task MissingRoutingHeadersRemainNullable()
     {
-        var result = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null));
+        var result = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null), UnitMcpOptions.Execution());
         await Assert.That(result.Method).IsNull();
         await Assert.That(result.Name).IsNull();
     }
@@ -36,7 +36,7 @@ internal sealed class McpTransportGuardTests
     public async Task InternalHorizontalTabsRemainPermitted()
     {
         var result = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(
-            McpTransportGuardTestData.TabbedMethod, McpTransportGuardTestData.TabbedName));
+            McpTransportGuardTestData.TabbedMethod, McpTransportGuardTestData.TabbedName), UnitMcpOptions.Execution());
         await Assert.That(result.Method).IsEqualTo(McpTransportGuardTestData.TabbedMethod);
         await Assert.That(result.Name).IsEqualTo(McpTransportGuardTestData.TabbedName);
     }
@@ -48,7 +48,7 @@ internal sealed class McpTransportGuardTests
         var headers = McpTransportGuardTestData.Headers();
         headers.Remove(McpTransportGuardTestData.RevisionHeader);
         headers[McpTransportGuardTestData.RevisionHeader.ToUpperInvariant()] = McpTransportGuardTestData.Revision;
-        var result = McpTransportGuard.ReadHeaders(headers);
+        var result = McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution());
         await Assert.That(result.Method).IsEqualTo(RequestMethods.ToolsCall);
     }
 
@@ -80,9 +80,9 @@ internal sealed class McpTransportGuardTests
     public async Task InvalidHeaderUsesFixedSafeValidation(McpTransportHeaderFault fault)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(fault)));
+            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(fault), UnitMcpOptions.Execution()));
         var baseline = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision)));
+            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision), UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(baseline.Message);
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);
@@ -100,11 +100,11 @@ internal sealed class McpTransportGuardTests
         var headers = McpTransportGuardTestData.Headers();
         var field = method ? McpTransportGuardTestData.MethodHeader : McpTransportGuardTestData.NameHeader;
         headers[field] = exact;
-        var parsed = McpTransportGuard.ReadHeaders(headers);
+        var parsed = McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution());
         await Assert.That(method ? parsed.Method : parsed.Name).IsEqualTo(exact);
 
         headers[field] = exact + 'a';
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.ReadHeaders(headers));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.ReadHeaders(headers, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
     }
 }
@@ -124,7 +124,7 @@ internal sealed class McpTransportGuardInspectionTests
     {
         var wire = McpTransportGuardTestData.Frame(method, new() { [field] = target });
         var snapshot = wire.ToArray();
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, target));
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, target), UnitMcpOptions.Execution());
         McpTransportGuard.Inspect(wire, headers);
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
         await Assert.That(McpTransportGuardTestData.ReadTarget(wire, field)).IsEqualTo(target);
@@ -140,7 +140,7 @@ internal sealed class McpTransportGuardInspectionTests
     public async Task BodySelectedTargetMismatchUsesSafeValidation(string method, string field)
     {
         var wire = McpTransportGuardTestData.Frame(method, new() { [field] = McpTransportGuardTestData.Marker });
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target));
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target), UnitMcpOptions.Execution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(wire, headers));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);
@@ -156,7 +156,7 @@ internal sealed class McpTransportGuardInspectionTests
         var method = missingMethod ? null : RequestMethods.ServerDiscover;
         var wire = McpTransportGuardTestData.Frame(method, new() { [McpTransportGuardTestData.NameField] = McpTransportGuardTestData.Marker });
         var snapshot = wire.ToArray();
-        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target)));
+        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, McpTransportGuardTestData.Target), UnitMcpOptions.Execution()));
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 
@@ -176,10 +176,10 @@ internal sealed class McpTransportGuardInspectionTests
     public async Task InvalidFrameFieldUsesFixedSafeValidation(McpTransportFrameFault fault)
     {
         var wire = McpTransportGuardTestData.InvalidFrame(fault);
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers());
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(), UnitMcpOptions.Execution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(wire, headers));
         var baseline = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision)));
+            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision), UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(baseline.Message);
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);
@@ -196,7 +196,7 @@ internal sealed class McpTransportGuardInspectionTests
             [McpTransportGuardTestData.MetaField] = new Dictionary<string, object?> { [MetaKeys.ProtocolVersion] = McpTransportGuardTestData.Revision }
         });
         var snapshot = wire.ToArray();
-        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers()));
+        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(), UnitMcpOptions.Execution()));
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 
@@ -206,7 +206,7 @@ internal sealed class McpTransportGuardInspectionTests
     {
         var wire = McpTransportGuardTestData.Frame(RequestMethods.ToolsCall, new());
         var snapshot = wire.ToArray();
-        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null)));
+        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null), UnitMcpOptions.Execution()));
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 
@@ -226,7 +226,7 @@ internal sealed class McpTransportGuardInspectionTests
             [McpTransportGuardTestData.ArgumentsField] = new Dictionary<string, object?> { [McpTransportGuardTestData.RequestField] = request }
         });
         var snapshot = wire.ToArray();
-        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers()));
+        McpTransportGuard.Inspect(wire, McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(), UnitMcpOptions.Execution()));
         await Assert.That(wire.AsSpan().SequenceEqual(snapshot)).IsTrue();
     }
 }

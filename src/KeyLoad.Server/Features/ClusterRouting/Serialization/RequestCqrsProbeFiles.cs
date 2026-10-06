@@ -7,10 +7,9 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeFiles
 {
-    private const string KnownNamePrefixText = "arm-";
-    private const string KnownNameJsonFileExtension = ".json";
-    private const string KnownNameKnownNamePrefixText = "tmp-";
-    private const string KnownNameTemporaryFileExtension = ".tmp";
+    private const string NameSeparator = "-";
+    private const string DiscoverySlotFormat = "D2";
+    private const string TemporaryFileSuffix = ".tmp";
     private const int DiscoveryNameSlotEmptyCount = 0;
     private const int DiscoveryNameSlotFirstCount = 1;
 
@@ -165,7 +164,7 @@ internal sealed class RequestCqrsProbeFiles
         if (before.FileCount >= executionOptions.Value.MaximumFiles
             || before.AggregateBytes + bytes.Length > executionOptions.Value.MaximumAggregateBytes)
         { throw Invalid(); }
-        var temporary = Path.Combine(root, $"tmp-{Guid.NewGuid():N}.tmp");
+        var temporary = Path.Combine(root, RequestCqrsProbeProtocol.TemporaryFilePrefix + Guid.NewGuid().ToString(RequestCqrsProbeProtocol.SessionIdFormat) + TemporaryFileSuffix);
         using (var stream = new FileStream(temporary, new FileStreamOptions
         {
             BufferSize = executionOptions.Value.FileBufferBytes,
@@ -187,30 +186,10 @@ internal sealed class RequestCqrsProbeFiles
     }
 
     internal static byte[] ReadRecord(string path, IOptions<RequestProbeExecutionOptions> executionOptions)
-    {
-        const int ReadInitialValue = 0;
-        const int EmptyCount = 0;
-        const int StartEmptyCount = 0;
-
-        _ = OfflineRegularFile.Inspect(path);
-        RequestCqrsProbePaths.RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateFileMode);
-        using var stream = OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read, executionOptions.Value.ReadBufferBytes);
-        var bytes = new byte[executionOptions.Value.ReadBufferBytes];
-        var read = ReadInitialValue;
-        while (read < bytes.Length)
-        {
-            var count = stream.Read(bytes, read, bytes.Length - read);
-            if (count == EmptyCount)
-            { break; }
-            read += count;
-        }
-        if (read == bytes.Length)
-        { throw Invalid(); }
-        return bytes.AsSpan(StartEmptyCount, read).ToArray();
-    }
+        => RequestCqrsProbeFileReader.Read(path, executionOptions);
 
     private static bool KnownName(string name) => name == RequestCqrsProbeProtocol.OwnerFile
-        || IsGuidName(name, KnownNamePrefixText, KnownNameJsonFileExtension) || IsGuidName(name, KnownNameKnownNamePrefixText, KnownNameTemporaryFileExtension)
+        || IsGuidName(name, RequestCqrsProbeProtocol.ArmFilePrefix, RequestCqrsProbeProtocol.JsonFileSuffix) || IsGuidName(name, RequestCqrsProbeProtocol.TemporaryFilePrefix, TemporaryFileSuffix)
         || name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
         || name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal) && name.EndsWith(RequestCqrsProbeProtocol.JsonFileSuffix, StringComparison.Ordinal)
         || name is RequestCqrsProbeProtocol.DiscoveryFileZero or RequestCqrsProbeProtocol.DiscoveryFileOne;
@@ -226,12 +205,12 @@ internal sealed class RequestCqrsProbeFiles
         return name.AsSpan(prefix.Length, CompactGuidCharacterCount).SequenceEqual(value.ToString(RequestCqrsProbeProtocol.SessionIdFormat));
     }
 
-    internal static string ArmName(RequestCqrsProbeArmRecord arm) => $"arm-{arm.ArmId:N}.json";
+    internal static string ArmName(RequestCqrsProbeArmRecord arm) => RequestCqrsProbeProtocol.ArmFilePrefix + arm.ArmId.ToString(RequestCqrsProbeProtocol.SessionIdFormat) + RequestCqrsProbeProtocol.JsonFileSuffix;
     internal static string ReleaseName(RequestCqrsProbeReleaseRecord release)
-        => $"release-{release.ArmId:N}-{release.RequestId:N}.json";
+        => RequestCqrsProbeProtocol.ReleaseFilePrefix + release.ArmId.ToString(RequestCqrsProbeProtocol.SessionIdFormat) + NameSeparator + release.RequestId.ToString(RequestCqrsProbeProtocol.SessionIdFormat) + RequestCqrsProbeProtocol.JsonFileSuffix;
     internal static string DiscoveryName(int slot)
-        => slot is DiscoveryNameSlotEmptyCount or DiscoveryNameSlotFirstCount ? $"discovery-{slot:D2}.json" : throw Invalid();
+        => slot is DiscoveryNameSlotEmptyCount or DiscoveryNameSlotFirstCount ? RequestCqrsProbeProtocol.DiscoveryFilePrefix + slot.ToString(DiscoverySlotFormat, System.Globalization.CultureInfo.InvariantCulture) + RequestCqrsProbeProtocol.JsonFileSuffix : throw Invalid();
     internal static string MarkerName(RequestCqrsProbeMarkerRecord marker)
-        => $"marker-{marker.ArmId:N}-{marker.RequestId:N}-{marker.Phase}-{marker.Outcome}.json";
+        => string.Concat(RequestCqrsProbeProtocol.MarkerFilePrefix, marker.ArmId.ToString(RequestCqrsProbeProtocol.SessionIdFormat), NameSeparator, marker.RequestId.ToString(RequestCqrsProbeProtocol.SessionIdFormat), NameSeparator, marker.Phase.ToString(), NameSeparator, marker.Outcome.ToString(), RequestCqrsProbeProtocol.JsonFileSuffix);
     private static InvalidOperationException Invalid() => new(RequestCqrsProbeProtocol.InvalidFiles);
 }

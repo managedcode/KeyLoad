@@ -59,7 +59,7 @@ internal static class RequestCqrsScopeFlowCases
                             () => producerSawScope = true), token),
                     fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<
                         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                    requestId, TimeProvider.System, CancellationToken.None);
+                    requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
                 await Assert.That(reply.Payload.IsEmpty).IsFalse();
                 await Assert.That(producerSawScope).IsTrue();
                 await AssertPublishedContextAsync(requestId, commandId, principal.Id);

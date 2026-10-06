@@ -48,6 +48,11 @@ internal static class TimeSeriesIntensiveFamilyContractErrors
 
 internal static class TimeSeriesIntensiveFamilyContractFacts
 {
+    private const int SingleItemCount = 1;
+    private const int PairMemberCount = 2;
+    private const int ThirdContractOrdinal = 3;
+    private const int SingleNodeTopology = 1;
+
     internal const int MaximumBytes = 16384;
     internal const int MaximumDepth = 4;
     internal const int SchemaVersion = 1;
@@ -73,14 +78,14 @@ internal static class TimeSeriesIntensiveFamilyContractFacts
 
     internal static readonly ImmutableArray<TimeSeriesIntensiveTargetKind> Targets =
         [TimeSeriesIntensiveTargetKind.KeyLoad, TimeSeriesIntensiveTargetKind.TimescaleDB];
-    internal static readonly ImmutableArray<int> NodeCounts = [1, 2, 3];
+    internal static readonly ImmutableArray<int> NodeCounts = [SingleItemCount, PairMemberCount, ThirdContractOrdinal];
     internal static readonly ImmutableArray<TimeSeriesIntensiveScenario> Scenarios =
     [
         TimeSeriesIntensiveScenario.Append, TimeSeriesIntensiveScenario.RawRangeRead,
         TimeSeriesIntensiveScenario.Latest, TimeSeriesIntensiveScenario.Aggregate, TimeSeriesIntensiveScenario.Windows,
     ];
-    internal static readonly ImmutableArray<int> QuorumAcknowledgements = [1, 2, 2];
-    internal static readonly ImmutableArray<int> DataCopies = [1, 2, 3];
+    internal static readonly ImmutableArray<int> QuorumAcknowledgements = [SingleItemCount, PairMemberCount, PairMemberCount];
+    internal static readonly ImmutableArray<int> DataCopies = [SingleNodeTopology, PairMemberCount, ThirdContractOrdinal];
 }
 
 internal static class TimeSeriesIntensiveFamilyContractValidation

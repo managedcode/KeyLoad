@@ -2,6 +2,7 @@ using KeyLoad.Server;
 using ManagedCode.MCPGateway;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
@@ -15,10 +16,11 @@ internal sealed class McpGatewayCatalogTestHost : IAsyncDisposable
         _services = services;
         Owner = new McpGatewayCatalogOwner(
             services.GetRequiredService<ManagedCode.MCPGateway.Abstractions.IMcpGatewayFactory>(),
-            services.GetRequiredService<IHttpContextAccessor>());
+            services.GetRequiredService<IHttpContextAccessor>(), ExecutionOptions);
     }
 
     internal McpGatewayCatalogOwner Owner { get; }
+    internal IOptions<McpExecutionOptions> ExecutionOptions { get; } = UnitMcpOptions.Execution();
 
     internal static McpGatewayCatalogTestHost Create()
     {

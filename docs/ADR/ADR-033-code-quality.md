@@ -820,3 +820,84 @@ flowchart LR
     Counts --> Repair[Real complete-operation tests]
     Repair --> Profile
 ```
+
+TASK-CQ-NATIVE-ORLEANS-091F (AC-CQ-022/034/038) is the preserving native
+Orleans/CLI repair continuation: validated options null guards, original
+immutable tokens, coherent final-cancellation-token signatures/callers for
+native stream lifetime/drain, membership and recurring wait, and historical CLI
+exit codes. Freeze before code; Luna owns guarded private source only; root owns
+caller/serialization/lifetime review, native full build/format and existing
+complete-operation Aspire regressions. Preserve one request grain, CQRS streams,
+context restoration, all original failure joins, RF3 and persisted authority.
+Rollback restores the coherent signature/caller pair. No dependency workaround,
+suppression or skipped acceptance gate is authorized by this repair stage.
+
+
+### Accepted complete functional cohort and native RF3 coverage stage
+
+TASK-CQ-FUNCTIONAL-COVERAGE-002 implements REQ-CQ-009, AC-CQ-018..021 and
+AC-CQ-039..042 from CodeQuality. Status remains Accepted until native reports,
+source identity, complete tests and exact-source Linux qualification exist.
+
+1. Root freezes a closed exact-case operation-flow inventory and all16 production
+   project classifications. A Luna worker reads actual case bodies, supplies
+   guarded semantic admission/denial proposals and preserves immutable revisions.
+   Do not admit old prefix matches solely because the first Query prototype
+   selected them. Keep executable shared contracts/telemetry/startup in the
+   production denominator; unknown and uncovered code is not infrastructure N/A.
+2. Add the native Microsoft CLI18.11.2 package download to the existing AppHost
+   with one central version pin, reconciling the former no-additional-collector
+   comment as use of the same MTP native engine for container processes. No
+   global installation or extra framework is introduced. Root owns restore,
+   package/native-file identity and canonical tool invocation. Extend existing
+   coverage output handoff with a closed native binary format selection while
+   preserving its default Cobertura route and all current suite selectors.
+3. Root composes one finite exact-method invocation per reviewed contributor
+   group through the existing Aspire suite entry; all-class invocation requires
+   every selected method to qualify. Bind the actual compiled test receipt,
+   complete source inventory,6 central inputs, producer, DLL/PDB/MVIDs, settings,
+   manifest and exact TRX instances before/after. Keep every original binary
+   report and its native conversions even after failed verification.
+4. AppHost preparation owns same-cohort server publish/copy, native-tool files,
+   test-only pinned Linux-x64 image creation and original identity receipt. No
+   server rebuild or static mutation of shared build outputs is admitted for
+   this image. Validate published DLL/PDB/MVID equality against the test closure;
+   source-equivalent but different modules cannot be merged as the same image.
+   New feature-local options are centrally bound/validated once and passed to
+   the real preparation, child resources, IPC, export and cleanup owners.
+5. Root joins scoped coverage into the existing ClusterFixture and ClusterResources
+   lifecycle. Only reviewed non-kill functional case selections contribute this
+   RF3 cohort; derive the bounded actual fixture/process roster before launch.
+   Start all3 genuine nodes and use original discovered SDK/official MCP paths.
+   The per-node command-mode wrapper owns its original native collect/server
+   process chain and, on Aspire stop, requests native session shutdown and joins
+   that chain. Prove actual native Linux stop/exit/flush behavior; never infer it
+   from command documentation, a canceled wait or a changed replacement process.
+   Preserve existing whole-suite kill/restart/recovery/fault/endurance gates.
+6. Save diagnostics, settle original nodes/collectors/readers, dispose the existing
+   owned AppHost, verify create-only terminal receipts and original reports,
+   copy them to retained TestResults, then delete only the owned fixture root.
+   Attempt every cleanup stage on success/error/cancellation and preserve
+   primary-first failure ordering. A missing export or cleanup failure remains
+   visible. Root alone joins CI preparation/invocation and always-upload paths.
+7. Verify the explicit report list and matching native modules/source identities
+   before native binary merging and conversions. Reject mixed/unbound/missing
+   reports; never glob arbitrary output. Retain per-run counts, test outcomes
+   and all originals. Native repeated-input merging must leave line/branch
+   denominators and outcomes unchanged; coarse Cobertura fractions cannot prove
+   union. Keep branches unmeasured until actual native outcome merging qualifies.
+8. Review uncovered operations per module, add complete positive/negative/edge
+   regressions and remeasure the same new source cohort. Preserve80/70/90,
+   module/no-decrease policy, CRAP same-cohort requirements and complete mandatory
+   tests. This stage introduces no database format or public-contract migration;
+   rollback removes the coherent test-only collector/resource joins, restores
+   the previous invocation route and preserves all original evidence.
+
+Canonical file ownership and join points are CodeQuality's feature-local scripts,
+AppHost configuration/resources and IntegrationTests scoped fixture/export
+helpers, plus root-owned TestSuiteResources/ClusterFixture/ClusterResources,
+Directory.Packages.props/AppHost project, Architecture/AGENTS and existing CI.
+Do not touch comparison/load contributors or published website figures to obtain
+coverage. The native command surface and supported formats were read from the
+actual cached18.11.2 CLI and [official native tool documentation](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-coverage);
+that inspection is not a collector execution, RF3 result or gate pass.

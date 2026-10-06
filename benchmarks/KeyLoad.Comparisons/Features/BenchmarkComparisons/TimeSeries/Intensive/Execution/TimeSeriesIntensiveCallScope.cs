@@ -1,15 +1,19 @@
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensiveCallScope : IDisposable
 {
+    private readonly NativeComparisonExecutionOptions execution;
     private readonly CancellationToken cellCancellation;
     private readonly CancellationTokenSource deadline;
     private long started;
 
-    internal TimeSeriesIntensiveCallScope(CancellationToken cellCancellation)
+    internal TimeSeriesIntensiveCallScope(IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation)
     {
+        execution = executionOptions.Value;
+        execution.Validate();
         this.cellCancellation = cellCancellation;
         deadline = CancellationTokenSource.CreateLinkedTokenSource(cellCancellation);
     }
@@ -22,7 +26,7 @@ internal sealed class TimeSeriesIntensiveCallScope : IDisposable
 
     internal void Start()
     {
-        deadline.CancelAfter(TimeSeriesIntensiveProfile.OperationTimeout);
+        deadline.CancelAfter(execution.OperationTimeout);
         started = Stopwatch.GetTimestamp();
     }
 
@@ -31,7 +35,7 @@ internal sealed class TimeSeriesIntensiveCallScope : IDisposable
         var stopped = Stopwatch.GetTimestamp();
         LatencyTicks = stopped - started;
         Completion = cellCancellation.IsCancellationRequested ? TimeSeriesIntensiveOutcome.Cancelled
-            : deadline.IsCancellationRequested || Stopwatch.GetElapsedTime(started, stopped) >= TimeSeriesIntensiveProfile.OperationTimeout
+            : deadline.IsCancellationRequested || Stopwatch.GetElapsedTime(started, stopped) >= execution.OperationTimeout
                 ? TimeSeriesIntensiveOutcome.DeadlineExceeded : TimeSeriesIntensiveOutcome.Succeeded;
     }
 

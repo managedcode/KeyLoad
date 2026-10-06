@@ -28,7 +28,7 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         Log = new(replica, configuration, canonicalDatabase: Canonical.Database);
         Materializer = new(Canonical.Database, Log,
             new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution()), execution);
-        Consensus = new(Materializer, configuration, UnitExecutionOptions.ReplicaExecution(), execution, TimeProvider.System);
+        Consensus = new(Materializer, configuration, execution, TimeProvider.System);
     }
 
     internal TestDatabase Canonical { get; }

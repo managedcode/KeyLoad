@@ -6,6 +6,8 @@ namespace KeyLoad.Server;
 
 internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, StoreIdentity Replica)
 {
+    private const string ReplicaCommandsJournalPath = "replica/commands.wal";
+
     internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original,
         ServerRuntimeOptions options)
     {
@@ -30,7 +32,7 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         return new(ServerNodeUpgradeProtocol.OwnerFormatVersion, paths.Source, paths.Destination, original.Sha256,
             original.FileDigest(BindPathText), original.FileDigest(BindBindPathText),
-            original.FileDigest("replica/identity.json"), original.FileDigest("replica/commands.wal"),
+            original.FileDigest(ServerNodeUpgradeProtocol.ReplicaIdentityPath), original.FileDigest(ReplicaCommandsJournalPath),
             canonical.FormatVersion, ServerNodeUpgradeProtocol.TargetEpoch);
     }
 

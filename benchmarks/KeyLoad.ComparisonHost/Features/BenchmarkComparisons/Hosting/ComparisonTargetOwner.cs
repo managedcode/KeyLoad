@@ -10,6 +10,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns target construction and each client until its target takes ownership.</summary>
 internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
 {
     private readonly List<IComparisonTarget> targets = new(ComparisonHostConstants.TargetCount);
@@ -31,7 +32,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
         neo4jClient.DefaultRequestHeaders.Authorization = CreateNeo4jAuthorization(settings.Neo4jPassword);
 
-        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, lifecycleOptions, clientOptions, translationOptions,
+        pendingTarget = new KeyLoadTarget(keyLoadClient, settings.AdminKey, settings.RunId, lifecycleOptions, executionOptions, admissionOptions, clientOptions, translationOptions,
             image: settings.ExecutionIdentity?.KeyLoadImage, peers: keyLoadClients);
         PublishPendingTarget(keyLoadClients);
         pendingTarget = new PostgresTarget(settings.PostgresConnection, settings.RunId, settings.PostgresImage, executionOptions, lifecycleOptions);
@@ -46,7 +47,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         PublishPendingTarget(rabbitManagementClient);
         pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions);
         PublishPendingTarget();
-        pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage, lifecycleOptions);
+        pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage, lifecycleOptions, executionOptions);
         PublishPendingTarget(neo4jClient);
         return [.. targets];
     }

@@ -35,9 +35,9 @@ internal static class QueryApi
     }
 
     private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context,
-        IOptions<DatabaseLimits> limitsOptions, KeyLoad.Core.HttpAdmissionGovernor admission)
+        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions, KeyLoad.Core.HttpAdmissionGovernor admission)
     {
-        var operation = SqlOperationCompiler.Compile(request, limitsOptions, admission.Limits.MaxBodyBytes,
+        var operation = SqlOperationCompiler.Compile(request, limitsOptions, admission.Limits.MaxBodyBytes, queryOptions,
             context.RequestAborted);
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
             operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted).ConfigureAwait(false);

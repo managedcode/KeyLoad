@@ -1,8 +1,10 @@
 namespace KeyLoad.Comparisons;
 
 internal sealed class ComparisonProgressState(ComparisonProgressPhase phase, int repetition, int total,
-    int completed = 0, int failed = 0)
+    int completed = ComparisonProgressState.CompletedDefault, int failed = ComparisonProgressState.CompletedDefault)
 {
+    private const int CompletedDefault = 0;
+
     private int _completed = completed;
     private int _failed = failed;
 

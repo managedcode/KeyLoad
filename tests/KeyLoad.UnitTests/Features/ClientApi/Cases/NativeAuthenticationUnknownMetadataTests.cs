@@ -30,20 +30,20 @@ internal sealed class NativeAuthenticationUnknownMetadataTests
         await Assert.That(valid.AsSpan().SequenceEqual(original)).IsTrue();
         await Assert.That(invalid.AsSpan().SequenceEqual(valid)).IsFalse();
 
-        var beforeInspect = McpNativeAuthentication.Inspect(valid, CancellationToken.None, UnitMcpOptions.Execution());
-        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, CancellationToken.None, UnitMcpOptions.Execution()), expected);
-        await Assert.That(beforeInspect).IsEqualTo(McpNativeAuthentication.Inspect(original, CancellationToken.None, UnitMcpOptions.Execution()));
-        await AssertDenial(() => McpNativeAuthentication.Inspect(invalid, CancellationToken.None, UnitMcpOptions.Execution()));
-        await Assert.That(McpNativeAuthentication.Inspect(valid, CancellationToken.None, UnitMcpOptions.Execution())).IsEqualTo(beforeInspect);
-        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, CancellationToken.None, UnitMcpOptions.Execution()), expected);
-        await AssertDenial(() => McpNativeAuthentication.ReadPrincipal(invalid, CancellationToken.None, UnitMcpOptions.Execution()));
-        await Assert.That(McpNativeAuthentication.Inspect(valid, CancellationToken.None, UnitMcpOptions.Execution())).IsEqualTo(beforeInspect);
-        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, CancellationToken.None, UnitMcpOptions.Execution()), expected);
+        var beforeInspect = McpNativeAuthentication.Inspect(valid, UnitMcpOptions.Execution(), CancellationToken.None);
+        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, UnitMcpOptions.Execution(), CancellationToken.None), expected);
+        await Assert.That(beforeInspect).IsEqualTo(McpNativeAuthentication.Inspect(original, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertDenial(() => McpNativeAuthentication.Inspect(invalid, UnitMcpOptions.Execution(), CancellationToken.None));
+        await Assert.That(McpNativeAuthentication.Inspect(valid, UnitMcpOptions.Execution(), CancellationToken.None)).IsEqualTo(beforeInspect);
+        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, UnitMcpOptions.Execution(), CancellationToken.None), expected);
+        await AssertDenial(() => McpNativeAuthentication.ReadPrincipal(invalid, UnitMcpOptions.Execution(), CancellationToken.None));
+        await Assert.That(McpNativeAuthentication.Inspect(valid, UnitMcpOptions.Execution(), CancellationToken.None)).IsEqualTo(beforeInspect);
+        await AssertPrincipal(McpNativeAuthentication.ReadPrincipal(valid, UnitMcpOptions.Execution(), CancellationToken.None), expected);
 
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
-        using (var rejected = new McpRequestState(governor, memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+        using (var rejected = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => rejected.Authenticate(invalid, CancellationToken.None));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
@@ -52,7 +52,7 @@ internal sealed class NativeAuthenticationUnknownMetadataTests
         }
         await AssertReleased(governor, memory, limits);
 
-        using (var accepted = new McpRequestState(governor, memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+        using (var accepted = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             accepted.Authenticate(valid, CancellationToken.None);
             await AssertPrincipal(accepted.Principal, expected);

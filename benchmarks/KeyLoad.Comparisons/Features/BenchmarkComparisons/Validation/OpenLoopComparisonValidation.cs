@@ -5,18 +5,24 @@ internal static class OpenLoopComparisonValidation
     internal static void Validate(ScaledComparisonProfile profile, int rate, IComparisonTarget target,
         IsolatedComparisonWorker worker, OpenLoopExecutionPolicy policy)
     {
+        const int NoItems = 0;
+        const int NoObservedItems = 0;
+
         ArgumentNullException.ThrowIfNull(profile);
         ArgumentNullException.ThrowIfNull(target);
         ArgumentNullException.ThrowIfNull(worker);
         ArgumentNullException.ThrowIfNull(policy);
-        if (!policy.IsQualifiedV1()) throw Invalid();
+        if (!policy.IsQualifiedV1())
+        {
+            throw new ArgumentOutOfRangeException(nameof(policy), OpenLoopFailureMessages.CellOutsideFrozenProfile);
+        }
         if (!OperatingSystem.IsLinux() || !OpenLoopRateContract.AcceptedRates.Contains(rate)
             || worker.Profile != profile.Id || worker.Target != target.Profile.Name
             || profile.Operations != OpenLoopRateContract.PlannedOperations
             || profile.Concurrency != policy.ConcurrentSessions
-            || worker.NodeCount <= 0 || worker.NodeCount > policy.MaximumNodes || !IsSupportedScenario(worker.Scenario)
+            || worker.NodeCount <= NoItems || worker.NodeCount > policy.MaximumNodes || !IsSupportedScenario(worker.Scenario)
             || !target.Supports(worker.Scenario) || !ValidSource(worker.SourceRevision)
-            || worker.RunId <= 0 || worker.Attempt <= 0 || worker.JobId <= 0
+            || worker.RunId <= NoObservedItems || worker.Attempt <= NoObservedItems || worker.JobId <= NoObservedItems
             || !Within(worker.Repository, OpenLoopEvidenceContract.MaximumRepositoryCharacters)
             || !Within(worker.Ref, OpenLoopEvidenceContract.MaximumRefCharacters)
             || !Within(worker.Workflow, OpenLoopEvidenceContract.MaximumWorkflowCharacters))

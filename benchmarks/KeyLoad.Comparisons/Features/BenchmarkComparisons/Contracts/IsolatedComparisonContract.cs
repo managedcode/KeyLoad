@@ -28,20 +28,26 @@ public sealed record IsolatedComparisonContract
     /// <summary>Gets the specialized workload family.</summary>
     [JsonRequired] public ImmutableArray<Scenario> SpecializedScenarios { get; init; }
     /// <summary>Gets the common options, without a varying native topology.</summary>
-    [JsonRequired] public ComparisonOptions Options { get; init; } = null!;
+    [JsonRequired, SerializedOptionsSnapshot] public ComparisonOptions Options { get; init; } = null!;
     /// <summary>Gets the explicitly unsupported Community cluster configurations.</summary>
     [JsonRequired] public ImmutableArray<UnsupportedComparisonTopology> UnsupportedTopologies { get; init; }
 
     private static IsolatedComparisonContract Read()
     {
+        const int ComparisonSchemaVersion = 1;
+        const int AcceptedWorkerSchemaVersion = 4;
+        const int SingleNodeTopology = 1;
+        const int TwoNodeReplicaCount = 2;
+        const int ThreeNodeTopology = 3;
+
         using var resource = typeof(IsolatedComparisonContract).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException(InvalidContract);
         var result = JsonSerializer.Deserialize<IsolatedComparisonContract>(resource, ReportWriter.JsonOptions)
             ?? throw new InvalidOperationException(InvalidContract);
         result.Options.Validate();
-        if (result.SchemaVersion != 1 || result.WorkerSchemaVersion != 4 || string.IsNullOrWhiteSpace(result.Profile)
+        if (result.SchemaVersion != ComparisonSchemaVersion || result.WorkerSchemaVersion != AcceptedWorkerSchemaVersion || string.IsNullOrWhiteSpace(result.Profile)
             || result.Targets.IsDefaultOrEmpty || result.Targets.Distinct(StringComparer.Ordinal).Count() != result.Targets.Length
-            || !result.NodeCounts.SequenceEqual([1, 2, 3])
+            || !result.NodeCounts.SequenceEqual([SingleNodeTopology, TwoNodeReplicaCount, ThreeNodeTopology])
             || !result.CrudScenarios.Concat(result.SpecializedScenarios).Order().SequenceEqual(Enum.GetValues<Scenario>().Order()))
         {
             throw new InvalidOperationException(InvalidContract);

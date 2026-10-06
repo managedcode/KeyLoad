@@ -207,3 +207,28 @@ joins both host callers using IsolatedHostTargetOwner.ExecutionOptions; build
 with native analyzers, run actual host/measurement/cancellation flows through
 Aspire, retain current-source resource results. Rollback restores the coherent
 caller/signature pair; all full-suite and Linux gates remain mandatory.
+
+The inventory test-process owner consumes one centrally bound and validated
+IOptions dependency for its actual deadline and stream/input/output limits,
+with defaults only in the feature-local test configuration definition. Luna
+prepares this guarded source-only extension and a meaningful owned-child
+cancel/failure-to-success flow; root joins it and runs native Aspire tests.
+This preserves REQ-CQ-013/AC-CQ-034/038, source guards and original child/readers
+settlement. No shape-only coverage contributor or new execution entry is added.
+
+TASK-SCALE-OPENLOOP-PLAN-JOINS-001 freezes the optional create-only
+`--open-loop-output` CLI join and explicit fourth matrix argument. Root owns
+isolated-plan-cli.mjs and isolated-preflight.mjs; preserve the old default129 rows
+and every original serialized row, then append72 measurements per database and
+only KeyLoad's six proofs (201/207, same11 groups, existing256 cap). Rate/proof
+labels and artifact/qualification prefixes are distinct and canonical. Verify
+actual CLI publication, complete matrix identity/partition and failed-input
+preservation through Aspire-owned tests. Existing CI selection stays unchanged
+until the separate workload and original-artifact/fairness admission joins are
+complete. Rollback removes only the new optional route; original outputs and all
+native qualification/publication gates remain mandatory.
+
+The selected open-loop output follows the same caller-owned create-only path
+semantics as the existing CLI outputs: bounded resolved paths and plain parents,
+with no new confinement to a test temp root. Absolute/normalized paths remain
+valid; an actual linked-parent escape fails before any linked target is changed.

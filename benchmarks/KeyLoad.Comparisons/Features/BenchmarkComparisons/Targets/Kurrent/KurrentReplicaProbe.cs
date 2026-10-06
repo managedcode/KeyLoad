@@ -9,9 +9,8 @@ internal readonly record struct KurrentAppendCut(long CommitPosition, long Prepa
 internal static class KurrentReplicaProbe
 {
     public static async Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients,
-        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
-        KurrentStreamOwnership ownership, TimeSpan timeout,
-        CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
+        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentStreamOwnership ownership,
+        TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
     {
         var cut = await AppendAndCaptureCutAsync(writer, ownership, stream, eventData, cancellationToken);
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -20,8 +19,8 @@ internal static class KurrentReplicaProbe
         {
             while (true)
             {
-                var evidence = await TryCreateCopyEvidenceAsync(nodeClients, httpClients, topology, stream,
-                    eventData, cut, timeout, limit.Token, options);
+                var evidence = await TryCreateCopyEvidenceAsync(nodeClients: nodeClients, httpClients: httpClients, topology: topology,
+                    stream: stream, eventData: eventData, cut: cut, timeout: timeout, cancellationToken: limit.Token, options: options);
                 if (evidence is not null)
                 {
                     return evidence;
@@ -35,17 +34,19 @@ internal static class KurrentReplicaProbe
         }
     }
 
-    private static async Task<ClusterEvidence?> TryCreateCopyEvidenceAsync(KurrentDBClient[] nodeClients,
-        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
-        KurrentAppendCut cut, TimeSpan timeout, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
+    private static async Task<ClusterEvidence?> TryCreateCopyEvidenceAsync(KurrentDBClient[] nodeClients, HttpClient[] httpClients,
+        ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentAppendCut cut, TimeSpan timeout,
+        IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
     {
-        var views = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken, options);
+        var views = await KurrentClusterVerifier.ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout,
+            cancellationToken: cancellationToken, options: options);
         if (!await AllCopiesAtCutAsync(nodeClients, views, stream, eventData, cut, cancellationToken))
         {
             return null;
         }
 
-        var finalViews = await KurrentClusterVerifier.ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken, options);
+        var finalViews = await KurrentClusterVerifier.ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout,
+            cancellationToken: cancellationToken, options: options);
         RequireSameLocalMembers(views, finalViews);
         return await AllCopiesAtCutAsync(nodeClients, finalViews, stream, eventData, cut, cancellationToken)
             ? KurrentClusterVerifier.CreateEvidence(finalViews, topology, cut)
@@ -78,13 +79,15 @@ internal static class KurrentReplicaProbe
     private static async Task<bool> AllCopiesAtCutAsync(KurrentDBClient[] clients, KurrentGossipView[] views,
         string stream, KurrentEventData expected, KurrentAppendCut cut, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         if (clients.Length != views.Length)
         {
             throw new ComparisonFailureException(KurrentConstants.InvalidTopology);
         }
 
         var copied = true;
-        for (var index = 0; index < clients.Length; index++)
+        for (var index = FirstElementIndex; index < clients.Length; index++)
         {
             if (!CheckpointAtCut(views[index].LocalMember, cut))
             {
@@ -130,6 +133,8 @@ internal static class KurrentReplicaProbe
 
     private static void ValidateSingleEvent(List<ResolvedEvent> items, KurrentEventData expected)
     {
+        const int FirstElementIndex = 0;
+
         if (items.Count > KurrentConstants.ExpectedSingleEventCount)
         {
             throw new ComparisonFailureException(KurrentConstants.ReadCardinality);
@@ -140,8 +145,8 @@ internal static class KurrentReplicaProbe
             return;
         }
 
-        var actual = items[0].OriginalEvent;
-        if (items[0].OriginalEventNumber.ToUInt64() != KurrentConstants.NativeFirstRevision ||
+        var actual = items[FirstElementIndex].OriginalEvent;
+        if (items[FirstElementIndex].OriginalEventNumber.ToUInt64() != KurrentConstants.NativeFirstRevision ||
             actual.EventId != expected.EventId || !actual.Data.Span.SequenceEqual(expected.Data.Span))
         {
             throw new ComparisonFailureException(KurrentConstants.ProbeEventMismatch);
@@ -150,8 +155,10 @@ internal static class KurrentReplicaProbe
 
     private static void RequireSameLocalMembers(KurrentGossipView[] before, KurrentGossipView[] after)
     {
+        const int FirstElementIndex = 0;
+
         if (before.Length != after.Length || before.Where((view, index) => view.LocalMember.Id != after[index].LocalMember.Id).Any() ||
-            !ViewsHaveSameMembers(before[0], after[0]))
+            !ViewsHaveSameMembers(before[FirstElementIndex], after[FirstElementIndex]))
         {
             throw new ComparisonFailureException(KurrentConstants.ClusterMembership);
         }

@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
@@ -41,10 +42,10 @@ internal static class ScaledRawStoragePreparationGuard
 {
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
-    internal static void Check(long deadlineStart, CancellationToken token, TimeSpan preparationTimeout)
+    internal static void Check(long deadlineStart, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(deadlineStart) >= preparationTimeout)
+        if (Stopwatch.GetElapsedTime(deadlineStart) >= executionOptions.Value.PreparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }
@@ -53,21 +54,22 @@ internal static class ScaledRawStoragePreparationGuard
 
 internal static class ScaledRawStorageSeedRunner
 {
-    private const int CancellationCheckStride = 256;
 
     internal static long Run(ScaledRawStorageCorpus corpus, ScaledRawStorageZoneTreeEngine engine,
         byte[] scratch, int recordCount, long deadlineStart, ref long attempts,
-        ref long successfulWrites, CancellationToken token, TimeSpan preparationTimeout)
+        ref long successfulWrites, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
     {
         const int IndexInitialValue = 0;
         const int EmptyIndexCancellationCheckStride = 0;
 
+        var settings = executionOptions.Value;
+        settings.Validate();
         var started = Stopwatch.GetTimestamp();
         for (var index = IndexInitialValue; index < recordCount; index++)
         {
-            if (index % CancellationCheckStride == EmptyIndexCancellationCheckStride)
+            if (index % settings.CancellationCheckInterval == EmptyIndexCancellationCheckStride)
             {
-                ScaledRawStoragePreparationGuard.Check(deadlineStart, token, preparationTimeout);
+                ScaledRawStoragePreparationGuard.Check(deadlineStart, executionOptions, token);
             }
 
             corpus.WriteValue(index, scratch);
@@ -76,7 +78,7 @@ internal static class ScaledRawStorageSeedRunner
             successfulWrites++;
         }
 
-        ScaledRawStoragePreparationGuard.Check(deadlineStart, token, preparationTimeout);
+        ScaledRawStoragePreparationGuard.Check(deadlineStart, executionOptions, token);
         return Stopwatch.GetTimestamp() - started;
     }
 }

@@ -69,11 +69,13 @@ internal static class TimeSeriesIntensiveResultDigest
 
     private static string RawCore(ImmutableArray<SampleRecord> samples, ImmutableArray<SampleRecord> expected, bool validate)
     {
+        const int FirstElementIndex = 0;
+
         var tags = new TimeSeriesIntensiveTagScope();
         using var frame = new TimeSeriesIntensiveDigestWriter(TimeSeriesIntensiveFrameLabels.ResultDomain + TimeSeriesIntensiveFrameLabels.Raw);
         frame.String(TimeSeriesIntensiveFrameLabels.Samples);
         frame.Count(samples.Length);
-        for (var index = 0; index < samples.Length; index++)
+        for (var index = FirstElementIndex; index < samples.Length; index++)
         {
             var sample = samples[index];
             var canonical = validate ? TimeSeriesIntensiveRowVerifier.Validate(expected[index], sample, tags)

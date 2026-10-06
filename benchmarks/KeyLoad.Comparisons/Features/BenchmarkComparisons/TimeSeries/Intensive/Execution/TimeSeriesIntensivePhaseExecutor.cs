@@ -1,17 +1,21 @@
+using Microsoft.Extensions.Options;
+
 using System.Diagnostics;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarget target,
     TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase,
-    TimeSeriesIntensiveAttemptLedger ledger, CancellationToken cellCancellation) : IAsyncDisposable
+    TimeSeriesIntensiveAttemptLedger ledger, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation) : IAsyncDisposable
 {
     private readonly TimeSeriesIntensivePhaseWorkers workers = new(cellCancellation);
     private readonly TimeSeriesIntensiveConcurrency concurrency = new();
 
     internal async Task<TimeSeriesIntensivePhaseResult> RunAsync()
     {
-        for (var index = 0; index < TimeSeriesIntensiveProfile.Concurrency; index++)
+        const int FirstElementIndex = 0;
+
+        for (var index = FirstElementIndex; index < TimeSeriesIntensiveProfile.Concurrency; index++)
         {
             workers.Add(WorkAsync(index));
         }
@@ -43,7 +47,7 @@ internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarge
                 }
 
                 var attempt = await TimeSeriesIntensiveAttemptExecutor.ExecuteAsync(target, expected, phase,
-                    index, worker, concurrency, workers.Token).ConfigureAwait(false);
+                    index, worker, concurrency, executionOptions, workers.Token).ConfigureAwait(false);
                 if (!attempt.HasValue)
                 {
                     break;

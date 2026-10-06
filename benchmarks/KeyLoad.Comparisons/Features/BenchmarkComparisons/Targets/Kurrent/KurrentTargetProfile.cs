@@ -4,7 +4,10 @@ internal static class KurrentTargetProfile
 {
     internal static TargetProfile Create(string connectionString, string image, ComparisonTopology topology)
     {
-        var imageName = image.Split(KurrentConstants.ImageDigestSeparator, KurrentConstants.ImageReferenceParts)[0];
+        const int FirstElementIndex = 0;
+        const int SingleItemCount = 1;
+
+        var imageName = image.Split(KurrentConstants.ImageDigestSeparator, KurrentConstants.ImageReferenceParts)[FirstElementIndex];
         var imageTag = imageName.Split(KurrentConstants.ImagePathSeparator).Last().Split(KurrentConstants.ImageTagSeparator).Last();
         if (imageTag != KurrentConstants.ExpectedServerVersion)
         {
@@ -24,9 +27,9 @@ internal static class KurrentTargetProfile
             ? insecure ? KurrentConstants.TlsClientCertificateIgnored : KurrentConstants.TlsClientCertificateConfigured
             : KurrentConstants.TlsClientCertificateAbsent;
         var profile = new TargetProfile(KurrentConstants.Name, KurrentConstants.ExpectedServerVersion,
-            ComparisonTopologies.NodeCount(topology) == 1 ? KurrentConstants.SingleTopology :
+            ComparisonTopologies.NodeCount(topology) == SingleItemCount ? KurrentConstants.SingleTopology :
                 topology == ComparisonTopology.TwoNode ? KurrentConstants.TwoNodeTopology : KurrentConstants.ReplicatedTopology,
-            ComparisonTopologies.NodeCount(topology) > 1 ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
+            ComparisonTopologies.NodeCount(topology) > SingleItemCount ? KurrentConstants.ReplicatedAcknowledgement : KurrentConstants.SingleAcknowledgement,
             KurrentConstants.ReadContract + KurrentConstants.WriterPreferenceLabel,
             transport, authorization + KurrentConstants.AuthorizationSeparator + certificateMetadata + KurrentConstants.AuthorizationSeparator + KurrentConstants.CommunityAuthorization, image);
         return profile;

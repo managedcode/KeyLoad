@@ -56,11 +56,13 @@ internal static class McpGatewayMetaProtocol
     private static readonly JsonElement InvokeOutputSchema = ParseSchema(InvokeOutputSchemaJson
         .Replace(InvokeOutputSchemaFAILURESchemaPlaceholder, FailureEnvelopeSchema, StringComparison.Ordinal));
 
+    private const string InvokeDescription = "Invoke one exact canonical KeyLoad operation.";
+
     internal static IReadOnlyList<Tool> CreateTools() =>
     [
         CreateTool(SearchName, CreateToolsDescriptionText, SearchInputSchema, SearchOutputSchema),
         CreateTool(RouteName, CreateToolsCreateToolsDescriptionText, RouteInputSchema, RouteOutputSchema),
-        CreateTool(InvokeName, "Invoke one exact canonical KeyLoad operation.", InvokeInputSchema, InvokeOutputSchema)
+        CreateTool(InvokeName, InvokeDescription, InvokeInputSchema, InvokeOutputSchema)
     ];
 
     internal static bool TryGetOperation(string name, out McpGatewayMetaOperation operation)

@@ -66,16 +66,24 @@ internal sealed class RecurringDueWaitTests
     [Test]
     public async Task ApplyLogFailureWakesDueWaitAndPreservesRecoveryFence()
     {
-        await using var fixture = new ReplicaAppliedPositionWaitFixture();
-        using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
-            TestContext.Current!.Execution.CancellationToken);
-        var pending = RecurringDueWait.WaitForChangeOrFallbackAsync(fixture.Consensus, 0,
-            TimeSpan.FromSeconds(10), TimeProvider.System, linked.Token);
+        var fixture = new ReplicaAppliedPositionWaitFixture();
+        try
+        {
+            using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+                TestContext.Current!.Execution.CancellationToken);
+            var pending = RecurringDueWait.WaitForChangeOrFallbackAsync(fixture.Consensus, 0,
+                TimeSpan.FromSeconds(10), TimeProvider.System, linked.Token);
 
-        fixture.CommitCorruptedNoOpEntry();
+            fixture.CommitCorruptedNoOpEntry();
 
-        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => pending.WaitAsync(linked.Token));
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+            var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => pending.WaitAsync(linked.Token));
+            await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
+        }
+        finally
+        {
+            var disposalFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.DisposeAsync().AsTask());
+            await Assert.That(disposalFailure!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+        }
     }
 }

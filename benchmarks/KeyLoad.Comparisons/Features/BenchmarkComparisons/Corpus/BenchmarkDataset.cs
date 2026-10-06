@@ -12,6 +12,10 @@ namespace KeyLoad.Comparisons;
 /// <remarks>Inference and exhaustive oracle work are outside measured requests.</remarks>
 public sealed class BenchmarkDataset : IComparisonCorpus
 {
+    private const string EdgeIdentityPrefix = "e";
+    private const string EdgeOrdinalFormat = "D6";
+    private const string IdentitySeparator = "-";
+
     private const string DocumentNumberFormat = "D9";
 
     private const string MutationTextProperty = "text";
@@ -38,22 +42,28 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <param name="workloadOptions">The workload options used to generate documents, vectors, and graph edges.</param>
     public BenchmarkDataset(IOptions<ComparisonOptions> workloadOptions)
     {
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+        const int DisconnectedGraphComponentCount = 2;
+        const int NoObservedItems = 0;
+        const int FirstNeighborOffset = 1;
+
         ArgumentNullException.ThrowIfNull(workloadOptions);
         options = workloadOptions.Value;
         options.Validate();
         ExecutionOptions = workloadOptions;
-        var documents = Enumerable.Range(0, options.Documents).Select(CreateDocument).ToArray();
+        var documents = Enumerable.Range(FirstElementIndex, options.Documents).Select(CreateDocument).ToArray();
         Documents = ImmutableCollectionsMarshal.AsImmutableArray(documents);
         // Two disconnected components, each with directed cycles and deterministic fan-out.
-        var split = (GraphVertexCount + 1) / 2;
-        var edges = Enumerable.Range(0, GraphVertexCount).SelectMany(number =>
+        var split = (GraphVertexCount + AdjacentElementOffset) / DisconnectedGraphComponentCount;
+        var edges = Enumerable.Range(FirstElementIndex, GraphVertexCount).SelectMany(number =>
         {
-            var first = number < split ? 0 : split;
+            var first = number < split ? NoObservedItems : split;
             var count = number < split ? split : GraphVertexCount - split;
-            return Enumerable.Range(1, Math.Min(options.GraphFanOut, count - 1)).Select(offset =>
+            return Enumerable.Range(FirstNeighborOffset, Math.Min(options.GraphFanOut, count - FirstNeighborOffset)).Select(offset =>
             {
                 var to = first + (number - first + offset) % count;
-                return new BenchmarkEdge($"e{number:D6}-{to:D6}", Documents[number].Id, Documents[to].Id);
+                return new BenchmarkEdge($"{EdgeIdentityPrefix}{(number).ToString(EdgeOrdinalFormat, global::System.Globalization.CultureInfo.CurrentCulture)}{IdentitySeparator}{(to).ToString(EdgeOrdinalFormat, global::System.Globalization.CultureInfo.CurrentCulture)}", Documents[number].Id, Documents[to].Id);
             });
         }).ToArray();
         Edges = ImmutableCollectionsMarshal.AsImmutableArray(edges);
@@ -65,28 +75,45 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns>The generated document, serialized payload, and vector.</returns>
     public BenchmarkDocument CreateDocument(int number)
     {
-        var id = "d" + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
-        var empty = JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = "" });
+        const int FinalXorShift = 5;
+
+        const string DocumentIdentityPrefix = "d";
+        const string SharedCorpusText = "KeyLoad shared corpus";
+        const string EmptyText = "";
+        const char PayloadPaddingCharacter = 'x';
+        const int AdjacentElementOffset = 1;
+        const uint SeedMixMultiplierUint = 0x9e3779b9u;
+        const int UninitializedRandomState = 0;
+        const int NonzeroRandomSeed = 1;
+        const int FirstElementIndex = 0;
+        const int FirstXorShift = 13;
+        const int ReverseXorShift = 17;
+        const int VectorFractionMask = 0xffffff;
+        const float VectorFractionDenominatorFloat = 8388608f;
+        const float VectorCoordinateOffsetFloat = 1f;
+
+        var id = DocumentIdentityPrefix + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
+        var empty = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = EmptyText });
         var json = JsonSerializer.Serialize(new
         {
             id,
             number,
-            text = "KeyLoad shared corpus",
-            padding = new string('x', options.PayloadBytes - Encoding.UTF8.GetByteCount(empty))
+            text = SharedCorpusText,
+            padding = new string(PayloadPaddingCharacter, options.PayloadBytes - Encoding.UTF8.GetByteCount(empty))
         });
-        var state = unchecked((uint)options.Seed ^ ((uint)number + 1) * 0x9e3779b9u);
-        if (state == 0)
+        var state = unchecked((uint)options.Seed ^ ((uint)number + AdjacentElementOffset) * SeedMixMultiplierUint);
+        if (state == UninitializedRandomState)
         {
-            state = 1;
+            state = NonzeroRandomSeed;
         }
 
         var vector = new float[options.Dimensions];
-        for (var i = 0; i < vector.Length; i++)
+        for (var i = FirstElementIndex; i < vector.Length; i++)
         {
-            state ^= state << 13;
-            state ^= state >> 17;
-            state ^= state << 5;
-            vector[i] = (state & 0xffffff) / 8388608f - 1f;
+            state ^= state << FirstXorShift;
+            state ^= state >> ReverseXorShift;
+            state ^= state << FinalXorShift;
+            vector[i] = (state & VectorFractionMask) / VectorFractionDenominatorFloat - VectorCoordinateOffsetFloat;
         }
         return new(number, id, json, ImmutableCollectionsMarshal.AsImmutableArray(vector));
     }
@@ -99,17 +126,22 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns>The deterministic document selected or generated for the operation.</returns>
     public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup)
     {
+        const int UpdateIdentityBlock = 1;
+        const int DeleteIdentityBlock = 2;
+        const int NoObservedItems = 0;
+        const uint DeterministicReadStrideUint = 2654435761u;
+
         if (scenario is Scenario.DocumentWrite or Scenario.QueueCycle or Scenario.StreamAppend
             or Scenario.DocumentUpdate or Scenario.DocumentDelete)
         {
-            var range = scenario switch { Scenario.DocumentUpdate => 1, Scenario.DocumentDelete => 2, _ => 0 };
+            var range = scenario switch { Scenario.DocumentUpdate => UpdateIdentityBlock, Scenario.DocumentDelete => DeleteIdentityBlock, _ => NoObservedItems };
             return CreateDocument(options.Documents + range * options.Repetitions * (options.Operations + options.Warmup)
                 + repetition * (options.Operations + options.Warmup)
                 + (warmup ? operation : options.Warmup + operation));
         }
 
         var count = scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse ? GraphVertexCount : Documents.Length;
-        var index = (int)((unchecked((uint)options.Seed) + (uint)operation * 2654435761u) % (uint)count);
+        var index = (int)((unchecked((uint)options.Seed) + (uint)operation * DeterministicReadStrideUint) % (uint)count);
         return Documents[index];
     }
 
@@ -141,6 +173,9 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns>The reachable identifiers in ordinal order, excluding the starting identifier.</returns>
     public ImmutableArray<string> Reachable(BenchmarkDocument start, int depth)
     {
+        const int NoObservedItems = 0;
+        const int AdjacentElementOffset = 1;
+
         ArgumentNullException.ThrowIfNull(start);
         if (reachable.TryGetValue((start.Number, depth), out var cached))
         {
@@ -150,7 +185,7 @@ public sealed class BenchmarkDataset : IComparisonCorpus
         var adjacency = Edges.ToLookup(edge => edge.From, edge => edge.To, StringComparer.Ordinal);
         var visited = new HashSet<string>(StringComparer.Ordinal) { start.Id };
         var frontier = new Queue<(string Id, int Depth)>();
-        frontier.Enqueue((start.Id, 0));
+        frontier.Enqueue((start.Id, NoObservedItems));
         while (frontier.TryDequeue(out var item))
         {
             if (item.Depth >= depth)
@@ -165,7 +200,7 @@ public sealed class BenchmarkDataset : IComparisonCorpus
                     continue;
                 }
 
-                frontier.Enqueue((next, item.Depth + 1));
+                frontier.Enqueue((next, item.Depth + AdjacentElementOffset));
             }
         }
 
@@ -183,21 +218,13 @@ public sealed class BenchmarkDataset : IComparisonCorpus
         ArgumentNullException.ThrowIfNull(query);
         if (!neighbors.TryGetValue(query.Number, out var result))
         {
-            var owned = Documents.Select(document => (Document: document, Score: Cosine(query.Vector, document.Vector)))
+            var owned = Documents.Select(document => (Document: document, Score: BenchmarkCosineOracle.Score(query.Vector, document.Vector)))
                 .OrderByDescending(candidate => candidate.Score).ThenBy(candidate => candidate.Document.Id, StringComparer.Ordinal)
                 .Take(options.TopK).Select(candidate => new FoundDocument(candidate.Document.Id, candidate.Document.Json)).ToArray();
             result = ImmutableCollectionsMarshal.AsImmutableArray(owned);
             neighbors.Add(query.Number, result);
         }
         return result;
-    }
-
-    private static double Cosine(ImmutableArray<float> left, ImmutableArray<float> right)
-    {
-        double dot = 0, a = 0, b = 0;
-        for (var i = 0; i < left.Length; i++)
-        { dot += (double)left[i] * right[i]; a += (double)left[i] * left[i]; b += (double)right[i] * right[i]; }
-        return dot / Math.Sqrt(a * b);
     }
 
     /// <summary>Checks whether a target result has the expected identifier and JSON value.</summary>
@@ -215,8 +242,11 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns>A GUID formed from the first 16 bytes of the identifier's SHA-256 hash.</returns>
     public static Guid EventId(BenchmarkDocument document)
     {
+        const int FirstElementIndex = 0;
+        const int GuidDigestBytes = 16;
+
         ArgumentNullException.ThrowIfNull(document);
-        return new(SHA256.HashData(Encoding.UTF8.GetBytes(document.Id)).AsSpan(0, 16));
+        return new(SHA256.HashData(Encoding.UTF8.GetBytes(document.Id)).AsSpan(FirstElementIndex, GuidDigestBytes));
     }
 
     /// <summary>Checks whether a target event matches the deterministic first-revision event for a document.</summary>
@@ -225,8 +255,10 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     /// <returns><see langword="true"/> when the event identifier, revision, and JSON value match.</returns>
     public static bool SameEvent(FoundEvent? actual, BenchmarkDocument expected)
     {
+        const int FirstEventRevision = 1;
+
         ArgumentNullException.ThrowIfNull(expected);
-        return actual is not null && actual.EventId == EventId(expected) && actual.Revision == 1 && SameJson(actual.Json, expected.Json);
+        return actual is not null && actual.EventId == EventId(expected) && actual.Revision == FirstEventRevision && SameJson(actual.Json, expected.Json);
     }
 
     /// <summary>Compares two JSON strings by their parsed JSON values.</summary>

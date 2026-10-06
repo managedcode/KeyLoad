@@ -62,6 +62,9 @@ internal static class KeyLoadDocumentOperations
 
     private static void ValidateReceipt(CommitReceipt receipt, Scenario scenario, BenchmarkDocument document)
     {
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
         var expectedRevision = scenario == Scenario.DocumentWrite
             ? KeyLoadWorkloadIdentities.CreatedDocumentRevision
             : KeyLoadWorkloadIdentities.UpdatedDocumentRevision;
@@ -69,8 +72,8 @@ internal static class KeyLoadDocumentOperations
         {
             throw new ComparisonFailureException(KeyLoadEventOperations.WrongWriteProfile);
         }
-        if (receipt.Mutations.Length != 1 || receipt.Mutations[0].Resource != OpenLoopProtocolIdentities.DocumentsCollection
-            || receipt.Mutations[0].Id != document.Id || receipt.Mutations[0].Revision != expectedRevision)
+        if (receipt.Mutations.Length != SingleItemCount || receipt.Mutations[FirstElementIndex].Resource != OpenLoopProtocolIdentities.DocumentsCollection
+            || receipt.Mutations[FirstElementIndex].Id != document.Id || receipt.Mutations[FirstElementIndex].Revision != expectedRevision)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }

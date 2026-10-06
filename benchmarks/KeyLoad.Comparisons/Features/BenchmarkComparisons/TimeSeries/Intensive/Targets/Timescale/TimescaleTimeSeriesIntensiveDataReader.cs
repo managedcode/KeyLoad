@@ -7,23 +7,32 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal static class TimescaleTimeSeriesIntensiveDataReader
 {
     internal static async Task<ImmutableArray<SampleRecord>> ReadSamplesAsync(NpgsqlDataReader reader,
-        int limit, CancellationToken token)
+        int limit, int initialCapacity, CancellationToken token)
     {
+        const int FirstElementIndex = 0;
+        const int GeometricGrowthFactor = 2;
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FourthColumnIndex = 3;
+        const int OrdinalIdentity = 4;
+        const int ReadSamplesAsyncOrdinalIdentity = 5;
+
         TimescaleTimeSeriesIntensiveReader.ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.SampleColumns);
-        var records = new SampleRecord[16];
-        var count = 0;
+        var records = new SampleRecord[initialCapacity];
+        var count = FirstElementIndex;
         while (await reader.ReadAsync(token).ConfigureAwait(false))
         {
             if (count == records.Length)
             {
-                Array.Resize(ref records, checked(records.Length * 2));
+                Array.Resize(ref records, checked(records.Length * GeometricGrowthFactor));
             }
-            if (count >= limit || await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(1, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(2, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(3, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(4, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(5, token).ConfigureAwait(false))
+            if (count >= limit || await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(ThirdColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(FourthColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(OrdinalIdentity, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(ReadSamplesAsyncOrdinalIdentity, token).ConfigureAwait(false))
             {
                 throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
             }
@@ -39,18 +48,25 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
 
     internal static async Task<SampleRecord?> ReadLatestAsync(NpgsqlDataReader reader, CancellationToken token)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FourthColumnIndex = 3;
+        const int OrdinalIdentity = 4;
+        const int ReadLatestAsyncOrdinalIdentity = 5;
+
         TimescaleTimeSeriesIntensiveReader.ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.SampleColumns);
         if (!await reader.ReadAsync(token).ConfigureAwait(false))
         {
             await TimescaleTimeSeriesIntensiveReader.ValidateEndAsync(reader, token).ConfigureAwait(false);
             return null;
         }
-        if (await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(1, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(2, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(3, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(4, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(5, token).ConfigureAwait(false))
+        if (await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(ThirdColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(FourthColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(OrdinalIdentity, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(ReadLatestAsyncOrdinalIdentity, token).ConfigureAwait(false))
         {
             throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
         }
@@ -65,17 +81,21 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
 
     internal static async Task<SampleAggregate> ReadAggregateAsync(NpgsqlDataReader reader, CancellationToken token)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int NoObservedItems = 0;
+
         TimescaleTimeSeriesIntensiveReader.ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.AggregateColumns);
         if (!await reader.ReadAsync(token).ConfigureAwait(false))
         {
             throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
         }
-        if (await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(1, token).ConfigureAwait(false))
+        if (await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false))
         {
             throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
         }
-        var aggregate = await ReadAggregateAsync(reader, 0, token).ConfigureAwait(false);
+        var aggregate = await ReadAggregateAsync(reader, NoObservedItems, token).ConfigureAwait(false);
         if (await reader.ReadAsync(token).ConfigureAwait(false))
         {
             throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
@@ -85,29 +105,38 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
     }
 
     internal static async Task<ImmutableArray<SampleAggregateWindow>> ReadWindowsAsync(NpgsqlDataReader reader,
-        int maxWindows, CancellationToken token)
+        int maxWindows, int initialCapacity, CancellationToken token)
     {
+        const int FirstElementIndex = 0;
+        const int GeometricGrowthFactor = 2;
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int FourthColumnIndex = 3;
+        const int FifthColumnIndex = 4;
+        const int OrdinalIdentity = 2;
+        const int ThirdContractOrdinal = 3;
+
         TimescaleTimeSeriesIntensiveReader.ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.WindowColumns);
-        var windows = new SampleAggregateWindow[16];
-        var count = 0;
+        var windows = new SampleAggregateWindow[initialCapacity];
+        var count = FirstElementIndex;
         while (await reader.ReadAsync(token).ConfigureAwait(false))
         {
             if (count == windows.Length)
             {
-                Array.Resize(ref windows, checked(windows.Length * 2));
+                Array.Resize(ref windows, checked(windows.Length * GeometricGrowthFactor));
             }
-            if (count >= maxWindows || await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(1, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(3, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(4, token).ConfigureAwait(false)
-                || reader.GetInt32(0) != count)
+            if (count >= maxWindows || await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(FourthColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(FifthColumnIndex, token).ConfigureAwait(false)
+                || reader.GetInt32(FirstColumnIndex) != count)
             {
                 throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
             }
-            var from = Utc(reader.GetDateTime(1));
-            DateTimeOffset? until = await reader.IsDBNullAsync(2, token).ConfigureAwait(false)
-                ? null : Utc(reader.GetDateTime(2));
-            windows[count++] = new(from, until, await ReadAggregateAsync(reader, 3, token).ConfigureAwait(false));
+            var from = Utc(reader.GetDateTime(SecondColumnIndex));
+            DateTimeOffset? until = await reader.IsDBNullAsync(OrdinalIdentity, token).ConfigureAwait(false)
+                ? null : Utc(reader.GetDateTime(OrdinalIdentity));
+            windows[count++] = new(from, until, await ReadAggregateAsync(reader, ThirdContractOrdinal, token).ConfigureAwait(false));
         }
         await TimescaleTimeSeriesIntensiveReader.ValidateEndAsync(reader, token).ConfigureAwait(false);
         if (count != windows.Length)
@@ -119,17 +148,29 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
 
     private static SampleRecord ReadSample(NpgsqlDataReader reader)
     {
-        return new(reader.GetString(0), new SampleData(reader.GetString(1), Utc(reader.GetDateTime(2)),
-            reader.GetDouble(3)), reader.GetInt64(4), reader.GetString(5));
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FourthColumnIndex = 3;
+        const int OrdinalIdentity = 4;
+        const int ReadSampleOrdinalIdentity = 5;
+
+        return new(reader.GetString(FirstColumnIndex), new SampleData(reader.GetString(SecondColumnIndex), Utc(reader.GetDateTime(ThirdColumnIndex)),
+            reader.GetDouble(FourthColumnIndex)), reader.GetInt64(OrdinalIdentity), reader.GetString(ReadSampleOrdinalIdentity));
     }
 
     private static async Task<SampleAggregate> ReadAggregateAsync(NpgsqlDataReader reader, int offset,
         CancellationToken token)
     {
-        return new(reader.GetInt64(offset), reader.GetDouble(offset + 1),
-            await NullableDoubleAsync(reader, offset + 2, token).ConfigureAwait(false),
-            await NullableDoubleAsync(reader, offset + 3, token).ConfigureAwait(false),
-            await NullableDoubleAsync(reader, offset + 4, token).ConfigureAwait(false));
+        const int SingleItemCount = 1;
+        const int PairMemberCount = 2;
+        const int ThirdContractOrdinal = 3;
+        const int OrdinalIdentity = 4;
+
+        return new(reader.GetInt64(offset), reader.GetDouble(offset + SingleItemCount),
+            await NullableDoubleAsync(reader, offset + PairMemberCount, token).ConfigureAwait(false),
+            await NullableDoubleAsync(reader, offset + ThirdContractOrdinal, token).ConfigureAwait(false),
+            await NullableDoubleAsync(reader, offset + OrdinalIdentity, token).ConfigureAwait(false));
     }
 
     private static async Task<double?> NullableDoubleAsync(NpgsqlDataReader reader, int ordinal, CancellationToken token) =>

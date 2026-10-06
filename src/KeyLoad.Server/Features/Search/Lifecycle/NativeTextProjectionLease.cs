@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
 
@@ -6,7 +7,7 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed class NativeTextProjectionLease(NativeTextProjection owner, NativeTextGeneration generation,
     NativeTextGenerationSlot slot, ReadExecutionBudget budget, Func<string, ulong> tokenHash,
     Action<NativeTextFaultStage>? faultObserver,
-    bool building) : ITextProjectionLease
+    bool building, IOptions<NativeTextExecutionOptions> executionOptions) : ITextProjectionLease
 {
     private const int RecordIndexSingleItemCount = -1;
 
@@ -47,7 +48,6 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
     public void ObserveToken(string token)
     {
         const int RecordIndexStep = 1;
-        const int PostingsSinceBoundCheckValidationBoundary = 64;
         const int PostingsSinceBoundCheckEmptyCount = 0;
 
         budget.Check();
@@ -67,7 +67,7 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
             faultObserver?.Invoke(NativeTextFaultStage.NativePostingWritten);
         }
         previousToken = hash;
-        if (++postingsSinceBoundCheck >= PostingsSinceBoundCheckValidationBoundary)
+        if (++postingsSinceBoundCheck >= executionOptions.Value.PostingsBoundCheckInterval)
         {
             owner.CheckPhysical(budget);
             postingsSinceBoundCheck = PostingsSinceBoundCheckEmptyCount;

@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.Comparisons;
 
@@ -111,6 +110,8 @@ public sealed record TargetProfile(string Name, string Version, string Topology,
 /// <summary>Defines the lifecycle and capabilities of a comparison database target.</summary>
 public interface IComparisonTarget : IAsyncDisposable
 {
+    private const string OutsideThisTargetSSharedContractDetail = "Outside this target's shared contract.";
+
     /// <summary>Gets the target's descriptive profile.</summary>
     TargetProfile Profile { get; }
     /// <summary>Determines whether the target supports the specified workload scenario.</summary>
@@ -118,7 +119,7 @@ public interface IComparisonTarget : IAsyncDisposable
     /// <returns><see langword="true"/> when the target supports the scenario; otherwise, <see langword="false"/>.</returns>
     bool Supports(Scenario scenario);
     /// <summary>Gets the reason a scenario is outside the target's shared contract.</summary>
-    string UnsupportedReason => "Outside this target's shared contract.";
+    string UnsupportedReason => OutsideThisTargetSSharedContractDetail;
     /// <summary>Initializes the target with the benchmark corpus.</summary>
     /// <param name="dataset">The deterministic corpus and workload oracle.</param>
     /// <param name="cancellationToken">A token used to cancel initialization.</param>
@@ -133,6 +134,8 @@ public interface IComparisonTarget : IAsyncDisposable
 /// <summary>Executes workload operations within one comparison target session.</summary>
 public interface IComparisonSession : IAsyncDisposable
 {
+    private const string NativeOrderedCorpusReadbackIsUnavailableDetail = "Native ordered corpus readback is unavailable.";
+
     /// <summary>Executes the selected workload operation for a document.</summary>
     /// <param name="scenario">The workload operation to execute.</param>
     /// <param name="document">The document used as the operation input.</param>
@@ -150,7 +153,7 @@ public interface IComparisonSession : IAsyncDisposable
     /// <returns>A task whose result is the found event, or <see langword="null"/> when it is absent.</returns>
     Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
     /// <summary>Reads all actual target corpus records once in bounded ascending identifier order.</summary>
-    IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken) => throw new NotSupportedException("Native ordered corpus readback is unavailable.");
+    IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken) => throw new NotSupportedException(NativeOrderedCorpusReadbackIsUnavailableDetail);
 }
 
 /// <summary>Captures one operation's timing, outcome, payload, and queue measurements.</summary>
@@ -234,7 +237,7 @@ public sealed record ComparisonCase(string Target, Scenario Scenario, int Repeti
 /// <param name="Targets">The target profiles included in the run.</param>
 /// <param name="Cases">The target/scenario repetition results.</param>
 public sealed record ComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
-    ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
+    [property: SerializedOptionsSnapshot] ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
     int LogicalProcessors, string Runtime, string Storage, string? SourceRevision,
     [property: JsonRequired] ImmutableArray<TargetProfile> Targets,
     [property: JsonRequired] ImmutableArray<ComparisonCase> Cases)

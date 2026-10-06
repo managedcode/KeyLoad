@@ -29,9 +29,12 @@ internal static class IsolatedTimeSeriesKeyLoadResources
         context.Runner.WithEnvironment(AdminEnvironment, admin);
         context.BindSetting(NativeIncarnationSetting, incarnation);
         context.BindImage(image.Reference);
+        var runtime = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder);
+        var admission = KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(runtime.IsolatedAdmission);
+        IsolatedKeyLoadAdmission.ForwardSelection(context.Runner, runtime.IsolatedAdmission);
         for (var index = FirstEndpointIndex; index < nodes.Length; index++)
         {
-            IsolatedKeyLoadAdmission.Apply(nodes[index]);
+            IsolatedKeyLoadAdmission.Apply(nodes[index], admission, runtime.IsolatedReplayAdmission);
             context.BindSetting(NativeVoterIdsPrefix + index.ToString(CultureInfo.InvariantCulture),
                 ClusterResources.Origin(nodes[index].Resource.Name));
             context.BindEndpoint(index, nodes[index], HttpEndpoint);

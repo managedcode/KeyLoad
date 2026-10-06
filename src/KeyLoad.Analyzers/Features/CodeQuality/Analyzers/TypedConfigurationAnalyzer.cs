@@ -46,7 +46,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
                 !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol) ||
             ConfigurationReadOperations.IsOptionsFactory(context.Compilation, context.Operation) &&
                 !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol) ||
-            !IsDefaultConstruction(context) &&
+            !IsDefaultConstruction(context) && !IsImmutableTemporalConstruction(context) &&
             IsUnownedPolicy(context))
         {
             Report(context.ReportDiagnostic, context.Operation.Syntax.GetLocation(), context.Operation.Syntax.ToString());
@@ -61,6 +61,23 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
                 invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan),
             IObjectCreationOperation creation => MagicRuntimeOperations.IsNativeType(context.Compilation,
                 creation.Type, MagicRuntimeMetadataNames.TimeSpan) || ConfigurationOwnership.IsOptionsType(context.Compilation, creation.Type),
+            _ => false
+        };
+
+    private static bool IsImmutableTemporalConstruction(OperationAnalysisContext context) =>
+        context.ContainingSymbol is IFieldSymbol field &&
+        ConfigurationOwnership.IsImmutableTemporalData(context.Compilation, field) &&
+        context.Operation.Parent is IFieldInitializerOperation initializer &&
+        initializer.InitializedFields.Length == ConfigurationMetadataNames.SingleSnapshotAssignment &&
+        SymbolEqualityComparer.Default.Equals(initializer.InitializedFields[0], field) &&
+        context.Operation switch
+        {
+            IInvocationOperation invocation when MagicRuntimeOperations.IsNativeType(context.Compilation,
+                invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan) =>
+                invocation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
+            IObjectCreationOperation creation when MagicRuntimeOperations.IsNativeType(context.Compilation,
+                creation.Type, MagicRuntimeMetadataNames.TimeSpan) =>
+                creation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
             _ => false
         };
 
@@ -102,8 +119,9 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
             }
 
             foreach (var parameter in constructor.Parameters.Where(parameter =>
-                ConfigurationOwnership.IsOptionsType(context.Compilation, parameter.Type) ||
-                ConfigurationOwnership.IsConfiguration(context.Compilation, parameter.Type)))
+                (ConfigurationOwnership.IsOptionsType(context.Compilation, parameter.Type) ||
+                 ConfigurationOwnership.IsConfiguration(context.Compilation, parameter.Type)) &&
+                !SerializedOptionsMetadata.IsDataParameter(context.Compilation, parameter, context.CancellationToken)))
             {
                 ReportSymbol(context, parameter);
             }
@@ -119,6 +137,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
     }
 
     private static bool IsInjectedProperty(SymbolAnalysisContext context, IPropertySymbol property) =>
+        !SerializedOptionsMetadata.IsDataProperty(context.Compilation, property, context.CancellationToken) &&
         property.DeclaringSyntaxReferences.Any(reference =>
             reference.GetSyntax(context.CancellationToken) is PropertyDeclarationSyntax) &&
         (property.SetMethod?.DeclaredAccessibility == Accessibility.Public ||

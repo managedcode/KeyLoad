@@ -36,7 +36,9 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     internal async Task ConfigureReplicationAsync(NpgsqlConnection connection, ComparisonTopology topology,
         CancellationToken cancellationToken)
     {
-        if (ComparisonTopologies.NodeCount(topology) == 1)
+        const int SingleNodeTopology = 1;
+
+        if (ComparisonTopologies.NodeCount(topology) == SingleNodeTopology)
         {
             return;
         }
@@ -52,10 +54,12 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     internal async Task<TargetProfile> ObserveCopiesAsync(NpgsqlConnection connection,
         ComparisonTopology topology, TargetProfile profile, CancellationToken cancellationToken)
     {
+        const int SingleNodeTopology = 1;
+
         if (topology == ComparisonTopology.Standalone)
         {
             await VerifySingleNodeAsync(connection, cancellationToken);
-            return profile with { Cluster = new(1, 1, SingleState, [profile.WriteAcknowledgement]) };
+            return profile with { Cluster = new(SingleNodeTopology, SingleNodeTopology, SingleState, [profile.WriteAcknowledgement]) };
         }
 
         return await ObserveReplicatedCopiesAsync(connection, topology, profile, cancellationToken);
@@ -81,10 +85,12 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private async Task<ReplicaMembers> WaitForMembersAsync(NpgsqlConnection connection, ComparisonTopology topology, bool requireQuorum,
         CancellationToken cancellationToken)
     {
+        const int SingleNodeTopology = 1;
+
         while (true)
         {
             var observation = await ReadMembersAsync(connection, requireQuorum, cancellationToken);
-            if (observation.Observed == ComparisonTopologies.NodeCount(topology) - 1 &&
+            if (observation.Observed == ComparisonTopologies.NodeCount(topology) - SingleNodeTopology &&
                 HasExpectedMembers(topology, observation.Members.Select(member => (member.Name, member.Address)).ToArray()))
             {
                 return observation;
@@ -116,13 +122,18 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private static async Task<ReplicaMember?> ReadMemberAsync(NpgsqlDataReader reader, bool requireQuorum,
         CancellationToken cancellationToken)
     {
-        if (reader.GetString(1) != Streaming || requireQuorum && reader.GetString(2) != Quorum)
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FourthColumnIndex = 3;
+        const int FirstColumnIndex = 0;
+
+        if (reader.GetString(SecondColumnIndex) != Streaming || requireQuorum && reader.GetString(ThirdColumnIndex) != Quorum)
         {
             return null;
         }
 
-        var address = await reader.IsDBNullAsync(3, cancellationToken) ? null : reader.GetString(3);
-        return new(reader.GetString(0), address);
+        var address = await reader.IsDBNullAsync(FourthColumnIndex, cancellationToken) ? null : reader.GetString(FourthColumnIndex);
+        return new(reader.GetString(FirstColumnIndex), address);
     }
 
     internal static string QuorumSettings(ComparisonTopology topology) => topology switch
@@ -134,8 +145,10 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
     internal static bool HasExpectedMembers(ComparisonTopology topology, (string Name, string? Address)[] members)
     {
-        var count = ComparisonTopologies.NodeCount(topology) - 1;
-        var names = count == 1 ? new[] { StandbyOne } : new[] { StandbyOne, StandbyTwo };
+        const int SingleNodeTopology = 1;
+
+        var count = ComparisonTopologies.NodeCount(topology) - SingleNodeTopology;
+        var names = count == SingleNodeTopology ? new[] { StandbyOne } : new[] { StandbyOne, StandbyTwo };
         return members.Length == count && members.Select(member => member.Name).Order(StringComparer.Ordinal).SequenceEqual(names, StringComparer.Ordinal)
             && members.All(member => !string.IsNullOrWhiteSpace(member.Address))
             && members.Select(member => member.Address).Distinct(StringComparer.Ordinal).Count() == count;
@@ -143,9 +156,13 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
     private static async Task VerifySingleNodeAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int NoObservedItems = 0;
+
         await using var verify = new NpgsqlCommand(SingleStatus, connection);
         await using var reader = await verify.ExecuteReaderAsync(cancellationToken);
-        if (!await reader.ReadAsync(cancellationToken) || reader.GetBoolean(0) || reader.GetInt64(1) != 0)
+        if (!await reader.ReadAsync(cancellationToken) || reader.GetBoolean(FirstColumnIndex) || reader.GetInt64(SecondColumnIndex) != NoObservedItems)
         {
             throw new ComparisonFailureException(ReplicaFailure);
         }
@@ -154,6 +171,8 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private async Task<TargetProfile> ObserveReplicatedCopiesAsync(NpgsqlConnection connection,
         ComparisonTopology topology, TargetProfile profile, CancellationToken cancellationToken)
     {
+        const char MemberSeparator = ',';
+
         await using var current = new NpgsqlCommand(CurrentWal, connection);
         var wal = (string)(await current.ExecuteScalarAsync(cancellationToken))!;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -168,7 +187,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
             Topology = state,
             WriteAcknowledgement = topology == ComparisonTopology.TwoNode ? TwoNodeAcknowledgement : ReplicatedAcknowledgement,
             Cluster = new(nodes, nodes, state, [CopyObservation + wal, QuorumObservation,
-                MemberObservation + string.Join(',', members.Members.Select(member => member.Name + IdentitySeparator + member.Address))])
+                MemberObservation + string.Join(MemberSeparator, members.Members.Select(member => member.Name + IdentitySeparator + member.Address))])
         };
     }
 
@@ -185,11 +204,13 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private async Task WaitForCopiesAsync(NpgsqlConnection connection, ComparisonTopology topology, string wal,
         CancellationToken cancellationToken)
     {
+        const int SingleNodeTopology = 1;
+
         while (true)
         {
             await using var command = new NpgsqlCommand(CopyStatus, connection);
             command.Parameters.AddWithValue(wal);
-            if (Equals(await command.ExecuteScalarAsync(cancellationToken), (long)ComparisonTopologies.NodeCount(topology) - 1))
+            if (Equals(await command.ExecuteScalarAsync(cancellationToken), (long)ComparisonTopologies.NodeCount(topology) - SingleNodeTopology))
             {
                 return;
             }

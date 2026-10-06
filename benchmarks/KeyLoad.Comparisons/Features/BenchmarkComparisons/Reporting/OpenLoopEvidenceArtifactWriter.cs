@@ -21,7 +21,7 @@ internal static class OpenLoopEvidenceArtifactWriter
                 await JsonSerializer.SerializeAsync(bounded, artifact, ReportWriter.JsonOptions, cancellationToken)
                     .ConfigureAwait(false);
                 await bounded.FlushAsync(cancellationToken).ConfigureAwait(false);
-                output.Flush(flushToDisk: true);
+                RandomAccess.FlushToDisk(output.SafeFileHandle);
             }
             await output.DisposeAsync().ConfigureAwait(false);
             output = null;
@@ -30,19 +30,45 @@ internal static class OpenLoopEvidenceArtifactWriter
         }
         catch (Exception failure)
         {
-            var cleanup = ImmutableArray.CreateBuilder<Exception>();
-            if (output is not null)
-            {
-                try { await output.DisposeAsync().ConfigureAwait(false); }
-                catch (Exception error) { cleanup.Add(error); }
-            }
-            if (ownsPending && File.Exists(pending))
-            {
-                try { File.Delete(pending); }
-                catch (Exception error) { cleanup.Add(error); }
-            }
-            ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(failure, cleanup.ToImmutable())!).Throw();
+            var combined = await SettleFailedWriteAsync(output, pending, ownsPending, failure).ConfigureAwait(false);
+            ExceptionDispatchInfo.Capture(combined).Throw();
             throw;
         }
+    }
+
+    private static async Task<Exception> SettleFailedWriteAsync(FileStream? output, string pending,
+        bool ownsPending, Exception failure)
+    {
+        var cleanup = ImmutableArray.CreateBuilder<Exception>();
+        if (output is not null)
+        {
+            var disposalFailure = await OpenLoopFailure.ObserveAsync(DisposeOutputAsync(output)).ConfigureAwait(false);
+            if (disposalFailure is not null)
+            {
+                cleanup.Add(disposalFailure);
+            }
+        }
+        if (ownsPending)
+        {
+            try
+            {
+                if (File.Exists(pending))
+                {
+                    File.Delete(pending);
+                }
+            }
+            catch (Exception error)
+            {
+                cleanup.Add(error);
+                ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(failure, cleanup.ToImmutable())!).Throw();
+                throw;
+            }
+        }
+        return OpenLoopFailure.Combine(failure, cleanup.ToImmutable())!;
+    }
+
+    private static async Task DisposeOutputAsync(FileStream output)
+    {
+        await output.DisposeAsync().ConfigureAwait(false);
     }
 }

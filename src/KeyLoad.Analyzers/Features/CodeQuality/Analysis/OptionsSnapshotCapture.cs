@@ -22,7 +22,8 @@ internal static class OptionsSnapshotCapture
             reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax declaration &&
             FindGetter(declaration) is { } expression &&
             compilation.GetSemanticModel(expression.SyntaxTree).GetOperation(expression, cancellationToken) is { } operation &&
-            IsFrozenField(compilation, operation, cancellationToken));
+            (IsFrozenField(compilation, operation, cancellationToken) ||
+             IsOptionsValue(compilation, expression, cancellationToken)));
 
     private static ExpressionSyntax? FindGetter(PropertyDeclarationSyntax property) =>
         property.ExpressionBody?.Expression ?? property.AccessorList?.Accessors

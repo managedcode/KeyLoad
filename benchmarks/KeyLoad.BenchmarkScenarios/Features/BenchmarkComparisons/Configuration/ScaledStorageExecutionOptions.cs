@@ -15,6 +15,8 @@ public sealed class ScaledStorageExecutionOptions
     private const long DefaultRequiredHeadroomBytes = 2_147_483_648;
     private const long DefaultQualificationCapacityBytes = 15_032_385_536;
     private const int DefaultMutableSegmentRecords = 1000;
+    private const int MaximumCancellationCheckInterval = 256;
+    private const int MaximumRecordsPerValueChunk = 4096;
     private const int MaximumPreparationHours = 24;
     private const int MinimumPositiveBudget = 0;
     private static readonly TimeSpan MaximumPreparationTimeout = TimeSpan.FromHours(MaximumPreparationHours);
@@ -29,6 +31,10 @@ public sealed class ScaledStorageExecutionOptions
     public long MinimumQualificationCapacityBytes { get; set; } = DefaultQualificationCapacityBytes;
     /// <summary>The minimum native mutable-segment capacity before corpus-based sizing.</summary>
     public int MinimumMutableSegmentRecords { get; set; } = DefaultMutableSegmentRecords;
+    /// <summary>The maximum operations between preparation cancellation checks.</summary>
+    public int CancellationCheckInterval { get; set; } = MaximumCancellationCheckInterval;
+    /// <summary>The bounded number of values retained in one contiguous allocation.</summary>
+    public int RecordsPerValueChunk { get; set; } = MaximumRecordsPerValueChunk;
 
     /// <summary>Checks consistent, positive memory admission and a native timer-safe deadline.</summary>
     /// <returns>Whether native fixture ownership can begin.</returns>
@@ -37,7 +43,9 @@ public sealed class ScaledStorageExecutionOptions
         && MaximumProcessBytes > MinimumPositiveBudget && RequiredHeadroomBytes > MinimumPositiveBudget
         && MaximumProcessBytes <= long.MaxValue - RequiredHeadroomBytes
         && MinimumQualificationCapacityBytes >= MaximumProcessBytes + RequiredHeadroomBytes
-        && MinimumMutableSegmentRecords > MinimumPositiveBudget;
+        && MinimumMutableSegmentRecords > MinimumPositiveBudget
+        && CancellationCheckInterval > MinimumPositiveBudget && CancellationCheckInterval <= MaximumCancellationCheckInterval
+        && RecordsPerValueChunk > MinimumPositiveBudget && RecordsPerValueChunk <= MaximumRecordsPerValueChunk;
 
     /// <summary>Rejects invalid standalone composition before storage allocation.</summary>
     public void Validate()

@@ -4,6 +4,17 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class Neo4jQueryProtocol
 {
+    private const char NineDigit = '9';
+    private const char LowerHexadecimalStart = 'a';
+    private const char IsAsciiLetterCharacter = 'z';
+
+    private const int NoItems = 0;
+    private const int FirstElementIndex = 0;
+    private const char ZeroDigit = '0';
+    private const char IdentifierSeparator = '_';
+    private const char UpperAsciiLetterStart = 'A';
+    private const char UpperAsciiLetterEnd = 'Z';
+
     private const int AcceptedStatusCode = 202;
     private const int QueryErrorStatusCode = 400;
     private const int MaximumNativeCodeLength = 256;
@@ -53,14 +64,16 @@ internal static class Neo4jQueryProtocol
 
     internal static void ValidateConstraintCreation(JsonElement response)
     {
+        const int NoItems = 0;
+
         ValidateErrors(response);
         var data = RequiredProperty(response, DataProperty);
         var fields = RequiredProperty(data, FieldsProperty);
         var values = RequiredProperty(data, ValuesProperty);
         var queryType = RequiredProperty(response, QueryTypeProperty);
         var bookmarks = RequiredProperty(response, BookmarksProperty);
-        if (fields.ValueKind != JsonValueKind.Array || fields.GetArrayLength() != 0
-            || values.ValueKind != JsonValueKind.Array || values.GetArrayLength() != 0
+        if (fields.ValueKind != JsonValueKind.Array || fields.GetArrayLength() != NoItems
+            || values.ValueKind != JsonValueKind.Array || values.GetArrayLength() != NoItems
             || queryType.ValueKind != JsonValueKind.String || queryType.GetString() != SchemaQueryType
             || !IsStringArray(bookmarks))
         {
@@ -171,19 +184,22 @@ internal static class Neo4jQueryProtocol
 
     private static bool IsNativeCode(string value)
     {
+        const char VersionSeparator = '.';
+        const int FirstElementIndex = 0;
+
         if (value.Length > MaximumNativeCodeLength)
         {
             return false;
         }
 
-        var parts = value.Split('.');
-        return parts.Length == NativeCodeComponentCount && parts[0] == NativeCodePrefix && parts.All(IsIdentifier);
+        var parts = value.Split(VersionSeparator);
+        return parts.Length == NativeCodeComponentCount && parts[FirstElementIndex] == NativeCodePrefix && parts.All(IsIdentifier);
     }
 
-    private static bool IsIdentifier(string value) => value.Length > 0 && IsAsciiLetter(value[0])
-        && value.All(character => IsAsciiLetter(character) || character is >= '0' and <= '9' or '_');
+    private static bool IsIdentifier(string value) => value.Length > NoItems && IsAsciiLetter(value[FirstElementIndex])
+        && value.All(character => IsAsciiLetter(character) || character is >= ZeroDigit and <= NineDigit or IdentifierSeparator);
 
-    private static bool IsAsciiLetter(char value) => value is >= 'A' and <= 'Z' or >= 'a' and <= 'z';
+    private static bool IsAsciiLetter(char value) => value is >= UpperAsciiLetterStart and <= UpperAsciiLetterEnd or >= LowerHexadecimalStart and <= IsAsciiLetterCharacter;
 
     internal static ComparisonFailureException Invalid() => new(InvalidResponse);
 }

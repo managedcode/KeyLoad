@@ -18,11 +18,10 @@ internal sealed class KeyLoadClientTransport
     {
         ArgumentNullException.ThrowIfNull(http);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        var execution = executionOptions.Value;
+        execution = executionOptions.Value;
         execution.Validate();
         this.http = http;
         this.apiKey = apiKey;
-        this.execution = execution;
     }
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution;

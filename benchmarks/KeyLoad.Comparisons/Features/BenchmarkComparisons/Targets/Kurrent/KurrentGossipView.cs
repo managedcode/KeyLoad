@@ -23,6 +23,8 @@ internal sealed record KurrentGossipView(string ServerIp, int ServerPort, Kurren
 
     private static KurrentGossipView Parse(JsonElement root, Uri endpoint)
     {
+        const int FirstElementIndex = 0;
+
         var serverIp = root.GetProperty(KurrentConstants.ServerIpField).GetString() ?? KurrentConstants.Empty;
         var serverPort = root.GetProperty(KurrentConstants.ServerPortField).GetInt32();
         var members = ReadMembers(root.GetProperty(KurrentConstants.MembersField));
@@ -34,7 +36,7 @@ internal sealed record KurrentGossipView(string ServerIp, int ServerPort, Kurren
             throw new ComparisonFailureException(KurrentConstants.EndpointAuthorityMismatch);
         }
 
-        return new KurrentGossipView(serverIp, serverPort, members, local[0]);
+        return new KurrentGossipView(serverIp, serverPort, members, local[FirstElementIndex]);
     }
 
     private static KurrentGossipMember[] ReadMembers(JsonElement members)

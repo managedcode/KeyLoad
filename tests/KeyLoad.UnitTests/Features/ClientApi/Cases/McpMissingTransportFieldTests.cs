@@ -11,7 +11,7 @@ internal sealed class McpMissingTransportFieldTests
     public async Task PresentMethodWithMissingBodyMethodUsesSafeValidation()
     {
         var wire = McpResponseBoundaryTestData.TransportFrame(null, null, omitParameters: true);
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(McpTransportGuardTestData.Marker, null));
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(McpTransportGuardTestData.Marker, null), UnitMcpOptions.Execution());
         var error = Assert.ThrowsExactly<KeyLoadException>(() => McpTransportGuard.Inspect(wire, headers));
         await AssertSafeValidationAsync(error);
     }
@@ -30,7 +30,7 @@ internal sealed class McpMissingTransportFieldTests
     public async Task PresentNameWithMissingRoutedTargetUsesSafeValidation(string method, string field, bool includeMethod)
     {
         var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(
-            includeMethod ? method : null, McpTransportGuardTestData.Marker));
+            includeMethod ? method : null, McpTransportGuardTestData.Marker), UnitMcpOptions.Execution());
         foreach (var fault in Enum.GetValues<McpMissingTargetFault>())
         {
             var wire = McpResponseBoundaryTestData.InvalidTargetFrame(method, field, fault);
@@ -48,7 +48,7 @@ internal sealed class McpMissingTransportFieldTests
     [Arguments(RequestMethods.ResourcesRead, McpTransportGuardTestData.UriField)]
     public async Task AbsentRoutingHeadersLeaveMissingFieldsToNative(string method, string field)
     {
-        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null));
+        var headers = McpTransportGuard.ReadHeaders(McpTransportGuardTestData.Headers(null, null), UnitMcpOptions.Execution());
         foreach (var fault in Enum.GetValues<McpMissingTargetFault>())
         {
             var wire = McpResponseBoundaryTestData.InvalidTargetFrame(method, field, fault);
@@ -64,7 +64,7 @@ internal sealed class McpMissingTransportFieldTests
     private static async Task AssertSafeValidationAsync(KeyLoadException error)
     {
         var baseline = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision)));
+            McpTransportGuard.ReadHeaders(McpTransportGuardTestData.InvalidHeaders(McpTransportHeaderFault.MarkerRevision), UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(baseline.Message);
         await Assert.That(error.Message).DoesNotContain(McpTransportGuardTestData.Marker);

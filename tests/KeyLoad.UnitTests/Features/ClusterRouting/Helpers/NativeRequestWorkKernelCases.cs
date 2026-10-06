@@ -151,11 +151,8 @@ internal static class NativeRequestWorkKernelCases
     {
         var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-        return NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => probe.HoldAsync(writer, requestId, throwOnCancellation), token),
-            serializer, requestId, TimeProvider.System, probe.SettleActivation,
-            CancellationToken.None, owner: owner);
+        return NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+                writer => probe.HoldAsync(writer, requestId, throwOnCancellation), token), serializer, requestId, TimeProvider.System, probe.SettleActivation, options: fixture.RoutingOptions, owner: owner, cancellationToken: CancellationToken.None);
     }
 
 }

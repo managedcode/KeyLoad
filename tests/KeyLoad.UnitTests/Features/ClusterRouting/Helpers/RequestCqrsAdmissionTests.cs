@@ -15,19 +15,19 @@ internal static class RequestCqrsAdmissionCases
     {
         var requestId = Guid.NewGuid();
         var serializer = ChunkSerializer(fixture);
-        var successful = new NativeCqrsStreamAdmission(serializer, requestId);
+        var successful = new NativeCqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         successful.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
         successful.Admit(RequestCqrsProtocolCases.CompletedChunk(new byte[SmallPayloadBytes]), CancellationToken.None);
         await Assert.That(successful.CompletionFailure(CancellationToken.None)).IsNull();
 
-        var earlyFailure = new NativeCqrsStreamAdmission(serializer, requestId);
+        var earlyFailure = new NativeCqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         earlyFailure.Admit(FailedChunk(ErrorCode.PermissionDenied, sequence: 1), CancellationToken.None);
         await Assert.That(earlyFailure.CompletionFailure(CancellationToken.None)).IsNull();
         var trailing = Assert.ThrowsExactly<KeyLoadException>(() =>
             earlyFailure.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None));
         await Assert.That(trailing.Code).IsEqualTo(ErrorCode.OwnershipLost);
 
-        var duplicateTerminal = new NativeCqrsStreamAdmission(serializer, requestId);
+        var duplicateTerminal = new NativeCqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         duplicateTerminal.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
         var completed = RequestCqrsProtocolCases.CompletedChunk(new byte[SmallPayloadBytes]);
         duplicateTerminal.Admit(completed, CancellationToken.None);
@@ -40,7 +40,7 @@ internal static class RequestCqrsAdmissionCases
     {
         var requestId = Guid.NewGuid();
         var serializer = ChunkSerializer(fixture);
-        var admission = new NativeCqrsStreamAdmission(serializer, requestId);
+        var admission = new NativeCqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         var chunk = InvalidChunk(invalid, requestId);
         if (invalid is not (RequestCqrsInvalidChunk.TerminalBeforeStarted
             or RequestCqrsInvalidChunk.WrongStartedIdentity))
@@ -55,7 +55,7 @@ internal static class RequestCqrsAdmissionCases
     internal static async Task AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion(RequestCqrsClusterFixture fixture)
     {
         var requestId = Guid.NewGuid();
-        var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId);
+        var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId, fixture.RoutingOptions);
         admission.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
         var missingTerminal = admission.CompletionFailure(CancellationToken.None);
         await Assert.That(missingTerminal).IsTypeOf<KeyLoadException>();
@@ -70,9 +70,9 @@ internal static class RequestCqrsAdmissionCases
     internal static async Task AcCrs004CompletedReplyPayloadRemainsInsideItsExistingRawReplyBound(RequestCqrsClusterFixture fixture)
     {
         var requestId = Guid.NewGuid();
-        var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId);
+        var admission = new NativeCqrsStreamAdmission(ChunkSerializer(fixture), requestId, fixture.RoutingOptions);
         admission.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
-        var overRawLimit = new byte[GrainRoutingProtocol.MaximumReplyBytes + 1];
+        var overRawLimit = new byte[fixture.RoutingOptions.Value.MaximumReplyBytes + 1];
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             admission.Admit(RequestCqrsProtocolCases.CompletedChunk(overRawLimit), CancellationToken.None));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
@@ -86,7 +86,7 @@ internal static class RequestCqrsAdmissionCases
     private static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> FailedChunk(ErrorCode code,
         long sequence)
     {
-        var problem = GrainRequestStreamProblem.Create(code, ClosedFailureDetail);
+        var problem = GrainRequestStreamProblem.Create(code, ClosedFailureDetail, UnitRoutingOptions.Routing());
         return new(CqrsStreamChunkKind.Failed, null,
             Result<GrainOperationReply>.Fail(problem), null, null, null, sequence);
     }
@@ -96,7 +96,7 @@ internal static class RequestCqrsAdmissionCases
     {
         var successReply = new GrainOperationReply { Payload = new byte[SmallPayloadBytes] };
         var successResult = Result<GrainOperationReply>.Succeed(successReply);
-        var problem = GrainRequestStreamProblem.Create(ErrorCode.PermissionDenied, ClosedFailureDetail);
+        var problem = GrainRequestStreamProblem.Create(ErrorCode.PermissionDenied, ClosedFailureDetail, UnitRoutingOptions.Routing());
         return invalid switch
         {
             RequestCqrsInvalidChunk.UnknownKind => new((CqrsStreamChunkKind)int.MaxValue,

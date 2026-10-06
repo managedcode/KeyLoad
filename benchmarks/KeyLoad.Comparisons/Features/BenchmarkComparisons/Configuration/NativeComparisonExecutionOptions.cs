@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Comparisons;
 /// <summary>Required operational limits shared by native comparison adapters.</summary>
 [ConfigurationOptions]
-public sealed class NativeComparisonExecutionOptions
+public sealed partial class NativeComparisonExecutionOptions
 {
     private const int MinimumPositiveLimit = 0;
     private const string NativeComparisonOperationalLimitsMustBePresentPositive = "Native comparison operational limits must be present, positive and consistent.";
@@ -70,6 +70,7 @@ public sealed class NativeComparisonExecutionOptions
             throw new OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions), [NativeComparisonOperationalLimitsMustBePresentPositive]);
         }
 
+        ValidateAdapterPolicy();
         return this;
     }
 
@@ -90,5 +91,6 @@ public sealed class NativeComparisonExecutionOptions
         parameters[nameof(CleanupTimeout)] = CleanupTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
         parameters[nameof(IndexBuildTimeout)] = IndexBuildTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
         parameters[nameof(IndexPollInterval)] = IndexPollInterval.ToString(DurationFormat, CultureInfo.InvariantCulture);
+        RecordAdapterEvidence(parameters);
     }
 }

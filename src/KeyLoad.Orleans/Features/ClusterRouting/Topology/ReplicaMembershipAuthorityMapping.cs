@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 
 namespace KeyLoad.Orleans;
@@ -14,9 +15,9 @@ internal static class ReplicaMembershipAuthorityMapping
             ImmutableArray.CreateRange(row.Suspects), etag);
     }
 
-    internal static MembershipEntry ToNative(ReplicaMembershipAuthorityEntryV1 entry)
+    internal static MembershipEntry ToNative(ReplicaMembershipAuthorityEntryV1 entry, IOptions<OrleansMembershipOptions> membershipOptions)
     {
-        ReplicaMembershipAuthorityValidation.Entry(entry);
+        ReplicaMembershipAuthorityValidation.Entry(entry: entry, membershipOptions: membershipOptions);
         return new MembershipEntry
         {
             SiloAddress = SiloAddress.FromParsableString(entry.Address),

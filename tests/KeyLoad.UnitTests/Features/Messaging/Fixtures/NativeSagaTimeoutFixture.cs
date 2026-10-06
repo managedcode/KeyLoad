@@ -3,7 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Orleans;
 using KeyLoad.UnitTests.Features.ClusterRouting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.TestingHost;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
@@ -22,13 +21,9 @@ internal sealed class NativeSagaTimeoutDataSourceAttribute : DataSourceGenerator
 
 internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDisposable
 {
-    private const int NativeSiloCount = 1;
-    private const string RootPrincipalId = "root";
     private const string InvalidProfileDetail = "The native runtime test timing profile is invalid.";
     private readonly IOptions<NativeRuntimeTestOptions> profile = Options.Create(new NativeRuntimeTestOptions());
-    private TestCluster? cluster;
-    private NativeRequestWorkOwner? requestWork;
-    private bool deployed;
+    private readonly NativeSagaTimeoutRuntimeLifecycle runtime;
     private bool disposed;
 
     internal NativeSagaTimeoutFixture()
@@ -44,13 +39,14 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
             RetryDelay = profile.Value.RetryDelay
         });
         Database = new TestDatabase();
+        runtime = new NativeSagaTimeoutRuntimeLifecycle(this);
     }
 
     internal TestDatabase Database { get; }
-    internal TestCluster Cluster => cluster ?? throw NotInitialized(nameof(Cluster));
+    internal TestCluster Cluster => runtime.Cluster;
     internal GrainRequestCodec Codec { get => field ?? throw NotInitialized(nameof(Codec)); private set; }
     internal ICommitCoordinator Coordinator { get => field ?? throw NotInitialized(nameof(Coordinator)); private set; }
-    internal NativeRequestWorkOwner RequestWork => requestWork ?? throw NotInitialized(nameof(RequestWork));
+    internal NativeRequestWorkOwner RequestWork => runtime.RequestWork;
     internal NativeSagaTimeoutJobHarness JobHarness { get => field ?? throw NotInitialized(nameof(JobHarness)); private set; }
     internal IServiceProvider SiloServices => Cluster.GetSiloServiceProvider();
     internal IOptions<GrainRoutingOptions> Routing { get; } = UnitRoutingOptions.Routing();
@@ -69,36 +65,19 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         {
             Database.Store.RequireReaderContract(KeyLoad.Storage.StoreReaderContract.RuntimeJournal);
             Database.Database.ConfigureRuntimeJournal(JournalOptions);
-            requestWork = new NativeRequestWorkOwner(Routing);
-            Coordinator = new EmbeddedCoordinator(Database.Database);
             Database.Configure("jobs", ResourceKind.WorkQueue);
             Database.Configure("timeouts", ResourceKind.WorkQueue);
             Current = this;
-            var builder = new TestClusterBuilder(initialSilosCount: NativeSiloCount);
-            builder.AddSiloBuilderConfigurator<NativeSagaTimeoutSiloConfigurator>();
-            builder.AddClientBuilderConfigurator<NativeSagaTimeoutClientConfigurator>();
-            cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System, Routing);
-            await Cluster.DeployAsync(deadline.Token);
-            deployed = true;
-            var principal = Database.Store.Read(view => Database.Database.Principal(
-                view, RootPrincipalId, TimeProvider.System.GetUtcNow()));
-            var startup = new RuntimeJournalStartupRequests(Cluster.Client, Codec, Database.Database,
-                Coordinator, SiloServices, TimeProvider.System, Routing);
-            await startup.BootstrapAsync(principal, Guid.NewGuid(), deadline.Token);
-            SiloServices.GetRequiredService<RuntimeJournalAdmission>().Open(deadline.Token);
-            JobHarness = new NativeSagaTimeoutJobHarness(Cluster.Client, SiloServices, TestProfile);
+            await runtime.StartAsync(deadline.Token);
         }
-        catch (Exception startupFailure)
+        catch (Exception startupFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(startupFailure))
         {
-            try
-            {
-                await DisposeAsync();
-            }
-            catch (Exception cleanupFailure)
-            {
-                throw new AggregateException(startupFailure, cleanupFailure);
-            }
+            await CleanupAfterStartupFailureAsync(startupFailure);
+            throw;
+        }
+        catch (Exception startupFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(startupFailure))
+        {
+            await CleanupAfterStartupFailureAsync(startupFailure);
             throw;
         }
     }
@@ -111,83 +90,43 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         }
         disposed = true;
         var failures = new List<Exception>();
-        await StopRuntimeAsync(failures);
-        await DisposeResourcesAsync(failures);
+        await runtime.StopAsync(failures, disposeDatabase: true);
         Current = null;
-        ThrowCleanupFailures(failures);
+        NativeSagaTimeoutCleanup.ThrowFailures(failures);
     }
 
     internal Task<DueDispatchResult> DispatchAsync(DueWorkHint hint, CancellationToken cancellationToken)
         => Cluster.Client.GetGrain<IRecurringDueCoordinatorGrain>(hint.Lane.Partition.AtomicPartitionId)
             .ProcessDueAsync(hint, cancellationToken);
 
+    internal Task RestartRuntimeAsync(CancellationToken cancellationToken)
+        => runtime.RestartAsync(cancellationToken);
+
+    internal void SetRuntimeDependencies(GrainRequestCodec codec, ICommitCoordinator coordinator)
+    {
+        Codec = codec;
+        Coordinator = coordinator;
+    }
+
+    internal void SetJobHarness(NativeSagaTimeoutJobHarness harness) => JobHarness = harness;
+
     private static InvalidOperationException NotInitialized(string member)
         => new($"Native saga timeout fixture member {member} is unavailable before initialization.");
 
-    private async Task StopRuntimeAsync(ICollection<Exception> failures)
-    {
-        if (cluster is null)
-        {
-            return;
-        }
-        if (deployed)
-        {
-            await ObserveAsync(() =>
-            {
-                SiloServices.GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
-                return Task.CompletedTask;
-            }, failures);
-        }
-        using var deadline = new CancellationTokenSource(TestProfile.ShutdownTimeout);
-        await ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
-        await ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
-    }
-
-    private async Task DisposeResourcesAsync(ICollection<Exception> failures)
-    {
-        if (requestWork is not null)
-        {
-            await ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
-        }
-        try
-        {
-            Database.Dispose();
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            failures.Add(error);
-        }
-    }
-
-    private static async Task ObserveAsync(Func<Task> operation, ICollection<Exception> failures)
+    private async Task CleanupAfterStartupFailureAsync(Exception startupFailure)
     {
         try
         {
-            await operation();
+            await DisposeAsync();
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception cleanupFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanupFailure))
         {
-            failures.Add(error);
+            throw new AggregateException(startupFailure, cleanupFailure);
         }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception cleanupFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanupFailure))
         {
-            failures.Add(error);
+            throw new AggregateException(startupFailure, cleanupFailure);
         }
     }
 
-    private static void ThrowCleanupFailures(IReadOnlyCollection<Exception> failures)
-    {
-        if (failures.Count == 1)
-        {
-            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failures[0]).Throw();
-        }
-        if (failures.Count > 1)
-        {
-            throw new AggregateException(failures);
-        }
-    }
 }

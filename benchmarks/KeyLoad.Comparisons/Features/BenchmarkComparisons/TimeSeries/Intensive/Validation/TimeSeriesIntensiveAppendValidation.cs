@@ -20,13 +20,18 @@ internal sealed class TimeSeriesIntensiveAppendValidation
 
     internal void Validate(int index, TimeSeriesIntensiveAppendReceipt receipt)
     {
-        if (commandIds.IsDefault || index < 0 || index >= commandIds.Length || receipt is null
-            || receipt.CommandId != commandIds[index] || receipt.Sequence < 1 || receipt.Sequence > commandIds.Length)
+        const int NoItems = 0;
+        const int AdjacentElementOffset = 1;
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
+        if (commandIds.IsDefault || index < NoItems || index >= commandIds.Length || receipt is null
+            || receipt.CommandId != commandIds[index] || receipt.Sequence < AdjacentElementOffset || receipt.Sequence > commandIds.Length)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.InvalidReceipt);
         }
 
-        if (Interlocked.CompareExchange(ref sequences[(int)receipt.Sequence - 1], 1, 0) != 0)
+        if (Interlocked.CompareExchange(ref sequences[(int)receipt.Sequence - SingleItemCount], SingleItemCount, NoObservedItems) != NoObservedItems)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.DuplicateSequence);
         }
@@ -34,7 +39,9 @@ internal sealed class TimeSeriesIntensiveAppendValidation
 
     internal void ValidateComplete()
     {
-        if (commandIds.IsDefaultOrEmpty || sequences.Any(sequence => sequence != 1))
+        const int SingleItemCount = 1;
+
+        if (commandIds.IsDefaultOrEmpty || sequences.Any(sequence => sequence != SingleItemCount))
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.MissingSequence);
         }

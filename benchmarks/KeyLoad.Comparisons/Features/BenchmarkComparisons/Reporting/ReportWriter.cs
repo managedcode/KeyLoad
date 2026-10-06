@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -12,13 +13,13 @@ public static class ReportWriter
     private const string JsonFileName = "results.json";
     private const string MarkdownFileName = "results.md";
     private const string CsvFileName = "samples.csv";
-    private const int JsonFileBufferBytes = 65_536;
 
     /// <summary>Gets the published JSON serializer settings for raw comparison results.</summary>
     public static JsonSerializerOptions JsonOptions { get; } = CreateJsonOptions();
     /// <summary>Writes JSON, Markdown, and CSV reports to the specified directory.</summary>
-    public static async Task WriteAsync(ComparisonReport report, string directory, CancellationToken cancellationToken)
+    public static async Task WriteAsync(ComparisonReport report, string directory, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(report);
         report.ValidateConfiguration();
@@ -31,7 +32,7 @@ public static class ReportWriter
             Mode = FileMode.Create,
             Access = FileAccess.Write,
             Share = FileShare.None,
-            BufferSize = JsonFileBufferBytes,
+            BufferSize = execution.ReportFileBufferBytes,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         }))
         {

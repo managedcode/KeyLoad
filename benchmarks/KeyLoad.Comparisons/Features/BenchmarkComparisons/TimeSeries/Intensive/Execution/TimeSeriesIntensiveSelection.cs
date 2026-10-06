@@ -57,7 +57,7 @@ internal sealed record TimeSeriesIntensiveSelection(TimeSeriesIntensiveTargetKin
     }
 
     [ConfigurationBinding]
-    private static IOptions<TimeSeriesIntensiveSelectionOptions> ReadSelection(IConfiguration configuration)
+    private static OptionsManager<TimeSeriesIntensiveSelectionOptions> ReadSelection(IConfiguration configuration)
     {
         var options = new OptionsManager<TimeSeriesIntensiveSelectionOptions>(new OptionsFactory<TimeSeriesIntensiveSelectionOptions>(
             [new ConfigureFromConfigurationOptions<TimeSeriesIntensiveSelectionOptions>(

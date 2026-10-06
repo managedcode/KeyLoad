@@ -45,7 +45,9 @@ internal static class RawStorageFixtureFailures
             return;
         }
 
-        var all = new List<Exception>(failures.Count + (primary is null ? 0 : 1));
+        const int NoPrimaryFailure = 0;
+        const int SinglePrimaryFailure = 1;
+        var all = new List<Exception>(failures.Count + (primary is null ? NoPrimaryFailure : SinglePrimaryFailure));
         if (primary is not null)
         {
             all.Add(primary);

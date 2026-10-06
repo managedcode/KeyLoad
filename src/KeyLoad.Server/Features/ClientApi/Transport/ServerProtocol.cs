@@ -22,5 +22,6 @@ internal static class ServerProtocol
     internal const string RequestCancelled = "The database request was cancelled.";
     internal const int KestrelMaximumBodyBytes = 33_554_432;
     internal const int MaximumJsonDepth = 64;
-    internal static readonly byte[] NullPayload = "null"u8.ToArray();
+    private const string JsonNullLiteral = "null";
+    internal static readonly byte[] NullPayload = System.Text.Encoding.UTF8.GetBytes(JsonNullLiteral);
 }

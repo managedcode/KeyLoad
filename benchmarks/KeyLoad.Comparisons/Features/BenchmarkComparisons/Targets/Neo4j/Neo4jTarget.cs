@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,9 +12,34 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Guid-formatted run identifier used to isolate node labels and constraints.</param>
 /// <param name="image">Neo4j image reference recorded in the target profile.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 public sealed class Neo4jTarget(HttpClient http, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
 {
+    private const string InitializeAsyncCREATECONSTRAINTText = "CREATE CONSTRAINT ";
+    private const string InitializeAsyncIdFORNText = "_id FOR (n:";
+    private const string InitializeAsyncREQUIRENIdISUNIQUEText = ") REQUIRE n.id IS UNIQUE";
+    private const string InitializeAsyncUNWINDDocumentsASDCREATENText = "UNWIND $documents AS d CREATE (n:";
+    private const string InitializeAsyncIdDIdJsonDJsonText = " {id:d.id,json:d.json})";
+    private const string InitializeAsyncUNWINDEdgesASEMATCHAText = "UNWIND $edges AS e MATCH (a:";
+    private const string InitializeAsyncIdEFromBText = " {id:e.from}),(b:";
+    private const string InitializeAsyncIdEToCREATEALINKSBText = " {id:e.to}) CREATE (a)-[:LINKS]->(b)";
+    private const string DisposeAsyncMATCHNText = "MATCH (n:";
+    private const string DisposeAsyncDETACHDELETENText = ") DETACH DELETE n";
+    private const string DisposeAsyncDROPCONSTRAINTText = "DROP CONSTRAINT ";
+    private const string DisposeAsyncIdIFEXISTSText = "_id IF EXISTS";
+
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+
+    private const string BenchmarkToken = "Benchmark_";
+    private const string Neo4jToken = "Neo4j";
+    private const string UnverifiedToken = "unverified";
+    private const string CommunitySingleNodeHeapMiBPageCacheMiBToken = "Community; single node; heap 512 MiB, page cache 256 MiB";
+    private const string LocalTransactionAcknowledgementContract = "local committed transaction; no synchronous replicas; durability not fault-qualified";
+    private const string CommittedPrimaryIndexedIDsAndBoundedDirectedReachabilityContractText = "committed primary; indexed IDs and bounded directed reachability";
+    private const string CypherQueryAPIV2HTTPJSONToken = "Cypher Query API v2 / HTTP JSON";
+    private const string Neo4jAdminNoRowFieldPolicyToken = "Neo4j admin; no row/field policy";
+
     private const string RunIdentityFormat = "N";
 
     private const string DataProperty = "data";
@@ -21,14 +47,14 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     private const string CommunityEdition = "community";
     private const string CommunityRequired = "Neo4jCommunityEditionRequired";
     private const string SingleCommunityState = "single native Community node";
-    private readonly string label = "Benchmark_" + Guid.Parse(runId).ToString(RunIdentityFormat);
+    private readonly string label = BenchmarkToken + Guid.Parse(runId).ToString(RunIdentityFormat);
     private bool ownsConstraint;
     private int depth;
     private int corpusCount;
     /// <summary>Gets the observed Neo4j version and declared single-node, local-transaction, and query profile.</summary>
-    public TargetProfile Profile { get; private set; } = new("Neo4j", "unverified", "Community; single node; heap 512 MiB, page cache 256 MiB",
-        "local committed transaction; no synchronous replicas; durability not fault-qualified", "committed primary; indexed IDs and bounded directed reachability",
-        "Cypher Query API v2 / HTTP JSON", "Neo4j admin; no row/field policy", image);
+    public TargetProfile Profile { get; private set; } = new(Neo4jToken, UnverifiedToken, CommunitySingleNodeHeapMiBPageCacheMiBToken,
+        LocalTransactionAcknowledgementContract, CommittedPrimaryIndexedIDsAndBoundedDirectedReachabilityContractText,
+        CypherQueryAPIV2HTTPJSONToken, Neo4jAdminNoRowFieldPolicyToken, image);
     /// <summary>Reports support for point reads, document writes, and directed graph neighbor or traversal queries.</summary>
     /// <param name="scenario">The comparison scenario to check.</param>
     /// <returns><see langword="true"/> for a supported scenario; otherwise <see langword="false"/>.</returns>
@@ -41,50 +67,59 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     /// <returns>A task that completes after index readiness.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
+        const string IndexedPrimaryDocumentReadsS1SeedsNodesOnlyWithNoGraphRelationshipsContractText = "indexed primary document reads; S1 seeds nodes only, with no graph relationships";
+        const string ServerComponentsStatement = "CALL dbms.components() YIELD name,versions,edition WHERE name='Neo4j Kernel' RETURN versions[0],edition";
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+        const string VersionEditionSeparator = "; ";
+
         ArgumentNullException.ThrowIfNull(dataset);
         depth = dataset.Settings.GraphDepth;
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            Profile = Profile with { ReadContract = "indexed primary document reads; S1 seeds nodes only, with no graph relationships" };
+            Profile = Profile with { ReadContract = IndexedPrimaryDocumentReadsS1SeedsNodesOnlyWithNoGraphRelationshipsContractText };
         }
         corpusCount = dataset.Documents.Count;
-        using var version = await QueryAsync("CALL dbms.components() YIELD name,versions,edition WHERE name='Neo4j Kernel' RETURN versions[0],edition", null, cancellationToken);
+        using var version = await QueryAsync(ServerComponentsStatement, null, cancellationToken);
         var row = Rows(version).EnumerateArray().Single();
-        var edition = row[1].GetString();
+        var edition = row[SingleItemCount].GetString();
         if (!string.Equals(edition, CommunityEdition, StringComparison.OrdinalIgnoreCase))
         {
             throw new ComparisonFailureException(CommunityRequired);
         }
         Profile = Profile with
         {
-            Version = row[0].GetString() + "; " + edition,
-            Cluster = new(1, 1, SingleCommunityState, [CommunityEdition])
+            Version = row[FirstElementIndex].GetString() + VersionEditionSeparator + edition,
+            Cluster = new(SingleItemCount, SingleItemCount, SingleCommunityState, [CommunityEdition])
         };
-        using (var constraint = await QueryAsync($"CREATE CONSTRAINT {label}_id FOR (n:{label}) REQUIRE n.id IS UNIQUE", null, cancellationToken))
+        using (var constraint = await QueryAsync($"{InitializeAsyncCREATECONSTRAINTText}{label}{InitializeAsyncIdFORNText}{label}{InitializeAsyncREQUIRENIdISUNIQUEText}", null, cancellationToken))
         {
             Neo4jQueryProtocol.ValidateConstraintCreation(constraint.RootElement);
             ownsConstraint = true;
         }
 
-        foreach (var batch in dataset.Documents.Chunk(256))
+        foreach (var batch in dataset.Documents.Chunk(execution.Neo4jSeedBatchSize))
         {
-            await ExecuteAsync($"UNWIND $documents AS d CREATE (n:{label} {{id:d.id,json:d.json}})",
+            await ExecuteAsync($"{InitializeAsyncUNWINDDocumentsASDCREATENText}{label}{InitializeAsyncIdDIdJsonDJsonText}",
                 new { documents = batch.Select(document => new { id = document.Id, json = document.Json }).ToArray() }, cancellationToken);
         }
 
-        foreach (var batch in dataset.Edges.Chunk(256))
+        foreach (var batch in dataset.Edges.Chunk(execution.Neo4jSeedBatchSize))
         {
-            await ExecuteAsync($"UNWIND $edges AS e MATCH (a:{label} {{id:e.from}}),(b:{label} {{id:e.to}}) CREATE (a)-[:LINKS]->(b)",
+            await ExecuteAsync($"{InitializeAsyncUNWINDEdgesASEMATCHAText}{label}{InitializeAsyncIdEFromBText}{label}{InitializeAsyncIdEToCREATEALINKSBText}",
                 new { edges = batch.Select(edge => new { from = edge.From, to = edge.To }).ToArray() }, cancellationToken);
         }
 
-        await ExecuteAsync("CALL db.awaitIndexes(30)", null, cancellationToken);
+        const string AwaitIndexesStatement = "CALL db.awaitIndexes({0})";
+        await ExecuteAsync(string.Format(CultureInfo.InvariantCulture, AwaitIndexesStatement, execution.Neo4jMaximumExecutionTimeSeconds), null, cancellationToken);
     }
 
     private static JsonElement Rows(JsonDocument response) => response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty);
     private async Task<JsonDocument> QueryAsync(string statement, object? parameters, CancellationToken cancellationToken)
     {
-        using var response = await http.PostAsJsonAsync("db/neo4j/query/v2", new { statement, parameters = parameters ?? new { }, maxExecutionTime = 30 }, cancellationToken);
+        const string DbNeo4jQueryV2Token = "db/neo4j/query/v2";
+
+        using var response = await http.PostAsJsonAsync(DbNeo4jQueryV2Token, new { statement, parameters = parameters ?? new { }, maxExecutionTime = execution.Neo4jMaximumExecutionTimeSeconds }, cancellationToken);
         Neo4jQueryProtocol.RequireQueryStatus((int)response.StatusCode);
         JsonDocument? json = null;
         try
@@ -119,8 +154,8 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
         {
             if (ownsConstraint)
             {
-                await ExecuteAsync($"MATCH (n:{label}) DETACH DELETE n", null, timeout.Token);
-                await ExecuteAsync($"DROP CONSTRAINT {label}_id IF EXISTS", null, timeout.Token);
+                await ExecuteAsync($"{DisposeAsyncMATCHNText}{label}{DisposeAsyncDETACHDELETENText}", null, timeout.Token);
+                await ExecuteAsync($"{DisposeAsyncDROPCONSTRAINTText}{label}{DisposeAsyncIdIFEXISTSText}", null, timeout.Token);
             }
         }
         finally { http.Dispose(); }
@@ -129,41 +164,61 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     /// <summary>Executes one comparison session’s document and directed graph queries.</summary>
     private sealed class Session(Neo4jTarget target) : IComparisonSession
     {
+    private const string ReadCorpusAsyncMATCHNText = "MATCH (n:";
+    private const string ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
+    private const string ReadAsyncIdIdRETURNNJsonText = " {id:$id}) RETURN n.json";
+    private const string ExecuteAsyncMATCHAText = "MATCH (a:";
+    private const string ExecuteAsyncIdIdLINKSText = " {id:$id})-[:LINKS*1..";
+    private const string ExecuteAsyncBText = "]->(b:";
+    private const string ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText = ") WHERE b.id<>$id RETURN DISTINCT b.id ORDER BY b.id";
+
         public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {
+            const int NoObservedItems = 0;
+            const int NoItems = 0;
+            const int FirstElementIndex = 0;
+            const int SingleItemCount = 1;
+            const string ScaledCorpusReadbackCountMismatchDetail = "ScaledCorpusReadbackCountMismatch";
+
             string? after = null;
-            var seen = 0;
+            var seen = NoObservedItems;
             while (true)
             {
-                using var response = await target.QueryAsync($"MATCH (n:{target.label}) WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT 256",
+                using var response = await target.QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText}{target.execution.ReadbackBatchCapacity}",
                     new { after }, cancellationToken);
                 var rows = Rows(response);
-                if (rows.GetArrayLength() == 0)
+                if (rows.GetArrayLength() == NoItems)
                 {
                     break;
                 }
                 foreach (var row in rows.EnumerateArray())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    after = row[0].GetString();
+                    after = row[FirstElementIndex].GetString();
                     seen++;
-                    yield return new(after!, row[1].GetString()!);
+                    yield return new(after!, row[SingleItemCount].GetString()!);
                 }
             }
             if (seen != target.corpusCount)
             {
-                throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+                throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
             }
         }
 
         public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
-            using var response = await target.QueryAsync($"MATCH (n:{target.label} {{id:$id}}) RETURN n.json", new { id = document.Id }, cancellationToken);
+            const int NoItems = 0;
+            const int FirstElementIndex = 0;
+
+            using var response = await target.QueryAsync($"{ReadCorpusAsyncMATCHNText}{target.label}{ReadAsyncIdIdRETURNNJsonText}", new { id = document.Id }, cancellationToken);
             var rows = Rows(response);
-            return rows.GetArrayLength() == 0 ? null : new(document.Id, rows[0][0].GetString()!);
+            return rows.GetArrayLength() == NoItems ? null : new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!);
         }
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {
+            const int SingleItemCount = 1;
+            const int FirstElementIndex = 0;
+
             switch (scenario)
             {
                 case Scenario.PointRead:
@@ -174,11 +229,11 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
                     return await Neo4jMutationOperations.ExecuteAsync(target.QueryAsync, target.label, scenario, document, cancellationToken);
                 case Scenario.GraphNeighbors:
                 case Scenario.GraphTraverse:
-                    var hops = scenario == Scenario.GraphNeighbors ? 1 : target.depth;
-                    using (var response = await target.QueryAsync($"MATCH (a:{target.label} {{id:$id}})-[:LINKS*1..{hops}]->(b:{target.label}) WHERE b.id<>$id RETURN DISTINCT b.id ORDER BY b.id", new { id = document.Id }, cancellationToken))
+                    var hops = scenario == Scenario.GraphNeighbors ? SingleItemCount : target.depth;
+                    using (var response = await target.QueryAsync($"{ExecuteAsyncMATCHAText}{target.label}{ExecuteAsyncIdIdLINKSText}{hops}{ExecuteAsyncBText}{target.label}{ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText}", new { id = document.Id }, cancellationToken))
                     {
                         return new(Vertices: ImmutableCollectionsMarshal.AsImmutableArray(Rows(response).EnumerateArray()
-                            .Select(row => row[0].GetString()!).ToArray()));
+                            .Select(row => row[FirstElementIndex].GetString()!).ToArray()));
                     }
 
                 default:

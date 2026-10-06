@@ -5,8 +5,6 @@ namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextPhysicalBudget
 {
-    internal const int MaximumGenerations = 3;
-
     internal static void Check(string root, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third, ReadExecutionBudget? budget, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         const int FilesInitialValue = 0;

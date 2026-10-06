@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +40,7 @@ internal static class CliStorageConfiguration
         Bind<ZoneTreePointCacheExecutionOptions>(CacheEnvironmentPrefix, CachePropertyNames,
             options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage));
 
-    private static IOptions<T> Bind<T>(string prefix, string[] propertyNames, Func<T, bool> validate, string message)
+    private static OptionsManager<T> Bind<T>(string prefix, string[] propertyNames, Func<T, bool> validate, string message)
         where T : class
     {
         var values = propertyNames.Select(name => new KeyValuePair<string, string?>(name,

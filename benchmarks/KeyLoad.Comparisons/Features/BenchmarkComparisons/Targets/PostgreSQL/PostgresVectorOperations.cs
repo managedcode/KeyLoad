@@ -7,16 +7,23 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class PostgresVectorOperations
 {
+    private const string VectorLiteralOpenBracket = "[";
+    private const string ValueSeparator = ",";
+    private const string VectorLiteralCloseBracket = "]";
+
     private const string VectorValueFormat = "R";
 
     private const string SearchSql = "SELECT id,body::text FROM documents WHERE embedding IS NOT NULL ORDER BY embedding <=> $1::vector, id LIMIT $2";
 
     internal static string VectorLiteral(ImmutableArray<float> vector)
-        => "[" + string.Join(",", vector.Select(value => value.ToString(VectorValueFormat, CultureInfo.InvariantCulture))) + "]";
+        => VectorLiteralOpenBracket + string.Join(ValueSeparator, vector.Select(value => value.ToString(VectorValueFormat, CultureInfo.InvariantCulture))) + VectorLiteralCloseBracket;
 
     internal static async Task<ImmutableArray<FoundDocument>> SearchAsync(NpgsqlConnection connection,
         BenchmarkDocument document, int topK, CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+
         await using var command = connection.CreateCommand();
         command.CommandText = SearchSql;
         command.Parameters.AddWithValue(VectorLiteral(document.Vector));
@@ -25,7 +32,7 @@ internal static class PostgresVectorOperations
         var found = new List<FoundDocument>();
         while (await reader.ReadAsync(cancellationToken))
         {
-            found.Add(new(reader.GetString(0), reader.GetString(1)));
+            found.Add(new(reader.GetString(FirstColumnIndex), reader.GetString(SecondColumnIndex)));
         }
 
         return ImmutableCollectionsMarshal.AsImmutableArray(found.ToArray());

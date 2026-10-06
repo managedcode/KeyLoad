@@ -46,7 +46,8 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     internal bool SiloJoined => Volatile.Read(ref siloJoined) == OrleansNodeProtocol.JoinedSilo;
 
     internal Task<MembershipReadinessSnapshot?> MembershipReadyAsync(CancellationToken cancellationToken)
-        => ReplicaMembershipReadiness.ReadNodeAsync(SiloJoined, Volatile.Read(ref host), Options, cancellationToken);
+        => ReplicaMembershipReadiness.ReadNodeAsync(SiloJoined, Volatile.Read(ref host), nodeOptions,
+            runtimeOptions.Membership, cancellationToken);
 
     /// <summary>Authenticator for exact discovery response bytes.</summary>
     public ReplicaEnvelopeAuthenticator? Authentication => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaEnvelopeAuthenticator>();
@@ -94,7 +95,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         await registered.ConfigureAwait(false);
         var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
-            address, cancellationToken, runtimeOptions);
+            address, runtimeOptions, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
@@ -102,7 +103,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
         { return; }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
-            built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting);
+            built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting, runtimeOptions.McpExecution);
         Volatile.Write(ref physicalShardCatalog, catalog);
         var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
         if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local)

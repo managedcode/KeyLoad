@@ -4,9 +4,11 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class ScaledMeasurementState(int operations, int sampleCapacity)
 {
+    private const int MissingItemIndex = -1;
+
     private readonly int[] sampleIndices = ScaledLatencySample.Indices(operations, sampleCapacity);
     private readonly OperationSample?[] samples = new OperationSample[sampleCapacity];
-    private int next = -1;
+    private int next = MissingItemIndex;
     private int attempted;
     private int successes;
     private int failures;
@@ -19,6 +21,8 @@ internal sealed class ScaledMeasurementState(int operations, int sampleCapacity)
     internal void CompleteOperation(int operation, int worker, double started, double completed,
         BenchmarkDocument input, string? error, bool success, bool timeout, bool rejection = false)
     {
+        const int NoObservedItems = 0;
+
         if (success)
         {
             Interlocked.Increment(ref successes);
@@ -36,7 +40,7 @@ internal sealed class ScaledMeasurementState(int operations, int sampleCapacity)
             Interlocked.Increment(ref rejections);
         }
         var sample = Array.BinarySearch(sampleIndices, operation);
-        if (sample >= 0)
+        if (sample >= NoObservedItems)
         {
             samples[sample] = new(operation, worker, started, completed, success, error,
                 Encoding.UTF8.GetByteCount(input.Json), null, null);
@@ -54,27 +58,33 @@ internal sealed record ScaledMeasurementResult(OperationSample[] Samples, double
 
 internal sealed class ScaledOperationInputs(IComparisonCorpus corpus, Scenario scenario)
 {
+    private const int NoObservedItems = 0;
+
     internal Scenario Scenario => scenario;
     internal int PayloadBytes => corpus.Settings.PayloadBytes;
-    internal BenchmarkDocument Create(int operation, bool warmup) => corpus.Input(scenario, 0, operation, warmup);
+    internal BenchmarkDocument Create(int operation, bool warmup) => corpus.Input(scenario, NoObservedItems, operation, warmup);
 }
 
 internal static class ScaledLatencySample
 {
     internal static int[] Indices(int operations, int capacity)
     {
-        if (operations < 1 || capacity < 1 || capacity > operations)
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+
+        if (operations < SingleItemCount || capacity < SingleItemCount || capacity > operations)
         {
             throw new ArgumentOutOfRangeException(nameof(capacity));
         }
-        if (capacity == 1)
+        if (capacity == SingleItemCount)
         {
-            return [0];
+            return [FirstElementIndex];
         }
         var indices = new int[capacity];
-        for (var index = 0; index < capacity; index++)
+        for (var index = FirstElementIndex; index < capacity; index++)
         {
-            indices[index] = checked((int)((long)index * (operations - 1) / (capacity - 1)));
+            indices[index] = checked((int)((long)index * (operations - AdjacentElementOffset) / (capacity - AdjacentElementOffset)));
         }
         return indices;
     }

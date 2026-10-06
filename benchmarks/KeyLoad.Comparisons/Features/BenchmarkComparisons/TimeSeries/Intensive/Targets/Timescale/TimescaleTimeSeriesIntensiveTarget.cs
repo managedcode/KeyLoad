@@ -1,10 +1,16 @@
+using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIntensiveTarget
 {
-    private const int MillisecondsPerSecond = 1000;
+    private const int SingleItemCount = 1;
+    private const int AdjacentElementOffset = 1;
+    private const int MissingItemIndex = -1;
+    private const int NoObservedItems = 0;
+
+    private readonly NativeComparisonExecutionOptions execution;
 
     private readonly TimescaleTimeSeriesIntensiveContext context;
     private readonly TimescaleTimeSeriesIntensiveSession session;
@@ -15,10 +21,12 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
     private int seedOrdinal;
     private bool ownsSchema;
 
-    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId)
+    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
+        execution = executionOptions.Value;
+        execution.Validate();
         context = new(runId);
-        session = new(connectionString, context.SchemaName);
+        session = new(connectionString, context.SchemaName, executionOptions);
     }
 
     internal TimescaleTimeSeriesIntensiveContext Context => context;
@@ -26,21 +34,23 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
     internal bool OwnsSchema { get => ownsSchema; set => ownsSchema = value; }
     internal int ReadSeedOrdinal() => Volatile.Read(ref seedOrdinal);
     internal bool TryReserveSeedOrdinal(int batch) =>
-        Interlocked.CompareExchange(ref seedOrdinal, -(batch + 1), batch) == batch;
+        Interlocked.CompareExchange(ref seedOrdinal, -(batch + SingleItemCount), batch) == batch;
     internal bool CompleteSeedOrdinal(int batch) =>
-        Interlocked.CompareExchange(ref seedOrdinal, batch + 1, -(batch + 1)) == -(batch + 1);
-    internal void ReleaseSeedOrdinal(int batch) => Interlocked.CompareExchange(ref seedOrdinal, batch, -(batch + 1));
-    internal bool TryBeginInitialization() => Interlocked.CompareExchange(ref initialized, -1, 0) == 0;
-    internal void MarkInitializationSucceeded() => Volatile.Write(ref initialized, 1);
-    internal void MarkInitializationFailed() => Volatile.Write(ref initialized, 0);
+        Interlocked.CompareExchange(ref seedOrdinal, batch + SingleItemCount, -(batch + SingleItemCount)) == -(batch + AdjacentElementOffset);
+    internal void ReleaseSeedOrdinal(int batch) => Interlocked.CompareExchange(ref seedOrdinal, batch, -(batch + SingleItemCount));
+    internal bool TryBeginInitialization() => Interlocked.CompareExchange(ref initialized, MissingItemIndex, NoObservedItems) == NoObservedItems;
+    internal void MarkInitializationSucceeded() => Volatile.Write(ref initialized, SingleItemCount);
+    internal void MarkInitializationFailed() => Volatile.Write(ref initialized, NoObservedItems);
 
     public ValueTask DisposeAsync()
     {
+        const int SingleItemCount = 1;
+
         lock (disposeGate)
         {
             if (disposeTask is null)
             {
-                Interlocked.Exchange(ref closed, 1);
+                Interlocked.Exchange(ref closed, SingleItemCount);
                 disposeTask = DisposeCoreAsync();
             }
             return new ValueTask(disposeTask);
@@ -49,7 +59,9 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
 
     internal void EnsureOpen()
     {
-        if (Volatile.Read(ref closed) != 0)
+        const int NoObservedItems = 0;
+
+        if (Volatile.Read(ref closed) != NoObservedItems)
         {
             throw new ObjectDisposedException(nameof(TimescaleTimeSeriesIntensiveTarget),
                 TimescaleTimeSeriesIntensiveProtocol.ContextClosed);
@@ -64,7 +76,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
             await context.CloseAndDrainAsync().ConfigureAwait(false);
             if (OwnsSchema)
             {
-                using var timeout = new CancellationTokenSource(TimescaleTimeSeriesIntensiveProtocol.ConnectionTimeoutSeconds * MillisecondsPerSecond);
+                using var timeout = new CancellationTokenSource(execution.TimescaleConnectionTimeout);
                 await session.DropOwnedSchemaAsync(context, timeout.Token).ConfigureAwait(false);
             }
         }
@@ -103,12 +115,14 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
 
     internal async ValueTask<TimescaleTimeSeriesIntensiveOperation> StartOperationAsync(CancellationToken token)
     {
+        const int SingleItemCount = 1;
+
         EnsureOpen();
         var operation = new TimescaleTimeSeriesIntensiveOperation();
         operation.Own(context.EnterOperation());
         try
         {
-            if (Volatile.Read(ref initialized) != 1)
+            if (Volatile.Read(ref initialized) != SingleItemCount)
             {
                 throw new ComparisonFailureException(TimescaleTimeSeriesIntensiveProtocol.InvalidInitialization);
             }

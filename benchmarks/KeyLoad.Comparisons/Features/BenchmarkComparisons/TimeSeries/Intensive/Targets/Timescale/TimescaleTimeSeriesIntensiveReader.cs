@@ -9,18 +9,23 @@ internal static class TimescaleTimeSeriesIntensiveReader
     internal static async Task<ImmutableArray<TimescaleTimeSeriesIntensiveAppendRow>> ReadBatchAsync(
         NpgsqlDataReader reader, CancellationToken token)
     {
+        const int FirstElementIndex = 0;
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+
         ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.BatchColumns);
         var rows = new TimescaleTimeSeriesIntensiveAppendRow[TimeSeriesIntensiveProfile.SeedBatchSize];
-        var count = 0;
+        var count = FirstElementIndex;
         while (await reader.ReadAsync(token).ConfigureAwait(false))
         {
-            if (count == rows.Length || await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(1, token).ConfigureAwait(false)
-                || await reader.IsDBNullAsync(2, token).ConfigureAwait(false))
+            if (count == rows.Length || await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false)
+                || await reader.IsDBNullAsync(ThirdColumnIndex, token).ConfigureAwait(false))
             {
                 throw InvalidReply();
             }
-            rows[count++] = new(reader.GetInt32(0), reader.GetGuid(1), reader.GetInt64(2));
+            rows[count++] = new(reader.GetInt32(FirstColumnIndex), reader.GetGuid(SecondColumnIndex), reader.GetInt64(ThirdColumnIndex));
         }
         await ValidateEndAsync(reader, token).ConfigureAwait(false);
         if (count != rows.Length)
@@ -33,17 +38,20 @@ internal static class TimescaleTimeSeriesIntensiveReader
     internal static async Task<TimeSeriesIntensiveAppendReceipt> ReadScalarAsync(NpgsqlDataReader reader,
         CancellationToken token)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+
         ValidateColumns(reader, TimescaleTimeSeriesIntensiveProtocol.ScalarColumns);
         if (!await reader.ReadAsync(token).ConfigureAwait(false))
         {
             throw InvalidReply();
         }
-        if (await reader.IsDBNullAsync(0, token).ConfigureAwait(false)
-            || await reader.IsDBNullAsync(1, token).ConfigureAwait(false))
+        if (await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
+            || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false))
         {
             throw InvalidReply();
         }
-        var receipt = new TimeSeriesIntensiveAppendReceipt(reader.GetGuid(0), reader.GetInt64(1));
+        var receipt = new TimeSeriesIntensiveAppendReceipt(reader.GetGuid(FirstColumnIndex), reader.GetInt64(SecondColumnIndex));
         if (await reader.ReadAsync(token).ConfigureAwait(false))
         {
             throw InvalidReply();
@@ -54,11 +62,13 @@ internal static class TimescaleTimeSeriesIntensiveReader
 
     internal static void ValidateColumns(NpgsqlDataReader reader, ReadOnlySpan<string> expected)
     {
+        const int FirstElementIndex = 0;
+
         if (reader.FieldCount != expected.Length)
         {
             throw InvalidReply();
         }
-        for (var index = 0; index < expected.Length; index++)
+        for (var index = FirstElementIndex; index < expected.Length; index++)
         {
             if (!string.Equals(reader.GetName(index), expected[index], StringComparison.Ordinal))
             {

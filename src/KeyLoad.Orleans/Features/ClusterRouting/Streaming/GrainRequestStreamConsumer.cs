@@ -26,7 +26,7 @@ internal static class GrainRequestStreamConsumer
                 var problem = chunk.Final!.Value.Problem!;
                 terminal = new GrainOperationReply
                 {
-                    Error = GrainRequestStreamProblem.ReadCode(problem),
+                    Error = GrainRequestStreamProblem.ReadCode(problem: problem, options: options),
                     SafeDetail = problem.Detail
                 };
             }

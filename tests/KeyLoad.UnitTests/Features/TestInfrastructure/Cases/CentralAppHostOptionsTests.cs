@@ -1,4 +1,7 @@
 using Aspire.Hosting;
+using KeyLoad.Comparisons;
+using KeyLoad.Core;
+using KeyLoad.Orleans;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
@@ -59,6 +62,37 @@ internal sealed class CentralAppHostOptionsTests
         builder.Configuration["Benchmarks:ServerResources:NativeReadBufferBytes"] = "0";
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostOptionsRegistration.Get(builder));
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(ScaleServerResourceOptions));
+        await Assert.That(builder.Resources.Count).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task CentralIsolatedAdmissionControlsTheActualGovernor()
+    {
+        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
+        builder.Configuration["IsolatedKeyLoadAdmission:RequestsPerScope"] = "2";
+        var runtime = AppHostOptionsRegistration.Get(builder);
+        var governor = new HttpAdmissionGovernor(IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(runtime.IsolatedAdmission));
+        builder.Configuration["IsolatedKeyLoadAdmission:RequestsPerScope"] = "3";
+        using (var first = governor.Begin("/v1/documents/get", 0))
+        using (var second = governor.Begin("/v1/documents/get", 0))
+        {
+            first.Bind(new("principal", "tenant", [], []));
+            second.Bind(new("principal", "tenant", [], []));
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(
+                () => governor.Begin("/v1/documents/get", 0)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(governor.Status().VerifiedScopes.Commands).IsEqualTo(2);
+        }
+        await Assert.That(governor.Status().Node.Commands).IsEqualTo(0);
+        await Assert.That(ReferenceEquals(runtime, AppHostOptionsRegistration.Get(builder))).IsTrue();
+    }
+
+    [Test]
+    public async Task InvalidIsolatedReplayRejectsBeforeContainerComposition()
+    {
+        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
+        builder.Configuration["Benchmarks:IsolatedReplayAdmission:ReadBarrierPerVoter"] = "196609";
+        var failure = Assert.ThrowsExactly<OptionsValidationException>(() => AppHostOptionsRegistration.Get(builder));
+        await Assert.That(failure.OptionsType).IsEqualTo(typeof(ReplicaReplayLimits));
         await Assert.That(builder.Resources.Count).IsEqualTo(0);
     }
 }

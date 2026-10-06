@@ -10,6 +10,7 @@ internal sealed class NativeTextProjection : ITextProjection
     private const int FailureSingleItemCount = 1;
     private const int FailureIndexEmptyCount = 0;
 
+    private const int NoCleanupFailures = 0;
     private readonly IOptions<NativeTextExecutionOptions> executionOptions;
 
     private readonly DatabaseLimits limits;
@@ -48,7 +49,7 @@ internal sealed class NativeTextProjection : ITextProjection
                 ? lifecycle.CreateGeneration(reservation.Slot, scope, budget)
                 : lifecycle.OpenGeneration(reservation.Slot, budget);
             return new NativeTextProjectionLease(this, generation, reservation.Slot, budget, tokenHash,
-                faultObserver, reservation.Building);
+                faultObserver, reservation.Building, executionOptions);
         }
         catch (Exception error)
         {
@@ -83,7 +84,7 @@ internal sealed class NativeTextProjection : ITextProjection
             lifecycle.SourceNodeId, budget, building, invalidate, completed, currentInvalidation,
             () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate, executionOptions: executionOptions),
             failures);
-        ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == 0 ? budget : null), failures);
+        ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == NoCleanupFailures ? budget : null), failures);
         var retired = state.CompleteLease(slot, Failure(failures));
         if (retired is not null)
         {

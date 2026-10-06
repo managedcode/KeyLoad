@@ -25,8 +25,10 @@ internal sealed class TimeSeriesIntensiveReceiptView : IReadOnlyList<TimeSeriesI
     {
         get
         {
+            const int SingleItemCount = 1;
+
             var attempt = attempts.Span[index];
-            if (attempt.Outcome != TimeSeriesIntensiveOutcome.Succeeded || attempt.ReceiptSequence < 1
+            if (attempt.Outcome != TimeSeriesIntensiveOutcome.Succeeded || attempt.ReceiptSequence < SingleItemCount
                 || attempt.ReceiptSequence > Count)
             {
                 throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.UnvalidatedReceipt);
@@ -38,7 +40,9 @@ internal sealed class TimeSeriesIntensiveReceiptView : IReadOnlyList<TimeSeriesI
 
     public IEnumerator<TimeSeriesIntensiveAppendReceipt> GetEnumerator()
     {
-        for (var index = 0; index < Count; index++)
+        const int FirstElementIndex = 0;
+
+        for (var index = FirstElementIndex; index < Count; index++)
         {
             yield return this[index];
         }

@@ -43,7 +43,7 @@ internal sealed class McpGatewayGraphCatalogTests
     [Test]
     public async Task RouteUsesFiniteFeatureAndOperationAliases()
     {
-        var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries);
+        var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries, UnitMcpOptions.Execution());
         var query = entries.Single(item => item.Operation.Name == QueryPartitionName);
         await Assert.That(query.SearchHints.Categories).Contains(SqlCategory);
         await Assert.That(query.SearchHints.Aliases).Contains(OperationAlias);

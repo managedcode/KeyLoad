@@ -121,12 +121,12 @@ internal sealed class GrainRoutingAuthorizationTests
         GrainNativePayload.RequireNoDto(NativeSerialization.Serialize(NoDtoMarker));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainNativePayload.RequireNoDto(
             NativeSerialization.Serialize(InvalidMarker))).Code).IsEqualTo(ErrorCode.Validation);
-        var reply = GrainReplyFactory.Value(new BackupReceipt(DocumentId, BackupPosition), CancellationToken.None);
+        var reply = GrainReplyFactory.Value(new BackupReceipt(DocumentId, BackupPosition), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(((BackupReceipt)NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value!).Id).IsEqualTo(DocumentId);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainReplyFactory.Value(
-            new string(Padding, GrainRoutingProtocol.MaximumReplyBytes), CancellationToken.None)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        var error = GrainReplyFactory.Failure(Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired), false, null);
+            new string(Padding, UnitRoutingOptions.Routing().Value.MaximumReplyBytes), UnitRoutingOptions.Routing(), CancellationToken.None)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        var error = GrainReplyFactory.Failure(Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired), false, null, UnitRoutingOptions.Routing());
         await Assert.That(error.Payload.Length).IsEqualTo(0);
         await Assert.That(error.Error).IsEqualTo(ErrorCode.PermissionDenied);
     }

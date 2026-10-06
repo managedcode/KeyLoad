@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text;
 using KeyLoad.Orleans;
 
@@ -18,7 +19,7 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
         ReplicaMembershipAuthorityProtocol.NonceHeader, ReplicaMembershipAuthorityProtocol.SignatureHeader
     ];
 
-    internal static bool TryRead(HttpRequest request, out ReplicaMembershipAuthorityRequestHeaders headers)
+    internal static bool TryRead(HttpRequest request, out ReplicaMembershipAuthorityRequestHeaders headers, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         const int TotalInitialValue = 0;
         const int IndexInitialValue = 0;
@@ -30,6 +31,13 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
         const int ValuesComponentIndex = 2;
         const int TryReadValuesComponentIndex = 3;
 
+        const int CallerIncarnationIndex = 4;
+        const int CallerVoterIndex = 5;
+        const int CallerSiloIndex = 6;
+        const int TimestampIndex = 7;
+        const int NonceIndex = 8;
+        const int SignatureIndex = 9;
+
         headers = null!;
         var total = TotalInitialValue;
         var values = new string[Names.Length];
@@ -37,15 +45,15 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
         {
             if (!request.Headers.TryGetValue(Names[index], out var supplied) || supplied.Count != EmptySuppliedCount
                 || supplied[IndexEmptyCount] is not { } value || value.Length == EmptyValueLength
-                || Encoding.UTF8.GetByteCount(value) > ReplicaMembershipAuthorityProtocol.MaximumHeaderValueBytes)
+                || Encoding.UTF8.GetByteCount(value) > membershipOptions.Value.MaximumHeaderValueBytes)
             { return false; }
             total = checked(total + Encoding.UTF8.GetByteCount(Names[index]) + Encoding.UTF8.GetByteCount(value));
-            if (total > ReplicaMembershipAuthorityProtocol.MaximumHeaderBytes)
+            if (total > membershipOptions.Value.MaximumHeaderBytes)
             { return false; }
             values[index] = value;
         }
-        headers = new(values[ValuesFirstIndex], values[ValuesSecondIndex], values[ValuesComponentIndex], values[TryReadValuesComponentIndex], values[4], values[5], values[6],
-            values[7], values[8], values[9]);
+        headers = new(values[ValuesFirstIndex], values[ValuesSecondIndex], values[ValuesComponentIndex], values[TryReadValuesComponentIndex], values[CallerIncarnationIndex], values[CallerVoterIndex], values[CallerSiloIndex],
+            values[TimestampIndex], values[NonceIndex], values[SignatureIndex]);
         return true;
     }
 }

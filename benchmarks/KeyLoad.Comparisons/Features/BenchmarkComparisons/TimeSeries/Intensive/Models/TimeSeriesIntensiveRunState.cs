@@ -16,9 +16,11 @@ internal sealed class TimeSeriesIntensiveRunState(TimeSeriesIntensiveScenario sc
 
     internal TimeSeriesIntensiveRunResult Finish(Exception? error = null)
     {
+        const int SingleItemCount = 1;
+
         var captured = error is null ? default : TimeSeriesIntensiveFailure.Capture(error);
         TimeSeriesIntensiveRunFailure? failure = error is null ? null : new(Executor?.Stage ?? Stage,
-            Math.Min(Repetition, TimeSeriesIntensiveProfile.RepetitionCount - 1),
+            Math.Min(Repetition, TimeSeriesIntensiveProfile.RepetitionCount - SingleItemCount),
             captured.Outcome, captured.Failure);
         return new(scenario, Stopwatch.Frequency, Storage, Repetitions.ToImmutable(), SeedVerified, failure)
         {

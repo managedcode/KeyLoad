@@ -1,14 +1,21 @@
+using Microsoft.Extensions.Options;
+
 using System.Diagnostics;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveAttemptExecutor
 {
+    private const int NoObservedItems = 0;
+
     internal static async Task<TimeSeriesIntensiveAttempt?> ExecuteAsync(ITimeSeriesIntensiveTarget target,
         TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index, int worker,
-        TimeSeriesIntensiveConcurrency concurrency, CancellationToken cellCancellation)
+        TimeSeriesIntensiveConcurrency concurrency, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation)
     {
-        using var call = new TimeSeriesIntensiveCallScope(cellCancellation);
+        const int NoItems = 0;
+        const int NoObservedItems = 0;
+
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cellCancellation);
         TimeSeriesIntensiveResponse? response;
         try
         {
@@ -30,8 +37,8 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         {
             if (call.Completion != TimeSeriesIntensiveOutcome.Succeeded)
             {
-                return new(phase.Repetition, index, worker, call.LatencyTicks, 0, call.Completion, observed.Count(phase.Scenario),
-                    default, observed.Receipt?.Sequence ?? 0, new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null))
+                return new(phase.Repetition, index, worker, call.LatencyTicks, NoItems, call.Completion, observed.Count(phase.Scenario),
+                    default, observed.Receipt?.Sequence ?? NoObservedItems, new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null))
                 {
                     Acknowledgement = Acknowledgement(observed)
                 };
@@ -48,12 +55,14 @@ internal static class TimeSeriesIntensiveAttemptExecutor
     private static TimeSeriesIntensiveAttempt Validate(TimeSeriesIntensiveExpectations expected,
         TimeSeriesIntensivePreparedPhase phase, int index, int worker, long latency, TimeSeriesIntensiveResponse response)
     {
+        const int NoItems = 0;
+
         var started = Stopwatch.GetTimestamp();
         try
         {
             var hash = TimeSeriesIntensiveResponseVerifier.Validate(expected, phase, index, response);
             return new(phase.Repetition, index, worker, latency, Stopwatch.GetTimestamp() - started,
-                TimeSeriesIntensiveOutcome.Succeeded, response.Count(phase.Scenario), hash, response.Receipt?.Sequence ?? 0, default)
+                TimeSeriesIntensiveOutcome.Succeeded, response.Count(phase.Scenario), hash, response.Receipt?.Sequence ?? NoItems, default)
             {
                 Acknowledgement = Acknowledgement(response)
             };
@@ -62,7 +71,7 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         {
             var captured = TimeSeriesIntensiveFailure.Capture(error);
             return new(phase.Repetition, index, worker, latency, Stopwatch.GetTimestamp() - started,
-                captured.Outcome, response.Count(phase.Scenario), default, response.Receipt?.Sequence ?? 0, captured.Failure)
+                captured.Outcome, response.Count(phase.Scenario), default, response.Receipt?.Sequence ?? NoItems, captured.Failure)
             {
                 Acknowledgement = Acknowledgement(response)
             };
@@ -70,6 +79,6 @@ internal static class TimeSeriesIntensiveAttemptExecutor
     }
 
     private static TimeSeriesIntensiveAcknowledgement? Acknowledgement(TimeSeriesIntensiveResponse response) =>
-        response.Receipt is { Sequence: > 0 } receipt && receipt.CommandId != Guid.Empty
+        response.Receipt is { Sequence: > NoObservedItems } receipt && receipt.CommandId != Guid.Empty
             ? TimeSeriesIntensiveAcknowledgement.FromReceipt(receipt) : null;
 }

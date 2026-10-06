@@ -11,15 +11,19 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
     private readonly ReplicaMembershipAuthorityMac requestMac;
     private readonly ReplicaMembershipAuthorityMac replyMac;
     private readonly HttpClient http;
+    private readonly IOptions<OrleansMembershipOptions> membershipOptions;
 
     internal ReplicaMembershipAuthorityExchange(ReplicaMembershipAuthorityExchangeOptions options,
         IOptions<OrleansMembershipOptions> membershipOptions)
     {
         ArgumentNullException.ThrowIfNull(options);
         ValidateOptions(options);
+        ArgumentNullException.ThrowIfNull(membershipOptions);
+        membershipOptions.Value.Validate();
+        this.membershipOptions = membershipOptions;
         this.options = options;
-        requestMac = new(options.CallerPeerSecret);
-        replyMac = new(options.AuthorityPeerSecret);
+        requestMac = new(options.CallerPeerSecret, membershipOptions);
+        replyMac = new(options.AuthorityPeerSecret, membershipOptions);
         SocketsHttpHandler? handler = new()
         {
             AllowAutoRedirect = false,
@@ -40,7 +44,7 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
     internal async Task<ReplicaMembershipAuthorityReplyV1> SendAsync(
         ReplicaMembershipAuthorityCallV1 call, CancellationToken cancellationToken)
     {
-        var body = ReplicaMembershipAuthorityCodec.SerializeCall(call);
+        var body = ReplicaMembershipAuthorityCodec.SerializeCall(call: call, membershipOptions: membershipOptions);
         foreach (var endpoint in options.AuthorityEndpoints)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -92,7 +96,7 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
         if (replySignature is null || !replyMac.VerifyReply(authorityPhysical, authorityIncarnation,
                 call.RequestId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), nonce, (int)response.StatusCode, responseBytes, replySignature))
         { throw Errors.Fail(ErrorCode.Unauthenticated, ReplicaMembershipAuthorityText.InvalidSignature); }
-        var reply = ReplicaMembershipAuthorityCodec.DeserializeReply(responseBytes);
+        var reply = ReplicaMembershipAuthorityCodec.DeserializeReply(bytes: responseBytes, membershipOptions: membershipOptions);
         ValidateReply(call, nonce, reply);
         if ((ReplicaMembershipAuthorityResultKind)reply.ResultKind == ReplicaMembershipAuthorityResultKind.Failed)
         { throw Failure(reply); }
@@ -117,16 +121,16 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
         request.Headers.Add(ReplicaMembershipAuthorityProtocol.SignatureHeader, signature);
     }
 
-    private static async Task<byte[]> ReadBoundedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    private async Task<byte[]> ReadBoundedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         const int MaximumReplyBytesStep = 1;
         const int CountInitialValue = 0;
         const int EmptyRead = 0;
         const int StartEmptyCount = 0;
 
-        if (response.Content.Headers.ContentLength is > ReplicaMembershipAuthorityProtocol.MaximumReplyBytes)
+        if (response.Content.Headers.ContentLength > membershipOptions.Value.MaximumReplyBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.ReplyTooLarge); }
-        var buffer = new byte[ReplicaMembershipAuthorityProtocol.MaximumReplyBytes + MaximumReplyBytesStep];
+        var buffer = new byte[membershipOptions.Value.MaximumReplyBytes + MaximumReplyBytesStep];
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         var count = CountInitialValue;
         while (count < buffer.Length)

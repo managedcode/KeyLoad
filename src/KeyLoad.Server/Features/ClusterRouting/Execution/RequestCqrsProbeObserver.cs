@@ -123,10 +123,6 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
     private RequestCqrsProbeClaim? Claim(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         RequestCqrsProbeSnapshot snapshot)
     {
-        const int EmptyMatchesLength = 0;
-        const int ClaimEmptyMatchesLength = 1;
-        const int MatchesFirstIndex = 0;
-
         if (!TryGetPhase(phase, out _))
         { throw Invalid(); }
         var existing = lifecycle.FindClaim(identity.RequestId);
@@ -136,15 +132,9 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
             { throw Invalid(); }
             return existing;
         }
-        var matches = snapshot.Arms.Where(loaded => loaded.Record.PrincipalId == identity.PrincipalId
-            && loaded.Record.CommandId == identity.CommandId
-            && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
-            && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();
-        if (matches.Length == EmptyMatchesLength)
+        var selected = RequestCqrsProbeClaimSelection.Find(identity, snapshot);
+        if (selected is null)
         { return null; }
-        if (matches.Length != ClaimEmptyMatchesLength)
-        { throw Invalid(); }
-        var selected = matches[MatchesFirstIndex];
         // Retain the first validated request identity so the later disposal callback can join across voters.
         return lifecycle.AddClaim(identity, selected);
     }

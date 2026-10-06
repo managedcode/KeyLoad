@@ -15,6 +15,8 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     IOptions<ComparisonLifecycleOptions> lifecycleOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
+    private const string FieldSeparator = ":";
+
     private const string RunIdentityFormat = "N";
 
     private const string Prefix = "keyload-benchmark:";
@@ -31,7 +33,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     private const string AofAcknowledgement = "AOF appendfsync=always; single-node ACK";
     private const string ReplicatedAcknowledgement = "AOF appendfsync=always; WAITAOF 1 local + 1 replica fsync on the same primary connection (receipt RPC included)";
     private readonly string connectionSettings = connectionString;
-    private readonly string prefix = Prefix + Guid.Parse(runId).ToString(RunIdentityFormat) + ":";
+    private readonly string prefix = Prefix + Guid.Parse(runId).ToString(RunIdentityFormat) + FieldSeparator;
     private readonly string imageName = image;
     private readonly ComparisonTopology configuredTopology = topology;
     private readonly string[] replicaEndpoints = replicas ?? [];
@@ -52,14 +54,18 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     /// <returns>A task that completes after the observed Redis profile has been recorded.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
+        const string PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken = "primary key reads; S1 seeds document keys only";
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
         ArgumentNullException.ThrowIfNull(dataset);
         corpusCount = dataset.Documents.Count;
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            Profile = Profile with { ReadContract = "primary key reads; S1 seeds document keys only" };
+            Profile = Profile with { ReadContract = PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken };
         }
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
-        if (settings.EndPoints.Count != 1)
+        if (settings.EndPoints.Count != SingleItemCount)
         {
             throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
         }
@@ -82,8 +88,9 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         }
 
         var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
-        var evidence = await RedisReplicaProof.VerifyAsync(connection, replicaEndpoints, configuredTopology, primaryIdentity, probeKey,
-            dataset.Documents[0].Json, cancellationToken, lifecycleOptions);
+        var evidence = await RedisReplicaProof.VerifyAsync(primary: connection, replicaStrings: replicaEndpoints,
+            topology: configuredTopology, primaryIdentity: primaryIdentity, probeKey: probeKey,
+            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,
@@ -93,7 +100,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
                 ComparisonTopology.TwoNode => TwoNodeTopology,
                 _ => SingleTopology
             },
-            WriteAcknowledgement = ComparisonTopologies.NodeCount(configuredTopology) > 1 ? ReplicatedAcknowledgement : AofAcknowledgement,
+            WriteAcknowledgement = ComparisonTopologies.NodeCount(configuredTopology) > SingleItemCount ? ReplicatedAcknowledgement : AofAcknowledgement,
             Image = imageName,
             Cluster = evidence
         };
@@ -104,8 +111,10 @@ public sealed class RedisTarget(string connectionString, string runId, string im
     /// <returns>A session that owns the worker connection until disposed.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
+        const int SingleItemCount = 1;
+
         var settings = RedisReplicaProof.CreateOptions(connectionSettings);
-        if (settings.EndPoints.Count != 1)
+        if (settings.EndPoints.Count != SingleItemCount)
         {
             throw new ComparisonFailureException(RedisNativeProtocol.PrimaryEndpointError);
         }

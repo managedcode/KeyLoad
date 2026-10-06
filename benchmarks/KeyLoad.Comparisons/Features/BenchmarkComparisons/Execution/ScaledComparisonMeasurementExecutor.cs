@@ -7,14 +7,15 @@ internal static class ScaledComparisonMeasurementExecutor
 {
     private const int RequiredLatencySampleCount = 4_096;
 
-    internal static async Task<ScaledMeasurementResult> MeasureAsync(List<IComparisonSession> sessions,
-        ScaledOperationInputs inputs, IComparisonSettings settings, CancellationToken token, IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal static async Task<ScaledMeasurementResult> MeasureAsync(List<IComparisonSession> sessions, ScaledOperationInputs inputs,
+        IComparisonSettings settings, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
     {
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
         var state = new ScaledMeasurementState(settings.Operations, RequiredLatencySampleCount);
         var timer = Stopwatch.StartNew();
         await using var resources = new ClientResourceSampler(executionOptions);
         var workers = sessions.Select((session, worker) => new ScaledComparisonWorker(session, worker,
-            inputs, settings, timer, state, token).RunAsync()).ToArray();
+            inputs, settings, timer, state, execution.OperationTimeout, token).RunAsync()).ToArray();
         try
         {
             await Task.WhenAll(workers).ConfigureAwait(false);
@@ -30,18 +31,23 @@ internal static class ScaledComparisonMeasurementExecutor
 
     internal static void ValidatePointRead(Scenario scenario, OperationResult result, BenchmarkDocument input)
     {
+        const string ScaledPointReadMismatchDetail = "ScaledPointReadMismatch";
+
         if (scenario == Scenario.PointRead && !BenchmarkDataset.SameDocument(result.Document, input))
         {
-            throw new ComparisonFailureException("ScaledPointReadMismatch");
+            throw new ComparisonFailureException(ScaledPointReadMismatchDetail);
         }
     }
 }
 
 internal sealed class ScaledComparisonWorker(IComparisonSession session, int worker, ScaledOperationInputs inputs,
-    IComparisonSettings settings, Stopwatch timer, ScaledMeasurementState state, CancellationToken token)
+    IComparisonSettings settings, Stopwatch timer, ScaledMeasurementState state, TimeSpan operationTimeout, CancellationToken token)
 {
     internal async Task RunAsync()
     {
+        const string CancelledToken = "Cancelled";
+        const string DeadlineExceededToken = "DeadlineExceeded";
+
         while (!token.IsCancellationRequested)
         {
             var operation = state.Next();
@@ -52,7 +58,7 @@ internal sealed class ScaledComparisonWorker(IComparisonSession session, int wor
             state.StartOperation();
             var input = inputs.Create(operation, warmup: false);
             var started = timer.Elapsed.TotalMilliseconds;
-            using var deadline = ComparisonDeadline.Create(settings.TimeoutSeconds, token);
+            using var deadline = ComparisonDeadline.Create(operationTimeout, token);
             try
             {
                 var result = await session.ExecuteAsync(inputs.Scenario, input, deadline.Token).ConfigureAwait(false);
@@ -62,12 +68,12 @@ internal sealed class ScaledComparisonWorker(IComparisonSession session, int wor
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 state.CompleteOperation(operation, worker, started, timer.Elapsed.TotalMilliseconds, input,
-                    "Cancelled", false, false);
+                    CancelledToken, false, false);
                 throw;
             }
             catch (OperationCanceledException) when (!token.IsCancellationRequested && deadline.Token.IsCancellationRequested)
             {
-                state.CompleteOperation(operation, worker, started, timer.Elapsed.TotalMilliseconds, input, "DeadlineExceeded", false, true);
+                state.CompleteOperation(operation, worker, started, timer.Elapsed.TotalMilliseconds, input, DeadlineExceededToken, false, true);
             }
             catch (Exception error) when (!token.IsCancellationRequested)
             {

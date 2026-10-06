@@ -5,6 +5,12 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadOutboxDiagnosticLine
 {
+    private const int NoObservedItems = 0;
+    private const int SingleItemCount = 1;
+    private const int AdjacentElementOffset = 1;
+    private const char SpaceSeparator = ' ';
+    private const char EmptyIdentityMarker = '~';
+
     private const int MaximumBytes = 512;
     private const int MaximumConsumers = 64;
     private const string Prefix = "KeyLoadOutboxDiagnostic ";
@@ -19,6 +25,10 @@ internal static class KeyLoadOutboxDiagnosticLine
 
     internal static string Format(ComparisonCase failed, OutboxStatus status)
     {
+        const int FirstElementIndex = 0;
+        const int MissingItemIndex = -1;
+        const int NoObservedItems = 0;
+
         ArgumentNullException.ThrowIfNull(failed);
         ArgumentNullException.ThrowIfNull(status);
         ValidateCase(failed);
@@ -27,17 +37,17 @@ internal static class KeyLoadOutboxDiagnosticLine
             throw new ArgumentException(InvalidStatus, nameof(status));
         }
 
-        var activeCount = 0;
-        long minimumCheckpoint = -1;
+        var activeCount = FirstElementIndex;
+        long minimumCheckpoint = MissingItemIndex;
         foreach (var consumer in status.Consumers)
         {
-            if (consumer is null || consumer.Checkpoint < 0 || consumer.Checkpoint > status.Head.Tail)
+            if (consumer is null || consumer.Checkpoint < NoObservedItems || consumer.Checkpoint > status.Head.Tail)
             {
                 throw new ArgumentException(InvalidConsumer, nameof(status));
             }
             if (!consumer.Released)
             {
-                minimumCheckpoint = activeCount == 0 ? consumer.Checkpoint : Math.Min(minimumCheckpoint, consumer.Checkpoint);
+                minimumCheckpoint = activeCount == NoObservedItems ? consumer.Checkpoint : Math.Min(minimumCheckpoint, consumer.Checkpoint);
                 activeCount++;
             }
         }
@@ -48,18 +58,20 @@ internal static class KeyLoadOutboxDiagnosticLine
 
     private static void ValidateCase(ComparisonCase failed)
     {
-        if (!Enum.IsDefined(failed.Scenario) || failed.Repetition < 0)
+        const int NoObservedItems = 0;
+
+        if (!Enum.IsDefined(failed.Scenario) || failed.Repetition < NoObservedItems)
         {
             throw new ArgumentException(InvalidCase, nameof(failed));
         }
     }
 
     private static bool ValidHead(OutboxHead head)
-        => head.Tail >= 0 && head.FirstAvailable >= 1 && head.FirstAvailable - 1 <= head.Tail
-            && head.StoredRecords == head.Tail - (head.FirstAvailable - 1) && head.StoredBytes >= 0;
+        => head.Tail >= NoObservedItems && head.FirstAvailable >= SingleItemCount && head.FirstAvailable - AdjacentElementOffset <= head.Tail
+            && head.StoredRecords == head.Tail - (head.FirstAvailable - AdjacentElementOffset) && head.StoredBytes >= NoObservedItems;
 
     private static string Bound(string line)
-        => line.All(character => character is >= ' ' and <= '~')
+        => line.All(character => character is >= SpaceSeparator and <= EmptyIdentityMarker)
             && Encoding.ASCII.GetByteCount(line) <= MaximumBytes
             ? line
             : throw new ArgumentException(InvalidOutput, nameof(line));

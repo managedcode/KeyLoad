@@ -67,6 +67,16 @@ entry, retains original artifacts and updates KL-012. No new project, public API
 serializer/fingerprint change, TTL path or copied database implementation is in
 scope. Root retains the required exact-source Linux recovery and RF3 gates.
 
+The existing real CrashHost recovery and C1 inspection helpers must inspect the
+actual private native outcome records and scoped keys, rather than infer durable
+state from caller evidence. Core grants internal visibility to the named
+`KeyLoad.CrashHost` assembly alongside its existing UnitTests and RecoveryTests
+friends in `Features/InternalSerialization/Execution/CoreTestVisibility.cs`.
+This test-only compile join preserves AC-DSTORE-006, the existing C1 inspection
+contract, private production records, scoped-key bytes and public APIs. Its
+verification remains the original full Aspire recovery and RF3 flows; no
+accessor-only regression or fabricated outcome is introduced.
+
 ```mermaid
 flowchart LR
     Request[Authenticated command ID and payload] --> Canonical[Resolve scope and fingerprint]

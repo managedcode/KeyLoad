@@ -60,7 +60,9 @@ internal static class OpenSearchReplicaProof
 
     private static int CountDataNodes(JsonElement nodeInfoNodes, int expectedNodes)
     {
-        var count = 0;
+        const int FirstElementIndex = 0;
+
+        var count = FirstElementIndex;
         foreach (var node in nodeInfoNodes.EnumerateObject())
         {
             VerifyNode(node.Value);

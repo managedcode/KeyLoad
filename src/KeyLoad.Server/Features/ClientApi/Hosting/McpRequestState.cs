@@ -17,13 +17,12 @@ internal sealed class McpRequestState : IDisposable
     private McpFrameBody? body;
     private bool disposed;
 
-    internal McpRequestState(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity,
-        CancellationToken cancellationToken, IOptions<McpExecutionOptions> options)
+    internal McpRequestState(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
     {
         this.capacity = capacity;
         this.options = options;
         settings = options.Value;
-        admission = new(governor, memory, capacity, cancellationToken, options);
+        admission = new(governor: governor, memory: memory, capacity: capacity, cancellationToken: cancellationToken, options: options);
     }
 
     /// <summary>Gets the current database-resolved principal; native sessions cannot cache it.</summary>
@@ -42,10 +41,10 @@ internal sealed class McpRequestState : IDisposable
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
         admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
-        authenticationShape = McpNativeAuthentication.Inspect(reply.Span, cancellationToken, options);
+        authenticationShape = McpNativeAuthentication.Inspect(payload: reply.Span, cancellationToken: cancellationToken, options: options);
         admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
         authentication = reply;
-        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(reply.Span, cancellationToken, options);
+        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
     }
 
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>
@@ -62,11 +61,12 @@ internal sealed class McpRequestState : IDisposable
     internal void Admit(McpGatewayMetaSelection selection, CancellationToken cancellationToken)
     {
         const int BodyWireBytesValidationBoundary = 0;
+        const int NoRetainedMetadataBytes = 0;
 
         var descriptor = selection.CanonicalOperation;
         var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? BodyWireBytesValidationBoundary,
             body?.Shape ?? default,
-            0, authentication.Length, authenticationShape);
+            NoRetainedMetadataBytes, authentication.Length, authenticationShape);
         admission.Acquire(Principal, descriptor, input, cancellationToken);
         Operation = descriptor;
         MetaOperation = selection.Operation;

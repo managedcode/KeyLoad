@@ -6,6 +6,8 @@ internal readonly record struct TimescaleTimeSeriesIntensiveAppendRow(int Ordina
 
 internal static class TimescaleTimeSeriesIntensiveReceipt
 {
+    private const int LastElementOffset = 1;
+
     internal static TimeSeriesIntensiveAppendReceipt ValidateScalar(TimeSeriesIntensiveAppendReceipt? actual,
         Guid expectedCommandId)
     {
@@ -20,24 +22,28 @@ internal static class TimescaleTimeSeriesIntensiveReceipt
     internal static TimeSeriesIntensiveAppendReceipt ValidateBatch(ImmutableArray<TimescaleTimeSeriesIntensiveAppendRow> actual,
         Guid expectedCommandId, int batchOrdinal)
     {
+        const int NoObservedItems = 0;
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+
         if (actual.IsDefault || actual.Length != TimeSeriesIntensiveProfile.SeedBatchSize
-            || expectedCommandId == Guid.Empty || batchOrdinal < 0
+            || expectedCommandId == Guid.Empty || batchOrdinal < NoObservedItems
             || batchOrdinal >= TimeSeriesIntensiveProfile.SeedBatchCount)
         {
             throw Invalid();
         }
 
         var sequence = batchOrdinal * (long)TimeSeriesIntensiveProfile.SeedBatchSize;
-        for (var index = 0; index < actual.Length; index++)
+        for (var index = FirstElementIndex; index < actual.Length; index++)
         {
             var row = actual[index];
-            if (row.Ordinal != index + 1 || row.CommandId != expectedCommandId
+            if (row.Ordinal != index + AdjacentElementOffset || row.CommandId != expectedCommandId
                 || row.Sequence != sequence + index + TimescaleTimeSeriesIntensiveProtocol.SeedSequenceOffset)
             {
                 throw Invalid();
             }
         }
-        var terminal = actual[^1];
+        var terminal = actual[^LastElementOffset];
         return new(terminal.CommandId, terminal.Sequence);
     }
 

@@ -10,9 +10,12 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Server image recorded in comparison provenance.</param>
 /// <param name="topology">Requested one, two or three native members.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
 {
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
+
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
     private readonly List<IMongoClient> ownedClients = [];
     private MongoClient? primaryClient;
@@ -39,11 +42,14 @@ public sealed class MongoTarget(string connectionString, string runId, string im
     /// <returns>A task that completes after verification.</returns>
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
+        const string DocumentOnlyMajorityReadContract = "primary majority document reads; S1 seeds documents only, with no edge or event records";
+        const int SingleItemCount = 1;
+
         ArgumentNullException.ThrowIfNull(dataset);
         graphDepth = dataset.Settings.GraphDepth;
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            Profile = Profile with { ReadContract = "primary majority document reads; S1 seeds documents only, with no edge or event records" };
+            Profile = Profile with { ReadContract = DocumentOnlyMajorityReadContract };
         }
         corpusCount = dataset.Documents.Count;
         var settings = CreateSettings(connectionString, dataset.Settings.Concurrency);
@@ -62,11 +68,11 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         }
         var version = await ReadPrimaryVersionAsync(cancellationToken);
         var profile = Profile with { Version = version };
-        if (ComparisonTopologies.NodeCount(topology) > 1)
+        if (ComparisonTopologies.NodeCount(topology) > SingleItemCount)
         {
-            var proof = await MongoReplicaVerifier.VerifyAsync(connectionString,
-                primaryClient.GetDatabase(MongoSchema.AdminDatabase), database, documents,
-                topology, dataset, cancellationToken, lifecycleOptions);
+            var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
+                adminDatabase: primaryClient.GetDatabase(MongoSchema.AdminDatabase), database: database, documents: documents,
+                topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
             ownedClients.AddRange(proof.SecondaryClients);
             profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
         }
@@ -91,7 +97,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             throw new ComparisonFailureException(MongoSchema.FailureNotInitialized);
         }
-        return Task.FromResult<IComparisonSession>(new MongoSession(this, documents, edges, events, graphDepth, corpusCount));
+        return Task.FromResult<IComparisonSession>(new MongoSession(this, documents, edges, events, graphDepth, corpusCount, executionOptions));
     }
 
     /// <summary>Drops the isolated benchmark database and disposes owned clients.</summary>
@@ -148,6 +154,8 @@ public sealed class MongoTarget(string connectionString, string runId, string im
 
     private async Task VerifySingleNodeAsync(CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         var admin = primaryClient!.GetDatabase(MongoSchema.AdminDatabase);
         var hello = await admin.RunCommandAsync<BsonDocument>(
             new BsonDocument(MongoSchema.HelloCommand, MongoSchema.CommandEnabledValue),
@@ -166,8 +174,8 @@ public sealed class MongoTarget(string connectionString, string runId, string im
             ReadPreference.Primary, cancellationToken);
         var members = status.GetValue(MongoSchema.MembersField).AsBsonArray;
         if (members.Count != MongoSchema.SingleNodeCount
-            || members[0].AsBsonDocument.GetValue(MongoSchema.MemberStateField).AsString != MongoSchema.PrimaryState
-            || members[0].AsBsonDocument.GetValue(MongoSchema.MemberHealthField).ToInt32() != MongoSchema.HealthyMemberValue)
+            || members[FirstElementIndex].AsBsonDocument.GetValue(MongoSchema.MemberStateField).AsString != MongoSchema.PrimaryState
+            || members[FirstElementIndex].AsBsonDocument.GetValue(MongoSchema.MemberHealthField).ToInt32() != MongoSchema.HealthyMemberValue)
         {
             throw new ComparisonFailureException(MongoSchema.FailureUnsupportedTopology);
         }

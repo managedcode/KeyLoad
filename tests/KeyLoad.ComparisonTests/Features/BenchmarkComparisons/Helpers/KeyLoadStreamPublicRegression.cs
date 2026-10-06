@@ -29,7 +29,8 @@ internal static class KeyLoadStreamPublicRegression
             }
             var peers = clients.Select(client => client!).ToArray();
             await using var target = new KeyLoadTarget(peers[0], adminKey, Guid.NewGuid().ToString("N"),
-                peers: peers, expectedNodes: nodeCount);
+                NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Admission(),
+                ComparisonClientOptions.Execution(), ComparisonClientOptions.Translation(), peers: peers, expectedNodes: nodeCount);
             ownershipTransferred = true;
             await VerifyTargetAsync(target, cancellationToken);
         }

@@ -7,6 +7,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal static class TimescaleSchemaLifecycle
 {
+    private const int FirstElementIndex = 0;
+    private const int GuidDigestBytes = 16;
+
     private const string SchemaPrefix = "keyload_tsc_";
     private const string SetSchemaSettingSql = "SELECT set_config('keyload.timeseries_schema', $1, false)";
     private const string SetSearchPathSql = "SELECT set_config('search_path', $1, false)";
@@ -25,7 +28,7 @@ internal static class TimescaleSchemaLifecycle
         "current_setting('keyload.timeseries_schema')); END $$";
 
     internal static string SchemaName(string runId)
-        => SchemaPrefix + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(runId)).AsSpan(0, 16));
+        => SchemaPrefix + Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(runId)).AsSpan(FirstElementIndex, GuidDigestBytes));
 
     internal static async Task<NpgsqlConnection> OpenConfiguredAsync(string connectionString, string schemaName,
         CancellationToken cancellationToken)
@@ -137,18 +140,23 @@ internal static class TimescaleSchemaLifecycle
 
     internal static void ValidateSchemaName(string schemaName)
     {
+        const int HexadecimalSchemaDigestCharacters = 32;
+        const string BenchmarkSchemaNameIsInvalidDetail = "The benchmark schema name is invalid.";
+        const char LowerHexadecimalStart = 'a';
+        const char LowerHexadecimalEnd = 'f';
+
         ArgumentNullException.ThrowIfNull(schemaName);
-        if (schemaName.Length != SchemaPrefix.Length + 32 ||
+        if (schemaName.Length != SchemaPrefix.Length + HexadecimalSchemaDigestCharacters ||
             !schemaName.StartsWith(SchemaPrefix, StringComparison.Ordinal))
         {
-            throw new ArgumentException("The benchmark schema name is invalid.", nameof(schemaName));
+            throw new ArgumentException(BenchmarkSchemaNameIsInvalidDetail, nameof(schemaName));
         }
 
         foreach (var character in schemaName.AsSpan(SchemaPrefix.Length))
         {
-            if (!char.IsAsciiDigit(character) && character is not (>= 'a' and <= 'f'))
+            if (!char.IsAsciiDigit(character) && character is not (>= LowerHexadecimalStart and <= LowerHexadecimalEnd))
             {
-                throw new ArgumentException("The benchmark schema name is invalid.", nameof(schemaName));
+                throw new ArgumentException(BenchmarkSchemaNameIsInvalidDetail, nameof(schemaName));
             }
         }
     }

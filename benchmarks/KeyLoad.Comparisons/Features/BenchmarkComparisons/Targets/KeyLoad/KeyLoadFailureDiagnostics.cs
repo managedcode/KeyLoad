@@ -10,10 +10,12 @@ internal static class KeyLoadFailureDiagnostics
 
     internal static bool IsEligible(ComparisonCase failed)
     {
+        const int NoObservedItems = 0;
+
         ArgumentNullException.ThrowIfNull(failed);
         if (!string.Equals(failed.Status, ComparisonStatuses.Failed, StringComparison.Ordinal)
             || string.Equals(failed.Detail, ComparisonSessionCleanup.Failure, StringComparison.Ordinal)
-            || !Enum.IsDefined(failed.Scenario) || failed.Repetition < 0)
+            || !Enum.IsDefined(failed.Scenario) || failed.Repetition < NoObservedItems)
         {
             return false;
         }
@@ -48,9 +50,8 @@ internal static class KeyLoadFailureDiagnostics
     internal static bool IsRecoverableOutputFailure(Exception error)
         => error is IOException or InvalidOperationException or ArgumentException or NotSupportedException;
 
-    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client,
-        global::KeyLoad.PartitionRef partition, ComparisonCase failed, CancellationToken cancellationToken,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition,
+        ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(partition);
@@ -87,5 +88,6 @@ public sealed partial class KeyLoadTarget : IComparisonFailureDiagnostics
 {
     /// <inheritdoc />
     Task IComparisonFailureDiagnostics.ObserveFailureAsync(ComparisonCase failed, CancellationToken cancellationToken)
-        => KeyLoadFailureDiagnostics.ObserveAsync(client, partition, failed, cancellationToken, lifecycleOptions);
+        => KeyLoadFailureDiagnostics.ObserveAsync(client: client, partition: partition, failed: failed, cancellationToken: cancellationToken,
+            lifecycleOptions: lifecycleOptions);
 }

@@ -204,6 +204,10 @@
     {
       "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs",
       "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsMetadata.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -356,7 +360,8 @@
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsSnapshotContract.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
-        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs"
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsMetadata.cs"
       ]
     }
   ],

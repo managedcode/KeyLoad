@@ -2,12 +2,15 @@ using System.Buffers.Binary;
 using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 /// <summary>Independent value-digest and native-residency assertions for real scaled fixture cases.</summary>
 internal static class ScaledRawStorageFixtureOracleTests
 {
+    private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;
+
     private const int ValueHeaderBytes = 32;
     private const int MinimumPositiveProcessPeakBytes = 1;
     private const int DigestHexCharacters = 64;
@@ -20,7 +23,7 @@ internal static class ScaledRawStorageFixtureOracleTests
 
     internal static async Task AssertFixtureOrdersAsync(ScaledRawStorageFixture fixture, int recordCount)
     {
-        var expectedOrder = new ScaledRawStorageReadOrder(recordCount);
+        var expectedOrder = new ScaledRawStorageReadOrder(recordCount, ExecutionOptions);
         var mismatches = 0;
         for (var index = 0; index < recordCount; index++)
         {
@@ -60,7 +63,7 @@ internal static class ScaledRawStorageFixtureOracleTests
 
     private static int FirstPermutationValue(int recordCount)
     {
-        var order = new ScaledRawStorageReadOrder(recordCount);
+        var order = new ScaledRawStorageReadOrder(recordCount, ExecutionOptions);
         return order.NextRandom();
     }
 

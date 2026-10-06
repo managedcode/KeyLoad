@@ -1,6 +1,7 @@
 using System.Globalization;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 
@@ -15,8 +16,6 @@ internal static class TestSuiteSelectionValidator
     internal const string OpenLoopCancellationProofSetting = TestSuiteProtocol.OpenLoopCancellationProofSetting;
     internal const string MeasuredOpenLoopFilter = "/*/*/IsolatedNativeOpenLoopComparisonTests/*";
     internal const string CancellationProofFilter = "/*/*/IsolatedNativeOpenLoopCancellationTests/*";
-    internal const int MaximumFilterLength = TestSuiteProtocol.MaximumTestFilterLength;
-    internal const int MaximumPathLength = TestSuiteProtocol.MaximumTestPathLength;
     private const string InvalidOpenLoop = "The open-loop test selection is invalid.";
     private const string InvalidProof = "The open-loop cancellation-proof selection is invalid.";
     private const string InvalidVectorProfile = "The vector-profile test selection is invalid.";

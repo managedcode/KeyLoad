@@ -29,6 +29,8 @@ internal static class SampleChunkBenchmarkCorpus
     private const string Series = "metrics-Київ🌍";
     private static readonly DateTimeOffset Start = new(CorpusStartYear, CorpusStartMonth, CorpusStartDay, CorpusStartHour, CorpusStartMinute, CorpusStartSecond, TimeSpan.Zero);
 
+    private const string SampleIdPrefix = "sample-";
+
     internal static SampleRecord[] Create(int count, string corpus)
     {
         const int CountFirstCount = 1;
@@ -65,7 +67,7 @@ internal static class SampleChunkBenchmarkCorpus
                 ? ((RandomPart(index, LaneSingleItemCount) >> RandomPartBitOffset) * (UnitIntervalNumerator / (UnitIntervalBase << DoublePrecisionMantissaBits)) - RandomValueMidpoint) * RandomValueRange : RegularInitialValue + index / RegularValueDivisor;
             var tags = MetadataPrefix
                 + (corpus == Regular ? CreateAbsentCount : index % IndexValidationBoundary).ToString(CultureInfo.InvariantCulture) + MetadataSuffix;
-            var id = "sample-" + index.ToString(CultureInfo.InvariantCulture);
+            var id = SampleIdPrefix + index.ToString(CultureInfo.InvariantCulture);
             records[index] = new(Series, new(id, timestamp, value), index + IndexStep, tags);
         }
         Array.Sort(records, static (left, right) =>

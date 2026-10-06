@@ -1,5 +1,6 @@
 using KeyLoad;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.Features.CodeQuality;
 using Microsoft.Extensions.Options;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.Comparisons;
@@ -33,6 +34,7 @@ internal sealed record TestSuiteSettings(
 
     internal VectorComparisonProfile? VectorProfile { get; init; }
     internal int? OpenLoopRate { get; init; }
+    internal string CoverageFormat { get; init; } = NativeCoverageProtocol.CoberturaFormat;
     internal const string VectorProfileSetting = TestSuiteProtocol.VectorProfileSetting;
     internal const string VectorProfileEnvironment = TestSuiteProtocol.VectorProfileEnvironment;
     internal const string SuiteSetting = TestSuiteProtocol.SuiteSetting;
@@ -93,6 +95,7 @@ internal sealed record TestSuiteSettings(
     {
         const string InvalidScaleProfile = "The scale-profile test selection is invalid.";
         const string InvalidVectorProfile = "The vector-profile test selection is invalid.";
+        NativeCoverageSelection.RejectWithoutSuite(configuration);
         _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
         if (!string.IsNullOrEmpty(configuration[ScaleProfileSetting]))
         {
@@ -162,7 +165,12 @@ internal sealed record TestSuiteSettings(
         var timeout = ReadTimeout(configuration, execution, suite, scaleProfile, vectorProfile);
         return new(suite, project, filter, timeout, resultsDirectory,
             configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
-            localRf3ImageEnabled, scaleProfile) { VectorProfile = vectorProfile, OpenLoopRate = openLoopRate };
+            localRf3ImageEnabled, scaleProfile)
+        {
+            VectorProfile = vectorProfile,
+            OpenLoopRate = openLoopRate,
+            CoverageFormat = NativeCoverageSelection.Read(configuration, suite, coverageSettings, coverageOutput)
+        };
     }
 
     private static TimeSpan ReadTimeout(IConfiguration configuration, TestExecutionOptions execution, string suite,

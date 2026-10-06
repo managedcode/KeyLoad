@@ -34,6 +34,7 @@ public sealed class KurrentTarget : IComparisonTarget
         ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
     {
         ArgumentNullException.ThrowIfNull(image);
+        ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
         this.lifecycleOptions = lifecycleOptions;
         this.connectionString = connectionString;
@@ -54,10 +55,12 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <returns>A task that completes after profile evidence has been recorded.</returns>
     public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
+        const string ThisTargetDoesNotSupportTheBoundedScaledDocumentCorpusDetail = "This target does not support the bounded scaled document corpus.";
+
         ArgumentNullException.ThrowIfNull(corpus);
         if (corpus is not BenchmarkDataset dataset)
         {
-            throw new NotSupportedException("This target does not support the bounded scaled document corpus.");
+            throw new NotSupportedException(ThisTargetDoesNotSupportTheBoundedScaledDocumentCorpusDetail);
         }
         if (ownership is not null)
         {
@@ -68,7 +71,8 @@ public sealed class KurrentTarget : IComparisonTarget
             ownership = new KurrentStreamOwnership(dataset.ExecutionOptions);
             setupStage = KurrentSetupStage.MemberVerification;
             var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
-            var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken, lifecycleOptions);
+            var proof = await KurrentClusterVerifier.VerifyAsync(connectionString: connectionString, httpClients: nodeHttpClients,
+                topology: topology, timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions);
             nodeClients = proof.NodeClients;
             ownedClients.AddRange(nodeClients);
             // Native SDK construction eagerly discovers and caches a preferred live member.
@@ -88,8 +92,9 @@ public sealed class KurrentTarget : IComparisonTarget
             setupStage = KurrentSetupStage.ReplicaCopy;
             var probe = StreamName(KurrentConstants.ProbeStreamSuffix);
             var eventData = CreateProbeEvent();
-            var evidence = await KurrentClusterVerifier.VerifyCopyAsync(RequireWriter(), nodeClients, nodeHttpClients,
-                topology, probe, eventData, ownership, timeout, cancellationToken, lifecycleOptions);
+            var evidence = await KurrentClusterVerifier.VerifyCopyAsync(writer: RequireWriter(), nodeClients: nodeClients,
+                httpClients: nodeHttpClients, topology: topology, stream: probe, eventData: eventData, ownership: ownership,
+                timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions);
             Profile = Profile with { Cluster = evidence };
             initialized = true;
             setupStage = KurrentSetupStage.Complete;
@@ -118,7 +123,8 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <returns>A value task that completes when cleanup and client disposal finish.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var cleanup = new KurrentCleanupOperation(ownership?.SnapshotAcknowledged() ?? [], CancellationToken.None, lifecycleOptions);
+        using var cleanup = new KurrentCleanupOperation(streams: ownership?.SnapshotAcknowledged() ?? [], token: CancellationToken.None,
+            options: lifecycleOptions);
         try
         {
             await cleanup.DeleteAsync(writer);

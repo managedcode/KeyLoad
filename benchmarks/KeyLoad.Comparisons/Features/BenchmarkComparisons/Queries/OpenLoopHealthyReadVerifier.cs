@@ -13,22 +13,21 @@ internal static class OpenLoopHealthyReadVerifier
         var session = await target.OpenSessionAsync(hostToken).ConfigureAwait(false);
         Exception? primary = null;
         OpenLoopCancellationHealthRead? result = null;
+        var original = ReadSessionAsync(session, expected, hostToken);
         try
         {
-            if (session is not IOpenLoopCancellationHealthSession healthSession)
-            {
-                throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthReadUnavailable);
-            }
-            result = await healthSession.ReadActualAsync(expected, hostToken).ConfigureAwait(false);
-            Verify(result, expected);
+            result = await original.ConfigureAwait(false);
         }
-        catch (Exception failure)
+        catch (Exception failure) when (original.IsFaulted || original.IsCanceled)
         {
             primary = failure;
         }
         var cleanup = ImmutableArray.CreateBuilder<Exception>();
-        try { await session.DisposeAsync().ConfigureAwait(false); }
-        catch (Exception failure) { cleanup.Add(failure); }
+        var disposalFailure = await OpenLoopFailure.ObserveAsync(DisposeSessionAsync(session)).ConfigureAwait(false);
+        if (disposalFailure is not null)
+        {
+            cleanup.Add(disposalFailure);
+        }
         var combined = OpenLoopFailure.Combine(primary, cleanup.ToImmutable());
         if (combined is not null)
         {
@@ -38,11 +37,30 @@ internal static class OpenLoopHealthyReadVerifier
         return new(actual.Revision, OpenLoopCancellationProofValidation.HashJson(actual.Json), SessionClosed: true);
     }
 
+    private static async Task<OpenLoopCancellationHealthRead> ReadSessionAsync(IComparisonSession session,
+        BenchmarkDocument expected, CancellationToken cancellationToken)
+    {
+        if (session is not IOpenLoopCancellationHealthSession healthSession)
+        {
+            throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthReadUnavailable);
+        }
+        var result = await healthSession.ReadActualAsync(expected, cancellationToken).ConfigureAwait(false);
+        Verify(result, expected);
+        return result;
+    }
+
+    private static async Task DisposeSessionAsync(IComparisonSession session)
+    {
+        await session.DisposeAsync().ConfigureAwait(false);
+    }
+
     private static void Verify(OpenLoopCancellationHealthRead result, BenchmarkDocument expected)
     {
+        const int BeforeFirstRevision = 0;
+
         var actual = result.Actual;
         if (result.RequestedReference != actual.Reference || actual.Reference.Collection != OpenLoopProtocolIdentities.DocumentsCollection
-            || actual.Reference.Id != expected.Id || actual.Revision <= 0 || actual.Redacted
+            || actual.Reference.Id != expected.Id || actual.Revision <= BeforeFirstRevision || actual.Redacted
             || !actual.RedactedFields.IsEmpty || !string.Equals(actual.Json, expected.Json, StringComparison.Ordinal))
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMismatch);

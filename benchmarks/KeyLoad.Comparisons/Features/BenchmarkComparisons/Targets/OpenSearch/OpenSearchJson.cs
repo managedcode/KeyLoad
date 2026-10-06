@@ -4,6 +4,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class OpenSearchJson
 {
+    private const int LastElementOffset = 1;
+
     internal static JsonElement RequiredObject(JsonElement parent, string property)
         => Required(parent, property, JsonValueKind.Object);
 
@@ -53,12 +55,15 @@ internal static class OpenSearchJson
 
     private static JsonElement RequiredValue(JsonElement parent, string[] path)
     {
-        for (var index = 0; index < path.Length - 1; index++)
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+
+        for (var index = FirstElementIndex; index < path.Length - AdjacentElementOffset; index++)
         {
             parent = RequiredObject(parent, path[index]);
         }
 
-        return parent.TryGetProperty(path[^1], out var value) ? value
+        return parent.TryGetProperty(path[^LastElementOffset], out var value) ? value
             : throw new ComparisonFailureException(OpenSearchNames.ExpectedObject);
     }
 }

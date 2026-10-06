@@ -7,16 +7,20 @@ namespace KeyLoad.Comparisons;
 /// <param name="profile">The exact immutable workload profile.</param>
 /// <param name="offeredRatePerSecond">The selected fixed arrival rate.</param>
 /// <param name="executionOptions">The validated native execution-policy source.</param>
+/// <param name="nativeExecutionOptions">The validated adapter and resource sampling policy.</param>
 /// <param name="progress">The optional bounded textual progress sink.</param>
 /// <param name="nativeProgress">The optional actual native completion observer.</param>
 public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, int offeredRatePerSecond,
-    IOptions<OpenLoopExecutionOptions> executionOptions, Action<string>? progress = null,
+    IOptions<OpenLoopExecutionOptions> executionOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
+    Action<string>? progress = null,
     Action<OpenLoopProgressV1>? nativeProgress = null)
 {
     private const double AccountingSnapshotElapsedSeconds = 1d;
 
     private readonly OpenLoopExecutionPolicy executionPolicy = OpenLoopExecutionOptions.Snapshot(
         (executionOptions ?? throw new ArgumentNullException(nameof(executionOptions))).Value);
+
+    private readonly IOptions<NativeComparisonExecutionOptions> nativeOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
 
     internal OpenLoopExecutionPolicy ExecutionPolicy => executionPolicy;
 
@@ -33,9 +37,10 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         ArgumentException.ThrowIfNullOrWhiteSpace(storage);
         OpenLoopComparisonValidation.Validate(profile, offeredRatePerSecond, target, worker, executionPolicy);
         var execution = new OpenLoopExecutionContext(profile, offeredRatePerSecond, target, worker, storage, executionPolicy);
+        var measurement = RunMeasurementAsync(execution, cancellationToken);
         try
         {
-            await RunMeasurementAsync(execution, cancellationToken).ConfigureAwait(false);
+            await measurement.ConfigureAwait(false);
         }
         catch (OperationCanceledException error) when (error.CancellationToken == cancellationToken
             && cancellationToken.IsCancellationRequested)
@@ -43,7 +48,7 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
             execution.CallerCancelled = true;
             execution.Primary = error;
         }
-        catch (Exception error)
+        catch (Exception error) when (measurement.IsFaulted || measurement.IsCanceled)
         {
             execution.Primary = error;
         }
@@ -58,19 +63,21 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
 
     private async Task RunMeasurementAsync(OpenLoopExecutionContext execution, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         await execution.Target.InitializeAsync(execution.Corpus, cancellationToken).ConfigureAwait(false);
         OpenLoopComparisonValidation.ValidateObservedTarget(execution.Worker, execution.Target.Profile);
         var inputs = new ScaledOperationInputs(execution.Corpus, execution.Scenario);
         execution.Sessions.AddRange(await OpenLoopSessionAcquisition.OpenAsync(execution.Target,
             execution.ExecutionPolicy, cancellationToken).ConfigureAwait(false));
-        await ScaledCorpusReadbackVerifier.VerifyAsync(execution.Sessions[0], execution.Corpus, cancellationToken)
+        await ScaledCorpusReadbackVerifier.VerifyAsync(execution.Sessions[FirstElementIndex], execution.Corpus, cancellationToken)
             .ConfigureAwait(false);
         await ScaledComparisonOperationSetup.PrepareAsync(execution.Sessions, inputs, execution.Profile,
             cancellationToken).ConfigureAwait(false);
         await ScaledComparisonOperationSetup.WarmupAsync(execution.Sessions, inputs, execution.Profile,
-            cancellationToken).ConfigureAwait(false);
+            TimeSpan.FromMilliseconds(execution.ExecutionPolicy.OperationDeadlineMilliseconds), cancellationToken).ConfigureAwait(false);
         StartMeasurement(execution);
-        await using var sampler = new ClientResourceSampler(executionOptions);
+        await using var sampler = new ClientResourceSampler(nativeOptions);
         try
         {
             execution.DrainExpired = await MeasureAsync(execution, inputs, cancellationToken).ConfigureAwait(false);

@@ -9,6 +9,8 @@ internal sealed record TimeSeriesIntensivePreparedPhase(TimeSeriesIntensiveScena
 
     internal static TimeSeriesIntensivePreparedPhase Create(TimeSeriesIntensiveScenario scenario, string runId, int repetition, bool warmup)
     {
+        const int FirstElementIndex = 0;
+
         ArgumentOutOfRangeException.ThrowIfNegative(repetition);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(repetition, TimeSeriesIntensiveProfile.RepetitionCount);
         if (scenario != TimeSeriesIntensiveScenario.Append)
@@ -18,7 +20,7 @@ internal sealed record TimeSeriesIntensivePreparedPhase(TimeSeriesIntensiveScena
 
         var count = warmup ? TimeSeriesIntensiveProfile.WarmupCount : TimeSeriesIntensiveProfile.OperationCount;
         var commands = ImmutableArray.CreateBuilder<Guid>(count);
-        for (var index = 0; index < count; index++)
+        for (var index = FirstElementIndex; index < count; index++)
         {
             commands.Add(TimeSeriesIntensivePlans.CommandId(runId, TimeSeriesIntensivePlans.CommandPurpose(repetition, warmup, index)));
         }

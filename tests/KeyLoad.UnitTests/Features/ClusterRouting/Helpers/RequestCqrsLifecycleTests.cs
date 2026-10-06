@@ -17,10 +17,8 @@ internal static class RequestCqrsLifecycleCases
         var observed = new RequestCqrsProducerObservation();
         var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-        var stream = NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => WaitForCancellationAsync(writer, requestId, observed), token),
-            serializer, requestId, TimeProvider.System, observed.MarkActivationSettled, cancelled.Token);
+        var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+                writer => WaitForCancellationAsync(writer, requestId, observed), token), serializer, requestId, TimeProvider.System, observed.MarkActivationSettled, options: fixture.RoutingOptions, owner: null, cancellationToken: cancelled.Token);
 
         await using (var enumerator = stream.GetAsyncEnumerator(cancelled.Token))
         {

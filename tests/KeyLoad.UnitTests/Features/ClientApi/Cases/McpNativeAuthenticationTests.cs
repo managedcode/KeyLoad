@@ -35,10 +35,10 @@ internal sealed class McpNativeAuthenticationTests
             ExpiresAt = expires ? DateTimeOffset.UnixEpoch : null
         };
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
-        var shape = McpNativeAuthentication.Inspect(payload, CancellationToken.None, UnitMcpOptions.Execution());
+        var shape = McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         var publicShape = McpFrameBounds.InspectValue(JsonDefaults.Serialize(principal), McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
         await Assert.That(shape).IsEqualTo(publicShape);
-        var decoded = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution());
+        var decoded = McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         await Assert.That(ReferenceEquals(decoded.Grants[0], decoded.Grants[1])).IsTrue();
     }
@@ -53,7 +53,7 @@ internal sealed class McpNativeAuthenticationTests
         var limits = new McpMemoryLimits();
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
-        using (var state = new McpRequestState(governor, memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+        using (var state = new McpRequestState(governor, memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             state.Authenticate(payload, CancellationToken.None);
             Array.Clear(payload);
@@ -70,10 +70,10 @@ internal sealed class McpNativeAuthenticationTests
         var payload = NativeSerialization.Serialize(new GrainValue(Principal(database)));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        Assert.ThrowsExactly<OperationCanceledException>(() => McpNativeAuthentication.Inspect(payload, cancelled.Token, UnitMcpOptions.Execution()));
-        Assert.ThrowsExactly<OperationCanceledException>(() => McpNativeAuthentication.ReadPrincipal(payload, cancelled.Token, UnitMcpOptions.Execution()));
+        Assert.ThrowsExactly<OperationCanceledException>(() => McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), cancelled.Token));
+        Assert.ThrowsExactly<OperationCanceledException>(() => McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), cancelled.Token));
         var legacy = Encoding.UTF8.GetBytes(LegacyPrincipalJson);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(legacy, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(legacy, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);
     }
 

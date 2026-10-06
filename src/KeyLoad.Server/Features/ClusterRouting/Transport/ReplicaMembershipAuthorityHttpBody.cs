@@ -1,15 +1,16 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Orleans;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class ReplicaMembershipAuthorityHttpBody
 {
-    internal static async Task<byte[]?> ReadAsync(HttpRequest request, CancellationToken cancellationToken)
+    internal static async Task<byte[]?> ReadAsync(HttpRequest request, IOptions<OrleansMembershipOptions> membershipOptions, CancellationToken cancellationToken)
     {
         const int LengthStep = 1;
         const int StartEmptyCount = 0;
 
-        if (request.ContentLength is not { } length || length > ReplicaMembershipAuthorityProtocol.MaximumRequestBytes)
+        if (request.ContentLength is not { } length || length > membershipOptions.Value.MaximumRequestBytes)
         { return null; }
         var buffer = new byte[checked((int)length + LengthStep)];
         var received = await ReadDeclaredBodyAsync(request.Body, buffer, cancellationToken).ConfigureAwait(false);

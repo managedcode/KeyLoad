@@ -5,6 +5,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisNativeProtocol
 {
+    private const int MissingItemIndex = -1;
+
     public const string ServerSection = "server";
     public const string ReplicationSection = "replication";
     public const string VersionField = "redis_version";
@@ -30,13 +32,16 @@ internal static class RedisNativeProtocol
 
     public static EndPoint ConfiguredEndpoint(ConnectionMultiplexer connection, string error)
     {
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
         var endpoints = connection.GetEndPoints(configuredOnly: true);
-        if (endpoints.Length != 1)
+        if (endpoints.Length != SingleItemCount)
         {
             throw new ComparisonFailureException(error);
         }
 
-        return endpoints[0];
+        return endpoints[FirstElementIndex];
     }
 
     public static bool SameEndpoint(EndPoint left, EndPoint right)
@@ -58,7 +63,7 @@ internal static class RedisNativeProtocol
     {
         DnsEndPoint dns => dns.Port,
         IPEndPoint ip => ip.Port,
-        _ => -1
+        _ => MissingItemIndex
     };
 
     public static async Task<Dictionary<string, string>> ReadInfoAsync(IServer server, string section,
@@ -75,22 +80,29 @@ internal static class RedisNativeProtocol
     }
 
     public static int ParseInteger(Dictionary<string, string> info, string key)
-        => int.TryParse(info.GetValueOrDefault(key), out var value) ? value : -1;
+        => int.TryParse(info.GetValueOrDefault(key), out var value) ? value : MissingItemIndex;
 
     private static Dictionary<string, string> ParseInfo(string info)
     {
+        const char LineFeed = '\n';
+        const char InfoCommentMarker = '#';
+        const char FieldSeparator = ':';
+        const int InfoFieldPairWidth = 2;
+        const int FirstElementIndex = 0;
+        const int SingleItemCount = 1;
+
         var fields = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var line in info.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var line in info.Split(LineFeed, StringSplitOptions.RemoveEmptyEntries))
         {
-            if (line.StartsWith('#'))
+            if (line.StartsWith(InfoCommentMarker))
             {
                 continue;
             }
 
-            var pair = line.Split(':', 2);
-            if (pair.Length == 2)
+            var pair = line.Split(FieldSeparator, InfoFieldPairWidth);
+            if (pair.Length == InfoFieldPairWidth)
             {
-                fields[pair[0].Trim()] = pair[1].Trim();
+                fields[pair[FirstElementIndex].Trim()] = pair[SingleItemCount].Trim();
             }
         }
         return fields;

@@ -29,6 +29,10 @@ internal static class PostgresStreamOperations
     internal static async Task<FoundEvent?> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+
         await using var command = connection.CreateCommand();
         command.CommandText = ReadEventSql;
         command.Parameters.AddWithValue(document.Id);
@@ -38,7 +42,7 @@ internal static class PostgresStreamOperations
             return null;
         }
 
-        var found = new FoundEvent(reader.GetGuid(0), checked((ulong)reader.GetInt64(1)), reader.GetString(2));
+        var found = new FoundEvent(reader.GetGuid(FirstColumnIndex), checked((ulong)reader.GetInt64(SecondColumnIndex)), reader.GetString(ThirdColumnIndex));
         if (await reader.ReadAsync(cancellationToken))
         {
             throw new ComparisonFailureException(CardinalityFailure);

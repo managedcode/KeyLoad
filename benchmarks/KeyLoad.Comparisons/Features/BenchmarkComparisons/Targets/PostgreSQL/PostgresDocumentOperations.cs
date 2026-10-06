@@ -54,11 +54,14 @@ internal static class PostgresDocumentOperations
 
     internal static void RequireAffected(Scenario scenario, int affected)
     {
-        if (affected == 1)
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
+        if (affected == SingleItemCount)
         {
             return;
         }
-        var code = affected == 0 ? scenario switch
+        var code = affected == NoObservedItems ? scenario switch
         {
             Scenario.DocumentUpdate => ComparisonMutationFailures.UpdateMissing,
             Scenario.DocumentDelete => ComparisonMutationFailures.DeleteMissing,
@@ -103,8 +106,10 @@ internal static class PostgresDocumentOperations
     private static async Task SeedScaledAsync(NpgsqlConnection connection, IReadOnlyList<BenchmarkDocument> documents,
         CancellationToken cancellationToken)
     {
+        const string COPYDocumentsIdBodyFROMSTDINFORMATBINARYToken = "COPY documents(id,body) FROM STDIN (FORMAT BINARY)";
+
         await using var copy = await connection.BeginBinaryImportAsync(
-            "COPY documents(id,body) FROM STDIN (FORMAT BINARY)", cancellationToken).ConfigureAwait(false);
+            COPYDocumentsIdBodyFROMSTDINFORMATBINARYToken, cancellationToken).ConfigureAwait(false);
         foreach (var document in documents)
         {
             cancellationToken.ThrowIfCancellationRequested();

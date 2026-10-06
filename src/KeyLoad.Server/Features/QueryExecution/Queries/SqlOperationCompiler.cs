@@ -1,3 +1,4 @@
+using KeyLoad.Query;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
@@ -8,11 +9,11 @@ internal static class SqlOperationCompiler
 {
     /// <summary>Preserves the selected operation's authority boundary, payload and stable caller identity.</summary>
     internal static McpDecodedOperation Compile(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
-        int maximumPayloadBytes, CancellationToken cancellationToken = default)
+        int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken = default)
     {
-        SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, cancellationToken);
+        SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, cancellationToken);
         var limits = limitsOptions.Value;
-        var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, cancellationToken);
+        var reader = new SqlOperationSyntaxReader(request.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, queryOptions, cancellationToken);
         var statement = ReadStatement(reader);
         if (statement.Equals(SqlOperationSyntax.Select, StringComparison.OrdinalIgnoreCase)
             || statement.Equals(SqlOperationSyntax.Explain, StringComparison.OrdinalIgnoreCase))

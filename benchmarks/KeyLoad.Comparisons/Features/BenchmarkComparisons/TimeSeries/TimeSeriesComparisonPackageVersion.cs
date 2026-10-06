@@ -10,6 +10,8 @@ internal static class TimeSeriesComparisonPackageVersion
 
     internal static string Read()
     {
+        const int NoObservedItems = 0;
+
         var informational = typeof(DoubleTimeSeriesSummer).Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         if (string.IsNullOrWhiteSpace(informational))
@@ -18,11 +20,11 @@ internal static class TimeSeriesComparisonPackageVersion
         }
 
         var separator = informational.IndexOf(BuildMetadataSeparator, StringComparison.Ordinal);
-        if (separator == 0)
+        if (separator == NoObservedItems)
         {
             throw new InvalidOperationException(MissingVersion);
         }
 
-        return separator < 0 ? informational : informational[..separator];
+        return separator < NoObservedItems ? informational : informational[..separator];
     }
 }

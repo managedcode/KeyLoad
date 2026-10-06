@@ -13,6 +13,9 @@ public sealed partial class GrainRequestCodec
     private readonly TimeProvider clock;
     private readonly int maximumTokenCharacters;
     private readonly GrainRoutingOptions settings;
+    private readonly IOptions<GrainRoutingOptions> executionOptions;
+
+    internal IOptions<GrainRoutingOptions> ExecutionOptions => executionOptions;
 
     internal IGrainRequestPhaseObserver? PhaseObserver { get; init; }
 
@@ -30,6 +33,7 @@ public sealed partial class GrainRequestCodec
         this.clock = clock;
         ArgumentNullException.ThrowIfNull(options);
         settings = options.Value;
+        executionOptions = options;
         var envelopeBytes = checked(database.Limits.MaxBatchBytes + GrainRoutingProtocol.EnvelopeMetadataBytes);
         maximumTokenCharacters = checked(Base64Url.GetEncodedLength(envelopeBytes)
             + GrainNativeContracts.SignedTokenPrefix.Length + SeparatorCharacters + Base64Url.GetEncodedLength(SignatureBytes));

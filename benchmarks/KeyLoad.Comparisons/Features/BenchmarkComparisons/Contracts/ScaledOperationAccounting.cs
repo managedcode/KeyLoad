@@ -16,6 +16,8 @@ public sealed record ScaledOperationAccounting(int Requested, int Attempted, int
     int DeadlineTimeouts, int Rejections, int Unfinished, string SamplingAlgorithm, int SampleCapacity,
     int CollectedSamples, int MissingSamples)
 {
+    private const string SampledLatencyQuantileMethod = "sampled-estimate";
+
     /// <summary>Gets the interpretation of the reported latency quantiles.</summary>
-    public string LatencyQuantileMethod => "sampled-estimate";
+    public string LatencyQuantileMethod => SampledLatencyQuantileMethod;
 }

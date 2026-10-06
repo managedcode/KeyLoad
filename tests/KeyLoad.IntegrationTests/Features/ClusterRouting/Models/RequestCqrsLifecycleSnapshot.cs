@@ -26,7 +26,6 @@ internal enum RequestCqrsLifecycleStage
     CaptureLifetimeDispose,
     CaptureDeadlineDispose,
     ObserverCancellation,
-    ObserverJoin,
     ObserverEnumeratorDispose,
     ObserverLifetimeDispose,
     IndependentComplete,

@@ -117,6 +117,15 @@ empty trace state, independent of the ambient activity. In Orleans v10.4.0 an
 empty trace parent triggers ambient inheritance, so empty strings cannot opt out.
 The actual native returned job must prove that caller trace state was not retained.
 
+The native-mechanism regression schedules one held job and records its actual
+native job/shard identity and persisted owner fence. Stop and dispose the first
+Orleans runtime through its native lifecycle, preserving the genuine canonical
+store, then create a fresh runtime and request-work owner. The new manager must
+claim the existing shard, advance its owner fence, recover the same job without
+rescheduling, and commit exactly one timeout effect. Every restart and wait is
+bounded and cleanup joins both runtimes. This in-process runtime restart is unit
+evidence only; it does not replace the required real-process and Aspire RF3 proof.
+
 The existing RecurringDueCoordinatorGrain also implements native IDurableJobHandler.
 The native receiver extension may AlwaysInterleave. Handler state is invocation
 local; after leadership/quorum checks it reloads canonical saga/creator state and
@@ -157,16 +166,23 @@ Authored AC-ORL-013 development cases are mapped to
 [journal reopen](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalReopenTests.cs),
 [reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderLifecycleTests.cs),
 [reader rejection](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs),
-and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutFunctionalTests.cs).
-These cases have not executed. A retained-job process restart/adoption assertion,
+and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutFunctionalTests.cs),
+plus [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutRestartTests.cs).
+The latter preserves the genuine store across two native runtimes and asserts
+the actual recovered shard, stable canonical journal instance, changed owner/fence,
+settled native work and exact timeout effect. It makes no process-restart claim.
+These cases have not executed. Retained-job process restart/adoption qualification,
 schedule-ACK uncertainty, frozen old-binary probe and complete Aspire SDK/MCP
 RF3 fault/resource evidence remain required before acceptance.
 
 Development checkpoint, 2026-10-06: matching packages restored. Backend, native
 adapter, startup/reader fencing, selective lifecycle join and native saga-handler
-sources/tests are being integrated. The canonical solution join build failed;
-introduced errors and unrelated literal/options migration diagnostics are tracked
-separately. No native test execution or final successful build is claimed. A frozen
+sources/tests are joined and unqualified. The final canonical build failed with456
+shared CrashHost/Comparisons diagnostics, and canonical formatting with1117;
+the104 reviewed stage paths had no reported finding in either check.
+[The development receipt](../../implementation/native-orleans-development-2026-10-06.json)
+preserves the exact commands and distinguishes source review from acceptance.
+No native test execution or final successful build is claimed. A frozen
 old-binary reader rejection probe and all Aspire RF3/fault/resource gates remain open.
 
 | Task | Ownership and dependency | Required join/evidence |

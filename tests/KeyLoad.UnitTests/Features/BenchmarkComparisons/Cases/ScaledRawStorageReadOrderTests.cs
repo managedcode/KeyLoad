@@ -1,12 +1,15 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies the complete deterministic scale-v1 shuffle independently of its implementation.</summary>
 internal sealed class ScaledRawStorageReadOrderTests
 {
+    private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;
+
     private const int GoldenRecordCount = 10;
     private const int FullRecordCount = 100_000;
     private const int EncodedIndexBytes = 4;
@@ -18,7 +21,7 @@ internal sealed class ScaledRawStorageReadOrderTests
     [Test]
     public async Task AcScale001TenRecordPermutationMatchesLiteralOrderAndDigest()
     {
-        var order = new ScaledRawStorageReadOrder(GoldenRecordCount);
+        var order = new ScaledRawStorageReadOrder(GoldenRecordCount, ExecutionOptions);
         var actual = new int[GoldenRecordCount];
         for (var index = 0; index < actual.Length; index++)
         {
@@ -34,16 +37,16 @@ internal sealed class ScaledRawStorageReadOrderTests
     [Test]
     public async Task AcScale001ReadOrderRejectsCountsOutsideTheFrozenBound()
     {
-        await Assert.That(() => new ScaledRawStorageReadOrder(InvalidOrderCount))
+        await Assert.That(() => new ScaledRawStorageReadOrder(InvalidOrderCount, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => new ScaledRawStorageReadOrder(MaximumOrderCount + 1))
+        await Assert.That(() => new ScaledRawStorageReadOrder(MaximumOrderCount + 1, ExecutionOptions))
             .Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task AcScale001SequentialAndShuffledCursorsCoverEveryIndexAndWrapIndependently()
     {
-        var order = new ScaledRawStorageReadOrder(FullRecordCount);
+        var order = new ScaledRawStorageReadOrder(FullRecordCount, ExecutionOptions);
         var visited = new bool[FullRecordCount];
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var encoded = new byte[EncodedIndexBytes];
@@ -91,13 +94,13 @@ internal sealed class ScaledRawStorageReadOrderTests
 
     private static int FirstPermutationValue()
     {
-        var order = new ScaledRawStorageReadOrder(FullRecordCount);
+        var order = new ScaledRawStorageReadOrder(FullRecordCount, ExecutionOptions);
         return order.NextRandom();
     }
 
     private static int SecondPermutationValue()
     {
-        var order = new ScaledRawStorageReadOrder(FullRecordCount);
+        var order = new ScaledRawStorageReadOrder(FullRecordCount, ExecutionOptions);
         _ = order.NextRandom();
         return order.NextRandom();
     }

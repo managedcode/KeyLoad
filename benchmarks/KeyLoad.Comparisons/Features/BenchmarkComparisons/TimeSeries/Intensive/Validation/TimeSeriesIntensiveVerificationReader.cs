@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 using System.Collections.Immutable;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
@@ -5,9 +7,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal static class TimeSeriesIntensiveVerificationReader
 {
     internal static async Task<ImmutableArray<SampleRecord>> ReadAsync(ITimeSeriesIntensiveTarget target,
-        string seriesId, DateTimeOffset from, DateTimeOffset until, CancellationToken cancellationToken)
+        string seriesId, DateTimeOffset from, DateTimeOffset until, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
         call.Start();
         ImmutableArray<SampleRecord> actual;
         try
@@ -30,9 +32,9 @@ internal static class TimeSeriesIntensiveVerificationReader
         return actual;
     }
 
-    internal static async Task<SampleRecord?> LatestAsync(ITimeSeriesIntensiveTarget target, string seriesId, CancellationToken cancellationToken)
+    internal static async Task<SampleRecord?> LatestAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
         call.Start();
         SampleRecord? actual;
         try
@@ -55,9 +57,9 @@ internal static class TimeSeriesIntensiveVerificationReader
         return actual;
     }
 
-    internal static async Task<SampleAggregate> WholeAsync(ITimeSeriesIntensiveTarget target, string seriesId, CancellationToken cancellationToken)
+    internal static async Task<SampleAggregate> WholeAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
         call.Start();
         SampleAggregate actual;
         try

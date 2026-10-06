@@ -37,6 +37,7 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         ArgumentNullException.ThrowIfNull(configurationOptions);
         ArgumentNullException.ThrowIfNull(peerOptions);
         ArgumentNullException.ThrowIfNull(replayOptions);
+        ArgumentNullException.ThrowIfNull(transportOptions);
         var configuration = configurationOptions.Value;
         var options = peerOptions.Value;
         ArgumentNullException.ThrowIfNull(options);

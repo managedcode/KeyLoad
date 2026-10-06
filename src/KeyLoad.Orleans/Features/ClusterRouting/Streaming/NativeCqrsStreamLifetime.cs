@@ -23,13 +23,13 @@ internal static class NativeCqrsStreamLifetime
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Action settled, IOptions<GrainRoutingOptions> options,
         NativeRequestWorkOwner? owner, CancellationToken cancellationToken)
-        => RunCore(createStream, serializer, requestId, clock, settled, owner, options.Value.ExecutionLifetime,
+        => RunCore(createStream, serializer, requestId, clock, settled, owner, options, options.Value.ExecutionLifetime,
             cancellationToken, CancellationToken.None);
 
     private static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunCore(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner, TimeSpan executionLifetime,
+        Guid requestId, TimeProvider clock, Action settled, NativeRequestWorkOwner? owner, IOptions<GrainRoutingOptions> options, TimeSpan executionLifetime,
         CancellationToken cancellationToken, [EnumeratorCancellation] CancellationToken enumerationToken)
     {
         using var deadline = new CancellationTokenSource(executionLifetime, clock);
@@ -38,7 +38,7 @@ internal static class NativeCqrsStreamLifetime
             : CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest?.Token ?? request.Token,
             deadline.Token);
-        var admission = new NativeCqrsStreamAdmission(serializer, requestId);
+        var admission = new NativeCqrsStreamAdmission(serializer: serializer, requestId: requestId, options: options);
         var workLease = await NativeRequestWorkStreamSettlement.AcquireOrSettleAsync(owner, requestId, settled)
             .ConfigureAwait(true);
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;

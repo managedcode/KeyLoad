@@ -19,20 +19,20 @@ internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
-        CancellationToken startupCancellation, ServerRuntimeOptions runtimeOptions)
+        ServerRuntimeOptions runtimeOptions, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
         runtimeOptions.RegisterBorrowed(builder.Services);
-        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, startupCancellation, runtimeOptions);
+        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
-            runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs));
+            runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting));
         return builder.Build();
     }
 
     private static void RegisterBorrowedServices(IServiceCollection services, PartitionHost partition,
         INodeAdministration administration, NodeOptions options, NativeRequestWorkOwner requestWork,
-        CancellationToken startupCancellation, ServerRuntimeOptions runtimeOptions)
+        ServerRuntimeOptions runtimeOptions, CancellationToken startupCancellation)
     {
         var peers = runtimeOptions.Peer.Value;
         peers.Validate(partition.Configuration);
@@ -84,12 +84,13 @@ internal static class OrleansSiloConfiguration
             services.AddSingleton<IMembershipTable>(provider => CreateMembershipProxy(provider, options));
             return;
         }
-        var boundedRows = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
-            ? ReplicaMembershipAuthorityProtocol.MaximumRows : ReplicaMembershipProtocol.UnboundedRows;
         services.AddSingleton<IMembershipTable>(provider => new ReplicaMembershipTable(partition.Database, partition.Coordinator,
             partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
-            boundedRows, startupCancellation, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>()));
+            options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
+                ? provider.GetRequiredService<IOptions<OrleansMembershipOptions>>().Value.MaximumRows
+                : ReplicaMembershipProtocol.UnboundedRows,
+            provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
+            provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>(), startupCancellation));
     }
 
     private static ReplicaMembershipAuthorityClientTable CreateMembershipProxy(IServiceProvider provider, NodeOptions options)
@@ -137,7 +138,7 @@ internal static class OrleansSiloConfiguration
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,
         OrleansMembershipOptions membershipOptions, IOptions<RuntimeJournalOptions> journal,
-        IOptions<NativeDurableJobOptions> jobs)
+        IOptions<NativeDurableJobOptions> jobs, IOptions<GrainRoutingOptions> routing)
     {
         silo.Configure<ClusterOptions>(cluster =>
         {
@@ -153,7 +154,7 @@ internal static class OrleansSiloConfiguration
         silo.Configure<SiloMessagingOptions>(messaging => messaging.MaxMessageBodySize = Math.Max(
             checked(replica.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
                 + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
-            checked(GrainRequestStreamProtocol.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
+            checked(routing.Value.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes)));
         silo.AddGrainService<PartitionReplicaGrainService>();
         silo.AddGrainService<RecurringDueGrainService>();
         silo.AddActivityPropagation();

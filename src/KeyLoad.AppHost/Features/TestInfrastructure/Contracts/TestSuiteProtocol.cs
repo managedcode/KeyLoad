@@ -45,8 +45,6 @@ internal static class TestSuiteProtocol
     internal const string GraphDepthWorkloadSettingName = "GraphDepth";
     internal const string AppHostBenchmarkProfileSetting = "Benchmarks:Profile";
     internal const string GeneralComparisonAppHostProfile = "general";
-    internal const int MaximumTestFilterLength = 4096;
-    internal const int MaximumTestPathLength = 4096;
     internal const string ProfileTimeoutMinutesText = "140";
     internal const string IsolatedComparisonFilter = "/*/*/IsolatedNativeComparisonTests/*";
     internal const string ArgumentPrefix = "--";

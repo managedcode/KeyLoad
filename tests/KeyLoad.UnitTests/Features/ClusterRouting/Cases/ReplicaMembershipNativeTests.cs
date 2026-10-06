@@ -27,11 +27,11 @@ internal sealed class ReplicaMembershipNativeTests
     public async Task ActualSnapshotAndRowsPreserveAllNativeMembershipFields()
     {
         var entry = Entry();
-        var empty = ReplicaMembershipSnapshot.Read(null);
+        var empty = ReplicaMembershipSnapshot.Read(null, UnitRoutingOptions.Membership());
         var inserted = empty.Insert(entry, new TableVersion((int)FirstVersion, ZeroEtag))!;
         var bytes = inserted.Serialize();
         var native = NativeSerialization.Deserialize<ReplicaMembershipTableSnapshot>(bytes);
-        var restored = ReplicaMembershipSnapshot.Read(new MembershipRecord(FirstVersion, bytes));
+        var restored = ReplicaMembershipSnapshot.Read(new MembershipRecord(FirstVersion, bytes), UnitRoutingOptions.Membership());
         var row = restored.Data().Members.Single();
         await Assert.That(native.Version).IsEqualTo(FirstVersion);
         await Assert.That(native.Rows.Single().Address).IsEqualTo(entry.SiloAddress.ToParsableString());
@@ -56,7 +56,7 @@ internal sealed class ReplicaMembershipNativeTests
     public async Task HeartbeatPreservesEtagAndStaleStatusCannotMoveAliveTimeBackwards()
     {
         var entry = Entry();
-        var initial = ReplicaMembershipSnapshot.Read(null).Insert(entry, new TableVersion((int)FirstVersion, ZeroEtag))!;
+        var initial = ReplicaMembershipSnapshot.Read(null, UnitRoutingOptions.Membership()).Insert(entry, new TableVersion((int)FirstVersion, ZeroEtag))!;
         var latest = Entry();
         latest.IAmAliveTime = Alive.AddMinutes(OneByte);
         var heartbeat = initial.Heartbeat(latest)!;
@@ -64,7 +64,7 @@ internal sealed class ReplicaMembershipNativeTests
         await Assert.That(heartbeat.Data().Members.Single().Item2).IsEqualTo(FirstEtag);
         await Assert.That(heartbeat.Heartbeat(entry)).IsNull();
         var updated = heartbeat.Update(entry, FirstEtag, new TableVersion((int)SecondVersion, FirstEtag))!;
-        var decoded = ReplicaMembershipSnapshot.Read(new MembershipRecord(SecondVersion, updated.Serialize()));
+        var decoded = ReplicaMembershipSnapshot.Read(new MembershipRecord(SecondVersion, updated.Serialize()), UnitRoutingOptions.Membership());
         await Assert.That(decoded.Data().Members.Single().Item1.IAmAliveTime).IsEqualTo(latest.IAmAliveTime);
         await Assert.That(decoded.Data().Members.Single().Item2).IsEqualTo(SecondEtag);
         await Assert.That(heartbeat.Update(entry, ZeroEtag, new TableVersion((int)SecondVersion, FirstEtag))).IsNull();
@@ -75,7 +75,7 @@ internal sealed class ReplicaMembershipNativeTests
     public async Task CleanupRemovesOnlyDeadRowsBeforeCutoffAndDeleteAdvancesVersion()
     {
         var entry = Entry();
-        var alive = ReplicaMembershipSnapshot.Read(null).Insert(entry, new TableVersion((int)FirstVersion, ZeroEtag))!;
+        var alive = ReplicaMembershipSnapshot.Read(null, UnitRoutingOptions.Membership()).Insert(entry, new TableVersion((int)FirstVersion, ZeroEtag))!;
         await Assert.That(alive.Cleanup(new DateTimeOffset(Alive.AddMinutes(OneByte)))).IsNull();
         entry.Status = SiloStatus.Dead;
         var dead = alive.Update(entry, FirstEtag, new TableVersion((int)SecondVersion, FirstEtag))!;
@@ -90,7 +90,7 @@ internal sealed class ReplicaMembershipNativeTests
     [Test]
     public async Task LegacyJsonWrongTypeAndTrailingNativeSnapshotAreCorruptionWithoutFallback()
     {
-        var native = ReplicaMembershipSnapshot.Read(null).Serialize();
+        var native = ReplicaMembershipSnapshot.Read(null, UnitRoutingOptions.Membership()).Serialize();
         var cases = new byte[][]
         {
             Encoding.UTF8.GetBytes(LegacyJson), NativeSerialization.Serialize(LegacyJson),
@@ -99,7 +99,7 @@ internal sealed class ReplicaMembershipNativeTests
         foreach (var bytes in cases)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-                ReplicaMembershipSnapshot.Read(new MembershipRecord(FirstVersion, bytes))).Code).IsEqualTo(ErrorCode.Corruption);
+                ReplicaMembershipSnapshot.Read(new MembershipRecord(FirstVersion, bytes), UnitRoutingOptions.Membership())).Code).IsEqualTo(ErrorCode.Corruption);
         }
     }
 

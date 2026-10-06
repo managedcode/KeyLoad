@@ -4,4 +4,7 @@ namespace KeyLoad.Server;
 /// <param name="TokenCount">The total JSON reader tokens, including container delimiters.</param>
 /// <param name="PropertyCount">The total object property names.</param>
 /// <param name="Depth">The maximum container nesting, zero for scalar values or count-only projections.</param>
-internal readonly record struct McpFrameShape(int TokenCount, int PropertyCount, int Depth = 0);
+internal readonly record struct McpFrameShape(int TokenCount, int PropertyCount, int Depth = McpFrameShape.ScalarDepth)
+{
+    internal const int ScalarDepth = 0;
+}

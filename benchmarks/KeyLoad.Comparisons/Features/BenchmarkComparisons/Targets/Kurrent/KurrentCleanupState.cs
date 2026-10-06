@@ -113,9 +113,11 @@ internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecy
 
     internal KurrentCleanupDiagnostic Snapshot()
     {
+        const int SingleItemCount = 1;
+
         lock (gate)
         {
-            return new(1, primary is null ? KurrentCleanupStage.Complete : failedStage,
+            return new(SingleItemCount, primary is null ? KurrentCleanupStage.Complete : failedStage,
                 primary is null ? KurrentCleanupOutcome.Succeeded : KurrentCleanupOutcome.Failed,
                 reason, Counts(), clock.ElapsedMilliseconds, cancelled, deadlineExpired, grpcStatus, laterDisposals);
         }

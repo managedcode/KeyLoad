@@ -24,6 +24,8 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
 
     internal IAsyncDisposable EnterOperation()
     {
+        const int NoObservedItems = 0;
+
         lock (lifetimeGate)
         {
             if (closing)
@@ -32,7 +34,7 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
                     TimescaleTimeSeriesIntensiveProtocol.ContextClosed);
             }
 
-            if (activeOperations == 0)
+            if (activeOperations == NoObservedItems)
             {
                 drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
             }
@@ -44,10 +46,12 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
 
     internal Task CloseAndDrainAsync()
     {
+        const int NoObservedItems = 0;
+
         lock (lifetimeGate)
         {
             closing = true;
-            return activeOperations == 0 ? Task.CompletedTask : drained.Task;
+            return activeOperations == NoObservedItems ? Task.CompletedTask : drained.Task;
         }
     }
 
@@ -60,10 +64,12 @@ internal sealed class TimescaleTimeSeriesIntensiveContext
 
     private void ExitOperation()
     {
+        const int NoObservedItems = 0;
+
         lock (lifetimeGate)
         {
             activeOperations--;
-            if (closing && activeOperations == 0)
+            if (closing && activeOperations == NoObservedItems)
             {
                 drained.TrySetResult();
             }

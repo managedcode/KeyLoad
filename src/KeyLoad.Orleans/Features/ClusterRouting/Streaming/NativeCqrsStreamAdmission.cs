@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Orleans.Serialization;
@@ -6,7 +7,7 @@ namespace KeyLoad.Orleans;
 
 /// <summary>Validates the fixed producer shape and admits its native encoded bytes before yield.</summary>
 internal sealed class NativeCqrsStreamAdmission(
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, Guid requestId)
+    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, Guid requestId, IOptions<GrainRoutingOptions> options)
 {
     private long aggregateBytes;
     private int count;
@@ -31,14 +32,14 @@ internal sealed class NativeCqrsStreamAdmission(
         ValidateShape(chunk, nextCount);
         var maximumBytes = chunk.Kind switch
         {
-            CqrsStreamChunkKind.Started => GrainRequestStreamProtocol.MaximumStartedBytes,
-            CqrsStreamChunkKind.Completed => GrainRequestStreamProtocol.MaximumCompletedBytes,
-            CqrsStreamChunkKind.Failed => GrainRequestStreamProtocol.MaximumFailedBytes,
+            CqrsStreamChunkKind.Started => options.Value.MaximumStartedBytes,
+            CqrsStreamChunkKind.Completed => options.Value.MaximumCompletedBytes,
+            CqrsStreamChunkKind.Failed => options.Value.MaximumFailedBytes,
             _ => throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest)
         };
-        var chunkBytes = GrainNativeByteCounter.Measure(serializer, chunk, maximumBytes, cancellationToken);
+        var chunkBytes = GrainNativeByteCounter.Measure(serializer: serializer, value: chunk, maximumBytes: maximumBytes, cancellationToken: cancellationToken, options: options);
         var nextAggregate = checked(aggregateBytes + chunkBytes);
-        if (nextAggregate > GrainRequestStreamProtocol.MaximumAggregateBytes)
+        if (nextAggregate > options.Value.MaximumAggregateBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }
@@ -87,7 +88,7 @@ internal sealed class NativeCqrsStreamAdmission(
         }
     }
 
-    private static void ValidateFinalShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
+    private void ValidateFinalShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         int nextCount)
     {
         const int EmptyNextCount = 1;
@@ -110,12 +111,12 @@ internal sealed class NativeCqrsStreamAdmission(
         ValidateTerminal(chunk.Kind, final);
     }
 
-    private static void ValidateTerminal(CqrsStreamChunkKind kind, Result<GrainOperationReply> final)
+    private void ValidateTerminal(CqrsStreamChunkKind kind, Result<GrainOperationReply> final)
     {
         if (final.IsSuccess)
         {
             if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
-                || final.Value is not { } reply || reply.Payload.IsEmpty || reply.Payload.Length > GrainRoutingProtocol.MaximumReplyBytes
+                || final.Value is not { } reply || reply.Payload.IsEmpty || reply.Payload.Length > options.Value.MaximumReplyBytes
                 || reply.Error is not null || reply.SafeDetail is not null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
@@ -130,6 +131,6 @@ internal sealed class NativeCqrsStreamAdmission(
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
 
-        GrainRequestStreamProblem.Validate(problem);
+        GrainRequestStreamProblem.Validate(problem: problem, options: options);
     }
 }

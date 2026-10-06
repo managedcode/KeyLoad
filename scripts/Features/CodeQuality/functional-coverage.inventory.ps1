@@ -149,7 +149,7 @@ function Invoke-FcVerify([string] $Root, [string] $EvidenceRoot, [string] $Contr
         $coveragePath = Resolve-FcEvidenceFile $EvidenceRoot $input.coverage
         $trxPath = Resolve-FcEvidenceFile $EvidenceRoot $input.trx
         $coverage = Read-FcCobertura $Root $coveragePath $sourceInventory
-        $trx = Read-FcTrx $trxPath $input.suite $contract.contributors.testNamespace @($contract.contributors.testClasses)
+        $trx = Read-FcTrx $trxPath $input.suite @($contract.contributors.exactCases)
         $runs.Add([ordered]@{ trx = $trx; coverage = $coverage; reportHash = Get-FcHash $coveragePath; trxHash = Get-FcHash $trxPath })
     }
     $manifestPath = Join-Path $EvidenceRoot $t.ManifestName

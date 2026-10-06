@@ -1,11 +1,14 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveWorkloadDigest
 {
-    internal static string Compute()
+    internal static string Compute(IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
         using var frame = new TimeSeriesIntensiveDigestWriter(TimeSeriesIntensiveFrameLabels.WorkloadDomain);
-        Header(frame);
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+        Header(frame, execution.OperationTimeout);
         frame.String(TimeSeriesIntensiveFrameLabels.SeedInsertion);
         frame.Count(TimeSeriesIntensiveProfile.SampleCount);
         foreach (var sample in TimeSeriesIntensiveCorpus.SeedInsertion)
@@ -18,7 +21,7 @@ internal static class TimeSeriesIntensiveWorkloadDigest
         return frame.Finish();
     }
 
-    private static void Header(TimeSeriesIntensiveDigestWriter frame)
+    private static void Header(TimeSeriesIntensiveDigestWriter frame, TimeSpan operationTimeout)
     {
         frame.Field(TimeSeriesIntensiveFrameLabels.Profile, TimeSeriesIntensiveProfile.Name);
         frame.Field(TimeSeriesIntensiveFrameLabels.RandomSeed, TimeSeriesIntensiveProfile.RandomSeed);
@@ -28,7 +31,7 @@ internal static class TimeSeriesIntensiveWorkloadDigest
         frame.Field(TimeSeriesIntensiveFrameLabels.WarmupCount, TimeSeriesIntensiveProfile.WarmupCount);
         frame.Field(TimeSeriesIntensiveFrameLabels.RepetitionCount, TimeSeriesIntensiveProfile.RepetitionCount);
         frame.Field(TimeSeriesIntensiveFrameLabels.Concurrency, TimeSeriesIntensiveProfile.Concurrency);
-        frame.Field(TimeSeriesIntensiveFrameLabels.OperationTimeoutTicks, TimeSeriesIntensiveProfile.OperationTimeout.Ticks);
+        frame.Field(TimeSeriesIntensiveFrameLabels.OperationTimeoutTicks, operationTimeout.Ticks);
         frame.Field(TimeSeriesIntensiveFrameLabels.RawLimit, TimeSeriesIntensiveProfile.RawLimit);
         frame.Field(TimeSeriesIntensiveFrameLabels.MaxSamples, TimeSeriesIntensiveProfile.MaxSamples);
         frame.Field(TimeSeriesIntensiveFrameLabels.MaxWindows, TimeSeriesIntensiveProfile.MaxWindows);

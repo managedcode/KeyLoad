@@ -5,6 +5,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed record RedisNodeIdentity(string RunId, string Version)
 {
+    private const int SingleItemCount = 1;
+
     public const string InvalidError = "RedisNativeIdentityInvalid";
     public const string DuplicateError = "RedisNativeIdentityNotUnique";
     public const string VersionError = "RedisNativeVersionMismatch";
@@ -60,24 +62,29 @@ internal sealed record RedisNodeIdentity(string RunId, string Version)
     public string Observation(string role) => ObservationPrefix + role + RunIdSeparator + RunId + VersionSeparator + Version;
 
     public static ClusterEvidence SingleEvidence(RedisNodeIdentity identity, string state)
-        => new(1, 1, state, [SingleStateObservation, identity.Observation(PrimaryRoleObservation), SingleAofObservation]);
+        => new(SingleItemCount, SingleItemCount, state, [SingleStateObservation, identity.Observation(PrimaryRoleObservation), SingleAofObservation]);
 
     public static ClusterEvidence ReplicatedEvidence(RedisNodeIdentity primary, RedisNodeIdentity[] replicas, string state)
     {
+        const int TwoNodeReplicaCount = 2;
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+        const int SingleItemCount = 1;
+
         var observations = new List<string>
         {
-            replicas.Length == 2 ? TwoReplicaObservation : OneReplicaObservation,
+            replicas.Length == TwoNodeReplicaCount ? TwoReplicaObservation : OneReplicaObservation,
             primary.Observation(PrimaryRoleObservation),
             ReplicaProtocolObservation,
             ReplicaPayloadObservation,
             ReplicatedAofObservation
         };
-        for (var index = 0; index < replicas.Length; index++)
+        for (var index = FirstElementIndex; index < replicas.Length; index++)
         {
-            observations.Add(replicas[index].Observation(ReplicaRolePrefix + (index + 1)));
+            observations.Add(replicas[index].Observation(ReplicaRolePrefix + (index + AdjacentElementOffset)));
         }
 
-        return new(replicas.Length + 1, replicas.Length + 1, state,
+        return new(replicas.Length + SingleItemCount, replicas.Length + SingleItemCount, state,
             ImmutableCollectionsMarshal.AsImmutableArray(observations.ToArray()));
     }
 }

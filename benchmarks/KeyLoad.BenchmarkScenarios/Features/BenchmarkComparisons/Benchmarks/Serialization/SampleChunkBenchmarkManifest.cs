@@ -16,6 +16,9 @@ internal static class SampleChunkBenchmarkManifest
     internal const string SourceHeadEnvironment = "KEYLOAD_CHUNK_SOURCE_HEAD";
     internal const string SourceInventoryEnvironment = "KEYLOAD_CHUNK_SOURCE_INVENTORY_SHA256";
 
+    private const string CorrectnessContract = "every_field_original_offset_and_IEEE_bits_verified_before_timing";
+    private const string AccountingContract = "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead";
+
     internal static void Write(int records, string corpus, SampleChunkBenchmarkState state,
         IOptions<BenchmarkArtifactOptions> artifactOptions)
     {
@@ -65,8 +68,8 @@ internal static class SampleChunkBenchmarkManifest
             chunkValueBytesPerSample = (double)state.ChunkBytes / state.RecordCount,
             orderedNativeValuesSha256 = HashNative(state.NativeValues),
             chunkValueSha256 = Convert.ToHexStringLower(SHA256.HashData(state.ChunkValue)),
-            correctness = "every_field_original_offset_and_IEEE_bits_verified_before_timing",
-            accounting = "complete_native_value_envelopes_excluding_keys_WAL_replication_indexes_and_storage_overhead",
+            correctness = CorrectnessContract,
+            accounting = AccountingContract,
             machineName = Environment.MachineName,
             processorCount = Environment.ProcessorCount,
             architecture = RuntimeInformation.ProcessArchitecture.ToString(),

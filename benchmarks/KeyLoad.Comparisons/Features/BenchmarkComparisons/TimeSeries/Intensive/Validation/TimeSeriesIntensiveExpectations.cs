@@ -9,11 +9,13 @@ internal sealed record TimeSeriesIntensiveExpectations(ImmutableArray<TimeSeries
 {
     internal static TimeSeriesIntensiveExpectations Create()
     {
+        const int FirstElementIndex = 0;
+
         var ranges = ImmutableArray.CreateBuilder<TimeSeriesIntensiveReadPlan>(TimeSeriesIntensiveProfile.RangeGroups);
         var raw = ImmutableArray.CreateBuilder<ImmutableArray<SampleRecord>>(ranges.Capacity);
         var aggregates = ImmutableArray.CreateBuilder<SampleAggregate>(ranges.Capacity);
         var windows = ImmutableArray.CreateBuilder<ImmutableArray<SampleAggregateWindow>>(ranges.Capacity);
-        for (var index = 0; index < ranges.Capacity; index++)
+        for (var index = FirstElementIndex; index < ranges.Capacity; index++)
         {
             var range = TimeSeriesIntensivePlans.Read(index);
             ranges.Add(range);
@@ -24,7 +26,7 @@ internal sealed record TimeSeriesIntensiveExpectations(ImmutableArray<TimeSeries
 
         var cuts = ImmutableArray.CreateBuilder<DateTimeOffset>(TimeSeriesIntensiveProfile.GroupCount);
         var latest = ImmutableArray.CreateBuilder<SampleRecord?>(cuts.Capacity);
-        for (var index = 0; index < cuts.Capacity; index++)
+        for (var index = FirstElementIndex; index < cuts.Capacity; index++)
         {
             var cut = TimeSeriesIntensivePlans.Read(index).LatestAtOrBefore;
             cuts.Add(cut);
@@ -32,7 +34,7 @@ internal sealed record TimeSeriesIntensiveExpectations(ImmutableArray<TimeSeries
         }
 
         var samples = ImmutableArray.CreateBuilder<SampleData>(TimeSeriesIntensiveProfile.OperationCount);
-        for (var index = 0; index < samples.Capacity; index++)
+        for (var index = FirstElementIndex; index < samples.Capacity; index++)
         {
             samples.Add(TimeSeriesIntensiveCorpus.AppendSample(index));
         }

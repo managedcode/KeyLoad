@@ -1,5 +1,3 @@
-using KeyLoad.Client;
-
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadOpenLoopResults

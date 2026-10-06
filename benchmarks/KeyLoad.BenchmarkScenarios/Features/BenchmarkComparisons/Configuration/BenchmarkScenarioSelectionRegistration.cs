@@ -13,7 +13,6 @@ internal static class BenchmarkScenarioSelectionRegistration
     private const string RawEngineFailure = "The raw-storage engine label is unsupported.";
     private const string ScaledEngineFailure = "The scaled benchmark engine label is unsupported.";
     private const string RecordCountFailure = "The scaled benchmark record-count selection is unsupported.";
-    private const string EngineArgument = "label";
     private const string SettingSeparator = ":";
 
     internal static IOptions<BenchmarkScenarioSelectionOptions> ReadRaw() => Read(false);
@@ -45,9 +44,14 @@ internal static class BenchmarkScenarioSelectionRegistration
 
     private static bool Validate(BenchmarkScenarioSelectionOptions snapshot, bool scaled)
     {
-        if (snapshot.Engine != BenchmarkScenarioSelectionOptions.ZoneTree)
-        { throw new ArgumentException(scaled ? ScaledEngineFailure : RawEngineFailure, EngineArgument); }
+        ValidateEngine(snapshot.Engine, scaled);
         if (scaled) { _ = RecordCount(snapshot); }
         return true;
+    }
+
+    private static void ValidateEngine(string label, bool scaled)
+    {
+        if (label != BenchmarkScenarioSelectionOptions.ZoneTree)
+        { throw new ArgumentException(scaled ? ScaledEngineFailure : RawEngineFailure, nameof(label)); }
     }
 }

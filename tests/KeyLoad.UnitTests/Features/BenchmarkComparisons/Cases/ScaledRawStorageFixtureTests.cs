@@ -1,4 +1,5 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -6,6 +7,8 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 [NotInParallel]
 internal sealed class ScaledRawStorageFixtureTests
 {
+    private static readonly IOptions<ScaledStorageExecutionOptions> ExecutionOptions = UnitBenchmarkOptions.ScaledPreparation;
+
     private const int MiniRecordCount = 4;
     private const int ScaledRecordCount = 100_000;
     private const int SmallPayloadBytes = 32;
@@ -24,7 +27,7 @@ internal sealed class ScaledRawStorageFixtureTests
     public async Task AcScale002And003MiniFixturesSeedVerifyAndRetainExactZoneTreeValues(int payloadBytes)
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage()), async fixture =>
+            () => new ScaledRawStorageFixture(MiniRecordCount, payloadBytes, ExecutionOptions), async fixture =>
             {
                 var before = fixture.Capture();
 
@@ -40,7 +43,7 @@ internal sealed class ScaledRawStorageFixtureTests
                     ExpectedRetainedValueBytes(MiniRecordCount, payloadBytes));
                 await Assert.That(before.RetainedOrderBytes).IsEqualTo((long)MiniRecordCount * OrderEntryBytes);
                 await Assert.That(before.PermutationDigest)
-                    .IsEqualTo(new ScaledRawStorageReadOrder(MiniRecordCount).PermutationDigest);
+                    .IsEqualTo(new ScaledRawStorageReadOrder(MiniRecordCount, ExecutionOptions).PermutationDigest);
                 await Assert.That(ScaledRawStorageFixtureOracleTests.IsSha256(before.FullValueDigest)).IsTrue();
                 await Assert.That(before.FullValueDigest)
                     .IsEqualTo(ScaledRawStorageFixtureOracleTests.IndependentValueDigest(MiniRecordCount, payloadBytes));
@@ -73,7 +76,8 @@ internal sealed class ScaledRawStorageFixtureTests
     public async Task AcScale002And003GenuineHundredThousandZoneTreeRowsPassFullValueOracle(int payloadBytes)
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(ScaledRecordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage(),             TestContext.Current!.Execution.CancellationToken), async fixture =>
+            () => new ScaledRawStorageFixture(ScaledRecordCount, payloadBytes, ExecutionOptions,
+                TestContext.Current!.Execution.CancellationToken), async fixture =>
             {
                 var seeded = fixture.Capture();
 
@@ -87,7 +91,7 @@ internal sealed class ScaledRawStorageFixtureTests
                     ExpectedRetainedValueBytes(ScaledRecordCount, payloadBytes));
                 await Assert.That(seeded.RetainedOrderBytes).IsEqualTo((long)ScaledRecordCount * OrderEntryBytes);
                 await Assert.That(seeded.PermutationDigest)
-                    .IsEqualTo(new ScaledRawStorageReadOrder(ScaledRecordCount).PermutationDigest);
+                    .IsEqualTo(new ScaledRawStorageReadOrder(ScaledRecordCount, ExecutionOptions).PermutationDigest);
                 await Assert.That(seeded.FullValueDigest)
                     .IsEqualTo(ScaledRawStorageFixtureOracleTests.IndependentValueDigest(ScaledRecordCount, payloadBytes));
 

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <KeyLoadNativeCoverageToolVersion>18.11.2</KeyLoadNativeCoverageToolVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
@@ -48,7 +49,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
     <PackageVersion Include="TUnit" Version="1.72.16" />
-    <!-- Pin TUnit's existing native MTP collector; no additional collector. -->
+    <!-- One native Microsoft engine: MTP collects test processes; the same-version CLI collects owned RF3 containers. -->
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />

@@ -53,7 +53,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
         try
         {
             _core = new ScaledRawStorageFixtureCore(recordCount, payloadBytes,
-                deadlineStart, processMemoryCeiling, _lifetime.Token, executionOptions);
+                deadlineStart, processMemoryCeiling, executionOptions, _lifetime.Token);
             _core.Initialize();
         }
         catch (Exception primary) when (RawStorageFixtureFailures.IsNonFatal(primary))

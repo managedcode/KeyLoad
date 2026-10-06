@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal static class TimeSeriesComparisonRunner
@@ -7,9 +9,13 @@ internal static class TimeSeriesComparisonRunner
     private const string LibraryName = "ManagedCode.TimeSeries";
 
     internal static async Task<int> RunAsync(ITimeSeriesPersistentTarget[] targets, string sourceRevision,
-        string outputDirectory, CancellationToken cancellationToken, GitHubProvenance? provenance = null,
+        string outputDirectory, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken, GitHubProvenance? provenance = null,
         string? loadGeneratorImage = null)
     {
+        const int NoObservedItems = 0;
+        const int SingleItemCount = 1;
+
+        NativeComparisonExecutionOptions.Require(executionOptions);
         ArgumentNullException.ThrowIfNull(targets);
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceRevision);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputDirectory);
@@ -28,14 +34,16 @@ internal static class TimeSeriesComparisonRunner
             Provenance = provenance,
             LoadGeneratorImage = loadGeneratorImage
         };
-        await TimeSeriesComparisonReportWriter.WriteAsync(report, outputDirectory);
-        return recorder.Passed ? 0 : 1;
+        await TimeSeriesComparisonReportWriter.WriteAsync(report, outputDirectory, executionOptions);
+        return recorder.Passed ? NoObservedItems : SingleItemCount;
     }
 
     private static async Task ExecuteTargetsAsync(ITimeSeriesPersistentTarget[] targets,
         TimeSeriesComparisonWorkload workload, TimeSeriesComparisonRecorder recorder,
         CancellationToken cancellationToken)
     {
+        const int SingleItemCount = 1;
+
         var executor = new TimeSeriesComparisonTargetExecutor(workload, recorder);
         try
         {
@@ -46,14 +54,17 @@ internal static class TimeSeriesComparisonRunner
         }
         finally
         {
-            await CleanupTargetsAsync(targets, executor, targets.Length - 1);
+            await CleanupTargetsAsync(targets, executor, targets.Length - SingleItemCount);
         }
     }
 
     private static async Task CleanupTargetsAsync(ITimeSeriesPersistentTarget[] targets,
         TimeSeriesComparisonTargetExecutor executor, int index)
     {
-        if (index < 0)
+        const int NoObservedItems = 0;
+        const int AdjacentElementOffset = 1;
+
+        if (index < NoObservedItems)
         {
             return;
         }
@@ -64,7 +75,7 @@ internal static class TimeSeriesComparisonRunner
         }
         finally
         {
-            await CleanupTargetsAsync(targets, executor, index - 1);
+            await CleanupTargetsAsync(targets, executor, index - AdjacentElementOffset);
         }
     }
 

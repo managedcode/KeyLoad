@@ -4,6 +4,8 @@ internal static class TimeSeriesIntensiveReadbackFrames
 {
     internal static void Write(TimeSeriesIntensiveDigestWriter frame)
     {
+        const int NoObservedItems = 0;
+
         frame.String(TimeSeriesIntensiveFrameLabels.SeedReadbacks);
         frame.Count(TimeSeriesIntensiveProfile.SeedBatchCount);
         foreach (var readback in TimeSeriesIntensivePlans.SeedReadbacks())
@@ -13,14 +15,14 @@ internal static class TimeSeriesIntensiveReadbackFrames
 
         frame.String(TimeSeriesIntensiveFrameLabels.WarmupReadbacks);
         frame.Count(TimeSeriesIntensiveProfile.RepetitionCount);
-        for (var repetition = 0; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
+        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             PhaseReadbacks(frame, repetition, true);
         }
 
         frame.String(TimeSeriesIntensiveFrameLabels.MeasuredReadbacks);
         frame.Count(TimeSeriesIntensiveProfile.RepetitionCount * TimeSeriesIntensiveProfile.AppendReadbackCount);
-        for (var repetition = 0; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
+        for (var repetition = NoObservedItems; repetition < TimeSeriesIntensiveProfile.RepetitionCount; repetition++)
         {
             PhaseReadbacks(frame, repetition, false);
         }

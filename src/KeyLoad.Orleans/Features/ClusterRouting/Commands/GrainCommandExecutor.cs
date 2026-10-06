@@ -37,7 +37,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken)
                 .ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
-            return GrainReplyFactory.Operation(result, operationToken);
+            return GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {

@@ -31,25 +31,29 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
     private async Task<ComparisonCase> MeasureOwnedAsync(IComparisonTarget target, BenchmarkDataset dataset,
         Scenario scenario, int repetition, List<IComparisonSession> sessions, CancellationToken cancellationToken)
     {
-        observer.Begin(ComparisonProgressPhase.Initialize, repetition + 1);
-        var inputs = Enumerable.Range(0, options.Operations).Select(operation => dataset.Input(scenario, repetition, operation, false)).ToArray();
-        for (var worker = 0; worker < options.Concurrency; worker++)
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+        const int NoObservedItems = 0;
+
+        observer.Begin(ComparisonProgressPhase.Initialize, repetition + SingleItemCount);
+        var inputs = Enumerable.Range(FirstElementIndex, options.Operations).Select(operation => dataset.Input(scenario, repetition, operation, false)).ToArray();
+        for (var worker = NoObservedItems; worker < options.Concurrency; worker++)
         {
             sessions.Add(await target.OpenSessionAsync(cancellationToken));
         }
 
         await WarmupAsync(sessions, dataset, scenario, repetition, cancellationToken);
-        observer.Begin(ComparisonProgressPhase.Prepare, repetition + 1);
+        observer.Begin(ComparisonProgressPhase.Prepare, repetition + SingleItemCount);
         await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken);
         var samples = new OperationSample[options.Operations];
         var outputs = new OperationResult?[options.Operations];
         await using var resources = new ClientResourceSampler(executionOptions);
-        observer.Begin(ComparisonProgressPhase.Measure, repetition + 1, options.Operations);
+        observer.Begin(ComparisonProgressPhase.Measure, repetition + SingleItemCount, options.Operations);
         var clock = Stopwatch.StartNew();
         await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);
         clock.Stop();
         var clientResources = await resources.StopAsync();
-        observer.Begin(ComparisonProgressPhase.Validate, repetition + 1, samples.Length, samples.Length,
+        observer.Begin(ComparisonProgressPhase.Validate, repetition + SingleItemCount, samples.Length, samples.Length,
             samples.Count(sample => !sample.Success));
         if (ComparisonMutationPreparation.Required(scenario))
         {
@@ -57,23 +61,26 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
         }
         else
         {
-            await ComparisonValidation.ValidateBatchAsync(sessions[0], dataset, scenario, inputs, samples, outputs, cancellationToken);
+            await ComparisonValidation.ValidateBatchAsync(sessions[FirstElementIndex], dataset, scenario, inputs, samples, outputs, cancellationToken);
         }
         var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
-        observer.Begin(ComparisonProgressPhase.Complete, repetition + 1, measurement.Attempts, measurement.Attempts, measurement.Failures);
-        return new(target.Profile.Name, scenario, repetition, measurement.Failures == 0 ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
-            measurement.Failures == 0 ? null : FailedAttemptDetail, measurement,
+        observer.Begin(ComparisonProgressPhase.Complete, repetition + SingleItemCount, measurement.Attempts, measurement.Attempts, measurement.Failures);
+        return new(target.Profile.Name, scenario, repetition, measurement.Failures == NoObservedItems ? ComparisonStatuses.Measured : ComparisonStatuses.Failed,
+            measurement.Failures == NoObservedItems ? null : FailedAttemptDetail, measurement,
             ImmutableCollectionsMarshal.AsImmutableArray(samples));
     }
 
     private async Task WarmupAsync(List<IComparisonSession> sessions, BenchmarkDataset dataset, Scenario scenario,
         int repetition, CancellationToken cancellationToken)
     {
-        var warmup = Enumerable.Range(0, options.Warmup).Select(operation => dataset.Input(scenario, repetition, operation, true)).ToArray();
-        observer.Begin(ComparisonProgressPhase.Prepare, repetition + 1);
+        const int FirstElementIndex = 0;
+        const int SingleItemCount = 1;
+
+        var warmup = Enumerable.Range(FirstElementIndex, options.Warmup).Select(operation => dataset.Input(scenario, repetition, operation, true)).ToArray();
+        observer.Begin(ComparisonProgressPhase.Prepare, repetition + SingleItemCount);
         await ComparisonMutationPreparation.PrepareAsync(sessions, warmup, scenario, options.TimeoutSeconds, cancellationToken);
-        observer.Begin(ComparisonProgressPhase.Warmup, repetition + 1, options.Warmup);
-        for (var operation = 0; operation < options.Warmup; operation++)
+        observer.Begin(ComparisonProgressPhase.Warmup, repetition + SingleItemCount, options.Warmup);
+        for (var operation = FirstElementIndex; operation < options.Warmup; operation++)
         {
             using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
             var input = warmup[operation];
@@ -95,7 +102,9 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
     private async Task ExecuteBatchAsync(List<IComparisonSession> sessions, BenchmarkDocument[] inputs, Scenario scenario,
         OperationSample[] samples, OperationResult?[] outputs, Stopwatch clock, CancellationToken cancellationToken)
     {
-        var next = -1;
+        const int MissingItemIndex = -1;
+
+        var next = MissingItemIndex;
         await Task.WhenAll(sessions.Select(async (session, worker) =>
         {
             while (true)
@@ -137,9 +146,13 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
 
 internal static class ComparisonStatistics
 {
+    private const int SingleItemCount = 1;
+
     public static Measurement Summarize(OperationSample[] samples, double elapsedSeconds)
     {
-        if (samples.Length == 0 || elapsedSeconds <= 0)
+        const int NoItems = 0;
+
+        if (samples.Length == NoItems || elapsedSeconds <= NoItems)
         {
             throw new ArgumentOutOfRangeException(nameof(samples));
         }
@@ -149,20 +162,25 @@ internal static class ComparisonStatistics
         return new(samples.Length, successes, samples.Length - successes, elapsedSeconds, successes / elapsedSeconds,
             Percentiles(samples.Select(sample => sample.LatencyMs)),
             samples.Where(sample => sample.Success && sample.CompletedMessageId is not null).Select(sample => sample.CompletedMessageId).Distinct().Count(),
-            queue.Length == 0 ? null : Percentiles(queue.Select(item => item.EnqueueMs)),
-            queue.Length == 0 ? null : Percentiles(queue.Select(item => item.ReceiveMs)),
-            queue.Length == 0 ? null : Percentiles(queue.Select(item => item.AckMs)));
+            queue.Length == NoItems ? null : Percentiles(queue.Select(item => item.EnqueueMs)),
+            queue.Length == NoItems ? null : Percentiles(queue.Select(item => item.ReceiveMs)),
+            queue.Length == NoItems ? null : Percentiles(queue.Select(item => item.AckMs)));
     }
 
     public static Latencies Percentiles(IEnumerable<double> values)
     {
+        const int NoItems = 0;
+        const double MedianQuantileDouble = .50;
+        const double TailP95QuantileDouble = .95;
+        const double PercentileIdentity = .99;
+
         var sorted = values.Order().ToArray();
-        if (sorted.Length == 0)
+        if (sorted.Length == NoItems)
         {
             throw new ArgumentOutOfRangeException(nameof(values));
         }
 
-        double At(double percentile) => sorted[Math.Clamp((int)Math.Ceiling(percentile * sorted.Length) - 1, 0, sorted.Length - 1)];
-        return new(At(.50), At(.95), At(.99));
+        double At(double percentile) => sorted[Math.Clamp((int)Math.Ceiling(percentile * sorted.Length) - SingleItemCount, NoItems, sorted.Length - SingleItemCount)];
+        return new(At(MedianQuantileDouble), At(TailP95QuantileDouble), At(PercentileIdentity));
     }
 }

@@ -10,23 +10,30 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
 {
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        const string SELECTIdBodyTextFROMDocumentsORDERBYIdCOLLATECStatement = "SELECT id,body::text FROM documents ORDER BY id COLLATE \"C\"";
+        const int NoObservedItems = 0;
+        const string ScaledCorpusReadbackExtraRecordDetail = "ScaledCorpusReadbackExtraRecord";
+        const int FirstColumnIndex = 0;
+        const int SecondColumnIndex = 1;
+        const string ScaledCorpusReadbackCountMismatchDetail = "ScaledCorpusReadbackCountMismatch";
+
         await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT id,body::text FROM documents ORDER BY id COLLATE \"C\"";
+        command.CommandText = SELECTIdBodyTextFROMDocumentsORDERBYIdCOLLATECStatement;
         await using var reader = await command.ExecuteReaderAsync(System.Data.CommandBehavior.SequentialAccess, cancellationToken);
-        var seen = 0;
+        var seen = NoObservedItems;
         while (await reader.ReadAsync(cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (seen >= corpusCount)
             {
-                throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
             }
-            yield return new(reader.GetString(0), reader.GetString(1));
+            yield return new(reader.GetString(FirstColumnIndex), reader.GetString(SecondColumnIndex));
             seen++;
         }
         if (seen != corpusCount)
         {
-            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+            throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }
     }
 
@@ -55,7 +62,8 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
             case Scenario.VectorExact:
                 return new(Neighbors: await PostgresVectorOperations.SearchAsync(connection, document, topK, cancellationToken));
             case Scenario.QueueCycle:
-                return await PostgresQueueOperations.ExecuteAsync(connection, document, cancellationToken, lifecycleOptions);
+                return await PostgresQueueOperations.ExecuteAsync(connection: connection, document: document,
+                    cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
             case Scenario.GraphNeighbors:
             case Scenario.GraphTraverse:
                 return await PostgresGraphOperations.ExecuteAsync(connection, scenario, document, graphDepth, cancellationToken);

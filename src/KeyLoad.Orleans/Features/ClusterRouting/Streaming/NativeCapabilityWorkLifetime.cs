@@ -120,7 +120,8 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
     {
         var failures = default(NativeCapabilityCleanupFailures);
         CaptureRelease(ref failures);
-        if (failures.Count > 0)
+        const int NoCleanupFailures = 0;
+        if (failures.Count > NoCleanupFailures)
         {
             ThrowCombined(primary, failures);
         }
@@ -202,7 +203,9 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
             ExceptionDispatchInfo.Capture(fatal).Throw();
         }
 
-        var failures = new List<Exception>(cleanup.Count + (primary is null ? 0 : 1));
+        const int NoPrimaryFailure = 0;
+        const int SinglePrimaryFailure = 1;
+        var failures = new List<Exception>(cleanup.Count + (primary is null ? NoPrimaryFailure : SinglePrimaryFailure));
         if (primary is not null)
         {
             failures.Add(primary);

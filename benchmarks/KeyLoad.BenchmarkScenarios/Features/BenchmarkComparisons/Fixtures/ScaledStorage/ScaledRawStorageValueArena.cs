@@ -1,23 +1,29 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Retains immutable-sized ZoneTree value chunks without per-record memory objects.</summary>
 internal sealed class ScaledRawStorageValueArena
 {
-    private const int RecordsPerChunk = 4096;
-    private const int CancellationCheckStride = 256;
+    private readonly int recordsPerChunk;
+    private readonly int cancellationCheckInterval;
     private readonly byte[][] chunks;
 
     /// <summary>Generates each seeded value once into bounded contiguous chunks.</summary>
-    public ScaledRawStorageValueArena(ScaledRawStorageCorpus corpus, CancellationToken cancellationToken = default)
+    public ScaledRawStorageValueArena(ScaledRawStorageCorpus corpus, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         const int RecordCountRecordsPerChunkStep = 1;
 
         ArgumentNullException.ThrowIfNull(corpus);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        cancellationCheckInterval = executionOptions.Value.CancellationCheckInterval;
+        recordsPerChunk = executionOptions.Value.RecordsPerValueChunk;
         cancellationToken.ThrowIfCancellationRequested();
         RecordCount = corpus.RecordCount;
         ValueBytes = corpus.ValueBytes;
         RetainedValueBytes = (long)RecordCount * ValueBytes;
-        chunks = new byte[(RecordCount + RecordsPerChunk - RecordCountRecordsPerChunkStep) / RecordsPerChunk][];
+        chunks = new byte[(RecordCount + recordsPerChunk - RecordCountRecordsPerChunkStep) / recordsPerChunk][];
         FillChunks(corpus, cancellationToken);
     }
 
@@ -38,8 +44,8 @@ internal sealed class ScaledRawStorageValueArena
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
-        var chunkIndex = index / RecordsPerChunk;
-        var withinChunk = index % RecordsPerChunk;
+        var chunkIndex = index / recordsPerChunk;
+        var withinChunk = index % recordsPerChunk;
         return chunks[chunkIndex].AsMemory(checked(withinChunk * ValueBytes), ValueBytes);
     }
 
@@ -52,8 +58,8 @@ internal sealed class ScaledRawStorageValueArena
         var operation = OperationInitialValue;
         for (var chunkIndex = ChunkIndexInitialValue; chunkIndex < chunks.Length; chunkIndex++)
         {
-            var firstIndex = chunkIndex * RecordsPerChunk;
-            var recordsInChunk = Math.Min(RecordsPerChunk, RecordCount - firstIndex);
+            var firstIndex = chunkIndex * recordsPerChunk;
+            var recordsInChunk = Math.Min(recordsPerChunk, RecordCount - firstIndex);
             var chunk = GC.AllocateUninitializedArray<byte>(checked(recordsInChunk * ValueBytes));
             chunks[chunkIndex] = chunk;
             FillChunk(corpus, scratch, chunk, firstIndex, recordsInChunk, ref operation, cancellationToken);
@@ -70,7 +76,7 @@ internal sealed class ScaledRawStorageValueArena
 
         for (var localIndex = LocalIndexInitialValue; localIndex < recordsInChunk; localIndex++)
         {
-            if (operation++ % CancellationCheckStride == EmptyOperationCancellationCheckStride)
+            if (operation++ % cancellationCheckInterval == EmptyOperationCancellationCheckStride)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }

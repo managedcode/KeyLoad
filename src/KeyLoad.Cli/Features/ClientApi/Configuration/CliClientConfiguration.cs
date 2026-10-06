@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Text.Json;
-using KeyLoad;
 using KeyLoad.Client;
 using Microsoft.Extensions.Options;
 
@@ -49,7 +48,7 @@ internal static class CliClientConfiguration
         return new(connection, execution, client);
     }
 
-    private static IOptions<KeyLoadClientExecutionOptions> ReadClient()
+    private static OptionsManager<KeyLoadClientExecutionOptions> ReadClient()
     {
         return Create<KeyLoadClientExecutionOptions>(options =>
         {
@@ -66,9 +65,9 @@ internal static class CliClientConfiguration
         }, options => options.IsValid(), KeyLoadClientExecutionOptions.ValidationMessage);
     }
 
-    private static IOptions<T> Create<T>(Action<T> configure, Func<T, bool> validate, string message)
+    private static OptionsManager<T> Create<T>(Action<T> configure, Func<T, bool> validate, string message)
         where T : class, new()
-        => new OptionsManager<T>(new OptionsFactory<T>(
+        => new(new OptionsFactory<T>(
             [new ConfigureNamedOptions<T>(Options.DefaultName, configure)], [],
             [new ValidateOptions<T>(Options.DefaultName, validate, message)]));
 

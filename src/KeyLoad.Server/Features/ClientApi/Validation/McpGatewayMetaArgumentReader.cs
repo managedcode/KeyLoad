@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -42,15 +43,14 @@ internal static class McpGatewayMetaArgumentReader
         return new(operation, descriptor);
     }
 
-    internal static McpGatewayMetaRequest Read(McpGatewayMetaOperation operation,
-        IDictionary<string, JsonElement>? arguments)
+    internal static McpGatewayMetaRequest Read(McpGatewayMetaOperation operation, IDictionary<string, JsonElement>? arguments, IOptions<McpExecutionOptions> executionOptions)
     {
         if (arguments is null || !HasExactKeys(operation, arguments))
         { throw InvalidArguments(); }
         return operation switch
         {
-            McpGatewayMetaOperation.Search => ReadSearch(arguments),
-            McpGatewayMetaOperation.Route => ReadRoute(arguments),
+            McpGatewayMetaOperation.Search => ReadSearch(arguments: arguments, executionOptions: executionOptions),
+            McpGatewayMetaOperation.Route => ReadRoute(arguments: arguments, executionOptions: executionOptions),
             McpGatewayMetaOperation.Invoke => ReadInvoke(arguments),
             _ => throw InvalidArguments()
         };
@@ -68,21 +68,21 @@ internal static class McpGatewayMetaArgumentReader
         return allowed is not null && arguments.Keys.All(allowed.Contains);
     }
 
-    private static McpGatewayMetaRequest ReadSearch(IDictionary<string, JsonElement> arguments)
+    private static McpGatewayMetaRequest ReadSearch(IDictionary<string, JsonElement> arguments, IOptions<McpExecutionOptions> executionOptions)
     {
-        var query = ReadQuery(arguments);
+        var query = ReadQuery(arguments: arguments, executionOptions: executionOptions);
         var limit = ReadOptionalInt(arguments, McpGatewayMetaProtocol.MaxResults,
-            McpGatewayMetaProtocol.DefaultSearchLimit, McpGatewayMetaProtocol.MaximumSearchLimit);
+            executionOptions.Value.DefaultSearchResults, executionOptions.Value.MaximumSearchResults);
         return new(McpGatewayMetaOperation.Search, query, limit);
     }
 
-    private static McpGatewayMetaRequest ReadRoute(IDictionary<string, JsonElement> arguments)
+    private static McpGatewayMetaRequest ReadRoute(IDictionary<string, JsonElement> arguments, IOptions<McpExecutionOptions> executionOptions)
     {
-        var query = ReadQuery(arguments);
+        var query = ReadQuery(arguments: arguments, executionOptions: executionOptions);
         var categories = ReadOptionalInt(arguments, McpGatewayMetaProtocol.MaxCategories,
-            McpGatewayMetaProtocol.DefaultRouteLimit, McpGatewayMetaProtocol.MaximumRouteLimit);
+            executionOptions.Value.DefaultRouteResults, executionOptions.Value.MaximumRouteResults);
         var tools = ReadOptionalInt(arguments, McpGatewayMetaProtocol.MaxToolsPerCategory,
-            McpGatewayMetaProtocol.DefaultRouteLimit, McpGatewayMetaProtocol.MaximumRouteLimit);
+            executionOptions.Value.DefaultRouteResults, executionOptions.Value.MaximumRouteResults);
         bool? prefer = arguments.TryGetValue(McpGatewayMetaProtocol.PreferReadOnly, out var value)
             ? ReadBoolean(value) : null;
         return new(McpGatewayMetaOperation.Route, query, CategoryLimit: categories,
@@ -104,7 +104,7 @@ internal static class McpGatewayMetaArgumentReader
         return new(McpGatewayMetaOperation.Invoke, ToolId: toolId, Arguments: values);
     }
 
-    private static string ReadQuery(IDictionary<string, JsonElement> arguments)
+    private static string ReadQuery(IDictionary<string, JsonElement> arguments, IOptions<McpExecutionOptions> executionOptions)
     {
         if (!arguments.TryGetValue(McpGatewayMetaProtocol.Query, out var value)
             || value.ValueKind != JsonValueKind.String)
@@ -114,7 +114,7 @@ internal static class McpGatewayMetaArgumentReader
         { throw InvalidArguments(); }
         try
         {
-            if (StrictUtf8.GetByteCount(query) > McpGatewayMetaProtocol.MaximumQueryBytes)
+            if (StrictUtf8.GetByteCount(query) > executionOptions.Value.MaximumDiscoveryQueryBytes)
             { throw InvalidArguments(); }
         }
         catch (EncoderFallbackException)

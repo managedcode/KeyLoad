@@ -16,6 +16,8 @@ internal static class ServerOfflineFormatUpgrade
     private const int ArgumentCount = 3;
     private const int MaximumPathCharacters = 4096;
 
+    private const string NodePublishedNotice = "Node published. Verify all three current nodes before starting compatible voters.";
+
     internal static async Task<bool> TryRunAsync(string[] args)
     {
         const int EmptyArgsLength = 0;
@@ -63,7 +65,7 @@ internal static class ServerOfflineFormatUpgrade
         {
             PrepareNode => ExecuteAsyncValueText,
             VerifyNode => ExecuteAsyncExecuteAsyncValueText,
-            _ => "Node published. Verify all three current nodes before starting compatible voters."
+            _ => NodePublishedNotice
         }).ConfigureAwait(false);
     }
 

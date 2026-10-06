@@ -1,14 +1,16 @@
+using Microsoft.Extensions.Options;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace KeyLoad.Orleans;
 
-internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credential) : IDisposable
+internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credential, IOptions<OrleansMembershipOptions> options) : IDisposable
 {
     private const string SignRequestFieldsText = "POST";
 
     private static readonly UTF8Encoding Utf8 = new(false, true);
+    private readonly OrleansMembershipOptions settings = options.Value;
     private readonly byte[] secret = credential.ToArray();
 
     internal string SignRequest(string cluster, string authorityPhysical, string authorityIncarnation,
@@ -40,7 +42,7 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
         const string SignFailureMessage = "The membership authority authentication metadata is too large.";
         const int StartEmptyCount = 0;
 
-        using var buffer = new MemoryStream(512);
+        using var buffer = new MemoryStream(settings.AuthenticationScratchBytes);
         buffer.Write(Utf8.GetBytes(purpose));
         buffer.WriteByte((byte)LineFeedCharacter);
         foreach (var field in fields)
@@ -49,7 +51,7 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
         BinaryPrimitives.WriteUInt64BigEndian(bodyLength, checked((ulong)body.Length));
         buffer.Write(bodyLength);
         buffer.Write(SHA256.HashData(body));
-        if (buffer.Length > ReplicaMembershipAuthorityProtocol.MaximumHeaderBytes)
+        if (buffer.Length > settings.MaximumHeaderBytes)
         { throw new InvalidOperationException(SignFailureMessage); }
         return Convert.ToBase64String(HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(StartEmptyCount, checked((int)buffer.Length))));
     }

@@ -184,30 +184,28 @@ function Read-FcCobertura([string] $Root, [string] $Path, [object[]] $Sources) {
     }
 }
 
-function Read-FcTrx([string] $Path, [string] $Suite, [string] $Namespace, [string[]] $ExpectedClasses) {
+function Read-FcTrx([string] $Path, [string] $Suite, [object[]] $ExpectedCases) {
     $t = $script:FunctionalCoverage
     $doc = Read-FcXml $Path 'TestRun'
     $definitions = @($doc.SelectNodes('//*[local-name()="TestDefinitions"]/*[local-name()="UnitTest"]'))
     $results = @($doc.SelectNodes('//*[local-name()="Results"]/*[local-name()="UnitTestResult"]'))
-    if ($definitions.Count -eq 0 -or $definitions.Count -gt $t.MaxDistinctLineLocations -or $results.Count -ne $definitions.Count) { throw $t.ErrorTrx }
+    if ($definitions.Count -ne $ExpectedCases.Count -or $results.Count -ne $ExpectedCases.Count) { throw $t.ErrorTrx }
 
-    $expected = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($class in $ExpectedClasses) { [void] $expected.Add("$Namespace.$class") }
-    $definitionsById = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
+    foreach ($case in $ExpectedCases) { $expected.Add("$($case.className)|$($case.methodName)", $case) }
     $selectedDefinitions = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
-    $observedClasses = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $observed = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($definition in $definitions) {
         $id = $definition.GetAttribute('id')
         $method = $definition.SelectSingleNode('./*[local-name()="TestMethod"]')
-        if ([string]::IsNullOrWhiteSpace($id) -or $null -eq $method -or $definitionsById.ContainsKey($id)) { throw $t.ErrorTrx }
-        $details = [ordered]@{ className = $method.GetAttribute('className'); methodName = $method.GetAttribute('name'); definitionName = $definition.GetAttribute('name') }
-        if ([string]::IsNullOrWhiteSpace($details.className) -or [string]::IsNullOrWhiteSpace($details.methodName)) { throw $t.ErrorTrx }
-        $definitionsById.Add($id, $details)
-        if (-not $expected.Contains($details.className)) { throw $t.ErrorTrx }
-        [void] $observedClasses.Add($details.className)
-        $selectedDefinitions.Add($id, $details)
+        if ([string]::IsNullOrWhiteSpace($id) -or $null -eq $method -or $selectedDefinitions.ContainsKey($id)) { throw $t.ErrorTrx }
+        $className = $method.GetAttribute('className')
+        $methodName = $method.GetAttribute('name')
+        $identity = "$className|$methodName"
+        if (-not $expected.ContainsKey($identity) -or $definition.GetAttribute('name') -cne $methodName -or -not $observed.Add($identity)) { throw $t.ErrorTrx }
+        $selectedDefinitions.Add($id, [ordered]@{ className = $className; methodName = $methodName; expected = $expected[$identity] })
     }
-    if (-not $observedClasses.SetEquals($expected)) { throw $t.ErrorTrx }
+    if ($observed.Count -ne $expected.Count) { throw $t.ErrorTrx }
 
     $resultsById = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
     $cases = [Collections.Generic.List[object]]::new()
@@ -218,7 +216,7 @@ function Read-FcTrx([string] $Path, [string] $Suite, [string] $Namespace, [strin
         $resultsById.Add($id, $result)
         $definition = $selectedDefinitions[$id]
         $testName = $result.GetAttribute('testName')
-        if ([string]::IsNullOrWhiteSpace($testName)) { throw $t.ErrorTrx }
+        if ($testName -cne $definition.expected.instanceName) { throw $t.ErrorTrx }
         $caseIdentity = "$id|$($definition.className)|$($definition.methodName)|$testName"
         $cases.Add([ordered]@{ identity = $caseIdentity; testId = $id; className = $definition.className; methodName = $definition.methodName; testName = $testName })
     }
@@ -281,9 +279,9 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
     })
     $manifestInfo = [ordered]@{ path = [IO.Path]::GetFileName($ManifestPath); sha256 = Get-FcHash $ManifestPath }
     [ordered]@{
-        schemaVersion = 1
+        schemaVersion = $script:FunctionalCoverage.SchemaVersion
         module = 'KeyLoad.Query'
-        requirements = @('REQ-CQ-009','AC-CQ-018','AC-CQ-019')
+        requirements = @('REQ-CQ-009','AC-CQ-018','AC-CQ-019','AC-CQ-039')
         scope = "Filter $Filter through Aspire unit and unit-scalar; KeyLoad.Query production module only"
         filter = $Filter
         lineHitUnion = $script:FunctionalCoverage.HitUnion
@@ -298,7 +296,7 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
         sourceFilesWithoutLineRecords = @($unreportedSources | Sort-Object)
         runs = $runReports
         thresholds = $null
-        qualification = 'private scoped profile only; every TRX definition has one result for the caller-selected filter; no source-completeness claim or threshold pass; does not close AC-CQ-009 or product/RF3 coverage'
+        qualification = 'private exact Query case profile only; every admitted class, method, and instance appears once per TRX with a passing result; no threshold pass; does not close AC-CQ-009 or product/RF3 coverage'
     }
 }
 
@@ -306,7 +304,7 @@ function Convert-FcReportToMarkdown([object] $Report) {
     $builder = [Text.StringBuilder]::new()
     [void] $builder.AppendLine('# KeyLoad.Query functional coverage')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('Private `PartitionQuery*` profile through Aspire `unit` and `unit-scalar` (`unit-scalar` disables hardware intrinsics). This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
+    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through Aspire `unit` and `unit-scalar` (`unit-scalar` disables hardware intrinsics). This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine('| Run | TRX cases | Native lines covered | Native lines valid | Native line percent | Native branch pairs |')
     [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|')

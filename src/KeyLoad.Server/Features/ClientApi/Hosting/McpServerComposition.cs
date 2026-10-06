@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Options;
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
-using Microsoft.Extensions.Options;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -25,7 +25,8 @@ internal static class McpServerComposition
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddMcpGateway();
         builder.Services.AddSingleton(services => new McpGatewayCatalogOwner(
-            services.GetRequiredService<IMcpGatewayFactory>(), services.GetRequiredService<IHttpContextAccessor>()));
+            services.GetRequiredService<IMcpGatewayFactory>(), services.GetRequiredService<IHttpContextAccessor>(),
+            services.GetRequiredService<IOptions<McpExecutionOptions>>()));
         builder.Services.AddHostedService(services => new McpGatewayCatalogWarmup(
             services.GetRequiredService<McpGatewayCatalogOwner>()));
         builder.Services.AddSingleton<McpMemoryBudget>();
@@ -55,10 +56,14 @@ internal static class McpServerComposition
         var dispatcher = new McpToolDispatcher(context, state);
         options.Handlers.ListToolsHandler = dispatcher.ListAsync;
         options.Handlers.CallToolHandler = dispatcher.CallAsync;
-        options.Handlers.ListResourcesHandler = McpAgentGuideHandlers.ListResourcesAsync;
-        options.Handlers.ReadResourceHandler = McpAgentGuideHandlers.ReadResourceAsync;
-        options.Handlers.ListPromptsHandler = McpAgentGuideHandlers.ListPromptsAsync;
-        options.Handlers.GetPromptHandler = McpAgentGuideHandlers.GetPromptAsync;
+        options.Handlers.ListResourcesHandler = (request, token) =>
+            McpAgentGuideHandlers.ListResourcesAsync(request, state.ExecutionOptions, token);
+        options.Handlers.ReadResourceHandler = (request, token) =>
+            McpAgentGuideHandlers.ReadResourceAsync(request, state.ExecutionOptions, token);
+        options.Handlers.ListPromptsHandler = (request, token) =>
+            McpAgentGuideHandlers.ListPromptsAsync(request, state.ExecutionOptions, token);
+        options.Handlers.GetPromptHandler = (request, token) =>
+            McpAgentGuideHandlers.GetPromptAsync(request, state.ExecutionOptions, token);
         var pipeline = new McpSessionPipeline(context, state);
         options.Filters.Message.IncomingFilters.Add(pipeline.Incoming);
         options.Filters.Message.OutgoingFilters.Add(pipeline.Outgoing);

@@ -1,5 +1,5 @@
 $script:FunctionalCoverage = [ordered]@{
-    SchemaVersion = 1
+    SchemaVersion = 2
     CollectorVersion = '18.11.2'
     Module = 'KeyLoad.Query'
     ModuleFile = 'KeyLoad.Query.dll'
@@ -11,9 +11,10 @@ $script:FunctionalCoverage = [ordered]@{
     SettingsCopyName = 'functional-coverage.settings.xml'
     DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Release/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
-    SourceCount = 98
+    SourceCount = 103
     ContributorSourceCount = 21
     ContributorClassCount = 10
+    ContributorCaseCount = 25
     TestNamespace = 'KeyLoad.UnitTests.Features.QueryExecution'
     DllName = 'KeyLoad.Query.dll'
     PdbName = 'KeyLoad.Query.pdb'
@@ -34,7 +35,7 @@ $script:FunctionalCoverage = [ordered]@{
     ErrorDeployment = 'Release test deployment must contain the Query DLL and matching PDB.'
     ErrorManifest = 'Prepared functional coverage manifest is missing, stale, or invalid.'
     ErrorCoverage = 'A required native Cobertura report is missing or malformed.'
-    ErrorTrx = 'PartitionQuery TRX definitions and result records are missing, mismatched, or unsuccessful.'
+    ErrorTrx = 'PartitionQuery TRX cases differ from the exact admitted class, method, or instance inventory.'
     ErrorDrift = 'Source, module, PDB, settings, or script identity drifted during collection.'
     ErrorUnexpectedModule = 'Cobertura contains a module outside the frozen Query identity.'
     ErrorUnexpectedSource = 'Cobertura contains a source outside the frozen KeyLoad.Query inventory.'
@@ -140,6 +141,7 @@ function Read-FcContract([string] $Path) {
         $contract.moduleFile -cne $t.ModuleFile -or $contract.collector.version -cne $t.CollectorVersion -or
         $contract.collector.package -cne 'Microsoft.Testing.Extensions.CodeCoverage' -or
         $contract.collector.format -cne 'cobertura' -or $contract.sourceDirectory -cne $t.SourceDirectory -or
+        (@($contract.requirements | Sort-Object) -join ',') -cne 'AC-CQ-018,AC-CQ-019,AC-CQ-039,REQ-CQ-009' -or
         $contract.deploymentDirectory -cne $t.DeploymentDirectory -or
         $contract.sources.Count -ne $t.SourceCount -or
         $contract.contributors.sourceFiles.Count -ne $t.ContributorSourceCount -or
@@ -149,9 +151,54 @@ function Read-FcContract([string] $Path) {
         $contract.contributors.filter -cne '/*/*/PartitionQuery*/*' -or
         (@($contract.contributors.suiteNames) -join ',') -cne 'unit,unit-scalar' -or
         (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryGrantTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicBudgetTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
+        $contract.contributors.exactCases.Count -ne $t.ContributorCaseCount -or
         $contract.bounds.originalXmlBytes -ne 33554432 -or $contract.bounds.sources -ne 5000 -or
         $contract.bounds.distinctLineLocations -ne 100000 -or
         $null -ne $contract.thresholds -or
         $contract.reportMerge.branchMerge -cne $t.BranchMerge) { throw $t.ErrorContract }
+    Assert-FcExpectedCases $contract
     $contract
+}
+
+function Assert-FcExpectedCases([object] $Contract) {
+    $t = $script:FunctionalCoverage
+    $classes = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($class in $Contract.contributors.testClasses) { [void] $classes.Add([string] $class) }
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $acceptanceRequirements = @{
+        'AC-PQUERY-001' = 'REQ-PQUERY-001'; 'AC-PQUERY-002' = 'REQ-PQUERY-002'
+        'AC-PQUERY-003' = 'REQ-PQUERY-003'; 'AC-PQUERY-004' = 'REQ-PQUERY-004'
+        'AC-PQUERY-005' = 'REQ-PQUERY-005'; 'AC-PQUERY-006' = 'REQ-PQUERY-006'
+    }
+    foreach ($case in $Contract.contributors.exactCases) {
+        $prefix = $Contract.contributors.testNamespace + '.'
+        $className = [string] $case.className
+        $methodName = [string] $case.methodName
+        $instanceName = [string] $case.instanceName
+        if ((@($case.Keys | Sort-Object) -join ',') -cne 'acceptance,className,executedModules,instanceName,methodName,operationOutcomeAndState,requirements') { throw $t.ErrorContract }
+        if (-not $className.StartsWith($prefix, [StringComparison]::Ordinal) -or
+            -not $classes.Contains($className.Substring($prefix.Length)) -or
+            -not $className.Substring($prefix.Length).StartsWith([string] $Contract.contributors.testNamePrefix, [StringComparison]::Ordinal) -or
+            $methodName -cnotmatch '\A[A-Za-z_][A-Za-z0-9_]*\z' -or
+            $instanceName -cne $methodName -or
+            [string]::IsNullOrWhiteSpace([string] $case.operationOutcomeAndState) -or
+            (@($case.executedModules).Count -ne 1) -or $case.executedModules[0] -cne $t.Module -or
+            (@($case.acceptance).Count -eq 0) -or (@($case.requirements).Count -eq 0) -or
+            -not $seen.Add("$className|$methodName")) { throw $t.ErrorContract }
+        $expectedRequirements = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        foreach ($acceptance in $case.acceptance) {
+            if (-not $acceptanceRequirements.ContainsKey([string] $acceptance)) { throw $t.ErrorContract }
+            [void] $expectedRequirements.Add($acceptanceRequirements[[string] $acceptance])
+        }
+        $observedRequirements = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+        foreach ($requirement in $case.requirements) { [void] $observedRequirements.Add([string] $requirement) }
+        if ($expectedRequirements.Count -ne @($case.requirements).Count -or
+            @($case.acceptance).Count -ne (@($case.acceptance | Sort-Object -Unique)).Count -or
+            -not $expectedRequirements.SetEquals($observedRequirements)) { throw $t.ErrorContract }
+    }
+    $admittedClasses = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($case in $Contract.contributors.exactCases) {
+        [void] $admittedClasses.Add(([string] $case.className).Substring($Contract.contributors.testNamespace.Length + 1))
+    }
+    if ($seen.Count -ne $t.ContributorCaseCount -or -not $admittedClasses.SetEquals($classes)) { throw $t.ErrorContract }
 }

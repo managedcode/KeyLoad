@@ -4,9 +4,13 @@ internal static class TimeSeriesIntensiveStatistics
 {
     internal static SampleAggregate Fold(IEnumerable<SampleRecord> expected)
     {
+        const long FirstElementIndexLong = 0L;
+        const long ZeroAccumulatorLong = 0L;
+        const int NoObservedItems = 0;
+
         ArgumentNullException.ThrowIfNull(expected);
-        var count = 0L;
-        var sum = 0L;
+        var count = FirstElementIndexLong;
+        var sum = ZeroAccumulatorLong;
         var minimum = long.MaxValue;
         var maximum = long.MinValue;
         foreach (var row in expected)
@@ -23,7 +27,7 @@ internal static class TimeSeriesIntensiveStatistics
             maximum = Math.Max(maximum, quarters);
         }
 
-        return count == 0 ? new(0, 0, null, null, null)
+        return count == NoObservedItems ? new(NoObservedItems, NoObservedItems, null, null, null)
             : new(count, sum / (double)TimeSeriesIntensiveProfile.QuarterScale, minimum / (double)TimeSeriesIntensiveProfile.QuarterScale, maximum / (double)TimeSeriesIntensiveProfile.QuarterScale, sum / ((double)TimeSeriesIntensiveProfile.QuarterScale * count));
     }
 

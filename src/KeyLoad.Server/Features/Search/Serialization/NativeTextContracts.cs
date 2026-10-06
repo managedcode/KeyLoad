@@ -19,13 +19,6 @@ internal static class NativeTextProtocol
     internal const string NativeDirectory = "native";
     internal const string GenerationPrefix = "generation-";
     internal const int FormatVersion = 1;
-    internal const int MaximumFiles = 512;
-    internal const int MaximumDirectories = 32;
-    internal const int MaximumDepth = 8;
-    internal const int MaximumEntries = MaximumFiles + MaximumDirectories;
-    internal const long MaximumDiskBytes = 256L * 1024 * 1024;
-    internal const int MutableSegmentMaximumItems = 4_096;
-    internal const int HashBufferBytes = 65_536;
     internal const int KeyBytes = sizeof(ulong) * 3;
     internal const int ValueBytes = sizeof(byte);
     internal const int PostingBytes = KeyBytes + ValueBytes;

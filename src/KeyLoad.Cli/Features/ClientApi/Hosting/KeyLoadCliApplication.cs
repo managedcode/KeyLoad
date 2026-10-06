@@ -10,8 +10,8 @@ internal static class KeyLoadCliApplication
     private const int CommandArgumentIndex = 0;
     private const int OneOperandArguments = 2;
     private const int TwoOperandArguments = 3;
-    private const int InvalidCommandExitCode = InvalidCommandExitCode;
-    private const int FailedOperationExitCode = FailedOperationExitCode;
+    private const int InvalidCommandExitCode = 2;
+    private const int FailedOperationExitCode = 1;
     private const string StatusCommand = "status";
     private const string BackupCommand = "backup";
     private const string CompactCommand = "compact";

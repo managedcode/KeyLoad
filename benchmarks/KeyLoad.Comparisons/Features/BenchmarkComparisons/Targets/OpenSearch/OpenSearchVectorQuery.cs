@@ -6,6 +6,8 @@ internal static class OpenSearchVectorQuery
 {
     internal static object Create(ImmutableArray<float> vector, int topK)
     {
+        const int NoObservedItems = 0;
+
         if (vector.IsDefault || vector.Length is < OpenSearchNames.MinimumVectorDimensions or > OpenSearchNames.MaximumVectorDimensions
             || vector.Any(value => !float.IsFinite(value)))
         {
@@ -16,7 +18,7 @@ internal static class OpenSearchVectorQuery
 
         return new
         {
-            size = 0,
+            size = NoObservedItems,
             query = new Dictionary<string, object>
             {
                 [OpenSearchNames.Exists] = new Dictionary<string, object> { [OpenSearchNames.Field] = OpenSearchNames.Vector }

@@ -6,17 +6,16 @@ namespace KeyLoad.UnitTests.Features.ClientApi;
 internal sealed class McpGatewayCatalogBoundsTests
 {
     private const string ValidQuery = "documents";
-    private const int TooManySearchResults = McpGatewayCatalogValidation.NativeMaximumResults + 1;
-    private const int TooManyRouteCategories = McpGatewayCatalogRequestValidation.MaximumRouteLimit + 1;
 
     [Test]
     public async Task StaticCatalogFitsOperationAndMetadataCaps()
     {
-        var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries);
+        var options = UnitMcpOptions.Execution();
+        var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries, options);
         await Assert.That(entries.Length).IsEqualTo(McpOperationCatalog.Entries.Length);
-        await Assert.That(entries.Length).IsLessThanOrEqualTo(McpGatewayCatalogValidation.MaximumOperations);
+        await Assert.That(entries.Length).IsLessThanOrEqualTo(options.Value.MaximumCatalogOperations);
         await Assert.That(entries.All(item => item.Operation.Description.Length <=
-            McpGatewayCatalogValidation.MaximumDescriptorTextLength)).IsTrue();
+            options.Value.MaximumDescriptorCharacters)).IsTrue();
     }
 
     [Test]
@@ -24,7 +23,7 @@ internal sealed class McpGatewayCatalogBoundsTests
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            host.Owner.SearchAsync(ValidQuery, TooManySearchResults, CancellationToken.None));
+            host.Owner.SearchAsync(ValidQuery, host.ExecutionOptions.Value.MaximumSearchResults + 1, CancellationToken.None));
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Validation);
     }
@@ -34,7 +33,7 @@ internal sealed class McpGatewayCatalogBoundsTests
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         var categoryFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            host.Owner.RouteAsync(ValidQuery, TooManyRouteCategories, 1, null, CancellationToken.None));
+            host.Owner.RouteAsync(ValidQuery, host.ExecutionOptions.Value.MaximumRouteResults + 1, 1, null, CancellationToken.None));
         var utf8Failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             host.Owner.RouteAsync(new string('\u4e00', 683), 1, 1, null, CancellationToken.None));
         await Assert.That(categoryFailure).IsNotNull();
@@ -48,9 +47,9 @@ internal sealed class McpGatewayCatalogBoundsTests
     {
         await using var host = McpGatewayCatalogTestHost.Create();
         McpGatewayCatalogRequestValidation.ValidateQuery(new string('a',
-            McpGatewayCatalogRequestValidation.MaximumQueryUtf8Bytes));
+            host.ExecutionOptions.Value.MaximumDiscoveryQueryBytes), host.ExecutionOptions);
         var tooLong = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            host.Owner.SearchAsync(new string('a', McpGatewayCatalogRequestValidation.MaximumQueryUtf8Bytes + 1),
+            host.Owner.SearchAsync(new string('a', host.ExecutionOptions.Value.MaximumDiscoveryQueryBytes + 1),
                 1, CancellationToken.None));
         var invalidUtf16 = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             host.Owner.SearchAsync("\ud800", 1, CancellationToken.None));

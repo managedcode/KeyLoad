@@ -15,6 +15,13 @@ internal static class UnitRoutingOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<OrleansMembershipOptions> Membership(OrleansMembershipOptions? configured = null)
+    {
+        var value = configured ?? new OrleansMembershipOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<PeerDiscoveryOptions> Discovery(PeerDiscoveryOptions? configured = null)
     {
         var value = configured ?? new PeerDiscoveryOptions();

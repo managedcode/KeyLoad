@@ -6,9 +6,11 @@ internal static class OpenLoopAccountingValidator
         int timedOutBeforeStart, int succeeded, int failed, int targetRejected, int timedOutAfterStart,
         int unfinishedQueued, int unfinishedStarted, int started, int completed)
     {
-        if (notOffered < 0 || harnessRejected < 0 || timedOutBeforeStart < 0 || succeeded < 0
-            || failed < 0 || targetRejected < 0 || timedOutAfterStart < 0 || unfinishedQueued < 0
-            || unfinishedStarted < 0 || started < 0 || completed < 0)
+        const int NoObservedItems = 0;
+
+        if (notOffered < NoObservedItems || harnessRejected < NoObservedItems || timedOutBeforeStart < NoObservedItems || succeeded < NoObservedItems
+            || failed < NoObservedItems || targetRejected < NoObservedItems || timedOutAfterStart < NoObservedItems || unfinishedQueued < NoObservedItems
+            || unfinishedStarted < NoObservedItems || started < NoObservedItems || completed < NoObservedItems)
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopAccountingInvariantFailed);
         }

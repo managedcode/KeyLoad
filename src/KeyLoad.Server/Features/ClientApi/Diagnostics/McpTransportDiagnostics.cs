@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Server;
 
 /// <summary>Tags rejected MCP transport checks and logs only closed, non-sensitive diagnostic values.</summary>
@@ -27,10 +29,13 @@ internal static class McpTransportDiagnostics
     /// <param name="logger">The optional application logger.</param>
     /// <param name="error">The original rejection; its object and text are never logged.</param>
     /// <param name="headers">The actual request headers; raw values are never logged.</param>
-    internal static void Log(ILogger? logger, KeyLoadException error, IHeaderDictionary headers)
+    /// <param name="executionOptions">The same validated transport admission bounds used by the guard.</param>
+    internal static void Log(ILogger? logger, KeyLoadException error, IHeaderDictionary headers,
+        IOptions<McpExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(error);
         ArgumentNullException.ThrowIfNull(headers);
+        ArgumentNullException.ThrowIfNull(executionOptions);
         if (logger is null)
         {
             return;
@@ -39,10 +44,10 @@ internal static class McpTransportDiagnostics
         var stage = error.Data[StageMetadataKey] is McpTransportStage marked && Enum.IsDefined(marked)
             ? marked
             : McpTransportStage.Unknown;
-        LogRejected(logger, stage, MethodCategory(headers), null);
+        LogRejected(logger, stage, MethodCategory(headers, executionOptions.Value.MaximumTransportMethodCharacters), null);
     }
 
-    private static McpTransportMethodCategory MethodCategory(IHeaderDictionary headers)
+    private static McpTransportMethodCategory MethodCategory(IHeaderDictionary headers, int maximumCharacters)
     {
         const int EmptyValuesCount = 1;
         const int IndexEmptyCount = 0;
@@ -53,7 +58,7 @@ internal static class McpTransportDiagnostics
             return McpTransportMethodCategory.Other;
         }
 
-        if (raw.Length > McpTransportProtocol.MaximumMethodCharacters)
+        if (raw.Length > maximumCharacters)
         {
             return McpTransportMethodCategory.Other;
         }

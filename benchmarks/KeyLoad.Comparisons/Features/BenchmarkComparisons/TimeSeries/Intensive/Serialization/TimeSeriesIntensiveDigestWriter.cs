@@ -21,6 +21,8 @@ internal sealed class TimeSeriesIntensiveDigestWriter : IDisposable
 
     internal void String(string value)
     {
+        const int FirstElementIndex = 0;
+
         ArgumentNullException.ThrowIfNull(value);
         var length = Utf8.GetByteCount(value);
         Count(length);
@@ -36,7 +38,7 @@ internal sealed class TimeSeriesIntensiveDigestWriter : IDisposable
         try
         {
             var written = Utf8.GetBytes(value, rented);
-            hash.AppendData(rented.AsSpan(0, written));
+            hash.AppendData(rented.AsSpan(FirstElementIndex, written));
         }
         finally
         {
@@ -83,8 +85,10 @@ internal sealed class TimeSeriesIntensiveDigestWriter : IDisposable
 
     internal void Present(bool present)
     {
+        const int FirstElementIndex = 0;
+
         Span<byte> buffer = stackalloc byte[sizeof(byte)];
-        buffer[0] = present ? PresentMarker : AbsentMarker;
+        buffer[FirstElementIndex] = present ? PresentMarker : AbsentMarker;
         hash.AppendData(buffer);
     }
 

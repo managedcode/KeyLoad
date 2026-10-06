@@ -20,8 +20,8 @@ internal static class RequestCqrsProtocolCases
     {
         foreach (var code in Enum.GetValues<ErrorCode>())
         {
-            var problem = GrainRequestStreamProblem.Create(code, SafeDetail);
-            await Assert.That(GrainRequestStreamProblem.ReadCode(problem)).IsEqualTo(code);
+            var problem = GrainRequestStreamProblem.Create(code, SafeDetail, UnitRoutingOptions.Routing());
+            await Assert.That(GrainRequestStreamProblem.ReadCode(problem, UnitRoutingOptions.Routing())).IsEqualTo(code);
             await Assert.That(problem.Type).IsEqualTo(ProblemTypePrefix + code);
             await Assert.That(problem.Title).IsEqualTo(code.ToString());
             await Assert.That(problem.StatusCode).IsEqualTo(Errors.Status(code));
@@ -35,7 +35,7 @@ internal static class RequestCqrsProtocolCases
     internal static async Task AcCrs004OpenProblemShapesFailClosed(RequestCqrsProblemMutation mutation)
     {
         var problem = CreateProblem(mutation);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => GrainRequestStreamProblem.Validate(problem));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => GrainRequestStreamProblem.Validate(problem, UnitRoutingOptions.Routing()));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);
     }
 
@@ -44,22 +44,22 @@ internal static class RequestCqrsProtocolCases
         var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<string>>();
         var sample = new string('n', 8_192);
         var native = serializer.SerializeToArray(sample);
-        await Assert.That(GrainNativeByteCounter.Measure(serializer, sample, native.Length, CancellationToken.None))
+        await Assert.That(GrainNativeByteCounter.Measure(serializer, sample, native.Length, fixture.RoutingOptions, CancellationToken.None))
             .IsEqualTo((long)native.Length);
         var oneUnder = Assert.ThrowsExactly<KeyLoadException>(() =>
-            GrainNativeByteCounter.Measure(serializer, sample, native.Length - ExtraReplyByte, CancellationToken.None));
+            GrainNativeByteCounter.Measure(serializer, sample, native.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
         await Assert.That(oneUnder.Code).IsEqualTo(ErrorCode.BudgetExceeded);
 
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
-            GrainNativeByteCounter.Measure(serializer, sample, native.Length, cancelled.Token)).CancellationToken)
+            GrainNativeByteCounter.Measure(serializer, sample, native.Length, fixture.RoutingOptions, cancelled.Token)).CancellationToken)
             .IsEqualTo(cancelled.Token);
     }
 
     internal static async Task AcCrs004ScratchAdmissionHonorsActualAdvanceNotReservationHint()
     {
-        using var writer = new GrainNativeCountingWriter(20, CancellationToken.None);
+        using var writer = new GrainNativeCountingWriter(20, UnitRoutingOptions.Routing(), CancellationToken.None);
         _ = writer.GetSpan(8);
         writer.Advance(8);
         var largerThanRemaining = writer.GetMemory(16);
@@ -69,9 +69,9 @@ internal static class RequestCqrsProtocolCases
         var excess = Assert.ThrowsExactly<KeyLoadException>(() => writer.Advance(1));
         await Assert.That(excess.Code).IsEqualTo(ErrorCode.BudgetExceeded);
 
-        using var bounded = new GrainNativeCountingWriter(32, CancellationToken.None);
+        using var bounded = new GrainNativeCountingWriter(32, UnitRoutingOptions.Routing(), CancellationToken.None);
         var overScratch = Assert.ThrowsExactly<KeyLoadException>(() =>
-            bounded.GetSpan(GrainRequestStreamProtocol.MaximumScratchBytes + ExtraReplyByte));
+            bounded.GetSpan(UnitRoutingOptions.Routing().Value.MaximumScratchBytes + ExtraReplyByte));
         await Assert.That(overScratch.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -79,24 +79,24 @@ internal static class RequestCqrsProtocolCases
     {
         var serializer = fixture.Cluster.ServiceProvider.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-        var payload = new byte[GrainRoutingProtocol.MaximumReplyBytes];
+        var payload = new byte[fixture.RoutingOptions.Value.MaximumReplyBytes];
         var chunk = CompletedChunk(payload);
         var native = serializer.SerializeToArray(chunk);
         var started = StartedChunk(Guid.NewGuid());
         var startedBytes = serializer.SerializeToArray(started).Length;
-        await Assert.That(native.Length).IsLessThanOrEqualTo(GrainRequestStreamProtocol.MaximumCompletedBytes);
+        await Assert.That(native.Length).IsLessThanOrEqualTo(fixture.RoutingOptions.Value.MaximumCompletedBytes);
         await Assert.That((long)startedBytes + native.Length)
-            .IsLessThanOrEqualTo(GrainRequestStreamProtocol.MaximumAggregateBytes);
-        await Assert.That(GrainNativeByteCounter.Measure(serializer, chunk, native.Length, CancellationToken.None))
+            .IsLessThanOrEqualTo(fixture.RoutingOptions.Value.MaximumAggregateBytes);
+        await Assert.That(GrainNativeByteCounter.Measure(serializer, chunk, native.Length, fixture.RoutingOptions, CancellationToken.None))
             .IsEqualTo((long)native.Length);
         var oneUnder = Assert.ThrowsExactly<KeyLoadException>(() =>
-            GrainNativeByteCounter.Measure(serializer, chunk, native.Length - ExtraReplyByte, CancellationToken.None));
+            GrainNativeByteCounter.Measure(serializer, chunk, native.Length - ExtraReplyByte, fixture.RoutingOptions, CancellationToken.None));
         await Assert.That(oneUnder.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     private static Problem CreateProblem(RequestCqrsProblemMutation mutation)
     {
-        var problem = GrainRequestStreamProblem.Create(ErrorCode.PermissionDenied, SafeDetail);
+        var problem = GrainRequestStreamProblem.Create(ErrorCode.PermissionDenied, SafeDetail, UnitRoutingOptions.Routing());
         switch (mutation)
         {
             case RequestCqrsProblemMutation.ExtraExtension:
@@ -124,7 +124,7 @@ internal static class RequestCqrsProtocolCases
                 problem.Instance = "/private/partition/key";
                 break;
             case RequestCqrsProblemMutation.ExcessDetail:
-                problem.Detail = new string('x', GrainRequestStreamProtocol.MaximumDetailCharacters + ExtraReplyByte);
+                problem.Detail = new string('x', UnitRoutingOptions.Routing().Value.MaximumDetailCharacters + ExtraReplyByte);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(mutation));

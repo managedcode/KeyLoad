@@ -18,7 +18,7 @@ internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RateP
         => checked(DueTimestamp(index) + ExecutionPolicy.OperationDeadlineTicks);
 
     internal long DrainDeadline()
-        => checked(DueTimestamp(OpenLoopRateContract.PlannedOperations - 1)
+        => checked(DueTimestamp(OpenLoopRateContract.PlannedOperations - MinimumSpinThresholdTicks)
             + ExecutionPolicy.DrainTicks);
 
     internal double OffsetMilliseconds(long timestamp)
@@ -29,12 +29,14 @@ internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RateP
 
     internal async Task WaitUntilAsync(long timestamp, CancellationToken cancellationToken)
     {
+        const int NoObservedItems = 0;
+
         var spinThreshold = Math.Max(MinimumSpinThresholdTicks, ExecutionPolicy.SpinWindowTicks);
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var remaining = timestamp - Stopwatch.GetTimestamp();
-            if (remaining <= 0)
+            if (remaining <= NoObservedItems)
             {
                 return;
             }

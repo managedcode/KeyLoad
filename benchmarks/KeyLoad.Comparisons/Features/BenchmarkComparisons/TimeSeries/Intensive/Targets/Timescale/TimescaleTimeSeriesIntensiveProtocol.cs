@@ -4,17 +4,35 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimescaleTimeSeriesIntensiveProtocol
 {
+    private const string BatchColumnNamesSampleSequenceToken = "sample_sequence";
+    private const string SampleTimeToken = "sample_time";
+    private const string SampleValueToken = "sample_value";
+    private const string SampleColumnNamesResultText = "sample_sequence";
+    private const string SampleColumnNamesSampleColumnNamesResultText = "tags_text";
+    private const string SampleMinToken = "sample_min";
+    private const string SampleMaxToken = "sample_max";
+    private const string AggregateColumnNamesResultText = "sample_avg";
+    private const string WindowUntilToken = "window_until";
+    private const string WindowColumnNamesSampleCountToken = "sample_count";
+    private const string WindowColumnNamesResultText = "sample_sum";
+    private const string WindowColumnNamesWindowColumnNamesResultText = "sample_min";
+
+    private const string InputOrdinalToken = "input_ordinal";
+    private const string CommandIdToken = "command_id";
+    private const string SampleSequenceToken = "sample_sequence";
+    private const string SeriesIdToken = "series_id";
+    private const string EventIdToken = "event_id";
+    private const string SampleCountToken = "sample_count";
+    private const string SampleSumToken = "sample_sum";
+    private const string WindowOrdinalToken = "window_ordinal";
+    private const string WindowFromToken = "window_from";
+
     internal const string ContextClosed = nameof(TimescaleTimeSeriesIntensiveProtocol) + ".ContextClosed";
     internal const string InvalidContext = nameof(TimescaleTimeSeriesIntensiveProtocol) + ".InvalidContext";
     internal const string InvalidInitialization = nameof(TimescaleTimeSeriesIntensiveProtocol) + ".InvalidInitialization";
     internal const string InvalidSeed = nameof(TimescaleTimeSeriesIntensiveProtocol) + ".InvalidSeed";
     internal const string InvalidReceipt = TimeSeriesIntensiveRuntimeErrors.InvalidReceipt;
     internal const string InvalidReply = nameof(TimescaleTimeSeriesIntensiveProtocol) + ".InvalidReply";
-    internal const int ConnectionTimeoutSeconds = 30;
-    internal const int CommandTimeoutSeconds = 30;
-    internal const int CancellationTimeoutMilliseconds = 2000;
-    internal const int MinimumPoolSize = 0;
-    internal const int MaximumPoolSize = TimeSeriesIntensiveProfile.Concurrency;
     internal const long MinimumSequence = 1;
     internal const int SeedSequenceOffset = 1;
 
@@ -43,11 +61,11 @@ internal static class TimescaleTimeSeriesIntensiveProtocol
     internal const string WindowsSql = "SELECT window_ordinal, window_from, window_until, sample_count, sample_sum, " +
         "sample_min, sample_max, sample_avg FROM kld_tsi_windows($1, $2, $3, $4, $5, $6, $7)";
 
-    private static readonly string[] BatchColumnNames = ["input_ordinal", "command_id", "sample_sequence"];
-    private static readonly string[] ScalarColumnNames = ["command_id", "sample_sequence"];
-    private static readonly string[] SampleColumnNames = ["series_id", "event_id", "sample_time", "sample_value", "sample_sequence", "tags_text"];
-    private static readonly string[] AggregateColumnNames = ["sample_count", "sample_sum", "sample_min", "sample_max", "sample_avg"];
-    private static readonly string[] WindowColumnNames = ["window_ordinal", "window_from", "window_until", "sample_count", "sample_sum", "sample_min", "sample_max", "sample_avg"];
+    private static readonly string[] BatchColumnNames = [InputOrdinalToken, CommandIdToken, BatchColumnNamesSampleSequenceToken];
+    private static readonly string[] ScalarColumnNames = [CommandIdToken, SampleSequenceToken];
+    private static readonly string[] SampleColumnNames = [SeriesIdToken, EventIdToken, SampleTimeToken, SampleValueToken, SampleColumnNamesResultText, SampleColumnNamesSampleColumnNamesResultText];
+    private static readonly string[] AggregateColumnNames = [SampleCountToken, SampleSumToken, SampleMinToken, SampleMaxToken, AggregateColumnNamesResultText];
+    private static readonly string[] WindowColumnNames = [WindowOrdinalToken, WindowFromToken, WindowUntilToken, WindowColumnNamesSampleCountToken, WindowColumnNamesResultText, WindowColumnNamesWindowColumnNamesResultText, SampleMaxToken, AggregateColumnNamesResultText];
 
     internal static ReadOnlySpan<string> BatchColumns => BatchColumnNames;
     internal static ReadOnlySpan<string> ScalarColumns => ScalarColumnNames;

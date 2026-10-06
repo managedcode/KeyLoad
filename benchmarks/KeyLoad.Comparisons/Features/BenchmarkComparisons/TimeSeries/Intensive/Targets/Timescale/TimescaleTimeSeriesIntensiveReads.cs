@@ -37,7 +37,7 @@ internal static class TimescaleTimeSeriesIntensiveReads
             AddReadParameters(command, seriesId, from, until);
             TimescaleTimeSeriesIntensiveParameters.Add(command, TimescaleTimeSeriesIntensiveProtocol.IntegerType, limit);
             var reader = operation.Own(await command.ExecuteReaderAsync(token).ConfigureAwait(false));
-            var result = await TimescaleTimeSeriesIntensiveDataReader.ReadSamplesAsync(reader, limit, token).ConfigureAwait(false);
+            var result = await TimescaleTimeSeriesIntensiveDataReader.ReadSamplesAsync(reader, limit, target.Session.InitialReadCapacity, token).ConfigureAwait(false);
             await operation.DisposeResourceAsync(reader).ConfigureAwait(false);
             await operation.DisposeAsync().ConfigureAwait(false);
             return result;
@@ -120,7 +120,7 @@ internal static class TimescaleTimeSeriesIntensiveReads
             TimescaleTimeSeriesIntensiveParameters.Add(command, TimescaleTimeSeriesIntensiveProtocol.IntegerType, maxSamples);
             TimescaleTimeSeriesIntensiveParameters.Add(command, TimescaleTimeSeriesIntensiveProtocol.IntegerType, maxWindows);
             var reader = operation.Own(await command.ExecuteReaderAsync(token).ConfigureAwait(false));
-            var result = await TimescaleTimeSeriesIntensiveDataReader.ReadWindowsAsync(reader, maxWindows, token).ConfigureAwait(false);
+            var result = await TimescaleTimeSeriesIntensiveDataReader.ReadWindowsAsync(reader, maxWindows, target.Session.InitialReadCapacity, token).ConfigureAwait(false);
             await operation.DisposeResourceAsync(reader).ConfigureAwait(false);
             await operation.DisposeAsync().ConfigureAwait(false);
             return result;

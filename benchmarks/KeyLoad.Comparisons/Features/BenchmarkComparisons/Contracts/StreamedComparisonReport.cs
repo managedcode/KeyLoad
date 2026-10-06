@@ -6,7 +6,7 @@ namespace KeyLoad.Comparisons;
 
 /// <summary>Write-only report projection which streams its existing case array.</summary>
 internal sealed record StreamedComparisonReport(int SchemaVersion, Guid RunId, DateTimeOffset StartedAt,
-    ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
+    [property: SerializedOptionsSnapshot] ComparisonOptions? Options, string DatasetSha256, string LoadModel, string HostOs, string Architecture,
     int LogicalProcessors, string Runtime, string Storage, string? SourceRevision,
     ImmutableArray<TargetProfile> Targets, IAsyncEnumerable<StreamedComparisonCase> Cases)
 {

@@ -7,6 +7,8 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class ComparisonProgressObserver : IAsyncDisposable
 {
+    private const int NoObservedItems = 0;
+
     private const string LineFormat = "KeyLoadBenchmarkProgress phase={0} repetition={1} completed={2} total={3} failed={4} elapsedSeconds={5:F3}";
     private static readonly CompositeFormat ProgressFormat = CompositeFormat.Parse(LineFormat);
     private readonly Action<string>? _progress;
@@ -15,7 +17,7 @@ internal sealed class ComparisonProgressObserver : IAsyncDisposable
     private readonly CancellationTokenSource _lifetime = new();
     private readonly PeriodicTimer _timer;
     private readonly Task _heartbeat;
-    private ComparisonProgressState _state = new(ComparisonProgressPhase.Oracle, 0, 0);
+    private ComparisonProgressState _state = new(ComparisonProgressPhase.Oracle, NoObservedItems, NoObservedItems);
     private bool _hasState;
 
     internal ComparisonProgressObserver(Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions)
@@ -27,9 +29,11 @@ internal sealed class ComparisonProgressObserver : IAsyncDisposable
         _heartbeat = progress is null ? Task.CompletedTask : Task.Run(ObserveAsync);
     }
 
-    internal void Begin(ComparisonProgressPhase phase, int repetition, int total = 0, int completed = 0, int failed = 0)
+    internal void Begin(ComparisonProgressPhase phase, int repetition, int total = ComparisonProgressObserver.NoObservedItems, int completed = ComparisonProgressObserver.NoObservedItems, int failed = ComparisonProgressObserver.NoObservedItems)
     {
-        if (!Enum.IsDefined(phase) || repetition < 0 || total < 0 || completed < 0 || completed > total || failed < 0 || failed > completed)
+        const int NoObservedItems = 0;
+
+        if (!Enum.IsDefined(phase) || repetition < NoObservedItems || total < NoObservedItems || completed < NoObservedItems || completed > total || failed < NoObservedItems || failed > completed)
         {
             throw new ArgumentOutOfRangeException(nameof(phase));
         }

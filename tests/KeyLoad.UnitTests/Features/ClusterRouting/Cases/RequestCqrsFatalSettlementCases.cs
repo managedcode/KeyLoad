@@ -18,10 +18,7 @@ internal static class RequestCqrsFatalSettlementCases
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound);
         var ordinaryCleanup = new IOException(CleanupCanary);
-        var stream = NativeCqrsStreamLifetime.Run(
-            _ => throw fatal.Thrown,
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, ordinaryCleanup), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(_ => throw fatal.Thrown, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, ordinaryCleanup), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
@@ -40,12 +37,9 @@ internal static class RequestCqrsFatalSettlementCases
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+        var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => RequestCqrsFatalSettlementProbe.ThrowAfterStartedAsync(
-                    writer, requestId, fatal.Thrown, observation), token),
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation), cancellation.Token);
+                    writer, requestId, fatal.Thrown, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainFatalPullAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
@@ -71,11 +65,8 @@ internal static class RequestCqrsFatalSettlementCases
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token),
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, fatal.Thrown), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, fatal.Thrown), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainCompletedAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
@@ -92,10 +83,7 @@ internal static class RequestCqrsFatalSettlementCases
         var requestId = Guid.NewGuid();
         var activationFatal = RequestCqrsFatalSettlementProbe.DifferentFatal(primaryFatal.Fatal);
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            _ => throw primaryFatal.Thrown,
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(_ => throw primaryFatal.Thrown, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), primaryFatal.Fatal);
@@ -111,12 +99,9 @@ internal static class RequestCqrsFatalSettlementCases
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+        var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => RequestCqrsFatalSettlementProbe.WaitThenThrowAsync(
-                    writer, requestId, fatal.Thrown, observation), token),
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, activationFailure), cancellation.Token);
+                    writer, requestId, fatal.Thrown, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFailure), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.CancelAndDisposeAfterStartedAsync(stream, requestId, cancellation, observation), fatal.Fatal);
@@ -133,10 +118,7 @@ internal static class RequestCqrsFatalSettlementCases
         var ordinaryPrimary = new InvalidOperationException(CleanupCanary);
         var activationFatal = RequestCqrsFatalSettlementProbe.FatalCases().First().Fatal;
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            _ => throw ordinaryPrimary,
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(_ => throw ordinaryPrimary, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), activationFatal);
@@ -153,10 +135,7 @@ internal static class RequestCqrsFatalSettlementCases
         var primary = new InvalidOperationException(CleanupCanary);
         var cleanup = new IOException(CleanupCanary);
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            _ => throw primary,
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation, cleanup), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(_ => throw primary, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, cleanup), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
 
         var failure = (await Assert.ThrowsExactlyAsync<AggregateException>(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token)))!;
@@ -211,11 +190,8 @@ internal static class RequestCqrsFatalSettlementCases
         var requestId = Guid.NewGuid();
         var observation = new RequestCqrsFatalObservation();
         using var cancellation = new CancellationTokenSource(SettlementBound);
-        var stream = NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token),
-            ChunkSerializer(fixture), requestId, TimeProvider.System,
-            RequestCqrsFatalSettlementProbe.Activation(observation), cancellation.Token);
+        var stream = NativeCqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
         await RequestCqrsFatalStreamDrain.DrainCompletedAsync(stream, requestId, observation, cancellation.Token);
         await AssertSettledOnceAsync(observation);
     }

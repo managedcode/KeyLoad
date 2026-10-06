@@ -13,7 +13,6 @@ internal static class MembershipAuthoritySettingsValidator
 
     private const string RootPath = "/";
 
-
     internal static void Validate(MembershipAuthoritySettings settings, NodeOptions node)
     {
         ArgumentNullException.ThrowIfNull(settings);
@@ -36,8 +35,8 @@ internal static class MembershipAuthoritySettingsValidator
     {
         const string ValidateSectionResultText = "Mode";
         const string ValidateSectionValidateSectionResultText = "TrustedGroupPhysicalShardId";
-        const string ValidateSectionNameText = "AuthorityEndpoints";
-        const string ValidateSectionValidateSectionNameText = "TrustedGroupVoterIds";
+        const string ValidateSectionNameText = nameof(MembershipAuthoritySettings.AuthorityEndpoints);
+        const string ValidateSectionValidateSectionNameText = nameof(MembershipAuthoritySettings.TrustedGroupVoterIds);
 
         ArgumentNullException.ThrowIfNull(section);
         var children = section.GetChildren().ToArray();
@@ -45,9 +44,9 @@ internal static class MembershipAuthoritySettingsValidator
         {
             MembershipAuthoritySettingsProtocol.Local => new[] { ValidateSectionResultText },
             MembershipAuthoritySettingsProtocol.Authority => new[]
-            { ValidateSectionResultText, ValidateSectionValidateSectionResultText, "TrustedGroupIncarnation", "TrustedGroupVoterIds", "TrustedGroupSiloEndpoints", "TrustedGroupPeerSecret" },
+            { ValidateSectionResultText, ValidateSectionValidateSectionResultText, nameof(MembershipAuthoritySettings.TrustedGroupIncarnation), nameof(MembershipAuthoritySettings.TrustedGroupVoterIds), nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), nameof(MembershipAuthoritySettings.TrustedGroupPeerSecret) },
             MembershipAuthoritySettingsProtocol.Proxy => new[]
-            { ValidateSectionResultText, "AuthorityPhysicalShardId", "AuthorityIncarnation", "AuthorityEndpoints", "AuthorityPeerSecret" },
+            { ValidateSectionResultText, nameof(MembershipAuthoritySettings.AuthorityPhysicalShardId), nameof(MembershipAuthoritySettings.AuthorityIncarnation), nameof(MembershipAuthoritySettings.AuthorityEndpoints), nameof(MembershipAuthoritySettings.AuthorityPeerSecret) },
             _ => []
         };
         if (children.Any(child => !allowed.Contains(child.Key, StringComparer.Ordinal))
@@ -55,7 +54,7 @@ internal static class MembershipAuthoritySettingsValidator
         { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
         ValidateArray(section, ValidateSectionNameText, settings.Mode == MembershipAuthoritySettingsProtocol.Proxy);
         ValidateArray(section, ValidateSectionValidateSectionNameText, settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
-        ValidateArray(section, "TrustedGroupSiloEndpoints", settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
+        ValidateArray(section, nameof(MembershipAuthoritySettings.TrustedGroupSiloEndpoints), settings.Mode == MembershipAuthoritySettingsProtocol.Authority);
     }
 
     private static void ValidateProxy(MembershipAuthoritySettings settings, NodeOptions node)
@@ -120,6 +119,7 @@ internal static class MembershipAuthoritySettingsValidator
         const int SeparatorValidationBoundary = 0;
         const int ValueSecondIndex = 1;
         const char PredicateCharacter = '.';
+        const char HostLabelHyphen = '-';
 
         if (value is not { Length: > ValueEmptyCount and <= MembershipAuthoritySettingsProtocol.MaximumIdentityBytes })
         { return false; }
@@ -128,7 +128,7 @@ internal static class MembershipAuthoritySettingsValidator
                 System.Globalization.CultureInfo.InvariantCulture, out var port)
             && port == MembershipAuthoritySettingsProtocol.NativeSiloPort
             && string.Equals(value, value.Trim(), StringComparison.Ordinal)
-            && value[..separator].All(character => char.IsAsciiLetterOrDigit(character) || character is PredicateCharacter or '-');
+            && value[..separator].All(character => char.IsAsciiLetterOrDigit(character) || character is PredicateCharacter or HostLabelHyphen);
     }
 
     private static string SiloHost(string value) => value[..value.LastIndexOf(SiloHostColonCharacter)];
@@ -161,12 +161,13 @@ internal static class MembershipAuthoritySettingsValidator
         const int EmptyValuesLength = 0;
         const string ValidateArraySecondText = "0";
         const string ValidateArrayValidateArraySecondText = "1";
+        const string ThirdVoterIndex = "2";
 
         var child = section.GetSection(name);
         var values = child.GetChildren().Take(MembershipAuthoritySettingsProtocol.RequiredMembers + RequiredMembersStep).ToArray();
         if (child.Value is not null || required && values.Length != MembershipAuthoritySettingsProtocol.RequiredMembers
             || !required && values.Length != EmptyValuesLength
-            || required && !values.Select(item => item.Key).SequenceEqual([ValidateArraySecondText, ValidateArrayValidateArraySecondText, "2"], StringComparer.Ordinal)
+            || required && !values.Select(item => item.Key).SequenceEqual([ValidateArraySecondText, ValidateArrayValidateArraySecondText, ThirdVoterIndex], StringComparer.Ordinal)
             || values.Any(item => item.Value is null || item.GetChildren().Any()))
         { throw new InvalidOperationException(MembershipAuthoritySettingsProtocol.Invalid); }
     }

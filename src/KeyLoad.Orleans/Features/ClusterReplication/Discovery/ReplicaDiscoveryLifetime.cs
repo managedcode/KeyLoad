@@ -89,7 +89,8 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
     private async Task StopCoreAsync()
     {
         await startShutdown.Task.ConfigureAwait(false);
-        var failures = new List<Exception>(4);
+        const int MaximumShutdownStages = 4;
+        var failures = new List<Exception>(MaximumShutdownStages);
         await ObserveAsync(cancelStopping, failures).ConfigureAwait(false);
         await ObserveAsync(() => drained.Task, failures).ConfigureAwait(false);
         if (ownedResources is not null)

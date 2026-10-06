@@ -26,10 +26,10 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
     internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
         ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
-        const int InitialCountSingleItemCount = 1;
+        const int DiscoveryMutexPermits = 1;
 
         exchange = new(configurationOptions, options, authentication, clock, peerOptions);
-        discoveryGate = new(InitialCountSingleItemCount, 1);
+        discoveryGate = new(DiscoveryMutexPermits, DiscoveryMutexPermits);
         stopping = new();
     }
 
@@ -53,7 +53,8 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
             return;
         }
 
-        var failures = new List<Exception>(3);
+        const int OwnedCleanupStages = 3;
+        var failures = new List<Exception>(OwnedCleanupStages);
         DisposeExchange(failures);
         DisposeDiscoveryGate(failures);
         DisposeStoppingSource(failures);

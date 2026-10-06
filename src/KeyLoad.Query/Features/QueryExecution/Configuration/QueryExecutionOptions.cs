@@ -60,12 +60,12 @@ public sealed record QueryExecutionOptions
     /// <returns>Whether the configured lifetime is valid.</returns>
     public bool IsValid() => CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
         && MaximumProjection >= MinimumWorkCount && MaximumOrdering >= MinimumWorkCount
-        && MaximumParameters >= MinimumWorkCount && MaximumInValues >= MinimumWorkCount
+        && MaximumParameters is >= MinimumWorkCount and <= DefaultMaximumParameters && MaximumInValues >= MinimumWorkCount
         && MaximumPartitions >= MinimumWorkCount && MaximumPartitions <= MaximumConformingPartitions
         && MaximumSearchResults >= MinimumWorkCount && MaximumSearchResults <= MaximumConformingSearchResults
         && MaximumSearchTextBytes >= MinimumWorkCount && MaximumSearchTextBytes <= MaximumConformingSearchTextBytes
         && TextBudgetCheckInterval >= MinimumWorkCount && MaximumDocumentWords >= MinimumWorkCount
-        && MaximumWordCharacters >= MinimumWorkCount && SqlBudgetCheckInterval >= MinimumWorkCount;
+        && MaximumWordCharacters >= MinimumWorkCount && SqlBudgetCheckInterval is >= MinimumWorkCount and <= DefaultSqlBudgetCheckInterval;
 
     /// <summary>Rejects invalid settings before query execution is admitted.</summary>
     /// <exception cref="InvalidOperationException">The configured continuation lifetime is invalid.</exception>

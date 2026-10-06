@@ -8,6 +8,8 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
     string? image = null)
     : ITimeSeriesPersistentTarget, ITimeSeriesAggregationTarget
 {
+    private const string PersistedTimescaleDBHypertableToken = "Persisted TimescaleDB hypertable";
+
     private const string TargetName = "TimescaleDB TimeSeries";
     private const string StorageGuarantee =
         "Container-lifetime single-node TimescaleDB hypertable; no cross-run volume and no replica guarantee";
@@ -17,15 +19,22 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
     private string schemaName = string.Empty;
     private int ownsSchema;
 
-    public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, "Persisted TimescaleDB hypertable",
+    public TimeSeriesTargetMetadata Metadata { get; } = new(TargetName, PersistedTimescaleDBHypertableToken,
         StorageGuarantee, AcknowledgementGuarantee, image, null);
 
     public async Task InitializeAsync(TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)
     {
+        const string TimescaleInitializeFailedDetail = "TimescaleInitializeFailed";
+
+        const int NoObservedItems = 0;
+        const string TimescaleAlreadyInitializedDetail = "TimescaleAlreadyInitialized";
+        const string TimescaleOwnershipUnconfirmedDetail = "TimescaleOwnershipUnconfirmed";
+        const int SingleItemCount = 1;
+
         ArgumentNullException.ThrowIfNull(workload);
-        if (Volatile.Read(ref ownsSchema) != 0)
+        if (Volatile.Read(ref ownsSchema) != NoObservedItems)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleAlreadyInitialized");
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleAlreadyInitializedDetail);
         }
 
         schemaName = TimescaleSchemaLifecycle.SchemaName(workload.RunId);
@@ -35,10 +44,10 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
                 cancellationToken).ConfigureAwait(false);
             if (!confirmed)
             {
-                throw TimeSeriesComparisonTargetErrors.Create("TimescaleOwnershipUnconfirmed");
+                throw TimeSeriesComparisonTargetErrors.Create(TimescaleOwnershipUnconfirmedDetail);
             }
 
-            Interlocked.Exchange(ref ownsSchema, 1);
+            Interlocked.Exchange(ref ownsSchema, SingleItemCount);
         }
         catch (OperationCanceledException)
         {
@@ -50,19 +59,19 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
         }
         catch (NpgsqlException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleInitializeFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleInitializeFailedDetail, error);
         }
         catch (TimeoutException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleInitializeFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleInitializeFailedDetail, error);
         }
         catch (ArgumentException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleInitializeFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleInitializeFailedDetail, error);
         }
         catch (InvalidOperationException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleInitializeFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleInitializeFailedDetail, error);
         }
     }
 
@@ -91,7 +100,10 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
 
     public async ValueTask DisposeAsync()
     {
-        if (Volatile.Read(ref ownsSchema) == 0)
+        const int NoObservedItems = 0;
+        const string TimescaleCleanupFailedDetail = "TimescaleCleanupFailed";
+
+        if (Volatile.Read(ref ownsSchema) == NoObservedItems)
         {
             return;
         }
@@ -101,7 +113,7 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
         {
             await TimescaleSchemaLifecycle.DropOwnedSchemaAsync(connectionString, schemaName, ownerId, timeout.Token)
                 .ConfigureAwait(false);
-            Interlocked.Exchange(ref ownsSchema, 0);
+            Interlocked.Exchange(ref ownsSchema, NoObservedItems);
         }
         catch (InvalidOperationException error) when (TimeSeriesComparisonTargetErrors.TryGetCode(error, out _))
         {
@@ -109,31 +121,34 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
         }
         catch (NpgsqlException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleCleanupFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleCleanupFailedDetail, error);
         }
         catch (TimeoutException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleCleanupFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleCleanupFailedDetail, error);
         }
         catch (ArgumentException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleCleanupFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleCleanupFailedDetail, error);
         }
         catch (InvalidOperationException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleCleanupFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleCleanupFailedDetail, error);
         }
         catch (OperationCanceledException error)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleCleanupFailed", error);
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleCleanupFailedDetail, error);
         }
     }
 
     private void RequireOwnership()
     {
-        if (Volatile.Read(ref ownsSchema) == 0)
+        const int NoObservedItems = 0;
+        const string TimescaleNamespaceNotOwnedDetail = "TimescaleNamespaceNotOwned";
+
+        if (Volatile.Read(ref ownsSchema) == NoObservedItems)
         {
-            throw TimeSeriesComparisonTargetErrors.Create("TimescaleNamespaceNotOwned");
+            throw TimeSeriesComparisonTargetErrors.Create(TimescaleNamespaceNotOwnedDetail);
         }
     }
 }

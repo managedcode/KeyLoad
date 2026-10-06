@@ -2,32 +2,39 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveSummary
 {
+    private const int SingleItemCount = 1;
+
     internal static TimeSeriesIntensiveMeasurement Calculate(ReadOnlySpan<TimeSeriesIntensiveAttempt> attempts, long wallTicks, long frequency)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(wallTicks, 0);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(frequency, 0);
+        const int NoObservedItems = 0;
+        const long NoObservedItemsLong = 0L;
+        const int FirstElementIndex = 0;
+        const int SingleItemCount = 1;
+
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(wallTicks, NoObservedItems);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(frequency, NoObservedItems);
         if (attempts.Length != TimeSeriesIntensiveProfile.OperationCount)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.InvalidSummary);
         }
 
         var latencies = new long[attempts.Length];
-        var successes = 0;
-        var validationTicks = 0L;
-        for (var index = 0; index < attempts.Length; index++)
+        var successes = NoObservedItems;
+        var validationTicks = NoObservedItemsLong;
+        for (var index = FirstElementIndex; index < attempts.Length; index++)
         {
             var attempt = attempts[index];
-            if (attempt.Index != index || attempt.Repetition != attempts[0].Repetition
+            if (attempt.Index != index || attempt.Repetition != attempts[FirstElementIndex].Repetition
                 || attempt.Worker != index % TimeSeriesIntensiveProfile.Concurrency
                 || !Enum.IsDefined(attempt.Outcome) || attempt.Outcome == TimeSeriesIntensiveOutcome.NotStarted
-                || attempt.LatencyTicks < 0 || attempt.ValidationTicks < 0)
+                || attempt.LatencyTicks < NoObservedItems || attempt.ValidationTicks < NoObservedItems)
             {
                 throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.InvalidSummary);
             }
 
             latencies[index] = attempt.LatencyTicks;
             validationTicks = checked(validationTicks + attempt.ValidationTicks);
-            successes += attempt.Outcome == TimeSeriesIntensiveOutcome.Succeeded ? 1 : 0;
+            successes += attempt.Outcome == TimeSeriesIntensiveOutcome.Succeeded ? SingleItemCount : NoObservedItems;
         }
 
         Array.Sort(latencies);
@@ -41,13 +48,17 @@ internal static class TimeSeriesIntensiveSummary
 
     internal static long Percentile(ReadOnlySpan<long> values, double percentile)
     {
-        if (values.IsEmpty || !double.IsFinite(percentile) || percentile is <= 0 or > 1)
+        const int NoObservedItems = 0;
+        const int SingleItemCount = 1;
+        const int ZeroAccumulator = 0;
+
+        if (values.IsEmpty || !double.IsFinite(percentile) || percentile is <= NoObservedItems or > SingleItemCount)
         {
             throw new ArgumentException(TimeSeriesIntensiveRuntimeErrors.InvalidPercentile, nameof(values));
         }
 
         var sorted = values.ToArray();
-        if (sorted.Any(value => value < 0))
+        if (sorted.Any(value => value < ZeroAccumulator))
         {
             throw new ArgumentException(TimeSeriesIntensiveRuntimeErrors.InvalidPercentile, nameof(values));
         }
@@ -58,6 +69,8 @@ internal static class TimeSeriesIntensiveSummary
 
     internal static double MedianFive(ReadOnlySpan<double> values)
     {
+        const int NoObservedItems = 0;
+
         if (values.Length != TimeSeriesIntensiveProfile.RepetitionCount)
         {
             throw new ArgumentException(TimeSeriesIntensiveRuntimeErrors.InvalidMedian, nameof(values));
@@ -67,7 +80,7 @@ internal static class TimeSeriesIntensiveSummary
         values.CopyTo(sorted);
         foreach (var value in sorted)
         {
-            if (!double.IsFinite(value) || value < 0)
+            if (!double.IsFinite(value) || value < NoObservedItems)
             {
                 throw new ArgumentException(TimeSeriesIntensiveRuntimeErrors.InvalidMedian, nameof(values));
             }
@@ -77,5 +90,5 @@ internal static class TimeSeriesIntensiveSummary
         return sorted[TimeSeriesIntensiveProfile.RepetitionCount / TimeSeriesIntensiveRuntimePolicy.MiddleDivisor];
     }
 
-    private static long Rank(ReadOnlySpan<long> sorted, double percentile) => sorted[(int)Math.Ceiling(sorted.Length * percentile) - 1];
+    private static long Rank(ReadOnlySpan<long> sorted, double percentile) => sorted[(int)Math.Ceiling(sorted.Length * percentile) - SingleItemCount];
 }

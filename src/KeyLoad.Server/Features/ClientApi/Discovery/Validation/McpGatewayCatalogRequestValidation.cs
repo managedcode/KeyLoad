@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text;
 
 namespace KeyLoad.Server;
@@ -5,13 +6,12 @@ namespace KeyLoad.Server;
 /// <summary>Enforces the bounded native search/route surface even when called outside protocol validation.</summary>
 internal static class McpGatewayCatalogRequestValidation
 {
-    internal const int MaximumQueryUtf8Bytes = 2048;
-    internal const int MaximumRouteLimit = 2;
+    private const int MinimumResultCount = 1;
     private const string InvalidQuery = "The MCP discovery query is invalid.";
     private const string InvalidLimit = "The MCP discovery limit is invalid.";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
-    internal static void ValidateQuery(string query)
+    internal static void ValidateQuery(string query, IOptions<McpExecutionOptions> executionOptions)
     {
         if (string.IsNullOrWhiteSpace(query))
         {
@@ -20,7 +20,7 @@ internal static class McpGatewayCatalogRequestValidation
 
         try
         {
-            if (StrictUtf8.GetByteCount(query) > MaximumQueryUtf8Bytes)
+            if (StrictUtf8.GetByteCount(query) > executionOptions.Value.MaximumDiscoveryQueryBytes)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidQuery);
             }
@@ -31,17 +31,18 @@ internal static class McpGatewayCatalogRequestValidation
         }
     }
 
-    internal static void ValidateSearchLimit(int limit)
+    internal static void ValidateSearchLimit(int limit, IOptions<McpExecutionOptions> executionOptions)
     {
-        if (limit is < 1 or > McpGatewayCatalogValidation.NativeMaximumResults)
+        if (limit < MinimumResultCount || limit > executionOptions.Value.MaximumSearchResults)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidLimit);
         }
     }
 
-    internal static void ValidateRouteLimits(int categories, int toolsPerCategory)
+    internal static void ValidateRouteLimits(int categories, int toolsPerCategory, IOptions<McpExecutionOptions> executionOptions)
     {
-        if (categories is < 1 or > MaximumRouteLimit || toolsPerCategory is < 1 or > MaximumRouteLimit)
+        if (categories < MinimumResultCount || categories > executionOptions.Value.MaximumRouteResults
+            || toolsPerCategory < MinimumResultCount || toolsPerCategory > executionOptions.Value.MaximumRouteResults)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidLimit);
         }

@@ -13,9 +13,11 @@ internal static class ComparisonValidation
     public static async Task ValidateBatchAsync(IComparisonSession reader, BenchmarkDataset dataset, Scenario scenario,
         BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         var expectedMessages = scenario == Scenario.QueueCycle ? inputs.ToDictionary(document => document.Id, StringComparer.Ordinal) : [];
         var completedMessages = new HashSet<string>(StringComparer.Ordinal);
-        for (var operation = 0; operation < samples.Length; operation++)
+        for (var operation = FirstElementIndex; operation < samples.Length; operation++)
         {
             if (!samples[operation].Success)
             {
@@ -79,6 +81,8 @@ internal static class ComparisonValidation
 
     private static void ValidateResult(Scenario scenario, BenchmarkDocument input, OperationResult output, BenchmarkDataset dataset)
     {
+        const int SingleItemCount = 1;
+
         if (scenario == Scenario.PointRead && !BenchmarkDataset.SameDocument(output.Document, input))
         {
             throw new ComparisonFailureException(PointMismatch);
@@ -106,7 +110,7 @@ internal static class ComparisonValidation
         }
         if (scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse)
         {
-            var expected = dataset.Reachable(input, scenario == Scenario.GraphNeighbors ? 1 : dataset.Options.GraphDepth);
+            var expected = dataset.Reachable(input, scenario == Scenario.GraphNeighbors ? SingleItemCount : dataset.Options.GraphDepth);
             if (output.Vertices is not { } vertices || vertices.IsDefault
                 || !vertices.SequenceEqual(expected, StringComparer.Ordinal))
             {

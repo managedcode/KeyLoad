@@ -42,10 +42,12 @@ internal sealed class KeyLoadTimeSeriesIntensiveContext
 
     private static void ValidatePeers(ImmutableArray<KeyLoadTimeSeriesIntensivePeer> peers)
     {
+        const int FirstElementIndex = 0;
+
         var voterIds = new HashSet<string>(StringComparer.Ordinal);
         var endpoints = new HashSet<string>(StringComparer.Ordinal);
         var clients = new HashSet<KeyLoadClient>(ReferenceEqualityComparer.Instance);
-        for (var index = 0; index < peers.Length; index++)
+        for (var index = FirstElementIndex; index < peers.Length; index++)
         {
             var peer = peers[index];
             if (peer is null || peer.Index != index + KeyLoadTimeSeriesIntensiveProtocol.FirstPeerIndex

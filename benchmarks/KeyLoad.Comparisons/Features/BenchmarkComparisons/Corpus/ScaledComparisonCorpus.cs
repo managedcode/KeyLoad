@@ -10,6 +10,10 @@ namespace KeyLoad.Comparisons;
 /// <summary>Generates a scaled corpus by index without retaining per-record objects.</summary>
 public sealed class ScaledComparisonCorpus : IComparisonCorpus
 {
+    private const int NoObservedItems = 0;
+    private const string SharedCorpusText = "KeyLoad shared corpus";
+    private const string DocumentIdentityPrefix = "d";
+
     private const string DocumentNumberFormat = "D9";
 
     private readonly ScaledComparisonProfile profile;
@@ -32,13 +36,17 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
     /// <inheritdoc />
     public IReadOnlyList<BenchmarkEdge> Edges => edges;
     /// <inheritdoc />
-    public int GraphVertexCount => 0;
+    public int GraphVertexCount => NoObservedItems;
     /// <inheritdoc />
     public string Sha256 { get; }
 
     /// <inheritdoc />
     public BenchmarkDocument CreateDocument(int number)
     {
+        const string SharedCorpusText = "KeyLoad shared corpus";
+        const char PayloadPaddingCharacter = 'x';
+        const string ScaledCorpusPayloadSizeMismatchDetail = "Scaled corpus payload size mismatch.";
+
         if ((uint)number >= (uint)profile.Documents)
         {
             throw new ArgumentOutOfRangeException(nameof(number));
@@ -47,10 +55,10 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         var id = Id(number);
         var empty = EmptyJson(id, number);
         var paddingLength = profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty);
-        var json = JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = new string('x', paddingLength) });
+        var json = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = new string(PayloadPaddingCharacter, paddingLength) });
         if (Encoding.UTF8.GetByteCount(json) != profile.PayloadBytes)
         {
-            throw new InvalidOperationException("Scaled corpus payload size mismatch.");
+            throw new InvalidOperationException(ScaledCorpusPayloadSizeMismatchDetail);
         }
 
         return new(number, id, json, ImmutableArray<float>.Empty);
@@ -59,26 +67,32 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
     /// <inheritdoc />
     public BenchmarkDocument Input(Scenario scenario, int repetition, int operation, bool warmup)
     {
-        if (repetition != 0)
+        const int SingleMeasurementRepetitionIndex = 0;
+        const int NoObservedItems = 0;
+        const uint DeterministicReadStrideUint = 2654435761u;
+        const int UpdateIdentityBlock = 1;
+        const int DeleteIdentityBlock = 2;
+
+        if (repetition != SingleMeasurementRepetitionIndex)
         {
-            ArgumentOutOfRangeException.ThrowIfNotEqual(repetition, 0);
+            ArgumentOutOfRangeException.ThrowIfNotEqual(repetition, SingleMeasurementRepetitionIndex);
         }
-        if (operation < 0 || operation >= (warmup ? profile.Warmup : profile.Operations))
+        if (operation < NoObservedItems || operation >= (warmup ? profile.Warmup : profile.Operations))
         {
             throw new ArgumentOutOfRangeException(nameof(operation));
         }
 
         if (scenario == Scenario.PointRead)
         {
-            var selected = unchecked((uint)profile.Seed + (uint)operation * 2654435761u) % (uint)profile.Documents;
+            var selected = unchecked((uint)profile.Seed + (uint)operation * DeterministicReadStrideUint) % (uint)profile.Documents;
             return CreateDocument((int)selected);
         }
 
         var block = scenario switch
         {
-            Scenario.DocumentWrite => 0,
-            Scenario.DocumentUpdate => 1,
-            Scenario.DocumentDelete => 2,
+            Scenario.DocumentWrite => NoObservedItems,
+            Scenario.DocumentUpdate => UpdateIdentityBlock,
+            Scenario.DocumentDelete => DeleteIdentityBlock,
             _ => throw new ArgumentOutOfRangeException(nameof(scenario))
         };
         var ordinal = warmup ? operation : profile.Warmup + operation;
@@ -90,26 +104,33 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
     /// <returns>The generated mutation input with the frozen payload size.</returns>
     public BenchmarkDocument CreateMutationDocument(int number)
     {
-        if (number < profile.Documents || number >= checked(profile.Documents + 3 * (profile.Operations + profile.Warmup)))
+        const int MutationIdentityBlockCount = 3;
+        const string SharedCorpusText = "KeyLoad shared corpus";
+        const char PayloadPaddingCharacter = 'x';
+        const string ScaledMutationPayloadSizeMismatchDetail = "Scaled mutation payload size mismatch.";
+
+        if (number < profile.Documents || number >= checked(profile.Documents + MutationIdentityBlockCount * (profile.Operations + profile.Warmup)))
         {
             throw new ArgumentOutOfRangeException(nameof(number));
         }
 
         var id = Id(number);
         var empty = EmptyJson(id, number);
-        var json = JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = new string('x', profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty)) });
+        var json = JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = new string(PayloadPaddingCharacter, profile.PayloadBytes - Encoding.UTF8.GetByteCount(empty)) });
         if (Encoding.UTF8.GetByteCount(json) != profile.PayloadBytes)
         {
-            throw new InvalidOperationException("Scaled mutation payload size mismatch.");
+            throw new InvalidOperationException(ScaledMutationPayloadSizeMismatchDetail);
         }
         return new(number, id, json, ImmutableArray<float>.Empty);
     }
 
     private string ComputeDigest()
     {
+        const int FirstElementIndex = 0;
+
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var length = new byte[sizeof(int)];
-        for (var number = 0; number < profile.Documents; number++)
+        for (var number = FirstElementIndex; number < profile.Documents; number++)
         {
             var document = CreateDocument(number);
             Append(hash, length, document.Id);
@@ -126,9 +147,9 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         hash.AppendData(bytes);
     }
 
-    internal static string EmptyJson(string id, int number) => JsonSerializer.Serialize(new { id, number, text = "KeyLoad shared corpus", padding = string.Empty });
+    internal static string EmptyJson(string id, int number) => JsonSerializer.Serialize(new { id, number, text = SharedCorpusText, padding = string.Empty });
 
-    internal static string Id(int number) => "d" + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
+    internal static string Id(int number) => DocumentIdentityPrefix + number.ToString(DocumentNumberFormat, System.Globalization.CultureInfo.InvariantCulture);
 
     private sealed class DocumentView(ScaledComparisonCorpus owner) : IReadOnlyList<BenchmarkDocument>
     {
@@ -136,7 +157,9 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
         public BenchmarkDocument this[int index] => owner.CreateDocument(index);
         public IEnumerator<BenchmarkDocument> GetEnumerator()
         {
-            for (var index = 0; index < Count; index++)
+            const int FirstElementIndex = 0;
+
+            for (var index = FirstElementIndex; index < Count; index++)
             {
                 yield return owner.CreateDocument(index);
             }
@@ -146,7 +169,9 @@ public sealed class ScaledComparisonCorpus : IComparisonCorpus
 
     private sealed class EmptyEdgeView : IReadOnlyList<BenchmarkEdge>
     {
-        public int Count => 0;
+        private const int NoObservedItems = 0;
+
+        public int Count => NoObservedItems;
         public BenchmarkEdge this[int index] => throw new ArgumentOutOfRangeException(nameof(index));
         public IEnumerator<BenchmarkEdge> GetEnumerator() => Enumerable.Empty<BenchmarkEdge>().GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

@@ -14,7 +14,7 @@ internal sealed class ReplicaMembershipAddressPinTests
     public async Task SignedCallerAddressMustMatchActualNativeDnsBeforePinPublication()
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints);
+        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints, UnitRoutingOptions.Membership());
         var mismatch = await Assert.ThrowsAsync<KeyLoadException>(() =>
             pins.PinCallerAsync(0, MismatchedAddress, deadline.Token));
         await Assert.That(mismatch).IsNotNull();
@@ -31,7 +31,7 @@ internal sealed class ReplicaMembershipAddressPinTests
     public async Task PreCancelledAdmissionDoesNotPinAndAnIndependentCallCanResolveNatively()
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints);
+        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints, UnitRoutingOptions.Membership());
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() =>
@@ -43,7 +43,7 @@ internal sealed class ReplicaMembershipAddressPinTests
     public async Task ConcurrentNativeResolutionCallsShareOneStableVoterPin()
     {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints);
+        using var pins = new ReplicaMembershipAuthorityAddressPins(Endpoints, UnitRoutingOptions.Membership());
         var calls = Enumerable.Range(0, 12)
             .Select(_ => pins.PinCallerAsync(2, MatchingAddress, deadline.Token)).ToArray();
         await Task.WhenAll(calls).ConfigureAwait(false);

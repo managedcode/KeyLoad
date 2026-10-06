@@ -45,7 +45,8 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         }
         if (batch.Count > QdrantVectorProtocol.EmptyCount)
         { await WriteBatchAsync(batch, token); loaded += batch.Count; }
-        var proof = await QdrantReplicaProof.VerifyAsync(nodes, collection, loaded, topology, token, lifecycleOptions);
+        var proof = await QdrantReplicaProof.VerifyAsync(clients: nodes, collection: collection, expectedPoints: loaded, topology: topology,
+            cancellationToken: token, lifecycleOptions: lifecycleOptions);
         Profile = Profile with
         {
             Version = proof.Version,

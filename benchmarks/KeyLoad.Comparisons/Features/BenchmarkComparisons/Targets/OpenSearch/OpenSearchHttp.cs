@@ -7,6 +7,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class OpenSearchHttp
 {
+    private const int ExpectedCopiesDefault = 0;
+
     internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const string JsonMediaType = "application/json";
     private const string NdjsonMediaType = "application/x-ndjson";
@@ -26,7 +28,7 @@ internal static class OpenSearchHttp
             allowNotFound: false, cancellationToken, scenario, expectedCopies);
 
     private static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path, string? body,
-        string contentType, bool allowNotFound, CancellationToken cancellationToken, Scenario? mutation = null, int expectedCopies = 0)
+        string contentType, bool allowNotFound, CancellationToken cancellationToken, Scenario? mutation = null, int expectedCopies = OpenSearchHttp.ExpectedCopiesDefault)
     {
         using var request = new HttpRequestMessage(method, path);
         if (body is not null)

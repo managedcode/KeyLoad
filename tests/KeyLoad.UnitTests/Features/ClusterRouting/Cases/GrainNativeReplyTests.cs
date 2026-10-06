@@ -17,7 +17,7 @@ internal sealed class GrainNativeReplyTests
     public async Task ReplyUsesActualQueryDtoWithUnchangedUserJsonAndExactNativeByteCount()
     {
         var value = new QueryPage([new QueryRow(Entity, Revision, UserJson)], null, CutPosition, AccessPath);
-        var reply = GrainReplyFactory.Value(value, CancellationToken.None);
+        var reply = GrainReplyFactory.Value(value, UnitRoutingOptions.Routing(), CancellationToken.None);
         var decoded = (QueryPage)NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value!;
         await Assert.That(decoded.Rows.Single().Json).IsEqualTo(UserJson);
         await Assert.That(decoded.Rows.Single().EntityId).IsEqualTo(Entity);
@@ -47,18 +47,18 @@ internal sealed class GrainNativeReplyTests
     public async Task OperationUsesNativeValueAndDomainFailurePrecedesCallerCancellation()
     {
         var value = new BackupReceipt(Entity, CutPosition);
-        var reply = GrainReplyFactory.Operation(new(UserJson) { NativeValue = value }, CancellationToken.None);
+        var reply = GrainReplyFactory.Operation(new(UserJson) { NativeValue = value }, UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value).IsEqualTo(value);
-        var empty = GrainReplyFactory.Operation(new(null), CancellationToken.None);
+        var empty = GrainReplyFactory.Operation(new(null), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(empty.Payload.Span).Value).IsNull();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var failure = GrainReplyFactory.Operation(new(null, ErrorCode.PermissionDenied, Detail), cancellation.Token);
+        var failure = GrainReplyFactory.Operation(new(null, ErrorCode.PermissionDenied, Detail), UnitRoutingOptions.Routing(), cancellation.Token);
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.SafeDetail).IsEqualTo(Detail);
         await Assert.That(failure.Payload.Length).IsEqualTo(0);
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
-            GrainReplyFactory.Operation(new(null) { NativeValue = value }, cancellation.Token))).IsNotNull();
+            GrainReplyFactory.Operation(new(null) { NativeValue = value }, UnitRoutingOptions.Routing(), cancellation.Token))).IsNotNull();
     }
 
     [Test]
@@ -66,7 +66,7 @@ internal sealed class GrainNativeReplyTests
     {
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        using var stream = new GrainBoundedPayloadStream(GrainRoutingProtocol.MaximumReplyBytes, cancellation.Token);
+        using var stream = new GrainBoundedPayloadStream(UnitRoutingOptions.Routing().Value.MaximumReplyBytes, cancellation.Token);
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
             NativeSerialization.Serialize(new GrainValue(new BackupReceipt(Entity, CutPosition)), stream))).IsNotNull();
         await Assert.That(stream.Length).IsEqualTo(0L);

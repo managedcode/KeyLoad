@@ -5,12 +5,32 @@ namespace KeyLoad.Server;
 /// <summary>Finite embedded console shell; public assets never exempt data routes from authentication.</summary>
 internal static class AdminStaticAssets
 {
-    private const string StylesheetsResultText = "brand.css";
-    private const string StylesheetsStylesheetsResultText = "layout.css";
-    private const string ScriptsResultText = "constants.js";
-    private const string ScriptsScriptsResultText = "text.js";
-    private const string IconsResultText = "favicon.ico";
-    private const string IconsIconsResultText = "favicon-32x32.png";
+    private const string BrandStylesheet = "brand.css";
+    private const string LayoutStylesheet = "layout.css";
+    private const string ConstantsScript = "constants.js";
+    private const string TextScript = "text.js";
+    private const string Favicon = "favicon.ico";
+    private const string SmallFavicon = "favicon-32x32.png";
+
+    private const string ViewsStylesheet = "views.css";
+    private const string FormattingScript = "format.js";
+    private const string DomScript = "dom.js";
+    private const string TooltipScript = "tooltip.js";
+    private const string ChartsScript = "charts.js";
+    private const string MetricsScript = "metrics.js";
+    private const string NavigationScript = "navigation.js";
+    private const string BrowsingScript = "browsing.js";
+    private const string CatalogScript = "catalog.js";
+    private const string ErrorsScript = "errors.js";
+    private const string OverviewScript = "overview.js";
+    private const string PerformanceScript = "performance.js";
+    private const string NodesScript = "nodes.js";
+    private const string StorageScript = "storage.js";
+    private const string ApplicationScript = "app.js";
+    private const string LargeFavicon = "favicon-96x96.png";
+    private const string AppleTouchIcon = "apple-touch-icon.png";
+    private const string SmallApplicationIcon = "icon-192.png";
+    private const string LargeApplicationIcon = "icon-512.png";
 
     private const string EntryPath = "/admin";
     private const string RootPath = "/admin/";
@@ -31,14 +51,14 @@ internal static class AdminStaticAssets
     private const string CspHeader = "Content-Security-Policy";
     private const string ReferrerHeader = "Referrer-Policy";
     private static readonly string[] Methods = [HttpMethods.Get, HttpMethods.Head];
-    private static readonly string[] Stylesheets = [StylesheetsResultText, StylesheetsStylesheetsResultText, "views.css"];
-    private static readonly string[] Scripts = [ScriptsResultText, ScriptsScriptsResultText, "format.js", "dom.js", "tooltip.js", "charts.js",
-        "metrics.js", "navigation.js", "browsing.js", "catalog.js", "errors.js", "overview.js", "performance.js",
-        "nodes.js", "storage.js", "app.js"];
+    private static readonly string[] Stylesheets = [BrandStylesheet, LayoutStylesheet, ViewsStylesheet];
+    private static readonly string[] Scripts = [ConstantsScript, TextScript, FormattingScript, DomScript, TooltipScript, ChartsScript,
+        MetricsScript, NavigationScript, BrowsingScript, CatalogScript, ErrorsScript, OverviewScript, PerformanceScript,
+        NodesScript, StorageScript, ApplicationScript];
     private static readonly (string File, string Type)[] Icons =
     [
-        (IconsResultText, Ico), (IconsIconsResultText, Png), ("favicon-96x96.png", Png),
-        ("apple-touch-icon.png", Png), ("icon-192.png", Png), ("icon-512.png", Png)
+        (Favicon, Ico), (SmallFavicon, Png), (LargeFavicon, Png),
+        (AppleTouchIcon, Png), (SmallApplicationIcon, Png), (LargeApplicationIcon, Png)
     ];
     private static readonly FrozenDictionary<string, (string File, string Type)> Assets = Catalog()
         .ToFrozenDictionary(StringComparer.Ordinal);

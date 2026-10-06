@@ -27,7 +27,7 @@ internal sealed class McpUnknownLengthAdmissionTests
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         var wire = Encoding.UTF8.GetBytes(DiscoveryFrame);
 
-        using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, CancellationToken.None, UnitMcpOptions.Execution()))
+        using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution(), CancellationToken.None))
         {
             state.Authenticate(principalBytes, CancellationToken.None);
             using var source = new MemoryStream(wire, writable: false);

@@ -18,11 +18,14 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
 
     internal void RecordNotOffered(int index, long? decisionTimestamp, long terminalTimestamp)
     {
+        const int AdjacentElementOffset = 1;
+        const int NoObservedItems = 0;
+
         lock (gate)
         {
-            notOffered = checked(notOffered + 1);
+            notOffered = checked(notOffered + AdjacentElementOffset);
             var slot = SampleSlot(index);
-            if (slot >= 0)
+            if (slot >= NoObservedItems)
             {
                 samples[slot] = new(index, null, timeline.DueOffsetNanoseconds(index),
                     Offset(decisionTimestamp), null, null, timeline.OffsetMilliseconds(terminalTimestamp),
@@ -33,6 +36,8 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
 
     internal OpenLoopOfferDisposition TryOffer(OpenLoopWorkItem item, ChannelWriter<OpenLoopWorkItem> writer)
     {
+        const int AdjacentElementOffset = 1;
+
         lock (gate)
         {
             if (frozen)
@@ -48,7 +53,7 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
             }
             live.Remove(item.Index);
             item.Phase = OpenLoopItemPhase.Terminal;
-            harnessRejected = checked(harnessRejected + 1);
+            harnessRejected = checked(harnessRejected + AdjacentElementOffset);
             RecordTerminalSample(item, OpenLoopOutcome.HarnessRejected, Stopwatch.GetTimestamp());
             return OpenLoopOfferDisposition.Rejected;
         }
@@ -56,6 +61,8 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
 
     internal bool TryStart(OpenLoopWorkItem item, int session, long timestamp)
     {
+        const int AdjacentElementOffset = 1;
+
         lock (gate)
         {
             if (frozen || item.Phase != OpenLoopItemPhase.Queued)
@@ -66,14 +73,14 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
             {
                 item.Phase = OpenLoopItemPhase.Terminal;
                 live.Remove(item.Index);
-                timedOutBeforeStart = checked(timedOutBeforeStart + 1);
+                timedOutBeforeStart = checked(timedOutBeforeStart + AdjacentElementOffset);
                 RecordTerminalSample(item, OpenLoopOutcome.TimedOutBeforeStart, timestamp);
                 return false;
             }
             item.Phase = OpenLoopItemPhase.Started;
             item.Session = session;
             item.StartedTimestamp = timestamp;
-            started = checked(started + 1);
+            started = checked(started + AdjacentElementOffset);
             return true;
         }
     }
@@ -81,6 +88,9 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
     internal OpenLoopProgressV1? Complete(OpenLoopWorkItem item, OpenLoopOutcome outcome, long timestamp,
         bool publishProgress)
     {
+        const int AdjacentElementOffset = 1;
+        const int NoMeasuredRate = 0;
+
         lock (gate)
         {
             if (frozen || item.Phase != OpenLoopItemPhase.Started)
@@ -90,20 +100,20 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
             switch (outcome)
             {
                 case OpenLoopOutcome.Succeeded:
-                    succeeded = checked(succeeded + 1);
-                    completed = checked(completed + 1);
+                    succeeded = checked(succeeded + AdjacentElementOffset);
+                    completed = checked(completed + AdjacentElementOffset);
                     break;
                 case OpenLoopOutcome.Failed:
-                    failed = checked(failed + 1);
-                    completed = checked(completed + 1);
+                    failed = checked(failed + AdjacentElementOffset);
+                    completed = checked(completed + AdjacentElementOffset);
                     break;
                 case OpenLoopOutcome.TargetRejected:
-                    targetRejected = checked(targetRejected + 1);
-                    completed = checked(completed + 1);
+                    targetRejected = checked(targetRejected + AdjacentElementOffset);
+                    completed = checked(completed + AdjacentElementOffset);
                     break;
                 case OpenLoopOutcome.TimedOutAfterStart:
-                    timedOutAfterStart = checked(timedOutAfterStart + 1);
-                    completed = checked(completed + 1);
+                    timedOutAfterStart = checked(timedOutAfterStart + AdjacentElementOffset);
+                    completed = checked(completed + AdjacentElementOffset);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(outcome));
@@ -111,7 +121,7 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
             item.Phase = OpenLoopItemPhase.Terminal;
             live.Remove(item.Index);
             RecordTerminalSample(item, outcome, timestamp);
-            return publishProgress && completed % OpenLoopRateContract.ProgressInterval == 0
+            return publishProgress && completed % OpenLoopRateContract.ProgressInterval == NoMeasuredRate
                 ? new(completed, OpenLoopRateContract.PlannedOperations, started, offeredRatePerSecond, scenario)
                 : null;
         }
@@ -119,6 +129,8 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
 
     internal void Freeze(long timestamp)
     {
+        const int AdjacentElementOffset = 1;
+
         lock (gate)
         {
             if (frozen)
@@ -133,11 +145,11 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
                     : OpenLoopOutcome.UnfinishedStarted;
                 if (outcome == OpenLoopOutcome.UnfinishedQueued)
                 {
-                    unfinishedQueued = checked(unfinishedQueued + 1);
+                    unfinishedQueued = checked(unfinishedQueued + AdjacentElementOffset);
                 }
                 else
                 {
-                    unfinishedStarted = checked(unfinishedStarted + 1);
+                    unfinishedStarted = checked(unfinishedStarted + AdjacentElementOffset);
                 }
                 item.Phase = OpenLoopItemPhase.Terminal;
                 RecordTerminalSample(item, outcome, timestamp);
@@ -162,14 +174,16 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
 
     private void RecordTerminalSample(OpenLoopWorkItem item, OpenLoopOutcome outcome, long timestamp)
     {
-        if (item.SampleSlot < 0)
+        const int NoObservedItems = 0;
+
+        if (item.SampleSlot < NoObservedItems)
         {
             return;
         }
-        samples[item.SampleSlot] = new(item.Index, item.Session < 0 ? null : item.Session,
+        samples[item.SampleSlot] = new(item.Index, item.Session < NoObservedItems ? null : item.Session,
             item.DueOffsetNanoseconds, timeline.OffsetMilliseconds(item.DecisionTimestamp),
             timeline.OffsetMilliseconds(item.OfferedTimestamp),
-            item.StartedTimestamp == 0 ? null : timeline.OffsetMilliseconds(item.StartedTimestamp),
+            item.StartedTimestamp == NoObservedItems ? null : timeline.OffsetMilliseconds(item.StartedTimestamp),
             timeline.OffsetMilliseconds(timestamp), item.PayloadBytes, outcome);
     }
 

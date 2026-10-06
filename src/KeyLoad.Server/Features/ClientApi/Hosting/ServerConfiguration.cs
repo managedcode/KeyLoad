@@ -65,7 +65,7 @@ internal static class ServerConfiguration
                 builder.Configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))], [],
             [new ValidateOptions<ZoneTreeStorageExecutionOptions>(Options.DefaultName,
                 options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage)]);
-        IOptions<ZoneTreeStorageExecutionOptions> configured = new OptionsManager<ZoneTreeStorageExecutionOptions>(factory);
+        var configured = new OptionsManager<ZoneTreeStorageExecutionOptions>(factory);
         _ = configured.Value;
         return configured;
     }

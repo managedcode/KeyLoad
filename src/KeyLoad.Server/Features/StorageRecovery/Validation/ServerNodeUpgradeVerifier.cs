@@ -8,6 +8,8 @@ internal static class ServerNodeUpgradeVerifier
 {
     private const string Path2Text = "prior";
 
+    private const string VerifiedImagesDirectory = "verified-images";
+
     internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, ServerRuntimeOptions options, bool published)
         => ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(receipt.FinalDestination)!, verifier =>
         {
@@ -29,7 +31,7 @@ internal static class ServerNodeUpgradeVerifier
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);
             ServerNodeUpgradeCurrentState.Verify(receipt, database, stores.Replica, log.State, authority, published);
             ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration,
-                Path.Combine(verifier, "verified-images"), executionOptions: options.NodeUpgrade,
+                Path.Combine(verifier, VerifiedImagesDirectory), executionOptions: options.NodeUpgrade,
                 recoveryOptions: options.OfflineRecovery);
             return log.State;
         });

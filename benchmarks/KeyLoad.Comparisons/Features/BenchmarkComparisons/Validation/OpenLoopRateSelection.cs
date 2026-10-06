@@ -4,7 +4,12 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopRateSelection
 {
-    internal static bool IsSupported(int rate) => rate is 250 or 1000 or 4000;
+    private const int HighHistoricalArrivalRate = 4000;
+
+    private const int LowHistoricalArrivalRate = 250;
+    private const int MediumHistoricalArrivalRate = 1000;
+
+    internal static bool IsSupported(int rate) => rate is LowHistoricalArrivalRate or MediumHistoricalArrivalRate or HighHistoricalArrivalRate;
 
     internal static int? Read(string? value)
     {

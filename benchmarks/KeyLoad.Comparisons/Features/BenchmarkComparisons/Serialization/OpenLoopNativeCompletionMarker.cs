@@ -39,6 +39,8 @@ public static class OpenLoopNativeCompletionMarker
     /// <returns><see langword="true"/> when the exact marker contract is valid.</returns>
     public static bool TryParse(string? value, out OpenLoopNativeCompletionV1? marker)
     {
+        const int NoMeasuredRate = 0;
+
         marker = null;
         if (string.IsNullOrEmpty(value) || value.Length > OpenLoopCancellationProofContract.MaximumMarkerBytes
             || value.Any(character => character > OpenLoopCancellationProofContract.MaximumMarkerAsciiCodePoint))
@@ -52,7 +54,7 @@ public static class OpenLoopNativeCompletionMarker
             || scenario != Scenario.PointRead || scenario.ToString() != fields[ScenarioFieldIndex]
             || !TryInt32(fields[RateFieldIndex], out var rate) || !OpenLoopRateContract.AcceptedRates.Contains(rate)
             || !TryInt64(fields[CompletedFieldIndex], out var completed) || completed < OpenLoopRateContract.ProgressInterval
-            || completed % OpenLoopRateContract.ProgressInterval != 0
+            || completed % OpenLoopRateContract.ProgressInterval != NoMeasuredRate
             || !TryInt64(fields[StartedFieldIndex], out var started) || started < completed
             || !TryInt64(fields[PlannedFieldIndex], out var planned) || planned != OpenLoopRateContract.PlannedOperations
             || started > planned)

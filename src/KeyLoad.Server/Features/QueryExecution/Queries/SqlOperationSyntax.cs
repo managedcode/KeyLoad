@@ -22,9 +22,7 @@ internal static class SqlOperationSyntax
     internal const char LastLower = 'z';
     internal const char FirstDigit = '0';
     internal const char LastDigit = '9';
-    internal const int MaximumParameters = 256;
     internal const int CallParameterCount = 1;
-    internal const int CheckInterval = 256;
 
     internal static KeyLoadException InvalidInput() => Errors.Fail(ErrorCode.Validation, Invalid);
     internal static KeyLoadException UnsupportedInput() => Errors.Fail(ErrorCode.UnsupportedCapability, Unsupported);

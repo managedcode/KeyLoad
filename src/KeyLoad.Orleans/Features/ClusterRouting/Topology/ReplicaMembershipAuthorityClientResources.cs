@@ -81,7 +81,8 @@ internal sealed class ReplicaMembershipAuthorityClientResources : IAsyncDisposab
                 return;
             }
 
-            var failures = new List<Exception>(3);
+            const int OwnedCleanupStages = 3;
+            var failures = new List<Exception>(OwnedCleanupStages);
             DisposeExchange(failures);
             DisposeAdmission(failures);
             DisposeStopping(failures);

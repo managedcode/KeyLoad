@@ -1,19 +1,19 @@
+using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedKeyLoadReplayProfile
 {
-    internal const int CriticalPerVoter = 16_384;
-    internal const int ForwardPerVoter = 32_768;
-    internal const int ReadBarrierPerVoter = 196_608;
-    internal const int DataAppendPerVoter = 32_768;
     private const string Prefix = "KeyLoad__ReplayAdmission__";
 
-    internal static void Apply(IResourceBuilder<ContainerResource> node)
+    internal static void Apply(IResourceBuilder<ContainerResource> node, IOptions<ReplicaReplayLimits> options)
     {
-        Set(node, nameof(CriticalPerVoter), CriticalPerVoter);
-        Set(node, nameof(ForwardPerVoter), ForwardPerVoter);
-        Set(node, nameof(ReadBarrierPerVoter), ReadBarrierPerVoter);
-        Set(node, nameof(DataAppendPerVoter), DataAppendPerVoter);
+        var limits = options.Value;
+        Set(node, nameof(limits.CriticalPerVoter), limits.CriticalPerVoter);
+        Set(node, nameof(limits.ForwardPerVoter), limits.ForwardPerVoter);
+        Set(node, nameof(limits.ReadBarrierPerVoter), limits.ReadBarrierPerVoter);
+        Set(node, nameof(limits.DataAppendPerVoter), limits.DataAppendPerVoter);
     }
 
     private static void Set(IResourceBuilder<ContainerResource> node, string option, int value)

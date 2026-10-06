@@ -53,6 +53,8 @@ internal sealed class TimeSeriesIntensivePhaseWorkers(CancellationToken cellCanc
 
     private async Task CloseAsync()
     {
+        const int SingleItemCount = 1;
+
         var cancelled = cancellation.CancelAsync();
         Release();
         var completion = Task.WhenAll(JoinAsync(), cancelled);
@@ -62,7 +64,7 @@ internal sealed class TimeSeriesIntensivePhaseWorkers(CancellationToken cellCanc
         }
         catch (Exception)
         {
-            if (completion.Exception is { InnerExceptions.Count: > 1 } failures)
+            if (completion.Exception is { InnerExceptions.Count: > SingleItemCount } failures)
             {
                 throw failures;
             }

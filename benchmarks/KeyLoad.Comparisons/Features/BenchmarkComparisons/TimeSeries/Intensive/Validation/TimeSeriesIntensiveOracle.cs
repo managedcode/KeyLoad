@@ -53,13 +53,17 @@ internal static class TimeSeriesIntensiveOracle
 
     internal static ImmutableArray<SampleAggregateWindow> Windows(DateTimeOffset from, DateTimeOffset untilExclusive, TimeSpan width)
     {
+        const int NoObservedItems = 0;
+        const int SingleItemCount = 1;
+        const long FirstElementIndexLong = 0L;
+
         ArgumentOutOfRangeException.ThrowIfLessThan(untilExclusive, from);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(width, TimeSpan.Zero);
         var duration = untilExclusive.UtcTicks - from.UtcTicks;
-        var count = duration / width.Ticks + (duration % width.Ticks == 0 ? 0 : 1);
+        var count = duration / width.Ticks + (duration % width.Ticks == NoObservedItems ? NoObservedItems : SingleItemCount);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(count, TimeSeriesIntensiveProfile.MaxWindows);
         var builder = ImmutableArray.CreateBuilder<SampleAggregateWindow>((int)count);
-        for (var index = 0L; index < count; index++)
+        for (var index = FirstElementIndexLong; index < count; index++)
         {
             var start = from.AddTicks(index * width.Ticks);
             var remaining = untilExclusive.UtcTicks - start.UtcTicks;
@@ -72,13 +76,15 @@ internal static class TimeSeriesIntensiveOracle
 
     internal static void ValidateRaw(ImmutableArray<SampleRecord> expected, ImmutableArray<SampleRecord> actual)
     {
+        const int FirstElementIndex = 0;
+
         if (expected.IsDefault || actual.IsDefault || actual.Length != expected.Length)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveErrors.SampleCardinality);
         }
 
         var tags = new TimeSeriesIntensiveTagScope();
-        for (var index = 0; index < expected.Length; index++)
+        for (var index = FirstElementIndex; index < expected.Length; index++)
         {
             _ = TimeSeriesIntensiveRowVerifier.Validate(expected[index], actual[index], tags);
         }
@@ -99,12 +105,14 @@ internal static class TimeSeriesIntensiveOracle
 
     internal static void ValidateWindows(ImmutableArray<SampleAggregateWindow> expected, ImmutableArray<SampleAggregateWindow> actual)
     {
+        const int FirstElementIndex = 0;
+
         if (expected.IsDefault || actual.IsDefault || actual.Length != expected.Length)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveErrors.WindowCardinality);
         }
 
-        for (var index = 0; index < expected.Length; index++)
+        for (var index = FirstElementIndex; index < expected.Length; index++)
         {
             var row = actual[index];
             if (row is null || row.From != expected[index].From || row.UntilExclusive != expected[index].UntilExclusive)

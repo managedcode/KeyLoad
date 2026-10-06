@@ -20,8 +20,8 @@ public sealed record ReplicaSiloDiscovery(
     [property: global::Orleans.Id(2)] Guid Incarnation,
     [property: global::Orleans.Id(3)] string SiloAddress,
     [property: global::Orleans.Id(4)] bool TransportReady,
-    [property: global::Orleans.Id(5)] int ApplicationRpcVersion = 0,
-    [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = 0,
+    [property: global::Orleans.Id(5)] int ApplicationRpcVersion = ReplicaSiloDiscoveryState.UnadvertisedProtocolVersion,
+    [property: global::Orleans.Id(6)] int PeerEnvelopeVersion = ReplicaSiloDiscoveryState.UnadvertisedProtocolVersion,
     [property: global::Orleans.Id(7)] int RuntimeJournalReaderContract = StoreReaderContract.Legacy);
 
 /// <summary>Publishes the actual local Orleans runtime generation after early service initialization.</summary>
@@ -32,6 +32,7 @@ public sealed record ReplicaSiloDiscovery(
 public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
     ILocalSiloDetails localSilo, int runtimeJournalReaderContract = StoreReaderContract.Legacy)
 {
+    internal const int UnadvertisedProtocolVersion = 0;
     private const int ReadEmptyRead = 0;
     private const int MarkTransportReadyValueSingleItemCount = 1;
     private const int StopDiscoveryValueEmptyCount = 0;

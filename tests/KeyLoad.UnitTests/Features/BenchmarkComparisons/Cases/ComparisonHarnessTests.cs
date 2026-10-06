@@ -23,7 +23,7 @@ internal sealed class ComparisonHarnessTests
     {
         using var handler = new QueryFailureHandler();
         using var http = new HttpClient(handler, disposeHandler: false) { BaseAddress = new Uri("http://localhost/") };
-        await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image", UnitBenchmarkOptions.Lifecycle());
+        await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image", UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Small)), TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.Message).IsEqualTo("Neo4j:Neo.ClientError.Statement.SyntaxError");
         await Assert.That(error!.Message).DoesNotContain("sensitive-query");
@@ -74,7 +74,7 @@ internal sealed class ComparisonHarnessTests
         var output = Path.Combine(Path.GetTempPath(), "keyload-report-" + Guid.NewGuid().ToString("N"));
         try
         {
-            await ReportWriter.WriteAsync(report, output, TestContext.Current!.Execution.CancellationToken);
+            await ReportWriter.WriteAsync(report, output, UnitBenchmarkOptions.Native(), TestContext.Current!.Execution.CancellationToken);
             var lines = await File.ReadAllLinesAsync(Path.Combine(output, "samples.csv"));
             await Assert.That(lines.Length).IsEqualTo(1 + Small.Operations * Small.Repetitions);
             var markdown = await File.ReadAllTextAsync(Path.Combine(output, "results.md"));

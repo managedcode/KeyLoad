@@ -7,6 +7,8 @@ internal sealed class KurrentSession(KurrentDBClient client, KurrentTarget targe
 {
     public async Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         var stream = target.StreamName(document);
         var result = client.ReadStreamAsync(Direction.Forwards, stream, StreamPosition.Start,
             maxCount: KurrentConstants.ReadLimit, cancellationToken: cancellationToken);
@@ -27,7 +29,7 @@ internal sealed class KurrentSession(KurrentDBClient client, KurrentTarget targe
         {
             throw new ComparisonFailureException(KurrentConstants.ReadCardinality);
         }
-        var resolvedItem = items[0];
+        var resolvedItem = items[FirstElementIndex];
         var actual = resolvedItem.OriginalEvent;
         var revision = resolvedItem.OriginalEventNumber.ToUInt64();
         var canonicalRevision = checked(revision + (ulong)KurrentConstants.CanonicalFirstRevision);

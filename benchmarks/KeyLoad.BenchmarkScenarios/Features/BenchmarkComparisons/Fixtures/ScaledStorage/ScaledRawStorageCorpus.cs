@@ -1,5 +1,7 @@
 using System.Buffers.Binary;
 
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Generates compact immutable scale-v1 keys and deterministic values for one dataset.</summary>
@@ -10,7 +12,7 @@ internal sealed class ScaledRawStorageCorpus
     private const int MaximumRecordCount = 1_000_000;
     private const int SmallValueBytes = 32;
     private const int LargeValueBytes = 1024;
-    private const int CancellationCheckStride = 256;
+    private readonly int cancellationCheckInterval;
     private const ulong Seed = 1729;
     private const uint Version = 1;
     private const int TailOffset = 32;
@@ -22,11 +24,14 @@ internal sealed class ScaledRawStorageCorpus
     private readonly byte[] keys;
 
     /// <summary>Allocates one pinned key slab and fills each seeded and reserved key once.</summary>
-    public ScaledRawStorageCorpus(int recordCount, int valueBytes, CancellationToken cancellationToken = default)
+    public ScaledRawStorageCorpus(int recordCount, int valueBytes, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         const int RecordCountStep = 1;
 
         ValidateArguments(recordCount, valueBytes);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        cancellationCheckInterval = executionOptions.Value.CancellationCheckInterval;
         cancellationToken.ThrowIfCancellationRequested();
         RecordCount = recordCount;
         ValueBytes = valueBytes;
@@ -93,7 +98,7 @@ internal sealed class ScaledRawStorageCorpus
 
         for (var index = IndexInitialValue; index < keyCount; index++)
         {
-            if (index % CancellationCheckStride == EmptyIndexCancellationCheckStride)
+            if (index % cancellationCheckInterval == EmptyIndexCancellationCheckStride)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
@@ -12,9 +13,10 @@ internal sealed class ReplicaMembershipStore
     private readonly ReplicaConsensus consensus;
     private readonly string principal;
     private readonly int maximumRows;
+    private readonly IOptions<OrleansMembershipOptions> membershipOptions;
 
     internal ReplicaMembershipStore(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus consensus,
-        string principal, int maximumRows = 0)
+        string principal, IOptions<OrleansMembershipOptions> membershipOptions, int maximumRows = ReplicaMembershipProtocol.UnboundedRows)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(coordinator);
@@ -24,6 +26,9 @@ internal sealed class ReplicaMembershipStore
         this.coordinator = coordinator;
         this.consensus = consensus;
         this.principal = principal;
+        ArgumentNullException.ThrowIfNull(membershipOptions);
+        membershipOptions.Value.Validate();
+        this.membershipOptions = membershipOptions;
         this.maximumRows = maximumRows;
     }
 
@@ -36,9 +41,9 @@ internal sealed class ReplicaMembershipStore
         cancellationToken.ThrowIfCancellationRequested();
         var record = database.Store.Read(view => view.GetRecord<MembershipRecord>(Key));
         if (maximumRows > MaximumRowsValidationBoundary && record is not null
-            && record.Payload.Length > ReplicaMembershipAuthorityProtocol.MaximumSnapshotBytes)
+            && record.Payload.Length > membershipOptions.Value.MaximumSnapshotBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.MembershipCapacity); }
-        return ReplicaMembershipSnapshot.Read(record, maximumRows);
+        return ReplicaMembershipSnapshot.Read(record: record, maximumRows: maximumRows, membershipOptions: membershipOptions);
     }
 
     internal async Task<bool> CompareExchangeAsync(ReplicaMembershipSnapshot snapshot, CancellationToken cancellationToken)

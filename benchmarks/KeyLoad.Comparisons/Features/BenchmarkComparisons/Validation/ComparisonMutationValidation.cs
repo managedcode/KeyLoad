@@ -7,7 +7,10 @@ internal static class ComparisonMutationValidation
         Scenario scenario, BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs,
         CancellationToken cancellationToken)
     {
-        var next = -1;
+        const int WarmupRepetitionIndex = -1;
+        const int FirstElementIndex = 0;
+
+        var next = WarmupRepetitionIndex;
         await Task.WhenAll(sessions.Select(async session =>
         {
             while (true)
@@ -35,16 +38,18 @@ internal static class ComparisonMutationValidation
                 }
             }
         }));
-        await VerifySentinelAsync(sessions[0], dataset, samples, cancellationToken);
+        await VerifySentinelAsync(sessions[FirstElementIndex], dataset, samples, cancellationToken);
     }
 
     private static async Task VerifySentinelAsync(IComparisonSession reader, BenchmarkDataset dataset,
         OperationSample[] samples, CancellationToken token)
     {
+        const int FirstElementIndex = 0;
+
         try
         {
             using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, token);
-            var sentinel = dataset.Documents[0];
+            var sentinel = dataset.Documents[FirstElementIndex];
             if (!BenchmarkDataset.SameDocument(await reader.ReadAsync(sentinel, deadline.Token), sentinel))
             {
                 throw new ComparisonFailureException(SentinelChanged);
@@ -52,7 +57,7 @@ internal static class ComparisonMutationValidation
         }
         catch (Exception error) when (!token.IsCancellationRequested)
         {
-            for (var operation = 0; operation < samples.Length; operation++)
+            for (var operation = FirstElementIndex; operation < samples.Length; operation++)
             {
                 if (samples[operation].Success)
                 {

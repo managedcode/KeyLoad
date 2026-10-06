@@ -60,13 +60,15 @@ internal readonly record struct TimeSeriesIntensiveFailure(TimeSeriesIntensiveFa
 
     internal static ulong PackSqlState(string sqlState)
     {
+        const ulong EmptyPackedSqlStateUlong = 0UL;
+
         ArgumentNullException.ThrowIfNull(sqlState);
         if (sqlState.Length != TimeSeriesIntensiveRuntimePolicy.SqlStateLength)
         {
             throw new FormatException(TimeSeriesIntensiveRuntimeErrors.InvalidSqlState);
         }
 
-        var packed = 0UL;
+        var packed = EmptyPackedSqlStateUlong;
         foreach (var value in sqlState)
         {
             if (!(value is >= TimeSeriesIntensiveRuntimePolicy.DigitStart and <= TimeSeriesIntensiveRuntimePolicy.DigitEnd

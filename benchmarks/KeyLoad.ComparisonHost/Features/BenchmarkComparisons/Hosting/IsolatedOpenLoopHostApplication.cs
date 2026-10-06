@@ -15,12 +15,12 @@ internal static class IsolatedOpenLoopHostApplication
         {
             _ = await OpenLoopCancellationProofRunner.RunAsync(openLoop.Profile, openLoop.Rate, target,
                 settings.Worker, settings.Storage, settings.OutputDirectory, Console.WriteLine,
-                openLoop.ExecutionOptions, cancellationToken).ConfigureAwait(false);
+                openLoop.ExecutionOptions, owner.ExecutionOptions, cancellationToken).ConfigureAwait(false);
             return ComparisonHostConstants.SuccessfulExitCode;
         }
 
         var runner = new OpenLoopComparisonRunner(openLoop.Profile, openLoop.Rate,
-            openLoop.ExecutionOptions, Console.WriteLine);
+            openLoop.ExecutionOptions, owner.ExecutionOptions, Console.WriteLine);
         var report = await runner.RunAsync(target, settings.Worker, settings.Storage, cancellationToken)
             .ConfigureAwait(false);
         _ = await OpenLoopEvidenceWriter.WriteAsync(settings.OutputDirectory, report, cancellationToken)

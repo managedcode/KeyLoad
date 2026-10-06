@@ -2,7 +2,7 @@ namespace KeyLoad.Server;
 
 /// <summary>Centrally configured readiness, shutdown and public HTTP resource admission.</summary>
 [ConfigurationOptions]
-public sealed class ServerExecutionOptions
+internal sealed class ServerExecutionOptions
 {
     /// <summary>The server execution configuration section.</summary>
     public const string SectionName = "KeyLoad:ServerExecution";

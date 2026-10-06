@@ -25,8 +25,12 @@ internal sealed class BoundedEvidenceStream(Stream output, int maximumBytes) : S
     }
     private void Reserve(int count)
     {
-        if (count < 0 || written > maximumBytes - count)
+        const int NoItems = 0;
+
+        if (count < NoItems || written > maximumBytes - count)
+        {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopEvidenceByteLimitExceeded);
+        }
         written = checked(written + count);
     }
 }

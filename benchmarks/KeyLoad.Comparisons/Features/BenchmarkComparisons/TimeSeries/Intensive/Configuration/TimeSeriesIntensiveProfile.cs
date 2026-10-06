@@ -16,7 +16,6 @@ internal static class TimeSeriesIntensiveProfile
     internal const int MaxWindows = 1000;
     internal const double AverageTolerance = 1e-12;
     internal const long EpochUtcTicks = 639028224000000000;
-    internal const int OperationTimeoutSeconds = 30;
     internal const int WindowWidthMinutes = 3;
     internal const int ItemsPerGroup = 16;
     internal const int TiedItems = 4;
@@ -50,6 +49,6 @@ internal static class TimeSeriesIntensiveProfile
     internal const string CommandSeparator = ":";
     internal const string GuidFormat = "N";
     internal static readonly DateTimeOffset Epoch = new(EpochUtcTicks, TimeSpan.Zero);
-    internal static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(OperationTimeoutSeconds);
+    [ImmutableTemporalData]
     internal static readonly TimeSpan WindowWidth = TimeSpan.FromMinutes(WindowWidthMinutes);
 }

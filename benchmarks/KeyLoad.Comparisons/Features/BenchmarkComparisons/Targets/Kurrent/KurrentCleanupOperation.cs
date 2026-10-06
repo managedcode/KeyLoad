@@ -3,22 +3,24 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class KurrentCleanupOperation(string[] streams, CancellationToken token, IOptions<ComparisonLifecycleOptions> options) : IDisposable
+internal sealed class KurrentCleanupOperation(string[] streams, IOptions<ComparisonLifecycleOptions> options, CancellationToken token) : IDisposable
 {
     private readonly KurrentCleanupState state = new(streams.Length, options);
-    private readonly KurrentCleanupCancellation cancellation = new(token, options);
+    private readonly KurrentCleanupCancellation cancellation = new(token: token, options: options);
     private readonly ComparisonLifecycleOptions settings = options.Value;
     private Task[] workers = [];
     private Task deletion = Task.CompletedTask;
 
     internal async Task DeleteAsync(KurrentDBClient? writer)
     {
+        const int FirstElementIndex = 0;
+
         try
         {
             token.ThrowIfCancellationRequested();
             if (writer is not null)
             {
-                workers = Enumerable.Range(0, Math.Min(settings.KurrentCleanupConcurrency, streams.Length))
+                workers = Enumerable.Range(FirstElementIndex, Math.Min(settings.KurrentCleanupConcurrency, streams.Length))
                     .Select(_ => DeleteWorkerAsync(writer)).ToArray();
                 deletion = Task.WhenAll(workers);
                 await deletion.WaitAsync(cancellation.Deadline.Token);

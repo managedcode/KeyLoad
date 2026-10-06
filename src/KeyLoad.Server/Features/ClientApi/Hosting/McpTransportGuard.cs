@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
@@ -8,13 +9,17 @@ internal static class McpTransportGuard
 {
     /// <summary>Checks the configured revision and bounds optional routing values without retaining raw failures.</summary>
     /// <param name="headers">The actual transport header dictionary.</param>
+    /// <param name="executionOptions">The centrally validated transport admission bounds.</param>
     /// <returns>Checked optional routing hints for field comparison only.</returns>
-    internal static McpTransportHeaders ReadHeaders(IHeaderDictionary headers)
+    internal static McpTransportHeaders ReadHeaders(IHeaderDictionary headers, IOptions<McpExecutionOptions> executionOptions)
     {
         const int EmptyRevisionCount = 1;
         const int IndexEmptyCount = 0;
 
         ArgumentNullException.ThrowIfNull(headers);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var bounds = executionOptions.Value;
+        bounds.Validate();
         var revision = headers[McpTransportProtocol.RevisionHeader];
         if (revision.Count != EmptyRevisionCount)
         { throw InvalidTransport(McpTransportStage.ProtocolRevisionCount); }
@@ -24,9 +29,9 @@ internal static class McpTransportGuard
         { throw InvalidTransport(McpTransportStage.SessionHeaderPresence); }
         if (headers.ContainsKey(McpTransportProtocol.LastEventHeader))
         { throw InvalidTransport(McpTransportStage.LastEventHeaderPresence); }
-        return new(ReadRoutingHeader(headers, McpTransportProtocol.MethodHeader, McpTransportProtocol.MaximumMethodCharacters,
+        return new(ReadRoutingHeader(headers, McpTransportProtocol.MethodHeader, bounds.MaximumTransportMethodCharacters,
                 McpTransportStage.MethodHeaderShape, McpTransportStage.MethodHeaderEncoding),
-            ReadTargetHeader(headers));
+            ReadTargetHeader(headers, bounds.MaximumTransportNameCharacters));
     }
 
     /// <summary>Compares bounded hints and version fields without changing business arguments or native message identity.</summary>
@@ -87,14 +92,14 @@ internal static class McpTransportGuard
         { throw InvalidTransport(stage); }
     }
 
-    private static string? ReadTargetHeader(IHeaderDictionary headers)
+    private static string? ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
     {
         const int EmptyDecodedLength = 0;
         const char TabCharacter = '\t';
         const char SpaceCharacter = ' ';
         const char ReadTargetHeaderCharacterToken = '\u007F';
 
-        var encoded = ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, McpTransportProtocol.MaximumNameCharacters,
+        var encoded = ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, maximumCharacters,
             McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding);
         if (encoded is null)
         { return null; }
@@ -102,7 +107,7 @@ internal static class McpTransportGuard
             && !encoded.EndsWith(McpTransportProtocol.EncodedHeaderSuffix, StringComparison.Ordinal))
         { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
         var decoded = McpHeaderEncoder.DecodeValue(encoded);
-        if (decoded is null || decoded.Length == EmptyDecodedLength || decoded.Length > McpTransportProtocol.MaximumNameCharacters)
+        if (decoded is null || decoded.Length == EmptyDecodedLength || decoded.Length > maximumCharacters)
         { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
         foreach (var character in decoded)
         {

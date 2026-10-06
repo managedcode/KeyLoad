@@ -143,9 +143,10 @@ internal static class NativeTextGenerationFiles
     private static void EnsureGenerationCapacity(string root, Guid sourceNodeId, DatabaseLimits limits, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         NativeTextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions: executionOptions);
-        var count = 0;
-        var files = 0;
-        long bytes = 0;
+        const int EmptyInventory = 0;
+        var count = EmptyInventory;
+        var files = EmptyInventory;
+        long bytes = EmptyInventory;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             if (Path.GetFileName(entry) == NativeTextProtocol.RootReceiptFile)

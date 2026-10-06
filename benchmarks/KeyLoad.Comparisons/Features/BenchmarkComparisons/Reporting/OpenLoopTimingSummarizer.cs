@@ -2,6 +2,9 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopTimingSummarizer
 {
+    private const int NoItems = 0;
+    private const int AdjacentElementOffset = 1;
+
     private const int MinimumQuantileIndex = 0;
     private const double P50Quantile = 0.50;
     private const double P95Quantile = 0.95;
@@ -9,6 +12,8 @@ internal static class OpenLoopTimingSummarizer
     private const double NanosecondsPerMillisecond = 1_000_000d;
     internal static OpenLoopTimingSummary Summarize(OpenLoopStateSnapshot state, int capacity)
     {
+        const int NoMeasuredRate = 0;
+
         var samples = state.Samples;
         return new(
             Quantiles(samples.Select(sample => HasObservedDisposition(sample)
@@ -18,7 +23,7 @@ internal static class OpenLoopTimingSummarizer
                 ? Delta(sample.StartedOffsetMilliseconds, sample.OfferedOffsetMilliseconds) : null), samples.Length),
             Quantiles(samples.Select(sample => IsNativeTerminal(sample.Outcome)
                 ? Delta(sample.TerminalOffsetMilliseconds, sample.StartedOffsetMilliseconds) : null), samples.Length),
-            state.ElapsedSeconds > 0 ? state.Accounting.Succeeded / state.ElapsedSeconds : 0,
+            state.ElapsedSeconds > NoMeasuredRate ? state.Accounting.Succeeded / state.ElapsedSeconds : NoMeasuredRate,
             capacity, samples.Length, capacity - samples.Length);
     }
 
@@ -52,5 +57,5 @@ internal static class OpenLoopTimingSummarizer
     }
 
     private static double? Percentile(double[] values, double quantile)
-        => values.Length == 0 ? null : values[Math.Max(MinimumQuantileIndex, (int)Math.Ceiling(values.Length * quantile) - 1)];
+        => values.Length == NoItems ? null : values[Math.Max(MinimumQuantileIndex, (int)Math.Ceiling(values.Length * quantile) - AdjacentElementOffset)];
 }

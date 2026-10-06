@@ -24,7 +24,7 @@ internal static class OpenSearchNativeVectorRegression
         var dataset = OpenSearchVectorQueryTests.WitnessDataset();
         using var client = new HttpClient { BaseAddress = endpoint, Timeout = RequestTimeout };
         await using var target = new OpenSearchTarget(client, Guid.NewGuid().ToString(GuidFormat), OpenSearchNames.ExpectedImage,
-            Topology(nodeCount));
+            Topology(nodeCount), NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
         await target.InitializeAsync(dataset, token);
         await using var session = await target.OpenSessionAsync(token);
         var query = dataset.Documents[QueryNumber];

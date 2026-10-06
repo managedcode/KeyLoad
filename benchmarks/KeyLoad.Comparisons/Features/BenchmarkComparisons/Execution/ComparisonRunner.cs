@@ -7,8 +7,8 @@ namespace KeyLoad.Comparisons;
 /// <summary>Runs the shared materialized control or one accepted bounded scaled profile.</summary>
 public sealed class ComparisonRunner
 {
-    private readonly ComparisonOptions options = null!;
-    private readonly IOptions<ComparisonOptions> workloadOptions = null!;
+    private readonly ComparisonOptions? options;
+    private readonly IOptions<ComparisonOptions>? workloadOptions;
     private readonly ScaledComparisonProfile? scaledProfile;
     private readonly VectorComparisonProfile? vectorProfile;
     private readonly IOptions<NativeComparisonExecutionOptions>? vectorExecution;
@@ -23,7 +23,7 @@ public sealed class ComparisonRunner
     {
         ArgumentNullException.ThrowIfNull(options);
         this.options = options.Value;
-        this.options.Validate();
+        this.options!.Validate();
         workloadOptions = options;
         this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
         this.progress = progress;
@@ -44,7 +44,7 @@ public sealed class ComparisonRunner
         this.progress = progress;
     }
 
-    /// <summary>Creates a runner for one exact typed scaled profile without manufacturing control options.</summary>
+    /// <summary>Creates a runner for one exact typed scaled profile without manufacturing control options!.</summary>
     /// <param name="profile">The closed accepted scaled profile.</param>
     /// <param name="executionOptions">Native process observation and progress policy.</param>
     /// <param name="progress">Optional progress observer.</param>
@@ -107,10 +107,10 @@ public sealed class ComparisonRunner
         await using var observer = new ComparisonProgressObserver(progress, executionOptions);
         observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex);
         cancellationToken.ThrowIfCancellationRequested();
-        var dataset = new BenchmarkDataset(workloadOptions);
+        var dataset = new BenchmarkDataset(workloadOptions!);
         var cases = new List<ComparisonCase>();
         PrepareOracle(dataset, scenario, observer, cancellationToken);
-        for (var repetition = ComparisonRunnerValues.FirstIndex; repetition < options.Repetitions; repetition++)
+        for (var repetition = ComparisonRunnerValues.FirstIndex; repetition < options!.Repetitions; repetition++)
         {
             var offset = repetition % targets.Length;
             foreach (var target in targets.Skip(offset).Concat(targets.Take(offset)))
@@ -146,7 +146,7 @@ public sealed class ComparisonRunner
         ComparisonProgressObserver observer, CancellationToken cancellationToken)
     {
         var operations = selectedScenario is null or Scenario.VectorExact or Scenario.GraphNeighbors or Scenario.GraphTraverse
-            ? Math.Max(options.Operations, options.Warmup) : ComparisonRunnerValues.FirstIndex;
+            ? Math.Max(options!.Operations, options!.Warmup) : ComparisonRunnerValues.FirstIndex;
         observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex, operations);
         cancellationToken.ThrowIfCancellationRequested();
         for (var operation = ComparisonRunnerValues.FirstIndex; operation < operations; operation++)
@@ -161,7 +161,7 @@ public sealed class ComparisonRunner
                 var root = dataset.Input(Scenario.GraphTraverse, ComparisonRunnerValues.FirstIndex, operation, false);
                 dataset.Reachable(root, ComparisonRunnerValues.SingleElementOffset);
                 cancellationToken.ThrowIfCancellationRequested();
-                dataset.Reachable(root, options.GraphDepth);
+                dataset.Reachable(root, options!.GraphDepth);
             }
             observer.Settle(success: true);
         }
@@ -215,7 +215,7 @@ public sealed class ComparisonRunner
 
         ComparisonCase result;
         try
-        { result = await new ComparisonMeasurer(workloadOptions, observer, executionOptions).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        { result = await new ComparisonMeasurer(workloadOptions!, observer, executionOptions).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
         await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);

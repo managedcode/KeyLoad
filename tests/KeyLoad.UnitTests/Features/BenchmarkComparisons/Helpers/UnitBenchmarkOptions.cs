@@ -20,6 +20,8 @@ internal static class UnitBenchmarkOptions
         value.Validate();
         return Options.Create(value);
     }
+    internal static IOptions<ScaledStorageExecutionOptions> ScaledPreparation { get; } = ScaledStorage();
+
     internal static IOptions<ScaledStorageExecutionOptions> ScaledStorage()
     {
         var value = new ScaledStorageExecutionOptions();
@@ -27,11 +29,20 @@ internal static class UnitBenchmarkOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<IsolatedKeyLoadAdmissionOptions> KeyLoadAdmission()
+    {
+        var value = new IsolatedKeyLoadAdmissionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<NativeComparisonExecutionOptions> Native()
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root is not null && !File.Exists(Path.Combine(root.FullName, "KeyLoad.slnx"))) { root = root.Parent; }
-        if (root is null) { throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout."); }
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, "KeyLoad.slnx")))
+        { root = root.Parent; }
+        if (root is null)
+        { throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout."); }
         var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
             .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json", optional: false).Build();
         using var configurationLifetime = configuration as IDisposable;

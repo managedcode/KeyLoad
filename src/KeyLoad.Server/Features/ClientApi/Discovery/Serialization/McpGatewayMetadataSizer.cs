@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace KeyLoad.Server;
@@ -28,9 +29,9 @@ internal static class McpGatewayMetadataSizer
     private const string CostTierProperty = "costTier";
     private const string LatencyTierProperty = "latencyTier";
 
-    internal static void Validate(IReadOnlyList<McpGatewayCatalogEntry> entries, int maximumBytes)
+    internal static void Validate(IReadOnlyList<McpGatewayCatalogEntry> entries, IOptions<McpExecutionOptions> executionOptions)
     {
-        using var stream = new BoundedCountingStream(maximumBytes);
+        using var stream = new BoundedCountingStream(executionOptions.Value.MaximumCatalogMetadataBytes);
         using var writer = new Utf8JsonWriter(stream);
         writer.WriteStartArray();
         foreach (var entry in entries)

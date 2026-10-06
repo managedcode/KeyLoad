@@ -11,6 +11,7 @@ using ManagedCode.Orleans.Identity.Core.Serializations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Orleans.Configuration;
 using Orleans.Journaling;
 using Orleans.Metadata;
 using Orleans.Providers;
@@ -176,6 +177,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         var fixture = RuntimeJournalNativeFixture.Current;
         var routing = UnitRoutingOptions.Routing();
         siloBuilder.Services.AddSerializer(serialization => serialization
+            .AddAssembly(typeof(RuntimeJournalReplayGrain).Assembly)
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
@@ -199,10 +201,19 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton<RuntimeJournalAdmission>();
         siloBuilder.Services.AddSingleton<IConfigureGrainTypeComponents>(services =>
             new RequestCqrsGrainComponentConfigurator(services.GetRequiredService<GrainClassMap>(), services));
+        siloBuilder.Services.AddSingleton<IConfigureGrainTypeComponents>(services =>
+            new RuntimeJournalReplayActivatorConfiguration(services.GetRequiredService<GrainClassMap>(), services));
         siloBuilder.Services.Configure<JournaledStateManagerOptions>(options =>
             options.JournalFormatKey = RuntimeJournalStoragePolicy.BinaryFormat);
+        siloBuilder.Configure<GrainTypeOptions>(options => options.AddClass(typeof(RuntimeJournalReplayGrain)));
         siloBuilder.AddJournalStorage<RuntimeJournalStorageProvider>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME,
             services => ActivatorUtilities.CreateInstance<RuntimeJournalStorageProvider>(services));
+        ConfigureGraph(siloBuilder);
+        siloBuilder.UseOrleansCommunication();
+    }
+
+    private static void ConfigureGraph(ISiloBuilder siloBuilder)
+    {
         siloBuilder.AddOrleansGraph(configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IRequestGrain>()
@@ -217,7 +228,6 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
                 .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
                 .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync)).And();
         });
-        siloBuilder.UseOrleansCommunication();
     }
 }
 

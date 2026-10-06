@@ -45,7 +45,7 @@ internal static class Neo4jHarnessRegression
         string password, string image, string nativeCode, string nativeMessage, CancellationToken cancellationToken)
     {
         using var client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-        var target = new Neo4jTarget(client, fixture.RunId, image);
+        var target = new Neo4jTarget(client, fixture.RunId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
         await using (target)
         {
             ComparisonFailureException? failure = null;
@@ -72,7 +72,7 @@ internal static class Neo4jHarnessRegression
         string password, string image, string nativeCode, string nativeMessage, CancellationToken cancellationToken)
     {
         using var client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-        var target = new Neo4jTarget(client, fixture.RunId, image);
+        var target = new Neo4jTarget(client, fixture.RunId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
         await using (target)
         {
             var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions()), NativeExecutionPolicyFixture.Read()).RunAsync([target], "test", cancellationToken);

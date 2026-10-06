@@ -44,6 +44,17 @@ internal static class NativeComparisonExecutionRegistration
         return options;
     }
 
+    internal static IOptions<IsolatedKeyLoadAdmissionOptions> ReadIsolatedAdmission(IConfiguration configuration)
+    {
+        var options = new OptionsManager<IsolatedKeyLoadAdmissionOptions>(new OptionsFactory<IsolatedKeyLoadAdmissionOptions>(
+            [new ConfigureFromConfigurationOptions<IsolatedKeyLoadAdmissionOptions>(
+                configuration.GetSection(IsolatedKeyLoadAdmissionOptions.SectionName))], [],
+            [new ValidateOptions<IsolatedKeyLoadAdmissionOptions>(Options.DefaultName,
+                value => value.IsValid(), IsolatedKeyLoadAdmissionOptions.ValidationMessage)]));
+        _ = options.Value;
+        return options;
+    }
+
     internal static IOptions<KeyLoadClientExecutionOptions> ReadClient(IConfiguration configuration)
     {
         var options = new OptionsManager<KeyLoadClientExecutionOptions>(new OptionsFactory<KeyLoadClientExecutionOptions>(

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions> nodeOptions, ReplicaMembershipAuthorityMac mac)
+internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions> nodeOptions, ReplicaMembershipAuthorityMac mac, IOptions<OrleansMembershipOptions> membershipOptions)
 {
     private const int DataReplyErrorDetailCodeEmptyCount = 0;
     private const int AppliedReplyErrorDetailCodeEmptyCount = 0;
@@ -43,7 +43,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
     private async Task<ReplicaMembershipAuthorityReplyV1> InsertAsync(ReplicaMembershipTable table,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken token)
     {
-        var entry = ReplicaMembershipAuthorityMapping.ToNative(call.CandidateEntry!);
+        var entry = ReplicaMembershipAuthorityMapping.ToNative(entry: call.CandidateEntry!, membershipOptions: membershipOptions);
         var version = Version(call);
         var applied = await table.InsertRowAsync(entry, version, token).ConfigureAwait(false);
         return AppliedReply(call, applied);
@@ -52,7 +52,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
     private async Task<ReplicaMembershipAuthorityReplyV1> UpdateAsync(ReplicaMembershipTable table,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken token)
     {
-        var entry = ReplicaMembershipAuthorityMapping.ToNative(call.CandidateEntry!);
+        var entry = ReplicaMembershipAuthorityMapping.ToNative(entry: call.CandidateEntry!, membershipOptions: membershipOptions);
         var version = Version(call);
         var applied = await table.UpdateRowAsync(entry, call.ExpectedRowETag!, version, token).ConfigureAwait(false);
         return AppliedReply(call, applied);
@@ -61,7 +61,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
     private async Task<ReplicaMembershipAuthorityReplyV1> AliveAsync(ReplicaMembershipTable table,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken token)
     {
-        var entry = ReplicaMembershipAuthorityMapping.ToNative(call.CandidateEntry!);
+        var entry = ReplicaMembershipAuthorityMapping.ToNative(entry: call.CandidateEntry!, membershipOptions: membershipOptions);
         await table.UpdateIAmAliveAsync(entry, token).ConfigureAwait(false);
         return AppliedReply(call, true);
     }
@@ -122,7 +122,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
         string nonce, ReplicaMembershipAuthorityReplyV1 reply)
     {
         var bound = reply with { RequestNonce = nonce };
-        var body = ReplicaMembershipAuthorityCodec.SerializeReply(bound);
+        var body = ReplicaMembershipAuthorityCodec.SerializeReply(reply: bound, membershipOptions: membershipOptions);
         var signature = mac.SignReply(options.PhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), options.Incarnation.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat),
             call.RequestId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat), nonce, StatusCodes.Status200OK, body);
         context.Response.StatusCode = StatusCodes.Status200OK;

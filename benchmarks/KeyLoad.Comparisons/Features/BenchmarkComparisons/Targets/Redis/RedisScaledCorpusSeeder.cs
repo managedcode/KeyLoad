@@ -9,13 +9,16 @@ internal static class RedisScaledCorpusSeeder
     internal static async Task SeedAsync(IDatabase database, string prefix, IReadOnlyList<BenchmarkDocument> documents,
         CancellationToken cancellationToken)
     {
-        for (var offset = 0; offset < documents.Count; offset += BatchSize)
+        const int FirstElementIndex = 0;
+        const string ScaledCorpusSeedReceiptMismatchDetail = "ScaledCorpusSeedReceiptMismatch";
+
+        for (var offset = FirstElementIndex; offset < documents.Count; offset += BatchSize)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var count = Math.Min(BatchSize, documents.Count - offset);
             var batch = database.CreateBatch();
             var writes = new Task<bool>[count];
-            for (var index = 0; index < count; index++)
+            for (var index = FirstElementIndex; index < count; index++)
             {
                 var document = documents[offset + index];
                 writes[index] = batch.StringSetAsync(prefix + document.Id, document.Json, flags: CommandFlags.DemandMaster);
@@ -24,7 +27,7 @@ internal static class RedisScaledCorpusSeeder
             var receipts = await Task.WhenAll(writes).ConfigureAwait(false);
             if (receipts.Any(written => !written))
             {
-                throw new ComparisonFailureException("ScaledCorpusSeedReceiptMismatch");
+                throw new ComparisonFailureException(ScaledCorpusSeedReceiptMismatchDetail);
             }
         }
     }

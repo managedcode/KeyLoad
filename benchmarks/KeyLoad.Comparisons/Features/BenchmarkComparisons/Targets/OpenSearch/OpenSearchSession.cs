@@ -1,10 +1,15 @@
+using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount) : IComparisonSession
+internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
 {
+    private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
+
+    private const string OpenSearchCorpusSortValueInvalidDetail = "OpenSearchCorpusSortValueInvalid";
+
     private const string HitsProperty = "hits";
     private const string IdKeywordField = "id.keyword";
     private const string QueryProperty = "query";
@@ -13,14 +18,21 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
     private const string SortProperty = "sort";
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        const int NoObservedItems = 0;
+        const string AscToken = "asc";
+        const int NoItems = 0;
+        const string ScaledCorpusReadbackExtraRecordDetail = "ScaledCorpusReadbackExtraRecord";
+        const int SingleItemCount = 1;
+        const string ScaledCorpusReadbackCountMismatchDetail = "ScaledCorpusReadbackCountMismatch";
+
         object?[]? searchAfter = null;
-        var seen = 0;
+        var seen = NoObservedItems;
         while (true)
         {
             var body = new Dictionary<string, object>
             {
-                [SizeProperty] = 256,
-                [SortProperty] = new object[] { new Dictionary<string, string> { [IdKeywordField] = "asc" } },
+                [SizeProperty] = execution.ReadbackBatchCapacity,
+                [SortProperty] = new object[] { new Dictionary<string, string> { [IdKeywordField] = AscToken } },
                 [QueryProperty] = new { match_all = new { } }
             };
             if (searchAfter is not null)
@@ -30,7 +42,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
             using var response = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Post,
                 OpenSearchNames.PathSeparator + index + OpenSearchNames.SearchSuffix, body, cancellationToken);
             var hits = response.RootElement.GetProperty(HitsProperty).GetProperty(HitsProperty);
-            if (hits.GetArrayLength() == 0)
+            if (hits.GetArrayLength() == NoItems)
             {
                 break;
             }
@@ -39,17 +51,17 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
                 cancellationToken.ThrowIfCancellationRequested();
                 if (seen >= corpusCount)
                 {
-                    throw new ComparisonFailureException("ScaledCorpusReadbackExtraRecord");
+                    throw new ComparisonFailureException(ScaledCorpusReadbackExtraRecordDetail);
                 }
                 yield return OpenSearchDocument.Read(hit.GetProperty(OpenSearchNames.Source));
                 seen++;
             }
-            var lastSort = hits[hits.GetArrayLength() - 1].GetProperty(SortProperty);
+            var lastSort = hits[hits.GetArrayLength() - SingleItemCount].GetProperty(SortProperty);
             searchAfter = lastSort.EnumerateArray().Select(ReadSortValue).ToArray();
         }
         if (seen != corpusCount)
         {
-            throw new ComparisonFailureException("ScaledCorpusReadbackCountMismatch");
+            throw new ComparisonFailureException(ScaledCorpusReadbackCountMismatchDetail);
         }
     }
 
@@ -60,7 +72,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
         JsonValueKind.True => true,
         JsonValueKind.False => false,
         JsonValueKind.Null => null,
-        _ => throw new ComparisonFailureException("OpenSearchCorpusSortValueInvalid")
+        _ => throw new ComparisonFailureException(OpenSearchCorpusSortValueInvalidDetail)
     };
 
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)

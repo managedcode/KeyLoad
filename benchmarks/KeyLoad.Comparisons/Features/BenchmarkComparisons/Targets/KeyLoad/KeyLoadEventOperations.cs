@@ -4,6 +4,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadEventOperations
 {
+    private const int RequiredEventReadCount = 2;
+
     internal const string EventsName = "events";
     private const string EventType = "comparison-event";
     private const string CardinalityFailure = "KeyLoadStreamCardinality";
@@ -34,19 +36,24 @@ internal static class KeyLoadEventOperations
     internal static async Task<FoundEvent?> ReadAsync(KeyLoadClient client, PartitionRef partition,
         BenchmarkDocument document, CancellationToken cancellationToken)
     {
+        const int BeforeFirstRevision = 0;
+        const int NoItems = 0;
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
         var page = KeyLoadClientResults.Success(await client.ReadStreamAsync(new(new(partition, EventsName, document.Id),
-            AfterRevision: 0, Limit: 2), cancellationToken));
-        if (page.Events.Length == 0 && !page.HasMore)
+            AfterRevision: BeforeFirstRevision, Limit: RequiredEventReadCount), cancellationToken));
+        if (page.Events.Length == NoItems && !page.HasMore)
         {
             return null;
         }
 
-        if (page.Events.Length != 1 || page.HasMore)
+        if (page.Events.Length != SingleItemCount || page.HasMore)
         {
             throw new ComparisonFailureException(CardinalityFailure);
         }
 
-        var found = page.Events[0];
+        var found = page.Events[FirstElementIndex];
         return new(Guid.Parse(found.Data.EventId), checked((ulong)found.Revision), found.Data.PayloadJson);
     }
 }

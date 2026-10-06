@@ -11,29 +11,42 @@ internal static class OpenLoopWorkLifetime
         Action<OpenLoopProgressV1>? nativeProgress, CancellationToken cancellationToken)
     {
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        return await RunOwnedAsync(scenario, inputs, sessions, timeline, state, lifetime, nativeProgress,
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task<bool> RunOwnedAsync(Scenario scenario, ScaledOperationInputs inputs,
+        List<IComparisonSession> sessions, OpenLoopTimeline timeline, OpenLoopRunState state,
+        CancellationTokenSource lifetime, Action<OpenLoopProgressV1>? nativeProgress,
+        CancellationToken cancellationToken)
+    {
         var channel = OpenLoopChannel.Create(timeline.ExecutionPolicy.QueueCapacity);
         var workers = sessions.Select((session, index) => OpenLoopWorker.RunAsync(session, index, scenario,
             inputs, channel.Reader, timeline, state, lifetime, nativeProgress)).ToArray();
         var producer = OpenLoopProducer.RunAsync(inputs, channel.Writer, timeline, state, lifetime.Token);
         Exception? failure = null;
         var drainExpired = false;
+        var scheduling = AwaitScheduleAndDrainAsync(producer, workers, timeline, state, lifetime, cancellationToken);
         try
         {
-            drainExpired = await AwaitScheduleAndDrainAsync(producer, workers, timeline, state, lifetime,
-                cancellationToken).ConfigureAwait(false);
+            drainExpired = await scheduling.ConfigureAwait(false);
         }
-        catch (Exception error)
+        catch (Exception error) when (scheduling.IsFaulted || scheduling.IsCanceled)
         {
-            failure = await FreezeAndCancelAsync(error, state, lifetime, cancellationToken, drainExpired)
+            failure = await FreezeAndCancelAsync(error, state, lifetime, drainExpired, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
             channel.Writer.TryComplete();
         }
-        failure = await JoinWorkAsync(producer, workers, failure, cancellationToken, lifetime.Token, drainExpired)
+        failure = await JoinWorkAsync(producer, workers, failure, lifetime, drainExpired, cancellationToken)
             .ConfigureAwait(false);
-        if (failure is not null) ExceptionDispatchInfo.Capture(failure).Throw();
+        failure = OpenLoopFailure.Combine(failure, ImmutableArray<Exception>.Empty);
+        if (failure is not null)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
         cancellationToken.ThrowIfCancellationRequested();
         return drainExpired;
     }
@@ -61,8 +74,24 @@ internal static class OpenLoopWorkLifetime
             await lifetime.CancelAsync().ConfigureAwait(false);
             return true;
         }
-        await workersJoined.ConfigureAwait(false);
-        await drainTimer.CancelAsync().ConfigureAwait(false);
+        Exception? workerFailure = null;
+        try
+        {
+            await workersJoined.ConfigureAwait(false);
+        }
+        catch (Exception error) when (workersJoined.IsFaulted || workersJoined.IsCanceled)
+        {
+            workerFailure = error;
+        }
+        await SettleDrainTimerAsync(drainTimer, drainWait, workerFailure).ConfigureAwait(false);
+        return false;
+    }
+
+    private static async Task SettleDrainTimerAsync(CancellationTokenSource drainTimer, Task drainWait,
+        Exception? primary)
+    {
+        var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(drainTimer).ConfigureAwait(false);
+        Exception? drainFailure = null;
         try
         {
             await drainWait.ConfigureAwait(false);
@@ -71,16 +100,38 @@ internal static class OpenLoopWorkLifetime
             && drainTimer.IsCancellationRequested)
         {
         }
-        return false;
+        catch (Exception error) when (drainWait.IsFaulted || drainWait.IsCanceled)
+        {
+            drainFailure = error;
+        }
+        var failures = ImmutableArray.CreateBuilder<Exception>();
+        if (cancellationFailure is not null)
+        {
+            failures.Add(cancellationFailure);
+        }
+        if (drainFailure is not null)
+        {
+            failures.Add(drainFailure);
+        }
+        var settlementFailure = OpenLoopFailure.Combine(primary, failures.ToImmutable());
+        if (settlementFailure is not null)
+        {
+            ExceptionDispatchInfo.Capture(settlementFailure).Throw();
+        }
     }
 
     private static async Task CompleteProducerAsync(Task producer, Task[] workers)
     {
+        const int NoItems = 0;
+
         var pendingWorkers = workers.ToList();
-        while (!producer.IsCompleted && pendingWorkers.Count > 0)
+        while (!producer.IsCompleted && pendingWorkers.Count > NoItems)
         {
             var completed = await Task.WhenAny(pendingWorkers.Append(producer)).ConfigureAwait(false);
-            if (ReferenceEquals(completed, producer)) break;
+            if (ReferenceEquals(completed, producer))
+            {
+                break;
+            }
             pendingWorkers.Remove(completed);
             await completed.ConfigureAwait(false);
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopWorkerStoppedBeforeSchedule);
@@ -89,38 +140,51 @@ internal static class OpenLoopWorkLifetime
     }
 
     private static async Task<Exception?> FreezeAndCancelAsync(Exception primary, OpenLoopRunState state,
-        CancellationTokenSource lifetime, CancellationToken callerToken, bool drainExpired)
+        CancellationTokenSource lifetime, bool drainExpired, CancellationToken callerToken)
     {
         state.Freeze(Stopwatch.GetTimestamp());
-        var expectedCancellation = ExpectedOwnerCancellation(primary, callerToken, lifetime.Token, drainExpired);
+        var expectedCancellation = ExpectedOwnerCancellation(primary, lifetime, drainExpired, callerToken);
         var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(lifetime).ConfigureAwait(false);
-        if (expectedCancellation) return cancellationFailure;
-        return OpenLoopFailure.Combine(primary,
-            cancellationFailure is null ? ImmutableArray<Exception>.Empty : [cancellationFailure]);
+        if (expectedCancellation)
+        {
+            return cancellationFailure;
+        }
+        return cancellationFailure is null
+            ? primary
+            : new AggregateException(OpenLoopFailureCodes.OpenLoopMeasurementFailed, primary, cancellationFailure);
     }
 
     private static async Task<Exception?> JoinWorkAsync(Task producer, Task[] workers, Exception? failure,
-        CancellationToken callerToken, CancellationToken ownerToken, bool drainExpired)
+        CancellationTokenSource owner, bool drainExpired, CancellationToken callerToken)
     {
         var joined = Task.WhenAll(workers.Prepend(producer));
         try
         {
             await joined.ConfigureAwait(false);
         }
-        catch (Exception error)
+        catch (Exception error) when (joined.IsFaulted || joined.IsCanceled)
         {
-            var observed = joined.Exception?.Flatten().InnerExceptions ?? [error];
-            var ownsSingleCancellation = observed.Count == 1
-                && ExpectedOwnerCancellation(observed[0], callerToken, ownerToken, drainExpired);
-            var retained = ownsSingleCancellation ? ImmutableArray<Exception>.Empty : observed.ToImmutableArray();
-            failure = OpenLoopFailure.Combine(failure, retained);
+            AppendJoinedFailure(joined, error, owner, drainExpired, ref failure, callerToken);
         }
         return failure;
     }
 
-    private static bool ExpectedOwnerCancellation(Exception failure, CancellationToken callerToken,
-        CancellationToken ownerToken, bool drainExpired)
+    private static void AppendJoinedFailure(Task joined, Exception error, CancellationTokenSource owner,
+        bool drainExpired, ref Exception? failure, CancellationToken callerToken)
+    {
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+
+        var observed = joined.Exception?.Flatten().InnerExceptions ?? [error];
+        var ownsSingleCancellation = observed.Count == SingleItemCount
+            && ExpectedOwnerCancellation(observed[FirstElementIndex], owner, drainExpired, callerToken);
+        var retained = ownsSingleCancellation ? ImmutableArray<Exception>.Empty : observed.ToImmutableArray();
+        failure = OpenLoopFailure.Combine(failure, retained);
+    }
+
+    private static bool ExpectedOwnerCancellation(Exception failure, CancellationTokenSource owner,
+        bool drainExpired, CancellationToken callerToken)
         => failure is OperationCanceledException cancellation
-            && cancellation.CancellationToken == ownerToken
+            && cancellation.CancellationToken == owner.Token
             && (callerToken.IsCancellationRequested || drainExpired);
 }

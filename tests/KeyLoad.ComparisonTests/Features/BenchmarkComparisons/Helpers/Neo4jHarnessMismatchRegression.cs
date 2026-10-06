@@ -32,7 +32,7 @@ internal static class Neo4jHarnessMismatchRegression
         try
         {
             client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
-            var target = new Neo4jTarget(client, runId, image);
+            var target = new Neo4jTarget(client, runId, image, NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.Read());
             client = null;
             return target;
         }

@@ -20,7 +20,6 @@ internal static class TestSuiteResources
     private const string ResultsDirectoryArgument = "--results-directory";
     private const string CoverageSettingsArgument = "--coverage-settings";
     private const string CoverageFormatArgument = "--coverage-output-format";
-    private const string CoberturaFormat = "cobertura";
     private const string CoverageOutputArgument = "--coverage-output";
     private const string TestFilterArgument = "--treenode-filter";
 
@@ -119,7 +118,7 @@ internal static class TestSuiteResources
             arguments.Add(CoverageSettingsArgument);
             arguments.Add(ResolvePath(root, settings.CoverageSettings));
             arguments.Add(CoverageFormatArgument);
-            arguments.Add(CoberturaFormat);
+            arguments.Add(settings.CoverageFormat);
             arguments.Add(CoverageOutputArgument);
             arguments.Add(ResolvePath(root, settings.CoverageOutput));
         }

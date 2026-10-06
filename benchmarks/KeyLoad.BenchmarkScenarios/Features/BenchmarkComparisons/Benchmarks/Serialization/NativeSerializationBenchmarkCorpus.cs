@@ -45,6 +45,7 @@ internal static class NativeSerializationBenchmarkCorpus
         const int ExpectedVectorDocumentRevision = 42;
         const int CorpusOwnershipEpoch = 7;
 
+        const string SecondDocumentId = "document-2";
         RequireSize(payloadBytes);
         var dimension = payloadBytes / sizeof(float);
         var values = Enumerable.Range(StartEmptyCount, dimension).Select(index => (index % VectorCycleLength - PatternOffset) / PatternScale).ToImmutableArray();
@@ -52,7 +53,7 @@ internal static class NativeSerializationBenchmarkCorpus
         return new(CommandId, Partition(),
         [
             new PutDocument(CommandCollectionText, CommandCommandIdText, Json(payloadBytes), PreviousDocumentRevision, new(CommandOwnerIdText, CommandProjectIdText), true),
-            new PutDocument(CommandCollectionText, "document-2", CommandJsonText),
+            new PutDocument(CommandCollectionText, SecondDocumentId, CommandJsonText),
             new PutVector(CommandCollectionText, CommandCommandIdText, CommandFieldText, values, space, ExpectedVectorDocumentRevision)
         ], CorpusOwnershipEpoch);
     }
@@ -66,6 +67,9 @@ internal static class NativeSerializationBenchmarkCorpus
         const int MaximumCorpusByte = 255;
         const int StorageSingleItemCount = 1;
         const int SecondStorageKeyPrefix = 2;
+        const byte ThirdStorageKeyPrefix = 3;
+        const byte FourthStorageKeyPrefix = 4;
+        const byte UnicodeStorageKeySuffix = 254;
 
         RequireSize(payloadBytes);
         var value = new byte[payloadBytes];
@@ -77,8 +81,8 @@ internal static class NativeSerializationBenchmarkCorpus
         [
             new(new byte[] { StorageEmptyCount, MaximumCorpusByte, StorageSingleItemCount }, value),
             new(new byte[] { SecondStorageKeyPrefix, StorageEmptyCount, MaximumCorpusByte }, ReadOnlyMemory<byte>.Empty),
-            new(new byte[] { 3, MaximumCorpusByte, StorageEmptyCount }, null),
-            new(new byte[] { 4, StorageEmptyCount, 254 }, Encoding.UTF8.GetBytes(UnicodeText))
+            new(new byte[] { ThirdStorageKeyPrefix, MaximumCorpusByte, StorageEmptyCount }, null),
+            new(new byte[] { FourthStorageKeyPrefix, StorageEmptyCount, UnicodeStorageKeySuffix }, Encoding.UTF8.GetBytes(UnicodeText))
         ];
     }
 

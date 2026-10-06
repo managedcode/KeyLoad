@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
 
@@ -23,55 +24,55 @@ internal static class ReplicaMembershipAuthorityValidation
     private const string InvalidRequest = "The membership authority request is invalid.";
     private const string InvalidReply = "The membership authority reply is invalid.";
 
-    internal static void Call(ReplicaMembershipAuthorityCallV1 call)
+    internal static void Call(ReplicaMembershipAuthorityCallV1 call, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         ArgumentNullException.ThrowIfNull(call);
         if (call.Version != ReplicaMembershipAuthorityProtocol.Version)
         { throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidRequest); }
-        if (string.IsNullOrWhiteSpace(call.ClusterId) || !Bounded(call.ClusterId)
+        if (string.IsNullOrWhiteSpace(call.ClusterId) || !Bounded(value: call.ClusterId, membershipOptions: membershipOptions)
             || call.AuthorityPhysicalShardId == Guid.Empty || call.AuthorityIncarnation == Guid.Empty
             || call.CallerPhysicalShardId == Guid.Empty || call.CallerIncarnation == Guid.Empty || call.RequestId == Guid.Empty
-            || !Bounded(call.CallerVoterId) || !CanonicalAddress(call.CallerSiloAddress)
+            || !Bounded(value: call.CallerVoterId, membershipOptions: membershipOptions) || !CanonicalAddress(value: call.CallerSiloAddress, membershipOptions: membershipOptions)
             || !Enum.IsDefined((ReplicaMembershipAuthorityOperation)call.Operation))
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
 
         var operation = (ReplicaMembershipAuthorityOperation)call.Operation;
         ValidateOperation(operation, call);
         if (call.CandidateEntry is { } entry)
-        { Entry(entry); }
-        if (call.TargetSiloAddress is { } target && !CanonicalAddress(target))
+        { Entry(entry: entry, membershipOptions: membershipOptions); }
+        if (call.TargetSiloAddress is { } target && !CanonicalAddress(value: target, membershipOptions: membershipOptions))
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
     }
 
-    internal static void Entry(ReplicaMembershipAuthorityEntryV1 entry)
+    internal static void Entry(ReplicaMembershipAuthorityEntryV1 entry, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         const int ProxyPortEmptyCount = 0;
 
-        if (entry is null || !CanonicalAddress(entry.Address) || !Bounded(entry.Host) || !Bounded(entry.Name)
+        if (entry is null || !CanonicalAddress(value: entry.Address, membershipOptions: membershipOptions) || !Bounded(value: entry.Host, membershipOptions: membershipOptions) || !Bounded(value: entry.Name, membershipOptions: membershipOptions)
             || !Enum.IsDefined(entry.Status) || entry.ProxyPort is < ProxyPortEmptyCount or > IPEndPoint.MaxPort
             || !ValidRowEtag(entry.RowETag)
-            || entry.Suspects.IsDefault || entry.Suspects.Length > ReplicaMembershipAuthorityProtocol.MaximumSuspects)
+            || entry.Suspects.IsDefault || entry.Suspects.Length > membershipOptions.Value.MaximumSuspects)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
         foreach (var suspect in entry.Suspects)
         {
-            if (suspect is null || !CanonicalAddress(suspect.Address))
+            if (suspect is null || !CanonicalAddress(value: suspect.Address, membershipOptions: membershipOptions))
             { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
         }
-        if (NativeSerialization.Measure(entry) > ReplicaMembershipAuthorityProtocol.MaximumRowBytes)
+        if (NativeSerialization.Measure(entry) > membershipOptions.Value.MaximumRowBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidRequest); }
     }
 
-    internal static void Reply(ReplicaMembershipAuthorityReplyV1 reply)
+    internal static void Reply(ReplicaMembershipAuthorityReplyV1 reply, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         ArgumentNullException.ThrowIfNull(reply);
-        ValidateReplyEnvelope(reply);
-        ValidateReplyRows(reply);
+        ValidateReplyEnvelope(reply: reply, membershipOptions: membershipOptions);
+        ValidateReplyRows(reply: reply, membershipOptions: membershipOptions);
         ValidateReplyOutcome(reply);
-        if (NativeSerialization.Measure(reply) > ReplicaMembershipAuthorityProtocol.MaximumReplyBytes)
+        if (NativeSerialization.Measure(reply) > membershipOptions.Value.MaximumReplyBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidReply); }
     }
 
-    private static void ValidateReplyEnvelope(ReplicaMembershipAuthorityReplyV1 reply)
+    private static void ValidateReplyEnvelope(ReplicaMembershipAuthorityReplyV1 reply, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         const int ErrorDetailCodeEmptyCount = 0;
         const int ErrorDetailCodeValidationBound = 12;
@@ -82,14 +83,14 @@ internal static class ReplicaMembershipAuthorityValidation
             || reply.ErrorDetailCode is < ErrorDetailCodeEmptyCount or > ErrorDetailCodeValidationBound
             || reply.ErrorCode is { } error && !Enum.IsDefined(error)
             || reply.TableVersionETag is null
-            || reply.Rows.IsDefault || reply.Rows.Length > ReplicaMembershipAuthorityProtocol.MaximumRows)
+            || reply.Rows.IsDefault || reply.Rows.Length > membershipOptions.Value.MaximumRows)
         { throw Errors.Fail(ErrorCode.Corruption, InvalidReply); }
     }
 
-    private static void ValidateReplyRows(ReplicaMembershipAuthorityReplyV1 reply)
+    private static void ValidateReplyRows(ReplicaMembershipAuthorityReplyV1 reply, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         foreach (var row in reply.Rows)
-        { Entry(row); }
+        { Entry(entry: row, membershipOptions: membershipOptions); }
     }
 
     private static void ValidateReplyOutcome(ReplicaMembershipAuthorityReplyV1 reply)
@@ -173,18 +174,18 @@ internal static class ReplicaMembershipAuthorityValidation
     private static bool IsValidCleanupCutoff(long ticks)
         => ticks > IsValidCleanupCutoffTicksValidationBoundary && ticks <= DateTime.MaxValue.Ticks;
 
-    internal static bool Bounded(string? value)
+    internal static bool Bounded(string? value, IOptions<OrleansMembershipOptions> membershipOptions)
     {
         if (string.IsNullOrWhiteSpace(value))
         { return false; }
         try
-        { return Utf8.GetByteCount(value) <= ReplicaMembershipAuthorityProtocol.MaximumAddressBytes; }
+        { return Utf8.GetByteCount(value) <= membershipOptions.Value.MaximumAddressBytes; }
         catch (EncoderFallbackException) { return false; }
     }
 
-    internal static bool CanonicalAddress(string? value)
+    internal static bool CanonicalAddress(string? value, IOptions<OrleansMembershipOptions> membershipOptions)
     {
-        if (!Bounded(value))
+        if (!Bounded(value: value, membershipOptions: membershipOptions))
         { return false; }
         try
         {

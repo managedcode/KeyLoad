@@ -63,8 +63,10 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         string? cursor = null;
-        var observedCount = 0;
+        var observedCount = FirstElementIndex;
         do
         {
             var query = KeyLoadQuery.From<CorpusQueryMarker>(partition,

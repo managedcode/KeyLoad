@@ -28,14 +28,14 @@ internal sealed class McpNativeAuthenticationMalformedTests
         var principal = McpNativeAuthenticationTests.Principal(database);
         var twin = McpAuthenticationMalformedFixture.Valid(principal);
         var expectedShape = McpFrameBounds.InspectValue(JsonDefaults.Serialize(principal), McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
-        await Assert.That(McpNativeAuthentication.Inspect(twin, CancellationToken.None, UnitMcpOptions.Execution())).IsEqualTo(expectedShape);
-        var decoded = McpNativeAuthentication.ReadPrincipal(twin, CancellationToken.None, UnitMcpOptions.Execution());
+        await Assert.That(McpNativeAuthentication.Inspect(twin, UnitMcpOptions.Execution(), CancellationToken.None)).IsEqualTo(expectedShape);
+        var decoded = McpNativeAuthentication.ReadPrincipal(twin, UnitMcpOptions.Execution(), CancellationToken.None);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
         var payload = McpAuthenticationMalformedFixture.Array(principal, fault);
         await Assert.That(payload.AsSpan().SequenceEqual(twin)).IsFalse();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(expected);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);
     }
 
@@ -55,9 +55,9 @@ internal sealed class McpNativeAuthenticationMalformedTests
         var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         foreach (var payload in malformed)
         {
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
                 .IsEqualTo(ErrorCode.Validation);
-            using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
+            using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, UnitMcpOptions.Execution(), CancellationToken.None))
             {
                 await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => state.Authenticate(payload, CancellationToken.None)).Code)
                     .IsEqualTo(ErrorCode.Validation);
@@ -76,9 +76,9 @@ internal sealed class McpNativeAuthenticationMalformedTests
         if (offset < 0)
         { throw new InvalidOperationException(MarkerMissing); }
         payload[offset] = InvalidUtf8;
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution())).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);
     }
 }

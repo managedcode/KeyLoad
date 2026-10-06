@@ -17,12 +17,12 @@ internal sealed class McpAgentGuideContractTests
     [Test]
     public async Task ResourceAndPromptReturnFreshNativeObjectsWithIdenticalContent()
     {
-        var resourceList = McpAgentGuideQuery.ListResources(null, CancellationToken.None);
-        var promptList = McpAgentGuideQuery.ListPrompts(null, CancellationToken.None);
+        var resourceList = McpAgentGuideQuery.ListResources(null, UnitMcpOptions.Execution(), CancellationToken.None);
+        var promptList = McpAgentGuideQuery.ListPrompts(null, UnitMcpOptions.Execution(), CancellationToken.None);
         var resource = resourceList.Resources.Single();
         var prompt = promptList.Prompts.Single();
-        var resourceRead = McpAgentGuideQuery.ReadResource(resource.Uri, CancellationToken.None);
-        var promptRead = McpAgentGuideQuery.GetPrompt(prompt.Name, null, CancellationToken.None);
+        var resourceRead = McpAgentGuideQuery.ReadResource(resource.Uri, UnitMcpOptions.Execution(), CancellationToken.None);
+        var promptRead = McpAgentGuideQuery.GetPrompt(prompt.Name, null, UnitMcpOptions.Execution(), CancellationToken.None);
         var resourceText = ((TextResourceContents)resourceRead.Contents.Single()).Text;
         var promptText = ((TextContentBlock)promptRead.Messages.Single().Content).Text;
         await Assert.That(resource.Uri).IsEqualTo(McpAgentGuideExpected.Uri);
@@ -40,12 +40,12 @@ internal sealed class McpAgentGuideContractTests
     [Test]
     public async Task ReturnedMutableMetadataIsNotSharedBetweenRequests()
     {
-        var resources = McpAgentGuideQuery.ListResources(null, CancellationToken.None);
-        var prompts = McpAgentGuideQuery.ListPrompts(null, CancellationToken.None);
+        var resources = McpAgentGuideQuery.ListResources(null, UnitMcpOptions.Execution(), CancellationToken.None);
+        var prompts = McpAgentGuideQuery.ListPrompts(null, UnitMcpOptions.Execution(), CancellationToken.None);
         resources.Resources[0].Name = UnknownName;
         prompts.Prompts[0].Name = UnknownName;
-        var nextResource = McpAgentGuideQuery.ListResources(null, CancellationToken.None).Resources.Single();
-        var nextPrompt = McpAgentGuideQuery.ListPrompts(null, CancellationToken.None).Prompts.Single();
+        var nextResource = McpAgentGuideQuery.ListResources(null, UnitMcpOptions.Execution(), CancellationToken.None).Resources.Single();
+        var nextPrompt = McpAgentGuideQuery.ListPrompts(null, UnitMcpOptions.Execution(), CancellationToken.None).Prompts.Single();
         await Assert.That(nextResource.Name).IsEqualTo("KeyLoad agent quickstart");
         await Assert.That(nextPrompt.Name).IsEqualTo(McpAgentGuideExpected.Name);
     }
@@ -53,12 +53,12 @@ internal sealed class McpAgentGuideContractTests
     [Test]
     public async Task UnknownInputsCursorsAndPromptArgumentsFailClosed()
     {
-        await AssertInvalidAsync(() => McpAgentGuideQuery.ReadResource(UnknownUri, CancellationToken.None));
-        await AssertInvalidAsync(() => McpAgentGuideQuery.GetPrompt(UnknownName, null, CancellationToken.None));
-        await AssertInvalidAsync(() => McpAgentGuideQuery.ListResources(InvalidCursor, CancellationToken.None));
-        await AssertInvalidAsync(() => McpAgentGuideQuery.ListPrompts(InvalidCursor, CancellationToken.None));
+        await AssertInvalidAsync(() => McpAgentGuideQuery.ReadResource(UnknownUri, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertInvalidAsync(() => McpAgentGuideQuery.GetPrompt(UnknownName, null, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertInvalidAsync(() => McpAgentGuideQuery.ListResources(InvalidCursor, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertInvalidAsync(() => McpAgentGuideQuery.ListPrompts(InvalidCursor, UnitMcpOptions.Execution(), CancellationToken.None));
         var arguments = new Dictionary<string, System.Text.Json.JsonElement> { [UnexpectedArgument] = default };
-        await AssertInvalidAsync(() => McpAgentGuideQuery.GetPrompt(McpAgentGuideExpected.Name, arguments, CancellationToken.None));
+        await AssertInvalidAsync(() => McpAgentGuideQuery.GetPrompt(McpAgentGuideExpected.Name, arguments, UnitMcpOptions.Execution(), CancellationToken.None));
     }
 
     [Test]
@@ -67,13 +67,13 @@ internal sealed class McpAgentGuideContractTests
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var listError = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            McpAgentGuideQuery.ListResources(null, cancellation.Token));
+            McpAgentGuideQuery.ListResources(null, UnitMcpOptions.Execution(), cancellation.Token));
         var readError = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            McpAgentGuideQuery.ReadResource(McpAgentGuideExpected.Uri, cancellation.Token));
+            McpAgentGuideQuery.ReadResource(McpAgentGuideExpected.Uri, UnitMcpOptions.Execution(), cancellation.Token));
         var promptListError = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            McpAgentGuideQuery.ListPrompts(null, cancellation.Token));
+            McpAgentGuideQuery.ListPrompts(null, UnitMcpOptions.Execution(), cancellation.Token));
         var promptError = Assert.ThrowsExactly<OperationCanceledException>(() =>
-            McpAgentGuideQuery.GetPrompt(McpAgentGuideExpected.Name, null, cancellation.Token));
+            McpAgentGuideQuery.GetPrompt(McpAgentGuideExpected.Name, null, UnitMcpOptions.Execution(), cancellation.Token));
         await Assert.That(listError).IsNotNull();
         await Assert.That(readError).IsNotNull();
         await Assert.That(promptListError).IsNotNull();

@@ -58,7 +58,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         using var requestContext = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
         var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
-        var principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span, cancellationToken, mcpExecutionOptions);
+        var principal = McpNativeAuthentication.ReadPrincipal(payload: reply.Payload.Span, cancellationToken: cancellationToken, options: mcpExecutionOptions);
         if (!principal.ClusterAdministrator)
         { throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalShardCatalogFence.AdministratorRequired); }
         return principal;

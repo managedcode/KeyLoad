@@ -6,13 +6,31 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisReplicaDiagnostics
 {
+    private const string KnownHostsLocalhostText = "localhost";
+    private const string KnownStatesUnknownText = "unknown";
+
+    private const string Replica1Token = "replica1";
+    private const string Replica1DevInternalToken = "replica1.dev.internal";
+    private const string KnownHostsResultText = "replica2";
+    private const string KnownHostsKnownHostsResultText = "replica2.dev.internal";
+    private const string ConnectToken = "connect";
+    private const string ConnectingToken = "connecting";
+    private const string KnownStatesResultText = "sync";
+    private const string KnownStatesKnownStatesResultText = "connected";
+
+    private const string PrimaryToken = "primary";
+    private const string PrimaryDevInternalToken = "primary.dev.internal";
+    private const string HandshakeToken = "handshake";
+    private const string NoneToken = "none";
+    private const int NoItems = 0;
+
     internal const int MaximumCharacters = 4096;
     private const int MaximumHostLength = 253, MinimumPort = 1, MaximumPort = 65535, RoleStateIndex = 3;
     private const string Prefix = "RedisReplicaDiagnostic ";
     private const string Overflow = "{\"Predicate\":\"ProjectionOverflow\"}";
     private const string LinkDown = "down";
-    private static readonly string[] KnownHosts = ["primary", "primary.dev.internal", "replica1", "replica1.dev.internal", "replica2", "replica2.dev.internal", "localhost"];
-    private static readonly string[] KnownStates = ["handshake", "none", "connect", "connecting", "sync", "connected", "unknown"];
+    private static readonly string[] KnownHosts = [PrimaryToken, PrimaryDevInternalToken, Replica1Token, Replica1DevInternalToken, KnownHostsResultText, KnownHostsKnownHostsResultText, KnownHostsLocalhostText];
+    private static readonly string[] KnownStates = [HandshakeToken, NoneToken, ConnectToken, ConnectingToken, KnownStatesResultText, KnownStatesKnownStatesResultText, KnownStatesUnknownText];
 
     internal static void WriteFailure(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
     {
@@ -32,6 +50,8 @@ internal static class RedisReplicaDiagnostics
 
     internal static string Project(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
     {
+        const int MissingItemIndex = -1;
+
         var infoHost = info.GetValueOrDefault(RedisNativeProtocol.MasterHostField);
         var roleHost = RoleText(role, RedisNativeProtocol.RoleHostIndex);
         var projection = new RedisReplicaDiagnostic(
@@ -39,7 +59,7 @@ internal static class RedisReplicaDiagnostics
             KnownRole(info.GetValueOrDefault(RedisNativeProtocol.RoleField)), KnownLink(info.GetValueOrDefault(RedisNativeProtocol.LinkField)),
             KnownHost(infoHost, primary, replica), ValidPort(RedisNativeProtocol.ParseInteger(info, RedisNativeProtocol.MasterPortField)), role.Length,
             KnownRole(RoleText(role, RedisNativeProtocol.RoleNameIndex)), KnownHost(roleHost, primary, replica),
-            ValidPort(int.TryParse(RoleText(role, RedisNativeProtocol.RolePortIndex), out var port) ? port : -1),
+            ValidPort(int.TryParse(RoleText(role, RedisNativeProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
             KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null);
         var json = JsonSerializer.Serialize(projection);
         return json.Length <= MaximumCharacters ? json : Overflow;
@@ -89,7 +109,7 @@ internal static class RedisReplicaDiagnostics
     }
 
     private static string? RoleText(RedisResult[] role, int index)
-        => index < role.Length && !role[index].IsNull && role[index].Length < 0 ? role[index].ToString() : null;
+        => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? role[index].ToString() : null;
 
     private static string? KnownRole(string? value)
         => value is RedisNativeProtocol.MasterRole or RedisNativeProtocol.ReplicaRole ? value : null;
@@ -109,6 +129,10 @@ internal static class RedisReplicaDiagnostics
 
     private static bool ValidHost(string? value)
     {
+        const char IdentitySeparator = '-';
+
+        const char VersionSeparator = '.';
+
         if (string.IsNullOrEmpty(value) || value.Length > MaximumHostLength)
         {
             return false;
@@ -117,7 +141,7 @@ internal static class RedisReplicaDiagnostics
         {
             return true;
         }
-        return value.All(static character => char.IsAsciiLetterOrDigit(character) || character is '.' or '-');
+        return value.All(static character => char.IsAsciiLetterOrDigit(character) || character is VersionSeparator or IdentitySeparator);
     }
 
     private static string? Host(EndPoint endpoint)

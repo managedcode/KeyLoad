@@ -47,7 +47,6 @@ internal static class ServerNodeUpgradeProtocol
     internal const int MaximumPathCharacters = 4_096;
     internal const int MaximumTotalPathCharacters = 4_194_304;
     internal const long MaximumSourceBytes = 549_755_813_888;
-    internal const int BufferBytes = 65_536;
     internal const int OwnerFormatVersion = 2;
     internal const int ReceiptFormatVersion = 2;
     internal const int ProgressFormatVersion = 2;

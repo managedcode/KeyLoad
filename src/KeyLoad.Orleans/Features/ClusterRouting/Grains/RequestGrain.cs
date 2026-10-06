@@ -74,12 +74,12 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
                 reply = await reader.ExecuteAsync(signedRequest, writer.CancellationToken).ConfigureAwait(true);
             }
 
-            return GrainReplyFactory.StreamResult(reply);
+            return GrainReplyFactory.StreamResult(reply: reply, options: options);
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            return GrainReplyFactory.StreamResult(GrainReplyFactory.Failure(error, command, diagnostics,
-                requestId, stage, writer.CancellationToken));
+            return GrainReplyFactory.StreamResult(reply: GrainReplyFactory.Failure(error: error, command: command, diagnostics: diagnostics,
+                requestId: requestId, stage: stage, cancellationToken: writer.CancellationToken, options: options), options: options);
         }
     }
 }

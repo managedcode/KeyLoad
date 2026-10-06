@@ -17,7 +17,7 @@ internal sealed class Neo4jHarnessReportFiles : IAsyncDisposable
 
     public async Task VerifyAsync(ComparisonReport report, int expectedCsvLines, CancellationToken cancellationToken)
     {
-        await ReportWriter.WriteAsync(report, DirectoryPath, cancellationToken);
+        await ReportWriter.WriteAsync(report, DirectoryPath, NativeExecutionPolicyFixture.Read(), cancellationToken);
         await VerifyJsonAsync(report, cancellationToken);
         await VerifyMarkdownAsync(report, cancellationToken);
         await VerifyCsvAsync(expectedCsvLines, cancellationToken);

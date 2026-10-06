@@ -26,10 +26,20 @@ internal sealed class NativeSagaTimeoutJobHarness(
 
     internal async Task<List<IJobShard>> CaptureOwnedShardsAsync(DateTimeOffset maxDueTime,
         CancellationToken cancellationToken)
+        => await AssignJobShardsAsync(maxDueTime, NoNewShardClaims, cancellationToken);
+
+    internal async Task<List<IJobShard>> RecoverShardsAsync(DateTimeOffset maxDueTime,
+        CancellationToken cancellationToken)
+        => await AssignJobShardsAsync(maxDueTime,
+            services.GetRequiredService<Microsoft.Extensions.Options.IOptions<NativeDurableJobOptions>>()
+                .Value.MaximumClaimBudget, cancellationToken);
+
+    private async Task<List<IJobShard>> AssignJobShardsAsync(DateTimeOffset maxDueTime, int maximumNewClaims,
+        CancellationToken cancellationToken)
     {
         using var deadline = CreateDeadline(cancellationToken);
         return await services.GetRequiredService<JobShardManager>()
-            .AssignJobShardsAsync(maxDueTime, NoNewShardClaims, deadline.Token);
+            .AssignJobShardsAsync(maxDueTime, maximumNewClaims, deadline.Token);
     }
 
     internal static async Task<int> CountScheduledJobsAsync(IEnumerable<IJobShard> shards,

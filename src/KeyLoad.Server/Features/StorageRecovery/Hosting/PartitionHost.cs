@@ -43,10 +43,7 @@ internal sealed class PartitionHost : IAsyncDisposable
         ITextProjection? openedText = null;
         try
         {
-            RuntimeJournalStorePreparation.Prepare(stores, runtimeOptions.Core.RuntimeJournal, runtimeOptions.StorageExecution);
-            Database = new(stores.Canonical, authorization, runtimeOptions.Core.DatabaseLimits,
-                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging, runtimeOptions.Core.GraphExecution, runtimeOptions.Core.ChangeFeedExecution, runtimeOptions.Core.TimeSeriesExecution);
-            Database.ConfigureRuntimeJournal(runtimeOptions.Core.RuntimeJournal);
+            Database = OpenCanonicalDatabase(runtimeOptions, authorization);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
@@ -92,6 +89,16 @@ internal sealed class PartitionHost : IAsyncDisposable
     public ReplicaConsensus Consensus { get; }
     /// <summary>Admission starts before silo membership and stops after membership shutdown.</summary>
     public ClusterCoordinator Coordinator { get; }
+
+    private DatabaseEngine OpenCanonicalDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization)
+    {
+        var core = runtimeOptions.Core;
+        RuntimeJournalStorePreparation.Prepare(stores, core.RuntimeJournal, runtimeOptions.StorageExecution);
+        var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
+            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.TimeSeriesExecution);
+        database.ConfigureRuntimeJournal(core.RuntimeJournal);
+        return database;
+    }
 
     private void BootstrapFreshNode(NodeOptions options)
     {

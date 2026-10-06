@@ -77,10 +77,10 @@ internal sealed class McpGatewayProtocolTests
     {
         var exactQuery = new string('é', 1024);
         var accepted = McpGatewayMetaArgumentReader.Read(McpGatewayMetaOperation.Search,
-            McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery })));
+            McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery })), UnitMcpOptions.Execution());
         await Assert.That(accepted.SearchLimit).IsEqualTo(3);
         var tooLong = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery + "é" }))));
+            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read(JsonSerializer.Serialize(new { query = exactQuery + "é" })), UnitMcpOptions.Execution()));
         await Assert.That(tooLong.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(accepted.Query).IsEqualTo(exactQuery);
     }
@@ -89,13 +89,13 @@ internal sealed class McpGatewayProtocolTests
     public async Task RouteDefaultsAndExplicitLimitsStayWithinFourResults()
     {
         var route = McpGatewayMetaArgumentReader.Read(McpGatewayMetaOperation.Route,
-            McpGatewayProtocolInputs.Read("{\"query\":\"graph task\",\"maxCategories\":2,\"maxToolsPerCategory\":2,\"preferReadOnly\":false}"));
+            McpGatewayProtocolInputs.Read("{\"query\":\"graph task\",\"maxCategories\":2,\"maxToolsPerCategory\":2,\"preferReadOnly\":false}"), UnitMcpOptions.Execution());
         await Assert.That(route.CategoryLimit).IsEqualTo(2);
         await Assert.That(route.ToolsPerCategory).IsEqualTo(2);
         await Assert.That(route.PreferReadOnly).IsFalse();
         await Assert.That(route.Query).IsEqualTo("graph task");
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Route, McpGatewayProtocolInputs.Read("{\"query\":\"x\",\"maxCategories\":3}")));
+            McpGatewayMetaOperation.Route, McpGatewayProtocolInputs.Read("{\"query\":\"x\",\"maxCategories\":3}"), UnitMcpOptions.Execution()));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
     }
 
@@ -103,13 +103,13 @@ internal sealed class McpGatewayProtocolTests
     public async Task MetaArgumentsRejectUnknownCaseChangedAndDuplicateNestedFields()
     {
         var unknown = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read("{\"query\":\"read\",\"extra\":1}")));
+            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read("{\"query\":\"read\",\"extra\":1}"), UnitMcpOptions.Execution()));
         var changed = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read("{\"Query\":\"read\"}")));
+            McpGatewayMetaOperation.Search, McpGatewayProtocolInputs.Read("{\"Query\":\"read\"}"), UnitMcpOptions.Execution()));
         var blankTarget = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Invoke, McpGatewayProtocolInputs.Read("{\"toolId\":\" \"}")));
+            McpGatewayMetaOperation.Invoke, McpGatewayProtocolInputs.Read("{\"toolId\":\" \"}"), UnitMcpOptions.Execution()));
         var duplicate = Assert.ThrowsExactly<KeyLoadException>(() => McpGatewayMetaArgumentReader.Read(
-            McpGatewayMetaOperation.Invoke, McpGatewayProtocolInputs.Read("{\"toolId\":\"keyload_documents_get\",\"arguments\":{\"x\":1,\"x\":2}}")));
+            McpGatewayMetaOperation.Invoke, McpGatewayProtocolInputs.Read("{\"toolId\":\"keyload_documents_get\",\"arguments\":{\"x\":1,\"x\":2}}"), UnitMcpOptions.Execution()));
         await Assert.That(unknown.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(changed.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(blankTarget.Code).IsEqualTo(ErrorCode.Validation);

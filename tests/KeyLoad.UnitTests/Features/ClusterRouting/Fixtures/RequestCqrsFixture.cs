@@ -6,6 +6,7 @@ using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Metadata;
 using Orleans.Hosting;
 using Orleans.Serialization;
@@ -48,7 +49,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
             builder.AddSiloBuilderConfigurator<RequestCqrsSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RequestCqrsClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
+            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System, RoutingOptions);
         }
         catch (Exception startupFailure)
         {
@@ -72,7 +73,8 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     internal TestCluster Cluster { get; }
     internal GrainRequestCodec Codec { get; }
     internal TestDatabase Database { get; }
-    internal NativeRequestWorkOwner RequestWork => requestWork ??= new(UnitRoutingOptions.Routing());
+    internal IOptions<GrainRoutingOptions> RoutingOptions { get; } = UnitRoutingOptions.Routing();
+    internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
     public async Task InitializeAsync()
     {
@@ -195,6 +197,7 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
         siloBuilder.Services.AddSingleton<ICommitCoordinator>(new EmbeddedCoordinator(fixture.Database.Database));
         siloBuilder.Services.AddSingleton(TimeProvider.System);
+        siloBuilder.Services.AddSingleton(fixture.RoutingOptions);
         siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
         siloBuilder.Services.AddSingleton<GrainRequestCodec>();
         siloBuilder.Services.AddSingleton(new RequestCqrsCapabilityLedger());

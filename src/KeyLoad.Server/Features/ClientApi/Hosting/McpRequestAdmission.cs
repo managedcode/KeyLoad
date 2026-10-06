@@ -15,8 +15,7 @@ internal sealed class McpRequestAdmission : IDisposable
     private McpMemoryLease? operation;
     private bool disposed;
 
-    internal McpRequestAdmission(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity,
-        CancellationToken cancellationToken, IOptions<McpExecutionOptions> options)
+    internal McpRequestAdmission(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken)
     {
         this.governor = governor;
         this.memory = memory;

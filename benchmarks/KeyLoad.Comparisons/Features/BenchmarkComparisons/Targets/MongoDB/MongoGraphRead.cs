@@ -25,9 +25,17 @@ internal static class MongoGraphRead
     private static PipelineDefinition<BsonDocument, BsonDocument> BuildPipeline(string edgeCollection,
         string startId, int depth)
     {
+        const int FifthPipelineStage = 4;
+        const int SixthPipelineStage = 5;
+
+        const int FirstPipelineStage = 0;
+        const int SecondPipelineStage = 1;
+        const int ThirdPipelineStage = 2;
+        const int FourthPipelineStage = 3;
+
         var stages = new BsonDocument[MatchStageCount];
-        stages[0] = new BsonDocument(MongoSchema.GraphMatchOperator, new BsonDocument(MongoSchema.IdField, startId));
-        stages[1] = new BsonDocument(MongoSchema.GraphLookupOperator, new BsonDocument
+        stages[FirstPipelineStage] = new BsonDocument(MongoSchema.GraphMatchOperator, new BsonDocument(MongoSchema.IdField, startId));
+        stages[SecondPipelineStage] = new BsonDocument(MongoSchema.GraphLookupOperator, new BsonDocument
         {
             [MongoSchema.GraphFromCollection] = edgeCollection,
             [MongoSchema.GraphStartField] = startId,
@@ -36,12 +44,12 @@ internal static class MongoGraphRead
             [MongoSchema.GraphMaxDepthField] = depth - MongoSchema.GraphBaseDepth,
             [MongoSchema.GraphAsField] = MongoSchema.GraphOutputField
         });
-        stages[2] = new BsonDocument(MongoSchema.GraphUnwindOperator, MongoSchema.GraphEdgePrefix);
-        stages[3] = new BsonDocument(MongoSchema.GraphMatchOperator,
+        stages[ThirdPipelineStage] = new BsonDocument(MongoSchema.GraphUnwindOperator, MongoSchema.GraphEdgePrefix);
+        stages[FourthPipelineStage] = new BsonDocument(MongoSchema.GraphMatchOperator,
             new BsonDocument(MongoSchema.GraphEdgeDestinationPath, new BsonDocument(MongoSchema.GraphNotEqualOperator, startId)));
-        stages[4] = new BsonDocument(MongoSchema.GraphGroupOperator,
+        stages[FifthPipelineStage] = new BsonDocument(MongoSchema.GraphGroupOperator,
             new BsonDocument(MongoSchema.GraphGroupId, MongoSchema.GraphEdgeDestination));
-        stages[5] = new BsonDocument(MongoSchema.GraphSortOperator, new BsonDocument(MongoSchema.GraphGroupId, MongoSchema.GraphSortDirection));
+        stages[SixthPipelineStage] = new BsonDocument(MongoSchema.GraphSortOperator, new BsonDocument(MongoSchema.GraphGroupId, MongoSchema.GraphSortDirection));
         return PipelineDefinition<BsonDocument, BsonDocument>.Create(stages);
     }
 }

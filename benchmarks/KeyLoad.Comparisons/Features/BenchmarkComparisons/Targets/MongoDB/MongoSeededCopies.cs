@@ -6,17 +6,20 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoSeededCopies
 {
-    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName,
-        IComparisonCorpus dataset, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset,
+        IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(TimeSpan.FromSeconds(dataset.Settings.TimeoutSeconds));
         try
         {
             foreach (var client in clients)
             {
-                await WaitForCopyAsync(client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
-                    dataset.Documents[0], dataset.Documents.Count, deadline.Token, lifecycleOptions.Value.MongoReadinessPollInterval);
+                await WaitForCopyAsync(collection: client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
+                    expected: dataset.Documents[FirstElementIndex], count: dataset.Documents.Count, cancellationToken: deadline.Token,
+                    pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -25,8 +28,8 @@ internal static class MongoSeededCopies
         }
     }
 
-    private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected,
-        long count, CancellationToken cancellationToken, TimeSpan pollInterval)
+    private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected, long count,
+        TimeSpan pollInterval, CancellationToken cancellationToken)
     {
         while (true)
         {

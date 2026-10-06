@@ -4,12 +4,14 @@ internal static class KurrentClusterMembers
 {
     internal static bool IsReady(KurrentGossipView[] views, ComparisonTopology topology)
     {
+        const int FirstElementIndex = 0;
+
         if (views.Length != ExpectedCount(topology))
         {
             return false;
         }
 
-        var canonical = CanonicalMembers(views[0].Members);
+        var canonical = CanonicalMembers(views[FirstElementIndex].Members);
         return MembershipIsValid(canonical, views, topology) && ViewsAgree(canonical, views);
     }
 
@@ -39,7 +41,12 @@ internal static class KurrentClusterMembers
 
     private static bool RolesMatch(KurrentGossipMember[] members, KurrentGossipView[] views, ComparisonTopology topology)
     {
-        if (ExpectedCount(topology) == 1)
+        const int SingleItemCount = 1;
+        const int AdjacentElementOffset = 1;
+        const int FirstElementIndex = 0;
+        const int SingleNodeTopology = 1;
+
+        if (ExpectedCount(topology) == SingleItemCount)
         {
             return members.Length == KurrentConstants.ExpectedSingleNode &&
                 members.Count(member => member.State == KurrentConstants.LeaderState) == KurrentConstants.ExpectedLeader;
@@ -47,10 +54,10 @@ internal static class KurrentClusterMembers
 
         var leaders = members.Where(member => member.State == KurrentConstants.LeaderState).ToArray();
         return leaders.Length == KurrentConstants.ExpectedLeader &&
-            members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - 1 &&
+            members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - AdjacentElementOffset &&
             views.All(view => view.Members.Count(member => member.State == KurrentConstants.LeaderState) == KurrentConstants.ExpectedLeader &&
-                              view.Members.Single(member => member.State == KurrentConstants.LeaderState).Id == leaders[0].Id &&
-                              view.Members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - 1);
+                              view.Members.Single(member => member.State == KurrentConstants.LeaderState).Id == leaders[FirstElementIndex].Id &&
+                              view.Members.Count(member => member.State == KurrentConstants.FollowerState) == ExpectedCount(topology) - SingleNodeTopology);
     }
 
     private static bool ViewsAgree(KurrentGossipMember[] expected, KurrentGossipView[] views)

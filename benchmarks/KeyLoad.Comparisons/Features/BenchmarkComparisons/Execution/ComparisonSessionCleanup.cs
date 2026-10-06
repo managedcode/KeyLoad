@@ -16,6 +16,13 @@ internal static class ComparisonSessionCleanup
         return result.Failures.IsEmpty && !result.ThresholdExpired;
     }
 
+    internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, TimeSpan timeout)
+    {
+        var result = await CloseAndJoinAsync(sessions, timeout).ConfigureAwait(false);
+        ThrowFatal(result.Failures);
+        return result.Failures.IsEmpty && !result.ThresholdExpired;
+    }
+
     internal static Task<ComparisonSessionCloseResult> CloseAndJoinAsync(
         IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
     {
@@ -28,7 +35,7 @@ internal static class ComparisonSessionCleanup
         IEnumerable<IComparisonSession> sessions, TimeSpan timeout)
     {
         ArgumentNullException.ThrowIfNull(sessions);
-        if (timeout <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(timeout));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
         var closeTasks = StartDisposals(sessions);
         var joined = Task.WhenAll(closeTasks);
         using var deadlineSource = new CancellationTokenSource();
@@ -47,6 +54,7 @@ internal static class ComparisonSessionCleanup
             }
         }
         var failures = await JoinOriginalsAsync(closeTasks).ConfigureAwait(false);
+        _ = await OpenLoopFailure.ObserveAsync(joined).ConfigureAwait(false);
         return new(thresholdExpired, failures);
     }
 
@@ -60,28 +68,15 @@ internal static class ComparisonSessionCleanup
         return tasks;
     }
 
-    private static Task StartDispose(IComparisonSession session)
-    {
-        try
-        {
-            return session.DisposeAsync().AsTask();
-        }
-        catch (Exception failure)
-        {
-            return Task.FromException(failure);
-        }
-    }
+    private static async Task StartDispose(IComparisonSession session)
+        => await session.DisposeAsync().ConfigureAwait(false);
 
     private static async Task<ImmutableArray<Exception>> JoinOriginalsAsync(IEnumerable<Task> tasks)
     {
         var failures = ImmutableArray.CreateBuilder<Exception>();
         foreach (var task in tasks)
         {
-            try
-            {
-                await task.ConfigureAwait(false);
-            }
-            catch (Exception failure)
+            if (await OpenLoopFailure.ObserveAsync(task).ConfigureAwait(false) is { } failure)
             {
                 failures.Add(failure);
             }

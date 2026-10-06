@@ -18,12 +18,12 @@ internal sealed class ReplicaMembershipAuthorityNativeContractTests
     {
         var caller = SiloAddress.New(new IPEndPoint(IPAddress.Loopback, NativePort), 9).ToParsableString();
         var call = Call(caller);
-        var encodedCall = ReplicaMembershipAuthorityCodec.SerializeCall(call);
-        var decodedCall = ReplicaMembershipAuthorityCodec.DeserializeCall(encodedCall);
+        var encodedCall = ReplicaMembershipAuthorityCodec.SerializeCall(call, UnitRoutingOptions.Membership());
+        var decodedCall = ReplicaMembershipAuthorityCodec.DeserializeCall(encodedCall, UnitRoutingOptions.Membership());
         await Assert.That(decodedCall.CallerSiloAddress).IsEqualTo(caller);
         await Assert.That(decodedCall.RequestId).IsEqualTo(call.RequestId);
         await Assert.That(decodedCall.Operation).IsEqualTo((int)ReplicaMembershipAuthorityOperation.ReadAll);
-        using var mac = new ReplicaMembershipAuthorityMac(new byte[ReplicaMembershipAuthorityProtocol.SecretBytes]);
+        using var mac = new ReplicaMembershipAuthorityMac(new byte[ReplicaMembershipAuthorityProtocol.SecretBytes], UnitRoutingOptions.Membership());
         var signature = mac.SignRequest(Cluster, call.AuthorityPhysicalShardId.ToString("N"),
             call.AuthorityIncarnation.ToString("N"), call.CallerPhysicalShardId.ToString("N"),
             call.CallerIncarnation.ToString("N"), Voter, caller, "638000000000000000", Nonce, encodedCall);
@@ -42,8 +42,8 @@ internal sealed class ReplicaMembershipAuthorityNativeContractTests
             call.AuthorityPhysicalShardId, call.AuthorityIncarnation, call.RequestId, Nonce,
             (int)ReplicaMembershipAuthorityResultKind.Completed, null,
             (int)ReplicaMembershipAuthorityErrorDetailCode.None, false, 7, Etag, [row]);
-        var encodedReply = ReplicaMembershipAuthorityCodec.SerializeReply(reply);
-        var decodedReply = ReplicaMembershipAuthorityCodec.DeserializeReply(encodedReply);
+        var encodedReply = ReplicaMembershipAuthorityCodec.SerializeReply(reply, UnitRoutingOptions.Membership());
+        var decodedReply = ReplicaMembershipAuthorityCodec.DeserializeReply(encodedReply, UnitRoutingOptions.Membership());
         await Assert.That(decodedReply.TableVersion).IsEqualTo(7);
         await Assert.That(decodedReply.TableVersionETag).IsEqualTo(Etag);
         await Assert.That(decodedReply.Rows.Single().Suspects.Single().Address).IsEqualTo(caller);

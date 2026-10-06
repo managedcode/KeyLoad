@@ -488,6 +488,10 @@ remain distinct; their configuration helpers follow the same native options path
   static readonly, reject direct runtime configuration reads and bare configuration
   object injection, permit centrally registered options/defaults and const/nameof
   identities, and cover all general-literal spans/assemblies/generated boundaries.
+  Genuine field-only immutable temporal corpus data permits its native TimeSpan
+  declaration; mutable/counterfeit markers and reuse as a timeout still fail.
+  Immutable JSON metadata record snapshots preserve their serialized shape; a
+  genuine property marker does not permit mutable/service configuration injection.
 - AC-CQ-038: complete preserving migration has no introduced literal/options
   diagnostics in the canonical full Release build; native Aspire full analyzers,
   unit/scalar/recovery/RF3 suites, format and source-bound coverage retain all gates.
@@ -607,3 +611,106 @@ immutable ordering mathematics are named domain constants. Root owns live joins,
 current-source native build/format and existing complete query-operation,
 continuation, budget and failure flows through Aspire. Source-only review does
 not establish a passing test or coverage result.
+
+TASK-CQ-NATIVE-ORLEANS-091F continues TASK-CQ-GENERAL-003/004 and
+AC-CQ-022/034/038. Review current-source native Orleans/CLI findings before
+repair: validated IOptions dependencies reject null before first use; immutable
+domain/protocol/mathematical tokens retain their exact original values. The
+native stream drain/lifetime, membership constructor and recurring-wait join
+signatures put their original cancellation token last and update every actual
+caller coherently. Preserve token identity, primary/failure ordering, original
+CQRS IAsyncEnumerable settlement/backpressure, RequestContext isolation, RF3
+membership and node-local ownership. No caller or serialization alias/field ID
+may drift. Repair circular CLI exit-code constants from their actual historical
+command behavior. Luna owns a guarded private current-source Orleans/CLI packet;
+root reviews the public/internal caller join, builds with enabled analyzers and
+runs existing complete request/stream/membership/recovery/CLI flows through
+Aspire. No suppression, alternate transport or ManagedCode consumer workaround
+is admitted; new dependency defects retain their owning-repository release rule.
+
+
+### Native complete functional cohort and RF3 collector contract
+
+TASK-CQ-FUNCTIONAL-COVERAGE-002 continues REQ-CQ-009 and AC-CQ-018..021 under
+[ADR-033](../ADR/ADR-033-code-quality.md). This is an accepted implementation
+contract, not a collected result. The first prefix-selected Query prototype is
+not an admissible complete contributor inventory: each selected method must be
+reviewed as an actual operation flow. Preserve that prototype's immutable source
+and any original reports as scoped history; do not relabel metadata-only cases
+as functional execution or reuse a stale test image.
+
+- AC-CQ-039: a closed source-bound manifest identifies every admitted case by
+  suite, full namespace, class and method, related feature REQ/AC and executed
+  modules. Each admission records the real operation, independent outcome and
+  resulting or preserved state. Run finite exact method selections through the
+  existing Aspire suites; a class selection is allowed only when every selected
+  method is admitted. Verify exact actual TRX identities and all parameterized
+  instances. Reject omissions, extras, changed source, failed or skipped cases.
+  Load/stress/performance/comparison and accessor/shape/source-inventory tests
+  remain outside product coverage even if included in a mandatory ordinary suite.
+- AC-CQ-040: retain original native binary `.coverage` files and native conversions
+  for each admitted invocation. Native CodeCoverage18.11.2 binary merging uses
+  an explicit verified report list and identical production DLL/PDB/MVID/source
+  identities, never a directory glob. Do not sum duplicate denominators. Require
+  repeated-input merge invariance and native integer line/branch counts before
+  accepting a merged outcome result. A per-line Cobertura branch fraction alone
+  still leaves branch union unmeasured. Keep originals, tool logs, outcomes and
+  bounded deterministic source-mapped uncovered locations. Missing evidence is
+  unqualified, not zero; the existing80/70/90/no-decrease gates are unchanged.
+- AC-CQ-041: server contribution comes from the original three server processes
+  inside the existing ClusterFixture-owned ephemeral Aspire RF3 graph. A finite
+  reviewed non-kill functional selection records its actual fixture roster and
+  exactly three collectors per fixture. Kill/restart/recovery/fault cases remain
+  mandatory in their complete suites and retain their own evidence; they cannot
+  contribute an assumed final collector flush. No independent Docker deployment
+  or parallel AppHost is admitted. Every original server, collector, readiness
+  and observer task must settle before reports are read, retained and the owned
+  fixture root is deleted. Every failure path preserves primary-first errors.
+- AC-CQ-042: collector preparation is an Aspire-owned dependency before the test
+  runner starts. Use the same native Microsoft coverage engine18.11.2 as MTP,
+  with an explicitly centrally pinned CLI package download; no global tool
+  installation, Coverlet, VSTest or second coverage framework. The test-only
+  Linux-x64 image copies the already built/published original server closure
+  without recompiling it, verifying matching DLL/PDB/MVIDs against the selected
+  test deployment. Bind the native tool package/files, pinned base image, actual
+  derived image identity and each original output to the exact source cohort.
+
+The complete production roster is Abstractions, Analyzers, AppHost, Artifacts,
+Cli, Client, Core, Diagnostics, Orleans, Query, Replication, Security, Server,
+ServiceDefaults, Storage.IO and Storage.ZoneTree. Compile-time Analyzers and
+Aspire test/deployment coordination retain explicit separate infrastructure
+qualification. Executable Abstractions, Diagnostics and ServiceDefaults code
+remains production source: shared contracts or startup/telemetry responsibilities
+do not make it N/A. Unexercised executable code remains an uncovered gap.
+Generated compiler-only infrastructure may be classified separately with an
+exact source reason; never remove executable source to raise a percentage.
+
+The server wrapper launches one original native `collect` command with an exact
+session, settings and binary output, wrapping `dotnet KeyLoad.Server.dll`. On an
+Aspire stop signal it asks the same native session to shut down and waits for
+that original collector/server chain. It writes a create-only terminal receipt
+only after native settlement; requested stop, a snapshot, a wrapper timeout or
+a later replacement process is not settlement proof. Native SIGTERM/exit/flush
+behavior must be proved with the actual Linux tool/server before qualification.
+Dedicated per-fixture/node report mounts are separate from database `/data`.
+Configured limits, IPC/shutdown duration and report/path/roster bounds live in
+validated native IOptions captured at their composition owner and passed to
+actual execution; consumers have no duplicate defaults or raw policy reads.
+
+Ownership is `scripts/Features/CodeQuality/` for closed manifests, native tool
+invocation, test-only image/wrapper, identity/report verification and retained
+artifacts; `src/KeyLoad.AppHost/Features/CodeQuality/{Configuration,Resources}/`
+for validated test-only preparation and resource dependencies; and
+`tests/KeyLoad.IntegrationTests/Features/CodeQuality/{Configuration,Fixtures,Helpers}/`
+for scoped fixture selection/export. Root owns the existing TestSuiteResources,
+ClusterFixture, central package, solution source map and CI joins. Workers supply
+guarded private packets. No product request, persisted format, replica receipt,
+public SDK/MCP contract or authorization boundary changes in this stage.
+
+Verification executes meaningful native success/denial/state-preservation flows,
+actual collector stop and report export, then native same-image merge. Also
+exercise missing/corrupt/replaced/mismatched reports, altered source/image/tool,
+unexpected contributors and failed cleanup with a healthy follow-up where
+applicable. Preserve full unit/scalar/recovery/RF3/analyzer/site gates separately
+and always-upload originals after failures. CI source-only settings, private
+fixtures and partial reports do not close this contract or any original task.

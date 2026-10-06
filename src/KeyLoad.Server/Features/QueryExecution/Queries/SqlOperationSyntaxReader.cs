@@ -1,10 +1,12 @@
+using KeyLoad.Query;
+using Microsoft.Extensions.Options;
 using KeyLoad.Features.QueryExecution;
 
 namespace KeyLoad.Server;
 
 /// <summary>Scans the bounded CALL grammar without allocating tokens or evaluating application code.</summary>
 internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, int maximumDepth,
-    CancellationToken cancellationToken)
+    IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
 {
     private int offset;
     private int tokens;
@@ -66,7 +68,7 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, in
         const int EmptyOffsetSqlOperationSyntaxCheckInterval = 0;
 
         offset++;
-        if (offset % SqlOperationSyntax.CheckInterval == EmptyOffsetSqlOperationSyntaxCheckInterval)
+        if (offset % queryOptions.Value.SqlBudgetCheckInterval == EmptyOffsetSqlOperationSyntaxCheckInterval)
         { cancellationToken.ThrowIfCancellationRequested(); }
     }
 

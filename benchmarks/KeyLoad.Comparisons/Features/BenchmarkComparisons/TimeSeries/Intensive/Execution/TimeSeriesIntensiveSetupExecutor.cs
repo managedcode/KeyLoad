@@ -1,10 +1,12 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveSetupExecutor
 {
-    internal static async Task InitializeAsync(ITimeSeriesIntensiveTarget target, CancellationToken cancellationToken)
+    internal static async Task InitializeAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
         call.Start();
         try
         {
@@ -25,13 +27,15 @@ internal static class TimeSeriesIntensiveSetupExecutor
         call.RequireSuccess();
     }
 
-    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, CancellationToken cancellationToken)
+    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        for (var batch = 0; batch < TimeSeriesIntensiveProfile.SeedBatchCount; batch++)
+        const int NoObservedItems = 0;
+
+        for (var batch = NoObservedItems; batch < TimeSeriesIntensiveProfile.SeedBatchCount; batch++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var samples = TimeSeriesIntensiveCorpus.SeedBatch(batch);
-            using var call = new TimeSeriesIntensiveCallScope(cancellationToken);
+            using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
             call.Start();
             try
             {

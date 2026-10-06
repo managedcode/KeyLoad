@@ -6,8 +6,10 @@ internal static class TimeSeriesComparisonTargetErrors
 
     internal static InvalidOperationException Create(string errorCode, Exception? innerException = null)
     {
+        const string TimeSeriesComparisonTargetOperationFailedDetail = "A time-series comparison target operation failed.";
+
         ArgumentException.ThrowIfNullOrWhiteSpace(errorCode);
-        var error = new InvalidOperationException("A time-series comparison target operation failed.", innerException);
+        var error = new InvalidOperationException(TimeSeriesComparisonTargetOperationFailedDetail, innerException);
         error.Data[ErrorCodeDataKey] = errorCode;
         return error;
     }

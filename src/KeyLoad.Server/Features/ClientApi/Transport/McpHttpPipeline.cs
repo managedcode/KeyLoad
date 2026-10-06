@@ -15,15 +15,15 @@ internal static class McpHttpPipeline
         var governor = context.RequestServices.GetRequiredService<HttpAdmissionGovernor>();
         var executionOptions = context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>();
         var capacity = Capacity(context.Request, governor.Limits.MaxBodyBytes);
-        using var state = new McpRequestState(governor, context.RequestServices.GetRequiredService<McpMemoryBudget>(),
-            capacity, context.RequestAborted, executionOptions);
+        using var state = new McpRequestState(governor: governor, memory: context.RequestServices.GetRequiredService<McpMemoryBudget>(),
+            capacity: capacity, cancellationToken: context.RequestAborted, options: executionOptions);
         var principal = await DatabaseCredentialResolver.ReadAsync(context).ConfigureAwait(false);
         state.Authenticate(principal, context.RequestAborted);
         var originalBody = context.Request.Body;
         McpFrameBody? pendingBody = null;
         try
         {
-            var headers = McpTransportGuard.ReadHeaders(context.Request.Headers);
+            var headers = McpTransportGuard.ReadHeaders(context.Request.Headers, executionOptions);
             context.Items[ServerProtocol.PrincipalItem] = state.Principal;
             context.Items[StateItem] = state;
             if (HttpMethods.IsPost(context.Request.Method))
@@ -44,7 +44,7 @@ internal static class McpHttpPipeline
         {
             var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(McpTransportGuard));
-            McpTransportDiagnostics.Log(logger, error, context.Request.Headers);
+            McpTransportDiagnostics.Log(logger, error, context.Request.Headers, executionOptions);
             throw;
         }
         finally
@@ -55,11 +55,13 @@ internal static class McpHttpPipeline
         }
     }
 
+    private const int NoBodyCapacity = 0;
+
     private static int Capacity(HttpRequest request, int maximumBytes)
     {
         if (!HttpMethods.IsPost(request.Method))
-        { return 0; }
-        if (request.ContentLength is < 0 || request.ContentLength > maximumBytes)
+        { return NoBodyCapacity; }
+        if (request.ContentLength is < NoBodyCapacity || request.ContentLength > maximumBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerProtocol.BodyExceeded); }
         return checked((int)(request.ContentLength ?? maximumBytes));
     }

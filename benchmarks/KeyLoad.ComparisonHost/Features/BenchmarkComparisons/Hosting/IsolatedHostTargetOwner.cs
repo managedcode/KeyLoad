@@ -9,6 +9,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Owns only one native target and tracks partial HTTP construction until ownership transfers.</summary>
 internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecutionOptions> executionOptions,
+    IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
 {
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
@@ -37,9 +38,9 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
             IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex)),
             IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, [.. native.Replicas]),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions),
-            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions, executionOptions),
+            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),
             IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
@@ -75,7 +76,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(native);
-        return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
+        return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, admissionOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
         { RequireIsolatedAdmission = true };
     }
 

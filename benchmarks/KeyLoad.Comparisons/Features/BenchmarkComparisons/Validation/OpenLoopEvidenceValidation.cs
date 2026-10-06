@@ -4,6 +4,10 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopEvidenceValidation
 {
+    private const int NoObservedItems = 0;
+    private const int NoMeasuredRate = 0;
+    private const int NoItems = 0;
+
     internal static void Validate(OpenLoopComparisonReport report)
     {
         if (report.Worker is not { } worker)
@@ -36,8 +40,8 @@ internal static class OpenLoopEvidenceValidation
             && worker.Profile == report.ProfileId && worker.Scenario == report.Scenario
             && worker.Target == report.Target.Name && worker.SourceRevision == report.SourceRevision
             && worker.JobId == report.JobId && worker.RunId == report.RunId
-            && worker.Attempt == report.Attempt && report.JobId > 0 && report.RunId > 0
-            && report.Attempt > 0 && report.DatasetRecords > 0
+            && worker.Attempt == report.Attempt && report.JobId > NoObservedItems && report.RunId > NoObservedItems
+            && report.Attempt > NoObservedItems && report.DatasetRecords > NoObservedItems
             && report.DatasetSha256.Length == OpenLoopEvidenceContract.Sha256HexCharacters
             && report.SourceRevision?.Length == OpenLoopEvidenceContract.GitRevisionHexCharacters
             && OpenLoopRateContract.AcceptedRates.Contains(report.OfferedRatePerSecond);
@@ -47,9 +51,9 @@ internal static class OpenLoopEvidenceValidation
             && report.Timing.MissingSamples == report.Timing.SampleCapacity - report.Samples.Length
             && report.Timing.SampleCapacity == OpenLoopRateContract.SampleCapacity
             && ValidDimensions(report.Timing)
-            && double.IsFinite(report.ElapsedSeconds) && report.ElapsedSeconds > 0
-            && (!report.ScheduleComplete || report.Accounting.NotOffered == 0)
-            && (report.ScheduleComplete || report.Accounting.NotOffered > 0);
+            && double.IsFinite(report.ElapsedSeconds) && report.ElapsedSeconds > NoMeasuredRate
+            && (!report.ScheduleComplete || report.Accounting.NotOffered == NoObservedItems)
+            && (report.ScheduleComplete || report.Accounting.NotOffered > NoObservedItems);
 
     private static bool ValidTarget(OpenLoopComparisonReport report, IsolatedComparisonWorker worker)
         => Within(report.Storage, OpenLoopEvidenceContract.MaximumStorageDescriptionCharacters)
@@ -76,8 +80,8 @@ internal static class OpenLoopEvidenceValidation
             && ValidDimension(timing.ServiceTime, timing.SampleCapacity);
 
     private static bool ValidDimension(OpenLoopLatencyQuantiles dimension, int capacity)
-        => dimension.Denominator == capacity && dimension.SampleCount is >= 0
-            && dimension.SampleCount <= capacity && dimension.MissingSamples is >= 0
+        => dimension.Denominator == capacity && dimension.SampleCount is >= NoObservedItems
+            && dimension.SampleCount <= capacity && dimension.MissingSamples is >= NoItems
             && dimension.MissingSamples <= capacity
             && dimension.SampleCount == capacity - dimension.MissingSamples;
 
@@ -91,17 +95,19 @@ internal static class OpenLoopEvidenceValidation
 
     private static bool ValidTargetMetadata(TargetProfile target)
     {
+        const int NoItems = 0;
+        const int ZeroAccumulator = 0;
+
         var values = new[] { target.Name, target.Version, target.Topology, target.WriteAcknowledgement,
             target.ReadContract, target.Transport, target.Authorization,
             target.Cluster?.State ?? string.Empty };
         return values.All(value => Within(value, OpenLoopEvidenceContract.MaximumTargetFieldCharacters))
-            && values.Sum(value => Encoding.UTF8.GetByteCount(value)) <= OpenLoopEvidenceContract.MaximumTargetMetadataBytes
+            && values.Sum(Encoding.UTF8.GetByteCount) <= OpenLoopEvidenceContract.MaximumTargetMetadataBytes
             && (target.Image is null || Within(target.Image, OpenLoopEvidenceContract.MaximumTargetFieldCharacters))
-            && (target.Cluster?.Observations.Length ?? 0) <= OpenLoopEvidenceContract.MaximumClusterObservations
+            && (target.Cluster?.Observations.Length ?? NoItems) <= OpenLoopEvidenceContract.MaximumClusterObservations
             && (target.Cluster?.Observations.All(value => Within(value, OpenLoopEvidenceContract.MaximumObservationCharacters)) ?? false)
-            && (target.Cluster?.Observations.Sum(value => (long)Encoding.UTF8.GetByteCount(value)) ?? 0) <= OpenLoopEvidenceContract.MaximumObservationBytes;
+            && (target.Cluster?.Observations.Sum(value => (long)Encoding.UTF8.GetByteCount(value)) ?? ZeroAccumulator) <= OpenLoopEvidenceContract.MaximumObservationBytes;
     }
 
     private static bool Within(string value, int maximum) => !string.IsNullOrWhiteSpace(value) && value.Length <= maximum;
 }
-

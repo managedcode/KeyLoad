@@ -6,6 +6,9 @@ internal readonly record struct TimeSeriesIntensiveHash(ulong First, ulong Secon
 {
     internal static TimeSeriesIntensiveHash Parse(string hex)
     {
+        const int FirstElementIndex = 0;
+        const int AdjacentElementOffset = 1;
+
         ArgumentNullException.ThrowIfNull(hex);
         if (hex.Length != TimeSeriesIntensiveRuntimePolicy.HashBytes * TimeSeriesIntensiveRuntimePolicy.HexCharactersPerByte)
         {
@@ -13,10 +16,10 @@ internal readonly record struct TimeSeriesIntensiveHash(ulong First, ulong Secon
         }
 
         Span<byte> bytes = stackalloc byte[TimeSeriesIntensiveRuntimePolicy.HashBytes];
-        for (var index = 0; index < bytes.Length; index++)
+        for (var index = FirstElementIndex; index < bytes.Length; index++)
         {
             var first = index * TimeSeriesIntensiveRuntimePolicy.HexCharactersPerByte;
-            bytes[index] = (byte)(Nibble(hex[first]) * TimeSeriesIntensiveRuntimePolicy.HexRadix + Nibble(hex[first + 1]));
+            bytes[index] = (byte)(Nibble(hex[first]) * TimeSeriesIntensiveRuntimePolicy.HexRadix + Nibble(hex[first + AdjacentElementOffset]));
         }
 
         var width = TimeSeriesIntensiveRuntimePolicy.HashWordBytes;

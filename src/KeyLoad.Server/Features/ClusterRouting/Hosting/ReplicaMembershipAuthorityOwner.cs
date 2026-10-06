@@ -10,6 +10,7 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
     private readonly TaskCompletionSource startShutdown = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private IMembershipTable? provider;
     private Task? shutdown;
+    private const int NoActiveWork = 0;
     private int active;
     private bool admissionClosed;
     private bool disposed;
@@ -62,7 +63,7 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
             if (shutdown is not null)
             { return shutdown; }
             admissionClosed = true;
-            if (active == 0)
+            if (active == NoActiveWork)
             { drained.TrySetResult(); }
             shutdown = StopCoreAsync();
             work = shutdown;
@@ -109,7 +110,8 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
     private async Task StopCoreAsync()
     {
         await startShutdown.Task.ConfigureAwait(false);
-        var failures = new List<Exception>(2);
+        const int ShutdownObservationStages = 2;
+        var failures = new List<Exception>(ShutdownObservationStages);
         await ServerFailureObserver.ObserveAsync(stopping.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => drained.Task, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

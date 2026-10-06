@@ -7,10 +7,10 @@ internal static class TimeSeriesIntensiveReferenceWorkload
     private const long Epoch = 639028224000000000;
     private const string Tags = "{\"kind\":\"intensive\",\"revision\":1}";
 
-    internal static string Compute()
+    internal static string Compute(long operationTimeoutTicks = 300000000)
     {
         using var frame = new TimeSeriesIntensiveReferenceFramer("keyload.timeseries-intensive.workload");
-        Header(frame);
+        Header(frame, operationTimeoutTicks);
         frame.Text("seedInsertion");
         frame.Count(4096);
         for (var original = 4095; original >= 0; original--)
@@ -28,7 +28,7 @@ internal static class TimeSeriesIntensiveReferenceWorkload
         return frame.Finish();
     }
 
-    private static void Header(TimeSeriesIntensiveReferenceFramer frame)
+    private static void Header(TimeSeriesIntensiveReferenceFramer frame, long operationTimeoutTicks)
     {
         frame.Field("profile", "intensive-timeseries-4096-c16");
         frame.Field("randomSeed", 1729);
@@ -38,7 +38,7 @@ internal static class TimeSeriesIntensiveReferenceWorkload
         frame.Field("warmupCount", 256);
         frame.Field("repetitionCount", 5);
         frame.Field("concurrency", 16);
-        frame.Field("operationTimeoutTicks", 300000000);
+        frame.Field("operationTimeoutTicks", operationTimeoutTicks);
         frame.Field("rawLimit", 1000);
         frame.Field("maxSamples", 10000);
         frame.Field("maxWindows", 1000);

@@ -6,11 +6,14 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Measures bounded lossless chunk values against the actual native per-record codec; these are small development controls.</summary>
 [MemoryDiagnoser]
-[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 1, warmupCount: 3, iterationCount: 8, id: "SampleChunkCodecDevelopment")]
+[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 1, warmupCount: 3, iterationCount: 8, id: JobIdentity)]
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 [CategoriesColumn]
 public class SampleChunkSerializationBenchmarks
 {
+    private const string JobIdentity = "SampleChunkCodecDevelopment";
+    private const string EncodeCategory = "Encode";
+    private const string DecodeCategory = "Decode";
     private const int DefaultControlRecordCount = 32;
     private const string RequireStateFailureMessage = "The sample chunk benchmark is not initialized.";
 
@@ -43,25 +46,25 @@ public class SampleChunkSerializationBenchmarks
     /// <summary>Encodes one current native SampleRecord value per actual sample.</summary>
     /// <returns>The complete independent native value envelopes, excluding storage keys and journals.</returns>
     [Benchmark(Baseline = true)]
-    [BenchmarkCategory("Encode")]
+    [BenchmarkCategory(EncodeCategory)]
     public byte[][] NativeRecordsEncode() => RequireState().NativeEncode();
 
     /// <summary>Encodes the same samples through the bounded checksummed generated chunk envelope.</summary>
     /// <returns>The complete native chunk value envelope.</returns>
     [Benchmark]
-    [BenchmarkCategory("Encode")]
+    [BenchmarkCategory(EncodeCategory)]
     public byte[] ChunkEncode() => RequireState().ChunkEncode();
 
     /// <summary>Decodes the current independent native value envelopes under one operation budget.</summary>
     /// <returns>The owned decoded sample records.</returns>
     [Benchmark(Baseline = true)]
-    [BenchmarkCategory("Decode")]
+    [BenchmarkCategory(DecodeCategory)]
     public SampleRecord[] NativeRecordsDecode() => RequireState().NativeDecode();
 
     /// <summary>Decodes the same samples from the bounded lossless chunk after charging its actual bytes.</summary>
     /// <returns>The owned decoded sample records.</returns>
     [Benchmark]
-    [BenchmarkCategory("Decode")]
+    [BenchmarkCategory(DecodeCategory)]
     public SampleRecord[] ChunkDecode() => RequireState().ChunkDecode();
 
     /// <summary>Releases the corpus after a measurement process; repeated cleanup is harmless.</summary>

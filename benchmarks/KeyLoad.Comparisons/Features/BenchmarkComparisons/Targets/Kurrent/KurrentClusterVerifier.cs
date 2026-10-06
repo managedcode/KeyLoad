@@ -9,11 +9,12 @@ internal sealed record KurrentClusterProof(KurrentDBClient[] NodeClients);
 
 internal static class KurrentClusterVerifier
 {
-    public static async Task<KurrentClusterProof> VerifyAsync(string connectionString, HttpClient[] httpClients,
-        ComparisonTopology topology, TimeSpan timeout, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
+    public static async Task<KurrentClusterProof> VerifyAsync(string connectionString, HttpClient[] httpClients, ComparisonTopology topology,
+        TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
     {
         ValidateHttpClientSet(httpClients, topology);
-        await ReadReadyViewsAsync(httpClients, topology, timeout, cancellationToken, options);
+        await ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout, cancellationToken: cancellationToken,
+            options: options);
         var nodeClients = new List<KurrentDBClient>(httpClients.Length);
         try
         {
@@ -35,15 +36,15 @@ internal static class KurrentClusterVerifier
         }
     }
 
-    public static Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients,
-        HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData,
-        KurrentStreamOwnership ownership, TimeSpan timeout,
-        CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
-        => KurrentReplicaProbe.VerifyCopyAsync(writer, nodeClients, httpClients, topology, stream, eventData, ownership,
-            timeout, cancellationToken, options);
+    public static Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients, HttpClient[] httpClients,
+        ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentStreamOwnership ownership, TimeSpan timeout,
+        IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
+        => KurrentReplicaProbe.VerifyCopyAsync(writer: writer, nodeClients: nodeClients, httpClients: httpClients, topology: topology,
+            stream: stream, eventData: eventData, ownership: ownership, timeout: timeout, cancellationToken: cancellationToken,
+            options: options);
 
-    internal static async Task<KurrentGossipView[]> ReadReadyViewsAsync(HttpClient[] clients,
-        ComparisonTopology topology, TimeSpan timeout, CancellationToken cancellationToken, IOptions<ComparisonLifecycleOptions> options)
+    internal static async Task<KurrentGossipView[]> ReadReadyViewsAsync(HttpClient[] clients, ComparisonTopology topology, TimeSpan timeout,
+        IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
     {
         using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         limit.CancelAfter(timeout);
@@ -68,6 +69,8 @@ internal static class KurrentClusterVerifier
     internal static ClusterEvidence CreateEvidence(KurrentGossipView[] views, ComparisonTopology topology,
         KurrentAppendCut? appendCut = null)
     {
+        const int SingleItemCount = 1;
+
         var nodes = views.Select(view => view.LocalMember).OrderBy(member => member.Id, StringComparer.Ordinal).ToArray();
         var observations = nodes.SelectMany(member => new[]
         {
@@ -86,7 +89,7 @@ internal static class KurrentClusterVerifier
             observations.Add(KurrentConstants.ObservationCheckpointEvidence);
         }
         return new ClusterEvidence(nodes.Length, nodes.Length,
-            ComparisonTopologies.NodeCount(topology) > 1 ? KurrentConstants.HealthyState : KurrentConstants.SingleState,
+            ComparisonTopologies.NodeCount(topology) > SingleItemCount ? KurrentConstants.HealthyState : KurrentConstants.SingleState,
             ImmutableCollectionsMarshal.AsImmutableArray(observations.ToArray()));
     }
 

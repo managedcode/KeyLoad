@@ -28,8 +28,8 @@ internal sealed class DatabaseIdentityMiddleware(RequestDelegate next)
             body.MaxRequestBodySize = incoming.MaxBodyBytes;
         }
         var reply = await DatabaseCredentialResolver.ReadAsync(context).ConfigureAwait(false);
-        var principal = McpNativeAuthentication.ReadPrincipal(reply.Span, context.RequestAborted,
-            context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>());
+        var principal = McpNativeAuthentication.ReadPrincipal(payload: reply.Span, cancellationToken: context.RequestAborted,
+            options: context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>());
         incoming.Bind(principal, context.RequestAborted);
         context.Items[ServerProtocol.PrincipalItem] = principal;
         await next(context).ConfigureAwait(false);

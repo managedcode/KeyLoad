@@ -4,6 +4,12 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class Neo4jMutationOperations
 {
+    private const string ExecuteAsyncCREATENText = "CREATE (n:";
+    private const string ExecuteAsyncIdIdJsonJsonRETURNCountNText = " {id:$id,json:$json}) RETURN count(n)";
+    private const string ExecuteAsyncMATCHNText = "MATCH (n:";
+    private const string ExecuteAsyncIdIdSETNJsonJsonRETURNCountNText = " {id:$id}) SET n.json=$json RETURN count(n)";
+    private const string ExecuteAsyncIdIdWITHNNIdASDeletedIdDETACHDELETENRETURNCountDeletedIdText = " {id:$id}) WITH n,n.id AS deletedId DETACH DELETE n RETURN count(deletedId)";
+
     private const string NativeConstraintConflict = "Neo4j:Neo.ClientError.Schema.ConstraintValidationFailed";
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
@@ -14,9 +20,9 @@ internal static class Neo4jMutationOperations
     {
         var statement = scenario switch
         {
-            Scenario.DocumentWrite => $"CREATE (n:{label} {{id:$id,json:$json}}) RETURN count(n)",
-            Scenario.DocumentUpdate => $"MATCH (n:{label} {{id:$id}}) SET n.json=$json RETURN count(n)",
-            Scenario.DocumentDelete => $"MATCH (n:{label} {{id:$id}}) WITH n,n.id AS deletedId DETACH DELETE n RETURN count(deletedId)",
+            Scenario.DocumentWrite => $"{ExecuteAsyncCREATENText}{label}{ExecuteAsyncIdIdJsonJsonRETURNCountNText}",
+            Scenario.DocumentUpdate => $"{ExecuteAsyncMATCHNText}{label}{ExecuteAsyncIdIdSETNJsonJsonRETURNCountNText}",
+            Scenario.DocumentDelete => $"{ExecuteAsyncMATCHNText}{label}{ExecuteAsyncIdIdWITHNNIdASDeletedIdDETACHDELETENRETURNCountDeletedIdText}",
             _ => throw new ArgumentOutOfRangeException(nameof(scenario))
         };
         try
@@ -33,17 +39,21 @@ internal static class Neo4jMutationOperations
 
     internal static void RequireAffected(JsonElement rows, Scenario scenario)
     {
-        if (rows.GetArrayLength() != 1 || rows[0].GetArrayLength() != 1)
+        const int SingleItemCount = 1;
+        const int FirstElementIndex = 0;
+        const int NoObservedItems = 0;
+
+        if (rows.GetArrayLength() != SingleItemCount || rows[FirstElementIndex].GetArrayLength() != SingleItemCount)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }
-        var count = rows[0][0].GetInt64();
-        if (count == 0 && scenario is Scenario.DocumentUpdate or Scenario.DocumentDelete)
+        var count = rows[FirstElementIndex][FirstElementIndex].GetInt64();
+        if (count == NoObservedItems && scenario is Scenario.DocumentUpdate or Scenario.DocumentDelete)
         {
             throw new ComparisonFailureException(scenario == Scenario.DocumentUpdate
                 ? ComparisonMutationFailures.UpdateMissing : ComparisonMutationFailures.DeleteMissing);
         }
-        if (count != 1)
+        if (count != SingleItemCount)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
         }

@@ -38,13 +38,13 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     public int? OpenLoopRate { get; init; }
 
     /// <summary>Gets the legacy control options with the selected native topology.</summary>
-    public ComparisonOptions Options
+    public ComparisonOptions Options => CreateExecutionOptions().Value;
+
+    [ConfigurationBinding]
+    private ComparisonOptions CreateSelectedSnapshot()
     {
-        get
-        {
-            Validate();
-            return IsolatedComparisonContract.Current.Options with { Topology = ComparisonTopologies.FromNodeCount(NodeCount) };
-        }
+        Validate();
+        return IsolatedComparisonContract.Current.Options with { Topology = ComparisonTopologies.FromNodeCount(NodeCount) };
     }
 
     /// <summary>Creates validated native execution options from the authenticated immutable manifest.</summary>
@@ -52,9 +52,9 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     [ConfigurationBinding]
     public IOptions<ComparisonOptions> CreateExecutionOptions()
     {
-        var snapshot = Options;
-        snapshot.Validate();
-        return Microsoft.Extensions.Options.Options.Create(snapshot);
+        var options = new OptionsManager<ComparisonOptions>(new SelectedWorkloadFactory(this));
+        _ = options.Value;
+        return options;
     }
 
     /// <summary>Validates the closed engine/node/scenario/profile inventory before allocating resources.</summary>
@@ -116,7 +116,7 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     }
 
     [ConfigurationBinding]
-    private static IOptions<ComparisonWorkerSelectionOptions> ReadSelection(IConfiguration configuration)
+    private static OptionsManager<ComparisonWorkerSelectionOptions> ReadSelection(IConfiguration configuration)
     {
         var options = new OptionsManager<ComparisonWorkerSelectionOptions>(new OptionsFactory<ComparisonWorkerSelectionOptions>(
             [new ConfigureFromConfigurationOptions<ComparisonWorkerSelectionOptions>(
@@ -177,4 +177,16 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
             || selection.Seed is not null || selection.Dimensions is not null || selection.TopK is not null
             || selection.TimeoutSeconds is not null || selection.GraphVertices is not null || selection.GraphFanOut is not null
             || selection.GraphDepth is not null;
+
+    [ConfigurationBinding]
+    private sealed class SelectedWorkloadFactory(ComparisonWorkerSelection selection) : IOptionsFactory<ComparisonOptions>
+    {
+        public ComparisonOptions Create(string name)
+        {
+            var snapshot = selection.CreateSelectedSnapshot();
+            snapshot.Validate();
+            return snapshot;
+        }
+    }
+
 }

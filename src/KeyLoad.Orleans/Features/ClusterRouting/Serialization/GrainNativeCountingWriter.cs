@@ -1,16 +1,22 @@
+using Microsoft.Extensions.Options;
 using System.Buffers;
 
 namespace KeyLoad.Orleans;
 
 internal sealed class GrainNativeCountingWriter : IBufferWriter<byte>, IDisposable
 {
+    private const int UnspecifiedSizeHint = 0;
+    private readonly GrainRoutingOptions settings;
     private readonly int maximumBytes;
     private readonly CancellationToken cancellationToken;
     private byte[] scratch = Array.Empty<byte>();
     private bool disposed;
 
-    internal GrainNativeCountingWriter(int maximumBytes, CancellationToken cancellationToken)
+    internal GrainNativeCountingWriter(int maximumBytes, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(options);
+        settings = options.Value;
+        settings.Validate();
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         this.maximumBytes = maximumBytes;
         this.cancellationToken = cancellationToken;
@@ -34,13 +40,13 @@ internal sealed class GrainNativeCountingWriter : IBufferWriter<byte>, IDisposab
         scratch.AsSpan(StartEmptyCount, count).Clear();
     }
 
-    public Memory<byte> GetMemory(int sizeHint = 0)
+    public Memory<byte> GetMemory(int sizeHint = UnspecifiedSizeHint)
     {
         EnsureCapacity(sizeHint);
         return scratch;
     }
 
-    public Span<byte> GetSpan(int sizeHint = 0)
+    public Span<byte> GetSpan(int sizeHint = UnspecifiedSizeHint)
     {
         EnsureCapacity(sizeHint);
         return scratch;
@@ -50,8 +56,8 @@ internal sealed class GrainNativeCountingWriter : IBufferWriter<byte>, IDisposab
     {
         CheckAvailable();
         ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
-        var required = Math.Max(sizeHint, 256);
-        if (required > GrainRequestStreamProtocol.MaximumScratchBytes)
+        var required = Math.Max(sizeHint, settings.MinimumScratchBytes);
+        if (required > settings.MaximumScratchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
         }

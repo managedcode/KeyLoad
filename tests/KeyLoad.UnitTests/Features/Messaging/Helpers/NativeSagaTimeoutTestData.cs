@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class NativeSagaTimeoutTestData
 {
+    internal const string RootPrincipalId = "root";
     private const string SagaQueue = "jobs";
     private const string TimeoutQueue = "timeouts";
     internal const string SagaState = "{\"phase\":\"waiting-payment\"}";

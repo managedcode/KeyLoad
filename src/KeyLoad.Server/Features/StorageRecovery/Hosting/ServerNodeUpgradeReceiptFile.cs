@@ -10,9 +10,11 @@ internal static class ServerNodeUpgradeReceiptFile
 
     internal static void Write<T>(string path, T receipt, ulong magic, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
+        var bounds = executionOptions.Value;
+        bounds.Validate();
         var payload = NativeSerialization.Serialize(receipt);
         var envelope = NativeSerialization.Serialize(new ServerNodeUpgradeEnvelope(payload, SHA256.HashData(payload)));
-        if (envelope.Length > ServerNodeUpgradeProtocol.MaximumReceiptBytes)
+        if (envelope.Length > bounds.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerNodeUpgradeProtocol.Limit); }
         using var file = ServerNodeUpgradeFiles.CreatePrivateFile(path, executionOptions: executionOptions);
         Span<byte> header = stackalloc byte[HeaderBytes];
@@ -27,15 +29,17 @@ internal static class ServerNodeUpgradeReceiptFile
     {
         const int LengthValidationBoundary = 0;
 
+        var bounds = executionOptions.Value;
+        bounds.Validate();
         ServerNodeUpgradeFiles.RequireRegularFile(path);
         using var file = ServerNodeUpgradeFiles.OpenRead(path, executionOptions: executionOptions);
-        if (file.Length <= HeaderBytes || file.Length > HeaderBytes + ServerNodeUpgradeProtocol.MaximumReceiptBytes)
+        if (file.Length <= HeaderBytes || file.Length > HeaderBytes + bounds.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         Span<byte> header = stackalloc byte[HeaderBytes];
         file.ReadExactly(header);
         var length = BinaryPrimitives.ReadInt32LittleEndian(header[sizeof(ulong)..]);
         if (BinaryPrimitives.ReadUInt64LittleEndian(header) != magic || length <= LengthValidationBoundary
-            || length != file.Length - HeaderBytes || length > ServerNodeUpgradeProtocol.MaximumReceiptBytes)
+            || length != file.Length - HeaderBytes || length > bounds.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         var encoded = new byte[length];
         file.ReadExactly(encoded);

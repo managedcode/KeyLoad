@@ -52,7 +52,7 @@ public sealed class ReplicaMembershipTable : IMembershipTable
         settings = membershipOptions.Value;
         var execution = executionOptions.Value;
         requestTimeout = execution.CommandTimeout + execution.ReadBarrierTimeout;
-        store = new(database, coordinator, endpoint, internalPrincipal, maximumRows);
+        store = new(database, coordinator, endpoint, internalPrincipal, membershipOptions, maximumRows);
         initialization = new(store, replica, membershipOptions, time, maximumRows, startupCancellation);
     }
 

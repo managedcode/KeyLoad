@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Query;
 using KeyLoad.Orleans;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -24,7 +25,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             if (parameters is null || !string.Equals(McpGatewayMetaProtocol.NameFor(state.MetaOperation),
                 parameters.Name, StringComparison.Ordinal))
             { throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments); }
-            var meta = McpGatewayMetaArgumentReader.Read(state.MetaOperation, parameters.Arguments);
+            var meta = McpGatewayMetaArgumentReader.Read(state.MetaOperation, parameters.Arguments, state.ExecutionOptions);
             return state.MetaOperation switch
             {
                 McpGatewayMetaOperation.Search => await SearchAsync(meta, cancellationToken).ConfigureAwait(false),
@@ -57,7 +58,8 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
             var operation = descriptor.IsAdapter
                 ? SqlMcpCatalog.Decode(arguments, state.MaximumPayloadBytes,
-                    context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(), cancellationToken)
+                    context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(),
+                    context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
                 operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);

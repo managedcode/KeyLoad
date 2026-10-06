@@ -45,7 +45,7 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
-            return GrainReplyFactory.Failure(error, true, diagnostics, requestId, stage, cancellationToken);
+            return GrainReplyFactory.Failure(error: error, command: true, diagnostics: diagnostics, requestId: requestId, stage: stage, cancellationToken: cancellationToken, options: options);
         }
     }
 }

@@ -30,11 +30,13 @@ internal static class PostgresGraphOperations
     private static async Task<ImmutableArray<string>> ReadVerticesAsync(NpgsqlCommand command,
         CancellationToken cancellationToken)
     {
+        const int FirstColumnIndex = 0;
+
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var vertices = new List<string>();
         while (await reader.ReadAsync(cancellationToken))
         {
-            vertices.Add(reader.GetString(0));
+            vertices.Add(reader.GetString(FirstColumnIndex));
         }
 
         return ImmutableCollectionsMarshal.AsImmutableArray(vertices.ToArray());

@@ -4,6 +4,17 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RabbitQuorumProbe
 {
+    private const string ReadReadyConnectedRunningDiscNodesText = "connected running disc nodes=";
+    private const string ReadReadyQuorumMembersOnlineText = "quorum members online=";
+    private const string ReadReadyQueueTypeText = "queue type=";
+    private const string ReadReadyRunningNodesText = "running nodes=";
+    private const string ReadReadyQueueMembersText = "queue members=";
+    private const string ReadReadyOnlineMembersText = "online members=";
+    private const string ReadReadyQuorumText = "quorum=";
+    private const string ReadReadyOfText = " of ";
+
+    private const int NoItems = 0;
+
     private const string NodesPath = "/api/nodes";
     private const string OverviewPath = "/api/overview";
     private const string QueuesPath = "/api/queues/%2F/";
@@ -30,6 +41,13 @@ internal static class RabbitQuorumProbe
     internal static (string Version, ClusterEvidence Evidence)? ReadReady(JsonElement nodesJson, JsonElement overview,
         JsonElement detail, string queue, ComparisonTopology topology)
     {
+        const int SingleItemCount = 1;
+        const string HealthyNativeQuorumClusterToken = "healthy native quorum cluster";
+        const string SingleNativeQuorumNodeToken = "single native quorum node";
+        const char MemberSeparator = ',';
+        const int MajorityDivisor = 2;
+        const int MajorityVoteOffset = 1;
+
         var expected = ComparisonTopologies.NodeCount(topology);
         var nativeNodes = nodesJson.EnumerateArray().ToArray();
         var nodes = nativeNodes.Select(node => node.GetProperty(NameField).GetString() ?? string.Empty)
@@ -43,13 +61,13 @@ internal static class RabbitQuorumProbe
             return null;
         }
 
-        var state = expected > 1
-            ? "healthy native quorum cluster"
-            : "single native quorum node";
+        var state = expected > SingleItemCount
+            ? HealthyNativeQuorumClusterToken
+            : SingleNativeQuorumNodeToken;
         var evidence = new ClusterEvidence(expected, expected, state,
-            [$"connected running disc nodes={nodes.Length}", $"quorum members online={online.Length}", $"queue type={QuorumType}",
-                $"running nodes={string.Join(',', nodes)}", $"queue members={string.Join(',', members)}",
-                $"online members={string.Join(',', online)}", $"quorum={expected / 2 + 1} of {expected}"]);
+            [$"{ReadReadyConnectedRunningDiscNodesText}{nodes.Length}", $"{ReadReadyQuorumMembersOnlineText}{online.Length}", $"{ReadReadyQueueTypeText}{QuorumType}",
+                $"{ReadReadyRunningNodesText}{string.Join(MemberSeparator, nodes)}", $"{ReadReadyQueueMembersText}{string.Join(MemberSeparator, members)}",
+                $"{ReadReadyOnlineMembersText}{string.Join(MemberSeparator, online)}", $"{ReadReadyQuorumText}{expected / MajorityDivisor + MajorityVoteOffset}{ReadReadyOfText}{expected}"]);
         return (version, evidence);
     }
 
@@ -62,13 +80,13 @@ internal static class RabbitQuorumProbe
 
     private static bool IsReady(JsonElement[] nativeNodes, string[] nodes, string[] members, string[] online,
         JsonElement detail, string version, int expected)
-        => nodes.Length == expected && nodes.All(node => node.Length != 0) &&
+        => nodes.Length == expected && nodes.All(node => node.Length != NoItems) &&
            nodes.Distinct(StringComparer.Ordinal).Count() == expected &&
            members.Length == expected && members.SequenceEqual(nodes, StringComparer.Ordinal) &&
            online.SequenceEqual(members, StringComparer.Ordinal) && detail.GetProperty(TypeField).GetString() == QuorumType &&
            detail.GetProperty(DurableField).GetBoolean() &&
            nativeNodes.All(node => node.GetProperty(RunningField).GetBoolean() &&
-               node.GetProperty(NodeTypeField).GetString() == DiskNodeType) && version.Length != 0;
+               node.GetProperty(NodeTypeField).GetString() == DiskNodeType) && version.Length != NoItems;
 
     private static string[] ReadNames(JsonElement detail, string field)
         => detail.GetProperty(field).EnumerateArray().Select(item => item.GetString() ?? string.Empty)

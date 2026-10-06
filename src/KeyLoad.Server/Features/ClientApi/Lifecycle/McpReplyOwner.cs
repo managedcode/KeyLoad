@@ -32,6 +32,7 @@ internal sealed class McpReplyOwner : IDisposable
     /// <param name="canonical">The borrowed complete canonical JSON value.</param>
     /// <param name="requestId">The actual database execution identity.</param>
     /// <param name="maximumBytes">The inclusive complete wrapper ceiling and private writer capacity.</param>
+    /// <param name="options">The centrally validated native MCP framing policy.</param>
     /// <returns>An owner that must survive native response serialization and draining.</returns>
     internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid? requestId, int maximumBytes,
         IOptions<McpExecutionOptions> options)

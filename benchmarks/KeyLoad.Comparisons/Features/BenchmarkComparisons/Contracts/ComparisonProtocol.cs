@@ -11,14 +11,22 @@ internal static class ComparisonDeadline
 {
     public static CancellationTokenSource Create(int seconds, CancellationToken cancellationToken)
     {
+        return Create(TimeSpan.FromSeconds(seconds), cancellationToken);
+    }
+
+    internal static CancellationTokenSource Create(TimeSpan timeout, CancellationToken cancellationToken)
+    {
         var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(seconds));
+        deadline.CancelAfter(timeout);
         return deadline;
     }
 }
 
 internal static class ComparisonErrors
 {
+    private const string LocationSeparator = " at ";
+    private const string SentencePeriod = ".";
+
     public static string Safe(Exception error) => error is ComparisonFailureException ? error.Message
-        : $"{error.GetType().Name} at {error.TargetSite?.DeclaringType?.Name}.{error.TargetSite?.Name}";
+        : $"{error.GetType().Name}{LocationSeparator}{error.TargetSite?.DeclaringType?.Name}{SentencePeriod}{error.TargetSite?.Name}";
 }

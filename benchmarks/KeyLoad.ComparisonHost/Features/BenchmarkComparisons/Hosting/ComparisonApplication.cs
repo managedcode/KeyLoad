@@ -21,6 +21,7 @@ internal static class ComparisonApplication
         var startup = ComparisonStartupRegistration.Read(configuration).Value;
         var executionOptions = NativeComparisonExecutionRegistration.Read(configuration);
         var owner = new ComparisonTargetOwner(executionOptions,
+            NativeComparisonExecutionRegistration.ReadIsolatedAdmission(configuration),
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
             NativeComparisonExecutionRegistration.ReadClient(configuration),
             NativeComparisonExecutionRegistration.ReadTranslation(configuration));
@@ -42,7 +43,7 @@ internal static class ComparisonApplication
             var settingsOptions = ComparisonHostSettings.ReadOptions(configuration);
             var settings = settingsOptions.Value;
             var targets = owner.CreateTargets(settings);
-            return await RunComparisonAsync(settings, targets, cancellationLifetime.Token, executionOptions);
+            return await RunComparisonAsync(settings, targets, executionOptions, cancellationLifetime.Token);
         }
         finally
         {
@@ -59,7 +60,7 @@ internal static class ComparisonApplication
     }
 
     private static async Task<int> RunComparisonAsync(ComparisonHostSettings settings,
-        KeyLoad.Comparisons.IComparisonTarget[] targets, CancellationToken cancellationToken, IOptions<NativeComparisonExecutionOptions> executionOptions)
+        KeyLoad.Comparisons.IComparisonTarget[] targets, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.WorkloadOptions, executionOptions, Console.WriteLine);
         var report = await runner.RunAsync(targets, settings.SourceRevision, cancellationToken, settings.Storage);
@@ -72,7 +73,7 @@ internal static class ComparisonApplication
             };
         }
 
-        await KeyLoad.Comparisons.ReportWriter.WriteAsync(report, settings.OutputDirectory, cancellationToken);
+        await KeyLoad.Comparisons.ReportWriter.WriteAsync(report, settings.OutputDirectory, executionOptions, cancellationToken);
         Console.WriteLine(KeyLoad.Comparisons.ReportWriter.Markdown(report));
         Console.WriteLine(ComparisonHostConstants.ReportsPrefix + settings.OutputDirectory);
         return report.Cases.Any(item => item.Status == ComparisonHostConstants.FailedStatus)

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
@@ -5,30 +6,38 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimescaleTimeSeriesIntensiveSession : IAsyncDisposable
 {
     private readonly NpgsqlDataSource dataSource;
+    private readonly NativeComparisonExecutionOptions execution;
 
-    internal TimescaleTimeSeriesIntensiveSession(string connectionString, string schemaName)
+    internal int InitialReadCapacity => execution.TimeSeriesInitialReadCapacity;
+
+    internal TimescaleTimeSeriesIntensiveSession(string connectionString, string schemaName, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
-        dataSource = NpgsqlDataSource.Create(CreateConnectionSettings(connectionString, schemaName));
+        execution = executionOptions.Value;
+        execution.Validate();
+        dataSource = NpgsqlDataSource.Create(CreateConnectionSettings(connectionString, schemaName, executionOptions));
     }
 
-    internal static NpgsqlConnectionStringBuilder CreateConnectionSettings(string connectionString, string schemaName)
+    internal static NpgsqlConnectionStringBuilder CreateConnectionSettings(string connectionString, string schemaName, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
+        const string PgCatalogPgTempToken = ",pg_catalog,pg_temp";
+
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         TimescaleSchemaLifecycle.ValidateSchemaName(schemaName);
         return new NpgsqlConnectionStringBuilder(connectionString)
         {
             Pooling = true,
-            Timeout = TimescaleTimeSeriesIntensiveProtocol.ConnectionTimeoutSeconds,
-            CommandTimeout = TimescaleTimeSeriesIntensiveProtocol.CommandTimeoutSeconds,
-            CancellationTimeout = TimescaleTimeSeriesIntensiveProtocol.CancellationTimeoutMilliseconds,
-            MinPoolSize = TimescaleTimeSeriesIntensiveProtocol.MinimumPoolSize,
-            MaxPoolSize = TimescaleTimeSeriesIntensiveProtocol.MaximumPoolSize,
+            Timeout = checked((int)execution.TimescaleConnectionTimeout.TotalSeconds),
+            CommandTimeout = checked((int)execution.TimescaleCommandTimeout.TotalSeconds),
+            CancellationTimeout = execution.TimescaleCancellationTimeoutMilliseconds,
+            MinPoolSize = execution.TimescaleMinimumPoolSize,
+            MaxPoolSize = execution.TimescaleMaximumPoolSize,
             Enlist = false,
             Multiplexing = false,
             NoResetOnClose = false,
             IncludeErrorDetail = false,
             LogParameters = false,
-            SearchPath = schemaName + ",pg_catalog,pg_temp"
+            SearchPath = schemaName + PgCatalogPgTempToken
         };
     }
 

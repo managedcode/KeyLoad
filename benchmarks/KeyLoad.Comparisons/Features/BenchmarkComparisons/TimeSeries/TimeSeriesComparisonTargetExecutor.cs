@@ -7,14 +7,19 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
 {
     internal async Task ExecuteAsync(ITimeSeriesPersistentTarget target, CancellationToken cancellationToken)
     {
-        if (!await ExecuteSetupAsync(target, "initialize",
+        const string IdempotentSeedRetryToken = "idempotent-seed-retry";
+
+        const string InitializeToken = "initialize";
+        const string SeedToken = "seed";
+
+        if (!await ExecuteSetupAsync(target, InitializeToken,
                 () => target.InitializeAsync(workload, cancellationToken)))
         {
             return;
         }
 
-        if (!await ExecuteSetupAsync(target, "seed", () => target.SeedAsync(workload, cancellationToken)) ||
-            !await ExecuteSetupAsync(target, "idempotent-seed-retry",
+        if (!await ExecuteSetupAsync(target, SeedToken, () => target.SeedAsync(workload, cancellationToken)) ||
+            !await ExecuteSetupAsync(target, IdempotentSeedRetryToken,
                 () => target.SeedAsync(workload, cancellationToken)))
         {
             return;
@@ -43,6 +48,8 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
     private async Task<bool> ExecuteSetupAsync(ITimeSeriesPersistentTarget target, string operation,
         Func<Task> action)
     {
+        const string CancelledToken = "Cancelled";
+
         try
         {
             await action();
@@ -56,17 +63,20 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
         }
         catch (OperationCanceledException)
         {
-            recorder.RecordSetup(target.Metadata.Name, operation, false, "Cancelled");
+            recorder.RecordSetup(target.Metadata.Name, operation, false, CancelledToken);
             return false;
         }
     }
 
     private async Task ExecuteReadsAsync(ITimeSeriesPersistentTarget target, CancellationToken cancellationToken)
     {
+        const int NoObservedItems = 0;
+        const string CancelledToken = "Cancelled";
+
         foreach (var range in workload.ReadRanges)
         {
             var measure = range.ExpectedErrorCode is null;
-            var started = measure ? Stopwatch.GetTimestamp() : 0;
+            var started = measure ? Stopwatch.GetTimestamp() : NoObservedItems;
             try
             {
                 var result = await target.ReadAsync(workload, range, cancellationToken);
@@ -80,7 +90,7 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
             }
             catch (OperationCanceledException)
             {
-                recorder.RecordTargetFailure(target.Metadata.Name, range.Name, "Cancelled");
+                recorder.RecordTargetFailure(target.Metadata.Name, range.Name, CancelledToken);
                 return;
             }
         }
@@ -89,6 +99,9 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
     private async Task ExecuteAggregationAsync(ITimeSeriesPersistentTarget target,
         ITimeSeriesAggregationTarget aggregator, CancellationToken cancellationToken)
     {
+        const string BucketSumOracleToken = "bucket-sum-oracle";
+        const string CancelledToken = "Cancelled";
+
         var started = Stopwatch.GetTimestamp();
         try
         {
@@ -98,12 +111,12 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
         }
         catch (InvalidOperationException error) when (TimeSeriesComparisonTargetErrors.TryGetCode(error, out _))
         {
-            recorder.RecordTargetFailure(target.Metadata.Name, "bucket-sum-oracle", ErrorCode(error),
+            recorder.RecordTargetFailure(target.Metadata.Name, BucketSumOracleToken, ErrorCode(error),
                 Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
         catch (OperationCanceledException)
         {
-            recorder.RecordTargetFailure(target.Metadata.Name, "bucket-sum-oracle", "Cancelled");
+            recorder.RecordTargetFailure(target.Metadata.Name, BucketSumOracleToken, CancelledToken);
         }
     }
 

@@ -30,9 +30,12 @@ internal static class IsolatedKeyLoadResources
             .Single(parameter => parameter.Name == AdminParameter));
         context.Runner.WithEnvironment(AdminEnvironment, admin);
         context.BindImage(image.Reference);
+        var runtime = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder);
+        var admission = KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.CreateHttpOptions(runtime.IsolatedAdmission);
+        IsolatedKeyLoadAdmission.ForwardSelection(context.Runner, runtime.IsolatedAdmission);
         for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
-            IsolatedKeyLoadAdmission.Apply(nodes[index]);
+            IsolatedKeyLoadAdmission.Apply(nodes[index], admission, runtime.IsolatedReplayAdmission);
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }
     }

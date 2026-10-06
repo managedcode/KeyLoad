@@ -6,8 +6,25 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopFailure
 {
+    internal static async Task<Exception?> ObserveAsync(Task original)
+    {
+        try
+        {
+            await original.ConfigureAwait(false);
+            return null;
+        }
+        catch (Exception failure) when (original.IsFaulted || original.IsCanceled)
+        {
+            return failure;
+        }
+    }
+
     internal static Exception? Combine(Exception? primary, ImmutableArray<Exception> cleanup)
     {
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+        const int FirstElementIndex = 0;
+
         var failures = ImmutableArray.CreateBuilder<Exception>();
         if (primary is not null)
         {
@@ -34,15 +51,15 @@ internal static class OpenLoopFailure
                 }
             }
             retained = ordered.ToImmutable();
-            if (retained.Length == 1)
+            if (retained.Length == SingleItemCount)
             {
                 ExceptionDispatchInfo.Capture(fatal).Throw();
             }
         }
         return retained.Length switch
         {
-            0 => null,
-            1 => retained[0],
+            NoObservedItems => null,
+            SingleItemCount => retained[FirstElementIndex],
             _ => new AggregateException(OpenLoopFailureCodes.OpenLoopMeasurementFailed, retained)
         };
     }

@@ -4,12 +4,12 @@
     "status": "in_progress",
     "feature": "docs/Features/ClusterRouting/ExecutionPrimitives.md",
     "decision": "docs/ADR/ADR-110-native-orleans-execution-primitives.md",
-    "sourceStage": "due_apply_wake_native_telemetry_rf3_journaling_and_native_saga_jobs_join_in_progress",
+    "sourceStage": "due_apply_wake_native_telemetry_rf3_journaling_native_saga_jobs_and_runtime_reclaim_regression_source_joined_unqualified",
     "runtimeAdoption": "docs/Features/ClusterRouting/RuntimeAdoption.md",
     "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
     "restorePassed": true,
     "canonicalBuildPassed": false,
-    "verificationStage": "canonical_join_build_failed_2026_10_06_own_repairs_and_unrelated_quality_migration_open",
+    "verificationStage": "canonical_build_failed_456_shared_CrashHost_and_Comparisons_diagnostics_formatter_failed_1117_shared_diagnostics_no_owned_path_findings_2026_10_06",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -19,13 +19,14 @@
     "remaining": [
       "Freeze concrete interchangeable computation and bounded worker keys/quotas before native worker adoption",
       "Freeze actual long-operation control and disposable hint methods before selective interleaving or OneWay adoption",
-      "Finish native journal/provider/job source joins and all introduced compiler/analyzer repairs",
       "Obtain passing final canonical solution build and formatting after the shared quality migration",
       "Qualify reader upgrade/backup/rollback with a frozen old executable, native job replay and owner adoption",
       "Freeze concrete native Streams outbox/provider/subscription and transaction-storage/visibility contracts before adoption",
       "Qualify per-silo lifecycle, native telemetry and measured collection/queue/repartitioner resource contracts",
       "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
-    ]
+    ],
+    "canonicalFormatterPassed": false,
+    "localDevelopmentReceipt": "docs/implementation/native-orleans-development-2026-10-06.json"
   },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",

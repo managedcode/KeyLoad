@@ -17,7 +17,7 @@ internal sealed class BenchmarkTopologyTargetTests
     public async Task AcIso004DefaultTargetRetainsItsRequiredRf3Contract()
     {
         using var http = new HttpClient();
-        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
+        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
         await Assert.That(target.Profile.Topology).IsEqualTo(Rf3Topology);
         await Assert.That(target.Profile.ReadContract).Contains(QuorumBarrier);
         await Assert.That(target.Profile.Cluster).IsNull();
@@ -30,7 +30,7 @@ internal sealed class BenchmarkTopologyTargetTests
         string replication, string quorum, string availability)
     {
         using var http = new HttpClient();
-        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
+        await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
         await Assert.That(target.Profile.Topology).Contains(replication);
         await Assert.That(target.Profile.Topology).Contains(quorum);
         await Assert.That(target.Profile.Topology).Contains(availability);
@@ -48,7 +48,7 @@ internal sealed class BenchmarkTopologyTargetTests
         using var http = new HttpClient();
         var error = await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(async () =>
         {
-            await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
+            await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation(), expectedNodes: nodes);
         });
         await Assert.That(error!.ParamName).IsEqualTo(ExpectedNodesParameter);
     }

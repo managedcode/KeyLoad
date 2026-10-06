@@ -5,7 +5,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimescaleTimeSeriesIntensiveOperation : IAsyncDisposable
 {
-    private readonly IAsyncDisposable?[] resources = new IAsyncDisposable?[5];
+    private const int OwnedNativeResourceSlots = 5;
+
+    private readonly IAsyncDisposable?[] resources = new IAsyncDisposable?[OwnedNativeResourceSlots];
     private ExceptionDispatchInfo? primary;
     private ExceptionDispatchInfo? cleanup;
     private int resourceCount;
@@ -51,7 +53,10 @@ internal sealed class TimescaleTimeSeriesIntensiveOperation : IAsyncDisposable
 
     internal async ValueTask DisposeResourceAsync(IAsyncDisposable resource)
     {
-        for (var index = resourceCount - 1; index >= 0; index--)
+        const int AdjacentElementOffset = 1;
+        const int NoObservedItems = 0;
+
+        for (var index = resourceCount - AdjacentElementOffset; index >= NoObservedItems; index--)
         {
             if (ReferenceEquals(resources[index], resource))
             {
@@ -64,12 +69,15 @@ internal sealed class TimescaleTimeSeriesIntensiveOperation : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        const int AdjacentElementOffset = 1;
+        const int NoObservedItems = 0;
+
         if (finished)
         {
             return;
         }
         finished = true;
-        for (var index = resourceCount - 1; index >= 0; index--)
+        for (var index = resourceCount - AdjacentElementOffset; index >= NoObservedItems; index--)
         {
             var resource = resources[index];
             resources[index] = null;

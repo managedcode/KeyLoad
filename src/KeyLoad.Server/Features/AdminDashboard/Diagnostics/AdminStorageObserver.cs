@@ -11,14 +11,13 @@ internal static class AdminStorageObserver
 
     private const string Unavailable = "Node storage observation is unavailable.";
 
-    internal static AdminStorageSnapshot Read(string directory, CancellationToken cancellationToken,
-        IOptions<AdminObservationOptions> options)
+    internal static AdminStorageSnapshot Read(string directory, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken)
     {
         const int EmptyRootAttributesFileAttributesReparsePoint = 0;
 
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
-        var scan = new AdminStorageScan(directory, cancellationToken, options);
+        var scan = new AdminStorageScan(rootPath: directory, cancellationToken: cancellationToken, options: options);
         try
         {
             var root = new DirectoryInfo(directory);
@@ -36,8 +35,7 @@ internal static class AdminStorageObserver
     private static AdminStorageSnapshot Missing() => new(null, null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
 }
 
-internal sealed class AdminStorageScan(string rootPath, CancellationToken cancellationToken,
-    IOptions<AdminObservationOptions> options)
+internal sealed class AdminStorageScan(string rootPath, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken)
 {
     private readonly AdminObservationOptions settings = options.Value;
     private const string Canonical = "canonical";

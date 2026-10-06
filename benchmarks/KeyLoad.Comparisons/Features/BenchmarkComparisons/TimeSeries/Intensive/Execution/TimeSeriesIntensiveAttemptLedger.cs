@@ -2,6 +2,8 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed class TimeSeriesIntensiveAttemptLedger
 {
+    private const int NoObservedItems = 0;
+
     private readonly TimeSeriesIntensiveAttempt[] storage;
     private readonly int[] states;
     private readonly int offset;
@@ -9,9 +11,12 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
 
     internal TimeSeriesIntensiveAttemptLedger(TimeSeriesIntensiveAttempt[] storage, int offset, int count, int repetition)
     {
+        const int NoObservedItems = 0;
+        const int FirstElementIndex = 0;
+
         ArgumentNullException.ThrowIfNull(storage);
         ArgumentOutOfRangeException.ThrowIfNegative(offset);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(count, 0);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(count, NoObservedItems);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(count, TimeSeriesIntensiveProfile.OperationCount);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, storage.Length - count);
         ArgumentOutOfRangeException.ThrowIfNegative(repetition);
@@ -20,10 +25,10 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
         this.offset = offset;
         this.repetition = repetition;
         states = new int[count];
-        for (var index = 0; index < count; index++)
+        for (var index = FirstElementIndex; index < count; index++)
         {
             storage[offset + index] = new(repetition, index, index % TimeSeriesIntensiveProfile.Concurrency,
-                0, 0, TimeSeriesIntensiveOutcome.NotStarted, null, default, 0, default);
+                NoObservedItems, NoObservedItems, TimeSeriesIntensiveOutcome.NotStarted, null, default, NoObservedItems, default);
         }
     }
 
@@ -52,16 +57,20 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
 
     internal void Publish(TimeSeriesIntensiveAttempt attempt)
     {
-        if (attempt.Repetition != repetition || attempt.Index < 0 || attempt.Index >= states.Length
+        const int NoItems = 0;
+        const int NoObservedItems = 0;
+        const int AdjacentElementOffset = 1;
+
+        if (attempt.Repetition != repetition || attempt.Index < NoItems || attempt.Index >= states.Length
             || attempt.Worker != attempt.Index % TimeSeriesIntensiveProfile.Concurrency || !Enum.IsDefined(attempt.Outcome)
-            || attempt.Outcome == TimeSeriesIntensiveOutcome.NotStarted || attempt.LatencyTicks < 0 || attempt.ValidationTicks < 0
+            || attempt.Outcome == TimeSeriesIntensiveOutcome.NotStarted || attempt.LatencyTicks < NoObservedItems || attempt.ValidationTicks < NoObservedItems
             || (attempt.Outcome == TimeSeriesIntensiveOutcome.Succeeded
-                && (attempt.Failure != default || !attempt.ResultCount.HasValue || attempt.ResultCount < 0)))
+                && (attempt.Failure != default || !attempt.ResultCount.HasValue || attempt.ResultCount < NoItems)))
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.InvalidAttempt);
         }
 
-        if (Interlocked.CompareExchange(ref states[attempt.Index], 1, 0) != 0)
+        if (Interlocked.CompareExchange(ref states[attempt.Index], AdjacentElementOffset, NoObservedItems) != NoObservedItems)
         {
             throw new ComparisonFailureException(TimeSeriesIntensiveRuntimeErrors.DuplicateAttempt);
         }
@@ -86,6 +95,8 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
 
     private static TimeSeriesIntensiveAttempt[] CreateStorage(int attemptsPerRepetition)
     {
+        const int NoItems = 0;
+
         if (attemptsPerRepetition != TimeSeriesIntensiveProfile.OperationCount
             && attemptsPerRepetition != TimeSeriesIntensiveProfile.WarmupCount)
         {
@@ -93,7 +104,7 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
         }
 
         var storage = new TimeSeriesIntensiveAttempt[checked(TimeSeriesIntensiveProfile.RepetitionCount * attemptsPerRepetition)];
-        for (var slot = 0; slot < storage.Length; slot++)
+        for (var slot = NoItems; slot < storage.Length; slot++)
         {
             var index = slot % attemptsPerRepetition;
             storage[slot] = CreateNotStarted(slot / attemptsPerRepetition, index);
@@ -104,5 +115,5 @@ internal sealed class TimeSeriesIntensiveAttemptLedger
 
     private static TimeSeriesIntensiveAttempt CreateNotStarted(int repetition, int index)
         => new(repetition, index, index % TimeSeriesIntensiveProfile.Concurrency,
-            0, 0, TimeSeriesIntensiveOutcome.NotStarted, null, default, 0, default);
+            NoObservedItems, NoObservedItems, TimeSeriesIntensiveOutcome.NotStarted, null, default, NoObservedItems, default);
 }

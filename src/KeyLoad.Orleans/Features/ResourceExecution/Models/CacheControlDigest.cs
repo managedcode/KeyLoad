@@ -11,12 +11,13 @@ internal readonly record struct CacheControlDigest(
     [property: Id(3)] ulong Word3)
 {
     internal const int ByteLength = 32;
+    private const int SecondWordOffset = sizeof(ulong);
+    private const int ThirdWordOffset = SecondWordOffset + sizeof(ulong);
+    private const int FourthWordOffset = ThirdWordOffset + sizeof(ulong);
 
     public static CacheControlDigest FromBytes(ReadOnlySpan<byte> bytes)
     {
         const string FromBytesFailureMessage = "A digest requires exactly 32 bytes.";
-        const int BytesComponentIndex = 8;
-        const int FromBytesBytesComponentIndex = 16;
 
         if (bytes.Length != ByteLength)
         {
@@ -24,16 +25,14 @@ internal readonly record struct CacheControlDigest(
         }
 
         return new(BinaryPrimitives.ReadUInt64LittleEndian(bytes),
-            BinaryPrimitives.ReadUInt64LittleEndian(bytes[BytesComponentIndex..]),
-            BinaryPrimitives.ReadUInt64LittleEndian(bytes[FromBytesBytesComponentIndex..]),
-            BinaryPrimitives.ReadUInt64LittleEndian(bytes[24..]));
+            BinaryPrimitives.ReadUInt64LittleEndian(bytes[SecondWordOffset..]),
+            BinaryPrimitives.ReadUInt64LittleEndian(bytes[ThirdWordOffset..]),
+            BinaryPrimitives.ReadUInt64LittleEndian(bytes[FourthWordOffset..]));
     }
 
     public void WriteBytes(Span<byte> bytes)
     {
         const string WriteBytesFailureMessage = "A digest requires exactly 32 bytes.";
-        const int BytesComponentIndex = 8;
-        const int WriteBytesBytesComponentIndex = 16;
 
         if (bytes.Length != ByteLength)
         {
@@ -41,9 +40,9 @@ internal readonly record struct CacheControlDigest(
         }
 
         BinaryPrimitives.WriteUInt64LittleEndian(bytes, Word0);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes[BytesComponentIndex..], Word1);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes[WriteBytesBytesComponentIndex..], Word2);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes[24..], Word3);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes[SecondWordOffset..], Word1);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes[ThirdWordOffset..], Word2);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes[FourthWordOffset..], Word3);
     }
 
     public bool FixedTimeEquals(CacheControlDigest other)

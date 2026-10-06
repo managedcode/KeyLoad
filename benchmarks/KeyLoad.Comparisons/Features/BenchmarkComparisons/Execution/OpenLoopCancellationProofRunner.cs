@@ -16,18 +16,23 @@ public static class OpenLoopCancellationProofRunner
     /// <param name="output">The owned output directory holding the fixed control and proof files.</param>
     /// <param name="emitMarker">The native Aspire log sink for the bounded marker.</param>
     /// <param name="executionOptions">The single validated native execution-options source.</param>
+    /// <param name="nativeExecutionOptions">The actual native adapter and resource observation policy.</param>
     /// <param name="hostToken">The uncancelled host token used for the healthy read and proof write.</param>
     /// <returns>The validated proof after original work and the healthy-read session settle.</returns>
     public static async Task<OpenLoopCancellationProofV1> RunAsync(ScaledComparisonProfile profile,
         int rate, IComparisonTarget target, IsolatedComparisonWorker worker, string storage, string output,
         Action<string> emitMarker, IOptions<OpenLoopExecutionOptions> executionOptions,
+        IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
         CancellationToken hostToken)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(nativeExecutionOptions);
+        ArgumentNullException.ThrowIfNull(target);
         OpenLoopProgressV1? milestone = null;
         Action<OpenLoopProgressV1> publish = progress => PublishFirstMilestone(profile, progress,
             emitMarker, ref milestone);
-        var runner = new OpenLoopComparisonRunner(profile, rate, executionOptions, nativeProgress: publish);
+        var runner = new OpenLoopComparisonRunner(profile, rate, executionOptions, nativeExecutionOptions,
+            nativeProgress: publish);
         var report = await RunRequestedMeasurementAsync(profile, rate, target, worker, storage,
             output, emitMarker, runner, hostToken).ConfigureAwait(false);
         var actualMilestone = milestone ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationMilestoneMissing);
@@ -49,33 +54,75 @@ public static class OpenLoopCancellationProofRunner
         OpenLoopCancellationRequestWatcher.ValidateFresh(output);
         using var runnerCancellation = CancellationTokenSource.CreateLinkedTokenSource(hostToken);
         using var watcherStop = new CancellationTokenSource();
-        var watcher = OpenLoopCancellationRequestWatcher.WatchAndCancelAsync(output, runnerCancellation,
-            policy, watcherStop.Token);
-        var report = await RunAndSettleWatcherAsync(runner, target, worker, storage, runnerCancellation,
-            watcherStop, watcher, hostToken).ConfigureAwait(false);
-        return report;
+        return await RunAndSettleMeasurementAsync(target, worker, storage, output, runner, policy,
+            runnerCancellation, watcherStop, hostToken).ConfigureAwait(false);
     }
 
-    private static async Task<OpenLoopComparisonReport> RunAndSettleWatcherAsync(
-        OpenLoopComparisonRunner runner, IComparisonTarget target, IsolatedComparisonWorker worker,
-        string storage, CancellationTokenSource runnerCancellation, CancellationTokenSource watcherStop,
-        Task<bool> watcher, CancellationToken hostToken)
+    private static async Task<OpenLoopComparisonReport> RunAndSettleMeasurementAsync(
+        IComparisonTarget target, IsolatedComparisonWorker worker, string storage, string output,
+        OpenLoopComparisonRunner runner, OpenLoopExecutionPolicy policy,
+        CancellationTokenSource runnerCancellation, CancellationTokenSource watcherStop,
+        CancellationToken hostToken)
     {
+        var watcher = OpenLoopCancellationRequestWatcher.WatchAndCancelAsync(output, runnerCancellation,
+            policy, watcherStop.Token);
+        var measurement = runner.RunAsync(target, worker, storage, runnerCancellation.Token);
         OpenLoopComparisonReport? report = null;
         Exception? primary = null;
         try
         {
-            report = await runner.RunAsync(target, worker, storage, runnerCancellation.Token).ConfigureAwait(false);
+            report = await measurement.ConfigureAwait(false);
         }
-        catch (Exception error)
+        catch (Exception error) when (measurement.IsFaulted || measurement.IsCanceled)
         {
             primary = error;
         }
-        var settlement = await StopAndJoinWatcherAsync(watcherStop, watcher).ConfigureAwait(false);
-        var failure = OpenLoopFailure.Combine(primary, settlement.Failures);
-        if (failure is not null) ExceptionDispatchInfo.Capture(failure).Throw();
+        var failures = ImmutableArray.CreateBuilder<Exception>();
+        if (primary is not null)
+        {
+            failures.Add(primary);
+        }
+        var requestObserved = await StopAndJoinWatcherAsync(watcherStop, watcher, failures)
+            .ConfigureAwait(false);
+        return CompleteCancellationMeasurement(report, requestObserved, runnerCancellation,
+            failures.ToImmutable(), hostToken);
+    }
+
+    private static async Task<bool> StopAndJoinWatcherAsync(CancellationTokenSource watcherStop,
+        Task<bool> watcher, ImmutableArray<Exception>.Builder failures)
+    {
+        var watcherCancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(watcherStop).ConfigureAwait(false);
+        if (watcherCancellationFailure is not null)
+        {
+            failures.Add(watcherCancellationFailure);
+        }
+        var requestObserved = false;
+        try
+        {
+            requestObserved = await watcher.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException error) when (error.CancellationToken == watcherStop.Token
+            && watcherStop.IsCancellationRequested)
+        {
+        }
+        catch (Exception error) when (watcher.IsFaulted || watcher.IsCanceled)
+        {
+            failures.Add(error);
+        }
+        return requestObserved;
+    }
+
+    private static OpenLoopComparisonReport CompleteCancellationMeasurement(OpenLoopComparisonReport? report,
+        bool requestObserved, CancellationTokenSource runnerCancellation, ImmutableArray<Exception> failures,
+        CancellationToken hostToken)
+    {
+        var failure = OpenLoopFailure.Combine(null, failures);
+        if (failure is not null)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
         hostToken.ThrowIfCancellationRequested();
-        if (!settlement.RequestObserved || report is null || !runnerCancellation.IsCancellationRequested
+        if (!requestObserved || report is null || !runnerCancellation.IsCancellationRequested
             || !report.CallerCancelled)
         {
             throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationWasNotObserved);
@@ -112,28 +159,6 @@ public static class OpenLoopCancellationProofRunner
         }
     }
 
-    private static async Task<OpenLoopWatcherSettlement> StopAndJoinWatcherAsync(
-        CancellationTokenSource watcherStop, Task<bool> watcher)
-    {
-        var failures = ImmutableArray.CreateBuilder<Exception>();
-        var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(watcherStop).ConfigureAwait(false);
-        if (cancellationFailure is not null) failures.Add(cancellationFailure);
-        var observed = false;
-        try
-        {
-            observed = await watcher.ConfigureAwait(false);
-        }
-        catch (OperationCanceledException error) when (error.CancellationToken == watcherStop.Token
-            && watcherStop.IsCancellationRequested)
-        {
-        }
-        catch (Exception error)
-        {
-            failures.Add(error);
-        }
-        return new(observed, failures.ToImmutable());
-    }
-
     private static OpenLoopCancellationProofV1 CreateProof(OpenLoopComparisonReport report,
         OpenLoopProgressV1 milestone, OpenLoopHealthyReadResult health)
         => new(OpenLoopCancellationProofContract.SchemaVersion, report.Worker!, report.ProfileId, report.OfferedRatePerSecond, report.Scenario,
@@ -141,5 +166,3 @@ public static class OpenLoopCancellationProofRunner
             report.CallerCancelled,
             true, true, report.SessionsClosed, true, health.Revision, health.JsonSha256, health.SessionClosed);
 }
-
-internal sealed record OpenLoopWatcherSettlement(bool RequestObserved, ImmutableArray<Exception> Failures);

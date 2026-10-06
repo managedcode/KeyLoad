@@ -6,6 +6,8 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class OpenSearchIndex
 {
+    private const int BulkLinesPerDocument = 2;
+
     private const int BulkBatchSize = 64;
     private const string KeywordSubfield = OpenSearchNames.KeywordSubfield;
     private const string ShardsSetting = OpenSearchNames.ShardsParameter;
@@ -44,7 +46,7 @@ internal static class OpenSearchIndex
     {
         foreach (var batch in documents.Chunk(BulkBatchSize))
         {
-            var lines = new List<string>(batch.Length * 2);
+            var lines = new List<string>(batch.Length * BulkLinesPerDocument);
             foreach (var document in batch)
             {
                 lines.Add(JsonSerializer.Serialize(new Dictionary<string, object>

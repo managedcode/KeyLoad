@@ -13,10 +13,9 @@ internal static class PostgresSchemaInitialization
     private const string TlsTransport = "pooled prepared SQL/TLS";
     private const string TcpTransport = "pooled prepared SQL/TCP";
 
-    internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
-        PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile,
-        Action<TargetProfile> updateProfile, Action markCommitAttempted, CancellationToken cancellationToken,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+    internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset, PostgresSchemaIdentity identity,
+        Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile, Action<TargetProfile> updateProfile,
+        Action markCommitAttempted, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
     {
         var nativeTopology = new PostgresTopology(lifecycleOptions);
         await nativeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
@@ -36,19 +35,26 @@ internal static class PostgresSchemaInitialization
     private static async Task<TargetProfile> VerifySettingsAsync(NpgsqlConnection connection, TargetProfile profile,
         Action<TargetProfile> updateProfile, CancellationToken cancellationToken)
     {
+        const int FifthColumnIndex = 4;
+
+        const int SecondColumnIndex = 1;
+        const int ThirdColumnIndex = 2;
+        const int FirstColumnIndex = 0;
+        const int FourthColumnIndex = 3;
+
         await using var verify = connection.CreateCommand();
         verify.CommandText = PostgresSchemaCommands.VerifySettings;
         await using var reader = await verify.ExecuteReaderAsync(cancellationToken);
         await reader.ReadAsync(cancellationToken);
-        if (reader.GetString(1) != FlushEnabled || reader.GetString(2) != FlushEnabled)
+        if (reader.GetString(SecondColumnIndex) != FlushEnabled || reader.GetString(ThirdColumnIndex) != FlushEnabled)
         {
             throw new ComparisonFailureException(FlushFailure);
         }
 
         var observed = profile with
         {
-            Version = reader.GetString(0) + VersionSeparator + reader.GetString(3),
-            Transport = reader.GetBoolean(4) ? TlsTransport : TcpTransport
+            Version = reader.GetString(FirstColumnIndex) + VersionSeparator + reader.GetString(FourthColumnIndex),
+            Transport = reader.GetBoolean(FifthColumnIndex) ? TlsTransport : TcpTransport
         };
         updateProfile(observed);
         return observed;

@@ -12,6 +12,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
     private readonly ReplicaMembershipAuthorityExchangeOptions options;
     private readonly TimeProvider clock;
     private readonly OrleansMembershipOptions settings;
+    private readonly IOptions<OrleansMembershipOptions> membershipOptions;
 
     internal ReplicaMembershipAuthorityClientTable(ReplicaMembershipAuthorityExchangeOptions options,
         IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
@@ -19,6 +20,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
         ArgumentNullException.ThrowIfNull(options);
         this.options = options;
         clock = options.Clock;
+        this.membershipOptions = membershipOptions;
         settings = membershipOptions.Value;
         resources = new(options, membershipOptions, executionOptions);
     }
@@ -133,9 +135,9 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
             options.CallerVoterId, options.CallerSiloAddress, Guid.NewGuid(), (int)operation,
             null, null, NewCallExpectedTableVersionEmptyCount, null, null, NewCallCleanupBeforeUtcTicksEmptyCount);
 
-    private static MembershipTableData Data(ReplicaMembershipAuthorityReplyV1 reply)
+    private MembershipTableData Data(ReplicaMembershipAuthorityReplyV1 reply)
     {
-        var rows = reply.Rows.Select(row => Tuple.Create(ReplicaMembershipAuthorityMapping.ToNative(row), row.RowETag)).ToList();
+        var rows = reply.Rows.Select(row => Tuple.Create(ReplicaMembershipAuthorityMapping.ToNative(entry: row, membershipOptions: membershipOptions), row.RowETag)).ToList();
         return new(rows, new TableVersion(reply.TableVersion, reply.TableVersionETag));
     }
 

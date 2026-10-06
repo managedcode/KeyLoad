@@ -76,19 +76,23 @@ internal static class ReportCsvWriter
 
     private static async ValueTask WriteQuotedAsync(StreamWriter writer, string value, CancellationToken cancellationToken)
     {
+        const int FirstElementIndex = 0;
+        const int NoObservedItems = 0;
+        const int AdjacentElementOffset = 1;
+
         await writer.WriteAsync(Quote.AsMemory(), cancellationToken).ConfigureAwait(false);
-        var position = 0;
+        var position = FirstElementIndex;
         while (position < value.Length)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var next = value.IndexOf(QuoteCharacter, position);
-            if (next < 0)
+            if (next < NoObservedItems)
             {
                 break;
             }
             await writer.WriteAsync(value.AsMemory(position, next - position), cancellationToken).ConfigureAwait(false);
             await writer.WriteAsync(DoubledQuote.AsMemory(), cancellationToken).ConfigureAwait(false);
-            position = next + 1;
+            position = next + AdjacentElementOffset;
         }
         await writer.WriteAsync(value.AsMemory(position), cancellationToken).ConfigureAwait(false);
         await writer.WriteAsync(Quote.AsMemory(), cancellationToken).ConfigureAwait(false);
