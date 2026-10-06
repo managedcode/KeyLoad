@@ -14,6 +14,7 @@ internal static class NativeComparisonAdapterOptionsValidator
             || options.TimeSeriesInitialReadCapacity is <= Zero or > NativeComparisonExecutionOptions.DefaultTimeSeriesInitialReadCapacity
             || options.KeyLoadTimeSeriesReadLimit is <= Zero or > NativeComparisonExecutionOptions.DefaultKeyLoadTimeSeriesReadLimit
             || options.ReportFileBufferBytes is <= Zero or > NativeComparisonExecutionOptions.DefaultReportFileBufferBytes
+            || options.OpenSearchHealthWaitTimeoutSeconds is <= Zero or > NativeComparisonExecutionOptions.DefaultOpenSearchHealthWaitTimeoutSeconds
             || !IsNativeSecondsTimeout(options.TimescaleConnectionTimeout, NativeComparisonExecutionOptions.DefaultTimescaleConnectionTimeoutSeconds)
             || !IsNativeSecondsTimeout(options.TimescaleCommandTimeout, NativeComparisonExecutionOptions.DefaultTimescaleCommandTimeoutSeconds)
             || options.TimescaleCancellationTimeoutMilliseconds is <= Zero or > NativeComparisonExecutionOptions.DefaultTimescaleCancellationTimeoutMilliseconds

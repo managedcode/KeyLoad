@@ -13,8 +13,8 @@ internal static class FailedBenchmarkNodeProcess
             throw new InvalidOperationException(ImageBundleRealProtocol.Failure);
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.ImageBundleProcessTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.ImageBundleProcessTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var output = ImageBundleRealOutput.ReadAsync(process.StandardOutput, deadline.Token);
         var error = ImageBundleRealOutput.ReadAsync(process.StandardError, deadline.Token);
         try
@@ -57,7 +57,7 @@ internal static class FailedBenchmarkNodeProcess
     private static async Task ReapAsync(Process process)
     {
         TryKill(process);
-        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.ImageBundleCleanupTimeout);
+        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.ImageBundleCleanupTimeout, TimeProvider.System);
         try
         {
             await process.WaitForExitAsync(cleanup.Token);

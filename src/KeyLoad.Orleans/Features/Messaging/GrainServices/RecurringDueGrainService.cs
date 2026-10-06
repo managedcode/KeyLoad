@@ -143,9 +143,9 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
 
     private async Task Dispatch(DueWorkHint hint, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var dispatchDeadline = options.Value.DispatchDeadline;
-        deadline.CancelAfter(dispatchDeadline);
+        using var timeout = new CancellationTokenSource(dispatchDeadline, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             var partition = hint.Lane.Partition.AtomicPartitionId;

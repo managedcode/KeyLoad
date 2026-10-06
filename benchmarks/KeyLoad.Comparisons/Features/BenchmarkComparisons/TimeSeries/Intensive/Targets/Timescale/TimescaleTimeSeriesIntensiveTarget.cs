@@ -5,6 +5,7 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIntensiveTarget
 {
+    private readonly TimeProvider timeProvider;
     private const int SingleItemCount = 1;
     private const int AdjacentElementOffset = 1;
     private const int MissingItemIndex = -1;
@@ -21,8 +22,9 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
     private int seedOrdinal;
     private bool ownsSchema;
 
-    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal TimescaleTimeSeriesIntensiveTarget(string connectionString, string runId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         execution = executionOptions.Value;
         execution.Validate();
         context = new(runId);
@@ -76,7 +78,7 @@ internal sealed partial class TimescaleTimeSeriesIntensiveTarget : ITimeSeriesIn
             await context.CloseAndDrainAsync().ConfigureAwait(false);
             if (OwnsSchema)
             {
-                using var timeout = new CancellationTokenSource(execution.TimescaleConnectionTimeout);
+                using var timeout = new CancellationTokenSource(execution.TimescaleConnectionTimeout, timeProvider);
                 await session.DropOwnedSchemaAsync(context, timeout.Token).ConfigureAwait(false);
             }
         }

@@ -7,7 +7,7 @@ internal static class CommandIdempotencyProcessCleanup
     internal static async Task CleanupActiveTrialAsync(string root, CommandIdempotencyProcessChild? active, Exception? primary)
     {
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds));
+            CommandIdempotencyProcessRecoveryTests.CleanupTimeoutSeconds), TimeProvider.System);
         var failures = new List<Exception>();
         if (active is not null)
         { await CommandIdempotencyProcess.SettleActiveAsync(active, failures, cleanup.Token); }

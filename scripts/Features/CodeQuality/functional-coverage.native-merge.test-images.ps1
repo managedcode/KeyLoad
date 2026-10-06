@@ -48,7 +48,7 @@ function Add-FcNativeTestImageManifestFile([string] $Path, [object] $Read,
         $script:FcNativeMergeInput.ReferenceBytes -gt $Bounds.maximumTotalBytes - $Read.length) {
         throw $script:FcNativeTestImages.Invalid
     }
-    $json = [System.Text.Json.JsonDocument]::Parse($Read.bytes)
+    $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($Read.bytes))
     try { Assert-FcNativeJsonUnique $json.RootElement }
     finally { $json.Dispose() }
     $identity = if ($Entry.suite -cin @('unit','unit-scalar')) {
@@ -91,7 +91,7 @@ $script:FcNativeTestImageProjects = [ordered]@{
 function Read-FcNativeTestIdentityManifest([string] $Path, [string] $Repository, [string] $Suite, [object] $Bounds) {
     if (-not $script:FcNativeTestImageProjects.Contains($Suite)) { throw $script:FcNativeTestImages.Invalid }
     $file = Read-FcNativeBoundedFile $Path $Bounds.maximumManifestBytes $Bounds.readBufferBytes $script:FcNativeTestImages.Invalid
-    $json = [System.Text.Json.JsonDocument]::Parse($file.bytes)
+    $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($file.bytes))
     try {
         Assert-FcNativeJsonUnique $json.RootElement
         $manifest = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($file.bytes)) -AsHashtable -Depth 12

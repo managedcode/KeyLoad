@@ -10,8 +10,10 @@ namespace KeyLoad.Comparisons;
 /// <summary>Runs one profile-bound vector workload against a real native vector target.</summary>
 /// <param name="profile">The immutable vector profile.</param>
 /// <param name="executionOptions">The explicitly configured native limits.</param>
-public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
+public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly VectorComparisonProfile profile = profile ?? throw new ArgumentNullException(nameof(profile));
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = ReadExecution(profile, executionOptions);
 
@@ -30,7 +32,7 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
             throw new NotSupportedException($"{target.Name}{VectorComparisonRunnerValues.DoesNotImplement}{profile.IndexKind}{VectorComparisonRunnerValues.AlgorithmModeSeparator}{profile.QueryMode}{VectorComparisonRunnerValues.Natively}");
         }
 
-        var started = TimeProvider.System.GetUtcNow();
+        var started = timeProvider.GetUtcNow();
         var corpus = new VectorComparisonCorpus(profile, executionOptions);
         var datasetHash = ComputeDatasetHash(corpus, cancellationToken);
         var loaded = await target.IngestAsync(StreamDocumentsAsync(corpus, cancellationToken), cancellationToken).ConfigureAwait(false);
@@ -39,7 +41,7 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
             throw new InvalidDataException($"{VectorComparisonRunnerValues.NativeIngestionLoaded}{loaded}{VectorComparisonRunnerValues.RecordsExpected}{profile.RecordCount}{VectorComparisonRunnerValues.SentencePeriod}");
         }
 
-        await new VectorResultValidator(profile, executionOptions).ValidateReadbackAsync(target, corpus, cancellationToken).ConfigureAwait(false);
+        await new VectorResultValidator(profile, executionOptions, provider: timeProvider).ValidateReadbackAsync(target, corpus, cancellationToken).ConfigureAwait(false);
 
         var index = await target.BuildIndexAsync(profile, cancellationToken).ConfigureAwait(false);
         var parameters = new Dictionary<string, string>(index.Parameters, StringComparer.Ordinal);
@@ -52,10 +54,10 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
         ValidateIndex(profile, index, plan);
         for (var i = VectorComparisonRunnerValues.FirstIndex; i < profile.WarmupQueries; i++)
         {
-            await new VectorResultValidator(profile, executionOptions).ValidateQueryAsync(target, corpus, queries[i % queries.Count], expected[i % queries.Count], cancellationToken).ConfigureAwait(false);
+            await new VectorResultValidator(profile, executionOptions, provider: timeProvider).ValidateQueryAsync(target, corpus, queries[i % queries.Count], expected[i % queries.Count], cancellationToken).ConfigureAwait(false);
         }
 
-        var measured = await new VectorWorkloadExecutor(profile, executionOptions).RunAsync(target, corpus, queries, expected,
+        var measured = await new VectorWorkloadExecutor(profile, executionOptions, provider: timeProvider).RunAsync(target, corpus, queries, expected,
             cancellationToken).ConfigureAwait(false);
         return CreateReport(target, sourceRevision, storage, started, datasetHash, loaded, index, plan, measured);
     }

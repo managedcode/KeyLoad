@@ -46,7 +46,7 @@ internal sealed class NativeReadCutCancellationTests
         using var fixture = new NativeReadCutFixture();
         fixture.Store.Commit((tx, _) => { tx.Put(NativeReadCutFixture.Key(RecordId), NativeReadCutFixture.Value(RowValue)); return true; });
         var lease = fixture.Capture(NativeReadCutFixture.Limits(4, 128, TimeSpan.FromSeconds(1)));
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100));
+        await Task.Delay(TimeSpan.FromMilliseconds(1_100), TimeProvider.System);
         var expired = Assert.ThrowsExactly<KeyLoadException>(() => lease.VisitPrefix(
             NativeReadCutFixture.Key(string.Empty), static (_, _) => true));
         await Assert.That(expired.Code).IsEqualTo(ErrorCode.BudgetExceeded);

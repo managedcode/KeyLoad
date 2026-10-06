@@ -53,7 +53,8 @@ internal static class OperationalPolicyBindings
     internal static bool IsOperationalProperty(Compilation compilation, IPropertySymbol property)
     {
         var type = property.ContainingType;
-        return MagicRuntimeOperations.IsNativeType(compilation, type, OperationalPolicyMetadataNames.HttpClient) &&
+        return NativeTimerPolicy.IsOperationalProperty(compilation, property) ||
+            MagicRuntimeOperations.IsNativeType(compilation, type, OperationalPolicyMetadataNames.HttpClient) &&
                 property.Name == OperationalPolicyMetadataNames.Timeout ||
             IsNativeFileType(compilation, type, OperationalPolicyMetadataNames.FileStreamOptions) &&
                 property.Name == OperationalPolicyMetadataNames.FileBufferSizeProperty ||

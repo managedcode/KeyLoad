@@ -64,5 +64,9 @@ try {
 }
 catch [System.Exception] {
     [Console]::Error.WriteLine($_.Exception.Message)
+    $location = $_.InvocationInfo
+    if ($null -ne $location) {
+        [Console]::Error.WriteLine(('{0}:{1}' -f [IO.Path]::GetFileName($location.ScriptName), $location.ScriptLineNumber))
+    }
     exit 1
 }

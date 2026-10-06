@@ -14,9 +14,9 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
     [Test]
     public async Task AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission()
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var root = CreatePrivateRoot();
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => RunWavesAsync(root, deadline.Token), failures)

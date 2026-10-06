@@ -11,7 +11,7 @@ internal sealed class RequestCqrsCohortUnavailableTests(RequestCqrsCohortRuntime
     [Test]
     public async Task StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using (var unavailable = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token))
         {
             await unavailable.Client.EnsureCompatibleCohortAsync(deadline.Token);

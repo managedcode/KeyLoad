@@ -7,6 +7,14 @@ Owner: KeyLoad lead. REQ-RESOURCE-003..006 / AC-DBPROF-001..008; related
 [ADR-035](ADR-035-memory-performance.md), [ADR-061](ADR-061-bounded-replica-term-metadata.md).
 Requirements and acceptance: [DatabasePhaseProfiling](../Features/ResourceExecution/DatabasePhaseProfiling.md) and this ADR.
 
+Owner correction2026-10-06 centralizes every operational parameter through native
+IOptions. [ADR-113's final phase-bank join](ADR-113-centralized-runtime-options.md)
+refines the historical bool-only API and four-stripe/four-attempt defaults below:
+required immutable startup operands come from centrally bound/validated
+DatabasePhaseExecutionOptions, with default/maximum4, stripes1/2/4 and attempts1..4.
+The BCL-only bank, fixed32/6/16 snapshot,128KiB ceiling and every existing hot-path,
+quality, producer, capture and qualification requirement remain mandatory.
+
 ## Decision
 
 Add one BCL-only solution-owned `src/KeyLoad.Diagnostics` project, owning

@@ -16,9 +16,9 @@ internal static class SurrealDbSqlTransport
     private const string ResultKey = "result";
     private const string ExistingRecordPrefix = "Database record `";
     private const string ExistingRecordSuffix = "` already exists";
-    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken, bool create = false)
+    internal static async Task<JsonDocument> QueryAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken, bool create = false)
     {
-        using var operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var operationDeadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         operationDeadline.CancelAfter(policy.OperationTimeout);
         cancellationToken = operationDeadline.Token;
         using var request = new HttpRequestMessage(HttpMethod.Post, ApiPath)
@@ -53,9 +53,9 @@ internal static class SurrealDbSqlTransport
         }
     }
 
-    internal static async Task ExecuteAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken)
+    internal static async Task ExecuteAsync(HttpClient http, string sql, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var response = await QueryAsync(http, sql, policy, cancellationToken).ConfigureAwait(false);
+        using var response = await QueryAsync(http, sql, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
     }
 
     private static void ValidateResponse(JsonElement root, bool create)

@@ -4,6 +4,7 @@ using System.Text.Json;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BackupRestore;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
@@ -49,7 +50,7 @@ internal static class NativeCoverageMergeChildProcess
         var unsettled = false;
         var disposed = false;
         Result? result = null;
-        var startedAt = Stopwatch.GetTimestamp();
+        var startedAt = new TestElapsedClock(TimeProvider.System);
         try
         {
             ServerFailureObserver.Observe(() => started = process.Start(), failures);
@@ -82,12 +83,12 @@ internal static class NativeCoverageMergeChildProcess
         return result ?? throw new InvalidOperationException(StartFailure);
     }
 
-    private static async Task<RunAttempt> RunStartedAsync(Process process, long startedAt, TimeSpan timeout,
+    private static async Task<RunAttempt> RunStartedAsync(Process process, TestElapsedClock startedAt, TimeSpan timeout,
         TimeSpan settlement, int maximumOutputCharacters, List<Exception> failures,
         CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(RemainingPrimaryTime(startedAt, timeout));
+        using var deadlineTimeout = new CancellationTokenSource(RemainingPrimaryTime(startedAt, timeout), startedAt.Provider);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var stdout = new CliBackupRestoreProcessOutput(maximumOutputCharacters);
         var stderr = new CliBackupRestoreProcessOutput(maximumOutputCharacters);
         Task? exit = null;
@@ -104,10 +105,10 @@ internal static class NativeCoverageMergeChildProcess
     }
 
     private static async Task<bool> ObserveUntilDeadlineAsync(Process process, Task joined,
-        long startedAt, TimeSpan timeout, TimeSpan settlement, List<Exception> failures, CancellationToken deadlineToken,
+        TestElapsedClock startedAt, TimeSpan timeout, TimeSpan settlement, List<Exception> failures, CancellationToken deadlineToken,
         CancellationToken callerToken)
     {
-        var deadlineSignal = Task.Delay(InfiniteWaitMilliseconds, deadlineToken);
+        var deadlineSignal = Task.Delay(TimeSpan.FromMilliseconds(InfiniteWaitMilliseconds), startedAt.Provider, deadlineToken);
         _ = await Task.WhenAny(joined, deadlineSignal).ConfigureAwait(false);
         if (!joined.IsCompleted)
         {
@@ -123,12 +124,11 @@ internal static class NativeCoverageMergeChildProcess
         return false;
     }
 
-    private static async Task<bool> SettleOriginalTasksAsync(Process process, Task joined, long startedAt,
+    private static async Task<bool> SettleOriginalTasksAsync(Process process, Task joined, TestElapsedClock startedAt,
         TimeSpan timeout, TimeSpan settlement, List<Exception> failures)
     {
-        using var cleanupDeadline = new CancellationTokenSource();
-        cleanupDeadline.CancelAfter(RemainingCleanupTime(startedAt, timeout, settlement));
-        var expiration = Task.Delay(InfiniteWaitMilliseconds, cleanupDeadline.Token);
+        using var cleanupDeadline = new CancellationTokenSource(RemainingCleanupTime(startedAt, timeout, settlement), startedAt.Provider);
+        var expiration = Task.Delay(TimeSpan.FromMilliseconds(InfiniteWaitMilliseconds), startedAt.Provider, cleanupDeadline.Token);
         ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
         if (!joined.IsCompleted)
         { _ = await Task.WhenAny(joined, expiration).ConfigureAwait(false); }
@@ -140,15 +140,15 @@ internal static class NativeCoverageMergeChildProcess
         return true;
     }
 
-    private static TimeSpan RemainingPrimaryTime(long startedAt, TimeSpan timeout)
+    private static TimeSpan RemainingPrimaryTime(TestElapsedClock startedAt, TimeSpan timeout)
     {
-        var elapsed = Stopwatch.GetElapsedTime(startedAt);
+        var elapsed = startedAt.Elapsed;
         return elapsed >= timeout ? TimeSpan.Zero : timeout - elapsed;
     }
 
-    private static TimeSpan RemainingCleanupTime(long startedAt, TimeSpan timeout, TimeSpan settlement)
+    private static TimeSpan RemainingCleanupTime(TestElapsedClock startedAt, TimeSpan timeout, TimeSpan settlement)
     {
-        var elapsed = Stopwatch.GetElapsedTime(startedAt);
+        var elapsed = startedAt.Elapsed;
         if (elapsed <= timeout)
         { return settlement; }
         var elapsedAfterPrimaryDeadline = elapsed - timeout;

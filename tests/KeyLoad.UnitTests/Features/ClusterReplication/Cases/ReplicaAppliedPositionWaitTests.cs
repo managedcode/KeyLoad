@@ -45,7 +45,7 @@ internal sealed class ReplicaAppliedPositionWaitTests
         fixture.Commit(FirstDocument, SecondDocument);
 
         var position = await fixture.Materializer.WaitForAppliedPositionChangeAsync(0, CancellationToken.None)
-            .WaitAsync(Timeout);
+            .WaitAsync(Timeout, TimeProvider.System);
 
         await Assert.That(position).IsEqualTo(2L);
         await Assert.That(fixture.Materializer.AppliedPosition).IsEqualTo(2L);

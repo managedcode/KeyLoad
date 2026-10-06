@@ -153,7 +153,7 @@ internal static class SampleRetentionRf3RestartWorkflow
     private static async Task RestoreFollowerAsync(ClusterFixture fixture, RestartContext context,
         string node, Exception? activeFailure)
     {
-        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         try
         {
             await fixture.RestartContainerAsync(node, recovery.Token);

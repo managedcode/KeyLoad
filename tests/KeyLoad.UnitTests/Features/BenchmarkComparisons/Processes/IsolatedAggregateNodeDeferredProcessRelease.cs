@@ -42,7 +42,7 @@ internal sealed class IsolatedAggregateNodeDeferredProcessRelease
                     Add(IsolatedAggregateNodeGuardedInvocation.Unwrap(envelope));
                 }
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(100), TimeProvider.System);
         }
         IsolatedAggregateNodeGuardedInvocation.Capture(process.Dispose, Add);
     }

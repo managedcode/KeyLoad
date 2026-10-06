@@ -134,7 +134,7 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
             ? null : lifecycleEvidence.RecordOwnerFailure;
         async Task CompleteOwnedAsync()
         {
-            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
             await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures,
                 failureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppStop).ConfigureAwait(false);
             if (diagnostics is not null)

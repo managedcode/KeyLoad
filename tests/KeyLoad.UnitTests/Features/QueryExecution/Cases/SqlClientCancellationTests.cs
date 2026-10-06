@@ -46,14 +46,14 @@ internal sealed class SqlClientCancellationTests
         Exception? failure = null;
         try
         {
-            await firstChunk.Task.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds));
+            await firstChunk.Task.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
             await Assert.That(pending.IsCompleted).IsFalse();
             await cancellation.CancelAsync();
-            var result = await pending.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds));
-            await stopped.Task.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds));
+            var result = await pending.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+            await stopped.Task.WaitAsync(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
-            using var nextCancellation = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+            using var nextCancellation = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
             var next = await client.ExecuteSqlAsync(request, nextCancellation.Token);
             await Assert.That(next.IsSuccess).IsTrue();
             await Assert.That(calls).IsEqualTo(2);
@@ -78,7 +78,7 @@ internal sealed class SqlClientCancellationTests
             await context.Response.WriteAsync(PartialReply, context.RequestAborted);
             await context.Response.Body.FlushAsync(context.RequestAborted);
             firstChunk.TrySetResult();
-            await Task.Delay(Timeout.InfiniteTimeSpan, context.RequestAborted);
+            await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, context.RequestAborted);
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         { }

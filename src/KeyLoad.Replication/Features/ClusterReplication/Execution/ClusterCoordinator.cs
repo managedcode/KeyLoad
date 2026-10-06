@@ -142,8 +142,8 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
 
     private async Task ExecuteAsync(AdmittedCommand pending, CancellationToken stoppingToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-        deadline.CancelAfter(commandTimeout);
+        using var timeout = new CancellationTokenSource(commandTimeout, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, timeout.Token);
         try
         {
             pending.Complete(await consensus.SubmitAsync(pending.Operation, deadline.Token).ConfigureAwait(false));

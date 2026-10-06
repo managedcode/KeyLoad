@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
@@ -7,14 +6,15 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 internal sealed class ScaleServerResourceEvidenceCollector(
     ComparisonWorkerSelection selection, string output,
     IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions,
-    CancellationToken applicationStopping, OpenLoopResourceSelection? openLoop = null) : IAsyncDisposable
+    CancellationToken applicationStopping, OpenLoopResourceSelection? openLoop = null, TimeProvider? provider = null) : IAsyncDisposable
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string RunnerName = "comparisons";
     private const string BootstrapFragment = "bootstrap";
     private readonly ScaleServerResourceOptions _settings = executionOptions.Value;
     private readonly CancellationTokenSource _stop = new();
     private readonly CancellationToken _applicationStopping = applicationStopping;
-    private readonly ScaleServerResourceEvidenceCompletion _completion = new(executionOptions);
+    private readonly ScaleServerResourceEvidenceCompletion _completion = new(executionOptions, provider);
     private readonly HashSet<string> _missing = new(StringComparer.Ordinal);
     private ScaleServerResourceSampler[] _samplers = [];
     private ScaleServerHardware? _hardware;
@@ -72,7 +72,7 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     private async Task ObserveAsync(Func<CancellationToken, Task> readiness, CancellationToken applicationToken)
     {
-        using var deadline = new CancellationTokenSource(_settings.MaximumObservation);
+        using var deadline = new CancellationTokenSource(_settings.MaximumObservation, timeProvider);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(
             applicationToken, _applicationStopping, _stop.Token, deadline.Token);
         var token = linked.Token;
@@ -114,7 +114,7 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             sampler.MarkReadyBoundary();
         }
 
-        (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(executionOptions, provenanceOptions, token);
+        (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(executionOptions, provenanceOptions, token: token, timeProvider: timeProvider);
         if (_hardware is null)
         {
             _missing.Add(ScaleServerResourceBounds.HardwareMissing);
@@ -136,11 +136,11 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     private async Task SampleAsync(CancellationToken token)
     {
         const int SampleInitialValue = 0;
-        var timer = Stopwatch.StartNew();
+        var timer = timeProvider.GetTimestamp();
         for (var sample = SampleInitialValue; sample < _settings.MaxSamples; sample++)
         {
             token.ThrowIfCancellationRequested();
-            var budget = new ScaleServerResourceSampleBudget(executionOptions, provenanceOptions);
+            var budget = new ScaleServerResourceSampleBudget(executionOptions, provenanceOptions, timeProvider: timeProvider);
             foreach (var sampler in _samplers)
             {
                 await sampler.SampleAsync(budget, token);
@@ -149,12 +149,12 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                     _missing.Add(ScaleServerResourceBounds.StorageMissing);
                 }
             }
-            if (timer.Elapsed >= _settings.MaximumObservation)
+            if (timeProvider.GetElapsedTime(timer) >= _settings.MaximumObservation)
             {
                 _missing.Add(ScaleServerResourceBounds.SamplingMissing);
                 return;
             }
-            await Task.Delay(_settings.Cadence, token);
+            await Task.Delay(_settings.Cadence, timeProvider, token);
         }
         _missing.Add(ScaleServerResourceBounds.SamplingMissing);
     }

@@ -127,8 +127,8 @@ internal static class LocalRf3ImageIdentity
     internal static async Task<string> RunVerifierAsync(string root, string script, string tag, string receipt,
         CancellationToken cancellationToken)
     {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(VerifyTimeout);
+        using var timeoutTimeout = new CancellationTokenSource(VerifyTimeout, TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var start = new ProcessStartInfo("node")
         {
             WorkingDirectory = root,

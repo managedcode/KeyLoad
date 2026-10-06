@@ -208,6 +208,30 @@
     {
       "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsMetadata.cs",
       "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedPolicyReturns.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedPolicySearch.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/NativeTimerPolicy.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OptionsSnapshotOverrides.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OwnedDiagnosticsPolicy.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/PolicyArgumentSources.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -361,7 +385,13 @@
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs",
-        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsMetadata.cs"
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsMetadata.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedPolicyReturns.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedPolicySearch.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/NativeTimerPolicy.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OptionsSnapshotOverrides.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OwnedDiagnosticsPolicy.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/PolicyArgumentSources.cs"
       ]
     }
   ],

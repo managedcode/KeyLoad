@@ -83,7 +83,7 @@ public sealed partial class QueryEngine
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();
@@ -97,7 +97,7 @@ public sealed partial class QueryEngine
         budget.Check();
         return database.WithQueryView(principalId, request.Partition, query.Collection,
             (view, principal, resource) => ExecuteView(view, principal, resource, request, hash, budget,
-                timeProvider ?? TimeProvider.System));
+                timeProvider ?? database.EvaluationClock));
     }
 
     internal static string QueryHash(AstQueryRequest request) => QueryRequestIdentity.Hash(request);

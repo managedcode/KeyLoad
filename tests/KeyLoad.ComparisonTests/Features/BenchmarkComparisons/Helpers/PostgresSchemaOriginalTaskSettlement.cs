@@ -13,7 +13,7 @@ internal static class PostgresSchemaOriginalTaskSettlement
     private static async Task JoinCoreAsync(Task original, TimeSpan timeout, Func<Task>? escalate,
         CancellationToken cancellationToken)
     {
-        var observation = original.WaitAsync(timeout, cancellationToken);
+        var observation = original.WaitAsync(timeout, TimeProvider.System, cancellationToken);
         try
         {
             await observation;

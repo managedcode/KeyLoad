@@ -1,13 +1,10 @@
-using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopProducer
 {
-    internal static async Task RunAsync(ScaledOperationInputs inputs,
-        ChannelWriter<OpenLoopWorkItem> writer, OpenLoopTimeline timeline, OpenLoopRunState state,
-        CancellationToken cancellationToken)
+    internal static async Task RunAsync(ScaledOperationInputs inputs, ChannelWriter<OpenLoopWorkItem> writer, OpenLoopTimeline timeline, OpenLoopRunState state, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
         const int AdjacentElementOffset = 1;
@@ -21,7 +18,7 @@ internal static class OpenLoopProducer
             {
                 var due = timeline.DueTimestamp(next);
                 await timeline.WaitUntilAsync(due, cancellationToken).ConfigureAwait(false);
-                var decision = Stopwatch.GetTimestamp();
+                var decision = timeProvider.GetTimestamp();
                 var nextDue = next + AdjacentElementOffset == OpenLoopRateContract.PlannedOperations
                     ? long.MaxValue : timeline.DueTimestamp(next + SingleItemCount);
                 if (decision >= nextDue)
@@ -40,7 +37,7 @@ internal static class OpenLoopProducer
         }
         catch (Exception error)
         {
-            RecordFailedProduction(state, next, error, ref failure);
+            RecordFailedProduction(state, next, error, ref failure, timeProvider: timeProvider);
             throw;
         }
         finally
@@ -49,21 +46,21 @@ internal static class OpenLoopProducer
         }
     }
 
-    private static void RecordUnofferedRemainder(OpenLoopRunState state, int next)
+    private static void RecordUnofferedRemainder(OpenLoopRunState state, int next, TimeProvider timeProvider)
     {
         for (; next < OpenLoopRateContract.PlannedOperations; next++)
         {
-            state.RecordNotOffered(next, null, Stopwatch.GetTimestamp());
+            state.RecordNotOffered(next, null, timeProvider.GetTimestamp());
         }
     }
 
     private static void RecordFailedProduction(OpenLoopRunState state, int next, Exception primary,
-        ref Exception? completionFailure)
+        ref Exception? completionFailure, TimeProvider timeProvider)
     {
         completionFailure = primary;
         try
         {
-            RecordUnofferedRemainder(state, next);
+            RecordUnofferedRemainder(state, next, timeProvider: timeProvider);
         }
         catch (Exception accountingFailure)
         {

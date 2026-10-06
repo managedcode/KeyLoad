@@ -19,7 +19,7 @@ internal static class RequestCqrsAuthorityFaultCleanup
         var cleanup = new List<Exception>();
         async Task CleanupOwnedAsync()
         {
-            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
             if (operationDeadline is not null)
             {
                 await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,

@@ -43,7 +43,7 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
         finally
         {
             release.TrySetResult();
-            await Task.WhenAll(consumers).WaitAsync(CoordinationTimeout);
+            await Task.WhenAll(consumers).WaitAsync(CoordinationTimeout, TimeProvider.System);
         }
 
         await Assert.That(budget.GetSnapshot()).IsEqualTo(new CacheMemorySnapshot(0, 0, 0,
@@ -73,7 +73,7 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
         finally
         {
             release.TrySetResult();
-            await Task.WhenAll(disposals).WaitAsync(CoordinationTimeout);
+            await Task.WhenAll(disposals).WaitAsync(CoordinationTimeout, TimeProvider.System);
         }
 
         reservation.Dispose();

@@ -9,7 +9,7 @@ internal static class SiteProcessCleanup
 
     internal static async Task StopAsync(Process process)
     {
-        using var deadline = new CancellationTokenSource(SiteTokens.CleanupTimeoutMilliseconds);
+        using var deadline = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.CleanupTimeoutMilliseconds), TimeProvider.System);
         try
         {
             if (!process.HasExited)
@@ -40,7 +40,7 @@ internal static class SiteProcessCleanup
         var captures = Task.WhenAll(stdout, stderr);
         try
         {
-            await captures.WaitAsync(TimeSpan.FromMilliseconds(SiteTokens.CleanupTimeoutMilliseconds));
+            await captures.WaitAsync(TimeSpan.FromMilliseconds(SiteTokens.CleanupTimeoutMilliseconds), TimeProvider.System);
         }
         catch (OperationCanceledException) when (captures.IsCanceled)
         {

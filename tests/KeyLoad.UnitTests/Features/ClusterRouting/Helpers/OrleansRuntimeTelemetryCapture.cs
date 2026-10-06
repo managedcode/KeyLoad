@@ -60,9 +60,14 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 
 internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
 {
+    private const long CounterStep = 1;
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansMetricPointCapture> records = [];
     private IOptions<OrleansTelemetryCaptureOptions>? configuredOptions;
+    private long exportCalls;
+    private long matchingPoints;
+    private long maximumPointsPerExport;
+    private long truncatingExports;
 
     internal void Configure(IOptions<OrleansTelemetryCaptureOptions> options)
         => configuredOptions = options;
@@ -88,16 +93,35 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
         }
     }
 
+    internal string DiagnosticSummary
+    {
+        get
+        {
+            lock (gate)
+            {
+                return FormattableString.Invariant(
+                    $"export_calls={exportCalls}; matching_points_total={matchingPoints}; max_points_per_export={maximumPointsPerExport}; retained_rows={records.Count}; truncating_exports={truncatingExports}");
+            }
+        }
+    }
+
     public override ExportResult Export(in Batch<Metric> batch)
     {
         lock (gate)
         {
+            exportCalls = AddSaturated(exportCalls, CounterStep);
+            var pointsInExport = 0L;
+            var truncated = false;
             foreach (var metric in batch)
             {
-                if (!CaptureMetric(metric))
-                {
-                    return ExportResult.Success;
-                }
+                CountAndCaptureMetric(metric, ref pointsInExport, ref truncated);
+            }
+
+            matchingPoints = AddSaturated(matchingPoints, pointsInExport);
+            maximumPointsPerExport = Math.Max(maximumPointsPerExport, pointsInExport);
+            if (truncated)
+            {
+                truncatingExports = AddSaturated(truncatingExports, CounterStep);
             }
         }
 
@@ -107,31 +131,31 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
     private int CaptureLimit => configuredOptions?.Value.MaximumRecords
         ?? throw new InvalidOperationException("The native metric exporter has no validated capture options.");
 
-    private bool CaptureMetric(Metric metric)
+    private void CountAndCaptureMetric(Metric metric, ref long pointsInExport, ref bool truncated)
     {
+        if (metric.MeterName != OrleansRuntimeTelemetryTokens.MetricMeter
+            && metric.MeterName != OrleansRuntimeTelemetryTokens.PrivacyMeter)
+        {
+            return;
+        }
+
         foreach (var point in metric.GetMetricPoints())
         {
-            if (!CapturePoint(metric, point))
+            pointsInExport = AddSaturated(pointsInExport, CounterStep);
+            if (records.Count >= CaptureLimit)
             {
-                return false;
+                WasTruncated = true;
+                truncated = true;
+                continue;
             }
-        }
 
-        return true;
+            records.Add(new OrleansMetricPointCapture(metric.MeterName, metric.Name,
+                CaptureTags(point.Tags), CaptureExemplarTags(point)));
+        }
     }
 
-    private bool CapturePoint(Metric metric, MetricPoint point)
-    {
-        if (records.Count >= CaptureLimit)
-        {
-            WasTruncated = true;
-            return false;
-        }
-
-        records.Add(new OrleansMetricPointCapture(metric.MeterName, metric.Name,
-            CaptureTags(point.Tags), CaptureExemplarTags(point)));
-        return true;
-    }
+    private static long AddSaturated(long current, long increment)
+        => current > long.MaxValue - increment ? long.MaxValue : current + increment;
 
     private static KeyValuePair<string, string?>[] CaptureTags(ReadOnlyTagCollection tags)
     {

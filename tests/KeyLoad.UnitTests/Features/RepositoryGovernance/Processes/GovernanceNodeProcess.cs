@@ -41,9 +41,9 @@ internal static class GovernanceNodeProcess
 
     internal static async Task<GovernanceResult> RunAsync(string fixtureRoot)
     {
+        using var timeoutTimeout = new CancellationTokenSource(Deadline, TimeProvider.System);
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        timeout.CancelAfter(Deadline);
+            TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
         using var process = new Process { StartInfo = CreateStartInfo(fixtureRoot) };
         if (!process.Start())
         {
@@ -63,7 +63,7 @@ internal static class GovernanceNodeProcess
             {
                 process.Kill(entireProcessTree: true);
             }
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupDeadlineSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupDeadlineSeconds), TimeProvider.System);
             await process.WaitForExitAsync(cleanup.Token);
             await timeout.CancelAsync();
             try

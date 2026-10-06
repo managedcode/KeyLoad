@@ -9,37 +9,37 @@ internal static class ComparisonSessionCleanup
     internal const string Failure = "ComparisonSessionCleanupFailed";
     private const int MinimumTimeoutSeconds = 1;
 
-    internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
+    internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, int timeoutSeconds, TimeProvider timeProvider)
     {
-        var result = await CloseAndJoinAsync(sessions, timeoutSeconds).ConfigureAwait(false);
+        var result = await CloseAndJoinAsync(sessions, timeoutSeconds, timeProvider: timeProvider).ConfigureAwait(false);
         ThrowFatal(result.Failures);
         return result.Failures.IsEmpty && !result.ThresholdExpired;
     }
 
-    internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, TimeSpan timeout)
+    internal static async Task<bool> CloseAsync(IEnumerable<IComparisonSession> sessions, TimeSpan timeout, TimeProvider timeProvider)
     {
-        var result = await CloseAndJoinAsync(sessions, timeout).ConfigureAwait(false);
+        var result = await CloseAndJoinAsync(sessions, timeout, timeProvider: timeProvider).ConfigureAwait(false);
         ThrowFatal(result.Failures);
         return result.Failures.IsEmpty && !result.ThresholdExpired;
     }
 
     internal static Task<ComparisonSessionCloseResult> CloseAndJoinAsync(
-        IEnumerable<IComparisonSession> sessions, int timeoutSeconds)
+        IEnumerable<IComparisonSession> sessions, int timeoutSeconds, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentOutOfRangeException.ThrowIfLessThan(timeoutSeconds, MinimumTimeoutSeconds);
-        return CloseAndJoinAsync(sessions, TimeSpan.FromSeconds(timeoutSeconds));
+        return CloseAndJoinAsync(sessions, TimeSpan.FromSeconds(timeoutSeconds), timeProvider: timeProvider);
     }
 
     internal static async Task<ComparisonSessionCloseResult> CloseAndJoinAsync(
-        IEnumerable<IComparisonSession> sessions, TimeSpan timeout)
+        IEnumerable<IComparisonSession> sessions, TimeSpan timeout, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(sessions);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
         var closeTasks = StartDisposals(sessions);
         var joined = Task.WhenAll(closeTasks);
         using var deadlineSource = new CancellationTokenSource();
-        var deadline = Task.Delay(timeout, deadlineSource.Token);
+        var deadline = Task.Delay(timeout, timeProvider, deadlineSource.Token);
         var thresholdExpired = await Task.WhenAny(joined, deadline).ConfigureAwait(false) != joined;
         if (!thresholdExpired)
         {

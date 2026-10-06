@@ -4,38 +4,36 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveVerification
 {
-    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         foreach (var readback in TimeSeriesIntensivePlans.SeedReadbacks())
         {
             var expected = TimeSeriesIntensiveOracle.SeedReadback(readback);
             var actual = await TimeSeriesIntensiveVerificationReader.ReadAsync(target, readback.SeriesId,
-                readback.From, readback.Until, executionOptions, cancellationToken).ConfigureAwait(false);
+                readback.From, readback.Until, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             _ = TimeSeriesIntensiveResultDigest.ValidatedRaw(expected, actual);
         }
 
         var expectedAggregate = TimeSeriesIntensiveStatistics.Fold(TimeSeriesIntensiveCorpus.SeedOrdered);
-        var actualAggregate = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, TimeSeriesIntensiveProfile.SeedSeries, executionOptions, cancellationToken).ConfigureAwait(false);
+        var actualAggregate = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, TimeSeriesIntensiveProfile.SeedSeries, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         TimeSeriesIntensiveOracle.ValidateFullCount(TimeSeriesIntensiveProfile.SeedSeries, actualAggregate);
         TimeSeriesIntensiveOracle.ValidateAggregate(expectedAggregate, actualAggregate);
     }
 
-    internal static async Task EmptyAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task EmptyAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
 
         var raw = await TimeSeriesIntensiveVerificationReader.ReadAsync(target, seriesId,
-            DateTimeOffset.MinValue, DateTimeOffset.MaxValue, executionOptions, cancellationToken).ConfigureAwait(false);
+            DateTimeOffset.MinValue, DateTimeOffset.MaxValue, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         _ = TimeSeriesIntensiveResultDigest.ValidatedRaw([], raw);
-        var latest = await TimeSeriesIntensiveVerificationReader.LatestAsync(target, seriesId, executionOptions, cancellationToken).ConfigureAwait(false);
+        var latest = await TimeSeriesIntensiveVerificationReader.LatestAsync(target, seriesId, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         _ = TimeSeriesIntensiveResultDigest.ValidatedLatest(null, latest);
-        var aggregate = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, seriesId, executionOptions, cancellationToken).ConfigureAwait(false);
+        var aggregate = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, seriesId, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         TimeSeriesIntensiveOracle.ValidateAggregate(new(NoObservedItems, NoObservedItems, null, null, null), aggregate);
     }
 
-    internal static async Task<TimeSeriesIntensiveRunFailure?> AppendAsync(ITimeSeriesIntensiveTarget target,
-        TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase,
-        TimeSeriesIntensiveAttemptLedger ledger, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task<TimeSeriesIntensiveRunFailure?> AppendAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, TimeSeriesIntensiveAttemptLedger ledger, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         TimeSeriesIntensiveRunFailure? failure = null;
         var view = new TimeSeriesIntensiveReceiptView(phase.Commands, ledger.Attempts);
@@ -44,7 +42,7 @@ internal static class TimeSeriesIntensiveVerification
             try
             {
                 var actual = await TimeSeriesIntensiveVerificationReader.ReadAsync(target, readback.SeriesId,
-                    readback.From, readback.Until, executionOptions, cancellationToken).ConfigureAwait(false);
+                    readback.From, readback.Until, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
                 var rows = TimeSeriesIntensiveAppendOracle.Readback(readback, view);
                 _ = TimeSeriesIntensiveResultDigest.ValidatedRaw(rows, actual);
             }
@@ -56,12 +54,11 @@ internal static class TimeSeriesIntensiveVerification
             cancellationToken.ThrowIfCancellationRequested();
         }
 
-        var wholeFailure = await WholeAppendAsync(target, expected, phase, executionOptions, cancellationToken).ConfigureAwait(false);
+        var wholeFailure = await WholeAppendAsync(target, expected, phase, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         return failure ?? wholeFailure;
     }
 
-    private static async Task<TimeSeriesIntensiveRunFailure?> WholeAppendAsync(ITimeSeriesIntensiveTarget target,
-        TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    private static async Task<TimeSeriesIntensiveRunFailure?> WholeAppendAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
 
@@ -69,7 +66,7 @@ internal static class TimeSeriesIntensiveVerification
         {
             var aggregate = TimeSeriesIntensiveStatistics.Fold(expected.AppendSamples.Take(phase.Count)
                 .Select(sample => new SampleRecord(phase.SeriesId, sample, NoObservedItems, TimeSeriesIntensiveProfile.Tags)));
-            var actual = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, phase.SeriesId, executionOptions, cancellationToken).ConfigureAwait(false);
+            var actual = await TimeSeriesIntensiveVerificationReader.WholeAsync(target, phase.SeriesId, executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             TimeSeriesIntensiveOracle.ValidateFullCount(phase.SeriesId, actual);
             TimeSeriesIntensiveOracle.ValidateAggregate(aggregate, actual);
             phase.Appends!.ValidateComplete();

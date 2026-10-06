@@ -33,8 +33,8 @@ internal static class IsolatedNativeCase
         var evidence = IsolatedNativeReportAssertions.EvidenceDirectory();
         var root = Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString(OpenLoopNativeTestOracle.GuidFormat));
         var output = Path.Combine(root, Reports);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(plan.Timeout);
+        using var timeoutTimeout = new CancellationTokenSource(plan.Timeout, TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var args = CreateArguments(plan, root, output);
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args, timeout.Token);
         builder.Services.AddLogging(logging => logging.ClearProviders().AddConsole().SetMinimumLevel(LogLevel.Warning));

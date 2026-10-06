@@ -36,8 +36,8 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
     internal static async Task RunAsync(bool useMcp, RequestCqrsProbePhase phase,
         CancellationToken cancellationToken)
     {
-        using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        parent.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+        using var parentTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, parentTimeout.Token);
         var scenario = new RequestCqrsPhaseFaultScenario(useMcp, phase);
         await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteAsync(parent.Token), scenario.failures)
             .ConfigureAwait(false);
@@ -53,8 +53,8 @@ internal sealed class RequestCqrsPhaseFaultScenario(bool useMcp, RequestCqrsProb
     {
         root = RequestCqrsPhaseFaultProvisioning.NewPrivateRootPath();
         RequestCqrsPhaseFaultProvisioning.CreatePrivateRoot(root, () => rootOwned = true);
-        using var waveDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        waveDeadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
+        using var waveDeadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        using var waveDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken, waveDeadlineTimeout.Token);
         scenarioDeadline = CancellationTokenSource.CreateLinkedTokenSource(waveDeadline.Token);
         await PrepareAndStartAsync(scenarioDeadline.Token).ConfigureAwait(false);
         await VerifyPhaseAndCancelAsync(scenarioDeadline.Token).ConfigureAwait(false);

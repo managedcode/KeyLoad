@@ -10,8 +10,8 @@ internal static class DueFaultRf3Run
 {
     internal static async Task ExecuteAsync(CancellationToken executionToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(executionToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(executionToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         string? root = null;
         try

@@ -24,12 +24,12 @@ internal static class RequestCqrsLifecycleCases
         {
             await Assert.That(await enumerator.MoveNextAsync()).IsTrue();
             await Assert.That(enumerator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
-            await observed.Started.Task.WaitAsync(SettlementBound);
+            await observed.Started.Task.WaitAsync(SettlementBound, TimeProvider.System);
             await cancelled.CancelAsync();
             Exception? moveFailure = null;
             try
             {
-                _ = await enumerator.MoveNextAsync().AsTask().WaitAsync(SettlementBound);
+                _ = await enumerator.MoveNextAsync().AsTask().WaitAsync(SettlementBound, TimeProvider.System);
             }
             catch (OperationCanceledException error)
             {
@@ -40,8 +40,8 @@ internal static class RequestCqrsLifecycleCases
             await Assert.That(((OperationCanceledException)moveFailure!).CancellationToken.IsCancellationRequested).IsTrue();
         }
 
-        await observed.ProducerSettled.Task.WaitAsync(SettlementBound);
-        await observed.ActivationSettled.Task.WaitAsync(SettlementBound);
+        await observed.ProducerSettled.Task.WaitAsync(SettlementBound, TimeProvider.System);
+        await observed.ActivationSettled.Task.WaitAsync(SettlementBound, TimeProvider.System);
         await Assert.That(observed.CancellationObserved).IsTrue();
         await Assert.That(observed.ProducerSettlementCount).IsEqualTo(1);
         await Assert.That(observed.ActivationSettlementCount).IsEqualTo(1);
@@ -55,7 +55,7 @@ internal static class RequestCqrsLifecycleCases
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
             observed.MarkStarted();
-            await Task.Delay(Timeout.InfiniteTimeSpan, writer.CancellationToken);
+            await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, writer.CancellationToken);
             return Result<GrainOperationReply>.Succeed(
                 new GrainOperationReply { Payload = new byte[] { 1 } });
         }

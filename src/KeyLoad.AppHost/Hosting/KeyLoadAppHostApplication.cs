@@ -2,6 +2,7 @@ using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication.Commands;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace KeyLoad.AppHost.Hosting;
 
@@ -46,6 +47,7 @@ internal static class KeyLoadAppHostApplication
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+        builder.Services.TryAddSingleton(TimeProvider.System);
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
         var twoRf3 = runtimeOptions.Control.Value.TwoRf3;
         var tests = runtimeOptions.Control.Value.Tests;

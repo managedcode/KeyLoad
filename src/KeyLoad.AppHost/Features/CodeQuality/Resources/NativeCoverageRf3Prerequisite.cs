@@ -38,7 +38,8 @@ internal static class NativeCoverageRf3Prerequisite
             seconds.ToString(CultureInfo.InvariantCulture),
             checked((int)options.Value.SettlementTimeout.TotalSeconds).ToString(CultureInfo.InvariantCulture)
         };
-        builder.Services.AddSingleton(new NativeCoverageRf3Cleanup(run, invocation, options, execution));
+        var ownedRun = run;
+        builder.Services.AddSingleton(services => new NativeCoverageRf3Cleanup(ownedRun, invocation, options, execution, services.GetRequiredService<TimeProvider>()));
         builder.Services.AddSingleton(run);
         builder.Services.AddSingleton(invocation);
         return builder.AddExecutable(ResourceName, NodeExecutable, repositoryRoot, args);

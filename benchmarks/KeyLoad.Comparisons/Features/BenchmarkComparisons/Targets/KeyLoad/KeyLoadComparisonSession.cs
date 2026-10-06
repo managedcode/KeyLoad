@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using KeyLoad.Client;
@@ -9,9 +8,10 @@ namespace KeyLoad.Comparisons.Targets;
 internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRef partition, VectorSpace space,
     int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
-    IOptions<QueryTranslationOptions> translationOptions)
+    IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null)
     : IComparisonSession, IOpenLoopCancellationHealthSession, IOpenLoopComparisonSession
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly NativeComparisonExecutionOptions execution = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
 
@@ -153,10 +153,10 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         CancellationToken cancellationToken)
     {
         var lane = new QueueLaneRef(partition, KeyLoadWorkloadIdentities.QueueName);
-        var begin = Stopwatch.GetTimestamp();
+        var begin = timeProvider.GetTimestamp();
         KeyLoadClientResults.Success(await client.CommitAsync(new(Guid.NewGuid(), partition,
             [new EnqueueMessage(KeyLoadWorkloadIdentities.QueueName, document.Id, document.Json)]), cancellationToken));
-        var enqueued = Stopwatch.GetTimestamp();
+        var enqueued = timeProvider.GetTimestamp();
         Delivery? delivery = null;
         while (delivery is null)
         {
@@ -166,15 +166,15 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
                 .Deliveries.SingleOrDefault();
             if (delivery is null)
             {
-                await Task.Delay(lifecycle.QueueClaimPollInterval, cancellationToken);
+                await Task.Delay(lifecycle.QueueClaimPollInterval, timeProvider, cancellationToken);
             }
         }
-        var received = Stopwatch.GetTimestamp();
+        var received = timeProvider.GetTimestamp();
         KeyLoadClientResults.Success(await client.CompleteAsync(new(Guid.NewGuid(), lane, delivery.Token,
             DeliveryAction.Ack), cancellationToken));
         return new(Message: new(delivery.Id, delivery.PayloadJson), Queue: new(
-            Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds,
-            Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds,
-            Stopwatch.GetElapsedTime(received).TotalMilliseconds));
+            timeProvider.GetElapsedTime(begin, enqueued).TotalMilliseconds,
+            timeProvider.GetElapsedTime(enqueued, received).TotalMilliseconds,
+            timeProvider.GetElapsedTime(received).TotalMilliseconds));
     }
 }

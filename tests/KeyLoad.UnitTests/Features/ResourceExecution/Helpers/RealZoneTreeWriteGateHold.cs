@@ -23,7 +23,7 @@ internal sealed class RealZoneTreeWriteGateHold : IAsyncDisposable
     }
 
     /// <summary>Waits until the commit callback owns the exclusive store gate.</summary>
-    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(CoordinationTimeout);
+    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
 
     /// <summary>Releases the callback and waits for the real commit to exit.</summary>
     internal async Task ReleaseAsync()
@@ -31,7 +31,7 @@ internal sealed class RealZoneTreeWriteGateHold : IAsyncDisposable
         release.TrySetResult();
         try
         {
-            await holder.WaitAsync(CoordinationTimeout);
+            await holder.WaitAsync(CoordinationTimeout, TimeProvider.System);
         }
         finally
         {

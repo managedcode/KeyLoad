@@ -60,7 +60,7 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
     {
         try
         {
-            using var timeout = new CancellationTokenSource(StartupTimeout);
+            using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
             coverage = await NativeCoverageRf3FixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
                 .ConfigureAwait(false);
             var arguments = coverage?.CreateArguments() ??

@@ -47,7 +47,7 @@ function Assert-FcNativeServerDependencyRoster([string] $ContextDirectory, [obje
     $depsPath = Join-Path $ContextDirectory 'server/KeyLoad.Server.deps.json'
     $deps = Read-FcNativeBoundedFile $depsPath $Bounds.maximumManifestBytes $Bounds.readBufferBytes $script:FcNativeContext.Invalid
     if ($deps.sha256 -cne $metadata[0].sha256 -or $deps.length -ne $metadata[0].length) { throw $script:FcNativeContext.Invalid }
-    $document = [System.Text.Json.JsonDocument]::Parse($deps.bytes)
+    $document = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($deps.bytes))
     try {
         Assert-FcNativeJsonUnique $document.RootElement
         $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($deps.bytes)) -AsHashtable -Depth 16

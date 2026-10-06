@@ -45,8 +45,8 @@ internal sealed class EpochUpgradeProcessRecoveryTests
         var target = Path.Combine(root, "target");
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         Process? process = null;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -67,7 +67,7 @@ internal sealed class EpochUpgradeProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleAsync(process, root, source, activeFailure, cleanup.Token);
         }
     }

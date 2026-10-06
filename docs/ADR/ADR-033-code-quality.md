@@ -966,3 +966,20 @@ AC-CQ-044 rows. This explicitly covers unit, scalar, recovery and RF3; the
 Query-only development profile remains separate. Registry bytes are part of
 the complete pre/post source inventory. Admission never substitutes for native
 pass, TRX identity, original image/cohort binding or actual coverage evidence.
+
+TASK-CQ-NATIVE-CLI-SETTINGS-006 (REQ-CQ-009; AC-CQ-039/040/045) binds standalone
+CLI collection to the original canonical production XML. Root freezes this
+contract, reviews the guarded private packet and owns actual Aspire execution;
+the Luna worker owns the feature-local NativeCoverageMergeProcess settings
+snapshot/argument join. Capture the bounded regular settings path/hash once,
+verify its unchanged bytes before/after each settled native child, and pass
+`--settings` to the existing native collector. Preserve the full original
+backup/pack/inspect/restore, state, repeated-input and independent union oracle.
+Retain original reports on success and failure before fixture cleanup. Empty
+exports remain failed evidence even when their coarse native rate equals one.
+Then run the actual operation through Aspire, normal/scalar coverage and exact
+delivered-source Linux cohorts. No alternate collector, test caller, dependency,
+database format, public API, raised cap or relaxed admission is introduced.
+Rollback restores the coherent test-only invocation/snapshot join and preserves
+immutable prior evidence; this stage remains Accepted until its runtime gates
+pass.

@@ -36,7 +36,7 @@ internal sealed class AdmissionOwnershipTests
         await Assert.That(() => inbox.ReadAsync(cancellation.Token).AsTask()).Throws<InvalidOperationException>();
         var command = inbox.Enqueue(NewOperation(), NewPrincipal(), 0);
 
-        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds))).IsSameReferenceAs(command);
+        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System)).IsSameReferenceAs(command);
         command.Complete(new(SuccessfulResultJson));
     }
 
@@ -50,8 +50,8 @@ internal sealed class AdmissionOwnershipTests
         var firstDisposal = inbox.DisposeAsync().AsTask();
         var secondDisposal = inbox.DisposeAsync().AsTask();
 
-        await Task.WhenAll(firstDisposal, secondDisposal).WaitAsync(TimeSpan.FromSeconds(WaitSeconds));
-        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds))).IsNull();
+        await Task.WhenAll(firstDisposal, secondDisposal).WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System);
+        await Assert.That(await reader.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System)).IsNull();
         await Assert.That(() => inbox.ReadAsync(cancellation.Token).AsTask()).Throws<ObjectDisposedException>();
         Assert.ThrowsExactly<ObjectDisposedException>(() => inbox.Enqueue(NewOperation(), NewPrincipal(), 0));
         await Assert.That(governor.Snapshot()).IsEqualTo(new(0, 0, 0, 0, 0, 0));

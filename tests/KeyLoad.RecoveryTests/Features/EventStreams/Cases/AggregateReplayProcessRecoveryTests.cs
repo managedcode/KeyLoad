@@ -21,8 +21,8 @@ internal sealed class AggregateReplayProcessRecoveryTests
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(25));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(25), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         try
         {
             await KillAtBoundaryAsync(process, root, timeout.Token);
@@ -30,7 +30,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
             await StopAndDeleteAsync(process, root, cleanup.Token);
         }
     }

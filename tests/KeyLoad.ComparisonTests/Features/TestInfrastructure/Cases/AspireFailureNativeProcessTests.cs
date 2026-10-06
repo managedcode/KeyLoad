@@ -50,11 +50,11 @@ internal sealed class AspireFailureNativeProcessTests
             if (native.Snapshot.ExitCode is { } exit && !AspireTerminalResource.HasFailedState(native.Snapshot))
             {
                 await Assert.That(exit).IsNotEqualTo(0);
-                await Assert.That(await execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(exit);
+                await Assert.That(await execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(exit);
             }
             else
             {
-                await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+                await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token));
             }
         }
         finally

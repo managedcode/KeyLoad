@@ -111,12 +111,12 @@ internal static class SiteBrowserVisualAssertions
             [SiteBrowserTokens.XField] = point.GetProperty(SiteBrowserTokens.XField).GetDouble(),
             [SiteBrowserTokens.YField] = point.GetProperty(SiteBrowserTokens.YField).GetDouble(),
         }, cancellationToken);
-        await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+        await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneSettleWaitMilliseconds), TimeProvider.System, cancellationToken);
         await SiteBrowserVectorAssetAssertions.AssertPoseUpdatedAsync(cdp, originalMark, cancellationToken);
         var moving = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         await Assert.That(moving.GetProperty(SiteBrowserUiTokens.FrameField).GetString())
             .IsEqualTo(SiteBrowserUiTokens.FrameRendered);
-        await Task.Delay(SiteBrowserUiTokens.SceneIdleWaitMilliseconds, cancellationToken);
+        await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneIdleWaitMilliseconds), TimeProvider.System, cancellationToken);
         var later = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         await Assert.That(later.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32())
             .IsGreaterThan(moving.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32());
@@ -126,10 +126,10 @@ internal static class SiteBrowserVisualAssertions
             .IsEqualTo(moving.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32());
         var paused = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisableScript, false, cancellationToken);
         await Assert.That(paused.GetBoolean()).IsTrue();
-        await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+        await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneSettleWaitMilliseconds), TimeProvider.System, cancellationToken);
         var settled = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         var metrics = settled.GetRawText();
-        await Task.Delay(SiteBrowserUiTokens.SceneIdleWaitMilliseconds, cancellationToken);
+        await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneIdleWaitMilliseconds), TimeProvider.System, cancellationToken);
         var idle = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         await Assert.That(idle.GetRawText()).IsEqualTo(metrics);
         await Assert.That(idle.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32())

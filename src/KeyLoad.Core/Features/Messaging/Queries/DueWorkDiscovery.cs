@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 
@@ -23,7 +22,7 @@ internal static class DueWorkDiscovery
             throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant);
         }
 
-        var state = new DuePageState(database.OperationLimitsOptions, wakeAt, Stopwatch.GetTimestamp(), database.DueDiscoveryDeadline,
+        var state = new DuePageState(database.OperationLimitsOptions, wakeAt, database.EvaluationClock, database.DueDiscoveryDeadline,
             database.DueExecution.MaximumRecordsPerPage, database.DueExecution.MaximumRangeBytes, cancellationToken);
         var page = database.Store.Read(view =>
         {

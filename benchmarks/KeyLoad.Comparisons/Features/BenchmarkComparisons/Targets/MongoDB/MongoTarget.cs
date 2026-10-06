@@ -11,9 +11,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="topology">Requested one, two or three native members.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class MongoTarget(string connectionString, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
 
     private readonly string databaseName = MongoSchema.DatabasePrefix + Guid.Parse(runId).ToString(MongoSchema.InvariantFormat);
@@ -73,7 +75,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
             var proof = await MongoReplicaVerifier.VerifyAsync(connectionString: connectionString,
                 adminDatabase: primaryClient.GetDatabase(MongoSchema.AdminDatabase), database: database, documents: documents,
                 topology: topology, dataset: dataset, cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions,
-                executionOptions: executionOptions);
+                executionOptions: executionOptions, timeProvider: timeProvider);
             ownedClients.AddRange(proof.SecondaryClients);
             profile = profile with { Cluster = proof.Evidence, Version = proof.Version };
         }
@@ -109,7 +111,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         {
             return;
         }
-        using var cleanup = new CancellationTokenSource(lifecycleOptions.Value.MongoCleanupTimeout);
+        using var cleanup = new CancellationTokenSource(lifecycleOptions.Value.MongoCleanupTimeout, timeProvider);
         try
         {
             await primaryClient.DropDatabaseAsync(databaseName, cleanup.Token);

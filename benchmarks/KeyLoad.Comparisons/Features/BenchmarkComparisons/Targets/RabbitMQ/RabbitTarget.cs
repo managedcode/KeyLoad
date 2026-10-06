@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -13,10 +12,12 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected one-, two- or three-member quorum queue topology.</param>
 /// <param name="management">Optional management API client for broker membership verification; initialization requires it, and the target disposes it.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class RabbitTarget(string connectionString, string runId, string image,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-    ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null) : IComparisonTarget
+    ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient? management = null, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string InitializeAsyncPersistentMessagesTrackedPublisherConfirmsQuorumText = "persistent messages + tracked publisher confirms; quorum ";
     private const string InitializeAsyncOfText = " of ";
     private const string InitializeAsyncQuorumMemberOnlineVerificationManualACKOrderedChannelRPCBarrierText = "; quorum member online verification; manual ACK + ordered channel RPC barrier";
@@ -75,7 +76,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
         }
 
         var proof = await RabbitReplicaProof.VerifyAsync(management: managementClient, queue: queue, topology: configuredTopology,
-            cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
+            cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
         await ProbeQueueAsync(cancellationToken);
         Profile = Profile with
         {
@@ -113,7 +114,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     /// <returns>A session that owns and later disposes its channel.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
         => new Session(await connection!.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken), queue,
-            lifecycleOptions.Value.QueueClaimPollInterval);
+            lifecycleOptions.Value.QueueClaimPollInterval, timeProvider);
 
     /// <summary>Deletes the run-specific queue, then disposes the broker connection and management client.</summary>
     /// <returns>A value task that completes after target cleanup.</returns>
@@ -130,7 +131,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     }
 
     /// <summary>Measures one persistent publish, manual receive, and acknowledgement cycle on its owned channel.</summary>
-    private sealed class Session(IChannel channel, string queue, TimeSpan claimPollInterval) : IComparisonSession
+    private sealed class Session(IChannel channel, string queue, TimeSpan claimPollInterval, TimeProvider timeProvider) : IComparisonSession
     {
         public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
 
@@ -144,26 +145,26 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
                 throw new NotSupportedException();
             }
 
-            var begin = Stopwatch.GetTimestamp();
+            var begin = timeProvider.GetTimestamp();
             await channel.BasicPublishAsync(EmptyText, queue, mandatory: true,
                 basicProperties: new BasicProperties { Persistent = true, MessageId = document.Id, ContentType = ApplicationJsonToken },
                 body: Encoding.UTF8.GetBytes(document.Json), cancellationToken: cancellationToken);
-            var enqueued = Stopwatch.GetTimestamp();
+            var enqueued = timeProvider.GetTimestamp();
             BasicGetResult? delivery = null;
             while (delivery is null)
             {
                 delivery = await channel.BasicGetAsync(queue, autoAck: false, cancellationToken);
                 if (delivery is null)
                 {
-                    await Task.Delay(claimPollInterval, cancellationToken);
+                    await Task.Delay(claimPollInterval, timeProvider, cancellationToken);
                 }
             }
-            var received = Stopwatch.GetTimestamp();
+            var received = timeProvider.GetTimestamp();
             await channel.BasicAckAsync(delivery.DeliveryTag, multiple: false, cancellationToken);
             await channel.QueueDeclarePassiveAsync(queue, cancellationToken);
             return new(Message: new(delivery.BasicProperties.MessageId!, Encoding.UTF8.GetString(delivery.Body.Span)), Queue: new(
-                Stopwatch.GetElapsedTime(begin, enqueued).TotalMilliseconds, Stopwatch.GetElapsedTime(enqueued, received).TotalMilliseconds,
-                Stopwatch.GetElapsedTime(received).TotalMilliseconds));
+                timeProvider.GetElapsedTime(begin, enqueued).TotalMilliseconds, timeProvider.GetElapsedTime(enqueued, received).TotalMilliseconds,
+                timeProvider.GetElapsedTime(received).TotalMilliseconds));
         }
 
         public ValueTask DisposeAsync() => channel.DisposeAsync();

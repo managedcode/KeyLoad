@@ -8,7 +8,7 @@ internal static class SqlGraphSearchExecutor
         string principalId, SqlGraphSearchRequest request, QueryExecutionOptions execution, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         budget.Check();
         var graphRequest = SqlGraphSearchParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters, execution.SqlBudgetCheckInterval);
         budget.Check();

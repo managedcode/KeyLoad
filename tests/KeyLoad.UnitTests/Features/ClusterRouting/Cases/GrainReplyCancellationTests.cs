@@ -100,7 +100,7 @@ internal sealed class GrainReplyCancellationTests
     private static async Task<OperationCanceledException> NativeCancellationAsync()
     {
         using var cancellation = new CancellationTokenSource();
-        var pending = Task.Delay(Timeout.InfiniteTimeSpan, cancellation.Token);
+        var pending = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, cancellation.Token);
         await cancellation.CancelAsync();
         var error = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending)
             ?? throw new InvalidOperationException(MissingCancellation);

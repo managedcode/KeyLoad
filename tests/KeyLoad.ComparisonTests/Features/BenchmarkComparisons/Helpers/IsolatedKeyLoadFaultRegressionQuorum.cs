@@ -65,7 +65,7 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
             }
             IsolatedKeyLoadFaultRegressionProtocol.Require(result.Problem?.ErrorCode is nameof(ErrorCode.OwnershipLost)
                 or nameof(ErrorCode.UnknownWriteOutcome));
-            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
         }
     }
 }

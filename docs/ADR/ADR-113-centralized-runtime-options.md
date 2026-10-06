@@ -459,3 +459,98 @@ MaximumManifestBytes setting. This joins AC-CQ-034 to the actual native coverage
 consumer without implementing a new coverage architecture or claiming coverage
 qualification. The lead owns shared registration/settings/prerequisite joins;
 the comparison worker owns the six RF3 reader/writer/protocol/selection files.
+
+### Final phase-bank operational policy join
+
+TASK-CQ-GENERAL-OPTIONS-001 applies AC-CQ-034/035/038 to ADR-063's bank as
+well as active host consumers. `DatabasePhaseExecutionOptions`, in Abstractions'
+ResourceExecution/Configuration responsibility, owns the disabled-by-default
+mode, stripe reservation (default4; only1/2/4) and maximum CAS attempts (default4;
+inclusive1..4). Server's existing central registration binds and validates the
+native wrapper before physical ownership; startup projects its captured values
+to the BCL-only process facade. There is no new Diagnostics dependency.
+Unknown properties, malformed native values and a scalar whole section are
+rejected before bank construction rather than silently selecting defaults.
+
+The required primitive signatures become `DatabasePhaseBank(bool enabled,
+int stripeCount, int maximumCasAttempts)`, `DatabasePhaseTelemetry.Initialize`
+with the same three required operands, and `TryIncrement(ref long, int)`.
+Remove the old bool-only/default overloads and operational const fields; do not
+silently restore four inside any primitive. Constructor validation occurs before
+allocation. The bank captures immutable scalars and its actual allocation,
+stripe selection, snapshot merge and CAS loop use those exact operands. Setup
+idempotence compares all three values; any different later value is rejected.
+The initially unpublished facade remains disabled without constructing policy.
+
+This owner-requested join refines ADR-063's fixed-four source defaults and API,
+preserving four as the qualified ceiling/default, its fixed32/6/16 public schema,
+128KiB startup ceiling, saturation/sticky degradation, no hot allocation/callback
+or gate, and no live reconfiguration/reset. It adds no request, wire or stored
+field. Root owns options, Server registration/preflight/startup, policy/docs and
+integrated checks; the runtime worker owns Diagnostics' bank/arithmetic/facade
+and the DatabasePhase* TUnit cases. Regression criteria include every allowed
+reservation, invalid pre-allocation rejection, actual lower-stripe memory,
+unchanged detached snapshots, native contention/saturation and zero hot-path
+allocation. Restore the former source only with a coordinated rollback before
+work; no data migration exists. Full build/format, Aspire unit/scalar/recovery
+and RF3 remain required; neither this source join nor a narrow case closes the
+separate profiling/overhead/export qualification in ADR-063.
+
+### Semantic policy coverage integration
+
+TASK-CQ-GENERAL-OPTIONS-001 joins AC-CQ-009/034/037 to the six new executable
+analysis helpers: HardcodedPolicyReturns, HardcodedPolicySearch, NativeTimerPolicy,
+OptionsSnapshotOverrides, OwnedDiagnosticsPolicy and PolicyArgumentSources.
+Root extends the frozen native coverage contract and KLD0037 critical pipeline
+before verification. The exact inventory becomes54 sources:45 executable and
+9 declaration-only. Every new helper contributes to module coverage and the
+critical pipeline; none is a declaration exclusion. Module80/70 and critical90
+thresholds, native integer semantics, source hashing and closed inventory checks
+remain unchanged. Controlled XML boundary fixtures retain their independent
+integer expectations for the expanded450-line synthetic corpus; these are parser
+regressions, never measured coverage. The existing native coverage process,
+threshold and source-inventory tests must pass through the Aspire entry point,
+followed by actual source-bound functional coverage before numerical qualification.
+Root owns this contract/script-token/test-token/docs join. A rollback must remove
+the six source files and their inventory entries together; no stored-data or
+collector-format migration exists.
+
+The same AC-CQ-037 semantic traversal includes conditional values, coalescing
+fallbacks and switch-expression arm values. Inspect result operands rather than
+predicate/pattern constants, and retain the existing depth32, symbol-cycle and
+cancellation guards. Native compiler regressions reject a constant deadline in
+any reachable result arm, preserve configured/dynamic result arms and native
+zero/infinite sentinels, and assert exact native sink spans. The bounded analyzer
+worker owns HardcodedPolicySearch plus its feature-local conditional-flow cases;
+root owns inventory/docs integration and final native analyzer verification.
+
+### Native OpenSearch health-wait policy
+
+The final all-class audit under TASK-CQ-GENERAL-OPTIONS-001 identified the
+embedded timeout=60s in OpenSearchNames.HealthParameters as an execution deadline.
+NativeComparisonExecutionOptions' existing adapter responsibility owns
+OpenSearchHealthWaitTimeoutSeconds (default60, inclusive1..60). The existing
+central native binding/validation creates the wrapper before target ownership.
+OpenSearchTarget passes that same wrapper to both pre/post-seed ObserveAsync calls;
+the native vector fixture passes its bound execution wrapper too. A cohesive
+health URI builder validates the wrapper and formats the configured whole-second
+operand using invariant culture. Green status, all active copies and shard-level
+evidence remain native protocol invariants; only the timeout operand changes.
+Record the effective setting with the existing native adapter evidence.
+
+Root owns source-controlled configuration, contracts/docs and final integration.
+The bounded adapter worker owns the existing options/validator/evidence members,
+OpenSearchNames/ClusterEvidence/Target and the native vector call-site join,
+plus TUnit regressions for configured native URI parameters, the unchanged default
+and invalid-option rejection before observation. Existing real OpenSearch cluster
+tests retain their actual operations and acknowledgement assertions. Run focused
+native unit cases through Aspire, then full build/format and all mandatory gates;
+URI regressions alone do not qualify the cluster. Rollback restores these source
+joins together; no schema, stored state or workload comparison contract changes.
+
+The native numeric self-review requires keeping aggregate partial types below200
+code lines. Move the existing seed validation/exception join into its already
+owning NativeComparisonSeedExecutionOptionsValidator, preserving exact exception
+metadata and failures; the general options owner calls that cohesive validator.
+OpenSearch URI/observation regressions live in their own OpenSearchHealthPolicyTests
+case class. Preserve the existing all-adapter boundary table and every assertion.

@@ -7,6 +7,7 @@ namespace KeyLoad.Comparisons;
 /// <summary>Runs the shared materialized control or one accepted bounded scaled profile.</summary>
 public sealed class ComparisonRunner
 {
+    private readonly TimeProvider timeProvider;
     private readonly ComparisonOptions? options;
     private readonly IOptions<ComparisonOptions>? workloadOptions;
     private readonly ScaledComparisonProfile? scaledProfile;
@@ -19,8 +20,10 @@ public sealed class ComparisonRunner
     /// <param name="options">Validated bounded control settings.</param>
     /// <param name="executionOptions">Native process observation and progress policy.</param>
     /// <param name="progress">Optional progress observer.</param>
-    public ComparisonRunner(IOptions<ComparisonOptions> options, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
+    public ComparisonRunner(IOptions<ComparisonOptions> options, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         ArgumentNullException.ThrowIfNull(options);
         this.options = options.Value;
         this.options!.Validate();
@@ -29,15 +32,17 @@ public sealed class ComparisonRunner
         this.progress = progress;
     }
 
-    private ComparisonRunner(ScaledComparisonProfile scaledProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
+    private ComparisonRunner(ScaledComparisonProfile scaledProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         this.scaledProfile = scaledProfile;
         this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
         this.progress = progress;
     }
 
-    private ComparisonRunner(VectorComparisonProfile vectorProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
+    private ComparisonRunner(VectorComparisonProfile vectorProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         this.vectorProfile = vectorProfile;
         vectorExecution = executionOptions;
         this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
@@ -48,17 +53,19 @@ public sealed class ComparisonRunner
     /// <param name="profile">The closed accepted scaled profile.</param>
     /// <param name="executionOptions">Native process observation and progress policy.</param>
     /// <param name="progress">Optional progress observer.</param>
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     /// <returns>The shared comparison runner with its bounded scale path selected.</returns>
-    public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
-        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions, progress);
+    public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null, TimeProvider? provider = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions, progress, provider);
 
     /// <summary>Creates a runner for one exact native vector profile.</summary>
     /// <param name="profile">The immutable bounded vector profile.</param>
     /// <param name="executionOptions">The explicitly configured native execution limits.</param>
     /// <param name="progress">The optional progress observer.</param>
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     /// <returns>The native vector workload runner.</returns>
-    public static ComparisonRunner ForVector(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
-        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), progress);
+    public static ComparisonRunner ForVector(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null, TimeProvider? provider = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), progress, provider);
 
     /// <summary>Runs the vector-specific workload against its already Aspire-owned native target.</summary>
     /// <param name="target">The actual native vector target.</param>
@@ -73,7 +80,7 @@ public sealed class ComparisonRunner
         {
             throw new InvalidOperationException(ComparisonRunnerValues.AVectorProfileMustBeSelected);
         }
-        return new VectorComparisonRunner(vectorProfile, vectorExecution!).RunAsync(target, sourceRevision, storage, cancellationToken);
+        return new VectorComparisonRunner(vectorProfile, vectorExecution!, timeProvider).RunAsync(target, sourceRevision, storage, cancellationToken);
     }
 
     private const string SetupPrefix = "setup:";
@@ -98,13 +105,13 @@ public sealed class ComparisonRunner
         }
         if (scaledProfile is { } profile)
         {
-            return await new ScaledComparisonRunner(profile, executionOptions, progress).RunAsync(targets, sourceRevision,
+            return await new ScaledComparisonRunner(profile, executionOptions, progress, timeProvider).RunAsync(targets, sourceRevision,
                 storage, scenario, cancellationToken).ConfigureAwait(false);
         }
         ValidateTargets(targets, scenario);
 
-        var started = TimeProvider.System.GetUtcNow();
-        await using var observer = new ComparisonProgressObserver(progress, executionOptions);
+        var started = timeProvider.GetUtcNow();
+        await using var observer = new ComparisonProgressObserver(progress, executionOptions, timeProvider);
         observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex);
         cancellationToken.ThrowIfCancellationRequested();
         var dataset = new BenchmarkDataset(workloadOptions!);
@@ -181,7 +188,7 @@ public sealed class ComparisonRunner
                 if (selectedScenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete
                     && target.Supports(Scenario.DocumentUpdate) && target.Supports(Scenario.DocumentDelete))
                 {
-                    await ComparisonMutationProbe.VerifyAsync(target, dataset, cancellationToken);
+                    await ComparisonMutationProbe.VerifyAsync(target, dataset, token: cancellationToken, timeProvider: timeProvider);
                 }
             }
             catch (Exception error) when (!cancellationToken.IsCancellationRequested) { failure = ComparisonErrors.Safe(error); }
@@ -215,7 +222,7 @@ public sealed class ComparisonRunner
 
         ComparisonCase result;
         try
-        { result = await new ComparisonMeasurer(workloadOptions!, observer, executionOptions).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        { result = await new ComparisonMeasurer(workloadOptions!, observer, executionOptions, timeProvider).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
         await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);

@@ -59,7 +59,7 @@ internal static class RecurringScheduleRf3Assertions
             {
                 throw new InvalidOperationException("The autonomous schedule advanced beyond the expected ordinal.");
             }
-            await Task.Delay(PollInterval, cancellationToken);
+            await Task.Delay(PollInterval, TimeProvider.System, cancellationToken);
         }
         throw new TimeoutException("The autonomous schedule did not advance within its bounded RF3 window.");
     }

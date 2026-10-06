@@ -30,7 +30,7 @@ internal static partial class LocalImageOwnedProcessLifetime
 
     internal static async Task ObserveAsync(Task exit, Task output, Task error, CancellationToken cancellationToken)
     {
-        var canceled = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        var canceled = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, cancellationToken);
         var observed = new HashSet<Task>();
         while (true)
         {
@@ -75,7 +75,7 @@ internal static partial class LocalImageOwnedProcessLifetime
         TrySendTerminate(process, failures);
         if (!HasExited(process, failures))
         {
-            await Task.WhenAny(exit, Task.Delay(TerminationGrace)).ConfigureAwait(false);
+            await Task.WhenAny(exit, Task.Delay(TerminationGrace, TimeProvider.System)).ConfigureAwait(false);
         }
         if (!HasExited(process, failures))
         {
@@ -83,7 +83,7 @@ internal static partial class LocalImageOwnedProcessLifetime
         }
 
         var joined = Task.WhenAll(exit, output, error);
-        if (await Task.WhenAny(joined, Task.Delay(SettlementLimit)).ConfigureAwait(false) != joined)
+        if (await Task.WhenAny(joined, Task.Delay(SettlementLimit, TimeProvider.System)).ConfigureAwait(false) != joined)
         {
             failures.Add(new TimeoutException("Local RF3 image process and original stream readers did not settle within the cleanup threshold."));
             if (!HasExited(process, failures))
@@ -146,7 +146,7 @@ internal static partial class LocalImageOwnedProcessLifetime
                 failures.AddRange(observations);
                 observationFailureRecorded = true;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(100), TimeProvider.System).ConfigureAwait(false);
         }
     }
 

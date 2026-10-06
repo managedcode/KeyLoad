@@ -63,7 +63,7 @@ internal sealed class NodeEpochPathValidationTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleNodeAsync(null, root, source, activeFailure, cleanup.Token);
         }
     }
@@ -85,8 +85,8 @@ internal sealed class NodeEpochPathValidationTests
         var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
         var source = Path.Combine(root, SourceName);
         var profile = NodeEpochComponentProfile.Create();
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(3));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(3), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -102,7 +102,7 @@ internal sealed class NodeEpochPathValidationTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleNodeAsync(null, root, source, activeFailure, cleanup.Token);
         }
     }

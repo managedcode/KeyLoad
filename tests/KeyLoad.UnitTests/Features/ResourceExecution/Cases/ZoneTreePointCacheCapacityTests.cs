@@ -128,7 +128,7 @@ internal sealed class ZoneTreePointCacheCapacityTests
                 }, release), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
         try
         {
-            await entered.Task.WaitAsync(WaitLimit);
+            await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var before = store.GetPointCacheDiagnostics();
             var fallback = store.Read(view => view.ReadOwnedValue(keys[17]));
             var pressured = store.GetPointCacheDiagnostics();
@@ -152,7 +152,7 @@ internal sealed class ZoneTreePointCacheCapacityTests
         => store.Read(view => view.ReadValue(key, value =>
         {
             signalEntered();
-            release.Task.WaitAsync(WaitLimit).GetAwaiter().GetResult();
+            release.Task.WaitAsync(WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
 
             if (value.Length != 1 || value[0] != expected)
             {

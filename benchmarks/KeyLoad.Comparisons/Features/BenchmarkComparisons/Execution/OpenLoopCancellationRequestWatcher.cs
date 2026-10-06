@@ -13,9 +13,7 @@ internal static class OpenLoopCancellationRequestWatcher
         RejectExisting(Path.Combine(output, OpenLoopCancellationProofContract.ProofFileName));
     }
 
-    internal static async Task<bool> WatchAndCancelAsync(string output,
-        CancellationTokenSource runnerCancellation, OpenLoopExecutionPolicy policy,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken stopToken)
+    internal static async Task<bool> WatchAndCancelAsync(string output, CancellationTokenSource runnerCancellation, OpenLoopExecutionPolicy policy, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken stopToken)
     {
         var execution = NativeComparisonExecutionOptions.Require(executionOptions);
         var request = Path.Combine(output, OpenLoopCancellationProofContract.RequestFileName);
@@ -31,7 +29,7 @@ internal static class OpenLoopCancellationRequestWatcher
                     await runnerCancellation.CancelAsync().ConfigureAwait(false);
                     return true;
                 }
-                await Task.Delay(policy.ControlPollMilliseconds, stopToken).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMilliseconds(policy.ControlPollMilliseconds), timeProvider, stopToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException error) when (error.CancellationToken == stopToken

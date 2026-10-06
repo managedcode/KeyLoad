@@ -9,9 +9,9 @@ internal sealed class PhysicalShardCatalogRf3Tests(ClusterFixture fixture)
     [Test]
     public async Task AcScat003AllVotersValidateOneCatalogAndRestartKeepsTheConfiguredIdentity()
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var configuredIdentity = fixture.PhysicalShardId;
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         await scenario.SeedAsync(fixture, deadline.Token).ConfigureAwait(false);

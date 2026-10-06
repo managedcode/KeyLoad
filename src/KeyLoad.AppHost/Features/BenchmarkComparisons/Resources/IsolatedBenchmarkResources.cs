@@ -47,7 +47,7 @@ internal static class IsolatedBenchmarkResources
                 AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectory),
                 applicationStopping: serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
                 executionOptions: AppHostOptionsRegistration.Get(builder).ServerResources, provenanceOptions: AppHostOptionsRegistration.Get(builder).Provenance,
-                openLoop: openLoop));
+                openLoop: openLoop, provider: serviceProvider.GetRequiredService<TimeProvider>()));
         }
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))

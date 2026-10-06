@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -54,7 +54,7 @@ internal static class PackedAnnWideSearchBoundary
         });
         try
         {
-            var budget = await ready.Task.WaitAsync(TimeSpan.FromSeconds(StartTimeoutSeconds));
+            var budget = await ready.Task.WaitAsync(TimeSpan.FromSeconds(StartTimeoutSeconds), TimeProvider.System);
             return new(search, budget);
         }
         catch (TimeoutException)
@@ -68,7 +68,7 @@ internal static class PackedAnnWideSearchBoundary
     internal static async Task<long> CancelAfterEdgeAsync(PackedAnnStartedSearch run,
         CancellationTokenSource cancellation)
     {
-        var timer = Stopwatch.StartNew();
+        var timer = new TestElapsedClock(TimeProvider.System);
         while (!run.Search.IsCompleted && timer.Elapsed < TimeSpan.FromSeconds(ObserverTimeoutSeconds))
         {
             var edges = run.Budget.EdgeVisits;
@@ -77,7 +77,7 @@ internal static class PackedAnnWideSearchBoundary
                 await cancellation.CancelAsync();
                 return edges;
             }
-            await Task.Delay(PollMilliseconds);
+            await Task.Delay(TimeSpan.FromMilliseconds(PollMilliseconds), timer.Provider);
         }
         return run.Budget.EdgeVisits;
     }

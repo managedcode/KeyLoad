@@ -43,14 +43,14 @@ internal static class NativeRequestWorkKernelCases
         {
             var move = enumerator.MoveNextAsync().AsTask();
             firstMove = move;
-            await Assert.That(await move.WaitAsync(SettlementBound)).IsTrue();
+            await Assert.That(await move.WaitAsync(SettlementBound, TimeProvider.System)).IsTrue();
             observed.Add(move);
             await Assert.That(enumerator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
-            await probe.HandlerEntered.WaitAsync(SettlementBound);
+            await probe.HandlerEntered.WaitAsync(SettlementBound, TimeProvider.System);
 
             var drainTask = owner.DrainAsync();
             drain = drainTask;
-            await probe.FinallyEntered.WaitAsync(SettlementBound);
+            await probe.FinallyEntered.WaitAsync(SettlementBound, TimeProvider.System);
             var disposalTask = enumerator.DisposeAsync().AsTask();
             disposal = disposalTask;
             await NativeRequestWorkKernelAssertions.AssertBothRunningAsync(disposalTask, drainTask);
@@ -58,11 +58,11 @@ internal static class NativeRequestWorkKernelCases
             await Assert.That(probe.ProducerSettled.IsCompleted).IsFalse();
 
             probe.ReleaseProducer();
-            await probe.ProducerSettled.WaitAsync(SettlementBound);
-            await disposalTask.WaitAsync(SettlementBound);
+            await probe.ProducerSettled.WaitAsync(SettlementBound, TimeProvider.System);
+            await disposalTask.WaitAsync(SettlementBound, TimeProvider.System);
             observed.Add(disposalTask);
-            await probe.ActivationSettled.WaitAsync(SettlementBound);
-            await drainTask.WaitAsync(SettlementBound);
+            await probe.ActivationSettled.WaitAsync(SettlementBound, TimeProvider.System);
+            await drainTask.WaitAsync(SettlementBound, TimeProvider.System);
             observed.Add(drainTask);
             await NativeRequestWorkKernelAssertions.AssertSettlementOrderAsync(probe);
             await Assert.That(owner.IsJoined).IsTrue();
@@ -86,24 +86,24 @@ internal static class NativeRequestWorkKernelCases
         {
             var move = enumerator.MoveNextAsync().AsTask();
             firstMove = move;
-            await Assert.That(await move.WaitAsync(SettlementBound)).IsTrue();
+            await Assert.That(await move.WaitAsync(SettlementBound, TimeProvider.System)).IsTrue();
             observed.Add(move);
             await Assert.That(enumerator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
-            await probe.CallbackRegistered.WaitAsync(SettlementBound);
+            await probe.CallbackRegistered.WaitAsync(SettlementBound, TimeProvider.System);
 
             var drainTask = owner.DrainAsync();
             drain = drainTask;
             var disposalTask = enumerator.DisposeAsync().AsTask();
             disposal = disposalTask;
-            await probe.CallbackEntered.WaitAsync(SettlementBound);
-            await probe.FinallyEntered.WaitAsync(SettlementBound);
+            await probe.CallbackEntered.WaitAsync(SettlementBound, TimeProvider.System);
+            await probe.FinallyEntered.WaitAsync(SettlementBound, TimeProvider.System);
             await NativeRequestWorkKernelAssertions.AssertBothRunningAsync(disposalTask, drainTask);
             await Assert.That(probe.ProducerSettled.IsCompleted).IsFalse();
             probe.ReleaseProducer();
-            await probe.ProducerSettled.WaitAsync(SettlementBound);
+            await probe.ProducerSettled.WaitAsync(SettlementBound, TimeProvider.System);
             await NativeRequestWorkKernelCleanup.ObserveBoundedAsync(disposalTask, failures, observed, SettlementBound);
             await NativeRequestWorkKernelCleanup.ObserveBoundedAsync(drainTask, failures, observed, SettlementBound);
-            await probe.ActivationSettled.WaitAsync(SettlementBound);
+            await probe.ActivationSettled.WaitAsync(SettlementBound, TimeProvider.System);
             await NativeRequestWorkKernelCleanup.ObserveBoundedAsync(
                 owner.DisposeAsync().AsTask(), failures, observed, SettlementBound);
 
@@ -134,10 +134,10 @@ internal static class NativeRequestWorkKernelCases
             var move = enumerator.MoveNextAsync().AsTask();
             firstMove = move;
             var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(
-                () => move.WaitAsync(SettlementBound)))!;
+                () => move.WaitAsync(SettlementBound, TimeProvider.System)))!;
             observed.Add(move);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await probe.ActivationSettled.WaitAsync(SettlementBound);
+            await probe.ActivationSettled.WaitAsync(SettlementBound, TimeProvider.System);
             await Assert.That(probe.HandlerEntered.IsCompleted).IsFalse();
             await Assert.That(probe.ProducerSettled.IsCompleted).IsFalse();
             await Assert.That(probe.ActivationSettleCount).IsEqualTo(1);

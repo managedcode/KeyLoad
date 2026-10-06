@@ -50,7 +50,7 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         {
             if (process.HasExited)
             { throw new InvalidOperationException(AdminBrowserProtocol.BrowserFailure); }
-            await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken);
         }
         var lines = await File.ReadAllLinesAsync(endpointFile, cancellationToken);
         var port = int.Parse(lines[0], CultureInfo.InvariantCulture);
@@ -68,7 +68,7 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         {
             if (!process.HasExited)
             { process.Kill(entireProcessTree: true); }
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10), TimeProvider.System);
             await process.WaitForExitAsync(timeout.Token);
             await Task.WhenAll(errors, output);
         }

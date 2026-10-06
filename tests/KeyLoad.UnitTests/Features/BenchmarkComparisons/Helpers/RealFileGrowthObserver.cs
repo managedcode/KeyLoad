@@ -5,6 +5,7 @@ internal sealed class RealFileGrowthObserver : IAsyncDisposable
 {
     private const int PollIntervalMilliseconds = 1;
 
+    private readonly TimeProvider clock;
     private readonly string path;
     private readonly Action cancelWriter;
     private readonly CancellationTokenSource stop = new();
@@ -13,8 +14,9 @@ internal sealed class RealFileGrowthObserver : IAsyncDisposable
     private readonly Task worker;
     private int disposed;
 
-    private RealFileGrowthObserver(string path, Action cancelWriter)
+    private RealFileGrowthObserver(string path, Action cancelWriter, TimeProvider? timeProvider = null)
     {
+        clock = timeProvider ?? TimeProvider.System;
         this.path = path;
         this.cancelWriter = cancelWriter;
         worker = Task.Factory.StartNew(Observe, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -76,7 +78,7 @@ internal sealed class RealFileGrowthObserver : IAsyncDisposable
                 return;
             }
 
-            Thread.Sleep(PollIntervalMilliseconds);
+            Task.Delay(TimeSpan.FromMilliseconds(PollIntervalMilliseconds), clock).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         growth.TrySetCanceled(stop.Token);

@@ -45,7 +45,7 @@ internal sealed class KeyLoadClientTransportTests
                 var length = Math.Min(ChunkSize, payload.Length - offset);
                 await context.Response.Body.WriteAsync(payload.AsMemory(offset, length), context.RequestAborted);
                 await context.Response.Body.FlushAsync(context.RequestAborted);
-                await Task.Delay(ChunkDelayMilliseconds, context.RequestAborted);
+                await Task.Delay(TimeSpan.FromMilliseconds(ChunkDelayMilliseconds), TimeProvider.System, context.RequestAborted);
             }
         });
 
@@ -74,7 +74,7 @@ internal sealed class KeyLoadClientTransportTests
                 response.HandlerFailure.Task, () => response.Stage);
             await Assert.That(pending.IsCompleted).IsFalse();
             await cancellation.CancelAsync();
-            var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             response.ReleaseSecondWrite();
             await WaitForRequestAbortAsync(response);
 
@@ -82,7 +82,7 @@ internal sealed class KeyLoadClientTransportTests
             await Assert.That(cancelled.Problem!.ErrorCode).IsEqualTo(ErrorCode.Cancelled.ToString());
             var nextRequestTask = client.StatusAsync(nextRequestCancellation.Token);
             nextRequest = nextRequestTask;
-            var next = await nextRequestTask.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            var next = await nextRequestTask.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             await Assert.That(next.IsSuccess).IsTrue();
             await Assert.That(next.Value!.NodeId).IsEqualTo(NodeAfterCancellation);
         }
@@ -91,18 +91,18 @@ internal sealed class KeyLoadClientTransportTests
             response.ReleaseSecondWrite();
             await cancellation.CancelAsync();
             await nextRequestCancellation.CancelAsync();
-            await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+            await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             if (nextRequest is not null)
             {
-                await nextRequest.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+                await nextRequest.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             }
             if (response.HandlerEntered.Task.IsCompleted)
             {
-                await response.FirstHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+                await response.FirstHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             }
             if (response.SecondHandlerEntered.Task.IsCompleted)
             {
-                await response.SecondHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+                await response.SecondHandlerCompleted.Task.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             }
         }
     }
@@ -112,7 +112,7 @@ internal sealed class KeyLoadClientTransportTests
         try
         {
             var completed = await Task.WhenAny(response.RequestAborted.Task, response.HandlerFailure.Task)
-                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             if (completed == response.HandlerFailure.Task)
             {
                 var failure = await response.HandlerFailure.Task;
@@ -133,7 +133,7 @@ internal sealed class KeyLoadClientTransportTests
         try
         {
             var completed = await Task.WhenAny(firstChunkWritten, handlerFailure)
-                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds));
+                .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
             if (completed == handlerFailure)
             {
                 var failure = await handlerFailure;

@@ -16,6 +16,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     private const string PayloadProperty = "payload";
     private const string IdProperty = "id";
     private const string DocumentProperty = "document";
+    private readonly TimeProvider timeProvider;
     private readonly HttpClient client;
     private readonly HttpClient[] nodeClients;
     private readonly HttpClient[] ownedClients;
@@ -31,7 +32,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
 
     private QdrantVectorOperations Vectors => vectorOperations ??= new(client, nodeClients, collection, image, topology,
-        executionOptions, lifecycleOptions);
+        executionOptions, lifecycleOptions, timeProvider);
     string IVectorComparisonTarget.Name => QdrantVectorProtocol.TargetName;
     bool IVectorComparisonTarget.Supports(VectorIndexKind indexKind, VectorQueryMode queryMode)
         => indexKind is VectorIndexKind.Exact or VectorIndexKind.Hnsw && Enum.IsDefined(queryMode);
@@ -68,10 +69,12 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <param name="lifecycleOptions">Centrally registered native lifecycle policy.</param>
     /// <param name="topology">The one-, two- or three-node native topology to configure and verify.</param>
     /// <param name="nodeClients">Optional clients for each Qdrant node used by replica verification; the target disposes distinct clients.</param>
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     public QdrantTarget(HttpClient http, string runId, string image,
         IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-        ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient[]? nodeClients = null)
+        ComparisonTopology topology = ComparisonTopology.Standalone, HttpClient[]? nodeClients = null, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
         this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
@@ -123,7 +126,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         await SeedAsync(dataset, cancellationToken);
         var proof = await QdrantReplicaProof.VerifyAsync(clients: nodeClients, collection: collection,
             expectedPoints: dataset.Documents.Length, topology: topology, cancellationToken: cancellationToken,
-            lifecycleOptions: lifecycleOptions);
+            lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
         Profile = Profile with
         {
             Version = proof.Version,
@@ -162,7 +165,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <returns>A value task that completes after collection cleanup and client disposal.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.QdrantCleanupTimeout);
+        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.QdrantCleanupTimeout, timeProvider);
         try
         {
             if (vectorOperations is not null)

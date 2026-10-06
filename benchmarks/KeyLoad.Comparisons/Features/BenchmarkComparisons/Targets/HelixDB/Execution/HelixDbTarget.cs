@@ -5,9 +5,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name = "http">Owned native HTTP client.</param>
 /// <param name = "runId">Unique native label scope.</param>
 /// <param name = "executionOptions">The required validated operational limits.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 /// <param name = "image">Immutable native server image.</param>
-public sealed class HelixDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonTarget
+public sealed class HelixDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string V0PinnedNativeServerImage = "v0.0.10; pinned native server image";
     private const string OnePersistentNativeLocalWriter = "one persistent native local writer";
     private const string XHelixAwaitDurableTrueNativeDiskFlush = "X-Helix-Await-Durable true; native disk flush; not fault-qualified";
@@ -42,18 +44,18 @@ public sealed class HelixDbTarget(HttpClient http, string runId, string image, I
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
         ownsData = true;
-        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenId, range: false), Policy, cancellationToken).ConfigureAwait(false);
+        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenId, range: false), Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         ownsEqualityIndex = true;
-        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, cancellationToken).ConfigureAwait(false);
+        await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         ownsRangeIndex = true;
-        await HelixDbDocumentStorage.SeedAsync(http, label, dataset, Policy, cancellationToken).ConfigureAwait(false);
+        await HelixDbDocumentStorage.SeedAsync(http, label, dataset, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<IComparisonSession>(new HelixDbSession(http, label, count, depth, execution));
+        return Task.FromResult<IComparisonSession>(new HelixDbSession(http, label, count, depth, execution, provider: timeProvider));
     }
 
     /// <inheritdoc/>
@@ -63,16 +65,16 @@ public sealed class HelixDbTarget(HttpClient http, string runId, string image, I
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
+                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
                 if (ownsEqualityIndex)
                 {
-                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenId, range: false), Policy, timeout.Token).ConfigureAwait(false);
+                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenId, range: false), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
                 if (ownsRangeIndex)
                 {
-                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, timeout.Token).ConfigureAwait(false);
+                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbNativeTokens.TokenNumber, range: true), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, timeout.Token).ConfigureAwait(false);
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbNativeTokens.TokenDrop, new() { [HelixDbNativeTokens.TokenInput] = HelixDbProtocol.Nodes(label) }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

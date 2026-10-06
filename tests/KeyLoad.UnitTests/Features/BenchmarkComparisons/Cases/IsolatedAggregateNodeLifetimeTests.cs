@@ -37,7 +37,8 @@ internal sealed class IsolatedAggregateNodeLifetimeTests
     [Test]
     public async Task AcImageLife003RealNodeRetainsBothIndependentPipeLimitFailures()
     {
-        using var prompt = CreatePrompt();
+        using var timeout = new CancellationTokenSource(TestDeadline, TimeProvider.System);
+        using var prompt = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
         var captured = await IsolatedAggregateNodePipeFailureFixture.CaptureBothAsync(
             prompt.Token);
         var outputFailures = captured.Combined.InnerExceptions
@@ -57,18 +58,12 @@ internal sealed class IsolatedAggregateNodeLifetimeTests
 
     private static async Task<IsolatedAggregateNodeResult> RunAsync(string scenario)
     {
-        using var prompt = CreatePrompt();
+        using var timeout = new CancellationTokenSource(TestDeadline, TimeProvider.System);
+        using var prompt = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
         return await IsolatedAggregateNodeProcess.RunAsync(Arguments(scenario), prompt.Token);
     }
 
     private static string[] Arguments(string scenario)
         => ["-e", IsolatedAggregateNodeLifetimeProgram.Source, scenario];
 
-    private static CancellationTokenSource CreatePrompt()
-    {
-        var prompt = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        prompt.CancelAfter(TestDeadline);
-        return prompt;
-    }
 }

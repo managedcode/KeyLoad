@@ -204,3 +204,5 @@ necessary shared-service synchronization, native Orleans scheduling for activati
 state and source-owned KLD0034 enforcement. Full verification remains pending.
 
 - [ADR-112: Independent website publication with optional benchmarks](ADR-112-independent-website-publication.md) — Accepted; conditional content/metric qualification and independent CI/Pages.
+
+- [ADR-115: TimeProvider ownership](ADR-115-time-provider.md) — Accepted; injected UTC, monotonic budgets and provider-owned timers; verification pending.

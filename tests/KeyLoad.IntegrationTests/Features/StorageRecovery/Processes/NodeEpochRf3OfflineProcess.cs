@@ -17,8 +17,8 @@ internal static class NodeEpochRf3OfflineProcess
         var output = NodeEpochRf3OfflineProcessIo.ReadAsync(process.StandardOutput.BaseStream);
         var error = NodeEpochRf3OfflineProcessIo.ReadAsync(process.StandardError.BaseStream);
         var exit = process.WaitForExitAsync(CancellationToken.None);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(NodeEpochRf3OfflineProtocol.Deadline);
+        using var deadlineTimeout = new CancellationTokenSource(NodeEpochRf3OfflineProtocol.Deadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         try
         {
             await NodeEpochRf3OfflineProcessIo.WaitAsync(exit, output, error, deadline.Token).ConfigureAwait(false);

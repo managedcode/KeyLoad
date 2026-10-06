@@ -5,8 +5,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensiveTarget target,
     TimeSeriesIntensiveExpectations expected, TimeSeriesIntensiveScenario scenario, string runId,
     int repetition, TimeSeriesIntensiveAttempt[] storage, TimeSeriesIntensiveAttempt[] warmupStorage,
-    IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation)
+    IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal TimeSeriesIntensiveRunStage Stage { get; private set; } = TimeSeriesIntensiveRunStage.Warmup;
 
     internal async Task<TimeSeriesIntensiveRepetitionResult> RunAsync()
@@ -34,7 +35,7 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
         var phase = TimeSeriesIntensivePreparedPhase.Create(scenario, runId, repetition, false);
         if (scenario == TimeSeriesIntensiveScenario.Append)
         {
-            await TimeSeriesIntensiveVerification.EmptyAsync(target, phase.SeriesId, executionOptions, cellCancellation).ConfigureAwait(false);
+            await TimeSeriesIntensiveVerification.EmptyAsync(target, phase.SeriesId, executionOptions, cancellationToken: cellCancellation, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
         var ledger = new TimeSeriesIntensiveAttemptLedger(storage, repetition * TimeSeriesIntensiveProfile.OperationCount, phase.Count, repetition);
@@ -45,7 +46,7 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
         try
         {
             var final = scenario == TimeSeriesIntensiveScenario.Append
-                ? await TimeSeriesIntensiveVerification.AppendAsync(target, expected, phase, ledger, executionOptions, cellCancellation).ConfigureAwait(false) : null;
+                ? await TimeSeriesIntensiveVerification.AppendAsync(target, expected, phase, ledger, executionOptions, cancellationToken: cellCancellation, timeProvider: timeProvider).ConfigureAwait(false) : null;
             return final.HasValue ? result.WithVerificationFailure(final.Value) : result;
         }
         catch (Exception error) when (TimeSeriesIntensiveExceptionBoundary.IsNonfatal(error))
@@ -60,7 +61,7 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
         var phase = TimeSeriesIntensivePreparedPhase.Create(scenario, runId, repetition, true);
         if (scenario == TimeSeriesIntensiveScenario.Append)
         {
-            await TimeSeriesIntensiveVerification.EmptyAsync(target, phase.SeriesId, executionOptions, cellCancellation).ConfigureAwait(false);
+            await TimeSeriesIntensiveVerification.EmptyAsync(target, phase.SeriesId, executionOptions, cancellationToken: cellCancellation, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
         var offset = repetition * TimeSeriesIntensiveProfile.WarmupCount;
@@ -71,7 +72,7 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
         try
         {
             var verification = scenario == TimeSeriesIntensiveScenario.Append
-                ? await TimeSeriesIntensiveVerification.AppendAsync(target, expected, phase, ledger, executionOptions, cellCancellation).ConfigureAwait(false) : null;
+                ? await TimeSeriesIntensiveVerification.AppendAsync(target, expected, phase, ledger, executionOptions, cancellationToken: cellCancellation, timeProvider: timeProvider).ConfigureAwait(false) : null;
             return (result, failure ?? verification);
         }
         catch (Exception error) when (TimeSeriesIntensiveExceptionBoundary.IsNonfatal(error))
@@ -82,7 +83,7 @@ internal sealed class TimeSeriesIntensiveRepetitionExecutor(ITimeSeriesIntensive
 
     private async Task<TimeSeriesIntensivePhaseResult> ExecutePhaseAsync(TimeSeriesIntensivePreparedPhase phase, TimeSeriesIntensiveAttemptLedger ledger)
     {
-        await using var executor = new TimeSeriesIntensivePhaseExecutor(target, expected, phase, ledger, executionOptions, cellCancellation);
+        await using var executor = new TimeSeriesIntensivePhaseExecutor(target, expected, phase, ledger, executionOptions, cellCancellation, provider: timeProvider);
         return await executor.RunAsync().ConfigureAwait(false);
     }
 

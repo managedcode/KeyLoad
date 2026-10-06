@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
@@ -7,15 +6,14 @@ internal static class ScaledComparisonMeasurementExecutor
 {
     private const int RequiredLatencySampleCount = 4_096;
 
-    internal static async Task<ScaledMeasurementResult> MeasureAsync(List<IComparisonSession> sessions, ScaledOperationInputs inputs,
-        IComparisonSettings settings, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
+    internal static async Task<ScaledMeasurementResult> MeasureAsync(List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
         var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
         var state = new ScaledMeasurementState(settings.Operations, RequiredLatencySampleCount);
-        var timer = Stopwatch.StartNew();
-        await using var resources = new ClientResourceSampler(executionOptions);
+        var timer = new ComparisonElapsedMeasurement(timeProvider);
+        await using var resources = new ClientResourceSampler(executionOptions, provider: timeProvider);
         var workers = sessions.Select((session, worker) => new ScaledComparisonWorker(session, worker,
-            inputs, settings, timer, state, execution.OperationTimeout, token).RunAsync()).ToArray();
+            inputs, settings, timer, state, execution.OperationTimeout, token, provider: timeProvider).RunAsync()).ToArray();
         try
         {
             await Task.WhenAll(workers).ConfigureAwait(false);
@@ -41,8 +39,9 @@ internal static class ScaledComparisonMeasurementExecutor
 }
 
 internal sealed class ScaledComparisonWorker(IComparisonSession session, int worker, ScaledOperationInputs inputs,
-    IComparisonSettings settings, Stopwatch timer, ScaledMeasurementState state, TimeSpan operationTimeout, CancellationToken token)
+    IComparisonSettings settings, ComparisonElapsedMeasurement timer, ScaledMeasurementState state, TimeSpan operationTimeout, CancellationToken token, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal async Task RunAsync()
     {
         const string CancelledToken = "Cancelled";
@@ -58,7 +57,7 @@ internal sealed class ScaledComparisonWorker(IComparisonSession session, int wor
             state.StartOperation();
             var input = inputs.Create(operation, warmup: false);
             var started = timer.Elapsed.TotalMilliseconds;
-            using var deadline = ComparisonDeadline.Create(operationTimeout, token);
+            using var deadline = ComparisonDeadline.Create(operationTimeout, cancellationToken: token, timeProvider: timeProvider);
             try
             {
                 var result = await session.ExecuteAsync(inputs.Scenario, input, deadline.Token).ConfigureAwait(false);

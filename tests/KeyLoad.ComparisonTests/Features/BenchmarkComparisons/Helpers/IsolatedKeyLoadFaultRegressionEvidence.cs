@@ -30,7 +30,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, Isolat
         var bytes = JsonSerializer.SerializeToUtf8Bytes(this, JsonDefaults.Options);
         IsolatedKeyLoadFaultRegressionProtocol.Require(bytes.Length <= NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultMaximumEvidenceBytes);
         var owned = false;
-        using var deadline = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout);
+        using var deadline = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout, TimeProvider.System);
         try
         {
             await using (var stream = new FileStream(pending, FileMode.CreateNew, FileAccess.Write, FileShare.None,

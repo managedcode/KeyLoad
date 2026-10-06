@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using KeyLoad.UnitTests.Features.RepositoryGovernance;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -32,6 +33,9 @@ internal static class OpenLoopPlanCliCapture
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         var githubLines = await File.ReadAllLinesAsync(githubPath, cancellationToken).ConfigureAwait(false);
         var matrixLine = githubLines.Single(line => line.StartsWith(MatrixPrefix, StringComparison.Ordinal));
+        var projectedMatrices = JsonNode.Parse(matrixLine[MatrixPrefix.Length..])!.AsObject();
+        var matrices = await ResolveFullMatricesAsync(executionOptions, planPath, scaledPath, vectorPath,
+            openLoopPath, projectedMatrices, cancellationToken).ConfigureAwait(false);
         return new(planPath, scaledPath, vectorPath, compositePath, githubPath, openLoopPath,
             await File.ReadAllBytesAsync(planPath, cancellationToken).ConfigureAwait(false),
             await File.ReadAllBytesAsync(scaledPath, cancellationToken).ConfigureAwait(false),
@@ -41,7 +45,26 @@ internal static class OpenLoopPlanCliCapture
             result.Error, githubLines, JsonNode.Parse(await File.ReadAllTextAsync(planPath, cancellationToken)
                 .ConfigureAwait(false))!.AsObject(), JsonNode.Parse(await File.ReadAllTextAsync(scaledPath, cancellationToken)
                 .ConfigureAwait(false))!.AsArray(), JsonNode.Parse(await File.ReadAllTextAsync(vectorPath, cancellationToken)
-                .ConfigureAwait(false))!.AsArray(), JsonNode.Parse(matrixLine[MatrixPrefix.Length..])!.AsObject());
+                .ConfigureAwait(false))!.AsArray(), projectedMatrices, matrices);
+    }
+
+    private static async Task<JsonObject> ResolveFullMatricesAsync(
+        IOptions<OpenLoopPlanProcessOptions> executionOptions, string planPath, string scaledPath,
+        string vectorPath, string? openLoopPath, JsonObject projected, CancellationToken cancellationToken)
+    {
+        var full = new JsonObject();
+        foreach (var (groupKey, _) in WorkflowDatabaseGroups.Entries)
+        {
+            var result = await OpenLoopPlanJoinNodeProcess.ResolveMatrixGroupAsync(executionOptions, planPath,
+                scaledPath, vectorPath, openLoopPath, groupKey,
+                projected[groupKey]!.ToJsonString(), cancellationToken).ConfigureAwait(false);
+            await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
+            await Assert.That(result.Error).IsEqualTo(string.Empty);
+            var resolved = JsonNode.Parse(result.Output)!.AsObject();
+            await Assert.That(resolved[IsolatedPlanFields.Rejected]!.GetValue<bool>()).IsFalse();
+            full[groupKey] = new JsonObject { [IsolatedPlanFields.Include] = resolved[IsolatedPlanFields.Include]!.DeepClone() };
+        }
+        return full;
     }
 
     internal static string[] Arguments(string planPath, string scaledPath, string vectorPath, string compositePath,

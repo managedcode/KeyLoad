@@ -11,8 +11,8 @@ internal static class IsolatedKurrentCleanupRegression
     /// <summary>AC-ISO-005/006: actual bounded deletion preserves an independently owned native stream.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupHostTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupHostTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var endpoint = await IsolatedKurrentCleanupRegressionGossip.ReadLeaderAsync(app, nodeCount, deadline.Token);
         var owner = new NativeProbeOwner(endpoint);
         ExceptionDispatchInfo? primary = null;
@@ -53,7 +53,7 @@ internal static class IsolatedKurrentCleanupRegression
         owner.PrivateDeletionStarted = true;
         owner.Clients.Remove(writer);
         // Ownership transfers to the actual production cleanup, even when native deletion fails.
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), token);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(writer, streams, [writer], [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, token);
         await IsolatedKurrentCleanupRegressionNative.RequireCompleteAsync(diagnostic, streams.Length);
         var reader = owner.CreateClient();
         await IsolatedKurrentCleanupRegressionNative.RequireDeletedAsync(reader, streams, token);
@@ -80,7 +80,7 @@ internal static class IsolatedKurrentCleanupRegression
             owner.Clients.Clear();
             try
             {
-                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
+                await KurrentOwnedStreamCleanup.RunAsync(null, streams, untransferred, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
             }
             finally
             {
@@ -92,7 +92,7 @@ internal static class IsolatedKurrentCleanupRegression
         owner.Clients.Clear();
         try
         {
-            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), CancellationToken.None);
+            await KurrentOwnedStreamCleanup.RunAsync(writer, streams, clients, [], NativeExecutionPolicyFixture.Lifecycle(), NativeExecutionPolicyFixture.ReadDiagnostics(), TimeProvider.System, CancellationToken.None);
         }
         catch (Exception)
         {

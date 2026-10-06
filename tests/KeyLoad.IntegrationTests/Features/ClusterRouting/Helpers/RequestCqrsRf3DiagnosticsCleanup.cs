@@ -11,7 +11,7 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
 {
     private readonly System.Threading.Lock gate = new();
     private readonly CancellationTokenSource lifetime = new();
-    private readonly CancellationTokenSource cleanupDeadline = new();
+    private CancellationTokenSource cleanupDeadline = new();
     private readonly ResourceLoggerService logger;
     private readonly ContainerResource[] resources;
     private readonly RequestCqrsRf3McpRejectionNodeCapture[] nodes;
@@ -62,7 +62,8 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         {
             if (disposalTask is null)
             {
-                cleanupDeadline.CancelAfter(RequestCqrsRf3Protocol.CleanupDeadline);
+                cleanupDeadline.Dispose();
+                cleanupDeadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
                 disposalTask = DisposeCoreAsync(cleanupDeadline.Token);
             }
             return new(disposalTask);

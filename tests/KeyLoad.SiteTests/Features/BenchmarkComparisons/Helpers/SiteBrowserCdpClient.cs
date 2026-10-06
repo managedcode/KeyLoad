@@ -20,8 +20,8 @@ internal sealed class SiteBrowserCdpClient : IAsyncDisposable
         var client = new SiteBrowserCdpClient();
         try
         {
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds);
+            using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds), TimeProvider.System);
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
             await client.socket.ConnectAsync(endpoint, timeout.Token);
             return client;
         }
@@ -42,8 +42,8 @@ internal sealed class SiteBrowserCdpClient : IAsyncDisposable
         var commandId = Interlocked.Increment(ref nextCommandId);
         var message = JsonSerializer.SerializeToUtf8Bytes(
             new CdpCommand(commandId, method, parameters ?? new Dictionary<string, object?>()), JsonOptions);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds);
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         await sendGate.WaitAsync(timeout.Token);
         try
         {
@@ -120,7 +120,7 @@ internal sealed class SiteBrowserCdpClient : IAsyncDisposable
         {
             if (socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
             {
-                using var timeout = new CancellationTokenSource(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds);
+                using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds), TimeProvider.System);
                 await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, SiteBrowserTokens.EmptyReason, timeout.Token);
             }
         }

@@ -8,6 +8,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Compares event-stream append and read operations against a KurrentDB cluster with pre-measurement topology evidence.</summary>
 public sealed class KurrentTarget : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider;
     private readonly IOptions<ComparisonLifecycleOptions> lifecycleOptions;
     private readonly IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions;
     private readonly KurrentSetupDiagnostics setupDiagnostics;
@@ -32,11 +33,13 @@ public sealed class KurrentTarget : IComparisonTarget
     /// <param name="image">Pinned server image reference recorded in the target profile.</param>
     /// <param name="lifecycleOptions">The validated native lifecycle policy.</param>
     /// <param name="diagnosticOptions">The centrally validated native diagnostic bounds.</param>
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     /// <param name="topology">The one, two or three native members that cluster verification must establish.</param>
     public KurrentTarget(string connectionString, HttpClient[] nodeClients, string runId, string image,
         ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions)
+        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         ArgumentNullException.ThrowIfNull(image);
         ArgumentNullException.ThrowIfNull(lifecycleOptions);
         lifecycleOptions.Value.Validate();
@@ -78,7 +81,7 @@ public sealed class KurrentTarget : IComparisonTarget
             setupStage = KurrentSetupStage.MemberVerification;
             var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
             var proof = await KurrentClusterVerifier.VerifyAsync(connectionString: connectionString, httpClients: nodeHttpClients,
-                topology: topology, timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions);
+                topology: topology, timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions, timeProvider: timeProvider);
             nodeClients = proof.NodeClients;
             ownedClients.AddRange(nodeClients);
             // Native SDK construction eagerly discovers and caches a preferred live member.
@@ -100,7 +103,7 @@ public sealed class KurrentTarget : IComparisonTarget
             var eventData = CreateProbeEvent();
             var evidence = await KurrentClusterVerifier.VerifyCopyAsync(writer: RequireWriter(), nodeClients: nodeClients,
                 httpClients: nodeHttpClients, topology: topology, stream: probe, eventData: eventData, ownership: ownership,
-                timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions);
+                timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions, timeProvider: timeProvider);
             Profile = Profile with { Cluster = evidence };
             initialized = true;
             setupStage = KurrentSetupStage.Complete;
@@ -130,7 +133,7 @@ public sealed class KurrentTarget : IComparisonTarget
     public async ValueTask DisposeAsync()
     {
         using var cleanup = new KurrentCleanupOperation(streams: ownership?.SnapshotAcknowledged() ?? [], token: CancellationToken.None,
-            options: lifecycleOptions, diagnosticOptions: diagnosticOptions);
+            options: lifecycleOptions, diagnosticOptions: diagnosticOptions, provider: timeProvider);
         try
         {
             await cleanup.DeleteAsync(writer);

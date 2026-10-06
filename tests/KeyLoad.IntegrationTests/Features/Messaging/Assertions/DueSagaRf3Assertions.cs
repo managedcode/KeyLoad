@@ -31,7 +31,7 @@ internal static class DueSagaRf3Assertions
             {
                 throw new InvalidOperationException("The saga left Waiting without its autonomous timeout transition.");
             }
-            await Task.Delay(PollInterval, cancellationToken);
+            await Task.Delay(PollInterval, TimeProvider.System, cancellationToken);
         }
         throw new TimeoutException("The waiting saga did not time out within its bounded RF3 window.");
     }

@@ -51,7 +51,7 @@ internal sealed class IsolatedNativeLogCaptureConcurrentDisposeTests
         Action<string> observer = line => BlockMarker(line, entered, release);
         await using var capture = new ComparisonTestLogCapture(fixture.Application, execution,
             [ResourceName], nativeLineObserver: observer);
-        using var timeout = new CancellationTokenSource(execution.Value.ConcurrentCaptureDisposalTimeout);
+        using var timeout = new CancellationTokenSource(execution.Value.ConcurrentCaptureDisposalTimeout, TimeProvider.System);
         async Task RunBodyAsync()
         {
             await PublishBlockedLineAsync(fixture, entered, execution, timeout.Token);

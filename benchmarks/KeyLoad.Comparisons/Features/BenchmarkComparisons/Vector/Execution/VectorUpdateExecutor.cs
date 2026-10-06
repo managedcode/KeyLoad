@@ -1,16 +1,16 @@
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
+internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal async Task RunAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         VectorWorkloadObservations measured, CancellationToken cancellationToken)
     {
-        var timer = Stopwatch.StartNew();
+        var timer = new ComparisonElapsedMeasurement(timeProvider);
         try
         {
             for (var ordinal = VectorUpdateExecutorValues.FirstIndex; ordinal < profile.UpdateCount; ordinal++)
@@ -44,13 +44,13 @@ internal sealed class VectorUpdateExecutor(VectorComparisonProfile profile, IOpt
     }
     private async Task UpdateAsync(IVectorComparisonTarget target, VectorUpdate update, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken: cancellationToken, timeProvider: timeProvider);
         await target.UpdateAsync(update, deadline.Token).ConfigureAwait(false);
     }
 
     private async Task<VectorReadback?> ReadAsync(IVectorComparisonTarget target, string id, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken: cancellationToken, timeProvider: timeProvider);
         return await target.ReadAsync(id, deadline.Token).ConfigureAwait(false);
     }
 }

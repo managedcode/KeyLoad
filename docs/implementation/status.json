@@ -1,4 +1,17 @@
 {
+  "TIME-PROVIDER-001": {
+    "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
+    "status": "in_progress",
+    "feature": "docs/Features/ResourceExecution/TimeProvider.md",
+    "decision": "docs/ADR/ADR-115-time-provider.md",
+    "sourceStage": "clock_migration_and_deterministic_real_operation_regressions_in_progress",
+    "canonicalBuildPassed": false,
+    "canonicalFormatterPassed": false,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "verificationStage": "owned_analyzer_release_build_passed_other_gates_pending",
+    "remaining": ["Final canonical solution build and format", "Aspire analyzer, unit, process recovery and Docker RF3 client suites", "Source-bound functional coverage and Linux qualification"]
+  },
   "ORLEANS-PRIMITIVES-001": {
     "title": "Native Orleans capability review, services, messaging, transactions and jobs",
     "status": "in_progress",
@@ -4873,12 +4886,12 @@
       100000,
       1000000
     ],
-    "sourceStage": "native_adapters_shared_vector_validation_typed_policy_and_website_joins_prepared_verification_blocked",
+    "sourceStage": "native_adapters_vector_validation_typed_policy_compact_dispatch_and_clock_joins_prepared_final_shared_source_qualification_pending",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Verify prepared native workload/report/resource/website joins through fresh Aspire-owned focused regressions",
+      "Verify prepared native workload/report/resource/website, selector and borrowed-clock joins through fresh Aspire-owned focused regressions",
       "KeyLoad vector scale cells are explicitly unavailable until persisted-vector readback and native numeric predicates exist",
       "Pass final canonical build, formatting and Aspire-owned required suites",
       "Retain actual complete authenticated Linux Benchmarks originals and website publication evidence"
@@ -4889,15 +4902,15 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "native_operational_options_and_consumer_joins_authored_full_unit_v24_completed_4047_pass_12_fail_fresh_current_source_build_format_and_remaining_regressions_pending",
+    "sourceStage": "full_options_and_literal_migration_checkpointed_final_public_phase_bank_and_native_analyzer_semantic_gap_joins_in_progress_current_source_build_and_runtime_gates_pending",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Pass fresh final canonical build and formatter after all current native options and required regression joins",
-      "Resolve actual full Aspire unit failures without weakening options, identity, version, lifecycle or negative assertions",
-      "Pass full Aspire-owned unit/scalar/recovery and native RF3 execution, retaining original reports",
-      "Pass required source-bound coverage and delivered-source Linux qualification"
+      "Pass final current-source canonical Release build and formatter after phase-bank/options/analyzer joins",
+      "Verify final native analyzer and phase-bank options regressions through Aspire",
+      "Pass full Aspire unit/scalar/recovery and native RF3 suites with completed original reports; interrupted runs cannot count",
+      "Pass required source-bound coverage and exact delivered-source Linux qualification"
     ],
     "canonicalFormatterPassed": false,
     "developmentEvidence": {
@@ -5037,6 +5050,95 @@
         "skipped": 0,
         "report": "unit-v24/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
         "qualification": "actual native local duplicate/sync/async/early-close/failed-transfer regressions; not recovery, RF3 or power-loss qualification"
+      },
+      "canonicalReleaseV27": {
+        "log": "keyload-general-options-full-release-v27.log",
+        "passed": true,
+        "warnings": 0,
+        "errors": 0,
+        "duration": "00:03:17.73",
+        "qualification": "actual complete local Release build before subsequent phase-bank/analyzer semantic joins; original native source SHA/inventory audit confirmed all19 projects and3148 owned C# inputs",
+        "compiledInventoryAudit": "keyload-general-options-compiled-inventory-audit-v27.log"
+      },
+      "canonicalFormatV28": {
+        "log": "keyload-general-options-format-verify-v28.log",
+        "passed": true,
+        "qualification": "actual canonical verification before subsequent phase-bank/analyzer joins; final current-source verify still required"
+      },
+      "canonicalReleaseV28": {
+        "log": "keyload-general-options-full-release-v28.log",
+        "passed": false,
+        "warnings": 0,
+        "errors": 1,
+        "qualification": "native Unit compilation identity guard rejected sources changed during compilation; no authoritative final current-source build claim"
+      },
+      "analyzersV27": {
+        "suite": "analyzers",
+        "nativeExit": 0,
+        "passed": 340,
+        "failed": 0,
+        "skipped": 0,
+        "report": "analyzers-v27/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+        "qualification": "actual local native Aspire full analyzer suite before later semantic-gap repairs"
+      },
+      "unitV27": {
+        "nativeExit": 134,
+        "status": "interrupted_by_native_same_project_Aspire_restart_no_completed_original_suite_report_no_pass_claim",
+        "log": "keyload-general-options-aspire-unit-v27.log",
+        "replacementCliLog": "unit-v27-replacement-native-aspire-cli.log",
+        "evidence": "native CLI06:09:28 explicitly stopped running AppHost PID79908; direct SDK hook suppression and --isolated do not permit concurrent same-directory instances"
+      },
+      "deliveredLinux43": {
+        "headSha": "43e01afa0bb21337233003cab146854a0f4f9416",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37420525126",
+        "analyzers": {
+          "passed": 340,
+          "failed": 0,
+          "skipped": 0,
+          "report": "linux-ci43-analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+          "job": "https://github.com/managedcode/KeyLoad/actions/runs/37420525126/job/112128633743"
+        },
+        "status": "completed_failed_unit_scalar_recovery_native_exit134_without_completed_original_suite_reports_RF3_failed_before_topology_at_native_source_PDB_binding_prerequisite",
+        "qualification": "exact committed-source Linux evidence; subsequent phase-bank/analyzer semantic joins are not included in this SHA"
+      },
+      "canonicalReleaseV31": {
+        "log": "keyload-general-options-full-release-v31.log",
+        "nativeExit": 1,
+        "passed": false,
+        "warnings": 0,
+        "errors": 1,
+        "compiledInventoryAudit": "keyload-general-options-compiled-inventory-audit-v31.log",
+        "qualification": "native source identity guard rejected changed WorkflowDatabaseGroups.cs during Unit compilation; actual PE audit found that sole content mismatch across19 projects and3164 sources"
+      },
+      "canonicalReleaseV32": {
+        "log": "keyload-general-options-full-release-v32.log",
+        "passed": false,
+        "qualification": "lead stopped the verified owned build after native analyzer regressions found nesting and frozen-inventory defects; truncated SIGTERM exit0 is not a successful build"
+      },
+      "analyzersV31": {
+        "suite": "analyzers",
+        "nativeExit": 134,
+        "log": "keyload-general-options-aspire-analyzers-v31.log",
+        "qualification": "unfinished native report; KLD0033 nesting and six-source coverage inventory defects confirmed and repaired; incoming same-directory Aspire CLI explicitly stopped AppHost PID18007 at07:26:52UTC; complete current-source rerun required"
+      },
+      "semanticCoverageInventory": {
+        "sources": 54,
+        "executable": 45,
+        "declarationOnly": 9,
+        "typedConfigurationCriticalSources": 18,
+        "qualification": "exact current source inventory checked; unchanged80/70/90 thresholds; controlled XML expectations updated, actual functional coverage remains unmeasured"
+      },
+      "canonicalFormatV35": {
+        "log": "keyload-general-options-format-verify-v35.log",
+        "nativeExit": 0,
+        "passed": true,
+        "qualification": "actual full canonical verification after nesting/inventory repair; subsequent final OpenSearch deadline join still requires final verification"
+      },
+      "canonicalFormatV36": {
+        "log": "keyload-general-options-format-verify-v36.log",
+        "nativeExit": 2,
+        "passed": false,
+        "qualification": "native aggregate type checks found options202 and adapter tests231 above200; seed validation joined its existing validator and OpenSearch cases split coherently; full current-source rerun pending"
       }
     }
   }

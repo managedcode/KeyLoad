@@ -80,7 +80,7 @@ internal sealed class ExistingStoreInspectorSession : IAsyncDisposable
             ExistingStoreInspectorFailureJoin.Capture(Kill, failures);
         }
         var warning = !ReferenceEquals(await Task.WhenAny(completionTask!,
-            Task.Delay(TimeSpan.FromSeconds(CleanupWarningSeconds))), completionTask);
+            Task.Delay(TimeSpan.FromSeconds(CleanupWarningSeconds), TimeProvider.System)), completionTask);
         if (warning && !killImmediately)
         {
             ExistingStoreInspectorFailureJoin.Capture(Kill, failures);

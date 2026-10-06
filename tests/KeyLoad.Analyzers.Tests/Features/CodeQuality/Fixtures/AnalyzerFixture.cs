@@ -91,6 +91,7 @@ internal static class AnalyzerFixture
                 typeof(Orleans.Runtime.IPersistentState<>).Assembly.Location,
                 typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location,
                 typeof(KeyLoad.ConfigurationOptionsAttribute).Assembly.Location,
+                typeof(KeyLoad.Diagnostics.Features.ResourceExecution.DatabasePhaseBank).Assembly.Location,
                 typeof(Microsoft.Extensions.Options.IOptions<>).Assembly.Location,
                 typeof(Microsoft.Extensions.Configuration.IConfiguration).Assembly.Location,
                 typeof(Microsoft.Extensions.Configuration.ConfigurationBinder).Assembly.Location,

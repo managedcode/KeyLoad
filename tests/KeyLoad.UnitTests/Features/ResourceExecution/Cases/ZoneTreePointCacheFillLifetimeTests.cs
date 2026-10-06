@@ -33,9 +33,9 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
 
         try
         {
-            await entered.Task.WaitAsync(WaitLimit);
-            var inFlight = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
-            var pool = await Task.Run(fixture.Budget.GetSnapshot).WaitAsync(WaitLimit);
+            await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
+            var inFlight = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
+            var pool = await Task.Run(fixture.Budget.GetSnapshot).WaitAsync(WaitLimit, TimeProvider.System);
             await Assert.That(inFlight.InFlightEntries).IsEqualTo(2);
             await Assert.That(inFlight.ChargedEntries).IsEqualTo(2);
             await Assert.That(inFlight.ActivePins).IsEqualTo(0);
@@ -77,17 +77,17 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         var borrower = Task.Run(() => store.Read(view => view.ReadValue(KeyA, value =>
         {
             entered.TrySetResult();
-            release.Task.WaitAsync(WaitLimit).GetAwaiter().GetResult();
+            release.Task.WaitAsync(WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
 
             borrowed = value.ToArray();
         })));
 
         try
         {
-            await entered.Task.WaitAsync(WaitLimit);
-            var before = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
+            await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
+            var before = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
             var fallback = store.Read(view => view.ReadOwnedValue(KeyB));
-            var pressure = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
+            var pressure = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
             await Assert.That(fallback).IsEquivalentTo(ValueB);
             await Assert.That(pressure.RetiredPinnedEntries).IsEqualTo(1);
             await Assert.That(pressure.AdmissionBypasses).IsEqualTo(before.AdmissionBypasses + 1);
@@ -96,7 +96,7 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         finally
         {
             release.TrySetResult();
-            await borrower.WaitAsync(WaitLimit);
+            await borrower.WaitAsync(WaitLimit, TimeProvider.System);
         }
 
         var afterRelease = store.GetPointCacheDiagnostics();
@@ -117,7 +117,7 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         }, _ =>
         {
             signalEntered();
-            release.Task.WaitAsync(WaitLimit).GetAwaiter().GetResult();
+            release.Task.WaitAsync(WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
         }));
 
     private static void Put(ZoneTreeStore store, byte[] key, byte[] value)

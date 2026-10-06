@@ -2,7 +2,7 @@ namespace KeyLoad.Comparisons;
 
 internal static class ComparisonMutationProbe
 {
-    internal static async Task VerifyAsync(IComparisonTarget target, BenchmarkDataset dataset, CancellationToken token)
+    internal static async Task VerifyAsync(IComparisonTarget target, BenchmarkDataset dataset, TimeProvider timeProvider, CancellationToken token)
     {
         const int MutationIdentityBlockCount = 3;
         const int AbsentDocumentIdentityOffset = 17;
@@ -11,7 +11,7 @@ internal static class ComparisonMutationProbe
         const int FirstElementIndex = 0;
 
         await using var session = await target.OpenSessionAsync(token);
-        using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, token);
+        using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: token, timeProvider: timeProvider);
         var number = dataset.Options.Documents + MutationIdentityBlockCount * dataset.Options.Repetitions
             * (dataset.Options.Operations + dataset.Options.Warmup) + AbsentDocumentIdentityOffset;
         var updated = dataset.CreateDocument(number);

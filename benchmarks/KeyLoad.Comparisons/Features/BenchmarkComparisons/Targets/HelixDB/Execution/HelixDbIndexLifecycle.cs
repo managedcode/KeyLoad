@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -11,12 +10,12 @@ internal static class HelixDbIndexLifecycle
     private const string CompletedReceipt = "; completed receipt=";
     private const int SingleResultCardinality = 1;
     private const int EmptyResultCount = 0;
-    internal static async Task<string> ExecuteAsync(HttpClient http, JsonObject definition, NativeComparisonExecutionOptions policy, CancellationToken token)
+    internal static async Task<string> ExecuteAsync(HttpClient http, JsonObject definition, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
-        using var indexDeadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var indexDeadline = new ComparisonCancellationSource(timeProvider, token);
         indexDeadline.CancelAfter(policy.IndexBuildTimeout);
         token = indexDeadline.Token;
-        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(definition, true), true, policy, token).ConfigureAwait(false);
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(definition, true), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         var receipt = Single(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows));
         var kind = receipt.GetProperty(HelixDbNativeTokens.TokenKind).GetString();
         if (kind != HelixDbNativeTokens.TokenAccepted && kind != HelixDbNativeTokens.TokenExistingOperation)
@@ -25,15 +24,15 @@ internal static class HelixDbIndexLifecycle
         }
 
         var operation = receipt.GetProperty(HelixDbNativeTokens.TokenOperationId).GetString()!;
-        var completion = await WaitAsync(http, operation, policy, token).ConfigureAwait(false);
+        var completion = await WaitAsync(http, operation, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         return receipt.GetRawText() + CompletedOperation + completion;
     }
 
-    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string label, int dimensions, NativeComparisonExecutionOptions policy, CancellationToken token)
+    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string label, int dimensions, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var definition = HelixDbVectorAst.Index(label, dimensions);
-        var watch = Stopwatch.StartNew();
-        var receipt = await ExecuteAsync(http, definition, policy, token).ConfigureAwait(false);
+        var watch = new ComparisonElapsedMeasurement(timeProvider);
+        var receipt = await ExecuteAsync(http, definition, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         watch.Stop();
         var parameters = new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -46,13 +45,13 @@ internal static class HelixDbIndexLifecycle
         return new(VectorIndexKind.NativeAnn, definition.ToJsonString() + CompletedReceipt + receipt, parameters, watch.Elapsed.TotalMilliseconds);
     }
 
-    private static async Task<string> WaitAsync(HttpClient http, string operation, NativeComparisonExecutionOptions policy, CancellationToken token)
+    private static async Task<string> WaitAsync(HttpClient http, string operation, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
-        var deadline = TimeProvider.System.GetUtcNow() + policy.IndexBuildTimeout;
+        var started = timeProvider.GetTimestamp();
         while (true)
         {
             var ast = HelixDbProtocol.Node(HelixDbNativeTokens.TokenGetIndexOperation, new() { [HelixDbNativeTokens.TokenOperationId] = operation });
-            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, false), false, policy, token).ConfigureAwait(false);
+            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(ast, false), false, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
             var observedOperation = Single(response.RootElement.GetProperty(HelixDbNativeTokens.TokenRows));
             var status = observedOperation.GetProperty(HelixDbNativeTokens.TokenStatus).GetString();
             if (status == HelixDbNativeTokens.TokenSucceeded)
@@ -60,12 +59,12 @@ internal static class HelixDbIndexLifecycle
                 return observedOperation.GetRawText();
             }
 
-            if (status is HelixDbNativeTokens.TokenBlocked or HelixDbNativeTokens.TokenAborted || TimeProvider.System.GetUtcNow() >= deadline)
+            if (status is HelixDbNativeTokens.TokenBlocked or HelixDbNativeTokens.TokenAborted || timeProvider.GetElapsedTime(started) >= policy.IndexBuildTimeout)
             {
                 throw new ComparisonFailureException(HelixDbNativeTokens.TokenHelixDbIndexDidNotSucceed);
             }
 
-            await Task.Delay(policy.IndexPollInterval, token).ConfigureAwait(false);
+            await Task.Delay(policy.IndexPollInterval, timeProvider, token).ConfigureAwait(false);
         }
     }
 

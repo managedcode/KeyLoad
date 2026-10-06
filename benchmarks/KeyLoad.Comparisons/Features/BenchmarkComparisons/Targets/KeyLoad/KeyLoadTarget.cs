@@ -17,13 +17,15 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
 /// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions,
     IOptions<QueryTranslationOptions> translationOptions, string? image = null,
-    HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault) : IComparisonTarget
+    HttpClient[]? peers = null, int expectedNodes = KeyLoadTarget.ExpectedNodesDefault, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const int ExpectedNodesDefault = 3;
     private const string BenchmarkTenantPrefix = "benchmark-";
     private const string ComparisonDatabaseName = "comparison";
@@ -152,7 +154,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
         => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
-            graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, nativeExecutionOptions, translationOptions));
+            graphDepth, graphVertices, graphEdges, expectedCorpusCount, lifecycleOptions, nativeExecutionOptions, translationOptions, provider: timeProvider));
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
     public ValueTask DisposeAsync()

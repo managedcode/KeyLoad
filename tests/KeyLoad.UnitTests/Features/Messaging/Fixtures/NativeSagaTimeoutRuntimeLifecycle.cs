@@ -20,8 +20,8 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
 
     internal async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(fixture.TestProfile.StartupTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(fixture.TestProfile.StartupTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         try
         {
             await StartRuntimeAsync(deadline.Token);
@@ -71,7 +71,7 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
 
     internal async Task StopAsync(ICollection<Exception> failures, bool disposeDatabase)
     {
-        using var deadline = new CancellationTokenSource(fixture.TestProfile.ShutdownTimeout);
+        using var deadline = new CancellationTokenSource(fixture.TestProfile.ShutdownTimeout, TimeProvider.System);
         await CloseSchedulingAsync(failures);
         await StopSilosAsync(failures, deadline.Token);
         await DrainRequestWorkAsync(failures);

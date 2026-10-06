@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -8,7 +9,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
     private const int CleanupSeconds = 5;
 
     internal static async Task ReapOwnedProcessesAsync(List<IsolatedAggregateNodeIdentity> identities,
-        Stopwatch timer, List<Exception> failures)
+        TestElapsedClock timer, List<Exception> failures)
     {
         foreach (var identity in identities.AsEnumerable().Reverse())
         {
@@ -19,7 +20,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
     }
 
     private static async Task ReapOwnedProcessAsync(IsolatedAggregateNodeIdentity identity,
-        Stopwatch timer, List<Exception> failures)
+        TestElapsedClock timer, List<Exception> failures)
     {
         var process = TryOpenProcess(identity.ProcessId, failures);
         if (process is null)
@@ -99,7 +100,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
         }
     }
 
-    private static async Task<bool> KillAndWaitAsync(Process process, Task exit, Stopwatch timer,
+    private static async Task<bool> KillAndWaitAsync(Process process, Task exit, TestElapsedClock timer,
         List<Exception> failures)
     {
         KillOwnedProcess(process, failures);
@@ -122,7 +123,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
         }
         try
         {
-            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => exit.WaitAsync(remaining));
+            await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => exit.WaitAsync(remaining, timer.Provider));
             return !exit.IsCompleted || !IsExited(process, failures);
         }
         catch (AggregateException envelope)
@@ -188,7 +189,7 @@ internal static class IsolatedAggregateNodeTestProcessReaper
     {
         while (!process.HasExited)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(100), TimeProvider.System);
         }
     }
 

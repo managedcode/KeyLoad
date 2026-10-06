@@ -16,8 +16,7 @@ internal static class ScaleServerHostEvidence
     private const string MemTotalField = "MemTotal";
     private const int Kilobytes = 1024;
 
-    internal static async Task<(ScaleServerHardware? Hardware, ScaleServerEnvelope? Envelope)> ReadAsync(
-        IOptions<ScaleServerResourceOptions> settings, IOptions<BenchmarkProvenanceOptions> provenance, CancellationToken token)
+    internal static async Task<(ScaleServerHardware? Hardware, ScaleServerEnvelope? Envelope)> ReadAsync(IOptions<ScaleServerResourceOptions> settings, IOptions<BenchmarkProvenanceOptions> provenance, TimeProvider timeProvider, CancellationToken token)
     {
         const string KernelReleaseArgument = "-r";
         const int BoundaryValue = 1;
@@ -28,7 +27,7 @@ internal static class ScaleServerHostEvidence
             return (null, null);
         }
 
-        var budget = new ScaleServerResourceSampleBudget(settings, provenance);
+        var budget = new ScaleServerResourceSampleBudget(settings, provenance, timeProvider: timeProvider);
         var cpu = await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, budget, token);
         var memory = await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, budget, token);
         var online = await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, budget, token);

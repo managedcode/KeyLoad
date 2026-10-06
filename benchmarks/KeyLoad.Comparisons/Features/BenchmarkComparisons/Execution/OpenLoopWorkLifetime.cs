@@ -1,39 +1,32 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopWorkLifetime
 {
-    internal static async Task<bool> RunAsync(Scenario scenario, ScaledOperationInputs inputs,
-        List<IComparisonSession> sessions, OpenLoopTimeline timeline, OpenLoopRunState state,
-        Action<OpenLoopProgressV1>? nativeProgress, CancellationToken cancellationToken)
+    internal static async Task<bool> RunAsync(Scenario scenario, ScaledOperationInputs inputs, List<IComparisonSession> sessions, OpenLoopTimeline timeline, OpenLoopRunState state, Action<OpenLoopProgressV1>? nativeProgress, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        return await RunOwnedAsync(scenario, inputs, sessions, timeline, state, lifetime, nativeProgress,
-            cancellationToken).ConfigureAwait(false);
+        return await RunOwnedAsync(scenario, inputs, sessions, timeline, state, lifetime, nativeProgress, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
     }
 
-    private static async Task<bool> RunOwnedAsync(Scenario scenario, ScaledOperationInputs inputs,
-        List<IComparisonSession> sessions, OpenLoopTimeline timeline, OpenLoopRunState state,
-        CancellationTokenSource lifetime, Action<OpenLoopProgressV1>? nativeProgress,
-        CancellationToken cancellationToken)
+    private static async Task<bool> RunOwnedAsync(Scenario scenario, ScaledOperationInputs inputs, List<IComparisonSession> sessions, OpenLoopTimeline timeline, OpenLoopRunState state, CancellationTokenSource lifetime, Action<OpenLoopProgressV1>? nativeProgress, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var channel = OpenLoopChannel.Create(timeline.ExecutionPolicy.QueueCapacity);
         var workers = sessions.Select((session, index) => OpenLoopWorker.RunAsync(session, index, scenario,
-            inputs, channel.Reader, timeline, state, lifetime, nativeProgress)).ToArray();
-        var producer = OpenLoopProducer.RunAsync(inputs, channel.Writer, timeline, state, lifetime.Token);
+            inputs, channel.Reader, timeline, state, lifetime, nativeProgress, timeProvider: timeProvider)).ToArray();
+        var producer = OpenLoopProducer.RunAsync(inputs, channel.Writer, timeline, state, cancellationToken: lifetime.Token, timeProvider: timeProvider);
         Exception? failure = null;
         var drainExpired = false;
-        var scheduling = AwaitScheduleAndDrainAsync(producer, workers, timeline, state, lifetime, cancellationToken);
+        var scheduling = AwaitScheduleAndDrainAsync(producer, workers, timeline, state, lifetime, cancellationToken: cancellationToken, timeProvider: timeProvider);
         try
         {
             drainExpired = await scheduling.ConfigureAwait(false);
         }
         catch (Exception error) when (scheduling.IsFaulted || scheduling.IsCanceled)
         {
-            failure = await FreezeAndCancelAsync(error, state, lifetime, drainExpired, cancellationToken)
+            failure = await FreezeAndCancelAsync(error, state, lifetime, drainExpired, callerToken: cancellationToken, timeProvider: timeProvider)
                 .ConfigureAwait(false);
         }
         finally
@@ -51,9 +44,7 @@ internal static class OpenLoopWorkLifetime
         return drainExpired;
     }
 
-    private static async Task<bool> AwaitScheduleAndDrainAsync(Task producer, Task[] workers,
-        OpenLoopTimeline timeline, OpenLoopRunState state, CancellationTokenSource lifetime,
-        CancellationToken cancellationToken)
+    private static async Task<bool> AwaitScheduleAndDrainAsync(Task producer, Task[] workers, OpenLoopTimeline timeline, OpenLoopRunState state, CancellationTokenSource lifetime, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         await CompleteProducerAsync(producer, workers).ConfigureAwait(false);
         var workersJoined = Task.WhenAll(workers);
@@ -70,7 +61,7 @@ internal static class OpenLoopWorkLifetime
             {
                 throw new OperationCanceledException(error.Message, error, lifetime.Token);
             }
-            state.Freeze(Stopwatch.GetTimestamp());
+            state.Freeze(timeProvider.GetTimestamp());
             await lifetime.CancelAsync().ConfigureAwait(false);
             return true;
         }
@@ -139,10 +130,9 @@ internal static class OpenLoopWorkLifetime
         await producer.ConfigureAwait(false);
     }
 
-    private static async Task<Exception?> FreezeAndCancelAsync(Exception primary, OpenLoopRunState state,
-        CancellationTokenSource lifetime, bool drainExpired, CancellationToken callerToken)
+    private static async Task<Exception?> FreezeAndCancelAsync(Exception primary, OpenLoopRunState state, CancellationTokenSource lifetime, bool drainExpired, TimeProvider timeProvider, CancellationToken callerToken)
     {
-        state.Freeze(Stopwatch.GetTimestamp());
+        state.Freeze(timeProvider.GetTimestamp());
         var expectedCancellation = ExpectedOwnerCancellation(primary, lifetime, drainExpired, callerToken);
         var cancellationFailure = await OpenLoopOwnerCancellation.CancelAsync(lifetime).ConfigureAwait(false);
         if (expectedCancellation)

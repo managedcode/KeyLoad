@@ -119,8 +119,8 @@ internal sealed class NodeEpochImageRejectionTests
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TrialTimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TrialTimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -134,7 +134,7 @@ internal sealed class NodeEpochImageRejectionTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleAsync(null, root, Path.Combine(root, SourceName), activeFailure,
                 cleanup.Token);
         }

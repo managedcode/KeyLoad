@@ -13,7 +13,7 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
     [Test]
     public async Task AuthenticatedCacheTransitionsExpireAndAdmitOneCompatibleRemote()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         await scenario.RemoteTwo.StopListeningAsync(deadline.Token);
         await scenario.Client.EnsureCompatibleCohortAsync(deadline.Token);
@@ -38,7 +38,7 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
         scenario.PublishCompatibleRemoteOne(1);
         var firstAddress = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, true, deadline.Token);
         await Assert.That(firstAddress).IsEqualTo(SiloAddress.FromParsableString(runtime.RuntimeAddress(1)));
-        await Task.Delay(RequestCqrsCohortScenario.LowerElectionTimeout + TimeSpan.FromMilliseconds(50), deadline.Token);
+        await Task.Delay(RequestCqrsCohortScenario.LowerElectionTimeout + TimeSpan.FromMilliseconds(50), TimeProvider.System, deadline.Token);
         scenario.PublishCompatibleRemoteOne(2);
         var beforeExpiryRefresh = scenario.RemoteOne.Requests;
         var expiredAddress = await scenario.Client.ResolveAsync(RequestCqrsCohortScenario.FirstRemote, false, deadline.Token);
@@ -49,7 +49,7 @@ internal sealed class RequestCqrsCohortTransitionTests(RequestCqrsCohortRuntimeF
     [Test]
     public async Task ReachableAuthenticatedThirdMismatchRejectsAnExistingMajority()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         scenario.PublishRemoteTwo(2, GrainRoutingProtocol.RequestInterfaceVersion - 1,
             ReplicaTransportProtocol.Version);

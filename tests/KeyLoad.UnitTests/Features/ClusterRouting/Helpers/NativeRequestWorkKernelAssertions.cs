@@ -27,13 +27,13 @@ internal static class NativeRequestWorkKernelAssertions
         await Assert.That(chunks[1].Kind).IsEqualTo(CqrsStreamChunkKind.Completed);
         await Assert.That(probe.ProducerSettleCount).IsEqualTo(1);
         await Assert.That(probe.ActivationSettleCount).IsEqualTo(1);
-        await owner.DrainAsync().WaitAsync(SettlementBound);
+        await owner.DrainAsync().WaitAsync(SettlementBound, TimeProvider.System);
     }
 
     internal static async Task AssertStillRunningAsync(Task operation)
     {
         using var window = new CancellationTokenSource();
-        var observation = Task.Delay(ObservationBound, window.Token);
+        var observation = Task.Delay(ObservationBound, TimeProvider.System, window.Token);
         Task completed;
         try
         {
@@ -50,7 +50,7 @@ internal static class NativeRequestWorkKernelAssertions
     internal static async Task AssertBothRunningAsync(Task first, Task second)
     {
         using var window = new CancellationTokenSource();
-        var observation = Task.Delay(ObservationBound, window.Token);
+        var observation = Task.Delay(ObservationBound, TimeProvider.System, window.Token);
         Task completed;
         try
         {

@@ -18,7 +18,7 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task DisabledBankReturnsEmptyUnavailableSnapshotWithoutRecording()
     {
-        var bank = new DatabasePhaseBank(false);
+        var bank = DatabasePhaseTestComposition.Create(false);
         var started = bank.Begin();
         bank.End(DatabasePhaseKind.NativeTreeMutation, DatabasePhaseOutcome.Completed, started);
         bank.End((DatabasePhaseKind)InvalidPhase, (DatabasePhaseOutcome)OutcomeCount, DisabledTimestamp);
@@ -42,7 +42,7 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task EnabledBankStartsWithTheExactEmptyFixedSchema()
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true);
         var snapshot = bank.Capture();
 
         await Assert.That(bank.IsEnabled).IsTrue();
@@ -57,9 +57,21 @@ internal sealed class DatabasePhaseBankTests
     }
 
     [Test]
-    public async Task RealBeginEndAndBusyUpdatesUseIndependentFixedLanes()
+    [Arguments(1, 1)]
+    [Arguments(1, 2)]
+    [Arguments(1, 3)]
+    [Arguments(1, 4)]
+    [Arguments(2, 1)]
+    [Arguments(2, 2)]
+    [Arguments(2, 3)]
+    [Arguments(2, 4)]
+    [Arguments(4, 1)]
+    [Arguments(4, 2)]
+    [Arguments(4, 3)]
+    [Arguments(4, 4)]
+    public async Task RealBeginEndAndBusyUpdatesUseIndependentFixedLanes(int stripeCount, int maximumCasAttempts)
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true, stripeCount, maximumCasAttempts);
         var kind = DatabasePhaseKind.ProviderWriteGateHold;
         var started = bank.Begin();
         bank.End(kind, DatabasePhaseOutcome.Completed, started);
@@ -78,7 +90,7 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task EveryClosedOutcomeRecordsExactlyOneIndependentLane()
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true);
         var phase = DatabasePhaseKind.QuorumFollowerAwait;
         var outcomes = Enum.GetValues<DatabasePhaseOutcome>();
 
@@ -105,7 +117,7 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task PreviouslyReturnedSnapshotStaysDetachedAfterLaterUpdatesAndDegradation()
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true);
         var phase = DatabasePhaseKind.NativeTreeMutation;
         var firstStart = bank.Begin();
         bank.End(phase, DatabasePhaseOutcome.Completed, firstStart);
@@ -130,8 +142,8 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task IndependentBanksKeepTheirCountersSeparate()
     {
-        var first = new DatabasePhaseBank(true);
-        var second = new DatabasePhaseBank(true);
+        var first = DatabasePhaseTestComposition.Create(true);
+        var second = DatabasePhaseTestComposition.Create(true);
         first.RecordBusy(DatabasePhaseKind.HeartbeatRoundsHold);
         var firstSnapshot = first.Capture();
         var secondSnapshot = second.Capture();
@@ -147,7 +159,7 @@ internal sealed class DatabasePhaseBankTests
     [Test]
     public async Task InvalidDimensionsAndElapsedTimeDegradeWithoutThrowing()
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true);
         var started = bank.Begin();
         bank.End((DatabasePhaseKind)InvalidPhase, DatabasePhaseOutcome.Completed, started);
         bank.End((DatabasePhaseKind)PhaseCount, DatabasePhaseOutcome.Completed, started);

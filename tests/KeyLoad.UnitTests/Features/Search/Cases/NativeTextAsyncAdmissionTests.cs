@@ -54,7 +54,7 @@ internal sealed class NativeTextAsyncAdmissionTests
         await lifetime.RunWithCleanupAsync(async () =>
         {
             active = search.SearchAsync("root", Request(database), cancellation.Token);
-            await postingObserved.Task.WaitAsync(CoordinationTimeout);
+            await postingObserved.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
             await Assert.That(database.Database.QueryReadsInFlight).IsEqualTo(1);
             await AssertSaturatedSearchRejectedWithoutReadsAsync(database, search);
             await cancellation.CancelAsync();
@@ -86,7 +86,7 @@ internal sealed class NativeTextAsyncAdmissionTests
         {
             return;
         }
-        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => worker.WaitAsync(CoordinationTimeout));
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => worker.WaitAsync(CoordinationTimeout, TimeProvider.System));
     }
 
     private static Task ReleasePostingAsync(TaskCompletionSource release)

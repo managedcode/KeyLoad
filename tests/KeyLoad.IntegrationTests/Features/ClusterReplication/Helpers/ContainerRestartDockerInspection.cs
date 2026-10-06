@@ -26,7 +26,7 @@ internal static class ContainerRestartDockerInspection
             return DockerUnavailableLine;
         }
 
-        using var timeout = new CancellationTokenSource(DiagnosticTimeout);
+        using var timeout = new CancellationTokenSource(DiagnosticTimeout, TimeProvider.System);
         using var process = Process.Start(CreateStartInfo(containerName))
             ?? throw new InvalidOperationException(DockerUnavailableLine);
         return await InspectProcessAsync(process, timeout.Token).ConfigureAwait(false);

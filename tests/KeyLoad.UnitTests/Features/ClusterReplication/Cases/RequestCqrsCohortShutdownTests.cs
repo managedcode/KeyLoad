@@ -11,7 +11,7 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
     [Test]
     public async Task AsyncDisposeStopsAdmissionAndJoinsGatedHttpAttempt()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         await VerifyShutdownAsync(scenario, synchronous: false);
     }
@@ -19,7 +19,7 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
     [Test]
     public async Task SyncDisposeStartsSameShutdownAndAsyncDisposeJoinsIt()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         await VerifyShutdownAsync(scenario, synchronous: true);
     }
@@ -33,7 +33,7 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
         var failures = new List<Exception>();
         await RequestCqrsCohortCleanup.CaptureAsync(async () =>
         {
-            await gate.Entered.WaitAsync(TestBound);
+            await gate.Entered.WaitAsync(TestBound, TimeProvider.System);
             if (synchronous)
             {
                 DisposeSynchronously(scenario.Client);
@@ -43,8 +43,8 @@ internal sealed class RequestCqrsCohortShutdownTests(RequestCqrsCohortRuntimeFix
             await AssertAdmissionStoppedAsync(scenario);
             await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
             await AssertShutdownCancellationAsync(attempt);
-            await gate.Aborted.WaitAsync(TestBound);
-            await disposal.WaitAsync(TestBound);
+            await gate.Aborted.WaitAsync(TestBound, TimeProvider.System);
+            await disposal.WaitAsync(TestBound, TimeProvider.System);
             await Assert.That(attempt.IsCompleted).IsTrue();
         }, failures);
 

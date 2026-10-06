@@ -165,7 +165,7 @@ internal sealed class RuntimeJournalNativeStorageTests(RuntimeJournalNativeFixtu
 
     private async Task WaitForActivationChangeAsync(IRuntimeJournalReplayGrain grain, string previousToken)
     {
-        using var deadline = new CancellationTokenSource(fixture.TimingOptions.Value.CompletionTimeout);
+        using var deadline = new CancellationTokenSource(fixture.TimingOptions.Value.CompletionTimeout, TimeProvider.System);
         while (true)
         {
             deadline.Token.ThrowIfCancellationRequested();
@@ -175,7 +175,7 @@ internal sealed class RuntimeJournalNativeStorageTests(RuntimeJournalNativeFixtu
                 return;
             }
 
-            await Task.Delay(fixture.TimingOptions.Value.PollInterval, deadline.Token);
+            await Task.Delay(fixture.TimingOptions.Value.PollInterval, TimeProvider.System, deadline.Token);
         }
     }
 }

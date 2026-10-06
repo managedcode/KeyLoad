@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Query.Features.Search;
@@ -20,7 +19,8 @@ internal static class PackedAnnBuildObservationRunner
         ArgumentNullException.ThrowIfNull(records);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(budget);
-        var started = Stopwatch.GetTimestamp();
+        var clock = TimeProvider.System;
+        var started = clock.GetTimestamp();
         var allocationStart = GC.GetAllocatedBytesForCurrentThread();
         PackedAnnIndex? index = null;
         Exception? buildFailure = null;
@@ -32,23 +32,23 @@ internal static class PackedAnnBuildObservationRunner
         }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            elapsedTicks = Stopwatch.GetTimestamp() - started;
+            elapsedTicks = clock.GetTimestamp() - started;
             allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - allocationStart;
             buildFailure = failure;
         }
         catch (Exception fatal) when (CqrsRuntimeFailures.FindFatal(fatal) is not null)
         {
-            elapsedTicks = Stopwatch.GetTimestamp() - started;
+            elapsedTicks = clock.GetTimestamp() - started;
             allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - allocationStart;
             buildFailure = fatal;
         }
         if (buildFailure is null)
         {
-            elapsedTicks = Stopwatch.GetTimestamp() - started;
+            elapsedTicks = clock.GetTimestamp() - started;
             allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - allocationStart;
         }
         var observation = CreateObservation(scenario, space, records.Count, options, budget,
-            buildFailure, elapsedTicks, allocatedBytes);
+            buildFailure, elapsedTicks, allocatedBytes, clock.TimestampFrequency);
         ThrowFailures(buildFailure, WriteObservation(observation));
         return index!;
     }
@@ -73,7 +73,7 @@ internal static class PackedAnnBuildObservationRunner
 
     private static PackedAnnBuildObservation CreateObservation(PackedAnnBuildScenario scenario,
         VectorSpace space, int recordCount, PackedAnnOptions options, AnnWorkBudget budget,
-        Exception? failure, long elapsedTicks, long allocatedBytes)
+        Exception? failure, long elapsedTicks, long allocatedBytes, long timestampFrequency)
     {
         var outcome = failure switch
         {
@@ -86,7 +86,7 @@ internal static class PackedAnnBuildObservationRunner
         return new(scenario, recordCount, space.Dimension, space.Metric, options.Connections,
             options.EfConstruction, options.EfSearch, options.MaxLevel, options.ExactThreshold,
             options.MaxRecords, options.MaxIndexBytes, options.MaxScratchBytes, options.Seed,
-            outcome, errorCode, Stopwatch.Frequency, elapsedTicks, allocatedBytes, budget.WorkUnits,
+            outcome, errorCode, timestampFrequency, elapsedTicks, allocatedBytes, budget.WorkUnits,
             budget.DistanceEvaluations, budget.EdgeVisits);
     }
 

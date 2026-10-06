@@ -50,7 +50,7 @@ internal static class NativeTextGenerationCensusOverlap
                 pause.WaitUntilEntered(cancellation);
                 lease.Dispose();
                 pause.Resume();
-                var replacement = await replacementTask.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), cancellation);
+                var replacement = await replacementTask.WaitAsync(TimeSpan.FromSeconds(WaitSeconds), TimeProvider.System, cancellation);
                 joined = true;
                 await Assert.That(replacement).HasSingleItem();
                 await Assert.That(replacement[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);

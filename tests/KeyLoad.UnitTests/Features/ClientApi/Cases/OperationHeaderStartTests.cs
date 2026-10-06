@@ -132,7 +132,8 @@ internal sealed class OperationHeaderTestServer : IAsyncDisposable
             pendingHandler = new(requireConcurrentRequests);
             pendingApplication.Use(RegisterResponseHeaders);
             pendingApplication.Run(pendingHandler.HandleRequestAsync);
-            using var startupToken = BoundedToken(executionToken);
+            using var startupTokenTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(OperationHeaderStartTests.OperationTimeoutSeconds), TimeProvider.System);
+            using var startupToken = CancellationTokenSource.CreateLinkedTokenSource(executionToken, startupTokenTimeout.Token);
             await pendingApplication.StartAsync(startupToken.Token);
             var feature = pendingApplication.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()
                 ?? throw new InvalidOperationException(MissingAddressFeature);
@@ -159,7 +160,8 @@ internal sealed class OperationHeaderTestServer : IAsyncDisposable
     internal async Task<HttpResponseMessage> GetAsync(string path, CancellationToken executionToken)
     {
         ArgumentNullException.ThrowIfNull(path);
-        using var requestToken = BoundedToken(executionToken);
+        using var requestTokenTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(OperationHeaderStartTests.OperationTimeoutSeconds), TimeProvider.System);
+        using var requestToken = CancellationTokenSource.CreateLinkedTokenSource(executionToken, requestTokenTimeout.Token);
         return await client.GetAsync(new Uri(path, UriKind.Relative), HttpCompletionOption.ResponseContentRead, requestToken.Token);
     }
 
@@ -186,16 +188,10 @@ internal sealed class OperationHeaderTestServer : IAsyncDisposable
         await next(context);
     }
 
-    private static CancellationTokenSource BoundedToken(CancellationToken executionToken)
-    {
-        var source = CancellationTokenSource.CreateLinkedTokenSource(executionToken);
-        source.CancelAfter(TimeSpan.FromSeconds(OperationHeaderStartTests.OperationTimeoutSeconds));
-        return source;
-    }
-
     private static async Task StopAndDisposeAsync(WebApplication application, CancellationToken executionToken)
     {
-        using var shutdownToken = BoundedToken(executionToken);
+        using var shutdownTokenTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(OperationHeaderStartTests.OperationTimeoutSeconds), TimeProvider.System);
+        using var shutdownToken = CancellationTokenSource.CreateLinkedTokenSource(executionToken, shutdownTokenTimeout.Token);
         try
         {
             await application.StopAsync(shutdownToken.Token);

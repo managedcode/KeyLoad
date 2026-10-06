@@ -16,7 +16,7 @@ internal static class RequestCqrsPhaseFaultCleanup
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures)
     {
         var cleanup = new List<Exception>();
-        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
         await StopAdmissionAndReleaseAsync(controls, discovery, callerCancellation, cleanup, deadline.Token)
             .ConfigureAwait(false);
         await JoinOriginalCallsAsync(sdkCall, mcpCall, cleanup).ConfigureAwait(false);

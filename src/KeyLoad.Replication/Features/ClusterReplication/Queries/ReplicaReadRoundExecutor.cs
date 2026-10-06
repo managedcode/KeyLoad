@@ -11,8 +11,8 @@ internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcCli
     internal async Task ExecuteAsync(ReplicaReadRoundPurpose purpose, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime);
-        request.CancelAfter(readBarrierTimeout);
+        using var deadline = new CancellationTokenSource(readBarrierTimeout, state.Clock);
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime, deadline.Token);
         var transportReadyStarted = DatabasePhaseTelemetry.Begin();
         var transportReadyOutcome = DatabasePhaseOutcome.Faulted;
         try

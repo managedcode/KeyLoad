@@ -2,7 +2,7 @@ import { constants } from 'node:fs';
 import { lstat, open, writeFile } from 'node:fs/promises';
 import { dirname, parse, resolve } from 'node:path';
 import { requireIsolatedPlan } from './isolated-plan-contract.mjs';
-import { createDatabaseMatrices } from './isolated-preflight.mjs';
+import { createWorkflowDatabaseMatrices } from './isolated-preflight.mjs';
 import { createCompositePlan, createScaledPlans } from './scaled-isolated-plan.mjs';
 import { createVectorPlans } from './vector-isolated-plan.mjs';
 import { createOpenLoopPlan } from './open-loop-isolated-plan.mjs';
@@ -76,7 +76,8 @@ export async function runIsolatedPlanCli(arguments_, plan, scaledPlans = createS
       await writeFile(openLoopOutput, JSON.stringify(openLoopPlan, null, 2) + '\n', { encoding: 'utf8', flag: 'wx' });
     }
     if (github !== null) {
-      await github.writeFile('database_matrices=' + JSON.stringify(createDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan)) + '\n', 'utf8');
+      await github.writeFile('database_matrices=' + JSON.stringify(createWorkflowDatabaseMatrices(
+        plan, scaledPlans, vectorPlans, openLoopPlan)) + '\n', 'utf8');
     }
     process.stdout.write(text);
   } finally {

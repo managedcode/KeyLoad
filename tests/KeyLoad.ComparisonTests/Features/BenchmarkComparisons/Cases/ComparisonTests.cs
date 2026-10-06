@@ -28,8 +28,8 @@ internal sealed class RealComparisonSuite
         var output = Path.Combine(root, "reports");
         var evidence = ComparisonTestEvidenceFiles.GetDirectory();
         var options = ReadOptions();
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(8));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(8), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
         var builder = await CreateBuilderAsync(root, output, options, timeout.Token);
         ConfigureLogging(builder);
         await using var app = await builder.BuildAsync(timeout.Token);

@@ -14,7 +14,7 @@ function Read-PsmProductContributorRegistry([string] $Root) {
     try {
         $options = [System.Text.Json.JsonDocumentOptions]::new()
         $options.MaxDepth = $script:Psm.MaximumJsonDepth
-        $document = [System.Text.Json.JsonDocument]::Parse($bytes, $options)
+        $document = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($bytes), $options)
         Assert-PsmUniqueJsonProperties $document.RootElement 0
         $rootElement = $document.RootElement
         Assert-PsmJsonObjectKeys $rootElement @(

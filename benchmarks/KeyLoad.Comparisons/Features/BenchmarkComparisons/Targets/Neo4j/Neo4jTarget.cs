@@ -13,9 +13,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="image">Neo4j image reference recorded in the target profile.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class Neo4jTarget(HttpClient http, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string InitializeAsyncCREATECONSTRAINTText = "CREATE CONSTRAINT ";
     private const string InitializeAsyncIdFORNText = "_id FOR (n:";
     private const string InitializeAsyncREQUIRENIdISUNIQUEText = ") REQUIRE n.id IS UNIQUE";
@@ -149,7 +151,7 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     /// <returns>A value task that completes after cleanup.</returns>
     public async ValueTask DisposeAsync()
     {
-        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.Neo4jCleanupTimeout);
+        using var timeout = new CancellationTokenSource(lifecycleOptions.Value.Neo4jCleanupTimeout, timeProvider);
         try
         {
             if (ownsConstraint)

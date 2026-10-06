@@ -11,8 +11,8 @@ internal static class NativeSagaTimeoutRestartWork
         NativeSagaTimeoutFixture fixture, DurableJob job, NativeSagaJournalFence previous,
         CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(fixture.TestProfile.CompletionTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(fixture.TestProfile.CompletionTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         while (true)
         {
             var shards = await fixture.JobHarness.RecoverShardsAsync(job.DueTime, deadline.Token);
@@ -28,21 +28,21 @@ internal static class NativeSagaTimeoutRestartWork
                 }
             }
 
-            await Task.Delay(fixture.TestProfile.PollInterval, deadline.Token);
+            await Task.Delay(fixture.TestProfile.PollInterval, TimeProvider.System, deadline.Token);
         }
     }
 
     internal static async Task WaitForTimeoutAsync(NativeSagaTimeoutFixture fixture,
         NativeSagaTimeoutCase saga, DurableJob job, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var dueTimeRemaining = job.DueTime - TimeProvider.System.GetUtcNow();
         var completionWindow = dueTimeRemaining > TimeSpan.Zero
             ? dueTimeRemaining + fixture.TestProfile.CompletionTimeout
             : fixture.TestProfile.CompletionTimeout;
-        deadline.CancelAfter(completionWindow > fixture.TestProfile.RestartCompletionTimeout
+        using var timeout = new CancellationTokenSource(completionWindow > fixture.TestProfile.RestartCompletionTimeout
             ? fixture.TestProfile.RestartCompletionTimeout
-            : completionWindow);
+            : completionWindow, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             while (true)
@@ -53,7 +53,7 @@ internal static class NativeSagaTimeoutRestartWork
                     return;
                 }
 
-                await Task.Delay(fixture.TestProfile.PollInterval, deadline.Token);
+                await Task.Delay(fixture.TestProfile.PollInterval, TimeProvider.System, deadline.Token);
             }
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested

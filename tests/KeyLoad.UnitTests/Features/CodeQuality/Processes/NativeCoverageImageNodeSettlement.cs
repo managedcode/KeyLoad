@@ -26,7 +26,7 @@ internal static class NativeCoverageImageNodeSettlement
         }
         var original = Task.WhenAll(exit ?? Task.CompletedTask, output ?? Task.CompletedTask,
             error ?? Task.CompletedTask);
-        await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures).ConfigureAwait(false);
         if (!original.IsCompleted)
         {
             failures.Add(new TimeoutException(SettlementFailure));

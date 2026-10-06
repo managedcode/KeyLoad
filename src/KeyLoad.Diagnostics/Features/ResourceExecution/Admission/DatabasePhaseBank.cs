@@ -1,33 +1,38 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 
 namespace KeyLoad.Diagnostics.Features.ResourceExecution;
 
-/// <summary>A fixed-size, callback-free, cumulative phase counter bank.</summary>
+/// <summary>A bounded, callback-free, cumulative phase counter bank.</summary>
 public sealed class DatabasePhaseBank
 {
     private const int PhaseCount = 32;
     private const int OutcomeCount = 6;
     private const int BucketCount = 16;
-    private const int StripeCount = 4;
     private const int HistogramLength = PhaseCount * OutcomeCount * BucketCount;
-    private const long DisabledTimestamp = -1;
+    internal const long DisabledTimestamp = -1;
 
+    private readonly TimeProvider _timeProvider;
     private readonly bool _enabled;
+    private readonly int _stripeCount;
+    private readonly int _maximumCasAttempts;
     private readonly long[][] _histogramStripes;
     private readonly long[][] _busyStripes;
     private readonly long[] _boundaries;
     private int _quality;
 
-    /// <summary>Creates a bank with a fixed enabled mode for its entire lifetime.</summary>
-    public DatabasePhaseBank(bool enabled)
+    /// <summary>Creates a bank with immutable mode and bounded execution settings.</summary>
+    public DatabasePhaseBank(bool enabled, int stripeCount, int maximumCasAttempts, TimeProvider? timeProvider = null)
     {
+        DatabasePhaseSettingsValidation.Validate(stripeCount, maximumCasAttempts);
+        _timeProvider = timeProvider ?? TimeProvider.System;
         _enabled = enabled;
-        _histogramStripes = enabled ? new long[StripeCount][] : Array.Empty<long[]>();
-        _busyStripes = enabled ? new long[StripeCount][] : Array.Empty<long[]>();
+        _stripeCount = stripeCount;
+        _maximumCasAttempts = maximumCasAttempts;
+        _histogramStripes = enabled ? new long[stripeCount][] : Array.Empty<long[]>();
+        _busyStripes = enabled ? new long[stripeCount][] : Array.Empty<long[]>();
         if (enabled)
         {
-            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < _stripeCount; stripe++)
             {
                 _histogramStripes[stripe] = new long[HistogramLength];
                 _busyStripes[stripe] = new long[PhaseCount];
@@ -35,7 +40,7 @@ public sealed class DatabasePhaseBank
         }
 
         _boundaries = enabled
-            ? DatabasePhaseArithmetic.CreateBoundaries(Stopwatch.Frequency)
+            ? DatabasePhaseArithmetic.CreateBoundaries(_timeProvider.TimestampFrequency)
             : Array.Empty<long>();
     }
 
@@ -43,7 +48,7 @@ public sealed class DatabasePhaseBank
     public bool IsEnabled => _enabled;
 
     /// <summary>Returns an actual monotonic timestamp, or the disabled sentinel.</summary>
-    public long Begin() => _enabled ? Stopwatch.GetTimestamp() : DisabledTimestamp;
+    public long Begin() => _enabled ? _timeProvider.GetTimestamp() : DisabledTimestamp;
 
     /// <summary>Records one completed scope without throwing into its producer.</summary>
     public void End(DatabasePhaseKind phase, DatabasePhaseOutcome outcome, long started)
@@ -61,7 +66,7 @@ public sealed class DatabasePhaseBank
             return;
         }
 
-        var finished = Stopwatch.GetTimestamp();
+        var finished = _timeProvider.GetTimestamp();
         if (started < DatabasePhaseValues.MinimumStartTimestamp || started > finished)
         {
             MarkQuality(DatabaseProfileQuality.InvalidElapsed);
@@ -78,7 +83,7 @@ public sealed class DatabasePhaseBank
 
         var stripe = CurrentStripe();
         var lane = (phaseIndex * OutcomeCount + outcomeIndex) * BucketCount + bucket;
-        MarkQuality(DatabasePhaseArithmetic.TryIncrement(ref _histogramStripes[stripe][lane]));
+        MarkQuality(DatabasePhaseArithmetic.TryIncrement(ref _histogramStripes[stripe][lane], _maximumCasAttempts));
     }
 
     /// <summary>Records one bounded admission rejection in its separate phase lane.</summary>
@@ -97,7 +102,7 @@ public sealed class DatabasePhaseBank
         }
 
         var stripe = CurrentStripe();
-        MarkQuality(DatabasePhaseArithmetic.TryIncrement(ref _busyStripes[stripe][phaseIndex]));
+        MarkQuality(DatabasePhaseArithmetic.TryIncrement(ref _busyStripes[stripe][phaseIndex], _maximumCasAttempts));
     }
 
     /// <summary>Returns a detached cumulative observation without resetting counters.</summary>
@@ -105,24 +110,17 @@ public sealed class DatabasePhaseBank
     {
         if (!_enabled)
         {
-            return new DatabasePhaseSnapshot(
-                false,
-                DatabasePhaseValues.DisabledSnapshotFrequency,
-                DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
-                DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
-                DatabaseProfileQuality.None,
-                ImmutableArray<long>.Empty,
-                ImmutableArray<long>.Empty);
+            return CaptureDisabled();
         }
 
-        var started = Stopwatch.GetTimestamp();
+        var started = _timeProvider.GetTimestamp();
         var histogram = CaptureHistogram();
         var busyAttempts = CaptureBusyAttempts();
         var quality = (DatabaseProfileQuality)Volatile.Read(ref _quality);
-        var finished = Stopwatch.GetTimestamp();
+        var finished = _timeProvider.GetTimestamp();
         return new DatabasePhaseSnapshot(
             true,
-            Stopwatch.Frequency,
+            _timeProvider.TimestampFrequency,
             started,
             finished,
             quality,
@@ -130,13 +128,26 @@ public sealed class DatabasePhaseBank
             busyAttempts);
     }
 
+    internal bool MatchesSettings(bool enabled, int stripeCount, int maximumCasAttempts, TimeProvider? timeProvider) =>
+        _enabled == enabled && _stripeCount == stripeCount && _maximumCasAttempts == maximumCasAttempts
+        && (timeProvider is null || ReferenceEquals(_timeProvider, timeProvider));
+
+    internal static DatabasePhaseSnapshot CaptureDisabled() => new(
+        false,
+        DatabasePhaseValues.DisabledSnapshotFrequency,
+        DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
+        DatabasePhaseValues.DisabledSnapshotMonotonicTimestamp,
+        DatabaseProfileQuality.None,
+        ImmutableArray<long>.Empty,
+        ImmutableArray<long>.Empty);
+
     private ImmutableArray<long> CaptureHistogram()
     {
         var values = ImmutableArray.CreateBuilder<long>(HistogramLength);
         for (var lane = DatabasePhaseValues.FirstHistogramLane; lane < HistogramLength; lane++)
         {
             var total = DatabasePhaseValues.EmptyCounterTotal;
-            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < _stripeCount; stripe++)
             {
                 total = DatabasePhaseArithmetic.AddSaturating(
                     total,
@@ -160,7 +171,7 @@ public sealed class DatabasePhaseBank
         for (var phase = DatabasePhaseValues.FirstPhaseIndex; phase < PhaseCount; phase++)
         {
             var total = DatabasePhaseValues.EmptyCounterTotal;
-            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < StripeCount; stripe++)
+            for (var stripe = DatabasePhaseValues.FirstStripeIndex; stripe < _stripeCount; stripe++)
             {
                 total = DatabasePhaseArithmetic.AddSaturating(
                     total,
@@ -178,7 +189,7 @@ public sealed class DatabasePhaseBank
         return values.MoveToImmutable();
     }
 
-    private static int CurrentStripe() => Environment.CurrentManagedThreadId & (StripeCount - DatabasePhaseValues.CounterIncrement);
+    private int CurrentStripe() => Environment.CurrentManagedThreadId & (_stripeCount - DatabasePhaseValues.CounterIncrement);
 
     private void MarkQuality(DatabaseProfileQuality quality)
     {

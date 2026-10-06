@@ -31,7 +31,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeOperation, Microsoft.CodeAnalysis.OperationKind.Invocation,
             Microsoft.CodeAnalysis.OperationKind.ObjectCreation, Microsoft.CodeAnalysis.OperationKind.PropertyReference,
-            Microsoft.CodeAnalysis.OperationKind.SimpleAssignment);
+            Microsoft.CodeAnalysis.OperationKind.SimpleAssignment, Microsoft.CodeAnalysis.OperationKind.With);
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method, SymbolKind.Field, SymbolKind.Property);
     }
 
@@ -84,8 +84,14 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
 
     private static bool IsUnownedPolicy(OperationAnalysisContext context) => context.Operation switch
     {
+        IWithOperation clone when ConfigurationOwnership.IsOptionsType(context.Compilation, clone.Type) =>
+            !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol) &&
+            OptionsSnapshotOverrides.IsHardcoded(context.Compilation, clone, context.CancellationToken),
         IObjectCreationOperation creation when ConfigurationOwnership.IsOptionsType(context.Compilation, creation.Type) =>
             !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol),
+        IObjectCreationOperation { Constructor: { } constructor } creation when OwnedDiagnosticsPolicy.IsMethod(context.Compilation, constructor) =>
+            creation.Arguments.Any(argument => OwnedDiagnosticsPolicy.IsArgument(argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IObjectCreationOperation { Constructor: { } constructor } creation when
             creation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, constructor, argument)) =>
             creation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, constructor, argument) &&
@@ -95,7 +101,11 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, constructor, creation.Arguments) =>
             !OperationalPolicyBindings.IsCoalescedWakeSignal(context.Compilation, creation) &&
             !ConfiguredCountingSignal.IsConfigured(context.Compilation, creation, context.CancellationToken) &&
-            creation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
+            creation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(context.Compilation, constructor, argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
+        IInvocationOperation invocation when OwnedDiagnosticsPolicy.IsMethod(context.Compilation, invocation.TargetMethod) =>
+            invocation.Arguments.Any(argument => OwnedDiagnosticsPolicy.IsArgument(argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IInvocationOperation invocation when
             invocation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, invocation.TargetMethod, argument)) =>
             invocation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, invocation.TargetMethod, argument) &&
@@ -103,7 +113,8 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         IInvocationOperation invocation when HardcodedDurationPolicy.IsDurationMethod(context.Compilation, invocation.TargetMethod) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, invocation.TargetMethod, invocation.Arguments) =>
             !OperationalPolicyBindings.IsNonblockingWait(context.Compilation, invocation) &&
-            invocation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
+            invocation.Arguments.Any(argument => NativeTimerPolicy.IsDurationArgument(context.Compilation, invocation.TargetMethod, argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         ISimpleAssignmentOperation { Target: IPropertyReferenceOperation property } assignment when
             OperationalPolicyBindings.IsOperationalProperty(context.Compilation, property.Property) =>
             HardcodedDurationPolicy.IsHardcoded(context.Compilation, assignment.Value, context.CancellationToken),

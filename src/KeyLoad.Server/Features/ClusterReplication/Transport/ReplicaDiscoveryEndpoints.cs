@@ -37,13 +37,13 @@ internal static class ReplicaDiscoveryEndpoints
     }
 
     private static async Task<IResult> ReadyAsync(PartitionHost partition, OrleansNode node,
-        IOptions<ServerExecutionOptions> options, CancellationToken cancellationToken)
+        IOptions<ServerExecutionOptions> options, TimeProvider clock, CancellationToken cancellationToken)
     {
         if (!node.DatabaseReady)
         { return Results.StatusCode(StatusCodes.Status503ServiceUnavailable); }
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var readyTimeout = options.Value.ReadyTimeout;
-        deadline.CancelAfter(readyTimeout);
+        using var timeout = new CancellationTokenSource(readyTimeout, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             await node.EnsureCompatibleCohortAsync(deadline.Token).ConfigureAwait(false);

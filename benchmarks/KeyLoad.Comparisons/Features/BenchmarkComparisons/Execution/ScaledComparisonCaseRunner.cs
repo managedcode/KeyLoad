@@ -16,9 +16,7 @@ internal static class ScaledComparisonCaseRunner
     private const string SampleAlgorithm = "evenly-spaced-operation-indices.v1";
     private const string FailureDetail = "Scaled case failed; latency values are a bounded deterministic sample.";
 
-    internal static async Task<ComparisonCase> RunAsync(IComparisonTarget target, IComparisonCorpus corpus, Scenario scenario,
-        string? setupFailure, Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions,
-        CancellationToken cancellationToken)
+    internal static async Task<ComparisonCase> RunAsync(IComparisonTarget target, IComparisonCorpus corpus, Scenario scenario, string? setupFailure, Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
 
@@ -33,9 +31,9 @@ internal static class ScaledComparisonCaseRunner
 
         var inputs = new ScaledOperationInputs(corpus, scenario);
         var settings = corpus.Settings;
-        var sessions = await ScaledComparisonOperationSetup.OpenSessionsAsync(target, settings.Concurrency, executionOptions, cancellationToken).ConfigureAwait(false);
+        var sessions = await ScaledComparisonOperationSetup.OpenSessionsAsync(target, settings.Concurrency, executionOptions, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var run = await RunSessionsAsync(target: target, scenario: scenario, sessions: sessions, inputs: inputs, settings: settings,
-            progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions).ConfigureAwait(false);
+            progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false);
         var result = run.Closed ? run.Result : run.Result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
         if (result.Status == ComparisonStatuses.Failed && !cancellationToken.IsCancellationRequested)
         {
@@ -44,16 +42,14 @@ internal static class ScaledComparisonCaseRunner
         return result;
     }
 
-    private static async Task<(ComparisonCase Result, bool Closed)> RunSessionsAsync(IComparisonTarget target, Scenario scenario,
-        List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings, Action<string>? progress,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    private static async Task<(ComparisonCase Result, bool Closed)> RunSessionsAsync(IComparisonTarget target, Scenario scenario, List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings, Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ComparisonCase result;
         bool closed;
         try
         {
             result = await ExecuteAsync(target: target, scenario: scenario, sessions: sessions, inputs: inputs, settings: settings,
-                progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions).ConfigureAwait(false);
+                progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -65,20 +61,18 @@ internal static class ScaledComparisonCaseRunner
         }
         finally
         {
-            closed = await ComparisonSessionCleanup.CloseAsync(sessions, executionOptions.Value.CleanupTimeout).ConfigureAwait(false);
+            closed = await ComparisonSessionCleanup.CloseAsync(sessions, executionOptions.Value.CleanupTimeout, timeProvider: timeProvider).ConfigureAwait(false);
         }
         return (result, closed);
     }
 
-    private static async Task<ComparisonCase> ExecuteAsync(IComparisonTarget target, Scenario scenario, List<IComparisonSession> sessions,
-        ScaledOperationInputs inputs, IComparisonSettings settings, Action<string>? progress,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    private static async Task<ComparisonCase> ExecuteAsync(IComparisonTarget target, Scenario scenario, List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings, Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         await ScaledComparisonOperationSetup.PrepareAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
-        await ScaledComparisonOperationSetup.WarmupAsync(sessions, inputs, settings, executionOptions.Value.OperationTimeout, cancellationToken).ConfigureAwait(false);
+        await ScaledComparisonOperationSetup.WarmupAsync(sessions, inputs, settings, executionOptions.Value.OperationTimeout, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         progress?.Invoke($"{ExecuteAsyncScaleText}{target.Profile.Name}{ExecuteAsyncText}{scenario}{ExecuteAsyncMeasureText}");
         var measured = await ScaledComparisonMeasurementExecutor.MeasureAsync(sessions: sessions, inputs: inputs, settings: settings,
-            token: cancellationToken, executionOptions: executionOptions).ConfigureAwait(false);
+            token: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false);
         var result = CreateCase(target, scenario, settings, measured, cancellationToken.IsCancellationRequested);
         var validationFailure = await ValidateMutationResultsAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
         return validationFailure is null ? result : result with { Status = ComparisonStatuses.Failed, Detail = validationFailure };

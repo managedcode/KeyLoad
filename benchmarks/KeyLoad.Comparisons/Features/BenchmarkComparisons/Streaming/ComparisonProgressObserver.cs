@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -7,24 +6,27 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class ComparisonProgressObserver : IAsyncDisposable
 {
+    private readonly TimeProvider timeProvider;
     private const int NoObservedItems = 0;
 
     private const string LineFormat = "KeyLoadBenchmarkProgress phase={0} repetition={1} completed={2} total={3} failed={4} elapsedSeconds={5:F3}";
     private static readonly CompositeFormat ProgressFormat = CompositeFormat.Parse(LineFormat);
     private readonly Action<string>? _progress;
     private readonly System.Threading.Lock _outputGate = new();
-    private readonly Stopwatch _elapsed = Stopwatch.StartNew();
+    private readonly ComparisonElapsedMeasurement _elapsed;
     private readonly CancellationTokenSource _lifetime = new();
     private readonly PeriodicTimer _timer;
     private readonly Task _heartbeat;
     private ComparisonProgressState _state = new(ComparisonProgressPhase.Oracle, NoObservedItems, NoObservedItems);
     private bool _hasState;
 
-    internal ComparisonProgressObserver(Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions)
+    internal ComparisonProgressObserver(Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
+        _elapsed = new(timeProvider);
         var settings = executionOptions.Value;
         settings.Validate();
-        _timer = new(settings.ProgressHeartbeatInterval);
+        _timer = new(settings.ProgressHeartbeatInterval, timeProvider);
         _progress = progress;
         _heartbeat = progress is null ? Task.CompletedTask : Task.Run(ObserveAsync);
     }

@@ -4,8 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorResultValidator(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
+internal sealed class VectorResultValidator(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal async Task ValidateReadbackAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         CancellationToken cancellationToken)
     {
@@ -33,7 +34,7 @@ internal sealed class VectorResultValidator(VectorComparisonProfile profile, IOp
     internal async Task ValidateQueryAsync(IVectorComparisonTarget target, VectorComparisonCorpus corpus,
         ReadOnlyMemory<float> query, IReadOnlyList<VectorNeighbor> expected, CancellationToken cancellationToken)
     {
-        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
+        using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken: cancellationToken, timeProvider: timeProvider);
         VectorResponseValidator.CalculateRecall(corpus,
             await target.SearchAsync(query, profile.TopK, profile.QueryMode, deadline.Token).ConfigureAwait(false), expected);
     }

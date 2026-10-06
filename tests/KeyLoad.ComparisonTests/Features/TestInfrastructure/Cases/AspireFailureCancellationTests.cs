@@ -21,7 +21,7 @@ internal sealed class AspireFailureCancellationTests
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Running, health: HealthStatus.Unhealthy).WaitAsync(deadline.Token);
             await Assert.That(completion.IsCompleted).IsFalse();
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, 0).WaitAsync(deadline.Token);
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(0);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(0);
             await fixture.PublishAsync(fixture.Leaf, KnownResourceStates.Exited, 137).WaitAsync(deadline.Token);
             await Assert.That(await completion).IsEqualTo(0);
         }

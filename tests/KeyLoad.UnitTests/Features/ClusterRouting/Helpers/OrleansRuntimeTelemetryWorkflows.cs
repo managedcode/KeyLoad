@@ -28,7 +28,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var traces = telemetry.Activities.Snapshot();
         var metrics = telemetry.Metrics.Snapshot();
         await Assert.That(telemetry.Activities.WasTruncated).IsFalse();
-        await Assert.That(telemetry.Metrics.WasTruncated).IsFalse();
+        await Assert.That(telemetry.Metrics.WasTruncated).IsFalse().Because(telemetry.Metrics.DiagnosticSummary);
         await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parentage,
             telemetry.Options);
         await OrleansRuntimeTelemetryAssertions.AssertMetricPrivacyAsync(metrics);
@@ -108,7 +108,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
     private static async Task<GrainOperationReply> ReadAsync(RequestCqrsClusterFixture fixture,
         PrincipalRecord principal, Guid requestId, string signed)
     {
-        using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound);
+        using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using var identity = new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, principal,
             requestId, Guid.Empty, deadline.Token);
         var request = fixture.Cluster.Client.GetGrain<IRequestGrain>(requestId);

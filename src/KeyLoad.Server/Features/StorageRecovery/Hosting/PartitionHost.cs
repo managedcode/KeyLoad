@@ -37,13 +37,13 @@ internal sealed class PartitionHost : IAsyncDisposable
         options.Validate();
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
-        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache);
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
         try
         {
-            Database = OpenCanonicalDatabase(runtimeOptions, authorization);
+            Database = OpenCanonicalDatabase(runtimeOptions, authorization, clock);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
@@ -90,12 +90,12 @@ internal sealed class PartitionHost : IAsyncDisposable
     /// <summary>Admission starts before silo membership and stops after membership shutdown.</summary>
     public ClusterCoordinator Coordinator { get; }
 
-    private DatabaseEngine OpenCanonicalDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization)
+    private DatabaseEngine OpenCanonicalDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization, TimeProvider clock)
     {
         var core = runtimeOptions.Core;
         RuntimeJournalStorePreparation.Prepare(stores, core.RuntimeJournal, runtimeOptions.StorageExecution);
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
-            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution);
+            core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, clock);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);
         return database;
     }

@@ -1,9 +1,8 @@
-using System.Diagnostics;
-
 namespace KeyLoad.Server;
 
-internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
+internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvider? clock = null)
 {
+    private readonly TimeProvider time = clock ?? TimeProvider.System;
     private const int RouteTemplateGetEndpointEmptyCount = 0;
 
     private const string ApiPrefix = "/v1";
@@ -22,7 +21,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
     {
         if (!Included(context.Request.Path))
         { await next(context).ConfigureAwait(false); return; }
-        var started = Stopwatch.GetTimestamp();
+        var started = time.GetTimestamp();
         var faulted = true;
         try
         {
@@ -30,7 +29,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
             faulted = false;
         }
         finally
-        { metrics.Record(Stopwatch.GetElapsedTime(started), Describe(context, faulted)); }
+        { metrics.Record(time.GetElapsedTime(started), Describe(context, faulted)); }
     }
 
     internal static bool Included(PathString path) =>

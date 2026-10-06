@@ -54,7 +54,7 @@ internal static class IsolatedNeo4jResources
             .WithEnvironment(AuthenticationEnvironment, ReferenceExpression.Create($"{Name}{ReadyPath}{password}"))
             .WithEnvironment(InitialHeapEnvironment, deployment.Neo4jInitialHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithEnvironment(MaximumHeapEnvironment, deployment.Neo4jMaximumHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit)
             .WithEnvironment(PageCacheEnvironment, deployment.Neo4jPageCacheMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithHttpHealthCheck(ReadyPath);
-        if (ClusterContainerUser.Resolve(context.Builder) is { } user)
+        if (ClusterContainerUser.Resolve(context.Builder, TimeProvider.System) is { } user)
         {
             node.WithContainerRuntimeArgs(UserArgument, user);
         }

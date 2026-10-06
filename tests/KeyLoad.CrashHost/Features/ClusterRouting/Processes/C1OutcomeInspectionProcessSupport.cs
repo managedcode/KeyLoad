@@ -15,8 +15,8 @@ internal static class C1OutcomeInspectionDeadline
     {
         var settings = executionOptions.Value;
         using var timer = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var stopped = Task.Delay(Timeout.InfiniteTimeSpan, timer.Token);
-        var deadline = Task.Delay(settings.InspectionExecutionTimeout, timer.Token);
+        var stopped = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, timer.Token);
+        var deadline = Task.Delay(settings.InspectionExecutionTimeout, TimeProvider.System, timer.Token);
         var first = await Task.WhenAny(all, stopped, deadline).ConfigureAwait(false);
         if (first == all)
         {
@@ -30,7 +30,7 @@ internal static class C1OutcomeInspectionDeadline
             : new TimeoutException(ExecutionTimeoutMessage));
         ServerFailureObserver.Observe(() => C1OutcomeInspectionProcessIo.Kill(process), failures);
         using var cleanupTimer = new CancellationTokenSource();
-        var cleanup = Task.Delay(settings.InspectionCleanupTimeout, cleanupTimer.Token);
+        var cleanup = Task.Delay(settings.InspectionCleanupTimeout, TimeProvider.System, cleanupTimer.Token);
         if (await Task.WhenAny(all, cleanup).ConfigureAwait(false) != all)
         {
             failures.Add(new TimeoutException(CleanupTimeoutMessage));

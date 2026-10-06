@@ -57,7 +57,7 @@ internal static class SiteBrowserVectorAssetAssertions
             }, cancellationToken);
             await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollScript, false, cancellationToken);
             await Assert.That(await cdp.WaitForExpressionAsync(SiteVectorAssetTokens.ReadyPredicate, cancellationToken)).IsTrue();
-            await Task.Delay(SiteBrowserUiTokens.SceneSettleWaitMilliseconds, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.SceneSettleWaitMilliseconds), TimeProvider.System, cancellationToken);
             await AssertPoseUpdatedAsync(cdp, originalMark, cancellationToken);
             originalMark = await ReadMarkAsync(cdp, cancellationToken);
         }

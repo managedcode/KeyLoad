@@ -138,7 +138,7 @@ function Read-BoundedJson([string] $Path, [long] $MaximumBytes) {
         $script:FcNativeProductDescriptor.Invalid
     $json = $null
     try {
-        $json = [System.Text.Json.JsonDocument]::Parse($file.bytes)
+        $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($file.bytes))
         Assert-FcNativeJsonUnique $json.RootElement
         $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($file.bytes)) -AsHashtable `
             -Depth $script:FcNativeProductDescriptor.JsonDepth

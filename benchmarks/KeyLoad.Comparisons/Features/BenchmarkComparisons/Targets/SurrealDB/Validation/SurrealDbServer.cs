@@ -3,9 +3,9 @@ namespace KeyLoad.Comparisons.Targets;
 internal static class SurrealDbServer
 {
     private const string ExpectedVersion = "surrealdb-3.2.4";
-    internal static async Task<string> VerifyAsync(HttpClient http, NativeComparisonExecutionOptions policy, CancellationToken token)
+    internal static async Task<string> VerifyAsync(HttpClient http, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
-        using var operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var operationDeadline = new ComparisonCancellationSource(timeProvider, token);
         operationDeadline.CancelAfter(policy.OperationTimeout);
         token = operationDeadline.Token;
         using var response = await http.GetAsync(new Uri(SurrealDbNativeTokens.TokenVersion, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);

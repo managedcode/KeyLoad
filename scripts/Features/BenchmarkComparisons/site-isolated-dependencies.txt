@@ -29,6 +29,7 @@ scripts/Features/BenchmarkComparisons/isolated-github-contract.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-files.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-headers.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-images.mjs
+scripts/Features/BenchmarkComparisons/isolated-github-job-selection.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-job.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-rate.mjs
 scripts/Features/BenchmarkComparisons/isolated-github-selection.mjs

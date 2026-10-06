@@ -9,12 +9,11 @@ internal sealed record KurrentClusterProof(KurrentDBClient[] NodeClients);
 
 internal static class KurrentClusterVerifier
 {
-    public static async Task<KurrentClusterProof> VerifyAsync(string connectionString, HttpClient[] httpClients, ComparisonTopology topology,
-        TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
+    public static async Task<KurrentClusterProof> VerifyAsync(string connectionString, HttpClient[] httpClients, ComparisonTopology topology, TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ValidateHttpClientSet(httpClients, topology);
         await ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout, cancellationToken: cancellationToken,
-            options: options);
+            options: options, timeProvider: timeProvider);
         var nodeClients = new List<KurrentDBClient>(httpClients.Length);
         try
         {
@@ -36,17 +35,14 @@ internal static class KurrentClusterVerifier
         }
     }
 
-    public static Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients, HttpClient[] httpClients,
-        ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentStreamOwnership ownership, TimeSpan timeout,
-        IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
+    public static Task<ClusterEvidence> VerifyCopyAsync(KurrentDBClient writer, KurrentDBClient[] nodeClients, HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentStreamOwnership ownership, TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
         => KurrentReplicaProbe.VerifyCopyAsync(writer: writer, nodeClients: nodeClients, httpClients: httpClients, topology: topology,
             stream: stream, eventData: eventData, ownership: ownership, timeout: timeout, cancellationToken: cancellationToken,
-            options: options);
+            options: options, timeProvider: timeProvider);
 
-    internal static async Task<KurrentGossipView[]> ReadReadyViewsAsync(HttpClient[] clients, ComparisonTopology topology, TimeSpan timeout,
-        IOptions<ComparisonLifecycleOptions> options, CancellationToken cancellationToken)
+    internal static async Task<KurrentGossipView[]> ReadReadyViewsAsync(HttpClient[] clients, ComparisonTopology topology, TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var limit = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var limit = new ComparisonCancellationSource(timeProvider, cancellationToken);
         limit.CancelAfter(timeout);
         try
         {
@@ -57,7 +53,7 @@ internal static class KurrentClusterVerifier
                 {
                     return views;
                 }
-                await Task.Delay(options.Value.KurrentReadinessPollInterval, limit.Token);
+                await Task.Delay(options.Value.KurrentReadinessPollInterval, timeProvider, limit.Token);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

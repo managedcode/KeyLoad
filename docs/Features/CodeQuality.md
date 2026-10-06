@@ -549,6 +549,16 @@ remain distinct; their configuration helpers follow the same native options path
   static readonly, reject direct runtime configuration reads and bare configuration
   object injection, permit centrally registered options/defaults and const/nameof
   identities, and cover all general-literal spans/assemblies/generated boundaries.
+  Native Monitor/Lock method groups remain synchronization use when converted
+  to delegates; a conversion cannot bypass the grain/typed-lock rule. Native
+  Timer due-time/period operands retain framework symbol ownership checks.
+  Const-backed default parameters, getters and helper returns cannot hide a
+  native timeout; semantic traversal is cycle-bounded and preserves dynamic
+  caller values. An options snapshot clone cannot overwrite policy with a
+  hardcoded value merely because its base came from a genuine IOptions.Value.
+  Conditional values, coalescing fallback values and switch-expression result
+  arms retain that source provenance; predicates/pattern literals are not timeout
+  operands. Native fixtures preserve configured results and framework sentinels.
   Native `FileStreamOptions.BufferSize` assignments and explicit `bufferSize`
   arguments of native FileStream/StreamWriter/StreamReader constructors are also
   operational policy sinks, including const-backed values. Verify actual framework
@@ -561,6 +571,39 @@ remain distinct; their configuration helpers follow the same native options path
   diagnostics in the canonical full Release build; native Aspire full analyzers,
   unit/scalar/recovery/RF3 suites, format and source-bound coverage retain all gates.
   Original narrow-stage findings and test artifacts remain historical evidence.
+
+AC-CQ-034/035 also cover the BCL-only diagnostic phase bank's allocation and
+CAS retries. The canonical native `DatabasePhaseExecutionOptions` is centrally
+bound/validated before server work and projects captured immutable operands to
+the pure bank/facade, which have no fallback/default overload. Actual stripes
+must be1/2/4 and attempts1..4 (defaults4), preserving the frozen32/6/16 snapshot
+and128KiB ceiling. DatabasePhase* native TUnit cases verify every allowed setting,
+invalid pre-allocation rejection, saturation/contention, detached observations
+and actual allocation limits. Full Aspire/CI gates remain required, alongside
+the independent diagnostics qualification in ADR-063.
+
+AC-CQ-037 recognizes the exact owned Diagnostics bank constructor/facade startup
+stripe/retry operands as operational sinks. Named constants at those calls are
+rejected; configured projections and application types with the same names are
+preserved. Compiler fixtures reference the actual Diagnostics assembly.
+
+AC-CQ-009/037 includes all six executable semantic helpers in ADR-113's final
+policy join. The frozen native analyzer coverage inventory contains54 sources
+(45 executable,9 declaration-only); HardcodedPolicyReturns, HardcodedPolicySearch,
+NativeTimerPolicy, OptionsSnapshotOverrides, OwnedDiagnosticsPolicy and
+PolicyArgumentSources belong to the KLD0037 critical pipeline. Existing
+SiteAnalyzerCoverageProcessTests and SiteAnalyzerCoverageThresholdTests verify
+the complete source inventory and unchanged80/70/90 thresholds, including
+independent integer boundaries for the expanded controlled XML fixture. Actual
+functional collector evidence remains required separately from synthetic inputs.
+
+AC-CQ-034/035 also removes the embedded OpenSearch health URL deadline. The
+already central native adapter wrapper owns OpenSearchHealthWaitTimeoutSeconds
+(default60, inclusive1..60), reaches both actual target observations and the native
+vector fixture, and records the effective setting. Native URI regressions cover
+lower/default values, culture-independent seconds and invalid pre-observation
+rejection; existing real OpenSearch cluster operations retain green/all-copy
+evidence. URL protocol/status tokens remain named identities rather than policy.
 
 Executable native regression helpers also use the centrally bound/validated
 `NativeComparisonHarnessOptions` section `KeyLoad:NativeComparisonHarness`.
@@ -1285,3 +1328,28 @@ qualified workload criteria and the bounded CAS arithmetic contract in ADR063
 retain their existing ownership. This source inventory supplies no passing test,
 coverage, performance or delivered-source claim: final formatter/build and the
 complete original Aspire/native Linux reports remain mandatory.
+
+### Explicit native CLI collection settings
+
+TASK-CQ-NATIVE-CLI-SETTINGS-006 extends REQ-CQ-009 and AC-CQ-039/040/045 under
+[ADR-033](../ADR/ADR-033-code-quality.md). Capture the canonical production
+settings path and SHA-256 before the first real CLI operation. Pass that original
+file explicitly through native `dotnet-coverage collect --settings` for each
+backup, pack and restore child; parent MTP settings do not configure an independent
+collector invocation. Require unchanged bounded regular settings bytes before
+and after each original child settles. Preserve the existing validated options,
+module allowlist, original reports and native tool identity.
+
+The automated proof remains
+`NativeCoverageMergeTests.ActualCliBackupRestoreCoverageMergesWithRepeatedInputInvariantAndPreservedState`:
+real committed ZoneTree data, CLI backup/pack/inspection/restore, reopened data,
+new incarnation and paused dispatch, original report retention, native merge,
+repeated-input invariance and independent executable-line union. Empty native
+exports remain rejected; a rate field without executable rows cannot qualify
+coverage. This tooling proof does not itself admit a product contributor or
+satisfy a numeric threshold. Complete source-bound Linux functional cohorts,
+RF3, recovery and every existing no-decrease/80/70/90 gate remain mandatory.
+
+## Controlled time ownership, 2026-10-06
+
+[ResourceExecution TimeProvider](ResourceExecution/TimeProvider.md) and [ADR-115](../ADR/ADR-115-time-provider.md) extend KLD0022 to native Stopwatch timing and Environment.TickCount/TickCount64, with exact-span real-compiler positive/negative/generated fixtures. Explicit provider/default composition boundaries remain allowed. Native provider timers and real clock-controlled engine/replica workflows are required; source migration alone is not qualification.

@@ -15,10 +15,11 @@ internal sealed class NativeDatabaseVectorFlowTests
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
         using var client = await fixture.ClientAsync(token);
+        var timeProvider = new NativeDatabaseFlowTimeProvider(TimeProvider.System);
         await using IVectorComparisonTarget target = name == "SurrealDB"
             ? new SurrealDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions,
-                NativeExecutionPolicyFixture.ReadSerialization())
-            : new HelixDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions);
+                NativeExecutionPolicyFixture.ReadSerialization(), timeProvider)
+            : new HelixDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions, timeProvider);
         var profile = VectorComparisonProfile.Parse("vector-100k-" + method + "-plain-c16");
         var corpus = new VectorComparisonCorpus(profile, NativeDatabaseFlowFixture.ExecutionOptions);
         await Assert.That(await target.IngestAsync(Seed(corpus, token), token)).IsEqualTo(256);
@@ -33,6 +34,8 @@ internal sealed class NativeDatabaseVectorFlowTests
 
         await Assert.That(readback.Count).IsEqualTo(256);
         await Assert.That(readback.All(row => row.Dimensions == profile.Dimensions && row.VectorSha256 == VectorComparisonCorpus.HashVector(corpus.Create(row.Number).Embedding.Span))).IsTrue();
+        await NativeDatabaseClockFlow.VerifyCancelledVectorRunnerAsync(target, profile,
+            NativeDatabaseFlowFixture.ExecutionOptions, timeProvider, token);
         foreach (var mode in new[] { VectorQueryMode.Plain, VectorQueryMode.Filtered, VectorQueryMode.Mixed })
         {
             var actual = await target.SearchAsync(corpus.Create(0).Embedding, 2, mode, token);

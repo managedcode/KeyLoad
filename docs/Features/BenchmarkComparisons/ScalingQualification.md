@@ -99,6 +99,33 @@ the production parser. A supported Linux envelope test must assert its actual
 value instead of conditionally omitting a null result. This source correction
 changes no sidecar schema, workload, bounds or qualification requirements.
 
+### Native probe cancellation regression repair
+
+TASK-SCALE-NATIVE-CANCELLATION-024 implements the existing REQ/AC-SCALE-016
+settlement contract. The original Linux normal/scalar CI sidecars for run
+37420525126, attempt 1, record an exact-type assertion failure: the original
+native operation produced `TaskCanceledException`, a valid derived
+`OperationCanceledException`. Cancelling immediately after launch also supplies
+no observable evidence that the owned child started or was joined.
+
+Replace that test with a complete real native probe flow. Observe a bounded
+operation-owned readiness marker and actual child PID before cancelling the
+original token; await the original probe and its redirected readers, assert a
+cancellation with the original token, and independently verify that child has
+exited. Then execute a healthy native follow-up through the same production
+process contract and verify its output and settled state. Use existing validated
+execution options and owned fixture cleanup, without mocks, source-text checks,
+new production APIs, raised limits or detached cleanup. Linux delivered-source
+qualification remains mandatory; a development platform result does not replace
+it.
+
+One Luna worker owns only the existing cancellation case and cohesive populated
+BenchmarkComparisons fixture/helper roles in a private guarded packet. Root
+reviews the operation, failure and cleanup oracles before joining, then runs
+the actual Aspire unit/scalar cases and complete required suites. This repairs
+test evidence, not an established production process defect; full CI, recovery,
+RF3, source-bound coverage and scaled cohort qualification remain open.
+
 ## Accepted prerequisite: Aspire scale forwarding (REQ/AC-SCALE-014)
 
 Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. TestSuiteSettings accepts one exact canonical scaled ID only for Suite=comparison, the exact /*/*/IsolatedNativeComparisonTests/* filter, present native Benchmarks:Target, matching Benchmarks:EvidenceProfile, disabled Benchmarks:Enabled, no direct Benchmarks:ScaleProfile and no workload overrides. Reject missing suite, other suites, unknown/blank/case-mismatched IDs or mixed modes before any resource creation. Existing direct Benchmarks:ScaleProfile plus a suite remains rejected.
@@ -618,6 +645,36 @@ rows/output and rejection/create-only preservation. The CI workflow does not
 select the new flag until workload routing and separate artifact/fairness/admission
 contracts are implemented together. Planning metadata alone does not qualify any
 performance cell or refresh published evidence.
+
+### Bounded GitHub matrix transport
+
+REQ-SCALE-023 / AC-SCALE-023 / TASK-SCALE-MATRIX-TRANSPORT-001 require the
+planning operation to retain all five original canonical plan files and all
+2217 rows across the same eleven database groups, while its combined GitHub job
+outputs fit the provider's 1048576-byte UTF-16 output limit. Each transported row
+contains exactly `id`, `jobName`, `target` and `kind`. This projection changes
+only the matrix transport serialization; the full canonical rows, plan-file
+bytes, workload settings, artifact identities and 201/207 group counts retain
+their meaning. Earlier unchanged-row statements refer to those full canonical
+rows and artifacts, rather than requiring their complete payload in job outputs.
+
+Before any native resource preparation, the worker downloads the same run's
+original plan artifact. The feature-local `isolated-matrix-entry.mjs` resolver
+validates its closed five-file inventory and canonical plans, then resolves
+exactly one full row using the existing `KEYLOAD_COMPARISON_CELL_ID`,
+`KEYLOAD_COMPARISON_JOB_NAME` and `Benchmarks__Target` selectors plus the admitted
+`KEYLOAD_MATRIX_KIND`. Missing, altered, mixed or ambiguous selectors fail before
+writing worker environment or starting resources. Workload and archive prefixes
+come from that canonical row; transported fields cannot supply trusted settings.
+
+Acceptance uses the actual plan CLI and resolver in `IsolatedPlanCliTests` and
+`OpenLoopPlanCliJoinTests`: publish create-only plan files, verify the complete
+projected identity set and output byte bound, resolve every row back to its full
+canonical payload, and preserve the existing independent row oracles. Rejected
+resolution preserves original environment bytes; a corrected follow-up resolves
+the intended row. Root owns workflow/CLI integration and delivered-source Linux
+verification; a Luna worker prepares guarded source and whole-flow regressions.
+This transport repair does not qualify a database measurement or reduce a cohort.
 
 ### Original open-loop terminal and cohort delivery
 

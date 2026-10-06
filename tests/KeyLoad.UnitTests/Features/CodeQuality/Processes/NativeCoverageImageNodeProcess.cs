@@ -29,8 +29,8 @@ internal static class NativeCoverageImageNodeProcess
         var execution = executionOptions.Value;
         var coverage = coverageOptions.Value;
         cancellationToken.ThrowIfCancellationRequested();
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(execution.OrdinaryTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(execution.OrdinaryTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         using var process = new Process { StartInfo = CreateStartInfo(repositoryRoot, invocation, coverage) };
         var failures = new List<Exception>();
         var started = false;

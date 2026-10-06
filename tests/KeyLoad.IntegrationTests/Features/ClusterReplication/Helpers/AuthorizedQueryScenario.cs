@@ -14,7 +14,7 @@ internal static class AuthorizedQueryScenario
 
     internal static async Task RunAsync(ClusterFixture fixture)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
         var administrator = fixture.Client("node1");
         var partition = new PartitionRef("integration", "database", "query-adapters", Guid.NewGuid().ToString("N"));
         try

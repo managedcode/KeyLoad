@@ -39,7 +39,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
 
     public async Task InitializeAsync()
     {
-        using var deadline = new CancellationTokenSource(StartupBound);
+        using var deadline = new CancellationTokenSource(StartupBound, TimeProvider.System);
         try
         {
             await cluster.DeployAsync(deadline.Token);
@@ -78,7 +78,7 @@ internal sealed class RequestCqrsCohortRuntimeFixture : IAsyncInitializer, IAsyn
         }
 
         disposed = true;
-        using var deadline = new CancellationTokenSource(ShutdownBound);
+        using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => cluster.StopAllSilosAsync(deadline.Token), failures);
         try

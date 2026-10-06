@@ -16,12 +16,17 @@ internal static class ConfigurationMetadataNames
     internal const string StaticOptions = "Microsoft.Extensions.Options.Options";
     internal const string Create = "Create";
     internal const string Configuration = "Microsoft.Extensions.Configuration.IConfiguration";
+    internal const string ConfigurationProvider = "Microsoft.Extensions.Configuration.IConfigurationProvider";
+    internal const string ConfigurationRootExtensions = "Microsoft.Extensions.Configuration.ConfigurationRootExtensions";
     internal const string ConfigurationBinder = "Microsoft.Extensions.Configuration.ConfigurationBinder";
     internal const string ConfigurationExtensions = "Microsoft.Extensions.Configuration.ConfigurationExtensions";
     internal const string Environment = "System.Environment";
     internal const string GetEnvironmentVariable = "GetEnvironmentVariable";
     internal const string GetEnvironmentVariables = "GetEnvironmentVariables";
     internal const string GetCommandLineArgs = "GetCommandLineArgs";
+    internal const string ExpandEnvironmentVariables = "ExpandEnvironmentVariables";
+    internal const string Activator = "System.Activator";
+    internal const string CreateInstance = "CreateInstance";
     internal const string Value = "Value";
     internal const string Timeout = "System.Threading.Timeout";
     internal const string Infinite = "Infinite";

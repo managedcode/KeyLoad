@@ -88,8 +88,8 @@ internal sealed class EpochPriorAcceptanceTests
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         var root = Path.Combine(Path.GetTempPath(), TrialPrefix + Guid.NewGuid().ToString("N"));
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TrialTimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TrialTimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -109,7 +109,7 @@ internal sealed class EpochPriorAcceptanceTests
 
     private static async Task CleanupTrialAsync(string root, Exception? activeFailure)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         try
         {
             await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cleanup.Token);

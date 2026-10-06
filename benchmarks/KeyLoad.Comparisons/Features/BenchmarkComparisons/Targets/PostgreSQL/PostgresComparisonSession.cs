@@ -5,9 +5,10 @@ using Npgsql;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int topK, int graphDepth, int corpusCount,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null)
     : IComparisonSession
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string SELECTIdBodyTextFROMDocumentsORDERBYIdCOLLATECStatement = "SELECT id,body::text FROM documents ORDER BY id COLLATE \"C\"";
@@ -63,7 +64,7 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
                 return new(Neighbors: await PostgresVectorOperations.SearchAsync(connection, document, topK, cancellationToken));
             case Scenario.QueueCycle:
                 return await PostgresQueueOperations.ExecuteAsync(connection: connection, document: document,
-                    cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions);
+                    cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
             case Scenario.GraphNeighbors:
             case Scenario.GraphTraverse:
                 return await PostgresGraphOperations.ExecuteAsync(connection, scenario, document, graphDepth, cancellationToken);

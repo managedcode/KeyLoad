@@ -103,8 +103,8 @@ internal static class DueNoQuorumRf3Assertions
     internal static async Task WaitForOrdinalOneAsync(DueNoQuorumRf3Callers callers, DueNoQuorumRf3Seed seed,
         CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(DueNoQuorumRf3Protocol.ProgressDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(DueNoQuorumRf3Protocol.ProgressDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         while (true)
         {
             var read = await callers.Sdk.InspectRecurringScheduleAsync(new(seed.Lane, seed.ScheduleId), deadline.Token)
@@ -123,7 +123,7 @@ internal static class DueNoQuorumRf3Assertions
                     expectedPresent: false, deadline.Token).ConfigureAwait(false);
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(DueNoQuorumRf3Protocol.PollMilliseconds), deadline.Token)
+            await Task.Delay(TimeSpan.FromMilliseconds(DueNoQuorumRf3Protocol.PollMilliseconds), TimeProvider.System, deadline.Token)
                 .ConfigureAwait(false);
         }
     }

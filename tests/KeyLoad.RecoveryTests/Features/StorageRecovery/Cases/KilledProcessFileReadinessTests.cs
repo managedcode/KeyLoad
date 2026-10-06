@@ -1,4 +1,3 @@
-using System.Diagnostics;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
@@ -23,7 +22,7 @@ internal sealed class KilledProcessFileReadinessTests
             var readiness = fixture.StartReadiness();
             await Assert.That(readiness.IsCompleted).IsFalse();
             fixture.ReleaseFile();
-            await readiness.WaitAsync(ReadinessBound);
+            await readiness.WaitAsync(ReadinessBound, TimeProvider.System);
             fixture.MarkReadinessObserved();
         });
     }
@@ -64,12 +63,13 @@ internal sealed class KilledProcessFileReadinessTests
         await fixture.RunAsync(async fixture =>
         {
             fixture.HoldFile(MetadataWalPath);
-            var started = Stopwatch.StartNew();
+            var clock = TimeProvider.System;
+            var started = clock.GetTimestamp();
             var readiness = fixture.StartReadiness();
             await Assert.ThrowsExactlyAsync<IOException>(() => readiness);
             fixture.MarkReadinessObserved();
-            await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
-            await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsGreaterThanOrEqualTo(ReadinessBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsLessThanOrEqualTo(ObservationBound);
         });
     }
 
@@ -114,12 +114,13 @@ internal sealed class KilledProcessFileReadinessTests
         {
             var missingPath = Path.Combine(fixture.Root, relativePath);
             File.Delete(missingPath);
-            var started = Stopwatch.StartNew();
+            var clock = TimeProvider.System;
+            var started = clock.GetTimestamp();
             var readiness = fixture.StartReadiness();
             await Assert.ThrowsExactlyAsync<FileNotFoundException>(() => readiness);
             fixture.MarkReadinessObserved();
-            await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
-            await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsGreaterThanOrEqualTo(ReadinessBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsLessThanOrEqualTo(ObservationBound);
             await Assert.That(File.Exists(missingPath)).IsFalse();
         });
     }

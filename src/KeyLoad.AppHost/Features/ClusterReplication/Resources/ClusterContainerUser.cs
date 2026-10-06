@@ -12,28 +12,28 @@ internal static class ClusterContainerUser
     private const string Separator = ":";
     private const string LookupError = "Cannot determine the host container uid:gid. Configure KeyLoad:ContainerUser explicitly.";
 
-    internal static string? Resolve(IDistributedApplicationBuilder builder)
+    internal static string? Resolve(IDistributedApplicationBuilder builder, TimeProvider timeProvider)
     {
         var options = AppHostOptionsRegistration.Get(builder).Startup;
         if (options.Value.ContainerUser is { } configured && !string.IsNullOrWhiteSpace(configured))
         { return configured; }
         if (OperatingSystem.IsWindows())
         { return null; }
-        return Task.Run(() => ReadUnixIdentityAsync(options)).GetAwaiter().GetResult();
+        return Task.Run(() => ReadUnixIdentityAsync(options, timeProvider)).GetAwaiter().GetResult();
     }
 
-    private static async Task<string> ReadUnixIdentityAsync(IOptions<AppHostStartupOptions> options)
+    private static async Task<string> ReadUnixIdentityAsync(IOptions<AppHostStartupOptions> options, TimeProvider timeProvider)
     {
-        var user = await ReadIdAsync(UserArgument, options.Value);
-        var group = await ReadIdAsync(GroupArgument, options.Value);
+        var user = await ReadIdAsync(UserArgument, options.Value, timeProvider);
+        var group = await ReadIdAsync(GroupArgument, options.Value, timeProvider);
         return user + Separator + group;
     }
 
-    private static async Task<string> ReadIdAsync(string argument, AppHostStartupOptions policy)
+    private static async Task<string> ReadIdAsync(string argument, AppHostStartupOptions policy, TimeProvider timeProvider)
     {
         const int EmptyValue = 0;
 
-        using var deadline = new CancellationTokenSource(policy.ContainerIdentityLookupTimeout, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(policy.ContainerIdentityLookupTimeout, timeProvider);
         using var process = new Process
         {
             StartInfo = new(IdExecutable)

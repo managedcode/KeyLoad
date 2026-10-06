@@ -20,8 +20,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     {
         using var admission = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             runtimeJournalAdmission.SchedulingToken);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(admission.Token);
-        deadline.CancelAfter(options.Value.DispatchDeadline);
+        using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(admission.Token, timeout.Token);
         var token = deadline.Token;
         ValidateHint(hint);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
@@ -55,8 +55,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     private async Task ExecuteNativeTimeoutAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
     {
         var hint = DecodeJob(context);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken);
-        deadline.CancelAfter(options.Value.DispatchDeadline);
+        using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken, timeout.Token);
         var token = deadline.Token;
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         var state = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());

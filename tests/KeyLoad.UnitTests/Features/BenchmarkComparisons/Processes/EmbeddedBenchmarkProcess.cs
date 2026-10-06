@@ -53,7 +53,7 @@ internal static class EmbeddedBenchmarkProcess
         var captures = Task.WhenAll(standardOutput, standardError);
         try
         {
-            using var deadline = new CancellationTokenSource(timeout);
+            using var deadline = new CancellationTokenSource(timeout, TimeProvider.System);
             using var runCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
             try
             {
@@ -150,7 +150,7 @@ internal static class EmbeddedBenchmarkProcess
         finally
         {
             await captureCancellation.CancelAsync();
-            await captures.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+            await captures.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         }
     }
 
@@ -168,7 +168,7 @@ internal static class EmbeddedBenchmarkProcess
             }
         }
 
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         await process.WaitForExitAsync(cleanup.Token);
     }
 }

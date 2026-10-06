@@ -6,20 +6,18 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoSeededCopies
 {
-    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions,
-        CancellationToken cancellationToken)
+    internal static async Task VerifyAsync(IEnumerable<IMongoClient> clients, string databaseName, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
 
-        using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken);
+        using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider);
         try
         {
             foreach (var client in clients)
             {
                 await WaitForCopyAsync(collection: client.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
                     expected: dataset.Documents[FirstElementIndex], count: dataset.Documents.Count, cancellationToken: deadline.Token,
-                    pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval);
+                    pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval, timeProvider: timeProvider);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -28,8 +26,7 @@ internal static class MongoSeededCopies
         }
     }
 
-    private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected, long count,
-        TimeSpan pollInterval, CancellationToken cancellationToken)
+    private static async Task WaitForCopyAsync(IMongoCollection<BsonDocument> collection, BenchmarkDocument expected, long count, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         while (true)
         {
@@ -43,7 +40,7 @@ internal static class MongoSeededCopies
                 }
                 return;
             }
-            await Task.Delay(pollInterval, cancellationToken);
+            await Task.Delay(pollInterval, timeProvider, cancellationToken);
         }
     }
 }

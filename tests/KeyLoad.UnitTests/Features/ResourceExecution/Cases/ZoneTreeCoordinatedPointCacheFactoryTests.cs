@@ -149,10 +149,10 @@ internal sealed class ZoneTreeCoordinatedPointCacheFactoryTests
                     reader = ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() => store.Read(view =>
                     {
                         entered.TrySetResult();
-                        release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit).GetAwaiter().GetResult();
+                        release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
                         return view.ReadOwnedValue(ReaderKey);
                     }));
-                    await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+                    await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
                     await Assert.That(control!.TryApply(receipt)).IsEqualTo(ZoneTreePointCacheControlResult.Busy);
                 }, failures);
             }

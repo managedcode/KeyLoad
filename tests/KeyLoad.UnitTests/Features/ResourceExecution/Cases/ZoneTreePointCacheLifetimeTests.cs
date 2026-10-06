@@ -57,7 +57,7 @@ internal sealed class ZoneTreePointCacheLifetimeTests
         var borrower = Task.Run(() => store.Read(view => view.ReadValue(KeyA, value =>
         {
             entered.TrySetResult();
-            release.Task.WaitAsync(WaitLimit).GetAwaiter().GetResult();
+            release.Task.WaitAsync(WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
 
             borrowed = value.ToArray();
         })));
@@ -65,16 +65,16 @@ internal sealed class ZoneTreePointCacheLifetimeTests
 
         try
         {
-            await entered.Task.WaitAsync(WaitLimit);
-            var beforeDisable = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
+            await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
+            var beforeDisable = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
             var nativeFallback = store.Read(view => view.ReadOwnedValue(KeyA));
-            var afterPinLimit = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
+            var afterPinLimit = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
             await Assert.That(nativeFallback).IsEquivalentTo(ValueA);
             await Assert.That(afterPinLimit.ReadBypasses - beforeDisable.ReadBypasses).IsEqualTo(1L);
             await Assert.That(afterPinLimit.NativeLookups - beforeDisable.NativeLookups).IsEqualTo(1L);
             disabling = Task.Run(store.DisablePointCache);
-            await disabling.WaitAsync(WaitLimit);
-            var retired = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit);
+            await disabling.WaitAsync(WaitLimit, TimeProvider.System);
+            var retired = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
             await Assert.That(beforeDisable.ActivePins).IsEqualTo(1);
             await Assert.That(retired.Enabled).IsFalse();
             await Assert.That(retired.RetiredPinnedEntries).IsEqualTo(1);
@@ -84,10 +84,10 @@ internal sealed class ZoneTreePointCacheLifetimeTests
         finally
         {
             release.TrySetResult();
-            await borrower.WaitAsync(WaitLimit);
+            await borrower.WaitAsync(WaitLimit, TimeProvider.System);
             if (disabling is not null)
             {
-                await disabling.WaitAsync(WaitLimit);
+                await disabling.WaitAsync(WaitLimit, TimeProvider.System);
             }
         }
 

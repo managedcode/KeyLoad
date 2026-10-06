@@ -39,7 +39,7 @@ internal static class TimeSeriesForeignSchemaCollision
         {
             if (testSchemaCreated)
             {
-                using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
                 await DropTestSchemaAsync(connection, schema, cleanup.Token);
             }
         }

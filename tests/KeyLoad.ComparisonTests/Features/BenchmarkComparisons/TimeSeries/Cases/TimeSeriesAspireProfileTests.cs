@@ -24,8 +24,8 @@ internal sealed class TimeSeriesAspireProfileTests
         var root = Path.Combine(Path.GetTempPath(), "keyload-timeseries-" + Guid.NewGuid().ToString("N"));
         var output = Path.Combine(root, "reports");
         var evidence = EvidenceDirectory();
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(10));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(10), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
         var adminKey = "root." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         var arguments = new[]
         {
@@ -167,7 +167,7 @@ internal sealed class TimeSeriesAspireProfileTests
         using var process = Process.Start(start) ?? throw new IOException("Cannot start temporary data cleanup.");
         var error = process.StandardError.ReadToEndAsync();
         var output = process.StandardOutput.ReadToEndAsync();
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
         try
         {
             await process.WaitForExitAsync(timeout.Token);

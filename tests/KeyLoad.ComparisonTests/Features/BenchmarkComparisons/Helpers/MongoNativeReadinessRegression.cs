@@ -16,8 +16,8 @@ internal static class MongoNativeReadinessRegression
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
         ArgumentOutOfRangeException.ThrowIfLessThan(nodeCount, MongoNativeReadinessRegressionProtocol.MinimumNodes);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodeCount, MongoNativeReadinessRegressionProtocol.MaximumNodes);
-        using var parent = CancellationTokenSource.CreateLinkedTokenSource(token);
-        parent.CancelAfter(MongoNativeReadinessRegressionProtocol.ParentDeadline);
+        using var parentTimeout = new CancellationTokenSource(MongoNativeReadinessRegressionProtocol.ParentDeadline, TimeProvider.System);
+        using var parent = CancellationTokenSource.CreateLinkedTokenSource(token, parentTimeout.Token);
         var resources = app.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<ContainerResource>().ToArray();
         var topology = await MongoNativeReadinessRegressionTopology.ReadAsync(resources, nodeCount, parent.Token);
         var child = MongoNativeReadinessRegressionChild.Create(topology.Image, topology.Network, topology.Module, password, nodeCount);
@@ -54,7 +54,7 @@ internal static class MongoNativeReadinessRegression
 
     private static async Task CleanupOwnedAsync(MongoNativeReadinessRegressionProcess process, MongoNativeReadinessRegressionChild child)
     {
-        using var cleanup = new CancellationTokenSource(MongoNativeReadinessRegressionProtocol.CleanupDeadline);
+        using var cleanup = new CancellationTokenSource(MongoNativeReadinessRegressionProtocol.CleanupDeadline, TimeProvider.System);
         await CleanupAsync(process, child, cleanup.Token);
     }
 

@@ -19,7 +19,8 @@ internal sealed class NativeSagaTimeoutJobHarness(
     {
         var target = grains.GetGrain<IRecurringDueCoordinatorGrain>(hint.Lane.Partition.AtomicPartitionId).GetGrainId();
         var request = NativeSagaTimeoutJobContract.CreateScheduleRequest(target, dueTime, hint);
-        using var deadline = CreateDeadline(cancellationToken);
+        using var timeout = new CancellationTokenSource(profile.CompletionTimeout, services.GetRequiredService<TimeProvider>());
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         return await services.GetRequiredService<ILocalDurableJobManager>()
             .ScheduleJobAsync(request, deadline.Token);
     }
@@ -37,7 +38,8 @@ internal sealed class NativeSagaTimeoutJobHarness(
     private async Task<List<IJobShard>> AssignJobShardsAsync(DateTimeOffset maxDueTime, int maximumNewClaims,
         CancellationToken cancellationToken)
     {
-        using var deadline = CreateDeadline(cancellationToken);
+        using var timeout = new CancellationTokenSource(profile.CompletionTimeout, services.GetRequiredService<TimeProvider>());
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         return await services.GetRequiredService<JobShardManager>()
             .AssignJobShardsAsync(maxDueTime, maximumNewClaims, deadline.Token);
     }
@@ -61,7 +63,8 @@ internal sealed class NativeSagaTimeoutJobHarness(
     internal async Task WaitUntilSettledAsync(IReadOnlyCollection<IJobShard> shards,
         CancellationToken cancellationToken)
     {
-        using var deadline = CreateDeadline(cancellationToken);
+        using var timeout = new CancellationTokenSource(profile.CompletionTimeout, services.GetRequiredService<TimeProvider>());
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             while (true)
@@ -70,7 +73,7 @@ internal sealed class NativeSagaTimeoutJobHarness(
                 {
                     return;
                 }
-                await Task.Delay(profile.PollInterval, deadline.Token);
+                await Task.Delay(profile.PollInterval, TimeProvider.System, deadline.Token);
             }
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
@@ -79,10 +82,4 @@ internal sealed class NativeSagaTimeoutJobHarness(
         }
     }
 
-    private CancellationTokenSource CreateDeadline(CancellationToken cancellationToken)
-    {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(profile.CompletionTimeout);
-        return deadline;
-    }
 }

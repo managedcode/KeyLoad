@@ -57,11 +57,11 @@ internal sealed class NativeSerializationBenchmarkCancellationTests
 
     private static async Task WaitForStartAsync(string marker, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(StartupTimeoutSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(StartupTimeoutSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         while (!await HasStartedAsync(marker, deadline.Token))
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(StartupPollMilliseconds), deadline.Token);
+            await Task.Delay(TimeSpan.FromMilliseconds(StartupPollMilliseconds), TimeProvider.System, deadline.Token);
         }
     }
 
@@ -119,7 +119,7 @@ internal sealed class NativeSerializationBenchmarkCancellationTests
     {
         try
         {
-            _ = await execution.WaitAsync(TimeSpan.FromSeconds(15));
+            _ = await execution.WaitAsync(TimeSpan.FromSeconds(15), TimeProvider.System);
         }
         catch (OperationCanceledException) when (execution.IsCanceled)
         {

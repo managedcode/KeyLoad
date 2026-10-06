@@ -26,12 +26,12 @@ public sealed partial class KeyLoadTarget
         var readers = peerClients.Select(peer => new KeyLoadClient(peer, credential, clientOptions)).ToArray();
         var initial = await ReadStatusesAsync(readers, cancellationToken);
         var required = initial.Max(status => status.Applied);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         var receipts = initial;
         while (receipts.Any(status => status.Applied < required))
         {
-            await Task.Delay(lifecycle.KeyLoadReadinessPollInterval, deadline.Token);
+            await Task.Delay(lifecycle.KeyLoadReadinessPollInterval, timeProvider, deadline.Token);
             receipts = await ReadStatusesAsync(readers, deadline.Token);
         }
         ValidateStatuses(receipts);

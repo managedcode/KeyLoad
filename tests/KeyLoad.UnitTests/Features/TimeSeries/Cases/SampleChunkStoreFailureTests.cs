@@ -46,7 +46,7 @@ internal sealed class SampleChunkStoreFailureTests
         var limits = database.Database.Limits with { QueryDeadlineSeconds = 1 };
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), database.Database.EvaluationClock);
         budget.ChargeBytes(cut.Encoded.Length);
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100));
+        await Task.Delay(TimeSpan.FromMilliseconds(1_100), TimeProvider.System);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(cut.Encoded, budget, UnitExecutionOptions.TimeSeriesExecution()));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

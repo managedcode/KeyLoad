@@ -9,10 +9,7 @@ internal sealed record MongoReplicaProof(ClusterEvidence Evidence, string Versio
 
 internal static class MongoReplicaVerifier
 {
-    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database,
-        IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions,
-        CancellationToken cancellationToken)
+    public static async Task<MongoReplicaProof> VerifyAsync(string connectionString, IMongoDatabase adminDatabase, IMongoDatabase database, IMongoCollection<BsonDocument> documents, ComparisonTopology topology, IComparisonCorpus dataset, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int SingleItemCount = 1;
         const int FirstElementIndex = 0;
@@ -46,9 +43,9 @@ internal static class MongoReplicaVerifier
             ValidateConcerns(settings);
             await VerifyCopiedProbeAsync(primary: documents, secondaries: clients.ToArray(),
                 databaseName: database.DatabaseNamespace.DatabaseName, executionOptions: executionOptions,
-                cancellationToken: cancellationToken, pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval);
+                cancellationToken: cancellationToken, pollInterval: lifecycleOptions.Value.MongoReadinessPollInterval, timeProvider: timeProvider);
             await MongoSeededCopies.VerifyAsync(clients: clients, databaseName: database.DatabaseNamespace.DatabaseName, dataset: dataset,
-                cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions, executionOptions: executionOptions);
+                cancellationToken: cancellationToken, lifecycleOptions: lifecycleOptions, executionOptions: executionOptions, timeProvider: timeProvider);
             var observations = BuildObservations(status, members, versions[FirstElementIndex], settings);
             return new(new ClusterEvidence(members.Length, members.Length, MongoSchema.HealthyState, observations), versions[FirstElementIndex], clients.ToArray());
         }
@@ -117,19 +114,18 @@ internal static class MongoReplicaVerifier
         }
     }
 
-    private static async Task VerifyCopiedProbeAsync(IMongoCollection<BsonDocument> primary, IMongoClient[] secondaries, string databaseName,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, TimeSpan pollInterval, CancellationToken cancellationToken)
+    private static async Task VerifyCopiedProbeAsync(IMongoCollection<BsonDocument> primary, IMongoClient[] secondaries, string databaseName, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var probeId = MongoSchema.CollectionProbePrefix + Guid.NewGuid().ToString(MongoSchema.GuidFormat);
         var body = MongoSchema.ProbeJsonPrefix + probeId + MongoSchema.ProbeJsonSuffix;
         await primary.InsertOneAsync(new BsonDocument { [MongoSchema.IdField] = probeId, [MongoSchema.BodyField] = body }, cancellationToken: cancellationToken);
         try
         {
-            using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken);
+            using var deadline = MongoReplicaDeadline.CreateOperation(executionOptions, cancellationToken: cancellationToken, timeProvider: timeProvider);
             foreach (var secondary in secondaries)
             {
                 await WaitForSecondaryCopyAsync(collection: secondary.GetDatabase(databaseName).GetCollection<BsonDocument>(MongoSchema.DocumentsCollection),
-                    probeId: probeId, expectedBody: body, cancellationToken: deadline.Token, pollInterval: pollInterval);
+                    probeId: probeId, expectedBody: body, cancellationToken: deadline.Token, pollInterval: pollInterval, timeProvider: timeProvider);
             }
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -138,13 +134,12 @@ internal static class MongoReplicaVerifier
         }
         finally
         {
-            using var cleanup = MongoReplicaDeadline.CreateCleanup(executionOptions);
+            using var cleanup = MongoReplicaDeadline.CreateCleanup(executionOptions, timeProvider);
             await primary.DeleteOneAsync(new BsonDocument(MongoSchema.IdField, probeId), cancellationToken: cleanup.Token);
         }
     }
 
-    private static async Task WaitForSecondaryCopyAsync(IMongoCollection<BsonDocument> collection, string probeId, string expectedBody,
-        TimeSpan pollInterval, CancellationToken cancellationToken)
+    private static async Task WaitForSecondaryCopyAsync(IMongoCollection<BsonDocument> collection, string probeId, string expectedBody, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         while (true)
         {
@@ -157,7 +152,7 @@ internal static class MongoReplicaVerifier
                 }
                 return;
             }
-            await Task.Delay(pollInterval, cancellationToken);
+            await Task.Delay(pollInterval, timeProvider, cancellationToken);
         }
     }
 

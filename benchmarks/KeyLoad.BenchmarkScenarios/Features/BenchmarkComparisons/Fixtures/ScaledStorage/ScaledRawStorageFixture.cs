@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
@@ -6,7 +5,9 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal sealed class ScaledRawStorageFixture : IDisposable
 {
+    private readonly TimeProvider timeProvider;
     private readonly CancellationTokenSource _lifetime;
+    private readonly CancellationTokenRegistration incoming;
     private ScaledRawStorageFixtureCore? _core;
     private bool _closing;
     private bool _disposed;
@@ -14,28 +15,30 @@ internal sealed class ScaledRawStorageFixture : IDisposable
     private const string DeadlineMessage = "The scaled fixture preparation deadline expired.";
 
     internal ScaledRawStorageFixture(int recordCount, int payloadBytes, IOptions<ScaledStorageExecutionOptions> executionOptions,
-        CancellationToken cancellationToken = default)
+        TimeProvider? provider = null, CancellationToken cancellationToken = default)
     {
+        timeProvider = provider ?? TimeProvider.System;
         var settings = executionOptions.Value;
         settings.Validate();
         ScaledRawStorageSettings.ValidateInput(recordCount, payloadBytes);
         cancellationToken.ThrowIfCancellationRequested();
-        var deadlineStart = Stopwatch.GetTimestamp();
+        var deadlineStart = timeProvider.GetTimestamp();
         var processMemoryCeiling = ScaledRawStorageSettings.ValidateFixtureCapacity(recordCount, payloadBytes, settings);
-        var remaining = settings.PreparationTimeout - Stopwatch.GetElapsedTime(deadlineStart);
+        var remaining = settings.PreparationTimeout - timeProvider.GetElapsedTime(deadlineStart);
         if (remaining <= TimeSpan.Zero)
         {
             throw new TimeoutException(DeadlineMessage);
         }
 
-        _lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _lifetime = new(remaining, timeProvider);
+        incoming = cancellationToken.UnsafeRegister(static state => ((CancellationTokenSource)state!).Cancel(), _lifetime);
         try
         {
-            _lifetime.CancelAfter(remaining);
             _lifetime.Token.ThrowIfCancellationRequested();
         }
         catch (Exception failure) when (RawStorageFixtureFailures.IsNonFatal(failure))
         {
+            incoming.Dispose();
             _lifetime.Dispose();
             throw;
         }
@@ -46,6 +49,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
         }
         catch (Exception failure) when (RawStorageFixtureFailures.IsNonFatal(failure))
         {
+            incoming.Dispose();
             _lifetime.Dispose();
             throw;
         }
@@ -53,7 +57,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
         try
         {
             _core = new ScaledRawStorageFixtureCore(recordCount, payloadBytes,
-                deadlineStart, processMemoryCeiling, executionOptions, _lifetime.Token);
+                deadlineStart, processMemoryCeiling, executionOptions, timeProvider, _lifetime.Token);
             _core.Initialize();
         }
         catch (Exception primary) when (RawStorageFixtureFailures.IsNonFatal(primary))
@@ -115,6 +119,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
     {
         if (_core is null)
         {
+            incoming.Dispose();
             _lifetime.Dispose();
             _disposed = true;
             ScaledRawStorageOwnership.ReleaseUninitialized(this);
@@ -164,6 +169,7 @@ internal sealed class ScaledRawStorageFixture : IDisposable
 
         if (_core is null)
         {
+            incoming.Dispose();
             _lifetime.Dispose();
             _disposed = true;
         }

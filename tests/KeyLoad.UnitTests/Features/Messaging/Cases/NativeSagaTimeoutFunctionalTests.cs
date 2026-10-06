@@ -154,7 +154,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
 
     private async Task<SagaInspection> WaitForTimedOutSagaAsync(QueueLaneRef lane, Guid sagaId)
     {
-        using var deadline = new CancellationTokenSource(fixture.TestProfile.CompletionTimeout);
+        using var deadline = new CancellationTokenSource(fixture.TestProfile.CompletionTimeout, TimeProvider.System);
         try
         {
             while (true)
@@ -164,7 +164,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
                 {
                     return current;
                 }
-                await Task.Delay(fixture.TestProfile.PollInterval, deadline.Token);
+                await Task.Delay(fixture.TestProfile.PollInterval, TimeProvider.System, deadline.Token);
             }
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested)

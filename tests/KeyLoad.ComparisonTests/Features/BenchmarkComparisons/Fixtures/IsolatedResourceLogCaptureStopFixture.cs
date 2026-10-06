@@ -49,11 +49,11 @@ internal sealed class IsolatedResourceLogCaptureStopFixture : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        using var captureTimeout = new CancellationTokenSource(DisposalDeadline);
+        using var captureTimeout = new CancellationTokenSource(DisposalDeadline, TimeProvider.System);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
             () => IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(
                 Capture.DisposeAsync().AsTask(), captureTimeout.Token), failures);
-        using var applicationTimeout = new CancellationTokenSource(DisposalDeadline);
+        using var applicationTimeout = new CancellationTokenSource(DisposalDeadline, TimeProvider.System);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
             () => IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(
                 Application.DisposeAsync().AsTask(), applicationTimeout.Token), failures);
@@ -67,7 +67,7 @@ internal sealed class IsolatedResourceLogCaptureStopFixture : IAsyncDisposable
             return;
         }
 
-        using var timeout = new CancellationTokenSource(DisposalDeadline);
+        using var timeout = new CancellationTokenSource(DisposalDeadline, TimeProvider.System);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
             () => IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(
                 resource.DisposeAsync().AsTask(), timeout.Token), failures);

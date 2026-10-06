@@ -34,7 +34,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
 
     private static async Task RunAsync(Func<RequestCqrsRf3DiagnosticsTestScope, CancellationToken, Task> scenario)
     {
-        using var deadline = new CancellationTokenSource(TestDeadline);
+        using var deadline = new CancellationTokenSource(TestDeadline, TimeProvider.System);
         var failures = new List<Exception>();
         var lifecycle = new RequestCqrsLifecycleEvidence();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -111,7 +111,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
     }
     private static async Task VerifyExactCallerCancellationAsync()
     {
-        using var caller = new CancellationTokenSource(TestDeadline);
+        using var caller = new CancellationTokenSource(TestDeadline, TimeProvider.System);
         var lifecycle = new RequestCqrsLifecycleEvidence();
         await using var scope = new RequestCqrsRf3DiagnosticsTestScope(Guid.NewGuid(), lifecycle);
         var failures = new List<Exception>();
@@ -138,7 +138,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
 
     private static async Task VerifyNativeEarlyCompletionAsync()
     {
-        using var deadline = new CancellationTokenSource(TestDeadline);
+        using var deadline = new CancellationTokenSource(TestDeadline, TimeProvider.System);
         var lifecycle = new RequestCqrsLifecycleEvidence();
         await using var scope = new RequestCqrsRf3DiagnosticsTestScope(Guid.NewGuid(), lifecycle);
         var failures = new List<Exception>();

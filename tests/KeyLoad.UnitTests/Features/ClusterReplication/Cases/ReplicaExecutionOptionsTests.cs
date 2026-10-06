@@ -24,7 +24,7 @@ internal sealed class ReplicaExecutionOptionsTests
         var caller = TestContext.Current!.Execution.CancellationToken;
         var pending = fixture.Consensus.ReadBarrierAsync(caller);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(() => pending.WaitAsync(OuterTimeout, caller));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => pending.WaitAsync(OuterTimeout, TimeProvider.System, caller));
 
         await Assert.That(caller.IsCancellationRequested).IsFalse();
         await Assert.That(fixture.Consensus.TransportReady.IsCompleted).IsFalse();
@@ -44,7 +44,7 @@ internal sealed class ReplicaExecutionOptionsTests
         fixture.Materializer.Commit(AppliedEntries);
 
         await fixture.Materializer.WaitForApplyAsync(AppliedEntries, TestContext.Current!.Execution.CancellationToken)
-            .WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds));
+            .WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), TimeProvider.System);
 
         await Assert.That(fixture.Database.LastApplied).IsEqualTo((long)AppliedEntries);
         await Assert.That(fixture.Log.State.CommittedIndex).IsEqualTo((long)AppliedEntries);
@@ -82,7 +82,7 @@ internal sealed class ReplicaExecutionOptionsTests
         try
         {
             fixture.Materializer.Commit(SingleAppendEntry);
-            await entered.Task.WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), caller);
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), TimeProvider.System, caller);
             for (var index = SingleAppendEntry + SingleAppendEntry; index <= AppliedEntries; index++)
             {
                 fixture.Materializer.Commit(index);
@@ -95,7 +95,7 @@ internal sealed class ReplicaExecutionOptionsTests
         }
 
         await fixture.Materializer.WaitForApplyAsync(AppliedEntries, caller)
-            .WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), caller);
+            .WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), TimeProvider.System, caller);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo((long)AppliedEntries);
         await Assert.That(intercepted).IsEqualTo(SingleAppendEntry);
     }

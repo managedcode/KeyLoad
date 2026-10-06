@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
@@ -10,11 +9,13 @@ namespace KeyLoad.Comparisons;
 /// <param name="nativeExecutionOptions">The validated adapter and resource sampling policy.</param>
 /// <param name="progress">The optional bounded textual progress sink.</param>
 /// <param name="nativeProgress">The optional actual native completion observer.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, int offeredRatePerSecond,
     IOptions<OpenLoopExecutionOptions> executionOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     Action<string>? progress = null,
-    Action<OpenLoopProgressV1>? nativeProgress = null)
+    Action<OpenLoopProgressV1>? nativeProgress = null, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const double AccountingSnapshotElapsedSeconds = 1d;
 
     private readonly OpenLoopExecutionPolicy executionPolicy = OpenLoopExecutionOptions.Snapshot(
@@ -54,7 +55,7 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         }
         finally
         {
-            await OpenLoopExecutionCompletion.SettleAsync(execution).ConfigureAwait(false);
+            await OpenLoopExecutionCompletion.SettleAsync(execution, timeProvider: timeProvider).ConfigureAwait(false);
         }
         var failure = OpenLoopFailure.Combine(execution.Primary, execution.CleanupFailures);
         OpenLoopExecutionCompletion.ThrowUnlessMeasuredCancellation(failure, execution.State, execution.CallerCancelled, cancellationToken);
@@ -69,33 +70,33 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         OpenLoopComparisonValidation.ValidateObservedTarget(execution.Worker, execution.Target.Profile);
         var inputs = new ScaledOperationInputs(execution.Corpus, execution.Scenario);
         execution.Sessions.AddRange(await OpenLoopSessionAcquisition.OpenAsync(execution.Target,
-            execution.ExecutionPolicy, cancellationToken).ConfigureAwait(false));
+            execution.ExecutionPolicy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false));
         await ScaledCorpusReadbackVerifier.VerifyAsync(execution.Sessions[FirstElementIndex], execution.Corpus, cancellationToken)
             .ConfigureAwait(false);
         await ScaledComparisonOperationSetup.PrepareAsync(execution.Sessions, inputs, execution.Profile,
             cancellationToken).ConfigureAwait(false);
         await ScaledComparisonOperationSetup.WarmupAsync(execution.Sessions, inputs, execution.Profile,
-            TimeSpan.FromMilliseconds(execution.ExecutionPolicy.OperationDeadlineMilliseconds), cancellationToken).ConfigureAwait(false);
+            TimeSpan.FromMilliseconds(execution.ExecutionPolicy.OperationDeadlineMilliseconds), token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         StartMeasurement(execution);
-        await using var sampler = new ClientResourceSampler(nativeOptions);
+        await using var sampler = new ClientResourceSampler(nativeOptions, provider: timeProvider);
         try
         {
             execution.DrainExpired = await MeasureAsync(execution, inputs, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            execution.MeasurementFinishedTimestamp = Stopwatch.GetTimestamp();
+            execution.MeasurementFinishedTimestamp = timeProvider.GetTimestamp();
         }
         cancellationToken.ThrowIfCancellationRequested();
         await VerifyMutationReadbackAsync(execution, inputs, cancellationToken).ConfigureAwait(false);
         execution.Resources = await sampler.StopAsync().ConfigureAwait(false);
     }
 
-    private static void StartMeasurement(OpenLoopExecutionContext execution)
+    private void StartMeasurement(OpenLoopExecutionContext execution)
     {
-        var started = Stopwatch.GetTimestamp();
-        execution.StartedAt = TimeProvider.System.GetUtcNow();
-        execution.Timeline = new(started, execution.Rate, execution.ExecutionPolicy);
+        var started = timeProvider.GetTimestamp();
+        execution.StartedAt = timeProvider.GetUtcNow();
+        execution.Timeline = new(started, execution.Rate, execution.ExecutionPolicy, timeProvider);
         execution.State = new(execution.Timeline, execution.Profile.PayloadBytes, execution.Rate,
             execution.Scenario);
     }
@@ -118,5 +119,5 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         CancellationToken cancellationToken)
         => OpenLoopWorkLifetime.RunAsync(execution.Scenario, inputs, execution.Sessions, execution.Timeline,
             execution.State ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopMeasurementNotStarted),
-            nativeProgress, cancellationToken);
+            nativeProgress, cancellationToken: cancellationToken, timeProvider: timeProvider);
 }

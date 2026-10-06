@@ -51,7 +51,7 @@ internal static class IsolatedSurrealDbResources
             .WithHttpEndpoint(targetPort: Port, name: Endpoint)
             .WithArgs(ResultText, AddResultText, SurrealBindAddress, SurrealStorageAddress)
             .WithHttpHealthCheck(PathText);
-        if (ClusterContainerUser.Resolve(context.Builder) is { } user)
+        if (ClusterContainerUser.Resolve(context.Builder, TimeProvider.System) is { } user)
         {
             node.WithContainerRuntimeArgs(ContainerUserArgument, user);
         }

@@ -74,6 +74,27 @@ internal static class IsolatedPlanFields
     internal const string ServerResourceQualified = "serverResourceQualified";
     internal const string VectorProfiles = "vectorProfiles";
     internal const string OpenLoopPlan = "openLoopPlan";
+    internal const string OpenLoop = "open-loop";
+    internal const string MatrixPreflightKind = "preflight";
+    internal const string MatrixWorkerKind = "worker";
+    internal const string MatrixProofKind = "proof";
+    internal const string OpenLoopRate = "openLoopRate";
+    internal const string OpenLoopCancellationProof = "openLoopCancellationProof";
+    internal const string Kind = "kind";
+    internal const string MatricesOutput = "database_matrices";
+    internal const string ScalePlan = "scaledPlans";
+    internal const string VectorPlansInput = "vectorPlans";
+    internal const string JobNameEnvironment = "KEYLOAD_COMPARISON_JOB_NAME";
+    internal const string MatrixIdEnvironment = "KEYLOAD_COMPARISON_CELL_ID";
+    internal const string MatrixTargetEnvironment = "Benchmarks__Target";
+    internal const string MatrixKindEnvironment = "KEYLOAD_MATRIX_KIND";
+    internal const string MatrixPlanDirectoryEnvironment = "KEYLOAD_MATRIX_PLAN_DIRECTORY";
+    internal const string MatrixGroupEnvironment = "KEYLOAD_MATRIX_GROUP";
+    internal const string MatrixPlanPathEnvironment = "KEYLOAD_MATRIX_PLAN_PATH";
+    internal const string MatrixScalePathEnvironment = "KEYLOAD_MATRIX_SCALE_PATH";
+    internal const string MatrixVectorPathEnvironment = "KEYLOAD_MATRIX_VECTOR_PATH";
+    internal const string MatrixOpenLoopPathEnvironment = "KEYLOAD_MATRIX_OPEN_LOOP_PATH";
+    internal const string GithubEnvironment = "GITHUB_ENV";
     internal const string MeasurementCells = "measurementCells";
     internal const string OfferedRatePerSecond = "offeredRatePerSecond";
 }

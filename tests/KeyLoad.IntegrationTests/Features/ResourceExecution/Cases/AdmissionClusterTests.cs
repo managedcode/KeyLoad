@@ -14,8 +14,8 @@ internal sealed class AdmissionClusterTests
     public async Task OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds()
     {
         var fixture = new ClusterFixture(new HttpAdmissionLimits { MaxBodyBytes = 1_024, MaxControlBodyBytes = 512 });
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(2));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
         try
         {
             await fixture.InitializeAsync();
@@ -56,8 +56,8 @@ internal sealed class AdmissionClusterTests
     public async Task FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable()
     {
         var fixture = new ClusterFixture(commandBytes: 4_096);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(2));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeoutTimeout.Token);
         try
         {
             await fixture.InitializeAsync();

@@ -77,7 +77,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
 
     public async Task InitializeAsync()
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(StartupSeconds));
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(StartupSeconds), TimeProvider.System);
         try
         {
             await Cluster.DeployAsync(deadline.Token);
@@ -156,7 +156,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
                 return;
             }
         }
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ShutdownSeconds));
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ShutdownSeconds), TimeProvider.System);
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
             () => Cluster.StopAllSilosAsync(deadline.Token), failures);
     }

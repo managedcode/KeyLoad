@@ -30,7 +30,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         try
         {
             observer.Observe(Marker);
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             await Assert.That(observer.HasWriteFailure).IsTrue();
             await Assert.That(await File.ReadAllTextAsync(pending)).IsEqualTo(ProtectedBytes);
             await Assert.That(await File.ReadAllTextAsync(protectedFile)).IsEqualTo(ProtectedBytes);
@@ -39,7 +39,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }
@@ -57,7 +57,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         try
         {
             observer.Observe(Marker);
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             await Assert.That(observer.HasWriteFailure).IsTrue();
             await Assert.That(await File.ReadAllTextAsync(protectedFile)).IsEqualTo(ProtectedBytes);
             await Assert.That(Directory.GetFileSystemEntries(outside.FullName).Length).IsEqualTo(1);
@@ -65,7 +65,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }
@@ -82,7 +82,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         try
         {
             observer.Observe(Marker);
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             await Assert.That(observer.HasWriteFailure).IsTrue();
             await Assert.That(await File.ReadAllTextAsync(protectedFile)).IsEqualTo(ProtectedBytes);
             await Assert.That(new FileInfo(path).LinkTarget).IsEqualTo(protectedFile);
@@ -90,7 +90,7 @@ internal sealed class ComparisonProgressFileSafetyTests
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }

@@ -68,7 +68,7 @@ internal sealed class TimescaleTimeSeriesIntensiveSchemaFailureFixture : IAsyncD
 
     public async ValueTask DisposeAsync()
     {
-        using var cleanup = new CancellationTokenSource(CleanupTimeout);
+        using var cleanup = new CancellationTokenSource(CleanupTimeout, TimeProvider.System);
         ExceptionDispatchInfo? failure = null;
         if (ownsDatabase)
         {

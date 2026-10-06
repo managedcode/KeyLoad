@@ -13,11 +13,13 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="diagnosticOptions">Centrally validated privacy-preserving diagnostic bounds.</param>
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class RedisTarget(string connectionString, string runId, string image,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
-    ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
+    ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
     private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private const string FieldSeparator = ":";
@@ -95,7 +97,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var probeKey = prefix + Guid.NewGuid().ToString(RunIdentityFormat);
         var evidence = await RedisReplicaProof.VerifyAsync(primary: connection, replicaStrings: replicaEndpoints,
             topology: configuredTopology, primaryIdentity: primaryIdentity, probeKey: probeKey,
-            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics);
+            payload: dataset.Documents[FirstElementIndex].Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics, timeProvider: timeProvider);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,

@@ -7,13 +7,15 @@ internal sealed class ReplicaRpcClient
 {
     private readonly ReplicaConfiguration configuration;
     private readonly CancellationToken stoppingToken;
+    private readonly TimeProvider clock;
 
-    internal ReplicaRpcClient(IOptions<ReplicaConfiguration> configurationOptions, CancellationToken stoppingToken)
+    internal ReplicaRpcClient(IOptions<ReplicaConfiguration> configurationOptions, TimeProvider clock, CancellationToken stoppingToken)
     {
         ArgumentNullException.ThrowIfNull(configurationOptions);
         configuration = configurationOptions.Value;
         configuration.Validate();
         this.stoppingToken = stoppingToken;
+        this.clock = clock;
     }
     private IReplicaTransport? transport;
     internal void Attach(IReplicaTransport value)
@@ -30,8 +32,8 @@ internal sealed class ReplicaRpcClient
     {
         var active = Volatile.Read(ref transport) ?? throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaProtocol.NoLeader);
         var payload = EncodeRequest(request, configuration);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken);
-        deadline.CancelAfter(configuration.RpcTimeout);
+        using var timeout = new CancellationTokenSource(configuration.RpcTimeout, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken, timeout.Token);
         try
         {
             var transportStarted = DatabasePhaseTelemetry.Begin();

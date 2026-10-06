@@ -17,7 +17,7 @@ internal sealed class ZoneTreePointCacheOwnerGateHold
             write ? store.Commit((_, _) => Hold()) : store.Read(_ => Hold()));
     }
 
-    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(HoldTimeout);
+    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(HoldTimeout, TimeProvider.System);
 
     internal void Release() => release.TrySetResult();
 
@@ -27,7 +27,7 @@ internal sealed class ZoneTreePointCacheOwnerGateHold
     private bool Hold()
     {
         entered.TrySetResult();
-        release.Task.WaitAsync(HoldTimeout).GetAwaiter().GetResult();
+        release.Task.WaitAsync(HoldTimeout, TimeProvider.System).GetAwaiter().GetResult();
         return true;
     }
 }
@@ -53,7 +53,7 @@ internal sealed class ZoneTreePointCacheOwnerProbe
     internal async Task<ZoneTreePointCacheOwnerObservation> WaitAsync()
     {
         var current = operation ?? throw new InvalidOperationException(MissingObservation);
-        var result = await current.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+        var result = await current.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
         operation = null;
         return result;
     }

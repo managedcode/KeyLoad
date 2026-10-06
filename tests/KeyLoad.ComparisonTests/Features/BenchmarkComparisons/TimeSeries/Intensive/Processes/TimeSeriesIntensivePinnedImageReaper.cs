@@ -19,7 +19,7 @@ internal static class TimeSeriesIntensivePinnedImageReaper
         }
 
         using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(
-            TimeSeriesIntensivePinnedImageProtocol.OperationSeconds));
+            TimeSeriesIntensivePinnedImageProtocol.OperationSeconds), TimeProvider.System);
         try
         {
             await process.WaitForExitAsync(cleanup.Token);

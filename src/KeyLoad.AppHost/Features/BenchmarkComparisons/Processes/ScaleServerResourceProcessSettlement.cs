@@ -8,10 +8,10 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 internal static class ScaleServerResourceProcessSettlement
 {
     internal static async Task SettleAsync(Process process, Task output, Task error, Task exit, Task readers,
-        TimeSpan settlement, Func<int, int, int> sendSignal, Exception primary)
+        TimeSpan settlement, Func<int, int, int> sendSignal, Exception primary, TimeProvider timeProvider)
     {
         var failures = new List<Exception>();
-        await RecordAsync(StopAsync(process, settlement, sendSignal), primary, failures);
+        await RecordAsync(StopAsync(process, settlement, sendSignal, timeProvider), primary, failures);
         await RecordAsync(exit, primary, failures);
         await RecordAsync(output, primary, failures);
         await RecordAsync(error, primary, failures);
@@ -20,7 +20,7 @@ internal static class ScaleServerResourceProcessSettlement
         ThrowFailures(failures);
     }
 
-    private static async Task StopAsync(Process process, TimeSpan settlement, Func<int, int, int> sendSignal)
+    private static async Task StopAsync(Process process, TimeSpan settlement, Func<int, int, int> sendSignal, TimeProvider timeProvider)
     {
         const int TerminationSignal = 15;
         if (process.HasExited)
@@ -33,7 +33,7 @@ internal static class ScaleServerResourceProcessSettlement
         }
         var exited = process.WaitForExitAsync(CancellationToken.None);
         using var timerCancellation = new CancellationTokenSource();
-        var timer = Task.Delay(settlement, timerCancellation.Token);
+        var timer = Task.Delay(settlement, timeProvider, timerCancellation.Token);
         var failures = new List<Exception>();
         await RecordAsync(WaitUntilStoppedAsync(process, exited, timer), failures);
         await RecordAsync(InvokeAsync(timerCancellation.CancelAsync), failures);

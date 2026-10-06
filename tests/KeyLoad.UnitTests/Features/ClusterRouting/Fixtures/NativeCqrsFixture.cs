@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Extensions;
 using ManagedCode.Orleans.Graph.Extensions;
@@ -30,7 +30,7 @@ internal sealed class NativeCqrsClusterFixture : IAsyncInitializer, IAsyncDispos
 
     public async Task InitializeAsync()
     {
-        using var deadline = new CancellationTokenSource(StartupBound);
+        using var deadline = new CancellationTokenSource(StartupBound, TimeProvider.System);
         try
         {
             await Cluster.DeployAsync(deadline.Token);
@@ -56,7 +56,7 @@ internal sealed class NativeCqrsClusterFixture : IAsyncInitializer, IAsyncDispos
             return;
         }
         disposed = true;
-        using var deadline = new CancellationTokenSource(ShutdownBound);
+        using var deadline = new CancellationTokenSource(ShutdownBound, TimeProvider.System);
         await NativeCqrsTestSupport.RunWithCleanupAsync(
             () => Cluster.StopAllSilosAsync(deadline.Token),
             async () => await Cluster.DisposeAsync());
@@ -107,8 +107,8 @@ internal static class NativeCqrsTestSupport
         IAsyncEnumerable<CqrsStreamChunk<NativeCqrsProgress, NativeCqrsResult>> stream,
         CancellationToken cancellationToken = default)
     {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(WaitBound);
+        using var timeoutTimeout = new CancellationTokenSource(WaitBound, TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var chunks = new List<CqrsStreamChunk<NativeCqrsProgress, NativeCqrsResult>>(4);
         await foreach (var chunk in stream.WithBatchSize(NativeCqrsProtocol.BatchSize)
                            .WithCancellation(timeout.Token))
@@ -125,17 +125,17 @@ internal static class NativeCqrsTestSupport
     internal static async Task<NativeCqrsObservationSnapshot> WaitForEventAsync(
         IGrainFactory grainFactory, Guid requestId, string expectedEvent)
     {
-        var started = Stopwatch.GetTimestamp();
+        var started = new TestElapsedClock(TimeProvider.System);
         var reader = grainFactory.GetGrain<INativeCqrsObservationReaderGrain>(requestId);
         while (true)
         {
             var remaining = Remaining(started);
-            var snapshot = await reader.ReadAsync().WaitAsync(remaining);
+            var snapshot = await reader.ReadAsync().WaitAsync(remaining, started.Provider);
             if (snapshot.Events.Contains(expectedEvent, StringComparer.Ordinal))
             {
                 return snapshot;
             }
-            await Task.Delay(PollInterval).WaitAsync(Remaining(started));
+            await Task.Delay(PollInterval, started.Provider).WaitAsync(Remaining(started), started.Provider);
         }
     }
 
@@ -179,9 +179,9 @@ internal static class NativeCqrsTestSupport
         await cleanup();
     }
 
-    internal static TimeSpan Remaining(long started)
+    internal static TimeSpan Remaining(TestElapsedClock started)
     {
-        var remaining = WaitBound - Stopwatch.GetElapsedTime(started);
+        var remaining = WaitBound - started.Elapsed;
         if (remaining <= TimeSpan.Zero)
         {
             throw new TimeoutException(WaitExpired);

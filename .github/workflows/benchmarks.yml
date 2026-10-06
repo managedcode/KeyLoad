@@ -194,7 +194,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   comparison-keyload:
-    name: KeyLoad / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -206,18 +206,20 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       KEYLOAD_COMPARISON_CELL_ID: ${{ matrix.id }}
       KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
-      KEYLOAD_SCALE_PROFILE: ${{ matrix.scaleProfile }}
-      KEYLOAD_VECTOR_PROFILE: ${{ matrix.vectorProfile }}
-      KEYLOAD_OPEN_LOOP_RATE: ${{ matrix.openLoopRate }}
-      KEYLOAD_OPEN_LOOP_CANCELLATION_PROOF: ${{ matrix.openLoopCancellationProof }}
       Benchmarks__Target: ${{ matrix.target }}
-      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
-      Benchmarks__Scenario: ${{ matrix.scenario }}
-      Benchmarks__EvidenceProfile: ${{ matrix.profile }}
-      Benchmarks__VectorProfile: ${{ matrix.vectorProfile }}
+      KEYLOAD_MATRIX_KIND: ${{ matrix.kind }}
     steps: &database-steps
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Download canonical comparison plan
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          name: comparison-plan
+          path: ${{ runner.temp }}/comparison-plan
+      - name: Resolve full matrix row from the canonical plan
+        env:
+          KEYLOAD_MATRIX_PLAN_DIRECTORY: ${{ runner.temp }}/comparison-plan
+        run: node scripts/Features/BenchmarkComparisons/isolated-matrix-entry.mjs
       - name: Prepare database containers
         id: images
         uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellSetup
@@ -249,7 +251,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: ${{ matrix.artifactPrefix }}${{ matrix.id }}
+          name: ${{ matrix.kind == 'preflight' && 'comparison-preflight-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-' || matrix.kind == 'open-loop' && 'comparison-open-loop-worker-' || 'comparison-worker-' }}${{ matrix.id }}
           path: artifacts/comparisons/isolated/workers/${{ matrix.id }}/*
           if-no-files-found: error
           retention-days: 90
@@ -258,9 +260,9 @@ jobs:
         uses: ./.github/workflows/Features/BenchmarkComparisons/IsolatedCellTeardown
         with:
           setup-outcome: ${{ steps.images.outcome }}
-          artifact-name: ${{ matrix.qualificationPrefix }}${{ matrix.id }}
+          artifact-name: ${{ matrix.kind == 'preflight' && 'comparison-preflight-qualification-' || matrix.kind == 'proof' && 'comparison-open-loop-proof-qualification-' || matrix.kind == 'open-loop' && 'comparison-open-loop-case-qualification-' || 'comparison-case-qualification-' }}${{ matrix.id }}
   comparison-postgresql:
-    name: PostgreSQL + pgvector / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -271,7 +273,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-qdrant:
-    name: Qdrant / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -282,7 +284,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-rabbitmq:
-    name: RabbitMQ / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -293,7 +295,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-redis:
-    name: Redis / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -304,7 +306,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-neo4j:
-    name: Neo4j / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -315,7 +317,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-mongodb:
-    name: MongoDB / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -326,7 +328,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-opensearch:
-    name: OpenSearch / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -337,7 +339,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-kurrentdb:
-    name: KurrentDB / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -348,7 +350,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-surrealdb:
-    name: SurrealDB / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -359,7 +361,7 @@ jobs:
     env: *database-environment
     steps: *database-steps
   comparison-helixdb:
-    name: HelixDB / ${{ matrix.label }}
+    name: ${{ matrix.jobName }}
     needs: [comparison-plan, comparison-images]
     runs-on: ubuntu-latest
     timeout-minutes: 150

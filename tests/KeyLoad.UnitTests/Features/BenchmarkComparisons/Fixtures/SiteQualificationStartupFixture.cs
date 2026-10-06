@@ -52,7 +52,7 @@ internal sealed class SiteQualificationStartupFixture : IAsyncDisposable
     {
         if (actualExit is not null)
         {
-            await actualExit.WaitAsync(CleanupBound);
+            await actualExit.WaitAsync(CleanupBound, TimeProvider.System);
         }
         if (link is not null)
         {

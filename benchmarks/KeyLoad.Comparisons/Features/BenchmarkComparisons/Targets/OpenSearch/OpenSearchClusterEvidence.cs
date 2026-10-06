@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -23,11 +25,19 @@ internal sealed record OpenSearchClusterObservation(string Status, string[] Node
 internal static class OpenSearchClusterEvidence
 {
 
+    internal static string BuildHealthPath(string index, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions)
+    {
+        var executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions).Value;
+        return OpenSearchNames.ClusterHealthPath + index + OpenSearchNames.HealthWaitParametersPrefix
+            + executionOptions.OpenSearchHealthWaitTimeoutSeconds.ToString(CultureInfo.InvariantCulture)
+            + OpenSearchNames.HealthWaitParametersSuffix;
+    }
+
     internal static async Task<OpenSearchClusterObservation> ObserveAsync(HttpClient client, string index, int expectedCopies,
-        ComparisonTopology topology, CancellationToken cancellationToken)
+        ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, CancellationToken cancellationToken)
     {
         using var healthResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
-            OpenSearchNames.ClusterHealthPath + index + OpenSearchNames.HealthParameters, null, cancellationToken);
+            BuildHealthPath(index, nativeExecutionOptions), null, cancellationToken);
         using var stateResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
             OpenSearchNames.ClusterStatePath + index, null, cancellationToken);
         using var nodesInfoResponse = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,

@@ -4,6 +4,7 @@ using System.Text.Json;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BackupRestore;
 using Microsoft.Extensions.Configuration;
 
@@ -17,6 +18,7 @@ internal static class NativeCoverageMergeProcess
     private const string CliAssembly = "src/KeyLoad.Cli/bin/Release/net10.0/KeyLoad.Cli.dll";
     private const string MergeScript = "scripts/Features/CodeQuality/functional-coverage.native-merge.ps1";
     private const string CollectCommand = "collect";
+    private const string SettingsOption = "--settings";
     private const string CoverageFormat = "coverage";
     private const string OutputOption = "--output";
     private const string FormatOption = "--output-format";
@@ -27,7 +29,7 @@ internal static class NativeCoverageMergeProcess
     private const string ToolingInputDescriptorName = "tooling-inputs.v1.json";
 
     internal sealed record ToolingOptions(NativeCoverageToolPackage Tool, NativeCoverageExecutionOptions Coverage,
-        TestExecutionOptions Tests, string RepositoryRoot);
+        TestExecutionOptions Tests, string RepositoryRoot, NativeCoverageSettingsSnapshot Settings);
 
     internal sealed record ChildResult(int ExitCode, string StandardOutput, string StandardError,
         bool ExitJoined, bool OutputJoined, bool ErrorJoined, bool Disposed)
@@ -44,7 +46,9 @@ internal static class NativeCoverageMergeProcess
         if (!coverage.IsValid())
         { throw new InvalidOperationException(NativeCoverageExecutionOptions.ValidationMessage); }
         var testOptions = AppHostOptionsRegistration.BindTestExecution(configuration).Value;
-        return new(NativeCoverageToolPackage.Read(), coverage, testOptions, FindRepositoryRoot());
+        var repositoryRoot = FindRepositoryRoot();
+        var settings = NativeCoverageSettingsSnapshot.Capture(repositoryRoot, coverage);
+        return new(NativeCoverageToolPackage.Read(), coverage, testOptions, repositoryRoot, settings);
     }
 
     internal static async Task<ChildResult> CollectCliAsync(ToolingOptions options, IReadOnlyList<string> cliArguments,
@@ -54,6 +58,8 @@ internal static class NativeCoverageMergeProcess
         var start = NativeCoverageMergeChildProcess.CreateStartInfo(DotnetCommand, options.Tests.CleanupOutputCharacters, options.Coverage);
         start.ArgumentList.Add(Path.Combine(options.Tool.PackageRoot, "tools/net8.0/any/dotnet-coverage.dll"));
         start.ArgumentList.Add(CollectCommand);
+        start.ArgumentList.Add(SettingsOption);
+        start.ArgumentList.Add(options.Settings.Path);
         start.ArgumentList.Add(OutputOption);
         start.ArgumentList.Add(reportPath);
         start.ArgumentList.Add(FormatOption);
@@ -64,9 +70,18 @@ internal static class NativeCoverageMergeProcess
         start.ArgumentList.Add(cli);
         foreach (var argument in cliArguments)
         { start.ArgumentList.Add(argument); }
-        var processResult = await NativeCoverageMergeChildProcess.RunAsync(start, options.Tests.OrdinaryTimeout,
-            options.Tests.ProcessSettlementTimeout, options.Tests.CleanupOutputCharacters, cancellationToken).ConfigureAwait(false);
-        var result = ConvertResult(processResult);
+        options.Settings.VerifyUnchanged(options.Coverage);
+        var failures = new List<Exception>();
+        NativeCoverageMergeChildProcess.Result? processResult = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            processResult = await NativeCoverageMergeChildProcess.RunAsync(start, options.Tests.OrdinaryTimeout,
+                options.Tests.ProcessSettlementTimeout, options.Tests.CleanupOutputCharacters, cancellationToken)
+                .ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.Observe(() => options.Settings.VerifyUnchanged(options.Coverage), failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        var result = ConvertResult(processResult ?? throw new InvalidOperationException(StartFailure));
         await AssertSuccessfulChildAsync(result).ConfigureAwait(false);
         var info = new FileInfo(reportPath);
         if (!info.Exists || info.Length <= 0 || info.Length > options.Coverage.MaximumReportBytes || info.LinkTarget is not null)

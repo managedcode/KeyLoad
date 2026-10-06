@@ -45,8 +45,8 @@ internal static class ProductionSourceManifestProcess
         cancellationToken.ThrowIfCancellationRequested();
         var options = executionOptions.Value;
         using var process = new Process { StartInfo = CreateStartInfo(mode, evidenceRoot) };
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(options.OrdinaryTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(options.OrdinaryTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         var started = false;
         ProductionSourceManifestProcessResult? result = null;
@@ -103,7 +103,7 @@ internal static class ProductionSourceManifestProcess
     private static async Task ObserveUntilDeadlineAsync(Task original, List<Exception> failures,
         CancellationToken deadline, CancellationToken caller)
     {
-        var signal = Task.Delay(Timeout.InfiniteTimeSpan, deadline);
+        var signal = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, deadline);
         if (await Task.WhenAny(original, signal).ConfigureAwait(false) == original)
         {
             await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);

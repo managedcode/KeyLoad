@@ -38,7 +38,7 @@ internal sealed class ReplicaFileReadinessFixture : IAsyncDisposable
         var current = readiness ?? throw new InvalidOperationException("Replica readiness was not started.");
         try
         {
-            await current.WaitAsync(TimeSpan.FromSeconds(6));
+            await current.WaitAsync(TimeSpan.FromSeconds(6), TimeProvider.System);
         }
         finally
         {

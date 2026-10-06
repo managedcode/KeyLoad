@@ -50,6 +50,40 @@ internal static class IsolatedDatabaseMatrixAssertions
             .Distinct().Count()).IsEqualTo(1419);
     }
 
+    internal static async Task VerifyWorkflowProjectionAsync(JsonObject actual, JsonObject expected, bool includeOpenLoop)
+    {
+        await Assert.That(JsonNode.DeepEquals(actual, expected)).IsTrue();
+        await Assert.That(actual.Count).IsEqualTo(WorkflowDatabaseGroups.Entries.Length);
+        var rows = actual.SelectMany(static entry => entry.Value![IsolatedPlanFields.Include]!.AsArray()).ToArray();
+        await Assert.That(rows.Length).IsEqualTo(includeOpenLoop ? 2217 : 1419);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "preflight")).IsEqualTo(33);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "worker")).IsEqualTo(1386);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "open-loop")).IsEqualTo(includeOpenLoop ? 792 : 0);
+        await Assert.That(rows.Count(static row => row![IsolatedPlanFields.Kind]!.GetValue<string>() == "proof")).IsEqualTo(includeOpenLoop ? 6 : 0);
+        await Assert.That(rows.Select(static row => row![IsolatedPlanFields.JobName]!.GetValue<string>())
+            .Distinct(StringComparer.Ordinal).Count()).IsEqualTo(rows.Length);
+        await Assert.That(rows.Select(static row => (row![IsolatedPlanFields.Id]!.GetValue<string>(),
+            row[IsolatedPlanFields.Kind]!.GetValue<string>())).Distinct().Count()).IsEqualTo(rows.Length);
+        await VerifyCompactGroupsAsync(actual, includeOpenLoop);
+    }
+
+    private static async Task VerifyCompactGroupsAsync(JsonObject matrices, bool includeOpenLoop)
+    {
+        foreach (var (key, target) in WorkflowDatabaseGroups.Entries)
+        {
+            var rows = matrices[key]![IsolatedPlanFields.Include]!.AsArray();
+            var expectedCount = includeOpenLoop ? 201 : 129;
+            if (includeOpenLoop && key == "keyload")
+            {
+                expectedCount = 207;
+            }
+            await Assert.That(rows.Count).IsEqualTo(expectedCount);
+            await Assert.That(rows.Count <= 256).IsTrue();
+            await Assert.That(rows.All(row => row!.AsObject().Count == 4
+                && row[IsolatedPlanFields.Target]!.GetValue<string>() == target)).IsTrue();
+        }
+    }
+
     private static async Task VerifyDatabaseAsync(JsonArray rows, string target, JsonArray cells)
     {
         await Assert.That(rows.Count).IsEqualTo(129);

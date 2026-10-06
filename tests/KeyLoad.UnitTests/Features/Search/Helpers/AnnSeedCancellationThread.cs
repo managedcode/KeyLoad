@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using KeyLoad.Core;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -11,6 +11,7 @@ internal sealed class AnnSeedCancellationThread
     private const string JoinTimeoutMessage = "The ANN seed cancellation observer exceeded its join bound.";
     internal const int TimeoutSeconds = 15;
 
+    private readonly TimeProvider clock;
     private readonly ReadExecutionBudget budget;
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim started;
@@ -21,8 +22,9 @@ internal sealed class AnnSeedCancellationThread
     private bool threadStarted;
 
     internal AnnSeedCancellationThread(ReadExecutionBudget budget, CancellationTokenSource cancellation,
-        ManualResetEventSlim started)
+        ManualResetEventSlim started, TimeProvider? timeProvider = null)
     {
+        clock = timeProvider ?? TimeProvider.System;
         this.budget = budget;
         this.cancellation = cancellation;
         this.started = started;
@@ -77,7 +79,7 @@ internal sealed class AnnSeedCancellationThread
 
     private void WaitForChargeAndCancel()
     {
-        var observedAt = Stopwatch.GetTimestamp();
+        var observedAt = new TestElapsedClock(clock);
         while (true)
         {
             var readBytes = budget.ReadBytes;
@@ -91,11 +93,11 @@ internal sealed class AnnSeedCancellationThread
             {
                 return;
             }
-            if (TimeProvider.System.GetElapsedTime(observedAt) >= TimeSpan.FromSeconds(TimeoutSeconds))
+            if (observedAt.Elapsed >= TimeSpan.FromSeconds(TimeoutSeconds))
             {
                 throw new TimeoutException(ObservationTimeoutMessage);
             }
-            Thread.Sleep(1);
+            Task.Delay(TimeSpan.FromMilliseconds(1), clock).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 

@@ -133,8 +133,8 @@ internal static class MongoDiagnosticProcess
         {
             throw new InvalidOperationException(Failure);
         }
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var output = ReadAsync(process.StandardOutput, deadline.Token);
         var error = ReadAsync(process.StandardError, deadline.Token);
         Exception? primaryFailure = null;
@@ -174,7 +174,7 @@ internal static class MongoDiagnosticProcess
         var failures = new List<Exception>();
         await CollectAsync(deadline.CancelAsync(), failures);
         await CollectAsync(ReapAsync(process), failures);
-        using var streams = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var streams = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
         try
         {
             await CollectAsync(output.WaitAsync(streams.Token), failures);
@@ -229,7 +229,7 @@ internal static class MongoDiagnosticProcess
         }
         catch (InvalidOperationException) when (process.HasExited) { }
         catch (Win32Exception) when (process.HasExited) { }
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
         await process.WaitForExitAsync(cleanup.Token);
     }
 

@@ -1,6 +1,7 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.StorageRecovery;
+using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -16,13 +17,13 @@ internal static class TestSuiteApplication
         const int BoundaryValue = 1;
         const string MessageText = "Aspire test execution or cleanup failed.";
 
+        var timeProvider = app.Services.GetRequiredService<TimeProvider>();
         var policy = app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value;
         var nativeCoverageCleanup = settings.NativeCoverageRf3 is null
             ? null : app.Services.GetRequiredService<NativeCoverageRf3Cleanup>();
         var failures = new List<Exception>();
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
+        using var deadline = new AppHostDeadline(settings.Timeout, timeProvider,
             app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
-        deadline.CancelAfter(settings.Timeout);
         using var outputLifetime = new CancellationTokenSource();
         var output = ForwardOutputAsync(app, settings, outputLifetime.Token);
         var execution = ExecuteAsync(app, settings.ResourceName, deadline.Token);
@@ -35,12 +36,12 @@ internal static class TestSuiteApplication
             if (settings.NativeCoverageRf3 is null)
             {
                 await CleanupOrdinaryAsync(app, settings, policy, nativeCoverageCleanup, outputLifetime,
-                    output, failures).ConfigureAwait(false);
+                    output, failures, timeProvider).ConfigureAwait(false);
             }
             else
             {
                 await CleanupNativeCoverageAsync(app, policy, nativeCoverageCleanup!, outputLifetime,
-                    output, failures).ConfigureAwait(false);
+                    output, failures, timeProvider).ConfigureAwait(false);
             }
         }
         if (failures.Count == SingleFailureCount)
@@ -56,13 +57,13 @@ internal static class TestSuiteApplication
 
     private static async Task CleanupOrdinaryAsync(DistributedApplication app, TestSuiteSettings settings,
         TestExecutionOptions policy, NativeCoverageRf3Cleanup? nativeCoverageCleanup,
-        CancellationTokenSource outputLifetime, Task output, List<Exception> failures)
+        CancellationTokenSource outputLifetime, Task output, List<Exception> failures, TimeProvider timeProvider)
     {
-        using var cleanup = new CancellationTokenSource(policy.ApplicationCleanupTimeout);
+        using var cleanup = new CancellationTokenSource(policy.ApplicationCleanupTimeout, timeProvider);
         await CollectAsync(() => app.StopAsync(cleanup.Token), failures).ConfigureAwait(false);
         if (settings.LocalRf3ImageEnabled)
         {
-            using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout);
+            using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout, timeProvider);
             await CollectAsync(() => app.Services.GetRequiredService<LocalRf3ImageCleanup>()
                 .CleanupAsync(imageCleanup.Token), failures).ConfigureAwait(false);
         }
@@ -71,7 +72,7 @@ internal static class TestSuiteApplication
         await CollectAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (nativeCoverageCleanup is not null)
         {
-            using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout);
+            using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout, timeProvider);
             await CollectAsync(() => nativeCoverageCleanup.CleanupAsync(imageCleanup.Token), failures)
                 .ConfigureAwait(false);
         }
@@ -79,15 +80,14 @@ internal static class TestSuiteApplication
 
     private static async Task CleanupNativeCoverageAsync(DistributedApplication app, TestExecutionOptions policy,
         NativeCoverageRf3Cleanup nativeCoverageCleanup, CancellationTokenSource outputLifetime, Task output,
-        List<Exception> failures)
+        List<Exception> failures, TimeProvider timeProvider)
     {
-        using var deadline = new NativeCoverageCleanupDeadline(policy.ApplicationCleanupTimeout);
+        using var deadline = new NativeCoverageCleanupDeadline(policy.ApplicationCleanupTimeout, timeProvider);
         await deadline.CollectAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await deadline.CollectAsync(outputLifetime.CancelAsync, failures).ConfigureAwait(false);
         await deadline.CollectAsync(() => output, failures).ConfigureAwait(false);
         await deadline.CollectAsync(() => app.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        using var imageCleanup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
-        imageCleanup.CancelAfter(policy.ImageCleanupTimeout);
+        using var imageCleanup = new AppHostDeadline(policy.ImageCleanupTimeout, timeProvider, deadline.Token);
         await deadline.CollectAsync(() => nativeCoverageCleanup.CleanupAsync(imageCleanup.Token), failures)
             .ConfigureAwait(false);
     }

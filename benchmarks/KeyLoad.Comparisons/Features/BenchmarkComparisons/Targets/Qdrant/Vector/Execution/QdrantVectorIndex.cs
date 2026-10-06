@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
@@ -6,28 +5,27 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class QdrantVectorIndex
 {
-    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient client, HttpClient[] nodes, string collection,
-        VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
+    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient client, HttpClient[] nodes, string collection, VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);
         token = deadline.Token;
         var path = QdrantVectorProtocol.CollectionPrefix + collection;
-        var watch = Stopwatch.StartNew();
+        var watch = new ComparisonElapsedMeasurement(timeProvider);
         if (profile.IndexKind == VectorIndexKind.Hnsw)
         {
             foreach (var field in new[] { QdrantVectorProtocol.Filtered, QdrantVectorProtocol.Mixed })
             {
                 using var payload = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, path + QdrantVectorProtocol.PayloadIndexPath,
-                    new { field_name = field, field_schema = QdrantVectorProtocol.BooleanIndexType }, executionOptions, token);
+                    new { field_name = field, field_schema = QdrantVectorProtocol.BooleanIndexType }, executionOptions, token: token, timeProvider: timeProvider);
             }
             using var start = await QdrantVectorHttp.SendAsync(client, HttpMethod.Patch, path, new
             {
                 hnsw_config = new { m = QdrantVectorProtocol.HnswConnections, ef_construct = QdrantVectorProtocol.HnswBreadth, full_scan_threshold = QdrantVectorProtocol.DisabledIndex },
                 optimizers_config = new { indexing_threshold = QdrantVectorProtocol.MinimumIndexThreshold }
-            }, executionOptions, token);
+            }, executionOptions, token: token, timeProvider: timeProvider);
         }
-        var definition = await AwaitReadyAsync(nodes, path, profile, executionOptions, token);
+        var definition = await AwaitReadyAsync(nodes, path, profile, executionOptions, token: token, timeProvider: timeProvider);
         watch.Stop();
         var parameters = new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -46,10 +44,9 @@ internal static class QdrantVectorIndex
             profile.IndexKind == VectorIndexKind.Exact ? QdrantVectorProtocol.EmptyCount : watch.Elapsed.TotalMilliseconds);
     }
 
-    private static async Task<string> AwaitReadyAsync(HttpClient[] nodes, string path, VectorComparisonProfile profile,
-        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
+    private static async Task<string> AwaitReadyAsync(HttpClient[] nodes, string path, VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(executionOptions.Value.IndexBuildTimeout);
         var observations = new JsonElement[nodes.Length];
         while (true)
@@ -57,7 +54,7 @@ internal static class QdrantVectorIndex
             var ready = true;
             for (var i = QdrantVectorProtocol.FirstElementIndex; i < nodes.Length; i++)
             {
-                using var response = await QdrantVectorHttp.SendAsync(nodes[i], HttpMethod.Get, path, null, executionOptions, deadline.Token);
+                using var response = await QdrantVectorHttp.SendAsync(nodes[i], HttpMethod.Get, path, null, executionOptions, token: deadline.Token, timeProvider: timeProvider);
                 var result = response.RootElement.GetProperty(QdrantVectorProtocol.Result);
                 observations[i] = result.Clone();
                 ready &= QdrantVectorIndexValidation.Ready(result, profile);
@@ -66,7 +63,7 @@ internal static class QdrantVectorIndex
             {
                 return JsonSerializer.Serialize(observations);
             }
-            await Task.Delay(executionOptions.Value.IndexPollInterval, deadline.Token);
+            await Task.Delay(executionOptions.Value.IndexPollInterval, timeProvider, deadline.Token);
         }
     }
 }

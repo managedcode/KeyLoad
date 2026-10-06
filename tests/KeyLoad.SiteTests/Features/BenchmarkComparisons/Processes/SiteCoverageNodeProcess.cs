@@ -15,8 +15,8 @@ internal static class SiteCoverageNodeProcess
             throw new InvalidOperationException(SiteCoverageTokens.NodeVersionFailure);
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.NodeTimeoutMilliseconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var standardOutput = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded,
             deadline.Token);
         var standardError = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded,

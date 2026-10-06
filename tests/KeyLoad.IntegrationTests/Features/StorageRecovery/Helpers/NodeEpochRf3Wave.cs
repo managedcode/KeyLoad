@@ -35,8 +35,8 @@ internal sealed class NodeEpochRf3Wave : IAsyncDisposable
         DistributedApplication? application = null;
         try
         {
-            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            deadline.CancelAfter(NodeEpochRf3Protocol.WaveDeadline);
+            using var deadlineTimeout = new CancellationTokenSource(NodeEpochRf3Protocol.WaveDeadline, TimeProvider.System);
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
             var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args.ToArray(), deadline.Token);
             ConfigureLogging(builder);
             var containerNames = ContainerNames(builder);
@@ -80,8 +80,8 @@ internal sealed class NodeEpochRf3Wave : IAsyncDisposable
         var owned = app;
         if (owned is null)
         { return; }
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(NodeEpochRf3Protocol.CleanupDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(NodeEpochRf3Protocol.CleanupDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(
@@ -105,7 +105,7 @@ internal sealed class NodeEpochRf3Wave : IAsyncDisposable
         var failures = new List<Exception>();
         if (application is null)
         { return failures; }
-        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.CleanupDeadline);
+        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => application.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(
             () => application.DisposeAsync().AsTask().WaitAsync(deadline.Token), failures).ConfigureAwait(false);

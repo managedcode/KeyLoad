@@ -12,7 +12,7 @@ internal sealed class IsolatedGitHubCurrentJobTests
         var environmentFile = IsolatedGitHubNativeProtocol.Required(IsolatedGitHubNativeProtocol.EnvironmentFile);
         var before = await File.ReadAllTextAsync(environmentFile, TestContext.Current!.Execution.CancellationToken);
         var result = await IsolatedGitHubNativeProcess.RunAsync(TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(result.ExitCode).IsEqualTo(0);
+        await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         await Assert.That(result.Output).IsEmpty();
         await Assert.That(result.Error).IsEmpty();
         using var jobDocument = JsonDocument.Parse(await File.ReadAllBytesAsync(

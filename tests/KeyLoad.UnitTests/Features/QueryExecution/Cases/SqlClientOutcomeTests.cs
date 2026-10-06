@@ -89,7 +89,7 @@ internal sealed class SqlClientOutcomeTests
             context.Response.StatusCode = first ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status200OK;
             await context.Response.WriteAsync(first ? NullReply : SuccessReply, context.RequestAborted);
         });
-        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
         var client = new KeyLoadClient(server.Client, ApiKey, UnitClientOptions.Execution());
         var partition = new PartitionRef(Tenant, Database, Domain, Partition);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)

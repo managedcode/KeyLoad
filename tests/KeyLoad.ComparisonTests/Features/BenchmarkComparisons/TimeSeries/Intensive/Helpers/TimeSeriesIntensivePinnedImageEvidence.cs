@@ -61,7 +61,7 @@ internal sealed class TimeSeriesIntensivePinnedImageEvidence(string root)
             throw new InvalidDataException(TimeSeriesIntensivePinnedImageProtocol.EvidenceInvalid);
         }
 
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(TimeSeriesIntensivePinnedImageProtocol.OperationSeconds));
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(TimeSeriesIntensivePinnedImageProtocol.OperationSeconds), TimeProvider.System);
         await using var stream = new FileStream(Path.Combine(root, name), FileMode.CreateNew, FileAccess.Write,
             FileShare.None, TimeSeriesIntensivePinnedImageProtocol.BufferBytes, FileOptions.Asynchronous);
         await stream.WriteAsync(bytes, deadline.Token);

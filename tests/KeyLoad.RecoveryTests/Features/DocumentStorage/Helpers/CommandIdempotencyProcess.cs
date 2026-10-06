@@ -14,8 +14,8 @@ internal static class CommandIdempotencyProcess
 
     internal static async Task RunAsync(string root, CancellationToken callerToken)
     {
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         CommandIdempotencyProcessChild? active = null;
         Exception? primary = null;
         try

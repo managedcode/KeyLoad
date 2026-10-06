@@ -25,8 +25,8 @@ internal sealed class EventProjectionProcessRecoveryTests
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         Process? process = null;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -47,7 +47,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
         }
     }

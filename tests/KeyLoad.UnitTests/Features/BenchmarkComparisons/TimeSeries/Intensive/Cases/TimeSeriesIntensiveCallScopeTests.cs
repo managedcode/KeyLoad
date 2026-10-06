@@ -23,11 +23,11 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
     [Test]
     public async Task AcTsi004OriginalTaskOwnDeadlineIsDistinctFromCallerCancellation()
     {
-        using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        lifetime.CancelAfter(TestLifetime);
+        using var lifetimeTimeout = new CancellationTokenSource(TestLifetime, TimeProvider.System);
+        using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, lifetimeTimeout.Token);
         using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), lifetime.Token);
         call.Start();
-        var original = Task.Delay(Timeout.InfiniteTimeSpan, call.Token);
+        var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, call.Token);
         var observed = await ObserveAsync(original, call);
         await Assert.That(original.IsCanceled).IsTrue();
         await Assert.That(lifetime.IsCancellationRequested).IsFalse();
@@ -42,7 +42,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
         using var cell = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         using var call = new TimeSeriesIntensiveCallScope(UnitBenchmarkOptions.Native(), cell.Token);
         call.Start();
-        var original = Task.Delay(Timeout.InfiniteTimeSpan, call.Token);
+        var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, call.Token);
         await cell.CancelAsync();
         var observed = await ObserveAsync(original, call);
         await Assert.That(original.IsCanceled).IsTrue();
@@ -70,7 +70,7 @@ internal sealed class TimeSeriesIntensiveCallScopeTests
         await Assert.That(call.AcceptInvocation()).IsTrue();
         await cell.CancelAsync();
         call.Start();
-        var original = Task.Delay(Timeout.InfiniteTimeSpan, call.Token);
+        var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, call.Token);
         var observed = await ObserveAsync(original, call);
         await Assert.That(original.IsCanceled).IsTrue();
         await Assert.That(call.Completion).IsEqualTo(TimeSeriesIntensiveOutcome.Cancelled);

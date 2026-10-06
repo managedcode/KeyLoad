@@ -85,7 +85,7 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
         if (owned is null)
         { return; }
         var before = failures.Count;
-        using var deadline = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline);
+        using var deadline = new CancellationTokenSource(TwoRf3MembershipProtocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => owned.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         if (failures.Count == before)

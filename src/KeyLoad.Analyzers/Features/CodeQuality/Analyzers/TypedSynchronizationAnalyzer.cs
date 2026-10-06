@@ -43,6 +43,9 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
             startContext.RegisterOperationAction(
                 operationContext => AnalyzeInvocation(operationContext, monitorType, lockType, grainType),
                 Microsoft.CodeAnalysis.OperationKind.Invocation);
+            startContext.RegisterOperationAction(
+                operationContext => AnalyzeMethodReference(operationContext, monitorType, lockType, grainType),
+                Microsoft.CodeAnalysis.OperationKind.MethodReference);
         });
     }
 
@@ -76,7 +79,23 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
         INamedTypeSymbol? lockType,
         INamedTypeSymbol? grainType)
     {
-        var method = ((IInvocationOperation)context.Operation).TargetMethod;
+        AnalyzeMethod(context, ((IInvocationOperation)context.Operation).TargetMethod, monitorType, lockType, grainType);
+    }
+
+    private static void AnalyzeMethodReference(
+        OperationAnalysisContext context,
+        INamedTypeSymbol? monitorType,
+        INamedTypeSymbol? lockType,
+        INamedTypeSymbol? grainType) =>
+        AnalyzeMethod(context, ((IMethodReferenceOperation)context.Operation).Method, monitorType, lockType, grainType);
+
+    private static void AnalyzeMethod(
+        OperationAnalysisContext context,
+        IMethodSymbol method,
+        INamedTypeSymbol? monitorType,
+        INamedTypeSymbol? lockType,
+        INamedTypeSymbol? grainType)
+    {
         var isMonitor = monitorType is not null &&
             SymbolEqualityComparer.Default.Equals(method.ContainingType, monitorType);
         var isGrainLock = lockType is not null &&

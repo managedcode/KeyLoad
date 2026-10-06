@@ -5,9 +5,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name = "http">Owned authenticated native HTTP client.</param>
 /// <param name = "runId">Unique corpus scope.</param>
 /// <param name = "executionOptions">The required validated operational limits.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 /// <param name = "image">Immutable native server image.</param>
-public sealed class SurrealDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonTarget
+public sealed class SurrealDbTarget(HttpClient http, string runId, string image, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string OnePersistentRocksDBNativeNode = "one persistent RocksDB native node";
     private const string SingleNativeCommittedWriteNotFaultQualified = "single native committed write; not fault-qualified";
     private const string CommittedPrimaryNativeDirectedGraphAndExactCosine = "committed primary; native directed graph and exact cosine KNN";
@@ -46,24 +48,24 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         ArgumentNullException.ThrowIfNull(dataset);
         Profile = Profile with
         {
-            Version = await SurrealDbServer.VerifyAsync(http, Policy, cancellationToken).ConfigureAwait(false)
+            Version = await SurrealDbServer.VerifyAsync(http, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false)
         };
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
         topK = dataset.Settings.TopK;
         ownsData = true;
-        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), Policy, cancellationToken).ConfigureAwait(false);
-        await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, cancellationToken).ConfigureAwait(false);
+        await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeDEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormat, table, edge), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+        await SurrealDbReadbackIndex.CreateAsync(http, table, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         foreach (var batch in dataset.Documents.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(document => SurrealDbDocumentSql.Create(table, document)));
-            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
+            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
         foreach (var batch in dataset.Edges.Chunk(Policy.WriteBatchCapacity))
         {
             var sql = string.Join(SqlStatementSeparator, batch.Select(link => string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeRELATEFormat, table, SurrealDbDocumentSql.Key(link.From), edge, SurrealDbDocumentSql.Key(link.Id), table, SurrealDbDocumentSql.Key(link.To))));
-            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken).ConfigureAwait(false);
+            await SurrealDbSqlTransport.ExecuteAsync(http, sql, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         }
     }
 
@@ -71,7 +73,7 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
     public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<IComparisonSession>(new SurrealDbSession(http, table, edge, count, depth, topK, execution));
+        return Task.FromResult<IComparisonSession>(new SurrealDbSession(http, table, edge, count, depth, topK, execution, provider: timeProvider));
     }
 
     /// <inheritdoc/>
@@ -81,8 +83,8 @@ public sealed class SurrealDbTarget(HttpClient http, string runId, string image,
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout);
-                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVETABLEREMOVETABLEFormat, edge, table), Policy, timeout.Token).ConfigureAwait(false);
+                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
+                await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeREMOVETABLEREMOVETABLEFormat, edge, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

@@ -133,7 +133,6 @@ internal static class MongoSchema
     public const int PrimaryNodeCount = 1;
     public const int SecondaryNodeCount = 2;
     public const int HealthyMemberValue = 1;
-    public const int ProbePollMilliseconds = 100;
 
     public static WriteConcern MajorityJournalWriteConcern => WriteConcern.WMajority.With(journal: true);
 

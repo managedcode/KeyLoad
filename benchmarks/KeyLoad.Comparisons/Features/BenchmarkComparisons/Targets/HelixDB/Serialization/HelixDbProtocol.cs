@@ -8,9 +8,9 @@ internal static class HelixDbProtocol
 {
     private const string HelixDbRequestFailed = "HelixDbRequestFailed:";
     private const string UniqueConstraintViolation = "unique_constraint_violation";
-    internal static async Task<JsonDocument> QueryAsync(HttpClient http, JsonObject root, bool write, NativeComparisonExecutionOptions policy, CancellationToken token, bool create = false)
+    internal static async Task<JsonDocument> QueryAsync(HttpClient http, JsonObject root, bool write, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token, bool create = false)
     {
-        using var operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var operationDeadline = new ComparisonCancellationSource(timeProvider, token);
         operationDeadline.CancelAfter(policy.OperationTimeout);
         token = operationDeadline.Token;
         using var request = new HttpRequestMessage(HttpMethod.Post, HelixDbNativeTokens.TokenV2Query)

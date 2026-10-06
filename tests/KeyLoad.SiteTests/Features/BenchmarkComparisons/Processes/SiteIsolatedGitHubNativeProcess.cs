@@ -23,8 +23,8 @@ internal static class SiteIsolatedGitHubNativeProcess
         }
         lease?.MarkStarted(process);
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(bound);
+        using var deadlineTimeout = new CancellationTokenSource(bound, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var stdout = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardOutput,
             SiteIsolatedGitHubProcessOutput.MaximumOutputCharacters, deadline.Token);
         var stderr = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardError,

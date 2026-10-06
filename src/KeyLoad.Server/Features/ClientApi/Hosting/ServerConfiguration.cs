@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using KeyLoad.Core;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
 using KeyLoad.Security;
@@ -29,10 +30,14 @@ internal static class ServerConfiguration
         Register(builder.Services);
         McpServerComposition.Register(builder);
         var app = builder.Build();
-        app.Services.GetRequiredService<ServerRuntimeOptions>().ValidateBeforePhysicalOwnership();
+        var runtime = app.Services.GetRequiredService<ServerRuntimeOptions>();
+        runtime.ValidateBeforePhysicalOwnership();
+        var phases = runtime.DatabasePhaseExecution.Value;
+        DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
+            app.Services.GetRequiredService<TimeProvider>());
         app.UseMiddleware<AdminHttpMetricsMiddleware>();
         app.Use(next => new ServerErrorMiddleware(next,
-            app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>()).InvokeAsync);
+            app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
         app.Use(next => new DatabaseIdentityMiddleware(next).InvokeAsync);
         app.MapDefaultEndpoints();
         ReplicaDiscoveryEndpoints.Map(app);

@@ -15,25 +15,18 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
     private readonly CancellationTokenSource stopping = new();
     private Task? shutdown;
     private readonly RequestProbeExecutionOptions settings;
+    private readonly TimeProvider clock;
 
-    private RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
-        string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions)
+    internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
+        string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
     {
         replica = replicaOptions.Value;
         this.applicationLifetime = applicationLifetime;
         this.siloAddress = siloAddress;
         this.files = files;
         settings = executionOptions.Value;
+        this.clock = clock ?? TimeProvider.System;
         lifecycle = new(executionOptions);
-    }
-
-    internal static RequestCqrsProbeObserver Create(RequestCqrsProbeOptions options,
-        IOptions<ReplicaConfiguration> replicaOptions, ILocalSiloDetails localSilo, IHostApplicationLifetime applicationLifetime,
-        IOptions<RequestProbeExecutionOptions> executionOptions)
-    {
-        var address = localSilo.SiloAddress.ToParsableString();
-        var files = RequestCqrsProbeFiles.Open(options, replicaOptions, executionOptions);
-        return new(files, replicaOptions, address, applicationLifetime, executionOptions);
     }
 
     public ValueTask ObserveIncompatibleAsync(string voterId, ReplicaDiscoveryObservation observation,
@@ -151,7 +144,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
 
         var holdTimeout = settings.HoldTimeout;
         var pollInterval = settings.PollInterval;
-        using var ceiling = new CancellationTokenSource(holdTimeout);
+        using var ceiling = new CancellationTokenSource(holdTimeout, clock);
         using var hostStop = CancellationTokenSource.CreateLinkedTokenSource(applicationLifetime.ApplicationStopping, stopping.Token);
         using var request = CancellationTokenSource.CreateLinkedTokenSource(requestCancellation, hostStop.Token);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(request.Token, ceiling.Token);
@@ -171,7 +164,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
                     files.WriteMarker(CreateMarker(claim, phase, RequestCqrsProbeOutcome.Released));
                     return;
                 }
-                await Task.Delay(pollInterval, linked.Token).ConfigureAwait(true);
+                await Task.Delay(pollInterval, clock, linked.Token).ConfigureAwait(true);
             }
         }
         catch (OperationCanceledException cancellation) when (linked.IsCancellationRequested)

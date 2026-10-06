@@ -7,11 +7,11 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <summary>Runs a single selected native workload and emits its exact source/run/job envelope.</summary>
 internal static class IsolatedHostApplication
 {
-    internal static async Task<int> RunAsync(IConfiguration configuration, CancellationToken cancellationToken)
+    internal static async Task<int> RunAsync(IConfiguration configuration, CancellationToken cancellationToken, TimeProvider? provider = null)
     {
         try
         {
-            return await RunSelectedAsync(configuration, cancellationToken);
+            return await RunSelectedAsync(configuration, provider ?? TimeProvider.System, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -25,7 +25,7 @@ internal static class IsolatedHostApplication
         }
     }
 
-    private static async Task<int> RunSelectedAsync(IConfiguration configuration, CancellationToken cancellationToken)
+    private static async Task<int> RunSelectedAsync(IConfiguration configuration, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         try
         {
@@ -47,7 +47,7 @@ internal static class IsolatedHostApplication
                 NativeComparisonExecutionRegistration.ReadIsolatedAdmission(configuration),
                 NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
                 NativeComparisonExecutionRegistration.ReadClient(configuration),
-                NativeComparisonExecutionRegistration.ReadTranslation(configuration), openLoop, cancellationToken);
+                NativeComparisonExecutionRegistration.ReadTranslation(configuration), openLoop, timeProvider, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -71,9 +71,9 @@ internal static class IsolatedHostApplication
         Microsoft.Extensions.Options.IOptions<ComparisonLifecycleOptions> lifecycleOptions,
         Microsoft.Extensions.Options.IOptions<KeyLoad.Client.KeyLoadClientExecutionOptions> clientOptions,
         Microsoft.Extensions.Options.IOptions<KeyLoad.Client.QueryTranslationOptions> translationOptions,
-        IsolatedOpenLoopSettings? openLoop, CancellationToken cancellationToken)
+        IsolatedOpenLoopSettings? openLoop, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        await using var owner = new IsolatedHostTargetOwner(policy, diagnosticOptions, serializationOptions, admissionOptions, lifecycleOptions, clientOptions, translationOptions);
+        await using var owner = new IsolatedHostTargetOwner(policy, diagnosticOptions, serializationOptions, admissionOptions, lifecycleOptions, clientOptions, translationOptions, timeProvider);
         if (openLoop is not null)
         {
             return await IsolatedOpenLoopHostApplication.RunAsync(owner, settings, openLoop, cancellationToken);
@@ -85,8 +85,8 @@ internal static class IsolatedHostApplication
 
         var target = owner.Create(settings);
         var runner = settings.Selection.ScaledProfile is { } scaledProfile
-            ? ComparisonRunner.ForScaled(scaledProfile, policy, Console.WriteLine)
-            : new ComparisonRunner(settings.Selection.CreateExecutionOptions(), policy, Console.WriteLine);
+            ? ComparisonRunner.ForScaled(scaledProfile, policy, Console.WriteLine, timeProvider)
+            : new ComparisonRunner(settings.Selection.CreateExecutionOptions(), policy, Console.WriteLine, timeProvider);
         var report = await runner.RunAsync([target], settings.Worker.SourceRevision, cancellationToken,
             settings.Storage, settings.Selection.Scenario);
         report = report with { Provenance = settings.Identity.Provenance, LoadGeneratorImage = settings.Identity.LoadGeneratorImage };

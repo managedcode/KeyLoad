@@ -162,7 +162,7 @@ internal static class GraphPathRf3LeaderLoss
     private static async Task RestoreNodeAsync(ClusterFixture fixture, string node,
         KeyLoadClient[] administrators, List<Exception> failures)
     {
-        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, recovery.Token), failures)
             .ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node,

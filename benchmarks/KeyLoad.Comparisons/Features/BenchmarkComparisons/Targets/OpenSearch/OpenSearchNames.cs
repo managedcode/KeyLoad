@@ -63,7 +63,8 @@ internal static class OpenSearchNames
     internal const string RealtimeQuery = "?realtime=true";
     internal const string ShardZero = "0";
     internal const string DeleteIndexSuffix = "";
-    internal const string HealthParameters = "?wait_for_status=green&wait_for_active_shards=all&timeout=60s&level=shards";
+    internal const string HealthWaitParametersPrefix = "?wait_for_status=green&wait_for_active_shards=all&timeout=";
+    internal const string HealthWaitParametersSuffix = "s&level=shards";
     internal const string Green = "green";
     internal const string Started = "STARTED";
     internal const string RequestDurability = "request";

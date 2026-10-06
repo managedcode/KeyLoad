@@ -33,7 +33,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
         var completion = AspireResourceCompletion.WaitForExitAsync(fixture.Application, fixture.Runner.Name, deadline.Token);
         try
         {
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(0);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(0);
             await fixture.PublishAsync(fixture.Leaf, KnownResourceStates.Exited, 137).WaitAsync(deadline.Token);
             await Assert.That(await completion).IsEqualTo(0);
         }
@@ -52,7 +52,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
         try
         {
             await fixture.PublishAsync(fixture.Leaf, KnownResourceStates.Exited, 137).WaitAsync(deadline.Token);
-            var error = await Assert.ThrowsAsync<DistributedApplicationException>(() => completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+            var error = await Assert.ThrowsAsync<DistributedApplicationException>(() => completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token));
             await Assert.That(error).IsNotNull();
             await Assert.That(error!.Message).Contains(fixture.Leaf.Name);
             await Assert.That(error.Message).Contains(KnownResourceStates.Exited);
@@ -76,7 +76,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
             var runnerPublication = fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, 0);
             var laterFault = fixture.PublishAsync(fixture.Leaf, KnownResourceStates.Exited, 137);
             await Task.WhenAll(runnerPublication, laterFault).WaitAsync(deadline.Token);
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(0);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(0);
         }
         finally
         {
@@ -94,7 +94,7 @@ internal sealed class AspireFailureCompletionBoundaryTests
         {
             await fixture.PublishAsync(fixture.Configuration, KnownResourceStates.RuntimeUnhealthy).WaitAsync(deadline.Token);
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, 0).WaitAsync(deadline.Token);
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(0);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(0);
         }
         finally
         {

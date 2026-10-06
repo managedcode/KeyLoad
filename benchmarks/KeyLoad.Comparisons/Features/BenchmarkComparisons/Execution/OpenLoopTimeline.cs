@@ -1,41 +1,40 @@
-using System.Diagnostics;
 
 namespace KeyLoad.Comparisons;
 
 internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RatePerSecond,
-    OpenLoopExecutionPolicy ExecutionPolicy)
+    OpenLoopExecutionPolicy ExecutionPolicy, TimeProvider TimeProvider)
 {
     private const int MinimumSpinThresholdTicks = 1;
 
     internal long DueTimestamp(int index)
-        => checked(OriginTimestamp + OpenLoopRateContract.ToStopwatchTicks(
-            OpenLoopRateContract.DueOffsetNanoseconds(index, RatePerSecond)));
+        => checked(OriginTimestamp + OpenLoopRateContract.ToTimestampTicks(
+            OpenLoopRateContract.DueOffsetNanoseconds(index, RatePerSecond), timeProvider: TimeProvider));
 
     internal long DueOffsetNanoseconds(int index)
         => OpenLoopRateContract.DueOffsetNanoseconds(index, RatePerSecond);
 
     internal long OperationDeadline(int index)
-        => checked(DueTimestamp(index) + ExecutionPolicy.OperationDeadlineTicks);
+        => checked(DueTimestamp(index) + ExecutionPolicy.OperationDeadlineTicks(TimeProvider));
 
     internal long DrainDeadline()
         => checked(DueTimestamp(OpenLoopRateContract.PlannedOperations - MinimumSpinThresholdTicks)
-            + ExecutionPolicy.DrainTicks);
+            + ExecutionPolicy.DrainTicks(TimeProvider));
 
     internal double OffsetMilliseconds(long timestamp)
-        => Stopwatch.GetElapsedTime(OriginTimestamp, timestamp).TotalMilliseconds;
+        => TimeProvider.GetElapsedTime(OriginTimestamp, timestamp).TotalMilliseconds;
 
     internal double ElapsedSeconds(long timestamp)
-        => Stopwatch.GetElapsedTime(OriginTimestamp, timestamp).TotalSeconds;
+        => TimeProvider.GetElapsedTime(OriginTimestamp, timestamp).TotalSeconds;
 
     internal async Task WaitUntilAsync(long timestamp, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
 
-        var spinThreshold = Math.Max(MinimumSpinThresholdTicks, ExecutionPolicy.SpinWindowTicks);
+        var spinThreshold = Math.Max(MinimumSpinThresholdTicks, ExecutionPolicy.SpinWindowTicks(TimeProvider));
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var remaining = timestamp - Stopwatch.GetTimestamp();
+            var remaining = timestamp - TimeProvider.GetTimestamp();
             if (remaining <= NoObservedItems)
             {
                 return;
@@ -43,21 +42,21 @@ internal readonly record struct OpenLoopTimeline(long OriginTimestamp, int RateP
             if (remaining > spinThreshold)
             {
                 var sleepTicks = remaining - spinThreshold;
-                await Task.Delay(TimeSpan.FromSeconds((double)sleepTicks / Stopwatch.Frequency), cancellationToken)
+                await Task.Delay(TimeSpan.FromSeconds((double)sleepTicks / TimeProvider.TimestampFrequency), TimeProvider, cancellationToken)
                     .ConfigureAwait(false);
             }
             else
             {
-                SpinUntil(timestamp, cancellationToken);
+                SpinUntil(timestamp, TimeProvider, cancellationToken);
                 return;
             }
         }
     }
 
-    private static void SpinUntil(long timestamp, CancellationToken cancellationToken)
+    private static void SpinUntil(long timestamp, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var spinner = new SpinWait();
-        while (Stopwatch.GetTimestamp() < timestamp)
+        while (timeProvider.GetTimestamp() < timestamp)
         {
             cancellationToken.ThrowIfCancellationRequested();
             spinner.SpinOnce();

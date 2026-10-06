@@ -19,7 +19,7 @@ internal sealed record IsolatedKeyLoadFaultRegressionMembership(int Index, strin
             {
                 return [.. nodes.OrderBy(item => item.Index)];
             }
-            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
         }
     }
 

@@ -41,8 +41,8 @@ internal sealed class NodeEpochProcessRecoveryTests
         var profile = NodeEpochComponentProfile.Create();
         var options = NodeEpochCrashSettings.CreateOptions(profile, destination);
         Process? process = null;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TrialTimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TrialTimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -64,7 +64,7 @@ internal sealed class NodeEpochProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleNodeAsync(process, root, source, activeFailure, cleanup.Token);
         }
     }

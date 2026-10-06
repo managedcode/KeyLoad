@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -11,11 +10,11 @@ internal static class OpenLoopExecutionCompletion
     private static readonly CompositeFormat ProgressMessageFormat = CompositeFormat.Parse(
         OpenLoopEvidenceContract.ProgressMessageFormat);
 
-    internal static async Task SettleAsync(OpenLoopExecutionContext execution)
+    internal static async Task SettleAsync(OpenLoopExecutionContext execution, TimeProvider timeProvider)
     {
-        execution.State?.Freeze(Stopwatch.GetTimestamp());
+        execution.State?.Freeze(timeProvider.GetTimestamp());
         var original = ComparisonSessionCleanup.CloseAndJoinAsync(execution.Sessions,
-            TimeSpan.FromMilliseconds(execution.ExecutionPolicy.DrainMilliseconds));
+            TimeSpan.FromMilliseconds(execution.ExecutionPolicy.DrainMilliseconds), timeProvider: timeProvider);
         try
         {
             var close = await original.ConfigureAwait(false);

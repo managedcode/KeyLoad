@@ -5,10 +5,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveVerificationReader
 {
-    internal static async Task<ImmutableArray<SampleRecord>> ReadAsync(ITimeSeriesIntensiveTarget target,
-        string seriesId, DateTimeOffset from, DateTimeOffset until, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task<ImmutableArray<SampleRecord>> ReadAsync(ITimeSeriesIntensiveTarget target, string seriesId, DateTimeOffset from, DateTimeOffset until, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken, provider: timeProvider);
         call.Start();
         ImmutableArray<SampleRecord> actual;
         try
@@ -31,9 +30,9 @@ internal static class TimeSeriesIntensiveVerificationReader
         return actual;
     }
 
-    internal static async Task<SampleRecord?> LatestAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task<SampleRecord?> LatestAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken, provider: timeProvider);
         call.Start();
         SampleRecord? actual;
         try
@@ -56,9 +55,9 @@ internal static class TimeSeriesIntensiveVerificationReader
         return actual;
     }
 
-    internal static async Task<SampleAggregate> WholeAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task<SampleAggregate> WholeAsync(ITimeSeriesIntensiveTarget target, string seriesId, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken, provider: timeProvider);
         call.Start();
         SampleAggregate actual;
         try

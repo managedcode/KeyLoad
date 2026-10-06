@@ -17,10 +17,16 @@ internal static class ConfigurationOwnership
     internal static bool IsConfiguration(Compilation compilation, ITypeSymbol? type)
     {
         var contract = compilation.GetTypeByMetadataName(ConfigurationMetadataNames.Configuration);
-        return contract is not null && type is not null &&
+        var provider = compilation.GetTypeByMetadataName(ConfigurationMetadataNames.ConfigurationProvider);
+        return IsConfigurationContract(type, contract) ||
+            provider?.Locations.All(static location => location.IsInMetadata) == true &&
+            IsConfigurationContract(type, provider);
+    }
+
+    private static bool IsConfigurationContract(ITypeSymbol? type, INamedTypeSymbol? contract) =>
+        contract is not null && type is not null &&
             (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, contract) ||
              type.AllInterfaces.Any(candidate => SymbolEqualityComparer.Default.Equals(candidate, contract)));
-    }
 
     internal static bool IsOptionsWrapper(Compilation compilation, ITypeSymbol? type) =>
         MagicRuntimeOperations.IsNativeType(compilation, type, ConfigurationMetadataNames.Options);

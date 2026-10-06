@@ -119,7 +119,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifetimeTests
             view.ReadValue(Key, value =>
             {
                 entered.TrySetResult();
-                release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit)
+                release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System)
                     .GetAwaiter().GetResult();
                 if (!value.SequenceEqual(Value))
                 {
@@ -132,7 +132,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifetimeTests
         Guid grant, CacheReadPermitAcceptance receipt, ZoneTreePointCacheControl control,
         ZoneTreePointCacheSnapshot beforeBorrow)
     {
-        await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+        await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
         await Assert.That(permit.TryWithdraw(grant, receipt.Revision)).IsTrue();
         await Assert.That(control.Retire(receipt.Revision)).IsTrue();
         var retired = control.GetDiagnostics();
@@ -158,7 +158,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifetimeTests
         TaskCompletionSource release, HeldOperations operations)
     {
         operations.Borrower = StartBorrow(store, entered, release, bytes => operations.BorrowedCopy = bytes);
-        await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+        await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
         operations.Disposer = ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() =>
         {
             store.Dispose();

@@ -5,9 +5,10 @@ using Npgsql;
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-    string? image = null)
+    string? image = null, TimeProvider? provider = null)
     : ITimeSeriesPersistentTarget, ITimeSeriesAggregationTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string PersistedTimescaleDBHypertableToken = "Persisted TimescaleDB hypertable";
 
     private const string TargetName = "TimescaleDB TimeSeries";
@@ -108,7 +109,7 @@ internal sealed class TimescaleTimeSeriesTarget(string connectionString, IOption
             return;
         }
 
-        using var timeout = new CancellationTokenSource(settings.TimescaleCleanupTimeout);
+        using var timeout = new CancellationTokenSource(settings.TimescaleCleanupTimeout, timeProvider);
         try
         {
             await TimescaleSchemaLifecycle.DropOwnedSchemaAsync(connectionString, schemaName, ownerId, timeout.Token)

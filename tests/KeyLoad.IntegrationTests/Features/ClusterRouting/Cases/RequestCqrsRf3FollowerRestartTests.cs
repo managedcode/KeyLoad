@@ -10,8 +10,8 @@ internal sealed class RequestCqrsRf3FollowerRestartTests
     [Test]
     public async Task TwoCompatibleVotersServeAndRestartedFollowerPublishesANewSignedGeneration()
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var dataRoot = CreatePrivateRoot();
         var (profile, _) = await NodeEpochRf3Profile.CreatePriorAsync(dataRoot, deadline.Token).ConfigureAwait(false);
         var images = await RequestCqrsRf3ImageProof.ReadAsync(deadline.Token).ConfigureAwait(false);

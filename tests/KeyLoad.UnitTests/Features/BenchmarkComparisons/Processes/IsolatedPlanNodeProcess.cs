@@ -18,7 +18,17 @@ internal static class IsolatedPlanNodeProcess
         const preflight = await import(new URL('./isolated-preflight.mjs', plannerUrl).href);
         const scale = await import(new URL('./scaled-isolated-plan.mjs', plannerUrl).href);
         const vectors = await import(new URL('./vector-isolated-plan.mjs', plannerUrl).href);
+        const openLoop = await import(new URL('./open-loop-isolated-plan.mjs', plannerUrl).href);
         const request = JSON.parse(readFileSync(0, 'utf8'));
+        function workflowMatrices() {
+          const matrices = preflight.createDatabaseMatrices(request.plan, request.scaledPlans,
+            request.vectorPlans, request.openLoopPlan);
+          return Object.fromEntries(Object.entries(matrices).map(([key, matrix]) => [key, { include: matrix.include.map(row => ({
+            id: row.id, jobName: row.jobName, target: row.target,
+            kind: row.preflight ? 'preflight' : row.openLoopCancellationProof ? 'proof'
+              : row.openLoopRate === undefined ? 'worker' : 'open-loop'
+          })) }]));
+        }
         try {
           const contract = request.contract ?? await planner.readIsolatedContract();
           const value = request.operation === 'create' ? planner.createIsolatedPlan(contract)
@@ -26,7 +36,9 @@ internal static class IsolatedPlanNodeProcess
             : request.operation === 'create-vectors' ? vectors.createVectorPlans(contract)
             : request.operation === 'create-composite' ? scale.createCompositePlan(planner.createIsolatedPlan(contract), scale.createScaledPlans(contract), vectors.createVectorPlans(contract))
             : request.operation === 'validate-scales' ? scale.validateScaledPlans(request.plan, contract)
-            : request.operation === 'matrices' ? preflight.createDatabaseMatrices(request.plan, request.scaledPlans, request.vectorPlans)
+            : request.operation === 'create-open-loop' ? openLoop.createOpenLoopPlan()
+            : request.operation === 'workflow-matrices' ? workflowMatrices()
+            : request.operation === 'matrices' ? preflight.createDatabaseMatrices(request.plan, request.scaledPlans, request.vectorPlans, request.openLoopPlan)
             : request.operation === 'preflight' ? preflight.createPreflightMatrix(request.plan)
             : planner.validateIsolatedPlan(request.plan, contract);
           process.stdout.write(JSON.stringify({ ok: true, value }));
@@ -36,13 +48,17 @@ internal static class IsolatedPlanNodeProcess
         """;
 
     internal static async Task<JsonObject> ProbeAsync(string operation, JsonNode? plan = null,
-        JsonNode? contract = null)
+        JsonNode? contract = null, JsonNode? scaledPlans = null, JsonNode? vectorPlans = null,
+        JsonNode? openLoopPlan = null)
     {
         var request = new JsonObject
         {
             [IsolatedPlanFields.Operation] = operation,
             [IsolatedPlanFields.Plan] = plan?.DeepClone(),
-            [IsolatedPlanFields.Contract] = contract?.DeepClone()
+            [IsolatedPlanFields.Contract] = contract?.DeepClone(),
+            [IsolatedPlanFields.ScalePlan] = scaledPlans?.DeepClone(),
+            [IsolatedPlanFields.VectorPlansInput] = vectorPlans?.DeepClone(),
+            [IsolatedPlanFields.OpenLoopPlan] = openLoopPlan?.DeepClone()
         };
         var result = await RunAsync(["--input-type=module", "-e", Probe], request.ToJsonString());
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
@@ -52,6 +68,18 @@ internal static class IsolatedPlanNodeProcess
 
     internal static Task<IsolatedPlanProcessResult> CliAsync(params string[] arguments)
         => RunAsync([ModulePath, .. arguments], null);
+
+    internal static Task<IsolatedPlanProcessResult> MatrixEntryAsync(string planDirectory, string githubEnvPath,
+        string target, string id, string jobName, string kind)
+        => RunAsync([MatrixEntryModulePath], null, new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [IsolatedPlanFields.MatrixPlanDirectoryEnvironment] = planDirectory,
+            [IsolatedPlanFields.GithubEnvironment] = githubEnvPath,
+            [IsolatedPlanFields.MatrixTargetEnvironment] = target,
+            [IsolatedPlanFields.MatrixIdEnvironment] = id,
+            [IsolatedPlanFields.JobNameEnvironment] = jobName,
+            [IsolatedPlanFields.MatrixKindEnvironment] = kind
+        });
 
     internal static string RepositoryRoot
     {
@@ -72,11 +100,15 @@ internal static class IsolatedPlanNodeProcess
     private static string ModulePath => Path.Combine(RepositoryRoot, "scripts", "Features",
         "BenchmarkComparisons", "isolated-plan.mjs");
 
-    private static async Task<IsolatedPlanProcessResult> RunAsync(string[] arguments, string? input)
+    private static string MatrixEntryModulePath => Path.Combine(RepositoryRoot, "scripts", "Features",
+        "BenchmarkComparisons", "isolated-matrix-entry.mjs");
+
+    private static async Task<IsolatedPlanProcessResult> RunAsync(string[] arguments, string? input,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(15));
-        using var process = new Process { StartInfo = CreateStart(arguments) };
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
+        using var process = new Process { StartInfo = CreateStart(arguments, environment) };
         if (!process.Start())
         { throw new InvalidOperationException(Failure); }
         var output = ReadBoundedAsync(process.StandardOutput, deadline.Token);
@@ -96,7 +128,7 @@ internal static class IsolatedPlanNodeProcess
         }
     }
 
-    private static ProcessStartInfo CreateStart(string[] arguments)
+    private static ProcessStartInfo CreateStart(string[] arguments, IReadOnlyDictionary<string, string>? environment)
     {
         var start = new ProcessStartInfo("node")
         {
@@ -114,6 +146,11 @@ internal static class IsolatedPlanNodeProcess
         if (executablePath is not null)
         { start.Environment[IsolatedPlanFields.PathEnvironment] = executablePath; }
         start.Environment[IsolatedPlanFields.ModuleEnvironment] = ModulePath;
+        if (environment is not null)
+        {
+            foreach (var (key, value) in environment)
+            { start.Environment[key] = value; }
+        }
         return start;
     }
 
@@ -142,7 +179,7 @@ internal static class IsolatedPlanNodeProcess
         }
         catch (InvalidOperationException) when (process.HasExited)
         { /* Natural exit may win the race with cleanup. */ }
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(3), TimeProvider.System);
         await process.WaitForExitAsync(cleanup.Token);
         await deadline.CancelAsync();
         try

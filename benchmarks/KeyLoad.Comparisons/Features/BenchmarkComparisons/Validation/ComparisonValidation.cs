@@ -10,8 +10,7 @@ internal static class ComparisonValidation
     private const string VectorMismatch = "ExactRecallOrProjectionMismatch";
     private const string GraphMismatch = "GraphReachabilityMismatch";
 
-    public static async Task ValidateBatchAsync(IComparisonSession reader, BenchmarkDataset dataset, Scenario scenario,
-        BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs, CancellationToken cancellationToken)
+    public static async Task ValidateBatchAsync(IComparisonSession reader, BenchmarkDataset dataset, Scenario scenario, BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
 
@@ -26,7 +25,7 @@ internal static class ComparisonValidation
 
             try
             {
-                using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken);
+                using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
                 var output = outputs[operation]!;
                 if (scenario == Scenario.QueueCycle)
                 {

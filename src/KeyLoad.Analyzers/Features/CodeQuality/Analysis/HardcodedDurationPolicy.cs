@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -13,6 +12,10 @@ internal static class HardcodedDurationPolicy
     internal static bool IsDurationMethod(Compilation compilation, IMethodSymbol method)
     {
         var type = method.ContainingType;
+        if (NativeTimerPolicy.IsDurationMethod(compilation, method))
+        {
+            return true;
+        }
         if (MagicRuntimeOperations.IsNativeType(compilation, type, MagicRuntimeMetadataNames.TimeSpan))
         {
             return method.MethodKind == MethodKind.Constructor ||
@@ -32,58 +35,12 @@ internal static class HardcodedDurationPolicy
     }
 
     internal static bool IsHardcoded(Compilation compilation, IOperation operation, CancellationToken cancellationToken) =>
-        IsHardcoded(compilation, operation, new HashSet<ISymbol>(SymbolEqualityComparer.Default), cancellationToken);
+        new HardcodedPolicySearch(compilation, cancellationToken).IsHardcoded(operation);
 
-    private static bool IsHardcoded(Compilation compilation, IOperation operation,
-        HashSet<ISymbol> visited, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (IsFixedNativeIdentity(compilation, operation))
-        {
-            return false;
-        }
+    internal static bool IsHardcodedOptionsOverride(Compilation compilation, IOperation operation, CancellationToken cancellationToken) =>
+        new HardcodedPolicySearch(compilation, cancellationToken, includeOtherConstants: true).IsHardcoded(operation);
 
-        if (MagicRuntimeOperations.IsNumeric(operation.Type) && operation.ConstantValue.HasValue)
-        {
-            return true;
-        }
-
-        return operation switch
-        {
-            IFieldReferenceOperation field when field.Field.IsReadOnly &&
-                !HasAuthoredWrites(compilation, field.Field, cancellationToken) =>
-                HasHardcodedInitializer(compilation, field.Field, visited, cancellationToken),
-            ILocalReferenceOperation local when local.Local.RefKind == RefKind.None &&
-                !HasAuthoredWrites(compilation, local.Local, cancellationToken) =>
-                HasHardcodedInitializer(compilation, local.Local, visited, cancellationToken),
-            IInvocationOperation invocation when IsDurationMethod(compilation, invocation.TargetMethod) =>
-                invocation.Arguments.Any(argument => IsHardcoded(compilation, argument.Value, visited, cancellationToken)),
-            IObjectCreationOperation { Constructor: { } constructor } creation when IsDurationMethod(compilation, constructor) =>
-                creation.Arguments.Any(argument => IsHardcoded(compilation, argument.Value, visited, cancellationToken)),
-            IConversionOperation conversion => IsHardcoded(compilation, conversion.Operand, visited, cancellationToken),
-            IUnaryOperation unary => IsHardcoded(compilation, unary.Operand, visited, cancellationToken),
-            IBinaryOperation binary => IsHardcoded(compilation, binary.LeftOperand, visited, cancellationToken) ||
-                IsHardcoded(compilation, binary.RightOperand, visited, cancellationToken),
-            IParenthesizedOperation parenthesized => IsHardcoded(compilation, parenthesized.Operand, visited, cancellationToken),
-            _ => false
-        };
-    }
-
-    private static bool HasHardcodedInitializer(Compilation compilation, ISymbol symbol,
-        HashSet<ISymbol> visited, CancellationToken cancellationToken)
-    {
-        if (!visited.Add(symbol))
-        {
-            return false;
-        }
-
-        return symbol.DeclaringSyntaxReferences.Any(reference =>
-            reference.GetSyntax(cancellationToken) is VariableDeclaratorSyntax { Initializer.Value: { } value } &&
-            compilation.GetSemanticModel(value.SyntaxTree).GetOperation(value, cancellationToken) is { } initializer &&
-            IsHardcoded(compilation, initializer, visited, cancellationToken));
-    }
-
-    private static bool HasAuthoredWrites(Compilation compilation, ISymbol symbol, CancellationToken cancellationToken)
+    internal static bool HasAuthoredWrites(Compilation compilation, ISymbol symbol, CancellationToken cancellationToken)
     {
         var roots = symbol is IFieldSymbol field
             ? field.ContainingType.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax(cancellationToken))
@@ -124,7 +81,7 @@ internal static class HardcodedDurationPolicy
         operation is ILocalReferenceOperation local && SymbolEqualityComparer.Default.Equals(local.Local, symbol) ||
         operation.ChildOperations.Any(child => ReferencesSymbol(child, symbol));
 
-    private static bool IsFixedNativeIdentity(Compilation compilation, IOperation operation) =>
+    internal static bool IsFixedNativeIdentity(Compilation compilation, IOperation operation) =>
         operation is IFieldReferenceOperation field &&
         (MagicRuntimeOperations.IsNativeType(compilation, field.Field.ContainingType, MagicRuntimeMetadataNames.TimeSpan) &&
             field.Field.Name is ConfigurationMetadataNames.Zero or ConfigurationMetadataNames.MinValue or ConfigurationMetadataNames.MaxValue ||

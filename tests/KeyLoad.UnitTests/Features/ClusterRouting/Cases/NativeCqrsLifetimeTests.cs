@@ -21,7 +21,7 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
         await NativeCqrsTestSupport.RunWithCleanupAsync(async () =>
         {
             initialMove = enumerator.MoveNextAsync().AsTask();
-            await Assert.That(await initialMove.WaitAsync(CleanupBound)).IsTrue();
+            await Assert.That(await initialMove.WaitAsync(CleanupBound, TimeProvider.System)).IsTrue();
             await Assert.That(enumerator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
             var attempted = await NativeCqrsTestSupport.WaitForEventAsync(
                 fixture.GrainFactory, requestId, NativeCqrsProtocol.ProgressTwoAttempted);
@@ -31,7 +31,7 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
 
             await cancellation.CancelAsync();
             disposal = enumerator.DisposeAsync().AsTask();
-            await disposal.WaitAsync(CleanupBound);
+            await disposal.WaitAsync(CleanupBound, TimeProvider.System);
             var settled = await NativeCqrsTestSupport.WaitForEventAsync(
                 fixture.GrainFactory, requestId, NativeCqrsProtocol.Settled);
             await Assert.That(settled.Settled).IsTrue();
@@ -57,7 +57,7 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
         await NativeCqrsTestSupport.RunWithCleanupAsync(async () =>
         {
             initialMove = enumerator.MoveNextAsync().AsTask();
-            await Assert.That(await initialMove.WaitAsync(CleanupBound)).IsTrue();
+            await Assert.That(await initialMove.WaitAsync(CleanupBound, TimeProvider.System)).IsTrue();
             await Assert.That(enumerator.Current.Kind).IsEqualTo(CqrsStreamChunkKind.Started);
             var attempted = await NativeCqrsTestSupport.WaitForEventAsync(
                 fixture.GrainFactory, requestId, NativeCqrsProtocol.ProgressTwoAttempted);
@@ -66,7 +66,7 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
             await Assert.That(attempted.Settled).IsFalse();
 
             disposal = enumerator.DisposeAsync().AsTask();
-            await disposal.WaitAsync(CleanupBound);
+            await disposal.WaitAsync(CleanupBound, TimeProvider.System);
             var settled = await NativeCqrsTestSupport.WaitForEventAsync(
                 fixture.GrainFactory, requestId, NativeCqrsProtocol.Settled);
             await Assert.That(settled.Settled).IsTrue();
@@ -134,7 +134,7 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
         {
             try
             {
-                await initialMove.WaitAsync(CleanupBound, CancellationToken.None);
+                await initialMove.WaitAsync(CleanupBound, TimeProvider.System, CancellationToken.None);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -142,10 +142,10 @@ internal sealed class NativeCqrsLifetimeTests(NativeCqrsClusterFixture fixture)
         }
         if (existingDisposal is not null)
         {
-            await existingDisposal.WaitAsync(CleanupBound, CancellationToken.None);
+            await existingDisposal.WaitAsync(CleanupBound, TimeProvider.System, CancellationToken.None);
             return;
         }
-        await enumerator.DisposeAsync().AsTask().WaitAsync(CleanupBound, CancellationToken.None);
+        await enumerator.DisposeAsync().AsTask().WaitAsync(CleanupBound, TimeProvider.System, CancellationToken.None);
     }
 
     private async Task AssertProducerSettledAsync(Guid requestId)

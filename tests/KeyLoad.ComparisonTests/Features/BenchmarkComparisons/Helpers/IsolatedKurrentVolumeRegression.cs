@@ -10,8 +10,8 @@ internal static class IsolatedKurrentVolumeRegression
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
         var harnessOptions = NativeExecutionPolicyFixture.Harness();
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(harnessOptions.Value.KurrentVolumeTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(harnessOptions.Value.KurrentVolumeTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var selection = new ComparisonWorkerSelection(KurrentConstants.Name, nodeCount, Scenario.StreamAppend,
             IsolatedQuorumResourceTokens.Profile);
         var options = selection.Options;

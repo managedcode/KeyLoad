@@ -26,7 +26,7 @@ internal sealed class TestDatabase : IDisposable
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
-        NativeClaimsExecutionOptions? claimsExecution = null)
+        NativeClaimsExecutionOptions? claimsExecution = null, TimeProvider? timeProvider = null)
     {
         Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
@@ -38,8 +38,9 @@ internal sealed class TestDatabase : IDisposable
         var claimsOptions = UnitExecutionOptions.NativeClaimsExecution(claimsExecution);
         try
         {
-            Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution());
+            var clock = timeProvider ?? TimeProvider.System;
+            Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), blobOptions, claimsOptions, UnitExecutionOptions.TimeSeriesExecution(), clock);
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)
@@ -51,7 +52,7 @@ internal sealed class TestDatabase : IDisposable
         {
             try
             {
-                acquired?.Dispose();
+                DisposeAcquiredStore(acquired);
             }
             finally
             {
@@ -61,7 +62,9 @@ internal sealed class TestDatabase : IDisposable
         }
     }
     public OperationResult Submit<T>(OperationKind kind, T payload, string principal = RootPrincipalId, Guid? id = null, DateTimeOffset? time = null)
-        => Database.Apply(new(id ?? Guid.NewGuid(), kind, principal, time ?? TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+        => Database.Apply(new(id ?? Guid.NewGuid(), kind, principal, time ?? Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options)));
+
+    private static void DisposeAcquiredStore(ZoneTreeStore? store) => store?.Dispose();
     public ResourceDefinition Configure(string name, ResourceKind kind, string? domain = null, IndexDefinition[]? indexes = null,
         SensitiveFieldPolicy[]? fields = null, QueuePolicy? queuePolicy = null)
     {

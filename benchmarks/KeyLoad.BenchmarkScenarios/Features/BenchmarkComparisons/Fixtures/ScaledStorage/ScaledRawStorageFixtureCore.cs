@@ -6,6 +6,7 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class ScaledRawStorageFixtureCore
 {
     private const string InitializedMessage = "The scaled fixture core initialization is one-shot.";
+    internal TimeProvider TimeProvider { get; }
     private readonly ScaledStorageExecutionOptions settings;
     private readonly IOptions<ScaledStorageExecutionOptions> executionOptions;
     private readonly CancellationToken _token;
@@ -33,8 +34,9 @@ internal sealed class ScaledRawStorageFixtureCore
     private bool _disposed;
 
     internal ScaledRawStorageFixtureCore(int recordCount, int payloadBytes,
-        long deadlineStart, long processMemoryCeilingBytes, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
+        long deadlineStart, long processMemoryCeilingBytes, IOptions<ScaledStorageExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
+        TimeProvider = timeProvider;
         settings = executionOptions.Value;
         this.executionOptions = executionOptions;
         _token = token;
@@ -68,12 +70,12 @@ internal sealed class ScaledRawStorageFixtureCore
         }
 
         _initializeStarted = true;
-        ScaledRawStoragePreparationGuard.Check(_deadlineStart, executionOptions, _token);
-        var engine = new ScaledRawStorageZoneTreeEngine(_corpus, _arena, _readScratch, _deadlineStart, executionOptions, _token);
+        ScaledRawStoragePreparationGuard.Check(_deadlineStart, executionOptions, TimeProvider, _token);
+        var engine = new ScaledRawStorageZoneTreeEngine(_corpus, _arena, _readScratch, _deadlineStart, executionOptions, TimeProvider, _token);
         _engine = engine;
         engine.Initialize();
         _seedElapsedTicks = ScaledRawStorageSeedRunner.Run(_corpus, engine, _seedScratch,
-            RecordCount, _deadlineStart, ref _seedAttempts, ref _successfulSeedWrites, executionOptions, _token);
+            RecordCount, _deadlineStart, ref _seedAttempts, ref _successfulSeedWrites, executionOptions, TimeProvider, _token);
         VerifyAllCore(enforceBudget: true);
         _initialized = true;
     }
@@ -181,11 +183,11 @@ internal sealed class ScaledRawStorageFixtureCore
         const long NoPreparationDeadline = 0L;
         var result = ScaledRawStorageVerification.Run(_corpus, _engine!, _expectedScratch,
             RecordCount, ref _nativeReadCalls, enforceBudget ? _deadlineStart : NoPreparationDeadline,
-            enforceBudget, executionOptions, enforceBudget ? _token : CancellationToken.None);
+            enforceBudget, executionOptions, TimeProvider, enforceBudget ? _token : CancellationToken.None);
         _ = _engine!.Capture();
         if (enforceBudget)
         {
-            ScaledRawStoragePreparationGuard.Check(_deadlineStart, executionOptions, _token);
+            ScaledRawStoragePreparationGuard.Check(_deadlineStart, executionOptions, TimeProvider, _token);
         }
 
         using var process = Process.GetCurrentProcess();

@@ -73,7 +73,7 @@ internal sealed class RequestCqrsProbeRecordFileTests
         {
             read = Task.Factory.StartNew(() => RequestCqrsProbeFiles.ReadRecord(fifo, UnitRequestProbeOptions.Execution), CancellationToken.None,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
-            var completedWithoutWriter = await Task.WhenAny(read, Task.Delay(ProbeBound)) == read;
+            var completedWithoutWriter = await Task.WhenAny(read, Task.Delay(ProbeBound, TimeProvider.System)) == read;
             await ServerFailureObserver.ObserveAsync(() => AssertFifoFailureAsync(read, fifo, completedWithoutWriter),
                 failures);
         }

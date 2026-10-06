@@ -17,13 +17,12 @@ internal sealed class NativeComparisonHarnessPolicyTests
         var callbackFailure = new IOException(CallbackFailure);
         using var callback = owner.Token.Register(() => throw callbackFailure);
         var failures = new IsolatedNativeTeardownFailures(null);
-        var original = Task.Delay(Timeout.InfiniteTimeSpan, owner.Token);
+        var original = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, owner.Token);
         var settlement = IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => original, Stage, failures, Options.Create(policy), owner.CancelAsync);
         try
         {
-            await Assert.That(await settlement.WaitAsync(TimeSpan.FromSeconds(1),
-                TestContext.Current!.Execution.CancellationToken)).IsFalse();
+            await Assert.That(await settlement.WaitAsync(TimeSpan.FromSeconds(1), TimeProvider.System, TestContext.Current!.Execution.CancellationToken)).IsFalse();
             await Assert.That(original.IsCanceled).IsTrue();
             await Assert.That(owner.IsCancellationRequested).IsTrue();
             var failure = CaptureFailure(failures);

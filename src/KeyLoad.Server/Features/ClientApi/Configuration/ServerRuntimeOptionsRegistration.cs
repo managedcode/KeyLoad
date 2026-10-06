@@ -63,6 +63,7 @@ internal static class ServerRuntimeOptionsRegistration
 
     private static void RegisterHostExecution(IServiceCollection services, IConfiguration configuration)
     {
+        AddDatabasePhaseOptions(services, configuration);
         services.AddOptions<ServerExecutionOptions>()
             .Bind(configuration.GetSection(ServerExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ServerExecutionOptions.ValidationMessage).ValidateOnStart();
@@ -70,6 +71,19 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), McpExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<AdminObservationOptions>().Bind(configuration.GetSection(AdminObservationOptions.SectionName))
             .Validate(options => options.IsValid(), AdminObservationOptions.ValidationMessage).ValidateOnStart();
+    }
+
+    internal static void AddDatabasePhaseOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(DatabasePhaseExecutionOptions.SectionName);
+        if (section.Value is not null)
+        {
+            throw new OptionsValidationException(Options.DefaultName, typeof(DatabasePhaseExecutionOptions),
+                [DatabasePhaseExecutionOptions.ValidationMessage]);
+        }
+        services.AddOptions<DatabasePhaseExecutionOptions>()
+            .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true)
+            .Validate(options => options.IsValid(), DatabasePhaseExecutionOptions.ValidationMessage).ValidateOnStart();
     }
 
     private static void RegisterNodeProjections(IServiceCollection services, IConfiguration configuration)

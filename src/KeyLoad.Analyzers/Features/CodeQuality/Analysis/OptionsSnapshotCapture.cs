@@ -86,7 +86,9 @@ internal static class OptionsSnapshotCapture
         }
         if (expression is WithExpressionSyntax clone)
         {
-            return IsOptionsValue(compilation, clone.Expression, cancellationToken);
+            return operation is IWithOperation withOperation &&
+                !OptionsSnapshotOverrides.IsHardcoded(compilation, withOperation, cancellationToken) &&
+                IsOptionsValue(compilation, clone.Expression, cancellationToken);
         }
         if (operation is ILocalReferenceOperation local &&
             local.Local.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(cancellationToken) is

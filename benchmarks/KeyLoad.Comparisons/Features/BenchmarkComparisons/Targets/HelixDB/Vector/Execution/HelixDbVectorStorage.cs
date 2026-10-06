@@ -10,7 +10,7 @@ internal static class HelixDbVectorStorage
 {
     private const int EmptyResultCount = 0;
     private const int SingleResultCardinality = 1;
-    internal static async Task<int> IngestAsync(HttpClient http, string label, IAsyncEnumerable<VectorDocument> documents, NativeComparisonExecutionOptions policy, CancellationToken token)
+    internal static async Task<int> IngestAsync(HttpClient http, string label, IAsyncEnumerable<VectorDocument> documents, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var entries = new JsonArray();
         var names = new JsonArray();
@@ -23,7 +23,7 @@ internal static class HelixDbVectorStorage
             count++;
             if (entries.Count == policy.WriteBatchCapacity)
             {
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token).ConfigureAwait(false);
+                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
                 entries = [];
                 names = [];
             }
@@ -31,19 +31,19 @@ internal static class HelixDbVectorStorage
 
         if (entries.Count != EmptyResultCount)
         {
-            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token).ConfigureAwait(false);
+            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
         return count;
     }
 
-    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string label, int count, NativeComparisonExecutionOptions policy, [EnumeratorCancellation] CancellationToken token)
+    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string label, int count, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken token)
     {
         var after = -SingleResultCardinality;
         var seen = EmptyResultCount;
         while (true)
         {
-            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Page(label, after, policy.ReadbackBatchCapacity), false), false, policy, token).ConfigureAwait(false);
+            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Page(label, after, policy.ReadbackBatchCapacity), false), false, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
             var rows = HelixDbProtocol.Rows(response);
             if (rows.GetArrayLength() == EmptyResultCount)
             {

@@ -33,8 +33,8 @@ internal static class ReleaseVersionNodeProcess
 
     internal static async Task<JsonElement> RunAsync(JsonObject request, CancellationToken token)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         using var process = new Process { StartInfo = StartInfo() };
         if (!process.Start())
         {

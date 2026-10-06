@@ -7,9 +7,9 @@ internal sealed class AtomicPartitionPlacementPublicRf3Tests(ClusterFixture fixt
     [Test]
     public async Task AcPmap003And004SdkMcpCasAuthorizationAndSequentialVoterReopen()
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         await new AtomicPartitionPlacementPublicRf3Workflow(fixture).RunAsync(deadline.Token).ConfigureAwait(false);
     }
 }

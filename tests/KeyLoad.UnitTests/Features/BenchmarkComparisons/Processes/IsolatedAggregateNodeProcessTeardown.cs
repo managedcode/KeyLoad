@@ -63,7 +63,7 @@ internal static class IsolatedAggregateNodeProcessTeardown
     internal static async Task<bool> WaitForOriginalsAsync(Task originalJoin, TimeSpan bound,
         IsolatedAggregateNodeFailureSet failures)
     {
-        using var cleanup = new CancellationTokenSource(bound);
+        using var cleanup = new CancellationTokenSource(bound, TimeProvider.System);
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(() => originalJoin.WaitAsync(cleanup.Token));
@@ -135,7 +135,7 @@ internal static class IsolatedAggregateNodeProcessTeardown
     {
         while (!process.HasExited)
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(100), TimeProvider.System);
         }
     }
 

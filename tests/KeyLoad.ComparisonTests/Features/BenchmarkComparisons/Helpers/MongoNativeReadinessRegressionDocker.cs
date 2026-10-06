@@ -41,7 +41,7 @@ internal static class MongoNativeReadinessRegressionDocker
 
     private static async Task StopOriginalAsync(MongoNativeReadinessRegressionProcess process)
     {
-        using var cleanup = new CancellationTokenSource(MongoNativeReadinessRegressionProtocol.CleanupDeadline);
+        using var cleanup = new CancellationTokenSource(MongoNativeReadinessRegressionProtocol.CleanupDeadline, TimeProvider.System);
         var client = process.StopClientAsync(cleanup.Token);
         var readers = process.DrainAsync(cleanup.Token);
         var originals = MongoNativeReadinessRegressionProcess.JoinAsync(client, readers);

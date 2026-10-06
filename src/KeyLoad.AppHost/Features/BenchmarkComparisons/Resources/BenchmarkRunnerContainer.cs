@@ -28,7 +28,7 @@ internal static class BenchmarkRunnerContainer
             .WithEnvironment(RunnerImageEnvironment, runnerImage.Reference)
             .WithEnvironment(ServerImageEnvironment, serverImage.Reference)
             .WithEnvironment(SourceEnvironment, source);
-        if (ClusterContainerUser.Resolve(builder) is { } user)
+        if (ClusterContainerUser.Resolve(builder, TimeProvider.System) is { } user)
         {
             runner.WithContainerRuntimeArgs(UserArgument, user);
         }

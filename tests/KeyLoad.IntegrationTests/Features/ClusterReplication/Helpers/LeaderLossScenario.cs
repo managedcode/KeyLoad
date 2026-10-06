@@ -18,7 +18,7 @@ internal static class LeaderLossScenario
 
     internal static async Task RunAsync(ClusterFixture fixture)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
         var stoppedContainers = new HashSet<string>(StringComparer.Ordinal);
         LeaderLossRunState? state = null;
         try
@@ -126,7 +126,7 @@ internal static class LeaderLossScenario
     private static async Task RestoreFailedClusterAsync(ClusterFixture fixture, KeyLoadClient[]? clients,
         IEnumerable<string> stoppedContainers, Exception failure)
     {
-        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         foreach (var node in stoppedContainers.Order(StringComparer.Ordinal))
         {
             try

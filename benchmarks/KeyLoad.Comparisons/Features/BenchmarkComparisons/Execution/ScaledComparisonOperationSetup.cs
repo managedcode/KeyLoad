@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons;
 
 internal static class ScaledComparisonOperationSetup
 {
-    internal static async Task<List<IComparisonSession>> OpenSessionsAsync(IComparisonTarget target, int count, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken token)
+    internal static async Task<List<IComparisonSession>> OpenSessionsAsync(IComparisonTarget target, int count, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
         const int FirstElementIndex = 0;
 
@@ -20,7 +20,7 @@ internal static class ScaledComparisonOperationSetup
         }
         catch (Exception)
         {
-            _ = await ComparisonSessionCleanup.CloseAsync(sessions, execution.CleanupTimeout).ConfigureAwait(false);
+            _ = await ComparisonSessionCleanup.CloseAsync(sessions, execution.CleanupTimeout, timeProvider: timeProvider).ConfigureAwait(false);
             throw;
         }
     }
@@ -57,15 +57,14 @@ internal static class ScaledComparisonOperationSetup
         }
     }
 
-    internal static async Task WarmupAsync(List<IComparisonSession> sessions, ScaledOperationInputs inputs,
-        IComparisonSettings settings, TimeSpan operationTimeout, CancellationToken token)
+    internal static async Task WarmupAsync(List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings, TimeSpan operationTimeout, TimeProvider timeProvider, CancellationToken token)
     {
         const int FirstElementIndex = 0;
 
         for (var operation = FirstElementIndex; operation < settings.Warmup; operation++)
         {
             token.ThrowIfCancellationRequested();
-            using var deadline = ComparisonDeadline.Create(operationTimeout, token);
+            using var deadline = ComparisonDeadline.Create(operationTimeout, cancellationToken: token, timeProvider: timeProvider);
             var input = inputs.Create(operation, warmup: true);
             var result = await sessions[operation % sessions.Count].ExecuteAsync(inputs.Scenario, input, deadline.Token).ConfigureAwait(false);
             ScaledComparisonMeasurementExecutor.ValidatePointRead(inputs.Scenario, result, input);

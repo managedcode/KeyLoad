@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons;
 // Measures the load generator, including its drivers and sampler. These are never database CPU/RSS.
 internal sealed class ClientResourceSampler : IAsyncDisposable
 {
+    private readonly TimeProvider timeProvider;
     private readonly NativeComparisonExecutionOptions settings;
     private const int NoResources = 0;
     private readonly System.Threading.Lock gate = new();
@@ -16,8 +17,9 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
     private readonly Task sampler;
     private long peak;
 
-    public ClientResourceSampler(IOptions<NativeComparisonExecutionOptions> options)
+    public ClientResourceSampler(IOptions<NativeComparisonExecutionOptions> options, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         settings = options.Value;
         settings.Validate();
         process.Refresh();
@@ -33,7 +35,7 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
         {
             while (true)
             {
-                await Task.Delay(settings.ResourceSampleIntervalMilliseconds, lifetime.Token);
+                await Task.Delay(TimeSpan.FromMilliseconds(settings.ResourceSampleIntervalMilliseconds), timeProvider, lifetime.Token);
                 lock (gate)
                 {
                     process.Refresh();

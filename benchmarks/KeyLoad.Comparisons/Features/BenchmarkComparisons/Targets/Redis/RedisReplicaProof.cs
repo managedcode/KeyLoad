@@ -26,10 +26,7 @@ internal static class RedisReplicaProof
     public static Task<RedisNodeIdentity> ReadIdentityAsync(ConnectionMultiplexer connection, EndPoint endpoint, CancellationToken token)
         => RedisNodeIdentity.ReadAsync(connection.GetServer(endpoint), CommandFlags.DemandMaster, token);
 
-    public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings,
-        ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload,
-        IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
-        CancellationToken token)
+    public static async Task<ClusterEvidence> VerifyAsync(ConnectionMultiplexer primary, string[] replicaStrings, ComparisonTopology topology, RedisNodeIdentity primaryIdentity, string probeKey, string payload, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken token)
     {
         const int AdjacentElementOffset = 1;
         const int NoObservedItems = 0;
@@ -63,7 +60,7 @@ internal static class RedisReplicaProof
             var allIdentities = new[] { primaryIdentity }.Concat(identities).ToArray();
             RedisNodeIdentity.RequireUniqueVersionedSet(allIdentities, primaryIdentity, requiredReplicas + SingleItemCount);
             await RedisCopyObservation.VerifyDirectCopiesAsync(replicas: replicas, endpoints: endpoints,
-                database: primary.GetDatabase().Database, key: probeKey, payload: payload, token: token, lifecycleOptions: lifecycleOptions);
+                database: primary.GetDatabase().Database, key: probeKey, payload: payload, token: token, lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
             for (var index = FirstElementIndex; index < replicas.Length; index++)
             {
                 await VerifyReplicaAsync(replicas[index].GetServer(endpoints[index]), endpoints[index], primaryEndpoint, diagnostics, token);

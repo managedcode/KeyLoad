@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -11,7 +11,7 @@ internal readonly record struct PackedAnnDeadlineSearch(
 
 internal sealed class PackedAnnDeadlineObservation
 {
-    internal long StartedTimestamp { get; private set; }
+    internal TestElapsedClock StartedTimestamp { get; private set; } = null!;
     internal int CompletedSearches { get; private set; }
     internal long FailedInvocationEdgeVisits { get; private set; }
     internal AnnSearchResult? LastResult { get; private set; }
@@ -20,7 +20,7 @@ internal sealed class PackedAnnDeadlineObservation
     internal long LastEdgeDelta { get; private set; }
     internal bool SuccessfulDeltasMatch { get; private set; } = true;
 
-    internal void Start(long timestamp) => StartedTimestamp = timestamp;
+    internal void Start(TestElapsedClock timestamp) => StartedTimestamp = timestamp;
 
     internal void RecordSuccess(AnnSearchResult result, AnnWorkBudget budget,
         long workBefore, long distancesBefore, long edgesBefore)
@@ -54,7 +54,7 @@ internal static class PackedAnnDeadlineBoundary
         try
         {
             var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(
-                () => run.Search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds))))!;
+                () => run.Search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds), TimeProvider.System)))!;
             expectedFailure = failure;
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             if (run.Observation.CompletedSearches > 0)
@@ -70,7 +70,7 @@ internal static class PackedAnnDeadlineBoundary
             await Assert.That(run.Observation.FailedInvocationEdgeVisits).IsGreaterThan(0);
             await Assert.That(run.Budget.WorkUnits).IsGreaterThan(0);
             await Assert.That(run.Budget.EdgeVisits).IsGreaterThan(0);
-            await Assert.That(Stopwatch.GetElapsedTime(run.Observation.StartedTimestamp))
+            await Assert.That(run.Observation.StartedTimestamp.Elapsed)
                 .IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(QueryDeadlineSeconds));
         }
         catch (Exception assertionFailure)
@@ -105,7 +105,7 @@ internal static class PackedAnnDeadlineBoundary
             limits, ready, observation, cancellation.Token));
         try
         {
-            var budget = await ready.Task.WaitAsync(TimeSpan.FromSeconds(StartupTimeoutSeconds));
+            var budget = await ready.Task.WaitAsync(TimeSpan.FromSeconds(StartupTimeoutSeconds), TimeProvider.System);
             return new(search, budget, observation);
         }
         catch (TimeoutException startupFailure)
@@ -126,9 +126,9 @@ internal static class PackedAnnDeadlineBoundary
         int searchLimit, DatabaseLimits limits, TaskCompletionSource<AnnWorkBudget> ready,
         PackedAnnDeadlineObservation observation, CancellationToken cancellationToken)
     {
-        var started = Stopwatch.GetTimestamp();
+        var started = new TestElapsedClock(TimeProvider.System);
         var budget = new AnnWorkBudget(
-            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), TimeProvider.System, cancellationToken),
+            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), started.Provider, cancellationToken),
             PackedAnnIndexTestSupport.GenerousWorkLimit);
         observation.Start(started);
         ready.SetResult(budget);
@@ -181,7 +181,7 @@ internal static class PackedAnnDeadlineBoundary
     {
         try
         {
-            await search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds), CancellationToken.None);
+            await search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds), TimeProvider.System, CancellationToken.None);
         }
         catch (KeyLoadException error) when (ReferenceEquals(error, observedFailure))
         {
@@ -218,7 +218,7 @@ internal static class PackedAnnDeadlineBoundary
     {
         try
         {
-            await search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds), CancellationToken.None);
+            await search.WaitAsync(TimeSpan.FromSeconds(CompletionTimeoutSeconds), TimeProvider.System, CancellationToken.None);
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
         {

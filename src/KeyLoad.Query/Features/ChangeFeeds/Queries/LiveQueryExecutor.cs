@@ -17,7 +17,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         TimeProvider? timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
@@ -25,14 +25,14 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         budget.Check();
         return database.WithQueryView(principalId, query.Partition, query.Query.Collection,
             (view, principal, resource) => StartView(view, principal, resource, query, hash, budget,
-                timeProvider ?? TimeProvider.System));
+                timeProvider ?? database.EvaluationClock));
     }
 
     internal LiveQueryPage Read(string principalId, ReadLiveQueryRequest request,
         TimeProvider? timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);

@@ -30,7 +30,7 @@ internal sealed class TimeSeriesIntensivePinnedImageOutput : IDisposable
     {
         try
         {
-            await task.WaitAsync(TimeSpan.FromSeconds(TimeSeriesIntensivePinnedImageProtocol.OperationSeconds)).ConfigureAwait(false);
+            await task.WaitAsync(TimeSpan.FromSeconds(TimeSeriesIntensivePinnedImageProtocol.OperationSeconds), TimeProvider.System).ConfigureAwait(false);
             return null;
         }
         catch (TimeoutException timeout)

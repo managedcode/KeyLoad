@@ -7,12 +7,14 @@ internal sealed class ScaleServerResourceSampleBudget
 {
     private readonly int maximum;
     private int _used;
+    internal TimeProvider TimeProvider { get; }
     internal ScaleServerResourceOptions Settings { get; }
     internal BenchmarkProvenanceOptions Provenance { get; }
 
     internal ScaleServerResourceSampleBudget(IOptions<ScaleServerResourceOptions> settings,
-        IOptions<BenchmarkProvenanceOptions> provenance, int? maximumBytes = null)
+        IOptions<BenchmarkProvenanceOptions> provenance, int? maximumBytes = null, TimeProvider? timeProvider = null)
     {
+        TimeProvider = timeProvider ?? TimeProvider.System;
         Settings = settings.Value;
         Settings.Validate();
         Provenance = provenance.Value;

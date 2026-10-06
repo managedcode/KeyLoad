@@ -8,81 +8,19 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
 internal static partial class LocalRf3OwnedProcessLifetime
 {
-    private const int ObservedTaskCapacity = 4;
-
     private const string LocalRf3OwnedProcessLifetimeMetadataName = "libc";
     private const string LocalRf3OwnedProcessLifetimeLocalRf3OwnedProcessLifetimeMetadataName = "kill";
 
     private const int SignalTerminate = 15;
 
-    internal static async Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
-    {
-        const int Step = 1;
-        const int CountInitialValue = 0;
-        const int CompletionCount = 0;
-        const int StartIndexValue = 0;
-        const string MessageText = "Local RF3 image cleanup output exceeded its bound.";
+    internal static Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
+        => LocalRf3OwnedProcessObservation.ReadBoundedAsync(reader, maximumCharacters);
 
-        var buffer = new char[maximumCharacters + Step];
-        var count = CountInitialValue;
-        while (count < buffer.Length)
-        {
-            var read = await reader.ReadAsync(buffer.AsMemory(count)).ConfigureAwait(false);
-            if (read == CompletionCount)
-            {
-                return new string(buffer, StartIndexValue, count);
-            }
-
-            count += read;
-        }
-        throw new InvalidOperationException(MessageText);
-    }
-
-    internal static async Task ObserveAsync(Task exit, Task output, Task error, CancellationToken cancellationToken)
-    {
-        const int CompletionCount = 3;
-
-        var canceled = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-        var observed = new HashSet<Task>();
-        while (true)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            await ObserveCompletedAsync(exit, observed).ConfigureAwait(false);
-            await ObserveCompletedAsync(output, observed).ConfigureAwait(false);
-            await ObserveCompletedAsync(error, observed).ConfigureAwait(false);
-            if (observed.Count == CompletionCount)
-            {
-                return;
-            }
-
-            var pending = new List<Task>(ObservedTaskCapacity) { canceled };
-            if (!observed.Contains(exit))
-            {
-                pending.Add(exit);
-            }
-
-            if (!observed.Contains(output))
-            {
-                pending.Add(output);
-            }
-
-            if (!observed.Contains(error))
-            {
-                pending.Add(error);
-            }
-
-            var completed = await Task.WhenAny(pending).ConfigureAwait(false);
-            if (completed == canceled)
-            {
-                throw new OperationCanceledException(cancellationToken);
-            }
-
-            await completed.ConfigureAwait(false);
-        }
-    }
+    internal static Task ObserveAsync(Task exit, Task output, Task error, TimeProvider timeProvider, CancellationToken cancellationToken)
+        => LocalRf3OwnedProcessObservation.ObserveAsync(exit, output, error, timeProvider, cancellationToken);
 
     internal static async Task TerminateAndJoinAsync(Process process, Task exit, Task output, Task error,
-        List<Exception> failures, IOptions<TestExecutionOptions> options)
+        List<Exception> failures, IOptions<TestExecutionOptions> options, TimeProvider timeProvider)
     {
         const string MessageText = "Local RF3 image process and original stream readers did not settle within the cleanup threshold.";
 
@@ -90,7 +28,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         TrySendTerminate(process, failures);
         if (!HasExited(process, failures))
         {
-            await Task.WhenAny(exit, Task.Delay(policy.TerminationGrace)).ConfigureAwait(false);
+            _ = await WaitThresholdAsync(exit, policy.TerminationGrace, timeProvider).ConfigureAwait(false);
         }
         if (!HasExited(process, failures))
         {
@@ -98,7 +36,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         }
 
         var joined = Task.WhenAll(exit, output, error);
-        if (await Task.WhenAny(joined, Task.Delay(policy.ProcessSettlementTimeout)).ConfigureAwait(false) != joined)
+        if (!await WaitThresholdAsync(joined, policy.ProcessSettlementTimeout, timeProvider).ConfigureAwait(false))
         {
             failures.Add(new TimeoutException(MessageText));
             if (!HasExited(process, failures))
@@ -110,7 +48,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         await CollectFailureAsync(exit, failures).ConfigureAwait(false);
         if (!HasExited(process, failures))
         {
-            await WaitForActualExitAsync(process, failures, policy.ProcessExitPollInterval).ConfigureAwait(false);
+            await WaitForActualExitAsync(process, failures, policy.ProcessExitPollInterval, timeProvider).ConfigureAwait(false);
         }
 
         if (!output.IsCompleted)
@@ -129,15 +67,19 @@ internal static partial class LocalRf3OwnedProcessLifetime
         _ = joined.Exception;
     }
 
-    private static async Task ObserveCompletedAsync(Task original, HashSet<Task> observed)
+    private static async Task<bool> WaitThresholdAsync(Task original, TimeSpan threshold, TimeProvider timeProvider)
     {
-        if (!original.IsCompleted)
+        using var lifetime = new CancellationTokenSource();
+        var elapsed = Task.Delay(threshold, timeProvider, lifetime.Token);
+        try
         {
-            return;
+            return await Task.WhenAny(original, elapsed).ConfigureAwait(false) == original;
         }
-
-        await original.ConfigureAwait(false);
-        observed.Add(original);
+        finally
+        {
+            await lifetime.CancelAsync().ConfigureAwait(false);
+            await elapsed.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
     }
 
     private static bool HasExited(Process process, List<Exception> failures)
@@ -147,7 +89,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
         return exited;
     }
 
-    private static async Task WaitForActualExitAsync(Process process, List<Exception> failures, TimeSpan pollInterval)
+    private static async Task WaitForActualExitAsync(Process process, List<Exception> failures, TimeSpan pollInterval, TimeProvider timeProvider)
     {
         const int CompletionCount = 0;
 
@@ -163,7 +105,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
                 failures.AddRange(observations);
                 observationFailureRecorded = true;
             }
-            await Task.Delay(pollInterval).ConfigureAwait(false);
+            await Task.Delay(pollInterval, timeProvider).ConfigureAwait(false);
         }
     }
 

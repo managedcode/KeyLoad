@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentCleanupOperation(string[] streams, IOptions<ComparisonLifecycleOptions> options,
-    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken token) : IDisposable
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken token, TimeProvider? provider = null) : IDisposable
 {
-    private readonly KurrentCleanupState state = new(streams.Length, options, diagnosticOptions);
+    private readonly KurrentCleanupState state = new(streams.Length, options, diagnosticOptions, provider);
     private readonly KurrentCleanupDiagnostics diagnostics = new(diagnosticOptions);
-    private readonly KurrentCleanupCancellation cancellation = new(token: token, options: options);
+    private readonly KurrentCleanupCancellation cancellation = new(token: token, options: options, provider: provider);
     private readonly ComparisonLifecycleOptions settings = options.Value;
     private Task[] workers = [];
     private Task deletion = Task.CompletedTask;

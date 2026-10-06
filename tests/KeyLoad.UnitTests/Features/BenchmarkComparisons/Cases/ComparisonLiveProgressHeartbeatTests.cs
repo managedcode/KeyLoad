@@ -11,8 +11,8 @@ internal sealed class ComparisonLiveProgressHeartbeatTests
     {
         using var file = new ComparisonLiveProgressFile();
         using var releaseOutput = new ManualResetEventSlim();
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ObservationDeadlineSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(ObservationDeadlineSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var heartbeat = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         var writes = 0;
         void Write(string line)

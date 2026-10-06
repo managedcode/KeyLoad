@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using KeyLoad.Core;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -87,7 +87,7 @@ internal sealed class PartitionQueryCancellationObserver
 
     private void WaitForReadProgressAndCancel()
     {
-        var startedAt = Stopwatch.GetTimestamp();
+        var startedAt = new TestElapsedClock(TimeProvider.System);
         while (true)
         {
             var readBytes = budget.ReadBytes;
@@ -110,7 +110,7 @@ internal sealed class PartitionQueryCancellationObserver
                 Record(new InvalidOperationException(ProgressTimeoutMessage));
                 return;
             }
-            if (Stopwatch.GetElapsedTime(startedAt) >= TimeSpan.FromSeconds(TimeoutSeconds))
+            if (startedAt.Elapsed >= TimeSpan.FromSeconds(TimeoutSeconds))
             {
                 RecordAndCancel(new TimeoutException(ProgressTimeoutMessage));
                 return;

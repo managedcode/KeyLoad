@@ -75,7 +75,7 @@ internal static class TwoRf3ClusterResources
         var firstPeer = builder.AddParameter(MembershipPeerParameterName, profile.PeerSecret, secret: true);
         var secondPeer = builder.AddParameter(ParameterPrefix + PeerParameterName, secondPeerSecret, secret: true);
         CryptographicOperations.ZeroMemory(Convert.FromBase64String(secondPeerSecret));
-        var containerUser = ClusterContainerUser.Resolve(builder);
+        var containerUser = ClusterContainerUser.Resolve(builder, TimeProvider.System);
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
         var secondGroup = Nodes[TwoRf3ProfileProtocol.MembersPerGroup..];
         var clusterId = ClusterPrefix + profile.Incarnation.ToString(ResourceIdentityFormat);

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.ExceptionServices;
 using Cartograph.Catalog;
 using Cartograph.Format;
 
@@ -25,23 +26,24 @@ public static class BackupArtifact
     private const string FlatGroupingMode = "flat";
     private const string CanonicalGroupName = "canonical";
     private const string InvalidBackupDirectory = "Pack requires a regular verified KeyLoad backup directory.";
-    private const string NonemptyDestination = "Artifact extraction requires an empty destination.";
-    private const string InvalidCatalog = "The artifact is not a canonical KeyLoad backup.";
-    private const string InvalidLength = "The artifact length does not match its catalog.";
-    private static readonly ImmutableArray<string> CanonicalFileNames = [ManifestFileName, JournalFileName, IdentityFileName];
+    private const string NonemptyDestination = BackupArtifactStageFileSystem.NonemptyDestinationError;
+    internal const string InvalidCatalog = "The artifact is not a canonical KeyLoad backup.";
+    internal const string InvalidLength = "The artifact length does not match its catalog.";
+    internal static readonly ImmutableArray<string> CanonicalFileNames = [ManifestFileName, JournalFileName, IdentityFileName];
 
     /// <summary>Packages the canonical backup files into bounded archive pieces.</summary>
     /// <param name="backupDirectory">Directory containing the verified backup files.</param>
     /// <param name="artifactPath">New archive path.</param>
     /// <param name="pieceBytes">Maximum bytes in each file-backed archive piece.</param>
-    public static void Pack(string backupDirectory, string artifactPath, int pieceBytes)
+    /// <param name="timeProvider">Borrowed catalog clock; defaults to the system provider.</param>
+    public static void Pack(string backupDirectory, string artifactPath, int pieceBytes, TimeProvider? timeProvider = null)
     {
         if (pieceBytes < MinimumPieceBytes || pieceBytes > MaximumPieceBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(pieceBytes));
         }
         var files = GetCanonicalFiles(Path.GetFullPath(backupDirectory));
-        var catalog = CreateCatalog(files, pieceBytes);
+        var catalog = CreateCatalog(files, pieceBytes, timeProvider ?? TimeProvider.System);
         var writer = new SegmentedArtifactWriter();
         PopulateWriter(writer, catalog, files, pieceBytes);
         using var destination = new FileStream(artifactPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
@@ -66,7 +68,7 @@ public static class BackupArtifact
         return files;
     }
 
-    private static FileCatalog CreateCatalog(FileInfo[] files, int pieceBytes)
+    private static FileCatalog CreateCatalog(FileInfo[] files, int pieceBytes, TimeProvider clock)
     {
         var entries = new List<CatalogEntry>();
         var record = FirstCatalogRecordIndex;
@@ -89,7 +91,7 @@ public static class BackupArtifact
         return new FileCatalog
         {
             SourceRoot = CatalogSourceRoot,
-            CreatedUtc = TimeProvider.System.GetUtcNow().UtcDateTime,
+            CreatedUtc = clock.GetUtcNow().UtcDateTime,
             GroupingMode = FlatGroupingMode,
             GroupNames = [CanonicalGroupName],
             Entries = entries
@@ -127,29 +129,29 @@ public static class BackupArtifact
     /// <param name="destination">Empty destination directory.</param>
     public static void Unpack(string artifactPath, string destination)
     {
-        if (Directory.Exists(destination) && Directory.EnumerateFileSystemEntries(destination).Any())
+        var destinationState = BackupArtifactStageFileSystem.CaptureDestination(destination, NonemptyDestination);
+        BackupArtifactStaging? staging = null;
+        Exception? failure = null;
+        try
         {
-            throw Errors.Fail(ErrorCode.Conflict, NonemptyDestination);
+            staging = BackupArtifactExtraction.StageArtifact(artifactPath, destinationState);
+            staging.Publish();
         }
-        using var artifact = CatalogedArtifact.Open(artifactPath);
-        if (!artifact.Entries.Select(entry => entry.RelativePath).Order().SequenceEqual(CanonicalFileNames))
+        catch (Exception operationFailure)
         {
-            throw Errors.Fail(ErrorCode.Validation, InvalidCatalog);
+            failure = operationFailure;
         }
-        Directory.CreateDirectory(destination);
-        if (!OperatingSystem.IsWindows())
+        try
         {
-            File.SetUnixFileMode(destination, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            staging?.Dispose();
         }
-        foreach (var entry in artifact.Entries)
+        catch (Exception cleanupFailure) when (failure is not null)
         {
-            using var file = new FileStream(Path.Combine(destination, entry.RelativePath), FileMode.CreateNew, FileAccess.Write, FileShare.None);
-            if (artifact.CopyTo(entry, file) != entry.Length)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, InvalidLength);
-            }
-            file.Flush(true);
+            throw new AggregateException(failure, cleanupFailure);
         }
-        // The storage restore command verifies the backup's SHA-256 manifest before accepting it.
+        if (failure is not null)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
     }
 }

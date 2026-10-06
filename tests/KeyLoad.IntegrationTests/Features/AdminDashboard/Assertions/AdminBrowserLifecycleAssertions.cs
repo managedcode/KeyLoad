@@ -48,7 +48,7 @@ internal static class AdminBrowserLifecycleAssertions
             await browser.WaitAsync(Hidden, cancellationToken);
             await browser.WaitForNetworkIdleAsync(cancellationToken);
             var before = (await browser.EvaluateAsync(ObservationText, cancellationToken)).GetString();
-            await Task.Delay(PollSuspensionObservation, cancellationToken);
+            await Task.Delay(PollSuspensionObservation, TimeProvider.System, cancellationToken);
             var after = (await browser.EvaluateAsync(ObservationText, cancellationToken)).GetString();
             await Assert.That(after).IsEqualTo(before);
             await browser.CommandAsync(ActivateTarget, new { targetId = originalId }, cancellationToken);

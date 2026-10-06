@@ -1,15 +1,13 @@
-using System.Diagnostics;
-
 namespace KeyLoad.Storage.ZoneTree;
 
-internal sealed class ZoneTreeReadCutWork(ZoneTreeReadCutLimits limits)
+internal sealed class ZoneTreeReadCutWork(ZoneTreeReadCutLimits limits, TimeProvider clock)
 {
     private const int SingleNativeAdvance = 1;
 
     private const string ElapsedExceededMessage = "The native read-cut lease exceeded its elapsed-time budget.";
     private const string RecordsExceededMessage = "The native read-cut lease exceeded its record budget.";
     private const string BytesExceededMessage = "The native read-cut lease exceeded its byte budget.";
-    private readonly long started = Stopwatch.GetTimestamp();
+    private readonly long started = clock.GetTimestamp();
     private long examinedBytes;
     private int records;
     private long advances;
@@ -27,7 +25,7 @@ internal sealed class ZoneTreeReadCutWork(ZoneTreeReadCutLimits limits)
 
     internal void CheckElapsed()
     {
-        if (Stopwatch.GetElapsedTime(started) > limits.MaxElapsed)
+        if (clock.GetElapsedTime(started) > limits.MaxElapsed)
         {
             elapsedFailure ??= Errors.Fail(ErrorCode.BudgetExceeded, ElapsedExceededMessage);
             throw elapsedFailure;

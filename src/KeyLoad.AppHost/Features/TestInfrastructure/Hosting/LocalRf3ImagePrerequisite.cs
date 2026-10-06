@@ -26,7 +26,7 @@ internal static class LocalRf3ImagePrerequisite
             throw new InvalidOperationException(MessageText);
         }
 
-        builder.Services.AddSingleton(new LocalRf3ImageCleanup(execution, scriptPath, AppHostOptionsRegistration.Get(builder).TestExecution));
+        builder.Services.AddSingleton(services => new LocalRf3ImageCleanup(execution, scriptPath, AppHostOptionsRegistration.Get(builder).TestExecution, services.GetRequiredService<TimeProvider>()));
         return builder.AddExecutable(ResourceName, CommandText, root, [scriptPath, ArgsText, execution.Tag, execution.ReceiptPath]);
     }
 }

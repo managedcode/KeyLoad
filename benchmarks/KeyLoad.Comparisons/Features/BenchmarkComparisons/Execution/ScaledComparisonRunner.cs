@@ -4,8 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
+internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const int EmptyCount = 0;
 
     private const int RequiredLatencySampleCount = 4_096;
@@ -18,7 +19,7 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
         const string ClosedLoopScaledS1BoundedNativeReadbackBeforeTimedOperationsContractText = "closed-loop scaled S1; bounded native readback before timed operations";
 
         ScaledComparisonRunnerValidation.Validate(targets, selectedScenario);
-        var started = TimeProvider.System.GetUtcNow();
+        var started = timeProvider.GetUtcNow();
         var corpus = new ScaledComparisonCorpus(profile);
         var cases = await RunTargetsAsync(targets, corpus, selectedScenario, cancellationToken).ConfigureAwait(false);
         return new ComparisonReport(ThirdContractOrdinal, Guid.NewGuid(), started, null, corpus.Sha256,
@@ -71,7 +72,7 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IO
                     continue;
                 }
                 cases.Add(await ScaledComparisonCaseRunner.RunAsync(target: target, corpus: corpus, scenario: scenario,
-                    setupFailure: failure, progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions).ConfigureAwait(false));
+                    setupFailure: failure, progress: progress, cancellationToken: cancellationToken, executionOptions: executionOptions, timeProvider: timeProvider).ConfigureAwait(false));
             }
         }
         return cases;

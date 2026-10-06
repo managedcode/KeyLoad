@@ -95,8 +95,8 @@ internal static class ImageToolingContractNodeProcess
             throw new InvalidOperationException(ProbeFailureMessage);
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ProcessTimeoutSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(ProcessTimeoutSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var stdoutTask = ReadBoundedAsync(process.StandardOutput, deadline.Token);
         var stderrTask = ReadBoundedAsync(process.StandardError, deadline.Token);
         try
@@ -199,7 +199,7 @@ internal static class ImageToolingContractNodeProcess
     {
         try
         {
-            await task.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+            await task.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         }
         catch (OperationCanceledException)
         {

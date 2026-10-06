@@ -118,7 +118,7 @@ internal sealed class EventProjectionRf3LeaderLoss(ClusterFixture fixture)
     {
         try
         {
-            using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(RestartDeadlineSeconds));
+            using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(RestartDeadlineSeconds), TimeProvider.System);
             await fixture.RestartContainerAsync(stoppedNode, recovery.Token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, recovery.Token);

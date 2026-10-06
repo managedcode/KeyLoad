@@ -40,7 +40,7 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
     internal async Task WaitAsync(string expression, CancellationToken cancellationToken)
     {
         while (!(await EvaluateAsync(expression, cancellationToken)).GetBoolean())
-        { await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken); }
+        { await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken); }
     }
 
     internal async Task WaitForNetworkIdleAsync(CancellationToken cancellationToken)
@@ -51,7 +51,7 @@ internal sealed class AdminBrowserCdp : IAsyncDisposable
             await EvaluateAsync(Probe, cancellationToken);
             if (Network.ActiveRequests == 0)
             { return; }
-            await Task.Delay(AdminBrowserProtocol.PollMilliseconds, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(AdminBrowserProtocol.PollMilliseconds), TimeProvider.System, cancellationToken);
         } while (true);
     }
 

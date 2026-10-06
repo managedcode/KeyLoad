@@ -43,7 +43,7 @@ internal static class SiteBrowserNoScriptAssertions
             {
                 return nodeId;
             }
-            await Task.Delay(SiteBrowserUiTokens.NoScriptPollMilliseconds, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserUiTokens.NoScriptPollMilliseconds), TimeProvider.System, cancellationToken);
         }
 
         throw new InvalidOperationException(SiteBrowserTokens.BrowserNoScriptMissing);

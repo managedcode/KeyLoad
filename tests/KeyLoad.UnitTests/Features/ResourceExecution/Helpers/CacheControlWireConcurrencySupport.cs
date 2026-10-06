@@ -42,10 +42,10 @@ internal static class CacheControlWireConcurrencySupport
         owner.DisposeTask = Task.Factory.StartNew(() =>
             CacheControlWireConcurrentWorkers.DisposeDuringWorkers(authenticator, barrier),
             CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        await barrier.Ready.Task.WaitAsync(JoinTimeout);
+        await barrier.Ready.Task.WaitAsync(JoinTimeout, TimeProvider.System);
         barrier.Start.TrySetResult();
-        await owner.WorkerJoin.WaitAsync(JoinTimeout);
-        await owner.DisposeTask.WaitAsync(JoinTimeout);
+        await owner.WorkerJoin.WaitAsync(JoinTimeout, TimeProvider.System);
+        await owner.DisposeTask.WaitAsync(JoinTimeout, TimeProvider.System);
     }
 
     private static async Task DispatchFallbackAsync(CacheControlAuthenticator authenticator,
@@ -60,7 +60,7 @@ internal static class CacheControlWireConcurrencySupport
 
     private static async Task ObserveScenarioAsync(Task scenario, CacheControlWireConcurrentFailures failures)
     {
-        var completed = await Task.WhenAny(scenario, Task.Delay(JoinTimeout));
+        var completed = await Task.WhenAny(scenario, Task.Delay(JoinTimeout, TimeProvider.System));
         if (completed != scenario)
         {
             failures.Add(new TimeoutException(ScenarioTimeoutMessage));
@@ -72,7 +72,7 @@ internal static class CacheControlWireConcurrencySupport
     private static async Task DrainAsync(CacheControlWireConcurrentTaskOwner owner,
         CacheControlWireConcurrentFailures failures)
     {
-        var completed = await Task.WhenAny(owner.CleanupObservation!, Task.Delay(JoinTimeout));
+        var completed = await Task.WhenAny(owner.CleanupObservation!, Task.Delay(JoinTimeout, TimeProvider.System));
         if (completed != owner.CleanupObservation)
         {
             failures.Add(new TimeoutException(OriginalJoinTimeoutMessage));

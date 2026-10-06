@@ -57,7 +57,7 @@ internal sealed class ComparisonProgressFile
         var ownsPending = false;
         try
         {
-            using var deadline = new CancellationTokenSource(WriteDeadline);
+            using var deadline = new CancellationTokenSource(WriteDeadline, TimeProvider.System);
             var directory = Path.GetDirectoryName(path)!;
             RequireUnlinkedAncestors(directory);
             Directory.CreateDirectory(directory);

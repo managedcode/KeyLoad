@@ -48,7 +48,7 @@ internal static class IsolatedRedisResources
         }
         var password = context.Builder.AddParameter(PasswordParameter,
             Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
-        var user = ClusterContainerUser.Resolve(context.Builder);
+        var user = ClusterContainerUser.Resolve(context.Builder, TimeProvider.System);
         IResourceBuilder<RedisResource>? primary = null;
         for (var index = IndexInitialValue; index < context.Selection.NodeCount; index++)
         {

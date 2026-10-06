@@ -93,7 +93,7 @@ internal sealed class IsolatedKeyLoadPublicRegressionMcp : IAsyncDisposable
         var cleanup = pending.AsTask();
         try
         {
-            await cleanup.WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadMcpCleanupTimeout);
+            await cleanup.WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadMcpCleanupTimeout, TimeProvider.System);
         }
         catch (Exception)
         {

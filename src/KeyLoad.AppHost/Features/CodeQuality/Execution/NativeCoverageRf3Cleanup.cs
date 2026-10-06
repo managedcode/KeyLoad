@@ -1,14 +1,16 @@
 using System.Diagnostics;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Processes;
+using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.CodeQuality;
 
 internal sealed class NativeCoverageRf3Cleanup(NativeCoverageRf3Run run,
     NativeCoverageRf3Invocation invocation, IOptions<NativeCoverageExecutionOptions> coverageOptions,
-    IOptions<TestExecutionOptions> executionOptions)
+    IOptions<TestExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string DockerExecutable = "docker";
     private const string RemoveCommand = "image";
     private const string RemoveSubcommand = "rm";
@@ -38,11 +40,10 @@ internal sealed class NativeCoverageRf3Cleanup(NativeCoverageRf3Run run,
         var output = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, execution.CleanupOutputCharacters);
         var error = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardError, execution.CleanupOutputCharacters);
         var exit = process.WaitForExitAsync(CancellationToken.None);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(coverage.ContainerStopTimeout);
+        using var timeout = new AppHostDeadline(coverage.ContainerStopTimeout, timeProvider, cancellationToken);
         try
         {
-            await LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error, timeout.Token).ConfigureAwait(false);
+            await LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             if (process.ExitCode != SuccessfulExitCode)
             {
                 throw new InvalidOperationException(OwnedImageCleanupMessage);
@@ -53,7 +54,7 @@ internal sealed class NativeCoverageRf3Cleanup(NativeCoverageRf3Run run,
         {
             var failures = new List<Exception> { primary };
             await LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures,
-                executionOptions).ConfigureAwait(false);
+                executionOptions, timeProvider).ConfigureAwait(false);
             if (failures.Count == PrimaryFailureCount)
             {
                 throw;

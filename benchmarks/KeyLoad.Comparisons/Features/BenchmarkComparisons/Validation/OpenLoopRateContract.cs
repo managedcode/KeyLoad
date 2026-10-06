@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 
 namespace KeyLoad.Comparisons;
 
@@ -33,11 +32,11 @@ internal static class OpenLoopRateContract
         return checked((long)index * NanosecondsPerSecond) / rate;
     }
 
-    internal static long ToStopwatchTicks(long nanoseconds)
+    internal static long ToTimestampTicks(long nanoseconds, TimeProvider timeProvider)
     {
         var seconds = nanoseconds / NanosecondsPerSecond;
         var remainder = nanoseconds % NanosecondsPerSecond;
-        return checked(seconds * Stopwatch.Frequency
-            + remainder * Stopwatch.Frequency / NanosecondsPerSecond);
+        return checked(seconds * timeProvider.TimestampFrequency
+            + remainder * timeProvider.TimestampFrequency / NanosecondsPerSecond);
     }
 }

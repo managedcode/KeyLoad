@@ -19,7 +19,7 @@ internal static class NodeEpochRegularFileFifoUtility
         var settings = executionOptions.Value;
         var start = CreateStart(path);
         using var process = Process.Start(start) ?? throw new InvalidOperationException(FailedStart);
-        using var timeout = new CancellationTokenSource(settings.FifoExecutionTimeout);
+        using var timeout = new CancellationTokenSource(settings.FifoExecutionTimeout, TimeProvider.System);
         var output = ReadBoundedAsync(process.StandardOutput, executionOptions, timeout.Token);
         var error = ReadBoundedAsync(process.StandardError, executionOptions, timeout.Token);
         Exception? primaryFailure = null;
@@ -80,7 +80,7 @@ internal static class NodeEpochRegularFileFifoUtility
         var settings = executionOptions.Value;
         try
         {
-            using var cleanup = new CancellationTokenSource(settings.FifoCleanupTimeout);
+            using var cleanup = new CancellationTokenSource(settings.FifoCleanupTimeout, TimeProvider.System);
             if (!process.HasExited)
             {
                 process.Kill(entireProcessTree: true);

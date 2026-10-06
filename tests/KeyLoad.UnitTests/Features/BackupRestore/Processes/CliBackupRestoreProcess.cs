@@ -73,8 +73,8 @@ internal static class CliBackupRestoreProcess
     private static async Task<CliBackupRestoreProcessResult?> RunStartedAsync(
         Process process, TestExecutionOptions options, List<Exception> failures, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(options.OrdinaryTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(options.OrdinaryTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var stdout = new CliBackupRestoreProcessOutput(options.CleanupOutputCharacters);
         var stderr = new CliBackupRestoreProcessOutput(options.CleanupOutputCharacters);
         Task? exitTask = null;
@@ -92,7 +92,7 @@ internal static class CliBackupRestoreProcess
 
     private static async Task ObserveUntilDeadlineAsync(Task joined, List<Exception> failures, CancellationToken token)
     {
-        var deadlineSignal = Task.Delay(Timeout.InfiniteTimeSpan, token);
+        var deadlineSignal = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, token);
         _ = await Task.WhenAny(joined, deadlineSignal).ConfigureAwait(false);
         var completed = joined.IsCompleted ? joined : deadlineSignal;
         await ServerFailureObserver.ObserveAsync(() => completed, failures).ConfigureAwait(false);
@@ -104,7 +104,7 @@ internal static class CliBackupRestoreProcess
         if (!joined.IsCompleted)
         {
             ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-            var cleanup = Task.Delay(options.ProcessSettlementTimeout);
+            var cleanup = Task.Delay(options.ProcessSettlementTimeout, TimeProvider.System);
             _ = await Task.WhenAny(joined, cleanup).ConfigureAwait(false);
             if (!joined.IsCompleted)
             {

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using KeyLoad.Replication;
 
 namespace KeyLoad.RecoveryTests.Features.ClusterReplication;
@@ -89,12 +88,13 @@ internal sealed class ReplicaFileReadinessTests
         await fixture.RunAsync(async () =>
         {
             fixture.HoldMetadataWal("replica");
-            var started = Stopwatch.StartNew();
+            var clock = TimeProvider.System;
+            var started = clock.GetTimestamp();
             var readiness = fixture.StartReadiness();
             await Assert.ThrowsExactlyAsync<IOException>(fixture.ObserveReadinessAsync);
             await Assert.That(readiness.IsFaulted).IsTrue();
-            await Assert.That(started.Elapsed).IsGreaterThanOrEqualTo(ReadinessBound);
-            await Assert.That(started.Elapsed).IsLessThanOrEqualTo(ObservationBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsGreaterThanOrEqualTo(ReadinessBound);
+            await Assert.That(clock.GetElapsedTime(started)).IsLessThanOrEqualTo(ObservationBound);
         });
     }
 }

@@ -40,8 +40,8 @@ internal static class SiteNodeProbeExecution
                 throw new InvalidOperationException(SiteTokens.NodeProbeDidNotStart);
             }
 
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
+            using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.NodeTimeoutMilliseconds), TimeProvider.System);
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
             var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded, timeout.Token);
             var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded, timeout.Token);
             try

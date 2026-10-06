@@ -13,8 +13,8 @@ internal static class IsolatedGitHubNativeProcess
             throw new InvalidOperationException(IsolatedGitHubNativeProtocol.Failure);
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.GitHubNativeProcessTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.GitHubNativeProcessTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var output = ImageBundleRealOutput.ReadAsync(process.StandardOutput, deadline.Token);
         var error = ImageBundleRealOutput.ReadAsync(process.StandardError, deadline.Token);
         try
@@ -56,7 +56,7 @@ internal static class IsolatedGitHubNativeProcess
     private static async Task ReapAsync(Process process)
     {
         TryKill(process);
-        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.GitHubNativeProcessCleanupTimeout);
+        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.GitHubNativeProcessCleanupTimeout, TimeProvider.System);
         try
         {
             await process.WaitForExitAsync(cleanup.Token);

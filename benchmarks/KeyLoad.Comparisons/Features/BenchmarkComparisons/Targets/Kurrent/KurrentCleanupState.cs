@@ -1,16 +1,15 @@
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecycleOptions> options,
-    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions)
+    IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider? provider = null)
 {
     private readonly KurrentCleanupDiagnostics diagnostics = new(diagnosticOptions);
     private readonly ComparisonLifecycleOptions settings = options.Value;
     private readonly System.Threading.Lock gate = new();
-    private readonly Stopwatch clock = Stopwatch.StartNew();
+    private readonly ComparisonElapsedMeasurement clock = new(provider ?? TimeProvider.System);
     private int next, submitted, acknowledged, faulted, pending, peak, laterDisposals;
     private ExceptionDispatchInfo? primary;
     private ExceptionDispatchInfo? firstFatal;

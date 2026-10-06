@@ -27,6 +27,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     private RequestCqrsAuthorityOutcomeOracle? outcomeOracle;
     private RequestCqrsProbeMarkerRecord? heldMarker;
     private CancellationTokenSource? operationDeadline;
+    private CancellationTokenSource? operationTimeout;
     private Task<Result<CommitReceipt>>? sdkCall;
     private Task<RequestCqrsFaultMcpObservation>? mcpCall;
     private Guid armId;
@@ -49,18 +50,27 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         }
     }
 
-    internal Task CleanupAsync()
-        => RequestCqrsAuthorityFaultCleanup.RunAsync(root, rootCreated, waveStartupAttempted,
+    internal async Task CleanupAsync()
+    {
+        try
+        {
+            await RequestCqrsAuthorityFaultCleanup.RunAsync(root, rootCreated, waveStartupAttempted,
             controls, wave, caller, administrator, discovery, operationDeadline, sdkCall, mcpCall,
-            armId, originalStarted, outcomeOracle, commandId, Failures, lifecycle.RecordOwnerFailure);
+            armId, originalStarted, outcomeOracle, commandId, Failures, lifecycle.RecordOwnerFailure).ConfigureAwait(false);
+        }
+        finally
+        {
+            operationTimeout?.Dispose();
+        }
+    }
 
     private async Task ExecuteAsync(CancellationToken parentToken)
     {
         lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         root = RequestCqrsAuthorityFaultProvisioning.NewPrivateRootPath();
         RequestCqrsAuthorityFaultProvisioning.CreatePrivateRoot(root, () => rootCreated = true);
-        operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        operationDeadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
+        operationTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken, operationTimeout.Token);
         lifecycle.SetTokens(callerToken, parentToken, operationDeadline.Token);
         await PrepareAsync(operationDeadline.Token).ConfigureAwait(false);
         await RevokeWhileHeldAsync(operationDeadline.Token).ConfigureAwait(false);

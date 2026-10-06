@@ -74,7 +74,7 @@ internal static class NodeEpochRf3ColdScenario
     {
         if (wave is null)
         { return; }
-        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.CleanupDeadline);
+        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.CleanupDeadline, TimeProvider.System);
         await ServerFailureObserver.ObserveAsync(() => wave.RestartPendingAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => wave.StopAsync(deadline.Token), failures).ConfigureAwait(false);
     }

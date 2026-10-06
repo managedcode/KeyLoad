@@ -18,12 +18,24 @@ internal sealed class DatabasePhaseBankConcurrencyTests
     private const long TotalAttempts = UpdateCount + ConcurrentWorkCount - ConcurrentCaptureCount;
 
     [Test]
-    public async Task ConcurrentUpdatesRemainMonotonicAndExposeBoundedContentionLoss()
+    [Arguments(1, 1)]
+    [Arguments(1, 2)]
+    [Arguments(1, 3)]
+    [Arguments(1, 4)]
+    [Arguments(2, 1)]
+    [Arguments(2, 2)]
+    [Arguments(2, 3)]
+    [Arguments(2, 4)]
+    [Arguments(4, 1)]
+    [Arguments(4, 2)]
+    [Arguments(4, 3)]
+    [Arguments(4, 4)]
+    public async Task ConcurrentUpdatesRemainMonotonicAndExposeBoundedContentionLoss(int stripeCount, int maximumCasAttempts)
     {
-        var bank = new DatabasePhaseBank(true);
+        var bank = DatabasePhaseTestComposition.Create(true, stripeCount, maximumCasAttempts);
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(DeadlineMilliseconds), TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(DeadlineMilliseconds);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var options = new ParallelOptions { CancellationToken = deadline.Token };
         var first = bank.Capture();
         var midpoint = UpdateCount / 2;

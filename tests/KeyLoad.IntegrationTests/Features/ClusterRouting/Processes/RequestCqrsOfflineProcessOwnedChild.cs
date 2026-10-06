@@ -50,10 +50,10 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
     {
         var marker = ArgumentForMarker(start);
         var nonce = ArgumentForNonce(start);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation.Token);
-        deadline.CancelAfter(RequestCqrsOfflineProcessProtocol.MarkerDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsOfflineProcessProtocol.MarkerDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation.Token, deadlineTimeout.Token);
         while (!File.Exists(marker))
-        { await Task.Delay(TimeSpan.FromMilliseconds(20), deadline.Token).ConfigureAwait(false); }
+        { await Task.Delay(TimeSpan.FromMilliseconds(20), TimeProvider.System, deadline.Token).ConfigureAwait(false); }
         var contents = await ReadMarkerAsync(marker, deadline.Token).ConfigureAwait(false);
         var values = contents.Split(':', StringSplitOptions.None);
         if (values.Length != 2 || values[1] != nonce

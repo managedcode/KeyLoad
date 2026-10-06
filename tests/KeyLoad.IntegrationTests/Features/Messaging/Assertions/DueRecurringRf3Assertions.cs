@@ -16,7 +16,7 @@ internal static class DueRecurringRf3Assertions
         var remaining = dueAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
         {
-            await Task.Delay(remaining, cancellationToken);
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken);
         }
     }
 
@@ -36,7 +36,7 @@ internal static class DueRecurringRf3Assertions
             {
                 throw new InvalidOperationException("The autonomous schedule advanced beyond its single due ordinal.");
             }
-            await Task.Delay(DueRecurringRf3Protocol.PollInterval, cancellationToken);
+            await Task.Delay(DueRecurringRf3Protocol.PollInterval, TimeProvider.System, cancellationToken);
         }
         throw new TimeoutException("The autonomous schedule did not advance within its bounded RF3 window.");
     }

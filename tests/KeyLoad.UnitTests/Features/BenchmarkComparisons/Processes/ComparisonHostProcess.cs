@@ -26,14 +26,14 @@ internal static class ComparisonHostProcess
             throw new InvalidOperationException(StartupFailureMessage);
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(StartupTimeoutSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         using var captureLifetime = new CancellationTokenSource();
         var stdout = new ComparisonHostOutputCapture();
         var stderr = new ComparisonHostOutputCapture();
         var stdoutTask = stdout.CaptureAsync(process.StandardOutput, captureLifetime.Token);
         var stderrTask = stderr.CaptureAsync(process.StandardError, captureLifetime.Token);
         var captures = Task.WhenAll(stdoutTask, stderrTask);
-        deadline.CancelAfter(TimeSpan.FromSeconds(StartupTimeoutSeconds));
         var stage = ComparisonHostStartupStage.Unavailable;
         try
         {
@@ -59,7 +59,7 @@ internal static class ComparisonHostProcess
     {
         try
         {
-            await capture.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+            await capture.WaitAsync(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         }
         catch (OperationCanceledException)
         {
@@ -83,7 +83,7 @@ internal static class ComparisonHostProcess
 
     private static async Task ObserveExitAsync(Process process)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds));
+        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
         try
         {
             await process.WaitForExitAsync(cleanup.Token);

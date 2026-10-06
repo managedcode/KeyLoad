@@ -22,7 +22,7 @@ internal static class OpenLoopPlanCancellationFlow
             original = OpenLoopPlanNodeProcess.RunAsync(executionOptions, OpenLoopPlanNodeProgram.CancelBeforePublishOperation,
                 input: null, outputPath: outputPath, keepStandardInputOpen: true, ready: ready,
                 cancellationToken: cancellation.Token);
-            await ready.Task.WaitAsync(options.ProcessTimeout, cancellationToken).ConfigureAwait(false);
+            await ready.Task.WaitAsync(options.ProcessTimeout, TimeProvider.System, cancellationToken).ConfigureAwait(false);
             await cancellation.CancelAsync().ConfigureAwait(false);
             try
             {

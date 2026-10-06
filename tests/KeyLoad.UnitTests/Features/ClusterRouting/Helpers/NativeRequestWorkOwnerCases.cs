@@ -68,7 +68,7 @@ internal static class NativeRequestWorkOwnerCases
                 firstDrain = owner.DrainAsync();
                 var secondDrain = owner.DrainAsync();
                 await Assert.That(secondDrain).IsSameReferenceAs(firstDrain);
-                await cancellationObserved.Task.WaitAsync(DrainBound);
+                await cancellationObserved.Task.WaitAsync(DrainBound, TimeProvider.System);
                 await Assert.That(owner.ShutdownToken.IsCancellationRequested).IsTrue();
                 await Assert.That(owner.IsJoined).IsFalse();
                 await Assert.That(firstDrain.IsCompleted).IsFalse();
@@ -84,7 +84,7 @@ internal static class NativeRequestWorkOwnerCases
 
         await Assert.That(owner.IsJoined).IsTrue();
         await Assert.That(owner.DrainAsync()).IsSameReferenceAs(firstDrain!);
-        await owner.DisposeAsync().AsTask().WaitAsync(DrainBound);
+        await owner.DisposeAsync().AsTask().WaitAsync(DrainBound, TimeProvider.System);
     }
 
     internal static async Task AssertCallbackFailureJoinsLiveLeaseAsync()
@@ -112,7 +112,7 @@ internal static class NativeRequestWorkOwnerCases
                 disposal = owner.DisposeAsync().AsTask();
                 repeatedDisposal = owner.DisposeAsync().AsTask();
                 await Assert.That(repeatedDisposal).IsSameReferenceAs(disposal);
-                await callbackEntered.Task.WaitAsync(DrainBound);
+                await callbackEntered.Task.WaitAsync(DrainBound, TimeProvider.System);
                 await registration.DisposeAsync();
                 await Assert.That(drain.IsCompleted).IsFalse();
                 await Assert.That(disposal.IsCompleted).IsFalse();

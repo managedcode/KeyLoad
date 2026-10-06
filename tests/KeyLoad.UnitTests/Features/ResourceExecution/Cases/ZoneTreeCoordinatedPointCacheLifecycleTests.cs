@@ -88,10 +88,10 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifecycleTests
             {
                 factory = StartFactory(store, fixture, permit, start, SignalReady);
                 dispose = StartDispose(store, start, SignalReady);
-                await ready.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+                await ready.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
                 start.TrySetResult();
-                var created = await factory.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
-                await dispose.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+                var created = await factory.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
+                await dispose.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
                 result = new FactoryRaceResult(created.Result, created.Control);
             }, failures);
         }
@@ -118,7 +118,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifecycleTests
         => ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() =>
         {
             signalReady();
-            start.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit).GetAwaiter().GetResult();
+            start.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
             var result = store.TryCreateCoordinatedPointCache(fixture.CreateOptions(), permit, out var control);
             return (result, control);
         });
@@ -127,7 +127,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheLifecycleTests
         => ZoneTreeCoordinatedPointCacheTestSupport.StartLongRunning(() =>
         {
             signalReady();
-            start.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit).GetAwaiter().GetResult();
+            start.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System).GetAwaiter().GetResult();
             store.Dispose();
             return true;
         });

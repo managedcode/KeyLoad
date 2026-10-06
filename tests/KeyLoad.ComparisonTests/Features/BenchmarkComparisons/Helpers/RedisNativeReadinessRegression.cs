@@ -89,8 +89,8 @@ internal static class RedisNativeReadinessRegression
         var payload = Guid.NewGuid().ToString(GuidFormat);
         await Assert.That(await database.KeyExistsAsync(absent, CommandFlags.DemandMaster)).IsFalse();
         token.ThrowIfCancellationRequested();
-        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
-        cancellation.CancelAfter(cancellationDelay);
+        using var cancellationTimeout = new CancellationTokenSource(cancellationDelay, TimeProvider.System);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, cancellationTimeout.Token);
         var original = RedisCopyObservation.VerifyDirectCopiesAsync(clients.Replicas, clients.ReplicaEndpoints,
             database.Database, absent, payload, NativeExecutionPolicyFixture.Lifecycle(), cancellation.Token);
         await Assert.That(async () => await original).Throws<OperationCanceledException>();

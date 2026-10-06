@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.Comparers;
@@ -15,6 +14,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private const string SeedLengthMessage = "The generated seed length differs from the immutable value arena.";
     private const string DeadlineMessage = "The scaled preparation deadline expired.";
     private const string ResidenceMessage = "ZoneTree moved scaled records outside the bounded mutable segment.";
+    private readonly TimeProvider timeProvider;
     private readonly ScaledStorageExecutionOptions settings;
     private readonly ScaledRawStorageCorpus _corpus;
     private readonly ScaledRawStorageValueArena _arena;
@@ -25,8 +25,9 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private IZoneTree<Memory<byte>, Memory<byte>>? _tree;
 
     internal ScaledRawStorageZoneTreeEngine(ScaledRawStorageCorpus corpus, ScaledRawStorageValueArena arena,
-        byte[] readScratch, long deadlineStart, IOptions<ScaledStorageExecutionOptions> executionOptions, CancellationToken token)
+        byte[] readScratch, long deadlineStart, IOptions<ScaledStorageExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken token)
     {
+        this.timeProvider = timeProvider;
         ArgumentNullException.ThrowIfNull(executionOptions);
         settings = executionOptions.Value;
         settings.Validate();
@@ -124,7 +125,7 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
     private void CheckPreparation()
     {
         _token.ThrowIfCancellationRequested();
-        if (Stopwatch.GetElapsedTime(_deadlineStart) >= settings.PreparationTimeout)
+        if (timeProvider.GetElapsedTime(_deadlineStart) >= settings.PreparationTimeout)
         {
             throw new TimeoutException(DeadlineMessage);
         }

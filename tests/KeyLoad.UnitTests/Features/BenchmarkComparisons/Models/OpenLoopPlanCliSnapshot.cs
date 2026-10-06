@@ -21,4 +21,5 @@ internal sealed record OpenLoopPlanCliSnapshot(
     JsonObject Plan,
     JsonArray ScaledPlans,
     JsonArray VectorPlans,
+    JsonObject ProjectedMatrices,
     JsonObject Matrices);

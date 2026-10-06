@@ -45,7 +45,7 @@ internal sealed class NodeEpochRf3Callers : IAsyncDisposable
     private async Task DisposeMcpBoundedAsync()
     {
         var disposal = Mcp.DisposeAsync().AsTask();
-        var timeout = Task.Delay(NodeEpochRf3Protocol.CleanupDeadline);
+        var timeout = Task.Delay(NodeEpochRf3Protocol.CleanupDeadline, TimeProvider.System);
         if (await Task.WhenAny(disposal, timeout).ConfigureAwait(false) != disposal)
         {
             _ = disposal.ContinueWith(static task => _ = task.Exception,

@@ -29,7 +29,7 @@ internal sealed class ZoneTreeReadCutLifecycle
                 throw Errors.Fail(ErrorCode.ResourceExhausted, SlotBusyMessage);
             }
 
-            lease = new ZoneTreeReadCutLease(limits, Release, cancellationToken);
+            lease = new ZoneTreeReadCutLease(limits, Release, runtime.Clock, cancellationToken);
             active = lease;
         }
 

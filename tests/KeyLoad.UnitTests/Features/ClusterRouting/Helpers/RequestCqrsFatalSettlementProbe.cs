@@ -87,7 +87,7 @@ internal static class RequestCqrsFatalSettlementProbe
         try
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
-            await Task.Delay(Timeout.InfiniteTimeSpan, writer.CancellationToken);
+            await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, writer.CancellationToken);
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
         }
         finally

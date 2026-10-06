@@ -63,7 +63,7 @@ internal sealed class AspireFailureDependencyTests
             await fixture.PublishAsync(fixture.Bootstrap, KnownResourceStates.Finished, expectedExit).WaitAsync(deadline.Token);
             await Assert.That(completion.IsCompleted).IsFalse();
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, 17).WaitAsync(deadline.Token);
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(17);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(17);
         }
         finally
         {

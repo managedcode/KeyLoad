@@ -47,8 +47,8 @@ internal sealed class NativeTextProjectionDisposalTests
     private static async Task DrainConcurrentCallersAsync(TestDatabase database, NativeTextProjection projection,
         RankedDocument document, CancellationToken cancellation)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
-        deadline.CancelAfter(WaitLimit);
+        using var deadlineTimeout = new CancellationTokenSource(WaitLimit, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation, deadlineTimeout.Token);
         var scope = CaptureScope(database);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         using var lease = projection.Acquire(scope, budget);
@@ -64,7 +64,7 @@ internal sealed class NativeTextProjectionDisposalTests
             lease.VerifyCandidates([Query], [document.Document.Reference], budget);
         }, failures);
         ServerFailureObserver.Observe(lease.Dispose, failures);
-        await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(disposals).WaitAsync(WaitLimit), failures);
+        await ServerFailureObserver.ObserveAsync(() => Task.WhenAll(disposals).WaitAsync(WaitLimit, TimeProvider.System), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
@@ -86,7 +86,7 @@ internal sealed class NativeTextProjectionDisposalTests
             {
                 // The held native lease saturates this generation until shutdown fences admission.
             }
-            await Task.Delay(AdmissionPollMilliseconds, cancellation);
+            await Task.Delay(TimeSpan.FromMilliseconds(AdmissionPollMilliseconds), TimeProvider.System, cancellation);
         }
     }
 

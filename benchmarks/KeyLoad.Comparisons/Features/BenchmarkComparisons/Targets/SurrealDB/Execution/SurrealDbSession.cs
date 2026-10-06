@@ -5,8 +5,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class SurrealDbSession(HttpClient http, string table, string edge, int count, int depth, int topK, IOptions<NativeComparisonExecutionOptions> executionOptions) : IComparisonSession
+internal sealed class SurrealDbSession(HttpClient http, string table, string edge, int count, int depth, int topK, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonSession
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private NativeComparisonExecutionOptions Policy => executionOptions.Value;
     private const string NativeSELECTKeyPayloadFROMFormatTemplate = "SELECT key, payload FROM {0}:{1};";
     private static readonly System.Text.CompositeFormat NativeSELECTKeyPayloadFROMFormat = System.Text.CompositeFormat.Parse(NativeSELECTKeyPayloadFROMFormatTemplate);
@@ -19,7 +20,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     private static readonly System.Text.CompositeFormat NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat = System.Text.CompositeFormat.Parse(NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate);
     public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadFROMFormat, table, SurrealDbDocumentSql.Key(document.Id)), Policy, cancellationToken).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadFROMFormat, table, SurrealDbDocumentSql.Key(document.Id)), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (rows.GetArrayLength() > SingleResultCardinality)
         {
@@ -34,7 +35,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
         var seen = EmptyResultCount;
         while (true)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormat, table, after, Policy.ReadbackBatchCapacity, SurrealDbReadbackIndex.Name(table)), Policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadNumberFROMWHERENumberORDERFormat, table, after, Policy.ReadbackBatchCapacity, SurrealDbReadbackIndex.Name(table)), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
             if (rows.GetArrayLength() == EmptyResultCount)
             {
@@ -76,13 +77,13 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
 
         if (scenario is Scenario.GraphNeighbors or Scenario.GraphTraverse)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Graph(table, edge, document.Id, scenario == Scenario.GraphNeighbors ? SingleResultCardinality : depth), Policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Graph(table, edge, document.Id, scenario == Scenario.GraphNeighbors ? SingleResultCardinality : depth), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             return new(Vertices: SurrealDbVectorProtocol.SingleResult(response.RootElement).EnumerateArray().Select(id => id.GetString()!).ToImmutableArray());
         }
 
         if (scenario == Scenario.VectorExact)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat, table, topK, JsonSerializer.Serialize(document.Vector), topK), Policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeSELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat, table, topK, JsonSerializer.Serialize(document.Vector), topK), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             return new(Neighbors: SurrealDbVectorProtocol.SingleResult(response.RootElement).EnumerateArray().Select(Read).ToImmutableArray());
         }
 
@@ -92,7 +93,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     private async Task MutateAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)
     {
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Mutation(table, scenario, document), Policy, token, create: scenario == Scenario.DocumentWrite).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Mutation(table, scenario, document), Policy, cancellationToken: token, create: scenario == Scenario.DocumentWrite, timeProvider: timeProvider).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         var affected = result.ValueKind == JsonValueKind.Object ? SingleResultCardinality : result.GetArrayLength();
         if (affected != SingleResultCardinality)
@@ -101,5 +102,5 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
         }
     }
 
-    private static FoundDocument Read(JsonElement row) => new(row.GetProperty(SurrealDbNativeTokens.TokenKey).GetString()!, row.GetProperty(SurrealDbNativeTokens.TokenPayload).GetString()!);
+    private FoundDocument Read(JsonElement row) => new(row.GetProperty(SurrealDbNativeTokens.TokenKey).GetString()!, row.GetProperty(SurrealDbNativeTokens.TokenPayload).GetString()!);
 }

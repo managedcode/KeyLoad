@@ -8,12 +8,14 @@ internal sealed class NativeReadCutFixture : IDisposable
     private const string DirectoryPrefix = "keyload-native-read-cut-";
     private const string Prefix = "doc/";
     private readonly List<ZoneTreeStore> opened = [];
+    private readonly TimeProvider clock;
 
     internal string DirectoryPath { get; } = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
     internal ZoneTreeStore Store { get; private set; }
 
-    internal NativeReadCutFixture()
+    internal NativeReadCutFixture(TimeProvider? timeProvider = null)
     {
+        clock = timeProvider ?? TimeProvider.System;
         Store = Open();
     }
 
@@ -47,7 +49,7 @@ internal sealed class NativeReadCutFixture : IDisposable
 
     private ZoneTreeStore Open()
     {
-        var store = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        var store = new ZoneTreeStore(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), clock);
         opened.Add(store);
         return store;
     }

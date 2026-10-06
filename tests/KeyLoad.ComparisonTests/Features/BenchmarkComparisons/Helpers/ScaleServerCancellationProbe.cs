@@ -106,7 +106,7 @@ internal static class ScaleServerCancellationProbe
         ScaleServerResourceEvidenceCollector collector, Task observation, CancellationToken token)
     {
         await Task.Delay(app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>().Value.Cadence
-            * (ScaleServerResourceBounds.MinimumSamples + AdditionalSampleCount) + app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ProcessSettlementTimeout, token);
+            * (ScaleServerResourceBounds.MinimumSamples + AdditionalSampleCount) + app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ProcessSettlementTimeout, TimeProvider.System, token);
         await caller.CancelAsync();
         var completion = collector.CompleteAsync(observation);
         await Assert.That(ReferenceEquals(completion, collector.CompleteAsync(observation))).IsTrue();

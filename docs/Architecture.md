@@ -1,5 +1,11 @@
 # KeyLoad architecture and ownership map
 
+[ResourceExecution TimeProvider](Features/ResourceExecution/TimeProvider.md) and
+[ADR-115](ADR/ADR-115-time-provider.md) require explicitly owned clocks for UTC
+timestamps, monotonic budgets, delays and timers. Composition selects the native
+system provider; tests may control the same native API while retaining real
+database/storage/replication operations. Implementation verification is pending.
+
 [ADR-113](ADR/ADR-113-centralized-runtime-options.md) requires the complete runtime
 literal migration and centralized validated native IOptions for operational policy.
 Immutable endpoint/method/format identities use constants/nameof; timeout and

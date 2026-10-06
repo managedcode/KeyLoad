@@ -22,7 +22,7 @@ internal static class ScaledRawStorageSnapshotFactory
             NativeResidentRecords = native.ResidentRecords,
             SeedElapsedTicks = fixture.SeedElapsedTicks,
             VerificationElapsedTicks = fixture.VerificationElapsedTicks,
-            StopwatchFrequency = System.Diagnostics.Stopwatch.Frequency,
+            StopwatchFrequency = fixture.TimeProvider.TimestampFrequency,
             EffectiveMemoryCapacityBytes = available,
             ProcessMemoryCeilingBytes = fixture.ProcessMemoryCeilingBytes,
             ProcessWorkingSetBytes = workingSet

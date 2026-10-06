@@ -98,7 +98,7 @@ internal static class NodeEpochRf3StatusOracle
             }
             if (allReady)
             { return; }
-            await Task.Delay(TimeSpan.FromMilliseconds(250), cancellationToken).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
 }

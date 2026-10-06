@@ -17,7 +17,7 @@ internal sealed class ComparisonProgressFileTests
         var observer = new ComparisonProgressFile(path);
         try
         {
-            using var deadline = new CancellationTokenSource(Deadline);
+            using var deadline = new CancellationTokenSource(Deadline, TimeProvider.System);
             observer.Observe(First);
             await WaitForSnapshotAsync(path, First, deadline.Token);
             observer.Observe(First + " private=payload");
@@ -33,7 +33,7 @@ internal sealed class ComparisonProgressFileTests
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }
@@ -46,7 +46,7 @@ internal sealed class ComparisonProgressFileTests
         var observer = new ComparisonProgressFile(path);
         try
         {
-            using var deadline = new CancellationTokenSource(Deadline);
+            using var deadline = new CancellationTokenSource(Deadline, TimeProvider.System);
             await Task.WhenAll(Enumerable.Range(0, 100).Select(index => Task.Run(() => observer.Observe(
                 First.Replace("completed=0", "completed=" + (index % 10).ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal)), deadline.Token)));
             observer.Observe(Last);
@@ -58,7 +58,7 @@ internal sealed class ComparisonProgressFileTests
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }
@@ -73,13 +73,13 @@ internal sealed class ComparisonProgressFileTests
         try
         {
             observer.Observe(First);
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             await Assert.That(observer.HasWriteFailure).IsTrue();
             await Assert.That(await File.ReadAllTextAsync(blocked)).IsEqualTo("occupied");
         }
         finally
         {
-            await observer.StopAsync().WaitAsync(Deadline);
+            await observer.StopAsync().WaitAsync(Deadline, TimeProvider.System);
             root.Delete(recursive: true);
         }
     }
@@ -93,7 +93,7 @@ internal sealed class ComparisonProgressFileTests
             {
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(10), token);
+            await Task.Delay(TimeSpan.FromMilliseconds(10), TimeProvider.System, token);
         }
     }
 

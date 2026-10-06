@@ -10,11 +10,13 @@ namespace KeyLoad.Orleans;
 /// <param name="discovery">The authenticated fixed-voter runtime-address resolver.</param>
 /// <param name="authentication">The request/reply envelope signer and verifier.</param>
 /// <param name="transportOptions">Centrally validated attempt and envelope bounds.</param>
+/// <param name="clock">Borrowed runtime clock for the bounded RPC deadline.</param>
 public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOptions<ReplicaConfiguration> configurationOptions,
     ReplicaSiloDiscoveryClient discovery, ReplicaEnvelopeAuthenticator authentication,
-    IOptions<ReplicaTransportOptions> transportOptions)
+    IOptions<ReplicaTransportOptions> transportOptions, TimeProvider? clock = null)
     : GrainServiceClient<IPartitionReplicaGrainService>(services), IReplicaTransport
 {
+    private readonly TimeProvider time = clock ?? TimeProvider.System;
     private readonly ReplicaConfiguration configuration = configurationOptions.Value;
     private readonly ReplicaTransportOptions settings = transportOptions.Value;
     /// <summary>Transports exact native bytes and retries only fenced/unavailable generation failures.</summary>
@@ -30,8 +32,8 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOption
         const int AttemptStep = 1;
 
         var payload = EncodePayload(payloadBytes);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(configuration.RpcTimeout);
+        using var timeout = new CancellationTokenSource(configuration.RpcTimeout, time);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             var maximumAttempts = settings.MaximumAttempts;

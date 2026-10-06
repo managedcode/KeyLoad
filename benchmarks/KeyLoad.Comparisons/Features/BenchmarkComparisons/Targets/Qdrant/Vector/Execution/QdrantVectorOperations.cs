@@ -6,8 +6,9 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nodes, string collection,
     string image, ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions) : IAsyncDisposable
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
 
     private bool created;
     private int loaded;
@@ -35,7 +36,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
             write_consistency_factor = count / QdrantVectorProtocol.QuorumDivisor + QdrantVectorProtocol.MajorityIncrement,
             hnsw_config = new { m = QdrantVectorProtocol.DisabledIndex },
             optimizers_config = new { indexing_threshold = QdrantVectorProtocol.DisabledIndex }
-        }, executionOptions, token);
+        }, executionOptions, token: token, timeProvider: timeProvider);
         var batch = new List<VectorDocument>(executionOptions.Value.WriteBatchCapacity);
         await foreach (var document in documents.WithCancellation(token))
         {
@@ -46,7 +47,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         if (batch.Count > QdrantVectorProtocol.EmptyCount)
         { await WriteBatchAsync(batch, token); loaded += batch.Count; }
         var proof = await QdrantReplicaProof.VerifyAsync(clients: nodes, collection: collection, expectedPoints: loaded, topology: topology,
-            cancellationToken: token, lifecycleOptions: lifecycleOptions);
+            cancellationToken: token, lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
         Profile = Profile with
         {
             Version = proof.Version,
@@ -72,7 +73,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
                 mixed = document.Number % QdrantVectorProtocol.MutableDivisor != QdrantVectorProtocol.MutableRemainder
             }
         }).ToArray();
-        using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, Path + QdrantVectorProtocol.PointsPath + WriteSuffix, new { points }, executionOptions, token);
+        using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, Path + QdrantVectorProtocol.PointsPath + WriteSuffix, new { points }, executionOptions, token: token, timeProvider: timeProvider);
     }
 
     internal async Task<VectorIndexReceipt> BuildIndexAsync(VectorComparisonProfile profile, CancellationToken token)
@@ -82,7 +83,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
             throw new ComparisonFailureException(QdrantVectorProtocol.ProfileMismatch);
         }
         kind = profile.IndexKind;
-        return await QdrantVectorIndex.BuildAsync(client, nodes, collection, profile, executionOptions, token);
+        return await QdrantVectorIndex.BuildAsync(client, nodes, collection, profile, executionOptions, token: token, timeProvider: timeProvider);
     }
 
     internal async IAsyncEnumerable<VectorReadback> ReadbackAsync([EnumeratorCancellation] CancellationToken token)
@@ -92,7 +93,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         do
         {
             using var page = await QdrantVectorHttp.SendAsync(client, HttpMethod.Post, Path + QdrantVectorProtocol.ScrollPath + ReadSuffix,
-                new { limit = executionOptions.Value.ReadbackBatchCapacity, offset, with_vector = true, with_payload = true }, executionOptions, token);
+                new { limit = executionOptions.Value.ReadbackBatchCapacity, offset, with_vector = true, with_payload = true }, executionOptions, token: token, timeProvider: timeProvider);
             var result = page.RootElement.GetProperty(QdrantVectorProtocol.Result);
             var points = result.GetProperty(QdrantVectorProtocol.Points);
             if (points.GetArrayLength() > executionOptions.Value.ReadbackBatchCapacity)
@@ -125,7 +126,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
             throw new ArgumentOutOfRangeException(nameof(topK));
         }
         using var response = await QdrantVectorHttp.SendAsync(client, HttpMethod.Post, Path + QdrantVectorProtocol.QueryPath + ReadSuffix,
-            QdrantVectorQueries.Request(query, topK, kind, mode), executionOptions, token);
+            QdrantVectorQueries.Request(query, topK, kind, mode), executionOptions, token: token, timeProvider: timeProvider);
         var points = response.RootElement.GetProperty(QdrantVectorProtocol.Result).GetProperty(QdrantVectorProtocol.Points);
         if (points.GetArrayLength() > topK)
         {
@@ -138,7 +139,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
 
     internal async Task<string> ExplainAsync(VectorQueryMode mode, CancellationToken token)
     {
-        using var native = await QdrantVectorHttp.SendAsync(client, HttpMethod.Get, Path, null, executionOptions, token);
+        using var native = await QdrantVectorHttp.SendAsync(client, HttpMethod.Get, Path, null, executionOptions, token: token, timeProvider: timeProvider);
         return JsonSerializer.Serialize(new
         {
             collection = native.RootElement.GetProperty(QdrantVectorProtocol.Result),
@@ -154,13 +155,13 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
             throw new ArgumentException(QdrantVectorProtocol.InvalidUpdate, nameof(update));
         }
         using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Put, Path + QdrantVectorProtocol.UpdatePath + WriteSuffix,
-            new { points = new[] { new { id = (long)update.Number + QdrantVectorProtocol.PointOrdinalOffset, vector = update.Embedding.ToArray() } } }, executionOptions, token);
+            new { points = new[] { new { id = (long)update.Number + QdrantVectorProtocol.PointOrdinalOffset, vector = update.Embedding.ToArray() } } }, executionOptions, token: token, timeProvider: timeProvider);
     }
 
     internal async Task<VectorReadback?> ReadAsync(string id, CancellationToken token)
     {
         using var response = await QdrantVectorHttp.SendAsync(client, HttpMethod.Post, Path + QdrantVectorProtocol.PointsPath + ReadSuffix,
-            new { ids = new[] { (long)QdrantVectorReadback.Number(id) + QdrantVectorProtocol.PointOrdinalOffset }, with_vector = true, with_payload = true }, executionOptions, token);
+            new { ids = new[] { (long)QdrantVectorReadback.Number(id) + QdrantVectorProtocol.PointOrdinalOffset }, with_vector = true, with_payload = true }, executionOptions, token: token, timeProvider: timeProvider);
         var points = response.RootElement.GetProperty(QdrantVectorProtocol.Result);
         if (points.GetArrayLength() > QdrantVectorProtocol.SingleShard)
         {
@@ -175,8 +176,8 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         {
             return;
         }
-        using var deadline = new CancellationTokenSource(executionOptions.Value.CleanupTimeout);
-        using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Delete, Path, null, executionOptions, deadline.Token);
+        using var deadline = new CancellationTokenSource(executionOptions.Value.CleanupTimeout, timeProvider);
+        using var receipt = await QdrantVectorHttp.SendAsync(client, HttpMethod.Delete, Path, null, executionOptions, token: deadline.Token, timeProvider: timeProvider);
         created = false;
     }
 }

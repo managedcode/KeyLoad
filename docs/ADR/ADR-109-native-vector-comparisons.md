@@ -87,3 +87,25 @@ policy join specified in VectorQualification TASK-VQ-POLICY-001. The comparison
 host centrally binds and validates IOptions; adapters consume typed policy and
 retain effective limits. Immutable profile/corpus/index identities stay frozen.
 No unrelated product configuration or protocol migration is authorized here.
+
+TASK-VQ-JOB-001 repairs the image preparation/current-job authority join under
+AC-VQ-007 and AC-ISO-006/007. Image preparation selects the original control
+cohort without a workload cell; worker selection binds the canonical cell,
+job name and profile before the unchanged authenticated GitHub transport.
+The exact selection, rejection and real-operation test contract is specified
+in VectorQualification. The lead owns docs and final integration; the tooling
+worker owns the selection helper and its focused Node/TUnit regressions.
+
+TASK-VQ-NEST-001 repairs the nested native fixture's test-selector composition
+under AC-VQ-005 and the existing Aspire-owned test boundary in ADR-074. Cleared
+environment selectors are unselected; explicit empty CLI selections and
+conflicting native workloads remain rejected. Its exact scope, reproduced
+baseline and real composition/native-flow checks are in VectorQualification.
+
+TASK-VQ-CLOCK-001 joins the native target/session and vector factory provider
+propagation under AC-VQ-005/006 and the owning clock contract in ADR-113. The
+worker owns the bounded propagation and native flow observations; the lead
+owns integration, canonical build/format, actual Aspire flows and exact-source
+Linux qualification. Preserve per-instance validated vector options and actual
+native state, data, cancellation and index contracts. VectorQualification
+defines the exact provider observations and preserved-state negative flow.

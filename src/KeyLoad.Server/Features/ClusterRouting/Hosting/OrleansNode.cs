@@ -13,11 +13,13 @@ namespace KeyLoad.Server;
 /// <param name="loggerFactory">Shared process diagnostics, owned by the outer application.</param>
 /// <param name="membershipAuthority">Borrowed discovery authority, drained before the native silo stops.</param>
 /// <param name="runtimeOptions">Shared validated options snapshots borrowed by the native silo.</param>
+/// <param name="clock">Borrowed runtime clock for the silo and its shutdown deadlines.</param>
 internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions> nodeOptions,
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
-    ServerRuntimeOptions runtimeOptions) : IAsyncDisposable
+    ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null) : IAsyncDisposable
 {
     private NodeOptions Options => nodeOptions.Value;
+    private readonly TimeProvider runtimeClock = clock ?? TimeProvider.System;
     private readonly Lock lifecycle = new();
     private readonly NativeRequestWorkOwner requestWork = new(runtimeOptions.GrainRouting);
     private readonly OrleansNodeRequestExecutor requests = new(runtimeOptions.GrainRouting,
@@ -95,7 +97,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         await registered.ConfigureAwait(false);
         var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
         var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
-            address, runtimeOptions, cancellationToken);
+            address, runtimeOptions, runtimeClock, cancellationToken);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
         Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
@@ -208,7 +210,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private async Task StopHostAsync(IHost stopping, List<Exception> failures)
     {
         var shutdownTimeout = runtimeOptions.Membership.Value.ShutdownTimeout;
-        using var deadline = new CancellationTokenSource(shutdownTimeout);
+        using var deadline = new CancellationTokenSource(shutdownTimeout, runtimeClock);
         await ServerFailureObserver.ObserveAsync(() => stopping.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
         if (!requestWork.IsJoined)

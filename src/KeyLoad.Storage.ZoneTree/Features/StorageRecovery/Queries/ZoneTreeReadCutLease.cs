@@ -15,11 +15,11 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     private readonly ZoneTreeReadCutLeaseState state = new();
 
     internal ZoneTreeReadCutLease(ZoneTreeReadCutLimits limits, Action<ZoneTreeReadCutLease> release,
-        CancellationToken cancellationToken)
+        TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         this.release = release;
+        work = new(limits, timeProvider);
         cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        work = new(limits);
     }
 
     internal ZoneTreeNativeReadCut Cut => state.Cut;

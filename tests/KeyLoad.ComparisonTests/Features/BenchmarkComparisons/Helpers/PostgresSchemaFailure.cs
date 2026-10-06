@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 using Npgsql;
@@ -66,8 +65,9 @@ internal static class PostgresSchemaFailure
         CancellationToken cancellationToken)
     {
         var policy = NativeExecutionPolicyFixture.Harness().Value;
-        var started = Stopwatch.GetTimestamp();
-        while (Stopwatch.GetElapsedTime(started) < policy.PostgresLockObservationTimeout)
+        var clock = TimeProvider.System;
+        var started = clock.GetTimestamp();
+        while (clock.GetElapsedTime(started) < policy.PostgresLockObservationTimeout)
         {
             await using var command = new NpgsqlCommand(WaitingLockSql, connection);
             command.Parameters.AddWithValue(lockKey);
@@ -75,7 +75,7 @@ internal static class PostgresSchemaFailure
             {
                 return;
             }
-            await Task.Delay(policy.PostgresLockPollInterval, cancellationToken);
+            await Task.Delay(policy.PostgresLockPollInterval, clock, cancellationToken);
         }
         throw new TimeoutException("PostgreSQL did not report the target waiting for its namespace advisory lock.");
     }
@@ -168,7 +168,7 @@ internal static class PostgresSchemaDatabase
     internal static async Task DropAsync(string connectionString)
     {
         var policy = NativeExecutionPolicyFixture.Harness().Value;
-        using var cleanup = new CancellationTokenSource(policy.PostgresDatabaseCleanupTimeout);
+        using var cleanup = new CancellationTokenSource(policy.PostgresDatabaseCleanupTimeout, TimeProvider.System);
         var ownedPool = new NpgsqlConnection(new NpgsqlConnectionStringBuilder(connectionString) { Database = DatabaseName }.ConnectionString);
         NpgsqlConnection.ClearPool(ownedPool);
         await ownedPool.DisposeAsync();

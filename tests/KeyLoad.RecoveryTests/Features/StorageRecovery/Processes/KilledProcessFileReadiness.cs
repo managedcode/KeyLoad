@@ -1,4 +1,3 @@
-using System.Diagnostics;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 
@@ -13,7 +12,8 @@ internal static class KilledProcessFileReadiness
 
     internal static async Task WaitAsync(string root, CancellationToken cancellationToken)
     {
-        var started = Stopwatch.StartNew();
+        var clock = TimeProvider.System;
+        var started = clock.GetTimestamp();
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -22,9 +22,9 @@ internal static class KilledProcessFileReadiness
                 EnsureFilesUnlocked(root);
                 return;
             }
-            catch (IOException) when (started.Elapsed < ReadinessTimeout)
+            catch (IOException) when (clock.GetElapsedTime(started) < ReadinessTimeout)
             {
-                await Task.Delay(PollInterval, cancellationToken);
+                await Task.Delay(PollInterval, clock, cancellationToken);
             }
         }
     }

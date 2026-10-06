@@ -18,7 +18,7 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
 
     internal async ValueTask<Lease> EnterAsync(CancellationToken cancellationToken)
     {
-        var lease = new Lease(gates[gateIndex], routingOptions.Value.ExecutionLifetime, cancellationToken);
+        var lease = new Lease(gates[gateIndex], routingOptions.Value.ExecutionLifetime, client.Clock, cancellationToken);
         try
         {
             await lease.AcquireAsync().ConfigureAwait(false);
@@ -105,15 +105,17 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
 
     internal void Retire() => retired = true;
 
-    internal sealed class Lease(SemaphoreSlim gate, TimeSpan timeout, CancellationToken callerToken) : IDisposable
+    internal sealed class Lease(SemaphoreSlim gate, TimeSpan timeout, TimeProvider clock, CancellationToken callerToken) : IDisposable
     {
-        private readonly CancellationTokenSource deadline = CreateDeadline(timeout, callerToken);
+        private readonly CancellationTokenSource timeoutSource = new(timeout, clock);
+        private CancellationTokenSource? deadline;
         private bool acquired;
 
-        internal CancellationToken Token => deadline.Token;
+        internal CancellationToken Token => deadline!.Token;
 
         internal async ValueTask AcquireAsync()
         {
+            deadline = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutSource.Token);
             await gate.WaitAsync(deadline.Token).ConfigureAwait(false);
             acquired = true;
         }
@@ -130,15 +132,9 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
             }
             finally
             {
-                deadline.Dispose();
+                deadline?.Dispose();
+                timeoutSource.Dispose();
             }
-        }
-
-        private static CancellationTokenSource CreateDeadline(TimeSpan timeout, CancellationToken callerToken)
-        {
-            var source = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-            source.CancelAfter(timeout);
-            return source;
         }
     }
 }

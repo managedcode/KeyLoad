@@ -6,6 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <summary>Owns the PostgreSQL schema and lifecycle for one scaled native vector cell.</summary>
 public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
 {
+    private readonly TimeProvider timeProvider;
     private const string VersionSeparator = "; pgvector ";
     private const string FlushEnabled = "on";
     private const string FlushRequired = "PostgresFlushRequired";
@@ -28,10 +29,12 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     /// <param name="executionOptions">The validated native execution limits.</param>
     /// <param name="serializationOptions">The centrally validated native SQL builder reservations.</param>
     /// <param name="lifecycleOptions">The centrally validated native replication lifecycle limits.</param>
+    /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
     public PostgresNativeVectorTarget(string connectionString, string runId, string image,
         ComparisonTopology topology, IOptions<NativeComparisonExecutionOptions> executionOptions,
-        IOptions<NativeComparisonSerializationOptions> serializationOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+        IOptions<NativeComparisonSerializationOptions> serializationOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentNullException.ThrowIfNull(executionOptions);
         execution = NativeComparisonExecutionOptions.Require(executionOptions);
@@ -40,7 +43,7 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
         lifecycleOptions.Value.Validate();
         identity = PostgresSchemaIdentity.FromRunId(runId);
         this.topology = topology;
-        nativeTopology = new(lifecycleOptions);
+        nativeTopology = new(lifecycleOptions, timeProvider);
         source = NpgsqlDataSource.Create(new NpgsqlConnectionStringBuilder(connectionString)
         {
             MaxAutoPrepare = Policy.PostgresMaxAutoPrepare,
@@ -79,7 +82,7 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
     {
         ArgumentNullException.ThrowIfNull(selected);
         profile = selected;
-        var receipt = await PostgresNativeVectorIndex.BuildAsync(source, selected, Policy, cancellationToken).ConfigureAwait(false);
+        var receipt = await PostgresNativeVectorIndex.BuildAsync(source, selected, Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var parameters = new Dictionary<string, string>(receipt.Parameters, StringComparer.Ordinal);
         serialization.RecordEvidence(parameters);
         return receipt with { Parameters = parameters };
@@ -119,7 +122,7 @@ public sealed class PostgresNativeVectorTarget : IVectorComparisonTarget
         {
             if (schemaCommitAttempted)
             {
-                using var deadline = new CancellationTokenSource(Policy.CleanupTimeout);
+                using var deadline = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
                 await using var connection = await source.OpenConnectionAsync(deadline.Token).ConfigureAwait(false);
                 await PostgresSchemaLifecycle.DropIfOwnedAsync(connection, identity, ownerGuid, deadline.Token).ConfigureAwait(false);
             }

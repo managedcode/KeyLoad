@@ -8,9 +8,9 @@ internal sealed class RequestCqrsRf3McpGuardEvidenceTests
     [Test]
     public async Task AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls()
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var root = RequestCqrsRf3McpGuardEvidenceScenario.CreatePrivateRoot();
         var (profile, _) = await NodeEpochRf3Profile.CreatePriorAsync(root, deadline.Token).ConfigureAwait(false);
         var images = await RequestCqrsRf3ImageProof.ReadAsync(deadline.Token).ConfigureAwait(false);

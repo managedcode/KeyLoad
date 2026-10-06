@@ -36,12 +36,13 @@ internal static class NativeRuntimeJournalRegistration
             provider.GetRequiredService<IOptions<JournaledStateManagerOptions>>()));
         silo.Configure<JournaledStateManagerOptions>(options => options.JournalFormatKey = BinaryFormat);
         var existing = services.Where(NativeJobLifecycleRegistration.IsLifecycle).ToArray();
-        silo.UseJournaledDurableJobs(options => Configure(options, jobs.Value));
+        services.AddOptions<DurableJobsOptions>().Configure<TimeProvider>((options, clock) => Configure(options, jobs.Value, clock));
+        silo.UseJournaledDurableJobs();
         NativeJobLifecycleRegistration.Decorate(services, existing);
         NativeJobGraphRegistration.Extend(services);
     }
 
-    private static void Configure(DurableJobsOptions native, NativeDurableJobOptions settings)
+    private static void Configure(DurableJobsOptions native, NativeDurableJobOptions settings, TimeProvider clock)
     {
         native.ActiveProviderName = ProviderName;
         native.ShardDuration = settings.ShardDuration;
@@ -58,10 +59,10 @@ internal static class NativeRuntimeJournalRegistration
         native.ShardClaimInitialBudget = settings.InitialClaimBudget;
         native.ShardClaimMaxBudget = settings.MaximumClaimBudget;
         native.ShardClaimRampUpDuration = settings.ClaimRampUpDuration;
-        native.ShouldRetry = (context, error) => Retry(context, error, settings);
+        native.ShouldRetry = (context, error) => Retry(context, error, settings, clock);
     }
 
-    private static DateTimeOffset? Retry(IJobRunContext context, Exception error, NativeDurableJobOptions settings)
+    private static DateTimeOffset? Retry(IJobRunContext context, Exception error, NativeDurableJobOptions settings, TimeProvider clock)
     {
         if (context.DequeueCount >= settings.MaximumAttempts
             || error is KeyLoadException
@@ -72,7 +73,7 @@ internal static class NativeRuntimeJournalRegistration
         {
             return null;
         }
-        return TimeProvider.System.GetUtcNow() + settings.RetryDelay;
+        return clock.GetUtcNow() + settings.RetryDelay;
     }
 }
 #pragma warning restore ORLEANSEXP005

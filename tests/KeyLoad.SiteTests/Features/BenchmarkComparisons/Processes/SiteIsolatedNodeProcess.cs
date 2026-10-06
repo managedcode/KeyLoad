@@ -44,8 +44,8 @@ internal static class SiteIsolatedNodeProcess
         }
         lease?.MarkStarted(process);
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(DeadlineSeconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(DeadlineSeconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, ProbeFailure, deadline.Token);
         var stderr = SiteProcessOutput.ReadAsync(process.StandardError, ProbeFailure, deadline.Token);
         try

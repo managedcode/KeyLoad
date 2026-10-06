@@ -9,6 +9,7 @@
 - Keep feature code in ResourceExecution and root-owned assembly friend metadata outside that slice only when solution-wide.
 - Preserve both authorized cuts, physical node ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
 - Fixed32/6/16 schema/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; no hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
+- Owner correction2026-10-06 applies centralized native IOptions ownership to every operational parameter, including this bank's stripe reservation and CAS retry count. Four remains the default and maximum; permit only1/2/4 stripes and1..4 attempts, preserving the128KiB ceiling and fixed32/6/16 snapshot schema. BCL primitives receive explicit validated scalars projected at startup from the same captured IOptions<DatabasePhaseExecutionOptions>; no primitive constructor/helper may recreate defaults. ADR-113 refines the historical bool-only bank/facade signature for this bounded options join while retaining BCL-only ownership and every hot-path restriction.
 - Only root freezes public shared signatures/project references and mode/export composition; workers may not invent broader telemetry/control architecture.
 
 ## Commands and evidence

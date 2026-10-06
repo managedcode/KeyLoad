@@ -9,7 +9,7 @@ internal static class DatabasePhaseValues
     internal const int FirstHistogramLane = 0;
     internal const int FirstPhaseIndex = 0;
     internal const long MinimumElapsedTicks = 0;
-    internal const long MinimumStopwatchFrequency = 0;
+    internal const long MinimumTimestampFrequency = 0;
     internal const long MinimumStartTimestamp = 0;
     internal const long MinimumCounterValue = 0;
     internal const long DisabledSnapshotFrequency = 0;

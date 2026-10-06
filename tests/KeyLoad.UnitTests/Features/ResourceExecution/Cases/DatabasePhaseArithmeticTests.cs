@@ -56,32 +56,50 @@ internal sealed class DatabasePhaseArithmeticTests
     }
 
     [Test]
-    public async Task IncrementSaturatesWithoutWrappingAndReportsDegradation()
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    public async Task IncrementSaturatesWithoutWrappingAndReportsDegradation(int maximumCasAttempts)
     {
         long counter = 0;
-        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter)).IsEqualTo(DatabaseProfileQuality.None);
+        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts)).IsEqualTo(DatabaseProfileQuality.None);
         await Assert.That(counter).IsEqualTo(1);
 
         counter = long.MaxValue - 1;
-        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
+        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
         await Assert.That(counter).IsEqualTo(long.MaxValue);
-        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
+        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
         await Assert.That(counter).IsEqualTo(long.MaxValue);
 
         counter = -1;
-        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
+        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts)).IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
         await Assert.That(counter).IsEqualTo(-1);
     }
 
     [Test]
-    public async Task ConcurrentIncrementLossIsBoundedAndAlwaysMarked()
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    public async Task ConcurrentIncrementLossIsBoundedAndAlwaysMarked(int maximumCasAttempts)
     {
         long counter = 0;
+        long deliveredReturns = 0;
+        long droppedReturns = 0;
         var qualityBits = 0;
         Parallel.For(0, ContentionAttempts, _ =>
         {
-            var quality = DatabasePhaseArithmetic.TryIncrement(ref counter);
+            var quality = DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts);
             _ = Interlocked.Or(ref qualityBits, (int)quality);
+            if (quality == DatabaseProfileQuality.None)
+            {
+                Interlocked.Increment(ref deliveredReturns);
+            }
+            else if (quality == DatabaseProfileQuality.ContentionDropped)
+            {
+                Interlocked.Increment(ref droppedReturns);
+            }
         });
 
         var delivered = Interlocked.Read(ref counter);
@@ -90,8 +108,56 @@ internal sealed class DatabasePhaseArithmeticTests
         await Assert.That(delivered).IsGreaterThan(0L);
         await Assert.That(delivered).IsLessThanOrEqualTo(ContentionAttempts);
         await Assert.That(dropped).IsGreaterThanOrEqualTo(0L);
+        await Assert.That(delivered).IsEqualTo(deliveredReturns);
+        await Assert.That(dropped).IsEqualTo(droppedReturns);
+        await Assert.That(deliveredReturns + droppedReturns).IsEqualTo(ContentionAttempts);
         await Assert.That(dropped == 0 || qualityResult.HasFlag(DatabaseProfileQuality.ContentionDropped)).IsTrue();
         await Assert.That((qualityResult & DatabaseProfileQuality.SaturatedCounter) == 0).IsTrue();
+    }
+
+    [Test]
+    [Arguments(1)]
+    [Arguments(2)]
+    [Arguments(3)]
+    [Arguments(4)]
+    public async Task GenuineConcurrentIncrementsAtSaturationRetainEveryOriginalOutcome(int maximumCasAttempts)
+    {
+        var counter = long.MaxValue - 1;
+        long saturatedReturns = 0;
+        long droppedReturns = 0;
+        Parallel.For(0, ContentionAttempts, _ =>
+        {
+            var quality = DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts);
+            if (quality == DatabaseProfileQuality.SaturatedCounter)
+            {
+                Interlocked.Increment(ref saturatedReturns);
+            }
+            else if (quality == DatabaseProfileQuality.ContentionDropped)
+            {
+                Interlocked.Increment(ref droppedReturns);
+            }
+        });
+
+        await Assert.That(Interlocked.Read(ref counter)).IsEqualTo(long.MaxValue);
+        await Assert.That(saturatedReturns).IsGreaterThan(0L);
+        await Assert.That(saturatedReturns + droppedReturns).IsEqualTo(ContentionAttempts);
+        await Assert.That(DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts))
+            .IsEqualTo(DatabaseProfileQuality.SaturatedCounter);
+        await Assert.That(counter).IsEqualTo(long.MaxValue);
+    }
+
+    [Test]
+    [Arguments(-1)]
+    [Arguments(0)]
+    [Arguments(5)]
+    public async Task InvalidRetryOperandsRejectBeforeTouchingTheCounter(int maximumCasAttempts)
+    {
+        long counter = 42;
+        var failure = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+            DatabasePhaseArithmetic.TryIncrement(ref counter, maximumCasAttempts));
+
+        await Assert.That(failure.ParamName).IsEqualTo(nameof(maximumCasAttempts));
+        await Assert.That(counter).IsEqualTo(42L);
     }
 
     [Test]

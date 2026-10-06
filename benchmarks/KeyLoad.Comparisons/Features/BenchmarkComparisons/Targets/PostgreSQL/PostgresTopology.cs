@@ -3,8 +3,9 @@ using Npgsql;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> lifecycleOptions)
+internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
 
     private const string ConfigureQuorum = "ALTER SYSTEM SET synchronous_standby_names TO 'ANY 1 (\"benchmark_standby1\", \"benchmark_standby2\")'";
@@ -43,7 +44,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
             return;
         }
 
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         await WaitForMembersAsync(connection, topology, false, deadline.Token);
         await ConfigureQuorumAsync(connection, topology, deadline.Token);
@@ -96,7 +97,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
                 return observation;
             }
 
-            await Task.Delay(lifecycle.PostgresReadinessPollInterval, cancellationToken);
+            await Task.Delay(lifecycle.PostgresReadinessPollInterval, timeProvider, cancellationToken);
         }
     }
 
@@ -175,7 +176,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
         await using var current = new NpgsqlCommand(CurrentWal, connection);
         var wal = (string)(await current.ExecuteScalarAsync(cancellationToken))!;
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         await WaitForCopiesAsync(connection, topology, wal, deadline.Token);
         var members = await WaitForMembersAsync(connection, topology, true, deadline.Token);
@@ -215,7 +216,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
                 return;
             }
 
-            await Task.Delay(lifecycle.PostgresReadinessPollInterval, cancellationToken);
+            await Task.Delay(lifecycle.PostgresReadinessPollInterval, timeProvider, cancellationToken);
         }
     }
 

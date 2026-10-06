@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -9,7 +9,7 @@ internal static class IsolatedAggregateNodeTestCleanup
 
     internal static async Task<(Task? Cancellation, bool Settled)> CleanupAsync(CancellationTokenSource prompt, Task? originalCancellation,
         Task<IsolatedAggregateNodeResult>? original, OperationCanceledException? expectedCancellation,
-        string directory, List<IsolatedAggregateNodeIdentity> identities, Stopwatch timer,
+        string directory, List<IsolatedAggregateNodeIdentity> identities, TestElapsedClock timer,
         List<Exception> failures)
     {
         Task? cancellation = null;
@@ -42,7 +42,7 @@ internal static class IsolatedAggregateNodeTestCleanup
     }
 
     private static async Task<(Task? Cancellation, bool Settled)> CancelPromptAsync(
-        CancellationTokenSource prompt, Task? originalCancellation, Stopwatch timer, List<Exception> failures)
+        CancellationTokenSource prompt, Task? originalCancellation, TestElapsedClock timer, List<Exception> failures)
     {
         Task? cancellation;
         if (originalCancellation is not null)
@@ -70,7 +70,7 @@ internal static class IsolatedAggregateNodeTestCleanup
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
-                () => cancellation.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero));
+                () => cancellation.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero, timer.Provider));
         }
         catch (AggregateException envelope)
         {
@@ -86,7 +86,7 @@ internal static class IsolatedAggregateNodeTestCleanup
     }
 
     private static async Task<bool> ObserveOriginalAsync(Task<IsolatedAggregateNodeResult>? original,
-        OperationCanceledException? expectedCancellation, Stopwatch timer, List<Exception> failures)
+        OperationCanceledException? expectedCancellation, TestElapsedClock timer, List<Exception> failures)
     {
         if (original is null)
         {
@@ -96,7 +96,7 @@ internal static class IsolatedAggregateNodeTestCleanup
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
-                () => original.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero));
+                () => original.WaitAsync(bound > TimeSpan.Zero ? bound : TimeSpan.Zero, timer.Provider));
         }
         catch (AggregateException envelope)
         {
@@ -138,7 +138,7 @@ internal static class IsolatedAggregateNodeTestCleanup
         }
     }
 
-    private static TimeSpan Remaining(Stopwatch timer)
+    private static TimeSpan Remaining(TestElapsedClock timer)
         => TimeSpan.FromSeconds(CleanupSeconds) - timer.Elapsed;
 
     internal static void AddDistinct(List<Exception> failures, Exception failure)

@@ -9,7 +9,8 @@ internal static class ContainerRuntimeDocker
     internal static async Task<ContainerRuntimeInspection> WaitForExitedAsync(string containerName,
         string resourceName, CancellationToken cancellationToken)
     {
-        var deadline = Stopwatch.StartNew();
+        var clock = TimeProvider.System;
+        var deadline = clock.GetTimestamp();
         ContainerRuntimeInspection stopped;
         do
         {
@@ -18,9 +19,9 @@ internal static class ContainerRuntimeDocker
             {
                 break;
             }
-            await Task.Delay(ContainerRuntimeProtocol.ExitPollInterval, cancellationToken);
+            await Task.Delay(ContainerRuntimeProtocol.ExitPollInterval, clock, cancellationToken);
         }
-        while (deadline.Elapsed < ContainerRuntimeProtocol.ContainerExitTimeout);
+        while (clock.GetElapsedTime(deadline) < ContainerRuntimeProtocol.ContainerExitTimeout);
 
         if (stopped.State != ContainerRuntimeProtocol.ExitedState)
         {
@@ -33,15 +34,16 @@ internal static class ContainerRuntimeDocker
     internal static async Task<ContainerRuntimeInspection> InspectRunningAsync(string containerName,
         string resourceName, CancellationToken cancellationToken)
     {
-        var deadline = Stopwatch.StartNew();
-        while (deadline.Elapsed < ContainerRuntimeProtocol.ContainerStartTimeout)
+        var clock = TimeProvider.System;
+        var deadline = clock.GetTimestamp();
+        while (clock.GetElapsedTime(deadline) < ContainerRuntimeProtocol.ContainerStartTimeout)
         {
             var current = await InspectAsync(containerName, cancellationToken);
             if (current.State == ContainerRuntimeProtocol.RunningState)
             {
                 return current;
             }
-            await Task.Delay(ContainerRuntimeProtocol.StartPollInterval, cancellationToken);
+            await Task.Delay(ContainerRuntimeProtocol.StartPollInterval, clock, cancellationToken);
         }
         throw new TimeoutException(string.Format(CultureInfo.InvariantCulture,
             ContainerRuntimeProtocol.RunningFailure, resourceName));

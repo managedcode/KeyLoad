@@ -194,7 +194,7 @@ internal static class RequestCqrsNativeCommandStream
         PrincipalRecord? contextPrincipal, bool publishContext, Guid requestId, Guid commandId, int terminalSequence,
         ErrorCode? expectedError, Func<Task>? beforeFirstPull = null)
     {
-        using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound);
+        using var deadline = new CancellationTokenSource(RequestCqrsRoutingTests.InvocationBound, TimeProvider.System);
         using IDisposable context = publishContext
             ? new GrainRequestIdentityScope(fixture.Cluster.ServiceProvider, contextPrincipal,
                 requestId, commandId, deadline.Token)

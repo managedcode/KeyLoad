@@ -6,8 +6,8 @@ internal sealed class TwoRf3MembershipProfileTests
     [Test]
     public async Task AcMembership001To003UsesOneSixSiloMembershipAndKeepsBothDatabaseGroupsClosed()
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(TimeSpan.FromMinutes(15));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         await using var wave = await TwoRf3MembershipWave.StartAsync(deadline.Token).ConfigureAwait(false);
         await TwoRf3MembershipReadinessAssertions.VerifyAllNodesAsync(wave.Application, deadline.Token).ConfigureAwait(false);
         await TwoRf3MembershipFingerprintOracle.VerifyAsync(wave.Application, wave.Profile, deadline.Token)

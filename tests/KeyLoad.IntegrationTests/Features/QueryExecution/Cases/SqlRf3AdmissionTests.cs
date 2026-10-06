@@ -97,8 +97,8 @@ internal sealed class SqlRf3AdmissionTests
     private static async Task<NodeAdmissionStatus> WaitForControlCommandsDrainedAsync(KeyLoadClient sdk,
         CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(AdmissionDrainDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(AdmissionDrainDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var started = TimeProvider.System.GetTimestamp();
         while (true)
         {

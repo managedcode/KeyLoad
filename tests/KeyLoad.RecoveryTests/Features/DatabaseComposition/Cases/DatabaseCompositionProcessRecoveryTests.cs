@@ -26,8 +26,8 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = StartCrashProcess(root, stage, index);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(25));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(25), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         try
         {
             await Assert.That(await process.StandardOutput.ReadLineAsync(timeout.Token)).IsEqualTo("crash-point");

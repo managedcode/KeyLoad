@@ -12,8 +12,9 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
     IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions,
     IOptions<NativeComparisonSerializationOptions> serializationOptions,
     IOptions<IsolatedKeyLoadAdmissionOptions> admissionOptions,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions) : IAsyncDisposable
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null) : IAsyncDisposable
 {
+    internal TimeProvider Clock { get; } = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonDiagnosticOptions> diagnostics = NativeComparisonDiagnosticOptions.Require(diagnosticOptions);
     private readonly IOptions<NativeComparisonExecutionOptions> execution = NativeComparisonExecutionOptions.Require(executionOptions);
     private readonly IOptions<NativeComparisonSerializationOptions> serialization = NativeComparisonSerializationOptions.Require(serializationOptions);
@@ -36,16 +37,16 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
-            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions),
-            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions),
-            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, provider: Clock),
+            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, provider: Clock),
+            IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology, provider: Clock),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
-            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex)),
-            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, executionOptions, diagnostics, topology, [.. native.Replicas]),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions, executionOptions),
-            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),
-            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions, diagnostics),
+            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex), provider: Clock),
+            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, executionOptions, diagnostics, topology, [.. native.Replicas], provider: Clock),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions, executionOptions, provider: Clock),
+            IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions, diagnostics, provider: Clock),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
@@ -64,11 +65,11 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         var native = settings.Native ?? throw new InvalidOperationException(IsolatedHostConstants.Failure);
         vectorTarget = settings.Selection.Target switch
         {
-            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions, serialization, lifecycleOptions),
+            IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions, serialization, lifecycleOptions, provider: Clock),
             IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, lifecycleOptions,
-                settings.Selection.Options.Topology, CreateClients(native)),
-            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions, serialization),
-            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions),
+                settings.Selection.Options.Topology, CreateClients(native), provider: Clock),
+            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions, serialization, provider: Clock),
+            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions, provider: Clock),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
@@ -80,7 +81,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(native);
-        return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, admissionOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
+        return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, executionOptions, diagnostics, admissionOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount, provider: Clock)
         { RequireIsolatedAdmission = true };
     }
 
@@ -89,7 +90,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         const int ClientsFirstIndex = 0;
 
         var clients = CreateClients(native);
-        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients);
+        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients, provider: Clock);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)
@@ -136,7 +137,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             if (ownedVectorTarget is not null)
             {
                 var cleanup = ownedVectorTarget.DisposeAsync().AsTask();
-                await cleanup.WaitAsync(Policy.CleanupTimeout);
+                await cleanup.WaitAsync(Policy.CleanupTimeout, Clock);
             }
         }
         finally
@@ -154,7 +155,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         var cleanup = ownedTarget.DisposeAsync().AsTask();
         try
         {
-            await cleanup.WaitAsync(Policy.CleanupTimeout);
+            await cleanup.WaitAsync(Policy.CleanupTimeout, Clock);
         }
         catch (Exception)
         {

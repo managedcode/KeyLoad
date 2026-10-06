@@ -10,7 +10,7 @@ internal static class NativeSerializationBenchmarkProcessExit
         try
         {
             KillProcessTree(process);
-            await exit.WaitAsync(TimeSpan.FromSeconds(15));
+            await exit.WaitAsync(TimeSpan.FromSeconds(15), TimeProvider.System);
         }
         catch (Exception failure) when (NativeSerializationBenchmarkFailures.IsNonFatal(failure))
         {

@@ -130,7 +130,7 @@ internal static class PostgresSchemaOwnership
         CancellationToken cancellationToken = default)
     {
         var policy = NativeExecutionPolicyFixture.Harness().Value;
-        using var cleanup = cancellationToken.CanBeCanceled ? null : new CancellationTokenSource(policy.PostgresSchemaCleanupTimeout);
+        using var cleanup = cancellationToken.CanBeCanceled ? null : new CancellationTokenSource(policy.PostgresSchemaCleanupTimeout, TimeProvider.System);
         var token = cancellationToken.CanBeCanceled ? cancellationToken : cleanup!.Token;
         await using var connection = await PostgresSchemaSupport.OpenAsync(connectionString, token);
         await using var transaction = await connection.BeginTransactionAsync(token);

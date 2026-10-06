@@ -47,7 +47,7 @@ internal static class ServerApplication
         PartitionHost? partition, List<Exception> failures)
     {
         var settings = app.Services.GetRequiredService<IOptions<ServerExecutionOptions>>().Value;
-        using var deadline = new CancellationTokenSource(settings.ShutdownTimeout);
+        using var deadline = new CancellationTokenSource(settings.ShutdownTimeout, app.Services.GetRequiredService<TimeProvider>());
         if (silo is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => silo.StopAsync(deadline.Token), failures).ConfigureAwait(false);

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -7,7 +7,7 @@ internal sealed class IsolatedAggregateNodePromptOwner : IAsyncDisposable
     private const string ReleaseFailure = "Native Node prompt release failed.";
     private readonly string directory;
     private readonly List<IsolatedAggregateNodeIdentity> identities;
-    private readonly Stopwatch timer;
+    private readonly TestElapsedClock timer;
     private readonly List<Exception> failures;
     private CancellationTokenSource? prompt;
     private Task<IsolatedAggregateNodeResult>? original;
@@ -15,7 +15,7 @@ internal sealed class IsolatedAggregateNodePromptOwner : IAsyncDisposable
     private int cleanupStarted;
 
     internal IsolatedAggregateNodePromptOwner(string directory, List<IsolatedAggregateNodeIdentity> identities,
-        Stopwatch timer, List<Exception> failures, CancellationToken cancellationToken)
+        TestElapsedClock timer, List<Exception> failures, CancellationToken cancellationToken)
     {
         this.directory = directory;
         this.identities = identities;

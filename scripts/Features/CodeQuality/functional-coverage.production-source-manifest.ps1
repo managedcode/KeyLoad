@@ -27,6 +27,11 @@ $script:Psm = [ordered]@{
     InvalidRoot = 'The production identity root is absent, linked or unsupported.'
     InvalidInventory = 'The production project inventory is unsafe, oversized or ambiguous.'
     InvalidArtifact = 'An actual Release project DLL or PDB is absent or unsupported.'
+    BindingProjectLabel = 'project='
+    BindingMissingCountLabel = '; missingSourceCount='
+    BindingMissingPathsLabel = '; firstMissingSourcePaths='
+    BindingMissingPathsSeparator = ','
+    MaximumBindingDiagnosticPaths = 8
     InvalidReceipt = 'The production source manifest or a referenced native image receipt is invalid.'
     Drift = 'A source, native image, compile input or producer changed during identity capture.'
     ProjectNames = @(
@@ -160,8 +165,16 @@ function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $I
         if (-not [IO.File]::Exists($path)) { throw $script:Psm.InvalidArtifact }
     }
     $identity = Read-FcCompiledIdentity $Root $dll $pdb $sources
-    if ($identity.moduleName -cne ($ProjectName + '.dll') -or -not $identity.compiledSourceBindingComplete) {
+    if ($identity.moduleName -cne ($ProjectName + '.dll')) {
         throw $script:Psm.InvalidArtifact
+    }
+    if (-not $identity.compiledSourceBindingComplete) {
+        $missingSources = @($identity.sourceFilesWithoutPdbDocuments)
+        $missingPaths = @($missingSources | Select-Object -First $script:Psm.MaximumBindingDiagnosticPaths |
+            ForEach-Object { [string] $_.path })
+        throw ($script:Psm.InvalidArtifact + ' ' + $script:Psm.BindingProjectLabel + $ProjectName +
+            $script:Psm.BindingMissingCountLabel + [string] $missingSources.Count +
+            $script:Psm.BindingMissingPathsLabel + ($missingPaths -join $script:Psm.BindingMissingPathsSeparator))
     }
     $producerPath = Resolve-FcPath $Root $script:Psm.ProducerPath
     $producer = [ordered]@{ path = $script:Psm.ProducerPath; sha256 = Get-FcHash $producerPath }

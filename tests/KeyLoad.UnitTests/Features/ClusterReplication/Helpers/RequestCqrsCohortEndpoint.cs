@@ -58,7 +58,7 @@ internal sealed class RequestCqrsCohortEndpoint : IAsyncDisposable
         catch (Exception startupFailure)
         {
             var failures = new List<Exception> { startupFailure };
-            using var cleanup = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound);
+            using var cleanup = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
             await RequestCqrsCohortCleanup.CaptureAsync(() => application.StopAsync(cleanup.Token), failures);
             await RequestCqrsCohortCleanup.CaptureAsync(() => application.DisposeAsync().AsTask(), failures);
             RequestCqrsCohortCleanup.ThrowIfAny(failures);
@@ -171,7 +171,7 @@ internal sealed class RequestCqrsCohortEndpoint : IAsyncDisposable
         var current = Volatile.Read(ref state);
         current.HeaderGate?.Release();
         current.BodyGate?.Release();
-        using var deadline = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound);
+        using var deadline = new CancellationTokenSource(RequestCqrsCohortRuntimeFixture.ShutdownBound, TimeProvider.System);
         var failures = new List<Exception>();
         if (!stopped)
         {

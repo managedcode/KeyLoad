@@ -44,7 +44,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheExceptionTests
                     view.ReadValue(Key, value =>
                     {
                         entered.TrySetResult();
-                        release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit)
+                        release.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System)
                             .GetAwaiter().GetResult();
                         if (!value.SequenceEqual(Value))
                         {
@@ -52,7 +52,7 @@ internal sealed class ZoneTreeCoordinatedPointCacheExceptionTests
                         }
                         throw new InvalidOperationException(ReaderFailure);
                     })));
-                await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit);
+                await entered.Task.WaitAsync(ZoneTreeCoordinatedPointCacheTestSupport.WaitLimit, TimeProvider.System);
                 await Assert.That(permit.TryWithdraw(grant, receipt.Revision)).IsTrue();
                 await Assert.That(control.Retire(receipt.Revision)).IsTrue();
             }, failures);

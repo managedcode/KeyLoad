@@ -1,4 +1,3 @@
-using System.Diagnostics;
 
 namespace KeyLoad.Comparisons;
 
@@ -22,18 +21,18 @@ public sealed record OpenLoopExecutionPolicy(int QueueCapacity, int ConcurrentSe
             && ControlPollMilliseconds == OpenLoopExecutionOptions.DefaultControlPollMilliseconds
             && SpinWindowMicroseconds == OpenLoopExecutionOptions.DefaultSpinWindowMicroseconds;
 
-    internal long OperationDeadlineTicks
-        => ToStopwatchTicks(OperationDeadlineMilliseconds, MillisecondsPerSecond);
+    internal long OperationDeadlineTicks(TimeProvider timeProvider)
+        => ToTimestampTicks(OperationDeadlineMilliseconds, MillisecondsPerSecond, timeProvider: timeProvider);
 
-    internal long DrainTicks
-        => ToStopwatchTicks(DrainMilliseconds, MillisecondsPerSecond);
+    internal long DrainTicks(TimeProvider timeProvider)
+        => ToTimestampTicks(DrainMilliseconds, MillisecondsPerSecond, timeProvider: timeProvider);
 
-    internal long SpinWindowTicks
-        => ToStopwatchTicks(SpinWindowMicroseconds, MicrosecondsPerSecond);
+    internal long SpinWindowTicks(TimeProvider timeProvider)
+        => ToTimestampTicks(SpinWindowMicroseconds, MicrosecondsPerSecond, timeProvider: timeProvider);
 
-    private static long ToStopwatchTicks(int amount, int unitsPerSecond)
+    private static long ToTimestampTicks(int amount, int unitsPerSecond, TimeProvider timeProvider)
     {
-        var numerator = checked((long)amount * Stopwatch.Frequency);
+        var numerator = checked((long)amount * timeProvider.TimestampFrequency);
         return checked((numerator + unitsPerSecond - CeilingRoundingAdjustment) / unitsPerSecond);
     }
 }

@@ -38,8 +38,8 @@ internal sealed class StorageRecoveryProcessTests
         var mutationIndex = random.Next(3);
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = Process.Start(CreateCrashHostStart(root, stage, mutationIndex))!;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(15));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         Exception? originalFailure = null;
         int[]? values = null;
         try
@@ -195,8 +195,8 @@ internal sealed class StoragePublicationRecoveryTests
         }
 
         using var process = Process.Start(start)!;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(20));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         try
         {
             await Assert.That(await process.StandardOutput.ReadLineAsync(timeout.Token)).IsEqualTo("crash-point");
@@ -266,13 +266,14 @@ internal sealed class StoragePublicationRecoveryTests
     }
     internal static async Task DeleteTrialAsync(string root, CancellationToken cancellationToken)
     {
-        var started = Stopwatch.StartNew();
+        var clock = TimeProvider.System;
+        var started = clock.GetTimestamp();
         while (true)
         {
             try
             { Directory.Delete(root, true); return; }
-            catch (IOException) when (started.Elapsed < TimeSpan.FromSeconds(5))
-            { await Task.Delay(25, cancellationToken); }
+            catch (IOException) when (clock.GetElapsedTime(started) < TimeSpan.FromSeconds(5))
+            { await Task.Delay(TimeSpan.FromMilliseconds(25), clock, cancellationToken); }
         }
     }
     [Test]

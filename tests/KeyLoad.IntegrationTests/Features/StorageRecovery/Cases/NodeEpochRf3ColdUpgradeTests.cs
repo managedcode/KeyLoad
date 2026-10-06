@@ -6,7 +6,7 @@ internal sealed class NodeEpochRf3ColdUpgradeTests
     [Test]
     public async Task AcEpoch010And011UpgradePriorThreeVoterStateBeforeStartingCurrentRf3()
     {
-        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.ParentDeadline);
+        using var deadline = new CancellationTokenSource(NodeEpochRf3Protocol.ParentDeadline, TimeProvider.System);
         await NodeEpochRf3ColdScenario.RunAsync(deadline.Token).ConfigureAwait(false);
     }
 }

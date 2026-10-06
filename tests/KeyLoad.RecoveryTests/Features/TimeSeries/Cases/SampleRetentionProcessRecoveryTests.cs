@@ -24,8 +24,8 @@ internal sealed class SampleRetentionProcessRecoveryTests
         var callerToken = TestContext.Current!.Execution.CancellationToken;
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
         using var process = StartCrashProcess(root, stage);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         try
         {
             await Assert.That(await process.StandardOutput.ReadLineAsync(timeout.Token))
@@ -37,7 +37,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30), TimeProvider.System);
             await StopAndDeleteAsync(process, root, cleanup.Token);
         }
     }

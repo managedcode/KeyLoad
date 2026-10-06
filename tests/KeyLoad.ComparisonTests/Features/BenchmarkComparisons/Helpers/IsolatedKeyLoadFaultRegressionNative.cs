@@ -57,7 +57,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
 
     private async Task RestoreWithDeadlineAsync(IsolatedKeyLoadFaultRegressionNativeReceipt receipt)
     {
-        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRestartTimeout);
+        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRestartTimeout, TimeProvider.System);
         await RestoreOneAsync(receipt, cleanup.Token);
     }
 
@@ -103,7 +103,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
             {
                 return current;
             }
-            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, token);
         }
     }
 
@@ -120,7 +120,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
                 ValidateExited(before, current);
                 return current;
             }
-            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
         }
     }
 

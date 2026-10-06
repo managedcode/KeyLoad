@@ -18,8 +18,8 @@ internal static class IsolatedKeyLoadFaultRegression
         var evidence = IsolatedKeyLoadFaultRegressionProvider.Read(nodeCount);
         IsolatedKeyLoadFaultRegressionNative? native = null;
         string? failure = null;
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRegressionTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRegressionTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         try
         {
             await IsolatedKeyLoadFaultRegressionExecution.RunAsync(async () =>

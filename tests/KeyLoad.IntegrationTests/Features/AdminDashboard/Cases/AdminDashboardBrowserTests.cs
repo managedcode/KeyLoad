@@ -21,8 +21,8 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
     [Test]
     public async Task AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession()
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(AdminBrowserProtocol.Deadline);
+        using var deadlineTimeout = new CancellationTokenSource(AdminBrowserProtocol.Deadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         var scenario = await AdminDashboardScenario.CreateAsync(fixture, deadline.Token);
         using var http = fixture.App.CreateHttpClient(McpCallerProtocol.Node1, McpCallerProtocol.HttpEndpoint);
         var url = new Uri(http.BaseAddress!, AdminPath).AbsoluteUri;

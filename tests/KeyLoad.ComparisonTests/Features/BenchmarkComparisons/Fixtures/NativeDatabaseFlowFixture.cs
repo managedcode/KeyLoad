@@ -51,7 +51,7 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
         try
         {
             await app.StartAsync(token);
-            await app.ResourceNotifications.WaitForResourceHealthyAsync(target == Surreal ? SurrealNode : HelixNode, token).WaitAsync(Deadline, token);
+            await app.ResourceNotifications.WaitForResourceHealthyAsync(target == Surreal ? SurrealNode : HelixNode, token).WaitAsync(Deadline, TimeProvider.System, token);
             return new(app, root, target);
         }
         catch (Exception)

@@ -65,7 +65,7 @@ internal sealed class AggregateReplayRf3LeaderLossTests(ClusterFixture fixture)
         {
             if (stoppedNode is not null && !restarted)
             {
-                using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+                using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
                 await RestoreLeaderAsync(stoppedNode, nodes, administrators, originalFailure, recovery.Token);
             }
         }

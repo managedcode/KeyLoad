@@ -5,8 +5,7 @@ namespace KeyLoad.Comparisons;
 
 internal static class OpenLoopSessionAcquisition
 {
-    internal static async Task<List<IComparisonSession>> OpenAsync(IComparisonTarget target,
-        OpenLoopExecutionPolicy policy, CancellationToken cancellationToken)
+    internal static async Task<List<IComparisonSession>> OpenAsync(IComparisonTarget target, OpenLoopExecutionPolicy policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
 
@@ -21,17 +20,17 @@ internal static class OpenLoopSessionAcquisition
         }
         catch (Exception primary)
         {
-            var failures = await SettlePartialSessionsAsync(sessions, policy).ConfigureAwait(false);
+            var failures = await SettlePartialSessionsAsync(sessions, policy, timeProvider: timeProvider).ConfigureAwait(false);
             ExceptionDispatchInfo.Capture(OpenLoopFailure.Combine(primary, failures)!).Throw();
             throw;
         }
     }
 
     private static async Task<ImmutableArray<Exception>> SettlePartialSessionsAsync(
-        List<IComparisonSession> sessions, OpenLoopExecutionPolicy policy)
+        List<IComparisonSession> sessions, OpenLoopExecutionPolicy policy, TimeProvider timeProvider)
     {
         var original = ComparisonSessionCleanup.CloseAndJoinAsync(sessions,
-            TimeSpan.FromMilliseconds(policy.DrainMilliseconds));
+            TimeSpan.FromMilliseconds(policy.DrainMilliseconds), timeProvider: timeProvider);
         try
         {
             var close = await original.ConfigureAwait(false);

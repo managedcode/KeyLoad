@@ -19,12 +19,12 @@ internal static class OrleansSiloConfiguration
 {
     internal static IHost Build(PartitionHost partition, NodeOptions options, INodeAdministration administration,
         ILoggerFactory loggerFactory, NativeRequestWorkOwner requestWork, IPAddress address,
-        ServerRuntimeOptions runtimeOptions, CancellationToken startupCancellation)
+        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation)
     {
         var builder = Host.CreateApplicationBuilder();
         builder.Services.AddSingleton(loggerFactory);
         runtimeOptions.RegisterBorrowed(builder.Services);
-        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, startupCancellation);
+        RegisterBorrowedServices(builder.Services, partition, administration, options, requestWork, runtimeOptions, clock, startupCancellation);
         builder.UseOrleans(silo => Configure(silo, options, partition.Configuration, address, runtimeOptions.Membership.Value,
             runtimeOptions.Core.RuntimeJournal, runtimeOptions.DurableJobs, runtimeOptions.GrainRouting));
         return builder.Build();
@@ -32,7 +32,7 @@ internal static class OrleansSiloConfiguration
 
     private static void RegisterBorrowedServices(IServiceCollection services, PartitionHost partition,
         INodeAdministration administration, NodeOptions options, NativeRequestWorkOwner requestWork,
-        ServerRuntimeOptions runtimeOptions, CancellationToken startupCancellation)
+        ServerRuntimeOptions runtimeOptions, TimeProvider clock, CancellationToken startupCancellation)
     {
         var peers = runtimeOptions.Peer.Value;
         peers.Validate(partition.Configuration);
@@ -44,7 +44,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton<ICommitCoordinator>(partition.Coordinator);
         services.AddSingleton<IReplicaEndpoint>(partition.Consensus);
         services.AddSingleton(partition.Consensus);
-        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton(clock);
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
@@ -61,13 +61,13 @@ internal static class OrleansSiloConfiguration
             RuntimeJournalStorePreparation.ReaderEvidence(partition)));
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
             provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
+            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<IOptions<ReplicaReplayLimits>>(),
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
         services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
-            provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), TimeProvider.System,
+            provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(), provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<PeerDiscoveryOptions>>(),
             options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture
                 ? provider.GetRequiredService<IReplicaDiscoveryObservationSink>() : null));
@@ -85,7 +85,7 @@ internal static class OrleansSiloConfiguration
             return;
         }
         services.AddSingleton<IMembershipTable>(provider => new ReplicaMembershipTable(partition.Database, partition.Coordinator,
-            partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
+            partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, provider.GetRequiredService<TimeProvider>(),
             options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
                 ? provider.GetRequiredService<IOptions<OrleansMembershipOptions>>().Value.MaximumRows
                 : ReplicaMembershipProtocol.UnboundedRows,
@@ -105,7 +105,7 @@ internal static class OrleansSiloConfiguration
                 authority.AuthorityPhysicalShardId, authority.AuthorityIncarnation, options.PhysicalShardId,
                 options.Incarnation, options.PublicEndpoint, local.SiloAddress.ToParsableString(),
                 authority.AuthorityEndpoints.Select(endpoint => new Uri(endpoint)).ToArray(), callerSecret,
-                authoritySecret, TimeProvider.System);
+                authoritySecret, provider.GetRequiredService<TimeProvider>());
             return new(settings, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
                 provider.GetRequiredService<IOptions<ReplicaExecutionOptions>>());
         }
@@ -123,13 +123,13 @@ internal static class OrleansSiloConfiguration
             services.AddSingleton(provider => RequestCqrsProbeObserverFactory.Create(
                 options.RequestCqrsProbe, provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
                 provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
-                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>())
+                provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
                 ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
             if (options.RequestCqrsProbe.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture)
             { services.AddSingleton<IReplicaDiscoveryObservationSink>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>()); }
         }
-        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, TimeProvider.System,
+        services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
         {
             PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>()

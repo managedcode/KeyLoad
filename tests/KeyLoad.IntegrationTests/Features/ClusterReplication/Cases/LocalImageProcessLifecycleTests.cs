@@ -34,7 +34,7 @@ internal sealed class LocalImageProcessLifecycleTests
             await File.WriteAllTextAsync(script, ProcessProgram(ready, terminated, writeOverflow: false));
             using var cancellation = new CancellationTokenSource();
             var verification = RunVerifierAsync(root, script, cancellation.Token);
-            using var startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10), TimeProvider.System);
             Exception? failure;
             try
             {
@@ -83,7 +83,7 @@ internal sealed class LocalImageProcessLifecycleTests
             source.TrySetResult(true);
         }
 
-        var canceled = Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+        var canceled = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, cancellationToken);
         var completed = await Task.WhenAny(source.Task, operation, canceled).ConfigureAwait(false);
         if (completed == canceled)
         {

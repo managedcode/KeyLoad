@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
@@ -62,10 +63,10 @@ internal static class OpenLoopPlanNodeProcess
             throw new InvalidOperationException(InputLimitMessage);
         }
         using var process = new Process { StartInfo = startInfo };
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(processOptions.ProcessTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(processOptions.ProcessTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
-        var clock = Stopwatch.StartNew();
+        var clock = new TestElapsedClock(TimeProvider.System);
         var outputCapture = new OpenLoopPlanOutputCapture(executionOptions);
         var errorCapture = new OpenLoopPlanOutputCapture(executionOptions);
         var started = StartProcess(process, failures);

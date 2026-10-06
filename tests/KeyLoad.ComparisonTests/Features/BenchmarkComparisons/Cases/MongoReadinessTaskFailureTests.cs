@@ -43,7 +43,7 @@ internal sealed class MongoReadinessTaskFailureTests
         await Assert.That(first.IsCompletedSuccessfully && second.IsCompletedSuccessfully).IsTrue();
     }
 
-    private static async Task CancelledAsync(CancellationToken token) => await Task.Delay(Timeout.InfiniteTimeSpan, token);
+    private static async Task CancelledAsync(CancellationToken token) => await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, token);
 
     private static async Task FaultedAsync(IOException failure)
     {

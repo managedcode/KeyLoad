@@ -6,8 +6,7 @@ internal static class ComparisonMutationPreparation
     internal static bool Required(Scenario scenario)
         => scenario is Scenario.DocumentUpdate or Scenario.DocumentDelete;
 
-    internal static async Task PrepareAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDocument[] inputs,
-        Scenario scenario, int timeoutSeconds, CancellationToken cancellationToken)
+    internal static async Task PrepareAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDocument[] inputs, Scenario scenario, int timeoutSeconds, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int WarmupRepetitionIndex = -1;
 
@@ -27,7 +26,7 @@ internal static class ComparisonMutationPreparation
                     return;
                 }
 
-                using var deadline = ComparisonDeadline.Create(timeoutSeconds, cancellationToken);
+                using var deadline = ComparisonDeadline.Create(timeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
                 var initial = BenchmarkDataset.InitialMutationState(scenario, inputs[operation]);
                 await session.ExecuteAsync(Scenario.DocumentWrite, initial, deadline.Token);
                 if (!BenchmarkDataset.SameDocument(await session.ReadAsync(initial, deadline.Token), initial))

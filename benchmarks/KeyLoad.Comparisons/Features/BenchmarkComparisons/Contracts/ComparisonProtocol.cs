@@ -9,14 +9,14 @@ internal static class ComparisonStatuses
 
 internal static class ComparisonDeadline
 {
-    public static CancellationTokenSource Create(int seconds, CancellationToken cancellationToken)
+    public static CancellationTokenSource Create(int seconds, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        return Create(TimeSpan.FromSeconds(seconds), cancellationToken);
+        return Create(TimeSpan.FromSeconds(seconds), cancellationToken: cancellationToken, timeProvider: timeProvider);
     }
 
-    internal static CancellationTokenSource Create(TimeSpan timeout, CancellationToken cancellationToken)
+    internal static CancellationTokenSource Create(TimeSpan timeout, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(timeout);
         return deadline;
     }

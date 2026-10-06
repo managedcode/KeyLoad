@@ -3,8 +3,9 @@ using KeyLoad.Orleans;
 
 namespace KeyLoad.Server;
 
-internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<ServerErrorMiddleware> logger)
+internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<ServerErrorMiddleware> logger, TimeProvider? clock = null)
 {
+    private readonly TimeProvider time = clock ?? TimeProvider.System;
     private const string UnexpectedFailure = "The server could not complete the database operation.";
 
     public async Task InvokeAsync(HttpContext context)
@@ -29,7 +30,7 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
         }
         catch (Exception error) when (!context.Response.HasStarted && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
-            RequestFailureDiagnostic.LogFailure(logger, context, error);
+            RequestFailureDiagnostic.LogFailure(logger, context, error, time);
             await WriteAsync(context, ErrorCode.RecoveryRequired, UnexpectedFailure).ConfigureAwait(false);
         }
     }

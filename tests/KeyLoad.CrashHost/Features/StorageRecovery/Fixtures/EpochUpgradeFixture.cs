@@ -123,7 +123,7 @@ internal static class EpochUpgradeFixture
         using var log = new DurableReplicaLog(replica, configuration, canonicalDatabase: database);
         var snapshots = new ReplicaSnapshotStore(canonical, log, configuration, CrashExecutionOptions.Replica());
         await using var materializer = new ReplicaMaterializer(database, log, snapshots, CrashExecutionOptions.Replica());
-        using var deadline = new CancellationTokenSource(CrashExecutionOptions.Child().Value.EpochApplyTimeout);
+        using var deadline = new CancellationTokenSource(CrashExecutionOptions.Child().Value.EpochApplyTimeout, TimeProvider.System);
         log.SaveTermAndVote(InitialTerm, profile.LocalId);
         for (var index = FirstAppliedIndex; index <= FinalAppliedIndex; index++)
         {

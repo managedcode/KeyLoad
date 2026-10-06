@@ -49,7 +49,7 @@ internal sealed class AnalyticalAdmissionTests
         {
             admitted = tasks.StartWorker(() => search.Search(Principal, request));
             var admissionWait = tasks.StartAdmissionWait(db.Database);
-            await Assert.That(await admissionWait.WaitAsync(CoordinationTimeout)).IsTrue();
+            await Assert.That(await admissionWait.WaitAsync(CoordinationTimeout, TimeProvider.System)).IsTrue();
             await AssertSaturatedRequests(db, independent, tasks);
         }, static () => Task.CompletedTask, held.ReleaseAsync,
             () => tasks.AssertWorkerCompletesAsync(admitted!));
@@ -94,7 +94,7 @@ internal sealed class AnalyticalAdmissionTests
         {
             admitted = tasks.StartExpectedCancellation(() => search.Search(Principal, request, cancellation.Token));
             var admissionWait = tasks.StartAdmissionWait(db.Database);
-            await Assert.That(await admissionWait.WaitAsync(CoordinationTimeout)).IsTrue();
+            await Assert.That(await admissionWait.WaitAsync(CoordinationTimeout, TimeProvider.System)).IsTrue();
         }, cancellation.CancelAsync, held.ReleaseAsync,
             () => tasks.AssertWorkerIsCancelledAsync(admitted!));
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);

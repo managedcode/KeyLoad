@@ -8,6 +8,16 @@ public sealed class NativeComparisonSeedExecutionOptionsValidator : IValidateOpt
     private const int MinimumSeedBatchSize = 1;
     internal static readonly NativeComparisonSeedExecutionOptionsValidator Instance = new();
 
+    internal static void ValidateRequired(NativeComparisonExecutionOptions options)
+    {
+        var result = Instance.Validate(Options.DefaultName, options);
+        if (result.Failed)
+        {
+            throw new OptionsValidationException(NativeComparisonExecutionOptions.SectionName,
+                typeof(NativeComparisonExecutionOptions), result.Failures);
+        }
+    }
+
     /// <summary>Validates seed execution before any native adapter schedules a batch.</summary>
     /// <param name="name">The native options instance name.</param>
     /// <param name="options">The bound native comparison execution policy.</param>

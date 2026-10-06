@@ -108,6 +108,41 @@ they cannot cause fallback to a different algorithm, topology or prior cohort.
 Status: acceptance contract established; implementation and native qualification
 are pending. No new performance result is established by this document.
 
+### Image preparation authority join
+
+TASK-VQ-JOB-001 implements AC-VQ-007 and the existing AC-ISO-006/007 authority
+contract. The image preparation job has no workload cell or evidence-profile
+selector; it must retain the canonical control cohort and authenticate the actual
+`Build Docker images` job. A database job must instead bind its exact canonical
+cell ID, job name and profile together, including preflight, vector, scaled and
+open-loop rows. Unknown, missing, mismatched or ambiguous selectors reject before
+transport or environment-file mutation. Image preparation with workload
+selectors also rejects. Actual GitHub run, attempt, source, executing-job and
+freshness checks remain unchanged after this selection.
+
+The lead owns this contract and the final checks. The bounded tooling worker
+owns current-job selection and its real Node/TUnit operation regressions; no
+product, workflow-matrix or provider changes belong to that worker. Regression
+coverage must exercise canonical image and worker selections, every row family,
+rejected mismatches and preservation of the input context. The existing genuine
+`IsolatedGitHubCurrentJobTests` remains the Linux image-job authentication proof.
+Run the focused Aspire-owned unit regressions, canonical build/format and the
+actual image preparation job before claiming this join qualified.
+
+TASK-VQ-NEST-001 repairs the AC-VQ-005 native fixture startup join. The test-runner
+composer clears its outer open-loop environment selector with an empty value;
+a nested AppHost must interpret that cleared value as unselected even when its
+comparison suite is explicit. Explicit empty CLI arguments still reject before
+orchestration. Unmatched native rate/proof selectors, whitespace, noncanonical
+rates and conflicting scale/vector/filter selections still reject. The initial
+Aspire development run reproduced five native-flow failures in this selection
+boundary before any database started. A bounded composition worker owns only
+the selector normalization and new `NativeNestedAppHostSelectionTests`; the
+lead joins the existing real `NativeDatabaseDocumentFlowTests` and
+`NativeDatabaseVectorFlowTests`, unchanged strict open-loop regressions and
+final solution gates. This does not change any measured workload or grant
+native database authority to the test selector.
+
 ## Source fairness review, 2026-10-06
 
 The active inventories contain two document scale profiles and 24 vector
@@ -141,8 +176,12 @@ query plan through this adapter. `QdrantVectorContractTests` checks the distinct
 filtered/mixed predicates and the unfiltered request alongside index admission.
 
 Local inventory, JavaScript syntax, authored-asset bounds and governance checks
-pass. The final whole-solution Release build remains blocked by active shared
-runtime-policy diagnostics. The Aspire/TUnit suites and genuine Linux native
+pass. A whole-solution Release build and formatter passed before the final
+dispatch repairs and concurrent TimeProvider migration. A subsequent build
+rejected changes to UnitTests sources during compilation. The latest full build
+reports 63 diagnostics across native clock call-site joins and the independently
+owned BackupRestore publication work; it is not an authoritative passing final
+build. Fresh Aspire/TUnit suites and genuine Linux native
 scale runs have not qualified this source, and no new website figures are ready.
 
 ## Typed native execution policy join, 2026-10-06
@@ -169,6 +208,25 @@ and every new native execution owner use the same validated policy. Existing
 unrelated runtime-policy migration stays with its owning task. AC-VQ-004/005/006
 include invalid-policy rejection, actual effective settings and unchanged
 corpus/accuracy/native algorithm, tested through the real composed host.
+
+The adapter policy evidence writer is owned by
+`Reporting/NativeComparisonAdapterEvidence.cs`; the options type delegates its
+existing evidence operation to that helper. Preserve every property, binding,
+validation rule and report key/value while keeping the combined partial options
+type within the mandatory 200-code-line limit. `NativeComparisonAdapterPolicyTests`
+continues to execute the actual binding, validation and evidence operation.
+
+TASK-VQ-CLOCK-001 joins the owner's borrowed TimeProvider rule to AC-VQ-005/006.
+The actual target passes its provider to SurrealDB/HelixDB sessions, and the
+ForVector factory passes it to the per-profile vector runner. The validated
+vector execution wrapper remains instance-owned. Native flow tests observe the
+provider's real timer creation during a native session read and its UTC read
+during a cancelled vector runner call, then verify unchanged server readback.
+The observing provider forwards to the actual system clock/timers; it does not
+replace the database, transport or storage. The lead owns this contract and
+final verification; the native worker owns these bounded propagation joins and
+the native flow helper/tests. Defaults remain composition boundaries, and no
+measurement or resource contract changes.
 
 All isolated worker selectors and immutable-workload override detection are bound
 from the trusted `Benchmarks` section into `IOptions<ComparisonWorkerSelectionOptions>` by `ComparisonWorkerSelection.Read`

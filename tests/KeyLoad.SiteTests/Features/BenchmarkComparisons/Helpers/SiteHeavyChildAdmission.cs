@@ -45,7 +45,7 @@ internal sealed class SiteHeavyChildAdmission(int capacity, int maximumQueued, T
         var waiter = Enqueue(token);
         try
         {
-            await waiter.Completion.Task.WaitAsync(_admissionDeadline, token);
+            await waiter.Completion.Task.WaitAsync(_admissionDeadline, TimeProvider.System, token);
             return new(this);
         }
         catch (Exception)

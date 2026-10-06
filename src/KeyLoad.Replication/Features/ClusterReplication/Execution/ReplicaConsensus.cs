@@ -51,7 +51,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         configuration.Validate();
         stoppingToken = lifetime.Token;
         state = new(materializer, configurationOptions, clock ?? TimeProvider.System);
-        rpc = new(configurationOptions, stoppingToken);
+        rpc = new(configurationOptions, state.Clock, stoppingToken);
         election = new(state, rpc);
         followers = new(state, rpc, settings.MaximumSnapshotChunksPerRound);
         leader = new(state, followers);
@@ -116,8 +116,8 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(operation);
         using var active = activity.Enter();
         operation = ReplicaOperationAuthority.Verify(operation, state.Materializer.Database)!;
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
-        request.CancelAfter(commandTimeout);
+        using var deadline = new CancellationTokenSource(commandTimeout, state.Clock);
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token, deadline.Token);
         await TransportReady.WaitAsync(request.Token).ConfigureAwait(false);
         var route = await state.LockedAsync(() => (state.Role, state.LeaderId), request.Token).ConfigureAwait(false);
         if (route.Role == ReplicaRole.Leader)
@@ -170,8 +170,8 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
     public async Task<ReadOnlyMemory<byte>> HandleAsync(ReplicaRpc method, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         using var active = activity.Enter();
-        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token);
-        request.CancelAfter(commandTimeout);
+        using var deadline = new CancellationTokenSource(commandTimeout, state.Clock);
+        using var request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, lifetime.Token, deadline.Token);
         request.Token.ThrowIfCancellationRequested();
         if (!state.Ready)
         {

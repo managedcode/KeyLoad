@@ -1,11 +1,11 @@
-using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
+internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal async Task<VectorWorkloadObservations> RunAsync(IVectorComparisonTarget target,
         VectorComparisonCorpus corpus, IReadOnlyList<ReadOnlyMemory<float>> queries,
         IReadOnlyList<IReadOnlyList<VectorNeighbor>> expected, CancellationToken cancellationToken)
@@ -28,8 +28,8 @@ internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IO
                 () => ExecuteQueriesAsync(target, corpus, queries, expected, measured, token));
         }
         var writer = profile.UpdateCount > VectorWorkloadExecutorValues.FirstIndex ? CancelOnFailureAsync(start.Task, failure, measured,
-            () => new VectorUpdateExecutor(profile, executionOptions).RunAsync(target, corpus, measured, token)) : Task.CompletedTask;
-        var timer = Stopwatch.StartNew();
+            () => new VectorUpdateExecutor(profile, executionOptions, provider: timeProvider).RunAsync(target, corpus, measured, token)) : Task.CompletedTask;
+        var timer = new ComparisonElapsedMeasurement(timeProvider);
         start.SetResult();
         try
         {
@@ -48,7 +48,7 @@ internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IO
 
     }
 
-    private static async Task CompleteQueriesAsync(Task[] workers, Stopwatch timer, VectorWorkloadObservations measured)
+    private static async Task CompleteQueriesAsync(Task[] workers, ComparisonElapsedMeasurement timer, VectorWorkloadObservations measured)
     {
         try
         {
@@ -91,13 +91,13 @@ internal sealed class VectorWorkloadExecutor(VectorComparisonProfile profile, IO
             }
             var index = operation % queries.Count;
             var sample = SampleOrdinal(operation, profile.MeasuredQueries, profile.LatencySampleCount);
-            var started = sample < VectorWorkloadExecutorValues.FirstIndex ? VectorWorkloadExecutorValues.FirstIndex : Stopwatch.GetTimestamp();
-            using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken);
+            var started = sample < VectorWorkloadExecutorValues.FirstIndex ? VectorWorkloadExecutorValues.FirstIndex : timeProvider.GetTimestamp();
+            using var deadline = VectorOperationDeadline.Create(executionOptions.Value, cancellationToken: cancellationToken, timeProvider: timeProvider);
             var neighbors = await target.SearchAsync(queries[index], profile.TopK, profile.QueryMode,
                 deadline.Token).ConfigureAwait(false);
             if (sample >= VectorWorkloadExecutorValues.FirstIndex)
             {
-                measured.Latencies[sample] = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+                measured.Latencies[sample] = timeProvider.GetElapsedTime(started).TotalMilliseconds;
             }
             measured.Recalls[operation] = VectorResponseValidator.CalculateRecall(corpus, neighbors, expected[index]);
             if (Volatile.Read(ref measured.UpdateActive) != VectorWorkloadExecutorValues.FirstIndex)

@@ -73,7 +73,7 @@ internal sealed class MidBodyCancellationResponse(byte[] partialResponse, NodeSt
             await SecondWriteReleased.Task;
             await WriteSecondChunkAsync(context);
             SetStage(FirstRequestStage.WaitingForRequestAborted);
-            await Task.Delay(Timeout.InfiniteTimeSpan, context.RequestAborted);
+            await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, context.RequestAborted);
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {

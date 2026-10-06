@@ -33,6 +33,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ServerNodeUpgradeExecutionOptions> NodeUpgrade,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<ServerExecutionOptions> ServerExecution,
+    IOptions<DatabasePhaseExecutionOptions> DatabasePhaseExecution,
     CoreRuntimeOptions Core)
 {
     internal void ValidateBeforePhysicalOwnership()
@@ -60,6 +61,7 @@ internal sealed record ServerRuntimeOptions(
         _ = NodeUpgrade.Value;
         _ = NativeText.Value;
         _ = ServerExecution.Value;
+        _ = DatabasePhaseExecution.Value;
         Core.ValidateBeforePhysicalOwnership();
     }
 
@@ -88,6 +90,7 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(NodeUpgrade);
         services.AddSingleton(NativeText);
         services.AddSingleton(ServerExecution);
+        services.AddSingleton(DatabasePhaseExecution);
         Core.RegisterBorrowed(services);
     }
 }

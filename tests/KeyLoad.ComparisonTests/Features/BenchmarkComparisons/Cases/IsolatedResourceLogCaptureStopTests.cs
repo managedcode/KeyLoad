@@ -54,7 +54,7 @@ internal sealed class IsolatedResourceLogCaptureStopTests
 
     private static async Task VerifyCaptureAsync(IsolatedResourceLogCaptureStopFixture fixture, string outputRoot)
     {
-        using var timeout = new CancellationTokenSource(Deadline);
+        using var timeout = new CancellationTokenSource(Deadline, TimeProvider.System);
         await PublishNativeLogsAsync(fixture, timeout.Token);
         await JoinSharedStopAsync(fixture.Capture, timeout.Token);
         await VerifyWritersAsync(fixture.Capture, outputRoot, timeout.Token);
@@ -106,7 +106,7 @@ internal sealed class IsolatedResourceLogCaptureStopTests
         while (!capture.HasCapturedLine(ResourceName, LogMarker)
             || !capture.HasCapturedLine(ComparisonResourceName, LogMarker))
         {
-            await Task.Delay(MarkerPollInterval, token);
+            await Task.Delay(MarkerPollInterval, TimeProvider.System, token);
         }
         await Assert.That(capture.HasCapturedLine(ResourceName, LogMarker)).IsTrue();
         await Assert.That(capture.HasCapturedLine(ComparisonResourceName, LogMarker)).IsTrue();

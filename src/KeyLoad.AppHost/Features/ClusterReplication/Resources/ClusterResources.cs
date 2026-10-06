@@ -77,7 +77,7 @@ internal static class ClusterResources
         const int IndexInitialValue = 0;
         var physicalShardId = profile.PhysicalShardId.ToString(GuidFormat);
         var firstPublicPort = AppHostOptionsRegistration.Get(builder).Cluster.Value.FirstPublicPort;
-        var containerUser = ClusterContainerUser.Resolve(builder);
+        var containerUser = ClusterContainerUser.Resolve(builder, TimeProvider.System);
         var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
         for (var index = IndexInitialValue; index < nodes.Length; index++)
         {

@@ -1,21 +1,22 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensiveCallScope : IDisposable
 {
+    private readonly TimeProvider timeProvider;
     private readonly NativeComparisonExecutionOptions execution;
     private readonly CancellationToken cellCancellation;
     private readonly CancellationTokenSource deadline;
     private long started;
 
-    internal TimeSeriesIntensiveCallScope(IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation)
+    internal TimeSeriesIntensiveCallScope(IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cellCancellation, TimeProvider? provider = null)
     {
+        timeProvider = provider ?? TimeProvider.System;
         execution = executionOptions.Value;
         execution.Validate();
         this.cellCancellation = cellCancellation;
-        deadline = CancellationTokenSource.CreateLinkedTokenSource(cellCancellation);
+        deadline = new ComparisonCancellationSource(timeProvider, cellCancellation);
     }
 
     internal CancellationToken Token => deadline.Token;
@@ -27,15 +28,15 @@ internal sealed class TimeSeriesIntensiveCallScope : IDisposable
     internal void Start()
     {
         deadline.CancelAfter(execution.OperationTimeout);
-        started = Stopwatch.GetTimestamp();
+        started = timeProvider.GetTimestamp();
     }
 
     internal void Stop()
     {
-        var stopped = Stopwatch.GetTimestamp();
+        var stopped = timeProvider.GetTimestamp();
         LatencyTicks = stopped - started;
         Completion = cellCancellation.IsCancellationRequested ? TimeSeriesIntensiveOutcome.Cancelled
-            : deadline.IsCancellationRequested || Stopwatch.GetElapsedTime(started, stopped) >= execution.OperationTimeout
+            : deadline.IsCancellationRequested || timeProvider.GetElapsedTime(started, stopped) >= execution.OperationTimeout
                 ? TimeSeriesIntensiveOutcome.DeadlineExceeded : TimeSeriesIntensiveOutcome.Succeeded;
     }
 

@@ -104,7 +104,7 @@ internal sealed class ReportFileTests
             Cases = [new ComparisonCase("large", Scenario.PointRead, 0, "failed", null, null, samples)]
         };
         using var cancellation = new CancellationTokenSource();
-        using var observation = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var observation = new CancellationTokenSource(TimeSpan.FromSeconds(10), TimeProvider.System);
         RealFileGrowthObserver? observer = null;
         Task? growth = null;
         Task? writing = null;

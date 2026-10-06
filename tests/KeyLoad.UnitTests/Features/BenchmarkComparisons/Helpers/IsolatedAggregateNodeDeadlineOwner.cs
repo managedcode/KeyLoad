@@ -3,10 +3,15 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class IsolatedAggregateNodeDeadlineOwner : IDisposable
 {
     private readonly IsolatedAggregateNodeFailureSet failures;
+    private readonly TimeProvider clock;
     private CancellationTokenSource? source;
+    private CancellationTokenSource? timeout;
 
-    internal IsolatedAggregateNodeDeadlineOwner(IsolatedAggregateNodeFailureSet failures)
-        => this.failures = failures;
+    internal IsolatedAggregateNodeDeadlineOwner(IsolatedAggregateNodeFailureSet failures, TimeProvider? clock = null)
+    {
+        this.failures = failures;
+        this.clock = clock ?? TimeProvider.System;
+    }
 
     internal CancellationToken Start(TimeSpan runBound, CancellationToken prompt)
     {
@@ -15,9 +20,9 @@ internal sealed class IsolatedAggregateNodeDeadlineOwner : IDisposable
         var initializationFailures = new IsolatedAggregateNodeFailureSet();
         try
         {
-            var active = CancellationTokenSource.CreateLinkedTokenSource(prompt);
+            timeout = IsolatedAggregateNodeGuardedInvocation.Invoke(() => new CancellationTokenSource(runBound, clock));
+            var active = CancellationTokenSource.CreateLinkedTokenSource(prompt, timeout.Token);
             source = active;
-            IsolatedAggregateNodeGuardedInvocation.Invoke(() => active.CancelAfter(runBound));
             token = active.Token;
         }
         catch (AggregateException envelope)
@@ -39,11 +44,15 @@ internal sealed class IsolatedAggregateNodeDeadlineOwner : IDisposable
     {
         IsolatedAggregateNodeGuardedInvocation.Capture(() => source?.Dispose(), failures.Add);
         source = null;
+        IsolatedAggregateNodeGuardedInvocation.Capture(() => timeout?.Dispose(), failures.Add);
+        timeout = null;
     }
 
     private void DisposeSource(IsolatedAggregateNodeFailureSet target)
     {
         IsolatedAggregateNodeGuardedInvocation.Capture(() => source?.Dispose(), target.Add);
         source = null;
+        IsolatedAggregateNodeGuardedInvocation.Capture(() => timeout?.Dispose(), target.Add);
+        timeout = null;
     }
 }

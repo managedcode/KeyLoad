@@ -74,6 +74,7 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | REQ-BACKUP-003: fence old identity and pause delivery after restore | AC-BACKUP-003 passes when restore produces a different incarnation, sets dispatch paused, and invalidates old cursor/lease identities until explicit operator reconciliation. | Existing `VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`; planned auth/feed/lease token invalidation and explicit resume integration cases. |
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
 | REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
+| REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | TASK-BACKUP-UNPACK-PUBLICATION-001, `CliBackupRestoreLengthMismatchTests`, [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source identifies the validation/publication ordering hazard; actual execution and all required qualification remain pending. |
 
 ### Functional CLI operation coverage
 
@@ -109,6 +110,35 @@ percentage. Existing artifact/recovery flows remain mandatory. Existing ADR-033,
 ADR-046 and ADR-048 contracts apply unchanged; no new format or public contract
 is introduced by this test stage. Root owns the native coverage and source-bound
 evidence joins; exact-source Linux qualification remains pending.
+
+TASK-CQ-BACKUP-CATALOG-FLOW-002 and TASK-CQ-BACKUP-LENGTH-FLOW-003 extend
+REQ-BACKUP-002 / AC-BACKUP-002 with actual CLI regressions in
+`CliBackupRestoreInvalidCatalogTests` and `CliBackupRestoreLengthMismatchTests`.
+The first uses Cartograph's native writer with a noncanonical identity entry,
+executes rejected unpack, preserves source/archive/backup bytes, and completes
+valid unpack/restore with reopened data, new incarnation and paused dispatch.
+The second changes only the declared length of the first or last native catalog
+entry, executes unpack and then actually tries restoring its output. A failed
+unpack must not publish a usable backup, including when the last entry fails
+after all payload files were copied. The untouched original must still restore
+successfully, and all original CLI children/readers and owned files must settle.
+These are complete operation flows under the existing criterion; source presence
+does not establish their pass, coverage hits or module closure. A reproduced
+production gap requires its failure/publication contract to be frozen in an ADR
+before changing archive execution. Existing restore, RF3 and recovery gates stay
+mandatory.
+
+TASK-CQ-BACKUP-REJECTED-INPUT-FLOW-004 maps REQ-BACKUP-001/002/003 and
+AC-BACKUP-001/002/003 to `ArtifactTransferRejectedInputFlowTests`. It executes the
+actual transfer with a directory source and actual pack with a piece size one
+byte below the accepted minimum. Both errors must leave source and backup bytes
+unchanged and publish no artifact or destination. The same fixture then completes
+native pack/inspect, ManagedCode file-storage transfer, unpack and ZoneTree restore,
+checks exact archive and backup bytes, and reopens both original seeded and large
+records under a new incarnation with dispatch paused. These existing API contracts
+need no new ADR; ADR-033 owns functional collection and ADR-046/048 own verified
+restore. The case is unqualified until its actual Aspire execution and original
+native coverage establish the operation results and source-bound hits.
 
 ## Negative and boundary flows
 

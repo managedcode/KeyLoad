@@ -92,7 +92,7 @@ internal static partial class ScaleServerResourceProcess
             try
             {
                 await ScaleServerResourceProcessSettlement.SettleAsync(process, output, error, exit, readers,
-                    budget.Settings.ProcessSettlement, SendSignal, failure);
+                    budget.Settings.ProcessSettlement, SendSignal, failure, budget.TimeProvider);
             }
             catch (Exception cleanupFailure)
             {

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Security;
 using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
@@ -11,13 +10,13 @@ internal static class AdminStorageObserver
 
     private const string Unavailable = "Node storage observation is unavailable.";
 
-    internal static AdminStorageSnapshot Read(string directory, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken)
+    internal static AdminStorageSnapshot Read(string directory, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken, TimeProvider? clock = null)
     {
         const int EmptyRootAttributesFileAttributesReparsePoint = 0;
 
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
-        var scan = new AdminStorageScan(rootPath: directory, cancellationToken: cancellationToken, options: options);
+        var scan = new AdminStorageScan(rootPath: directory, cancellationToken: cancellationToken, options: options, clock: clock);
         try
         {
             var root = new DirectoryInfo(directory);
@@ -35,16 +34,19 @@ internal static class AdminStorageObserver
     private static AdminStorageSnapshot Missing() => new(null, null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
 }
 
-internal sealed class AdminStorageScan(string rootPath, IOptions<AdminObservationOptions> options, CancellationToken cancellationToken)
+internal sealed class AdminStorageScan
 {
-    private readonly AdminObservationOptions settings = options.Value;
+    private readonly string rootPath;
+    private readonly AdminObservationOptions settings;
+    private readonly CancellationToken cancellationToken;
     private const string Canonical = "canonical";
     private const string Replica = "replica";
     private const string Backup = "backup";
     private const string Other = "other";
     private const string BackupDirectory = "backups";
     private const string Incomplete = "Storage observation is incomplete because files changed, were unavailable, or exceeded observation bounds.";
-    private readonly long started = Stopwatch.GetTimestamp();
+    private readonly TimeProvider time;
+    private readonly long started;
     private readonly List<AdminFileInfo> files = [];
     private readonly Stack<DirectoryInfo> directories = [];
     private long canonicalBytes;
@@ -54,6 +56,16 @@ internal sealed class AdminStorageScan(string rootPath, IOptions<AdminObservatio
     private int observedFiles;
     private int entries;
     private bool complete = true;
+
+    internal AdminStorageScan(string rootPath, IOptions<AdminObservationOptions> options,
+        CancellationToken cancellationToken, TimeProvider? clock = null)
+    {
+        this.rootPath = rootPath;
+        settings = options.Value;
+        this.cancellationToken = cancellationToken;
+        time = clock ?? TimeProvider.System;
+        started = time.GetTimestamp();
+    }
 
     internal void Run(DirectoryInfo root)
     {
@@ -69,7 +81,7 @@ internal sealed class AdminStorageScan(string rootPath, IOptions<AdminObservatio
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (entries < settings.MaximumEntries
-            && Stopwatch.GetElapsedTime(started) < settings.ScanDeadline)
+            && time.GetElapsedTime(started) < settings.ScanDeadline)
         { return true; }
         complete = false;
         return false;

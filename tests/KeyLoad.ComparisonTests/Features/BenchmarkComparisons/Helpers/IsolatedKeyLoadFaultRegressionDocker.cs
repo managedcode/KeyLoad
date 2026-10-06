@@ -23,7 +23,7 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
         try
         {
             await process.WaitForExitAsync(deadline.Token);
-            var readers = await Task.WhenAll(output, error).WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout, deadline.Token);
+            var readers = await Task.WhenAll(output, error).WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout, TimeProvider.System, deadline.Token);
             IsolatedKeyLoadFaultRegressionProtocol.Require(process.ExitCode == 0 && readers.All(item => !item.Oversized));
             return readers[0].Text.Trim();
         }
@@ -42,7 +42,7 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
             {
                 process.Kill(entireProcessTree: true);
             }
-            using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout);
+            using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout, TimeProvider.System);
             await process.WaitForExitAsync(cleanup.Token);
             await Task.WhenAll(output, error).WaitAsync(cleanup.Token);
         }

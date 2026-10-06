@@ -31,7 +31,7 @@ internal sealed class TimeSeriesRf3ReplicaRestartTests(ClusterFixture fixture)
     [Test]
     public async Task AcSeries012FollowerRestartRetainsLatestAndWindowValuesOnEveryReplica()
     {
-        using var deadline = new CancellationTokenSource(OriginalTestLifetime);
+        using var deadline = new CancellationTokenSource(OriginalTestLifetime, TimeProvider.System);
         var clients = Enumerable.Range(FirstNode, NodeCount).Select(number => fixture.Client(NodeName(number))).ToArray();
         string? stoppedNode = null;
         var restarted = false;
@@ -140,7 +140,7 @@ internal sealed class TimeSeriesRf3ReplicaRestartTests(ClusterFixture fixture)
 
     private async Task RestoreFollowerAsync(string node, KeyLoadClient[] clients, Exception failure)
     {
-        using var recovery = new CancellationTokenSource(ReadinessLifetime);
+        using var recovery = new CancellationTokenSource(ReadinessLifetime, TimeProvider.System);
         try
         {
             await fixture.RestartContainerAsync(node, recovery.Token);

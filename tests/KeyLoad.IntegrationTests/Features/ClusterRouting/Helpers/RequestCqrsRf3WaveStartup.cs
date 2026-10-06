@@ -49,8 +49,8 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
 
     private async Task<RequestCqrsRf3Wave> RunAsync()
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         await ServerFailureObserver.ObserveAsync(() => StartCoreAsync(deadline.Token), failures)

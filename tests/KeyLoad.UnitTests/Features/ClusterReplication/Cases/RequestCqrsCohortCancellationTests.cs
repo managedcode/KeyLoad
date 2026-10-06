@@ -9,7 +9,7 @@ internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntim
     [Test]
     public async Task CallerCancellationDuringHeadersAndBodySettlesBeforeHealthyLookup()
     {
-        using var deadline = new CancellationTokenSource(TestBound);
+        using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
         await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
         await VerifyCancellationAtHeadersAsync(scenario);
         await VerifyCancellationAtBodyAsync(scenario);
@@ -36,7 +36,7 @@ internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntim
     private static async Task VerifyCancellationAsync(
         RequestCqrsCohortScenario scenario, RequestCqrsCohortHttpGate gate)
     {
-        using var cancellation = new CancellationTokenSource(TestBound);
+        using var cancellation = new CancellationTokenSource(TestBound, TimeProvider.System);
         Task<SiloAddress>? attempt = null;
         var failures = new List<Exception>();
         await RequestCqrsCohortCleanup.CaptureAsync(async () =>
@@ -54,9 +54,9 @@ internal sealed class RequestCqrsCohortCancellationTests(RequestCqrsCohortRuntim
     private static async Task AssertCancelledAttemptAsync(
         Task<SiloAddress> attempt, RequestCqrsCohortHttpGate gate, CancellationTokenSource cancellation)
     {
-        await gate.Entered.WaitAsync(TestBound);
+        await gate.Entered.WaitAsync(TestBound, TimeProvider.System);
         await cancellation.CancelAsync();
         _ = await Assert.ThrowsAsync<OperationCanceledException>(() => attempt);
-        await gate.Aborted.WaitAsync(TestBound);
+        await gate.Aborted.WaitAsync(TestBound, TimeProvider.System);
     }
 }

@@ -35,13 +35,21 @@ public class EmbeddedBenchmarks : IDisposable
     private const decimal CompositeKeyNumber = 42m;
     private const string ActiveSetupMessage = "The benchmark fixture already has an active setup.";
 
+    private readonly TimeProvider timeProvider;
     private readonly PartitionRef partition = new(TenantId, DatabaseId, CollectionId, BenchmarkRecordId);
     private EmbeddedBenchmarkResources? resources;
     private bool disposed;
 
     /// <summary>Initializes a fresh embedded fixture for BenchmarkDotNet or a real caller.</summary>
-    public EmbeddedBenchmarks()
+    public EmbeddedBenchmarks() : this(TimeProvider.System)
     {
+    }
+
+    /// <summary>Creates a fixture borrowing the supplied command clock.</summary>
+    public EmbeddedBenchmarks(TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        this.timeProvider = timeProvider;
     }
 
     /// <summary>Creates the real ZoneTree-backed database and seeds its benchmark document.</summary>
@@ -54,7 +62,7 @@ public class EmbeddedBenchmarks : IDisposable
             throw new InvalidOperationException(ActiveSetupMessage);
         }
 
-        var candidate = new EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeRegistration.Read());
+        var candidate = new EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeRegistration.Read(), timeProvider);
         var initialized = false;
         try
         {
@@ -117,7 +125,7 @@ public class EmbeddedBenchmarks : IDisposable
     private EmbeddedBenchmarkResources RequireResources()
         => resources ?? throw new InvalidOperationException(EmbeddedBenchmarkResources.InactiveFixtureMessage);
 
-    private sealed class EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeOptions options) : IDisposable
+    private sealed class EmbeddedBenchmarkResources(EmbeddedBenchmarkRuntimeOptions options, TimeProvider timeProvider) : IDisposable
     {
         internal const string InactiveFixtureMessage = "The benchmark fixture is not initialized.";
         private const string GuidFormat = "N";
@@ -135,9 +143,9 @@ public class EmbeddedBenchmarks : IDisposable
             const int BootstrapCatalogVersion = 1;
             const int InitialCatalogRevision = 0;
 
-            store = new(new(directory), options.Storage, options.PointCache);
+            store = new(new(directory), options.Storage, options.PointCache, timeProvider);
             database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution);
+                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution, timeProvider);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },
@@ -147,7 +155,7 @@ public class EmbeddedBenchmarks : IDisposable
                 [shardId.ToString(GuidFormat)]);
             Database.Apply(Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
                 PhysicalShardCatalogIdentity.CreateBootstrapCommandId(shardId), PrincipalId,
-                TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(catalog))).Get<bool>();
+                timeProvider.GetUtcNow(), NativeSerialization.Serialize(catalog))).Get<bool>();
             Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(TenantId, DatabaseId,
                     new(CollectionId, ResourceKind.Collection, CollectionId)));
@@ -191,7 +199,7 @@ public class EmbeddedBenchmarks : IDisposable
         private void Submit<T>(OperationKind kind, T payload)
         {
             var commandId = payload is CommandRequest command ? command.CommandId : Guid.NewGuid();
-            var result = Database.Apply(new(commandId, kind, PrincipalId, TimeProvider.System.GetUtcNow(),
+            var result = Database.Apply(new(commandId, kind, PrincipalId, timeProvider.GetUtcNow(),
                 System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options)));
             if (result.Error is { } error)
             {

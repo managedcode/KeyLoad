@@ -10,8 +10,8 @@ internal static class TimeSeriesIntensivePinnedImageProcess
         TimeSeriesIntensivePinnedImageEvidence? evidence = null, string? label = null)
     {
         using var process = new Process { StartInfo = StartInfo(executable, arguments), EnableRaisingEvents = true };
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromSeconds(seconds));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(seconds), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         using var output = new TimeSeriesIntensivePinnedImageOutput();
         using var error = new TimeSeriesIntensivePinnedImageOutput();
         var failures = new List<string>();

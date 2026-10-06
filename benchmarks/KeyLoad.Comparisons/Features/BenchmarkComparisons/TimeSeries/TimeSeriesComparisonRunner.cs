@@ -8,9 +8,7 @@ internal static class TimeSeriesComparisonRunner
 
     private const string LibraryName = "ManagedCode.TimeSeries";
 
-    internal static async Task<int> RunAsync(ITimeSeriesPersistentTarget[] targets, string sourceRevision,
-        string outputDirectory, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken, GitHubProvenance? provenance = null,
-        string? loadGeneratorImage = null)
+    internal static async Task<int> RunAsync(ITimeSeriesPersistentTarget[] targets, string sourceRevision, string outputDirectory, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken, GitHubProvenance? provenance = null, string? loadGeneratorImage = null)
     {
         const int NoObservedItems = 0;
         const int SingleItemCount = 1;
@@ -20,15 +18,15 @@ internal static class TimeSeriesComparisonRunner
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceRevision);
         ArgumentException.ThrowIfNullOrWhiteSpace(outputDirectory);
         var workload = TimeSeriesComparisonWorkloadFactory.Create(Guid.NewGuid().ToString(RunIdentityFormat));
-        var recorder = new TimeSeriesComparisonRecorder(workload, TimeProvider.System);
+        var recorder = new TimeSeriesComparisonRecorder(workload, timeProvider);
         foreach (var target in targets)
         {
             recorder.AddTarget(target.Metadata);
         }
 
         recorder.AddLibraryTarget();
-        await ExecuteTargetsAsync(targets, workload, recorder, cancellationToken);
-        ExecuteLibraryAggregation(workload, recorder);
+        await ExecuteTargetsAsync(targets, workload, recorder, cancellationToken: cancellationToken, timeProvider: timeProvider);
+        ExecuteLibraryAggregation(workload, recorder, timeProvider: timeProvider);
         var report = recorder.CreateReport(sourceRevision) with
         {
             Provenance = provenance,
@@ -38,13 +36,11 @@ internal static class TimeSeriesComparisonRunner
         return recorder.Passed ? NoObservedItems : SingleItemCount;
     }
 
-    private static async Task ExecuteTargetsAsync(ITimeSeriesPersistentTarget[] targets,
-        TimeSeriesComparisonWorkload workload, TimeSeriesComparisonRecorder recorder,
-        CancellationToken cancellationToken)
+    private static async Task ExecuteTargetsAsync(ITimeSeriesPersistentTarget[] targets, TimeSeriesComparisonWorkload workload, TimeSeriesComparisonRecorder recorder, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int SingleItemCount = 1;
 
-        var executor = new TimeSeriesComparisonTargetExecutor(workload, recorder);
+        var executor = new TimeSeriesComparisonTargetExecutor(workload, recorder, provider: timeProvider);
         try
         {
             foreach (var target in targets)
@@ -80,11 +76,11 @@ internal static class TimeSeriesComparisonRunner
     }
 
     private static void ExecuteLibraryAggregation(TimeSeriesComparisonWorkload workload,
-        TimeSeriesComparisonRecorder recorder)
+        TimeSeriesComparisonRecorder recorder, TimeProvider timeProvider)
     {
-        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        var started = timeProvider.GetTimestamp();
         var buckets = ManagedCodeTimeSeriesAggregation.Aggregate(workload);
-        var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        var elapsed = timeProvider.GetElapsedTime(started).TotalMilliseconds;
         recorder.RecordBuckets(LibraryName, buckets, elapsed);
     }
 }

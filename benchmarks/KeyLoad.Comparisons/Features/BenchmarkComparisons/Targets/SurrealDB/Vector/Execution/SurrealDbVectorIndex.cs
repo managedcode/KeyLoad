@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 
 namespace KeyLoad.Comparisons.Targets;
@@ -26,17 +25,17 @@ internal static class SurrealDbVectorIndex
     private const int Neighbors = 16;
     private const int ConstructionEf = 200;
     private const int SearchEf = 200;
-    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string table, string index, VectorComparisonProfile profile, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken)
+    internal static async Task<VectorIndexReceipt> BuildAsync(HttpClient http, string table, string index, VectorComparisonProfile profile, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var indexDeadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var indexDeadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         indexDeadline.CancelAfter(policy.IndexBuildTimeout);
         cancellationToken = indexDeadline.Token;
         var definition = SurrealDbVectorProtocol.HnswIndex(index, table, profile.Dimensions, ConstructionEf, Neighbors);
-        var timer = Stopwatch.StartNew();
-        await SurrealDbSqlTransport.ExecuteAsync(http, definition, policy, cancellationToken).ConfigureAwait(false);
-        await WaitAsync(http, table, index, policy, cancellationToken).ConfigureAwait(false);
+        var timer = new ComparisonElapsedMeasurement(timeProvider);
+        await SurrealDbSqlTransport.ExecuteAsync(http, definition, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
+        await WaitAsync(http, table, index, policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         timer.Stop();
-        using var nativeInfo = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORTABLEFormat, table), policy, cancellationToken).ConfigureAwait(false);
+        using var nativeInfo = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORTABLEFormat, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var actualDefinition = SurrealDbVectorProtocol.ReadRequiredString(SurrealDbVectorProtocol.SingleResult(nativeInfo.RootElement).GetProperty(IndexesField), index);
         if (!actualDefinition.Contains(NativeHnsw, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(NativeCosine, StringComparison.OrdinalIgnoreCase) || !actualDefinition.Contains(NativeFloat32, StringComparison.OrdinalIgnoreCase)
             || !HasNumericSetting(actualDefinition, DimensionSetting, profile.Dimensions)
@@ -73,12 +72,12 @@ internal static class SurrealDbVectorIndex
         return false;
     }
 
-    private static async Task WaitAsync(HttpClient http, string table, string index, NativeComparisonExecutionOptions policy, CancellationToken cancellationToken)
+    private static async Task WaitAsync(HttpClient http, string table, string index, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        var deadline = TimeProvider.System.GetUtcNow() + policy.IndexBuildTimeout;
+        var started = timeProvider.GetTimestamp();
         while (true)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORINDEXONTABLEFormat, index, table), policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, NativeINFOFORINDEXONTABLEFormat, index, table), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             var info = SurrealDbVectorProtocol.SingleResult(response.RootElement);
             if (!info.TryGetProperty(SurrealDbNativeTokens.TokenBuilding, out var building))
             {
@@ -91,12 +90,12 @@ internal static class SurrealDbVectorIndex
                 return;
             }
 
-            if (state is FailedState or AbortedState or ErrorState || TimeProvider.System.GetUtcNow() >= deadline)
+            if (state is FailedState or AbortedState or ErrorState || timeProvider.GetElapsedTime(started) >= policy.IndexBuildTimeout)
             {
                 throw new InvalidDataException(SurrealDbNativeTokens.TokenSurrealDbHnswBuildDidNotBecomeReady);
             }
 
-            await Task.Delay(policy.IndexPollInterval, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(policy.IndexPollInterval, timeProvider, cancellationToken).ConfigureAwait(false);
         }
     }
 }

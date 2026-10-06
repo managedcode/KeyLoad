@@ -25,15 +25,15 @@ internal sealed class RequestCqrsCohortLifetimeTests
         var firstShutdown = lifetime.StopAsync();
         var concurrentShutdown = lifetime.StopAsync();
 
-        await shutdownCancellation.Task.WaitAsync(TestBound);
+        await shutdownCancellation.Task.WaitAsync(TestBound, TimeProvider.System);
         await Assert.That(ReferenceEquals(firstShutdown, concurrentShutdown)).IsTrue();
         await Assert.That(lifetime.TryEnter()).IsNull();
         await Assert.That(firstShutdown.IsCompleted).IsFalse();
         await Assert.That(Volatile.Read(ref releaseCount)).IsEqualTo(0);
 
         ownedOperation.Dispose();
-        await firstShutdown.WaitAsync(TestBound);
-        await resourcesReleased.Task.WaitAsync(TestBound);
+        await firstShutdown.WaitAsync(TestBound, TimeProvider.System);
+        await resourcesReleased.Task.WaitAsync(TestBound, TimeProvider.System);
         await Assert.That(Volatile.Read(ref releaseCount)).IsEqualTo(1);
         await Assert.That(lifetime.IsStopping).IsTrue();
     }

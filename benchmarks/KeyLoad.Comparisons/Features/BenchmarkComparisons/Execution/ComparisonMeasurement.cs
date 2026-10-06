@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -6,8 +5,9 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Comparisons;
 
 internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOptions, ComparisonProgressObserver observer,
-    IOptions<NativeComparisonExecutionOptions> executionOptions)
+    IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly ComparisonOptions options = workloadOptions.Value;
     private const string FailedAttemptDetail = "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.";
 
@@ -23,7 +23,7 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
         }
         finally
         {
-            closed = await ComparisonSessionCleanup.CloseAsync(sessions, options.TimeoutSeconds);
+            closed = await ComparisonSessionCleanup.CloseAsync(sessions, options.TimeoutSeconds, timeProvider: timeProvider);
         }
         return closed ? result : result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
     }
@@ -44,12 +44,12 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
 
         await WarmupAsync(sessions, dataset, scenario, repetition, cancellationToken);
         observer.Begin(ComparisonProgressPhase.Prepare, repetition + SingleItemCount);
-        await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken);
+        await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
         var samples = new OperationSample[options.Operations];
         var outputs = new OperationResult?[options.Operations];
-        await using var resources = new ClientResourceSampler(executionOptions);
+        await using var resources = new ClientResourceSampler(executionOptions, provider: timeProvider);
         observer.Begin(ComparisonProgressPhase.Measure, repetition + SingleItemCount, options.Operations);
-        var clock = Stopwatch.StartNew();
+        var clock = new ComparisonElapsedMeasurement(timeProvider);
         await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);
         clock.Stop();
         var clientResources = await resources.StopAsync();
@@ -57,11 +57,11 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
             samples.Count(sample => !sample.Success));
         if (ComparisonMutationPreparation.Required(scenario))
         {
-            await ComparisonMutationValidation.ValidateAsync(sessions, dataset, scenario, inputs, samples, outputs, cancellationToken);
+            await ComparisonMutationValidation.ValidateAsync(sessions, dataset, scenario, inputs, samples, outputs, cancellationToken: cancellationToken, timeProvider: timeProvider);
         }
         else
         {
-            await ComparisonValidation.ValidateBatchAsync(sessions[FirstElementIndex], dataset, scenario, inputs, samples, outputs, cancellationToken);
+            await ComparisonValidation.ValidateBatchAsync(sessions[FirstElementIndex], dataset, scenario, inputs, samples, outputs, cancellationToken: cancellationToken, timeProvider: timeProvider);
         }
         var measurement = ComparisonStatistics.Summarize(samples, clock.Elapsed.TotalSeconds) with { ClientResources = clientResources };
         observer.Begin(ComparisonProgressPhase.Complete, repetition + SingleItemCount, measurement.Attempts, measurement.Attempts, measurement.Failures);
@@ -78,11 +78,11 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
 
         var warmup = Enumerable.Range(FirstElementIndex, options.Warmup).Select(operation => dataset.Input(scenario, repetition, operation, true)).ToArray();
         observer.Begin(ComparisonProgressPhase.Prepare, repetition + SingleItemCount);
-        await ComparisonMutationPreparation.PrepareAsync(sessions, warmup, scenario, options.TimeoutSeconds, cancellationToken);
+        await ComparisonMutationPreparation.PrepareAsync(sessions, warmup, scenario, options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
         observer.Begin(ComparisonProgressPhase.Warmup, repetition + SingleItemCount, options.Warmup);
         for (var operation = FirstElementIndex; operation < options.Warmup; operation++)
         {
-            using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
+            using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
             var input = warmup[operation];
             var session = sessions[operation % sessions.Count];
             var success = false;
@@ -100,7 +100,7 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
     }
 
     private async Task ExecuteBatchAsync(List<IComparisonSession> sessions, BenchmarkDocument[] inputs, Scenario scenario,
-        OperationSample[] samples, OperationResult?[] outputs, Stopwatch clock, CancellationToken cancellationToken)
+        OperationSample[] samples, OperationResult?[] outputs, ComparisonElapsedMeasurement clock, CancellationToken cancellationToken)
     {
         const int MissingItemIndex = -1;
 
@@ -122,9 +122,9 @@ internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOpt
     }
 
     private async Task ExecuteAttemptAsync(IComparisonSession session, BenchmarkDocument[] inputs, Scenario scenario,
-        OperationSample[] samples, OperationResult?[] outputs, Stopwatch clock, int operation, int worker, CancellationToken cancellationToken)
+        OperationSample[] samples, OperationResult?[] outputs, ComparisonElapsedMeasurement clock, int operation, int worker, CancellationToken cancellationToken)
     {
-        using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken);
+        using var deadline = ComparisonDeadline.Create(options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
         var started = clock.Elapsed.TotalMilliseconds;
         var success = false;
         try

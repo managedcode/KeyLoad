@@ -34,7 +34,7 @@ internal static class ClusterReplicationTestSupport
         while (!await predicate())
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await Task.Delay(250, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }
 
@@ -52,7 +52,7 @@ internal static class ClusterReplicationTestSupport
             var code = result.Problem?.ErrorCode ?? "MissingProblem";
             await Assert.That(new[] { nameof(ErrorCode.UnknownWriteOutcome), nameof(ErrorCode.OwnershipLost) }).Contains(code)
                 .Because($"Unexpected election retry result: {code}; {result.Problem?.Detail ?? "No safe detail."}");
-            await Task.Delay(250, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(250), TimeProvider.System, cancellationToken);
         }
     }
 }
@@ -73,7 +73,7 @@ internal static class LeaderLossRecoveryScenario
         stoppedContainers.Add(stoppedNode);
         await fixture.KillContainerAsync(stoppedNode,
             LeadershipFailure, cancellationToken);
-        await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+        await Task.Delay(TimeSpan.FromSeconds(3), TimeProvider.System, cancellationToken);
         var denied = await surviving.CommitAsync(
             new(Guid.NewGuid(), state.Partition, [new PutDocument(Collection, "minority", "{}")]), cancellationToken);
         await Assert.That(denied.IsFailed).IsTrue();

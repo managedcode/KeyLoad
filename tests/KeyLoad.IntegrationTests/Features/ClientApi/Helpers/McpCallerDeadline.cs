@@ -1,14 +1,30 @@
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
-/// <summary>Owns system-time operation deadlines linked to the actual TUnit test lifetime.</summary>
-internal static class McpCallerDeadline
+/// <summary>Owns provider-backed operation deadlines linked to the actual TUnit test lifetime.</summary>
+internal sealed class McpCallerDeadline : IDisposable
 {
-    /// <summary>Creates a caller-owned bounded token source without changing any cluster clock.</summary>
-    /// <returns>A source disposed by the test after its native client drains.</returns>
-    internal static CancellationTokenSource Create()
+    private readonly CancellationTokenSource timeout = new(McpCallerProtocol.Deadline, TimeProvider.System);
+    private readonly CancellationTokenSource deadline;
+
+    private McpCallerDeadline()
     {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(McpCallerProtocol.Deadline);
-        return deadline;
+        try
+        {
+            deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
+        }
+        catch
+        {
+            timeout.Dispose();
+            throw;
+        }
+    }
+
+    internal CancellationToken Token => deadline.Token;
+    internal static McpCallerDeadline Create() => new();
+
+    public void Dispose()
+    {
+        deadline.Dispose();
+        timeout.Dispose();
     }
 }

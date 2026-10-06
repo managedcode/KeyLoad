@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
@@ -7,22 +6,24 @@ internal sealed class DuePageState
 {
     private const int AdjacentElementOffset = 1;
 
+    private readonly TimeProvider clock;
     private readonly TimeSpan discoveryDeadline;
     private readonly long started;
     private readonly ReadExecutionBudget budget;
     private readonly long maximumRangeBytes;
     internal int MaximumRecordsPerPage { get; }
 
-    internal DuePageState(IOptions<DatabaseLimits> limits, DateTimeOffset wakeAt, long started, TimeSpan discoveryDeadline, int maximumRecordsPerPage, long maximumRangeBytes,
+    internal DuePageState(IOptions<DatabaseLimits> limits, DateTimeOffset wakeAt, TimeProvider clock, TimeSpan discoveryDeadline, int maximumRecordsPerPage, long maximumRangeBytes,
         CancellationToken cancellationToken)
     {
-        this.started = started;
+        this.clock = clock;
+        started = clock.GetTimestamp();
         this.discoveryDeadline = discoveryDeadline;
         this.maximumRangeBytes = maximumRangeBytes;
         MaximumRecordsPerPage = maximumRecordsPerPage;
         WakeAt = wakeAt;
         CancellationToken = cancellationToken;
-        budget = new(limits, cancellationToken: cancellationToken);
+        budget = new(limits, clock, cancellationToken);
     }
 
     internal DateTimeOffset WakeAt { get; }
@@ -47,7 +48,7 @@ internal sealed class DuePageState
     {
         CancellationToken.ThrowIfCancellationRequested();
         budget.Check();
-        if (Stopwatch.GetElapsedTime(started) > discoveryDeadline)
+        if (clock.GetElapsedTime(started) > discoveryDeadline)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.DeadlineExceeded);
         }

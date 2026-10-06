@@ -24,8 +24,8 @@ internal static class EpochPriorExecutableProcess
         start.ArgumentList.Add(executable);
         start.ArgumentList.Add(EpochPriorSourceProbe.ModeForEpoch(dataEpoch));
         using var process = Process.Start(start) ?? throw new InvalidOperationException(FailedStart);
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(TimeoutSeconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var output = EpochPriorProcessOutput.ReadAsync(process.StandardOutput, timeout.Token);
         var error = EpochPriorProcessOutput.ReadAsync(process.StandardError, timeout.Token);
         Exception? activeFailure = null;
@@ -49,7 +49,7 @@ internal static class EpochPriorExecutableProcess
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochPriorProcessOutput.SettleAsync(process, output, error, activeFailure, cleanup.Token);
         }
     }

@@ -21,7 +21,7 @@ internal static class RequestCqrsProbeMarkerReader
             var match = FindMarker(fixture, armId, phase, outcome, null, signedDiscovery);
             if (match is { } marker)
             { return marker; }
-            await Task.Delay(PollInterval, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -38,7 +38,7 @@ internal static class RequestCqrsProbeMarkerReader
                 RequestCqrsProbeOutcome.Cancelled, signedDiscovery);
             if (match is not null)
             { return; }
-            await Task.Delay(PollInterval, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(PollInterval, TimeProvider.System, cancellationToken).ConfigureAwait(false);
         }
     }
 

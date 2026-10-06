@@ -67,8 +67,8 @@ internal static class DueFaultRf3Leadership
     private static async Task<string> WaitForReplacementLeaderAsync(NodeEpochRf3Callers first,
         NodeEpochRf3Callers second, DueFaultRf3LeaderCut cut, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.WaveDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         while (true)
         {
             var a = await first.Sdk.StatusAsync(deadline.Token).ConfigureAwait(false);
@@ -79,7 +79,7 @@ internal static class DueFaultRf3Leadership
                 await AssertSnapshotMatchesAsync(second, cut.Survivors[1], b.Value!, deadline.Token).ConfigureAwait(false);
                 return leader;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), deadline.Token)
+            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), TimeProvider.System, deadline.Token)
                 .ConfigureAwait(false);
         }
     }
@@ -127,13 +127,13 @@ internal static class DueFaultRf3Leadership
     private static async Task WaitForDueEffectsAsync(KeyLoadClient first, KeyLoadClient second,
         DueFaultRf3Seed seed, CancellationToken cancellationToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromMinutes(4));
+        using var deadlineTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(4), TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         await WaitUntilDueAsync(seed.DueAt, deadline.Token).ConfigureAwait(false);
         while (!await DueFaultRf3Assertions.AreBothTransitionsCommittedAsync(first, second, seed, deadline.Token)
             .ConfigureAwait(false))
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), deadline.Token)
+            await Task.Delay(TimeSpan.FromMilliseconds(DueFaultRf3Protocol.PollMilliseconds), TimeProvider.System, deadline.Token)
                 .ConfigureAwait(false);
         }
     }
@@ -142,7 +142,7 @@ internal static class DueFaultRf3Leadership
     {
         var delay = dueAt - TimeProvider.System.GetUtcNow();
         if (delay > TimeSpan.Zero)
-        { await Task.Delay(delay, cancellationToken).ConfigureAwait(false); }
+        { await Task.Delay(delay, TimeProvider.System, cancellationToken).ConfigureAwait(false); }
     }
 
     private static async Task<long> ReadSurvivorHighWaterAsync(Aspire.Hosting.DistributedApplication app,

@@ -50,9 +50,7 @@ internal static class KeyLoadFailureDiagnostics
     internal static bool IsRecoverableOutputFailure(Exception error)
         => error is IOException or InvalidOperationException or ArgumentException or NotSupportedException;
 
-    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition,
-        ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-        IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, CancellationToken cancellationToken)
+    internal static async Task ObserveAsync(global::KeyLoad.Client.KeyLoadClient client, global::KeyLoad.PartitionRef partition, ComparisonCase failed, IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonDiagnosticOptions> diagnosticOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(partition);
@@ -66,7 +64,7 @@ internal static class KeyLoadFailureDiagnostics
         var line = KeyLoadOutboxDiagnosticLine.UnavailableLine;
         if (!cancellationToken.IsCancellationRequested)
         {
-            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
             deadline.CancelAfter(lifecycleOptions.Value.FailureObservationTimeout);
             try
             {
@@ -92,5 +90,5 @@ public sealed partial class KeyLoadTarget : IComparisonFailureDiagnostics
     /// <inheritdoc />
     Task IComparisonFailureDiagnostics.ObserveFailureAsync(ComparisonCase failed, CancellationToken cancellationToken)
         => KeyLoadFailureDiagnostics.ObserveAsync(client: client, partition: partition, failed: failed, cancellationToken: cancellationToken,
-            lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics);
+            lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics, timeProvider: timeProvider);
 }

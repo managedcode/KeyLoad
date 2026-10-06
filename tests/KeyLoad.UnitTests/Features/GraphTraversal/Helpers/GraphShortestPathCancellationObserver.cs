@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using KeyLoad.Core;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
@@ -11,6 +11,7 @@ internal sealed class GraphShortestPathCancellationObserver
     private const string JoinTimeoutMessage = "The shortest-path cancellation observer exceeded its join bound.";
     internal const int TimeoutSeconds = 15;
 
+    private readonly TimeProvider clock;
     private readonly ReadExecutionBudget budget;
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim started;
@@ -23,8 +24,9 @@ internal sealed class GraphShortestPathCancellationObserver
     private bool threadStarted;
 
     internal GraphShortestPathCancellationObserver(ReadExecutionBudget budget,
-        CancellationTokenSource cancellation, ManualResetEventSlim started, long minimumReadBytes)
+        CancellationTokenSource cancellation, ManualResetEventSlim started, long minimumReadBytes, TimeProvider? timeProvider = null)
     {
+        clock = timeProvider ?? TimeProvider.System;
         this.budget = budget;
         this.cancellation = cancellation;
         this.started = started;
@@ -83,7 +85,7 @@ internal sealed class GraphShortestPathCancellationObserver
 
     private void WaitForAdjacencyAndCancel()
     {
-        var observedAt = Stopwatch.GetTimestamp();
+        var observedAt = new TestElapsedClock(clock);
         while (true)
         {
             var readBytes = budget.ReadBytes;
@@ -97,11 +99,11 @@ internal sealed class GraphShortestPathCancellationObserver
             {
                 return;
             }
-            if (TimeProvider.System.GetElapsedTime(observedAt) >= TimeSpan.FromSeconds(TimeoutSeconds))
+            if (observedAt.Elapsed >= TimeSpan.FromSeconds(TimeoutSeconds))
             {
                 throw new TimeoutException(ProgressTimeoutMessage);
             }
-            Thread.Sleep(1);
+            Task.Delay(TimeSpan.FromMilliseconds(1), clock).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 

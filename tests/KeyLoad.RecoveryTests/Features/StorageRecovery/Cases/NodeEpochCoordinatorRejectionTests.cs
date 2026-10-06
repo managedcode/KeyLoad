@@ -132,8 +132,8 @@ internal sealed class NodeEpochCoordinatorRejectionTests
         var source = Path.Combine(root, SourceName);
         var destination = Path.Combine(root, TargetName);
         var profile = NodeEpochComponentProfile.Create();
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
-        timeout.CancelAfter(TimeSpan.FromMinutes(3));
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(3), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutTimeout.Token);
         Exception? activeFailure = null;
         try
         {
@@ -149,7 +149,7 @@ internal sealed class NodeEpochCoordinatorRejectionTests
         }
         finally
         {
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds));
+            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
             await EpochUpgradeCleanup.SettleNodeAsync(null, root, source, activeFailure, cleanup.Token);
         }
     }

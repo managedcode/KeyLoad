@@ -84,7 +84,7 @@ internal sealed class SiteStaticFileHost : IAsyncDisposable
             // Release exactly once: on the managed (non-Windows) listener, Close() after Stop() re-binds the port that
             // Stop() already released, racing parallel tests for it ("Address already in use", website run 37074632196).
             listener.Close();
-            using var timeout = new CancellationTokenSource(SiteTokens.StaticHostTimeoutMilliseconds);
+            using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.StaticHostTimeoutMilliseconds), TimeProvider.System);
             await serving.WaitAsync(timeout.Token);
         }
         finally

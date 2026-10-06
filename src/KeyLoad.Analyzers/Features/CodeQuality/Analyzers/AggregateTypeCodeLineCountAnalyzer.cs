@@ -11,6 +11,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
 {
+    private readonly TimeProvider clock;
     private const int MaximumTypeCodeLines = 200;
     private static readonly ImmutableArray<DiagnosticDescriptor> Rules =
         [NumericQualityRuleDescriptors.AggregateTypeCodeLines];
@@ -25,6 +26,17 @@ public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
         SyntaxKind.DelegateDeclaration
     ];
 
+    /// <summary>Creates the compiler-owned analyzer with the system clock.</summary>
+    public AggregateTypeCodeLineCountAnalyzer() : this(TimeProvider.System) { }
+
+    /// <summary>Creates the analyzer with an explicit clock for exception expiry.</summary>
+    /// <param name="timeProvider">Borrowed clock used to evaluate dated migration exceptions.</param>
+    public AggregateTypeCodeLineCountAnalyzer(TimeProvider timeProvider)
+    {
+        ArgumentNullException.ThrowIfNull(timeProvider);
+        clock = timeProvider;
+    }
+
     /// <inheritdoc/>
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => Rules;
 
@@ -37,9 +49,9 @@ public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
         context.RegisterCompilationStartAction(RegisterCompilationAnalysis);
     }
 
-    private static void RegisterCompilationAnalysis(CompilationStartAnalysisContext context)
+    private void RegisterCompilationAnalysis(CompilationStartAnalysisContext context)
     {
-        var utcDate = DateOnly.FromDateTime(TimeProvider.System.GetUtcNow().UtcDateTime);
+        var utcDate = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var measurements = new AggregateTypeCodeLineAccumulator();
         context.RegisterSyntaxNodeAction(
             nodeContext => MeasureDeclaration(nodeContext, utcDate, measurements),

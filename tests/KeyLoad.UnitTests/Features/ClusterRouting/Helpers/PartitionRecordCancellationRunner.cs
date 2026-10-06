@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using KeyLoad.Core.Features.ClusterRouting.Queries;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting.Helpers;
 
@@ -86,9 +86,9 @@ internal static class PartitionRecordCancellationRunner
         {
             return;
         }
-        var started = Stopwatch.GetTimestamp();
+        var started = new TestElapsedClock(TimeProvider.System);
         while (!cancellation.IsCancellationRequested
-            && Stopwatch.GetElapsedTime(started).TotalMilliseconds < ObserverTimeoutMilliseconds)
+            && started.Elapsed.TotalMilliseconds < ObserverTimeoutMilliseconds)
         {
             var snapshot = store.GetReadDiagnostics();
             var examinedSinceBaseline = snapshot.RangeExaminedBytes - baselineExaminedBytes;

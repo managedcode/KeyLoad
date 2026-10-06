@@ -22,6 +22,8 @@ internal sealed class RuntimeJournalClient(
     private readonly IOptions<RuntimeJournalOptions> journalOptions = ValidateOptions(configuredJournalOptions,
         database.Limits.MaxBatchBytes);
 
+    internal TimeProvider Clock => clock;
+
     internal async Task<RuntimeJournalSnapshot?> GetHeaderAsync(string name, CancellationToken cancellationToken)
     {
         var payload = NativeSerialization.Serialize(name);
@@ -68,7 +70,8 @@ internal sealed class RuntimeJournalClient(
     private async Task<T?> ReadCoreAsync<T>(GrainReadKind kind, ReadOnlyMemory<byte> payload,
         bool allowNull, CancellationToken cancellationToken) where T : class
     {
-        using var deadline = CreateDeadline(cancellationToken);
+        using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
         var principal = await PrepareAsync(token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
@@ -85,7 +88,8 @@ internal sealed class RuntimeJournalClient(
     private async Task<GrainOperationReply> SendCommandAsync(ReadOnlyMemory<byte> payload, Guid commandId,
         CancellationToken cancellationToken)
     {
-        using var deadline = CreateDeadline(cancellationToken);
+        using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
         var principal = await PrepareAsync(token).ConfigureAwait(false);
         var requestId = Guid.NewGuid();
@@ -112,13 +116,6 @@ internal sealed class RuntimeJournalClient(
             database.Principal(view, RuntimeJournalIdentity.ProtectedPrincipalId, clock.GetUtcNow()));
         RuntimeJournalIdentity.RequireProtected(principal);
         return principal;
-    }
-
-    private CancellationTokenSource CreateDeadline(CancellationToken cancellationToken)
-    {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(routingOptions.Value.ExecutionLifetime);
-        return deadline;
     }
 
     private static T? Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class

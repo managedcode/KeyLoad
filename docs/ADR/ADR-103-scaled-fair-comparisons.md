@@ -69,6 +69,15 @@ Root owns workflow/AppHost/runner hardware/resource observations/aggregation/sit
 
 REQ/AC-SCALE-016 (new) and ADR-103 stage 10 (new). This accepted contract precedes private code; durable docs join before its live source. Only the two exact scaled profiles use the new sidecar. The historical 270 controls and website aggregate schema remain unchanged.
 
+Stage 10's native probe cancellation test repair is
+TASK-SCALE-NATIVE-CANCELLATION-024 in the owning
+[ScalingQualification contract](../Features/BenchmarkComparisons/ScalingQualification.md#native-probe-cancellation-regression-repair).
+It replaces an overly narrow exception-type assertion with actual readiness,
+original cancellation/settlement, exited-child observation and a healthy native
+follow-up. Production APIs, sidecar bounds and qualification requirements remain
+unchanged. The worker submits private guarded test sources; root owns review,
+integration and the actual Aspire/Linux gates.
+
 One AppHost-owned collector observes the exact selected native target ContainerResources and lifecycle, never the load generator. It writes server-resource-evidence.v1 in a separate server-resource-evidence.json beside the original worker.json only after runner settlement; it binds exact source/run/attempt/job/target/nodeCount/scenario/profile and SHA256 of original worker bytes. AppHost/test teardown must await this original collector before reports are copied and app ownership is released. Failed/unavailable observation never changes workload timing/results or invents successful qualification.
 
 Observe actual Linux kernel/architecture, CPU vendor/family/model/stepping and physical/logical CPU membership, memory, AppHost effective cgroup envelope, actual target container full IDs/image IDs/start identity/state and cgroup CPU/memory limits/counters, and actual writable data mount filesystem type/capacity. Never substitute requested limits, client sampler counters, host processor count alone, unknown VM class or Docker cache-adjusted working set for server RSS. For exact sampled aggregate process RSS, read bounded cgroup.procs plus /proc/<pid>/status and start identity, verify each PID belongs to the exact current container/cgroup, and reject PID reuse/identity ambiguity. Name measurements maxObservedRssBytes and observedCpuUsage, not an unsampled true peak. Missing permissions/remote daemon/unavailable cgroup or storage is explicit unqualified evidence.
@@ -264,3 +273,25 @@ coherent dispatch-to-intake route exists. Rollback removes only this new route
 and preserves original immutable evidence. No new website open-loop projection
 is enabled. This ADR remains Accepted with native and delivered-source gates
 pending until the complete required evidence exists.
+
+## Accepted stage14: bounded GitHub matrix transport
+
+REQ/AC-SCALE-023 and TASK-SCALE-MATRIX-TRANSPORT-001 repair the actual Linux
+planning failure: full matrix job outputs exceeded GitHub's 1048576-byte UTF-16
+limit. Preserve all2217 canonical rows, eleven named groups and original five
+plan artifacts. The matrix transport contains only id/jobName/target/kind;
+same-run artifact resolution supplies the complete canonical row before resource
+preparation, using existing trusted selectors rather than a second selector path.
+
+Ordered implementation: freeze the transport and full-row resolution contract in
+ScalingQualification; update the existing plan CLI/matrix output and workflow
+download/resolution ordering; extend actual Node-process CLI/resolver flows while
+preserving independent full-row assertions; run Aspire-owned regressions, complete
+solution gates and the delivered-source Linux planning job. Root owns shared
+scripts/workflow joins and evidence; the Luna worker owns the guarded private
+implementation and test helpers in the existing BenchmarkComparisons slice.
+
+Migration changes internal matrix serialization only. Original plan, worker,
+terminal, archive and public metric schemas remain mandatory. Rollback must keep
+the output bound and complete canonical inventory; reverting to oversized output
+cannot count as successful delivery. There is no data migration or new test entry.

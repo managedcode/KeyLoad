@@ -1,6 +1,6 @@
-using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -13,7 +13,7 @@ internal static class AnnSeedCancellationCapture
         using var started = new ManualResetEventSlim(false);
         var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
         var observer = new AnnSeedCancellationThread(budget, cancellation, started);
-        var startedAt = Stopwatch.GetTimestamp();
+        var startedAt = new TestElapsedClock(TimeProvider.System);
         AnnSeed? seed = null;
         Exception? primary = null;
         OperationCanceledException? captureCancellation = null;
@@ -43,7 +43,7 @@ internal static class AnnSeedCancellationCapture
         }
 
         AnnSeedCancellationFailures.ThrowIfAny(primary, captureCancellation, settlementFailures);
-        return new(TimeProvider.System.GetElapsedTime(startedAt), budget.ReadBytes,
+        return new(startedAt.Elapsed, budget.ReadBytes,
             observer.ObservedReadBytes, observer.CancellationRequested, seed, captureCancellation);
     }
 

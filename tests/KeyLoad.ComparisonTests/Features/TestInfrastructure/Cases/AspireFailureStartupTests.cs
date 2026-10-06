@@ -34,7 +34,7 @@ internal sealed class AspireFailureStartupTests
         try
         {
             await entered.Task.WaitAsync(deadline.Token);
-            await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+            await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token));
             await Assert.That(settled.Task.IsCompletedSuccessfully).IsTrue();
             await Assert.That(execution.IsCompleted).IsTrue();
         }
@@ -60,7 +60,7 @@ internal sealed class AspireFailureStartupTests
         var execution = AspireResourceCompletion.RunToExitAsync(fixture.Application, fixture.Runner.Name, deadline.Token);
         try
         {
-            var error = await Assert.ThrowsAsync<FileNotFoundException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+            var error = await Assert.ThrowsAsync<FileNotFoundException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token));
             await Assert.That(error).IsNotNull();
             await Assert.That(error!.FileName).IsEqualTo(Path.Combine(directory.FullName, "missing-startup-input"));
             await Assert.That(execution.IsCompleted).IsTrue();

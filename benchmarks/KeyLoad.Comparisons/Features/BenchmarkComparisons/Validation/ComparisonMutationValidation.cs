@@ -3,9 +3,7 @@ namespace KeyLoad.Comparisons;
 internal static class ComparisonMutationValidation
 {
     private const string SentinelChanged = "MutationSentinelChanged";
-    internal static async Task ValidateAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDataset dataset,
-        Scenario scenario, BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs,
-        CancellationToken cancellationToken)
+    internal static async Task ValidateAsync(IReadOnlyList<IComparisonSession> sessions, BenchmarkDataset dataset, Scenario scenario, BenchmarkDocument[] inputs, OperationSample[] samples, OperationResult?[] outputs, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int WarmupRepetitionIndex = -1;
         const int FirstElementIndex = 0;
@@ -28,7 +26,7 @@ internal static class ComparisonMutationValidation
 
                 try
                 {
-                    using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken);
+                    using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
                     await ComparisonValidation.ValidateOperationAsync(session, dataset, scenario,
                         inputs[operation], outputs[operation]!, deadline.Token);
                 }
@@ -38,17 +36,16 @@ internal static class ComparisonMutationValidation
                 }
             }
         }));
-        await VerifySentinelAsync(sessions[FirstElementIndex], dataset, samples, cancellationToken);
+        await VerifySentinelAsync(sessions[FirstElementIndex], dataset, samples, token: cancellationToken, timeProvider: timeProvider);
     }
 
-    private static async Task VerifySentinelAsync(IComparisonSession reader, BenchmarkDataset dataset,
-        OperationSample[] samples, CancellationToken token)
+    private static async Task VerifySentinelAsync(IComparisonSession reader, BenchmarkDataset dataset, OperationSample[] samples, TimeProvider timeProvider, CancellationToken token)
     {
         const int FirstElementIndex = 0;
 
         try
         {
-            using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, token);
+            using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: token, timeProvider: timeProvider);
             var sentinel = dataset.Documents[FirstElementIndex];
             if (!BenchmarkDataset.SameDocument(await reader.ReadAsync(sentinel, deadline.Token), sentinel))
             {

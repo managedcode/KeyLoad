@@ -6,7 +6,7 @@ internal static class HelixDbDocumentStorage
 {
     private const char IdentitySeparator = '-';
     private const char NativeIdentitySeparator = '_';
-    internal static async Task SeedAsync(HttpClient http, string label, IComparisonCorpus dataset, NativeComparisonExecutionOptions policy, CancellationToken token)
+    internal static async Task SeedAsync(HttpClient http, string label, IComparisonCorpus dataset, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         foreach (var batch in dataset.Documents.Chunk(policy.WriteBatchCapacity))
         {
@@ -19,16 +19,16 @@ internal static class HelixDbDocumentStorage
                 names.Add(name);
             }
 
-            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token).ConfigureAwait(false);
+            using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         }
 
         foreach (var batch in dataset.Edges.Chunk(policy.WriteBatchCapacity))
         {
-            await SeedEdgesAsync(http, label, batch, policy, token).ConfigureAwait(false);
+            await SeedEdgesAsync(http, label, batch, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
         }
     }
 
-    private static async Task SeedEdgesAsync(HttpClient http, string label, BenchmarkEdge[] edges, NativeComparisonExecutionOptions policy, CancellationToken token)
+    private static async Task SeedEdgesAsync(HttpClient http, string label, BenchmarkEdge[] edges, NativeComparisonExecutionOptions policy, TimeProvider timeProvider, CancellationToken token)
     {
         var entries = new JsonArray();
         var names = new JsonArray();
@@ -44,6 +44,6 @@ internal static class HelixDbDocumentStorage
             names.Add(suffix);
         }
 
-        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token).ConfigureAwait(false);
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, policy, token: token, timeProvider: timeProvider).ConfigureAwait(false);
     }
 }

@@ -6,9 +6,9 @@ internal sealed class PhysicalShardCatalogInterface34Tests
     [Test]
     public async Task Interface3ColdUpgradeMixedFenceAndRestoreOnlyRollback()
     {
+        using var deadlineTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(
-            TestContext.Current!.Execution.CancellationToken);
-        deadline.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+            TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);
         await PhysicalShardCatalogInterface34Scenario.RunAsync(deadline.Token).ConfigureAwait(false);
     }
 }

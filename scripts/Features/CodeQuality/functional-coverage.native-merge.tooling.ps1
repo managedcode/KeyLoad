@@ -54,7 +54,7 @@ function Get-FcNativeToolingInputs {
     }
     Assert-FcNativeNoReparsePath $descriptorPath
     $descriptor = Read-FcNativeBoundedFile $descriptorPath $MaximumDescriptorBytes $ReadBufferBytes 'The native coverage tooling descriptor is invalid.'
-    $json = [System.Text.Json.JsonDocument]::Parse($descriptor.bytes)
+    $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($descriptor.bytes))
     try {
         Assert-FcNativeJsonUnique $json.RootElement
         $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($descriptor.bytes)) -AsHashtable -Depth 8

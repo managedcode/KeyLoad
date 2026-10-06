@@ -29,12 +29,12 @@ internal static class NativeRequestWorkKernelCleanup
         if (probe.HandlerEntered.IsCompleted)
         {
             await ServerFailureObserver.ObserveAsync(
-                () => probe.ProducerSettled.WaitAsync(TimeSpan.FromSeconds(SignalJoinSeconds)), failures);
+                () => probe.ProducerSettled.WaitAsync(TimeSpan.FromSeconds(SignalJoinSeconds), TimeProvider.System), failures);
         }
         if (firstMove is not null)
         {
             await ServerFailureObserver.ObserveAsync(
-                () => probe.ActivationSettled.WaitAsync(TimeSpan.FromSeconds(SignalJoinSeconds)), failures);
+                () => probe.ActivationSettled.WaitAsync(TimeSpan.FromSeconds(SignalJoinSeconds), TimeProvider.System), failures);
         }
         await ObserveIfNeededAsync(owner.DisposeAsync().AsTask(), observed, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -43,7 +43,7 @@ internal static class NativeRequestWorkKernelCleanup
     internal static async Task ObserveBoundedAsync(Task operation, List<Exception> failures,
         HashSet<Task> observed, TimeSpan bound)
     {
-        await ServerFailureObserver.ObserveAsync(() => operation.WaitAsync(bound), failures);
+        await ServerFailureObserver.ObserveAsync(() => operation.WaitAsync(bound, TimeProvider.System), failures);
         if (operation.IsCompleted)
         {
             observed.Add(operation);

@@ -16,7 +16,8 @@ internal static class ConfigurationReadOperations
 
     internal static bool IsOptionsFactory(Compilation compilation, IOperation operation) => operation switch
     {
-        IInvocationOperation invocation => invocation.TargetMethod.Name == ConfigurationMetadataNames.Create &&
+        IInvocationOperation invocation => IsOptionsActivator(compilation, invocation) ||
+            invocation.TargetMethod.Name == ConfigurationMetadataNames.Create &&
             MagicRuntimeOperations.IsNativeType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.StaticOptions) &&
             invocation.TargetMethod.TypeArguments.Any(type => ConfigurationOwnership.IsOptionsType(compilation, type)),
         IObjectCreationOperation { Type: INamedTypeSymbol type } =>
@@ -30,7 +31,22 @@ internal static class ConfigurationReadOperations
         ConfigurationOwnership.IsConfiguration(compilation, method.ContainingType) ||
         MagicRuntimeOperations.IsNativeType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationBinder) ||
         MagicRuntimeOperations.IsNativeType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationExtensions) ||
-        MagicRuntimeOperations.IsNativeType(compilation, method.ContainingType, ConfigurationMetadataNames.Environment) &&
+        MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.ConfigurationRootExtensions) ||
+        MagicRuntimeOperations.IsNativeMetadataType(compilation, method.ContainingType, ConfigurationMetadataNames.Environment) &&
             method.Name is ConfigurationMetadataNames.GetEnvironmentVariable or
-                ConfigurationMetadataNames.GetEnvironmentVariables or ConfigurationMetadataNames.GetCommandLineArgs;
+                ConfigurationMetadataNames.GetEnvironmentVariables or ConfigurationMetadataNames.GetCommandLineArgs or
+                ConfigurationMetadataNames.ExpandEnvironmentVariables;
+
+    private static bool IsOptionsActivator(Compilation compilation, IInvocationOperation invocation) =>
+        invocation.TargetMethod.Name == ConfigurationMetadataNames.CreateInstance &&
+        MagicRuntimeOperations.IsNativeMetadataType(compilation, invocation.TargetMethod.ContainingType, ConfigurationMetadataNames.Activator) &&
+        (invocation.TargetMethod.TypeArguments.Any(type => ConfigurationOwnership.IsOptionsType(compilation, type)) ||
+         invocation.Arguments.Any(argument => KnownOptionsType(compilation, argument.Value)));
+
+    private static bool KnownOptionsType(Compilation compilation, IOperation operation) => operation switch
+    {
+        ITypeOfOperation typeOf => ConfigurationOwnership.IsOptionsType(compilation, typeOf.TypeOperand),
+        IConversionOperation conversion => KnownOptionsType(compilation, conversion.Operand),
+        _ => false
+    };
 }

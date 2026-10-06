@@ -5,13 +5,12 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class RabbitReplicaProof
 {
-    public static async Task<(string Version, ClusterEvidence Evidence)> VerifyAsync(HttpClient management, string queue,
-        ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
+    public static async Task<(string Version, ClusterEvidence Evidence)> VerifyAsync(HttpClient management, string queue, ComparisonTopology topology, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const string RabbitReplicaReadinessTimeoutDetail = "RabbitReplicaReadinessTimeout";
 
         var lifecycle = lifecycleOptions.Value;
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var deadline = new ComparisonCancellationSource(timeProvider, cancellationToken);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         while (true)
         {
@@ -26,7 +25,7 @@ internal static class RabbitReplicaProof
             catch (HttpRequestException) when (!deadline.IsCancellationRequested) { }
             catch (JsonException) when (!deadline.IsCancellationRequested) { }
             try
-            { await Task.Delay(lifecycle.HttpReadinessPollInterval, deadline.Token); }
+            { await Task.Delay(lifecycle.HttpReadinessPollInterval, timeProvider, deadline.Token); }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             { throw new ComparisonFailureException(RabbitReplicaReadinessTimeoutDetail); }
         }

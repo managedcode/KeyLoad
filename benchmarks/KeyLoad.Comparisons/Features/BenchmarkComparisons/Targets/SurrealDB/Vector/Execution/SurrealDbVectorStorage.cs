@@ -15,13 +15,13 @@ internal static class SurrealDbVectorStorage
     private const string IdKey = "id";
     private const string EmbeddingKey = "embedding";
     private const string PayloadKey = "payload";
-    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, int corpusCount, [EnumeratorCancellation] CancellationToken cancellationToken)
+    internal static async IAsyncEnumerable<VectorReadback> ReadbackAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, int corpusCount, TimeProvider timeProvider, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var seen = EmptyResultCount;
         var after = -SingleResultCardinality;
         while (true)
         {
-            using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadbackSql(table, after, policy.ReadbackBatchCapacity), policy, cancellationToken).ConfigureAwait(false);
+            using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadbackSql(table, after, policy.ReadbackBatchCapacity), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
             var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
             if (rows.ValueKind != JsonValueKind.Array)
             {
@@ -56,9 +56,9 @@ internal static class SurrealDbVectorStorage
         }
     }
 
-    internal static async Task<VectorReadback?> ReadAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, string id, CancellationToken cancellationToken)
+    internal static async Task<VectorReadback?> ReadAsync(HttpClient http, string table, NativeComparisonExecutionOptions policy, string id, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken).ConfigureAwait(false);
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
         if (result.ValueKind != JsonValueKind.Array || result.GetArrayLength() > SingleResultCardinality)
         {

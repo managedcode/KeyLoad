@@ -39,7 +39,7 @@ internal sealed class ComparisonProgressNativeFixture : IAsyncDisposable
         {
             var failures = new List<Exception> { primaryFailure };
             await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
-                () => application.DisposeAsync().AsTask().WaitAsync(Deadline), failures);
+                () => application.DisposeAsync().AsTask().WaitAsync(Deadline, TimeProvider.System), failures);
             IsolatedResourceLogCaptureStopSupport.ThrowFailures(failures);
             throw;
         }
@@ -49,9 +49,9 @@ internal sealed class ComparisonProgressNativeFixture : IAsyncDisposable
     {
         var failures = new List<Exception>();
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
-            () => Capture.DisposeAsync().AsTask().WaitAsync(Deadline), failures);
+            () => Capture.DisposeAsync().AsTask().WaitAsync(Deadline, TimeProvider.System), failures);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
-            () => Application.DisposeAsync().AsTask().WaitAsync(Deadline), failures);
+            () => Application.DisposeAsync().AsTask().WaitAsync(Deadline, TimeProvider.System), failures);
         IsolatedResourceLogCaptureStopSupport.ThrowFailures(failures);
     }
 }

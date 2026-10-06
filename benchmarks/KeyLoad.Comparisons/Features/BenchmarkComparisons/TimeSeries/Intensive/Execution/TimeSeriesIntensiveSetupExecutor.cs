@@ -4,9 +4,9 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive
 
 internal static class TimeSeriesIntensiveSetupExecutor
 {
-    internal static async Task InitializeAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task InitializeAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
+        using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken, provider: timeProvider);
         call.Start();
         try
         {
@@ -27,7 +27,7 @@ internal static class TimeSeriesIntensiveSetupExecutor
         call.RequireSuccess();
     }
 
-    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+    internal static async Task SeedAsync(ITimeSeriesIntensiveTarget target, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
 
@@ -35,7 +35,7 @@ internal static class TimeSeriesIntensiveSetupExecutor
         {
             cancellationToken.ThrowIfCancellationRequested();
             var samples = TimeSeriesIntensiveCorpus.SeedBatch(batch);
-            using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken);
+            using var call = new TimeSeriesIntensiveCallScope(executionOptions, cancellationToken, provider: timeProvider);
             call.Start();
             try
             {

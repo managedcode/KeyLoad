@@ -1,10 +1,10 @@
-using System.Diagnostics;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 
 internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWorkload workload,
-    TimeSeriesComparisonRecorder recorder)
+    TimeSeriesComparisonRecorder recorder, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     internal async Task ExecuteAsync(ITimeSeriesPersistentTarget target, CancellationToken cancellationToken)
     {
         const string IdempotentSeedRetryToken = "idempotent-seed-retry";
@@ -76,16 +76,16 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
         foreach (var range in workload.ReadRanges)
         {
             var measure = range.ExpectedErrorCode is null;
-            var started = measure ? Stopwatch.GetTimestamp() : NoObservedItems;
+            var started = measure ? timeProvider.GetTimestamp() : NoObservedItems;
             try
             {
                 var result = await target.ReadAsync(workload, range, cancellationToken);
-                double? elapsed = measure ? Stopwatch.GetElapsedTime(started).TotalMilliseconds : null;
+                double? elapsed = measure ? timeProvider.GetElapsedTime(started).TotalMilliseconds : null;
                 recorder.RecordRead(target.Metadata.Name, range, result, elapsed);
             }
             catch (InvalidOperationException error) when (TimeSeriesComparisonTargetErrors.TryGetCode(error, out _))
             {
-                double? elapsed = measure ? Stopwatch.GetElapsedTime(started).TotalMilliseconds : null;
+                double? elapsed = measure ? timeProvider.GetElapsedTime(started).TotalMilliseconds : null;
                 recorder.RecordTargetFailure(target.Metadata.Name, range.Name, ErrorCode(error), elapsed);
             }
             catch (OperationCanceledException)
@@ -102,17 +102,17 @@ internal sealed class TimeSeriesComparisonTargetExecutor(TimeSeriesComparisonWor
         const string BucketSumOracleToken = "bucket-sum-oracle";
         const string CancelledToken = "Cancelled";
 
-        var started = Stopwatch.GetTimestamp();
+        var started = timeProvider.GetTimestamp();
         try
         {
             var buckets = await aggregator.AggregateAsync(workload, cancellationToken);
             recorder.RecordBuckets(target.Metadata.Name, buckets,
-                Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+                timeProvider.GetElapsedTime(started).TotalMilliseconds);
         }
         catch (InvalidOperationException error) when (TimeSeriesComparisonTargetErrors.TryGetCode(error, out _))
         {
             recorder.RecordTargetFailure(target.Metadata.Name, BucketSumOracleToken, ErrorCode(error),
-                Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+                timeProvider.GetElapsedTime(started).TotalMilliseconds);
         }
         catch (OperationCanceledException)
         {

@@ -14,10 +14,11 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     private long position;
     private readonly bool guarded;
 
-    internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null)
+    internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null, TimeProvider? timeProvider = null)
     {
         _ = options.MaximumReadCutElapsed;
         Options = options;
+        Clock = timeProvider ?? TimeProvider.System;
         guarded = expectedNodeId.HasValue;
         if (expectedNodeId is not { } nodeId)
         {
@@ -53,6 +54,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     }
 
     internal ZoneTreeStoreOptions Options { get; }
+    internal TimeProvider Clock { get; }
 
     internal ReaderWriterLockSlim Gate { get; } = new();
     internal ZoneTreeReadCutLifecycle NativeReadCuts { get; } = new();

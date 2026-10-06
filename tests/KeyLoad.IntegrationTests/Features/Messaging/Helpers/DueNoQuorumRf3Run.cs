@@ -10,8 +10,8 @@ internal static class DueNoQuorumRf3Run
 {
     internal static async Task ExecuteAsync(CancellationToken executionToken)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(executionToken);
-        deadline.CancelAfter(DueNoQuorumRf3Protocol.ParentDeadline);
+        using var deadlineTimeout = new CancellationTokenSource(DueNoQuorumRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(executionToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         string? root = null;
         try
@@ -128,7 +128,7 @@ internal static class DueNoQuorumRf3Run
         var observationEnd = dueAt.AddSeconds(DueNoQuorumRf3Protocol.NoQuorumObservationSeconds);
         var remaining = observationEnd - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
-        { await Task.Delay(remaining, cancellationToken).ConfigureAwait(false); }
+        { await Task.Delay(remaining, TimeProvider.System, cancellationToken).ConfigureAwait(false); }
     }
 
     private static void RequireBeforeDue(DateTimeOffset dueAt)

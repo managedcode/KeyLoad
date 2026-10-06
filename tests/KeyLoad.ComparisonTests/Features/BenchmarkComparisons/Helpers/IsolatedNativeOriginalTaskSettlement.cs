@@ -28,7 +28,7 @@ internal static class IsolatedNativeOriginalTaskSettlement
     private static async Task<bool> JoinAsync(Task original, string stage,
         IsolatedNativeTeardownFailures failures, IOptions<NativeComparisonHarnessOptions> options, Func<Task>? escalate)
     {
-        var wait = original.WaitAsync(options.Value.OriginalTaskSettlementTimeout);
+        var wait = original.WaitAsync(options.Value.OriginalTaskSettlementTimeout, TimeProvider.System);
         try
         {
             await wait;

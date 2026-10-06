@@ -56,9 +56,10 @@ internal sealed class ReadExecutionTests
     public async Task OneReadDeadlineCoversSubsequentPointAndScanWork()
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }), TimeProvider.System, cancellationToken);
+        var clock = new ControlledReadClock(new DateTimeOffset(2040, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }), clock, cancellationToken);
         budget.ChargeBytes(InitialReadBytes);
-        await Task.Delay(TimeSpan.FromSeconds(DeadlineWaitSeconds), TimeProvider.System, cancellationToken);
+        clock.Advance(TimeSpan.FromSeconds(DeadlineWaitSeconds));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => budget.ChargeBytes(AdditionalReadByte)).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(budget.ChargeTextToken).Code).IsEqualTo(ErrorCode.BudgetExceeded);

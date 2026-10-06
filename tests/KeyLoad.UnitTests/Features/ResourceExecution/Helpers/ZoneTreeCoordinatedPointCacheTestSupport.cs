@@ -62,7 +62,7 @@ internal static class ZoneTreeCoordinatedPointCacheTestSupport
     {
         try
         {
-            await WrapFailureAsync(() => operation.WaitAsync(WaitLimit));
+            await WrapFailureAsync(() => operation.WaitAsync(WaitLimit, TimeProvider.System));
         }
         catch (AggregateException failure)
         {

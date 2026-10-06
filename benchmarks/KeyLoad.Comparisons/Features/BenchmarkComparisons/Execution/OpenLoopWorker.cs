@@ -9,26 +9,26 @@ internal static class OpenLoopWorker
 {
     internal static async Task RunAsync(IComparisonSession session, int sessionIndex, Scenario scenario,
         ScaledOperationInputs inputs, ChannelReader<OpenLoopWorkItem> reader, OpenLoopTimeline timeline,
-        OpenLoopRunState state, CancellationTokenSource lifetime, Action<OpenLoopProgressV1>? nativeProgress)
+        OpenLoopRunState state, CancellationTokenSource lifetime, Action<OpenLoopProgressV1>? nativeProgress, TimeProvider timeProvider)
     {
         await foreach (var item in reader.ReadAllAsync(lifetime.Token).ConfigureAwait(false))
         {
             var document = inputs.Create(item.Index, warmup: false);
-            var started = System.Diagnostics.Stopwatch.GetTimestamp();
+            var started = timeProvider.GetTimestamp();
             if (lifetime.IsCancellationRequested || !state.TryStart(item, sessionIndex, started))
             {
                 continue;
             }
             await ExecuteStartedAsync(session, item, scenario, state, document, lifetime, timeline.ExecutionPolicy,
-                nativeProgress).ConfigureAwait(false);
+                nativeProgress, timeProvider: timeProvider).ConfigureAwait(false);
         }
     }
 
     private static async Task ExecuteStartedAsync(IComparisonSession session, OpenLoopWorkItem item,
         Scenario scenario, OpenLoopRunState state, BenchmarkDocument document, CancellationTokenSource lifetime,
-        OpenLoopExecutionPolicy policy, Action<OpenLoopProgressV1>? nativeProgress)
+        OpenLoopExecutionPolicy policy, Action<OpenLoopProgressV1>? nativeProgress, TimeProvider timeProvider)
     {
-        var observation = await ObserveAsync(session, item, scenario, document, lifetime, policy)
+        var observation = await ObserveAsync(session, item, scenario, document, lifetime, policy, timeProvider: timeProvider)
             .ConfigureAwait(false);
         var progress = state.Complete(item, observation.Outcome, observation.FinishedTimestamp,
             nativeProgress is not null);
@@ -37,10 +37,10 @@ internal static class OpenLoopWorker
 
     private static async Task<OpenLoopNativeObservation> ObserveAsync(IComparisonSession session,
         OpenLoopWorkItem item, Scenario scenario, BenchmarkDocument document,
-        CancellationTokenSource lifetime, OpenLoopExecutionPolicy policy)
+        CancellationTokenSource lifetime, OpenLoopExecutionPolicy policy, TimeProvider timeProvider)
     {
-        using var deadline = CreateDeadline(item, policy, lifetime.Token);
-        var original = ExecuteAndObserveAsync(session, item, scenario, document, deadline.Token);
+        using var deadline = CreateDeadline(item, policy, token: lifetime.Token, timeProvider: timeProvider);
+        var original = ExecuteAndObserveAsync(session, item, scenario, document, cancellationToken: deadline.Token, timeProvider: timeProvider);
         try
         {
             return await original.ConfigureAwait(false);
@@ -48,7 +48,7 @@ internal static class OpenLoopWorker
         catch (OperationCanceledException error) when (deadline.IsCancellationRequested
             && !lifetime.IsCancellationRequested && error.CancellationToken == deadline.Token)
         {
-            return new(OpenLoopOutcome.TimedOutAfterStart, System.Diagnostics.Stopwatch.GetTimestamp(), null);
+            return new(OpenLoopOutcome.TimedOutAfterStart, timeProvider.GetTimestamp(), null);
         }
         catch (OperationCanceledException error) when (lifetime.IsCancellationRequested
             && error.CancellationToken == deadline.Token)
@@ -61,17 +61,16 @@ internal static class OpenLoopWorker
         }
         catch (Exception error) when (original.IsFaulted)
         {
-            var finished = System.Diagnostics.Stopwatch.GetTimestamp();
+            var finished = timeProvider.GetTimestamp();
             var fatal = CqrsRuntimeFailures.FindFatal(error) is null ? null : error;
             return new(OpenLoopOutcome.Failed, finished, fatal);
         }
     }
 
-    private static async Task<OpenLoopNativeObservation> ExecuteAndObserveAsync(IComparisonSession session,
-        OpenLoopWorkItem item, Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
+    private static async Task<OpenLoopNativeObservation> ExecuteAndObserveAsync(IComparisonSession session, OpenLoopWorkItem item, Scenario scenario, BenchmarkDocument document, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var result = await ExecuteAsync(session, scenario, document, cancellationToken).ConfigureAwait(false);
-        var finished = System.Diagnostics.Stopwatch.GetTimestamp();
+        var finished = timeProvider.GetTimestamp();
         return ObserveResult(item, scenario, document, result, finished);
     }
 
@@ -139,12 +138,11 @@ internal static class OpenLoopWorker
         return new(OpenLoopSessionDisposition.Succeeded, result);
     }
 
-    private static CancellationTokenSource CreateDeadline(OpenLoopWorkItem item, OpenLoopExecutionPolicy policy,
-        CancellationToken token)
+    private static ComparisonCancellationSource CreateDeadline(OpenLoopWorkItem item, OpenLoopExecutionPolicy policy, TimeProvider timeProvider, CancellationToken token)
     {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        var remaining = System.Diagnostics.Stopwatch.GetElapsedTime(
-            System.Diagnostics.Stopwatch.GetTimestamp(), item.DeadlineTimestamp);
+        var deadline = new ComparisonCancellationSource(timeProvider, token);
+        var remaining = timeProvider.GetElapsedTime(
+            timeProvider.GetTimestamp(), item.DeadlineTimestamp);
         if (remaining <= TimeSpan.Zero)
         {
             deadline.Cancel();

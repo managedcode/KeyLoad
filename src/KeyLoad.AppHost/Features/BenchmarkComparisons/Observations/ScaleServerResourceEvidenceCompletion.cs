@@ -3,8 +3,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
-internal sealed class ScaleServerResourceEvidenceCompletion(IOptions<ScaleServerResourceOptions> options)
+internal sealed class ScaleServerResourceEvidenceCompletion(IOptions<ScaleServerResourceOptions> options, TimeProvider? provider = null)
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly TimeSpan cleanupThreshold = options.Value.CleanupThreshold;
     private readonly Lock sync = new();
     private Task? original;
@@ -59,7 +60,7 @@ internal sealed class ScaleServerResourceEvidenceCompletion(IOptions<ScaleServer
     private async Task WaitThresholdAsync(Task observation, Action markMissing, List<Exception> failures)
     {
         using var thresholdCancellation = new CancellationTokenSource();
-        var threshold = Task.Delay(cleanupThreshold, thresholdCancellation.Token);
+        var threshold = Task.Delay(cleanupThreshold, timeProvider, thresholdCancellation.Token);
         try
         {
             if (await Task.WhenAny(observation, threshold) != observation)

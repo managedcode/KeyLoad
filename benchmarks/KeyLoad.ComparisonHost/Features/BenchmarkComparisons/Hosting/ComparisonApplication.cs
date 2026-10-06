@@ -21,31 +21,32 @@ internal static class ComparisonApplication
         configuration.AddCommandLine(arguments);
         var startup = ComparisonStartupRegistration.Read(configuration).Value;
         var executionOptions = NativeComparisonExecutionRegistration.Read(configuration);
+        var timeProvider = TimeProvider.System;
         var owner = new ComparisonTargetOwner(executionOptions,
             NativeComparisonExecutionRegistration.ReadDiagnostics(configuration),
             NativeComparisonExecutionRegistration.ReadIsolatedAdmission(configuration),
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
             NativeComparisonExecutionRegistration.ReadClient(configuration),
-            NativeComparisonExecutionRegistration.ReadTranslation(configuration));
+            NativeComparisonExecutionRegistration.ReadTranslation(configuration), timeProvider);
         ComparisonCancellationLifetime? cancellationLifetime = null;
         try
         {
-            cancellationLifetime = new ComparisonCancellationLifetime(executionOptions);
+            cancellationLifetime = new ComparisonCancellationLifetime(executionOptions, timeProvider);
             if (startup.Target is not null)
             {
-                return await IsolatedHostApplication.RunAsync(configuration, cancellationLifetime.Token);
+                return await IsolatedHostApplication.RunAsync(configuration, cancellationLifetime.Token, timeProvider);
             }
 
             if (string.Equals(startup.Profile,
                     ComparisonHostConstants.TimeSeriesProfile, StringComparison.OrdinalIgnoreCase))
             {
-                return await TimeSeriesComparisonApplication.RunAsync(configuration, cancellationLifetime.Token);
+                return await TimeSeriesComparisonApplication.RunAsync(configuration, cancellationLifetime.Token, timeProvider);
             }
 
             var settingsOptions = ComparisonHostSettings.ReadOptions(configuration);
             var settings = settingsOptions.Value;
             var targets = owner.CreateTargets(settings);
-            return await RunComparisonAsync(settings, targets, executionOptions, cancellationLifetime.Token);
+            return await RunComparisonAsync(settings, targets, executionOptions, timeProvider, cancellationLifetime.Token);
         }
         finally
         {
@@ -62,9 +63,9 @@ internal static class ComparisonApplication
     }
 
     private static async Task<int> RunComparisonAsync(ComparisonHostSettings settings,
-        KeyLoad.Comparisons.IComparisonTarget[] targets, IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
+        KeyLoad.Comparisons.IComparisonTarget[] targets, IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.WorkloadOptions, executionOptions, Console.WriteLine);
+        var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.WorkloadOptions, executionOptions, Console.WriteLine, timeProvider);
         var report = await runner.RunAsync(targets, settings.SourceRevision, cancellationToken, settings.Storage);
         if (settings.ExecutionIdentity is { } identity)
         {
@@ -95,9 +96,9 @@ internal static class ComparisonApplication
         private bool disposeRequested;
         private bool disposed;
 
-        internal ComparisonCancellationLifetime(IOptions<NativeComparisonExecutionOptions> executionOptions)
+        internal ComparisonCancellationLifetime(IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider)
         {
-            source = new(executionOptions.Value.HostLifetime);
+            source = new(executionOptions.Value.HostLifetime, timeProvider);
             token = source.Token;
             handler = OnCancelKeyPress;
             try

@@ -4,7 +4,6 @@ namespace KeyLoad.Diagnostics.Features.ResourceExecution;
 internal static class DatabasePhaseArithmetic
 {
     private const int BoundaryCount = 15;
-    private const int CasAttempts = 4;
     private const int InvalidBucket = -1;
     private const uint MicrosecondsPerSecond = 1_000_000;
     private static readonly int[] BoundaryMicroseconds =
@@ -33,10 +32,10 @@ internal static class DatabasePhaseArithmetic
         return boundaries;
     }
 
-    /// <summary>Maps elapsed Stopwatch ticks to one of sixteen inclusive buckets.</summary>
+    /// <summary>Maps elapsed provider timestamp ticks to one of sixteen inclusive buckets.</summary>
     internal static int BucketFor(long elapsed, long frequency)
     {
-        if (elapsed < DatabasePhaseValues.MinimumElapsedTicks || frequency <= DatabasePhaseValues.MinimumStopwatchFrequency)
+        if (elapsed < DatabasePhaseValues.MinimumElapsedTicks || frequency <= DatabasePhaseValues.MinimumTimestampFrequency)
         {
             return InvalidBucket;
         }
@@ -63,10 +62,11 @@ internal static class DatabasePhaseArithmetic
         return BoundaryCount;
     }
 
-    /// <summary>Attempts at most four compare-exchanges and never wraps a counter.</summary>
-    internal static DatabaseProfileQuality TryIncrement(ref long counter)
+    /// <summary>Uses the selected compare-exchange bound and never wraps a counter.</summary>
+    internal static DatabaseProfileQuality TryIncrement(ref long counter, int maximumCasAttempts)
     {
-        for (var attempt = DatabasePhaseValues.FirstCasAttempt; attempt < CasAttempts; attempt++)
+        DatabasePhaseSettingsValidation.ValidateMaximumCasAttempts(maximumCasAttempts);
+        for (var attempt = DatabasePhaseValues.FirstCasAttempt; attempt < maximumCasAttempts; attempt++)
         {
             var observed = Interlocked.Read(ref counter);
             if (observed == long.MaxValue || observed < DatabasePhaseValues.MinimumCounterValue)

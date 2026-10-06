@@ -9,6 +9,15 @@ REQ-RESOURCE-005 private honest node capture → AC-DBPROF-005/007.
 REQ-RESOURCE-006 correctness/measured overhead → AC-DBPROF-006/008.
 Existing REQ-RESOURCE-002 and REQ-MP-005 require actual native evidence.
 
+Owner correction2026-10-06 also maps REQ-CQ-013 / AC-CQ-034/035/038 to this
+primitive's operational reservation and retry policy. ADR-113 freezes native
+DatabasePhaseExecutionOptions registration, pre-ownership validation and explicit
+BCL scalar projection: disabled mode by default, stripes1/2/4 (default4), attempts
+1..4 (default4), no primitive fallback. DatabasePhase* TUnit cases cover nondefault
+native binding, invalid admission, actual bounded allocation, concurrency and
+unchanged snapshots. Fixed32/6/16 metadata and128KiB remain upper guarantees;
+enabled-startup/overhead/export/RF3 qualification remains separately pending.
+
 ```mermaid
 sequenceDiagram
     participant Operation as Actual operation owner

@@ -16,8 +16,8 @@ internal static class PostgresSchemaContextReset
     internal static async Task VerifyAsync(string connectionString, CancellationToken cancellationToken)
     {
         var policy = NativeExecutionPolicyFixture.Harness().Value;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(policy.PostgresContextResetTimeout);
+        using var timeoutTimeout = new CancellationTokenSource(policy.PostgresContextResetTimeout, TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         var poolConnectionString = new NpgsqlConnectionStringBuilder(connectionString)
         {
             Pooling = true,

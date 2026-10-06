@@ -186,8 +186,8 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     {
         try
         {
-            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            deadline.CancelAfter(DiagnosticRequestTimeout);
+            using var deadlineTimeout = new CancellationTokenSource(DiagnosticRequestTimeout, TimeProvider.System);
+            using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
             using var security = new PeerSecurity(peerSecret, TimeProvider.System, IntegrationRoutingOptions.Discovery());
             using var http = new HttpClient(security.CreateHandler())
             { Timeout = Timeout.InfiniteTimeSpan };

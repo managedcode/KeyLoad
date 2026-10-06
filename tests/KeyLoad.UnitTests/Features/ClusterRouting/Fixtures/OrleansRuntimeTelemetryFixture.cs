@@ -98,7 +98,7 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         {
             try
             {
-                using var timeout = new CancellationTokenSource(CaptureOptions.FlushTimeoutMilliseconds);
+                using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(CaptureOptions.FlushTimeoutMilliseconds), TimeProvider.System);
                 await host.StopAsync(timeout.Token);
             }
             finally

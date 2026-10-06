@@ -23,7 +23,7 @@ internal sealed class RealZoneTreeReadGateHold : IAsyncDisposable
     }
 
     /// <summary>Waits until the real storage read callback owns the gate.</summary>
-    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(CoordinationTimeout);
+    internal Task WaitUntilEnteredAsync() => entered.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
 
     /// <summary>Releases the callback and waits for the real read to exit.</summary>
     internal async Task ReleaseAsync()
@@ -31,7 +31,7 @@ internal sealed class RealZoneTreeReadGateHold : IAsyncDisposable
         release.TrySetResult();
         try
         {
-            await holder.WaitAsync(CoordinationTimeout);
+            await holder.WaitAsync(CoordinationTimeout, TimeProvider.System);
         }
         finally
         {

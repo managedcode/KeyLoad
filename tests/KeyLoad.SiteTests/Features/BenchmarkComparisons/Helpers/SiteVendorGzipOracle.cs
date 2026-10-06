@@ -12,8 +12,8 @@ internal static class SiteVendorGzipOracle
             throw new InvalidOperationException(SiteVendorTokens.OracleDidNotStart);
         }
 
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-        timeout.CancelAfter(SiteTokens.NodeTimeoutMilliseconds);
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteTokens.NodeTimeoutMilliseconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutTimeout.Token);
         var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, SiteTokens.NodeOutputExceeded, timeout.Token);
         var stderr = SiteProcessOutput.ReadAsync(process.StandardError, SiteTokens.NodeOutputExceeded, timeout.Token);
         try

@@ -10,11 +10,10 @@ internal static class RedisCopyObservation
     private const string LinkDown = "down";
     private const string ErrorReplicaCopy = "RedisDirectReplicaProbeFailed";
 
-    internal static async Task VerifyDirectCopiesAsync(ConnectionMultiplexer[] replicas, EndPoint[] endpoints, int database, string key,
-        string payload, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken token)
+    internal static async Task VerifyDirectCopiesAsync(ConnectionMultiplexer[] replicas, EndPoint[] endpoints, int database, string key, string payload, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken token)
     {
         var lifecycle = lifecycleOptions.Value;
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        using var deadline = new ComparisonCancellationSource(timeProvider, token);
         deadline.CancelAfter(lifecycle.ReadinessTimeout);
         while (true)
         {
@@ -22,7 +21,7 @@ internal static class RedisCopyObservation
             {
                 return;
             }
-            await DelayUntilNextProbeAsync(deadline: deadline.Token, caller: token, pollInterval: lifecycle.RedisReadinessPollInterval);
+            await DelayUntilNextProbeAsync(deadline: deadline.Token, caller: token, pollInterval: lifecycle.RedisReadinessPollInterval, timeProvider: timeProvider);
         }
     }
 
@@ -63,11 +62,11 @@ internal static class RedisCopyObservation
         };
     }
 
-    private static async Task DelayUntilNextProbeAsync(TimeSpan pollInterval, CancellationToken deadline, CancellationToken caller)
+    private static async Task DelayUntilNextProbeAsync(TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken deadline, CancellationToken caller)
     {
         try
         {
-            await Task.Delay(pollInterval, deadline);
+            await Task.Delay(pollInterval, timeProvider, deadline);
         }
         catch (OperationCanceledException) when (!caller.IsCancellationRequested)
         {

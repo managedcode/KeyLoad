@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace KeyLoad.Comparisons;
@@ -7,6 +6,7 @@ namespace KeyLoad.Comparisons;
 internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadBytes,
     int offeredRatePerSecond, Scenario scenario)
 {
+    private readonly TimeProvider timeProvider = timeline.TimeProvider;
     private readonly System.Threading.Lock gate = new();
     private readonly int[] sampleIndices = ScaledLatencySample.Indices(OpenLoopRateContract.PlannedOperations,
         OpenLoopRateContract.SampleCapacity);
@@ -45,7 +45,7 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
                 return OpenLoopOfferDisposition.Frozen;
             }
             item.Phase = OpenLoopItemPhase.Queued;
-            item.OfferedTimestamp = Stopwatch.GetTimestamp();
+            item.OfferedTimestamp = timeProvider.GetTimestamp();
             live.Add(item.Index, item);
             if (writer.TryWrite(item))
             {
@@ -54,7 +54,7 @@ internal sealed class OpenLoopRunState(OpenLoopTimeline timeline, int payloadByt
             live.Remove(item.Index);
             item.Phase = OpenLoopItemPhase.Terminal;
             harnessRejected = checked(harnessRejected + AdjacentElementOffset);
-            RecordTerminalSample(item, OpenLoopOutcome.HarnessRejected, Stopwatch.GetTimestamp());
+            RecordTerminalSample(item, OpenLoopOutcome.HarnessRejected, timeProvider.GetTimestamp());
             return OpenLoopOfferDisposition.Rejected;
         }
     }

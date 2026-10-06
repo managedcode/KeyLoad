@@ -75,8 +75,8 @@ internal static class IsolatedPostgresSlotRegression
 
     private static async Task WaitForCopiesAsync(NpgsqlConnection connection, int expected, string cut, CancellationToken token)
     {
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.PostgresSlotObservationTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.PostgresSlotObservationTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         while (true)
         {
             await using var command = new NpgsqlCommand(Copies, connection);
@@ -87,7 +87,7 @@ internal static class IsolatedPostgresSlotRegression
                 return;
             }
 
-            await Task.Delay(ProbeMilliseconds, deadline.Token);
+            await Task.Delay(TimeSpan.FromMilliseconds(ProbeMilliseconds), TimeProvider.System, deadline.Token);
         }
     }
 }

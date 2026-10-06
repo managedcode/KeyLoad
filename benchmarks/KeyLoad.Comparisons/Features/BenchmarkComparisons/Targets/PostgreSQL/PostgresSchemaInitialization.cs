@@ -13,11 +13,9 @@ internal static class PostgresSchemaInitialization
     private const string TlsTransport = "pooled prepared SQL/TLS";
     private const string TcpTransport = "pooled prepared SQL/TCP";
 
-    internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset, PostgresSchemaIdentity identity,
-        Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile, Action<TargetProfile> updateProfile,
-        Action markCommitAttempted, IOptions<ComparisonLifecycleOptions> lifecycleOptions, CancellationToken cancellationToken)
+    internal static async Task InitializeAsync(NpgsqlConnection connection, IComparisonCorpus dataset, PostgresSchemaIdentity identity, Guid ownerGuid, ComparisonTopology topology, TargetProfile initialProfile, Action<TargetProfile> updateProfile, Action markCommitAttempted, IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
-        var nativeTopology = new PostgresTopology(lifecycleOptions);
+        var nativeTopology = new PostgresTopology(lifecycleOptions, provider: timeProvider);
         await nativeTopology.ConfigureReplicationAsync(connection, topology, cancellationToken);
         await PostgresSchemaLifecycle.CreateAsync(connection, identity, ownerGuid, dataset.Settings.Dimensions,
             markCommitAttempted, cancellationToken);

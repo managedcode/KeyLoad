@@ -26,7 +26,7 @@ internal sealed class VectorExecutionPolicyContractTests
         execution.OperationTimeout = TimeSpan.ParseExact("00:00:00.0100000", "c", CultureInfo.InvariantCulture);
         using (var deadline = VectorOperationDeadline.Create(execution, CancellationToken.None))
         {
-            await Assert.That(async () => await Task.Delay(Timeout.InfiniteTimeSpan, deadline.Token))
+            await Assert.That(async () => await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, deadline.Token))
                 .Throws<TaskCanceledException>();
             await Assert.That(deadline.IsCancellationRequested).IsTrue();
         }
@@ -34,7 +34,7 @@ internal sealed class VectorExecutionPolicyContractTests
         using var caller = new CancellationTokenSource();
         using var linked = VectorOperationDeadline.Create(execution, caller.Token);
         await caller.CancelAsync();
-        await Assert.That(async () => await Task.Delay(Timeout.InfiniteTimeSpan, linked.Token))
+        await Assert.That(async () => await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, linked.Token))
             .Throws<TaskCanceledException>();
         await Assert.That(linked.IsCancellationRequested).IsTrue();
     }

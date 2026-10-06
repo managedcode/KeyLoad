@@ -15,8 +15,8 @@ internal static class IsolatedKeyLoadPublicRegression
         ArgumentNullException.ThrowIfNull(app);
         ArgumentOutOfRangeException.ThrowIfLessThan(nodeCount, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodeCount, 3);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.KeyLoadPublicRegressionTimeout);
+        using var deadlineTimeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadPublicRegressionTimeout, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
         var key = await app.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ParameterResource>().Single(item => item.Name == AdminParameter).GetValueAsync(deadline.Token)
             ?? throw new InvalidOperationException("The persisted administrator credential is missing.");

@@ -36,7 +36,7 @@ internal static class SagaTimeoutRf3Assertions
         var remaining = dueAt - TimeProvider.System.GetUtcNow();
         if (remaining > TimeSpan.Zero)
         {
-            await Task.Delay(remaining, cancellationToken);
+            await Task.Delay(remaining, TimeProvider.System, cancellationToken);
         }
     }
 
@@ -57,7 +57,7 @@ internal static class SagaTimeoutRf3Assertions
             {
                 throw new InvalidOperationException("The saga left Waiting without its autonomous terminal transition.");
             }
-            await Task.Delay(PollInterval, cancellationToken);
+            await Task.Delay(PollInterval, TimeProvider.System, cancellationToken);
         }
         throw new TimeoutException("The autonomous timeout did not commit within its bounded RF3 window.");
     }

@@ -34,19 +34,19 @@ internal sealed class AnalyticalAdmissionTaskLifetime(TimeSpan timeout)
     {
         foreach (var worker in workers)
         {
-            var error = await worker.WaitAsync(timeout);
+            var error = await worker.WaitAsync(timeout, TimeProvider.System);
             await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         }
     }
 
     internal async Task AssertWorkerCompletesAsync<TResult>(Task<TResult> worker)
     {
-        _ = await worker.WaitAsync(timeout);
+        _ = await worker.WaitAsync(timeout, TimeProvider.System);
     }
 
     internal async Task AssertWorkerIsCancelledAsync(Task worker)
     {
-        _ = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => worker.WaitAsync(timeout));
+        _ = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => worker.WaitAsync(timeout, TimeProvider.System));
     }
 
     internal async Task RunWithCleanupAsync(Func<Task> operation, Func<Task> cancel, Func<Task> release,

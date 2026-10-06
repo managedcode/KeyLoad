@@ -11,8 +11,8 @@ internal static class SiteBrowserNavigation
             ?? throw new InvalidOperationException(SiteBrowserTokens.BrowserProtocolFailure);
         var loaderId = navigation.TryGetProperty(SiteBrowserTokens.LoaderIdField, out var loader)
             ? loader.GetString() : null;
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds);
+        using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(SiteBrowserTokens.BrowserCommandTimeoutMilliseconds), TimeProvider.System);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTimeout.Token);
         while (true)
         {
             var tree = await cdp.CommandAsync(SiteBrowserTokens.PageGetFrameTree, null, timeout.Token);
@@ -27,7 +27,7 @@ internal static class SiteBrowserNavigation
                 }
             }
 
-            await Task.Delay(SiteBrowserTokens.NavigationPollDelayMilliseconds, timeout.Token);
+            await Task.Delay(TimeSpan.FromMilliseconds(SiteBrowserTokens.NavigationPollDelayMilliseconds), TimeProvider.System, timeout.Token);
         }
     }
 

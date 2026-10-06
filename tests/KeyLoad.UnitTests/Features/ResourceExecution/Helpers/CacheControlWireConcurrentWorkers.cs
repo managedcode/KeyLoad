@@ -10,11 +10,11 @@ internal static class CacheControlWireConcurrentWorkers
     {
         var signed = TrySignProof(authenticator, proof) ? 1 : 0;
         SignalReady(barrier);
-        barrier.Start.Task.WaitAsync(JoinTimeout).GetAwaiter().GetResult();
+        barrier.Start.Task.WaitAsync(JoinTimeout, TimeProvider.System).GetAwaiter().GetResult();
         var closed = SignUntilDisposed(authenticator, proof, ref signed);
         if (closed == 0)
         {
-            barrier.Disposed.Task.WaitAsync(JoinTimeout).GetAwaiter().GetResult();
+            barrier.Disposed.Task.WaitAsync(JoinTimeout, TimeProvider.System).GetAwaiter().GetResult();
             closed = ThrowsAfterDisposal(authenticator, proof) ? 1 : 0;
         }
 
@@ -24,7 +24,7 @@ internal static class CacheControlWireConcurrentWorkers
     internal static void DisposeDuringWorkers(CacheControlAuthenticator authenticator, BarrierState barrier)
     {
         SignalReady(barrier);
-        barrier.Start.Task.WaitAsync(JoinTimeout).GetAwaiter().GetResult();
+        barrier.Start.Task.WaitAsync(JoinTimeout, TimeProvider.System).GetAwaiter().GetResult();
         DisposeAndSignal(authenticator, barrier);
     }
 

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
@@ -25,7 +24,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
         var corpus = new ScaledRawStorageCorpus(recordCount, PayloadBytes, options);
         var arena = new ScaledRawStorageValueArena(corpus, options);
         var engine = new ScaledRawStorageZoneTreeEngine(corpus, arena, new byte[PayloadBytes],
-            Stopwatch.GetTimestamp(), options, TestContext.Current!.Execution.CancellationToken);
+            TimeProvider.System.GetTimestamp(), options, TestContext.Current!.Execution.CancellationToken);
         string directory;
         using (engine)
         {
@@ -74,7 +73,7 @@ internal sealed class ScaledRawStorageExecutionPolicyTests
         var arena = new ScaledRawStorageValueArena(corpus, validOptions);
         var invalidOptions = Options.Create(new ScaledStorageExecutionOptions { MutableSegmentSlackRecords = slackRecords });
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() => _ = new ScaledRawStorageZoneTreeEngine(
-            corpus, arena, new byte[PayloadBytes], Stopwatch.GetTimestamp(), invalidOptions, CancellationToken.None));
+            corpus, arena, new byte[PayloadBytes], TimeProvider.System.GetTimestamp(), invalidOptions, CancellationToken.None));
         await Assert.That(failure.OptionsName).IsEqualTo(ScaledStorageExecutionOptions.SectionName);
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(ScaledStorageExecutionOptions));
         await Assert.That(failure.Failures.ToArray()).IsEquivalentTo([ScaledStorageExecutionOptions.ValidationMessage]);

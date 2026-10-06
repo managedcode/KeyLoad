@@ -2,12 +2,14 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class OpenSearchNativeVectorIndex(Uri endpoint, int nodeCount) : IAsyncDisposable
 {
     private const int Dimensions = 2;
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeExecutionPolicyFixture.Read();
     private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchRequestTimeout;
     private static TimeSpan CleanupTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchIndexCleanupTimeout;
     private readonly HttpClient client = new() { BaseAddress = endpoint, Timeout = RequestTimeout };
@@ -18,7 +20,7 @@ internal sealed class OpenSearchNativeVectorIndex(Uri endpoint, int nodeCount) :
     {
         owned = true;
         await OpenSearchIndex.CreateAsync(client, index, Dimensions, nodeCount - 1, token);
-        _ = await OpenSearchClusterEvidence.ObserveAsync(client, index, nodeCount, OpenSearchNativeVectorRegression.Topology(nodeCount), token);
+        _ = await OpenSearchClusterEvidence.ObserveAsync(client, index, nodeCount, OpenSearchNativeVectorRegression.Topology(nodeCount), executionOptions, token);
     }
 
     internal async Task WriteAsync(string id, object source, CancellationToken token)
@@ -52,7 +54,7 @@ internal sealed class OpenSearchNativeVectorIndex(Uri endpoint, int nodeCount) :
         {
             if (owned)
             {
-                using var cleanup = new CancellationTokenSource(CleanupTimeout);
+                using var cleanup = new CancellationTokenSource(CleanupTimeout, TimeProvider.System);
                 using var deleted = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Delete,
                     OpenSearchNames.PathSeparator + index, null, cleanup.Token, allowNotFound: true);
                 using var absent = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,

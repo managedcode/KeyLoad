@@ -14,9 +14,10 @@ internal sealed class NativeDatabaseDocumentFlowTests
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var fixture = await NativeDatabaseFlowFixture.CreateAsync(name, token);
         using var client = await fixture.ClientAsync(token);
+        var timeProvider = new NativeDatabaseFlowTimeProvider(TimeProvider.System);
         await using IComparisonTarget target = name == "SurrealDB"
-            ? new SurrealDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions)
-            : new HelixDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions);
+            ? new SurrealDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions, timeProvider)
+            : new HelixDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions, timeProvider);
         var corpus = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Comparisons.ComparisonOptions() { Documents = 32, Dimensions = 128, GraphVertices = 16, GraphDepth = 3 }));
         await target.InitializeAsync(corpus, token);
         await using var session = await target.OpenSessionAsync(token);
@@ -29,6 +30,7 @@ internal sealed class NativeDatabaseDocumentFlowTests
         await Assert.That(readback.Select(row => row.Id)).IsEquivalentTo(corpus.Documents.Select(row => row.Id));
         await Assert.That(readback.All(row => BenchmarkDataset.SameJson(row.Json, corpus.Documents.Single(doc => doc.Id == row.Id).Json))).IsTrue();
         var first = corpus.Documents[0];
+        await NativeDatabaseClockFlow.VerifySessionReadAsync(session, first, timeProvider, token);
         foreach (var scenario in new[] { Scenario.GraphNeighbors, Scenario.GraphTraverse })
         {
             var actual = await session.ExecuteAsync(scenario, first, token);

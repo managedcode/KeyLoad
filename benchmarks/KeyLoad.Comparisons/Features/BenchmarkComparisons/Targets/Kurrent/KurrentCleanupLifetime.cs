@@ -30,7 +30,7 @@ internal static class KurrentCleanupLifetime
         {
             RequireWithinBudget(state);
             var remaining = state.Remaining;
-            await joined.WaitAsync(joined.IsCompleted ? TimeSpan.Zero : remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero);
+            await joined.WaitAsync(joined.IsCompleted ? TimeSpan.Zero : remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero, cancellation.TimeProvider);
             RequireWithinBudget(state);
         }
         catch (Exception error)

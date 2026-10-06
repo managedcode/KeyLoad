@@ -89,7 +89,7 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
 
     public async Task InitializeAsync()
     {
-        using var deadline = new CancellationTokenSource(TimingOptions.Value.StartupTimeout);
+        using var deadline = new CancellationTokenSource(TimingOptions.Value.StartupTimeout, TimeProvider.System);
         try
         {
             await Cluster.DeployAsync(deadline.Token);
@@ -118,7 +118,7 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         }
 
         var failures = new List<Exception>();
-        using (var deadline = new CancellationTokenSource(TimingOptions.Value.ShutdownTimeout))
+        using (var deadline = new CancellationTokenSource(TimingOptions.Value.ShutdownTimeout, TimeProvider.System))
         {
             await ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
         }

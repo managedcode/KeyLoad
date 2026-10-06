@@ -8,8 +8,8 @@ internal static class RequestCqrsAuthorityFaultLifecycleRunner
 {
     internal static async Task RunAsync(bool officialMcp, CancellationToken cancellationToken)
     {
-        using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        parent.CancelAfter(RequestCqrsRf3Protocol.ParentDeadline);
+        using var parentTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, parentTimeout.Token);
         var lifecycle = new RequestCqrsLifecycleEvidence();
         var scenario = new RequestCqrsAuthorityFaultScenario(officialMcp, lifecycle, cancellationToken);
         await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteObservedAsync(parent.Token),

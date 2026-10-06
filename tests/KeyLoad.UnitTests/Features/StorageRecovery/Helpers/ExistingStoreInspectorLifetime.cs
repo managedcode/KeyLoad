@@ -12,6 +12,7 @@ internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
     private SafeFileHandle? ownerHandle;
     private ExistingStoreInspectorSession? session;
     private CancellationTokenSource? deadline;
+    private CancellationTokenSource? timeout;
     private ExistingStoreInspectorExit? result;
     private string assemblySha256 = string.Empty;
     private bool canceled;
@@ -39,8 +40,8 @@ internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
         var (startInfo, assemblyPath) = ExistingStoreInspectorLaunchSettings.Create();
         assemblySha256 = await HashAssemblyAsync(assemblyPath);
         session = await ExistingStoreInspectorSession.StartAsync(startInfo, payload);
-        deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ExecutionDeadlineSeconds));
+        timeout = new CancellationTokenSource(TimeSpan.FromSeconds(ExecutionDeadlineSeconds), TimeProvider.System);
+        deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         try
         {
             canceled = await session.WaitAsync(cancelWhenReady, deadline.Token);
@@ -93,6 +94,7 @@ internal sealed class ExistingStoreInspectorLifetime : IAsyncDisposable
         try
         {
             deadline?.Dispose();
+            timeout?.Dispose();
         }
         catch (Exception original)
         {

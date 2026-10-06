@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Common" ExcludeAssets="compile;runtime" PrivateAssets="all" />
     <ProjectReference Include="../../src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>

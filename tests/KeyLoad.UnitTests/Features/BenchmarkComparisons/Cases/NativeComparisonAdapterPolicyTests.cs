@@ -13,6 +13,7 @@ internal sealed class NativeComparisonAdapterPolicyTests
     [Arguments(nameof(NativeComparisonExecutionOptions.TimeSeriesInitialReadCapacity), 16)]
     [Arguments(nameof(NativeComparisonExecutionOptions.KeyLoadTimeSeriesReadLimit), 1000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.ReportFileBufferBytes), 65_536)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.OpenSearchHealthWaitTimeoutSeconds), 60)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleCancellationTimeoutMilliseconds), 2000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize), 16)]
     [Arguments(nameof(NativeComparisonExecutionOptions.ReportWriterBufferCharacters), 16_384)]
@@ -139,6 +140,9 @@ internal sealed class NativeComparisonAdapterPolicyTests
                 break;
             case nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize):
                 options.TimescaleMaximumPoolSize = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.OpenSearchHealthWaitTimeoutSeconds):
+                options.OpenSearchHealthWaitTimeoutSeconds = value;
                 break;
             default:
                 SetSeedOrReportInteger(options, property, value);

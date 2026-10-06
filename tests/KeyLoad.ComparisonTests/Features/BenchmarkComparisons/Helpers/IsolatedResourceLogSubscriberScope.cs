@@ -70,7 +70,7 @@ internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
         }
 
         var settled = Task.WhenAll(_originalOperations);
-        using var timeout = new CancellationTokenSource(CleanupDeadline);
+        using var timeout = new CancellationTokenSource(CleanupDeadline, TimeProvider.System);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
             () => IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(settled, timeout.Token),
             failures);
@@ -120,7 +120,7 @@ internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
             return;
         }
 
-        using var timeout = new CancellationTokenSource(CleanupDeadline);
+        using var timeout = new CancellationTokenSource(CleanupDeadline, TimeProvider.System);
         await IsolatedResourceLogCaptureStopSupport.CollectFailureAsync(
             () => IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(disposal, timeout.Token),
             waitFailures);

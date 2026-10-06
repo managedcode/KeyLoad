@@ -10,10 +10,12 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="executionOptions">Centrally validated native connection capacities.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="topology">The expected topology used by replication setup and copy observation.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class PostgresTarget(string connectionString, string runId, string image,
     IOptions<NativeComparisonExecutionOptions> executionOptions, IOptions<ComparisonLifecycleOptions> lifecycleOptions,
-    ComparisonTopology topology = ComparisonTopology.Standalone) : IComparisonTarget
+    ComparisonTopology topology = ComparisonTopology.Standalone, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private const string PostgreSQLPgvectorToken = "PostgreSQL + pgvector";
     private const string UnverifiedToken = "unverified";
     private const string SinglePrimaryNoReplicasToken = "single primary, no replicas";
@@ -73,7 +75,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
             await PostgresSchemaInitialization.InitializeAsync(connection: connection, dataset: dataset, identity: schemaIdentity,
                 ownerGuid: ownerGuid, topology: topology, initialProfile: Profile, updateProfile: profile => Profile = profile,
                 markCommitAttempted: () => schemaCommitAttempted = true, cancellationToken: cancellationToken,
-                lifecycleOptions: lifecycleOptions);
+                lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
         }
         catch (Exception)
         {
@@ -97,7 +99,7 @@ public sealed class PostgresTarget(string connectionString, string runId, string
     /// <param name="cancellationToken">A token that cancels opening the session connection.</param>
     /// <returns>A session whose disposal returns its connection to the data source.</returns>
     public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth, corpusCount, lifecycleOptions);
+        => new PostgresComparisonSession(await source.OpenConnectionAsync(cancellationToken), topK, graphDepth, corpusCount, lifecycleOptions, provider: timeProvider);
 
     /// <summary>Drops only this target's marked schema and disposes its owned data source.</summary>
     /// <returns>A value task that completes after schema cleanup and data-source disposal.</returns>

@@ -48,7 +48,7 @@ function Read-FcNativeBoundedFile([string] $Path, [long] $MaximumBytes, [int] $R
     if ($before -isnot [IO.FileInfo] -or $before.Length -le 0 -or $before.Length -gt $MaximumBytes -or
         ($before.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw $Failure }
     $stream = [IO.FileStream]::new($Path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
-    $failure = $null
+    $primaryFailure = $null
     $bytes = $null
     try {
         if ($stream.Length -ne $before.Length) { throw $Failure }
@@ -61,15 +61,15 @@ function Read-FcNativeBoundedFile([string] $Path, [long] $MaximumBytes, [int] $R
         }
         if ($stream.ReadByte() -ne -1 -or $stream.Length -ne $before.Length) { throw $Failure }
     }
-    catch [System.Exception] { $failure = $_.Exception }
+    catch [System.Exception] { $primaryFailure = $_.Exception }
     finally {
         try { $stream.Dispose() }
         catch [System.Exception] {
-            if ($null -eq $failure) { $failure = $_.Exception }
-            else { $failure = [AggregateException]::new($failure, $_.Exception) }
+            if ($null -eq $primaryFailure) { $primaryFailure = $_.Exception }
+            else { $primaryFailure = [AggregateException]::new($primaryFailure, $_.Exception) }
         }
     }
-    if ($null -ne $failure) { throw $failure }
+    if ($null -ne $primaryFailure) { throw $primaryFailure }
     [ordered]@{ bytes = $bytes; length = $before.Length; sha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant() }
 }
 
@@ -130,7 +130,7 @@ function Read-FcNativeEvidenceFile([string] $Root, [object] $Reference, [long] $
 function Read-FcNativeJsonReference([string] $Root, [object] $Reference, [long] $MaximumBytes, [int] $MaximumPathCharacters) {
     $file = Read-FcNativeEvidenceFile $Root $Reference $MaximumBytes $MaximumPathCharacters
     try {
-        $json = [System.Text.Json.JsonDocument]::Parse($file.bytes)
+        $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($file.bytes))
         Assert-FcNativeJsonUnique $json.RootElement
         $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($file.bytes)) -AsHashtable -Depth $script:FcNativeMergeInput.MaximumJsonDepth
         return [ordered]@{ file = $file; value = $value }

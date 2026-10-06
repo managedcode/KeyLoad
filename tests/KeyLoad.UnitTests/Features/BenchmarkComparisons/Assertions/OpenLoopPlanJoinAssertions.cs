@@ -50,6 +50,8 @@ internal static class OpenLoopPlanJoinAssertions
         await Assert.That(JsonNode.DeepEquals(baseline.VectorPlans, expanded.VectorPlans)).IsTrue();
         await IsolatedDatabaseMatrixAssertions.VerifyAsync(baseline.Matrices, baseline.Plan,
             baseline.ScaledPlans, baseline.VectorPlans).ConfigureAwait(false);
+        await OpenLoopPlanCompactMatrixAssertions.VerifyAsync(baseline).ConfigureAwait(false);
+        await OpenLoopPlanCompactMatrixAssertions.VerifyAsync(expanded).ConfigureAwait(false);
         await VerifyTargetMatrixAppendAsync(baseline, expanded, contract).ConfigureAwait(false);
         await VerifyMatrixGroupsAsync(expanded.Matrices).ConfigureAwait(false);
     }

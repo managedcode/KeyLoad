@@ -37,7 +37,7 @@ internal static class IsolatedHelixDbResources
             .WithEnvironment(DataDirectorySetting, DataMount)
             .WithHttpEndpoint(targetPort: Port, name: Endpoint)
             .WithHttpHealthCheck(PathText);
-        if (ClusterContainerUser.Resolve(context.Builder) is { } user)
+        if (ClusterContainerUser.Resolve(context.Builder, TimeProvider.System) is { } user)
         {
             node.WithContainerRuntimeArgs(ResultText, user);
         }

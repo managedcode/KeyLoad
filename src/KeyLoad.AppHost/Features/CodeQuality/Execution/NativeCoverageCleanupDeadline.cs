@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace KeyLoad.AppHost.Features.CodeQuality;
@@ -10,18 +9,21 @@ internal sealed class NativeCoverageCleanupDeadline : IDisposable
     private const string UnsettledMessage = "Native coverage cleanup did not settle before its owner deadline.";
 
     private readonly TimeSpan timeout;
-    private readonly CancellationTokenSource cancellation = new();
-    private readonly Stopwatch elapsed = Stopwatch.StartNew();
+    private readonly CancellationTokenSource cancellation;
+    private readonly TimeProvider timeProvider;
+    private readonly long started;
     private readonly Task expiration;
 
     internal CancellationToken Token => cancellation.Token;
 
-    internal NativeCoverageCleanupDeadline(TimeSpan timeout)
+    internal NativeCoverageCleanupDeadline(TimeSpan timeout, TimeProvider? provider = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero, nameof(timeout));
         this.timeout = timeout;
-        cancellation.CancelAfter(timeout);
-        expiration = Task.Delay(timeout, cancellation.Token);
+        timeProvider = provider ?? TimeProvider.System;
+        started = timeProvider.GetTimestamp();
+        cancellation = new(timeout, timeProvider);
+        expiration = Task.Delay(timeout, timeProvider, cancellation.Token);
     }
 
     internal async Task WaitAsync(Func<Task> operation)
@@ -78,7 +80,7 @@ internal sealed class NativeCoverageCleanupDeadline : IDisposable
         }
     }
 
-    private bool IsExpired() => cancellation.IsCancellationRequested || elapsed.Elapsed >= timeout;
+    private bool IsExpired() => cancellation.IsCancellationRequested || timeProvider.GetElapsedTime(started) >= timeout;
 
     private static void RecordCompletedFailure(Task original, List<Exception> failures)
     {
@@ -109,5 +111,16 @@ internal sealed class NativeCoverageCleanupDeadline : IDisposable
         throw new InvalidOperationException(UnsettledMessage);
     }
 
-    public void Dispose() => cancellation.Dispose();
+    public void Dispose()
+    {
+        try
+        {
+            cancellation.Cancel();
+        }
+        finally
+        {
+            expiration.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing).GetAwaiter().GetResult();
+            cancellation.Dispose();
+        }
+    }
 }

@@ -13,7 +13,7 @@ internal static class RetainedReplicaSnapshotScenario
 
     internal static async Task RunAsync(ClusterFixture fixture)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(3), TimeProvider.System);
         SnapshotState? state = null;
         StoppedReplica? replica = null;
         var replicaRestarted = false;
@@ -143,7 +143,7 @@ internal static class RetainedReplicaSnapshotScenario
     private static async Task RestoreFailedReplicaAsync(ClusterFixture fixture, SnapshotState? state,
         StoppedReplica replica, Exception failure)
     {
-        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         try
         { await fixture.RestartContainerAsync(replica.Name, recoveryTimeout.Token); }
         catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))

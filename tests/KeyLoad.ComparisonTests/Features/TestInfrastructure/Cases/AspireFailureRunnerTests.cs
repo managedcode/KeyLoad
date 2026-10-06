@@ -38,7 +38,7 @@ internal sealed class AspireFailureRunnerTests
         try
         {
             await fixture.PublishAsync(fixture.Runner, KnownResourceStates.Exited, exit).WaitAsync(deadline.Token);
-            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token)).IsEqualTo(exit);
+            await Assert.That(await completion.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token)).IsEqualTo(exit);
         }
         finally
         {
@@ -74,7 +74,7 @@ internal sealed class AspireFailureRunnerTests
         var execution = AspireResourceCompletion.RunToExitAsync(fixture.Application, fixture.Runner.Name, deadline.Token);
         try
         {
-            await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, deadline.Token));
+            await Assert.ThrowsAsync<DistributedApplicationException>(() => execution.WaitAsync(AspireFailureAssertions.EventDeadline, TimeProvider.System, deadline.Token));
             await Assert.That(fixture.Notifications.TryGetCurrentState(fixture.Runner.Name, out _)).IsFalse();
         }
         finally

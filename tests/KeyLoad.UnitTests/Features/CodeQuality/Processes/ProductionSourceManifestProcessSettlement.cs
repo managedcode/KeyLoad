@@ -13,7 +13,7 @@ internal static class ProductionSourceManifestProcessSettlement
         if (!original.IsCompleted)
         {
             ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-            await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout), failures)
+            await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures)
                 .ConfigureAwait(false);
             if (!original.IsCompleted)
             {
@@ -21,7 +21,7 @@ internal static class ProductionSourceManifestProcessSettlement
                 ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
                 ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
                 ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
-                await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout), failures)
+                await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures)
                     .ConfigureAwait(false);
                 if (original.IsCompleted)
                 {

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Globalization;
 using Npgsql;
 using NpgsqlTypes;
@@ -23,8 +22,7 @@ internal static class PostgresNativeVectorIndex
     private const string VectorParamProbes = "probes";
     private const string VectorParamIterativeScan = "iterativeScan";
 
-    internal static async Task<VectorIndexReceipt> BuildAsync(NpgsqlDataSource source,
-        VectorComparisonProfile profile, NativeComparisonExecutionOptions execution, CancellationToken cancellationToken)
+    internal static async Task<VectorIndexReceipt> BuildAsync(NpgsqlDataSource source, VectorComparisonProfile profile, NativeComparisonExecutionOptions execution, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using (var analyze = connection.CreateCommand())
@@ -38,7 +36,7 @@ internal static class PostgresNativeVectorIndex
         }
 
         var parameters = Parameters(profile);
-        var timer = Stopwatch.StartNew();
+        var timer = new ComparisonElapsedMeasurement(timeProvider);
         await CreateIndexAsync(connection, profile, execution, cancellationToken).ConfigureAwait(false);
         timer.Stop();
         await using var metadata = connection.CreateCommand();

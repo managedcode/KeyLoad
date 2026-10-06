@@ -40,7 +40,7 @@ public sealed class SearchEngine
         {
             throw new InvalidOperationException(UnsafeSynchronousSearch);
         }
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return SearchCore(principalId, request, budget);
@@ -54,7 +54,7 @@ public sealed class SearchEngine
     public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await Task.Run(() => SearchCore(principalId, request, budget), cancellationToken).ConfigureAwait(false);
@@ -69,7 +69,7 @@ public sealed class SearchEngine
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await Task.Run(() => GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution),

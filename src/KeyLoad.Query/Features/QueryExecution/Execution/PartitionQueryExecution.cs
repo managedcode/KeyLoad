@@ -14,7 +14,8 @@ internal static class PartitionQueryExecution
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.PartitionQueryOwner.OperationLimitsOptions, timeProvider, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.PartitionQueryOwner.OperationLimitsOptions,
+            timeProvider ?? engine.PartitionQueryOwner.EvaluationClock, cancellationToken);
         return engine.ExecutePartitionQuery(principalId, request, partitions, budget);
     }
 

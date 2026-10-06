@@ -82,7 +82,7 @@ internal static class IsolatedNativeTeardown
     private static async Task WriteReceiptAsync(string evidence, IsolatedNativeTeardownFailures failures, IOptions<NativeComparisonHarnessOptions> options)
     {
         var execution = options.Value;
-        using var timeout = new CancellationTokenSource(execution.TeardownReceiptTimeout);
+        using var timeout = new CancellationTokenSource(execution.TeardownReceiptTimeout, TimeProvider.System);
         var bytes = failures.CreateReceipt();
         await using var stream = new FileStream(Path.Combine(evidence, Receipt), FileMode.CreateNew,
             FileAccess.Write, FileShare.None, execution.TeardownReceiptFileBufferBytes, FileOptions.Asynchronous);

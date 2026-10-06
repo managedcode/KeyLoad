@@ -154,7 +154,7 @@ internal sealed class NativeReadCutLifetimeTests
         var timedOut = false;
         try
         {
-            await joined.WaitAsync(TimeSpan.FromSeconds(10));
+            await joined.WaitAsync(TimeSpan.FromSeconds(10), TimeProvider.System);
         }
         catch (TimeoutException)
         {

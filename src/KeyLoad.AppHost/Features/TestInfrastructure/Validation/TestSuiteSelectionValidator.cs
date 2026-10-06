@@ -70,7 +70,7 @@ internal static class TestSuiteSelectionValidator
     internal static int? ReadOpenLoopRate(string? value, string? nativeRate, string? suite, string? filter,
         bool nativeCancellationProofSelected)
     {
-        if (value is null || value.Length == ReadOpenLoopRateEmptyCount && string.IsNullOrWhiteSpace(suite))
+        if (value is null || value.Length == ReadOpenLoopRateEmptyCount)
         {
             if (!string.IsNullOrWhiteSpace(suite) && (nativeRate is not null || nativeCancellationProofSelected))
             {

@@ -21,6 +21,10 @@ internal static class SampleChunkBenchmarkCorpus
     private const int NegativeOffsetMinutes = -330;
     private const int OffsetSingleItemCount = 1;
     private const int PositiveOffsetMinutes = 120;
+    [ImmutableTemporalData]
+    private static readonly TimeSpan NegativeTimestampOffset = TimeSpan.FromMinutes(NegativeOffsetMinutes);
+    [ImmutableTemporalData]
+    private static readonly TimeSpan PositiveTimestampOffset = TimeSpan.FromMinutes(PositiveOffsetMinutes);
 
     internal const string Regular = "regular";
     internal const string Late = "late-equal";
@@ -88,7 +92,12 @@ internal static class SampleChunkBenchmarkCorpus
         };
 
     private static TimeSpan Offset(int index)
-        => TimeSpan.FromMinutes((index % OffsetCycleLength) switch { OffsetEmptyCount => NegativeOffsetMinutes, OffsetSingleItemCount => OffsetEmptyCount, _ => PositiveOffsetMinutes });
+        => (index % OffsetCycleLength) switch
+        {
+            OffsetEmptyCount => NegativeTimestampOffset,
+            OffsetSingleItemCount => TimeSpan.Zero,
+            _ => PositiveTimestampOffset
+        };
 
     private static ulong RandomPart(int index, int lane)
     {

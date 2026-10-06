@@ -87,11 +87,10 @@ internal sealed class NativeComparisonMongoPolicyTests
         }
         options.Value.Validate();
         using var deadline = cleanup
-            ? MongoReplicaDeadline.CreateCleanup(options)
-            : MongoReplicaDeadline.CreateOperation(options, CancellationToken.None);
-        var pending = Task.Delay(Timeout.InfiniteTimeSpan, deadline.Token);
-        var failure = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending.WaitAsync(
-            TimeSpan.FromSeconds(5), TestContext.Current!.Execution.CancellationToken));
+            ? MongoReplicaDeadline.CreateCleanup(options, TimeProvider.System)
+            : MongoReplicaDeadline.CreateOperation(options, TimeProvider.System, CancellationToken.None);
+        var pending = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, deadline.Token);
+        var failure = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending.WaitAsync(TimeSpan.FromSeconds(5), TimeProvider.System, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.CancellationToken).IsEqualTo(deadline.Token);
         await Assert.That(deadline.IsCancellationRequested).IsTrue();
@@ -102,14 +101,14 @@ internal sealed class NativeComparisonMongoPolicyTests
     {
         var options = UnitBenchmarkOptions.Native();
         using var caller = new CancellationTokenSource();
-        using var operation = MongoReplicaDeadline.CreateOperation(options, caller.Token);
-        using var cleanup = MongoReplicaDeadline.CreateCleanup(options);
-        var pending = Task.Delay(Timeout.InfiniteTimeSpan, operation.Token);
+        using var operation = MongoReplicaDeadline.CreateOperation(options, TimeProvider.System, caller.Token);
+        using var cleanup = MongoReplicaDeadline.CreateCleanup(options, TimeProvider.System);
+        var pending = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, operation.Token);
         await caller.CancelAsync();
         var failure = await Assert.ThrowsExactlyAsync<TaskCanceledException>(() => pending);
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.CancellationToken).IsEqualTo(operation.Token);
-        await Task.Delay(TimeSpan.FromMilliseconds(1), cleanup.Token);
+        await Task.Delay(TimeSpan.FromMilliseconds(1), TimeProvider.System, cleanup.Token);
         await Assert.That(cleanup.IsCancellationRequested).IsFalse();
     }
 
@@ -132,8 +131,8 @@ internal sealed class NativeComparisonMongoPolicyTests
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() =>
         {
             using var deadline = cleanup
-                ? MongoReplicaDeadline.CreateCleanup(options)
-                : MongoReplicaDeadline.CreateOperation(options, CancellationToken.None);
+                ? MongoReplicaDeadline.CreateCleanup(options, TimeProvider.System)
+                : MongoReplicaDeadline.CreateOperation(options, TimeProvider.System, CancellationToken.None);
         });
         await Assert.That(failure.OptionsName).IsEqualTo(NativeComparisonExecutionOptions.SectionName);
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(NativeComparisonExecutionOptions));

@@ -32,14 +32,15 @@ internal static class RequestFailureDiagnostic
     /// <param name="logger">The middleware logger.</param>
     /// <param name="context">The failed public HTTP request.</param>
     /// <param name="error">The caught error, used only for closed type classification.</param>
-    internal static void LogFailure(ILogger logger, HttpContext context, Exception error)
+    /// <param name="clock">The middleware owner's clock for the failure timestamp.</param>
+    internal static void LogFailure(ILogger logger, HttpContext context, Exception error, TimeProvider clock)
     {
         var phase = context.Items.TryGetValue(PhaseItemKey, out var value)
             && value is RequestFailurePhase knownPhase && Enum.IsDefined(knownPhase)
             ? knownPhase
             : RequestFailurePhase.None;
         RequestFailureDiagnosticLog.Failure(logger, phase, Category(error), OperationResponseHeaders.RequestId(context),
-            TimeProvider.System.GetUtcNow().ToString(FailureUtcFormat, CultureInfo.InvariantCulture));
+            clock.GetUtcNow().ToString(FailureUtcFormat, CultureInfo.InvariantCulture));
     }
 
     private static RequestFailureCategory Category(Exception error) => error switch

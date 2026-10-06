@@ -73,7 +73,7 @@ function Read-FcNativeDescriptor([string] $Root, [string] $Descriptor, [object] 
     $relative = [IO.Path]::GetRelativePath($Root, [IO.Path]::GetFullPath($Descriptor)).Replace([IO.Path]::DirectorySeparatorChar, '/')
     $canonical = Resolve-FcNativeEvidencePath $Root $relative $ExpectedBounds.maximumPathCharacters
     $jsonFile = Read-FcNativeBoundedFile $canonical $ExpectedBounds.maximumDescriptorBytes $ExpectedBounds.readBufferBytes $script:FcNativeMergeInput.InvalidDescriptor
-    $json = [System.Text.Json.JsonDocument]::Parse($jsonFile.bytes)
+    $json = [System.Text.Json.JsonDocument]::Parse([ReadOnlyMemory[byte]]::new($jsonFile.bytes))
     try { Assert-FcNativeJsonUnique $json.RootElement }
     finally { $json.Dispose() }
     $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($jsonFile.bytes)) -AsHashtable -Depth 32

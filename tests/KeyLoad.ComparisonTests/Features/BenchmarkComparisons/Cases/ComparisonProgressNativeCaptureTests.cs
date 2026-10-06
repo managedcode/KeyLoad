@@ -45,7 +45,7 @@ internal sealed class ComparisonProgressNativeCaptureTests
 
     private static async Task VerifyNativeAsync(ComparisonProgressNativeFixture fixture, string progressPath)
     {
-        using var deadline = new CancellationTokenSource(Deadline);
+        using var deadline = new CancellationTokenSource(Deadline, TimeProvider.System);
         var token = deadline.Token;
         await ObserveSubscribersAsync(fixture, token);
         var logger = fixture.Application.Services.GetRequiredService<ResourceLoggerService>();
@@ -98,7 +98,7 @@ internal sealed class ComparisonProgressNativeCaptureTests
     {
         while (!capture.HasCapturedLine(resource, marker))
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(10), token);
+            await Task.Delay(TimeSpan.FromMilliseconds(10), TimeProvider.System, token);
         }
     }
 }

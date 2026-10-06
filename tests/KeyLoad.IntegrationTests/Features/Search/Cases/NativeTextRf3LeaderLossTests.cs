@@ -143,7 +143,7 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
     {
         try
         {
-            using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+            using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
             await fixture.RestartContainerAsync(stoppedNode, recovery.Token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, recovery.Token);

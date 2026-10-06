@@ -133,8 +133,7 @@ internal sealed class SampleAggregateBudgetTests
         await Assert.That(invalidConfiguration.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
         var expiredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(
             new() { QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds }), TimeProvider.System);
-        await Task.Delay(TimeSpan.FromMilliseconds(SampleAggregateTestData.DeadlineElapsedWaitMilliseconds),
-            TestContext.Current!.Execution.CancellationToken);
+        await Task.Delay(TimeSpan.FromMilliseconds(SampleAggregateTestData.DeadlineElapsedWaitMilliseconds), TimeProvider.System, TestContext.Current!.Execution.CancellationToken);
         var deadlineFailure = SampleAggregateTestData.Failure(() => db.Store.Read(view =>
             SampleAggregateReader.Read(db.Database, expiredBudget.CreateView(view), SampleAggregateTestData.RootPrincipal,
                 request, expiredBudget)), ErrorCode.BudgetExceeded);

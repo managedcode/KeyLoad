@@ -12,11 +12,11 @@ internal static class SqlClientCancellationCleanup
         if (primary is not null)
         { failures.Add(primary); }
         await CaptureAsync(cancellation.CancelAsync(), failures);
-        await CaptureAsync(pending.WaitAsync(deadline), failures);
+        await CaptureAsync(pending.WaitAsync(deadline, TimeProvider.System), failures);
         if (originalResponse() is { } original)
         {
-            await CaptureAsync(original.WaitAsync(deadline), failures);
-            await CaptureAsync(stopped.WaitAsync(deadline), failures);
+            await CaptureAsync(original.WaitAsync(deadline, TimeProvider.System), failures);
+            await CaptureAsync(stopped.WaitAsync(deadline, TimeProvider.System), failures);
         }
         if (failures.Count == 1 && primary is null)
         { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }

@@ -62,3 +62,16 @@ export function createDatabaseMatrices(plan, scaledPlans = createScaledPlans(), 
     return [key, { include }];
   }));
 }
+
+export function createWorkflowDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan) {
+  const matrices = createDatabaseMatrices(plan, scaledPlans, vectorPlans, openLoopPlan);
+  return Object.fromEntries(Object.entries(matrices).map(([key, matrix]) => [key, {
+    include: matrix.include.map(row => ({ id: row.id, jobName: row.jobName, target: row.target, kind: matrixKind(row) }))
+  }]));
+}
+
+function matrixKind(row) {
+  if (row.preflight) return 'preflight';
+  if (row.openLoopCancellationProof) return 'proof';
+  return row.openLoopRate === undefined ? 'worker' : 'open-loop';
+}

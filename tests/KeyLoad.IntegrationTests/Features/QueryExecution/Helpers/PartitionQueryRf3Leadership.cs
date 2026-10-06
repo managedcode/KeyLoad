@@ -86,7 +86,7 @@ internal static class PartitionQueryRf3Leadership
 
     private static async Task RestoreLeaderAsync(ClusterFixture fixture, string leader, Exception? primary)
     {
-        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(leader, recovery.Token), failures)
             .ConfigureAwait(false);

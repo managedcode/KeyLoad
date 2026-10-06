@@ -14,7 +14,7 @@ internal static class NativeSerializationBenchmarkCaptures
         var stdoutCapture = CaptureAsync(stdoutSource, stdoutDestination, capturesCancellation.Token);
         var stderrCapture = CaptureAsync(stderrSource, stderrDestination, capturesCancellation.Token);
         var captures = Task.WhenAll(stdoutCapture, stderrCapture);
-        using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(15));
+        using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
         var failures = new NativeSerializationBenchmarkFailures();
         await ObserveExecutionAsync(process, captures, deadline, failures, cancellationToken);
         try
@@ -111,7 +111,7 @@ internal static class NativeSerializationBenchmarkCaptures
     {
         try
         {
-            await captures.WaitAsync(TimeSpan.FromSeconds(15));
+            await captures.WaitAsync(TimeSpan.FromSeconds(15), TimeProvider.System);
         }
         catch (Exception failure) when (NativeSerializationBenchmarkFailures.IsNonFatal(failure))
         {

@@ -9,9 +9,11 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="topology">The expected one, two or three native nodes verified against the created index.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
 /// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
+/// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed class OpenSearchTarget(HttpClient client, string runId, string image, ComparisonTopology topology,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions) : IComparisonTarget
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, TimeProvider? provider = null) : IComparisonTarget
 {
+    private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
 
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.Parse(runId).ToString(OpenSearchNames.GuidFormat);
@@ -64,7 +66,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
 
         await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);
         indexCreated = true;
-        var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
+        var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
         await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, executionOptions, cancellationToken);
         if (dataset.Settings is not ScaledComparisonProfile)
         {
@@ -76,7 +78,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
             _ = refresh.RootElement;
         }
         var settings = await OpenSearchIndex.VerifySettingsAsync(client, index, expectedCopies - AdjacentElementOffset, cancellationToken);
-        var afterSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
+        var afterSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, executionOptions, cancellationToken);
         Profile = Profile with
         {
             Version = version,
@@ -99,7 +101,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
         {
             if (indexCreated)
             {
-                using var timeout = new CancellationTokenSource(lifecycleOptions.Value.OpenSearchCleanupTimeout);
+                using var timeout = new CancellationTokenSource(lifecycleOptions.Value.OpenSearchCleanupTimeout, timeProvider);
                 using var response = await client.DeleteAsync(
                     new Uri(OpenSearchNames.PathSeparator + index + OpenSearchNames.DeleteIndexSuffix, UriKind.RelativeOrAbsolute), timeout.Token);
                 response.EnsureSuccessStatusCode();

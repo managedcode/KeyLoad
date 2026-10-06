@@ -21,7 +21,7 @@ internal static class IsolatedVectorHostApplication
         try
         {
             var target = owner.CreateVector(settings);
-            var report = await new VectorComparisonRunner(profile, owner.ExecutionOptions)
+            var report = await new VectorComparisonRunner(profile, owner.ExecutionOptions, owner.Clock)
                 .RunAsync(target, settings.Worker.SourceRevision, settings.Storage, cancellationToken);
             report = report with
             {

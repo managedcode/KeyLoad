@@ -29,8 +29,9 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <param name="options">Store directory, identity and persistence budgets.</param>
     /// <param name="executionOptions">Centrally validated storage execution policy, frozen before files are opened.</param>
     /// <param name="cacheExecutionOptions">Centrally validated cache policy, frozen before any optional memory admission.</param>
+    /// <param name="timeProvider">Borrowed clock for native read-cut elapsed budgets; defaults to the system provider.</param>
     public ZoneTreeStore(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
-        IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions)
+        IOptions<ZoneTreePointCacheExecutionOptions> cacheExecutionOptions, TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);
@@ -48,7 +49,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         {
             resolved = resolved with { EmbeddedPointCache = embedded.WithExecutionSnapshot(cacheExecutionPolicy) };
         }
-        runtime = new(resolved);
+        runtime = new(resolved, timeProvider: timeProvider);
     }
 
     internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)

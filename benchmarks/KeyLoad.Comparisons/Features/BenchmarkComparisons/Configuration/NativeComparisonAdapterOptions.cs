@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace KeyLoad.Comparisons;
 
 /// <summary>Adapter policies consumed from the same validated native execution group.</summary>
@@ -13,6 +11,7 @@ public sealed partial class NativeComparisonExecutionOptions
     internal const int DefaultTimeSeriesInitialReadCapacity = 16;
     internal const int DefaultKeyLoadTimeSeriesReadLimit = 1000;
     internal const int DefaultReportFileBufferBytes = 65_536;
+    internal const int DefaultOpenSearchHealthWaitTimeoutSeconds = 60;
     internal const int DefaultTimescaleCancellationTimeoutMilliseconds = 2000;
     internal const int DefaultTimescaleMaximumPoolSize = 16;
     /// <summary>The maximum graph vertices seeded in one KeyLoad request.</summary>
@@ -27,6 +26,8 @@ public sealed partial class NativeComparisonExecutionOptions
     public int KeyLoadTimeSeriesReadLimit { get; set; } = DefaultKeyLoadTimeSeriesReadLimit;
     /// <summary>The native asynchronous report file buffer capacity.</summary>
     public int ReportFileBufferBytes { get; set; } = DefaultReportFileBufferBytes;
+    /// <summary>The native OpenSearch cluster-health observation deadline in whole seconds.</summary>
+    public int OpenSearchHealthWaitTimeoutSeconds { get; set; } = DefaultOpenSearchHealthWaitTimeoutSeconds;
     /// <summary>The native Timescale connection establishment deadline.</summary>
     public TimeSpan TimescaleConnectionTimeout { get; set; } = TimeSpan.FromSeconds(DefaultTimescaleConnectionTimeoutSeconds);
     /// <summary>The native Timescale command deadline.</summary>
@@ -37,19 +38,4 @@ public sealed partial class NativeComparisonExecutionOptions
     public int TimescaleMinimumPoolSize { get; set; } = MinimumPositiveLimit;
     /// <summary>The maximum native Timescale connection pool capacity.</summary>
     public int TimescaleMaximumPoolSize { get; set; } = DefaultTimescaleMaximumPoolSize;
-
-    private void RecordAdapterEvidence(IDictionary<string, string> parameters)
-    {
-        parameters[nameof(KeyLoadGraphSeedBatchSize)] = KeyLoadGraphSeedBatchSize.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(Neo4jSeedBatchSize)] = Neo4jSeedBatchSize.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(Neo4jMaximumExecutionTimeSeconds)] = Neo4jMaximumExecutionTimeSeconds.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(TimeSeriesInitialReadCapacity)] = TimeSeriesInitialReadCapacity.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(KeyLoadTimeSeriesReadLimit)] = KeyLoadTimeSeriesReadLimit.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(ReportFileBufferBytes)] = ReportFileBufferBytes.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(TimescaleConnectionTimeout)] = TimescaleConnectionTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
-        parameters[nameof(TimescaleCommandTimeout)] = TimescaleCommandTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
-        parameters[nameof(TimescaleCancellationTimeoutMilliseconds)] = TimescaleCancellationTimeoutMilliseconds.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(TimescaleMinimumPoolSize)] = TimescaleMinimumPoolSize.ToString(CultureInfo.InvariantCulture);
-        parameters[nameof(TimescaleMaximumPoolSize)] = TimescaleMaximumPoolSize.ToString(CultureInfo.InvariantCulture);
-    }
 }

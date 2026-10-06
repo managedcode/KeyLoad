@@ -64,7 +64,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
 
     private void UpdateSeedJson(string value, CancellationToken cancellationToken, bool restoreAll = false)
     {
-        using var timeout = new CancellationTokenSource(MutationTimeout);
+        using var timeout = new CancellationTokenSource(MutationTimeout, TimeProvider.System);
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var documents = seedDocuments.Select(document => new { document.Id, json = restoreAll ? document.Json : value }).ToArray();
         var statement = Neo4jHarnessStatements.UpdateDocuments(label);
@@ -73,7 +73,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
 
     private void VerifyStoredSeeds(CancellationToken cancellationToken)
     {
-        using var timeout = new CancellationTokenSource(MutationTimeout);
+        using var timeout = new CancellationTokenSource(MutationTimeout, TimeProvider.System);
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var statement = Neo4jHarnessStatements.ReadDocuments(label);
         using var document = SendStatement(statement, new { ids = seedDocuments.Select(item => item.Id).ToArray() }, bounded.Token);

@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
+using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -22,13 +23,14 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         var identities = new List<IsolatedAggregateNodeIdentity>();
         Exception? primary = null;
         var cleanupFailures = new List<Exception>();
-        var timer = Stopwatch.StartNew();
+        var timer = new TestElapsedClock(TimeProvider.System);
+        using var timeout = new CancellationTokenSource(testDeadline, timer.Provider);
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
         await using (var owner = new IsolatedAggregateNodePromptOwner(directory, identities, timer, cleanupFailures,
-            TestContext.Current!.Execution.CancellationToken))
+            caller.Token))
         {
             try
             {
-                IsolatedAggregateNodeGuardedInvocation.Invoke(() => owner.Prompt.CancelAfter(testDeadline));
                 owner.ExpectedCancellation = await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
                     () => RunCancellationScenarioAsync(directory, receipt, owner.Prompt, identities, timer,
                         testDeadline, owner.RegisterOriginal, owner.RegisterCancellation, cleanupFailures));
@@ -47,7 +49,7 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         while (!File.Exists(path))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await Task.Delay(ReceiptPollMilliseconds, cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(ReceiptPollMilliseconds), TimeProvider.System, cancellationToken);
         }
         var json = await File.ReadAllTextAsync(path, cancellationToken);
         using var document = JsonDocument.Parse(json);
@@ -57,7 +59,7 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
 
     private static async Task<OperationCanceledException> RunCancellationScenarioAsync(string directory,
         string receipt, CancellationTokenSource prompt, List<IsolatedAggregateNodeIdentity> identities,
-        Stopwatch timer, TimeSpan testDeadline, Action<Task<IsolatedAggregateNodeResult>> registerOriginal,
+        TestElapsedClock timer, TimeSpan testDeadline, Action<Task<IsolatedAggregateNodeResult>> registerOriginal,
         Action<Task> registerCancellation, List<Exception> cancellationFailures)
     {
         Directory.CreateDirectory(directory);
@@ -67,12 +69,12 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         registerOriginal(started);
         var receiptData = await ReadReceiptAsync(receipt, prompt.Token);
         CaptureIdentities(receiptData, identities);
-        await Task.Delay(CancellationWaitMilliseconds, prompt.Token);
+        await Task.Delay(TimeSpan.FromMilliseconds(CancellationWaitMilliseconds), timer.Provider, prompt.Token);
         var cancellationTask = prompt.CancelAsync();
         registerCancellation(cancellationTask);
         await ObserveCancellationWithinBoundAsync(cancellationTask, timer, testDeadline, cancellationFailures);
         var remaining = testDeadline - timer.Elapsed;
-        var boundedObservation = started.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero);
+        var boundedObservation = started.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero, timer.Provider);
         var cancellation = await Assert.ThrowsAsync<OperationCanceledException>(() => boundedObservation)
             ?? throw new InvalidOperationException(IsolatedAggregateNodeLifetimeProgram.OriginalDidNotCancel);
         await Assert.That(prompt.IsCancellationRequested).IsTrue();
@@ -82,14 +84,14 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
         return cancellation;
     }
 
-    private static async Task ObserveCancellationWithinBoundAsync(Task cancellation, Stopwatch timer,
+    private static async Task ObserveCancellationWithinBoundAsync(Task cancellation, TestElapsedClock timer,
         TimeSpan testDeadline, List<Exception> failures)
     {
         var remaining = testDeadline - timer.Elapsed;
         try
         {
             await IsolatedAggregateNodeGuardedInvocation.InvokeAsync(
-                () => cancellation.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero));
+                () => cancellation.WaitAsync(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero, timer.Provider));
         }
         catch (AggregateException envelope)
         {
@@ -127,7 +129,7 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
     }
 
     private static async Task AssertExitedAsync(List<IsolatedAggregateNodeIdentity> identities,
-        Stopwatch timer, TimeSpan testDeadline)
+        TestElapsedClock timer, TimeSpan testDeadline)
     {
         Win32Exception? pending = null;
         while (timer.Elapsed < testDeadline)
@@ -144,7 +146,7 @@ internal static class IsolatedAggregateNodeLifetimeTestSupport
             {
                 pending = failure;
             }
-            await Task.Delay(ReceiptPollMilliseconds);
+            await Task.Delay(TimeSpan.FromMilliseconds(ReceiptPollMilliseconds), timer.Provider);
         }
         if (pending is not null)
         {

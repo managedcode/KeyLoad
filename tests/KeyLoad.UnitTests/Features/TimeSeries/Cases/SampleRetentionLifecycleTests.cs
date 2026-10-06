@@ -147,7 +147,7 @@ internal sealed class SampleRetentionLifecycleTests
             {
                 throw new TimeoutException("The expiry command did not start.");
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(50));
+            await Task.Delay(TimeSpan.FromMilliseconds(50), TimeProvider.System);
             await Assert.That(expiry.IsCompleted).IsFalse();
         }
         finally
