@@ -21,3 +21,6 @@
 
 ## Vertical-slice responsibility folders
 - Keep feature-owned implementation inside its canonical `Features/<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+
+## Native benchmark test execution, owner correction 2026-10-07
+- The comparisons container MUST be a native TUnit executable. Its test invokes the existing real C# client workload and asserts the original report outcome after Aspire prerequisite readiness. Preserve separate database jobs, measured client operations, timings, resource observations, cancellation and report provenance. This supersedes the former CLI entry; no standalone non-test workload entry remains.

@@ -541,3 +541,15 @@ A bounded website qualification candidate contains the20-project historical runt
 ## Build and Tests scope, owner correction 2026-10-06
 
 - Build and Tests MUST execute only solution builds, repository checks and KeyLoad functional tests, including analyzer, unit/scalar, process recovery and Aspire RF3 SDK/MCP tests. Benchmark/comparison tests, progress/entry/counter checks, load generators and comparison-image preparation MUST NOT execute there, even when stored in the unit-test project. Run them exclusively in the separate Benchmarks workflow; preserve their checks there. This explicit correction supersedes earlier placement of benchmark correctness checks in ordinary CI. Compiling the complete solution remains mandatory.
+
+## Visible functional test progress, owner correction 2026-10-06
+
+- Aspire-owned test execution MUST forward original native TUnit/Microsoft.Testing.Platform Detailed output to GitHub Actions stdout during execution, including available per-test progress, outcomes and native summaries. Do not substitute custom test counters, invented percentages or fabricated outcomes. Preserve native exit codes, original reports and joined cleanup. Additional diagnostics MUST NOT expose credentials, test arguments or user payloads.
+
+## Native test execution boundary, owner reiteration 2026-10-06
+
+- All functional tests and benchmark measurements MUST execute through TUnit tests after Aspire owns infrastructure startup/readiness. The C# test uses the actual C# client to serialize requests and execute database operations; shell/Node CI adapters may forward logs and select suites but MUST NOT replace TUnit execution or implement database workload clients.
+
+## TUnit owns test invocation, owner correction 2026-10-07
+
+- CI MUST invoke native TUnit/Microsoft.Testing.Platform tests directly after build, with native Detailed output. TUnit fixtures own the Aspire testing builder, resource startup/readiness, real C# client requests, benchmark measurements and joined shutdown. Do not put Aspire CLI or an outer test-runner AppHost between CI and TUnit. This explicit correction supersedes earlier prohibitions on direct TUnit entry; all RF3, recovery, scalar, artifact and qualification gates remain mandatory. Benchmarks and their contract tests remain exclusively in Benchmarks.

@@ -123,8 +123,8 @@ internal sealed class ComparisonHostCleanupTests
     {
         var processOutput = result.Stdout + result.Stderr + reportText;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
-        await Assert.That(result.Stderr.Contains(SafeCleanupFailureCode, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(result.Stderr.Contains(QdrantCleanupDiagnostic, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(SafeCleanupFailureCode, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(QdrantCleanupDiagnostic, StringComparison.Ordinal)).IsTrue();
         await Assert.That(report.Targets.Length).IsEqualTo(ExpectedTargets);
         await Assert.That(report.Cases.Length).IsEqualTo(ExpectedCases);
         foreach (var item in report.Cases)

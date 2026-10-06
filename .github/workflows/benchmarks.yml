@@ -28,13 +28,13 @@ jobs:
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test benchmark contracts
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
       - name: Test benchmark contracts without CPU intrinsics
         env:
           DOTNET_EnableHWIntrinsic: '0'
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts-scalar --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts-scalar --KeyLoadTests:ReportTrx=true
       - name: Test prompt termination on Aspire resource failures
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
       - name: Save benchmark contract test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -100,7 +100,7 @@ jobs:
         id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
       - name: Check bounded Docker registry readiness
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
@@ -112,15 +112,15 @@ jobs:
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
       - name: Check native KurrentDB discovery settings
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentDiscoverySettingsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-discovery
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentDiscoverySettingsTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-discovery
       - name: Check exact OpenSearch vector query contract
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorQueryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-query
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorQueryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-query
       - name: Check exact OpenSearch vector response contract
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorResponseTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-response
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/OpenSearchVectorResponseTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/opensearch-response
       - name: Check TimescaleDB Docker image and startup tools
         env:
           KEYLOAD_TIMESERIES_IMAGE_FACTS_DIRECTORY: ${{ runner.temp }}/keyload-timeseries-image-facts
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesIntensivePinnedImageTests/*' --KeyLoadTests:ResultsDirectory=TestResults/timeseries-image
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesIntensivePinnedImageTests/*' --KeyLoadTests:ResultsDirectory=TestResults/timeseries-image
       - name: Save TimescaleDB image checks
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -134,53 +134,53 @@ jobs:
           retention-days: 90
       - name: Check Docker image export and import
         id: roundtrip
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageBundleRealTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/image-roundtrip
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageBundleRealTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/image-roundtrip
       - name: Verify GitHub job identity
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedGitHubCurrentJobTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/job-identity
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedGitHubCurrentJobTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/job-identity
       - name: Test database cluster resource models
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/Isolated*Resource*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/resource-models
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/Isolated*Resource*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/resource-models
       - name: Test MongoDB readiness configuration
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-resource
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-resource
       - name: Test MongoDB node identity
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessIdentityTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-identity
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessIdentityTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-identity
       - name: Test MongoDB startup failure handling
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessTaskFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-task-failure
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoReadinessTaskFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-task-failure
       - name: Test KurrentDB storage failure handling
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-volume-failure
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKurrentVolumeRegressionFailureTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-volume-failure
       - name: Test KeyLoad request admission
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/keyload-admission
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/keyload-admission
       - name: Test bounded database log buffers
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonResourceLogBufferTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/log-buffer
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonResourceLogBufferTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/log-buffer
       - name: Test live benchmark progress capture
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-progress
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-progress
       - name: Test live benchmark process entry
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
       - name: Test benchmark phase and attempt counters
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
       - name: Test KeyLoad replay admission
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
       - name: Test Redis replica error reporting
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/RedisReplicaDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/redis-diagnostics
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/RedisReplicaDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/redis-diagnostics
       - name: Test MongoDB startup error reporting
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoBootstrapDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-diagnostics
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/MongoBootstrapDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/mongo-diagnostics
       - name: Test KurrentDB cleanup error reporting
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentCleanupDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-diagnostics
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentCleanupDiagnosticTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-diagnostics
       - name: Test KurrentDB stream ownership
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentStreamOwnershipTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-stream-ownership
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/KurrentStreamOwnershipTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/kurrent-stream-ownership
       - name: Test database replay logs
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticLogTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-log
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticLogTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-log
       - name: Test database replay log retention
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticRetentionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-retention
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonReplayDiagnosticRetentionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-retention
       - name: Test time-series workload correctness
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesWorkloadTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-workload
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesWorkloadTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-workload
       - name: Check published time-series package version
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesPackageVersionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-package
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/TimeSeriesPackageVersionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-package
       - name: Test KeyLoad time-series cluster configuration
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-keyload-model
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesKeyLoadResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-keyload-model
       - name: Test TimescaleDB cluster configuration
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesTimescaleResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-timescale-model
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesTimescaleResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-timescale-model
       - name: Test time-series workload configuration
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-family-model
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedTimeSeriesBenchmarkResourceTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/timeseries-family-model
       - name: Save Docker images
         id: bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a

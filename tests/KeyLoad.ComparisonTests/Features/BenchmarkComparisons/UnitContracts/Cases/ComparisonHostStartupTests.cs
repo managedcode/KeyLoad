@@ -20,8 +20,8 @@ internal sealed class ComparisonHostStartupTests
         var result = await ComparisonHostProcess.RunAsync([], cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That(result.Stderr.Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(result.Stderr.Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsFalse();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsFalse();
     }
 
     [Test]
@@ -31,8 +31,8 @@ internal sealed class ComparisonHostStartupTests
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That(result.Stderr.Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(result.Stderr.Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
+        await Assert.That((result.Stdout + result.Stderr).Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
     }
 
     [Test]
@@ -46,8 +46,8 @@ internal sealed class ComparisonHostStartupTests
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That(result.Stderr.Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(result.Stderr.Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsFalse();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(InvalidBudgetDetail, StringComparison.Ordinal)).IsFalse();
     }
 
     [Test]
@@ -61,7 +61,7 @@ internal sealed class ComparisonHostStartupTests
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.ExitCode).IsNotEqualTo(SuccessExitCode);
-        await Assert.That(result.Stderr.Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(result.Stderr.Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingQdrantSetting, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(MissingKeyLoadSetting, StringComparison.Ordinal)).IsFalse();
     }
 }

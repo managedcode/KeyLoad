@@ -253,7 +253,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public CI claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; ADR-047 public fixture library for external generated consumer, source joined with a clean enabled host build; real GitHub Dry execution pending. |
 | benchmarks/KeyLoad.Comparisons | Features/BenchmarkComparisons/Contracts/Contracts.cs, Features/BenchmarkComparisons/Corpus/BenchmarkDataset.cs, Features/BenchmarkComparisons/Execution/ComparisonRunner.cs; Features/BenchmarkComparisons/Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | Program.cs and Features/BenchmarkComparisons/ | BenchmarkComparisons; sole CLI composition/lifetime under ADR-043, source-joined with actual build and GitHub qualification pending. |
+| benchmarks/KeyLoad.ComparisonHost | Features/BenchmarkComparisons/Cases/NativeClientWorkloadTests.cs and Hosting/ | BenchmarkComparisons; native TUnit C# client workload container under ADR-117, retaining Aspire dependencies and original measurements; runtime qualification pending. |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; website workflow is separate from benchmark execution. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, release.yml, website.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, release, and website workflows. |
@@ -348,7 +348,7 @@ implementation and GitHub qualification remain pending.
 
 ```mermaid
 flowchart LR
-    AppHost[comparisons Aspire resource] --> ComparisonHost[Sole CLI host]
+    AppHost[comparisons Aspire resource] --> ComparisonHost[TUnit C# client workload]
     ComparisonHost --> ComparisonLibrary[Public harness library]
     ComparisonTests[Real TUnit and engine tests] --> ComparisonLibrary
 ```

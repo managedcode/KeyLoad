@@ -40,7 +40,7 @@ internal sealed class IsolatedHostOutputTests
         var path = Path.Combine(fixture.DirectoryPath, "worker.json");
         await File.WriteAllTextAsync(path, IsolatedHostFixture.Canary);
         var exit = await IsolatedHostFixture.RunAsync(fixture.Settings());
-        await Assert.That(exit.ExitCode).IsEqualTo(1);
+        await Assert.That(exit.ExitCode).IsEqualTo(2);
         await Assert.That(exit.Stderr.Trim()).IsEqualTo(IsolatedHostFixture.Failure);
         await Assert.That(await File.ReadAllTextAsync(path)).IsEqualTo(IsolatedHostFixture.Canary);
         await Assert.That(Directory.GetFiles(fixture.DirectoryPath).Length).IsEqualTo(1);
@@ -51,10 +51,10 @@ internal sealed class IsolatedHostOutputTests
     {
         using var fixture = new IsolatedHostFixture();
         var exits = await Task.WhenAll(IsolatedHostFixture.RunAsync(fixture.Settings()), IsolatedHostFixture.RunAsync(fixture.Settings()));
-        await Assert.That(exits.Select(item => item.ExitCode).Order().SequenceEqual([0, 1])).IsTrue();
+        await Assert.That(exits.Select(item => item.ExitCode).Order().SequenceEqual([0, 2])).IsTrue();
         await Assert.That((await ReadAsync(fixture)).Report).IsNull();
         await Assert.That(Directory.GetFiles(fixture.DirectoryPath).Length).IsEqualTo(1);
-        await Assert.That(exits.Single(item => item.ExitCode == 1).Stderr.Trim()).IsEqualTo(IsolatedHostFixture.Failure);
+        await Assert.That(exits.Single(item => item.ExitCode == 2).Stderr.Trim()).IsEqualTo(IsolatedHostFixture.Failure);
     }
 
     [Test]
@@ -63,7 +63,7 @@ internal sealed class IsolatedHostOutputTests
         using var fixture = new IsolatedHostFixture();
         await File.WriteAllTextAsync(fixture.DirectoryPath, IsolatedHostFixture.Canary);
         var exit = await IsolatedHostFixture.RunAsync(fixture.Settings());
-        await Assert.That(exit.ExitCode).IsEqualTo(1);
+        await Assert.That(exit.ExitCode).IsEqualTo(2);
         await Assert.That(exit.Stderr.Trim()).IsEqualTo(IsolatedHostFixture.Failure);
         await Assert.That(await File.ReadAllTextAsync(fixture.DirectoryPath)).IsEqualTo(IsolatedHostFixture.Canary);
     }
@@ -77,7 +77,7 @@ internal sealed class IsolatedHostOutputTests
         settings[IsolatedHostFixture.User] = "neo4j";
         settings[IsolatedHostFixture.Password] = IsolatedHostFixture.Canary;
         var exit = await IsolatedHostFixture.RunAsync(settings);
-        await Assert.That(exit.ExitCode).IsEqualTo(1);
+        await Assert.That(exit.ExitCode).IsEqualTo(2);
         await Assert.That((exit.Stdout + exit.Stderr).Contains(IsolatedHostFixture.Canary, StringComparison.Ordinal)).IsFalse();
         var envelope = await ReadAsync(fixture);
         await Assert.That(envelope.Disposition).IsEqualTo("measured");

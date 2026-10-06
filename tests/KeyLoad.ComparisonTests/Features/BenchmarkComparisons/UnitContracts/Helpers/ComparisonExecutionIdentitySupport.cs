@@ -47,7 +47,7 @@ internal static class ComparisonExecutionIdentitySupport
     {
         var output = result.Stdout + result.Stderr;
         await Assert.That(result.ExitCode).IsNotEqualTo(0);
-        await Assert.That(result.Stderr.Contains(expectedDetail, StringComparison.Ordinal)).IsTrue();
+        await Assert.That((result.Stdout + result.Stderr).Contains(expectedDetail, StringComparison.Ordinal)).IsTrue();
         foreach (var value in privateValues)
         {
             await Assert.That(output.Contains(value, StringComparison.Ordinal)).IsFalse();

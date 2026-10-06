@@ -10,8 +10,9 @@ internal static class ComparisonApplication
 {
     /// <summary>Validates configuration, runs the existing comparison library and writes its reports.</summary>
     /// <param name="arguments">Command-line configuration arguments.</param>
+    /// <param name="cancellationToken">The native TUnit test cancellation lifetime.</param>
     /// <returns>The existing comparison process exit meaning.</returns>
-    internal static async Task<int> RunAsync(string[] arguments)
+    internal static async Task<int> RunAsync(string[] arguments, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(arguments);
         _ = SerializationExecutionRegistration.Process.Value;
@@ -31,7 +32,7 @@ internal static class ComparisonApplication
         ComparisonCancellationLifetime? cancellationLifetime = null;
         try
         {
-            cancellationLifetime = new ComparisonCancellationLifetime(executionOptions, timeProvider);
+            cancellationLifetime = new ComparisonCancellationLifetime(executionOptions, timeProvider, cancellationToken);
             if (startup.Target is not null)
             {
                 return await IsolatedHostApplication.RunAsync(configuration, cancellationLifetime.Token, timeProvider);
@@ -88,6 +89,7 @@ internal static class ComparisonApplication
     {
         private readonly System.Threading.Lock gate = new();
         private readonly CancellationTokenSource source;
+        private readonly CancellationTokenSource deadline;
         private readonly ConsoleCancelEventHandler handler;
         private readonly CancellationToken token;
         private bool closing;
@@ -96,9 +98,10 @@ internal static class ComparisonApplication
         private bool disposeRequested;
         private bool disposed;
 
-        internal ComparisonCancellationLifetime(IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider)
+        internal ComparisonCancellationLifetime(IOptions<NativeComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
         {
-            source = new(executionOptions.Value.HostLifetime, timeProvider);
+            deadline = new(executionOptions.Value.HostLifetime, timeProvider);
+            source = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
             token = source.Token;
             handler = OnCancelKeyPress;
             try
@@ -114,6 +117,7 @@ internal static class ComparisonApplication
                     Console.CancelKeyPress -= handler;
                 }
                 source.Dispose();
+                deadline.Dispose();
                 throw;
             }
         }
@@ -190,6 +194,7 @@ internal static class ComparisonApplication
             {
                 disposed = true;
                 source.Dispose();
+                deadline.Dispose();
             }
         }
     }

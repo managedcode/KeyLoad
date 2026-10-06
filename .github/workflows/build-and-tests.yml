@@ -51,7 +51,7 @@ jobs:
       - name: Run analyzer tests
         id: analyzers
         run: |
-          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ResultsDirectory=TestResults/analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:CoverageSettings=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.cobertura.xml"
+          node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ResultsDirectory=TestResults/analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:CoverageSettings=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.cobertura.xml"
       - name: Verify every analyzer test passed
         if: ${{ !cancelled() && steps.analyzers.outcome != 'skipped' }}
         shell: pwsh
@@ -143,10 +143,10 @@ jobs:
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test code analyzers
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
       - name: Test native coverage source ownership
         id: source-ownership
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true
       - name: Verify original source ownership test receipt
         if: ${{ !cancelled() && steps.source-ownership.outcome != 'skipped' }}
         shell: pwsh
@@ -168,13 +168,13 @@ jobs:
           $receipt | ConvertTo-Json | Set-Content TestResults/native-source-ownership/test-receipt.json
       - name: Run unit tests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
       - name: Run unit tests without CPU intrinsics
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit-scalar --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit-scalar --KeyLoadTests:ReportTrx=true
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
       - name: Save test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
@@ -235,33 +235,33 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST=$evidence/functional-coverage.production-source-manifest.json" | Add-Content $env:GITHUB_ENV
       - name: Test three-node database with .NET and MCP clients
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
       - name: Collect four native functional coverage cohorts
         id: functional-coverage
         shell: pwsh
         run: |
           $common = @(
-            'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
+            'scripts/Features/TestInfrastructure/run-tests.mjs',
             '--KeyLoadTests:ReportTrx=true',
             '--KeyLoadTests:CoverageSettings=scripts/Features/CodeQuality/functional-coverage.production.settings.xml',
             '--KeyLoadTests:CoverageFormat=coverage')
-          & dotnet @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+          & node @common '--KeyLoadTests:Suite=unit' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit/coverage.coverage'
           $unitExitCode = $LASTEXITCODE
           "unit_exit_code=$unitExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & dotnet @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
+          & node @common '--KeyLoadTests:Suite=unit-scalar' '--KeyLoadTests:Filter=/*/*/PartitionQuery*/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/unit-scalar' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/unit-scalar/coverage.coverage'
           $scalarExitCode = $LASTEXITCODE
           "scalar_exit_code=$scalarExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & dotnet @common '--KeyLoadTests:Suite=recovery' `
+          & node @common '--KeyLoadTests:Suite=recovery' `
             '--KeyLoadTests:Filter=/*/*/CommandIdempotencyProcessRecoveryTests/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3/recovery' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/recovery/coverage.coverage'
           $recoveryExitCode = $LASTEXITCODE
           "recovery_exit_code=$recoveryExitCode" | Add-Content $env:GITHUB_OUTPUT
-          & dotnet @common '--KeyLoadTests:Suite=rf3' `
+          & node @common '--KeyLoadTests:Suite=rf3' `
             '--KeyLoadTests:Filter=/*/*/(PartitionQueryPublicRf3Tests)|(McpDocumentCrudParityTests)/*' `
             '--KeyLoadTests:ResultsDirectory=TestResults/functional-coverage/rf3' `
             '--KeyLoadTests:CoverageOutput=TestResults/functional-coverage/rf3/coverage.coverage' `

@@ -1,0 +1,15 @@
+# TestInfrastructure: native TUnit CI entry
+
+The owner correction on 2026-10-07 requires CI to run native TUnit tests after compilation. TUnit owns test outcomes and native Detailed progress. Existing TUnit fixtures start real Aspire applications and exercise discovered endpoints with the actual C# clients; benchmark workload containers also execute TUnit. Benchmarks remain exclusive to their separate pipeline.
+
+REQ-TUNIT-ENTRY-001: select each functional, scalar, recovery, RF3, site or benchmark project without an outer Aspire CLI invocation. AC-TUNIT-ENTRY-001: native argument regressions verify project/filter/TRX/coverage, bounded parallelism/timeout, scalar environment and rejection of unknown/duplicate options. Actual C# TUnit client operations and measured workload timings remain unchanged.
+
+REQ-TUNIT-ENTRY-002: native RF3 server coverage retains the original source/manifest/collector contract. AC-TUNIT-ENTRY-002: the TUnit session starts only the existing Aspire image prerequisite, propagates the original validated runner environment, removes the recursive runner, observes its original exit and joins output/application/image cleanup. Existing native coverage fixture tests and Linux RF3 coverage receipts qualify this lifecycle.
+
+REQ-TUNIT-ENTRY-003: all actual benchmark client workload execution is a TUnit test. AC-TUNIT-ENTRY-003: the pinned Aspire load-generator image contains the ComparisonHost native TUnit executable, runs its existing C# client workloads after resource dependencies settle, asserts failure/success and retains original measurement JSON plus native TRX. Existing host startup, negative configuration, report and cleanup cases cover failures.
+
+Implementation: [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md), TASK-TUNIT-ENTRY-001..004. Root owns scripts/Features/TestInfrastructure, workflow joins, IntegrationTests Features/CodeQuality/Lifecycle, ComparisonHost Features/BenchmarkComparisons/Cases and associated regressions. Frontend: N/A, runner execution only. Contracts: N/A, no public database API change. Existing RF3 membership, authorization, scalar, recovery, correctness, provenance and performance requirements remain mandatory.
+
+Verification for this editing task is compilation, native formatting, Node syntax and workflow syntax only. The owner explicitly requested no local runtime tests or infrastructure startup; Linux runtime qualification remains unproven until the original CI suites complete.
+
+Automated traceability: AC-TUNIT-ENTRY-001 maps to `tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/NativeTUnitSelectionTests.cs`; AC-TUNIT-ENTRY-003 maps to ComparisonHost `NativeClientWorkloadTests`, the existing real host configuration/report/cleanup cases and ComparisonTests `NativeWorkloadTestReportRetentionTests`. AC-TUNIT-ENTRY-002 maps to the existing native RF3 collector/fixture cases and complete Linux coverage cohort; no local runtime qualification was executed. Static stage evidence: [NativeTUnitVerification](NativeTUnitVerification.md).

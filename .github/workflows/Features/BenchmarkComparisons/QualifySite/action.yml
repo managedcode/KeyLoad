@@ -124,13 +124,13 @@ runs:
         dotnet restore KeyLoad.slnx
         dotnet build src/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore --configuration Release
         dotnet build tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj --no-restore --configuration Release
-        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
-        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteOptionalBenchmarkSelectionTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
+        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteQualificationStartupTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/startup-tests"
+        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/SiteOptionalBenchmarkSelectionTests/*' --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/selection-tests"
         dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore --configuration Release
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
         pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
-        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/analyzer-tests" "--KeyLoadTests:CoverageSettings=$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
+        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/analyzer-tests" "--KeyLoadTests:CoverageSettings=$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
     - name: Check analyzer test coverage
       if: (success() || failure()) && steps.analyzers.outcome != 'skipped'
       working-directory: website
@@ -162,7 +162,7 @@ runs:
         else
           [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]
         fi
-        dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- "${site_args[@]}"
+        node scripts/Features/TestInfrastructure/run-tests.mjs "${site_args[@]}"
     - name: Check every required test passed
       shell: pwsh
       run: |

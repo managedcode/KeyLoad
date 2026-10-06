@@ -1,3 +1,4 @@
+import { nativeSelection } from '../TestInfrastructure/run-tests.mjs';
 import { spawn } from 'node:child_process';
 import { constants } from 'node:fs';
 import { lstat, open } from 'node:fs/promises';
@@ -70,8 +71,7 @@ export function workloadArguments(scaleProfile, vectorProfile, openLoopCell) {
   }
   const filter = openLoop?.filter ?? '/*/*/IsolatedNativeComparisonTests/*';
   const arguments_ = [
-    'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
-    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=' + filter,
+        '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=' + filter,
     `--KeyLoadTests:TimeoutMinutes=${vector || scaled ? 140 : 60}`
   ];
   if (scaled) arguments_.push(`--KeyLoadTests:ScaleProfile=${scaleProfile}`);
@@ -163,10 +163,10 @@ async function writeProgress(line) {
 
 // Tests exercise this lifecycle with genuine short-lived child processes.
 // The production entry below always runs the repository's closed Aspire command.
-export async function runProgressProcess(command, arguments_, workingDirectory, progressFile, period = intervalMilliseconds) {
+export async function runProgressProcess(command, arguments_, workingDirectory, progressFile, period = intervalMilliseconds, nativeEnvironment = process.env) {
   if (!Number.isInteger(period) || period < 1 || period > intervalMilliseconds) throw new Error('Invalid progress interval.');
-  const environment = { ...process.env };
-  delete environment.Benchmarks__VectorProfile;
+  const environment = { ...nativeEnvironment };
+
   const child = spawn(command, arguments_, { env: environment, cwd: workingDirectory, stdio: 'inherit', detached: process.platform !== 'win32' });
   const signals = ownSignals(child);
   const outputError = () => {};
@@ -194,7 +194,8 @@ export async function runWorkload() {
   const openLoopCell = selectOpenLoopWorkload(process.env, scaleProfile, vectorProfile);
   const progress = path.join(root, 'artifacts/comparisons/isolated/failures', cell, 'progress.log');
   const arguments_ = workloadArguments(scaleProfile, vectorProfile, openLoopCell);
-  return await runProgressProcess('dotnet', arguments_, root, progress);
+  const selected = nativeSelection(arguments_);
+  return await runProgressProcess('dotnet', selected.args, root, progress, intervalMilliseconds, selected.environment);
 }
 
 const evaluated = process.execArgv.some(argument => argument === '--eval' || argument === '-e');

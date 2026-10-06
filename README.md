@@ -442,17 +442,17 @@ Shared primitives and composition entry points remain at project roots.
 
 ## Contributing
 
-All test suites run through the Aspire AppHost. After building, pick a suite: `unit`, `unit-scalar`, `recovery`, `rf3`, `analyzers`, `comparison` or `site`.
+CI runs native TUnit tests after building, with live Detailed output. TUnit fixtures start and dispose the real Aspire infrastructure. Pick a suite: `unit`, `unit-scalar`, `recovery`, `rf3`, `analyzers`, `comparison` or `site`.
 
 ```bash
-dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit
+node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
 ```
 
 ```bash
 dotnet format KeyLoad.slnx --verify-no-changes --no-restore
 ```
 
-The `rf3` suite starts a real three-node cluster in Docker and tests it through the .NET SDK and the official MCP client. Before your first change, read the [architecture map](docs/Architecture.md) and the feature spec in [`docs/Features/`](docs/Features). If you work with AI coding agents, [AGENTS.md](AGENTS.md) holds the repository rules.
+Benchmark measurements and their contract tests run exclusively in the separate Benchmarks pipeline, through TUnit and Aspire with real C# clients. The `rf3` suite starts a real three-node cluster in Docker and tests it through the .NET SDK and the official MCP client. Before your first change, read the [architecture map](docs/Architecture.md) and the feature spec in [`docs/Features/`](docs/Features). If you work with AI coding agents, [AGENTS.md](AGENTS.md) holds the repository rules.
 
 ## Credits
 

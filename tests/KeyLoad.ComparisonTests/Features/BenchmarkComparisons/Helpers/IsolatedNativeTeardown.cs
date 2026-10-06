@@ -36,7 +36,10 @@ internal static class IsolatedNativeTeardown
             () => capture.DisposeAsync().AsTask(), "capture-dispose", failures, options);
         var applicationDisposed = await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => app.DisposeAsync().AsTask(), "app-dispose", failures, options);
-        if (runnerSettled && controlSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed)
+        var nativeReportsRetained = stopped && applicationDisposed
+            && await IsolatedNativeOriginalTaskSettlement.RunAsync(() => RetainNativeReportsAsync(output, evidence),
+                "native-trx-retain", failures, options);
+        if (runnerSettled && controlSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed && nativeReportsRetained)
         {
             await IsolatedNativeOriginalTaskSettlement.RunAsync(
                 () => IsolatedNativeDataCleanup.DeleteAsync(root, containers), "data", failures, options);
@@ -70,6 +73,12 @@ internal static class IsolatedNativeTeardown
         using var cancellation = new CancellationTokenSource();
         return await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => app.StopAsync(cancellation.Token), "stop", failures, options, cancellation.CancelAsync);
+    }
+
+    private static Task RetainNativeReportsAsync(string output, string evidence)
+    {
+        NativeWorkloadTestReports.Retain(output, evidence);
+        return Task.CompletedTask;
     }
 
     private static Task CopyRawAsync(string output, string evidence)

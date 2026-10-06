@@ -50,7 +50,7 @@ internal sealed class IsolatedHostFixture : IDisposable
 
     internal async Task AssertFailureAsync(ComparisonHostExit result)
     {
-        await Assert.That(result.ExitCode).IsEqualTo(1);
+        await Assert.That(result.ExitCode).IsEqualTo(2);
         await Assert.That(result.Stderr.Trim()).IsEqualTo(Failure);
         await Assert.That((result.Stdout + result.Stderr).Contains(Canary, StringComparison.Ordinal)).IsFalse();
         await Assert.That(File.Exists(Path.Combine(DirectoryPath, "worker.json"))).IsFalse();

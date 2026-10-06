@@ -198,10 +198,8 @@ internal static class ComparisonHostLaunchSettings
             WorkingDirectory = root
         };
         startInfo.ArgumentList.Add(assembly);
-        foreach (var argument in arguments)
-        {
-            startInfo.ArgumentList.Add(argument);
-        }
+        startInfo.ArgumentList.Add("--output");
+        startInfo.ArgumentList.Add("Detailed");
         foreach (var key in startInfo.Environment.Keys.Where(IsBenchmarkSetting).ToArray())
         {
             startInfo.Environment.Remove(key);
@@ -212,6 +210,13 @@ internal static class ComparisonHostLaunchSettings
             {
                 startInfo.Environment[key] = value;
             }
+        }
+        foreach (var argument in arguments)
+        {
+            var separator = argument.IndexOf('=', StringComparison.Ordinal);
+            if (!argument.StartsWith("--", StringComparison.Ordinal) || separator <= 2)
+            { throw new InvalidOperationException("The native workload test requires configuration assignments."); }
+            startInfo.Environment[argument[2..separator].Replace(":", "__", StringComparison.Ordinal)] = argument[(separator + 1)..];
         }
         return startInfo;
     }
