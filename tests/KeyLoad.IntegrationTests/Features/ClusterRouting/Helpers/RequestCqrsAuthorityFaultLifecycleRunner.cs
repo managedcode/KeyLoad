@@ -11,8 +11,8 @@ internal static class RequestCqrsAuthorityFaultLifecycleRunner
         using var parentTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
         using var parent = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, parentTimeout.Token);
         var lifecycle = new RequestCqrsLifecycleEvidence();
-        var scenario = new RequestCqrsAuthorityFaultScenario(officialMcp, lifecycle, cancellationToken);
-        await ServerFailureObserver.ObserveAsync(() => scenario.ExecuteObservedAsync(parent.Token),
+        var scenario = new RequestCqrsAuthorityFaultScenario(officialMcp, lifecycle, TimeProvider.System, cancellationToken);
+        await ServerFailureObserver.ObserveAsync(() => ExecuteObservedAsync(scenario, lifecycle, parent.Token),
             scenario.Failures).ConfigureAwait(false);
         if (scenario.Failures.Count == 0)
         {
@@ -21,8 +21,21 @@ internal static class RequestCqrsAuthorityFaultLifecycleRunner
                 scenario.Failures).ConfigureAwait(false);
         }
         lifecycle.RecordFirstFailureIfAny(scenario.Failures);
-        await ServerFailureObserver.ObserveAsync(scenario.CleanupAsync, scenario.Failures).ConfigureAwait(false);
+        var cleanup = scenario.DisposeAsync().AsTask();
+        await ServerFailureObserver.ObserveAsync(() => cleanup, scenario.Failures).ConfigureAwait(false);
         lifecycle.RecordTerminal();
         lifecycle.ThrowWithContext(scenario.Failures);
+    }
+
+    private static async Task ExecuteObservedAsync(RequestCqrsAuthorityFaultScenario scenario,
+        RequestCqrsLifecycleEvidence lifecycle, CancellationToken parentToken)
+    {
+        try
+        { await scenario.ExecuteAsync(parentToken).ConfigureAwait(false); }
+        catch (Exception)
+        {
+            lifecycle.RecordFirstFailure();
+            throw;
+        }
     }
 }

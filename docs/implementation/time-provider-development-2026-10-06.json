@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-06",
+  "scope": "TimeProvider local development; not Linux qualification",
+  "feature": "docs/Features/ResourceExecution/TimeProvider.md",
+  "decision": "docs/ADR/ADR-115-time-provider.md",
+  "sourceRevisionObserved": "51ce19cfbb086b316d41cd959e98946d78cc26e3",
+  "concurrentSourceChangesExcluded": true,
+  "canonicalBuildPassed": false,
+  "canonicalFormatterPassed": false,
+  "runtimeQualified": false,
+  "fullTaskComplete": false,
+  "analyzers": {
+    "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers",
+    "exitCode": 0,
+    "summary": {
+      "total": 388,
+      "passed": 388,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "nativeReport": "TestResults/analyzers/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+    "nativeReportSha256": "b5f02f448bc940fbfb50be86db8c1d26e7ef307c0f0ac70d7ae5114ba539189e",
+    "publicationGeneration": "15a5a712955e4dd48ba50337feeccc5f",
+    "operatingSystem": "macOS 27.0.1",
+    "runtimeVersion": ".NET 10.0.12",
+    "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T082534_8247a03f.log",
+    "clockCases": [
+      {
+        "className": "AggregateTypeClockTests",
+        "summary": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "className": "SystemClockAccessTests",
+        "summary": {
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "className": "SystemClockElapsedTests",
+        "summary": {
+          "total": 10,
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "cancelled": 0,
+          "timedOut": 0,
+          "flaky": 0
+        }
+      }
+    ]
+  },
+  "builds": {
+    "canonical": "failed: 33 parallel BackupRestore artifact diagnostics and one AppHost signal join; join subsequently repaired and scoped AppHost build passed",
+    "canonicalLog": "/tmp/keyload-time-solution-build-final.log",
+    "compiledModules": [
+      "Core",
+      "Query",
+      "Security",
+      "Diagnostics",
+      "Storage.IO",
+      "Storage.ZoneTree",
+      "BenchmarkScenarios",
+      "Benchmarks",
+      "Client",
+      "Comparisons",
+      "ComparisonHost",
+      "Replication",
+      "Orleans",
+      "ServiceDefaults",
+      "Server",
+      "Analyzers.Tests",
+      "CrashHost",
+      "RecoveryTests"
+    ],
+    "scopedAppHost": "passed 0 warnings/errors, current product references; no replacement for solution gate",
+    "unitSource": "blocked by 8 parallel cancellation-flow and BackupRestore diagnostics; controlled operation cases not executed",
+    "unitLog": "/tmp/keyload-time-unit-source-final-r2.log",
+    "integrationSource": "passed 0 warnings/errors after async deadline ownership and disposal join repair",
+    "integrationLog": "/private/tmp/keyload-time-runtime-integration-source-build.log"
+  },
+  "recovery": {
+    "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery",
+    "exitCode": 134,
+    "status": "blocked before test execution: prepare-native5-probe original exit1, prior-source CA1822 compilation diagnostics",
+    "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T082313_208b3de5.log"
+  },
+  "format": {
+    "command": "dotnet format KeyLoad.slnx --verify-no-changes --no-restore",
+    "exitCode": 2,
+    "status": "parallel BackupRestore and cancellation-flow diagnostics; scoped clock formatting passed",
+    "log": "/tmp/keyload-time-format-final.log"
+  },
+  "governance": "passed 27 projects and 4 modules",
+  "performance": "unmeasured; no acceleration claim",
+  "coverageAndCrap": "unmeasured",
+  "remaining": [
+    "Fresh passing complete solution build and canonical formatting",
+    "Execute controlled engine/read-cut/replica tests through freshly compiled Aspire unit runner",
+    "Complete unit/scalar/recovery/RF3 and exact-source Linux gates"
+  ],
+  "rf3": {
+    "command": "dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=rf3",
+    "exitCode": 2,
+    "summary": {
+      "total": 158,
+      "passed": 16,
+      "failed": 142,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "nativeReport": "TestResults/rf3/KeyLoad.IntegrationTests-macos-net10.0.tunit-report.json",
+    "nativeReportSha256": "98fa6f4065dab9fa6fd13af1dd0232305ffcdc5cf1d204f9d16876bd40b9e54d",
+    "status": "failed local development: cluster profile rejects macOS reparse temp paths; genuine prior-server proof unavailable; no passing Docker RF3 claim",
+    "log": "/Users/ksemenenko/.aspire/logs/cli_20261006T083253_a37d4221.log"
+  }
+}

@@ -9,7 +9,7 @@ using ManagedCode.Communication;
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrsLifecycleEvidence lifecycle,
-    CancellationToken callerToken)
+    TimeProvider clock, CancellationToken callerToken) : IAsyncDisposable
 {
     private const string MissingOwner = "The authority-fault wave did not retain its owner.";
     private const string AdminJson = RequestCqrsAuthorityFaultAssertions.AdministratorJson;
@@ -39,18 +39,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
 
     internal List<Exception> Failures { get; } = [];
 
-    internal async Task ExecuteObservedAsync(CancellationToken parentToken)
-    {
-        try
-        { await ExecuteAsync(parentToken).ConfigureAwait(false); }
-        catch (Exception)
-        {
-            lifecycle.RecordFirstFailure();
-            throw;
-        }
-    }
-
-    internal async Task CleanupAsync()
+    public async ValueTask DisposeAsync()
     {
         try
         {
@@ -60,16 +49,23 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         }
         finally
         {
-            operationTimeout?.Dispose();
+            try
+            {
+                operationDeadline?.Dispose();
+            }
+            finally
+            {
+                operationTimeout?.Dispose();
+            }
         }
     }
 
-    private async Task ExecuteAsync(CancellationToken parentToken)
+    internal async Task ExecuteAsync(CancellationToken parentToken)
     {
         lifecycle.SetStage(RequestCqrsLifecycleStage.WaveStartup);
         root = RequestCqrsAuthorityFaultProvisioning.NewPrivateRootPath();
         RequestCqrsAuthorityFaultProvisioning.CreatePrivateRoot(root, () => rootCreated = true);
-        operationTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, TimeProvider.System);
+        operationTimeout = new CancellationTokenSource(RequestCqrsRf3Protocol.WaveDeadline, clock);
         operationDeadline = CancellationTokenSource.CreateLinkedTokenSource(parentToken, operationTimeout.Token);
         lifecycle.SetTokens(callerToken, parentToken, operationDeadline.Token);
         await PrepareAsync(operationDeadline.Token).ConfigureAwait(false);

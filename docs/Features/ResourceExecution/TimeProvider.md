@@ -1,11 +1,11 @@
 # ResourceExecution: controlled time
 
-Status: implementation in progress; local development verification is distinct from Linux RF3 qualification.
+Status: source joined; full build and runtime qualification remain incomplete. Local development verification is distinct from Linux RF3 qualification.
 Decision: [ADR-115](../../ADR/ADR-115-time-provider.md).
 
 ## Goal and scope
 
-All KeyLoad-owned C# current-time reads and elapsed/deadline/timer work use native .NET `TimeProvider`. Existing DateTime/DateTimeOffset static clocks are already rejected by KLD0022; hidden System-provider calls and Stopwatch still bypass controlled clocks. Use injected clocks in execution owners and select System only in constructor defaults or composition roots. Preserve UTC persisted timestamps, signed-request validity, RF3 ordering, native Orleans scheduling, monotonic budgets and actual benchmark provenance. No new packages or replacement database/transport dependencies. Provider control is explicitly authorized for tests. Runtime-host and business clocks may remain separately composed where their ownership differs.
+All KeyLoad-owned C# current-time reads and elapsed/deadline/timer work use native .NET `TimeProvider`. KLD0022 rejects DateTime/DateTimeOffset static clocks, native Stopwatch properties, fields, calls and creation, and Environment tick access. Use injected clocks in execution owners and select System only in constructor defaults or composition roots. Preserve UTC persisted timestamps, signed-request validity, RF3 ordering, native Orleans scheduling, monotonic budgets and actual benchmark provenance. No new packages or replacement database/transport dependencies. Provider control is explicitly authorized for tests. Runtime-host and business clocks may remain separately composed where their ownership differs.
 
 ## Requirements and acceptance
 
@@ -27,6 +27,12 @@ All KeyLoad-owned C# current-time reads and elapsed/deadline/timer work use nati
 6. TASK-TIME-006 (lead): inspect all diffs; scoped canonical formatting; solution Release build; Aspire analyzers/unit/recovery/RF3 suites; governance/diff checks. Collect available functional coverage through AppHost; unavailable coverage/CRAP remains unmeasured. Preserve every failure and qualification gate.
 
 Validation skills in order: quality-ci (check native gates), analyzer-config (existing severity), format (canonical dotnet format), csharpier (N/A: dotnet format owner), code-analysis (Release analyzers), roslynator/meziantou/stylecop (review current package ownership; no new packages), complexity (existing source-owned limits plus changed-code review), crap-score (actual source-bound coverage only). Baseline and final outcomes will be recorded here after checks. A failed build is not completion. No worker commits; lead checkpoints only coherent scope without unrelated work.
+
+## Development evidence, 2026-10-06
+
+The [development receipt](../../implementation/time-provider-development-2026-10-06.json) records actual commands, native report hash and unresolved gates. The complete Aspire-owned analyzer suite passed 388/388 tests, including readonly Stopwatch fields and the controlled migration deadline. Product clock modules, ComparisonHost and the final integration test sources compile with analyzers. The complete solution and canonical formatter remain blocked by parallel BackupRestore/cancellation-flow diagnostics; process recovery stops during prior-source preparation. The local RF3 suite failed (16 passed, 142 failed) on cluster-profile reparse paths and unavailable prior-server proof. These are local macOS development observations, with no Linux qualification, coverage, CRAP or performance claim.
+
+Controlled real-operation sources: `TimeProviderOperationTests` (JSON/native command timestamp and retry, query/due-work expiry, UTC versus monotonic budget), `NativeReadCutClockTests` (real snapshot expiry, released slot and preserved bytes), and `DueWaitControlledClockTests` (real apply waiter fallback/cancellation and joined timers). Fresh UnitTests compilation and execution remain required. The controlled timer supports these single-threaded one-shot workflows; it is not qualified as a general concurrent or periodic timer implementation. Framework-native synchronous process/thread waits without a provider overload remain bounded OS observations; managed delays and timed task waits use provider overloads.
 
 ```mermaid
 flowchart LR

@@ -4,16 +4,18 @@
     "status": "in_progress",
     "feature": "docs/Features/ResourceExecution/TimeProvider.md",
     "decision": "docs/ADR/ADR-115-time-provider.md",
-    "sourceStage": "clock_migration_and_deterministic_real_operation_regressions_in_progress",
+    "sourceStage": "clock_migration_and_deterministic_real_operation_regressions_joined",
     "canonicalBuildPassed": false,
     "canonicalFormatterPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
-    "verificationStage": "owned_analyzer_release_build_passed_other_gates_pending",
+    "verificationStage": "Aspire_analyzers_388_passed_shared_build_and_runtime_gates_blocked",
+    "analyzerTestsPassed": 388,
+    "localDevelopmentReceipt": "docs/implementation/time-provider-development-2026-10-06.json",
     "remaining": [
-      "Final canonical solution build and format",
-      "Aspire analyzer, unit, process recovery and Docker RF3 client suites",
-      "Source-bound functional coverage and Linux qualification"
+      "Fresh passing complete solution build and canonical formatting",
+      "Execute controlled engine/read-cut/replica tests through freshly compiled Aspire unit runner",
+      "Complete unit/scalar/recovery/RF3 and exact-source Linux gates"
     ]
   },
   "ORLEANS-PRIMITIVES-001": {
