@@ -79,7 +79,61 @@ internal readonly record struct RequestCqrsLifecycleSnapshot(
     RequestCqrsNodeReadinessOutcome Node2Readiness,
     RequestCqrsNodeReadinessOutcome Node3Readiness,
     bool HeldWriteObserved,
-    bool PersistedRevocationEntered);
+    bool PersistedRevocationEntered,
+    RequestCqrsScopeCompletionSnapshot ScopeCompletion,
+    RequestCqrsCleanupCompletionSnapshot CleanupCompletion);
+
+internal enum RequestCqrsCompletionCallState
+{
+    NotStarted,
+    Started,
+    Returned,
+    Failed
+}
+
+internal enum RequestCqrsScopeCompletionOwner
+{
+    Explicit,
+    Batch
+}
+
+internal readonly record struct RequestCqrsCompletionCallSnapshot(
+    RequestCqrsCompletionCallState State,
+    TaskStatus? StatusAtStart,
+    TaskStatus? StatusAtReturn);
+
+internal readonly record struct RequestCqrsScopeCompletionSnapshot(
+    RequestCqrsCompletionCallSnapshot ExplicitNode1,
+    RequestCqrsCompletionCallSnapshot ExplicitNode2,
+    RequestCqrsCompletionCallSnapshot ExplicitNode3,
+    RequestCqrsCompletionCallSnapshot BatchNode1,
+    RequestCqrsCompletionCallSnapshot BatchNode2,
+    RequestCqrsCompletionCallSnapshot BatchNode3);
+
+internal readonly record struct RequestCqrsDrainObservationSnapshot(
+    bool Started,
+    bool? TokenCanceledAtStart,
+    TaskStatus? StartNode1,
+    TaskStatus? StartNode2,
+    TaskStatus? StartNode3,
+    bool? TokenCanceledAtFailure,
+    TaskStatus? FailureNode1,
+    TaskStatus? FailureNode2,
+    TaskStatus? FailureNode3,
+    bool? Returned,
+    bool FallbackEntered,
+    bool? CaptureCanceledAtFallback,
+    bool? OriginalJoined,
+    TaskStatus? JoinedNode1,
+    TaskStatus? JoinedNode2,
+    TaskStatus? JoinedNode3,
+    bool? CaptureCanceledAfterJoin);
+
+internal readonly record struct RequestCqrsCleanupCompletionSnapshot(
+    RequestCqrsCompletionCallSnapshot Node1,
+    RequestCqrsCompletionCallSnapshot Node2,
+    RequestCqrsCompletionCallSnapshot Node3,
+    RequestCqrsDrainObservationSnapshot Drain);
 
 internal readonly record struct RequestCqrsCaptureLifecycleSnapshot(
     TaskStatus? Node1,
@@ -87,7 +141,8 @@ internal readonly record struct RequestCqrsCaptureLifecycleSnapshot(
     TaskStatus? Node3,
     bool LifetimeCancellationRequested,
     bool DrainCancellationRequested,
-    bool FallbackRequested);
+    bool FallbackRequested,
+    RequestCqrsCleanupCompletionSnapshot Completion);
 
 internal readonly record struct RequestCqrsSingleTaskLifecycleSnapshot(
     TaskStatus? PendingMove,

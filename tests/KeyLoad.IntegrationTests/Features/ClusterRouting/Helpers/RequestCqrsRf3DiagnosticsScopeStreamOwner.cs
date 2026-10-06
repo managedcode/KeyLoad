@@ -17,10 +17,8 @@ internal sealed class RequestCqrsRf3DiagnosticsScopeStreamOwner(ResourceLoggerSe
         lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
         var resource = resources.Single(candidate => string.Equals(candidate.Name, node, StringComparison.Ordinal));
         var failures = new List<Exception>();
-        RequestCqrsLifecycleFailureObserver.Observe(() => logger.Complete(resource), failures,
-            lifecycle.RecordOwnerFailure, CompletionStage(resource.Name));
+        CompleteResource(resource, RequestCqrsScopeCompletionOwner.Explicit, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        completedResourceNames.Add(resource.Name);
     }
 
     internal void CompleteResourceStreams()
@@ -36,12 +34,41 @@ internal sealed class RequestCqrsRf3DiagnosticsScopeStreamOwner(ResourceLoggerSe
         {
             if (completedResourceNames.Contains(resource.Name))
             { continue; }
-            var before = failures.Count;
-            RequestCqrsLifecycleFailureObserver.Observe(() => logger.Complete(resource), failures,
-                lifecycle.RecordOwnerFailure, CompletionStage(resource.Name));
-            if (failures.Count == before)
-            { completedResourceNames.Add(resource.Name); }
+            CompleteResource(resource, RequestCqrsScopeCompletionOwner.Batch, failures);
         }
+    }
+
+    private void CompleteResource(ContainerResource resource, RequestCqrsScopeCompletionOwner owner,
+        List<Exception> failures)
+    {
+        var stage = CompletionStage(resource.Name);
+        RequestCqrsLifecycleFailureObserver.Observe(() => lifecycle.RecordScopeCompletion(owner,
+            resource.Name, RequestCqrsCompletionCallState.Started, CaptureStatus(resource.Name)),
+            failures, lifecycle.RecordOwnerFailure, stage);
+        var returned = false;
+        RequestCqrsLifecycleFailureObserver.Observe(() =>
+        {
+            logger.Complete(resource);
+            returned = true;
+        }, failures, lifecycle.RecordOwnerFailure, stage);
+        RequestCqrsLifecycleFailureObserver.Observe(() => lifecycle.RecordScopeCompletion(owner,
+            resource.Name, returned ? RequestCqrsCompletionCallState.Returned
+                : RequestCqrsCompletionCallState.Failed, CaptureStatus(resource.Name)),
+            failures, lifecycle.RecordOwnerFailure, stage);
+        if (returned)
+        { completedResourceNames.Add(resource.Name); }
+    }
+
+    private TaskStatus? CaptureStatus(string node)
+    {
+        var state = diagnostics?.ReadLifecycleSnapshot();
+        return node switch
+        {
+            RequestCqrsRf3Protocol.Node1 => state?.Node1,
+            RequestCqrsRf3Protocol.Node2 => state?.Node2,
+            RequestCqrsRf3Protocol.Node3 => state?.Node3,
+            _ => throw new ArgumentOutOfRangeException(nameof(node))
+        };
     }
 
     private static RequestCqrsLifecycleStage CompletionStage(string resourceName) => resourceName switch

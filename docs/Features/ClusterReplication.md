@@ -173,6 +173,22 @@ contract; no injected storage substitute, silent retry, lost cut or changed quor
 is acceptable. Source races are established independently from the unresolved
 cf630 OwnershipLost runtime attribution; exact native node logs remain necessary.
 
+TASK-REP-MATERIALIZER-FAULT-ORACLE refines AC-REP-002/004/051 without changing
+production shutdown. In the real ZoneTree JournalFlushed failure flow, the pending
+apply waiter must fail with RecoveryRequired and the memoized disposal task must
+preserve its original UnknownWriteOutcome. Successful resource cleanup does not
+require a successful terminal task. Assert repeated disposal observes the same
+original exception, the borrowed log gate stays usable until its physical owner
+closes, and reopening retains the committed prefix and storage identity.
+The lifecycle fixture may acknowledge only that exact terminal exception after
+the scenario has asserted it; any different exception, unasserted failure or
+independent owner/directory cleanup error remains fatal to the test. Keep the
+normal/concurrent disposal and filesystem-failure regressions. The owning paths
+are RecoveryTests/Features/ClusterReplication/Cases/ReplicaMaterializerLifecycleTests.cs
+and Fixtures/ReplicaMaterializerLifecycleFixture.cs. Native TUnit recovery and
+exact-source Linux recovery reports qualify this test correction; they do not
+close RF3, endurance or power-loss gates. ADR-007 preserves the failure contract.
+
 
 ## TASK-ISO-021 accepted application/control read separation
 

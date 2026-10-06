@@ -8,7 +8,7 @@ internal sealed class AdaptiveFilteredPlannerTests
     private const int RecordCount = PackedAnnTestData.QualityRecordCount;
     private const int TopCount = PackedAnnTestData.TopK;
 
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public async Task AcFilter004SelectivityPlanAndPackedSearchMatchIndependentScalarCohortOracles()
     {
         using var database = new TestDatabase();
@@ -84,7 +84,7 @@ internal sealed class AdaptiveFilteredPlannerTests
         await Assert.That(empty.ExpansionPasses).IsEqualTo(0);
     }
 
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public async Task AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch()
     {
         using var database = new TestDatabase();

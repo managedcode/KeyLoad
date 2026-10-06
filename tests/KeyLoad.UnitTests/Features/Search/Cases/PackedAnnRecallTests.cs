@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed class PackedAnnRecallTests
 {
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public async Task AcAnn005TenThousandCanonicalRowsMeetRecallForEveryMetricFilterAndCorrelationCell()
     {
         using var database = new TestDatabase();

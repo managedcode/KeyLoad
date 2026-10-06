@@ -27,6 +27,8 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         {
             var tool = await session.Client.DiscoverKeyLoadToolAsync(expected.Name, deadline.Token);
             await Assert.That(discovered.Add(tool.Name)).IsTrue();
+            if (tool.Name == McpCallerProtocol.GraphShortestPath)
+            { await NativeMcpSchemaEvidence.RetainGraphShortestPathAsync(tool, deadline.Token); }
             await McpDiscoveryAssertions.VerifyAsync(tool);
         }
         await McpDiscoveryAssertions.VerifyInventoryAsync(discovered);

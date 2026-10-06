@@ -55,7 +55,7 @@ internal sealed class PackedAnnFilterTests
         }
     }
 
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public async Task AcAnn004InsufficientFilteredCandidatesFallBackToCompleteExactEligibleTopK()
     {
         using var database = new TestDatabase();

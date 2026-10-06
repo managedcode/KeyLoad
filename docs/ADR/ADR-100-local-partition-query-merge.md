@@ -48,7 +48,12 @@ the existing read path.
 Capture canonical encoded Q1 order keys while each document is still an
 authorized pre-projection candidate. Retain only the requested local top-L,
 including full `EntityRef` and projected/redacted `QueryRow`; never export
-borrowed database views or raw unprojected documents. Merge with order-key
+borrowed database views or raw unprojected documents. For every unredacted row
+emitted by this partition-query path, `RedactedFields` is a present initialized
+empty immutable array;
+redacted rows carry the exact omitted field paths. Null and empty remain
+distinct serialized values, so callers and parity checks must not normalize
+one into the other. Merge with order-key
 direction followed by ordinal full-identity components. Preserve a vector of
 per-leaf owner, read-generation, cut, policy and schema witnesses; there is no
 single cross-partition snapshot position. Require the same owner and policy

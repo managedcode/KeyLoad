@@ -10,7 +10,7 @@ import { runBounded } from './image-process.mjs';
 const gitCommand = 'git';
 const gitRevisionArguments = Object.freeze(['rev-parse', 'HEAD']);
 const gitDiffArguments = Object.freeze(['diff', '--quiet', 'HEAD', '--']);
-const gitStatusArguments = Object.freeze(['status', '--porcelain', '--untracked-files=no']);
+const gitStatusArguments = Object.freeze(['status', '--porcelain', '--untracked-files=all']);
 const schemaVersion = 1;
 
 export async function prepareImages(environment = process.env, argv = process.argv.slice(2)) {

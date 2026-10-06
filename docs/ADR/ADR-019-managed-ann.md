@@ -4,12 +4,17 @@ Status: Accepted for the bounded first-party managed HNSW candidate stage on 202
 
 The accepted 2026-10-05 test-resource stage is REQ/AC-ANN-013 in
 [ManagedAnn](../Features/Search/ManagedAnn.md). Root freezes/reviews/joins; a Luna
-worker adds only the named Search test resource and native keyed TUnit attributes
-on the specified five heavyweight fixture methods. Test bodies, corpus sizes,
-product execution budgets and global runner concurrency remain unchanged. Verify
-the private base/post packet, full strict build/format/governance, Aspire normal
+worker changes only native TUnit attributes on the specified six heavyweight
+fixture methods to unkeyed `[NotInParallel]`, as refined on 2026-10-07. The
+unused named Search test-resource helper is removed. Only those six flows are
+globally isolated within their TUnit process; there is no assembly-wide
+serialization. Test bodies, corpus sizes, explicit concurrency tests, product
+execution budgets and global runner settings remain unchanged. Verify
+the private base/post packet, full strict build/format/governance, native TUnit normal
 and scalar suites and exact-source Linux originals before any qualification
-claim. Rollback removes only the resource key and attributes; there is no data,
+claim. The unchanged full R111 failure and focused pass indicate scheduling
+sensitivity without proving the failure's cause. Rollback restores only the
+prior test scheduling; there is no data,
 dependency, public API or production admission change.
 
 ## Context and decision

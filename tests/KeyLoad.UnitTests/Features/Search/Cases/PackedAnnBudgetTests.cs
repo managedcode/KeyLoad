@@ -49,7 +49,7 @@ internal sealed class PackedAnnBudgetTests
         await Assert.That(second.EdgeVisits).IsEqualTo(sharedBudget.EdgeVisits - edgesBeforeSecond);
     }
 
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public async Task AcAnn003RealCancellationAndDeadlineInterruptWideCanonicalSearchAndAllowHealthySearch()
     {
         using var database = new TestDatabase();

@@ -7,6 +7,12 @@ reachability. Select one versioned directed same-partition path operator over
 native node-local ZoneTree adjacency in one current authorized committed cut.
 Explicit depth frontiers batch local work without per-edge RPC. Orleans retains
 one request grain and native ManagedCode CQRS; storage handles remain node-local.
+A nonempty `Labels` predicate is authorized as field use of graph `/label`: the
+persisted field policy's `RawUseGrant` is required even when the principal has a
+separate `RawReadGrant`. Missing use authority returns `PermissionDenied` before
+adjacency traversal; null/empty labels do not invoke that use check. An RF3
+restart scenario asserting a filtered path must persist this grant before its
+initial path read.
 
 ```mermaid
 flowchart LR

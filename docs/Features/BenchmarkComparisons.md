@@ -207,7 +207,7 @@ Status: in progress. Owner: lead benchmark integrator. Product scope and authori
 - Harness/adapters: benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/; existing flat files are migration debt tracked by ADR-032.
 - Embedded scenario library: benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/; existing KeyLoad.Benchmarks retains only its typed executable runner under ADR-047. New boundary implementation/qualification is pending; exact accepted contract is ../ADR/ADR-047-embedded-benchmark-host.md and its ordered working plan.
 - Aspire engine resources: src/KeyLoad.AppHost/Features/BenchmarkComparisons/; shared Program.cs composition has one integration owner.
-- Tests: tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/ and tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/; existing fixtures are shared.
+- Tests: `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
 - Evidence/chart tooling: scripts/Features/BenchmarkComparisons/.
 - Site: site/Features/BenchmarkComparisons/; existing root assets are migration debt and updated only under serialized integration ownership.
 - Docs: this spec, ADR-034, implementation/comparative-benchmarks.md and the README presentation.
@@ -701,7 +701,7 @@ settings, machine, cost and allocations. Fixed small batches are explicitly
 microbenchmark controls, never the required100k/1m database datasets,
 RF3/durability evidence, public website comparisons or an acceleration claim.
 Actual canonical rewrite cost and correction recovery remain pending KL-078.
-`UnitTests/Features/BenchmarkComparisons/SampleChunkBenchmarkConsumerTests.cs`
+`ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/SampleChunkBenchmarkConsumerTests.cs`
 verifies all36 matched cases through the real external generated consumer;
 its Dry execution proves interoperability rather than performance.
 `scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs` binds the
@@ -1388,6 +1388,35 @@ site qualification and actual Website/Pages delivery evidence remain required.
 REQ-BC-SCENE-001 / AC-BC-SCENE-001 / TASK-BC-SCENE-001 replace the model-card carousel with three illustrative silo/node groups, eighteen distinct grain activations and thirty intra/inter-silo links. Each node retains its own storage base; grain routing must not suggest migration of storage handles or live telemetry. Desktop and mobile SVG posters convey the same concepts. Native projected DOM labels and the canonical SVG mark remain sharp across viewport/DPR changes. Motion, pause, reduced motion, visibility, disposal and existing renderer budgets remain mandatory.
 
 ADR-040 owns this presentation-only replacement. Files: scene-geometry.mjs owns topology and motion; scene-lifecycle.mjs/scene-observers.mjs project labels and report actual graph counts; index.html/scene.css own semantics and presentation; existing cluster-poster assets own fallback. SiteVectorAssetTests and SiteBrowserVectorAssetAssertions verify actual asset semantics, native graph counts, label containment and Retina poses through Aspire. Existing scene suites retain lifecycle/budget gates. Ordered delivery: specify, replace assets/graph, native browser qualification, scoped checkpoint, Website qualification and Pages verification. Rollback is a reviewed source revert; no alternative scene implementation is retained.
+
+## Exact clean source checkout before image preparation
+
+REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 / TASK-BC-SOURCE-001 strengthen the existing
+REQ-BC-001/009/055 and AC-IMAGE-006 source contract: a producer's real Git HEAD
+must equal its declared source revision and its checkout must contain no tracked
+changes or unignored untracked inputs. Native Git continues honoring the actual
+repository ignore rules for generated build/test output. Check this before
+Dockerfile validation, Docker/registry startup, image construction, receipts or
+GitHub outputs. Preserve all existing manifest/config/source, run/attempt and
+owned-cleanup checks; a Git-only regression does not qualify a Docker image.
+
+Automated mapping: `SourceCheckoutIdentityTests.CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead`
+creates an actual committed temporary Git checkout, admits its real HEAD through
+production `verifySourceCheckout`/`runBounded`, adds an unignored
+`src/KeyLoad.Server/UntrackedProbe.cs`, asserts the exact existing dirty-source
+diagnostic, removes only that owned file, and successfully admits the same HEAD
+again. It also proves an ignored generated file preserves admission and that
+tracked sentinel bytes and HEAD remain unchanged. Missing Git/Node, child errors
+and unexpected rejection reasons fail; no authored Git output or image evidence.
+
+[ADR-034](../ADR/ADR-034-cluster-comparisons.md) owns the implementation contract.
+Source: `scripts/Features/BenchmarkComparisons/prepare-images.mjs`. New test paths:
+`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/SourceCheckoutIdentityTests.cs`
+and `UnitContracts/Fixtures/TemporaryGitCheckout.cs`. Root owns specification,
+review, native CI evidence and delivery; a Luna worker owns this narrowly guarded
+source/test packet. Execute the case only through the Aspire comparison entry in
+Benchmarks, alongside existing genuine image roundtrip/preflight gates. Product
+API/persistence/schema changes and new packages are N/A.
 
 ## Owner clarification: replace motion inside the existing hero, 2026-10-06
 

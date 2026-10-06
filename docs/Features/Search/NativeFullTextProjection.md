@@ -61,3 +61,22 @@ Positive/negative/edge/error cases are the table and ADR; tests use genuine
 ZoneTree/native FTS, persisted policy and real client operations. Source-present
 work is not acceptance evidence; every qualification gate remains open until its
 actual passing artifacts exist.
+
+## Native-text recovery mode dispatch repair
+
+TASK-FTS-RECOVERY-DISPATCH maps REQ/AC-FTS-003/004/005 to the existing ten
+`NativeTextProjectionProcessRecoveryTests.AcFts003004005NativeProcessCutsPreserveCanonicalCutAndRebuildSearch`
+cases. Their real CrashHost arguments remain exactly source directory, canonical
+receipt path, native fault stage, replacement flag and mode. The mode is the
+last argument; dispatch must inspect it from the end before ordinary commit-stage
+parsing. Preserve the five first-build and five replacement-build process kills,
+full canonical digest/raw-record checks, recognized cleanup, native reconstruction
+and healthy exact search assertions. No new synthetic argument-only test replaces
+these actual operation flows.
+
+Root owns the one-index repair in
+`tests/KeyLoad.CrashHost/Features/Search/Helpers/NativeTextCrashScenario.cs`,
+source review, current Release build and the Aspire recovery gate. ADR-078 freezes
+this helper protocol; product data/wire formats and dependencies do not change.
+Local native results remain development evidence. Complete exact-source Linux
+recovery and RF3 qualification remain mandatory.

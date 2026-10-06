@@ -335,9 +335,12 @@ Discovery exposes static operation documentation. Each invocation checks current
 The original 104-task plan has **0 fully accepted, 104 in progress and 0 pending**.
 KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
 fanout, recovery and movement acceptance remains open. The joined stage has
-compiler/analyzer failures under repair. The earlier local full unit suite passed
-**3,490 of 3,492 tests**, with two failures and no skips; this does not qualify
-the later source. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
+passed the local Release build with zero analyzer errors and warnings. The current
+native process-recovery suite passed **235/235**, with no skips. The latest full
+uninstrumented unit report, before the ANN test-scheduling correction, passed
+**2,762/2,763**, with one ANN construction deadline failure and no skips.
+Complete normal/scalar reruns and delivered-source Linux qualification remain
+open. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
 passes the official MCP SDK guidance case but fails the complete RF3 and release
 gates. [Checkpoint evidence](docs/implementation/partition-runtime-development-2026-10-05.json)
 keeps those failures and the remaining scalar, recovery, RF3 and scale gates explicit.

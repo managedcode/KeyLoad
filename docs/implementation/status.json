@@ -529,7 +529,7 @@
       "Directory.Packages.props",
       "global.json",
       "https://github.com/managedcode/KeyLoad/actions/runs/37163610260",
-      ".github/workflows/ci.yml",
+      ".github/workflows/build-and-tests.yml",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
@@ -721,7 +721,8 @@
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Neo4j/Neo4jTarget.cs",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/ResourceMeasurement/ClientResourceSampler.cs",
       "site/Features/BenchmarkComparisons/index.html",
-      ".github/workflows/ci.yml",
+      ".github/workflows/build-and-tests.yml",
+      ".github/workflows/benchmarks.yml",
       ".github/workflows/Features/BenchmarkComparisons/QualifySite/action.yml",
       ".github/workflows/Features/BenchmarkComparisons/DeploySite/action.yml",
       "docs/implementation/website.md",
@@ -889,6 +890,22 @@
           "measured_acceleration"
         ],
         "qualified": false
+      },
+      "latestOwnedSourceLinux": {
+        "runIds": [
+          "37536668550",
+          "37535888906"
+        ],
+        "mappedCaseCount": 18,
+        "normalPassed": 18,
+        "scalarPassed": 18,
+        "mappedSkipped": 0,
+        "ownedSourceClosureFiles": 33,
+        "currentOwnedSourceDrift": 0,
+        "wholeRecoveryPassed": 224,
+        "wholeRecoveryTotal": 235,
+        "independentCompiledImageReceiptAvailable": false,
+        "qualification": "original_Linux_mapped_cases_pass; full_recovery_and_compiled_image_task_acceptance_remain_open"
       }
     }
   },
@@ -1988,7 +2005,7 @@
     "status": "in_progress",
     "evidence": [
       "README.md",
-      ".github/workflows/ci.yml",
+      ".github/workflows/build-and-tests.yml",
       "docs/implementation/durability-audit.md"
     ]
   },
@@ -2921,7 +2938,7 @@
     "status": "in_progress",
     "evidence": [
       "README.md",
-      ".github/workflows/ci.yml",
+      ".github/workflows/build-and-tests.yml",
       "docs/implementation/durability-audit.md",
       "docs/Features/CodeQuality.md",
       "docs/ADR/ADR-033-code-quality.md",
@@ -3898,9 +3915,10 @@
         "closure": "only full mapped criteria and required evidence close an acceptance"
       },
       "codeDelivery": {
-        "currentBuild": "R107 full Release passed4,101 inputs with zero source drift/warnings/errors; log SHA25673a047613fc36140ece8fb61d7400dcb1a24a3b18d4e5af6b064aca5e384ed2f",
-        "formatter": "R107 full native dotnet format passed4,101 inputs with zero source drift",
-        "verificationScope": "local source-bound development; Linux delivered-source gates remain open"
+        "currentBuild": "R114 full native Release passed4,111 inputs with zero source drift/warnings/errors; original log SHA256c13b5af305522ac54bab113ba955c1aac8c3d1517c5b7df47e10175795412727",
+        "formatter": "R114 full native dotnet format --verify-no-changes passed4,111 inputs with zero source drift",
+        "verificationScope": "local source-bound native TUnit development; current recovery235/235 passed; complete normal/scalar, exact-source Linux/RF3/endurance/coverage gates remain open",
+        "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory"
       },
       "currentArchitectureDecisions": {
         "reviewed": 111,
@@ -3913,11 +3931,11 @@
       "nativeQualification": {
         "physicalNativeId8Omission": "passed",
         "physicalRF3Id7MissingFieldFlow": "open",
-        "functionalCoverageAndCRAP": "open; R104 unfiltered binary is ineligible because native performance children can contribute. R107 focused functional binaries are partial evidence only; full source-bound coverage and CRAP remain unmeasured",
+        "functionalCoverageAndCRAP": "Open and unmeasured. Benchmark/comparison cases are physically transferred; R111 complete functional native census failed one ANN deadline. The private five-group inventory requires successful current normal/scalar census, exact CLR/MTP identities, owning REQ/AC mappings and the complete sixteen-module/RF3-server cohort before merge.",
         "scalarRecoveryRF3AndLinuxDelivery": "open",
         "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
         "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
-        "completeUnit": "Prior R104 actual Aspire full unit:4,044 executed,4,023 passed,21 failed,zero skipped and source/assembly drift. R107 focused ClusterRouting218/218 and fresh diagnostic1/1 passed; native saga4/5 failed. These are separate focused runs, not a complete suite. Full unfiltered ordinary unit rerun pending, separately from functional coverage.",
+        "completeUnit": "R111 full native uninstrumented unit: 2,763 executed, 2,762 passed, one ANN construction deadline failure, zero skips/source/assembly drift. The six existing heavyweight ANN flows now use native unkeyed isolation with identical bodies/corpora/budgets; fresh complete normal/scalar same-image reruns remain pending. Focused unchanged AdaptiveFilteredPlanner 6/6 is separate development evidence.",
         "focusedCurrentFixtures": {
           "ClusterRouting": "R107218/218 passed; TRX SHA256145e4fa04cebed567b59497f4d80b48429c1b6ef14510b48b1adb6f44b88087c",
           "ColdDiagnostics": "R107 fresh-process1/1 passed; TRX SHA2569aa036e548dff39a9c999c8bfce173d5bc60ea8e2f25d506303446c678225666",
@@ -3926,7 +3944,20 @@
           "ReaderCapability": "R1062/2 passed",
           "NativeSagaJobs": "R1074/5 passed; TRX SHA2568971ea143c97d2718bc067d5e9a9cd3db5a10f6bd747a5c7e2ccbc236a57b0e2. Background journal work-loop method attribution needs observed confirmation; exact coordinator method edges did not repair it",
           "sourceAndAssemblyDrift": 0,
-          "skipped": 0
+          "skipped": 0,
+          "MaterializerLifecycle": "R113 native 4/4 passed; real converted journal fault preserves same terminal task/exception, committed-prefix reopen and physical-owner closure; TRX SHA25614d8ccfbc9ff7129310f251e6078adc8b1da9222e2d77c0dc0f570a8c30657a1"
+        },
+        "currentRecovery": {
+          "runner": "native_TUnit_test_owned_Aspire_entry",
+          "passed": 235,
+          "total": 235,
+          "failed": 0,
+          "skipped": 0,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "trxSha256": "d97c0d9cd6a80a5537b85ea1e63d53dd9775f54ff6fad98c5253525d90ddd1b1",
+          "logSha256": "8a0de4f8a87608f95ab6dc8ee4a814a9051434d8cef64336857b1e4c2cc454c1",
+          "qualification": "local_native_process_recovery_development_only; exact_source_Linux_RF3_endurance_and_power_loss_gates_remain_open"
         }
       }
     }

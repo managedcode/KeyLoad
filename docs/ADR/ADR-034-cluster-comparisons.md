@@ -151,3 +151,31 @@ Keep original measurement artifacts immutable; no legacy reader, previous-format
 path, alternate topology, weaker bound or host-process fallback is authorized.
 Source implementation, local development and a pushed commit alone do not mark
 this decision Implemented or establish a performance winner.
+
+## Exact clean source checkout regression
+
+TASK-BC-SOURCE-001 implements REQ-BC-SOURCE-001 / AC-BC-SOURCE-001 in the owning
+feature and retains AC-IMAGE-006. Native `verifySourceCheckout` must reject
+unignored untracked files as well as tracked changes before Dockerfile checks,
+Docker/registry allocation, receipts and GitHub outputs. Use Git's existing
+porcelain status with `--untracked-files=all`, retaining repository ignore rules,
+revision equality, bounded child execution and the existing exact diagnostics.
+
+Ordered stages: root freezes this contract; a Luna worker adds the real
+`SourceCheckoutIdentityTests.CleanSourceIdentityRejectsUntrackedInputAndRecoversWithoutChangingHead`
+operation and its `TemporaryGitCheckout` fixture under
+`KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/{Cases,Fixtures}`;
+root reviews and joins the minimal `prepare-images.mjs` change, builds the
+solution, then verifies this case through Aspire in Benchmarks and retains the
+original native Git/image results. A real committed temporary checkout must
+admit, reject an added untracked source only for the expected dirty diagnostic,
+recover after removing that owned file, and preserve HEAD/tracked bytes. A
+generated ignored file remains admissible. Existing genuine image export/import
+and preflight gates remain mandatory; no Git-only result establishes image
+identity or GitHub qualification.
+
+No schema migration or rollout path is introduced. If qualification fails, fix
+the narrow source/check pair while retaining original evidence; do not keep an
+alternate permissive reader. Root owns docs, integration, source evidence and
+delivery; worker edits are confined to the three owned paths. No dependency,
+Dockerfile, RF3, receipt-field or public operation change is authorized here.

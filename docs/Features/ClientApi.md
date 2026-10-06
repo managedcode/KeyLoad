@@ -223,3 +223,22 @@ transport does not capture a session principal. The .NET SDK's missing Backup an
 SetDispatch are explicit parity work, not completed methods.
 
 Canonical map: Client/Server `Features/ClientApi/` transport/adapters та matching IntegrationTests/UnitTests helpers; business operations/tests зберігають owning slice name. CLI — operator/worker entry point; окремий frontend N/A. Shared contracts і host composition мають одного integration owner. Freeze protocol → real parity tests → adapters → rollout/version contract → exact GitHub TUnit/recovery/Docker RF3 evidence. Existing source/test names не виконують planned MCP/agent AC; timeout не означає rollback.
+
+TASK-MCP-NATIVE-SCHEMA-EVIDENCE retains the original official-client input schemas
+needed to diagnose AC-MCP-001 / REQ/AC-CLIENT-006. The existing discovery,
+incoming-graph and partition-query RF3 cases capture only their exact shortest-path,
+incoming-graph and partition-query `Tool.InputSchema` objects before assertions.
+Keep every strict type/nullability/required-member/item/hint assertion unchanged.
+Each UTF-8 schema is at most 64 KiB; its sidecar is at most 1 KiB and contains
+only canonical tool name, official SDK capture source, actual Aspire RF3/node1
+context, owned filename, byte count and SHA-256. Three schema payloads total at
+most 192 KiB. Unknown tool names, non-object schemas, excess bounds and failed
+writes fail; no credentials, caller data or private inventory is recorded.
+
+ADR-039 freezes the test-only helper
+`tests/KeyLoad.IntegrationTests/Features/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
+and the three existing case call sites. Use the existing repository-root helper
+and uploaded `artifacts/qualification/mcp-schema-evidence/` ownership. Root owns
+contract, review, native RF3 evidence and delivery; a Luna worker prepares the
+guarded helper/calls. Schema capture alone is diagnostic evidence, not a passing
+operation or an authorization to relax assertions or alter production schemas.

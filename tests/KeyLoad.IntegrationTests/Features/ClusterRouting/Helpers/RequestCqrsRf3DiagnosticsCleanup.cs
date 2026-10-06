@@ -18,6 +18,7 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     private readonly Guid waveId;
     private readonly Task[] subscriptions;
     private readonly Action<RequestCqrsLifecycleStage>? failureObserver;
+    private readonly RequestCqrsResourceCompletionEvidence completionEvidence = new();
     private Task? disposalTask;
     private bool fallbackRequested;
 
@@ -39,7 +40,8 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     internal RequestCqrsCaptureLifecycleSnapshot ReadLifecycleSnapshot()
         => new(StatusFor(RequestCqrsRf3Protocol.Node1), StatusFor(RequestCqrsRf3Protocol.Node2),
             StatusFor(RequestCqrsRf3Protocol.Node3),
-            lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, fallbackRequested);
+            lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, fallbackRequested,
+            completionEvidence.Snapshot());
 
     private TaskStatus? StatusFor(string node)
     {
@@ -77,8 +79,17 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
         try
         {
             CompleteResourceStreams(failures);
-            await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => drain.WaitAsync(cancellationToken),
-                failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
+            RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.StartDrain(
+                cancellationToken.IsCancellationRequested, StatusFor(RequestCqrsRf3Protocol.Node1),
+                StatusFor(RequestCqrsRf3Protocol.Node2), StatusFor(RequestCqrsRf3Protocol.Node3)),
+                failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(async () =>
+            {
+                await drain.WaitAsync(cancellationToken).ConfigureAwait(false);
+                completionEvidence.ReturnDrain();
+            }, failures, stage => completionEvidence.ObserveDrainFailure(stage, StatusFor,
+                failureObserver, cancellationToken),
+                RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
         }
         finally
         {
@@ -108,19 +119,28 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
     private async Task JoinFallbackAsync(Task drain, List<Exception> failures)
     {
         if (drain.IsCompleted)
-        { return; }
+        {
+            completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
+                failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
+            return;
+        }
         fallbackRequested = true;
+        RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.EnterFallback(
+            lifetime.IsCancellationRequested), failures, failureObserver,
+            RequestCqrsLifecycleStage.CaptureFallbackCancellation);
         await ObserveCleanupAsync(lifetime.CancelAsync, failures,
             RequestCqrsLifecycleStage.CaptureFallbackCancellation).ConfigureAwait(false);
         await ObserveCleanupAsync(() => drain, failures,
             RequestCqrsLifecycleStage.CaptureFallbackJoin).ConfigureAwait(false);
+        completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
+            failureObserver, RequestCqrsLifecycleStage.CaptureFallbackJoin);
     }
 
     private void CompleteResourceStreams(List<Exception> failures)
     {
         foreach (var resource in resources)
         {
-            RequestCqrsLifecycleFailureObserver.Observe(() => logger.Complete(resource), failures,
+            completionEvidence.CompleteResourceStream(logger, resource, StatusFor, failures,
                 failureObserver, CompletionStage(resource.Name));
         }
     }

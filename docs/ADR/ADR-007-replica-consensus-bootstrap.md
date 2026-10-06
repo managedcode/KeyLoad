@@ -83,6 +83,21 @@ faults have source-review evidence only unless an exact original runtime receipt
 proves their execution; no forced fatal failure or successful settlement is
 invented.
 
+TASK-REP-MATERIALIZER-FAULT-ORACLE implements AC-REP-002/004/051 in the existing
+real ZoneTree lifecycle case and fixture. Preserve production fault propagation:
+JournalFlushed failure fences the waiter with RecoveryRequired, while repeated
+memoized disposal observes the same original UnknownWriteOutcome after terminal
+cleanup. Verify the borrowed protocol gate, physical owner closure and committed
+prefix reopen. Only the exact already-asserted terminal exception may be
+acknowledged by fixture cleanup; every other scenario or cleanup failure remains
+visible. Implement the test oracle, then its narrow fixture acknowledgment, review
+the normal/faulted paths, and run native recovery before exact-source Linux
+qualification. Root owns contract/integration; the recovery worker owns only
+ReplicaMaterializerLifecycleTests.cs and ReplicaMaterializerLifecycleFixture.cs
+under RecoveryTests/Features/ClusterReplication. No production, format, dependency
+or topology change is involved; reverting the test correction preserves every
+durable cut. Existing process-kill proof does not qualify power-loss or RF3.
+
 Local development execution, when useful, uses the canonical Aspire-owned test
 entry and is labeled development evidence. Only exact-source Linux GitHub
 Recovery/RF3 jobs qualify delivered behavior. No test-only result or historical

@@ -397,8 +397,8 @@ flowchart LR
     Receipt --> Cleanup[Existing owned cleanup]
 ```
 
-Slice ownership: one worker owns only UnitTests/Features/BenchmarkComparisons/
-ComparisonHostProcess.cs and new cohesive capture/diagnostic/test helpers;
+Slice ownership: one worker owns only ComparisonTests/Features/BenchmarkComparisons/
+UnitContracts/Processes/ComparisonHostProcess.cs and new cohesive capture/diagnostic/test helpers;
 root owns shared documentation and integration. New genuine native-shaped
 projection/privacy and real-stream prefix/EOF cases map AC-TEST-009.1–003;
 the existing real host cases map009.4. Exact delivered-SHA full GitHub
@@ -444,7 +444,7 @@ exact expected cancellation exception. CQ016's accepted B3 contract and graph
 govern source review and genuine GitHub admission/cancellation regressions;
 environmental error branches retain the explicit full-source audit supplement.
 
-Актори: contributor, CI runner, release owner і evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/ci.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), dependency survey (report removed from repository), [qualification status](../implementation/status.json). Product runtime N/A: infrastructure запускає та перевіряє справжній продукт, не підміняє його demo engine.
+Актори: contributor, CI runner, release owner і evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/build-and-tests.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), dependency survey (report removed from repository), [qualification status](../implementation/status.json). Product runtime N/A: infrastructure запускає та перевіряє справжній продукт, не підміняє його demo engine.
 
 | Вимога | Acceptance / flows | Test / evidence mapping |
 |---|---|---|
@@ -475,3 +475,13 @@ preparation; TASK-TEST-PIPELINE-003 verifies compilation, discovery, unchanged
 assertions, formatting and governance. The implementation contract is
 [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md). No database API, persisted
 format, replication or authorization contract changes.
+
+TASK-TEST-PIPELINE-EXCLUSIVE-HELPERS completes REQ/AC-TEST-PIPELINE-001 by moving
+the exclusively benchmark-consumed `TestOrchestrationConfigurationKeys.cs` and
+`WorkflowDatabaseGroups.cs` into ComparisonTests
+`Features/BenchmarkComparisons/UnitContracts/Contracts/` and `UnitContracts/Models/`.
+Preserve their complete bytes/namespaces; remove only their two comparison-project
+Compile links. `TestElapsedClock` keeps its one shared source because functional
+unit cases use it. ADR-074 fixes source ownership and root/Luna join roles; source
+byte/hash/reference review plus the existing canonical build/discovery gates
+verify this structural continuation without artificial structure-only tests.

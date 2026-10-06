@@ -25,6 +25,7 @@ internal sealed class RequestCqrsLifecycleEvidence
     private CancellationToken waveToken;
     private bool heldWriteObserved;
     private bool persistedRevocationEntered;
+    private readonly RequestCqrsResourceCompletionEvidence completionEvidence = new();
 
     internal void SetStage(RequestCqrsLifecycleStage value) => stage = value;
     internal void SetTokens(CancellationToken caller, CancellationToken parent, CancellationToken wave)
@@ -34,6 +35,10 @@ internal sealed class RequestCqrsLifecycleEvidence
     internal void BindConsumer(RequestCqrsRf3DiagnosticsIndependentConsumer value) => consumer = value;
     internal void MarkHeldWriteObserved() => heldWriteObserved = true;
     internal void MarkPersistedRevocationEntered() => persistedRevocationEntered = true;
+
+    internal void RecordScopeCompletion(RequestCqrsScopeCompletionOwner owner, string node,
+        RequestCqrsCompletionCallState state, TaskStatus? taskStatus)
+        => completionEvidence.RecordScopeCompletion(owner, node, state, taskStatus);
 
     internal void RecordReadiness(string node, RequestCqrsNodeReadinessOutcome outcome)
     {
@@ -59,7 +64,8 @@ internal sealed class RequestCqrsLifecycleEvidence
             capture?.DrainCancellationRequested ?? false, capture?.FallbackRequested ?? false,
             observerState?.LifetimeCancellationRequested ?? false,
             consumerState?.LifetimeCancellationRequested ?? false,
-            readiness[0], readiness[1], readiness[2], heldWriteObserved, persistedRevocationEntered);
+            readiness[0], readiness[1], readiness[2], heldWriteObserved, persistedRevocationEntered,
+            completionEvidence.ScopeSnapshot(), capture?.Completion ?? default);
     }
 
     internal void RecordFirstFailure()
@@ -127,7 +133,7 @@ internal sealed class RequestCqrsLifecycleEvidence
     }
 
     private static string Format(RequestCqrsLifecycleSnapshot value)
-        => $"s={value.Stage};c1={Status(value.CaptureNode1)};c2={Status(value.CaptureNode2)};c3={Status(value.CaptureNode3)};a={Status(value.AdmissionMove)};i={Status(value.IndependentConsumerMove)};caller={Bit(value.CallerCancellationRequested)};parent={Bit(value.ParentCancellationRequested)};wave={Bit(value.WaveCancellationRequested)};capture={Bit(value.CaptureCancellationRequested)};drain={Bit(value.DrainCancellationRequested)};fallback={Bit(value.CaptureFallbackRequested)};observer={Bit(value.ObserverCancellationRequested)};consumer={Bit(value.ConsumerCancellationRequested)};r1={value.Node1Readiness};r2={value.Node2Readiness};r3={value.Node3Readiness};held={Bit(value.HeldWriteObserved)};revoke={Bit(value.PersistedRevocationEntered)}";
+        => $"s={value.Stage};c1={Status(value.CaptureNode1)};c2={Status(value.CaptureNode2)};c3={Status(value.CaptureNode3)};a={Status(value.AdmissionMove)};i={Status(value.IndependentConsumerMove)};caller={Bit(value.CallerCancellationRequested)};parent={Bit(value.ParentCancellationRequested)};wave={Bit(value.WaveCancellationRequested)};capture={Bit(value.CaptureCancellationRequested)};drain={Bit(value.DrainCancellationRequested)};fallback={Bit(value.CaptureFallbackRequested)};observer={Bit(value.ObserverCancellationRequested)};consumer={Bit(value.ConsumerCancellationRequested)};r1={value.Node1Readiness};r2={value.Node2Readiness};r3={value.Node3Readiness};held={Bit(value.HeldWriteObserved)};revoke={Bit(value.PersistedRevocationEntered)};{RequestCqrsResourceCompletionEvidence.Format(value.ScopeCompletion, value.CleanupCompletion)}";
 
     private static string Status(TaskStatus? status) => status switch
     {

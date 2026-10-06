@@ -71,6 +71,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         var artifact = await scope.CompleteAndReadArtifactAsync(cancellationToken).ConfigureAwait(false);
         await RequestCqrsRf3DiagnosticsArtifactAssertions.AssertAsync(artifact, scope.WaveId, 32)
             .ConfigureAwait(false);
+        await AssertCompletedCaptureObservationsAsync(scope.ReadLifecycleSnapshot()).ConfigureAwait(false);
     }
 
     private static async Task VerifyIndependentNativeConsumerAsync(RequestCqrsRf3DiagnosticsTestScope scope,
@@ -91,6 +92,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
             scope.OwnedArtifactPath, cancellationToken).ConfigureAwait(false);
         await RequestCqrsRf3DiagnosticsArtifactAssertions.AssertAsync(artifact, scope.WaveId, 1)
             .ConfigureAwait(false);
+        await AssertCompletedCaptureObservationsAsync(scope.ReadLifecycleSnapshot()).ConfigureAwait(false);
     }
 
     private static async Task VerifySuccessEvidenceLifecycleAsync(RequestCqrsRf3DiagnosticsTestScope scope,
@@ -108,6 +110,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         await Assert.That(lifecycle.Node1).IsEqualTo(TaskStatus.RanToCompletion);
         await Assert.That(lifecycle.Node2).IsEqualTo(TaskStatus.RanToCompletion);
         await Assert.That(lifecycle.Node3).IsEqualTo(TaskStatus.RanToCompletion);
+        await AssertCompletedCaptureObservationsAsync(scope.ReadLifecycleSnapshot()).ConfigureAwait(false);
     }
     private static async Task VerifyExactCallerCancellationAsync()
     {
@@ -130,6 +133,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         await Assert.That(snapshot.ObserverCancellationRequested).IsTrue();
         await Assert.That(snapshot.AdmissionMove).IsEqualTo(TaskStatus.Canceled);
         await AssertThreeCapturesCompletedAsync(snapshot).ConfigureAwait(false);
+        await AssertCompletedCaptureObservationsAsync(snapshot).ConfigureAwait(false);
         await Assert.That(File.Exists(scope.OwnedArtifactPath)).IsFalse();
         var context = lifecycle.FormatBoundedContext();
         await Assert.That(context.Contains("first{s=SubscriberAdmission", StringComparison.Ordinal)).IsTrue();
@@ -161,6 +165,16 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         lifecycle.RecordTerminal();
         var terminal = lifecycle.Snapshot();
         await AssertThreeCapturesCompletedAsync(terminal).ConfigureAwait(false);
+        await Assert.That(beforeCleanup.ScopeCompletion.ExplicitNode1.State)
+            .IsEqualTo(RequestCqrsCompletionCallState.Returned);
+        await Assert.That(beforeCleanup.ScopeCompletion.ExplicitNode1.StatusAtStart.HasValue).IsTrue();
+        await Assert.That(beforeCleanup.ScopeCompletion.ExplicitNode1.StatusAtReturn.HasValue).IsTrue();
+        await AssertReturnedCallAsync(terminal.ScopeCompletion.BatchNode2).ConfigureAwait(false);
+        await AssertReturnedCallAsync(terminal.ScopeCompletion.BatchNode3).ConfigureAwait(false);
+        await AssertReturnedCallAsync(terminal.CleanupCompletion.Node1).ConfigureAwait(false);
+        await AssertReturnedCallAsync(terminal.CleanupCompletion.Node2).ConfigureAwait(false);
+        await AssertReturnedCallAsync(terminal.CleanupCompletion.Node3).ConfigureAwait(false);
+        await Assert.That(terminal.CleanupCompletion.Drain.OriginalJoined).IsTrue();
         await Assert.That(terminal.CaptureNode2).IsNotEqualTo(beforeCleanup.CaptureNode2);
         await Assert.That(terminal.CaptureNode3).IsNotEqualTo(beforeCleanup.CaptureNode3);
         await Assert.That(File.Exists(scope.OwnedArtifactPath)).IsFalse();
@@ -173,6 +187,28 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         await Assert.That(snapshot.CaptureNode1).IsEqualTo(TaskStatus.RanToCompletion);
         await Assert.That(snapshot.CaptureNode2).IsEqualTo(TaskStatus.RanToCompletion);
         await Assert.That(snapshot.CaptureNode3).IsEqualTo(TaskStatus.RanToCompletion);
+    }
+
+    private static async Task AssertCompletedCaptureObservationsAsync(RequestCqrsLifecycleSnapshot snapshot)
+    {
+        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode1).ConfigureAwait(false);
+        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode2).ConfigureAwait(false);
+        await AssertReturnedCallAsync(snapshot.ScopeCompletion.BatchNode3).ConfigureAwait(false);
+        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node1).ConfigureAwait(false);
+        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node2).ConfigureAwait(false);
+        await AssertReturnedCallAsync(snapshot.CleanupCompletion.Node3).ConfigureAwait(false);
+        await Assert.That(snapshot.CleanupCompletion.Drain.Started).IsTrue();
+        await Assert.That(snapshot.CleanupCompletion.Drain.TokenCanceledAtStart).IsFalse();
+        await Assert.That(snapshot.CleanupCompletion.Drain.Returned).IsTrue();
+        await Assert.That(snapshot.CleanupCompletion.Drain.OriginalJoined).IsTrue();
+        await Assert.That(snapshot.CleanupCompletion.Drain.FallbackEntered).IsFalse();
+    }
+
+    private static async Task AssertReturnedCallAsync(RequestCqrsCompletionCallSnapshot call)
+    {
+        await Assert.That(call.State).IsEqualTo(RequestCqrsCompletionCallState.Returned);
+        await Assert.That(call.StatusAtStart.HasValue).IsTrue();
+        await Assert.That(call.StatusAtReturn.HasValue).IsTrue();
     }
 
     private static bool IsPending(TaskStatus? status) => status is TaskStatus.Created

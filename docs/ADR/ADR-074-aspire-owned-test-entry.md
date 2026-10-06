@@ -32,6 +32,17 @@ and rejection, transferred discovery inventory, solution build, formatter,
 governance and Aspire functional suites. Failed gates remain open; reverting
 this boundary requires owner direction.
 
+TASK-TEST-PIPELINE-EXCLUSIVE-HELPERS completes that ownership boundary without
+behavior changes. Move the byte-identical benchmark-only
+`TestOrchestrationConfigurationKeys.cs` and `WorkflowDatabaseGroups.cs` into
+ComparisonTests `Features/BenchmarkComparisons/UnitContracts/Contracts/` and
+`UnitContracts/Models/` respectively, preserving their namespaces. Remove their
+two linked Compile entries from `KeyLoad.ComparisonTests.csproj`; the SDK includes
+the new owned paths. Keep the genuinely shared `TestElapsedClock` link. Root owns
+contract, join, solution build and evidence; a Luna worker owns only those two
+file relocations and the comparison project change. No new tests are needed for
+a byte-preserving move; retain existing discovery/assertions and required gates.
+
 ## Decision and boundaries
 
 `KeyLoad.AppHost --KeyLoadTests:Suite=<suite>` composes one actual Aspire

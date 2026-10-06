@@ -22,7 +22,10 @@ CQRS. No per-edge RPC or borrowed storage value escapes the gate.
 `GraphShortestPathRequest` version1 generated IDs: 0 Version, 1 Partition,
 2 Graph, 3 From, 4 To, 5 MaxDepth=16, 6 MaxVertices=1000, 7 MaxEdges=5000,
 8 optional immutable Labels. Bounds: depth0..16, vertices1..10000, examined
-edges1..50000, at most64 canonical nonempty labels. Null/empty Labels admits all.
+edges1..50000, at most64 canonical nonempty labels. Null/empty Labels admits all. A nonempty label filter is field use of graph
+`/label`: the persisted principal must hold that field policy's `RawUseGrant`;
+a separate `RawReadGrant` does not authorize filtering. Without the use grant,
+the operation returns `PermissionDenied` before adjacency traversal.
 Version/shape/identifier/label errors are Validation; invalid numeric caps are
 BudgetExceeded; a foreign endpoint partition is UnsupportedCapability.
 Existing request/read/result byte caps, deadline and cancellation apply.
@@ -64,7 +67,7 @@ foreign endpoint, which fails UnsupportedCapability.
 | Requirement | Measurable acceptance and automated mapping |
 |---|---|
 | REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then native ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
-| REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. Labels require existing graph field-use authority; edge AttributesJson is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux RF3 failover cases exclude stale/hidden payload. |
+| REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux RF3 failover cases exclude stale/hidden payload. |
 | REQ-GRAPH-009: finite node/edge/time/byte work | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation/deadline during every frontier, scan, dereference, predecessor walk and output. Retention is admitted before insertion; exact output includes protocol metadata. Real during-work cancellation and healthy follow-up preserve committed position. |
 | REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire RF3 SDK/official MCP preserve one request grain and native CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
 

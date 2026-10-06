@@ -30,6 +30,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         ?? throw new InvalidOperationException("The owned artifact path is absent.");
     internal RequestCqrsRf3DiagnosticsIndependentConsumer IndependentConsumer => independentConsumer
         ?? throw new InvalidOperationException("The native independent consumer is absent.");
+    internal RequestCqrsLifecycleSnapshot ReadLifecycleSnapshot() => lifecycle.Snapshot();
 
     internal Task WaitForSubscriberStateAsync(bool expected)
     {
@@ -126,9 +127,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
         var failures = new List<Exception>();
         lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
         streamOwner?.CompleteResourceStreams(failures);
+        await DisposeDiagnosticsAsync(failures).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.IndependentConsumerJoin);
         await DisposeIndependentConsumerAsync(failures).ConfigureAwait(false);
-        await DisposeDiagnosticsAsync(failures).ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.ObserverJoin);
         await RequestCqrsRf3DiagnosticsObserverCleanup.DisposeAsync(subscriberObserver, failures,
                 lifecycle.RecordOwnerFailure)

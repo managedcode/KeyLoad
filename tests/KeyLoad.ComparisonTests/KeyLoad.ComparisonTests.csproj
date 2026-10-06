@@ -11,8 +11,6 @@
     <Compile Include="../KeyLoad.UnitTests/Features/ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" Link="Features/ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" />
     <Compile Include="../KeyLoad.UnitTests/Features/InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" Link="Features/InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" />
     <Compile Include="../KeyLoad.UnitTests/Features/TestInfrastructure/Helpers/TestElapsedClock.cs" Link="Features/TestInfrastructure/Helpers/TestElapsedClock.cs" />
-    <Compile Include="../KeyLoad.UnitTests/Features/TestInfrastructure/Helpers/TestOrchestrationConfigurationKeys.cs" Link="Features/TestInfrastructure/Helpers/TestOrchestrationConfigurationKeys.cs" />
-    <Compile Include="../KeyLoad.UnitTests/Features/RepositoryGovernance/Models/WorkflowDatabaseGroups.cs" Link="Features/RepositoryGovernance/Models/WorkflowDatabaseGroups.cs" />
     <ProjectReference Include="../../benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />

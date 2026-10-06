@@ -6,7 +6,7 @@ internal sealed class PackedAnnReciprocalInsertionTests
     public Task SmallDotProductAdjacencyIsUniqueOrderedAndDeterministic()
         => PackedAnnReciprocalInsertionAssertions.AssertCorpusAsync(128, 8);
 
-    [Test, NotInParallel(PackedAnnBuildResources.AdmissionKey)]
+    [Test, NotInParallel]
     public Task TenThousandDotProductAdjacencyIsUniqueOrderedAndDeterministic()
         => PackedAnnReciprocalInsertionAssertions.AssertCorpusAsync(
             PackedAnnTestData.QualityRecordCount, 64);

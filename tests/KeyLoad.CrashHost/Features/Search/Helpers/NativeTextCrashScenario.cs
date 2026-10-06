@@ -37,7 +37,7 @@ internal static class NativeTextCrashScenario
         const int TryRunAsyncArgsComponentIndex = 3;
 
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length != ArgumentCount || !string.Equals(args[ModeArgumentFromEnd], Mode, StringComparison.Ordinal))
+        if (args.Length != ArgumentCount || !string.Equals(args[^ModeArgumentFromEnd], Mode, StringComparison.Ordinal))
         {
             return false;
         }

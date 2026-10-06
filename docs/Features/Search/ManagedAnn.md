@@ -279,25 +279,35 @@ The original fb586 Linux scalar report contains3260/3263 passes and three fresh
 Its testcase spans reach16 concurrent cases. Contention is a hypothesis; these
 observations do not prove a production algorithm defect or performance gain.
 
-REQ-ANN-013 / AC-ANN-013: heavyweight10,000-row packed ANN fixture builds share
-one native keyed TUnit admission resource. The same complete normal/scalar suites
+REQ-ANN-013 / AC-ANN-013, refined 2026-10-07: the six existing heavyweight
+10,000-row packed ANN fixture flows use native unkeyed `[NotInParallel]` so each
+runs alone within its TUnit process. Native keyed admission excludes only tests
+sharing its key and permits overlap with unrelated tests, as defined by the
+[TUnit parallelism contract](https://tunit.dev/docs/execution/parallelism/).
+The same complete normal/scalar suites
 retain all cases,10,000-row corpora,100-query quality cells, construction options,
 30-second operation deadlines, work/memory bounds and independent assertions.
-The key governs these test fixtures only; it changes no product admission,
-parallel execution contract, default or measured performance claim.
+This scheduling applies only to these six test flows, with no assembly-wide
+serialization or change to explicit concurrency tests, product admission,
+parallel execution contracts, defaults or measured performance claims.
 
 TASK-ANN-TEST-ADMISSION: root owns this freeze and ADR-019 join; the Luna worker
-owns only a new UnitTests Search/Helpers/PackedAnnBuildResources.cs named key and
-native NotInParallel attributes on the two10,000-row AdaptiveFilteredPlanner
-methods, the wide PackedAnnBudget method, and the10,000-row PackedAnnRecall and
-PackedAnnFilter methods. Existing test bodies remain byte-identical. Production,
-shared fixtures, AppHost, global concurrency, budgets, packages and CI receive no
+owns only native unkeyed NotInParallel attributes on the two10,000-row
+AdaptiveFilteredPlanner methods, the wide PackedAnnBudget method, the
+10,000-row PackedAnnRecall and PackedAnnFilter methods, and the representative
+PackedAnnReciprocalInsertion flow. Remove the unused
+Search/Helpers/PackedAnnBuildResources.cs after its six keyed references are
+replaced. Existing test bodies remain byte-identical. Production, shared
+fixtures, AppHost, global runner settings, budgets, packages and CI receive no
 worker edits. Root verifies the private base/post-hash packet, then full strict
-build/format/governance and actual Aspire normal/scalar suites. Exact-source Linux
+build/format/governance and actual native TUnit normal/scalar suites. Exact-source Linux
 originals determine whether construction and the previously unreached assertions
 pass. Failure retains the original diagnostics and calls for actual profiling;
-raising deadlines or shrinking corpora is not a fallback. Rollback removes the
-key and its attributes; API/data migration and frontend are N/A for this test-only
+raising deadlines or shrinking corpora is not a fallback. The unchanged R111
+full unit census failed the selectivity build at its original deadline, while
+the unchanged focused flow passed; this suggests scheduling sensitivity and
+does not establish the failure's cause. Rollback restores only the previous
+test scheduling; API/data migration and frontend are N/A for this test-only
 resource contract.
 
 ## Accepted construction observation contract, 2026-10-05
@@ -305,7 +315,7 @@ resource contract.
 REQ-ANN-014 / AC-ANN-014: all seven existing synchronous 10,000-row, 16-component
 packed builds emit a bounded test-scoped observation after that same call settles,
 including failed builds. Retain the caller's actual `AnnWorkBudget`, unchanged
-corpus, options, work cap, deadline, admission key and assertions. Invoke Build
+corpus, options, work cap, deadline, native scheduling from REQ/AC-ANN-013 and assertions. Invoke Build
 exactly once on the same thread; return its original index or preserve its
 original failure. Capture Stopwatch ticks and current-thread allocated bytes
 immediately around Build, excluding formatting, output, loading and assertions.

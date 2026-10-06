@@ -72,7 +72,7 @@ internal sealed class ReplicaMaterializerLifecycleTests
         return receipts.Select(receipt => receipt.Terminal).ToArray();
     }
 
-    /// <summary>The real provider's converted journal failure fences an existing waiter and still permits complete materializer cleanup.</summary>
+    /// <summary>The real provider's journal failure fences the waiter and preserves its terminal fault after cleanup.</summary>
     [Test]
     public async Task ConvertedDurableJournalFailureFencesWaiterAndReopensCommittedPrefix()
     {
@@ -89,9 +89,15 @@ internal sealed class ReplicaMaterializerLifecycleTests
             var terminal = fixture.Materializer.DisposeAsync().AsTask();
             var concurrent = fixture.Materializer.DisposeAsync().AsTask();
             await Assert.That(concurrent).IsSameReferenceAs(terminal);
-            await Task.WhenAll(terminal, concurrent).WaitAsync(linked.Token);
-            await Assert.That(terminal.IsCompletedSuccessfully).IsTrue();
-            await Assert.That(concurrent.IsCompletedSuccessfully).IsTrue();
+            var terminalFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => terminal.WaitAsync(linked.Token));
+            await Assert.That(terminalFailure!.Code).IsEqualTo(ErrorCode.UnknownWriteOutcome);
+            var repeated = fixture.Materializer.DisposeAsync().AsTask();
+            await Assert.That(repeated).IsSameReferenceAs(terminal);
+            var repeatedFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => repeated.WaitAsync(linked.Token));
+            await Assert.That(repeatedFailure).IsSameReferenceAs(terminalFailure!);
+            await Assert.That(terminal.IsFaulted).IsTrue();
+            await Assert.That(concurrent.IsFaulted).IsTrue();
+            fixture.AcknowledgeAssertedTerminalFailure(terminalFailure!);
             await AssertBorrowedGateAsync(fixture.Materializer, fixture.Log);
             await fixture.AssertReopenedAsync(ReplicaMaterializerLifecycleFixture.AppliedCut);
             await AssertOwnerClosedGateAsync(fixture.Log);

@@ -44,8 +44,12 @@ internal static class PartitionQueryRf3Assertions
         await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
         await Assert.That(actual.Json).IsEqualTo(expected.Json);
         await Assert.That(actual.Redacted).IsEqualTo(expected.Redacted);
-        await Assert.That(actual.RedactedFields).IsNull();
-        await Assert.That(expected.RedactedFields).IsNull();
+        await Assert.That(actual.RedactedFields.HasValue).IsTrue();
+        await Assert.That(actual.RedactedFields!.Value.IsDefault).IsFalse();
+        await Assert.That(actual.RedactedFields!.Value.IsEmpty).IsTrue();
+        await Assert.That(expected.RedactedFields.HasValue).IsTrue();
+        await Assert.That(expected.RedactedFields!.Value.IsDefault).IsFalse();
+        await Assert.That(expected.RedactedFields!.Value.IsEmpty).IsTrue();
     }
 
     private static async Task AssertRowAsync(PartitionQueryRowV1 actual,

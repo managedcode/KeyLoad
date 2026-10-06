@@ -218,3 +218,20 @@ records the full Release build and formatter, actual Aspire native unit26/26 and
 process-recovery10/10 results, source/binary/report hashes, and the real package
 signature check. These bounded filtered development suites do not qualify the
 complete Linux/RF3 release gates or close KL-029/039/097.
+
+## Native-text recovery dispatch correction
+
+TASK-FTS-RECOVERY-DISPATCH implements the existing REQ/AC-FTS-003/004/005
+process-cut contract. The private CrashHost protocol has exactly five arguments:
+canonical source directory, receipt path, native fault stage, replacement flag,
+and mode. `NativeTextCrashScenario.TryRunAsync` reads the mode from the end of
+that array before the ordinary commit-stage fallback. The former forward index
+missed the native mode and sent the receipt path into commit-stage parsing.
+
+Root freezes this protocol, repairs only that index in the owning CrashHost
+Search helper, reviews it, builds current Release source and runs all ten existing
+first/replacement native-cut cases through Aspire recovery. Their real kill,
+complete canonical digest/bytes, recognized cleanup, rebuild and healthy search
+oracles remain unchanged. No package, canonical format, public operation,
+migration or alternate dispatcher is introduced. Retain original failed and
+passing native receipts; local execution alone does not close Linux/RF3 gates.

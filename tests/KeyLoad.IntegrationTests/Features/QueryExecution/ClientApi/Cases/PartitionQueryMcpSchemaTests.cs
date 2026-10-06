@@ -13,6 +13,7 @@ internal sealed class PartitionQueryMcpSchemaTests(ClusterFixture fixture)
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             fixture.AdminKey, deadline.Token);
         var tool = await session.Client.DiscoverKeyLoadToolAsync(McpCallerTools.QueryPartitions, deadline.Token);
+        await NativeMcpSchemaEvidence.RetainPartitionQueryAsync(tool, deadline.Token);
         await McpDiscoveryAssertions.VerifyAsync(tool);
         await PartitionQueryMcpSchemaAssertions.VerifyAsync(tool.InputSchema, tool.OutputSchema!.Value);
     }

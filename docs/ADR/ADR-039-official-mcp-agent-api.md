@@ -298,3 +298,24 @@ request cannot pin that cut. No fake transport, direct-store proof, fixture chan
 new provider or runtime contract. This adds no persisted/public format change;
 rollback removes only these tests/helper overload together. A failure or blocked
 cluster does not qualify the EventStreams capability.
+
+## Native official-client schema evidence
+
+TASK-MCP-NATIVE-SCHEMA-EVIDENCE supports existing REQ/AC-CLIENT-006 and AC-MCP-001.
+Root freezes the bounded diagnostics contract in ClientApi. A Luna worker owns
+only new `IntegrationTests/Features/ClientApi/Helpers/NativeMcpSchemaEvidence.cs`
+and additive capture calls in existing `McpDiscoveryTests`,
+`GraphIncomingMcpSchemaTests` and `PartitionQueryMcpSchemaTests`. Root reviews,
+joins, builds and executes those unchanged assertion flows through actual Aspire
+Docker RF3 and the official C# MCP client, then retains original GitHub artifacts.
+
+Capture only the three exact tool input schemas before the existing assertions:
+at most 64 KiB UTF-8 per object, with at most 1 KiB safe name/context/filename/size/
+SHA-256 sidecar. Use the existing repository-root helper and unique owned files
+under uploaded `artifacts/qualification/mcp-schema-evidence/`; reject unknown
+names, invalid objects, excess size and failed writes. No credential, caller
+payload, private catalog, production logger, alternate schema or synthetic
+response is introduced. Public API, persistence and dependencies are unchanged.
+Original failed assertions remain failures. Fix their owning schema/oracle only
+after actual payload evidence establishes the defect; no compatibility reader
+or permissive integer/nullability fallback is authorized.

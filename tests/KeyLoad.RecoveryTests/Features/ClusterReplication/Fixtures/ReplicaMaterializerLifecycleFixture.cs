@@ -24,6 +24,7 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
     private readonly TaskCompletionSource entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource released = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private int armed;
+    private KeyLoadException? acknowledgedTerminalFailure;
     private bool ownersClosed;
     private List<Exception>? scenarioFailures;
     private bool cleanupCompleted;
@@ -93,6 +94,15 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
 
     internal void Release() => released.TrySetResult();
 
+    internal void AcknowledgeAssertedTerminalFailure(KeyLoadException error)
+    {
+        if (error is not { Code: ErrorCode.UnknownWriteOutcome } || acknowledgedTerminalFailure is not null)
+        {
+            throw new InvalidOperationException("Only one asserted materializer terminal outcome may be acknowledged.");
+        }
+        acknowledgedTerminalFailure = error;
+    }
+
     internal async Task RunAsync(Func<Task> scenario)
     {
         var failures = new List<Exception>();
@@ -117,7 +127,7 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         }
         var failures = scenarioFailures ??= [];
         Release();
-        await ReplicaMaterializerLifecycleErrors.AttemptAsync(() => Materializer.DisposeAsync().AsTask(), failures);
+        await ReplicaMaterializerLifecycleErrors.AttemptAsync(DisposeMaterializerAsync, failures);
         if (!ownersClosed)
         {
             ownersClosed = true;
@@ -141,7 +151,7 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         Release();
         try
         {
-            Materializer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            DisposeMaterializerAsync().GetAwaiter().GetResult();
         }
         catch (IOException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
         catch (InvalidOperationException error) { ReplicaMaterializerLifecycleErrors.Add(error, failures); }
@@ -168,6 +178,14 @@ internal sealed class ReplicaMaterializerLifecycleFixture : IAsyncDisposable, ID
         {
             Directory.Delete(directory, true);
         }
+    }
+
+    private async Task DisposeMaterializerAsync()
+    {
+        try
+        { await Materializer.DisposeAsync().AsTask(); }
+        catch (KeyLoadException error) when (ReferenceEquals(error, acknowledgedTerminalFailure))
+        { acknowledgedTerminalFailure = null; }
     }
 
     private ZoneTreeStore OpenCanonicalStore() => new(new(CanonicalPath)

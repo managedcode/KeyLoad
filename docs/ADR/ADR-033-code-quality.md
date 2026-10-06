@@ -78,13 +78,17 @@ format, dependency, public API or topology changes belong to this quality stage.
 ## Complete functional unit contributor partition
 
 TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 implements REQ-CQ-009 and AC-CQ-018/020/021.
-Keep ordinary unit and scalar suites complete, unfiltered and without coverage.
-Collect functional unit coverage separately through five bounded positive
-selector groups in each mode, with one exact current case inventory. Every
-allowed case belongs to exactly one group; classify every excluded BDN, load,
-stress, performance or comparison case explicitly. Namespace membership alone
-does not authorize a contributor. Bind the inventory to current test sources,
-the same Release compiler-input/DLL/PDB/MVID identities and actual native TRX.
+Keep ordinary unit and scalar suites complete, unfiltered and without coverage
+after the authorized physical transfer leaves their assemblies free of benchmark
+and comparison cases. Those checks stay with the Benchmarks-owned projects and
+workflow. Collect functional unit coverage separately through five bounded
+positive selector groups in each mode, with one exact post-transfer current case
+inventory. Every permitted functional case belongs to exactly one group;
+classify any residual nonfunctional cross-slice case explicitly and record the
+new owner for moved benchmark cases without duplicating selector inventories.
+Namespace membership alone does not authorize a contributor. Bind the inventory
+to current test sources, the same Release compiler-input/DLL/PDB/MVID identities
+and actual native TRX.
 
 Ordered stages: root freezes this contract and owning feature; a Luna worker
 prepares guarded source and meaningful merge-operation regressions; root joins,
@@ -98,3 +102,74 @@ Root owns workflow, inventory, identity and report joins. Roll out one coherent
 strict descriptor/validator/CI checkpoint; rollback restores that checkpoint's
 source/configuration pair, without an alternate reader or reduced qualification.
 No numeric coverage or module closure follows from preparing an inventory.
+
+
+A separate post-descriptor regression invokes the native merge entry point in
+`ProductAdmission` mode against the actual generated Product descriptor and TRX
+receipts. Product and admission modes share path/tool/bounds checks and
+`Read-FcNativeProductPlan`; admission emits only a bounded validation result and
+does not invoke collectors, merge reports or write coverage outputs. The
+regression admits original evidence, rejects a controlled modified copy only
+for its expected validation failure, verifies original bytes remain unchanged,
+and admits the originals again. It uses no authored TRX. Ordinary full unit/scalar
+operations do not claim to perform this separate admission regression.
+
+The Product descriptor also binds successful full normal and scalar unit
+`unitCensus` runs from the same evidence cohort and Release build. Both run with
+coverage disabled and bind original TRX/report hashes, exact identities and
+source locations, the captured source-manifest digest and test-image receipt.
+Normal/scalar census identity sets must agree with each other and with the exact
+current functional inventory. In each mode, its five instrumented groups are
+disjoint and their union equals both that mode's census and the inventory, with
+zero failed/skipped cases. Census files are bounded validation inputs only, never
+coverage merge inputs/counts. Product and ProductAdmission both revalidate the
+same descriptor/census through `Read-FcNativeProductPlan`; native merge
+execution remains unchanged.
+
+Each inventory case also records the original native TUnit `lineNumber` and
+`endLineNumber` alongside its exact current source path/hash. Require positive,
+ordered line bounds within that source file; both census reports and every
+instrumented report must match this exact method/argument source range. Missing
+or mismatched ranges reject rather than falling back to path-only ownership.
+
+
+The descriptor producer takes `-UnitRunStatusPath` pointing to
+`functional-coverage.unit-run-status.v1.json` inside the same evidence root,
+replacing the former single unit/scalar exit-code parameters. Its strict schema
+is `schemaVersion:1`, `sourceRevision`, `sourceManifestSha256`, and `runs`; each
+run has exactly `id`, `suite`, `filter`, `coverageEnabled`, `exitCode`, and
+`resultsDirectory`. Require exactly twelve unique runs: `unit-census`,
+`unit-scalar-census`, `unit-functional-01` through `unit-functional-05`, and
+`unit-scalar-functional-01` through `unit-scalar-functional-05`. The two census
+filters are empty and coverage is false; each coverage filter equals its exact
+inventory selector and coverage is true. Each results directory equals its run
+ID and is confined to the evidence root. Capture each integer exit code from
+the original native TUnit process; all twelve must be zero. Recovery/RF3 retain their
+explicit existing exit-code inputs. Require current source/image parity and
+original bounded native reports for every row; the status file alone cannot
+prove successful execution. Read at most 64 KiB, within the configured manifest
+limit, and reject unknown, duplicate, missing, skipped or malformed entries.
+No alternate directory discovery or prior unit-status schema is accepted.
+The fixed 64 KiB bound accommodates ten ASCII selectors of at most 4,096
+characters and the twelve closed metadata rows. Keep the per-selector bound,
+exact schema and configured manifest limit; the former 16 KiB aggregate cannot
+represent every admitted selector set. This is a private evidence-format bound,
+not a change to operation deadlines, test outcomes or coverage thresholds.
+
+Bind `unitRunStatus` and per-unit/scalar/census `statusId`, consuming all twelve
+rows once with exact directory confinement; recovery/RF3 inputs stay separate.
+The existing `NativeCoverageMergeTests` case uses new CodeQuality/Helpers
+`NativeCoverageProductEvidenceRejection.cs` and
+`NativeCoverageProductEvidenceFiles.cs` for its required post-descriptor phase.
+Set `KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED=true` and
+`KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH` together; missing, inconsistent or
+invalid required inputs fail. CI validates the bounded
+`native-product-admission-phase.v1.json` receipt after the complete native
+admit/controlled-denial/immutability/re-admit/cleanup flow. Both absent selects
+only ordinary real backup/restore and cannot qualify the separate phase.
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 joins temporary-directory creation to the existing observed admission/cleanup lifetime: the caller retains the exact owned path before creation and attempts bounded cleanup even when creation fails. Check copied native TRX/descriptor bytes against their own format bounds and the configured per-file bound before writing. Preserve original native failure, all cleanup errors, the existing whole-operation case and the required post-descriptor receipt. No runtime fault proof is inferred from source review.
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 inventory validation preserves native multi-case declaring classes and byte-preserving benchmark transfer namespaces. Distinct declaring classes still obey the frozen positive selector identity contract. The exact physical ComparisonTests source path/hash establishes moved-case ownership; preserved UnitTests namespaces are not functional coverage authority. Case identities remain unique and all functional census/positive-group parity and exclusion checks remain mandatory.
+
+The 2026-10-07 report-display amendment to TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 records the declared CLR `className` from original TRX separately from exact original MTP `nativeReportClassName` on each functional inventory row. Native TUnit tree selectors use the former; fixture display suffixes remain untouched in the latter. The linked CodeQuality contract freezes the extra field's bounds, one-to-one report/TRX/source joins, unchanged moved-case shape and mandatory successful census/group parity. Ordered stages are contract freeze, private two-script producer repair and native draft reconciliation, one coherent inventory/producer/workflow join, strict build/format/parser checks, and original complete Linux coverage plus ProductAdmission qualification. Root owns integration; the Luna worker owns only `functional-coverage.native-merge.contributors.ps1` and `functional-coverage.native-merge.functional-report.ps1` within the existing stage. Rollback removes the coherent amendment without introducing a fallback alias reader. Public APIs, persisted formats, dependencies and all existing thresholds are unchanged; failed draft evidence remains unqualified.
