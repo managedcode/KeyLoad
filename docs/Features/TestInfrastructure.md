@@ -454,3 +454,24 @@ environmental error branches retain the explicit full-source audit supplement.
 Negative/edge/error flows: skipped suite не passing; flaky case — failure; malformed/missing artifact, mismatched SHA/profile, unavailable engine/license/platform або test resource startup failure не замінює previous qualified history. Old CI не кваліфікує uncommitted code; test method name не є result. [ADR-031](../ADR/ADR-031-modular-all-in-one-resource-isolation.md) і [ADR-036 foundation](../ADR/ADR-036-orleans-foundation.md) фіксують topology/capability scope.
 
 Target maps: shared AppHost/CrashHost/fixtures/workflows — composition/infrastructure; business cases mirror owning canonical `Features/<SliceName>/`, TUnit/MTP — єдиний .NET framework/runner. Frontend N/A; real first-render website evidence належить BenchmarkComparisons. One integration owner owns central project/CI/resource graph; bounded test workers зберігають every assertion та join з real GitHub evidence. Нові doc files не запускають локальний продукт і не послаблюють жоден gate.
+# Build and Tests boundary, owner correction 2026-10-06
+
+REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and
+KeyLoad functional analyzer/unit/scalar/recovery/RF3 tests only. Benchmark tests
+are compiled in the separate KeyLoad.ComparisonTests project and executed only
+by Benchmarks, including progress, entry and counter regressions.
+
+AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases;
+the comparison assembly retains their test inventory and assertions; Build and
+Tests invokes no comparison suite or benchmark load-generator preparation.
+Benchmarks executes the transferred contracts in normal and scalar modes and
+retains original TRX reports. Static workflow/project inventory review is the
+explicit infrastructure-placement evidence exception; actual Aspire/TUnit
+discovery and original reports verify the runtime boundary.
+
+TASK-TEST-PIPELINE-001 moves benchmark cases and exclusive helpers;
+TASK-TEST-PIPELINE-002 updates workflow callers and server-only RF3 image
+preparation; TASK-TEST-PIPELINE-003 verifies compilation, discovery, unchanged
+assertions, formatting and governance. The implementation contract is
+[ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md). No database API, persisted
+format, replication or authorization contract changes.

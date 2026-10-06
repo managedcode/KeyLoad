@@ -8633,7 +8633,7 @@
         "modelTier": "cost_efficient_coding_luna",
         "permissions": "read_only",
         "files": [
-          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ComparisonHostProcess.cs",
+          "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Processes/ComparisonHostProcess.cs",
           "tests/KeyLoad.UnitTests/Features/ClientApi/Cases/KeyLoadClientTransportTests.cs"
         ],
         "acceptanceIds": [

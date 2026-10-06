@@ -31,8 +31,8 @@ timeout would hide slow execution and cannot qualify the workload.
 4. Root owns the process relay scripts, workflow/test integration and docs. Retain
    canonical dotnet/AppHost invocation, original exit and signal handling. No
    independent database startup or global process termination is permitted.
-   CI runs focused native progress capture regressions independently of the
-   complete Benchmarks matrix; these do not qualify a database workload.
+   Benchmarks runs focused native progress capture regressions independently of
+   its complete measurement matrix; these do not qualify a database workload.
 5. Root reviews every diff, builds, runs real focused Aspire/TUnit checks, format
    and governance; commits only this repair and pushes under standing authority.
    Actual Linux CI/native workload/cancellation artifacts supply delivered proof.

@@ -1,4 +1,25 @@
 {
+  "TEST-PIPELINE-001": {
+    "title": "Separate functional database tests from benchmark contracts",
+    "status": "in_progress",
+    "feature": "docs/Features/TestInfrastructure.md",
+    "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
+    "functionalProject": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+    "benchmarkProject": "tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj",
+    "functionalWorkflow": ".github/workflows/build-and-tests.yml",
+    "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
+    "runtimeQualified": false,
+    "canonicalBuildPassed": true,
+    "canonicalFormatterPassed": true,
+    "preservedBenchmarkTestMethods": 566,
+    "localFocusedFunctionalTestsPassed": 18,
+    "localServerOnlyImageRegressionPassed": 1,
+    "verificationStage": "Projects and CI separated; full Release build, formatter, governance and focused Aspire regressions passed; full Linux suites remain unqualified",
+    "remaining": [
+      "Complete exact-source Linux unit/scalar/recovery/RF3 qualification",
+      "Local full unit was interrupted by an AppHost stop request; local recovery observed native text process argument failures outside the moved benchmark scope"
+    ]
+  },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
     "status": "in_progress",
@@ -691,7 +712,7 @@
       "docs/Features/TimeSeries.md",
       "docs/ADR/ADR-050-timeseries-timescale-comparison.md",
       "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Resources/BenchmarkResources.cs",
-      "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHarnessTests.cs",
+      "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/Cases/ComparisonHarnessTests.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/",
       "docs/implementation/comparative-benchmarks.md",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/Neo4j/Neo4jTarget.cs",

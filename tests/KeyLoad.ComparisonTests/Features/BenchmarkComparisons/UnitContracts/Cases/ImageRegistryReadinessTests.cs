@@ -6,7 +6,7 @@ internal sealed class ImageRegistryReadinessTests
     private const string FixtureName = "ImageRegistryReadinessFixture.mjs";
     private const string ModuleName = "image-manifest.mjs";
     private const string TestsDirectory = "tests";
-    private const string ProjectDirectory = "KeyLoad.UnitTests";
+    private const string ProjectDirectory = "KeyLoad.ComparisonTests";
     private const string FeaturesDirectory = "Features";
     private const string SliceDirectory = "BenchmarkComparisons";
     private const string AcceptedPrefix = "accepted:";
@@ -26,7 +26,7 @@ internal sealed class ImageRegistryReadinessTests
     {
         using var directory = new ImageBundleTestDirectory();
         var fixture = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), TestsDirectory, ProjectDirectory,
-            FeaturesDirectory, SliceDirectory, "Processes", FixtureName);
+            FeaturesDirectory, SliceDirectory, "UnitContracts", "Processes", FixtureName);
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             [fixture, IsolatedAggregateNodeProcess.Module(ModuleName), scenario, directory.Root],
             TestContext.Current!.Execution.CancellationToken);

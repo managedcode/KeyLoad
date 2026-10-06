@@ -1,5 +1,9 @@
 # KeyLoad.UnitTests
 
+## Functional test scope, owner correction 2026-10-06
+
+- This project owns KeyLoad functional unit tests only. Move benchmark/comparison cases and their exclusive helpers to KeyLoad.ComparisonTests and execute them in Benchmarks. This explicit correction supersedes the earlier BenchmarkComparisons test ownership below; ordinary unit/scalar execution must not discover benchmark tests.
+
 ## Purpose and entry points
 - Owns focused TUnit tests for contracts and feature behavior, including queries, transactions, storage codecs, admission, change feeds, subscriptions, search, messaging and artifacts.
 - Test sources include `Features/QueryExecution/Cases/QueryAdapterTests.cs`, `Features/ResourceExecution/Cases/TransactionTests.cs`, `Features/StorageRecovery/Cases/KeyCodecTests.cs`, `Features/ResourceExecution/Cases/CommandAdmissionGovernorTests.cs`, `Features/GraphTraversal/Cases/GraphTraversalTests.cs` and `Features/Search/Cases/SearchResourceTests.cs`, `TestDatabase.cs` and the other feature-named test files in this project.

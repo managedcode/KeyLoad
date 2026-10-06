@@ -1137,3 +1137,10 @@ Build and Tests (`build-and-tests.yml`) retains solution build and ordinary test
 (`website.yml`) has no build/test workflow dependency; Benchmarks produces JSON
 and Release remains manual. This four-workflow correction supersedes the earlier
 three-workflow map without changing database qualification.
+
+Owner correction 2026-10-06: benchmark unit contracts and their exclusive helpers
+are owned by `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/UnitContracts/`
+and run only in Benchmarks. `KeyLoad.UnitTests` owns functional database tests.
+Build and Tests compiles the complete solution and runs functional
+analyzer/unit/scalar/recovery/RF3 gates; RF3 prepares only the server image.
+See TestInfrastructure REQ/AC-TEST-PIPELINE-001 and ADR-074.

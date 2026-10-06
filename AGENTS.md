@@ -537,3 +537,7 @@ A bounded website qualification candidate contains the20-project historical runt
 ## Build and Tests workflow filename, owner direction 2026-10-06
 
 - The canonical Build and Tests workflow is `.github/workflows/build-and-tests.yml`, renamed from `ci.yml`. Dispatch with `gh workflow run build-and-tests.yml --repo managedcode/KeyLoad --ref main`. This supersedes earlier active filename/dispatch references only; preserve all build/test gates, stable job IDs, permissions and historical evidence.
+
+## Build and Tests scope, owner correction 2026-10-06
+
+- Build and Tests MUST execute only solution builds, repository checks and KeyLoad functional tests, including analyzer, unit/scalar, process recovery and Aspire RF3 SDK/MCP tests. Benchmark/comparison tests, progress/entry/counter checks, load generators and comparison-image preparation MUST NOT execute there, even when stored in the unit-test project. Run them exclusively in the separate Benchmarks workflow; preserve their checks there. This explicit correction supersedes earlier placement of benchmark correctness checks in ordinary CI. Compiling the complete solution remains mandatory.

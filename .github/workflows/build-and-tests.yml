@@ -144,14 +144,6 @@ jobs:
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test code analyzers
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
-      - name: Test prompt termination on Aspire resource failures
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
-      - name: Test live benchmark progress capture
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-progress --KeyLoadTests:ReportTrx=true
-      - name: Test live benchmark process entry
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-entry --KeyLoadTests:ReportTrx=true
-      - name: Test benchmark phase and attempt counters
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-counters --KeyLoadTests:ReportTrx=true
       - name: Test native coverage source ownership
         id: source-ownership
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/(NativePathMapCompilerTests)|(ProductionSourceManifestSettlementTests)|(NativeSourceManifestChildSettlementTests)|(ProductionSourceManifestOperationTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/native-source-ownership --KeyLoadTests:ReportTrx=true
@@ -212,17 +204,16 @@ jobs:
           global-json-file: global.json
       - name: Check Docker
         run: docker version
-      - name: Build KeyLoad server and benchmark Docker images
+      - name: Build KeyLoad server Docker image
         id: images
-        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
+        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs --server-only
       - name: Configure Docker image references
         shell: bash
         env:
           KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
-          KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
         run: |
-          test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
-          printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
+          test -n "$KEYLOAD_SERVER_IMAGE"
+          printf 'KeyLoad__ContainerImages__Server=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |

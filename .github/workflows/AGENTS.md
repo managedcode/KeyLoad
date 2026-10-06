@@ -1,5 +1,9 @@
 # GitHub Actions workflows
 
+## Build and Tests scope, owner correction 2026-10-06
+
+- Build and Tests executes only solution builds, repository checks and KeyLoad functional tests. Benchmark/comparison cases and their progress, entry, counter and image-preparation checks belong exclusively to Benchmarks. Keep benchmark contracts in KeyLoad.ComparisonTests, not KeyLoad.UnitTests; retain their assertions and execution in Benchmarks. RF3 functional qualification builds only the KeyLoad server image, never a benchmark load-generator image. This explicit owner correction supersedes earlier benchmark-correctness placement in ordinary CI.
+
 ## Purpose and entry points
 - Owns repository CI qualification and GitHub Pages publication workflows.
 - Canonical workflows: `ci.yml` (restore, Release build, TUnit unit/integration/recovery suites and comparison artifact production) and `pages.yml` (verified artifact download, site checks/build and Pages deployment).

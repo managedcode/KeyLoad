@@ -5,8 +5,8 @@ internal static class IsolatedCurrentJobCacheNodeProbe
     internal static Task<IsolatedAggregateNodeResult> RunPolicyAsync(CancellationToken cancellationToken)
     {
         var root = IsolatedAggregateNodeProcess.RepositoryRoot();
-        var fixtureDirectory = Path.Combine(root, "tests", "KeyLoad.UnitTests", "Features",
-            "BenchmarkComparisons", "Fixtures");
+        var fixtureDirectory = Path.Combine(root, "tests", "KeyLoad.ComparisonTests", "Features",
+            "BenchmarkComparisons", "UnitContracts", "Fixtures");
         return RunAsync(["policy", IsolatedAggregateNodeProcess.Module("isolated-current-job.mjs"),
             IsolatedAggregateNodeProcess.Module("isolated-github-transport.mjs"), fixtureDirectory], cancellationToken);
     }

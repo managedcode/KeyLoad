@@ -14,7 +14,7 @@ const gitStatusArguments = Object.freeze(['status', '--porcelain', '--untracked-
 const schemaVersion = 1;
 
 export async function prepareImages(environment = process.env, argv = process.argv.slice(2)) {
-  validateEntryArguments(argv);
+  const kinds = preparationImageKinds(argv);
   const context = createRunContext(environment, process.platform);
   await ensureEvidenceDirectory(context);
   await verifySourceCheckout(context);
@@ -23,19 +23,24 @@ export async function prepareImages(environment = process.env, argv = process.ar
   await verifyBuildx(context);
 
   const tag = makeImageTag(context);
-  const serverTaggedReference = makeTaggedReference(imageKind.server, tag);
-  const loadGeneratorTaggedReference = makeTaggedReference(imageKind.comparisons, tag);
   await startOwnedRegistry(context);
   await waitForRegistry(context);
 
-  const serverImage = await buildProductImage(context, imageKind.server, serverTaggedReference);
-  const loadGeneratorImage = await buildProductImage(context, imageKind.comparisons, loadGeneratorTaggedReference);
-  await pushProductImage(context, serverTaggedReference);
-  const serverManifest = await fetchManifest(context, imageReference.serverName, tag, serverImage);
-  await createImmutableManifest(context, fileName.serverManifest, serverManifest.manifestBytes);
-  await pushProductImage(context, loadGeneratorTaggedReference);
-  const loadGeneratorManifest = await fetchManifest(context, imageReference.comparisonsName, tag, loadGeneratorImage);
-  await createImmutableManifest(context, fileName.comparisonsManifest, loadGeneratorManifest.manifestBytes);
+  const images = {};
+  const references = {};
+  for (const kind of kinds) {
+    const tagged = makeTaggedReference(kind, tag);
+    const built = await buildProductImage(context, kind, tagged);
+    await pushProductImage(context, tagged);
+    const isServer = kind === imageKind.server;
+    const name = isServer ? imageReference.serverName : imageReference.comparisonsName;
+    const filename = isServer ? fileName.serverManifest : fileName.comparisonsManifest;
+    const manifest = await fetchManifest(context, name, tag, built);
+    await createImmutableManifest(context, filename, manifest.manifestBytes);
+    const key = isServer ? receiptField.server : receiptField.comparisons;
+    images[key] = makeImageRecord(manifest, filename, built);
+    references[key] = manifest.finalReference;
+  }
   const receipt = Object.freeze({
     [receiptField.schemaVersion]: schemaVersion,
     [receiptField.sourceRevision]: context.sourceSha,
@@ -50,14 +55,19 @@ export async function prepareImages(environment = process.env, argv = process.ar
       [receiptField.runtime]: baseImage.aspnet,
       [receiptField.registry]: registry.image,
     }),
-    [receiptField.images]: Object.freeze({
-      [receiptField.server]: makeImageRecord(serverManifest, fileName.serverManifest, serverImage),
-      [receiptField.comparisons]: makeImageRecord(loadGeneratorManifest, fileName.comparisonsManifest, loadGeneratorImage),
-    }),
+    [receiptField.images]: Object.freeze(images),
   });
 
   await createImmutableReceipt(context, receipt);
-  await appendImageOutputs(context, serverManifest.finalReference, loadGeneratorManifest.finalReference);
+  await appendImageOutputs(context, references[receiptField.server], references[receiptField.comparisons]);
+}
+
+export function preparationImageKinds(argv) {
+  if (Array.isArray(argv) && argv.length === 1 && argv[0] === '--server-only') {
+    return Object.freeze([imageKind.server]);
+  }
+  validateEntryArguments(argv);
+  return Object.freeze([imageKind.server, imageKind.comparisons]);
 }
 
 export function makeImageRecord(manifest, manifestFile, builtImage) {

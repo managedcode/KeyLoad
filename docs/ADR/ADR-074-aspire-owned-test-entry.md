@@ -16,6 +16,22 @@ minutes after original run37349838022 cancelled recovery at the old job limit.
 Keep unit, scalar and recovery sequential, every suite's native deadline and all
 required source/runtime/artifact gates. No timeout or failed suite becomes green.
 
+## Build and Tests boundary, owner correction 2026-10-06
+
+REQ/AC-TEST-PIPELINE-001 requires only functional KeyLoad suites in Build and
+Tests. Benchmark contract cases and exclusive helpers move from UnitTests to
+ComparisonTests/Features/BenchmarkComparisons/UnitContracts, preserving
+namespaces/assertions. Benchmarks owns their normal/scalar Aspire comparison
+execution and original TRX artifacts. Shared pure infrastructure retains one
+source compiled by both executables. Root owns TASK-TEST-PIPELINE-001..003 and
+integration. RF3 selects `prepare-images.mjs --server-only`: build/push/hash only
+the server image, with the same source-bound receipt/manifest and scoped registry
+cleanup. Benchmarks keeps both server and load-generator preparation. No database
+API or server-record receipt format changes. Verify native image-mode selection
+and rejection, transferred discovery inventory, solution build, formatter,
+governance and Aspire functional suites. Failed gates remain open; reverting
+this boundary requires owner direction.
+
 ## Decision and boundaries
 
 `KeyLoad.AppHost --KeyLoadTests:Suite=<suite>` composes one actual Aspire

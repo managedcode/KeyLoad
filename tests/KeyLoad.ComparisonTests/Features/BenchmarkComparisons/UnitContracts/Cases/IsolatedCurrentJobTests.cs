@@ -28,7 +28,7 @@ internal sealed class IsolatedCurrentJobTests
     {
         var root = IsolatedAggregateNodeProcess.RepositoryRoot();
         var module = IsolatedAggregateNodeProcess.Module("isolated-current-job.mjs");
-        var fixture = Path.Combine(root, "tests", "KeyLoad.UnitTests", "Features", "BenchmarkComparisons",
+        var fixture = Path.Combine(root, "tests", "KeyLoad.ComparisonTests", "Features", "BenchmarkComparisons", "UnitContracts",
             "IsolatedCurrentJobOriginal.json");
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedCurrentJobNodeProgram.Policy, module, fixture, corruption],

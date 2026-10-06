@@ -10,6 +10,6 @@
     <PackageReference Include="BenchmarkDotNet" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
-    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
   </ItemGroup>
 </Project>

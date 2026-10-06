@@ -31,7 +31,9 @@ flowchart LR
 Slice map: Comparisons owns the observer/phase accounting; ComparisonTests owns
 native log capture and durable latest snapshot; scripts/BenchmarkComparisons owns
 the real process/output relay; benchmarks.yml is the root-owned workload join,
-and ci.yml independently runs focused native logger/parser/file regressions.
+and benchmarks.yml runs focused native logger/parser/file regressions. Benchmark
+contract cases live in KeyLoad.ComparisonTests/Features/BenchmarkComparisons/
+UnitContracts; Build and Tests unit/scalar execution never runs them.
 Database API, SDK/MCP, stored state, GUI and website metrics: N/A, unchanged.
 
 Task graph: TASK-BC-LIVE-CONTRACT(root) -> TASK-BC-LIVE-RUNNER(workerA) and

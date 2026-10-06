@@ -3,9 +3,22 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../KeyLoad.UnitTests/Features/ResourceExecution/Helpers/UnitExecutionOptions.cs" Link="Features/ResourceExecution/Helpers/UnitExecutionOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/ClientApi/Helpers/UnitClientOptions.cs" Link="Features/ClientApi/Helpers/UnitClientOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" Link="Features/ClusterReplication/Helpers/ReplicaExecutionTestOptions.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" Link="Features/InternalSerialization/Helpers/ReplicaNativeFixtureEncoder.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/TestInfrastructure/Helpers/TestElapsedClock.cs" Link="Features/TestInfrastructure/Helpers/TestElapsedClock.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/TestInfrastructure/Helpers/TestOrchestrationConfigurationKeys.cs" Link="Features/TestInfrastructure/Helpers/TestOrchestrationConfigurationKeys.cs" />
+    <Compile Include="../KeyLoad.UnitTests/Features/RepositoryGovernance/Models/WorkflowDatabaseGroups.cs" Link="Features/RepositoryGovernance/Models/WorkflowDatabaseGroups.cs" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../../benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />
     <Content Include="../../benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json" Link="native-execution.json" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />

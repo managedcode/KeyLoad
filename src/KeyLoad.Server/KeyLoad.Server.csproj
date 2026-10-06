@@ -4,6 +4,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />

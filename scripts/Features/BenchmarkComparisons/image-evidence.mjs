@@ -166,10 +166,11 @@ export async function appendImageOutputs(context, serverReference, loadGenerator
   const outputFilePath = context.githubOutput;
   const fileInfo = await lstat(outputFilePath).catch(() => null);
   if (!fileInfo?.isFile() || fileInfo.isSymbolicLink()) throw new Error(message.invalidEnvironment);
-  for (const reference of [serverReference, loadGeneratorReference]) {
+  for (const reference of loadGeneratorReference === undefined ? [serverReference] : [serverReference, loadGeneratorReference]) {
     if (typeof reference !== 'string' || validation.controlCharacterPattern.test(reference)) throw new Error(message.invalidManifest);
   }
-  const content = `${imageReference.outputServer}=${serverReference}${outputFormat.newline}${imageReference.outputLoadGenerator}=${loadGeneratorReference}${outputFormat.newline}`;
+  const content = `${imageReference.outputServer}=${serverReference}${outputFormat.newline}`
+    + (loadGeneratorReference === undefined ? '' : `${imageReference.outputLoadGenerator}=${loadGeneratorReference}${outputFormat.newline}`);
   await writeFile(outputFilePath, content, { flag: appendWriteFlag, encoding: outputFormat.utf8, mode: privateFileMode });
 }
 

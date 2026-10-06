@@ -1,5 +1,9 @@
 # KeyLoad.ComparisonTests
 
+## Benchmark contract ownership, owner correction 2026-10-06
+
+- Own all benchmark/comparison contract tests previously held in KeyLoad.UnitTests, including corpus, progress, process-entry and counter checks. Keep them under Features/BenchmarkComparisons/UnitContracts with responsibility folders and preserve their existing namespaces and assertions during this structural move. Execute them through the Aspire comparison suite exclusively in Benchmarks; Build and Tests must not execute this project.
+
 ## Purpose and entry points
 - Owns TUnit comparison-harness checks and the CI comparison workload entry point.
 - Main suite: `Features/BenchmarkComparisons/Cases/ComparisonTests.cs`; project: `KeyLoad.ComparisonTests.csproj`.

@@ -15,7 +15,7 @@ internal sealed class BenchmarkTopologyMembershipNativeCodec(BenchmarkMembership
     : IFieldCodec<ReplicaBenchmarkMembershipRecord>
 {
     internal static byte[] Encode(ReplicaBenchmarkMembershipRecord value, BenchmarkMembershipDefect defect)
-        => ReplicaNativeFixtureWriter.Encode(value, new BenchmarkTopologyMembershipNativeCodec(defect));
+        => ReplicaNativeFixtureEncoder.Encode(value, new BenchmarkTopologyMembershipNativeCodec(defect));
 
     public ReplicaBenchmarkMembershipRecord ReadValue<TInput>(ref Reader<TInput> reader, Field field)
         => throw new NotSupportedException();

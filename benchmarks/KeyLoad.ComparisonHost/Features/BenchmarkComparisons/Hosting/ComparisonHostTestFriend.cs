@@ -6,5 +6,5 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 internal static class ComparisonHostTestFriend
 {
-    internal const string AssemblyName = "KeyLoad.UnitTests";
+    internal const string AssemblyName = "KeyLoad.ComparisonTests";
 }

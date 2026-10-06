@@ -30,8 +30,8 @@ internal sealed class IsolatedGitHubTransientTests
     public async Task AcBcFail005RetriesOriginalTransientGetFailuresWithinBudgets(string input, bool accepted)
     {
         var module = IsolatedAggregateNodeProcess.Module("isolated-github-rate.mjs");
-        var original = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "tests", "KeyLoad.UnitTests",
-            "Features", "BenchmarkComparisons", "IsolatedGitHubTransientOriginal.headers");
+        var original = Path.Combine(IsolatedAggregateNodeProcess.RepositoryRoot(), "tests", "KeyLoad.ComparisonTests",
+            "Features", "BenchmarkComparisons", "UnitContracts", "IsolatedGitHubTransientOriginal.headers");
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubTransientProgram.Source, module, input, original],
             TestContext.Current!.Execution.CancellationToken);

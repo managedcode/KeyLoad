@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using KeyLoad.UnitTests.Features.BenchmarkComparisons;
+using KeyLoad.UnitTests.Features.RepositoryGovernance;
 
 namespace KeyLoad.UnitTests.Features.ReleaseDelivery;
 
@@ -69,7 +69,7 @@ internal static class ReleaseVersionNodeProcess
 
     private static ProcessStartInfo StartInfo()
     {
-        var repository = IsolatedAggregateNodeProcess.RepositoryRoot();
+        var repository = GovernanceNodeProcess.RepositoryRoot;
         var module = Path.Combine(repository, ScriptsDirectory, FeaturesDirectory, SliceDirectory, ModuleFile);
         var start = new ProcessStartInfo("node")
         {

@@ -11,7 +11,7 @@ jobs:
   comparison-build:
     name: Build and check KeyLoad
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 120
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,6 +27,21 @@ jobs:
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
+      - name: Test benchmark contracts
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
+      - name: Test benchmark contracts without CPU intrinsics
+        env:
+          DOTNET_EnableHWIntrinsic: '0'
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts-scalar --KeyLoadTests:ReportTrx=true
+      - name: Test prompt termination on Aspire resource failures
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
+      - name: Save benchmark contract test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: benchmark-contract-tests
+          path: TestResults/**
+          if-no-files-found: error
       - name: Save build diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -84,10 +99,8 @@ jobs:
       - name: Build benchmark tests
         id: benchmark-build
         run: dotnet build tests/KeyLoad.ComparisonTests --no-restore --configuration Release
-      - name: Build benchmark preparation unit tests
-        run: dotnet build tests/KeyLoad.UnitTests --no-restore --configuration Release
       - name: Check bounded Docker registry readiness
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
@@ -141,9 +154,9 @@ jobs:
       - name: Test live benchmark progress capture
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-progress
       - name: Test live benchmark process entry
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-entry
       - name: Test benchmark phase and attempt counters
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
+        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/live-counters
       - name: Test KeyLoad replay admission
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedKeyLoadReplayAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/replay-admission
       - name: Test Redis replica error reporting
