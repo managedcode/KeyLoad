@@ -14,6 +14,11 @@ internal static class IsolatedNativeTeardown
         Exception? primaryFailure)
     {
         var failures = new IsolatedNativeTeardownFailures(primaryFailure);
+        var runnerSettled = await IsolatedNativeOriginalTaskSettlement.RunAsync(
+            work.StopRunnerAsync, "native-runner", failures);
+        var controlSettled = work.CancellationControl is null
+            || await IsolatedNativeOriginalTaskSettlement.RunAsync(
+                () => work.CancellationControl.DisposeAsync().AsTask(), "open-loop-control", failures);
         var collectorSettled = await SettleCollectorAsync(work, failures);
         var captureSettled = capture is null || await IsolatedNativeOriginalTaskSettlement.RunAsync(
             capture.StopAsync, "logs-close", failures);
@@ -30,7 +35,7 @@ internal static class IsolatedNativeTeardown
             () => capture.DisposeAsync().AsTask(), "capture-dispose", failures);
         var applicationDisposed = await IsolatedNativeOriginalTaskSettlement.RunAsync(
             () => app.DisposeAsync().AsTask(), "app-dispose", failures);
-        if (collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed)
+        if (runnerSettled && controlSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed)
         {
             await IsolatedNativeOriginalTaskSettlement.RunAsync(
                 () => IsolatedNativeDataCleanup.DeleteAsync(root, containers), "data", failures);

@@ -5,6 +5,9 @@ namespace KeyLoad.Core;
 
 internal sealed class DuePrefixScanState
 {
+    private const int EqualOrder = 0;
+    private const int NoRetainedBytes = 0;
+
     private readonly DatabaseEngine database;
     private readonly DueSweepCursor cursor;
     private readonly DueWorkKind kind;
@@ -31,7 +34,7 @@ internal sealed class DuePrefixScanState
     internal bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
         page.Check();
-        if (key.SequenceCompareTo(upper) > 0)
+        if (key.SequenceCompareTo(upper) > EqualOrder)
         {
             page.ExamineRecord();
             reachedUpper = true;
@@ -56,7 +59,7 @@ internal sealed class DuePrefixScanState
         lastKey = DueWorkRecordDecoder.CopyKey(key);
         AddHintOrRejection(key, value);
         reachedUpper = atUpper;
-        if (page.ExaminedRecords >= DueWorkProtocol.MaximumRecordsPerPage)
+        if (page.ExaminedRecords >= page.MaximumRecordsPerPage)
         {
             deferred = !atUpper;
             return false;
@@ -78,7 +81,7 @@ internal sealed class DuePrefixScanState
         DuePrefixCursor bounds, byte[] upper, DuePageState page)
     {
         var next = DueWorkCursor.WithPrefix(cursor, kind, new(true, upper.ToArray(), bounds.LastKey?.ToArray()));
-        return new([], [], next, kind, false, page.ExaminedRecords, page.ExaminedBytes, 0);
+        return new([], [], next, kind, false, page.ExaminedRecords, page.ExaminedBytes, NoRetainedBytes);
     }
 
     private void AddHintOrRejection(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)

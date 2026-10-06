@@ -1,6 +1,8 @@
 #pragma warning disable ORLEANSEXP005
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
+using KeyLoad.Storage;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
@@ -29,17 +31,22 @@ internal sealed class RuntimeJournalNativeDataSourceAttribute : DataSourceGenera
 }
 internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDisposable
 {
-    private const int StartupSeconds = 30;
-    private const int ShutdownSeconds = 30;
-    private static RuntimeJournalNativeFixture? active;
+    private int disposed;
     internal readonly TestDatabase Database = new();
     internal readonly IOptions<RuntimeJournalOptions> JournalOptions = Options.Create(new RuntimeJournalOptions());
+    internal readonly IOptions<NativeRuntimeTestOptions> TimingOptions = Options.Create(new NativeRuntimeTestOptions());
     private NativeRequestWorkOwner? requestWork;
 
     internal RuntimeJournalNativeFixture()
     {
+        if (!TimingOptions.Value.IsValid())
+        {
+            throw new InvalidOperationException("The native runtime test timing profile is invalid.");
+        }
+
+        Database.Store.RequireReaderContract(StoreReaderContract.RuntimeJournal);
         Database.Database.ConfigureRuntimeJournal(JournalOptions);
-        active = this;
+        Current = this;
         try
         {
             var builder = new TestClusterBuilder(initialSilosCount: 1);
@@ -48,10 +55,22 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
             Cluster = builder.Build();
             Codec = new(Database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         }
-        catch
+        catch (Exception failure)
         {
-            active = null;
-            Database.Dispose();
+            Current = null;
+            try
+            {
+                Database.Dispose();
+            }
+            catch (Exception cleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                throw new AggregateException(failure, cleanup);
+            }
+            catch (Exception cleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                throw new AggregateException(failure, cleanup);
+            }
+
             throw;
         }
     }
@@ -60,8 +79,8 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
     internal GrainRequestCodec Codec { get; }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(UnitRoutingOptions.Routing());
 
-    internal static RuntimeJournalNativeFixture Current
-        => active ?? throw new InvalidOperationException("The native runtime journal fixture is not active.");
+    [AllowNull]
+    internal static RuntimeJournalNativeFixture Current { get => field ?? throw new InvalidOperationException("The native runtime journal fixture is not active."); private set; }
 
     internal IServiceProvider SiloServices => Cluster.GetSiloServiceProvider();
     internal IJournalStorageProvider Provider => SiloServices.GetRequiredService<IJournalStorageProvider>();
@@ -69,7 +88,7 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
 
     public async Task InitializeAsync()
     {
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(StartupSeconds));
+        using var deadline = new CancellationTokenSource(TimingOptions.Value.StartupTimeout);
         try
         {
             await Cluster.DeployAsync(deadline.Token);
@@ -92,14 +111,19 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
 
     public async ValueTask DisposeAsync()
     {
+        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        {
+            return;
+        }
+
         var failures = new List<Exception>();
+        using (var deadline = new CancellationTokenSource(TimingOptions.Value.ShutdownTimeout))
+        {
+            await ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
+        }
         if (requestWork is not null)
         {
             await ObserveAsync(requestWork.DrainAsync, failures);
-        }
-        using (var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(ShutdownSeconds)))
-        {
-            await ObserveAsync(() => Cluster.StopAllSilosAsync(deadline.Token), failures);
         }
         await ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
         if (requestWork is not null)
@@ -110,41 +134,36 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         {
             Database.Dispose();
         }
-        catch (Exception error)
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        Current = null;
+        if (failures.Count == 1)
         {
-            failures.Add(error);
+            throw failures[0];
         }
-        active = null;
-        if (failures.Count == 1) throw failures[0];
-        if (failures.Count > 1) throw new AggregateException(failures);
+
+        if (failures.Count > 1)
+        {
+            throw new AggregateException(failures);
+        }
     }
 
     private async Task BootstrapAsync(CancellationToken cancellationToken)
     {
         var principal = Database.Store.Read(view => Database.Database.Principal(view, "root", TimeProvider.System.GetUtcNow()));
-        var mutation = new RuntimeJournalMutation(RuntimeJournalAction.BootstrapIdentity, string.Empty, Guid.Empty,
-            0, 0, null, ReadOnlyMemory<byte>.Empty, new(StringComparer.Ordinal), []);
-        var requestId = Guid.NewGuid();
-        var commandId = Guid.NewGuid();
-        var signed = Codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId,
-            NativeSerialization.Serialize(mutation));
-        using var identity = new GrainRequestIdentityScope(Cluster.ServiceProvider, principal, requestId,
-            commandId, cancellationToken);
-        var actor = Cluster.Client.GetGrain<IRequestGrain>(requestId);
-        var serializer = Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-        var reply = await GrainRequestStreamConsumer.DrainAsync(
-            streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer, requestId,
-            TimeProvider.System, cancellationToken, UnitRoutingOptions.Routing()).ConfigureAwait(false);
-        if (reply.Error is not null)
-        {
-            throw Errors.Fail(reply.Error.Value, reply.SafeDetail ?? "Runtime journal bootstrap failed.");
-        }
+        var services = SiloServices;
+        var startup = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(), Codec,
+            Database.Database, services.GetRequiredService<ICommitCoordinator>(), services, TimeProvider.System,
+            UnitRoutingOptions.Routing());
+        await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task ObserveAsync(Func<Task> operation, ICollection<Exception> failures)
     {
-        try { await operation().ConfigureAwait(false); }
-        catch (Exception error) { failures.Add(error); }
+        try
+        { await operation().ConfigureAwait(false); }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
     }
 }
 
@@ -167,6 +186,16 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         siloBuilder.Services.AddSingleton(fixture.Codec);
         siloBuilder.Services.AddSingleton(routing);
         siloBuilder.Services.AddSingleton(fixture.JournalOptions);
+        siloBuilder.Services.AddOptions<NativeRuntimeTestOptions>()
+            .Validate(options => options.IsValid(), "The native runtime test timing profile is invalid.")
+            .ValidateOnStart();
+        siloBuilder.Services.AddSingleton(services => new RuntimeJournalClient(
+            services.GetRequiredService<IGrainFactory>(), fixture.Codec, fixture.Database.Database,
+            services.GetRequiredService<ICommitCoordinator>(), services,
+            services.GetRequiredService<TimeProvider>(),
+            services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            services.GetRequiredService<IOptions<GrainRoutingOptions>>(), fixture.JournalOptions,
+            services.GetRequiredService<RuntimeJournalAdmission>()));
         siloBuilder.Services.AddSingleton<RuntimeJournalAdmission>();
         siloBuilder.Services.AddSingleton<IConfigureGrainTypeComponents>(services =>
             new RequestCqrsGrainComponentConfigurator(services.GetRequiredService<GrainClassMap>(), services));
@@ -177,6 +206,12 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         siloBuilder.AddOrleansGraph(configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IRequestGrain>()
+                .AllowClientCallGrain<IRuntimeJournalReplayGrain>()
+                .AddGrainTransition<IRuntimeJournalReplayGrain, IRequestGrain>()
+                .MethodByName(nameof(IRuntimeJournalReplayGrain.SetAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
+                .MethodByName(nameof(IRuntimeJournalReplayGrain.ReadAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
+                .MethodByName(nameof(IRuntimeJournalReplayGrain.GetActivationTokenAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
+                .MethodByName(nameof(IRuntimeJournalReplayGrain.DeleteAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
                 .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
                 .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
@@ -196,7 +231,8 @@ internal sealed class RuntimeJournalNativeClientConfigurator : IClientBuilderCon
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
-        clientBuilder.AddOrleansGraph().UseOrleansCommunication();
+        clientBuilder.AddOrleansGraph(configureGraph: graph =>
+            graph.AllowClientCallGrain<IRuntimeJournalReplayGrain>()).UseOrleansCommunication();
     }
 }
 #pragma warning restore ORLEANSEXP005

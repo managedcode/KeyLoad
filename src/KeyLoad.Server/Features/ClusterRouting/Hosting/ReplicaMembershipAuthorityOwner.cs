@@ -31,11 +31,13 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
 
     internal void Publish(IMembershipTable table)
     {
+        const string PublishFailureMessage = "The membership authority provider cannot be published.";
+
         ArgumentNullException.ThrowIfNull(table);
         lock (sync)
         {
             if (provider is not null || admissionClosed)
-            { throw new InvalidOperationException("The membership authority provider cannot be published."); }
+            { throw new InvalidOperationException(PublishFailureMessage); }
             provider = table;
         }
     }
@@ -71,10 +73,13 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
 
     internal void ClearProvider()
     {
+        const int EmptyActive = 0;
+        const string ClearProviderFailureMessage = "Membership authority operations have not joined.";
+
         lock (sync)
         {
-            if (!admissionClosed || active != 0)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, "Membership authority operations have not joined."); }
+            if (!admissionClosed || active != EmptyActive)
+            { throw Errors.Fail(ErrorCode.OwnershipLost, ClearProviderFailureMessage); }
             provider = null;
         }
     }
@@ -112,10 +117,12 @@ internal sealed class ReplicaMembershipAuthorityOwner : IAsyncDisposable
 
     private void Exit()
     {
+        const int EmptyActive = 0;
+
         lock (sync)
         {
             active--;
-            if (active == 0 && admissionClosed)
+            if (active == EmptyActive && admissionClosed)
             { drained.TrySetResult(); }
         }
     }

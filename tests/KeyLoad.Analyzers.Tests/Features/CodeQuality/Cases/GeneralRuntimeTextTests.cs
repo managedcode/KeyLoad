@@ -4,6 +4,51 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class GeneralRuntimeTextTests
 {
     [Test]
+    public async Task NativeFriendAssemblyIdentityIsCompilerMetadataAsync()
+    {
+        const string source = """
+            [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("KeyLoad.Analyzers.Tests")]
+            internal sealed class Subject { }
+            """;
+
+        await MagicRuntimeFixture.AssertStringAsync(source);
+    }
+
+    [Test]
+    public async Task AnUnrelatedAttributeDoesNotBorrowTheCompilerAssemblyIdentityBoundaryAsync()
+    {
+        const string source = """
+            [FriendAssembly([|"KeyLoad.Analyzers.Tests"|])]
+            internal sealed class Subject { }
+            internal sealed class FriendAssemblyAttribute(string identity) : System.Attribute
+            {
+                internal string Identity { get; } = identity;
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertStringAsync(source);
+    }
+
+    [Test]
+    public async Task AMarkedOptionsConstructorCannotHideExecutableMessageTextAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy
+            {
+                internal string Endpoint { get; }
+                internal Policy()
+                {
+                    Endpoint = "localhost";
+                    System.Console.WriteLine([|"Runtime diagnostic message"|]);
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertStringAsync(source);
+    }
+
+    [Test]
     [Arguments("return [|\"caller payload\"|];")]
     [Arguments("return [|\"\"|];")]
     [Arguments("return [|'x'|];")]

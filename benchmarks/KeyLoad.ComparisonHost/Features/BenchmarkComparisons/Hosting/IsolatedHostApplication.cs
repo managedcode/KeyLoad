@@ -30,14 +30,14 @@ internal static class IsolatedHostApplication
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var settings = IsolatedHostSettings.Read(configuration);
-            var openLoop = IsolatedOpenLoopSettings.Read(configuration, settings.Selection);
+            var settings = IsolatedHostSettings.ReadOptions(configuration).Value;
+            var openLoop = IsolatedOpenLoopSettings.ReadOptions(configuration, settings.Selection).Value.Selected;
             IsolatedHostReportWriter.ValidateDestination(settings.OutputDirectory);
             if (settings.UnsupportedReason is { } reason)
             {
                 var report = new IsolatedComparisonReport(IsolatedComparisonContract.Current.WorkerSchemaVersion, settings.Worker,
                     IsolatedHostConstants.UnsupportedTopology, reason, null);
-                await IsolatedHostReportWriter.WriteAsync(report, settings.OutputDirectory, cancellationToken);
+                await IsolatedHostReportWriter.WriteAsync(report, settings.OutputDirectory, settings.HostExecution, cancellationToken);
                 return ComparisonHostConstants.SuccessfulExitCode;
             }
             var policy = NativeComparisonExecutionRegistration.Read(configuration);
@@ -79,15 +79,15 @@ internal static class IsolatedHostApplication
 
         var target = owner.Create(settings);
         var runner = settings.Selection.ScaledProfile is { } scaledProfile
-            ? ComparisonRunner.ForScaled(scaledProfile, Console.WriteLine)
-            : new ComparisonRunner(settings.Selection.Options, Console.WriteLine);
+            ? ComparisonRunner.ForScaled(scaledProfile, policy, Console.WriteLine)
+            : new ComparisonRunner(settings.Selection.CreateExecutionOptions(), policy, Console.WriteLine);
         var report = await runner.RunAsync([target], settings.Worker.SourceRevision, cancellationToken,
             settings.Storage, settings.Selection.Scenario);
         report = report with { Provenance = settings.Identity.Provenance, LoadGeneratorImage = settings.Identity.LoadGeneratorImage };
         ValidateNativeReport(report, settings);
         var envelope = new IsolatedComparisonReport(IsolatedComparisonContract.Current.WorkerSchemaVersion,
             settings.Worker, IsolatedHostConstants.Measured, null, report);
-        await IsolatedHostReportWriter.WriteAsync(envelope, settings.OutputDirectory, cancellationToken);
+        await IsolatedHostReportWriter.WriteAsync(envelope, settings.OutputDirectory, settings.HostExecution, cancellationToken);
         return HasFailedCases(report) ? ComparisonHostConstants.FailedExitCode : ComparisonHostConstants.SuccessfulExitCode;
     }
 

@@ -44,7 +44,7 @@ internal sealed class ReplicaNativePersistenceTests
     {
         using var files = new ReplicaNativeFiles();
         using var canonical = files.Open(CanonicalDirectory);
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var operation = database.NormalizeOperation(new(Guid.NewGuid(), OperationKind.Batch, Principal,
             DateTimeOffset.UnixEpoch, Payload));
         using (var store = files.Open())

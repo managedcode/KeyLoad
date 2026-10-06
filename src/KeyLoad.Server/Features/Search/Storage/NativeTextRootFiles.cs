@@ -1,13 +1,14 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextRootFiles
 {
-    internal static void InitializeReceipt(string root, Guid sourceNodeId)
+    internal static void InitializeReceipt(string root, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         var path = Path.Combine(root, NativeTextProtocol.RootReceiptFile);
         if (File.Exists(path))
         {
-            VerifyReceipt(root, sourceNodeId);
+            VerifyReceipt(root, sourceNodeId, executionOptions: executionOptions);
             return;
         }
         if (Directory.EnumerateFileSystemEntries(root).Any())
@@ -15,21 +16,24 @@ internal static class NativeTextRootFiles
             throw NativeTextErrors.Ownership();
         }
         NativeTextFileIO.WriteEnvelope(path, new NativeTextOwnerReceipt(NativeTextProtocol.FormatVersion,
-            root, string.Empty, sourceNodeId, null, []), 65_536);
+            root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions);
     }
 
-    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits)
+    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        var leaves = new List<string>(NativeTextPhysicalBudget.MaximumGenerations);
-        var files = 0;
-        long bytes = 0;
+        const int FilesInitialValue = 0;
+        const int BytesInitialValue = 0;
+
+        var leaves = new List<string>(executionOptions.Value.MaximumGenerations);
+        var files = FilesInitialValue;
+        long bytes = BytesInitialValue;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
         {
             if (Path.GetFileName(entry) == NativeTextProtocol.RootReceiptFile)
             {
                 continue;
             }
-            if (leaves.Count == NativeTextPhysicalBudget.MaximumGenerations)
+            if (leaves.Count == executionOptions.Value.MaximumGenerations)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -39,11 +43,11 @@ internal static class NativeTextRootFiles
                 throw NativeTextErrors.Ownership();
             }
             leaves.Add(leaf);
-            NativeTextGenerationFiles.ValidateGeneration(entry, root, leaf, sourceNodeId, limits);
-            var measured = NativeTextFileIO.MeasureRegularFiles(entry, NativeTextProtocol.MaximumFiles,
-                NativeTextProtocol.MaximumDiskBytes);
-            if (measured.Files > NativeTextProtocol.MaximumFiles - files
-                || measured.Bytes > NativeTextProtocol.MaximumDiskBytes - bytes)
+            NativeTextGenerationFiles.ValidateGeneration(entry, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+            var measured = NativeTextFileIO.MeasureRegularFiles(entry, executionOptions.Value.MaximumFiles,
+                executionOptions.Value.MaximumDiskBytes, executionOptions: executionOptions);
+            if (measured.Files > executionOptions.Value.MaximumFiles - files
+                || measured.Bytes > executionOptions.Value.MaximumDiskBytes - bytes)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -56,14 +60,16 @@ internal static class NativeTextRootFiles
         }
     }
 
-    internal static void VerifyReceipt(string root, Guid sourceNodeId)
+    internal static void VerifyReceipt(string root, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        const int EmptyOwnedPathsLength = 0;
+
         var path = Path.Combine(root, NativeTextProtocol.RootReceiptFile);
         NativeTextFileIO.VerifyRegularFile(path);
-        var owner = NativeTextFileIO.ReadEnvelope<NativeTextOwnerReceipt>(path, 65_536);
+        var owner = NativeTextFileIO.ReadEnvelope<NativeTextOwnerReceipt>(path, executionOptions.Value.MaximumOwnerReceiptBytes);
         if (owner is null || owner.FormatVersion != NativeTextProtocol.FormatVersion || owner.RootDirectory != root
             || !string.IsNullOrEmpty(owner.GenerationLeaf) || owner.SourceNodeId != sourceNodeId
-            || owner.Scope is not null || owner.OwnedPaths is null || owner.OwnedPaths.Length != 0)
+            || owner.Scope is not null || owner.OwnedPaths is null || owner.OwnedPaths.Length != EmptyOwnedPathsLength)
         {
             throw NativeTextErrors.Ownership();
         }

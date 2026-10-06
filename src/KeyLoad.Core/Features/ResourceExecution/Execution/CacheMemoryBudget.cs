@@ -5,6 +5,9 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Atomically admits modeled retained cache bytes and entries for one node.</summary>
 public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
 {
+    private const int EmptyElementCount = 0;
+    private const int NoRetainedBytes = 0;
+
     private const string InvalidBytes = "A cache reservation must charge positive modeled bytes.";
     private const string InvalidEntries = "A cache reservation cannot charge a negative entry count.";
     private const string AccountingInvariantFailed = "The cache memory reservation accounting is inconsistent.";
@@ -81,7 +84,7 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
     {
         lock (gate)
         {
-            if (activeReservations == 0 || retainedBytes < bytes || retainedEntries < entries)
+            if (activeReservations == EmptyElementCount || retainedBytes < bytes || retainedEntries < entries)
             {
                 throw new InvalidOperationException(AccountingInvariantFailed);
             }
@@ -94,12 +97,12 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
 
     private static void ValidateRequest(long bytes, int entries)
     {
-        if (bytes <= 0)
+        if (bytes <= NoRetainedBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(bytes), bytes, InvalidBytes);
         }
 
-        if (entries < 0)
+        if (entries < NoRetainedBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(entries), entries, InvalidEntries);
         }

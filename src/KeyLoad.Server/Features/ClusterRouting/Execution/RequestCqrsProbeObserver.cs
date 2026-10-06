@@ -32,7 +32,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
         IOptions<RequestProbeExecutionOptions> executionOptions)
     {
         var address = localSilo.SiloAddress.ToParsableString();
-        var files = RequestCqrsProbeFiles.Open(options, replicaOptions.Value);
+        var files = RequestCqrsProbeFiles.Open(options, replicaOptions, executionOptions);
         return new(files, replicaOptions, address, applicationLifetime, executionOptions);
     }
 
@@ -123,6 +123,10 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
     private RequestCqrsProbeClaim? Claim(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         RequestCqrsProbeSnapshot snapshot)
     {
+        const int EmptyMatchesLength = 0;
+        const int ClaimEmptyMatchesLength = 1;
+        const int MatchesFirstIndex = 0;
+
         if (!TryGetPhase(phase, out _))
         { throw Invalid(); }
         var existing = lifecycle.FindClaim(identity.RequestId);
@@ -136,11 +140,11 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
             && loaded.Record.CommandId == identity.CommandId
             && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
             && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();
-        if (matches.Length == 0)
+        if (matches.Length == EmptyMatchesLength)
         { return null; }
-        if (matches.Length != 1)
+        if (matches.Length != ClaimEmptyMatchesLength)
         { throw Invalid(); }
-        var selected = matches[0];
+        var selected = matches[MatchesFirstIndex];
         // Retain the first validated request identity so the later disposal callback can join across voters.
         return lifecycle.AddClaim(identity, selected);
     }
@@ -151,6 +155,10 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
     private async Task HoldAsync(RequestCqrsProbeClaim claim, RequestCqrsProbePhase phase,
         CancellationToken requestCancellation)
     {
+        const int ReleasesLengthValidationBoundary = 1;
+        const int EmptyReleasesLength = 1;
+        const int ReleasesFirstIndex = 0;
+
         var holdTimeout = settings.HoldTimeout;
         var pollInterval = settings.PollInterval;
         using var ceiling = new CancellationTokenSource(holdTimeout);
@@ -165,10 +173,10 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
                 var snapshot = files.ReadSnapshot();
                 RequestCqrsProbeFiles.RequireActiveArm(claim.Arm, snapshot);
                 var releases = snapshot.Releases.Where(record => record.ArmId == claim.Arm.Record.ArmId).ToArray();
-                if (releases.Length > 1 || releases.Length == 1
-                    && (releases[0].RequestId != claim.Identity.RequestId || releases[0].SessionId != claim.Arm.Record.SessionId))
+                if (releases.Length > ReleasesLengthValidationBoundary || releases.Length == EmptyReleasesLength
+                    && (releases[ReleasesFirstIndex].RequestId != claim.Identity.RequestId || releases[ReleasesFirstIndex].SessionId != claim.Arm.Record.SessionId))
                 { throw Invalid(); }
-                if (releases.Length == 1)
+                if (releases.Length == EmptyReleasesLength)
                 {
                     files.WriteMarker(CreateMarker(claim, phase, RequestCqrsProbeOutcome.Released));
                     return;

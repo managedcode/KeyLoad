@@ -24,7 +24,7 @@ internal sealed class ScaledRawStorageFixtureTests
     public async Task AcScale002And003MiniFixturesSeedVerifyAndRetainExactZoneTreeValues(int payloadBytes)
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, payloadBytes), async fixture =>
+            () => new ScaledRawStorageFixture(MiniRecordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage()), async fixture =>
             {
                 var before = fixture.Capture();
 
@@ -73,8 +73,7 @@ internal sealed class ScaledRawStorageFixtureTests
     public async Task AcScale002And003GenuineHundredThousandZoneTreeRowsPassFullValueOracle(int payloadBytes)
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(ScaledRecordCount, payloadBytes,
-            TestContext.Current!.Execution.CancellationToken), async fixture =>
+            () => new ScaledRawStorageFixture(ScaledRecordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage(),             TestContext.Current!.Execution.CancellationToken), async fixture =>
             {
                 var seeded = fixture.Capture();
 

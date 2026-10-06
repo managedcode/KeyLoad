@@ -2,6 +2,13 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PackedAnnGraph
 {
+    private const int EmptyElementCount = 0;
+    private const int BaseLevelDegreeMultiplier = 2;
+    private const int MissingNeighbor = -1;
+    private const int AdjacentElementOffset = 1;
+    private const int SingleWorkUnit = 1;
+    private const int FirstElementIndex = 0;
+
     private const string DegreeExceeded = "The ANN adjacency exceeds its admitted degree.";
     private const string InvalidAddress = "The ANN adjacency address is invalid.";
     // Node ordinals stay below 2^23; the first slot packs its count above the ordinal.
@@ -26,25 +33,25 @@ internal sealed class PackedAnnGraph
         upperEdges = new int[upperSlots];
     }
 
-    internal int Degree(int layer) => layer == 0 ? connections * 2 : connections;
+    internal int Degree(int layer) => layer == EmptyElementCount ? connections * BaseLevelDegreeMultiplier : connections;
     internal int Connections => connections;
 
     internal int Neighbor(int node, int layer, int offset)
     {
         var slot = Slot(node, layer, offset);
-        var encoded = layer == 0 ? baseEdges[slot] : upperEdges[slot];
-        if (offset == 0)
+        var encoded = layer == EmptyElementCount ? baseEdges[slot] : upperEdges[slot];
+        if (offset == EmptyElementCount)
         {
             encoded &= NeighborMask;
         }
-        return encoded == 0 ? -1 : encoded - 1;
+        return encoded == EmptyElementCount ? MissingNeighbor : encoded - AdjacentElementOffset;
     }
 
     internal int NeighborCount(int node, int layer, AnnWorkBudget budget)
     {
-        budget.Charge(1);
-        var firstSlot = Slot(node, layer, 0);
-        var encoded = layer == 0 ? baseEdges[firstSlot] : upperEdges[firstSlot];
+        budget.Charge(SingleWorkUnit);
+        var firstSlot = Slot(node, layer, EmptyElementCount);
+        var encoded = layer == EmptyElementCount ? baseEdges[firstSlot] : upperEdges[firstSlot];
         return encoded >> NeighborBits;
     }
 
@@ -55,9 +62,9 @@ internal sealed class PackedAnnGraph
         {
             throw new InvalidOperationException(DegreeExceeded);
         }
-        var start = Slot(node, layer, 0);
+        var start = Slot(node, layer, EmptyElementCount);
         budget.Charge(degree);
-        if (layer == 0)
+        if (layer == EmptyElementCount)
         {
             Array.Clear(baseEdges, start, degree);
         }
@@ -69,18 +76,18 @@ internal sealed class PackedAnnGraph
         {
             throw new InvalidOperationException(DegreeExceeded);
         }
-        for (var offset = 0; offset < neighbors.Length; offset++)
+        for (var offset = FirstElementIndex; offset < neighbors.Length; offset++)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             var neighbor = neighbors[offset];
             if ((uint)neighbor >= (uint)count || neighbor >= NeighborMask)
             {
                 throw new InvalidOperationException(InvalidAddress);
             }
-            var encoded = offset == 0
-                ? checked((int)(((uint)neighbors.Length << NeighborBits) | (uint)(neighbor + 1)))
-                : checked(neighbor + 1);
-            if (layer == 0)
+            var encoded = offset == EmptyElementCount
+                ? checked((int)(((uint)neighbors.Length << NeighborBits) | (uint)(neighbor + AdjacentElementOffset)))
+                : checked(neighbor + AdjacentElementOffset);
+            if (layer == EmptyElementCount)
             {
                 baseEdges[start + offset] = encoded;
             }
@@ -94,22 +101,22 @@ internal sealed class PackedAnnGraph
     private int Slot(int node, int layer, int offset)
     {
         var degree = Degree(layer);
-        if ((uint)node >= (uint)count || (uint)offset >= (uint)degree || layer < 0
+        if ((uint)node >= (uint)count || (uint)offset >= (uint)degree || layer < EmptyElementCount
             || layer > levels[node])
         {
             throw new InvalidOperationException(InvalidAddress);
         }
-        if (layer == 0)
+        if (layer == EmptyElementCount)
         {
             return checked(node * degree + offset);
         }
         var first = upperOffsets[node];
-        var end = upperOffsets[node + 1];
+        var end = upperOffsets[node + AdjacentElementOffset];
         var nodeSlots = checked((int)levels[node] * connections);
         if (end - first != nodeSlots)
         {
             throw new InvalidOperationException(InvalidAddress);
         }
-        return checked(first + (layer - 1) * connections + offset);
+        return checked(first + (layer - AdjacentElementOffset) * connections + offset);
     }
 }

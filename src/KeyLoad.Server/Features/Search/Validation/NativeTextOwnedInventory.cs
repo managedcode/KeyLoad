@@ -1,13 +1,17 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextOwnedInventory
 {
-    internal static void ValidateTrackedLayout(string generationPath, NativeTextOwnedPath[] ownedPaths,
-        ReadExecutionBudget? budget, bool allowMissingNative)
+    internal static void ValidateTrackedLayout(string generationPath, NativeTextOwnedPath[] ownedPaths, ReadExecutionBudget? budget, bool allowMissingNative, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        NativeTextValidation.ValidateOwnedPaths(ownedPaths);
+        const int EntriesInitialValue = 1;
+        const int DirectoriesInitialValue = 1;
+        const string AllEntriesSearchPattern = "*";
+
+        NativeTextValidation.ValidateOwnedPaths(ownedPaths, executionOptions: executionOptions);
         var nativePath = Path.Combine(generationPath, NativeTextProtocol.NativeDirectory);
         if (!Directory.Exists(nativePath))
         {
@@ -15,18 +19,17 @@ internal static class NativeTextOwnedInventory
             return;
         }
         NativeTextFileIO.VerifyDirectory(nativePath);
-        var counts = new LayoutCounts { Entries = 1, Directories = 1 };
-        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, "*", SearchOption.AllDirectories))
+        var counts = new LayoutCounts { Entries = EntriesInitialValue, Directories = DirectoriesInitialValue };
+        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, AllEntriesSearchPattern, SearchOption.AllDirectories))
         {
             budget?.Check();
             var attributes = File.GetAttributes(path);
-            VerifyEntry(generationPath, path, attributes, ownedPaths, counts);
+            VerifyEntry(generationPath, path, attributes, ownedPaths, counts, executionOptions: executionOptions);
         }
     }
 
-    internal static NativeTextFile[] CaptureFiles(string generationPath, NativeTextOwnedPath[] ownedPaths,
-        ReadExecutionBudget? budget)
-        => new NativeTextInventoryCapture(generationPath, ownedPaths, budget).Capture();
+    internal static NativeTextFile[] CaptureFiles(string generationPath, NativeTextOwnedPath[] ownedPaths, ReadExecutionBudget? budget, IOptions<NativeTextExecutionOptions> executionOptions)
+        => new NativeTextInventoryCapture(generationPath, ownedPaths, budget, executionOptions: executionOptions).Capture();
 
     internal static void RequireOwnedPath(NativeTextOwnedPath[] ownedPaths, string relative, bool directory)
     {
@@ -38,10 +41,13 @@ internal static class NativeTextOwnedInventory
 
     private static void VerifyMissingNative(string path, bool allowMissing)
     {
+        const int EmptyAttributesFileAttributesReparsePoint = 0;
+        const int EmptyAttributesFileAttributesDirectory = 0;
+
         try
         {
             var attributes = File.GetAttributes(path);
-            if ((attributes & FileAttributes.ReparsePoint) != 0 || (attributes & FileAttributes.Directory) == 0)
+            if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributesFileAttributesReparsePoint || (attributes & FileAttributes.Directory) == EmptyAttributesFileAttributesDirectory)
             {
                 throw NativeTextErrors.Ownership();
             }
@@ -65,35 +71,39 @@ internal static class NativeTextOwnedInventory
         throw NativeTextErrors.Ownership();
     }
 
-    private static void VerifyEntry(string generationPath, string path, FileAttributes attributes,
-        NativeTextOwnedPath[] ownedPaths, LayoutCounts counts)
+    private static void VerifyEntry(string generationPath, string path, FileAttributes attributes, NativeTextOwnedPath[] ownedPaths, LayoutCounts counts, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        if (++counts.Entries > NativeTextProtocol.MaximumEntries)
+        const int EmptyAttributesFileAttributesReparsePoint = 0;
+        const int EmptyAttributesFileAttributesDirectory = 0;
+        const char SlashCharacter = '/';
+        const int RelativeCountStep = 1;
+
+        if (++counts.Entries > executionOptions.Value.MaximumEntries)
         {
             throw NativeTextErrors.BoundExceeded();
         }
-        if ((attributes & FileAttributes.ReparsePoint) != 0)
+        if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributesFileAttributesReparsePoint)
         {
             throw NativeTextErrors.Ownership();
         }
         var relative = NativeTextPath.RelativePath(generationPath, path);
-        var directory = (attributes & FileAttributes.Directory) != 0;
+        var directory = (attributes & FileAttributes.Directory) != EmptyAttributesFileAttributesDirectory;
         RequireOwnedPath(ownedPaths, relative, directory);
-        if (relative.Count(character => character == '/') + 1 > NativeTextProtocol.MaximumDepth)
+        if (relative.Count(character => character == SlashCharacter) + RelativeCountStep > executionOptions.Value.MaximumDepth)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         if (directory)
         {
-            if (++counts.Directories > NativeTextProtocol.MaximumDirectories)
+            if (++counts.Directories > executionOptions.Value.MaximumDirectories)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
             return;
         }
         var length = new FileInfo(path).Length;
-        if (++counts.Files > NativeTextProtocol.MaximumFiles
-            || length > NativeTextProtocol.MaximumDiskBytes - counts.Bytes)
+        if (++counts.Files > executionOptions.Value.MaximumFiles
+            || length > executionOptions.Value.MaximumDiskBytes - counts.Bytes)
         {
             throw NativeTextErrors.BoundExceeded();
         }
@@ -111,17 +121,22 @@ internal static class NativeTextOwnedInventory
 
 internal sealed class NativeTextInventoryCapture
 {
+    private const int EntriesInitialValue = 1;
+    private const int DirectoriesInitialValue = 1;
+
+    private readonly IOptions<NativeTextExecutionOptions> executionOptions;
+
     private readonly string _generationPath;
     private readonly NativeTextOwnedPath[] _ownedPaths;
     private readonly ReadExecutionBudget? _budget;
     private readonly List<NativeTextFile> _files = [];
-    private int _entries = 1;
-    private int _directories = 1;
+    private int _entries = EntriesInitialValue;
+    private int _directories = DirectoriesInitialValue;
     private long _bytes;
 
-    internal NativeTextInventoryCapture(string generationPath, NativeTextOwnedPath[] ownedPaths,
-        ReadExecutionBudget? budget)
+    internal NativeTextInventoryCapture(string generationPath, NativeTextOwnedPath[] ownedPaths, ReadExecutionBudget? budget, IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        this.executionOptions = executionOptions;
         _generationPath = generationPath;
         _ownedPaths = ownedPaths;
         _budget = budget;
@@ -129,8 +144,10 @@ internal sealed class NativeTextInventoryCapture
 
     internal NativeTextFile[] Capture()
     {
+        const string AllEntriesSearchPattern = "*";
+
         var nativePath = Path.Combine(_generationPath, NativeTextProtocol.NativeDirectory);
-        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, "*", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, AllEntriesSearchPattern, SearchOption.AllDirectories))
         {
             _budget?.Check();
             CaptureEntry(path, File.GetAttributes(path));
@@ -141,18 +158,23 @@ internal sealed class NativeTextInventoryCapture
 
     private void CaptureEntry(string path, FileAttributes attributes)
     {
-        if (++_entries > NativeTextProtocol.MaximumEntries)
+        const int EmptyAttributesFileAttributesReparsePoint = 0;
+        const int EmptyAttributesFileAttributesDirectory = 0;
+        const char SlashCharacter = '/';
+        const int RelativeCountStep = 1;
+
+        if (++_entries > executionOptions.Value.MaximumEntries)
         {
             throw NativeTextErrors.BoundExceeded();
         }
-        if ((attributes & FileAttributes.ReparsePoint) != 0)
+        if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributesFileAttributesReparsePoint)
         {
             throw NativeTextErrors.Ownership();
         }
         var relative = NativeTextPath.RelativePath(_generationPath, path);
-        var isDirectory = (attributes & FileAttributes.Directory) != 0;
+        var isDirectory = (attributes & FileAttributes.Directory) != EmptyAttributesFileAttributesDirectory;
         NativeTextOwnedInventory.RequireOwnedPath(_ownedPaths, relative, isDirectory);
-        if (relative.Count(character => character == '/') + 1 > NativeTextProtocol.MaximumDepth)
+        if (relative.Count(character => character == SlashCharacter) + RelativeCountStep > executionOptions.Value.MaximumDepth)
         {
             throw NativeTextErrors.BoundExceeded();
         }
@@ -166,7 +188,7 @@ internal sealed class NativeTextInventoryCapture
 
     private void CaptureDirectory()
     {
-        if (++_directories > NativeTextProtocol.MaximumDirectories)
+        if (++_directories > executionOptions.Value.MaximumDirectories)
         {
             throw NativeTextErrors.BoundExceeded();
         }
@@ -174,16 +196,16 @@ internal sealed class NativeTextInventoryCapture
 
     private void CaptureFile(string path, string relative)
     {
-        if (_files.Count >= NativeTextProtocol.MaximumFiles)
+        if (_files.Count >= executionOptions.Value.MaximumFiles)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         NativeTextFileIO.VerifyRegularFile(path);
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            NativeTextProtocol.HashBufferBytes, FileOptions.SequentialScan);
+            executionOptions.Value.HashBufferBytes, FileOptions.SequentialScan);
         var length = input.Length;
-        var remaining = NativeTextProtocol.MaximumDiskBytes - _bytes;
-        var digest = NativeTextDigest.HashBounded(input, length, remaining, _budget);
+        var remaining = executionOptions.Value.MaximumDiskBytes - _bytes;
+        var digest = NativeTextDigest.HashBounded(input, length, remaining, _budget, executionOptions: executionOptions);
         if (input.Length != length)
         {
             throw NativeTextErrors.Corrupt();

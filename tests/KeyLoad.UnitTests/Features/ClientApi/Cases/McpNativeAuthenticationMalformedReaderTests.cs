@@ -14,12 +14,12 @@ internal sealed class McpNativeAuthenticationMalformedReaderTests
         for (var length = 0; length < payload.Length; length++)
         {
             var prefix = payload[..length];
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(prefix, CancellationToken.None)).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.Inspect(prefix, CancellationToken.None, UnitMcpOptions.Execution())).Code)
                 .IsEqualTo(ErrorCode.Validation);
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(prefix, CancellationToken.None)).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpNativeAuthentication.ReadPrincipal(prefix, CancellationToken.None, UnitMcpOptions.Execution())).Code)
                 .IsEqualTo(ErrorCode.Validation);
         }
-        var decoded = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None);
+        var decoded = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution());
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
     }
 

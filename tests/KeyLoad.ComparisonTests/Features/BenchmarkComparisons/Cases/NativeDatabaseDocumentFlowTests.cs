@@ -17,7 +17,7 @@ internal sealed class NativeDatabaseDocumentFlowTests
         await using IComparisonTarget target = name == "SurrealDB"
             ? new SurrealDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions)
             : new HelixDbTarget(client, Guid.NewGuid().ToString(), fixture.Image, NativeDatabaseFlowFixture.ExecutionOptions);
-        var corpus = new BenchmarkDataset(new() { Documents = 32, Dimensions = 128, GraphVertices = 16, GraphDepth = 3 });
+        var corpus = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Comparisons.ComparisonOptions() { Documents = 32, Dimensions = 128, GraphVertices = 16, GraphDepth = 3 }));
         await target.InitializeAsync(corpus, token);
         await using var session = await target.OpenSessionAsync(token);
         var readback = new List<FoundDocument>();

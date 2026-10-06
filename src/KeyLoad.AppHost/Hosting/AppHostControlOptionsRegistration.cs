@@ -11,6 +11,14 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationBinding]
 internal static class AppHostControlOptionsRegistration
 {
+    private const string ProtocolSection = "KeyLoadTests:ProtocolCohort";
+    private const string BenchmarkEnabled = "Benchmarks:Enabled";
+    private const string BenchmarkScale = "Benchmarks:ScaleProfile";
+    private const string BenchmarkScenario = "Benchmarks:Scenario";
+    private const string BenchmarkProfile = "Benchmarks:Profile";
+    private const string BenchmarkNodes = "Benchmarks:NodeCount";
+    private const int SectionPresenceCount = 1;
+
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
     {
         IOptions<AppHostControlOptions> options = new OptionsManager<AppHostControlOptions>(
@@ -24,9 +32,14 @@ internal static class AppHostControlOptionsRegistration
                 value.Ephemeral = configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting);
                 value.BenchmarksEnabled = configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting);
                 value.TargetSelected = configuration[ComparisonWorkerSelection.TargetSetting] is not null;
+                value.ProtocolCohortConfigured = configuration.GetSection(ProtocolSection).GetChildren().Take(SectionPresenceCount).Any();
+                value.ComparisonSelectorsPresent = HasValue(configuration, BenchmarkEnabled)
+                    || HasValue(configuration, ComparisonWorkerSelection.TargetSetting) || HasValue(configuration, BenchmarkNodes)
+                    || HasValue(configuration, BenchmarkScenario) || HasValue(configuration, BenchmarkProfile) || HasValue(configuration, BenchmarkScale);
                 value.ScaleSelected = configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null;
             })], [], []));
         _ = options.Value;
         return options;
     }
+    private static bool HasValue(IConfiguration configuration, string key) => !string.IsNullOrWhiteSpace(configuration[key]);
 }

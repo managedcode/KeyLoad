@@ -2,13 +2,22 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnExactSearch
 {
+    private const int EmptyElementCount = 0;
+    private const int BitmapWordShift = 6;
+    private const ulong LowestBitmapBit = 1UL;
+    private const int BitmapRemainderMask = 63;
+    private const int FirstElementIndex = 0;
+    private const int SingleWorkUnit = 1;
+    private const int BitmapWordBits = 64;
+    private const int AdjacentElementOffset = 1;
+
     private const string EligibilityChanged = "The validated ANN eligibility count changed during exact search.";
     internal static AnnCandidate[] Run(PackedAnnState state, PreparedSimilarity similarity,
         ulong[]? eligibility, int resultCount, AnnWorkBudget budget)
     {
         budget.Charge(resultCount);
         var candidates = new AnnCandidate[resultCount];
-        var found = 0;
+        var found = EmptyElementCount;
         if (eligibility is null)
         {
             found = ScanAll(state, similarity, candidates, found, budget);
@@ -25,14 +34,14 @@ internal static class PackedAnnExactSearch
     }
 
     internal static bool IsEligible(int ordinal, ulong[]? eligibility)
-        => eligibility is null || (eligibility[ordinal >> 6] & (1UL << (ordinal & 63))) != 0;
+        => eligibility is null || (eligibility[ordinal >> BitmapWordShift] & (LowestBitmapBit << (ordinal & BitmapRemainderMask))) != EmptyElementCount;
 
     private static int ScanAll(PackedAnnState state, PreparedSimilarity similarity,
         AnnCandidate[] candidates, int found, AnnWorkBudget budget)
     {
-        for (var ordinal = 0; ordinal < state.Count; ordinal++)
+        for (var ordinal = FirstElementIndex; ordinal < state.Count; ordinal++)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             found = ScoreOrdinal(state, similarity, ordinal, candidates, found, budget);
         }
         return found;
@@ -41,18 +50,18 @@ internal static class PackedAnnExactSearch
     private static int ScanEligible(PackedAnnState state, PreparedSimilarity similarity, ulong[] eligibility,
         AnnCandidate[] candidates, int found, AnnWorkBudget budget)
     {
-        for (var wordIndex = 0; wordIndex < eligibility.Length; wordIndex++)
+        for (var wordIndex = FirstElementIndex; wordIndex < eligibility.Length; wordIndex++)
         {
             budget.Charge(sizeof(ulong));
             var bits = eligibility[wordIndex];
-            while (bits != 0)
+            while (bits != EmptyElementCount)
             {
                 budget.Check();
                 var bit = System.Numerics.BitOperations.TrailingZeroCount(bits);
-                var ordinal = checked(wordIndex * 64 + bit);
-                budget.Charge(1);
+                var ordinal = checked(wordIndex * BitmapWordBits + bit);
+                budget.Charge(SingleWorkUnit);
                 found = ScoreOrdinal(state, similarity, ordinal, candidates, found, budget);
-                bits &= bits - 1;
+                bits &= bits - AdjacentElementOffset;
             }
         }
         return found;
@@ -69,10 +78,10 @@ internal static class PackedAnnExactSearch
 
     internal static int InsertTop(AnnCandidate[] candidates, int found, AnnCandidate candidate, AnnWorkBudget budget)
     {
-        var position = 0;
+        var position = FirstElementIndex;
         while (position < found)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             var current = candidates[position];
             if (Better(candidate, current, budget))
             {
@@ -84,11 +93,11 @@ internal static class PackedAnnExactSearch
         {
             return found;
         }
-        var newCount = Math.Min(candidates.Length, found + 1);
-        for (var index = newCount - 1; index > position; index--)
+        var newCount = Math.Min(candidates.Length, found + AdjacentElementOffset);
+        for (var index = newCount - AdjacentElementOffset; index > position; index--)
         {
-            budget.Charge(1);
-            candidates[index] = candidates[index - 1];
+            budget.Charge(SingleWorkUnit);
+            candidates[index] = candidates[index - AdjacentElementOffset];
         }
         candidates[position] = candidate;
         return newCount;
@@ -100,7 +109,7 @@ internal static class PackedAnnExactSearch
         {
             return left.Score > right.Score;
         }
-        budget.Charge(1);
+        budget.Charge(SingleWorkUnit);
         return left.SourceOrdinal < right.SourceOrdinal;
     }
 }

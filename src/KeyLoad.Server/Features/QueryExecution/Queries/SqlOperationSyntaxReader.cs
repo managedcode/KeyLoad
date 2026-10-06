@@ -63,8 +63,10 @@ internal sealed class SqlOperationSyntaxReader(string sql, int maximumTokens, in
 
     private void Advance()
     {
+        const int EmptyOffsetSqlOperationSyntaxCheckInterval = 0;
+
         offset++;
-        if (offset % SqlOperationSyntax.CheckInterval == 0)
+        if (offset % SqlOperationSyntax.CheckInterval == EmptyOffsetSqlOperationSyntaxCheckInterval)
         { cancellationToken.ThrowIfCancellationRequested(); }
     }
 

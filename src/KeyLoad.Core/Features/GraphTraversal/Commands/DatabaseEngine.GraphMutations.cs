@@ -17,6 +17,8 @@ public sealed partial class DatabaseEngine
     private MutationReceipt Upsert(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition,
         UpsertEdge edge)
     {
+        const int AbsentRevision = 0;
+
         JsonData.Identifier(edge.EdgeId);
         JsonData.Identifier(edge.Label);
         var resource = Resource(tx, partition, edge.Graph, ResourceKind.Graph);
@@ -38,8 +40,8 @@ public sealed partial class DatabaseEngine
             ValidateCanonicalEdge(previous, partition, edge.EdgeId);
         }
         var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
-        CheckRevision(ownerVersion?.Revision ?? previous?.Revision ?? 0, edge.ExpectedRevision);
-        var nextRevision = NextRevision(ownerVersion?.Revision ?? previous?.Revision ?? 0);
+        CheckRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision, edge.ExpectedRevision);
+        var nextRevision = NextRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision);
         var record = new EdgeRecord(edge.EdgeId, edge.From, edge.To, edge.Label,
             JsonData.Validate(edge.AttributesJson, Limits), nextRevision);
         if (edge.To.Partition != partition)
@@ -127,9 +129,11 @@ public sealed partial class DatabaseEngine
 
     private static long NextRevision(long revision)
     {
+        const int RevisionIncrement = 1;
+
         try
         {
-            return checked(revision + 1);
+            return checked(revision + RevisionIncrement);
         }
         catch (OverflowException)
         {

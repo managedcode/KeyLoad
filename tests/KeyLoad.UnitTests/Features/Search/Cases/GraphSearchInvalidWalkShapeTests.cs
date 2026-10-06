@@ -15,7 +15,7 @@ internal sealed class GraphSearchInvalidWalkShapeTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var seed = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects,
             GraphSearchTestSupport.Root);
         var position = database.Store.Position;

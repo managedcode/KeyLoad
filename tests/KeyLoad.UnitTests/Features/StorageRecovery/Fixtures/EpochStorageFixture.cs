@@ -69,7 +69,7 @@ internal sealed class EpochStorageFixture : IDisposable
         }
 
         identity = identity with { FormatVersion = sourceEpoch };
-        ZoneTreeIdentityFile.Write(Path.Combine(Source, "identity.json"), identity);
+        ZoneTreeIdentityFile.Write(Path.Combine(Source, "identity.json"), identity, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         if (checkpoint)
         {
             await RewriteCheckpointToSourceAsync(Path.Combine(Source, JournalName), sourceEpoch);

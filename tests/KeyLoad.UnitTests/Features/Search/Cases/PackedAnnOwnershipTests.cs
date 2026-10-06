@@ -24,7 +24,7 @@ internal sealed class PackedAnnOwnershipTests
         records[0] = records[1];
         await Assert.That(original.Values[0]).IsEqualTo(-100f);
         await Assert.That(records[0].DocumentId).IsEqualTo(records[1].DocumentId);
-        await AssertValidation(() => PackedAnnIndex.Build(space, [records[1], original], new(),
+        await AssertValidation(() => PackedAnnIndex.Build(space, [records[1], original], UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database)));
 
         var after = index.Search(query, 2, null, PackedAnnIndexTestSupport.Budget(database));

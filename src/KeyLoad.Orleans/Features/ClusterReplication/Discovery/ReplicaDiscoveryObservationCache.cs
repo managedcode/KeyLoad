@@ -24,9 +24,11 @@ internal sealed class ReplicaDiscoveryObservationCache
 
     internal ReplicaDiscoveryObservation ReadLocal()
     {
+        const int PortValidationBoundary = 0;
+
         var current = local.Read();
         var address = SiloAddress.FromParsableString(current.SiloAddress);
-        if (address.Endpoint.Port <= 0 || address.ToParsableString() != current.SiloAddress)
+        if (address.Endpoint.Port <= PortValidationBoundary || address.ToParsableString() != current.SiloAddress)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidDiscovery);
         }

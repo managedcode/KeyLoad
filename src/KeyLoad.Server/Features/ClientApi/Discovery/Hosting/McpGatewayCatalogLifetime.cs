@@ -79,13 +79,15 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
     private async Task DisposeCoreAsync()
     {
+        const int EmptyActive = 0;
+
         Task? initialization;
         Task drained;
         lock (_sync)
         {
             _closing = true;
             initialization = _initialization;
-            drained = _active == 0
+            drained = _active == EmptyActive
                 ? Task.CompletedTask
                 : (_drained ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously)).Task;
         }
@@ -116,10 +118,12 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
     private void Release()
     {
+        const int EmptyActive = 0;
+
         lock (_sync)
         {
             _active--;
-            if (_active == 0)
+            if (_active == EmptyActive)
             {
                 _drained?.TrySetResult();
             }

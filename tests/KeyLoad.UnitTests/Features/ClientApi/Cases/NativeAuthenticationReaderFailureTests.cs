@@ -17,8 +17,8 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var principal = McpNativeAuthenticationTests.Principal(database) with { Id = PrivateMarker };
         var payload = NativeSerialization.Serialize(new GrainValue(principal));
 
-        var shape = McpNativeAuthentication.Inspect(payload, CancellationToken.None);
-        var actual = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None);
+        var shape = McpNativeAuthentication.Inspect(payload, CancellationToken.None, UnitMcpOptions.Execution());
+        var actual = McpNativeAuthentication.ReadPrincipal(payload, CancellationToken.None, UnitMcpOptions.Execution());
 
         await Assert.That(shape.TokenCount).IsGreaterThan(0);
         await Assert.That(actual.Id).IsEqualTo(principal.Id);
@@ -42,8 +42,8 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var valid = NativeSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^TruncatedByteCount];
 
-        await AssertSafeValidationAsync(() => McpNativeAuthentication.Inspect(truncated, CancellationToken.None));
-        await AssertSafeValidationAsync(() => McpNativeAuthentication.ReadPrincipal(truncated, CancellationToken.None));
+        await AssertSafeValidationAsync(() => McpNativeAuthentication.Inspect(truncated, CancellationToken.None, UnitMcpOptions.Execution()));
+        await AssertSafeValidationAsync(() => McpNativeAuthentication.ReadPrincipal(truncated, CancellationToken.None, UnitMcpOptions.Execution()));
     }
 
     [Test]
@@ -54,9 +54,9 @@ internal sealed class NativeAuthenticationReaderFailureTests
         var valid = NativeSerialization.Serialize(new GrainValue(principal));
         var truncated = valid[..^TruncatedByteCount];
         var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
+        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None))
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
         {
             await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
         }
@@ -72,11 +72,11 @@ internal sealed class NativeAuthenticationReaderFailureTests
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
+        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
 
-        await AssertCancelledAsync(() => McpNativeAuthentication.Inspect(payload, cancelled.Token));
-        await AssertCancelledAsync(() => McpNativeAuthentication.ReadPrincipal(payload, cancelled.Token));
-        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None))
+        await AssertCancelledAsync(() => McpNativeAuthentication.Inspect(payload, cancelled.Token, UnitMcpOptions.Execution()));
+        await AssertCancelledAsync(() => McpNativeAuthentication.ReadPrincipal(payload, cancelled.Token, UnitMcpOptions.Execution()));
+        using (var state = new McpRequestState(new HttpAdmissionGovernor(UnitAdmissionOptions.Http()), memory, RequestCapacity, CancellationToken.None, UnitMcpOptions.Execution()))
         {
             await AssertCancelledAsync(() => state.Authenticate(payload, cancelled.Token));
         }

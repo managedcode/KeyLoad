@@ -15,6 +15,11 @@ public sealed record NativeDurableJobOptions
     private const int DefaultCheckMilliseconds = 1_000;
     private const int DefaultPollMilliseconds = 100;
     private const int MaximumPolicySeconds = 60;
+    private const int EmptyCapacity = 0;
+    private const int MinimumStripes = 1;
+    private const int MinimumPolicyMilliseconds = 1;
+    private static readonly TimeSpan MinimumPolicyDuration = TimeSpan.FromMilliseconds(MinimumPolicyMilliseconds);
+    private static readonly TimeSpan MaximumPolicyDuration = TimeSpan.FromSeconds(MaximumPolicySeconds);
 
     /// <summary>Gets the maximum native jobs running on one silo.</summary>
     public int MaximumConcurrentJobs { get; init; } = ConcurrencyLimit;
@@ -24,6 +29,8 @@ public sealed record NativeDurableJobOptions
     public TimeSpan RetryDelay { get; init; } = TimeSpan.FromMilliseconds(DefaultCheckMilliseconds);
     /// <summary>Gets the bounded native shard time bucket.</summary>
     public TimeSpan ShardDuration { get; init; } = TimeSpan.FromSeconds(MaximumPolicySeconds);
+    /// <summary>Gets the fixed single stripe used by the bounded initial consumer.</summary>
+    public int ShardStripeCount { get; init; } = MinimumStripes;
     /// <summary>Gets the periodic discovery cadence.</summary>
     public TimeSpan ShardCheckInterval { get; init; } = TimeSpan.FromMilliseconds(DefaultCheckMilliseconds);
     /// <summary>Gets the handler completion polling cadence.</summary>
@@ -33,7 +40,7 @@ public sealed record NativeDurableJobOptions
     /// <summary>Gets the maximum crash adoptions before native poisoning.</summary>
     public int MaximumAdoptedCount { get; init; } = AdoptionLimit;
     /// <summary>Gets the initial orphan claim capacity.</summary>
-    public int InitialClaimBudget { get; init; } = 1;
+    public int InitialClaimBudget { get; init; } = MinimumStripes;
     /// <summary>Gets the bounded catalog claim capacity after ramp-up.</summary>
     public int MaximumClaimBudget { get; init; } = CatalogLimit;
     /// <summary>Gets the bounded orphan claim ramp-up duration.</summary>
@@ -44,10 +51,11 @@ public sealed record NativeDurableJobOptions
     /// <summary>Checks native execution and discovery settings before any ownership begins.</summary>
     /// <returns>Whether the settings are within the accepted bounds.</returns>
     public bool IsValid()
-        => MaximumConcurrentJobs is > 0 and <= ConcurrencyLimit
-            && MaximumAttempts is > 0 and <= RetryLimit
-            && MaximumAdoptedCount is >= 0 and <= AdoptionLimit
-            && InitialClaimBudget is > 0 and <= CatalogLimit
+        => MaximumConcurrentJobs is > EmptyCapacity and <= ConcurrencyLimit
+            && ShardStripeCount == MinimumStripes
+            && MaximumAttempts is > EmptyCapacity and <= RetryLimit
+            && MaximumAdoptedCount is >= EmptyCapacity and <= AdoptionLimit
+            && InitialClaimBudget is > EmptyCapacity and <= CatalogLimit
             && MaximumClaimBudget >= InitialClaimBudget && MaximumClaimBudget <= CatalogLimit
             && PositiveBounded(RetryDelay) && PositiveBounded(ShardDuration)
             && PositiveBounded(ShardCheckInterval) && PositiveBounded(JobStatusPollInterval)
@@ -55,5 +63,5 @@ public sealed record NativeDurableJobOptions
             && PositiveBounded(BootstrapPollInterval);
 
     private static bool PositiveBounded(TimeSpan duration)
-        => duration >= TimeSpan.FromMilliseconds(1) && duration <= TimeSpan.FromSeconds(MaximumPolicySeconds);
+        => duration >= MinimumPolicyDuration && duration <= MaximumPolicyDuration;
 }

@@ -24,7 +24,7 @@ internal sealed class McpValueFrameBoundsTests
     [Arguments("{}", 2)]
     public async Task InspectValueAcceptsSingleJsonValues(string frame, int expectedTokenCount)
     {
-        var shape = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes);
+        var shape = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(shape.TokenCount).IsEqualTo(expectedTokenCount);
         await Assert.That(shape.PropertyCount).IsEqualTo(0);
     }
@@ -34,10 +34,10 @@ internal sealed class McpValueFrameBoundsTests
     public async Task ObjectInspectionStillRejectsNonObjectRoot()
     {
         var bytes = Encoding.UTF8.GetBytes("[1]");
-        var valueShape = McpFrameBounds.InspectValue(bytes, MaximumWireBytes);
+        var valueShape = McpFrameBounds.InspectValue(bytes, MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(valueShape.TokenCount).IsEqualTo(3);
 
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(bytes, MaximumWireBytes));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(bytes, MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
     }
 
@@ -51,7 +51,7 @@ internal sealed class McpValueFrameBoundsTests
     public async Task InvalidOrTrailingValueIsRejected(string frame)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes));
+            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
     }
 
@@ -60,9 +60,9 @@ internal sealed class McpValueFrameBoundsTests
     public async Task InvalidUtf8ValueUsesFixedSafeDetail()
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue([0x22, 0xC3, 0x28, 0x22], MaximumWireBytes));
+            McpFrameBounds.InspectValue([0x22, 0xC3, 0x28, 0x22], MaximumWireBytes, UnitMcpOptions.Execution()));
         var malformed = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("[1,]"), MaximumWireBytes));
+            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("[1,]"), MaximumWireBytes, UnitMcpOptions.Execution()));
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(malformed.Message);
@@ -78,9 +78,9 @@ internal sealed class McpValueFrameBoundsTests
     public async Task EscapedUnpairedSurrogatesUseSafeValidation(string frame)
     {
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes));
+            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes(frame), MaximumWireBytes, UnitMcpOptions.Execution()));
         var malformed = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("{"), MaximumWireBytes));
+            McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("{"), MaximumWireBytes, UnitMcpOptions.Execution()));
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(malformed.Message);
@@ -90,8 +90,8 @@ internal sealed class McpValueFrameBoundsTests
     [Test]
     public async Task EscapedSurrogatePairsAreValidInNamesAndValues()
     {
-        var key = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("""{"\uD83D\uDE00":0}"""), MaximumWireBytes);
-        var value = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("""{"value":"\uD83D\uDE00"}"""), MaximumWireBytes);
+        var key = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("""{"\uD83D\uDE00":0}"""), MaximumWireBytes, UnitMcpOptions.Execution());
+        var value = McpFrameBounds.InspectValue(Encoding.UTF8.GetBytes("""{"value":"\uD83D\uDE00"}"""), MaximumWireBytes, UnitMcpOptions.Execution());
 
         await Assert.That(key.PropertyCount).IsEqualTo(1);
         await Assert.That(value.PropertyCount).IsEqualTo(1);
@@ -101,11 +101,11 @@ internal sealed class McpValueFrameBoundsTests
     [Test]
     public async Task ValueDepthLimitIsSharedWithObjectFraming()
     {
-        var exact = McpFrameBounds.InspectValue(NestedArrayFrame(MaximumDepth), MaximumWireBytes);
+        var exact = McpFrameBounds.InspectValue(NestedArrayFrame(MaximumDepth), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exact.TokenCount).IsEqualTo((MaximumDepth * 2) + 1);
 
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(NestedArrayFrame(MaximumDepth + 1), MaximumWireBytes));
+            McpFrameBounds.InspectValue(NestedArrayFrame(MaximumDepth + 1), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -114,10 +114,10 @@ internal sealed class McpValueFrameBoundsTests
     public async Task ValueByteLimitIsSharedWithObjectFraming()
     {
         var bytes = Encoding.UTF8.GetBytes("\"é\"");
-        var exact = McpFrameBounds.InspectValue(bytes, bytes.Length);
+        var exact = McpFrameBounds.InspectValue(bytes, bytes.Length, UnitMcpOptions.Execution());
         await Assert.That(exact.TokenCount).IsEqualTo(1);
 
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.InspectValue(bytes, bytes.Length - 1));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.InspectValue(bytes, bytes.Length - 1, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -125,16 +125,16 @@ internal sealed class McpValueFrameBoundsTests
     [Test]
     public async Task ValueTokenAndPropertyLimitsAreSharedWithObjectFraming()
     {
-        var exactTokens = McpFrameBounds.InspectValue(ValueArrayFrame(MaximumTokens - 2), MaximumWireBytes);
+        var exactTokens = McpFrameBounds.InspectValue(ValueArrayFrame(MaximumTokens - 2), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exactTokens.TokenCount).IsEqualTo(MaximumTokens);
         var tokenError = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(ValueArrayFrame(MaximumTokens - 1), MaximumWireBytes));
+            McpFrameBounds.InspectValue(ValueArrayFrame(MaximumTokens - 1), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(tokenError.Code).IsEqualTo(ErrorCode.ResourceExhausted);
 
-        var exactProperties = McpFrameBounds.InspectValue(PropertyFrame(MaximumProperties), MaximumWireBytes);
+        var exactProperties = McpFrameBounds.InspectValue(PropertyFrame(MaximumProperties), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exactProperties.PropertyCount).IsEqualTo(MaximumProperties);
         var propertyError = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(PropertyFrame(MaximumProperties + 1), MaximumWireBytes));
+            McpFrameBounds.InspectValue(PropertyFrame(MaximumProperties + 1), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(propertyError.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -144,11 +144,11 @@ internal sealed class McpValueFrameBoundsTests
     {
         var exactName = new string('é', MaximumPropertyNameBytes / 2);
         var overName = new string('a', MaximumPropertyNameBytes - 1) + 'é';
-        var exact = McpFrameBounds.InspectValue(PropertyFrame(exactName), MaximumWireBytes);
+        var exact = McpFrameBounds.InspectValue(PropertyFrame(exactName), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exact.PropertyCount).IsEqualTo(1);
 
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectValue(PropertyFrame(overName), MaximumWireBytes));
+            McpFrameBounds.InspectValue(PropertyFrame(overName), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 

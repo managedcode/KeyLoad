@@ -93,9 +93,8 @@ internal sealed class ReplicaTransportSecurityTests
         var request = fixture.Vote();
         var credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
         var options = fixture.Options with { Secret = credential };
-        using var wrongCredential = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
-        using var wrongCluster = new ReplicaEnvelopeAuthenticator(fixture.Configuration,
-            fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
+        using var wrongCredential = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
+        using var wrongCluster = new ReplicaEnvelopeAuthenticator(fixture.Configuration,             fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCredential.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCluster.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         CryptographicOperations.ZeroMemory(credential);

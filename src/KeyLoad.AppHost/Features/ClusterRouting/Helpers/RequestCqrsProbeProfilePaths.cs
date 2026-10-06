@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
@@ -10,17 +11,16 @@ internal static class RequestCqrsProbeProfilePaths
 
     private const string OwnerFileName = "owner.json";
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
-    private const int MaximumPathCharacters = 4_096;
     private const UnixFileMode PrivateDirectoryMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
 
     internal static IReadOnlyDictionary<string, string> Validate(string configuredRoot, string sessionId,
-        string dataRoot)
+        string dataRoot, IOptions<RequestProbeFileOptions> executionOptions)
     {
         try
         {
             ValidatePlatform();
-            var root = CanonicalDirectory(configuredRoot);
-            var data = CanonicalDirectory(dataRoot);
+            var root = CanonicalDirectory(configuredRoot, executionOptions);
+            var data = CanonicalDirectory(dataRoot, executionOptions);
             if (IsWithin(root, data) || IsWithin(data, root))
             { throw new InvalidOperationException(InvalidConfiguration); }
             ValidateDirectoryAndAncestors(root, PrivateDirectoryMode);
@@ -30,7 +30,7 @@ internal static class RequestCqrsProbeProfilePaths
             {
                 var directory = Path.Combine(root, voter);
                 ValidateDirectoryAndAncestors(directory, PrivateDirectoryMode);
-                ValidateOwnerDirectory(directory, sessionId, global::ClusterResources.Origin(voter));
+                ValidateOwnerDirectory(directory, sessionId, global::ClusterResources.Origin(voter), executionOptions);
                 nodes.Add(voter, directory);
             }
             return nodes;
@@ -39,11 +39,11 @@ internal static class RequestCqrsProbeProfilePaths
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
 
-    private static string CanonicalDirectory(string path)
+    private static string CanonicalDirectory(string path, IOptions<RequestProbeFileOptions> executionOptions)
     {
         const int StructuralValue = 0;
 
-        if (path.Length is StructuralValue or > MaximumPathCharacters || !Path.IsPathFullyQualified(path))
+        if (path.Length == StructuralValue || path.Length > executionOptions.Value.MaximumPathCharacters || !Path.IsPathFullyQualified(path))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var full = Path.GetFullPath(path);
         var trimmed = Path.TrimEndingDirectorySeparator(full);
@@ -88,7 +88,7 @@ internal static class RequestCqrsProbeProfilePaths
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
 
-    private static void ValidateOwnerDirectory(string directory, string sessionId, string voter)
+    private static void ValidateOwnerDirectory(string directory, string sessionId, string voter, IOptions<RequestProbeFileOptions> executionOptions)
     {
         const int CountValue = 2;
         const int OwnerEntryCount = 1;
@@ -98,7 +98,7 @@ internal static class RequestCqrsProbeProfilePaths
         if (entries.Length != OwnerEntryCount || !string.Equals(Path.GetFileName(entries[FirstIndex]), OwnerFileName, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var ownerPath = Path.Combine(directory, OwnerFileName);
-        var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath);
+        var owner = RequestCqrsProbeOwnerReader.ReadFile(ownerPath, executionOptions);
         if (!string.Equals(owner.SessionId, sessionId, StringComparison.Ordinal)
             || !string.Equals(owner.Voter, voter, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }

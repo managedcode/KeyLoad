@@ -1,17 +1,18 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
 internal static class ScaledComparisonMeasurementExecutor
 {
-    private const int SampleCapacity = 4_096;
+    private const int RequiredLatencySampleCount = 4_096;
 
     internal static async Task<ScaledMeasurementResult> MeasureAsync(List<IComparisonSession> sessions,
-        ScaledOperationInputs inputs, IComparisonSettings settings, CancellationToken token)
+        ScaledOperationInputs inputs, IComparisonSettings settings, CancellationToken token, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
-        var state = new ScaledMeasurementState(settings.Operations, SampleCapacity);
+        var state = new ScaledMeasurementState(settings.Operations, RequiredLatencySampleCount);
         var timer = Stopwatch.StartNew();
-        await using var resources = new ClientResourceSampler();
+        await using var resources = new ClientResourceSampler(executionOptions);
         var workers = sessions.Select((session, worker) => new ScaledComparisonWorker(session, worker,
             inputs, settings, timer, state, token).RunAsync()).ToArray();
         try

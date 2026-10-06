@@ -4,6 +4,15 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryPlanValidation
 {
+    private const int FirstElementIndex = 0;
+    private const int EmptyElementCount = 0;
+    private const int InitialSequence = 0;
+    private const int NoRetainedBytes = 0;
+    private const int MinimumPositiveCount = 1;
+    private const int VersionOne = 1;
+    private const int AdjacentElementOffset = 1;
+    private const int EqualOrder = 0;
+
     private const int MinimumLeafCount = 1;
     private const string InvalidPlanMessage = "The partition query plan is invalid.";
     private const string PlanBudgetMessage = "The partition query plan exceeds its resource budget.";
@@ -15,14 +24,14 @@ internal static class PartitionQueryPlanValidation
         ValidateBounds(plan, limits, execution.MaximumPartitions);
 
         var partitions = new PartitionRef[plan.Leaves.Length];
-        var firstRequest = NormalizeShape(plan.Leaves[0], plan, partitions, 0);
-        long examined = 0;
-        long bytes = 0;
-        long retained = 0;
-        for (var index = 0; index < plan.Leaves.Length; index++)
+        var firstRequest = NormalizeShape(plan.Leaves[FirstElementIndex], plan, partitions, EmptyElementCount);
+        long examined = InitialSequence;
+        long bytes = NoRetainedBytes;
+        long retained = NoRetainedBytes;
+        for (var index = FirstElementIndex; index < plan.Leaves.Length; index++)
         {
             var leaf = plan.Leaves[index] ?? throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
-            if (index != 0)
+            if (index != EmptyElementCount)
             {
                 _ = NormalizeShape(leaf, plan, partitions, index);
                 var comparable = leaf.Request with { Partition = firstRequest.Partition };
@@ -31,7 +40,7 @@ internal static class PartitionQueryPlanValidation
                     throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
                 }
             }
-            if (leaf.MaxCandidates != plan.Limit || leaf.MaxCandidates < 1
+            if (leaf.MaxCandidates != plan.Limit || leaf.MaxCandidates < MinimumPositiveCount
                 || leaf.MaxRetainedBytes < checked(PartitionQueryRetention.LeafHeapReserve(plan.Limit)
                     + PartitionQueryRetention.CandidateArrayBytes(plan.Limit))
                 || leaf.MaxExaminedRecords > plan.MaxExaminedRecords - examined
@@ -58,15 +67,15 @@ internal static class PartitionQueryPlanValidation
 
     private static void ValidateBounds(PartitionQueryPlanV1 plan, DatabaseLimits limits, int maximumLeafCount)
     {
-        if (plan.Version != 1 || plan.NodeId == Guid.Empty || plan.Incarnation == Guid.Empty
-            || plan.ReadGeneration < 0 || plan.Leaves.IsDefaultOrEmpty
+        if (plan.Version != VersionOne || plan.NodeId == Guid.Empty || plan.Incarnation == Guid.Empty
+            || plan.ReadGeneration < InitialSequence || plan.Leaves.IsDefaultOrEmpty
             || plan.Leaves.Length < MinimumLeafCount || plan.Leaves.Length > maximumLeafCount)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
         }
-        if (plan.Limit < 1 || plan.Limit > limits.MaxResults || plan.MaxExaminedRecords < 1
-            || plan.MaxExaminedRecords > limits.MaxScanRecords || plan.MaxReadBytes < 0
-            || plan.MaxReadBytes > limits.MaxQueryReadBytes || plan.MaxRetainedBytes < 0
+        if (plan.Limit < MinimumPositiveCount || plan.Limit > limits.MaxResults || plan.MaxExaminedRecords < MinimumPositiveCount
+            || plan.MaxExaminedRecords > limits.MaxScanRecords || plan.MaxReadBytes < NoRetainedBytes
+            || plan.MaxReadBytes > limits.MaxQueryReadBytes || plan.MaxRetainedBytes < NoRetainedBytes
             || plan.MaxRetainedBytes > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PlanBudgetMessage);
@@ -76,10 +85,10 @@ internal static class PartitionQueryPlanValidation
     private static AstQueryRequest NormalizeShape(PartitionQueryLeafPlanV1 leaf,
         PartitionQueryPlanV1 plan, PartitionRef[] partitions, int index)
     {
-        if (leaf is null || leaf.Version != 1 || leaf.Partition is null || leaf.Request is null
+        if (leaf is null || leaf.Version != VersionOne || leaf.Partition is null || leaf.Request is null
             || leaf.Request.Partition is null || leaf.Request.Query is null
-            || leaf.MaxExaminedRecords < 0 || leaf.MaxReadBytes < 0 || leaf.MaxRetainedBytes < 0
-            || leaf.MaxCandidates < 0 || leaf.Request.Partition != leaf.Partition
+            || leaf.MaxExaminedRecords < EmptyElementCount || leaf.MaxReadBytes < NoRetainedBytes || leaf.MaxRetainedBytes < NoRetainedBytes
+            || leaf.MaxCandidates < NoRetainedBytes || leaf.Request.Partition != leaf.Partition
             || leaf.Request.Query.Limit != plan.Limit || leaf.Request.Cursor is not null
             || leaf.Request.Query.Explain || leaf.Request.Query.ModelSource is not null)
         {
@@ -93,10 +102,10 @@ internal static class PartitionQueryPlanValidation
     private static void EnsureUniqueAndOrdered(PartitionRef[] partitions)
     {
         var seen = new HashSet<PartitionRef>();
-        for (var index = 0; index < partitions.Length; index++)
+        for (var index = FirstElementIndex; index < partitions.Length; index++)
         {
             if (!seen.Add(partitions[index])
-                || index > 0 && PartitionQueryOrder.ComparePartition(partitions[index - 1], partitions[index]) >= 0)
+                || index > EmptyElementCount && PartitionQueryOrder.ComparePartition(partitions[index - AdjacentElementOffset], partitions[index]) >= EqualOrder)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
             }

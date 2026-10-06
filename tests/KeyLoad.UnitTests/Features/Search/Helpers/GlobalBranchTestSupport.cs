@@ -35,7 +35,7 @@ internal static class GlobalBranchTestSupport
         ImmutableArray<GlobalBranchWindow> windows, DatabaseLimits? limits = null,
         ReadExecutionBudget? budget = null)
         => GlobalBranchWindowMerger.Merge(request, windows, limits ?? new DatabaseLimits(),
-            budget ?? new ReadExecutionBudget(new DatabaseLimits()));
+            budget ?? new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new DatabaseLimits())));
 
     internal static GlobalBranchCandidate[] IndependentOrder(IEnumerable<GlobalBranchCandidate> candidates)
         => candidates.OrderByDescending(candidate => candidate.Score)

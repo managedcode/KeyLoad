@@ -16,7 +16,9 @@ internal static class PhysicalShardCatalogValidation
 
     internal static void ValidateEncodedRequestLength(long encodedLength)
     {
-        if (encodedLength < 0 || encodedLength > PhysicalShardCatalogProtocol.MaximumEncodedBytes)
+        const int EncodedLengthValidationBoundary = 0;
+
+        if (encodedLength < EncodedLengthValidationBoundary || encodedLength > PhysicalShardCatalogProtocol.MaximumEncodedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, RequestTooLarge);
         }
@@ -38,10 +40,13 @@ internal static class PhysicalShardCatalogValidation
 
     internal static void ValidateCatalog(PhysicalShardCatalog? catalog)
     {
+        const int RevisionValidationBoundary = 0;
+        const int PlacementEpochValidationBoundary = 0;
+
         if (catalog is null || catalog.Version != PhysicalShardCatalogProtocol.CurrentVersion
-            || catalog.Revision <= 0
+            || catalog.Revision <= RevisionValidationBoundary
             || catalog.DefaultShard is null
-            || catalog.DefaultShard.PlacementEpoch <= 0)
+            || catalog.DefaultShard.PlacementEpoch <= PlacementEpochValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredCatalog);
         }

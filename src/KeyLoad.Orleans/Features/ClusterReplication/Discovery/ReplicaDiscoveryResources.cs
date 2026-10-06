@@ -26,8 +26,10 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
     internal ReplicaDiscoveryResources(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> options,
         ReplicaEnvelopeAuthenticator authentication, TimeProvider clock, IOptions<PeerDiscoveryOptions> peerOptions)
     {
+        const int InitialCountSingleItemCount = 1;
+
         exchange = new(configurationOptions, options, authentication, clock, peerOptions);
-        discoveryGate = new(1, 1);
+        discoveryGate = new(InitialCountSingleItemCount, 1);
         stopping = new();
     }
 
@@ -43,7 +45,10 @@ internal sealed class ReplicaDiscoveryResources : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        const int ValueSingleItemCount = 1;
+        const int EmptyExchange = 0;
+
+        if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
         {
             return;
         }

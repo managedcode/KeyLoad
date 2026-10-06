@@ -36,7 +36,7 @@ internal sealed class SearchTests
         database.Commit(
             new PutVector(Orders, DocumentA, EmbeddingPath, [1, 0], Space, VectorVersion),
             new PutVector(Orders, DocumentB, EmbeddingPath, [0, 1], Space, VectorVersion));
-        var search = new SearchEngine(database.Database);
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var result = await search.SearchAsync(RootIdentity, new(database.Partition, Orders, TextPath, ClusterTerm, EmbeddingPath, [1, 0], Space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result[0].Document.Reference.Id).IsEqualTo(DocumentA);
@@ -61,7 +61,7 @@ internal sealed class SearchTests
             new PutVector(Orders, LargeDocument, EmbeddingPath, [.. values], space, VectorVersion),
             new AppendSamples(Metrics, LargeSeriesId, [new(SampleId, TimeProvider.System.GetUtcNow(), LargeFiniteSampleValue)]));
 
-        var match = await Assert.That(await new SearchEngine(database.Database).SearchAsync(RootIdentity, new(database.Partition, Orders,
+        var match = await Assert.That(await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(RootIdentity, new(database.Partition, Orders,
             VectorField: EmbeddingPath, Vector: [.. values], Space: space), TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
         await Assert.That(match.Document.Reference.Id).IsEqualTo(LargeDocument);
         await Assert.That(SearchEngine.Similarity(values, values, DistanceMetric.Cosine)).IsEqualTo(1).Within(TwelveDecimalPlacesTolerance);

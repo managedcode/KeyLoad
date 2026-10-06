@@ -30,7 +30,13 @@ public sealed record ReplicaReplayLimits
     /// <param name="voterCount">The number of configured voters.</param>
     public void Validate(int voterCount)
     {
-        if (voterCount < 1 || CriticalPerVoter < 1 || ForwardPerVoter < 1 || ReadBarrierPerVoter < 1 || DataAppendPerVoter < 1
+        const int VoterCountValidationBoundary = 1;
+        const int CriticalPerVoterValidationBoundary = 1;
+        const int ForwardPerVoterValidationBoundary = 1;
+        const int ReadBarrierPerVoterValidationBoundary = 1;
+        const int DataAppendPerVoterValidationBoundary = 1;
+
+        if (voterCount < VoterCountValidationBoundary || CriticalPerVoter < CriticalPerVoterValidationBoundary || ForwardPerVoter < ForwardPerVoterValidationBoundary || ReadBarrierPerVoter < ReadBarrierPerVoterValidationBoundary || DataAppendPerVoter < DataAppendPerVoterValidationBoundary
             || PerVoterTotal > ReplicaTransportProtocol.MaximumRetainedReplayNonces / voterCount)
         {
             throw new InvalidOperationException(ReplicaTransportProtocol.InvalidReplayLimits);

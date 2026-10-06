@@ -8,8 +8,6 @@ internal static class ZoneTreeSnapshotUpgradeRunner
 {
     private const int FileStartPosition = 0;
 
-    private const int BufferBytes = ZoneTreePersistenceFormat.FileBufferBytes;
-
     internal static StorageSnapshot VerifySource(string sourcePath, Guid incarnation, int sourceDataEpoch,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, ZoneTreeSnapshotUpgradeOptions? options)
     {
@@ -23,12 +21,12 @@ internal static class ZoneTreeSnapshotUpgradeRunner
         ZoneTreeSnapshotUpgradeSafety.ValidateSourceEpoch(sourceDataEpoch);
         var path = ZoneTreeSnapshotUpgradeSafety.Normalize(sourcePath);
         ZoneTreeSnapshotUpgradeSafety.VerifySourcePath(path);
-        return ZoneTreeSnapshotUpgradeIO.WithSource(path, settings.MaxSnapshotBytes, input =>
+        return ZoneTreeSnapshotUpgradeIO.WithSource(path, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes, input =>
         {
-            var rawDigest = ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes);
+            var rawDigest = ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes);
             var semantic = ReadSource(input, settings, incarnation, sourceDataEpoch);
             if (!ZoneTreeSnapshotUpgradeDigest.Equal(rawDigest,
-                    ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes)))
+                    ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes)))
             { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed); }
 
             return semantic.Snapshot;
@@ -72,14 +70,14 @@ internal static class ZoneTreeSnapshotUpgradeRunner
     {
         ZoneTreeSnapshotUpgradeSafety.VerifySourcePath(source);
         ZoneTreeSnapshotUpgradeSafety.VerifyAbsentDestination(destination);
-        return ZoneTreeSnapshotUpgradeIO.WithSource(source, settings.MaxSnapshotBytes,
+        return ZoneTreeSnapshotUpgradeIO.WithSource(source, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes,
             input => UpgradeWithSource(source, destination, incarnation, sourceDataEpoch, settings, outputCreated, input));
     }
 
     private static StorageSnapshot UpgradeWithSource(string source, string destination, Guid incarnation,
         int sourceDataEpoch, ZoneTreeSnapshotUpgradeSettings settings, Action outputCreated, FileStream input)
     {
-        var rawDigest = ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes);
+        var rawDigest = ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes);
         var firstPass = ReadSource(input, settings, incarnation, sourceDataEpoch);
         using var secondSemantic = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         StorageSnapshot? secondSnapshot = null;
@@ -100,7 +98,7 @@ internal static class ZoneTreeSnapshotUpgradeRunner
         var verifiedOutput = ReadOutput(destination, settings, firstPass, outputSnapshot);
         input.Position = FileStartPosition;
         if (!ZoneTreeSnapshotUpgradeDigest.Equal(rawDigest,
-                ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes)))
+                ZoneTreeSnapshotUpgradeIO.DigestFile(input, settings.MaxSnapshotBytes, settings.Descriptor.FileBufferBytes)))
         { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed); }
 
         return verifiedOutput;
@@ -116,7 +114,7 @@ internal static class ZoneTreeSnapshotUpgradeRunner
         ReadResult first, StorageSnapshot outputSnapshot)
     {
         using var semantic = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, BufferBytes,
+        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, settings.Descriptor.FileBufferBytes,
             FileOptions.SequentialScan);
         ZoneTreeSnapshotUpgradeIO.RequireSnapshotSize(input, settings.MaxSnapshotBytes);
         var verified = ZoneTreeCheckpointReader.Read(input, ReaderOptions(path, settings),

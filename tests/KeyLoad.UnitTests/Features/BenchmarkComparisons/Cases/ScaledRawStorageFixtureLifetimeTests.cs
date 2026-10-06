@@ -30,7 +30,7 @@ internal sealed class ScaledRawStorageFixtureLifetimeTests
     public async Task AcScale003ClosedFixtureRejectsReadsAndCanBeClosedRepeatedly()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes), async fixture =>
+            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage()), async fixture =>
             {
                 fixture.VerifyAll();
                 fixture.Dispose();
@@ -42,11 +42,11 @@ internal sealed class ScaledRawStorageFixtureLifetimeTests
 
     private static void CreateCancelledFixture(CancellationToken cancellationToken)
     {
-        using var fixture = new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, cancellationToken);
+        using var fixture = new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(), cancellationToken);
     }
 
     private static void CreateFixture(int recordCount, int payloadBytes)
     {
-        using var fixture = new ScaledRawStorageFixture(recordCount, payloadBytes);
+        using var fixture = new ScaledRawStorageFixture(recordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage());
     }
 }

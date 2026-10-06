@@ -7,6 +7,8 @@ internal static class SampleRetentionStatusReader
     internal static SampleRetentionStatus Read(DatabaseEngine database, IKeyValueView view, string principalId,
         ReadSampleRetentionRequest request, ReadExecutionBudget budget)
     {
+        const int PurgedCountEmptyCount = 0;
+
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(request);
@@ -16,7 +18,7 @@ internal static class SampleRetentionStatusReader
         var state = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         budget.Check();
         return state is null
-            ? new(null, 0, false)
+            ? new(null, PurgedCountEmptyCount, false)
             : new(SampleRetentionStateReader.Before(state), state.PurgedCount, state.HasMore);
     }
 }

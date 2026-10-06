@@ -1,13 +1,20 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextProjectionShutdown(string root, DatabaseLimits limits, Guid sourceNodeId,
-    NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate,
-    Action<NativeTextFaultStage>? faultObserver)
+internal sealed class NativeTextProjectionShutdown(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate, Action<NativeTextFaultStage>? faultObserver, IOptions<NativeTextExecutionOptions> executionOptions)
 {
+    private const int FailureEmptyCount = 0;
+    private const int FailureSingleItemCount = 1;
+    private const int FailureIndexEmptyCount = 0;
+
+    private readonly DatabaseLimits limits = limitsOptions.Value;
     internal void Run(NativeTextGenerationSlot?[] slots)
     {
+        const int SlotsFirstIndex = 0;
+
         var failures = new List<Exception>();
-        var current = slots[0];
+        var current = slots[SlotsFirstIndex];
         foreach (var slot in slots)
         {
             if (slot is null)
@@ -37,7 +44,7 @@ internal sealed class NativeTextProjectionShutdown(string root, DatabaseLimits l
         {
             var beforeRefresh = failures.Count;
             ServerFailureObserver.Observe(() => NativeTextSettlement.Refresh(root, limits, generation,
-                budget: null, faultObserver, physicalGate), failures);
+                budget: null, faultObserver, physicalGate, executionOptions: executionOptions), failures);
             canDelete = failures.Count == beforeRefresh;
         }
         if (generation.CurrentIndex is not null)
@@ -47,7 +54,7 @@ internal sealed class NativeTextProjectionShutdown(string root, DatabaseLimits l
         if (!keepFiles && canDelete && generation.CurrentIndex is null)
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
-                root, generation.Leaf, sourceNodeId, limits)), failures);
+                root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions)), failures);
         }
         return Failure(failures);
     }
@@ -60,10 +67,10 @@ internal sealed class NativeTextProjectionShutdown(string root, DatabaseLimits l
         }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => NativeTextFiles.DeleteBuildingGeneration(
-            root, slot.Leaf, sourceNodeId, limits)), failures);
+            root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions)), failures);
         return Failure(failures);
     }
 
     private static Exception? Failure(List<Exception> failures)
-        => failures.Count switch { 0 => null, 1 => failures[0], _ => new AggregateException(failures) };
+        => failures.Count switch { FailureEmptyCount => null, FailureSingleItemCount => failures[FailureIndexEmptyCount], _ => new AggregateException(failures) };
 }

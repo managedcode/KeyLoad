@@ -93,7 +93,7 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE n IS MISSING", AllowFullScan: true)).Rows).EntityId).IsEqualTo("c");
         await Assert.That(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE status = 'open' AND status = 'closed'")).Rows).IsEmpty();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", new(db.Partition, "SELECT * FROM orders"))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders; DELETE FROM orders", new()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders; DELETE FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
     [Test]
     public async Task WorkerRequiredProtectedInputFailsBeforeClaim()

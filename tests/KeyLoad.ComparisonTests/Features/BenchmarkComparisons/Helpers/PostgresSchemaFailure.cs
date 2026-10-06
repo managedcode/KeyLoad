@@ -112,7 +112,7 @@ internal static class PostgresSchemaFailure
     {
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
             return null;
         }
         catch (PostgresException exception)
@@ -126,7 +126,7 @@ internal static class PostgresSchemaFailure
     {
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
             return null;
         }
         catch (OperationCanceledException exception)
@@ -141,7 +141,7 @@ internal static class PostgresSchemaFailure
         var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
         }
         finally
         {

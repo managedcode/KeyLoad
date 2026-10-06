@@ -94,14 +94,18 @@ internal sealed class RequestCqrsProbeLifecycle(IOptions<RequestProbeExecutionOp
 
     private void StartCallback(bool resetJoin)
     {
-        if (activeCallbacks == 0 && resetJoin)
+        const int EmptyActiveCallbacks = 0;
+
+        if (activeCallbacks == EmptyActiveCallbacks && resetJoin)
         { drained = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); }
         activeCallbacks++;
     }
 
     private void CompleteJoinIfDrained()
     {
-        if (stopAdmission && activeCallbacks == 0)
+        const int EmptyActiveCallbacks = 0;
+
+        if (stopAdmission && activeCallbacks == EmptyActiveCallbacks)
         { drained.TrySetResult(); }
     }
 

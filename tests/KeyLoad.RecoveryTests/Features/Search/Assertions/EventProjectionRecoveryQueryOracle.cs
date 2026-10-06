@@ -18,7 +18,7 @@ internal static class EventProjectionRecoveryQueryOracle
     internal static async Task AssertSearchAsync(DatabaseEngine database, bool committed,
         CancellationToken cancellationToken)
     {
-        var actual = await new SearchEngine(database).SearchAsync(CrashFixtureValues.Principal,
+        var actual = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution()).SearchAsync(CrashFixtureValues.Principal,
             new(EventProjectionCrashScenario.Partition, EventProjectionCrashScenario.Collection,
                 VectorField: EventProjectionCrashScenario.VectorField, Vector: [1, 0],
                 Space: EventProjectionCrashScenario.Space, Limit: ResultLimit, FusionConstant: FusionConstant),

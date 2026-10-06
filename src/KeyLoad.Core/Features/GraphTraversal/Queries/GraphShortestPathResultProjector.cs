@@ -8,6 +8,10 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     PrincipalRecord principal, ResourceDefinition graph, GraphShortestPathRequest request,
     ReadExecutionBudget budget, GraphPathRetention retention)
 {
+    private const int FirstElementIndex = 0;
+    private const int NoSeparatorBytes = 0;
+    private const int CommaBytes = 1;
+
     private const int ContractVersion = 1;
     private const int OneHop = 1;
     private const string EdgeSpace = "edge";
@@ -40,8 +44,10 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
 
     private ImmutableArray<EntityRef> ProjectVertices(EntityRef[] path)
     {
+        const int FirstResultIndex = 0;
+
         var vertices = ImmutableArray.CreateBuilder<EntityRef>(path.Length);
-        for (var index = 0; index < path.Length; index++)
+        for (var index = FirstResultIndex; index < path.Length; index++)
         {
             budget.Check();
             var vertex = path[index];
@@ -54,8 +60,10 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     private ImmutableArray<EdgeRecord> ProjectEdges(EntityRef[] vertices,
         IReadOnlyDictionary<EntityRef, GraphPathPredecessor> predecessors)
     {
+        const int FirstResultIndex = 0;
+
         var projected = ImmutableArray.CreateBuilder<EdgeRecord>(vertices.Length - OneHop);
-        for (var index = 0; index < vertices.Length - OneHop; index++)
+        for (var index = FirstResultIndex; index < vertices.Length - OneHop; index++)
         {
             budget.Check();
             var target = vertices[index + OneHop];
@@ -83,5 +91,5 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     }
 
     private long ArrayElementBytes<T>(T value, int index)
-        => checked(budget.MeasureResult(value) + (index == 0 ? 0 : OneHop));
+        => checked(budget.MeasureResult(value) + (index == FirstElementIndex ? NoSeparatorBytes : CommaBytes));
 }

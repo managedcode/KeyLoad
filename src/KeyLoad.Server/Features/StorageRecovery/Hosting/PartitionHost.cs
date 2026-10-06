@@ -23,6 +23,9 @@ internal sealed class PartitionHost : IAsyncDisposable
     public PartitionHost(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization,
         CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger)
     {
+        const string SearchIndexDirectoryName = "search-indexes";
+        const int FailuresCountValidationBoundary = 1;
+
         var options = runtimeOptions.Node.Value;
         var replicaOptions = runtimeOptions.ReplicaConfiguration;
         var executionOptions = runtimeOptions.ReplicaExecution;
@@ -42,15 +45,15 @@ internal sealed class PartitionHost : IAsyncDisposable
         {
             RuntimeJournalStorePreparation.Prepare(stores, runtimeOptions.Core.RuntimeJournal, runtimeOptions.StorageExecution);
             Database = new(stores.Canonical, authorization, runtimeOptions.Core.DatabaseLimits,
-                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging, runtimeOptions.Core.GraphExecution);
+                runtimeOptions.Core.DueWork, runtimeOptions.Core.EventSource, runtimeOptions.Core.Messaging, runtimeOptions.Core.GraphExecution, runtimeOptions.Core.ChangeFeedExecution, runtimeOptions.Core.TimeSeriesExecution);
             Database.ConfigureRuntimeJournal(runtimeOptions.Core.RuntimeJournal);
             log = openedLog = new(stores.Replica, replicaOptions, canonicalDatabase: Database);
             var snapshots = new ReplicaSnapshotStore(stores.Canonical, log, replicaOptions, executionOptions);
             snapshots.Recover();
             new BlobStorageOperations(Database).NormalizeRestoredStore();
             BootstrapFreshNode(options);
-            TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, "search-indexes"),
-                Database.Limits, Database.Store.Identity.NodeId);
+            TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, SearchIndexDirectoryName),
+                runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
             Materializer = applying = new(Database, log, snapshots, executionOptions);
             Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
             Coordinator = new(Consensus, Database, admission, clock, executionOptions);
@@ -65,7 +68,7 @@ internal sealed class PartitionHost : IAsyncDisposable
             if (openedLog is not null)
             { ServerFailureObserver.Observe(() => openedLog.Dispose(), failures); }
             ServerFailureObserver.Observe(() => stores.Dispose(), failures);
-            if (failures.Count > 1)
+            if (failures.Count > FailuresCountValidationBoundary)
             { throw new AggregateException(failures); }
             throw;
         }
@@ -92,7 +95,9 @@ internal sealed class PartitionHost : IAsyncDisposable
 
     private void BootstrapFreshNode(NodeOptions options)
     {
-        if (stores.Canonical.Position == 0)
+        const int EmptyPosition = 0;
+
+        if (stores.Canonical.Position == EmptyPosition)
         {
             Database.Bootstrap(new(PartitionStoreProtocol.AdministratorId, PartitionStoreProtocol.AdministratorTenant,
                 [new(PartitionStoreProtocol.Wildcard, PartitionStoreProtocol.Wildcard, Capability.All)],

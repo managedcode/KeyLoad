@@ -47,22 +47,30 @@ internal sealed class ScaledRawStorageReadOrder
     /// <summary>Returns the next ascending index and wraps after the last record.</summary>
     public int NextSequential()
     {
+        const int ValueStep = 1;
+        const int SequentialCursorEmptyCount = 0;
+
         var value = sequentialCursor;
-        sequentialCursor = value + 1 == RecordCount ? 0 : value + 1;
+        sequentialCursor = value + ValueStep == RecordCount ? SequentialCursorEmptyCount : value + ValueStep;
         return value;
     }
 
     /// <summary>Returns the next shuffled index and wraps after one complete permutation.</summary>
     public int NextRandom()
     {
+        const int RandomCursorStep = 1;
+        const int RandomCursorEmptyCount = 0;
+
         var value = permutation[randomCursor];
-        randomCursor = randomCursor + 1 == RecordCount ? 0 : randomCursor + 1;
+        randomCursor = randomCursor + RandomCursorStep == RecordCount ? RandomCursorEmptyCount : randomCursor + RandomCursorStep;
         return value;
     }
 
     private void InitializePermutation(CancellationToken cancellationToken)
     {
-        for (var index = 0; index < permutation.Length; index++)
+        const int IndexInitialValue = 0;
+
+        for (var index = IndexInitialValue; index < permutation.Length; index++)
         {
             CheckCancellationAtBoundary(index, cancellationToken);
             permutation[index] = index;
@@ -73,12 +81,17 @@ internal sealed class ScaledRawStorageReadOrder
 
     private void ShufflePermutation(CancellationToken cancellationToken)
     {
+        const int OperationInitialValue = 0;
+        const int PermutationLengthStep = 1;
+        const int IndexValidationBoundary = 0;
+        const int IndexStep = 1;
+
         var state = InitialState;
-        var operation = 0;
-        for (var index = permutation.Length - 1; index > 0; index--)
+        var operation = OperationInitialValue;
+        for (var index = permutation.Length - PermutationLengthStep; index > IndexValidationBoundary; index--)
         {
             CheckCancellationAtBoundary(operation++, cancellationToken);
-            var otherIndex = (int)(NextSplitMix64(ref state) % (ulong)(index + 1));
+            var otherIndex = (int)(NextSplitMix64(ref state) % (ulong)(index + IndexStep));
             (permutation[index], permutation[otherIndex]) = (permutation[otherIndex], permutation[index]);
         }
 
@@ -87,9 +100,11 @@ internal sealed class ScaledRawStorageReadOrder
 
     private string ComputePermutationDigest(CancellationToken cancellationToken)
     {
+        const int IndexInitialValue = 0;
+
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Span<byte> encodedIndex = stackalloc byte[EncodedIndexBytes];
-        for (var index = 0; index < permutation.Length; index++)
+        for (var index = IndexInitialValue; index < permutation.Length; index++)
         {
             CheckCancellationAtBoundary(index, cancellationToken);
             BinaryPrimitives.WriteInt32LittleEndian(encodedIndex, permutation[index]);
@@ -102,7 +117,9 @@ internal sealed class ScaledRawStorageReadOrder
 
     private static void CheckCancellationAtBoundary(int operation, CancellationToken cancellationToken)
     {
-        if (operation % CancellationCheckStride == 0)
+        const int EmptyOperationCancellationCheckStride = 0;
+
+        if (operation % CancellationCheckStride == EmptyOperationCancellationCheckStride)
         {
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -110,10 +127,13 @@ internal sealed class ScaledRawStorageReadOrder
 
     private static ulong NextSplitMix64(ref ulong state)
     {
+        const int ValueBitOffset = 30;
+        const int NextSplitMix64ValueBitOffset = 27;
+
         state = unchecked(state + StateIncrement);
         var value = state;
-        value = unchecked((value ^ (value >> 30)) * FirstMultiplier);
-        value = unchecked((value ^ (value >> 27)) * SecondMultiplier);
+        value = unchecked((value ^ (value >> ValueBitOffset)) * FirstMultiplier);
+        value = unchecked((value ^ (value >> NextSplitMix64ValueBitOffset)) * SecondMultiplier);
         return value ^ (value >> 31);
     }
 }

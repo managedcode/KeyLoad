@@ -33,7 +33,11 @@ internal static class PartitionRecordValidation
 
     private static void ValidateBounds(int maxRecords, long maxRetainedBytes, long maxExaminedBytes)
     {
-        if (maxRecords <= 0 || maxRetainedBytes <= 0 || maxExaminedBytes <= 0)
+        const int MaxRecordsValidationBoundary = 0;
+        const int MaxRetainedBytesValidationBoundary = 0;
+        const int MaxExaminedBytesValidationBoundary = 0;
+
+        if (maxRecords <= MaxRecordsValidationBoundary || maxRetainedBytes <= MaxRetainedBytesValidationBoundary || maxExaminedBytes <= MaxExaminedBytesValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidBudget);
         }
@@ -41,24 +45,31 @@ internal static class PartitionRecordValidation
 
     private static bool ContainsFamily(string family)
     {
-        var low = 0;
-        var high = PartitionRecordFamilies.All.Length - 1;
+        const int LowInitialValue = 0;
+        const int AllLengthStep = 1;
+        const int HighLowScaleFactor = 2;
+        const int EmptyComparison = 0;
+        const int ComparisonValidationBoundary = 0;
+        const int MiddleStep = 1;
+
+        var low = LowInitialValue;
+        var high = PartitionRecordFamilies.All.Length - AllLengthStep;
         while (low <= high)
         {
-            var middle = low + ((high - low) / 2);
+            var middle = low + ((high - low) / HighLowScaleFactor);
             var comparison = string.Compare(PartitionRecordFamilies.All[middle], family, StringComparison.Ordinal);
-            if (comparison == 0)
+            if (comparison == EmptyComparison)
             {
                 return true;
             }
 
-            if (comparison < 0)
+            if (comparison < ComparisonValidationBoundary)
             {
-                low = middle + 1;
+                low = middle + MiddleStep;
             }
             else
             {
-                high = middle - 1;
+                high = middle - MiddleStep;
             }
         }
 

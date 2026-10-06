@@ -776,6 +776,42 @@ reports. All six frozen central build inputs and every actual UnitTests project
 source are identity inputs; excluded test cases remain excluded contributors.
 Existing original reports are immutable and cannot receive these bindings later.
 
+TASK-CQ-FUNCTIONAL-COMPILE-IDENTITY-001C refines that identity implementation,
+not the acceptance boundary: native PDB documents are observed debug mappings;
+they are not an oracle for the complete compiler input set. The UnitTests-local
+`Features/CodeQuality/Build/` target snapshots actual non-generated owned
+`@(Compile)` inputs and all six central files immediately before `CoreCompile`
+and emits their bounded identity into that compilation. Bind the producer target's
+own path/hash separately in the compiled receipt and outer source manifest.
+Native PE metadata binds
+the receipt to the inspected DLL, MVID and matching PDB GUID/stamp; a later source
+snapshot cannot attest an older compilation. The native reader verifies the full
+receipt and every existing inventoried PDB checksum, keeps sources without debug
+mappings represented in the compile receipt, and classifies bounded external/
+generated PDB documents without accessing their paths as repository files.
+
+Stages and ownership: root freezes AC-CQ-018/020 and this contract; Luna supplies
+guarded private target, PE-reader and identity-helper source; root reviews and
+joins the UnitTests project import and canonical Prepare/Verify path; build the
+current solution, collect complete operation flows through Aspire and retain
+positive and rejected stale/missing/foreign/bounded metadata evidence. There is
+no new test caller, coverage framework or runtime product contract. New receipts
+cannot retrofit immutable prior reports. Rollback restores coherent tooling and
+requires a fresh owned collection directory; every original coverage, Linux,
+recovery, RF3 and endurance gate remains mandatory. This task and ADR remain
+unqualified until their real build/collection evidence exists.
+
+TASK-CQ-QUERY-COHESION-091F continues the accepted preserving source-repair
+contract (REQ-CQ-004/006/007; AC-CQ-022/038). First inspect current source and
+preserve concurrent Query helpers. Luna owns a guarded private PreparedQuery
+ordering extraction under the existing QueryExecution slice only if that type
+still exceeds its budget. Root owns review/join, native full build and formatter,
+then existing complete query, cursor, budget and negative-operation regressions
+through Aspire and fresh coverage. No public API, persistence, protocol, alias,
+policy or ordering change is authorized by this task. Rollback restores the
+coherent helper/caller pair and retains original evidence; all acceptance gates
+remain mandatory.
+
 ```mermaid
 flowchart LR
     Profile[Functional contributor profile] --> Original[Native Aspire coverage reports]

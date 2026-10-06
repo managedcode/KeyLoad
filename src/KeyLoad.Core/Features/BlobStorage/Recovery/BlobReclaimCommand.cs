@@ -9,7 +9,17 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
 
     internal BlobReclaimResult Execute(IAtomicTransaction tx, ReclaimBlobRequest request, DateTimeOffset now)
     {
-        if (request.MaxParts is < 1 or > BlobLimits.MaxReclaimParts)
+        const int MaxPartsFirstCount = 1;
+        const int DeletedPartsEmptyCount = 0;
+        const int RemainingPartsEmptyCount = 0;
+        const int ReleasedBytesEmptyCount = 0;
+        const int NoReleasedReservationBytes = 0;
+        const int KeysEmptyCount = 0;
+        const int VersionsRemovalDelta = -1;
+        const int VersionsEmptyCount = 0;
+        const int UploadsEmptyCount = 0;
+
+        if (request.MaxParts is < MaxPartsFirstCount or > BlobLimits.MaxReclaimParts)
         { throw BlobErrors.Validation(); }
         var head = Reader.Head(tx, request.Blob);
         var state = Reader.State(tx, request.Blob, request.UploadId);
@@ -23,21 +33,21 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
         if (state is null)
         {
             ProveEmpty(tx, request.Blob, request.UploadId);
-            return new(request.UploadId, 0, 0, 0, true);
+            return new(request.UploadId, DeletedPartsEmptyCount, RemainingPartsEmptyCount, ReleasedBytesEmptyCount, true);
         }
         if (head is null)
         { throw BlobErrors.Corruption(); }
         if (state.Status == BlobUploadStatus.Active && state.ExpiresAt > now
             || state.Status == BlobUploadStatus.Complete && !state.Retired)
         { throw BlobErrors.StateConflict(); }
-        var released = state.Status == BlobUploadStatus.Active ? state.RemainingReservation : 0;
+        var released = state.Status == BlobUploadStatus.Active ? state.RemainingReservation : NoReleasedReservationBytes;
         state = new BlobUploadCommands(database).ReleaseActive(tx, state, BlobUploadStatus.Expired);
         var count = Math.Min(request.MaxParts, state.NextOrdinal - state.ReclaimCursor);
         var deletedBytes = DeleteParts(tx, state, count);
         var cursor = checked(state.ReclaimCursor + count);
         var done = cursor == state.NextOrdinal;
         var policy = database.Resource(tx, request.Blob.Partition, request.Blob.Resource, ResourceKind.BlobStore).BlobPolicy ?? new BlobPolicy();
-        BlobQuotaOperations.Change(tx, request.Blob, Incarnation, policy, -deletedBytes, 0, done ? -1 : 0, 0);
+        BlobQuotaOperations.Change(tx, request.Blob, Incarnation, policy, -deletedBytes, KeysEmptyCount, done ? VersionsRemovalDelta : VersionsEmptyCount, UploadsEmptyCount);
         if (done)
         {
             ProveEmpty(tx, request.Blob, request.UploadId);
@@ -50,7 +60,9 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
 
     private static long DeleteParts(IAtomicTransaction tx, BlobState state, int count)
     {
-        var bytes = 0L;
+        const long BytesInitialValue = 0L;
+
+        var bytes = BytesInitialValue;
         for (var ordinal = state.ReclaimCursor; ordinal < state.ReclaimCursor + count; ordinal++)
         {
             var meta = BlobRecordReader.Part(tx, state, ordinal, static _ => { });
@@ -63,10 +75,13 @@ internal sealed class BlobReclaimCommand(DatabaseEngine database)
 
     private static void ProveEmpty(IKeyValueView view, BlobRef blob, Guid upload)
     {
+        const int MaxRecordsSingleItemCount = 1;
+        const int EmptyRecords = 0;
+
         var raw = KeySpace.Partition(BlobKeys.PartSpace, blob.Partition, blob.Resource, blob.Id, upload.ToString(BlobKeys.GuidFormat));
         var meta = KeySpace.Partition(BlobKeys.PartMetaSpace, blob.Partition, blob.Resource, blob.Id, upload.ToString(BlobKeys.GuidFormat));
-        if (view.VisitRange(raw, 1, static (_, _) => false).Records != 0
-            || view.VisitRange(meta, 1, static (_, _) => false).Records != 0)
+        if (view.VisitRange(raw, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords
+            || view.VisitRange(meta, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
         { throw BlobErrors.Corruption(); }
     }
 }

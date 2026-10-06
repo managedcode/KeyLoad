@@ -25,4 +25,5 @@
     <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+  <Import Project="Features/CodeQuality/Build/FunctionalCompilationIdentity.targets" />
 </Project>

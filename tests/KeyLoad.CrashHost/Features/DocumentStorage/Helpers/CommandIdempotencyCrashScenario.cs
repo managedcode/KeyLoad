@@ -24,7 +24,7 @@ internal static class CommandIdempotencyCrashScenario
 
     internal static async Task RunReplayAsync(string directory, ZoneTreeStore store)
     {
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
         // Evidence supplies the original caller request only; recovered state is read exclusively from ZoneTree.
         var operation = await CommandIdempotencyCrashData.ReadEvidenceAsync<ReplicatedOperation>(directory,
             CommandIdempotencyCrashContract.CommandEvidenceFile);

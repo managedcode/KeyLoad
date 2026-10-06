@@ -7,17 +7,34 @@ namespace KeyLoad.Query;
 
 internal static class QueryValidation
 {
+    private const string QueryRequestPartitionAndQueryAreRequiredDetail = "A query request, partition and query are required.";
+    private const int VersionOne = 1;
+    private const string QueryASTVersionIsUnsupportedDetail = "The query AST version is unsupported.";
+    private const int MinimumPositiveCount = 1;
+    private const string QueryStructureExceedsItsBudgetDetail = "The query structure exceeds its budget.";
+    private const int RootPredicateDepth = 1;
+    private const string QueryRequestExceedsItsByteBudgetDetail = "The query request exceeds its byte budget.";
+    private const string ModelQuerySourceIsUnsupportedDetail = "The model query source is unsupported.";
+    private const string ModelQueryRequiresExplicitFullScanConsentDetail = "A model query requires explicit full-scan consent.";
+    private const string ModelQueryContinuationIsNotSupportedDetail = "Model query continuation is not supported.";
+    private const int AdjacentElementOffset = 1;
+    private const string ModelQuerySourceArgumentsAreInvalidDetail = "The model query source arguments are invalid.";
+    private const string QueryProjectionEntryIsMissingDetail = "A query projection entry is missing.";
+    private const string QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail = "The query projection has duplicate aliases or an invalid star.";
+    private const string QueryOrderingEntryIsMissingDetail = "A query ordering entry is missing.";
+    private const int EmptyElementCount = 0;
+
     private const string InvalidPath = "The query field path is invalid.";
 
     public static AstQueryRequest Normalize(AstQueryRequest request, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         if (request is null || request.Partition is null || request.Query is null)
         {
-            throw Errors.Fail(ErrorCode.Validation, "A query request, partition and query are required.");
+            throw Errors.Fail(ErrorCode.Validation, QueryRequestPartitionAndQueryAreRequiredDetail);
         }
-        if (request.AstVersion != 1)
+        if (request.AstVersion != VersionOne)
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query AST version is unsupported.");
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryASTVersionIsUnsupportedDetail);
         }
 
         var query = request.Query;
@@ -25,17 +42,18 @@ internal static class QueryValidation
         JsonData.Identifier(query.Collection);
         ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault
-            || query.Projection.Length < 1 || query.Projection.Length > execution.MaximumProjection
-            || query.Order.Length > execution.MaximumOrdering || query.Limit < 1 || query.Limit > limits.MaxResults
+            || query.Projection.Length < MinimumPositiveCount || query.Projection.Length > execution.MaximumProjection
+            || query.Order.Length > execution.MaximumOrdering || query.Limit < MinimumPositiveCount || query.Limit > limits.MaxResults
             || request.Parameters?.Count > execution.MaximumParameters)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The query structure exceeds its budget.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, QueryStructureExceedsItsBudgetDetail);
         }
 
         var projection = NormalizeProjection(query.Projection, limits);
         var order = NormalizeOrder(query.Order, limits);
-        var predicates = new PredicateNormalizer(limits, execution.MaximumInValues);
-        var filter = query.Filter is null ? null : predicates.Filter(query.Filter, 1);
+        var predicates = new QueryPredicateNormalizer(limits.MaxQueryDepth, limits.MaxQueryTokens, execution.MaximumInValues,
+            value => JsonData.Validate(value, limits, false));
+        var filter = query.Filter is null ? null : predicates.Filter(query.Filter, RootPredicateDepth);
         var parameters = NormalizeParameters(request.Parameters, predicates);
         var normalized = request with
         {
@@ -44,7 +62,7 @@ internal static class QueryValidation
         };
         if (JsonDefaults.Serialize(normalized).Length > limits.MaxQueryBytes)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The query request exceeds its byte budget.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, QueryRequestExceedsItsByteBudgetDetail);
         }
         return normalized;
     }
@@ -57,22 +75,22 @@ internal static class QueryValidation
         }
         if (!Enum.IsDefined(source.Kind))
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, "The model query source is unsupported.");
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, ModelQuerySourceIsUnsupportedDetail);
         }
         JsonData.Identifier(source.Item);
         if (!request.AllowFullScan)
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, "A model query requires explicit full-scan consent.");
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, ModelQueryRequiresExplicitFullScanConsentDetail);
         }
         if (request.Cursor is not null)
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, "Model query continuation is not supported.");
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, ModelQueryContinuationIsNotSupportedDetail);
         }
-        if (source.Kind == ModelQuerySourceKind.Events && source.Generation < 1
+        if (source.Kind == ModelQuerySourceKind.Events && source.Generation < MinimumPositiveCount
             || source.Kind == ModelQuerySourceKind.QueueMessages
-            && (source.Generation != 1 || source.Item != query.Collection))
+            && (source.Generation != AdjacentElementOffset || source.Item != query.Collection))
         {
-            throw Errors.Fail(ErrorCode.Validation, "The model query source arguments are invalid.");
+            throw Errors.Fail(ErrorCode.Validation, ModelQuerySourceArgumentsAreInvalidDetail);
         }
     }
 
@@ -82,16 +100,16 @@ internal static class QueryValidation
         {
             if (selection is null)
             {
-                throw Errors.Fail(ErrorCode.Validation, "A query projection entry is missing.");
+                throw Errors.Fail(ErrorCode.Validation, QueryProjectionEntryIsMissingDetail);
             }
-            Path(selection.Path, limits, true);
+            Path(selection.Path, limits.MaxQueryDepth, true);
             JsonData.Identifier(selection.Alias);
             return selection with { };
         }).ToImmutableArray();
         if (projection.Select(s => s.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Length
-            || projection.Length > 1 && projection.Any(s => s.Path == SqlSyntax.Star))
+            || projection.Length > MinimumPositiveCount && projection.Any(s => s.Path == SqlSyntax.Star))
         {
-            throw Errors.Fail(ErrorCode.Validation, "The query projection has duplicate aliases or an invalid star.");
+            throw Errors.Fail(ErrorCode.Validation, QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail);
         }
         return projection;
     }
@@ -101,103 +119,28 @@ internal static class QueryValidation
         {
             if (item is null)
             {
-                throw Errors.Fail(ErrorCode.Validation, "A query ordering entry is missing.");
+                throw Errors.Fail(ErrorCode.Validation, QueryOrderingEntryIsMissingDetail);
             }
-            Path(item.Path, limits);
+            Path(item.Path, limits.MaxQueryDepth);
             return item with { };
         }).ToImmutableArray();
 
     private static Dictionary<string, JsonElement>? NormalizeParameters(Dictionary<string, JsonElement>? parameters,
-        PredicateNormalizer predicates) => parameters is not { Count: > 0 } ? null : parameters.ToDictionary(item =>
+        QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? null : parameters.ToDictionary(item =>
     {
         JsonData.Identifier(item.Key);
         return item.Key;
     }, item => predicates.Scalar(item.Value), StringComparer.Ordinal);
 
-    private static void Path(string path, DatabaseLimits limits, bool star = false)
+    internal static void Path(string path, int maximumDepth, bool star = false)
     {
         if (star && path == SqlSyntax.Star)
         {
             return;
         }
-        if (string.IsNullOrEmpty(path) || JsonData.PathSegments(path).Length > limits.MaxQueryDepth)
+        if (string.IsNullOrEmpty(path) || JsonData.PathSegments(path).Length > maximumDepth)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPath);
-        }
-    }
-
-    private sealed class PredicateNormalizer(DatabaseLimits limits, int maximumInValues)
-    {
-        private int count;
-
-        internal JsonElement Scalar(JsonElement value)
-        {
-            _ = JsonData.Scalar(value, "");
-            using var normalized = JsonDocument.Parse(JsonData.Validate(value.GetRawText(), limits, false));
-            return normalized.RootElement.Clone();
-        }
-
-        private void Visit(int depth)
-        {
-            if (depth > limits.MaxQueryDepth || ++count > limits.MaxQueryTokens)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The query AST exceeds its depth or node budget.");
-            }
-        }
-
-        private Operand NormalizeOperand(Operand operand, int depth)
-        {
-            Visit(depth);
-            switch (operand)
-            {
-                case FieldOperand field:
-                    Path(field.Path, limits);
-                    return new FieldOperand(field.Path);
-                case ValueOperand value:
-                    return ValueOperand.Create(Scalar(value.Value));
-                case ParameterOperand parameter:
-                    JsonData.Identifier(parameter.Name);
-                    return new ParameterOperand(parameter.Name);
-                default:
-                    throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query operand is unsupported.");
-            }
-        }
-
-        internal Predicate Filter(Predicate predicate, int depth)
-        {
-            Visit(depth);
-            return predicate switch
-            {
-                Comparison comparison => NormalizeComparison(comparison, depth),
-                Logical logical => NormalizeLogical(logical, depth),
-                Negation negation => new Negation(Filter(negation.Inner, depth + 1)),
-                NullTest test => new NullTest(NormalizeOperand(test.Value, depth + 1), test.Negated, test.Missing),
-                InPredicate list when !list.Values.IsDefault && list.Values.Length >= 1 && list.Values.Length <= maximumInValues
-                    => new InPredicate(NormalizeOperand(list.Value, depth + 1),
-                        [.. list.Values.Select(value => NormalizeOperand(value, depth + 1))], list.Negated),
-                _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query predicate is unsupported.")
-            };
-        }
-
-        private Comparison NormalizeComparison(Comparison comparison, int depth)
-        {
-            if (comparison.Operator is not (SqlSyntax.Equals or SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals
-                or SqlSyntax.Greater or SqlSyntax.GreaterOrEqual or SqlSyntax.Less or SqlSyntax.LessOrEqual))
-            {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query comparison is unsupported.");
-            }
-            return new Comparison(NormalizeOperand(comparison.Left, depth + 1),
-                comparison.Operator == SqlSyntax.AlternateNotEquals ? SqlSyntax.NotEquals : comparison.Operator,
-                NormalizeOperand(comparison.Right, depth + 1));
-        }
-
-        private Logical NormalizeLogical(Logical logical, int depth)
-        {
-            if (logical.Operator is not (SqlSyntax.And or SqlSyntax.Or))
-            {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, "The query logical operator is unsupported.");
-            }
-            return new Logical(Filter(logical.Left, depth + 1), logical.Operator, Filter(logical.Right, depth + 1));
         }
     }
 }

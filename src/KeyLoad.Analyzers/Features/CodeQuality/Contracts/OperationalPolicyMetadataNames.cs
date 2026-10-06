@@ -2,6 +2,10 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class OperationalPolicyMetadataNames
 {
+    internal const string Math = "System.Math";
+    internal const string Minimum = nameof(System.Math.Min);
+    internal const int EmptySignalCount = 0;
+    internal const int StopWakeCount = 1;
     internal const string Channel = "System.Threading.Channels.Channel";
     internal const string BoundedChannel = "System.Threading.Channels.BoundedChannelOptions";
     internal const string CreateBounded = "CreateBounded";

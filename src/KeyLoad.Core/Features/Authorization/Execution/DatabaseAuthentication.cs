@@ -6,16 +6,20 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string UnavailableCredentialDetail = "The credential is unavailable or expired.";
+
     /// <summary>Creates the initial administrator and credential if that principal is absent.</summary>
     /// <param name="administrator">Initial persisted cluster administrator.</param>
     /// <param name="apiKey">Credential belonging to that administrator.</param>
     public void Bootstrap(PrincipalRecord administrator, ApiKeyRecord apiKey)
     {
+        const string BootstrapDetailText = "Bootstrap requires a cluster administrator.";
+
         ArgumentNullException.ThrowIfNull(administrator);
         ArgumentNullException.ThrowIfNull(apiKey);
         if (!administrator.ClusterAdministrator || administrator.Id != apiKey.PrincipalId)
         {
-            throw Errors.Fail(ErrorCode.Validation, "Bootstrap requires a cluster administrator.");
+            throw Errors.Fail(ErrorCode.Validation, BootstrapDetailText);
         }
 
         Store.Commit((tx, _) =>
@@ -35,11 +39,13 @@ public sealed partial class DatabaseEngine
     /// <returns>The active persisted principal.</returns>
     public PrincipalRecord Principal(IKeyValueView view, string id, DateTimeOffset now)
     {
+        const string PrincipalDetailText = UnavailableCredentialDetail;
+
         ArgumentNullException.ThrowIfNull(view);
         var principal = view.GetRecord<PrincipalRecord>(KeySpace.Principal(id));
         if (principal is null || principal.Revoked || principal.ExpiresAt <= now)
         {
-            throw Errors.Fail(ErrorCode.Unauthenticated, "The credential is unavailable or expired.");
+            throw Errors.Fail(ErrorCode.Unauthenticated, PrincipalDetailText);
         }
 
         return principal;
@@ -50,11 +56,19 @@ public sealed partial class DatabaseEngine
     /// <returns>The verified persisted principal identifier.</returns>
     public string Authenticate(string secret, DateTimeOffset now)
     {
+        const char KeyIdentitySeparator = '.';
+        const int MinimumEncodedKeyCharacters = 20;
+        const int MaximumEncodedKeyCharacters = 256;
+        const int FirstKeyCharacterIndex = 0;
+        const string AuthenticateDetailText = "An API key is required.";
+        const int CredentialVerifierBytes = 32;
+        const string InvalidCredentialVerifierDetail = "A credential verifier is invalid.";
+
         ArgumentNullException.ThrowIfNull(secret);
-        var separator = secret.IndexOf('.', StringComparison.Ordinal);
-        if (secret.Length is < 20 or > 256 || separator <= 0)
+        var separator = secret.IndexOf(KeyIdentitySeparator, StringComparison.Ordinal);
+        if (secret.Length is < MinimumEncodedKeyCharacters or > MaximumEncodedKeyCharacters || separator <= FirstKeyCharacterIndex)
         {
-            throw Errors.Fail(ErrorCode.Unauthenticated, "An API key is required.");
+            throw Errors.Fail(ErrorCode.Unauthenticated, AuthenticateDetailText);
         }
 
         return Store.Read(view =>
@@ -63,11 +77,11 @@ public sealed partial class DatabaseEngine
             var hash = SHA256.HashData(Encoding.UTF8.GetBytes(secret));
             byte[] verifier;
             try
-            { verifier = key is null ? new byte[32] : Convert.FromHexString(key.Verifier); }
-            catch (FormatException) { throw Errors.Fail(ErrorCode.Corruption, "A credential verifier is invalid."); }
+            { verifier = key is null ? new byte[CredentialVerifierBytes] : Convert.FromHexString(key.Verifier); }
+            catch (FormatException) { throw Errors.Fail(ErrorCode.Corruption, InvalidCredentialVerifierDetail); }
             if (key is null || !CryptographicOperations.FixedTimeEquals(hash, verifier) || key.Revoked || key.ExpiresAt <= now)
             {
-                throw Errors.Fail(ErrorCode.Unauthenticated, "The credential is unavailable or expired.");
+                throw Errors.Fail(ErrorCode.Unauthenticated, UnavailableCredentialDetail);
             }
 
             return Principal(view, key.PrincipalId, now).Id;

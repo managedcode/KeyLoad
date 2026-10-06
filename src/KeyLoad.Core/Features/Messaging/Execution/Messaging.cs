@@ -7,11 +7,22 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string MessagingQueueCountersKeySpace = "queue-counters";
+    private const int MessagingInitialSequence = 0;
+    private const string MessagingSystemKeySpace = "system";
+    private const string MessagingDispatchPausedKey = "dispatch-paused";
+    private const int MessagingSingleElementCount = 1;
+    private const int MessagingAdjacentElementOffset = 1;
+    private const int MessagingEmptyElementCount = 0;
+    private const int MessagingMinimumPositiveCount = 1;
+    private const string MessagingMessageMetadataKeySpace = "message-meta";
+    private const string MessagingMessageBodyKeySpace = "message-body";
+
     private static byte[] QueueKey(string space, QueueLaneRef lane, params object?[] tail)
         => KeySpace.Partition(space, lane.Partition, new object?[] { lane.Queue }.Concat(tail).ToArray());
     private static QueueCounters Counters(IKeyValueView view, QueueLaneRef lane)
-        => view.GetRecord<QueueCounters>(QueueKey("queue-counters", lane)) ?? new(0, 0, 0, 0, 0);
-    private bool DispatchPaused(IKeyValueView view) => view.ReadOwnedValue(KeyCodec.Encode("system", "dispatch-paused")) is { } value
+        => view.GetRecord<QueueCounters>(QueueKey(MessagingQueueCountersKeySpace, lane)) ?? new(MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence, MessagingInitialSequence);
+    private bool DispatchPaused(IKeyValueView view) => view.ReadOwnedValue(KeyCodec.Encode(MessagingSystemKeySpace, MessagingDispatchPausedKey)) is { } value
         ? NativeSerialization.Deserialize<bool>(value) : Store.Identity.DispatchPaused;
     private MutationReceipt Enqueue(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, EnqueueMessage message, DateTimeOffset now)
     {
@@ -41,7 +52,7 @@ public sealed partial class DatabaseEngine
         var body = new MessageBody(message.MessageId, JsonData.Validate(message.PayloadJson, Limits),
             JsonData.Validate(message.HeadersJson, Limits), message.OrderingKey, JsonData.Fingerprint(message));
         PersistEnqueuedMessage(tx, lane, message, resource, body, now);
-        return new(EnqueueReceiptKind, message.Queue, message.MessageId, 1);
+        return new(EnqueueReceiptKind, message.Queue, message.MessageId, MessagingSingleElementCount);
     }
 
     private static void PersistEnqueuedMessage(IAtomicTransaction tx, QueueLaneRef lane, EnqueueMessage message,
@@ -56,22 +67,22 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.ResourceExhausted, StoredQuotaExhausted);
         }
         var scheduled = message.NotBefore > now;
-        var readySequence = scheduled ? 0 : checked(counters.NextReadySequence + 1);
+        var readySequence = scheduled ? MessagingInitialSequence : checked(counters.NextReadySequence + MessagingAdjacentElementOffset);
         var metadata = new MessageMetadata(message.MessageId, scheduled ? MessageState.Scheduled : MessageState.Ready,
-            0, 1, readySequence, message.NotBefore, message.ExpiresAt);
+            MessagingEmptyElementCount, MessagingSingleElementCount, readySequence, message.NotBefore, message.ExpiresAt);
         tx.Put(QueueKey(MessageBodySpace, lane, message.MessageId), payload);
         tx.PutRecord(QueueKey(MessageMetadataSpace, lane, message.MessageId), metadata);
         tx.PutRecord(scheduled ? QueueKey(ScheduledQueueSpace, lane, message.NotBefore!.Value, message.MessageId)
             : QueueKey(ReadyQueueSpace, lane, readySequence, message.MessageId), message.MessageId);
         tx.PutRecord(QueueKey(QueueCountersSpace, lane), counters with
         {
-            StoredMessages = counters.StoredMessages + 1,
+            StoredMessages = counters.StoredMessages + MessagingAdjacentElementOffset,
             StoredBytes = counters.StoredBytes + size,
             NextReadySequence = scheduled ? counters.NextReadySequence : readySequence
         });
     }
 
-    private static void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now)
+    private void Sweep(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now)
         => SweepDueEntries(tx, lane, policy, now);
 
     private ReceiveResult Receive(IAtomicTransaction tx, PrincipalRecord principal, ReceiveRequest request, DateTimeOffset now, long position)
@@ -82,8 +93,8 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.DispatchPaused, DispatchPausedMessage);
         }
-        if (request.MaxMessages is < 1 or > 100 || request.MaxBytes is < 1 || request.MaxBytes > Limits.MaxBatchBytes
-            || request.LeaseSeconds < 1 || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxMessages < MessagingMinimumPositiveCount || request.MaxMessages > messagingExecution.MaximumReceiveMessages || request.MaxBytes is < MessagingMinimumPositiveCount || request.MaxBytes > Limits.MaxBatchBytes
+            || request.LeaseSeconds < MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidReceiveBudget);
         }
@@ -140,7 +151,7 @@ public sealed partial class DatabaseEngine
     private CommitReceipt CompleteProcessing(IAtomicTransaction tx, PrincipalRecord principal, ProcessingRequest request, DateTimeOffset now, long position)
     {
         JsonData.Identifier(request.HandlerScope);
-        if (request.ExecutionGeneration < 1)
+        if (request.ExecutionGeneration < MessagingMinimumPositiveCount)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidHandlerGeneration);
         }
@@ -179,7 +190,7 @@ public sealed partial class DatabaseEngine
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         Authorization.Require(principal, lane.Partition, lane.Queue, Capability.QueueInspect);
         var resource = Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
-        var metadata = view.GetRecord<MessageMetadata>(QueueKey("message-meta", lane, id));
+        var metadata = view.GetRecord<MessageMetadata>(QueueKey(MessagingMessageMetadataKeySpace, lane, id));
         if (metadata is null)
         {
             return null;
@@ -190,7 +201,7 @@ public sealed partial class DatabaseEngine
             Authorization.Require(principal, lane.Partition, lane.Queue, Capability.DeadLettersRead);
         }
 
-        var body = view.GetRecord<MessageBody>(QueueKey("message-body", lane, id));
+        var body = view.GetRecord<MessageBody>(QueueKey(MessagingMessageBodyKeySpace, lane, id));
         return new MessageInspection(metadata, body is null ? null : Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _),
             body is null ? null : Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));
     });

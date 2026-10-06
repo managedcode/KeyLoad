@@ -135,20 +135,25 @@ internal sealed class ReplicaDiscoveryExchange : IDisposable
 
     private static async Task<byte[]> ReadBoundedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
+        const int MaximumDiscoveryBytesStep = 1;
+        const int CountInitialValue = 0;
+        const int EmptyRead = 0;
+        const int StartEmptyCount = 0;
+
         if (response.Content.Headers.ContentLength > ReplicaTransportProtocol.MaximumDiscoveryBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.InvalidDiscovery);
         }
 
-        var bytes = new byte[ReplicaTransportProtocol.MaximumDiscoveryBytes + 1];
+        var bytes = new byte[ReplicaTransportProtocol.MaximumDiscoveryBytes + MaximumDiscoveryBytesStep];
         await using var ownedStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        var count = 0;
+        var count = CountInitialValue;
         while (count < bytes.Length)
         {
             var read = await ownedStream.ReadAsync(bytes.AsMemory(count), cancellationToken).ConfigureAwait(false);
-            if (read == 0)
+            if (read == EmptyRead)
             {
-                return bytes.AsSpan(0, count).ToArray();
+                return bytes.AsSpan(StartEmptyCount, count).ToArray();
             }
 
             count += read;

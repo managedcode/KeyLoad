@@ -18,8 +18,12 @@ internal static class ServerOfflineFormatUpgrade
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
+        const int EmptyArgsLength = 0;
+        const int ArgsFirstIndex = 0;
+        const int ExitCodeInitialValue = 1;
+
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length == 0 || args[0] is not (Command or PrepareNode or VerifyNode or PublishNode))
+        if (args.Length == EmptyArgsLength || args[ArgsFirstIndex] is not (Command or PrepareNode or VerifyNode or PublishNode))
         {
             return false;
         }
@@ -27,18 +31,21 @@ internal static class ServerOfflineFormatUpgrade
         try
         {
             var paths = Parse(args);
-            await ExecuteAsync(args[0], paths.Source, paths.Destination).ConfigureAwait(false);
+            await ExecuteAsync(args[ArgsFirstIndex], paths.Source, paths.Destination).ConfigureAwait(false);
         }
         catch (KeyLoadException failure)
         {
             await Console.Error.WriteLineAsync(failure.Code.ToString()).ConfigureAwait(false);
-            Environment.ExitCode = 1;
+            Environment.ExitCode = ExitCodeInitialValue;
         }
         return true;
     }
 
     private static async Task ExecuteAsync(string operation, string source, string destination)
     {
+        const string ExecuteAsyncValueText = "Node prepared. Prepare and verify every stopped RF3 node before publishing any node.";
+        const string ExecuteAsyncExecuteAsyncValueText = "Node verified. Verify all three current nodes before starting compatible voters.";
+
         if (operation == Command)
         {
             _ = ZoneTreeFormatUpgrade.Upgrade(source, new(destination), ServerConfiguration.ReadOfflineStorageExecution());
@@ -54,14 +61,16 @@ internal static class ServerOfflineFormatUpgrade
         };
         await Console.Out.WriteLineAsync(operation switch
         {
-            PrepareNode => "Node prepared. Prepare and verify every stopped RF3 node before publishing any node.",
-            VerifyNode => "Node verified. Verify all three current nodes before starting compatible voters.",
+            PrepareNode => ExecuteAsyncValueText,
+            VerifyNode => ExecuteAsyncExecuteAsyncValueText,
             _ => "Node published. Verify all three current nodes before starting compatible voters."
         }).ConfigureAwait(false);
     }
 
     private static (string Source, string Destination) Parse(string[] args)
     {
+        const int StartSingleItemCount = 1;
+
         if (args.Length != ArgumentCount)
         {
             throw Errors.Fail(ErrorCode.Validation, Usage);
@@ -69,7 +78,7 @@ internal static class ServerOfflineFormatUpgrade
 
         string? source = null;
         string? destination = null;
-        foreach (var argument in args.AsSpan(1))
+        foreach (var argument in args.AsSpan(StartSingleItemCount))
         {
             if (argument.StartsWith(SourceOption, StringComparison.Ordinal) && source is null)
             {
@@ -90,8 +99,10 @@ internal static class ServerOfflineFormatUpgrade
 
     private static string PathArgument(string argument, string prefix)
     {
+        const char NullCharacter = '\0';
+
         var value = argument[prefix.Length..];
-        if (string.IsNullOrWhiteSpace(value) || value.Length > MaximumPathCharacters || value.Contains('\0', StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(value) || value.Length > MaximumPathCharacters || value.Contains(NullCharacter, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Validation, Usage);
         }

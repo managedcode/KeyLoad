@@ -9,6 +9,23 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class TwoRf3ClusterResources
 {
+    private const string ThirdVoterName = "node3";
+    private const string FourthVoterName = "node4";
+    private const string FifthVoterName = "node5";
+    private const string SixthVoterName = "node6";
+    private const string SigningKeyParameterName = "signing-key";
+    private const string AdminKeyParameterName = "admin-key";
+    private const string MembershipPeerParameterName = "membership-peer-a";
+    private const string PeerParameterName = "peer-b";
+    private const string TrustedGroupIncarnationEnvironment = "TrustedGroup__Incarnation";
+    private const string TrustedGroupPeerSecretEnvironment = "TrustedGroup__PeerSecret";
+    private const string TrustedGroupVotersEnvironment = "TrustedGroup__VoterIds";
+    private const string TrustedGroupSiloEndpointsEnvironment = "TrustedGroup__SiloEndpoints";
+    private const string AuthorityPhysicalShardEnvironment = "AuthorityPhysicalShardId";
+    private const string AuthorityIncarnationEnvironment = "AuthorityIncarnation";
+    private const string AuthorityPeerSecretEnvironment = "AuthorityPeerSecret";
+    private const string AuthorityEndpointsEnvironment = "AuthorityEndpoints";
+
     private const string OriginFormatFormatText = "http://{0}:8080";
     private const string NodesResultText = "node1";
     private const string NodesNodesResultText = "node2";
@@ -38,7 +55,7 @@ internal static class TwoRf3ClusterResources
     private const string AuthorityHealth = "/health/membership-authority";
     private const string MembershipHealth = "/health/membership-ready";
     private const string True = "true";
-    private static readonly string[] Nodes = [NodesResultText, NodesNodesResultText, "node3", "node4", "node5", "node6"];
+    private static readonly string[] Nodes = [NodesResultText, NodesNodesResultText, ThirdVoterName, FourthVoterName, FifthVoterName, SixthVoterName];
 
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,
         LocalProfile profile, string dataRoot)
@@ -55,10 +72,10 @@ internal static class TwoRf3ClusterResources
         var secondPeerSecret = RandomSecret();
         var physicalB = builder.AddParameter(ParameterPrefix + NameText, secondPhysical.ToString(ParameterIdentityFormat));
         var incarnationB = builder.AddParameter(ParameterPrefix + AddNameText, secondIncarnation.ToString(ParameterIdentityFormat));
-        var signing = builder.AddParameter("signing-key", profile.SigningKey, secret: true);
-        var admin = builder.AddParameter("admin-key", profile.AdminKey, secret: true);
-        var firstPeer = builder.AddParameter("membership-peer-a", profile.PeerSecret, secret: true);
-        var secondPeer = builder.AddParameter(ParameterPrefix + "peer-b", secondPeerSecret, secret: true);
+        var signing = builder.AddParameter(SigningKeyParameterName, profile.SigningKey, secret: true);
+        var admin = builder.AddParameter(AdminKeyParameterName, profile.AdminKey, secret: true);
+        var firstPeer = builder.AddParameter(MembershipPeerParameterName, profile.PeerSecret, secret: true);
+        var secondPeer = builder.AddParameter(ParameterPrefix + PeerParameterName, secondPeerSecret, secret: true);
         CryptographicOperations.ZeroMemory(Convert.FromBase64String(secondPeerSecret));
         var containerUser = ClusterContainerUser.Resolve(builder);
         var firstGroup = Nodes[..TwoRf3ProfileProtocol.MembersPerGroup];
@@ -146,17 +163,17 @@ internal static class TwoRf3ClusterResources
         if (groupA)
         {
             resource.WithEnvironment(AuthorityPrefix + ApplyAuthoritySettingsNameText, secondPhysical)
-                .WithEnvironment(AuthorityPrefix + "TrustedGroup__Incarnation", secondIncarnation)
-                .WithEnvironment(AuthorityPrefix + "TrustedGroup__PeerSecret", secondSecret);
-            AddVector(resource, "TrustedGroup__VoterIds", secondGroup.Select(Origin).ToArray());
-            AddVector(resource, "TrustedGroup__SiloEndpoints", secondGroup.Select(name => name + SelectorText).ToArray());
+                .WithEnvironment(AuthorityPrefix + TrustedGroupIncarnationEnvironment, secondIncarnation)
+                .WithEnvironment(AuthorityPrefix + TrustedGroupPeerSecretEnvironment, secondSecret);
+            AddVector(resource, TrustedGroupVotersEnvironment, secondGroup.Select(Origin).ToArray());
+            AddVector(resource, TrustedGroupSiloEndpointsEnvironment, secondGroup.Select(name => name + SelectorText).ToArray());
         }
         else
         {
-            resource.WithEnvironment(AuthorityPrefix + "AuthorityPhysicalShardId", profile.PhysicalShardId.ToString(ParameterIdentityFormat))
-                .WithEnvironment(AuthorityPrefix + "AuthorityIncarnation", profile.Incarnation.ToString(ParameterIdentityFormat))
-                .WithEnvironment(AuthorityPrefix + "AuthorityPeerSecret", firstSecret);
-            AddVector(resource, "AuthorityEndpoints", firstGroup.Select(Origin).ToArray());
+            resource.WithEnvironment(AuthorityPrefix + AuthorityPhysicalShardEnvironment, profile.PhysicalShardId.ToString(ParameterIdentityFormat))
+                .WithEnvironment(AuthorityPrefix + AuthorityIncarnationEnvironment, profile.Incarnation.ToString(ParameterIdentityFormat))
+                .WithEnvironment(AuthorityPrefix + AuthorityPeerSecretEnvironment, firstSecret);
+            AddVector(resource, AuthorityEndpointsEnvironment, firstGroup.Select(Origin).ToArray());
         }
     }
 

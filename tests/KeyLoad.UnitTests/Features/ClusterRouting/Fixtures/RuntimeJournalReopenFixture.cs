@@ -25,7 +25,7 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     {
         Open();
         Database.Bootstrap(new PrincipalRecord(RootId, "system", [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
-            { ClusterAdministrator = true }, DatabaseEngine.Credential(RootKeyId, RootId, RootSecret));
+        { ClusterAdministrator = true }, DatabaseEngine.Credential(RootKeyId, RootId, RootSecret));
         ClusterPrincipalPolicy.Initialize(Database);
         store!.RequireReaderContract(KeyLoad.Storage.StoreReaderContract.RuntimeJournal);
         Database.ConfigureRuntimeJournal(Options.Create(options));
@@ -50,14 +50,16 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     {
         store?.Dispose();
         store = null;
-        if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        if (Directory.Exists(directory))
+        {
+            Directory.Delete(directory, true);
+        }
     }
 
     private void Open()
     {
         store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
             UnitExecutionOptions.PointCacheExecution());
-        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
     }
 }

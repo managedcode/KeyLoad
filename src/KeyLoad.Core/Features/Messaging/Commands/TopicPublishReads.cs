@@ -5,6 +5,13 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int TopicPublishReadsInitialSequence = 0;
+    private const int TopicPublishReadsSingleElementCount = 1;
+    private const int TopicPublishReadsNoRetainedBytes = 0;
+    private const int TopicPublishReadsMinimumPositiveCount = 1;
+    private const int TopicPublishReadsVersionOne = 1;
+    private const int TopicPublishReadsAdjacentElementOffset = 1;
+
     private const string TopicHeadKeySpace = "topic-head";
     private const string EventSequenceKeySpace = "event-sequence";
     private const string TopicEventIdKeySpace = "topic-event-id";
@@ -19,14 +26,14 @@ public sealed partial class DatabaseEngine
     {
         var topic = view.GetRecord<TopicHead>(KeySpace.Partition(TopicHeadKeySpace, source.Partition, source.Resource));
         var head = topic is null
-            ? new EventSourceHead(0, 1, source.Generation)
+            ? new EventSourceHead(TopicPublishReadsInitialSequence, TopicPublishReadsSingleElementCount, source.Generation)
             : new EventSourceHead(topic.TailPosition, topic.FirstAvailablePosition, topic.Generation);
         if (head.Generation != source.Generation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, StaleSourceGenerationMessage);
         }
 
-        return new(head, topic?.StoredBytes ?? 0);
+        return new(head, topic?.StoredBytes ?? TopicPublishReadsNoRetainedBytes);
     }
 
     private void ValidateTopicPublication(PrincipalRecord principal, ResourceDefinition resource, ImmutableArray<EventData> events)
@@ -35,7 +42,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.DispatchPaused, PausedTopicMessage);
         }
-        if (events.Length < 1 || events.Length > messagingExecution.MaximumTopicEvents)
+        if (events.Length < TopicPublishReadsMinimumPositiveCount || events.Length > messagingExecution.MaximumTopicEvents)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidTopicEventCountMessage);
         }
@@ -57,7 +64,7 @@ public sealed partial class DatabaseEngine
         {
             JsonData.Identifier(item.EventId);
             JsonData.Identifier(item.EventType);
-            if (item.SchemaVersion < 1)
+            if (item.SchemaVersion < TopicPublishReadsVersionOne)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidEventSchemaVersionMessage);
             }
@@ -76,7 +83,7 @@ public sealed partial class DatabaseEngine
             var record = new SourceEventRecord(source, checked(++tail), checked(++sequence), data, now);
             var payload = NativeSerialization.Serialize(record);
             storedBytes = checked(storedBytes + payload.LongLength);
-            if (tail - firstAvailablePosition + 1 > resource.EventRetention.MaxEvents
+            if (tail - firstAvailablePosition + TopicPublishReadsAdjacentElementOffset > resource.EventRetention.MaxEvents
                 || storedBytes > resource.EventRetention.MaxBytes)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, TopicQuotaExhaustedMessage);

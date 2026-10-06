@@ -5,6 +5,17 @@ namespace KeyLoad.Core.Features.RelationalStorage;
 
 internal static class RelationalDecimalValidation
 {
+    private const int FirstCharacterIndex = 0;
+    private const int SignCharacters = 1;
+    private const int ExponentSeparatorCharacters = 1;
+    private const int NoExponent = 0;
+    private const int CharacterRangeAdjustment = 1;
+    private const int DecimalPointCharacters = 1;
+    private const int NoDecimalPointCharacters = 0;
+    private const int NoFractionalDigits = 0;
+    private const int MinimumDecimalScale = 0;
+    private const int MissingCharacterIndex = -1;
+    private const int NoCoefficient = 0;
     private const char Minus = '-';
     private const char DecimalPoint = '.';
     private const char LowerExponent = 'e';
@@ -25,63 +36,63 @@ internal static class RelationalDecimalValidation
             return false;
         }
         var raw = value.GetRawText().AsSpan();
-        if (raw[0] == Minus)
+        if (raw[FirstCharacterIndex] == Minus)
         {
-            raw = raw[1..];
+            raw = raw[SignCharacters..];
         }
         var exponentPosition = raw.IndexOfAny(LowerExponent, UpperExponent);
-        var exponent = 0;
-        if (exponentPosition >= 0 && !int.TryParse(raw[(exponentPosition + 1)..], NumberStyles.AllowLeadingSign,
+        var exponent = NoExponent;
+        if (exponentPosition >= FirstCharacterIndex && !int.TryParse(raw[(exponentPosition + ExponentSeparatorCharacters)..], NumberStyles.AllowLeadingSign,
                 CultureInfo.InvariantCulture, out exponent))
         {
             return false;
         }
-        var mantissa = exponentPosition < 0 ? raw : raw[..exponentPosition];
+        var mantissa = exponentPosition < FirstCharacterIndex ? raw : raw[..exponentPosition];
         var decimalPoint = mantissa.IndexOf(DecimalPoint);
         var first = FirstNonzero(mantissa);
-        if (first < 0)
+        if (first < FirstCharacterIndex)
         {
             return true;
         }
         var last = LastNonzero(mantissa);
-        var significantDigits = last - first + 1 - (decimalPoint >= first && decimalPoint <= last ? 1 : 0);
-        var trailingZeros = mantissa.Length - last - 1 - (decimalPoint > last ? 1 : 0);
-        var fractionalDigits = decimalPoint < 0 ? 0 : mantissa.Length - decimalPoint - 1;
+        var significantDigits = last - first + CharacterRangeAdjustment - (decimalPoint >= first && decimalPoint <= last ? DecimalPointCharacters : NoDecimalPointCharacters);
+        var trailingZeros = mantissa.Length - last - CharacterRangeAdjustment - (decimalPoint > last ? DecimalPointCharacters : NoDecimalPointCharacters);
+        var fractionalDigits = decimalPoint < FirstCharacterIndex ? NoFractionalDigits : mantissa.Length - decimalPoint - CharacterRangeAdjustment;
         var scale = (long)fractionalDigits - trailingZeros - exponent;
-        if (significantDigits > MaximumSignificantDigits || scale > MaximumScale || significantDigits - Math.Min(scale, 0) > MaximumSignificantDigits)
+        if (significantDigits > MaximumSignificantDigits || scale > MaximumScale || significantDigits - Math.Min(scale, MinimumDecimalScale) > MaximumSignificantDigits)
         {
             return false;
         }
-        return CoefficientFits(mantissa[first..(last + 1)], scale);
+        return CoefficientFits(mantissa[first..(last + CharacterRangeAdjustment)], scale);
     }
 
     private static int FirstNonzero(ReadOnlySpan<char> mantissa)
     {
-        for (var index = 0; index < mantissa.Length; index++)
+        for (var index = FirstCharacterIndex; index < mantissa.Length; index++)
         {
             if (mantissa[index] is not (Zero or DecimalPoint))
             {
                 return index;
             }
         }
-        return -1;
+        return MissingCharacterIndex;
     }
 
     private static int LastNonzero(ReadOnlySpan<char> mantissa)
     {
-        for (var index = mantissa.Length - 1; index >= 0; index--)
+        for (var index = mantissa.Length - CharacterRangeAdjustment; index >= FirstCharacterIndex; index--)
         {
             if (mantissa[index] is not (Zero or DecimalPoint))
             {
                 return index;
             }
         }
-        return -1;
+        return MissingCharacterIndex;
     }
 
     private static bool CoefficientFits(ReadOnlySpan<char> digits, long scale)
     {
-        UInt128 coefficient = 0;
+        UInt128 coefficient = NoCoefficient;
         foreach (var digit in digits)
         {
             if (digit != DecimalPoint)
@@ -89,7 +100,7 @@ internal static class RelationalDecimalValidation
                 coefficient = (coefficient * DecimalRadix) + (uint)(digit - Zero);
             }
         }
-        for (; scale < 0; scale++)
+        for (; scale < MinimumDecimalScale; scale++)
         {
             coefficient *= DecimalRadix;
         }

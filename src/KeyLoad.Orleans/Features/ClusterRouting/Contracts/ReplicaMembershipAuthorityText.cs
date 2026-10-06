@@ -2,6 +2,9 @@ namespace KeyLoad.Orleans;
 
 internal static class ReplicaMembershipAuthorityText
 {
+    private const string ForResultText = "The membership authority request is invalid.";
+    private const string ForForResultText = "The membership authority request is unauthenticated.";
+
     internal const string Unavailable = "The membership authority is unavailable.";
     internal const string InvalidSignature = "The membership authority response authentication is invalid.";
     internal const string InvalidReply = "The membership authority response is invalid.";
@@ -13,8 +16,8 @@ internal static class ReplicaMembershipAuthorityText
 
     internal static string For(ErrorCode code) => code switch
     {
-        ErrorCode.Validation => "The membership authority request is invalid.",
-        ErrorCode.Unauthenticated => "The membership authority request is unauthenticated.",
+        ErrorCode.Validation => ForResultText,
+        ErrorCode.Unauthenticated => ForForResultText,
         ErrorCode.UnsupportedCapability => "The membership authority protocol is not supported.",
         ErrorCode.ResourceExhausted => "The membership authority capacity is exhausted.",
         ErrorCode.Corruption => "The persisted membership table is corrupt.",

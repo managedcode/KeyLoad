@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+using System.Globalization;
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedPostgresBootstrap
@@ -21,7 +23,7 @@ internal static class IsolatedPostgresBootstrap
     private const string Configuration = "-c";
     private const string Fsync = "fsync=on";
     private const string Commit = "synchronous_commit=on";
-    private const string SlotRetention = "max_slot_wal_keep_size=512MB";
+    private const string SlotRetentionFormat = "max_slot_wal_keep_size={0}MB";
     private const string MissingBootstrap = "IsolatedPostgresBootstrapMissing";
 
     internal static (string Entry, string Init) FindScripts(IsolatedResourceContext context) => FindScripts(context.Builder);
@@ -39,15 +41,16 @@ internal static class IsolatedPostgresBootstrap
     }
 
     internal static void Configure<T>(IResourceBuilder<T> node, string directory, (string Entry, string Init) scripts,
-        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, string primaryName = Primary) where T : ContainerResource
+        IResourceBuilder<ParameterResource> password, string? standby, int standbyCount, IOptions<BenchmarkDeploymentOptions> deploymentOptions, string primaryName = Primary) where T : ContainerResource
     {
+        var slotRetention = string.Format(CultureInfo.InvariantCulture, SlotRetentionFormat, deploymentOptions.Value.PostgresSlotWalRetentionMegabytes);
         node.WithBindMount(directory, Data).WithBindMount(scripts.Entry, EntryTarget, isReadOnly: true)
             .WithEnvironment(PgDataEnvironment, PgData).WithEnvironment(Password, password).WithEntrypoint(Shell)
-            .WithArgs(static arguments =>
+            .WithArgs(arguments =>
             {
                 arguments.Args.Clear();
                 foreach (var argument in new[] { EntryTarget, Postgres, Configuration, Fsync, Configuration, Commit,
-                    Configuration, SlotRetention })
+                    Configuration, slotRetention })
                 {
                     arguments.Args.Add(argument);
                 }

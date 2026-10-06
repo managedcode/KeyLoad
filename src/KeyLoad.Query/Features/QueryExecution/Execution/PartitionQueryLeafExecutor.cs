@@ -8,6 +8,9 @@ namespace KeyLoad.Query.Features.QueryExecution;
 internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEngine database,
     ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null)
 {
+    private const int EmptyElementCount = 0;
+    private const int VersionOne = 1;
+
     internal PartitionQueryLeafResultV1 Execute(string principalId, PartitionQueryLeafPlanV1 plan,
         AstQueryRequest normalized, ReadExecutionBudgetReadGrant grant)
     {
@@ -26,7 +29,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         engine.Bind(principal, resource, request);
         ValidatePlacement(view, plan.Partition, grant);
         PreparedQuery? prepared = null;
-        prepared = new(request.Query, 0, plan.MaxCandidates, ordinalFullReferenceOrder: true,
+        prepared = new(request.Query, EmptyElementCount, plan.MaxCandidates, ordinalFullReferenceOrder: true,
             projectCandidate: document => engine.Project(principal, resource, document,
                 request.Query.Projection, prepared!.Paths),
             reserveCandidate: retention.Reserve, releaseCandidate: retention.Release);
@@ -36,7 +39,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         var candidates = prepared.DrainCandidates(request.Query.Limit, budget,
             retention.Reserve, retention.ReleaseHeap);
         var identity = database.Store.Identity;
-        return new(1, plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
+        return new(VersionOne, plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion, grant.ExaminedRecords,
             grant.ReadBytes, retention.CurrentBytes, accessPath, candidates);
     }

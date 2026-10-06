@@ -8,6 +8,8 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 [ConfigurationBinding]
 internal static class RequestCqrsProbeProfileSettingsReader
 {
+    private const string ThirdVoterName = "node3";
+
     private const string NodesArrayText = "node1";
     private const string NodesNodesArrayText = "node2";
     private const int ValidSessionStructuralValue = 32;
@@ -27,7 +29,7 @@ internal static class RequestCqrsProbeProfileSettingsReader
     private const string DiscoveryModeKey = "DiscoveryCaptureMode";
     private const string DisabledMode = "disabled";
     private const string MixedMode = "mixed-interface3-v1";
-    private static readonly IReadOnlyList<string> Nodes = Array.AsReadOnly(new[] { NodesArrayText, NodesNodesArrayText, "node3" });
+    private static readonly IReadOnlyList<string> Nodes = Array.AsReadOnly(new[] { NodesArrayText, NodesNodesArrayText, ThirdVoterName });
 
     internal static IReadOnlyList<string> VoterNames => Nodes;
 

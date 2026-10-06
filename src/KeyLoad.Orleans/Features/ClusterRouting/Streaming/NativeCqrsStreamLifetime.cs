@@ -21,8 +21,8 @@ internal static class NativeCqrsStreamLifetime
     internal static IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Action settled, CancellationToken cancellationToken,
-        IOptions<GrainRoutingOptions> options, NativeRequestWorkOwner? owner = null)
+        Guid requestId, TimeProvider clock, Action settled, IOptions<GrainRoutingOptions> options,
+        NativeRequestWorkOwner? owner, CancellationToken cancellationToken)
         => RunCore(createStream, serializer, requestId, clock, settled, owner, options.Value.ExecutionLifetime,
             cancellationToken, CancellationToken.None);
 

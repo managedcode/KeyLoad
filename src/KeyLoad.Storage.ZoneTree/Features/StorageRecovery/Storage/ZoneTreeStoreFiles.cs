@@ -6,7 +6,7 @@ internal static class ZoneTreeStoreFiles
 {
     internal static FileStream OpenJournal(ZoneTreeStoreOptions options, FileMode mode = FileMode.OpenOrCreate) => new(
         Path.Combine(options.Directory, JournalFileName), mode,
-        FileAccess.ReadWrite, FileShare.Read, FileBufferBytes, FileOptions.WriteThrough);
+        FileAccess.ReadWrite, FileShare.Read, options.FileBufferBytes, FileOptions.WriteThrough);
 
     internal static void CreatePrivateDirectory(string directory)
     {

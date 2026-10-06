@@ -24,6 +24,7 @@ internal sealed class TypedOptionsExecutionFlowTests
     [Test]
     public async Task CanonicalDefaultsReachTheSameNativeOperationAsync()
     {
+        var defaults = new TypedOptionsFlowSettings();
         var state = new TypedOptionsFlowState();
         using var provider = TypedOptionsFlowRegistration.CreateProvider(state);
         var consumer = provider.GetRequiredService<TypedOptionsFlowConsumer>();
@@ -34,6 +35,8 @@ internal sealed class TypedOptionsExecutionFlowTests
         await Assert.That(state.AdmittedOperations).IsEqualTo(1);
         await Assert.That(state.InitialPermits).IsEqualTo(64);
         await Assert.That(state.ObservedDeadline).IsEqualTo(TimeSpan.FromSeconds(30));
+        await Assert.That(state.InitialPermits).IsEqualTo(defaults.AdmissionCapacity);
+        await Assert.That(state.ObservedDeadline).IsEqualTo(defaults.Deadline);
     }
 
     [Test]

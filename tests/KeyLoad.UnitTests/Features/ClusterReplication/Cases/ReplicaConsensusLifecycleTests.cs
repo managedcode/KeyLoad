@@ -80,7 +80,8 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
     private readonly ZoneTreeStore canonical;
     private readonly ZoneTreeStore replica;
 
-    internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null)
+    internal ReplicaLifecycleFixture(ReplicaExecutionOptions? executionSettings = null, int? maximumAppendEntries = null,
+        Action<CommitStage, long, int>? canonicalObserver = null)
     {
         directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
         Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, Guid.NewGuid());
@@ -88,11 +89,11 @@ internal sealed class ReplicaLifecycleFixture : IAsyncDisposable
         {
             Configuration = Configuration with { MaxAppendEntries = maximum };
         }
-        canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = Configuration.Incarnation, FaultObserver = canonicalObserver }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         replica = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = Configuration.Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         Log = new(replica, ReplicaExecutionTestOptions.Configuration(Configuration));
         Database = new(canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+            UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var execution = ReplicaExecutionTestOptions.Execution(executionSettings);
         Materializer = new(Database, Log, new ReplicaSnapshotStore(canonical, Log,
             ReplicaExecutionTestOptions.Configuration(Configuration), execution), execution);

@@ -12,6 +12,7 @@ internal sealed class ScaleServerResourceEvidenceParserTests
     [Arguments("separate-profiles")]
     [Arguments("complete-matched-cohort")]
     [Arguments("retained-incomplete")]
+    [Arguments("configured-policy")]
     public async Task AcScale016AcceptsBoundedNativeEvidenceAndExplicitUnavailableRows(string scenario)
         => await AssertScenarioAsync(scenario);
 
@@ -26,6 +27,9 @@ internal sealed class ScaleServerResourceEvidenceParserTests
     [Arguments("invalid-cpu-quota")]
     [Arguments("invalid-cpu-set-membership")]
     [Arguments("failed-workload-mismatch")]
+    [Arguments("invalid-configured-policy")]
+    [Arguments("configured-sample-overflow")]
+    [Arguments("mismatched-configured-policy")]
     public async Task AcScale016RejectsMisboundOrIncomparableServerEvidence(string scenario)
         => await AssertScenarioAsync(scenario);
 

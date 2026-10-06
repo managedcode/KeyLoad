@@ -33,9 +33,11 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
     {
         if (message.JsonRpcMessage is JsonRpcError nativeError)
         { nativeError.Error = SafeProtocolError(nativeError.Error.Code); }
-        var maximumBytes = checked(state.MaximumReplyBytes + McpFramingProtocol.EnvelopeAllowanceBytes);
+        var executionOptions = state.ExecutionOptions;
+        var envelopeBytes = executionOptions.Value.EnvelopeAllowanceBytes;
+        var maximumBytes = checked(state.MaximumReplyBytes + envelopeBytes);
         try
-        { McpNativeOutput.Validate(message.JsonRpcMessage, maximumBytes); }
+        { McpNativeOutput.Validate(message.JsonRpcMessage, maximumBytes, executionOptions); }
         catch (KeyLoadException error)
         {
             if (message.JsonRpcMessage is JsonRpcResponse response)
@@ -46,7 +48,7 @@ internal sealed class McpSessionPipeline(HttpContext context, McpRequestState st
             { failed.Error = SafeProtocolError((int)McpErrorCode.InternalError); }
             else
             { throw; }
-            McpNativeOutput.Validate(message.JsonRpcMessage, McpFramingProtocol.EnvelopeAllowanceBytes);
+            McpNativeOutput.Validate(message.JsonRpcMessage, envelopeBytes, executionOptions);
         }
         await next(message, cancellationToken).ConfigureAwait(false);
     };

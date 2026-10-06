@@ -4,6 +4,10 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class GlobalBranchSinglePartitionAdapter
 {
+    private const int EmptyElementCount = 0;
+    private const int OneBranch = 1;
+    private const int EqualOrder = 0;
+
     private const string InvalidLocalOrder = "The local search branch is not ordered by the global branch contract.";
 
     internal static SearchScore[] Prepare(SearchScore[] branch)
@@ -16,7 +20,7 @@ internal static class GlobalBranchSinglePartitionAdapter
     {
         budget.Check();
         if (!double.IsFinite(branch[index].Score)
-            || index > 0 && GlobalBranchOrder.CompareScores(branch[index - 1], branch[index]) > 0)
+            || index > EmptyElementCount && GlobalBranchOrder.CompareScores(branch[index - OneBranch], branch[index]) > EqualOrder)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidLocalOrder);
         }

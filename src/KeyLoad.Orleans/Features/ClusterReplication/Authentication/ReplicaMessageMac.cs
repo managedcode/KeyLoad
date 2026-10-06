@@ -56,12 +56,14 @@ internal sealed class ReplicaMessageMac(ReadOnlyMemory<byte> credential, string 
 
     private byte[] Sign(MemoryStream buffer)
     {
+        const int StartEmptyCount = 0;
+
         if (buffer.Length > ReplicaTransportProtocol.MaximumMetadataBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaProtocol.InvalidPeer);
         }
 
-        return HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(0, checked((int)buffer.Length)));
+        return HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(StartEmptyCount, checked((int)buffer.Length)));
     }
 
     public void Dispose() => CryptographicOperations.ZeroMemory(secret);

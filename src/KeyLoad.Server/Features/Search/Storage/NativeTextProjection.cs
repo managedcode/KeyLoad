@@ -1,27 +1,38 @@
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjection : ITextProjection
 {
+    private const int FailureEmptyCount = 0;
+    private const int FailureSingleItemCount = 1;
+    private const int FailureIndexEmptyCount = 0;
+
+    private readonly IOptions<NativeTextExecutionOptions> executionOptions;
+
     private readonly DatabaseLimits limits;
-    private readonly NativeTextProjectionState state = new();
+    private readonly NativeTextProjectionState state;
     private readonly NativeTextProjectionPhysicalGate physicalGate = new();
     private readonly NativeTextProjectionLifecycle lifecycle;
     private readonly Func<string, ulong> tokenHash;
     private readonly Action<NativeTextFaultStage>? faultObserver;
     private readonly Lock disposeSync = new();
 
-    internal NativeTextProjection(string directory, DatabaseLimits limits, Guid sourceNodeId,
-        Func<string, ulong>? tokenHash = null, Action<NativeTextFaultStage>? faultObserver = null)
+    internal NativeTextProjection(string directory, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<NativeTextFaultStage>? faultObserver = null)
     {
-        ArgumentNullException.ThrowIfNull(limits);
-        var root = NativeTextFiles.InitializeRoot(directory, sourceNodeId, limits);
-        this.limits = limits;
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        this.executionOptions = executionOptions;
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        limits = limitsOptions.Value;
+        limits.Validate();
+        state = new(executionOptions: executionOptions);
+        var root = NativeTextFiles.InitializeRoot(directory, sourceNodeId, limits, executionOptions: executionOptions);
         this.tokenHash = tokenHash ?? NativeTextHash.Sha256;
         this.faultObserver = faultObserver;
-        lifecycle = new(root, limits, sourceNodeId, state, physicalGate, faultObserver);
+        lifecycle = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions);
     }
 
     public ITextProjectionLease Acquire(TextProjectionScope scope, ReadExecutionBudget budget)
@@ -70,7 +81,7 @@ internal sealed class NativeTextProjection : ITextProjection
         var currentInvalidation = invalidate && state.BeginInvalidation(generation);
         ServerFailureObserver.Observe(() => NativeTextSettlement.Release(lifecycle.Root, limits, generation,
             lifecycle.SourceNodeId, budget, building, invalidate, completed, currentInvalidation,
-            () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate),
+            () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate, executionOptions: executionOptions),
             failures);
         ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == 0 ? budget : null), failures);
         var retired = state.CompleteLease(slot, Failure(failures));
@@ -89,5 +100,5 @@ internal sealed class NativeTextProjection : ITextProjection
     internal void MutatePhysical(Action mutation) => physicalGate.Run(mutation);
 
     private static Exception? Failure(List<Exception> failures)
-        => failures.Count switch { 0 => null, 1 => failures[0], _ => new AggregateException(failures) };
+        => failures.Count switch { FailureEmptyCount => null, FailureSingleItemCount => failures[FailureIndexEmptyCount], _ => new AggregateException(failures) };
 }

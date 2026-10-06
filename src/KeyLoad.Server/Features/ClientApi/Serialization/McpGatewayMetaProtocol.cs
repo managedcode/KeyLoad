@@ -6,6 +6,15 @@ namespace KeyLoad.Server;
 /// <summary>Owns the fixed public gateway-tool names and schemas.</summary>
 internal static class McpGatewayMetaProtocol
 {
+    private const string ScoredToolSchemaJsonCANONICALTOOLSchemaPlaceholder = "CANONICAL_TOOL";
+    private const string SearchOutputSchemaSCOREDTOOLSchemaPlaceholder = "SCORED_TOOL";
+    private const string SearchOutputSchemaFAILURESchemaPlaceholder = "FAILURE";
+    private const string RouteOutputSchemaSCOREDTOOLSchemaPlaceholder = "SCORED_TOOL";
+    private const string RouteOutputSchemaFAILURESchemaPlaceholder = "FAILURE";
+    private const string InvokeOutputSchemaFAILURESchemaPlaceholder = "FAILURE";
+    private const string CreateToolsDescriptionText = "Find relevant KeyLoad operations by task description.";
+    private const string CreateToolsCreateToolsDescriptionText = "Route a task to a small set of relevant KeyLoad operations.";
+
     internal const string SearchName = "gateway_tools_search";
     internal const string RouteName = "gateway_tools_route";
     internal const string InvokeName = "gateway_tool_invoke";
@@ -37,20 +46,20 @@ internal static class McpGatewayMetaProtocol
     private static readonly JsonElement RouteInputSchema = ParseSchema(RouteSchema);
     private static readonly JsonElement InvokeInputSchema = ParseSchema(InvokeSchema);
     private static readonly string ScoredToolSchemaJson = ScoredToolSchema
-        .Replace("CANONICAL_TOOL", CanonicalToolSchema, StringComparison.Ordinal);
+        .Replace(ScoredToolSchemaJsonCANONICALTOOLSchemaPlaceholder, CanonicalToolSchema, StringComparison.Ordinal);
     private static readonly JsonElement SearchOutputSchema = ParseSchema(SearchOutputSchemaJson
-        .Replace("SCORED_TOOL", ScoredToolSchemaJson, StringComparison.Ordinal)
-        .Replace("FAILURE", FailureEnvelopeSchema, StringComparison.Ordinal));
+        .Replace(SearchOutputSchemaSCOREDTOOLSchemaPlaceholder, ScoredToolSchemaJson, StringComparison.Ordinal)
+        .Replace(SearchOutputSchemaFAILURESchemaPlaceholder, FailureEnvelopeSchema, StringComparison.Ordinal));
     private static readonly JsonElement RouteOutputSchema = ParseSchema(RouteOutputSchemaJson
-        .Replace("SCORED_TOOL", ScoredToolSchemaJson, StringComparison.Ordinal)
-        .Replace("FAILURE", FailureEnvelopeSchema, StringComparison.Ordinal));
+        .Replace(RouteOutputSchemaSCOREDTOOLSchemaPlaceholder, ScoredToolSchemaJson, StringComparison.Ordinal)
+        .Replace(RouteOutputSchemaFAILURESchemaPlaceholder, FailureEnvelopeSchema, StringComparison.Ordinal));
     private static readonly JsonElement InvokeOutputSchema = ParseSchema(InvokeOutputSchemaJson
-        .Replace("FAILURE", FailureEnvelopeSchema, StringComparison.Ordinal));
+        .Replace(InvokeOutputSchemaFAILURESchemaPlaceholder, FailureEnvelopeSchema, StringComparison.Ordinal));
 
     internal static IReadOnlyList<Tool> CreateTools() =>
     [
-        CreateTool(SearchName, "Find relevant KeyLoad operations by task description.", SearchInputSchema, SearchOutputSchema),
-        CreateTool(RouteName, "Route a task to a small set of relevant KeyLoad operations.", RouteInputSchema, RouteOutputSchema),
+        CreateTool(SearchName, CreateToolsDescriptionText, SearchInputSchema, SearchOutputSchema),
+        CreateTool(RouteName, CreateToolsCreateToolsDescriptionText, RouteInputSchema, RouteOutputSchema),
         CreateTool(InvokeName, "Invoke one exact canonical KeyLoad operation.", InvokeInputSchema, InvokeOutputSchema)
     ];
 

@@ -7,6 +7,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int AtomicMutationApplicationInitialSequence = 0;
+    private const int AtomicMutationApplicationAdjacentElementOffset = 1;
+    private const int AtomicMutationApplicationEmptyElementCount = 0;
+
     private const string UnsupportedMutationMessage = "The mutation is unsupported.";
     private const string DocumentEpochSpace = "document-epoch";
 
@@ -35,7 +39,7 @@ public sealed partial class DatabaseEngine
             }
             receipts.Add(receipt);
             var after = image?.After;
-            AppendOutbox(tx, partition, new(0, receipts.Count - 1, token, now, mutation, receipt, before, after), allowOutboxProgressReserve);
+            AppendOutbox(tx, partition, new(AtomicMutationApplicationInitialSequence, receipts.Count - AtomicMutationApplicationAdjacentElementOffset, token, now, mutation, receipt, before, after), allowOutboxProgressReserve);
             if (before is not null && after is not null && before.Access != after.Access)
             {
                 AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
@@ -44,7 +48,7 @@ public sealed partial class DatabaseEngine
         foreach (var collection in mutations.Where(mutation => mutation is PutDocument or PatchDocument or DeleteDocument)
             .Select(mutation => mutation.Resource).Distinct(StringComparer.Ordinal))
         {
-            tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + 1));
+            tx.PutRecord(KeySpace.Partition(DocumentEpochSpace, partition, collection), checked(DocumentEpoch(tx, partition, collection) + AtomicMutationApplicationAdjacentElementOffset));
         }
 
         return receipts.Count == receipts.Capacity ? receipts.MoveToImmutable() : receipts.ToImmutable();
@@ -53,7 +57,7 @@ public sealed partial class DatabaseEngine
     private IEnumerable<(Mutation Effect, bool Derived)> ExpandCommandMutations(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now)
     {
-        var count = 0;
+        var count = AtomicMutationApplicationEmptyElementCount;
         ReadExecutionBudget? budget = null;
         foreach (var requested in mutations)
         {
@@ -63,7 +67,7 @@ public sealed partial class DatabaseEngine
                 yield return (requested, false);
                 continue;
             }
-            budget ??= new ReadExecutionBudget(Limits, CompositionTimeProvider.Instance);
+            budget ??= new ReadExecutionBudget(OperationLimitsOptions, CompositionTimeProvider.Instance);
             foreach (var effect in ExpandComposition(tx, principal, partition, requested, now, budget))
             {
                 AcceptExpandedMutation(ref count);

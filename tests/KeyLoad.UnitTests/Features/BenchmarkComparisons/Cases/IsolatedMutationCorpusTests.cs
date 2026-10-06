@@ -9,7 +9,7 @@ internal sealed class IsolatedMutationCorpusTests
     public async Task AcIso005MutationIdsAreUniqueAcrossOperationsWarmupsRepetitionsAndScenarios()
     {
         var options = ComparisonHarnessInputs.Small with { Operations = 32, Warmup = 4, Repetitions = 3 };
-        var data = new BenchmarkDataset(options);
+        var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         var ids = data.Documents.Select(document => document.Id).ToHashSet(StringComparer.Ordinal);
         foreach (var scenario in new[] { Scenario.DocumentWrite, Scenario.DocumentUpdate, Scenario.DocumentDelete })
         {
@@ -30,7 +30,7 @@ internal sealed class IsolatedMutationCorpusTests
     [Test]
     public async Task AcIso005UpdateStartsFromDifferentExactLengthBodyAndDeleteStartsExisting()
     {
-        var data = new BenchmarkDataset(ComparisonHarnessInputs.Small);
+        var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         var input = data.Input(Scenario.DocumentUpdate, 0, 0, false);
         var initial = BenchmarkDataset.InitialMutationState(Scenario.DocumentUpdate, input);
         await Assert.That(initial.Id).IsEqualTo(input.Id);
@@ -44,12 +44,12 @@ internal sealed class IsolatedMutationCorpusTests
     [Test]
     public async Task AcIso005ExistingWriteInputsAndSharedHashRemainStableAcrossNativeCounts()
     {
-        var data = new BenchmarkDataset(ComparisonHarnessInputs.Small);
+        var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         var expected = data.CreateDocument(data.Options.Documents + data.Options.Warmup);
         var actual = data.Input(Scenario.DocumentWrite, 0, 0, false);
         await Assert.That(BenchmarkDataset.SameDocument(new(actual.Id, actual.Json), expected)).IsTrue();
         await Assert.That(actual.Vector.SequenceEqual(expected.Vector)).IsTrue();
-        var two = new BenchmarkDataset(data.Options with { Topology = ComparisonTopology.TwoNode });
+        var two = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(data.Options with { Topology = ComparisonTopology.TwoNode }));
         await Assert.That(two.Sha256).IsEqualTo(data.Sha256);
     }
 }

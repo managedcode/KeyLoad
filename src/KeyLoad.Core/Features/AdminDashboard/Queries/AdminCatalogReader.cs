@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 /// <param name="database">Borrowed canonical engine.</param>
 public sealed class AdminCatalogReader(DatabaseEngine database)
 {
+    private const int LastCatalogRecordOffset = 1;
+
     private const string CatalogSpace = "catalog";
 
     /// <summary>Reads one metadata page after enforcing current persisted administrator authority.</summary>
@@ -19,7 +21,7 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
         JsonData.Identifier(request.TenantId);
         JsonData.Identifier(request.DatabaseId);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterName);
-        var budget = new ReadExecutionBudget(database.Limits, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         return database.Store.Read(view => ReadPage(budget.CreateView(view), budget, principalId, request));
     }
 
@@ -37,7 +39,7 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
                     resource.SchemaVersion, resource.Indexes.Length, resource.Paused));
                 return true;
             }, after, cancellationToken: budget.Cancellation);
-        var page = new AdminResourcesPage([.. items], scan.HasMore ? items[^1].Name : null, AdminReadAuthority.Position(view));
+        var page = new AdminResourcesPage([.. items], scan.HasMore ? items[^LastCatalogRecordOffset].Name : null, AdminReadAuthority.Position(view));
         budget.CheckResult(page);
         return page;
     }

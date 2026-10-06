@@ -4,42 +4,48 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class GlobalBranchOrder
 {
+    private const int EqualOrder = 0;
+    private const int HeapChildCount = 2;
+    private const int AdjacentElementOffset = 1;
+    private const int EmptyElementCount = 0;
+    private const int FirstElementIndex = 0;
+
     internal static int CompareReferences(EntityRef left, EntityRef right)
     {
         var order = StringComparer.Ordinal.Compare(left.Partition.TenantId, right.Partition.TenantId);
-        if (order != 0)
+        if (order != EqualOrder)
         {
             return order;
         }
         order = StringComparer.Ordinal.Compare(left.Partition.DatabaseId, right.Partition.DatabaseId);
-        if (order != 0)
+        if (order != EqualOrder)
         {
             return order;
         }
         order = StringComparer.Ordinal.Compare(left.Partition.TransactionDomainId, right.Partition.TransactionDomainId);
-        if (order != 0)
+        if (order != EqualOrder)
         {
             return order;
         }
         order = StringComparer.Ordinal.Compare(left.Partition.PartitionKey, right.Partition.PartitionKey);
-        if (order != 0)
+        if (order != EqualOrder)
         {
             return order;
         }
         order = StringComparer.Ordinal.Compare(left.Collection, right.Collection);
-        return order != 0 ? order : StringComparer.Ordinal.Compare(left.Id, right.Id);
+        return order != EqualOrder ? order : StringComparer.Ordinal.Compare(left.Id, right.Id);
     }
 
     internal static int CompareCandidates(GlobalBranchCandidate left, GlobalBranchCandidate right)
     {
         var scoreOrder = right.Score.CompareTo(left.Score);
-        return scoreOrder != 0 ? scoreOrder : CompareReferences(left.Reference, right.Reference);
+        return scoreOrder != EqualOrder ? scoreOrder : CompareReferences(left.Reference, right.Reference);
     }
 
     internal static int CompareScores(SearchScore left, SearchScore right)
     {
         var scoreOrder = right.Score.CompareTo(left.Score);
-        return scoreOrder != 0 ? scoreOrder : CompareReferences(left.Reference, right.Reference);
+        return scoreOrder != EqualOrder ? scoreOrder : CompareReferences(left.Reference, right.Reference);
     }
 
     internal static void SortCandidates(GlobalBranchCandidate[] candidates, ReadExecutionBudget budget)
@@ -53,30 +59,30 @@ internal static class GlobalBranchOrder
 
     private static void HeapSort<T>(T[] values, Comparison<T> compare, ReadExecutionBudget budget)
     {
-        for (var root = values.Length / 2 - 1; root >= 0; root--)
+        for (var root = values.Length / HeapChildCount - AdjacentElementOffset; root >= EmptyElementCount; root--)
         {
             SiftDown(values, root, values.Length, compare, budget);
         }
-        for (var end = values.Length - 1; end > 0; end--)
+        for (var end = values.Length - AdjacentElementOffset; end > EmptyElementCount; end--)
         {
             budget.Check();
-            (values[0], values[end]) = (values[end], values[0]);
-            SiftDown(values, 0, end, compare, budget);
+            (values[FirstElementIndex], values[end]) = (values[end], values[FirstElementIndex]);
+            SiftDown(values, FirstElementIndex, end, compare, budget);
         }
     }
 
     private static void SiftDown<T>(T[] values, int root, int length, Comparison<T> compare,
         ReadExecutionBudget budget)
     {
-        while (root * 2 + 1 < length)
+        while (root * HeapChildCount + AdjacentElementOffset < length)
         {
             budget.Check();
-            var child = root * 2 + 1;
-            if (child + 1 < length && compare(values[child], values[child + 1]) < 0)
+            var child = root * HeapChildCount + AdjacentElementOffset;
+            if (child + AdjacentElementOffset < length && compare(values[child], values[child + AdjacentElementOffset]) < EmptyElementCount)
             {
                 child++;
             }
-            if (compare(values[root], values[child]) >= 0)
+            if (compare(values[root], values[child]) >= EmptyElementCount)
             {
                 return;
             }

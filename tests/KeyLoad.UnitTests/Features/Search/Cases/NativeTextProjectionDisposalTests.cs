@@ -27,17 +27,17 @@ internal sealed class NativeTextProjectionDisposalTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, DocumentId, Payload));
         var root = Path.Combine(database.Directory, Collection);
-        using var projection = new NativeTextProjection(root, database.Database.Limits, database.Store.Identity.NodeId);
+        using var projection = new NativeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, Field, Query);
         var cancellation = TestContext.Current!.Execution.CancellationToken;
-        var original = await new SearchEngine(database.Database, projection).SearchAsync(Principal, request, cancellation);
+        var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation);
         await Assert.That(original).HasSingleItem();
         await DrainConcurrentCallersAsync(database, projection, original[0], cancellation);
         projection.Dispose();
         await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() =>
-            new SearchEngine(database.Database, projection).SearchAsync(Principal, request, cancellation));
-        using var reopened = new NativeTextProjection(root, database.Database.Limits, database.Store.Identity.NodeId);
-        var recovered = await new SearchEngine(database.Database, reopened).SearchAsync(Principal, request, cancellation);
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation));
+        using var reopened = new NativeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        var recovered = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), reopened).SearchAsync(Principal, request, cancellation);
         await Assert.That(recovered).HasSingleItem();
         await Assert.That(recovered[0].Document.Reference).IsEqualTo(original[0].Document.Reference);
         await Assert.That(recovered[0].Document.Revision).IsEqualTo(original[0].Document.Revision);
@@ -50,7 +50,7 @@ internal sealed class NativeTextProjectionDisposalTests
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         deadline.CancelAfter(WaitLimit);
         var scope = CaptureScope(database);
-        var budget = new ReadExecutionBudget(database.Database.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         using var lease = projection.Acquire(scope, budget);
         lease.BeginRecord(document.Document.Reference, document.Document.Revision);
         lease.ObserveToken(Query);
@@ -76,7 +76,7 @@ internal sealed class NativeTextProjectionDisposalTests
             cancellation.ThrowIfCancellationRequested();
             try
             {
-                using var rejected = projection.Acquire(scope, new(limits));
+                using var rejected = projection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(limits)));
             }
             catch (ObjectDisposedException)
             {

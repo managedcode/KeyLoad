@@ -4,6 +4,12 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int DefaultTraversalDepth = 3;
+    private const int DefaultTraversalVertices = 1_000;
+    private const int DefaultTraversalEdges = 5_000;
+    private const int MinimumTraversalDepth = 0;
+    private const int MinimumTraversalVertices = 1;
+    private const int MinimumTraversalEdges = 1;
     /// <summary>Traverses visible graph edges in breadth-first order within one committed read cut.</summary>
     /// <param name="principalId">Persisted caller identity.</param>
     /// <param name="partition">Atomic graph partition.</param>
@@ -16,15 +22,17 @@ public sealed partial class DatabaseEngine
     /// <param name="cancellationToken">Cancellation across storage and result work.</param>
     /// <returns>Qualified vertices and projected edges in deterministic order.</returns>
     public GraphTraversal Traverse(string principalId, PartitionRef partition, string graph, EntityRef start,
-        int maxDepth = 3, int maxVertices = 1_000, int maxEdges = 5_000, string[]? labels = null,
+        int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null,
         CancellationToken cancellationToken = default)
     {
         const string InvalidTraversalBudget = "The graph traversal budget is invalid.";
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         return Store.Read(view =>
         {
-            if (maxDepth is < 0 or > 16 || maxVertices is < 1 or > 10_000 || maxEdges is < 1 or > 50_000 || start.Partition != partition)
+            if (maxDepth < MinimumTraversalDepth || maxDepth > graphExecution.MaximumDepth
+                || maxVertices < MinimumTraversalVertices || maxVertices > graphExecution.MaximumVertices
+                || maxEdges < MinimumTraversalEdges || maxEdges > graphExecution.MaximumEdges || start.Partition != partition)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidTraversalBudget);
             }

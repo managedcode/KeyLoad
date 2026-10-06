@@ -1,11 +1,13 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
 // Measures the load generator, including its drivers and sampler. These are never database CPU/RSS.
 internal sealed class ClientResourceSampler : IAsyncDisposable
 {
-    private const int IntervalMs = 50;
+    private readonly NativeComparisonExecutionOptions settings;
+    private const int NoResources = 0;
     private readonly System.Threading.Lock gate = new();
     private readonly Process process = Process.GetCurrentProcess();
     private readonly CancellationTokenSource lifetime = new();
@@ -14,8 +16,10 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
     private readonly Task sampler;
     private long peak;
 
-    public ClientResourceSampler()
+    public ClientResourceSampler(IOptions<NativeComparisonExecutionOptions> options)
     {
+        settings = options.Value;
+        settings.Validate();
         process.Refresh();
         peak = process.WorkingSet64;
         cpu = process.TotalProcessorTime;
@@ -29,7 +33,7 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
         {
             while (true)
             {
-                await Task.Delay(IntervalMs, lifetime.Token);
+                await Task.Delay(settings.ResourceSampleIntervalMilliseconds, lifetime.Token);
                 lock (gate)
                 {
                     process.Refresh();
@@ -49,7 +53,8 @@ internal sealed class ClientResourceSampler : IAsyncDisposable
         await lifetime.CancelAsync();
         await sampler;
         process.Refresh();
-        return new(Math.Max(0, elapsedCpu.TotalSeconds), Math.Max(0, bytes), Math.Max(peak, process.WorkingSet64), IntervalMs);
+        return new(Math.Max(NoResources, elapsedCpu.TotalSeconds), Math.Max(NoResources, bytes), Math.Max(peak, process.WorkingSet64),
+            settings.ResourceSampleIntervalMilliseconds);
     }
 
     public async ValueTask DisposeAsync()

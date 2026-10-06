@@ -72,6 +72,7 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
             HardcodedDurationPolicy.IsDurationMethod(context.Compilation, constructor) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, constructor, creation.Arguments) =>
             !OperationalPolicyBindings.IsCoalescedWakeSignal(context.Compilation, creation) &&
+            !ConfiguredCountingSignal.IsConfigured(context.Compilation, creation, context.CancellationToken) &&
             creation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IInvocationOperation invocation when HardcodedDurationPolicy.IsDurationMethod(context.Compilation, invocation.TargetMethod) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, invocation.TargetMethod, invocation.Arguments) =>

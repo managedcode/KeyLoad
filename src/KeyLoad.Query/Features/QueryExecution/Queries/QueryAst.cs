@@ -8,6 +8,12 @@ namespace KeyLoad.Query;
 /// <summary>Evaluates the supported Q1 scalar and three-valued predicate semantics.</summary>
 public static class PredicateEvaluator
 {
+    private const string OperandIsInvalidDetail = "An operand is invalid.";
+    private const string PredicateIsInvalidDetail = "A predicate is invalid.";
+    private const string QueryComparisonsRequireValuesOfTheSameScalarTypeDetail = "Query comparisons require values of the same scalar type.";
+    private const int EqualOrder = 0;
+    private const string ComparisonOperatorIsInvalidDetail = "The comparison operator is invalid.";
+
     private const string MissingParameter = "A required query parameter is missing.";
     /// <summary>Resolves a query operand against a document and bound parameters.</summary>
     /// <param name="operand">Typed field, literal, or parameter operand.</param>
@@ -27,7 +33,7 @@ public static class PredicateEvaluator
             ParameterOperand parameter when parameters?.TryGetValue(parameter.Name, out var value) == true
                 => JsonData.Scalar(value, ReadOnlySpan<string>.Empty),
             ParameterOperand => throw Errors.Fail(ErrorCode.Validation, MissingParameter),
-            _ => throw Errors.Fail(ErrorCode.Validation, "An operand is invalid.")
+            _ => throw Errors.Fail(ErrorCode.Validation, OperandIsInvalidDetail)
         };
 
     internal static object? FieldValue(string path, DocumentRecord document, JsonElement json,
@@ -58,7 +64,7 @@ public static class PredicateEvaluator
             Negation negation => !Evaluate(negation.Inner, document, json, parameters, paths),
             NullTest test => (test.Missing ? Get(test.Value) is MissingValue : Get(test.Value) is null) != test.Negated,
             InPredicate list => In(Get(list.Value), list.Values.Select(Get), list.Negated),
-            _ => throw Errors.Fail(ErrorCode.Validation, "A predicate is invalid.")
+            _ => throw Errors.Fail(ErrorCode.Validation, PredicateIsInvalidDetail)
         };
     }
     private static bool? In(object? value, IEnumerable<object?> values, bool negated)
@@ -93,18 +99,18 @@ public static class PredicateEvaluator
         }
         if (left.GetType() != right.GetType())
         {
-            throw Errors.Fail(ErrorCode.Validation, "Query comparisons require values of the same scalar type.");
+            throw Errors.Fail(ErrorCode.Validation, QueryComparisonsRequireValuesOfTheSameScalarTypeDetail);
         }
         var order = KeyCodec.Encode(left).AsSpan().SequenceCompareTo(KeyCodec.Encode(right));
         return operation switch
         {
-            SqlSyntax.Equals => order == 0,
-            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != 0,
-            SqlSyntax.Greater => order > 0,
-            SqlSyntax.GreaterOrEqual => order >= 0,
-            SqlSyntax.Less => order < 0,
-            SqlSyntax.LessOrEqual => order <= 0,
-            _ => throw Errors.Fail(ErrorCode.Validation, "The comparison operator is invalid.")
+            SqlSyntax.Equals => order == EqualOrder,
+            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != EqualOrder,
+            SqlSyntax.Greater => order > EqualOrder,
+            SqlSyntax.GreaterOrEqual => order >= EqualOrder,
+            SqlSyntax.Less => order < EqualOrder,
+            SqlSyntax.LessOrEqual => order <= EqualOrder,
+            _ => throw Errors.Fail(ErrorCode.Validation, ComparisonOperatorIsInvalidDetail)
         };
     }
     /// <summary>Enumerates field paths referenced by a predicate.</summary>

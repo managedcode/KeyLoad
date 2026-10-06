@@ -9,8 +9,8 @@ internal sealed class SqlModelViewParserTests
     public async Task AcSqlView001EventAndQueueSourcesLowerToBoundedTypedAst()
     {
         var events = new SqlParser("SELECT e.eventType FROM EVENTS('events', 'stream-a', 3) AS e " +
-            "WHERE e.payload.visible = @visible ORDER BY e.revision DESC LIMIT 4", new()).Parse();
-        var queue = new SqlParser("SELECT q.id, q.state FROM QUEUE_MESSAGES('jobs') q ORDER BY q.id", new()).Parse();
+            "WHERE e.payload.visible = @visible ORDER BY e.revision DESC LIMIT 4", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
+        var queue = new SqlParser("SELECT q.id, q.state FROM QUEUE_MESSAGES('jobs') q ORDER BY q.id", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
 
         await Assert.That(events.Collection).IsEqualTo(SqlModelViewTestSupport.StreamSet);
         await Assert.That(events.Alias).IsEqualTo("e");
@@ -27,8 +27,8 @@ internal sealed class SqlModelViewParserTests
     [Test]
     public async Task AcSqlView001QuotedAndPlainSourceNamesRemainOrdinaryCollections()
     {
-        var quoted = new SqlParser("SELECT * FROM \"EVENTS\"", new()).Parse();
-        var plain = new SqlParser("SELECT * FROM events", new()).Parse();
+        var quoted = new SqlParser("SELECT * FROM \"EVENTS\"", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
+        var plain = new SqlParser("SELECT * FROM events", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
 
         await Assert.That(quoted.Collection).IsEqualTo("EVENTS");
         await Assert.That(quoted.ModelSource).IsNull();
@@ -40,13 +40,13 @@ internal sealed class SqlModelViewParserTests
     public async Task AcSqlView001RejectsWrongSourceArgumentsAndExtraStatements()
     {
         var secondQueueArgument = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new SqlParser("SELECT * FROM QUEUE_MESSAGES('jobs', 'lane-a')", new()).Parse());
+            new SqlParser("SELECT * FROM QUEUE_MESSAGES('jobs', 'lane-a')", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         var parameterSourceArgument = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new SqlParser("SELECT * FROM EVENTS(@set, 'stream-a')", new()).Parse());
+            new SqlParser("SELECT * FROM EVENTS(@set, 'stream-a')", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         var invalidGeneration = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new SqlParser("SELECT * FROM EVENTS('events', 'stream-a', 0)", new()).Parse());
+            new SqlParser("SELECT * FROM EVENTS('events', 'stream-a', 0)", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         var multiStatement = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new SqlParser("SELECT * FROM EVENTS('events', 'stream-a'); SELECT * FROM jobs", new()).Parse());
+            new SqlParser("SELECT * FROM EVENTS('events', 'stream-a'); SELECT * FROM jobs", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
 
         await Assert.That(secondQueueArgument.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(parameterSourceArgument.Code).IsEqualTo(ErrorCode.Validation);

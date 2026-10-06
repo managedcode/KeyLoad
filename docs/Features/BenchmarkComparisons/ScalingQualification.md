@@ -329,7 +329,7 @@ identity. No field may be set true before its original operation settles.
 | Worker | Actual existing IsolatedComparisonWorker, including source/run/attempt/job/repository/ref/workflow, KeyLoad/3/PointRead and the selected profile. |
 | ProfileId, Rate, Scenario | Exact selected immutable100k/1m profile,250/1000/4000 rate and PointRead, equal to Worker and Milestone. |
 | DatasetRecords, DatasetSha256 | Actual loaded profile cardinality and canonical generated-corpus digest, validated by native initialization. |
-| Milestone | Actual OpenLoopProgressV1 snapshot, Completed >=1024 and Completed <= Started <= Planned=100000, observed after setup and before caller cancellation. |
+| Milestone | Actual first OpenLoopProgressV1 snapshot, Completed=1024 and Completed <= Started <= Planned=100000, observed after setup and before caller cancellation; profile/scenario/rate/Completed/Started/Planned exactly match the typed marker retained by the parent that published the request. |
 | Accounting | Original runner's disjoint frozen counters satisfying AC-SCALE-019, including actual completed and unfinished dispositions; never fabricated cancellation totals. |
 | CallerCancelled | Exact runner caller CTS was cancelled by the validated parent control. |
 | ProducerSettled, NativeCallsSettled, SessionsClosed | Original producer, original native-call tasks and every acquired runner session disposal completed before follow-up; failures remain failures. |
@@ -342,7 +342,12 @@ Use invariant unsigned decimal text for counters/rate and the exact closed
 profile/scenario identifiers, at most192 bytes. The parent accepts only seven
 fields, the fixed marker, its own selected profile/scenario/rate and the bounded
 counter relations above from its owned comparisons resource. Only the first
-accepted native milestone triggers cancellation. Malformed marker/control/proof,
+accepted native milestone at Completed=1024 triggers cancellation. Retain its
+typed identity and all counters through proof verification; a later milestone or
+different Started/Planned counters cannot replace the triggering marker. A
+cancellation callback failure must not skip joining an original owned task;
+every concurrent disposal caller awaits the same retained settlement task.
+Malformed marker/control/proof,
 original task failure, unsuccessful follow-up or unclosed session fails the case.
 
 The child cannot attest to parent collector/AppHost teardown before it exits.
@@ -470,3 +475,105 @@ original artifacts remain immutable. Required tests are actual native positive,
 rejection, cancellation and post-cancellation health flows through Aspire.
 Coverage excludes these load/proof cells; their test execution never substitutes
 for functional coverage or full product acceptance.
+
+TASK-SCALE-OPENLOOP-NATIVE-OPTIONS-001 applies ADR-113 to that native join.
+The case composition captures the original environment provenance once through
+the existing `BenchmarkProvenanceRegistration` and passes its native
+`IOptions<BenchmarkProvenanceOptions>` to measured, proof and resource assertions.
+Assertions compare the original artifact's worker and selected cell with that
+bound provenance; they must not reread raw environment or accept caller-supplied
+run identities. Preserve full source/run/attempt/job/repository/ref/workflow
+checks and the exact independent accounting, sample and cancellation-marker
+oracles. Fixed values asserted by those oracles are named immutable qualification
+contracts, not alternative runtime configuration. Execution durations and
+resource limits still come only from their canonical validated options. Root
+owns the case integration and live join; a Luna worker may prepare disjoint
+guarded assertion/configuration postimages. The existing six actual native
+measured/proof cases remain the proof; source checks do not qualify them.
+
+TASK-SCALE-OPENLOOP-RESOURCE-001 implements that sidecar as new AppHost-local
+Contracts/Observations/Serialization files. A typed `OpenLoopResourceSelection`
+holds the selected rate and proof intent. `ScaleServerObservationSnapshot`
+holds the already observed hardware, AppHost envelope, native container records,
+missing evidence, resource-only qualification and consumed observation policy.
+The original collector captures this snapshot after joining its observation;
+it remains the only owner of resource sampling and cleanup.
+
+`OpenLoopResourceEvidenceWriter.WriteAsync` accepts the existing worker
+selection, typed open-loop selection, owned output, observation snapshot,
+native `IOptions<ScaleServerResourceOptions>` and
+`IOptions<BenchmarkProvenanceOptions>`, and cancellation. It reads the matching
+actual typed measurement or proof artifact with the fixed4MiB format limit,
+validates its identity against the selected source/run/attempt/job and cell,
+retains its exact SHA256, and publishes the distinct sidecar with create-new,
+flush/close and atomic no-overwrite move. Every observation-policy bound comes
+from the canonical native options. No synthetic observation, new sampler,
+parallel resource owner or `WorkerSha256` reuse is allowed. Root owns the
+existing collector/composition join; a worker owns only guarded new files.
+
+TASK-SCALE-OPENLOOP-INVENTORY-001 owns the independent canonical plan before
+workflow and artifact admission. Add only
+`scripts/Features/BenchmarkComparisons/open-loop-isolated-plan.mjs` and mapped
+real Node-process TUnit flows under UnitTests' BenchmarkComparisons slice.
+Root owns the existing plan CLI, database matrices, workload dispatch, workflow
+and later finalizer/collector/aggregate joins. The canonical plan is a closed
+object with exactly `schemaVersion:1`, `kind:"open-loop-isolated-plan.v1"`,
+`measurementCells` and `cancellationProofCells`; no measurement value or
+qualification claim belongs in that plan. Each cell has exactly `id`, `target`,
+`nodeCount`, `scenario`, `profile`, `family`, `offeredRatePerSecond` and
+`cancellationProof`. Measurements use family `open-loop`; proofs use
+`open-loop-proof`. The selected rate is one of250/1000/4000. Derive targets,
+native node counts, CRUD scenarios and unsupported topology from the unchanged
+canonical isolated contract and use the existing two scaled profiles.
+
+For a measurement, append `-openloop-r<rate>` to the existing canonical
+scaled-cell ID. For a proof, append `-openloop-proof-r<rate>` to KeyLoad's
+three-node PointRead scaled-cell ID. Preserve target/scenario slug rules and
+the existing120-character limit. Order measurements by target, node count,
+scenario, scaled profile, then rate; order proofs by profile then rate.
+Require exactly792 unique measurements and6 unique proofs, disjoint IDs,
+72 measurements per target, exactly144 explicit unsupported measurement
+identities and no unsupported proof. Validation recomputes the entire canonical
+plan and rejects any omitted, duplicated, added, reordered or changed row/field.
+
+The native flow tests execute the real Node module, publish a canonical plan to
+an owned create-only output and verify its full independently enumerated
+identity partition. Negative flows submit a changed plan to the actual validator,
+verify rejection and preservation of the original output. These are functional
+tooling flows, never database measurements. Keep the existing control/scaled/
+vector composite and all original artifacts unchanged; later matrix integration
+appends72 rows per target and6 KeyLoad proofs, producing201/207 rows in the same
+eleven database groups. Rollback removes only the new independent route. Full
+native runs, artifact admission and the792-cell authenticated Linux receipt are
+still mandatory before AC-SCALE-018/019/021 can close.
+
+The native case also retains its original runner-completion task and linked
+runner lifetime. If the proof observer fails, cancel and join that original
+runner before tearing down its resources; an abandoned runner task cannot
+produce a settlement receipt. The sole `TestExecutionOptions` definition owns
+the existing native control/scaled/vector timeouts of60/140/145 minutes as
+`NativeControlTimeout`, `NativeScaledTimeout` and `NativeVectorTimeout`. Bind,
+validate and consume native `IOptions<TestExecutionOptions>` at case startup;
+execution helpers must not retain parallel operational defaults.
+
+The child selector's exact empty outer rate environment is an explicit clear
+when no suite is selected, as with the existing cleared suite/scale selectors.
+It must not re-enter test dispatch in the inner benchmark AppHost. Empty CLI
+assignments and empty rates under an active suite remain rejected. The native
+vector selector is absent for open-loop; verify the cleared outer vector key
+instead of inventing an empty native vector profile that its parser rejects.
+
+TASK-SCALE-OPENLOOP-RESOURCE-OPTIONS-091F repairs the native shared-sampler join
+under REQ-CQ-013/AC-CQ-034/038 and AC-SCALE-018..021. The open-loop runner now
+requires a fourth argument, native `IOptions<NativeComparisonExecutionOptions>`,
+before its optional textual/native progress observers. This extends the earlier
+source constructor contract while preserving the v1 measurement/proof schemas.
+The existing client sampler receives that original centrally validated options
+instance; open-loop scheduling still receives only OpenLoopExecutionOptions.
+Do not duplicate the resource sampling policy, cast unrelated options or create
+a replacement sampler. The cancellation-proof entry threads the same additional
+required dependency before its final cancellation token. Root joins both actual
+host callers through IsolatedHostTargetOwner.ExecutionOptions, already captured
+by the canonical native registration. A Luna worker owns guarded private runner
+and proof-entry repairs; root owns the two host-call joins, existing real host
+and native operation flows, current-source build and Aspire qualification.

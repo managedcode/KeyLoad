@@ -1,3 +1,4 @@
+using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -13,13 +14,27 @@ internal static class UnitBenchmarkOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<RawStorageExecutionOptions> RawStorage()
+    {
+        var value = new RawStorageExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+    internal static IOptions<ScaledStorageExecutionOptions> ScaledStorage()
+    {
+        var value = new ScaledStorageExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<NativeComparisonExecutionOptions> Native()
     {
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !File.Exists(Path.Combine(root.FullName, "KeyLoad.slnx"))) { root = root.Parent; }
         if (root is null) { throw new DirectoryNotFoundException("The native comparison policy requires the actual KeyLoad checkout."); }
-        using var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
+        var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
             .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json", optional: false).Build();
+        using var configurationLifetime = configuration as IDisposable;
         IOptions<NativeComparisonExecutionOptions> options = new OptionsManager<NativeComparisonExecutionOptions>(
             new OptionsFactory<NativeComparisonExecutionOptions>([new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(
                 configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName))], [],

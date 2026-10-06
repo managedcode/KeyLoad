@@ -15,6 +15,7 @@ public sealed class ServerExecutionOptions
     private const int MaximumHttpBodyBytes = 33_554_432;
     private const int MaximumSupportedJsonDepth = 64;
     private const int MinimumPositiveCount = 1;
+    private static readonly TimeSpan MaximumDeadline = TimeSpan.FromMinutes(MaximumDeadlineMinutes);
 
     /// <summary>Gets or sets the cancellation deadline for a readiness check.</summary>
     public TimeSpan ReadyTimeout { get; set; } = TimeSpan.FromSeconds(DefaultReadySeconds);
@@ -32,5 +33,5 @@ public sealed class ServerExecutionOptions
         && MaximumJsonDepth is >= MinimumPositiveCount and <= MaximumSupportedJsonDepth;
 
     private static bool IsBounded(TimeSpan duration)
-        => duration > TimeSpan.Zero && duration <= TimeSpan.FromMinutes(MaximumDeadlineMinutes);
+        => duration > TimeSpan.Zero && duration <= MaximumDeadline;
 }

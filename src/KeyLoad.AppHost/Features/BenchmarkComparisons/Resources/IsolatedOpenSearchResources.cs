@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Hosting;
 using System.Globalization;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -24,7 +25,7 @@ internal static class IsolatedOpenSearchResources
     private const string NetworkHost = "network.host";
     private const string BindAll = "0.0.0.0";
     private const string HeapSetting = "OPENSEARCH_JAVA_OPTS";
-    private const string Heap = "-Xms512m -Xmx512m";
+    private const string HeapFormat = "-Xms{0}m -Xmx{0}m";
     private const string DisableDemo = "DISABLE_INSTALL_DEMO_CONFIG";
     private const string DisableSecurity = "DISABLE_SECURITY_PLUGIN";
     private const string Enabled = "true";
@@ -45,6 +46,8 @@ internal static class IsolatedOpenSearchResources
         {
             throw new InvalidOperationException(InvalidSelection);
         }
+        var deployment = AppHostOptionsRegistration.Get(context.Builder).Deployment.Value;
+        var heap = string.Format(CultureInfo.InvariantCulture, HeapFormat, deployment.OpenSearchHeapMegabytes);
         var cell = Guid.NewGuid().ToString(GuidFormat);
         var names = Enumerable.Range(StartValue, context.Selection.NodeCount)
             .Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
@@ -55,7 +58,7 @@ internal static class IsolatedOpenSearchResources
                 .WithContainerNetworkAlias(name).WithVolume(VolumePrefix + name + VolumeSuffix + cell, Data)
                 .WithHttpEndpoint(targetPort: Port, name: Http).WithHttpHealthCheck(HealthPath)
                 .WithEnvironment(ClusterName, ClusterPrefix + cell).WithEnvironment(NodeName, name)
-                .WithEnvironment(NetworkHost, BindAll).WithEnvironment(HeapSetting, Heap)
+                .WithEnvironment(NetworkHost, BindAll).WithEnvironment(HeapSetting, heap)
                 .WithEnvironment(DisableDemo, Enabled).WithEnvironment(DisableSecurity, Enabled);
             ConfigureDiscovery(node, names);
             context.BindEndpoint(index, node, Http);

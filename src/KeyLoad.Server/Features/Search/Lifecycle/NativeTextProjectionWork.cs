@@ -2,12 +2,15 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionWork
 {
+    private const int GetIsQuietEmptyActiveLeases = 0;
+    private const int GetIsQuietEmptyActiveCleanups = 0;
+
     private TaskCompletionSource<bool> signal = CompletedSignal();
     private int activeLeases;
     private int activeCleanups;
 
     internal int ActiveLeases => activeLeases;
-    internal bool IsQuiet => activeLeases == 0 && activeCleanups == 0;
+    internal bool IsQuiet => activeLeases == GetIsQuietEmptyActiveLeases && activeCleanups == GetIsQuietEmptyActiveCleanups;
     internal Task Signal => signal.Task;
 
     internal void StartLease()

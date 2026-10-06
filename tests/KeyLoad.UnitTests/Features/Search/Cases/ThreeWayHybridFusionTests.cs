@@ -13,7 +13,7 @@ internal sealed class ThreeWayHybridFusionTests
     public async Task AcGsearch003ThreeBranchesMatchIndependentWeightedOracleAndOrdinalTie()
     {
         using var database = CreateDatabase();
-        var result = await new SearchEngine(database.Database).GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
             ThreeWayHybridTestSupport.Request(database.Partition), TestContext.Current!.Execution.CancellationToken);
         var expected = ThreeWayHybridRrfOracle.Rank(AllHits, AllHits);
         await AssertHitsAsync(result.Hits, expected);
@@ -31,7 +31,7 @@ internal sealed class ThreeWayHybridFusionTests
     {
         using var database = CreateDatabase();
         var request = ThreeWayHybridTestSupport.Request(database.Partition, [.. RestrictedHits], scoped: true);
-        var result = await new SearchEngine(database.Database).GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
             request, TestContext.Current!.Execution.CancellationToken);
         var expected = ThreeWayHybridRrfOracle.Rank(
             [ThreeWayHybridTestSupport.A, ThreeWayHybridTestSupport.B, ThreeWayHybridTestSupport.C], RestrictedHits);
@@ -45,7 +45,7 @@ internal sealed class ThreeWayHybridFusionTests
     public async Task AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize()
     {
         using var database = CreateDatabase();
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
         var plain = await engine.GraphSearchAsync(ThreeWayHybridTestSupport.Reader,
             ThreeWayHybridTestSupport.Request(database.Partition), token);

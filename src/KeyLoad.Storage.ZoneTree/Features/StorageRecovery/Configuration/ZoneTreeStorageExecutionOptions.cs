@@ -19,6 +19,11 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const int DefaultMaximumReadCutRecords = 5_000_000;
     private const long DefaultMaximumReadCutExaminedBytes = 1_073_741_824;
     private const int DefaultMaximumReadCutElapsedMinutes = 1;
+    private const int DefaultFileBufferBytes = 65_536;
+    private const int DefaultIdentityBufferBytes = 4_096;
+    private const int DefaultMaximumBackupManifestBytes = 16_384;
+    private const int DefaultMaximumIdentityFileBytes = 4_096;
+    private const int DefaultMaximumUpgradeReceiptBytes = 65_536;
     private const int MinimumPositiveBudget = 1;
     private const long MaximumTimerMilliseconds = 4_294_967_294;
     private static readonly TimeSpan MaximumNativeTimerDuration = TimeSpan.FromMilliseconds(MaximumTimerMilliseconds);
@@ -42,13 +47,29 @@ public sealed record ZoneTreeStorageExecutionOptions
     /// <summary>The maximum admitted duration of a captured native read cut.</summary>
     public TimeSpan MaximumReadCutElapsed { get; init; } = TimeSpan.FromMinutes(DefaultMaximumReadCutElapsedMinutes);
 
+    /// <summary>Maximum bytes used for FileBufferBytes during storage and offline operations.</summary>
+    public int FileBufferBytes { get; init; } = DefaultFileBufferBytes;
+    /// <summary>Maximum bytes used for IdentityBufferBytes during storage and offline operations.</summary>
+    public int IdentityBufferBytes { get; init; } = DefaultIdentityBufferBytes;
+    /// <summary>Maximum bytes used for MaximumBackupManifestBytes during storage and offline operations.</summary>
+    public int MaximumBackupManifestBytes { get; init; } = DefaultMaximumBackupManifestBytes;
+    /// <summary>Maximum bytes used for MaximumIdentityFileBytes during storage and offline operations.</summary>
+    public int MaximumIdentityFileBytes { get; init; } = DefaultMaximumIdentityFileBytes;
+    /// <summary>Maximum bytes used for MaximumUpgradeReceiptBytes during storage and offline operations.</summary>
+    public int MaximumUpgradeReceiptBytes { get; init; } = DefaultMaximumUpgradeReceiptBytes;
+
     /// <summary>Checks positive budgets without inventing relationships between independently valid limits.</summary>
     /// <returns>Whether every budget can be consumed by the native storage owners.</returns>
     public bool IsValid() => MaxFrameBytes >= MinimumPositiveBudget && MaxSnapshotBytes >= MinimumPositiveBudget
         && CheckpointBatchBytes >= MinimumPositiveBudget && CheckpointBatchRecords >= MinimumPositiveBudget
         && MaximumRangeRecords >= MinimumPositiveBudget && MaximumRangeWorkBytes >= MinimumPositiveBudget
         && MaximumReadCutRecords >= MinimumPositiveBudget && MaximumReadCutExaminedBytes >= MinimumPositiveBudget
-        && MaximumReadCutElapsed > TimeSpan.Zero && MaximumReadCutElapsed <= MaximumNativeTimerDuration;
+        && MaximumReadCutElapsed > TimeSpan.Zero && MaximumReadCutElapsed <= MaximumNativeTimerDuration
+        && FileBufferBytes is >= MinimumPositiveBudget and <= DefaultFileBufferBytes
+        && IdentityBufferBytes is >= MinimumPositiveBudget and <= DefaultIdentityBufferBytes
+        && MaximumBackupManifestBytes is >= MinimumPositiveBudget and <= DefaultMaximumBackupManifestBytes
+        && MaximumIdentityFileBytes is >= MinimumPositiveBudget and <= DefaultMaximumIdentityFileBytes
+        && MaximumUpgradeReceiptBytes is >= MinimumPositiveBudget and <= DefaultMaximumUpgradeReceiptBytes;
 
     /// <summary>Rejects invalid policy before opening files or admitting native work.</summary>
     public void Validate()

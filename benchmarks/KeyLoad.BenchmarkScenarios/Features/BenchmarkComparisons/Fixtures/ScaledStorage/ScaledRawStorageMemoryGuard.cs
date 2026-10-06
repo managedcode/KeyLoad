@@ -7,7 +7,9 @@ internal static class ScaledRawStorageMemoryGuard
 
     internal static void ValidateObserved(long peak, long available, long ceiling, long requiredHeadroomBytes)
     {
-        if (peak <= 0)
+        const int PeakValidationBoundary = 0;
+
+        if (peak <= PeakValidationBoundary)
         {
             throw new InvalidDataException(UnavailablePeakMessage);
         }

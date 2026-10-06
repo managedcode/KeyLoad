@@ -59,6 +59,9 @@ public sealed record ZoneTreePointCacheExecutionOptions
     /// <summary>Rejects unsafe policy before allocating an index or reserving shared memory.</summary>
     public void Validate()
     {
-        if (!IsValid()) throw new InvalidOperationException(ValidationMessage);
+        if (!IsValid())
+        {
+            throw new InvalidOperationException(ValidationMessage);
+        }
     }
 }

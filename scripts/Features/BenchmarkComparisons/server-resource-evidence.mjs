@@ -156,7 +156,9 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
     const storageMissing = value.missingEvidence.includes('storageEnvelope');
     requireGitHub(value.containers.length <= cell.nodeCount
       && (sampleMissing || value.containers.length === cell.nodeCount)
-      && value.containers.every(item => validContainer(item, !storageMissing, value.qualified, value.hardware))
+      && value.containers.every(item => validContainer(item, !storageMissing, value.qualified, value.hardware)
+        && (!configured || item.sampleCount <= value.observationPolicy.maxSamples
+          && item.writableMounts.length <= value.observationPolicy.maxMounts))
       && new Set(value.containers.map(item => item.resource)).size === value.containers.length
       && value.containers.length <= maximumContainers);
   } else {
@@ -186,7 +188,7 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
 function validObservationPolicy(value) {
   const bounds = { maxProcesses: 128, maxMounts: 8, maxFileBytes: 4096, minimumCommandBytes: 4096,
     maxHardwareBytes: 262144, maxSampleMetadataBytes: 262144, maxSidecarBytes: 65536, maxWorkerBytes: 67108864,
-    maxSamples: 1680, maxCgroupAncestors: 64, nativeReadBufferBytes: 4096, maxNativeOutputBytes: 4096 };
+    maxSamples: 1680, maxCgroupAncestors: 64, nativeReadBufferBytes: 4096, maxNativeOutputBytes: 4096, standardErrorOutputDivisor: 4096 };
   const timings = { cadenceMilliseconds: 60000, maximumObservationMilliseconds: 8400000,
     cleanupThresholdMilliseconds: 30000, processSettlementMilliseconds: 30000 };
   return keys(value, [...Object.keys(bounds), ...Object.keys(timings)])
@@ -194,6 +196,7 @@ function validObservationPolicy(value) {
       && value[name] > 0 && value[name] <= maximum)
     && Object.entries(timings).every(([name, maximum]) => Number.isFinite(value[name])
       && value[name] > 0 && value[name] <= maximum)
+    && value.standardErrorOutputDivisor >= 2
     && value.minimumCommandBytes >= 8 && value.minimumCommandBytes <= value.maxFileBytes
     && value.maxSamples >= 2 && value.maxHardwareBytes <= value.maxSampleMetadataBytes
     && value.nativeReadBufferBytes <= value.maxFileBytes

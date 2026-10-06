@@ -29,6 +29,8 @@ internal static class McpGatewayMetaProjector
     internal static McpGatewayRouteProjection Route(McpGatewayToolRouteResult result,
         int maximumCategories, int maximumPerCategory)
     {
+        const int ToolsCountValidationBoundary = 0;
+
         ArgumentNullException.ThrowIfNull(result);
         if (result.Categories is null || result.Categories.Count > maximumCategories)
         { throw InvalidNativeResult(); }
@@ -45,7 +47,7 @@ internal static class McpGatewayMetaProjector
                 if (seen.Add(tool.Name))
                 { tools.Add(new(tool, match.Score)); }
             }
-            if (tools.Count > 0)
+            if (tools.Count > ToolsCountValidationBoundary)
             { categories.Add(new(category.Category, category.Score, tools.ToImmutable())); }
         }
         if (seen.Count > checked(maximumCategories * maximumPerCategory))

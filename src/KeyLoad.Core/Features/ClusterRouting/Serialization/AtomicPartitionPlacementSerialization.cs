@@ -47,10 +47,12 @@ internal static class AtomicPartitionPlacementSerialization
 
     internal static byte[] SerializeBounded<T>(T record)
     {
+        const string SerializeBoundedDetailText = "The atomic partition placement exceeds its encoded byte limit.";
+
         var bytes = NativeSerialization.Serialize(record);
         if (bytes.Length > AtomicPartitionPlacementProtocol.MaximumEncodedBytes)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The atomic partition placement exceeds its encoded byte limit.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, SerializeBoundedDetailText);
         }
 
         return bytes;

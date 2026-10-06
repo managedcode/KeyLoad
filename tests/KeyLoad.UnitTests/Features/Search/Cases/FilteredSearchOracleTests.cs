@@ -16,7 +16,7 @@ internal sealed class FilteredSearchOracleTests
     {
         using var database = FilteredSearchTestSupport.Create();
         FilteredSearchTestSupport.AddCorpus(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var allText = await engine.SearchAsync(Root, FilteredSearchTestSupport.Request(hybrid: false), Token());
         var allVector = await engine.SearchAsync(Root, VectorOnly(), Token());
         var allowed = ImmutableArray.Create("b", "a", "d", "b", "missing");
@@ -52,7 +52,7 @@ internal sealed class FilteredSearchOracleTests
     {
         using var database = FilteredSearchTestSupport.Create();
         FilteredSearchTestSupport.AddCorpus(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var legacy = await engine.SearchAsync(Root, FilteredSearchTestSupport.Request(), Token());
         var explicitNull = await engine.SearchAsync(Root,
             FilteredSearchTestSupport.Request(null), Token());

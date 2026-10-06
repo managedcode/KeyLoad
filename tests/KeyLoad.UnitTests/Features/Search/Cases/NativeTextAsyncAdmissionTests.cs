@@ -17,7 +17,7 @@ internal sealed class NativeTextAsyncAdmissionTests
     {
         using var database = CreateDatabase();
         using var projection = CreateProjection(database);
-        var search = new SearchEngine(database.Database, projection);
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
 
@@ -46,7 +46,7 @@ internal sealed class NativeTextAsyncAdmissionTests
                 releasePosting.Task.GetAwaiter().GetResult();
             }
         });
-        var search = new SearchEngine(database.Database, projection);
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         using var cancellation = new CancellationTokenSource();
         Task<RankedDocument[]>? active = null;
         var lifetime = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
@@ -105,8 +105,8 @@ internal sealed class NativeTextAsyncAdmissionTests
 
     private static NativeTextProjection CreateProjection(TestDatabase database,
         Action<NativeTextFaultStage>? faultObserver = null)
-        => new(Path.Combine(database.Directory, "native-text"), database.Database.Limits,
-            database.Store.Identity.NodeId, faultObserver: faultObserver);
+        => new(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution(), faultObserver: faultObserver);
 
     private static SearchRequest Request(TestDatabase database) => new(database.Partition, Collection, TextPath, Query);
 

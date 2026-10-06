@@ -2,21 +2,14 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.Search;
 
-internal sealed record PackedAnnOptions
-{
-    internal int Connections { get; init; } = 16;
-    internal int EfConstruction { get; init; } = 128;
-    internal int EfSearch { get; init; } = 128;
-    internal int MaxLevel { get; init; } = 16;
-    internal int ExactThreshold { get; init; } = 256;
-    internal int MaxRecords { get; init; } = 5_000_000;
-    internal long MaxIndexBytes { get; init; } = 268_435_456;
-    internal long MaxScratchBytes { get; init; } = 8_388_608;
-    internal ulong Seed { get; init; } = 0x4B45594C4F414431UL;
-}
-
 internal sealed class AnnWorkBudget
 {
+    private const int InitialSequence = 0;
+    private const int MinimumPositiveCount = 1;
+    private const int MaximumVectorDimension = 4_096;
+    private const int AdjacentElementOffset = 1;
+    private const int SingleWorkUnit = 1;
+
     private const string InvalidMaximum = "The ANN work maximum must be positive.";
     private const string InvalidCharge = "The ANN work charge is invalid.";
     private const string WorkExceeded = "The ANN work budget is exceeded.";
@@ -29,7 +22,7 @@ internal sealed class AnnWorkBudget
     internal AnnWorkBudget(ReadExecutionBudget readBudget, long maxWorkUnits)
     {
         ArgumentNullException.ThrowIfNull(readBudget);
-        if (maxWorkUnits <= 0)
+        if (maxWorkUnits <= InitialSequence)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidMaximum);
         }
@@ -46,7 +39,7 @@ internal sealed class AnnWorkBudget
     internal void Charge(long units)
     {
         Check();
-        if (units < 0)
+        if (units < InitialSequence)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidCharge);
         }
@@ -59,18 +52,18 @@ internal sealed class AnnWorkBudget
 
     internal void ChargeDistance(int dimension)
     {
-        if (dimension < 1 || dimension > 4_096)
+        if (dimension < MinimumPositiveCount || dimension > MaximumVectorDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidCharge);
         }
         Charge(dimension);
-        distanceEvaluations = checked(distanceEvaluations + 1);
+        distanceEvaluations = checked(distanceEvaluations + AdjacentElementOffset);
     }
 
     internal void ChargeEdge()
     {
-        Charge(1);
-        edgeVisits = checked(edgeVisits + 1);
+        Charge(SingleWorkUnit);
+        edgeVisits = checked(edgeVisits + AdjacentElementOffset);
     }
 }
 

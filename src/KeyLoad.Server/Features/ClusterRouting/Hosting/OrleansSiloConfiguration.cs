@@ -9,9 +9,9 @@ using KeyLoad.Server.Features.ClusterRouting;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Graph.Extensions;
 using ManagedCode.Orleans.Identity.Core.Serializations;
+using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 using Orleans.Serialization;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -48,7 +48,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(requestWork);
         services.AddSingleton(administration);
         services.AddSingleton<QueryEngine>();
-        services.AddSingleton(_ => new SearchEngine(partition.Database, partition.TextProjection));
+        services.AddSingleton(_ => new SearchEngine(partition.Database, runtimeOptions.Core.QueryExecution, partition.TextProjection));
         RegisterRequestCodec(services, partition, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
@@ -62,7 +62,7 @@ internal static class OrleansSiloConfiguration
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
             provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ReplicaSiloDiscoveryState>(), TimeProvider.System,
-            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
+            provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(), provider.GetRequiredService<IOptions<ReplicaReplayLimits>>(),
             logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(), canonicalDatabase: partition.Database));
         services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new ReplicaSiloDiscoveryClient(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
@@ -85,7 +85,7 @@ internal static class OrleansSiloConfiguration
             return;
         }
         var boundedRows = options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority
-            ? ReplicaMembershipAuthorityProtocol.MaximumRows : 0;
+            ? ReplicaMembershipAuthorityProtocol.MaximumRows : ReplicaMembershipProtocol.UnboundedRows;
         services.AddSingleton<IMembershipTable>(provider => new ReplicaMembershipTable(partition.Database, partition.Coordinator,
             partition.Consensus, options.ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
             boundedRows, startupCancellation, provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),

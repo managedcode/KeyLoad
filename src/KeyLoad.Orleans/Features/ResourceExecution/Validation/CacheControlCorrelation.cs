@@ -50,6 +50,8 @@ internal static class CacheControlCorrelation
 
     private static bool Grant(CacheGrantRequest request, CacheGrantReply reply)
     {
+        const int GrantEmptyCount = 0;
+
         if (request.GrantId != reply.GrantId)
         {
             return false;
@@ -65,7 +67,7 @@ internal static class CacheControlCorrelation
             CacheVoterSlot.Slot0 => request.Slot0Proof.ChallengeSequence,
             CacheVoterSlot.Slot1 => request.Slot1Proof.ChallengeSequence,
             CacheVoterSlot.Slot2 => request.Slot2Proof.ChallengeSequence,
-            _ => 0
+            _ => GrantEmptyCount
         };
         return reply.AcceptedBinding == request.TargetBinding && reply.AcceptedSequence == sequence;
     }

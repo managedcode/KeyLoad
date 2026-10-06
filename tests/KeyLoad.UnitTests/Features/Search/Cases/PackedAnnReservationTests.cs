@@ -94,11 +94,11 @@ internal sealed class PackedAnnReservationTests
         var space = PackedAnnTestData.Space(metric, 2);
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric), [[1, 0]]);
         var records = PackedAnnTestData.Load(database, metric);
-        await AssertValidation(() => PackedAnnIndex.Build(space with { Id = null! }, records, new(),
+        await AssertValidation(() => PackedAnnIndex.Build(space with { Id = null! }, records, UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database)));
-        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { DocumentId = null! }], new(),
+        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { DocumentId = null! }], UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database)));
-        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { Field = null! }], new(),
+        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { Field = null! }], UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database)));
     }
 

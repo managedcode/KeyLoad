@@ -62,7 +62,7 @@ public static class TimeSeriesReadOperations
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(database);
-        var budget = new ReadExecutionBudget(database.Limits, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         budget.Check();
         return database.Store.Read(view =>
         {

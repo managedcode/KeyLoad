@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,19 +9,23 @@ internal sealed record ServerNodeUpgradeEntry(string Path, bool Directory, long 
 
 internal sealed record ServerNodeUpgradeInventory(string Sha256, IReadOnlyList<ServerNodeUpgradeEntry> Entries)
 {
+    private const char SlashCharacter = '/';
+    private const int EmptyPathCount = 1;
+
     internal string FileDigest(string path)
         => Entries.FirstOrDefault(entry => !entry.Directory && entry.Path == path)?.Sha256
             ?? throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid);
 
     internal int BackupCount => Entries.Count(entry => entry.Directory
         && entry.Path.StartsWith(ServerNodeUpgradeProtocol.Backups + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal)
-        && entry.Path.Count(character => character == '/') == 1);
+        && entry.Path.Count(character => character == SlashCharacter) == EmptyPathCount);
 
-    internal static ServerNodeUpgradeInventory Capture(string directory,
+    internal static ServerNodeUpgradeInventory Capture(string directory, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions,
         IReadOnlyDictionary<string, FileStream>? held = null, bool excludePreparedReceipt = false, bool excludeProgressReceipt = false)
     {
+        executionOptions.Value.Validate();
         ServerNodeUpgradePaths.CheckAncestors(directory, false);
-        var collector = new ServerNodeUpgradeInventoryCollector(directory, held, excludePreparedReceipt, excludeProgressReceipt);
+        var collector = new ServerNodeUpgradeInventoryCollector(directory, held, excludePreparedReceipt, excludeProgressReceipt, executionOptions);
         var entries = collector.Collect();
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         foreach (var entry in entries)
@@ -36,10 +41,13 @@ internal sealed record ServerNodeUpgradeInventory(string Sha256, IReadOnlyList<S
 
     private static void Append(IncrementalHash digest, ServerNodeUpgradeEntry entry)
     {
+        const int PrefixInitialValue = 1;
+        const int PrefixEmptyCount = 0;
+
         var path = Encoding.UTF8.GetBytes(entry.Path);
         Span<byte> prefix = stackalloc byte[sizeof(int) + sizeof(byte) + sizeof(long)];
         BinaryPrimitives.WriteInt32LittleEndian(prefix, path.Length);
-        prefix[sizeof(int)] = entry.Directory ? (byte)1 : (byte)0;
+        prefix[sizeof(int)] = entry.Directory ? (byte)PrefixInitialValue : (byte)PrefixEmptyCount;
         BinaryPrimitives.WriteInt64LittleEndian(prefix[(sizeof(int) + sizeof(byte))..], entry.Length);
         digest.AppendData(prefix[..sizeof(int)]);
         digest.AppendData(path);

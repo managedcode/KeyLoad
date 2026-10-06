@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
 
@@ -6,20 +7,22 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class ComparisonProgressObserver : IAsyncDisposable
 {
-    private const int HeartbeatSeconds = 30;
     private const string LineFormat = "KeyLoadBenchmarkProgress phase={0} repetition={1} completed={2} total={3} failed={4} elapsedSeconds={5:F3}";
     private static readonly CompositeFormat ProgressFormat = CompositeFormat.Parse(LineFormat);
     private readonly Action<string>? _progress;
     private readonly System.Threading.Lock _outputGate = new();
     private readonly Stopwatch _elapsed = Stopwatch.StartNew();
     private readonly CancellationTokenSource _lifetime = new();
-    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(HeartbeatSeconds));
+    private readonly PeriodicTimer _timer;
     private readonly Task _heartbeat;
     private ComparisonProgressState _state = new(ComparisonProgressPhase.Oracle, 0, 0);
     private bool _hasState;
 
-    internal ComparisonProgressObserver(Action<string>? progress)
+    internal ComparisonProgressObserver(Action<string>? progress, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
+        var settings = executionOptions.Value;
+        settings.Validate();
+        _timer = new(settings.ProgressHeartbeatInterval);
         _progress = progress;
         _heartbeat = progress is null ? Task.CompletedTask : Task.Run(ObserveAsync);
     }

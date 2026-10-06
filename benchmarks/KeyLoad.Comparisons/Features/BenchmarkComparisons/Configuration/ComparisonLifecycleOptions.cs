@@ -31,6 +31,8 @@ public sealed class ComparisonLifecycleOptions
     private const int KurrentPollMilliseconds = 100;
     private const int KurrentDeleteConcurrency = 16;
     private const int MaximumDeadlineMinutes = 10;
+    private const int EmptyCapacity = 0;
+    private static readonly TimeSpan MaximumDeadline = TimeSpan.FromMinutes(MaximumDeadlineMinutes);
 
     /// <summary>The deadline for observing all required native replica copies.</summary>
     public TimeSpan ReadinessTimeout { get; set; } = TimeSpan.FromSeconds(ReadinessSeconds);
@@ -84,7 +86,7 @@ public sealed class ComparisonLifecycleOptions
         && Deadline(OpenSearchCleanupTimeout) && Deadline(TimescaleCleanupTimeout)
         && Deadline(KurrentCleanupTimeout) && Deadline(KurrentCleanupHostTimeout)
         && KurrentCleanupHostTimeout >= KurrentCleanupTimeout && Poll(KurrentReadinessPollInterval)
-        && KurrentCleanupConcurrency is > 0 and <= KurrentDeleteConcurrency;
+        && KurrentCleanupConcurrency is > EmptyCapacity and <= KurrentDeleteConcurrency;
 
     /// <summary>Rejects invalid standalone caller settings before target construction.</summary>
     public void Validate()
@@ -97,5 +99,5 @@ public sealed class ComparisonLifecycleOptions
 
     private bool Poll(TimeSpan value) => Deadline(value) && value < ReadinessTimeout;
     private static bool Deadline(TimeSpan value) => value > TimeSpan.Zero
-        && value <= TimeSpan.FromMinutes(MaximumDeadlineMinutes);
+        && value <= MaximumDeadline;
 }

@@ -12,7 +12,7 @@ internal sealed class SqlBetweenGrammarTests
     [Test]
     public async Task AcSqlc006ABetweenLowersToExistingInclusiveComparisonsAgainstIndependentAst()
     {
-        var actual = new SqlParser(BetweenSql, new()).Parse().Filter;
+        var actual = new SqlParser(BetweenSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter;
         var operand = new FieldOperand(SqlBetweenTestData.NumberPath);
         var expected = new Logical(
             new Comparison(operand, ">=", ValueOperand.Create(1m)),
@@ -26,7 +26,7 @@ internal sealed class SqlBetweenGrammarTests
     [Test]
     public async Task AcSqlc006ANotBetweenNegatesTheCompleteConjunction()
     {
-        var actual = new SqlParser(NotBetweenSql, new()).Parse().Filter;
+        var actual = new SqlParser(NotBetweenSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter;
         var inner = new Logical(
             new Comparison(new FieldOperand(SqlBetweenTestData.NumberPath), ">=", ValueOperand.Create(1m)),
             "AND",
@@ -39,7 +39,7 @@ internal sealed class SqlBetweenGrammarTests
     [Test]
     public async Task AcSqlc006ABetweenRetainsExistingAndBeforeOrPrecedence()
     {
-        var actual = (Logical)new SqlParser(MixedPrecedenceSql, new()).Parse().Filter!;
+        var actual = (Logical)new SqlParser(MixedPrecedenceSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
         var numberRange = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(5m));
         var right = (Logical)actual.Right;
 
@@ -53,7 +53,7 @@ internal sealed class SqlBetweenGrammarTests
     [Test]
     public async Task AcSqlc006ABetweenUsesExistingAliasQuotedPathAndParameterOperands()
     {
-        var query = new SqlParser(AliasedQuotedSql, new()).Parse();
+        var query = new SqlParser(AliasedQuotedSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse();
         var logical = (Logical)query.Filter!;
 
         await Assert.That(query.Collection).IsEqualTo(SqlBetweenTestData.Collection);
@@ -66,9 +66,8 @@ internal sealed class SqlBetweenGrammarTests
     [Test]
     public async Task AcSqlc006APrefixNotAndImmediateOuterAndKeepPredicateGrouping()
     {
-        var prefixNot = new SqlParser("SELECT * FROM orders WHERE NOT number BETWEEN 1 AND 9", new()).Parse().Filter;
-        var immediateAnd = (Logical)new SqlParser(
-            "SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = TRUE", new()).Parse().Filter!;
+        var prefixNot = new SqlParser("SELECT * FROM orders WHERE NOT number BETWEEN 1 AND 9", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter;
+        var immediateAnd = (Logical)new SqlParser(            "SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = TRUE", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
         var range = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(9m));
         var immediateRange = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(5m));
 

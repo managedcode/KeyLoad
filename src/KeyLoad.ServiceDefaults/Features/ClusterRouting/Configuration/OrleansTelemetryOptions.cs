@@ -13,9 +13,15 @@ public sealed class OrleansTelemetryOptions
     private const int DefaultMaximumTags = 32;
     private const int DefaultMaximumEvents = 24;
     private const int DefaultMaximumBaggageItems = 8;
+    private const int DefaultMaximumTagValueCharacters = 256;
+    private const int MinimumMaximumTags = 1;
+    private const int MinimumMaximumEvents = 1;
+    private const int MinimumMaximumBaggageItems = 0;
     private const int AbsoluteMaximumTags = 32;
     private const int AbsoluteMaximumEvents = 24;
     private const int AbsoluteMaximumBaggageItems = 8;
+    private const int MinimumMaximumTagValueCharacters = 1;
+    private const int AbsoluteMaximumTagValueCharacters = 256;
 
     /// <summary>Gets or sets the maximum tags inspected on one activity.</summary>
     public int MaximumTags { get; set; } = DefaultMaximumTags;
@@ -26,10 +32,16 @@ public sealed class OrleansTelemetryOptions
     /// <summary>Gets or sets the maximum baggage keys removed from one activity at start.</summary>
     public int MaximumBaggageItems { get; set; } = DefaultMaximumBaggageItems;
 
+    /// <summary>Gets or sets the maximum text length inspected before tag normalization.</summary>
+    public int MaximumTagValueCharacters { get; set; } = DefaultMaximumTagValueCharacters;
+
     /// <summary>Checks that all privacy budgets are bounded by the reviewed contract.</summary>
     /// <returns>Whether every configured limit is within its safe range.</returns>
     public bool IsValid()
-        => MaximumTags is >= 1 and <= AbsoluteMaximumTags
-            && MaximumEvents is >= 1 and <= AbsoluteMaximumEvents
-            && MaximumBaggageItems is >= 0 and <= AbsoluteMaximumBaggageItems;
+        => MaximumTags >= MinimumMaximumTags && MaximumTags <= AbsoluteMaximumTags
+            && MaximumEvents >= MinimumMaximumEvents && MaximumEvents <= AbsoluteMaximumEvents
+            && MaximumBaggageItems >= MinimumMaximumBaggageItems
+            && MaximumBaggageItems <= AbsoluteMaximumBaggageItems
+            && MaximumTagValueCharacters >= MinimumMaximumTagValueCharacters
+            && MaximumTagValueCharacters <= AbsoluteMaximumTagValueCharacters;
 }

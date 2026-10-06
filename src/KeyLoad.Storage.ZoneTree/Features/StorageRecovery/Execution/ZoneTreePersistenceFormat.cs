@@ -31,10 +31,6 @@ internal static class ZoneTreePersistenceFormat
     internal const int InitialIdentityVersion = 1;
     internal const int LegacyBinaryJournalIdentityVersion = 3;
     internal const int BackupManifestVersion = 2;
-    internal const int FileBufferBytes = 65_536;
-    internal const int IdentityBufferBytes = 4_096;
-    internal const int MaximumBackupManifestBytes = 16_384;
-    internal const int MaximumIdentityFileBytes = 4_096;
     internal const int SigningKeyBytes = 32;
     internal const int StorageValueHeaderBytes = 1;
     internal const byte DeletedValueMarker = 0;

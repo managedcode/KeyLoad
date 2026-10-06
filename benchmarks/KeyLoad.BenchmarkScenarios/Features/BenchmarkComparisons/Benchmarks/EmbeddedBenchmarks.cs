@@ -10,6 +10,10 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [MemoryDiagnoser]
 public class EmbeddedBenchmarks : IDisposable
 {
+    private const int FirstVectorCoordinate = 1;
+    private const int SecondVectorCoordinate = 2;
+    private const int ThirdVectorCoordinate = 3;
+
     private const string TemporaryDirectoryPrefix = "keyload-benchmark-";
     private const string TenantId = "benchmark";
     private const string DatabaseId = "database";
@@ -75,7 +79,7 @@ public class EmbeddedBenchmarks : IDisposable
     /// <summary>Computes cosine similarity over the existing eight-dimensional input pair.</summary>
     [Benchmark]
     public double ExactCosine()
-        => SearchEngine.Similarity([1, 2, 3, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, 3, 2, 1], DistanceMetric.Cosine);
+        => SearchEngine.Similarity([FirstVectorCoordinate, SecondVectorCoordinate, ThirdVectorCoordinate, 4, 5, 6, 7, 8], [8, 7, 6, 5, 4, ThirdVectorCoordinate, SecondVectorCoordinate, FirstVectorCoordinate], DistanceMetric.Cosine);
 
     /// <summary>Releases the fixture's database, store and temporary directory.</summary>
     [GlobalCleanup]
@@ -123,15 +127,18 @@ public class EmbeddedBenchmarks : IDisposable
 
         internal void Initialize(PartitionRef partition)
         {
+            const int BootstrapCatalogVersion = 1;
+            const int InitialCatalogRevision = 0;
+
             store = new(new(directory), options.Storage, options.PointCache);
             database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging, options.GraphExecution);
+                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.TimeSeriesExecution);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             { ClusterAdministrator = true },
                 DatabaseEngine.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
             var shardId = store.Identity.NodeId;
-            var catalog = new BootstrapPhysicalShardCatalogRequest(1, 0, shardId, store.Identity.Incarnation,
+            var catalog = new BootstrapPhysicalShardCatalogRequest(BootstrapCatalogVersion, InitialCatalogRevision, shardId, store.Identity.Incarnation,
                 [shardId.ToString(GuidFormat)]);
             Database.Apply(Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
                 PhysicalShardCatalogIdentity.CreateBootstrapCommandId(shardId), PrincipalId,

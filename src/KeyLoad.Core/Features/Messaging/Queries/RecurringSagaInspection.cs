@@ -7,6 +7,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int RecurringSagaInspectionEmptyElementCount = 0;
+
     private const string PayloadRedactionPrefix = "payload:";
     private const string HeaderRedactionPrefix = "headers:";
     private const string StateRedactionPrefix = "state:";
@@ -15,7 +17,7 @@ public sealed partial class DatabaseEngine
     public RecurringScheduleInspection? InspectRecurringSchedule(string principalId, QueueLaneRef lane,
         Guid scheduleId, CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         var request = new InspectRecurringScheduleRequest(lane, scheduleId);
         ChargeRecurringRequest(budget, principalId, request);
         return Store.Read(view =>
@@ -35,7 +37,7 @@ public sealed partial class DatabaseEngine
     public SagaInspection? InspectSaga(string principalId, QueueLaneRef lane, Guid sagaId,
         CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         var request = new InspectSagaRequest(lane, sagaId);
         ChargeRecurringRequest(budget, principalId, request);
         return Store.Read(view =>
@@ -89,7 +91,7 @@ public sealed partial class DatabaseEngine
         var redactedFields = ProjectRedactedPaths(payloadOmitted, headerOmitted);
         var definition = record.Definition with { PayloadJson = payload, HeadersJson = headers };
         return new(definition, record.Revision, record.Generation, record.NextOrdinal, record.Cancelled,
-            redactedFields.Length != 0, redactedFields);
+            redactedFields.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
     }
 
     private SagaInspection ProjectSaga(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
@@ -100,7 +102,7 @@ public sealed partial class DatabaseEngine
         var state = Authorization.Project(principal, resource.FieldPolicies, record.StateJson, out var omitted);
         var redactedFields = omitted.Select(path => string.Concat(StateRedactionPrefix, path)).ToImmutableArray();
         return new(lane, sagaId, record.Revision, record.Phase, state, record.Deadline,
-            redactedFields.Length != 0, redactedFields);
+            redactedFields.Length != RecurringSagaInspectionEmptyElementCount, redactedFields);
     }
 
     private static ImmutableArray<string> ProjectRedactedPaths(string[] payload, string[] headers)

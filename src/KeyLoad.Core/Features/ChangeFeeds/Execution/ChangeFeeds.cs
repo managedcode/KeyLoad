@@ -6,14 +6,18 @@ namespace KeyLoad.Core;
 /// <summary>Provides authorized change-feed reads over the database engine.</summary>
 public sealed partial class DatabaseEngine
 {
+    private const string VisibilityEpochSpace = "visibility-epoch";
+    private const int InitialVisibilityEpoch = 0;
+    private const int AdvanceVisibilityEpochVisibilityEpochStep = 1;
+
     private const string DocumentChangeFeedCursorPurpose = "document-change-feed";
     private static long VisibilityEpoch(IKeyValueView view, PartitionRef partition, string collection)
-        => view.ReadOwnedValue(KeySpace.Partition("visibility-epoch", partition, collection)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0;
+        => view.ReadOwnedValue(KeySpace.Partition(VisibilityEpochSpace, partition, collection)) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : InitialVisibilityEpoch;
     private static void AdvanceVisibilityEpoch(IAtomicTransaction tx, PartitionRef partition, string collection)
-        => tx.PutRecord(KeySpace.Partition("visibility-epoch", partition, collection), checked(VisibilityEpoch(tx, partition, collection) + 1));
+        => tx.PutRecord(KeySpace.Partition(VisibilityEpochSpace, partition, collection), checked(VisibilityEpoch(tx, partition, collection) + AdvanceVisibilityEpochVisibilityEpochStep));
     private string ChangeCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, long after)
         => Sign(new ChangeFeedClaims(DocumentChangeFeedCursorPurpose, Store.Identity.Incarnation, partition, resource.Name, principal.Id,
-            principal.PolicyEpoch, resource.SchemaVersion, VisibilityEpoch(view, partition, resource.Name), after, Clock.GetUtcNow().AddHours(24)));
+            principal.PolicyEpoch, resource.SchemaVersion, VisibilityEpoch(view, partition, resource.Name), after, Clock.GetUtcNow().Add(changeFeedExecution.CursorLifetime)));
     /// <summary>Captures a signed cursor at the current outbox tail for an authorized collection.</summary>
     /// <param name="view">Current gated storage view.</param>
     /// <param name="principal">Persisted authorized principal.</param>
@@ -70,19 +74,25 @@ public sealed partial class DatabaseEngine
     private (ResourceDefinition Resource, OutboxHead Head, long After) PrepareChangeRead(
         IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request)
     {
+        const int LimitValidationBoundary = 1;
+        const int MaxBytesValidationBoundary = 1;
+        const string InvalidChangeReadBoundsDetail = "The change-feed request exceeds its supported bounds.";
+        const int FirstAvailableStep = 1;
+        const string FreshAuthorizedSnapshotRequiredDetail = "The change-feed cursor requires a fresh authorized snapshot.";
+
         ValidatePartition(request.Partition);
         JsonData.Identifier(request.Collection);
         var now = Clock.GetUtcNow();
         Authorization.Require(principal, request.Partition, request.Collection, Capability.ChangesRead | Capability.DocumentsRead);
         var resource = Resource(view, request.Partition, request.Collection, ResourceKind.Collection);
-        if (request.Limit < 1 || request.Limit > Limits.MaxResults || request.MaxBytes < 1 || request.MaxBytes > Limits.MaxBatchBytes
+        if (request.Limit < LimitValidationBoundary || request.Limit > Limits.MaxResults || request.MaxBytes < MaxBytesValidationBoundary || request.MaxBytes > Limits.MaxBatchBytes
             || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The change-feed request exceeds its supported bounds.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidChangeReadBoundsDetail);
         }
 
         var head = ReadOutboxHead(view, request.Partition);
-        var after = request.Start == ChangeFeedStart.Now ? head.Tail : head.FirstAvailable - 1;
+        var after = request.Start == ChangeFeedStart.Now ? head.Tail : head.FirstAvailable - FirstAvailableStep;
         if (request.Cursor is { } cursor)
         {
             var claims = Verify<ChangeFeedClaims>(cursor);
@@ -91,7 +101,7 @@ public sealed partial class DatabaseEngine
                 || claims.SchemaVersion != resource.SchemaVersion || claims.VisibilityEpoch != VisibilityEpoch(view, request.Partition, request.Collection)
                 || claims.ExpiresAt <= now)
             {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, "The change-feed cursor requires a fresh authorized snapshot.");
+                throw Errors.Fail(ErrorCode.TokenInvalidated, FreshAuthorizedSnapshotRequiredDetail);
             }
 
             after = claims.After;
@@ -104,9 +114,12 @@ public sealed partial class DatabaseEngine
         ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project,
         ResourceDefinition resource, OutboxHead head, long after) where T : class
     {
+        const int BytesInitialValue = 0;
+        const string ProjectChangePageDetailText = "The first change exceeds the page byte budget.";
+
         var changes = new List<T>();
         var through = after;
-        var bytes = 0;
+        var bytes = BytesInitialValue;
         foreach (var entry in ReadOutboxRange(view, request.Partition, after, head.Tail, request.Limit))
         {
             var visible = VisibleChange(view, principal, resource, request.Partition, entry);
@@ -122,7 +135,7 @@ public sealed partial class DatabaseEngine
             {
                 if (through == after)
                 {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, "The first change exceeds the page byte budget.");
+                    throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectChangePageDetailText);
                 }
 
                 break;

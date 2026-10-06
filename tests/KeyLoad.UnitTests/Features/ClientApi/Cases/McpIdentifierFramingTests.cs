@@ -29,14 +29,14 @@ internal sealed class McpIdentifierFramingTests
         var encoded = McpResponseBoundaryTestData.EncodedIdentifier(encoding, MaximumEncodedIdentifierBytes);
         await Assert.That(Encoding.UTF8.GetByteCount(encoded)).IsEqualTo(MaximumEncodedIdentifierBytes);
         var wire = McpResponseBoundaryTestData.IdentifierFrame(encoded);
-        var shape = McpFrameBounds.Inspect(wire, MaximumWireBytes);
+        var shape = McpFrameBounds.Inspect(wire, MaximumWireBytes, UnitMcpOptions.Execution());
         using var document = JsonDocument.Parse(wire);
         await Assert.That(shape.PropertyCount).IsEqualTo(1);
         var decoded = document.RootElement.GetProperty(IdentifierField).GetString();
         await Assert.That(decoded).IsNotNull();
         await Assert.That(Encoding.UTF8.GetByteCount(decoded!)).IsEqualTo(decodedBytes);
         var over = McpResponseBoundaryTestData.IdentifierFrame(encoded + McpResponseBoundaryTestData.Padding);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(over, MaximumWireBytes));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(over, MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -45,10 +45,9 @@ internal sealed class McpIdentifierFramingTests
     public async Task EscapedRootIdentifierKeyKeepsTheSameBound()
     {
         var encoded = McpResponseBoundaryTestData.EncodedIdentifier(McpIdentifierEncoding.Ascii, MaximumEncodedIdentifierBytes);
-        var exact = McpFrameBounds.Inspect(McpResponseBoundaryTestData.IdentifierFrame(encoded, escapedKey: true), MaximumWireBytes);
+        var exact = McpFrameBounds.Inspect(McpResponseBoundaryTestData.IdentifierFrame(encoded, escapedKey: true), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exact.PropertyCount).IsEqualTo(1);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(
-            McpResponseBoundaryTestData.IdentifierFrame(encoded + McpResponseBoundaryTestData.Padding, escapedKey: true), MaximumWireBytes));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(            McpResponseBoundaryTestData.IdentifierFrame(encoded + McpResponseBoundaryTestData.Padding, escapedKey: true), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -62,7 +61,7 @@ internal sealed class McpIdentifierFramingTests
             [ParametersField] = new Dictionary<string, object?> { [IdentifierField] = value }
         });
         var before = wire.ToArray();
-        var shape = McpFrameBounds.Inspect(wire, MaximumWireBytes);
+        var shape = McpFrameBounds.Inspect(wire, MaximumWireBytes, UnitMcpOptions.Execution());
         using var document = JsonDocument.Parse(wire);
         await Assert.That(shape.PropertyCount).IsEqualTo(2);
         await Assert.That(wire.AsSpan().SequenceEqual(before)).IsTrue();
@@ -76,7 +75,7 @@ internal sealed class McpIdentifierFramingTests
     [Arguments(NullIdentifierJson)]
     public async Task ScalarIdentifierSemanticsRemainNative(string json)
     {
-        var shape = McpFrameBounds.Inspect(Encoding.UTF8.GetBytes(json), MaximumWireBytes);
+        var shape = McpFrameBounds.Inspect(Encoding.UTF8.GetBytes(json), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(shape.PropertyCount).IsEqualTo(1);
     }
 
@@ -85,7 +84,7 @@ internal sealed class McpIdentifierFramingTests
     public async Task ReplyIdentifierIsNotAnInboundProtocolIdentifier()
     {
         var encoded = McpResponseBoundaryTestData.EncodedIdentifier(McpIdentifierEncoding.Ascii, MaximumEncodedIdentifierBytes + 1);
-        var shape = McpFrameBounds.InspectReply(McpResponseBoundaryTestData.IdentifierFrame(encoded), MaximumWireBytes);
+        var shape = McpFrameBounds.InspectReply(McpResponseBoundaryTestData.IdentifierFrame(encoded), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(shape.PropertyCount).IsEqualTo(1);
         await Assert.That(shape.Depth).IsEqualTo(1);
     }

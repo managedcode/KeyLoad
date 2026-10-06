@@ -4,6 +4,9 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 {
+    private const int MinimumPositiveCount = 1;
+    private const int FirstElementIndex = 0;
+
     private const string InvalidVector = "Vector dimensions or values are invalid.";
     private const int MaxDimension = 4_096;
     private readonly ReadOnlyMemory<float> query;
@@ -60,11 +63,11 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 
     private static void Validate(ReadOnlySpan<float> values)
     {
-        if (values.Length is < 1 or > MaxDimension)
+        if (values.Length is < MinimumPositiveCount or > MaxDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }
-        var index = 0;
+        var index = FirstElementIndex;
         var infinity = new Vector<float>(float.PositiveInfinity);
         for (; Vector.IsHardwareAccelerated && index + Vector<float>.Count <= values.Length; index += Vector<float>.Count)
         {

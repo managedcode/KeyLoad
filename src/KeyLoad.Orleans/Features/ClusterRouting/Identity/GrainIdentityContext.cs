@@ -51,6 +51,8 @@ internal static class GrainIdentityContext
 
     internal static void ValidatePrincipal(ClaimsPrincipal principal, string subject)
     {
+        const int EmptyPropertiesCount = 0;
+
         ArgumentNullException.ThrowIfNull(principal);
         JsonData.Identifier(subject);
         using var identities = principal.Identities.GetEnumerator();
@@ -78,7 +80,7 @@ internal static class GrainIdentityContext
         var claim = claims.Current;
         if (claims.MoveNext() || claim.Type != ClaimTypes.NameIdentifier || claim.Value != subject
             || claim.ValueType != ClaimValueTypes.String || claim.Issuer != ClaimsIdentity.DefaultIssuer
-            || claim.OriginalIssuer != ClaimsIdentity.DefaultIssuer || claim.Properties.Count != 0)
+            || claim.OriginalIssuer != ClaimsIdentity.DefaultIssuer || claim.Properties.Count != EmptyPropertiesCount)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }

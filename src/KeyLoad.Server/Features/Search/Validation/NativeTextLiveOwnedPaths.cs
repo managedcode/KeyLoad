@@ -1,29 +1,35 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextLiveOwnedPaths
 {
     private const string NativeFilePrefix = NativeTextProtocol.NativeDirectory + "/";
 
-    internal static void VerifyFilesystem(string generationPath, NativeTextOwnedPath[] ownedPaths,
-        NativeTextOwnedPath[] expectedPaths)
+    internal static void VerifyFilesystem(string generationPath, NativeTextOwnedPath[] ownedPaths, NativeTextOwnedPath[] expectedPaths, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        NativeTextValidation.ValidateOwnedPaths(ownedPaths);
+        const string AllEntriesSearchPattern = "*";
+        const int EmptyAttributesFileAttributesReparsePoint = 0;
+        const int EmptyAttributesFileAttributesDirectory = 0;
+        const char SlashCharacter = '/';
+        const int RelativeCountStep = 1;
+
+        NativeTextValidation.ValidateOwnedPaths(ownedPaths, executionOptions: executionOptions);
         var nativePath = Path.Combine(generationPath, NativeTextProtocol.NativeDirectory);
         NativeTextFileIO.VerifyDirectory(nativePath);
         var actual = new SortedDictionary<string, bool>(StringComparer.Ordinal)
         {
             [NativeTextProtocol.NativeDirectory] = true
         };
-        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, "*", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFileSystemEntries(nativePath, AllEntriesSearchPattern, SearchOption.AllDirectories))
         {
             var attributes = File.GetAttributes(path);
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
+            if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributesFileAttributesReparsePoint)
             {
                 throw NativeTextErrors.Ownership();
             }
             var relative = NativeTextPath.RelativePath(generationPath, path);
-            var isDirectory = (attributes & FileAttributes.Directory) != 0;
-            if (relative.Count(static character => character == '/') + 1 > NativeTextProtocol.MaximumDepth)
+            var isDirectory = (attributes & FileAttributes.Directory) != EmptyAttributesFileAttributesDirectory;
+            if (relative.Count(static character => character == SlashCharacter) + RelativeCountStep > executionOptions.Value.MaximumDepth)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -31,7 +37,7 @@ internal static class NativeTextLiveOwnedPaths
             {
                 throw NativeTextErrors.Ownership();
             }
-            if (actual.Count == NativeTextProtocol.MaximumEntries)
+            if (actual.Count == executionOptions.Value.MaximumEntries)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -49,29 +55,36 @@ internal static class NativeTextLiveOwnedPaths
 
     private static bool IsOwned(NativeTextOwnedPath[] ownedPaths, string relative, bool isDirectory)
     {
-        var low = 0;
-        var high = ownedPaths.Length - 1;
+        const int LowInitialValue = 0;
+        const int OwnedPathsLengthStep = 1;
+        const int BinarySearchDivisor = 2;
+        const int EmptyComparison = 0;
+        const int ComparisonValidationBoundary = 0;
+        const int MiddleStep = 1;
+
+        var low = LowInitialValue;
+        var high = ownedPaths.Length - OwnedPathsLengthStep;
         while (low <= high)
         {
-            var middle = low + ((high - low) / 2);
+            var middle = low + ((high - low) / BinarySearchDivisor);
             var comparison = StringComparer.Ordinal.Compare(ownedPaths[middle].RelativePath, relative);
-            if (comparison == 0)
+            if (comparison == EmptyComparison)
             {
                 return ownedPaths[middle].IsDirectory == isDirectory;
             }
-            if (comparison < 0)
+            if (comparison < ComparisonValidationBoundary)
             {
-                low = middle + 1;
+                low = middle + MiddleStep;
             }
             else
             {
-                high = middle - 1;
+                high = middle - MiddleStep;
             }
         }
         return false;
     }
 
-    internal static NativeTextOwnedPath[] FromFiles(NativeTextFile[] files)
+    internal static NativeTextOwnedPath[] FromFiles(NativeTextFile[] files, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         var paths = new SortedDictionary<string, bool>(StringComparer.Ordinal)
         {
@@ -79,37 +92,42 @@ internal static class NativeTextLiveOwnedPaths
         };
         foreach (var file in files)
         {
-            AddFile(paths, file.RelativePath);
+            AddFile(paths, file.RelativePath, executionOptions: executionOptions);
         }
-        if (paths.Count > NativeTextProtocol.MaximumEntries)
+        if (paths.Count > executionOptions.Value.MaximumEntries)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         var result = paths.Select(static path => new NativeTextOwnedPath(path.Key, path.Value)).ToArray();
-        NativeTextValidation.ValidateOwnedPaths(result);
+        NativeTextValidation.ValidateOwnedPaths(result, executionOptions: executionOptions);
         return result;
     }
 
-    private static void AddFile(SortedDictionary<string, bool> paths, string relativePath)
+    private static void AddFile(SortedDictionary<string, bool> paths, string relativePath, IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        const char SlashCharacter = '/';
+        const int RelativePathCountStep = 1;
+
         if (string.IsNullOrWhiteSpace(relativePath)
             || !relativePath.StartsWith(NativeFilePrefix, StringComparison.Ordinal)
             || paths.ContainsKey(relativePath))
         {
             throw NativeTextErrors.Corrupt();
         }
-        if (relativePath.Count(static character => character == '/') + 1 > NativeTextProtocol.MaximumDepth
-            || paths.Count == NativeTextProtocol.MaximumEntries)
+        if (relativePath.Count(static character => character == SlashCharacter) + RelativePathCountStep > executionOptions.Value.MaximumDepth
+            || paths.Count == executionOptions.Value.MaximumEntries)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         paths.Add(relativePath, false);
-        AddParentDirectories(paths, relativePath);
+        AddParentDirectories(paths, relativePath, executionOptions: executionOptions);
     }
 
-    private static void AddParentDirectories(SortedDictionary<string, bool> paths, string relativePath)
+    private static void AddParentDirectories(SortedDictionary<string, bool> paths, string relativePath, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        var parentEnd = relativePath.LastIndexOf('/');
+        const char SlashCharacter = '/';
+
+        var parentEnd = relativePath.LastIndexOf(SlashCharacter);
         while (parentEnd >= NativeTextProtocol.NativeDirectory.Length)
         {
             var parent = relativePath[..parentEnd];
@@ -122,13 +140,13 @@ internal static class NativeTextLiveOwnedPaths
             }
             else
             {
-                if (paths.Count == NativeTextProtocol.MaximumEntries)
+                if (paths.Count == executionOptions.Value.MaximumEntries)
                 {
                     throw NativeTextErrors.BoundExceeded();
                 }
                 paths.Add(parent, true);
             }
-            parentEnd = parent.LastIndexOf('/');
+            parentEnd = parent.LastIndexOf(SlashCharacter);
         }
     }
 }

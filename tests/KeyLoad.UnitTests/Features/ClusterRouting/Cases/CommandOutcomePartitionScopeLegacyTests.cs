@@ -95,7 +95,7 @@ internal sealed class CommandOutcomePartitionScopeLegacyTests
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(v1Locator))!.AsSpan()
             .SequenceEqual(v1Index)).IsTrue();
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId))!.AsSpan()
+            KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId)))!.AsSpan()
             .SequenceEqual(v2Index)).IsTrue();
     }
 }

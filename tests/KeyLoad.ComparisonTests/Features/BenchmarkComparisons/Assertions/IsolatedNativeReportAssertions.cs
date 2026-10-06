@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
@@ -14,8 +15,7 @@ internal static partial class IsolatedNativeReportAssertions
     private const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
     private const string WorkerFile = "worker.json";
     private const string ServerResourceFile = "server-resource-evidence.json";
-    private const string ServerResourceSchema = "server-resource-evidence.v1";
-    private const int MinimumResourceSamples = 2;
+    private const string ServerResourceSchema = "server-resource-evidence.v2";
     private const string Runner = "comparisons";
     private const string Bootstrap = "bootstrap";
     private const string KeyLoad = "KeyLoad";
@@ -110,7 +110,7 @@ internal static partial class IsolatedNativeReportAssertions
         }
         await Assert.That(report.Options).IsEqualTo(selection.ScaledProfile is null ? selection.Options : null);
         await Assert.That(report.ScaledProfile).IsEqualTo(selection.ScaledProfile);
-        await Assert.That(report.DatasetSha256).IsEqualTo(selection.ScaledProfile is { } scale ? new ScaledComparisonCorpus(scale).Sha256 : new BenchmarkDataset(selection.Options).Sha256);
+        await Assert.That(report.DatasetSha256).IsEqualTo(selection.ScaledProfile is { } scale ? new ScaledComparisonCorpus(scale).Sha256 : new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(selection.Options)).Sha256);
         var target = report.Targets.Single();
         await Assert.That(target.Name).IsEqualTo(selection.Target);
         await Assert.That(target.Cluster!.Nodes).IsEqualTo(selection.NodeCount);
@@ -144,16 +144,17 @@ internal static partial class IsolatedNativeReportAssertions
     };
 
     internal static async Task VerifyServerResourceEvidenceAsync(string output, ComparisonWorkerSelection selection,
-        CancellationToken cancellationToken)
+        IOptions<ScaleServerResourceOptions> options, CancellationToken cancellationToken)
     {
         var path = Path.Combine(output, ServerResourceFile);
         var info = new FileInfo(path);
-        await Assert.That(info.Exists && info.Length <= ScaleServerResourceBounds.MaxSidecarBytes).IsTrue();
+        await Assert.That(info.Exists && info.Length <= options.Value.MaxSidecarBytes).IsTrue();
         await using var stream = File.OpenRead(path);
         var evidence = await JsonSerializer.DeserializeAsync<ScaleServerResourceEvidence>(stream,
             new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken)
             ?? throw new InvalidDataException("Server resource evidence is malformed.");
         await Assert.That(evidence.Schema).IsEqualTo(ServerResourceSchema);
+        await Assert.That(evidence.ObservationPolicy).IsEqualTo(ScaleServerObservationPolicySnapshot.Capture(options));
         await Assert.That(evidence.Target).IsEqualTo(selection.Target);
         await Assert.That(evidence.NodeCount).IsEqualTo(selection.NodeCount);
         await Assert.That(evidence.Scenario).IsEqualTo(selection.Scenario.ToString());
@@ -173,24 +174,13 @@ internal static partial class IsolatedNativeReportAssertions
             await Assert.That(evidence.Containers).IsEmpty();
             return;
         }
-        await Assert.That(evidence.Qualified).IsEqualTo(evidence.MissingEvidence.Length == 0);
-        await Assert.That(evidence.Containers.Length <= selection.NodeCount);
-        if (evidence.Containers.Length == selection.NodeCount
-            && evidence.Containers.All(item => item.SampleCount >= MinimumResourceSamples))
-        {
-            await Assert.That(evidence.MissingEvidence).DoesNotContain("serverCpuRss");
-        }
-        if (evidence.Qualified)
-        {
-            await Assert.That(evidence.Containers.Length).IsEqualTo(selection.NodeCount);
-            await Assert.That(evidence.Containers.All(item => item.SampleCount >= MinimumResourceSamples
-                && item.ContainerId.Length == 64 && item.ImageId.Length > 0 && item.WritableMounts.Length > 0)).IsTrue();
-        }
+        await IsolatedNativeServerObservationAssertions.VerifyAsync(evidence, selection, options);
     }
 
     internal static void CopyRawIfPresent(string output, string evidence)
     {
-        foreach (var name in new[] { WorkerFile, ServerResourceFile })
+        foreach (var name in new[] { WorkerFile, ServerResourceFile, OpenLoopEvidenceContract.OpenLoopEvidenceFileName,
+            OpenLoopCancellationProofContract.ProofFileName, OpenLoopResourceEvidenceContract.SidecarFileName })
         {
             var file = Path.Combine(output, name);
             if (File.Exists(file))

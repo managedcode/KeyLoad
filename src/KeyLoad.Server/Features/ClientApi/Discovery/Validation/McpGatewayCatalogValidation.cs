@@ -44,8 +44,10 @@ internal static class McpGatewayCatalogValidation
     internal static ImmutableArray<McpGatewayCatalogEntry> CreateEntries(
         IReadOnlyList<McpOperationDescriptor> operations)
     {
+        const int OperationsCountEmptyCount = 0;
+
         ArgumentNullException.ThrowIfNull(operations);
-        if (operations.Count is 0 or > MaximumOperations)
+        if (operations.Count is OperationsCountEmptyCount or > MaximumOperations)
         {
             throw new InvalidOperationException(MetadataBoundFailure);
         }
@@ -72,13 +74,18 @@ internal static class McpGatewayCatalogValidation
 
     private static McpGatewayToolSearchHints CreateHints(McpOperationDescriptor operation)
     {
+        const char UnderscoreCharacter = '_';
+        const char SpaceCharacter = ' ';
+        const char SlashCharacter = '/';
+        const int ValueLengthEmptyCount = 0;
+
         var category = ResolveCategory(operation.Name);
         var aliases = new[]
         {
-            operation.Name.Replace('_', ' '),
-            operation.Route.Trim('/').Replace('/', ' '),
+            operation.Name.Replace(UnderscoreCharacter, SpaceCharacter),
+            operation.Route.Trim(SlashCharacter).Replace(SlashCharacter, SpaceCharacter),
             category
-        }.Where(static value => value.Length is > 0 and <= MaximumAliasLength)
+        }.Where(static value => value.Length is > ValueLengthEmptyCount and <= MaximumAliasLength)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(MaximumAliasesPerOperation)
             .ToArray();
@@ -99,9 +106,12 @@ internal static class McpGatewayCatalogValidation
 
     private static string ResolveCategory(string name)
     {
+        const char UnderscoreCharacter = '_';
+        const int SeparatorValidationBoundary = 0;
+
         name = name.StartsWith(OperationPrefix, StringComparison.Ordinal) ? name[OperationPrefix.Length..] : name;
-        var separator = name.IndexOf('_', StringComparison.Ordinal);
-        var category = separator > 0 ? name[..separator] : name;
+        var separator = name.IndexOf(UnderscoreCharacter, StringComparison.Ordinal);
+        var category = separator > SeparatorValidationBoundary ? name[..separator] : name;
         return category switch
         {
             AdminPrefix => AdministrationCategory,

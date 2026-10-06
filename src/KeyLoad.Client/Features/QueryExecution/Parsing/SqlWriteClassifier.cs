@@ -13,21 +13,21 @@ internal static class SqlWriteClassifier
     private const char Parameter = '@';
     private const int SqlStartOffset = 0;
 
-    internal static bool MayWrite(string? sql, CancellationToken cancellationToken, KeyLoadClientExecutionOptions bounds)
+    internal static bool MayWrite(string? sql, KeyLoadClientExecutionOptions bounds, CancellationToken cancellationToken)
     {
         if (sql is null || sql.Length > bounds.MaximumSqlInspectionBytes
             || Encoding.UTF8.GetByteCount(sql) > bounds.MaximumSqlInspectionBytes)
         { return true; }
         var offset = SqlStartOffset;
-        if (!SkipTrivia(sql, ref offset, cancellationToken, bounds.MaximumSqlInspectionDepth))
+        if (!SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, cancellationToken))
         { return true; }
         if (Keyword(sql, ref offset, Select, cancellationToken))
         { return false; }
-        return !Keyword(sql, ref offset, Explain, cancellationToken) || !SkipTrivia(sql, ref offset, cancellationToken, bounds.MaximumSqlInspectionDepth)
+        return !Keyword(sql, ref offset, Explain, cancellationToken) || !SkipTrivia(sql, ref offset, bounds.MaximumSqlInspectionDepth, cancellationToken)
             || !Keyword(sql, ref offset, Select, cancellationToken);
     }
 
-    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, CancellationToken cancellationToken, int maximumDepth)
+    private static bool SkipTrivia(ReadOnlySpan<char> sql, ref int offset, int maximumDepth, CancellationToken cancellationToken)
     {
         var state = new SqlTriviaState();
         var end = cancellationToken.IsCancellationRequested

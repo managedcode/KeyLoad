@@ -5,11 +5,12 @@ namespace KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
 
 internal static class OrleansTelemetryTagSanitizer
 {
-    internal static void Scrub(Activity activity)
+    private const int EmptyStringLength = 0;
+    internal static void Scrub(Activity activity, int maximumTagValueCharacters)
     {
         foreach (var (key, value) in activity.TagObjects.ToArray())
         {
-            var normalized = Normalize(key, value);
+            var normalized = Normalize(key, value, maximumTagValueCharacters);
             if (normalized is null)
             {
                 activity.SetTag(key, null);
@@ -21,14 +22,14 @@ internal static class OrleansTelemetryTagSanitizer
         }
     }
 
-    private static object? Normalize(string key, object? value)
+    private static object? Normalize(string key, object? value, int maximumTagValueCharacters)
     {
         if (key == OrleansTelemetryPolicy.ExceptionEscapedTag && value is bool escaped)
         {
             return escaped;
         }
 
-        if (value is not string text || text.Length is 0 or > 256)
+        if (value is not string text || text.Length == EmptyStringLength || text.Length > maximumTagValueCharacters)
         {
             return null;
         }

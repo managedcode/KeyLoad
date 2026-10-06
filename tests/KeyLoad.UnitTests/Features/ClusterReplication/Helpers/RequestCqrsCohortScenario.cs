@@ -113,7 +113,7 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
         remoteTwo.SetDiscovery(Authenticator(SecondRemote), Discovery(SecondRemote, 2));
         var localState = new ReplicaSiloDiscoveryState(Configuration, Options, runtime.LocalSilo);
         localState.MarkTransportReady();
-        var localAuthenticator = new ReplicaEnvelopeAuthenticator(Configuration, Options, localState, TimeProvider.System);
+        var localAuthenticator = new ReplicaEnvelopeAuthenticator(Configuration, Options, localState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay());
         authenticators.Add(localAuthenticator);
         client = new ReplicaSiloDiscoveryClient(Configuration, Options, localState, localAuthenticator, TimeProvider.System);
     }
@@ -122,7 +122,7 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
     {
         var remoteConfiguration = Configuration with { LocalId = endpoint.VoterId };
         var remoteState = new ReplicaSiloDiscoveryState(remoteConfiguration, Options, runtime.LocalSilo);
-        var authentication = new ReplicaEnvelopeAuthenticator(remoteConfiguration, Options, remoteState, TimeProvider.System);
+        var authentication = new ReplicaEnvelopeAuthenticator(remoteConfiguration, Options, remoteState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay());
         authenticators.Add(authentication);
         serverAuthenticators.Add(endpoint.VoterId, authentication);
         endpoint.SetDiscovery(authentication,

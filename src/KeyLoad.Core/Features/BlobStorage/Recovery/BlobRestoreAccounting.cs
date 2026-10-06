@@ -13,13 +13,17 @@ internal sealed class BlobRestoreAccounting(DatabaseEngine database, BlobRestore
 
     internal void AbortReservation(IAtomicTransaction tx, BlobState state)
     {
+        const int KeysEmptyCount = 0;
+        const int VersionsEmptyCount = 0;
+        const int UploadsRemovalDelta = -1;
+
         if (state.Status != BlobUploadStatus.Active)
         { return; }
         var key = BlobKeys.Quota(state.Blob);
         var resource = SourceQuota(tx, key);
         var global = SourceQuota(tx, BlobKeys.Global);
-        tx.PutRecord(key, BlobQuotaOperations.Adjust(resource, -state.RemainingReservation, 0, 0, -1));
-        tx.PutRecord(BlobKeys.Global, BlobQuotaOperations.Adjust(global, -state.RemainingReservation, 0, 0, -1));
+        tx.PutRecord(key, BlobQuotaOperations.Adjust(resource, -state.RemainingReservation, KeysEmptyCount, VersionsEmptyCount, UploadsRemovalDelta));
+        tx.PutRecord(BlobKeys.Global, BlobQuotaOperations.Adjust(global, -state.RemainingReservation, KeysEmptyCount, VersionsEmptyCount, UploadsRemovalDelta));
     }
 
     internal void Add(IAtomicTransaction tx, BlobRef blob, long bytes, int keys, int versions, int uploads)

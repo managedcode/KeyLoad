@@ -4,6 +4,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int GraphShortestPathEmptyElementCount = 0;
+
     private const string LabelField = "/label";
 
     /// <summary>Finds one bounded shortest directed path inside the current authorized read cut.</summary>
@@ -15,7 +17,7 @@ public sealed partial class DatabaseEngine
     public GraphShortestPathResult ShortestPath(string principalId, GraphShortestPathRequest request,
         TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, timeProvider ?? Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, timeProvider ?? Clock, cancellationToken);
         return ShortestPath(principalId, request, budget);
     }
 
@@ -36,7 +38,7 @@ public sealed partial class DatabaseEngine
             var principal = Principal(budgetedView, principalId, Clock.GetUtcNow());
             Authorization.Require(principal, request.Partition, request.Graph, Capability.GraphRead);
             var graph = Resource(budgetedView, request.Partition, request.Graph, ResourceKind.Graph);
-            if (labels is { Length: > 0 })
+            if (labels is { Length: > GraphShortestPathEmptyElementCount })
             {
                 Authorization.RequireFieldUse(principal, graph, LabelField);
             }

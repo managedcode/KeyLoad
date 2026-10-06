@@ -7,6 +7,8 @@ namespace KeyLoad.Core.Features.GraphTraversal;
 /// <summary>Validates shortest-path caller shapes and native graph records.</summary>
 internal static class GraphShortestPathValidation
 {
+    private const int FirstElementIndex = 0;
+
     private const int ContractVersion = 1;
     private const int MinimumDepth = 0;
     private const int MinimumVertices = 1;
@@ -127,7 +129,7 @@ internal static class GraphShortestPathValidation
         }
         var values = new string[labels.Value.Length];
         var unique = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = 0; index < labels.Value.Length; index++)
+        for (var index = FirstElementIndex; index < labels.Value.Length; index++)
         {
             budget.Check();
             var label = labels.Value[index] ?? throw Errors.Fail(ErrorCode.Validation, InvalidRequest);

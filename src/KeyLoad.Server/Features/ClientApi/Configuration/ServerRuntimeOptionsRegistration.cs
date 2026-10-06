@@ -3,6 +3,7 @@ using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -14,18 +15,19 @@ internal static class ServerRuntimeOptionsRegistration
     internal static IServiceCollection AddRuntimeOptions(this IServiceCollection services, IConfiguration configuration)
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
+        RegisterClusterExecution(services, configuration);
+        RegisterStorageExecution(services, configuration);
+        RegisterHostExecution(services, configuration);
+        RegisterNodeProjections(services, configuration);
+        services.AddSingleton<ServerRuntimeOptions>();
+        return services;
+    }
+
+    private static void RegisterClusterExecution(IServiceCollection services, IConfiguration configuration)
+    {
         services.AddDueCoordinationOptions(configuration);
         services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<ZoneTreeStorageExecutionOptions>().Bind(configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<OfflineRecoveryExecutionOptions>()
-            .Bind(configuration.GetSection(OfflineRecoveryExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), OfflineRecoveryExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaExecutionOptions>()
             .Bind(configuration.GetSection(ReplicaExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaProtocol.InvalidLimits).ValidateOnStart();
@@ -40,9 +42,38 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<GrainRoutingOptions>()
             .Bind(configuration.GetSection(GrainRoutingOptions.SectionName))
             .Validate(options => options.IsValid(), GrainRoutingOptions.ValidationMessage).ValidateOnStart();
+    }
+
+    private static void RegisterStorageExecution(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<ZoneTreeStorageExecutionOptions>().Bind(configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<OfflineRecoveryExecutionOptions>()
+            .Bind(configuration.GetSection(OfflineRecoveryExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), OfflineRecoveryExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ServerNodeUpgradeExecutionOptions>().Bind(configuration.GetSection(ServerNodeUpgradeExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ServerNodeUpgradeExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<NativeTextExecutionOptions>().Bind(configuration.GetSection(NativeTextExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), NativeTextExecutionOptions.ValidationMessage).ValidateOnStart();
+    }
+
+    private static void RegisterHostExecution(IServiceCollection services, IConfiguration configuration)
+    {
         services.AddOptions<ServerExecutionOptions>()
             .Bind(configuration.GetSection(ServerExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ServerExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<McpExecutionOptions>().Bind(configuration.GetSection(McpExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), McpExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<AdminObservationOptions>().Bind(configuration.GetSection(AdminObservationOptions.SectionName))
+            .Validate(options => options.IsValid(), AdminObservationOptions.ValidationMessage).ValidateOnStart();
+    }
+
+    private static void RegisterNodeProjections(IServiceCollection services, IConfiguration configuration)
+    {
         services.AddOptions<NodeOptions>().Bind(configuration.GetSection(ServerProtocol.ConfigurationSection))
             .PostConfigure(node => ConfigureNode(node, configuration)).ValidateOnStart();
         services.AddSingleton<IValidateOptions<NodeOptions>, NodeOptionsValidator>();
@@ -60,8 +91,10 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddSingleton<IOptionsFactory<HttpAdmissionLimits>>(provider =>
             new NodeOptionsProjectionFactory<HttpAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
                 node => node.HttpAdmission));
-        services.AddSingleton<ServerRuntimeOptions>();
-        return services;
+        services.AddOptions<McpMemoryLimits>();
+        services.AddSingleton<IOptionsFactory<McpMemoryLimits>>(provider =>
+            new NodeOptionsProjectionFactory<McpMemoryLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
+                node => node.McpMemory));
     }
 
     internal static IServiceCollection AddDueCoordinationOptions(this IServiceCollection services, IConfiguration configuration)

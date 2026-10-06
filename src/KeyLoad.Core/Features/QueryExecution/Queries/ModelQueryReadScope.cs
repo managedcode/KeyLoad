@@ -5,10 +5,18 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string InvalidEventSourceGenerationDetail = "The event source generation must be positive.";
+    private const string InvalidQueueSourceGenerationDetail = "A queue model source generation must be one.";
+    private const long QueueModelGeneration = 1;
+
     /// <summary>Runs a read-only event or queue query in one authorized, budgeted storage cut.</summary>
     public T WithModelQueryView<T>(string principalId, PartitionRef partition, string resourceName, ModelQuerySource source,
         ReadExecutionBudget budget, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
     {
+        const string WithModelQueryViewDetailText = "The model query source is unsupported.";
+        const string QueueResourceNameMismatchDetail = "A queue model source must use its configured resource name.";
+        const int FirstSourceGeneration = 1;
+
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(resourceName);
         ArgumentNullException.ThrowIfNull(source);
@@ -17,7 +25,7 @@ public sealed partial class DatabaseEngine
         ValidatePartition(partition);
         if (!Enum.IsDefined(source.Kind))
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, "The model query source is unsupported.");
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, WithModelQueryViewDetailText);
         }
 
         return Store.Read(rawView =>
@@ -29,18 +37,18 @@ public sealed partial class DatabaseEngine
             var capability = source.Kind == ModelQuerySourceKind.Events ? Capability.EventsRead : Capability.QueueInspect;
             if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Item != resourceName)
             {
-                throw Errors.Fail(ErrorCode.Validation, "A queue model source must use its configured resource name.");
+                throw Errors.Fail(ErrorCode.Validation, QueueResourceNameMismatchDetail);
             }
             JsonData.Identifier(source.Item);
-            if (source.Kind == ModelQuerySourceKind.Events && source.Generation < 1)
+            if (source.Kind == ModelQuerySourceKind.Events && source.Generation < FirstSourceGeneration)
             {
-                throw Errors.Fail(ErrorCode.Validation, "The event source generation must be positive.");
+                throw Errors.Fail(ErrorCode.Validation, InvalidEventSourceGenerationDetail);
             }
             Authorization.Require(principal, partition, resourceName, Capability.Query | capability);
             var resource = Resource(budgetedView, partition, resourceName, kind);
-            if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Generation != 1)
+            if (source.Kind == ModelQuerySourceKind.QueueMessages && source.Generation != QueueModelGeneration)
             {
-                throw Errors.Fail(ErrorCode.Validation, "A queue model source generation must be one.");
+                throw Errors.Fail(ErrorCode.Validation, InvalidQueueSourceGenerationDetail);
             }
 
             budget.Check();

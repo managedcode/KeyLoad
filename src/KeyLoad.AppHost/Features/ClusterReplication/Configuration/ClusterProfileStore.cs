@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,8 +14,6 @@ internal static class ClusterProfileStore
     internal const string InvalidProfile = "The private cluster profile is missing required identity or credential fields, or is invalid.";
     private const string UnsafeProfilePath = "The private cluster profile directory and files cannot use reparse paths.";
     internal const int CurrentVersion = 2;
-    private const int MaximumProfileBytes = 8192;
-    private const int MaximumDepth = 8;
     private const int SecretBytes = 32;
     private const int Base64Characters = 44;
     private const int MinimumAdminCharacters = 32;
@@ -25,24 +24,24 @@ internal static class ClusterProfileStore
         nameof(LocalProfile.Version), nameof(LocalProfile.PhysicalShardId), nameof(LocalProfile.Incarnation),
         nameof(LocalProfile.SigningKey), nameof(LocalProfile.PeerSecret), nameof(LocalProfile.AdminKey)
     ];
-    internal static readonly JsonSerializerOptions Json = new()
+    internal static JsonSerializerOptions CreateJson(IOptions<ClusterProfileExecutionOptions> executionOptions) => new()
     {
-        MaxDepth = MaximumDepth,
+        MaxDepth = executionOptions.Value.MaximumJsonDepth,
         RespectNullableAnnotations = true,
         RespectRequiredConstructorParameters = true,
         UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow
     };
 
     /// <summary>Opens or atomically creates the bounded private V2 profile without emitting credentials.</summary>
-    internal static LocalProfile Open(string dataRoot)
+    internal static LocalProfile Open(string dataRoot, IOptions<ClusterProfileExecutionOptions> executionOptions)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
-        var root = Path.GetFullPath(dataRoot);
+        var root = ClusterProfileInputBounds.Root(dataRoot, executionOptions);
         PrepareDirectory(root);
         var path = Path.Combine(root, ProfileName);
         RejectLinks(path);
         if (File.Exists(path))
-        { return Read(path); }
+        { return Read(path, executionOptions); }
         var profile = new LocalProfile(CurrentVersion, Guid.NewGuid(), Guid.NewGuid(),
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
@@ -51,7 +50,7 @@ internal static class ClusterProfileStore
         var staged = StagingPath(path);
         try
         {
-            WriteStage(staged, JsonSerializer.SerializeToUtf8Bytes(profile, Json), ClusterProfilePermissions.NewProfileMode);
+            WriteStage(staged, JsonSerializer.SerializeToUtf8Bytes(profile, CreateJson(executionOptions)), ClusterProfilePermissions.NewProfileMode, executionOptions);
             File.Move(staged, path);
             return profile;
         }
@@ -59,18 +58,18 @@ internal static class ClusterProfileStore
     }
 
     /// <summary>Explicit offline conversion of one strict four-field legacy profile with a verified backup.</summary>
-    internal static LocalProfile UpgradeLegacyOffline(string dataRoot)
-        => ClusterProfileOfflineUpgrade.Run(dataRoot);
+    internal static LocalProfile UpgradeLegacyOffline(string dataRoot, IOptions<ClusterProfileExecutionOptions> executionOptions)
+        => ClusterProfileOfflineUpgrade.Run(dataRoot, executionOptions);
 
-    private static LocalProfile Read(string path)
-        => DeserializeCurrent(ReadBoundedBytes(path));
+    private static LocalProfile Read(string path, IOptions<ClusterProfileExecutionOptions> executionOptions)
+        => DeserializeCurrent(ReadBoundedBytes(path, executionOptions), executionOptions);
 
-    internal static LocalProfile DeserializeCurrent(byte[] bytes)
+    internal static LocalProfile DeserializeCurrent(byte[] bytes, IOptions<ClusterProfileExecutionOptions> executionOptions)
     {
         try
         {
-            RequireFields(bytes, CurrentFields, RequiredFields);
-            var profile = JsonSerializer.Deserialize<LocalProfile>(bytes, Json)
+            RequireFields(bytes, CurrentFields, RequiredFields, executionOptions);
+            var profile = JsonSerializer.Deserialize<LocalProfile>(bytes, CreateJson(executionOptions))
                 ?? throw new InvalidOperationException(InvalidProfile);
             Validate(profile);
             return profile;
@@ -78,9 +77,10 @@ internal static class ClusterProfileStore
         catch (JsonException) { throw new InvalidOperationException(InvalidProfile); }
     }
 
-    internal static void RequireFields(byte[] bytes, string[] allowedFields, int requiredCount)
+    internal static void RequireFields(byte[] bytes, string[] allowedFields, int requiredCount, IOptions<ClusterProfileExecutionOptions> executionOptions)
     {
-        using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = MaximumDepth });
+        ClusterProfileInputBounds.Bytes(bytes, executionOptions);
+        using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = executionOptions.Value.MaximumJsonDepth });
         if (document.RootElement.ValueKind != JsonValueKind.Object)
         { throw new InvalidOperationException(InvalidProfile); }
         var allowed = new HashSet<string>(allowedFields, StringComparer.Ordinal);
@@ -126,7 +126,7 @@ internal static class ClusterProfileStore
         ClusterProfilePermissions.PreparePrivateDirectory(directory);
     }
 
-    internal static byte[] ReadBoundedBytes(string path)
+    internal static byte[] ReadBoundedBytes(string path, IOptions<ClusterProfileExecutionOptions> executionOptions)
     {
         const int StructuralValue = 1;
         const int Step = 1;
@@ -137,11 +137,12 @@ internal static class ClusterProfileStore
 
         RejectLinks(path);
         ClusterProfilePermissions.RequirePrivate(path);
-        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            executionOptions.Value.FileBufferBytes);
         var initialLength = input.Length;
-        if (initialLength is < StructuralValue or > MaximumProfileBytes)
+        if (initialLength < StructuralValue || initialLength > executionOptions.Value.MaximumProfileBytes)
         { throw new InvalidOperationException(InvalidProfile); }
-        var buffer = new byte[MaximumProfileBytes + Step];
+        var buffer = new byte[executionOptions.Value.MaximumProfileBytes + Step];
         var total = TotalInitialValue;
         while (total < buffer.Length)
         {
@@ -150,7 +151,7 @@ internal static class ClusterProfileStore
             { break; }
             total += read;
         }
-        if (total is < StructuralValue or > MaximumProfileBytes || initialLength != total || input.Length != total
+        if (total < StructuralValue || total > executionOptions.Value.MaximumProfileBytes || initialLength != total || input.Length != total
             || input.ReadByte() != MissingValue || input.Length != total)
         { throw new InvalidOperationException(InvalidProfile); }
         return buffer.AsSpan(StartValue, total).ToArray();
@@ -164,11 +165,12 @@ internal static class ClusterProfileStore
         { throw new InvalidOperationException(InvalidProfile); }
     }
 
-    internal static void WriteStage(string path, byte[] bytes, UnixFileMode? fileMode)
+    internal static void WriteStage(string path, byte[] bytes, UnixFileMode? fileMode, IOptions<ClusterProfileExecutionOptions> executionOptions)
     {
+        ClusterProfileInputBounds.Bytes(bytes, executionOptions);
         RejectLinks(path);
         using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-            MaximumProfileBytes, FileOptions.WriteThrough);
+            executionOptions.Value.FileBufferBytes, FileOptions.WriteThrough);
         ClusterProfilePermissions.ApplyFileMode(path, fileMode);
         output.Write(bytes);
         output.Flush(true);

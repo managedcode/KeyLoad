@@ -36,6 +36,8 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
 
     private bool VisitLocal(GraphIncomingEdgesPageBuilder page, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
+        const int LocalProjectionRevision = 0;
+
         budget.Check();
         var edgeId = NativeSerialization.Deserialize<string>(value);
         if (edgeId is null || !key.SequenceEqual(GraphCrossPartitionKeys.LocalIncoming(
@@ -56,7 +58,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         {
             return true;
         }
-        page.Add(edge, 0, targetGraph);
+        page.Add(edge, LocalProjectionRevision, targetGraph);
         return true;
     }
 
@@ -128,9 +130,11 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
 
     private void RequireVisible(EntityRef entity)
     {
+        const string VertexUnavailable = "The graph vertex is unavailable.";
+
         if (!TryRequireVisible(entity))
         {
-            throw Errors.Fail(ErrorCode.NotFound, "The graph vertex is unavailable.");
+            throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
         }
     }
 

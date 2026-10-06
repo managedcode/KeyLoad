@@ -21,12 +21,12 @@ internal static class PhysicalShardProfileTestData
 
     internal static void AssertOpenAndUpgradeRejected(string root)
     {
-        _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(root));
+        _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(root, UnitProfileOptions.Execution()));
         AssertOfflineUpgradeRejected(root);
     }
 
     internal static void AssertOfflineUpgradeRejected(string root)
-        => _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.UpgradeLegacyOffline(root));
+        => _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.UpgradeLegacyOffline(root, UnitProfileOptions.Execution()));
 
     internal static void SetPrivateFileMode(string path)
     {

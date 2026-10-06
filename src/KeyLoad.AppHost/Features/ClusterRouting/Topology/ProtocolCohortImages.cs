@@ -9,6 +9,9 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 [ConfigurationBinding]
 internal static class ProtocolCohortImages
 {
+    private const string ThirdVoterName = "node3";
+    private const int ProtocolSectionFieldCount = 2;
+
     private const string VotersResultText = "node1";
     private const string VotersVotersResultText = "node2";
 
@@ -20,14 +23,14 @@ internal static class ProtocolCohortImages
     private const string InvalidConfiguration = "ProtocolCohortTestConfigurationInvalid";
     private const string EnabledKey = "Enabled";
     private const string VotersKey = "Voters";
-    private static readonly string[] Voters = [VotersResultText, VotersVotersResultText, "node3"];
+    private static readonly string[] Voters = [VotersResultText, VotersVotersResultText, ThirdVoterName];
 
     internal static void ValidateMode(IConfiguration configuration)
     {
         const int EmptyValue = 0;
 
         ArgumentNullException.ThrowIfNull(configuration);
-        var section = ReadChildren(configuration.GetSection(SectionSetting), 2);
+        var section = ReadChildren(configuration.GetSection(SectionSetting), ProtocolSectionFieldCount);
         if (section.Any(child => child.Key is not (EnabledKey or VotersKey))
             || configuration.GetSection(EnabledSetting).GetChildren().Any())
         {
@@ -62,8 +65,7 @@ internal static class ProtocolCohortImages
         const string ConfigurationKeyText = ":";
 
         ArgumentNullException.ThrowIfNull(builder);
-        ValidateMode(builder.Configuration);
-        var enabled = builder.Configuration.GetValue<bool>(EnabledSetting);
+        var enabled = KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(builder).Control.Value.ProtocolCohortEnabled;
         if (enabled && (!ephemeral || benchmarkNodeCount is not null))
         {
             throw new InvalidOperationException(InvalidConfiguration);

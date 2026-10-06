@@ -13,7 +13,7 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = maximumBytes });
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(database.Database.Limits);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
             var firstGrant = budget.CreateReadGrant(ReadExecutionBudgetGrantSeed.FirstKey.Length
                 + ReadExecutionBudgetGrantSeed.FirstValue.Length, 1);
             var secondGrant = budget.CreateReadGrant(ReadExecutionBudgetGrantSeed.SecondKey.Length
@@ -37,21 +37,21 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new() { MaxQueryReadBytes = 64 });
         var rootCharge = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(database.Database.Limits);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
             budget.CreateReadGrant(64, database.Database.Limits.MaxScanRecords);
             budget.ChargeBytes(1);
             return true;
         }));
         var additionalGrant = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(database.Database.Limits);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
             budget.CreateReadGrant(64, database.Database.Limits.MaxScanRecords);
             budget.CreateReadGrant(1, 0);
             return true;
         }));
         var recordGrant = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(database.Database.Limits);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
             budget.CreateReadGrant(0, database.Database.Limits.MaxScanRecords);
             budget.CreateReadGrant(0, 1);
             return true;

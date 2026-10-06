@@ -6,6 +6,14 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int RecurringScheduleCommandsAdjacentElementOffset = 1;
+    private const int RecurringScheduleCommandsMinimumPositiveCount = 1;
+    private const int RecurringScheduleCommandsEmptyElementCount = 0;
+    private const int RecurringScheduleCommandsLastComponentFromEnd = 1;
+    private const int RecurringScheduleCommandsFirstElementIndex = 0;
+    private const int RecurringScheduleCommandsInitialSequence = 0;
+    private const string RecurringScheduleCommandsReceiptIdentitySeparator = "-";
+
     private const long MinimumIntervalTicks = TimeSpan.TicksPerSecond;
     private const long MaximumIntervalTicks = 365L * TimeSpan.TicksPerDay;
 
@@ -51,7 +59,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
-        var next = record with { Revision = checked(record.Revision + 1), Cancelled = true };
+        var next = record with { Revision = checked(record.Revision + RecurringScheduleCommandsAdjacentElementOffset), Cancelled = true };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
         var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record),
             RecurringSagaStorage.SerializedBytes(next), Limits);
@@ -65,7 +73,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
-        if (request.MaxOccurrences < 1 || request.MaxOccurrences > messagingExecution.MaximumOccurrenceCatchUp)
+        if (request.MaxOccurrences < RecurringScheduleCommandsMinimumPositiveCount || request.MaxOccurrences > messagingExecution.MaximumOccurrenceCatchUp)
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
@@ -81,11 +89,11 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
         var due = DueOccurrences(record, now, request.MaxOccurrences);
-        if (due.Count == 0)
+        if (due.Count == RecurringScheduleCommandsEmptyElementCount)
         {
             return ScheduleReceipt(RecurringSagaProtocol.EmitReceipt, request.Lane, request.ScheduleId, record.Revision);
         }
-        var nextOrdinal = NextOccurrenceOrdinal(due[^1].Ordinal);
+        var nextOrdinal = NextOccurrenceOrdinal(due[^RecurringScheduleCommandsLastComponentFromEnd].Ordinal);
         EmitOccurrences(tx, principal, record, due, now);
         UpdateScheduleOrdinal(tx, record, nextOrdinal);
         return ScheduleReceipt(RecurringSagaProtocol.EmitReceipt, request.Lane, request.ScheduleId, record.Revision);
@@ -95,7 +103,7 @@ public sealed partial class DatabaseEngine
         DateTimeOffset now, int maximum)
     {
         var due = new List<(long Ordinal, DateTimeOffset DueAt)>(maximum);
-        for (var offset = 0; offset < maximum; offset++)
+        for (var offset = RecurringScheduleCommandsFirstElementIndex; offset < maximum; offset++)
         {
             long ordinal;
             try
@@ -143,16 +151,16 @@ public sealed partial class DatabaseEngine
     private static RecurringScheduleRecord NewScheduleRecord(RecurringScheduleRecord? existing,
         RecurringScheduleDefinition definition, string principalId)
     {
-        var revision = existing is null ? 1 : checked(existing.Revision + 1);
-        var generation = existing is null ? 1 : checked(existing.Generation + 1);
+        var revision = existing is null ? RecurringScheduleCommandsAdjacentElementOffset : checked(existing.Revision + RecurringScheduleCommandsAdjacentElementOffset);
+        var generation = existing is null ? RecurringScheduleCommandsAdjacentElementOffset : checked(existing.Generation + RecurringScheduleCommandsAdjacentElementOffset);
         return new(definition.Lane, definition.ScheduleId, existing?.CreatorPrincipalId ?? principalId,
-            definition, revision, generation, 0, false);
+            definition, revision, generation, RecurringScheduleCommandsInitialSequence, false);
     }
 
     private void ValidateScheduleRevision(long expectedRevision, RecurringScheduleRecord? existing,
         QueueLaneRef lane, Guid scheduleId)
     {
-        if (expectedRevision < 0 || (existing is null ? expectedRevision != 0 : expectedRevision != existing.Revision))
+        if (expectedRevision < RecurringScheduleCommandsInitialSequence || (existing is null ? expectedRevision != RecurringScheduleCommandsInitialSequence : expectedRevision != existing.Revision))
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
@@ -164,7 +172,7 @@ public sealed partial class DatabaseEngine
 
     private static void RequireScheduleRevision(long expectedRevision, long revision)
     {
-        if (expectedRevision < 1 || expectedRevision != revision)
+        if (expectedRevision < RecurringScheduleCommandsMinimumPositiveCount || expectedRevision != revision)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
@@ -182,8 +190,8 @@ public sealed partial class DatabaseEngine
     {
         if (record.Lane is null || record.CreatorPrincipalId is null || record.Definition is null
             || record.Lane != lane || record.ScheduleId != scheduleId || record.Definition.Lane != lane
-            || record.Definition.ScheduleId != scheduleId || record.Revision < 1 || record.Generation < 1
-            || record.NextOrdinal < 0)
+            || record.Definition.ScheduleId != scheduleId || record.Revision < RecurringScheduleCommandsMinimumPositiveCount || record.Generation < RecurringScheduleCommandsMinimumPositiveCount
+            || record.NextOrdinal < RecurringScheduleCommandsInitialSequence)
         {
             throw Errors.Fail(ErrorCode.Corruption, RecurringSagaProtocol.CorruptRecord);
         }
@@ -231,7 +239,7 @@ public sealed partial class DatabaseEngine
     {
         try
         {
-            return checked(ordinal + 1);
+            return checked(ordinal + RecurringScheduleCommandsAdjacentElementOffset);
         }
         catch (OverflowException)
         {
@@ -243,8 +251,8 @@ public sealed partial class DatabaseEngine
     {
         var definition = record.Definition;
         var id = string.Concat(RecurringSagaProtocol.SchedulePrefix,
-            record.ScheduleId.ToString(RecurringSagaProtocol.IdentifierFormat), "-",
-            record.Generation.ToString(RecurringSagaProtocol.HexOrdinalFormat, CultureInfo.InvariantCulture), "-",
+            record.ScheduleId.ToString(RecurringSagaProtocol.IdentifierFormat), RecurringScheduleCommandsReceiptIdentitySeparator,
+            record.Generation.ToString(RecurringSagaProtocol.HexOrdinalFormat, CultureInfo.InvariantCulture), RecurringScheduleCommandsReceiptIdentitySeparator,
             ordinal.ToString(RecurringSagaProtocol.HexOrdinalFormat, CultureInfo.InvariantCulture));
         var expiresAt = OccurrenceExpiry(dueAt, definition.MessageTimeToLive);
         return new(definition.Lane.Queue, id, definition.PayloadJson, definition.HeadersJson,

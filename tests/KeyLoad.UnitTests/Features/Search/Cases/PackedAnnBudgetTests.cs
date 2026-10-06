@@ -13,9 +13,9 @@ internal sealed class PackedAnnBudgetTests
         PackedAnnTestData.Seed(database, 64, 8, DistanceMetric.Cosine);
         var records = PackedAnnTestData.Load(database, DistanceMetric.Cosine);
         var space = PackedAnnTestData.Space(DistanceMetric.Cosine, 8);
-        var measuredBuild = new AnnWorkBudget(new ReadExecutionBudget(database.Database.Limits),
+        var measuredBuild = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)),
             PackedAnnIndexTestSupport.GenerousWorkLimit);
-        var index = PackedAnnIndex.Build(space, records, new(), measuredBuild);
+        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(new()), measuredBuild);
         var exactBuild = Build(space, records, measuredBuild.WorkUnits);
         await Assert.That(exactBuild.Count).IsEqualTo(index.Count);
         await AssertBudgetExceeded(() => Build(space, records, measuredBuild.WorkUnits - 1));
@@ -75,7 +75,7 @@ internal sealed class PackedAnnBudgetTests
     }
 
     private static PackedAnnIndex Build(VectorSpace space, VectorRecord[] records, long workLimit)
-        => PackedAnnIndex.Build(space, records, new(), new(new ReadExecutionBudget(new()), workLimit));
+        => PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(new()), new(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())), workLimit));
 
     private static AnnSearchResult Run(PackedAnnIndex index, TestDatabase database, float[] query, long workLimit)
         => index.Search(query, 10, null, PackedAnnIndexTestSupport.Budget(database, maxWorkUnits: workLimit));

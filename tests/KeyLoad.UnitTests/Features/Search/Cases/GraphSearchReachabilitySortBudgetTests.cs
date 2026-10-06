@@ -53,7 +53,7 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
     private static GraphSearchReachability[] ReadReachability(TestDatabase database, GraphWalkSpec walk,
         TimeProvider clock, CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(database.Database.Limits, clock, cancellationToken);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), clock, cancellationToken);
         return database.Database.WithQueryView(PrincipalId, database.Partition,
             GraphSearchTestSupport.Documents, (view, principal, _) =>
                 database.Database.ReadGraphSearchReachability(view, principal, database.Partition, walk, budget));

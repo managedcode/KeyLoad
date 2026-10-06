@@ -14,6 +14,8 @@ internal sealed class PartitionStores : IDisposable
     internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
     {
+        const int FailuresCountValidationBoundary = 1;
+
         var options = nodeOptions.Value;
         Directory.CreateDirectory(directory);
         if (!OperatingSystem.IsWindows())
@@ -41,7 +43,7 @@ internal sealed class PartitionStores : IDisposable
             if (canonical is not null)
             { ServerFailureObserver.Observe(() => canonical.Dispose(), failures); }
             ServerFailureObserver.Observe(() => ownership.Dispose(), failures);
-            if (failures.Count > 1)
+            if (failures.Count > FailuresCountValidationBoundary)
             { throw new AggregateException(failures); }
             throw;
         }
@@ -50,8 +52,7 @@ internal sealed class PartitionStores : IDisposable
     internal ZoneTreeStore Canonical { get; }
     internal ZoneTreeStore Replica { get; }
 
-    private static ZoneTreeStore Open(NodeOptions options, string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions) => new(new(directory)
+    private static ZoneTreeStore Open(NodeOptions options, string directory, IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions) => new(new(directory)
     {
         Incarnation = options.Incarnation,
         SigningKey = Convert.FromBase64String(options.SigningKey)
@@ -59,7 +60,10 @@ internal sealed class PartitionStores : IDisposable
 
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        const int ValueSingleItemCount = 1;
+        const int EmptyExchange = 0;
+
+        if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
         { return; }
         var failures = new List<Exception>();
         var closingStores = CloseStoresAsync(failures);

@@ -10,5 +10,6 @@ internal static class OrleansNodeProtocol
     internal const string ReplyRejected = "The database operation was rejected.";
     internal const string GuidFormat = "N";
     internal const int GatewayPort = 0;
+    internal const int JoinedSilo = 1;
     internal const int NativeEnvelopeOverheadBytes = 65_536;
 }

@@ -17,6 +17,8 @@ internal static partial class ScaledRawStorageProcessMemory
 
     internal static long ReadPeakBytes(Process currentProcess)
     {
+        const int PeakBytesValidationBoundary = 0;
+
         ArgumentNullException.ThrowIfNull(currentProcess);
 
         if (currentProcess.Id != Environment.ProcessId)
@@ -30,7 +32,7 @@ internal static partial class ScaledRawStorageProcessMemory
             ? ReadMacOsPeakBytes()
             : currentProcess.PeakWorkingSet64;
 
-        if (peakBytes <= 0)
+        if (peakBytes <= PeakBytesValidationBoundary)
         {
             throw new InvalidDataException(NonPositivePeakMessage);
         }
@@ -40,7 +42,9 @@ internal static partial class ScaledRawStorageProcessMemory
 
     private static long ReadMacOsPeakBytes()
     {
-        if (GetResourceUsage(CurrentProcessUsage, out var usage) != 0)
+        const int EmptyGetResourceUsage = 0;
+
+        if (GetResourceUsage(CurrentProcessUsage, out var usage) != EmptyGetResourceUsage)
         {
             throw new Win32Exception(Marshal.GetLastPInvokeError());
         }

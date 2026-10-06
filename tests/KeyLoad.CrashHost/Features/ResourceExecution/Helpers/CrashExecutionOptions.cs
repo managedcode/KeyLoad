@@ -1,7 +1,9 @@
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Core;
+using KeyLoad.Query;
 using KeyLoad.Replication;
+using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost;
@@ -9,6 +11,48 @@ namespace KeyLoad.CrashHost;
 /// <summary>Explicit validated native options composition for genuine test-owned engine and replica fixtures.</summary>
 internal static class CrashExecutionOptions
 {
+    internal static IOptions<NativeTextExecutionOptions> NativeText()
+    {
+        var settings = new NativeTextExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<MessagingExecutionOptions> Messaging()
+    {
+        var settings = new MessagingExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<GraphExecutionOptions> GraphExecution()
+    {
+        var settings = new GraphExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution()
+    {
+        var settings = new ChangeFeedExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution()
+    {
+        var settings = new TimeSeriesExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
+    internal static IOptions<QueryExecutionOptions> QueryExecution()
+    {
+        var settings = new QueryExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
+    }
+
     internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
     {
         var settings = configured ?? new ZoneTreePointCacheExecutionOptions();

@@ -4,6 +4,8 @@ namespace KeyLoad.Server;
 
 internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
 {
+    private const int RouteTemplateGetEndpointEmptyCount = 0;
+
     private const string ApiPrefix = "/v1";
     private const string McpPrefix = "/mcp";
     private const string AdmissionPath = "/v1/admin/admission";
@@ -60,7 +62,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next)
     }
 
     private static string RouteTemplate(HttpContext context) =>
-        context.GetEndpoint() is RouteEndpoint { RoutePattern.RawText: { Length: > 0 } template }
+        context.GetEndpoint() is RouteEndpoint { RoutePattern.RawText: { Length: > RouteTemplateGetEndpointEmptyCount } template }
             ? template
             : AdminDashboardProtocol.UnmatchedRoute;
 }

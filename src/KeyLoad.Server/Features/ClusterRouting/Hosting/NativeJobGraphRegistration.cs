@@ -8,6 +8,7 @@ namespace KeyLoad.Server;
 
 internal static class NativeJobGraphRegistration
 {
+    private const string ExistingPolicyRequired = "The native jobs graph requires the existing default-deny policy instance.";
     internal static Type ManagerType(IServiceCollection services)
         => services.Where(static descriptor => !descriptor.IsKeyedService)
             .Select(static descriptor => descriptor.ServiceType)
@@ -23,7 +24,7 @@ internal static class NativeJobGraphRegistration
             && value.ServiceType == typeof(GrainTransitionManager));
         if (descriptor.ImplementationInstance is not GrainTransitionManager existing)
         {
-            throw new InvalidOperationException("The native jobs graph requires the existing default-deny policy instance.");
+            throw new InvalidOperationException(ExistingPolicyRequired);
         }
         var graph = new DirectedGraph(allowSelfLoops: true);
         foreach (var edge in existing.GetPolicyEdges())

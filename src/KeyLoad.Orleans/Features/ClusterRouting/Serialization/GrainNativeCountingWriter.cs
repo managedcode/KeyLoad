@@ -20,6 +20,8 @@ internal sealed class GrainNativeCountingWriter : IBufferWriter<byte>, IDisposab
 
     public void Advance(int count)
     {
+        const int StartEmptyCount = 0;
+
         CheckAvailable();
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(count, scratch.Length);
@@ -29,7 +31,7 @@ internal sealed class GrainNativeCountingWriter : IBufferWriter<byte>, IDisposab
         }
 
         Length = checked(Length + count);
-        scratch.AsSpan(0, count).Clear();
+        scratch.AsSpan(StartEmptyCount, count).Clear();
     }
 
     public Memory<byte> GetMemory(int sizeHint = 0)

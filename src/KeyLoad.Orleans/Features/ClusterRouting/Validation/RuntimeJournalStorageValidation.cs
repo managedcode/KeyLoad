@@ -1,6 +1,6 @@
-using KeyLoad.Core;
 using System.Collections.Immutable;
 using System.Text;
+using KeyLoad.Core;
 
 namespace KeyLoad.Orleans;
 
@@ -17,7 +17,7 @@ internal static class RuntimeJournalStorageValidation
             return values.ToImmutable();
         }
 
-        var bytes = 0;
+        var bytes = RuntimeJournalStoragePolicy.InitialMetadataByteCount;
         foreach (var (key, value) in properties)
         {
             if (values.Count >= options.MaximumMetadataEntries)
@@ -47,7 +47,7 @@ internal static class RuntimeJournalStorageValidation
 
         var values = ImmutableArray.CreateBuilder<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var bytes = 0;
+        var bytes = RuntimeJournalStoragePolicy.InitialMetadataByteCount;
         foreach (var key in properties)
         {
             if (values.Count >= options.MaximumMetadataEntries)
@@ -79,8 +79,7 @@ internal static class RuntimeJournalStorageValidation
     {
         ValidatePropertyName(key, options);
         ArgumentNullException.ThrowIfNull(value);
-        if (value.StartsWith('$') || value.Length > options.MaximumNameBytes
-            || ByteCount(value) > options.MaximumNameBytes)
+        if (value.Length > options.MaximumNameBytes || ByteCount(value) > options.MaximumNameBytes)
         {
             Invalid();
         }
@@ -89,6 +88,8 @@ internal static class RuntimeJournalStorageValidation
     internal static void ValidateName(string value, RuntimeJournalOptions options)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length > options.MaximumNameBytes
+            || value.IndexOf(RuntimeJournalStoragePolicy.InvalidMetadataKeyCharacter, StringComparison.Ordinal)
+                > RuntimeJournalStoragePolicy.MissingCharacterIndex
             || ByteCount(value) > options.MaximumNameBytes)
         {
             Invalid();
@@ -97,7 +98,10 @@ internal static class RuntimeJournalStorageValidation
 
     private static void ValidatePropertyName(string key, RuntimeJournalOptions options)
     {
-        if (string.IsNullOrWhiteSpace(key) || key.StartsWith('$') || key.Length > options.MaximumNameBytes
+        if (string.IsNullOrWhiteSpace(key) || key.StartsWith(RuntimeJournalStoragePolicy.ProviderOwnedMetadataPrefix)
+            || key.IndexOf(RuntimeJournalStoragePolicy.InvalidMetadataKeyCharacter, StringComparison.Ordinal)
+                > RuntimeJournalStoragePolicy.MissingCharacterIndex
+            || key.Length > options.MaximumNameBytes
             || ByteCount(key) > options.MaximumNameBytes)
         {
             Invalid();
@@ -113,7 +117,7 @@ internal static class RuntimeJournalStorageValidation
         catch (EncoderFallbackException)
         {
             Invalid();
-            return 0;
+            return default;
         }
     }
 

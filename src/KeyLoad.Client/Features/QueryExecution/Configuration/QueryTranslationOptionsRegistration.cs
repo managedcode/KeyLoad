@@ -14,6 +14,8 @@ public static class QueryTranslationOptionsRegistration
     public static IServiceCollection AddKeyLoadQueryTranslationOptions(this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
         services.AddOptions<QueryTranslationOptions>()
             .Bind(configuration.GetSection(QueryTranslationOptions.SectionName))
             .Validate(options => options.IsValid(), QueryTranslationOptions.ValidationMessage)

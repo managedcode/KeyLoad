@@ -11,7 +11,9 @@ public sealed class AdmittedCommandInbox(CommandAdmissionGovernor governor) : IA
 
     private readonly Lock gate = new();
     private readonly CommandInboxLanes lanes = new();
-    private readonly SemaphoreSlim available = new(0);
+    private const int NoReadyEntries = 0;
+    private const int StopWakeCount = 1;
+    private readonly SemaphoreSlim available = new(NoReadyEntries, SignalCapacity(governor));
     private readonly TaskCompletionSource disposalCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly CommandAdmissionGovernor governor = governor ?? throw new ArgumentNullException(nameof(governor));
     private bool stopped;
@@ -19,6 +21,13 @@ public sealed class AdmittedCommandInbox(CommandAdmissionGovernor governor) : IA
     private bool disposeStarted;
     private bool disposed;
     private TaskCompletionSource? readerDrained;
+
+    private static int SignalCapacity(CommandAdmissionGovernor governor)
+    {
+        ArgumentNullException.ThrowIfNull(governor);
+        var configured = governor.Limits;
+        return (int)Math.Min(int.MaxValue, (long)configured.MaxCommands + configured.ReservedControlCommands + StopWakeCount);
+    }
 
     /// <summary>Reserves and queues an operation after validating its verified-principal identity.</summary>
     /// <param name="operation">The immutable operation to enqueue.</param>

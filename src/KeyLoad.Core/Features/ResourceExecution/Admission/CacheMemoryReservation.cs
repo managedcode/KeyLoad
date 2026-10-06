@@ -3,6 +3,9 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Returns one exact modeled charge to its owning node budget at most once.</summary>
 internal sealed class CacheMemoryReservation : ICacheMemoryReservation
 {
+    private const int SingleElementCount = 1;
+    private const int EmptyElementCount = 0;
+
     private readonly CacheMemoryBudget owner;
     private int released;
 
@@ -22,7 +25,7 @@ internal sealed class CacheMemoryReservation : ICacheMemoryReservation
     /// <inheritdoc />
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref released, 1) == 0)
+        if (Interlocked.Exchange(ref released, SingleElementCount) == EmptyElementCount)
         {
             owner.Release(Bytes, Entries);
         }

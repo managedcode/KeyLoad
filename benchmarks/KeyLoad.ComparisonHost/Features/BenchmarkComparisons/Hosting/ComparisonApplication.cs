@@ -1,9 +1,11 @@
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Composes the comparison workload, cancellation lifetime and report output.</summary>
+[KeyLoad.ConfigurationBinding]
 internal static class ComparisonApplication
 {
     /// <summary>Validates configuration, runs the existing comparison library and writes its reports.</summary>
@@ -16,28 +18,31 @@ internal static class ComparisonApplication
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, NativeComparisonExecutionRegistration.ConfigurationPath), optional: false);
         configuration.AddEnvironmentVariables();
         configuration.AddCommandLine(arguments);
-        var owner = new ComparisonTargetOwner(NativeComparisonExecutionRegistration.Read(configuration),
+        var startup = ComparisonStartupRegistration.Read(configuration).Value;
+        var executionOptions = NativeComparisonExecutionRegistration.Read(configuration);
+        var owner = new ComparisonTargetOwner(executionOptions,
             NativeComparisonExecutionRegistration.ReadLifecycle(configuration),
             NativeComparisonExecutionRegistration.ReadClient(configuration),
             NativeComparisonExecutionRegistration.ReadTranslation(configuration));
         ComparisonCancellationLifetime? cancellationLifetime = null;
         try
         {
-            cancellationLifetime = new ComparisonCancellationLifetime();
-            if (configuration[ComparisonWorkerSelection.TargetSetting] is not null)
+            cancellationLifetime = new ComparisonCancellationLifetime(executionOptions);
+            if (startup.Target is not null)
             {
                 return await IsolatedHostApplication.RunAsync(configuration, cancellationLifetime.Token);
             }
 
-            if (string.Equals(configuration[ComparisonHostConstants.Profile],
+            if (string.Equals(startup.Profile,
                     ComparisonHostConstants.TimeSeriesProfile, StringComparison.OrdinalIgnoreCase))
             {
                 return await TimeSeriesComparisonApplication.RunAsync(configuration, cancellationLifetime.Token);
             }
 
-            var settings = ComparisonHostSettings.Read(configuration);
+            var settingsOptions = ComparisonHostSettings.ReadOptions(configuration);
+            var settings = settingsOptions.Value;
             var targets = owner.CreateTargets(settings);
-            return await RunComparisonAsync(settings, targets, cancellationLifetime.Token);
+            return await RunComparisonAsync(settings, targets, cancellationLifetime.Token, executionOptions);
         }
         finally
         {
@@ -54,9 +59,9 @@ internal static class ComparisonApplication
     }
 
     private static async Task<int> RunComparisonAsync(ComparisonHostSettings settings,
-        KeyLoad.Comparisons.IComparisonTarget[] targets, CancellationToken cancellationToken)
+        KeyLoad.Comparisons.IComparisonTarget[] targets, CancellationToken cancellationToken, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
-        var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.Options, Console.WriteLine);
+        var runner = new KeyLoad.Comparisons.ComparisonRunner(settings.WorkloadOptions, executionOptions, Console.WriteLine);
         var report = await runner.RunAsync(targets, settings.SourceRevision, cancellationToken, settings.Storage);
         if (settings.ExecutionIdentity is { } identity)
         {
@@ -78,7 +83,7 @@ internal static class ComparisonApplication
     private sealed class ComparisonCancellationLifetime : IDisposable
     {
         private readonly System.Threading.Lock gate = new();
-        private readonly CancellationTokenSource source = new(TimeSpan.FromHours(ComparisonHostConstants.LifetimeHours));
+        private readonly CancellationTokenSource source;
         private readonly ConsoleCancelEventHandler handler;
         private readonly CancellationToken token;
         private bool closing;
@@ -87,8 +92,9 @@ internal static class ComparisonApplication
         private bool disposeRequested;
         private bool disposed;
 
-        internal ComparisonCancellationLifetime()
+        internal ComparisonCancellationLifetime(IOptions<NativeComparisonExecutionOptions> executionOptions)
         {
+            source = new(executionOptions.Value.HostLifetime);
             token = source.Token;
             handler = OnCancelKeyPress;
             try

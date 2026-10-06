@@ -8,9 +8,9 @@ internal static class SqlGraphSearchExecutor
         string principalId, SqlGraphSearchRequest request, QueryExecutionOptions execution, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
         budget.Check();
-        var graphRequest = SqlGraphSearchParser.Parse(request, database.Limits, budget, execution.MaximumParameters);
+        var graphRequest = SqlGraphSearchParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters, execution.SqlBudgetCheckInterval);
         budget.Check();
         return await search.GraphSearchAsync(principalId, graphRequest, cancellationToken).ConfigureAwait(false);
     }

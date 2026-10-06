@@ -8,6 +8,13 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine queries)
 {
+    private const string EventModelScanPath = "model-scan:events";
+    private const string QueueModelScanPath = "model-scan:queue-messages";
+    private const int EmptyElementCount = 0;
+    private const int InitialSequence = 0;
+    private const long NoRetainedBytesLong = 0L;
+    private const int NoRetainedBytes = 0;
+
     internal QueryPage Execute(string principalId, AstQueryRequest request, ReadExecutionBudget budget)
     {
         var query = request.Query;
@@ -24,13 +31,13 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var modelResource = ModelQueryPolicies.Rebase(resource);
         queries.Bind(principal, modelResource, request);
         var accessPath = source.Kind == ModelQuerySourceKind.Events
-            ? "model-scan:events" : "model-scan:queue-messages";
+            ? EventModelScanPath : QueueModelScanPath;
         if (query.Explain)
         {
             return BuildModelExplain(view, principal, request, source, modelResource, budget, accessPath);
         }
 
-        var prepared = new PreparedQuery(query, 0, query.Limit);
+        var prepared = new PreparedQuery(query, EmptyElementCount, query.Limit);
         database.VisitModelQueryRows(view, principal, request.Partition, modelResource, source, budget, false,
             document => ConsiderModelCandidate(document, request, prepared, budget));
         return BuildModelPage(principal, request, modelResource, prepared, budget, accessPath);
@@ -41,7 +48,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
     {
         database.VisitModelQueryRows(view, principal, request.Partition, resource, source,
             budget, true, static _ => { });
-        var row = new QueryRow(QueryEngine.ExplainId, 0, JsonSerializer.Serialize(new
+        var row = new QueryRow(QueryEngine.ExplainId, InitialSequence, JsonSerializer.Serialize(new
         {
             AccessPath = accessPath,
             ModelViews = true,
@@ -68,8 +75,8 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         PreparedQuery prepared, ReadExecutionBudget budget, string accessPath)
     {
         var rows = ImmutableArray.CreateBuilder<QueryRow>();
-        var resultBytes = 0L;
-        foreach (var row in prepared.Page(0, request.Query.Limit, budget))
+        var resultBytes = NoRetainedBytesLong;
+        foreach (var row in prepared.Page(NoRetainedBytes, request.Query.Limit, budget))
         {
             budget.Check();
             var projected = queries.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths);

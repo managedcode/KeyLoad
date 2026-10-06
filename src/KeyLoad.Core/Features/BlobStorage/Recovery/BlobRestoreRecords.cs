@@ -40,25 +40,34 @@ internal static class BlobRestoreFence
 
     internal static void RequireOpen(IKeyValueView view)
     {
+        const int MaxRecordsSingleItemCount = 1;
+        const int EmptyRecords = 0;
+
         var marker = BlobRecordReader.Get<BlobRestoreMarker>(view, MarkerKey);
         if (marker is not null)
         {
             Validate(marker);
             throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced);
         }
-        if (view.VisitRange(Accounts, 1, static (_, _) => false).Records != 0)
+        if (view.VisitRange(Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
         { throw BlobErrors.Corruption(); }
     }
 
     internal static void Validate(BlobRestoreMarker marker)
     {
+        const int ReservedBytesEmptyCount = 0;
+        const int ObjectKeysEmptyCount = 0;
+        const int VersionsEmptyCount = 0;
+        const int ActiveUploadsEmptyCount = 0;
+        const int ResourcesValidationBoundary = 0;
+
         BlobRecordReader.Version(marker.FormatVersion);
         if (!Enum.IsDefined(marker.Phase) || marker.SourceIncarnation == Guid.Empty
             || marker.TargetIncarnation == Guid.Empty || marker.SourceIncarnation == marker.TargetIncarnation
-            || marker.ReservedBytes is < 0 or > BlobLimits.StoreMaxReservedBytes
-            || marker.ObjectKeys is < 0 or > BlobLimits.StoreMaxObjectKeys
-            || marker.Versions is < 0 or > BlobLimits.StoreMaxVersions
-            || marker.ActiveUploads is < 0 or > BlobLimits.StoreMaxUploads || marker.Resources < 0)
+            || marker.ReservedBytes is < ReservedBytesEmptyCount or > BlobLimits.StoreMaxReservedBytes
+            || marker.ObjectKeys is < ObjectKeysEmptyCount or > BlobLimits.StoreMaxObjectKeys
+            || marker.Versions is < VersionsEmptyCount or > BlobLimits.StoreMaxVersions
+            || marker.ActiveUploads is < ActiveUploadsEmptyCount or > BlobLimits.StoreMaxUploads || marker.Resources < ResourcesValidationBoundary)
         { throw BlobErrors.Corruption(); }
         if (marker.ExclusiveCursor is { } cursor)
         {
@@ -80,10 +89,16 @@ internal static class BlobRestoreFence
 
     internal static BlobRef QuotaScope(ReadOnlySpan<byte> key, string space)
     {
+        const int PrefixComponentIndex = 0;
+        const int TenantComponentIndex = 1;
+        const int DatabaseComponentIndex = 2;
+        const int DomainComponentIndex = 3;
+        const int ResourceComponentIndex = 4;
+
         var parts = KeyCodec.Decode(key);
-        if (parts.Length != QuotaComponents || parts[0] is not string prefix || prefix != space
-            || parts[1] is not string tenant || parts[2] is not string database
-            || parts[3] is not string domain || parts[4] is not string resource)
+        if (parts.Length != QuotaComponents || parts[PrefixComponentIndex] is not string prefix || prefix != space
+            || parts[TenantComponentIndex] is not string tenant || parts[DatabaseComponentIndex] is not string database
+            || parts[DomainComponentIndex] is not string domain || parts[ResourceComponentIndex] is not string resource)
         { throw BlobErrors.Corruption(); }
         var blob = new BlobRef(new(tenant, database, domain, BlobListAccumulator.ScopeId), resource, BlobListAccumulator.ScopeId);
         BlobKeys.Validate(blob);

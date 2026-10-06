@@ -8,11 +8,9 @@ internal static class ZoneTreeSnapshotUpgradeIO
     private const int FirstBufferByte = 0;
     private const int EndOfStreamRead = 0;
 
-    private const int BufferBytes = ZoneTreePersistenceFormat.FileBufferBytes;
-
-    internal static T WithSource<T>(string path, long maximumBytes, Func<FileStream, T> operation)
+    internal static T WithSource<T>(string path, long maximumBytes, int fileBufferBytes, Func<FileStream, T> operation)
     {
-        using var lease = ZoneTreeSnapshotUpgradeFileLease.OpenSource(path);
+        using var lease = ZoneTreeSnapshotUpgradeFileLease.OpenSource(path, fileBufferBytes);
         try
         {
             RequireSnapshotSize(lease.Stream, maximumBytes);
@@ -25,12 +23,12 @@ internal static class ZoneTreeSnapshotUpgradeIO
         }
     }
 
-    internal static byte[] DigestFile(FileStream input, long maximumBytes)
+    internal static byte[] DigestFile(FileStream input, long maximumBytes, int fileBufferBytes)
     {
         RequireSnapshotSize(input, maximumBytes);
         input.Position = FileStartPosition;
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = new byte[BufferBytes];
+        var buffer = new byte[fileBufferBytes];
         int read;
         while ((read = input.Read(buffer, FirstBufferByte, buffer.Length)) != EndOfStreamRead)
         { digest.AppendData(buffer, FirstBufferByte, read); }

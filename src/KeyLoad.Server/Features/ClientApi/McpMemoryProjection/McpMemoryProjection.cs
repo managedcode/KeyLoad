@@ -1,50 +1,46 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Server;
 
 /// <summary>Projects conservative retained-memory peaks for MCP ingress, decoding, operation and native reply stages.</summary>
-internal static class McpMemoryProjection
+internal sealed class McpMemoryProjection
 {
-    private const int MaximumAuthenticationBytes = 16 * 1024 * 1024;
-    private const int MaximumDataReplyBytes = 16 * 1024 * 1024;
-    private const int MaximumRequestCapacityBytes = 32 * 1024 * 1024;
-    private const int MaximumCanonicalPayloadBytes = 32 * 1024 * 1024;
-    private const int MaximumControlReplyBytes = 64 * 1024;
-    private const int MaximumTokens = 131_072;
-    private const int MaximumProperties = 32_768;
-    private const int MaximumDepth = 64;
-    private const int MaximumReplyResultDepth = 61;
-    private const int IngressScratchBytes = 16_384;
-    private const int SafeFailureBytes = 256 * 1024;
-    private const int NativeEnvelopeBytes = 64 * 1024;
-    private const int NativeEnvelopeItems = 1_024;
+    private readonly McpExecutionOptions settings;
     private const int WorstShapeTokenSlack = 1;
     private const int MinimumPropertyWireBytes = 4;
     private const long InputExpansionMultiplier = 6;
+
+    internal McpMemoryProjection(IOptions<McpExecutionOptions> options)
+    {
+        settings = options.Value;
+        settings.Validate();
+    }
 
     /// <summary>Charges body capacity, parser metadata, worst bounded shape, authentication bytes and safe failure space.</summary>
     /// <param name="capacity">The complete private request-body capacity.</param>
     /// <returns>A conservative retained-byte charge before framing and authentication.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The capacity is negative or exceeds the configured Kestrel request ceiling.</exception>
-    internal static long Ingress(int capacity)
+    internal long Ingress(int capacity)
     {
-        ValidateBound(capacity, MaximumRequestCapacityBytes, nameof(capacity));
-        var tokens = Math.Min((long)capacity + WorstShapeTokenSlack, MaximumTokens);
-        var properties = Math.Min(capacity / MinimumPropertyWireBytes, MaximumProperties);
-        return checked(capacity + IngressScratchBytes +
+        ValidateBound(capacity, settings.MaximumRequestCapacityBytes, nameof(capacity));
+        var tokens = Math.Min((long)capacity + WorstShapeTokenSlack, settings.MaximumTokens);
+        var properties = Math.Min(capacity / MinimumPropertyWireBytes, settings.MaximumProperties);
+        return checked(capacity + settings.IngressScratchBytes +
             McpMemoryProjectionComponents.Metadata(capacity, tokens) +
             McpMemoryProjectionComponents.Structure(capacity, tokens, properties) +
             McpMemoryProjectionComponents.Escaping(capacity) +
-            MaximumAuthenticationBytes + SafeFailureBytes);
+            settings.MaximumAuthenticationBytes + settings.SafeFailureBytes);
     }
 
     /// <summary>Precharges the strict framing inspector for the worst shape that fits actual bounded bytes.</summary>
     /// <param name="bytes">The bounded UTF-8 buffer capacity to inspect.</param>
     /// <returns>The complete named inspection components before the scanner allocates metadata or decoded strings.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The byte capacity is negative or exceeds the Kestrel frame ceiling.</exception>
-    internal static long Inspection(int bytes)
+    internal long Inspection(int bytes)
     {
-        ValidateBound(bytes, MaximumRequestCapacityBytes, nameof(bytes));
-        var tokens = Math.Min((long)bytes + WorstShapeTokenSlack, MaximumTokens);
-        var properties = Math.Min(bytes / MinimumPropertyWireBytes, MaximumProperties);
+        ValidateBound(bytes, settings.MaximumRequestCapacityBytes, nameof(bytes));
+        var tokens = Math.Min((long)bytes + WorstShapeTokenSlack, settings.MaximumTokens);
+        var properties = Math.Min(bytes / MinimumPropertyWireBytes, settings.MaximumProperties);
         return checked(McpMemoryProjectionComponents.Metadata(bytes, tokens) +
             McpMemoryProjectionComponents.Structure(bytes, tokens, properties) +
             McpMemoryProjectionComponents.Escaping(bytes));
@@ -55,10 +51,10 @@ internal static class McpMemoryProjection
     /// <param name="authBytes">The actual canonical authentication reply length.</param>
     /// <returns>The ingress charge, actual reply owner and framing-inspection peak.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Either capacity is negative or exceeds its accepted ceiling.</exception>
-    internal static long AuthenticationScan(int capacity, int authBytes)
+    internal long AuthenticationScan(int capacity, int authBytes)
     {
-        ValidateBound(capacity, MaximumRequestCapacityBytes, nameof(capacity));
-        ValidateBound(authBytes, MaximumAuthenticationBytes, nameof(authBytes));
+        ValidateBound(capacity, settings.MaximumRequestCapacityBytes, nameof(capacity));
+        ValidateBound(authBytes, settings.MaximumAuthenticationBytes, nameof(authBytes));
         return checked(Ingress(capacity) + authBytes + Inspection(authBytes));
     }
 
@@ -67,10 +63,10 @@ internal static class McpMemoryProjection
     /// <param name="authBytes">The actual bounded authentication reply byte count.</param>
     /// <param name="authShape">The inspected authentication reply token and property counts.</param>
     /// <returns>The ingress charge plus authentication document and decoded-string ownership.</returns>
-    internal static long Authentication(int capacity, int authBytes, McpFrameShape authShape)
+    internal long Authentication(int capacity, int authBytes, McpFrameShape authShape)
     {
-        ValidateBound(capacity, MaximumRequestCapacityBytes, nameof(capacity));
-        ValidateBound(authBytes, MaximumAuthenticationBytes, nameof(authBytes));
+        ValidateBound(capacity, settings.MaximumRequestCapacityBytes, nameof(capacity));
+        ValidateBound(authBytes, settings.MaximumAuthenticationBytes, nameof(authBytes));
         ValidateShape(authShape, nameof(authShape));
         return checked(Ingress(capacity) + authBytes +
             McpMemoryProjectionComponents.Metadata(authBytes, authShape.TokenCount) +
@@ -83,10 +79,10 @@ internal static class McpMemoryProjection
     /// <param name="replyBytes">The actual bounded canonical result byte length.</param>
     /// <returns>The held charge plus all worst-shape inspection components for the result.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The held charge is negative or reply exceeds its canonical ceiling.</exception>
-    internal static long ReplyScan(long held, int replyBytes)
+    internal long ReplyScan(long held, int replyBytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(held);
-        ValidateBound(replyBytes, MaximumDataReplyBytes, nameof(replyBytes));
+        ValidateBound(replyBytes, settings.MaximumDataReplyBytes, nameof(replyBytes));
         return checked(held + Inspection(replyBytes));
     }
 
@@ -95,8 +91,12 @@ internal static class McpMemoryProjection
     /// <param name="maximumReplyBytes">The canonical operation reply ceiling.</param>
     /// <param name="protocolReply">Whether native protocol/SSE reply capacity must be charged before dispatch.</param>
     /// <returns>The complete conservative byte charge held before invoking the native operation handler.</returns>
-    internal static long BeforeOperation(McpInputMemory input, int maximumReplyBytes, bool protocolReply)
+    internal long BeforeOperation(McpInputMemory input, int maximumReplyBytes, bool protocolReply)
     {
+        const long MaximumPayloadBytesScaleFactor = 2L;
+        const int HeldEmptyCount = 0;
+        const int BeforeOperationAbsentCount = 0;
+
         ValidateInput(input, maximumReplyBytes);
         var ingressAndPrincipal = Authentication(input.Capacity, input.AuthenticationBytes, input.AuthenticationShape);
         var nativeUntypedMetadata = McpMemoryProjectionComponents.Metadata(input.WireBytes, input.Shape.TokenCount);
@@ -111,11 +111,11 @@ internal static class McpMemoryProjection
         var canonicalEscaping = McpMemoryProjectionComponents.Escaping(input.MaximumPayloadBytes);
         var canonicalDtoStructure = McpMemoryProjectionComponents.Structure(input.MaximumPayloadBytes,
             input.Shape.TokenCount, input.Shape.PropertyCount);
-        var canonicalBufferAndReturnedCopy = checked(2L * input.MaximumPayloadBytes);
+        var canonicalBufferAndReturnedCopy = checked(MaximumPayloadBytesScaleFactor * input.MaximumPayloadBytes);
         var operationReply = maximumReplyBytes;
-        var nativeValidationCapacity = checked((long)maximumReplyBytes + NativeEnvelopeBytes);
-        var controlReplyPeak = protocolReply ? AfterReply(0, MaximumControlReplyBytes,
-            WorstShape(MaximumControlReplyBytes)) : 0;
+        var nativeValidationCapacity = checked((long)maximumReplyBytes + settings.EnvelopeAllowanceBytes);
+        var controlReplyPeak = protocolReply ? AfterReply(HeldEmptyCount, settings.MaximumControlReplyBytes,
+            WorstShape(settings.MaximumControlReplyBytes)) : BeforeOperationAbsentCount;
 
         return checked(ingressAndPrincipal + nativeUntypedMetadata + nativeUntypedStructure +
             typedParameterMetadata + typedParameterStructure + nativePayloadWriter + canonicalWriter +
@@ -128,42 +128,45 @@ internal static class McpMemoryProjection
     /// <param name="replyBytes">The actual bounded canonical reply length.</param>
     /// <param name="replyShape">The inspected reply token and property counts.</param>
     /// <returns>The original reservation plus wrapper, metadata, DOM, writer and escaping peaks.</returns>
-    internal static long AfterReply(long held, int replyBytes, McpFrameShape replyShape)
+    internal long AfterReply(long held, int replyBytes, McpFrameShape replyShape)
     {
+        const int WriterScaleFactor = 2;
+        const int WrapperCapacityScaleFactor = 2;
+
         ArgumentOutOfRangeException.ThrowIfNegative(held);
-        ValidateBound(replyBytes, MaximumDataReplyBytes, nameof(replyBytes));
+        ValidateBound(replyBytes, settings.MaximumDataReplyBytes, nameof(replyBytes));
         ValidateShape(replyShape, nameof(replyShape));
 
-        var wrapperCapacity = checked((long)replyBytes + NativeEnvelopeBytes);
-        var encodedUpper = checked(InputExpansionMultiplier * wrapperCapacity + NativeEnvelopeBytes);
-        var wrapperTokens = checked((long)replyShape.TokenCount + NativeEnvelopeItems);
-        var wrapperProperties = checked((long)replyShape.PropertyCount + NativeEnvelopeItems);
+        var wrapperCapacity = checked((long)replyBytes + settings.EnvelopeAllowanceBytes);
+        var encodedUpper = checked(InputExpansionMultiplier * wrapperCapacity + settings.EnvelopeAllowanceBytes);
+        var wrapperTokens = checked((long)replyShape.TokenCount + settings.NativeEnvelopeItems);
+        var wrapperProperties = checked((long)replyShape.PropertyCount + settings.NativeEnvelopeItems);
         var nativeMetadata = McpMemoryProjectionComponents.Metadata(encodedUpper, wrapperTokens);
         var nativeStructure = McpMemoryProjectionComponents.Structure(encodedUpper, wrapperTokens, wrapperProperties);
         var nativeWriter = McpMemoryProjectionComponents.Writer(wrapperCapacity, encodedUpper);
         var escaping = McpMemoryProjectionComponents.Escaping(encodedUpper);
-        var sseWriters = checked(2 * McpMemoryProjectionComponents.Writer(encodedUpper, encodedUpper));
+        var sseWriters = checked(WriterScaleFactor * McpMemoryProjectionComponents.Writer(encodedUpper, encodedUpper));
 
-        var simultaneousWrapperOwners = checked(2 * wrapperCapacity + encodedUpper);
+        var simultaneousWrapperOwners = checked(WrapperCapacityScaleFactor * wrapperCapacity + encodedUpper);
         return checked(held + simultaneousWrapperOwners + nativeMetadata + nativeStructure + nativeWriter + escaping + sseWriters);
     }
 
-    private static void ValidateInput(McpInputMemory input, int maximumReplyBytes)
+    private void ValidateInput(McpInputMemory input, int maximumReplyBytes)
     {
-        ValidateBound(input.Capacity, MaximumRequestCapacityBytes, nameof(input.Capacity));
+        ValidateBound(input.Capacity, settings.MaximumRequestCapacityBytes, nameof(input.Capacity));
         ValidateBound(input.WireBytes, input.Capacity, nameof(input.WireBytes));
-        ValidateBound(input.MaximumPayloadBytes, MaximumCanonicalPayloadBytes, nameof(input.MaximumPayloadBytes));
-        ValidateBound(input.AuthenticationBytes, MaximumAuthenticationBytes, nameof(input.AuthenticationBytes));
-        ValidateBound(maximumReplyBytes, MaximumDataReplyBytes, nameof(maximumReplyBytes));
+        ValidateBound(input.MaximumPayloadBytes, settings.MaximumCanonicalPayloadBytes, nameof(input.MaximumPayloadBytes));
+        ValidateBound(input.AuthenticationBytes, settings.MaximumAuthenticationBytes, nameof(input.AuthenticationBytes));
+        ValidateBound(maximumReplyBytes, settings.MaximumDataReplyBytes, nameof(maximumReplyBytes));
         ValidateShape(input.Shape, nameof(input.Shape));
         ValidateShape(input.AuthenticationShape, nameof(input.AuthenticationShape));
     }
 
-    private static McpFrameShape WorstShape(int bytes) => new(
-        (int)Math.Min((long)bytes + WorstShapeTokenSlack, MaximumTokens),
-        Math.Min(bytes / MinimumPropertyWireBytes, MaximumProperties), MaximumReplyResultDepth);
+    private McpFrameShape WorstShape(int bytes) => new(
+        (int)Math.Min((long)bytes + WorstShapeTokenSlack, settings.MaximumTokens),
+        Math.Min(bytes / MinimumPropertyWireBytes, settings.MaximumProperties), settings.MaximumReplyDepth);
 
-    private static long InputExpansion(int wireBytes) => checked(InputExpansionMultiplier * wireBytes + NativeEnvelopeBytes);
+    private long InputExpansion(int wireBytes) => checked(InputExpansionMultiplier * wireBytes + settings.EnvelopeAllowanceBytes);
 
     private static void ValidateBound(int value, int maximum, string parameterName)
     {
@@ -171,15 +174,15 @@ internal static class McpMemoryProjection
         ArgumentOutOfRangeException.ThrowIfGreaterThan(value, maximum, parameterName);
     }
 
-    private static void ValidateShape(McpFrameShape shape, string parameterName)
+    private void ValidateShape(McpFrameShape shape, string parameterName)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(shape.TokenCount, parameterName);
         ArgumentOutOfRangeException.ThrowIfNegative(shape.PropertyCount, parameterName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.TokenCount, MaximumTokens, parameterName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.PropertyCount, MaximumProperties, parameterName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.TokenCount, settings.MaximumTokens, parameterName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.PropertyCount, settings.MaximumProperties, parameterName);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.PropertyCount, shape.TokenCount, parameterName);
         ArgumentOutOfRangeException.ThrowIfNegative(shape.Depth, parameterName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.Depth, MaximumDepth, parameterName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(shape.Depth, settings.MaximumDepth, parameterName);
     }
 }
 
@@ -208,11 +211,13 @@ internal static class McpMemoryProjectionComponents
     /// <returns>The conservative metadata byte charge.</returns>
     internal static long Metadata(long bytes, long tokens)
     {
+        const int RoundCapacityScaleFactor = 2;
+
         ArgumentOutOfRangeException.ThrowIfNegative(bytes);
         ArgumentOutOfRangeException.ThrowIfNegative(tokens);
         var arrayCapacity = Math.Max(checked(bytes + MetadataEntryBytes),
             checked(MetadataPerTokenBytes * (tokens + MetadataCompletionEntries)));
-        return checked(2 * RoundCapacity(arrayCapacity) + MetadataPerTokenBytes * tokens + MetadataBaseBytes);
+        return checked(RoundCapacityScaleFactor * RoundCapacity(arrayCapacity) + MetadataPerTokenBytes * tokens + MetadataBaseBytes);
     }
 
     /// <summary>Projects native writer growth, maximum size hint and old/new buffer overlap.</summary>

@@ -81,7 +81,7 @@ internal sealed class NativeQueryCursorTests
     {
         using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
-        var query = new AstQueryRequest(fixture.Partition, new SqlParser(LiveSql, fixture.Database.Limits).Parse());
+        var query = new AstQueryRequest(fixture.Partition, new SqlParser(LiveSql, UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse());
         var snapshot = engine.StartLiveQuery(Root, new(query));
         var claims = fixture.Database.Verify<LiveCursorClaims>(snapshot.Cursor);
         await Assert.That(NativeSerialization.Deserialize<LiveCursorClaims>(NativeSerialization.Serialize(claims))).IsEqualTo(claims);

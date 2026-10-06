@@ -38,6 +38,7 @@ public sealed class MagicRuntimeStringAnalyzer : DiagnosticAnalyzer
     {
         if (!CodeQualityAssemblyNames.IsProduction(context.Compilation.AssemblyName) ||
             LiteralDeclarationOwnership.IsNamedConstant(context.Node) ||
+            LiteralDeclarationOwnership.IsAssemblyIdentity(context) ||
             LiteralDeclarationOwnership.IsOptionsDefault(context) ||
             context.Node is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression) &&
             literal.Token.ValueText.Length > 0 && MachineKeyLiteralClassifier.IsMachineKey(context, literal))

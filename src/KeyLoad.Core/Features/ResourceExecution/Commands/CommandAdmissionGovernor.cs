@@ -5,6 +5,9 @@ namespace KeyLoad.Core;
 /// <summary>Reserves bounded node, tenant, principal, and retained-byte capacity for commands.</summary>
 public sealed class CommandAdmissionGovernor
 {
+    private const long Utf16RetainedCharacterWidth = 2L;
+    private const int AdjacentElementOffset = 1;
+
     private readonly Lock gate = new();
     private readonly Dictionary<(bool Control, string Id), int> tenants = [];
     private readonly Dictionary<(bool Control, string Id), int> principals = [];
@@ -16,29 +19,68 @@ public sealed class CommandAdmissionGovernor
     private const string ControlPayloadLimitDetail = "The control command exceeds its reserved byte budget.";
     private const string AdmissionLimitDetail = "The node, tenant or principal command admission budget is exhausted.";
     private const int EnvelopeOverheadBytes = 4_096;
+    private const int MinimumPositiveCapacity = 1;
+    private const string DerivedPoolHasNoCommandConfiguration = "An HTTP admission pool has HTTP configuration rather than command configuration.";
+    private readonly CommandAdmissionLimits? configuredLimits;
+    private readonly int maxCommands;
+    private readonly long maxRetainedBytes;
+    private readonly int maxTenantCommands;
+    private readonly int maxPrincipalCommands;
+    private readonly int reservedControlCommands;
+    private readonly long reservedControlBytes;
+    private readonly int maxControlPayloadBytes;
+    private readonly int maxTenantControlCommands;
+    private readonly int maxPrincipalControlCommands;
 
     /// <summary>Gets the immutable command admission limits used by this governor.</summary>
-    public CommandAdmissionLimits Limits { get; }
+    public CommandAdmissionLimits Limits => configuredLimits ?? throw new InvalidOperationException(DerivedPoolHasNoCommandConfiguration);
 
     /// <summary>Creates a governor with validated limits.</summary>
     /// <param name="options">Centrally validated node-local limits, frozen for this admission owner.</param>
     public CommandAdmissionGovernor(IOptions<CommandAdmissionLimits> options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        Limits = options.Value;
-        Limits.Validate();
+        configuredLimits = options.Value;
+        configuredLimits.Validate();
+        maxCommands = configuredLimits.MaxCommands;
+        maxRetainedBytes = configuredLimits.MaxRetainedBytes;
+        maxTenantCommands = configuredLimits.MaxTenantCommands;
+        maxPrincipalCommands = configuredLimits.MaxPrincipalCommands;
+        reservedControlCommands = configuredLimits.ReservedControlCommands;
+        reservedControlBytes = configuredLimits.ReservedControlBytes;
+        maxControlPayloadBytes = configuredLimits.MaxControlPayloadBytes;
+        maxTenantControlCommands = configuredLimits.MaxTenantControlCommands;
+        maxPrincipalControlCommands = configuredLimits.MaxPrincipalControlCommands;
     }
 
-    private CommandAdmissionGovernor(CommandAdmissionLimits validatedHttpLimits)
+    private CommandAdmissionGovernor(int maxCommands, long maxRetainedBytes, int maxTenantCommands,
+        int maxPrincipalCommands, int reservedControlCommands, long reservedControlBytes,
+        int maxControlPayloadBytes, int maxTenantControlCommands, int maxPrincipalControlCommands)
     {
-        Limits = validatedHttpLimits;
+        if (maxCommands < MinimumPositiveCapacity || maxRetainedBytes < MinimumPositiveCapacity
+            || maxTenantCommands < MinimumPositiveCapacity || maxPrincipalCommands < MinimumPositiveCapacity
+            || reservedControlCommands < MinimumPositiveCapacity || reservedControlBytes < MinimumPositiveCapacity
+            || maxControlPayloadBytes < MinimumPositiveCapacity || maxTenantControlCommands < MinimumPositiveCapacity
+            || maxPrincipalControlCommands < MinimumPositiveCapacity)
+        {
+            throw new ArgumentException(CommandAdmissionLimits.ValidationMessage);
+        }
+        this.maxCommands = maxCommands;
+        this.maxRetainedBytes = maxRetainedBytes;
+        this.maxTenantCommands = maxTenantCommands;
+        this.maxPrincipalCommands = maxPrincipalCommands;
+        this.reservedControlCommands = reservedControlCommands;
+        this.reservedControlBytes = reservedControlBytes;
+        this.maxControlPayloadBytes = maxControlPayloadBytes;
+        this.maxTenantControlCommands = maxTenantControlCommands;
+        this.maxPrincipalControlCommands = maxPrincipalControlCommands;
     }
 
-    internal static CommandAdmissionGovernor CreateDerivedHttpPool(CommandAdmissionLimits limits)
-    {
-        limits.Validate();
-        return new(limits);
-    }
+    internal static CommandAdmissionGovernor CreateDerivedHttpPool(int maxCommands, long maxRetainedBytes,
+        int maxTenantCommands, int maxPrincipalCommands, int reservedControlCommands, long reservedControlBytes,
+        int maxControlPayloadBytes, int maxTenantControlCommands, int maxPrincipalControlCommands)
+        => new(maxCommands, maxRetainedBytes, maxTenantCommands, maxPrincipalCommands, reservedControlCommands,
+            reservedControlBytes, maxControlPayloadBytes, maxTenantControlCommands, maxPrincipalControlCommands);
 
     /// <summary>Returns whether an operation uses the reserved control lane.</summary>
     /// <param name="kind">The operation kind to classify.</param>
@@ -65,7 +107,7 @@ public sealed class CommandAdmissionGovernor
 
         var bytes = CalculateRetainedBytes(payloadBytes, payloadCharacters);
         var control = IsControl(kind);
-        if (control && payloadBytes > Limits.MaxControlPayloadBytes)
+        if (control && payloadBytes > maxControlPayloadBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, ControlPayloadLimitDetail);
         }
@@ -101,17 +143,17 @@ public sealed class CommandAdmissionGovernor
     }
 
     private static long CalculateRetainedBytes(int payloadBytes, int payloadCharacters)
-        => checked(payloadCharacters * 2L + payloadBytes * 2L + EnvelopeOverheadBytes);
+        => checked(payloadCharacters * Utf16RetainedCharacterWidth + payloadBytes * Utf16RetainedCharacterWidth + EnvelopeOverheadBytes);
 
     private void EnsureCapacity(bool control, long bytes, (bool Control, string Id) tenantKey,
         (bool Control, string Id) principalKey)
     {
         var count = control ? controlCommands : commands;
         var used = control ? controlRetainedBytes : retainedBytes;
-        var maxCount = control ? Limits.ReservedControlCommands : Limits.MaxCommands;
-        var maxBytes = control ? Limits.ReservedControlBytes : Limits.MaxRetainedBytes;
-        var maxTenant = control ? Limits.MaxTenantControlCommands : Limits.MaxTenantCommands;
-        var maxPrincipal = control ? Limits.MaxPrincipalControlCommands : Limits.MaxPrincipalCommands;
+        var maxCount = control ? reservedControlCommands : maxCommands;
+        var maxBytes = control ? reservedControlBytes : maxRetainedBytes;
+        var maxTenant = control ? maxTenantControlCommands : maxTenantCommands;
+        var maxPrincipal = control ? maxPrincipalControlCommands : maxPrincipalCommands;
         if (count >= maxCount || bytes > maxBytes - used || tenants.GetValueOrDefault(tenantKey) >= maxTenant
             || principals.GetValueOrDefault(principalKey) >= maxPrincipal)
         {
@@ -132,8 +174,8 @@ public sealed class CommandAdmissionGovernor
             commands++;
             retainedBytes += bytes;
         }
-        tenants[tenantKey] = tenants.GetValueOrDefault(tenantKey) + 1;
-        principals[principalKey] = principals.GetValueOrDefault(principalKey) + 1;
+        tenants[tenantKey] = tenants.GetValueOrDefault(tenantKey) + AdjacentElementOffset;
+        principals[principalKey] = principals.GetValueOrDefault(principalKey) + AdjacentElementOffset;
     }
 
     private void RemoveReservation(CommandAdmissionLease lease)
@@ -152,7 +194,7 @@ public sealed class CommandAdmissionGovernor
 
     private static void Decrement(Dictionary<(bool Control, string Id), int> scopes, (bool Control, string Id) key)
     {
-        if (scopes[key] == 1)
+        if (scopes[key] == AdjacentElementOffset)
         {
             scopes.Remove(key);
         }

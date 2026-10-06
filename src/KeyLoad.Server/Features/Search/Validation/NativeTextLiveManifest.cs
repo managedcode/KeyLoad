@@ -4,6 +4,8 @@ internal static class NativeTextLiveManifest
 {
     internal static bool Matches(NativeTextGeneration generation, NativeTextManifest manifest)
     {
+        const int IndexInitialValue = 0;
+
         var records = generation.Records;
         var files = generation.Files;
         if (manifest.Scope != generation.Scope || records.Count != manifest.Records.Length
@@ -11,14 +13,14 @@ internal static class NativeTextLiveManifest
         {
             return false;
         }
-        for (var index = 0; index < records.Count; index++)
+        for (var index = IndexInitialValue; index < records.Count; index++)
         {
             if (records[index] != manifest.Records[index])
             {
                 return false;
             }
         }
-        for (var index = 0; index < files.Length; index++)
+        for (var index = IndexInitialValue; index < files.Length; index++)
         {
             var expected = files[index];
             var actual = manifest.Files[index];

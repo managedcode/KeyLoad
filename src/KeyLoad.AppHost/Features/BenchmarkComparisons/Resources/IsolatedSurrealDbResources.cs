@@ -2,6 +2,10 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedSurrealDbResources
 {
+    private const string SurrealBindAddress = "0.0.0.0:8000";
+    private const string SurrealStorageAddress = "rocksdb:/data/benchmark.db";
+    private const string ContainerUserArgument = "--user";
+
     private const string Target = "SurrealDB";
     private const string Name = "isolated-surrealdb";
     private const string Image = "surrealdb/surrealdb";
@@ -45,11 +49,11 @@ internal static class IsolatedSurrealDbResources
             .WithEnvironment(UserEnvironment, User)
             .WithEnvironment(PasswordEnvironment, password)
             .WithHttpEndpoint(targetPort: Port, name: Endpoint)
-            .WithArgs(ResultText, AddResultText, "0.0.0.0:8000", "rocksdb:/data/benchmark.db")
+            .WithArgs(ResultText, AddResultText, SurrealBindAddress, SurrealStorageAddress)
             .WithHttpHealthCheck(PathText);
         if (ClusterContainerUser.Resolve(context.Builder) is { } user)
         {
-            node.WithContainerRuntimeArgs("--user", user);
+            node.WithContainerRuntimeArgs(ContainerUserArgument, user);
         }
 
         context.BindSetting(nameof(User), User);

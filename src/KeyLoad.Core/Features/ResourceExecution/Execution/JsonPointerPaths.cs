@@ -3,6 +3,10 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Preserves bounded RFC 6901 pointer encoding and decoding for shared field operations.</summary>
 internal static class JsonPointerPaths
 {
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int FirstElementIndex = 0;
+
     private const int MaximumCharacters = 1_024;
     private const char Separator = '/';
     private const char Escape = '~';
@@ -18,7 +22,7 @@ internal static class JsonPointerPaths
     internal static string[] Parse(string pointer)
     {
         ArgumentNullException.ThrowIfNull(pointer);
-        if (pointer.Length == 0)
+        if (pointer.Length == EmptyElementCount)
         {
             return [];
         }
@@ -26,7 +30,7 @@ internal static class JsonPointerPaths
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPointer);
         }
-        var parts = pointer[1..].Split(Separator);
+        var parts = pointer[AdjacentElementOffset..].Split(Separator);
         foreach (var part in parts)
         {
             ValidateEscaping(part);
@@ -45,7 +49,7 @@ internal static class JsonPointerPaths
 
     private static void ValidateEscaping(string part)
     {
-        for (var index = 0; index < part.Length; index++)
+        for (var index = FirstElementIndex; index < part.Length; index++)
         {
             if (part[index] == Escape && (++index == part.Length
                     || part[index] is not (EscapedTildeCode or EscapedSeparatorCode)))

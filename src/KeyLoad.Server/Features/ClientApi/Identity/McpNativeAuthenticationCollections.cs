@@ -4,15 +4,17 @@ using KeyLoad.Features.InternalSerialization;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, CancellationToken cancellationToken)
+internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, CancellationToken cancellationToken,
+    IOptions<McpExecutionOptions> options)
 {
     private const uint FirstField = 0;
     private const uint NextField = 1;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
-    private readonly McpAuthenticationProjection projection = new(enforceMcpBounds);
+    private readonly McpAuthenticationProjection projection = new(enforceMcpBounds, options);
 
     internal McpFrameShape Array<T, TInput>(ref Reader<TInput> reader, uint delta) where T : class
     {
@@ -27,6 +29,10 @@ internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, 
 
     private McpFrameShape Values<T, TInput>(ref Reader<TInput> reader, Field field) where T : class
     {
+        const int CountValidationBoundary = 0;
+        const int IndexInitialValue = 0;
+        const int EmptyIndex = 0;
+
         cancellationToken.ThrowIfCancellationRequested();
         if (field.IsReference)
         {
@@ -45,13 +51,13 @@ internal sealed class McpNativeAuthenticationCollections(bool enforceMcpBounds, 
         McpAuthenticationNativeFields.Require(countField.HasFieldId && countField.FieldIdDelta == FirstField
             && (countField.FieldType is null || countField.FieldType == typeof(uint)));
         var count = UInt32Codec.ReadValue(ref reader, countField);
-        McpAuthenticationNativeFields.Require(count > 0);
+        McpAuthenticationNativeFields.Require(count > CountValidationBoundary);
         projection.RequireCount<T>(count);
         reader.EnsureAvailable(count);
-        for (uint index = 0; index < count; index++)
+        for (uint index = IndexInitialValue; index < count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var item = McpAuthenticationNativeFields.Field(ref reader, index == 0 ? NextField : FirstField, typeof(T));
+            var item = McpAuthenticationNativeFields.Field(ref reader, index == EmptyIndex ? NextField : FirstField, typeof(T));
             var child = typeof(T) == typeof(string) ? String(ref reader, item, nullable: false) : Grant(ref reader, item);
             shape = projection.Add(shape, child);
         }

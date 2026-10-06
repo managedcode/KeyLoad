@@ -13,7 +13,7 @@ internal sealed class PartitionQueryCancellationTests
         using var database = PartitionQueryTestSupport.Create();
         SeedRows(database);
         using var cancellation = new CancellationTokenSource();
-        var budget = new ReadExecutionBudget(database.Database.Limits, cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var outcome = PartitionQueryCancellationRun.Execute(database, engine, cancellation, budget);
 

@@ -30,9 +30,9 @@ internal sealed class ReadBudgetAllocationTests
         fixture.Store.Commit((tx, _) => { tx.Put(key, new byte[LargeValueBytes]); return true; });
         var limits = new DatabaseLimits { MaxQueryReadBytes = SmallReadBudget };
         var token = TestContext.Current!.Execution.CancellationToken;
-        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(limits, cancellationToken: token).Read(view, key)));
+        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token).Read(view, key)));
 
-        var budget = new ReadExecutionBudget(limits, cancellationToken: token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token);
         var before = GC.GetAllocatedBytesForCurrentThread();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.Read(view, key)));
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
@@ -57,9 +57,9 @@ internal sealed class ReadBudgetAllocationTests
         var limits = new DatabaseLimits { MaxQueryReadBytes = SmallReadBudget };
         var prefix = Key(Prefix);
         var token = TestContext.Current!.Execution.CancellationToken;
-        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(limits, cancellationToken: token).Scan(view, prefix, 3)));
+        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token).Scan(view, prefix, 3)));
 
-        var budget = new ReadExecutionBudget(limits, cancellationToken: token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token);
         var before = GC.GetAllocatedBytesForCurrentThread();
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.Scan(view, prefix, 3)));
         var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
@@ -92,9 +92,9 @@ internal sealed class ReadBudgetAllocationTests
     {
         var result = new JsonRecord(EscapedUnicode);
         var bytes = JsonDefaults.Serialize(result).Length;
-        new ReadExecutionBudget(new() { MaxBatchBytes = bytes }).CheckResult(result);
+        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes })).CheckResult(result);
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new ReadExecutionBudget(new() { MaxBatchBytes = bytes - 1 }).CheckResult(result));
+            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes - 1 })).CheckResult(result));
 
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
@@ -104,8 +104,8 @@ internal sealed class ReadBudgetAllocationTests
     {
         var result = Enumerable.Repeat(new string('x', ResultPartCharacters), ResultParts).ToArray();
         var limits = new DatabaseLimits();
-        new ReadExecutionBudget(limits).CheckResult(result);
-        var budget = new ReadExecutionBudget(limits, cancellationToken: TestContext.Current!.Execution.CancellationToken);
+        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits)).CheckResult(result);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
         var before = GC.GetAllocatedBytesForCurrentThread();
         budget.CheckResult(result);
@@ -123,7 +123,7 @@ internal sealed class ReadBudgetAllocationTests
         var position = fixture.Store.Position;
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var budget = new ReadExecutionBudget(new(), cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
 
         await Assert.That(() => fixture.Store.Read(view => budget.Read(view, key))).Throws<OperationCanceledException>();
         await Assert.That(() => fixture.Store.Read(view => budget.Scan(view, Key(Prefix), 1))).Throws<OperationCanceledException>();

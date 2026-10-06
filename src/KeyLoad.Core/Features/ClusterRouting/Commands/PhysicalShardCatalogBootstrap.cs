@@ -12,9 +12,11 @@ public sealed partial class DatabaseEngine
     private static OperationResult ExecuteBootstrapPhysicalShardCatalog(IAtomicTransaction transaction,
         ReplicatedOperation operation)
     {
+        const int EmptyExpectedRevision = 0;
+
         var request = Payload<BootstrapPhysicalShardCatalogRequest>(operation);
         PhysicalShardCatalogValidation.ValidateRequest(request);
-        if (request.ExpectedRevision != 0)
+        if (request.ExpectedRevision != EmptyExpectedRevision)
         {
             throw Errors.Fail(ErrorCode.Conflict, BootstrapRequiresRevisionZero);
         }

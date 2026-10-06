@@ -31,7 +31,10 @@ public sealed partial class DatabaseEngine
 
     private void ValidateStreamRead(long afterRevision, int limit)
     {
-        if (limit is < 1 || limit > Limits.MaxResults || afterRevision < 0)
+        const int LimitFirstCount = 1;
+        const int AfterRevisionValidationBoundary = 0;
+
+        if (limit is < LimitFirstCount || limit > Limits.MaxResults || afterRevision < AfterRevisionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, StreamReadBudgetInvalid);
         }
@@ -39,17 +42,22 @@ public sealed partial class DatabaseEngine
 
     private static StreamHead ReadStreamHead(IKeyValueView view, StreamRef stream, ReadExecutionBudget budget)
     {
+        const int TailRevisionEmptyCount = 0;
+        const int FirstAvailableRevisionSingleItemCount = 1;
+
         var key = KeySpace.Partition(StreamHeadSpace, stream.Partition, stream.StreamSet, stream.StreamId);
-        return budget.ReadRecord<StreamHead>(view, key) ?? new(0, 1, stream.Generation);
+        return budget.ReadRecord<StreamHead>(view, key) ?? new(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, stream.Generation);
     }
 
     private static void ValidateStreamHead(StreamHead head, StreamRef stream, long afterRevision)
     {
+        const int FirstAvailableRevisionStep = 1;
+
         if (head.Generation != stream.Generation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, StreamGenerationStale);
         }
-        if (afterRevision < head.FirstAvailableRevision - 1)
+        if (afterRevision < head.FirstAvailableRevision - FirstAvailableRevisionStep)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, StreamHistoryUnavailable);
         }
@@ -58,10 +66,12 @@ public sealed partial class DatabaseEngine
     private (ImmutableArray<EventRecord> Events, bool HasMore) ReadProjectedEvents(IKeyValueView view, StreamRef stream,
         PrincipalRecord principal, ResourceDefinition resource, long afterRevision, int limit, ReadExecutionBudget budget)
     {
+        const long ProjectedBytesInitialValue = 0L;
+
         var prefix = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation);
         var after = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation, afterRevision);
         var events = new List<EventRecord>();
-        var projectedBytes = 0L;
+        var projectedBytes = ProjectedBytesInitialValue;
         var result = budget.VisitRange(view, prefix, limit, (_, value) =>
         {
             var record = NativeSerialization.Deserialize<EventRecord>(value);

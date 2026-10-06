@@ -1,5 +1,6 @@
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -51,7 +52,8 @@ internal static class CanonicalOperationGateway
         }
         var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
         cancellationToken.ThrowIfCancellationRequested();
-        return new(requestId, McpBoundedJson.Serialize(value.Value, McpFramingProtocol.MaximumDataReplyBytes));
+        return new(requestId, McpBoundedJson.Serialize(value.Value,
+            context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
     }
 
     /// <summary>Returns the actual operation identity, or null before actor dispatch began.</summary>

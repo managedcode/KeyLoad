@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Configuration;
+using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Resources;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication.Commands;
 
 /// <summary>Runs the explicitly requested, offline-only V1 profile conversion.</summary>
+[KeyLoad.ConfigurationBinding]
 internal static class ClusterProfileUpgradeCommand
 {
     private const int ArgumentCount = 3;
@@ -18,7 +22,6 @@ internal static class ClusterProfileUpgradeCommand
     private const string UpgradePrefix = "--keyload-profile-upgrade";
     private const int InvalidArgumentsExitCode = 2;
     private const int ConversionFailedExitCode = 1;
-    private const int MaximumPathLength = 4096;
     private const string MessagesBaseName = "KeyLoad.AppHost.Features.ClusterReplication.Commands.ClusterProfileUpgradeMessages";
     private const string InvalidArgumentsMessage = "InvalidArguments";
     private const string ConversionFailedMessage = "ConversionFailed";
@@ -34,7 +37,10 @@ internal static class ClusterProfileUpgradeCommand
         ArgumentNullException.ThrowIfNull(args);
         if (!ContainsReservedArgument(args))
         { return null; }
-        if (!HasExactArguments(args))
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+        using var configurationLifetime = configuration as IDisposable;
+        var executionOptions = AppHostOptionsRegistration.BindProfileExecution(configuration);
+        if (!HasExactArguments(args, executionOptions))
         {
             Console.Error.WriteLine(GetMessage(InvalidArgumentsMessage));
             return InvalidArgumentsExitCode;
@@ -42,7 +48,7 @@ internal static class ClusterProfileUpgradeCommand
 
         try
         {
-            _ = ClusterProfileStore.UpgradeLegacyOffline(args[ElementIndex]);
+            _ = ClusterProfileStore.UpgradeLegacyOffline(args[ElementIndex], executionOptions);
             Console.WriteLine(GetMessage(SuccessMessage));
             return EmptyResult;
         }
@@ -57,9 +63,9 @@ internal static class ClusterProfileUpgradeCommand
         => args.Any(argument => argument.StartsWith(UpgradePrefix, StringComparison.Ordinal)
             || argument.StartsWith(DataRootFlag, StringComparison.Ordinal));
 
-    private static bool HasExactArguments(string[] args)
+    private static bool HasExactArguments(string[] args, IOptions<ClusterProfileExecutionOptions> executionOptions)
         => args.Length == ArgumentCount && args[HasExactArgumentsFirstIndex] == UpgradeFlag && args[HasExactArgumentsSecondIndex] == DataRootFlag
-            && args[HasExactArgumentsElementIndex].Length <= MaximumPathLength && !args[HasExactArgumentsElementIndex].Contains(HasExactArgumentsNullCharacter, StringComparison.Ordinal)
+            && args[HasExactArgumentsElementIndex].Length <= executionOptions.Value.MaximumPathCharacters && !args[HasExactArgumentsElementIndex].Contains(HasExactArgumentsNullCharacter, StringComparison.Ordinal)
             && Path.IsPathFullyQualified(args[HasExactArgumentsElementIndex]) && Directory.Exists(args[HasExactArgumentsElementIndex]);
 
     private static bool IsExpectedFailure(Exception exception)

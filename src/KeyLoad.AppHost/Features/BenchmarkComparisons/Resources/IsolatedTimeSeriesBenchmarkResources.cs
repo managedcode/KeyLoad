@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Hosting;
 using System.Globalization;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
@@ -44,8 +45,8 @@ internal static class IsolatedTimeSeriesBenchmarkResources
         var contract = TimeSeriesIntensiveFamilyContract.Current;
         var cell = FindCell(selection, contract);
         RequireOptionalIdentity(builder, cell, contract.ContractSha256);
-        var root = ResolvePath(builder.Configuration[RootSetting], DefaultRoot());
-        var output = ResolvePath(builder.Configuration[OutputSetting], Path.Combine(root, ReportsDirectory));
+        var root = ResolvePath(AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkRoot, DefaultRoot());
+        var output = ResolvePath(AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput, Path.Combine(root, ReportsDirectory));
         RequireFreshNativePath(root);
         ValidatePrivateDirectoryIfExisting(root);
         ValidatePrivateDirectoryIfExisting(output);
@@ -61,7 +62,7 @@ internal static class IsolatedTimeSeriesBenchmarkResources
 
     private static void RequireEnabled(IDistributedApplicationBuilder builder)
     {
-        if (!bool.TryParse(builder.Configuration[EnabledSetting], out var enabled) || !enabled)
+        if (!AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkMode)
         {
             throw new InvalidOperationException(InvalidSelection);
         }
@@ -83,8 +84,8 @@ internal static class IsolatedTimeSeriesBenchmarkResources
     private static void RequireOptionalIdentity(IDistributedApplicationBuilder builder,
         TimeSeriesIntensiveFamilyCell cell, string contractSha)
     {
-        var configuredCell = builder.Configuration[CellIdSetting];
-        var configuredHash = builder.Configuration[ContractHashSetting];
+        var configuredCell = AppHostOptionsRegistration.Get(builder).BenchmarkRelay.Value.TimeSeriesCellId;
+        var configuredHash = AppHostOptionsRegistration.Get(builder).BenchmarkRelay.Value.TimeSeriesContractSha256;
         if ((configuredCell is not null && configuredCell != cell.Id)
             || (configuredHash is not null && configuredHash != contractSha))
         {

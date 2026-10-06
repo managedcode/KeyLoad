@@ -6,6 +6,18 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int MinimumEventSourcePageRecords = 1;
+    private const int MinimumEventSourceAfterPosition = 0;
+    private const int UnpositionedEventSourceCursor = 0;
+    private const int RetainedSourcePositionOffset = 1;
+    private const string EventSourceRetainedHistoryDetail = "The requested event history was retained away.";
+    private const string EventSourceCursorBeyondTailDetail = "The requested position is beyond the source tail.";
+    private const long InitialEventSourceReadBytes = 0L;
+    private const int NextEventSourcePositionOffset = 1;
+    private const int EmptyEventSourceResultCount = 0;
+
+    private const int LastPublishedEventOffset = 1;
+    private const int LastReadPositionOffset = 1;
 
     private const string SourceCursorPurpose = "event-source-page";
     private const string SourceReadStartInvalidMessage = "The event source read budget or start position is invalid.";
@@ -13,13 +25,16 @@ public sealed partial class DatabaseEngine
     private static Capability SourceReadCapability(EventSourceRef source) => source.Kind == EventSourceKind.Topic ? Capability.TopicsRead : Capability.EventsRead;
     private ResourceDefinition SourceResource(IKeyValueView view, EventSourceRef source)
     {
+        const int GenerationValidationBoundary = 1;
+        const string SourceResourceDetailText = "The event source identity is invalid.";
+
         ValidatePartition(source.Partition);
         JsonData.Identifier(source.Resource);
-        if (source.Generation < 1 || !Enum.IsDefined(source.Kind)
+        if (source.Generation < GenerationValidationBoundary || !Enum.IsDefined(source.Kind)
             || source.Kind == EventSourceKind.Topic && source.StreamId is not null
             || source.Kind == EventSourceKind.Stream && source.StreamId is null)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The event source identity is invalid.");
+            throw Errors.Fail(ErrorCode.Validation, SourceResourceDetailText);
         }
 
         if (source.StreamId is not null)
@@ -36,13 +51,17 @@ public sealed partial class DatabaseEngine
     }
     private static EventSourceHead SourceHead(IKeyValueView view, EventSourceRef source, ResourceDefinition resource)
     {
+        const string SourceHeadSpaceText = "stream-head";
+        const int TailPositionEmptyCount = 0;
+        const int FirstAvailablePositionSingleItemCount = 1;
+
         ArgumentNullException.ThrowIfNull(resource);
         if (source.Kind == EventSourceKind.Topic)
         {
             return ReadTopicHead(view, source).Head;
         }
-        var stream = view.GetRecord<StreamHead>(KeySpace.Partition("stream-head", source.Partition, source.Resource, source.StreamId));
-        var head = stream is null ? new EventSourceHead(0, 1, source.Generation)
+        var stream = view.GetRecord<StreamHead>(KeySpace.Partition(SourceHeadSpaceText, source.Partition, source.Resource, source.StreamId));
+        var head = stream is null ? new EventSourceHead(TailPositionEmptyCount, FirstAvailablePositionSingleItemCount, source.Generation)
             : new EventSourceHead(stream.TailRevision, stream.FirstAvailableRevision, stream.Generation);
         if (head.Generation != source.Generation)
         {
@@ -52,13 +71,16 @@ public sealed partial class DatabaseEngine
     }
     private static byte[] SourceKey(EventSourceRef source, long? position = null)
     {
+        const string TopicEventSpace = "topic-event";
+        const string EventRecordSpace = "event";
+
         object?[] suffix = source.Kind == EventSourceKind.Topic ? [source.Resource, source.Generation] : [source.Resource, source.StreamId, source.Generation];
         if (position is { } value)
         {
             suffix = [.. suffix, value];
         }
 
-        return KeySpace.Partition(source.Kind == EventSourceKind.Topic ? "topic-event" : "event", source.Partition, suffix);
+        return KeySpace.Partition(source.Kind == EventSourceKind.Topic ? TopicEventSpace : EventRecordSpace, source.Partition, suffix);
     }
     private static SourceEventRecord SourceRecord(IKeyValueView view, EventSourceRef source, long position)
         => SourceEventReader.Read(view, source, position);
@@ -72,6 +94,8 @@ public sealed partial class DatabaseEngine
     };
     private MutationReceipt Publish(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, PublishTopic publish, DateTimeOffset now)
     {
+        const int PublishAbsentCount = 0;
+
         var source = new EventSourceRef(partition, publish.Topic, EventSourceKind.Topic, Generation: publish.Generation);
         var resource = SourceResource(tx, source);
         var topicHead = ReadTopicHead(tx, source);
@@ -79,12 +103,12 @@ public sealed partial class DatabaseEngine
         ValidateTopicPublication(principal, resource, publish.Events);
         var headKey = KeySpace.Partition(TopicHeadKeySpace, partition, publish.Topic);
         var sequenceKey = KeySpace.Partition(EventSequenceKeySpace, partition);
-        var sequence = tx.ReadOwnedValue(sequenceKey) is { } prior ? NativeSerialization.Deserialize<long>(prior) : 0;
+        var sequence = tx.ReadOwnedValue(sequenceKey) is { } prior ? NativeSerialization.Deserialize<long>(prior) : PublishAbsentCount;
         var progress = AppendTopicEvents(tx, source, resource, publish.Events, now,
             head.TailPosition, sequence, head.FirstAvailablePosition, topicHead.StoredBytes);
         tx.PutRecord(headKey, new TopicHead(progress.Tail, head.FirstAvailablePosition, publish.Generation, progress.StoredBytes));
         tx.PutRecord(sequenceKey, progress.Sequence);
-        return new(PublishTopicKind, publish.Topic, publish.Events[^1].EventId, progress.Tail);
+        return new(PublishTopicKind, publish.Topic, publish.Events[^LastPublishedEventOffset].EventId, progress.Tail);
     }
     private long SourceCursorPosition(IKeyValueView view, PrincipalRecord principal, EventSourceRef source, string token, DateTimeOffset now)
     {
@@ -101,11 +125,14 @@ public sealed partial class DatabaseEngine
     private long SourceCursorPosition(SourceCursor cursor, PrincipalRecord principal, EventSourceRef source,
         DateTimeOffset now, ResourceDefinition resource)
     {
+        const int PositionValidationBoundary = 0;
+        const string SourceCursorPositionDetailText = "The event source cursor expired or changed scope.";
+
         if (cursor.Purpose != SourceCursorPurpose || cursor.Incarnation != Store.Identity.Incarnation || cursor.Source != source
             || cursor.PrincipalId != principal.Id || cursor.PolicyEpoch != principal.PolicyEpoch || cursor.SchemaVersion != resource.SchemaVersion
-            || cursor.ExpiresAt <= now || cursor.Position < 0)
+            || cursor.ExpiresAt <= now || cursor.Position < PositionValidationBoundary)
         {
-            throw Errors.Fail(ErrorCode.CursorExpired, "The event source cursor expired or changed scope.");
+            throw Errors.Fail(ErrorCode.CursorExpired, SourceCursorPositionDetailText);
         }
         return cursor.Position;
     }
@@ -120,15 +147,16 @@ public sealed partial class DatabaseEngine
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         return Store.Read(view => ReadEventSource(view, principalId, request, budget));
     }
     private EventSourcePage ReadEventSource(IKeyValueView gatedView, string principalId, ReadEventSourceRequest request,
         ReadExecutionBudget budget)
     {
-        if (request.Limit is < 1 || request.Limit > Limits.MaxResults || request.AfterPosition < 0
-            || request.Cursor is not null && request.AfterPosition != 0)
+
+        if (request.Limit is < MinimumEventSourcePageRecords || request.Limit > Limits.MaxResults || request.AfterPosition < MinimumEventSourceAfterPosition
+            || request.Cursor is not null && request.AfterPosition != UnpositionedEventSourceCursor)
         {
             throw Errors.Fail(ErrorCode.Validation, SourceReadStartInvalidMessage);
         }
@@ -140,20 +168,20 @@ public sealed partial class DatabaseEngine
         var head = SourceHead(view, request.Source, resource);
         var after = request.Cursor is null ? request.AfterPosition
             : SourceCursorPosition(principal, request.Source, request.Cursor, now, resource);
-        if (after < head.FirstAvailablePosition - 1)
+        if (after < head.FirstAvailablePosition - RetainedSourcePositionOffset)
         {
-            throw Errors.Fail(ErrorCode.HistoryUnavailable, "The requested event history was retained away.");
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, EventSourceRetainedHistoryDetail);
         }
         if (after > head.TailPosition)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The requested position is beyond the source tail.");
+            throw Errors.Fail(ErrorCode.Validation, EventSourceCursorBeyondTailDetail);
         }
         var records = new List<SourceEventRecord>();
-        var projectedBytes = 0L;
+        var projectedBytes = InitialEventSourceReadBytes;
         var position = after;
         while (position < head.TailPosition && records.Count < request.Limit)
         {
-            position = checked(position + 1);
+            position = checked(position + NextEventSourcePositionOffset);
             budget.Check();
             var record = ProjectEvent(principal, resource, SourceRecord(view, request.Source, position));
             var eventBytes = budget.MeasureResult(record);
@@ -164,7 +192,7 @@ public sealed partial class DatabaseEngine
             records.Add(record);
             projectedBytes += eventBytes;
         }
-        var last = records.Count == 0 ? after : records[^1].Position;
+        var last = records.Count == EmptyEventSourceResultCount ? after : records[^LastReadPositionOffset].Position;
         var token = Sign(new SourceCursor(SourceCursorPurpose, Store.Identity.Incarnation, request.Source, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion, last, now.Add(eventSourceCursorLifetime)));
         var page = new EventSourcePage(request.Source, head, records.ToImmutableArray(), token, Store.Position, last < head.TailPosition);

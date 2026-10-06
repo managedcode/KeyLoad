@@ -31,7 +31,9 @@ internal sealed class RequestCqrsProbeDiscoveryPolicy(IReadOnlyList<string> vote
 
     internal int GetSlot(string peer)
     {
-        var slot = 0;
+        const int SlotInitialValue = 0;
+
+        var slot = SlotInitialValue;
         foreach (var voter in voterIds)
         {
             if (voter == observerId)

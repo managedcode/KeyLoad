@@ -9,7 +9,7 @@ internal sealed class SqlCommentBudgetTests
     public async Task AcSqlc004_CancellationIsObservedBeforeTheNextTriviaChunk()
     {
         using var cancellation = new CancellationTokenSource();
-        var budget = new ReadExecutionBudget(new(), cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
         var sql = SqlCommentTestData.LongCommentPrefix
             + new string(SqlCommentTestData.LongCommentCharacter, SqlCommentTestData.LongCommentSize)
             + SqlCommentTestData.LongCommentSuffix;

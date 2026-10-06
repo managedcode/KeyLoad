@@ -6,6 +6,12 @@ internal sealed class BlobRestoreHeadPage(DatabaseEngine database, BlobRestoreMa
 {
     internal BlobRestoreMarker Process(IAtomicTransaction tx, KeyValueRecord record, bool verify)
     {
+        const int BytesEmptyCount = 0;
+        const int KeysSingleItemCount = 1;
+        const int VersionsEmptyCount = 0;
+        const int UploadsEmptyCount = 0;
+        const int ObjectKeysStep = 1;
+
         var blob = BlobKeys.DecodeScope(record.Key.Span, BlobKeys.HeadSpace, BlobKeys.ScopeComponents);
         var head = BlobRecordReader.Decode<BlobHead>(record.Value.Span);
         BlobRecordReader.ValidateHead(head, blob, verify ? marker.TargetIncarnation : marker.SourceIncarnation);
@@ -19,17 +25,20 @@ internal sealed class BlobRestoreHeadPage(DatabaseEngine database, BlobRestoreMa
         }
         if (verify)
         { return marker; }
-        accounting.Add(tx, blob, 0, 1, 0, 0);
+        accounting.Add(tx, blob, BytesEmptyCount, KeysSingleItemCount, VersionsEmptyCount, UploadsEmptyCount);
         BlobMetadataRules.Put(tx, record.Key.ToArray(), head with { Incarnation = marker.TargetIncarnation });
-        return marker with { ObjectKeys = checked(marker.ObjectKeys + 1) };
+        return marker with { ObjectKeys = checked(marker.ObjectKeys + ObjectKeysStep) };
     }
 
     private static void ValidateCurrent(BlobMetadata metadata, BlobState state)
     {
-        if (state.Status != BlobUploadStatus.Complete || state.Retired || state.ReclaimCursor != 0
+        const int EmptyReclaimCursor = 0;
+        const int RevisionStep = 1;
+
+        if (state.Status != BlobUploadStatus.Complete || state.Retired || state.ReclaimCursor != EmptyReclaimCursor
             || state.DeclaredLength != metadata.Length || state.NextOrdinal != metadata.PartCount
             || state.IntegrityHash != metadata.IntegrityHash || state.Access != metadata.Access
-            || state.ExpectedRevision != metadata.Revision - 1)
+            || state.ExpectedRevision != metadata.Revision - RevisionStep)
         { throw BlobErrors.Corruption(); }
     }
 }

@@ -11,13 +11,13 @@ internal sealed class ZoneTreeSnapshotUpgradeFileLease : IDisposable
 
     internal FileStream Stream => stream;
 
-    internal static ZoneTreeSnapshotUpgradeFileLease OpenSource(string path)
+    internal static ZoneTreeSnapshotUpgradeFileLease OpenSource(string path, int fileBufferBytes)
     {
         FileStream? stream = null;
         try
         {
             stream = OfflineRegularFile.Open(path, FileAccess.Read, FileShare.None,
-                ZoneTreePersistenceFormat.FileBufferBytes);
+                fileBufferBytes);
             var lease = new ZoneTreeSnapshotUpgradeFileLease(stream);
             stream = null;
             return lease;
@@ -26,14 +26,14 @@ internal sealed class ZoneTreeSnapshotUpgradeFileLease : IDisposable
         { stream?.Dispose(); }
     }
 
-    internal static ZoneTreeSnapshotUpgradeFileLease CreatePrivateOutput(string path)
+    internal static ZoneTreeSnapshotUpgradeFileLease CreatePrivateOutput(string path, int fileBufferBytes)
     {
         var options = new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
             Access = FileAccess.Write,
             Share = FileShare.None,
-            BufferSize = ZoneTreePersistenceFormat.FileBufferBytes,
+            BufferSize = fileBufferBytes,
             Options = FileOptions.WriteThrough
         };
         if (!OperatingSystem.IsWindows())

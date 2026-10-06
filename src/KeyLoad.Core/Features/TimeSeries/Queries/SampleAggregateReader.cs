@@ -4,6 +4,8 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleAggregateReader
 {
+    private const int MinimumRequestedSamples = 1;
+
     private const string InvalidRange = "The time-series aggregate range is invalid.";
     private const string InvalidSampleBudget = "The time-series sample budget is invalid.";
     internal const string SampleBudgetExceeded = "The time-series sample budget is exceeded.";
@@ -59,7 +61,7 @@ internal static class SampleAggregateReader
 
     internal static void ValidateSampleLimit(int maxSamples, int serverMaximum)
     {
-        if (maxSamples < 1 || maxSamples > serverMaximum)
+        if (maxSamples < MinimumRequestedSamples || maxSamples > serverMaximum)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidSampleBudget);
         }

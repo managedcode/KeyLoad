@@ -27,6 +27,14 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), CacheReadPermitOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<RuntimeJournalOptions>().Bind(configuration.GetSection(RuntimeJournalOptions.SectionName))
             .Validate(options => options.IsValid(), RuntimeJournalOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ChangeFeedExecutionOptions>().Bind(configuration.GetSection(ChangeFeedExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), ChangeFeedExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<TimeSeriesExecutionOptions>().Bind(configuration.GetSection(TimeSeriesExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), TimeSeriesExecutionOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Query.Features.Search.PackedAnnOptions>().Bind(configuration.GetSection(KeyLoad.Query.Features.Search.PackedAnnOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Query.Features.Search.PackedAnnOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<KeyLoad.Core.Features.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Features.Search.AnnSeedOptions.SectionName))
+            .Validate(options => options.IsValid(), KeyLoad.Core.Features.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
         services.AddSingleton<CoreRuntimeOptions>();
     }
 }

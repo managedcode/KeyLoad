@@ -2,11 +2,11 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class RequestCqrsProbeRecordFields
 {
-    private static readonly string[] OwnerFields = ["Version", "Kind", "SessionId", "Voter"];
-    private static readonly string[] ArmFields = ["Version", "Kind", "SessionId", "ArmId", "PrincipalId", "CommandId", "ReadKind", "Phase", "Action"];
-    private static readonly string[] ReleaseFields = ["Version", "Kind", "SessionId", "ArmId", "RequestId"];
-    private static readonly string[] MarkerFields = ["Version", "Kind", "SessionId", "ArmId", "RequestId", "CommandId", "Phase", "Outcome", "Voter", "SiloAddress"];
-    private static readonly string[] DiscoveryFields = ["Version", "Kind", "SessionId", "ObserverVoterId", "PeerVoterId", "ApplicationRpcVersion", "PeerEnvelopeVersion", "TransportReady", "ProtocolCompatible"];
+    private static readonly string[] OwnerFields = [nameof(RequestCqrsProbeOwnerRecord.Version), nameof(RequestCqrsProbeOwnerRecord.Kind), nameof(RequestCqrsProbeOwnerRecord.SessionId), nameof(RequestCqrsProbeOwnerRecord.Voter)];
+    private static readonly string[] ArmFields = [nameof(RequestCqrsProbeArmRecord.Version), nameof(RequestCqrsProbeArmRecord.Kind), nameof(RequestCqrsProbeArmRecord.SessionId), nameof(RequestCqrsProbeArmRecord.ArmId), nameof(RequestCqrsProbeArmRecord.PrincipalId), nameof(RequestCqrsProbeArmRecord.CommandId), nameof(RequestCqrsProbeArmRecord.ReadKind), nameof(RequestCqrsProbeArmRecord.Phase), nameof(RequestCqrsProbeArmRecord.Action)];
+    private static readonly string[] ReleaseFields = [nameof(RequestCqrsProbeReleaseRecord.Version), nameof(RequestCqrsProbeReleaseRecord.Kind), nameof(RequestCqrsProbeReleaseRecord.SessionId), nameof(RequestCqrsProbeReleaseRecord.ArmId), nameof(RequestCqrsProbeReleaseRecord.RequestId)];
+    private static readonly string[] MarkerFields = [nameof(RequestCqrsProbeMarkerRecord.Version), nameof(RequestCqrsProbeMarkerRecord.Kind), nameof(RequestCqrsProbeMarkerRecord.SessionId), nameof(RequestCqrsProbeMarkerRecord.ArmId), nameof(RequestCqrsProbeMarkerRecord.RequestId), nameof(RequestCqrsProbeMarkerRecord.CommandId), nameof(RequestCqrsProbeMarkerRecord.Phase), nameof(RequestCqrsProbeMarkerRecord.Outcome), nameof(RequestCqrsProbeMarkerRecord.Voter), nameof(RequestCqrsProbeMarkerRecord.SiloAddress)];
+    private static readonly string[] DiscoveryFields = [nameof(RequestCqrsProbeDiscoveryRecord.Version), nameof(RequestCqrsProbeDiscoveryRecord.Kind), nameof(RequestCqrsProbeDiscoveryRecord.SessionId), nameof(RequestCqrsProbeDiscoveryRecord.ObserverVoterId), nameof(RequestCqrsProbeDiscoveryRecord.PeerVoterId), nameof(RequestCqrsProbeDiscoveryRecord.ApplicationRpcVersion), nameof(RequestCqrsProbeDiscoveryRecord.PeerEnvelopeVersion), nameof(RequestCqrsProbeDiscoveryRecord.TransportReady), nameof(RequestCqrsProbeDiscoveryRecord.ProtocolCompatible)];
 
     internal static ReadOnlySpan<string> Owner => OwnerFields;
     internal static ReadOnlySpan<string> Arm => ArmFields;

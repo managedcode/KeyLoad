@@ -19,7 +19,7 @@ internal sealed class McpGatewayReplyTests
         var canonical = JsonSerializer.SerializeToUtf8Bytes(new { tools = Array.Empty<object>() });
         using var expectedDocument = JsonDocument.Parse(canonical);
         var expected = expectedDocument.RootElement.Clone();
-        using var owner = McpReplyOwner.Success(canonical, null, canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes);
+        using var owner = McpReplyOwner.Success(canonical, null, canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes, UnitMcpOptions.Execution());
         var result = owner.ToolResult();
         var wrapper = result.StructuredContent!.Value;
         await Assert.That(wrapper.GetProperty(RequestIdKey).ValueKind).IsEqualTo(JsonValueKind.Null);

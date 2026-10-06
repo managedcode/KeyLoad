@@ -24,20 +24,24 @@ internal static class RawStorageFixtureFailures
 
     internal static void Throw(Exception? primary, List<Exception> failures)
     {
-        if (primary is null && failures.Count == 0)
+        const int EmptyFailuresCount = 0;
+        const int ThrowEmptyFailuresCount = 1;
+        const int IndexEmptyCount = 0;
+
+        if (primary is null && failures.Count == EmptyFailuresCount)
         {
             return;
         }
 
-        if (primary is not null && failures.Count == 0)
+        if (primary is not null && failures.Count == EmptyFailuresCount)
         {
             ExceptionDispatchInfo.Capture(primary).Throw();
             return;
         }
 
-        if (primary is null && failures.Count == 1)
+        if (primary is null && failures.Count == ThrowEmptyFailuresCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();
             return;
         }
 

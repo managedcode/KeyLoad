@@ -6,7 +6,12 @@
     "REQ-BC-027",
     "AC-BC-027",
     "REQ-CQ-010",
-    "AC-CQ-025"
+    "AC-CQ-025",
+    "REQ-CQ-013",
+    "AC-CQ-034",
+    "AC-CQ-037",
+    "REQ-CQ-012",
+    "AC-CQ-033"
   ],
   "module": "KeyLoad.Analyzers",
   "collectorVersion": "18.11.2",
@@ -155,6 +160,50 @@
     {
       "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeStringAnalyzer.cs",
       "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationOwnership.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationReadOperations.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedDurationPolicy.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OperationalPolicyBindings.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OptionsSnapshotCapture.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsSnapshotContract.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedConfigurationAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/ConfigurationMetadataNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/OperationalPolicyMetadataNames.cs",
+      "classification": "declaration-only"
+    },
+    {
+      "path": "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -275,14 +324,39 @@
       "diagnostic": "KLD0035",
       "sources": [
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeDurationAnalyzer.cs",
-        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs"
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/CodeQualityAssemblyNames.cs"
       ]
     },
     {
       "diagnostic": "KLD0036",
       "sources": [
         "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/MagicRuntimeStringAnalyzer.cs",
-        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs"
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MachineKeyLiteralClassifier.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MachineKeySemanticSymbols.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/MachineKeyRuleCatalog.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0037",
+      "sources": [
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analyzers/TypedConfigurationAnalyzer.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationReadOperations.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfigurationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/HardcodedDurationPolicy.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/LiteralDeclarationOwnership.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OperationalPolicyBindings.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/OptionsSnapshotCapture.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/SerializedOptionsSnapshotContract.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/MagicRuntimeOperations.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Contracts/CodeQualityAssemblyNames.cs",
+        "src/KeyLoad.Analyzers/Features/CodeQuality/Analysis/ConfiguredCountingSignal.cs"
       ]
     }
   ],

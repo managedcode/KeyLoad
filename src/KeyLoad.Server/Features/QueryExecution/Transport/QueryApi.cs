@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Query;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -34,9 +35,9 @@ internal static class QueryApi
     }
 
     private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context,
-        KeyLoad.Core.DatabaseEngine database, KeyLoad.Core.HttpAdmissionGovernor admission)
+        IOptions<DatabaseLimits> limitsOptions, KeyLoad.Core.HttpAdmissionGovernor admission)
     {
-        var operation = SqlOperationCompiler.Compile(request, database.Limits, admission.Limits.MaxBodyBytes,
+        var operation = SqlOperationCompiler.Compile(request, limitsOptions, admission.Limits.MaxBodyBytes,
             context.RequestAborted);
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
             operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted).ConfigureAwait(false);

@@ -87,7 +87,7 @@ internal sealed class GraphShortestPathBudgetTests
         var sourceEntity = GraphShortestPathTestSupport.Vertex(database, source.Collection, source.Id);
         var targetEntity = GraphShortestPathTestSupport.Vertex(database, target.Collection, target.Id);
         var requestBytes = JsonDefaults.Serialize(request).Length;
-        var measuredBudget = new ReadExecutionBudget(database.Database.Limits);
+        var measuredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var expected = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, measuredBudget);
         await Assert.That(expected.Edges.Single().AttributesJson).IsEqualTo(attributes);
         var readBytes = measuredBudget.ReadBytes;
@@ -105,8 +105,8 @@ internal sealed class GraphShortestPathBudgetTests
             MaxQueryReadBytes = readBytes,
             MaxBatchBytes = responseBytes
         };
-        var exactEngine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var exactBudget = new ReadExecutionBudget(exactLimits);
+        var exactEngine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exactLimits));
         var exact = exactEngine.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, exactBudget);
 
         await Assert.That(exact.Found).IsTrue();
@@ -182,7 +182,7 @@ internal sealed class GraphShortestPathBudgetTests
     {
         var position = database.Store.Position;
         var limits = new DatabaseLimits { MaxQueryBytes = maxQueryBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
             GraphShortestPathTestSupport.RootPrincipal, request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -194,8 +194,8 @@ internal sealed class GraphShortestPathBudgetTests
     {
         var position = database.Store.Position;
         var limits = new DatabaseLimits { MaxQueryReadBytes = maxReadBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var budget = new ReadExecutionBudget(limits);
+        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
             GraphShortestPathTestSupport.RootPrincipal, request, budget));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -207,8 +207,8 @@ internal sealed class GraphShortestPathBudgetTests
     {
         var position = database.Store.Position;
         var limits = new DatabaseLimits { MaxQueryReadBytes = maxReadBytes, MaxBatchBytes = maxBatchBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var budget = new ReadExecutionBudget(limits);
+        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
             GraphShortestPathTestSupport.RootPrincipal, request, budget));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

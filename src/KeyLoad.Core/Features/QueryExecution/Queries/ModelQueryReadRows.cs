@@ -11,6 +11,8 @@ internal static class ModelQueryReadRows
         PartitionRef partition, ResourceDefinition resource, ModelQuerySource source,
         ReadExecutionBudget budget, bool explain, Action<DocumentRecord> accept)
     {
+        const string VisitDetailText = "The model query source is unsupported.";
+
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
@@ -29,7 +31,7 @@ internal static class ModelQueryReadRows
                 ModelQueueQueryRows.Visit(database, view, principal, partition, resource, source, budget, explain, accept);
                 break;
             default:
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, "The model query source is unsupported.");
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, VisitDetailText);
         }
     }
 

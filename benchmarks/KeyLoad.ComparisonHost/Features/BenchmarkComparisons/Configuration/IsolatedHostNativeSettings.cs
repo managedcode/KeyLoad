@@ -6,11 +6,16 @@ using Microsoft.Extensions.Configuration;
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Reads only the selected engine's native connections and credentials before allocation.</summary>
+[KeyLoad.ConfigurationBinding]
 internal sealed record IsolatedHostNativeSettings(string Image, string? Connection, ImmutableArray<Uri> Endpoints,
     ImmutableArray<string> Replicas, string? User, string? Password, string? ApiKey, string? AdminKey)
 {
+    private const char CarriageReturnCharacter = '\r';
+    private const char LineFeedCharacter = '\n';
     internal static IsolatedHostNativeSettings Read(IConfiguration configuration, ComparisonWorkerSelection selection, string image)
     {
+        const int PrimaryReplicaCount = 1;
+
         var target = selection.Target;
         var connection = target is IsolatedHostConstants.Postgres or IsolatedHostConstants.Redis or IsolatedHostConstants.Rabbit
             or IsolatedHostConstants.Mongo or IsolatedHostConstants.Kurrent
@@ -20,7 +25,7 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
             or IsolatedHostConstants.SurrealDb or IsolatedHostConstants.HelixDb
             ? ReadEndpoints(configuration, selection.NodeCount) : ImmutableArray<Uri>.Empty;
         var replicas = target == IsolatedHostConstants.Redis
-            ? ReadArray(configuration, IsolatedHostConstants.ReplicaConnections, selection.NodeCount - 1) : ImmutableArray<string>.Empty;
+            ? ReadArray(configuration, IsolatedHostConstants.ReplicaConnections, selection.NodeCount - PrimaryReplicaCount) : ImmutableArray<string>.Empty;
         var authenticated = target is IsolatedHostConstants.Rabbit or IsolatedHostConstants.Neo4j or IsolatedHostConstants.SurrealDb;
         var user = authenticated ? IsolatedHostSettings.Required(configuration, IsolatedHostConstants.User)
             : target == IsolatedHostConstants.OpenSearch ? configuration[IsolatedHostConstants.User] : null;
@@ -36,14 +41,18 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
 
     private static ImmutableArray<Uri> ReadEndpoints(IConfiguration configuration, int count)
     {
+        const int EmptyUserInfoLength = 0;
+        const int EmptyQueryLength = 0;
+        const int EmptyFragmentLength = 0;
+
         var values = ReadArray(configuration, IsolatedHostConstants.Endpoints, count);
         var result = ImmutableArray.CreateBuilder<Uri>(count);
         foreach (var value in values)
         {
             if (!Uri.TryCreate(value, UriKind.Absolute, out var endpoint)
                 || endpoint.Scheme is not (IsolatedHostConstants.Http or IsolatedHostConstants.Https)
-                || string.IsNullOrWhiteSpace(endpoint.Host) || endpoint.UserInfo.Length != 0
-                || endpoint.Query.Length != 0 || endpoint.Fragment.Length != 0 || endpoint.AbsolutePath != IsolatedHostConstants.RootPath)
+                || string.IsNullOrWhiteSpace(endpoint.Host) || endpoint.UserInfo.Length != EmptyUserInfoLength
+                || endpoint.Query.Length != EmptyQueryLength || endpoint.Fragment.Length != EmptyFragmentLength || endpoint.AbsolutePath != IsolatedHostConstants.RootPath)
             {
                 throw InvalidSettings();
             }
@@ -59,6 +68,8 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
 
     private static ImmutableArray<string> ReadArray(IConfiguration configuration, string key, int count)
     {
+        const int FirstEntryIndex = 0;
+
         var section = configuration.GetSection(key);
         var children = section.GetChildren().ToArray();
         if (section.Value is not null || children.Length != count)
@@ -66,7 +77,7 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
             throw InvalidSettings();
         }
         var values = ImmutableArray.CreateBuilder<string>(count);
-        for (var index = 0; index < count; index++)
+        for (var index = FirstEntryIndex; index < count; index++)
         {
             var suffix = index.ToString(CultureInfo.InvariantCulture);
             if (!children.Any(item => item.Key == suffix))
@@ -91,8 +102,8 @@ internal sealed record IsolatedHostNativeSettings(string Image, string? Connecti
         }
         if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(password)
             || user.Contains(IsolatedHostConstants.CredentialSeparator, StringComparison.Ordinal)
-            || user.Contains('\r', StringComparison.Ordinal) || user.Contains('\n', StringComparison.Ordinal)
-            || password.Contains('\r', StringComparison.Ordinal) || password.Contains('\n', StringComparison.Ordinal))
+            || user.Contains(CarriageReturnCharacter, StringComparison.Ordinal) || user.Contains(LineFeedCharacter, StringComparison.Ordinal)
+            || password.Contains(CarriageReturnCharacter, StringComparison.Ordinal) || password.Contains(LineFeedCharacter, StringComparison.Ordinal))
         {
             throw InvalidSettings();
         }

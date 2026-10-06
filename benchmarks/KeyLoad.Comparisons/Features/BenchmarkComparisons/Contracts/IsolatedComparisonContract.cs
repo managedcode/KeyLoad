@@ -28,7 +28,7 @@ public sealed record IsolatedComparisonContract
     /// <summary>Gets the specialized workload family.</summary>
     [JsonRequired] public ImmutableArray<Scenario> SpecializedScenarios { get; init; }
     /// <summary>Gets the common options, without a varying native topology.</summary>
-    public ComparisonOptions Options { get; init; } = new();
+    [JsonRequired] public ComparisonOptions Options { get; init; } = null!;
     /// <summary>Gets the explicitly unsupported Community cluster configurations.</summary>
     [JsonRequired] public ImmutableArray<UnsupportedComparisonTopology> UnsupportedTopologies { get; init; }
 

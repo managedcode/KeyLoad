@@ -28,11 +28,7 @@ internal static class McpServerComposition
             services.GetRequiredService<IMcpGatewayFactory>(), services.GetRequiredService<IHttpContextAccessor>()));
         builder.Services.AddHostedService(services => new McpGatewayCatalogWarmup(
             services.GetRequiredService<McpGatewayCatalogOwner>()));
-        builder.Services.AddSingleton(provider =>
-        {
-            var memory = provider.GetRequiredService<IOptions<NodeOptions>>().Value.McpMemory;
-            return new McpMemoryBudget(memory.DataBytes, memory.ControlBytes, memory.IngressBytes);
-        });
+        builder.Services.AddSingleton<McpMemoryBudget>();
         builder.Services.AddMcpServer(options =>
         {
             options.ProtocolVersion = McpTransportProtocol.Revision;

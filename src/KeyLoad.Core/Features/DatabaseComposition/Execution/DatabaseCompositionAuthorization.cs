@@ -4,12 +4,13 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string DatabaseCompositionAuthorizationSourceFieldRequiresRawReadAuthorityDetail = "A source field requires raw-read authority.";
+    private const int DatabaseCompositionAuthorizationMinimumPositiveCount = 1;
+
     private const string InvalidComposition = "The database composition request is invalid.";
     private const string InvalidLink = "The queue graph link is invalid.";
     private const string MissingReadyMessage = "The ready queue message is unavailable.";
     private const string CompositionLimit = "The database composition source exceeds its budget.";
-    private const int MaximumCompositionDepth = 16;
-    private const int MaximumCompositionVertices = 10_000;
     private const string FullResourcePath = "";
     private const string WildcardGrant = "*";
 
@@ -55,7 +56,7 @@ public sealed partial class DatabaseEngine
         {
             if (!HasGrant(principal, policy.RawReadGrant))
             {
-                throw Errors.Fail(ErrorCode.PermissionDenied, "A source field requires raw-read authority.");
+                throw Errors.Fail(ErrorCode.PermissionDenied, DatabaseCompositionAuthorizationSourceFieldRequiresRawReadAuthorityDetail);
             }
         }
     }
@@ -81,7 +82,7 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(command.Graph);
         JsonData.Identifier(command.Queue);
         JsonData.Identifier(command.EdgeIdPrefix);
-        if (command.Resource != command.Graph || command.MaxMessages < 1
+        if (command.Resource != command.Graph || command.MaxMessages < DatabaseCompositionAuthorizationMinimumPositiveCount
             || command.MaxMessages > Limits.MaxBatchMutations)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidComposition);
@@ -94,9 +95,9 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(command.Graph);
         JsonData.Identifier(command.MessageIdPrefix);
         if (command.Resource != command.Queue || command.Start is null || command.Start.Partition != partition
-            || command.MaxDepth is < 1 or > MaximumCompositionDepth
-            || command.MaxVertices is < 1 or > MaximumCompositionVertices
-            || command.MaxEdges < 1 || command.MaxEdges > Limits.MaxBatchMutations)
+            || command.MaxDepth < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxDepth > graphExecution.MaximumDepth
+            || command.MaxVertices < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxVertices > graphExecution.MaximumVertices
+            || command.MaxEdges < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxEdges > Limits.MaxBatchMutations)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidComposition);
         }

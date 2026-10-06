@@ -44,7 +44,7 @@ internal static class RequestCqrsProbeCodecInput
     internal const string MarkerKind = "Marker";
     internal const string TestPrincipal = "c1-probe-unit-owner";
     internal static string MaximumPrincipal => RequestCqrsProbeProtocol.PrincipalPrefix
-        + new string('a', RequestCqrsProbeProtocol.MaximumPrincipalBytes - Encoding.UTF8.GetByteCount(RequestCqrsProbeProtocol.PrincipalPrefix));
+        + new string('a', UnitRequestProbeOptions.Execution.Value.MaximumPrincipalBytes - Encoding.UTF8.GetByteCount(RequestCqrsProbeProtocol.PrincipalPrefix));
     internal static string OverlongPrincipal => MaximumPrincipal + "a";
     internal const string SessionId = "00000000000000000000000000000001";
     internal static readonly Guid ArmId = Guid.ParseExact("00000000000000000000000000000002", "N");
@@ -137,7 +137,7 @@ internal static class RequestCqrsProbeCodecInput
     {
         var options = new JsonSerializerOptions
         {
-            MaxDepth = RequestCqrsProbeProtocol.MaximumJsonDepth,
+            MaxDepth = UnitRequestProbeOptions.Execution.Value.MaximumJsonDepth,
             PropertyNameCaseInsensitive = false,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
             RespectNullableAnnotations = true,

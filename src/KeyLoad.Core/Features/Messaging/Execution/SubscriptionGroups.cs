@@ -5,6 +5,47 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string SubscriptionGroupsSubscriptionKeySpace = "subscription";
+    private const string SubscriptionGroupsSubscriptionGroupIsUnavailableDetail = "The subscription group is unavailable.";
+    private const int SubscriptionGroupsAdjacentElementOffset = 1;
+    private const string SubscriptionGroupsSubscriptionStartModeOrCursorIsInvalidDetail = "The subscription start mode or cursor is invalid.";
+    private const string SubscriptionGroupsSubscriptionHistoryIsUnavailableDetail = "The subscription history is unavailable.";
+    private const string SubscriptionGroupsSubscriptionStartIsBeyondTheSourceTailDetail = "The subscription start is beyond the source tail.";
+    private const int SubscriptionGroupsMinimumPositiveCount = 1;
+    private const int SubscriptionGroupsMaximumSubscriptionWindow = 4_096;
+    private const int SubscriptionGroupsMaximumSubscriptionAttempts = 1_000;
+    private const int SubscriptionGroupsMaximumSubscriptionLeaseSeconds = 3_600;
+    private const int SubscriptionGroupsMaximumSubscriptionEventTypes = 128;
+    private const string SubscriptionGroupsSubscriptionPolicyExceedsItsBoundsDetail = "The subscription policy exceeds its bounds.";
+    private const string SubscriptionGroupsChangingASubscriptionDefinitionRequiresANewGroupIdentityDetail = "Changing a subscription definition requires a new group identity.";
+    private const int SubscriptionGroupsSingleElementCount = 1;
+    private const string SubscriptionGroupsSubscriptionGenerationChangedDetail = "The subscription generation changed.";
+    private const string SubscriptionGroupsSubscriptionWindowKeySpace = "subscription-window";
+    private const string SubscriptionGroupsParkedSubscriptionRequiresAnExplicitSeekOrNewGroupBeforeResumingDetail = "A parked subscription requires an explicit seek or new group before resuming.";
+    private const string SubscriptionGroupsSubscriptionReceiveBudgetOrLeaseIsInvalidDetail = "The subscription receive budget or lease is invalid.";
+    private const string SubscriptionGroupsSubscriptionDeliveryIsPausedDetail = "Subscription delivery is paused.";
+    private const string SubscriptionGroupsSubscriptionHistoryWasRetainedAwayDetail = "The subscription history was retained away.";
+    private const int SubscriptionGroupsNoRetainedBytes = 0;
+    private const int SubscriptionGroupsEmptyElementCount = 0;
+    private const int SubscriptionGroupsInitialSequence = 0;
+    private const string SubscriptionGroupsSubscriptionCompletionKeySpace = "subscription-completion";
+    private const string SubscriptionGroupsFilteredCompletion = "Filtered";
+    private const string SubscriptionGroupsAttemptsExhaustedFailureCode = "AttemptsExhausted";
+    private const string SubscriptionGroupsNextSubscriptionEventExceedsTheReceiveByteBudgetDetail = "The next subscription event exceeds the receive byte budget.";
+    private const int SubscriptionGroupsVersionOne = 1;
+    private const string SubscriptionGroupsSubscriptionTokenScopeOrGenerationIsInvalidDetail = "The subscription token scope or generation is invalid.";
+    private const string SubscriptionGroupsSubscriptionPrincipalPolicyChangedAfterDeliveryDetail = "A subscription principal policy changed after delivery.";
+    private const string SubscriptionGroupsSubscriptionDeliveryLeaseIsStaleDetail = "The subscription delivery lease is stale.";
+    private const string SubscriptionGroupsSubscriptionLeaseExpiredDetail = "The subscription lease expired.";
+    private const int SubscriptionGroupsDefaultSubscriptionRenewalSeconds = 30;
+    private const string SubscriptionGroupsSubscriptionRenewalLeaseIsInvalidDetail = "The subscription renewal lease is invalid.";
+    private const string SubscriptionGroupsAckedCompletion = "Acked";
+    private const int SubscriptionGroupsSubscriptionRetryExponentialBase = 2;
+    private const string SubscriptionGroupsSubscriptionDeliveryActionIsInvalidDetail = "The subscription delivery action is invalid.";
+    private const string SubscriptionGroupsSubscriptionHandlerGenerationIsInvalidDetail = "The subscription handler generation is invalid.";
+    private const string SubscriptionGroupsSubscriptionInboxKeySpace = "subscription-inbox";
+    private const string SubscriptionGroupsSubscriptionInputWasCompletedWithDifferentEffectsDetail = "The subscription input was completed with different effects.";
+
     private const string SubscriptionDeliveryTokenPurpose = "subscription-delivery";
 
     private static byte[] GroupKey(string space, SubscriptionRef subscription, params object?[] suffix)
@@ -14,7 +55,7 @@ public sealed partial class DatabaseEngine
             source.Generation, subscription.GroupId }.Concat(suffix).ToArray());
     }
     private static GroupState Group(IKeyValueView view, SubscriptionRef subscription)
-        => view.GetRecord<GroupState>(GroupKey("subscription", subscription)) ?? throw Errors.Fail(ErrorCode.NotFound, "The subscription group is unavailable.");
+        => view.GetRecord<GroupState>(GroupKey(SubscriptionGroupsSubscriptionKeySpace, subscription)) ?? throw Errors.Fail(ErrorCode.NotFound, SubscriptionGroupsSubscriptionGroupIsUnavailableDetail);
     private ResourceDefinition AuthorizeSubscription(IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription,
         Capability capability, DateTimeOffset now, bool requireDataPrincipal = false)
     {
@@ -40,19 +81,19 @@ public sealed partial class DatabaseEngine
         var head = SourceHead(view, source);
         var position = start switch
         {
-            SubscriptionStart.FromBeginning when cursor is null => head.FirstAvailablePosition - 1,
+            SubscriptionStart.FromBeginning when cursor is null => head.FirstAvailablePosition - SubscriptionGroupsAdjacentElementOffset,
             SubscriptionStart.FromNow when cursor is null => head.TailPosition,
             SubscriptionStart.FromCursor when cursor is not null => SourceCursorPosition(view, principal, source, cursor, now),
-            _ => throw Errors.Fail(ErrorCode.Validation, "The subscription start mode or cursor is invalid.")
+            _ => throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionStartModeOrCursorIsInvalidDetail)
         };
-        if (position < head.FirstAvailablePosition - 1)
+        if (position < head.FirstAvailablePosition - SubscriptionGroupsAdjacentElementOffset)
         {
-            throw Errors.Fail(ErrorCode.HistoryUnavailable, "The subscription history is unavailable.");
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SubscriptionGroupsSubscriptionHistoryIsUnavailableDetail);
         }
 
         if (position > head.TailPosition)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The subscription start is beyond the source tail.");
+            throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionStartIsBeyondTheSourceTailDetail);
         }
 
         return position;
@@ -62,12 +103,12 @@ public sealed partial class DatabaseEngine
         var definition = request.Definition;
         JsonData.Identifier(definition.DataPrincipalId);
         var policy = definition.Policy;
-        if (policy.MaxWindow is < 1 or > 4_096 || policy.MaxAttempts is < 1 or > 1_000 || policy.MaxLeaseSeconds is < 1 or > 3_600
-            || policy.RetryBaseMilliseconds < 1 || policy.RetryMaxMilliseconds < policy.RetryBaseMilliseconds
-            || definition.EventTypes.IsDefault || definition.EventTypes.Length > 128
+        if (policy.MaxWindow is < SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroupsMaximumSubscriptionWindow || policy.MaxAttempts is < SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroupsMaximumSubscriptionAttempts || policy.MaxLeaseSeconds is < SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroupsMaximumSubscriptionLeaseSeconds
+            || policy.RetryBaseMilliseconds < SubscriptionGroupsMinimumPositiveCount || policy.RetryMaxMilliseconds < policy.RetryBaseMilliseconds
+            || definition.EventTypes.IsDefault || definition.EventTypes.Length > SubscriptionGroupsMaximumSubscriptionEventTypes
             || definition.EventTypes.Distinct(StringComparer.Ordinal).Count() != definition.EventTypes.Length)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The subscription policy exceeds its bounds.");
+            throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionPolicyExceedsItsBoundsDetail);
         }
 
         foreach (var type in definition.EventTypes)
@@ -79,18 +120,18 @@ public sealed partial class DatabaseEngine
         var dataPrincipal = Principal(tx, definition.DataPrincipalId, now);
         Authorization.Require(dataPrincipal, request.Subscription.Source.Partition, request.Subscription.Source.Resource, SourceReadCapability(request.Subscription.Source));
         Authorization.RequireWorkerInput(dataPrincipal, resource);
-        var key = GroupKey("subscription", request.Subscription);
+        var key = GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription);
         if (tx.GetRecord<GroupState>(key) is { } existing)
         {
             if (JsonData.Fingerprint(existing.Definition) != JsonData.Fingerprint(definition))
             {
-                throw Errors.Fail(ErrorCode.Conflict, "Changing a subscription definition requires a new group identity.");
+                throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsChangingASubscriptionDefinitionRequiresANewGroupIdentityDetail);
             }
 
             return GroupInfo(tx, request.Subscription, existing);
         }
         var cut = StartPosition(tx, principal, request.Subscription.Source, request.Start, request.Cursor, now);
-        var state = new GroupState(definition, 1, 1, cut, cut);
+        var state = new GroupState(definition, SubscriptionGroupsSingleElementCount, SubscriptionGroupsSingleElementCount, cut, cut);
         tx.PutRecord(key, state);
         return GroupInfo(tx, request.Subscription, state);
     }
@@ -99,25 +140,25 @@ public sealed partial class DatabaseEngine
         var state = Group(tx, request.Subscription);
         if (request.ExpectedGeneration != state.Generation)
         {
-            throw Errors.Fail(ErrorCode.RevisionConflict, "The subscription generation changed.");
+            throw Errors.Fail(ErrorCode.RevisionConflict, SubscriptionGroupsSubscriptionGenerationChangedDetail);
         }
 
         var cut = StartPosition(tx, principal, request.Subscription.Source, request.Start, request.Cursor, now);
-        foreach (var item in tx.Scan(GroupKey("subscription-window", request.Subscription, state.Generation), state.Definition.Policy.MaxWindow + 1).Records)
+        foreach (var item in tx.Scan(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, state.Generation), state.Definition.Policy.MaxWindow + SubscriptionGroupsAdjacentElementOffset).Records)
         {
             tx.Delete(item.Key.ToArray());
         }
         // Explicit seek fences old leases and pauses delivery until an authorized resume.
         state = state with
         {
-            Generation = checked(state.Generation + 1),
-            OwnershipEpoch = checked(state.OwnershipEpoch + 1),
+            Generation = checked(state.Generation + SubscriptionGroupsAdjacentElementOffset),
+            OwnershipEpoch = checked(state.OwnershipEpoch + SubscriptionGroupsAdjacentElementOffset),
             Checkpoint = cut,
             IssuedPosition = cut,
             Paused = true,
             SafeFailureCode = null
         };
-        tx.PutRecord(GroupKey("subscription", request.Subscription), state);
+        tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return GroupInfo(tx, request.Subscription, state);
     }
     private SubscriptionInfo SetSubscriptionPaused(IAtomicTransaction tx, SetSubscriptionPausedRequest request)
@@ -125,16 +166,16 @@ public sealed partial class DatabaseEngine
         var state = Group(tx, request.Subscription);
         if (state.Generation != request.ExpectedGeneration)
         {
-            throw Errors.Fail(ErrorCode.RevisionConflict, "The subscription generation changed.");
+            throw Errors.Fail(ErrorCode.RevisionConflict, SubscriptionGroupsSubscriptionGenerationChangedDetail);
         }
 
         if (!request.Paused && state.SafeFailureCode is not null)
         {
-            throw Errors.Fail(ErrorCode.Conflict, "A parked subscription requires an explicit seek or new group before resuming.");
+            throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsParkedSubscriptionRequiresAnExplicitSeekOrNewGroupBeforeResumingDetail);
         }
 
         state = state with { Paused = request.Paused };
-        tx.PutRecord(GroupKey("subscription", request.Subscription), state);
+        tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return GroupInfo(tx, request.Subscription, state);
     }
     private static GroupState AdvanceCheckpoint(IAtomicTransaction tx, SubscriptionRef subscription, GroupState state)
@@ -142,7 +183,7 @@ public sealed partial class DatabaseEngine
         var checkpoint = state.Checkpoint;
         while (checkpoint < state.IssuedPosition)
         {
-            var key = GroupKey("subscription-window", subscription, state.Generation, checkpoint + 1);
+            var key = GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, checkpoint + SubscriptionGroupsAdjacentElementOffset);
             var delivery = tx.GetRecord<GroupDelivery>(key);
             if (delivery?.State is not (GroupDeliveryState.Acked or GroupDeliveryState.Filtered))
             {
@@ -163,26 +204,26 @@ public sealed partial class DatabaseEngine
         var resource = SourceResource(tx, subscription.Source);
         var head = SourceHead(tx, subscription.Source);
         var dataPrincipal = Principal(tx, state.Definition.DataPrincipalId, now);
-        if (request.MaxEvents is < 1 or > 100 || request.MaxBytes < 1 || request.MaxBytes > Limits.MaxBatchBytes
-            || request.LeaseSeconds < 1 || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxEvents < SubscriptionGroupsMinimumPositiveCount || request.MaxEvents > messagingExecution.MaximumReceiveEvents || request.MaxBytes < SubscriptionGroupsMinimumPositiveCount || request.MaxBytes > Limits.MaxBatchBytes
+            || request.LeaseSeconds < SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The subscription receive budget or lease is invalid.");
+            throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionReceiveBudgetOrLeaseIsInvalidDetail);
         }
 
         if (state.Paused || resource.Paused || DispatchPaused(tx))
         {
-            throw Errors.Fail(ErrorCode.DispatchPaused, "Subscription delivery is paused.");
+            throw Errors.Fail(ErrorCode.DispatchPaused, SubscriptionGroupsSubscriptionDeliveryIsPausedDetail);
         }
 
-        if (state.Checkpoint < head.FirstAvailablePosition - 1)
+        if (state.Checkpoint < head.FirstAvailablePosition - SubscriptionGroupsAdjacentElementOffset)
         {
-            throw Errors.Fail(ErrorCode.HistoryUnavailable, "The subscription history was retained away.");
+            throw Errors.Fail(ErrorCode.HistoryUnavailable, SubscriptionGroupsSubscriptionHistoryWasRetainedAwayDetail);
         }
 
         var result = new List<SubscriptionDelivery>();
         state = FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result);
         state = AdvanceCheckpoint(tx, subscription, state);
-        tx.PutRecord(GroupKey("subscription", subscription), state);
+        tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, subscription), state);
         return new(request.RequestId, result.ToImmutableArray(), GroupInfo(tx, subscription, state), Token(tx, subscription.Source.Partition, position));
     }
     private GroupState FillSubscriptionWindow(IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request,
@@ -190,12 +231,12 @@ public sealed partial class DatabaseEngine
         PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result)
     {
         var subscription = request.Subscription;
-        long bytes = 0;
+        long bytes = SubscriptionGroupsNoRetainedBytes;
         var windowEnd = long.Min(head.TailPosition, checked(state.Checkpoint + policy.MaxWindow));
-        for (var sequence = state.Checkpoint + 1; sequence <= windowEnd && result.Count < request.MaxEvents; sequence++)
+        for (var sequence = state.Checkpoint + SubscriptionGroupsAdjacentElementOffset; sequence <= windowEnd && result.Count < request.MaxEvents; sequence++)
         {
-            var key = GroupKey("subscription-window", subscription, state.Generation, sequence);
-            var delivery = tx.GetRecord<GroupDelivery>(key) ?? new(sequence, GroupDeliveryState.Pending, 0, 0);
+            var key = GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, sequence);
+            var delivery = tx.GetRecord<GroupDelivery>(key) ?? new(sequence, GroupDeliveryState.Pending, SubscriptionGroupsEmptyElementCount, SubscriptionGroupsInitialSequence);
             if (delivery.State is GroupDeliveryState.Acked or GroupDeliveryState.Filtered or GroupDeliveryState.Parked
                 || delivery.State == GroupDeliveryState.Leased && delivery.LeaseUntil > now || delivery.AvailableAt > now)
             {
@@ -203,18 +244,18 @@ public sealed partial class DatabaseEngine
             }
 
             var record = SourceRecord(tx, subscription.Source, sequence);
-            if (state.Definition.EventTypes.Length != 0 && !state.Definition.EventTypes.Contains(record.Data.EventType, StringComparer.Ordinal))
+            if (state.Definition.EventTypes.Length != SubscriptionGroupsEmptyElementCount && !state.Definition.EventTypes.Contains(record.Data.EventType, StringComparer.Ordinal))
             {
                 tx.PutRecord(key, delivery with { State = GroupDeliveryState.Filtered });
-                tx.PutRecord(GroupKey("subscription-completion", subscription, state.Generation, sequence),
-                    new SubscriptionCompletion(state.Generation, sequence, "Filtered", dataPrincipal.PolicyEpoch));
+                tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionCompletionKeySpace, subscription, state.Generation, sequence),
+                    new SubscriptionCompletion(state.Generation, sequence, SubscriptionGroupsFilteredCompletion, dataPrincipal.PolicyEpoch));
                 state = state with { IssuedPosition = long.Max(state.IssuedPosition, sequence) };
                 continue;
             }
             if (delivery.Attempts >= policy.MaxAttempts)
             {
                 tx.PutRecord(key, delivery with { State = GroupDeliveryState.Parked, LeaseUntil = null, PrincipalId = null });
-                state = state with { Paused = true, SafeFailureCode = "AttemptsExhausted" };
+                state = state with { Paused = true, SafeFailureCode = SubscriptionGroupsAttemptsExhaustedFailureCode };
                 break;
             }
             if (!TryLeaseSubscriptionEvent(tx, principal, request, now, state, resource, dataPrincipal,
@@ -234,9 +275,9 @@ public sealed partial class DatabaseEngine
         issuedState = state;
         var projected = ProjectEvent(principal, resource, ProjectEvent(dataPrincipal, resource, record));
         var size = JsonDefaults.Serialize(projected).LongLength;
-        if (size > request.MaxBytes && result.Count == 0)
+        if (size > request.MaxBytes && result.Count == SubscriptionGroupsNoRetainedBytes)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, "The next subscription event exceeds the receive byte budget.");
+            throw Errors.Fail(ErrorCode.ResourceExhausted, SubscriptionGroupsNextSubscriptionEventExceedsTheReceiveByteBudgetDetail);
         }
         if (bytes + size > request.MaxBytes)
         {
@@ -246,8 +287,8 @@ public sealed partial class DatabaseEngine
         delivery = delivery with
         {
             State = GroupDeliveryState.Leased,
-            Attempts = delivery.Attempts + 1,
-            LeaseVersion = checked(delivery.LeaseVersion + 1),
+            Attempts = delivery.Attempts + SubscriptionGroupsAdjacentElementOffset,
+            LeaseVersion = checked(delivery.LeaseVersion + SubscriptionGroupsVersionOne),
             LeaseUntil = now.AddSeconds(request.LeaseSeconds),
             PrincipalId = principal.Id,
             AvailableAt = null
@@ -265,15 +306,15 @@ public sealed partial class DatabaseEngine
         var claims = Verify<GroupClaims>(token);
         var state = Group(view, subscription);
         if (claims.Purpose != SubscriptionDeliveryTokenPurpose || claims.Incarnation != Store.Identity.Incarnation || claims.Subscription != subscription
-            || claims.PrincipalId != principal.Id || claims.Generation != state.Generation || claims.OwnershipEpoch != state.OwnershipEpoch || claims.Position < 1)
+            || claims.PrincipalId != principal.Id || claims.Generation != state.Generation || claims.OwnershipEpoch != state.OwnershipEpoch || claims.Position < SubscriptionGroupsMinimumPositiveCount)
         {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, "The subscription token scope or generation is invalid.");
+            throw Errors.Fail(ErrorCode.TokenInvalidated, SubscriptionGroupsSubscriptionTokenScopeOrGenerationIsInvalidDetail);
         }
 
         var dataPrincipal = Principal(view, state.Definition.DataPrincipalId, now);
         if (claims.PolicyEpoch != principal.PolicyEpoch || claims.DataPolicyEpoch != dataPrincipal.PolicyEpoch)
         {
-            throw Errors.Fail(ErrorCode.PermissionDenied, "A subscription principal policy changed after delivery.");
+            throw Errors.Fail(ErrorCode.PermissionDenied, SubscriptionGroupsSubscriptionPrincipalPolicyChangedAfterDeliveryDetail);
         }
 
         return claims;
@@ -283,15 +324,15 @@ public sealed partial class DatabaseEngine
     {
         var claims = ValidateGroupClaims(view, principal, subscription, token, now);
         var state = Group(view, subscription);
-        var delivery = view.GetRecord<GroupDelivery>(GroupKey("subscription-window", subscription, state.Generation, claims.Position));
+        var delivery = view.GetRecord<GroupDelivery>(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, claims.Position));
         if (delivery is null || delivery.State != GroupDeliveryState.Leased || delivery.PrincipalId != principal.Id || delivery.LeaseVersion != claims.LeaseVersion)
         {
-            throw Errors.Fail(ErrorCode.StaleLease, "The subscription delivery lease is stale.");
+            throw Errors.Fail(ErrorCode.StaleLease, SubscriptionGroupsSubscriptionDeliveryLeaseIsStaleDetail);
         }
 
         if (delivery.LeaseUntil <= now)
         {
-            throw Errors.Fail(ErrorCode.LeaseExpired, "The subscription lease expired.");
+            throw Errors.Fail(ErrorCode.LeaseExpired, SubscriptionGroupsSubscriptionLeaseExpiredDetail);
         }
 
         return (claims, state, delivery);
@@ -301,33 +342,33 @@ public sealed partial class DatabaseEngine
     {
         var (_, state, delivery) = SubscriptionLease(tx, principal, request.Subscription, request.Token, now);
         var policy = state.Definition.Policy;
-        var key = GroupKey("subscription-window", request.Subscription, state.Generation, delivery.Position);
+        var key = GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, state.Generation, delivery.Position);
         switch (request.Action)
         {
             case DeliveryAction.Renew:
-                var seconds = request.LeaseSeconds ?? 30;
-                if (seconds < 1 || seconds > policy.MaxLeaseSeconds)
+                var seconds = request.LeaseSeconds ?? SubscriptionGroupsDefaultSubscriptionRenewalSeconds;
+                if (seconds < SubscriptionGroupsMinimumPositiveCount || seconds > policy.MaxLeaseSeconds)
                 {
-                    throw Errors.Fail(ErrorCode.Validation, "The subscription renewal lease is invalid.");
+                    throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionRenewalLeaseIsInvalidDetail);
                 }
 
                 delivery = delivery with { LeaseUntil = now.AddSeconds(seconds) };
                 break;
             case DeliveryAction.Ack:
                 delivery = delivery with { State = GroupDeliveryState.Acked, LeaseUntil = null, PrincipalId = null };
-                tx.PutRecord(GroupKey("subscription-completion", request.Subscription, state.Generation, delivery.Position),
-                    new SubscriptionCompletion(state.Generation, delivery.Position, "Acked", principal.PolicyEpoch));
+                tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionCompletionKeySpace, request.Subscription, state.Generation, delivery.Position),
+                    new SubscriptionCompletion(state.Generation, delivery.Position, SubscriptionGroupsAckedCompletion, principal.PolicyEpoch));
                 break;
             case DeliveryAction.Nack:
-                var delay = Math.Min(policy.RetryMaxMilliseconds, policy.RetryBaseMilliseconds * Math.Pow(2, Math.Min(delivery.Attempts - 1, 20)));
+                var delay = Math.Min(policy.RetryMaxMilliseconds, policy.RetryBaseMilliseconds * Math.Pow(SubscriptionGroupsSubscriptionRetryExponentialBase, Math.Min(delivery.Attempts - SubscriptionGroupsAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));
                 delivery = delivery with { State = GroupDeliveryState.Pending, AvailableAt = now.AddMilliseconds(delay), LeaseUntil = null, PrincipalId = null };
                 break;
             default:
-                throw Errors.Fail(ErrorCode.Validation, "The subscription delivery action is invalid.");
+                throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionDeliveryActionIsInvalidDetail);
         }
         tx.PutRecord(key, delivery);
         state = AdvanceCheckpoint(tx, request.Subscription, state);
-        tx.PutRecord(GroupKey("subscription", request.Subscription), state);
+        tx.PutRecord(GroupKey(SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return new(request.CommandId, Token(tx, request.Subscription.Source.Partition, position),
             [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], Durability);
     }
@@ -335,23 +376,23 @@ public sealed partial class DatabaseEngine
         SubscriptionProcessingRequest request, DateTimeOffset now, long position)
     {
         JsonData.Identifier(request.HandlerScope);
-        if (request.ExecutionGeneration < 1)
+        if (request.ExecutionGeneration < SubscriptionGroupsMinimumPositiveCount)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The subscription handler generation is invalid.");
+            throw Errors.Fail(ErrorCode.Validation, SubscriptionGroupsSubscriptionHandlerGenerationIsInvalidDetail);
         }
 
         var claims = ValidateGroupClaims(tx, principal, request.Subscription, request.Token, now);
-        var inboxKey = GroupKey("subscription-inbox", request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration);
+        var inboxKey = GroupKey(SubscriptionGroupsSubscriptionInboxKeySpace, request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration);
         var fingerprint = JsonData.Fingerprint(new { request.Subscription, claims.Position, request.HandlerScope, request.ExecutionGeneration, request.Effects });
         if (tx.GetRecord<InboxRecord>(inboxKey) is { } completed)
         {
             if (completed.Fingerprint != fingerprint)
             {
-                throw Errors.Fail(ErrorCode.Conflict, "The subscription input was completed with different effects.");
+                throw Errors.Fail(ErrorCode.Conflict, SubscriptionGroupsSubscriptionInputWasCompletedWithDifferentEffectsDetail);
             }
 
             ReauthorizeEffects(tx, principal, request.Subscription.Source.Partition, request.Effects);
-            var delivery = tx.GetRecord<GroupDelivery>(GroupKey("subscription-window", request.Subscription, claims.Generation, claims.Position));
+            var delivery = tx.GetRecord<GroupDelivery>(GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, claims.Generation, claims.Position));
             var acknowledgement = delivery is { State: GroupDeliveryState.Leased } && delivery.LeaseVersion == claims.LeaseVersion
                 ? CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position)
                 : completed.Receipt;

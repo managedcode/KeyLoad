@@ -5,6 +5,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string OperationDispatcherBatchPlacementWitnessDoesNotMatchItsTransactionDetail = "The Batch placement witness does not match its transaction.";
+    private const int OperationDispatcherInitialSequence = 0;
+    private const int OperationDispatcherVersionOne = 1;
+
     private const string UnsupportedOperationMessage = "The operation is unsupported.";
     private const string BatchEnvelopeMismatchMessage = "The envelope and command IDs differ.";
     private const string MembershipSpaceName = "membership";
@@ -53,7 +57,7 @@ public sealed partial class DatabaseEngine
         }
         if (placement is null || placement.Partition != batch.Partition)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "The Batch placement witness does not match its transaction.");
+            throw Errors.Fail(ErrorCode.Corruption, OperationDispatcherBatchPlacementWitnessDoesNotMatchItsTransactionDetail);
         }
         var token = new CommitToken(placement.Incarnation, batch.Partition.AtomicPartitionId, position,
             placement.PlacementEpoch);
@@ -67,11 +71,11 @@ public sealed partial class DatabaseEngine
         var membership = Payload<MembershipMutation>(operation);
         var key = KeyCodec.Encode(MembershipSpaceName, membership.Key);
         var row = transaction.GetRecord<MembershipRecord>(key);
-        if (membership.ExpectedVersion != (row?.Version ?? 0))
+        if (membership.ExpectedVersion != (row?.Version ?? OperationDispatcherInitialSequence))
         {
             return Result(false);
         }
-        transaction.PutRecord(key, new MembershipRecord((row?.Version ?? 0) + 1, membership.Payload));
+        transaction.PutRecord(key, new MembershipRecord((row?.Version ?? OperationDispatcherInitialSequence) + OperationDispatcherVersionOne, membership.Payload));
         return Result(true);
     }
 

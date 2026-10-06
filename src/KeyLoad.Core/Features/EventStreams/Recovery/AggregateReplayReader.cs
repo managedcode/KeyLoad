@@ -5,6 +5,13 @@ namespace KeyLoad.Core;
 
 internal static class AggregateReplayReader
 {
+    private const int ContinuationLookaheadRecords = 1;
+    private const int LastReplayEventOffset = 1;
+
+    private const int ReadHeadTailRevisionEmptyCount = 0;
+    private const int ReadHeadFirstAvailableRevisionSingleItemCount = 1;
+    private const int ReadHeadGenerationSingleItemCount = 1;
+
     internal const string StreamHeadKeySpace = "stream-head";
     private const string EventSpace = "event";
     private const string EventIdentitySpace = "event-id";
@@ -24,6 +31,8 @@ internal static class AggregateReplayReader
     internal static AggregateReplayPage Read(DatabaseEngine database, IKeyValueView view, string principalId,
         ReadAggregateReplayRequest request, ReadExecutionBudget budget)
     {
+        const int ReadAbsentCount = 0;
+
         ValidateRequest(database, request);
         var metadataView = budget.CreateView(view);
         var principal = database.Principal(metadataView, principalId, database.EvaluationClock.GetUtcNow());
@@ -39,7 +48,7 @@ internal static class AggregateReplayReader
         }
 
         var snapshot = request.FromBeginning ? null : ReadSnapshot(view, request.Stream, database.Limits, budget);
-        var startRevision = snapshot is null ? 0 : ValidateSnapshot(snapshot, request, head);
+        var startRevision = snapshot is null ? ReadAbsentCount : ValidateSnapshot(snapshot, request, head);
         ValidateRetainedStart(startRevision, head);
         var events = ReadTail(view, request.Stream, head, startRevision, request.MaximumEvents,
             database.Limits, budget);
@@ -50,17 +59,21 @@ internal static class AggregateReplayReader
 
     private static void ValidateRequest(DatabaseEngine database, ReadAggregateReplayRequest request)
     {
+        const int GenerationValidationBoundary = 1;
+        const int StateSchemaVersionValidationBoundary = 1;
+        const int MaximumEventsValidationBoundary = 1;
+
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Stream);
         DatabaseEngine.ValidatePartition(request.Stream.Partition);
         JsonData.Identifier(request.Stream.StreamSet);
         JsonData.Identifier(request.Stream.StreamId);
         JsonData.Identifier(request.ReducerVersion);
-        if (request.Stream.Generation < 1 || request.StateSchemaVersion < 1)
+        if (request.Stream.Generation < GenerationValidationBoundary || request.StateSchemaVersion < StateSchemaVersionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidReplayIdentityMessage);
         }
-        if (request.MaximumEvents < 1 || request.MaximumEvents > database.Limits.MaxResults
+        if (request.MaximumEvents < MaximumEventsValidationBoundary || request.MaximumEvents > database.Limits.MaxResults
             || request.MaximumEvents > database.Limits.MaxScanRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidReplayLimitMessage);
@@ -70,7 +83,7 @@ internal static class AggregateReplayReader
     private static StreamHead ReadHead(IKeyValueView view, StreamRef stream, ReadExecutionBudget budget)
         => budget.ReadRecord<StreamHead>(view,
             KeySpace.Partition(StreamHeadKeySpace, stream.Partition, stream.StreamSet, stream.StreamId))
-            ?? new StreamHead(0, 1, 1);
+            ?? new StreamHead(ReadHeadTailRevisionEmptyCount, ReadHeadFirstAvailableRevisionSingleItemCount, ReadHeadGenerationSingleItemCount);
 
     private static AggregateSnapshotState? ReadSnapshot(IKeyValueView view, StreamRef stream,
         DatabaseLimits limits, ReadExecutionBudget budget)
@@ -99,7 +112,9 @@ internal static class AggregateReplayReader
 
     private static void ValidateRetainedStart(long revision, StreamHead head)
     {
-        if (revision < head.FirstAvailableRevision - 1)
+        const int FirstAvailableRevisionStep = 1;
+
+        if (revision < head.FirstAvailableRevision - FirstAvailableRevisionStep)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, ReplayHistoryUnavailableMessage);
         }
@@ -108,23 +123,27 @@ internal static class AggregateReplayReader
     private static ImmutableArray<EventRecord> ReadTail(IKeyValueView view, StreamRef stream, StreamHead head,
         long afterRevision, int maximumEvents, DatabaseLimits limits, ReadExecutionBudget budget)
     {
+        const long ResultBytesInitialValue = 0L;
+        const long VisitorSingleItemCount = 1L;
+        const int VisitorEmptyCount = 0;
+
         var requiredCount = head.TailRevision - afterRevision;
         if (requiredCount > maximumEvents)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReplayEventsExceededMessage);
         }
-        var scanLimit = (int)Math.Min(maximumEvents, requiredCount + 1);
+        var scanLimit = (int)Math.Min(maximumEvents, requiredCount + ContinuationLookaheadRecords);
         var records = new List<EventRecord>(scanLimit);
-        var resultBytes = 0L;
+        var resultBytes = ResultBytesInitialValue;
         var prefix = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation);
         var afterKey = KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet, stream.StreamId,
             stream.Generation, afterRevision);
         var scan = budget.VisitRange(view, prefix, scanLimit, (key, value) =>
         {
-            var expectedRevision = checked(afterRevision + records.Count + 1L);
+            var expectedRevision = checked(afterRevision + records.Count + VisitorSingleItemCount);
             var record = NativeSerialization.Deserialize<EventRecord>(value);
             ValidateEvent(record, key, stream, expectedRevision, head, limits);
-            if (records.Count > 0 && record.EventSequence <= records[^1].EventSequence)
+            if (records.Count > VisitorEmptyCount && record.EventSequence <= records[^LastReplayEventOffset].EventSequence)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidEventRecordMessage);
             }
@@ -151,8 +170,11 @@ internal static class AggregateReplayReader
     private static void ValidateEvent(EventRecord record, ReadOnlySpan<byte> key, StreamRef stream,
         long expectedRevision, StreamHead head, DatabaseLimits limits)
     {
+        const int EventSequenceValidationBoundary = 1;
+        const int SchemaVersionValidationBoundary = 1;
+
         if (!record.Stream.Equals(stream) || record.Revision != expectedRevision || record.Revision > head.TailRevision
-            || record.EventSequence < 1 || record.Data.SchemaVersion < 1
+            || record.EventSequence < EventSequenceValidationBoundary || record.Data.SchemaVersion < SchemaVersionValidationBoundary
             || !key.SequenceEqual(KeySpace.Partition(EventSpace, stream.Partition, stream.StreamSet,
                 stream.StreamId, stream.Generation, record.Revision)))
         {
@@ -185,8 +207,13 @@ internal static class AggregateReplayReader
 
     internal static void ValidateHead(StreamHead head)
     {
-        if (head.Generation < 1 || head.TailRevision < 0 || head.FirstAvailableRevision < 1
-            || head.FirstAvailableRevision - 1 > head.TailRevision)
+        const int GenerationValidationBoundary = 1;
+        const int TailRevisionValidationBoundary = 0;
+        const int FirstAvailableRevisionValidationBoundary = 1;
+        const int FirstAvailableRevisionStep = 1;
+
+        if (head.Generation < GenerationValidationBoundary || head.TailRevision < TailRevisionValidationBoundary || head.FirstAvailableRevision < FirstAvailableRevisionValidationBoundary
+            || head.FirstAvailableRevision - FirstAvailableRevisionStep > head.TailRevision)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStreamHeadMessage);
         }
@@ -203,7 +230,7 @@ public sealed partial class DatabaseEngine
     public AggregateReplayPage ReadAggregateReplay(string principalId, ReadAggregateReplayRequest request,
         CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         return Store.Read(view => AggregateReplayReader.Read(this, view, principalId, request, budget));
     }

@@ -3,7 +3,7 @@ using KeyLoad.Diagnostics.Features.ResourceExecution;
 namespace KeyLoad.Replication;
 
 internal sealed class ReplicaReadRoundExecutor(ReplicaState state, ReplicaRpcClient rpc, ReplicaLeader leader,
-    ReplicaActivityTracker activity, Task transportReady, CancellationToken lifetime, TimeSpan readBarrierTimeout)
+    ReplicaActivityTracker activity, Task transportReady, TimeSpan readBarrierTimeout, CancellationToken lifetime)
 {
     private const int FirstCommittedPosition = 1;
     private const int FirstElectionTerm = 1;

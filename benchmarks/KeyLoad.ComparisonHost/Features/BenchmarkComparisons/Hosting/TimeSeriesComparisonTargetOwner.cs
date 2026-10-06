@@ -27,9 +27,11 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
 
     public async ValueTask DisposeAsync()
     {
+        const int FirstOwnerIndex = 0;
+
         try
         {
-            await DisposeTargetsAsync(0);
+            await DisposeTargetsAsync(FirstOwnerIndex);
         }
         finally
         {
@@ -39,7 +41,7 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
             }
             finally
             {
-                await DisposeUnownedClientsAsync(0);
+                await DisposeUnownedClientsAsync(FirstOwnerIndex);
                 targets.Clear();
                 unownedClients.Clear();
                 pendingTarget = null;
@@ -49,6 +51,8 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
 
     private async Task DisposeTargetsAsync(int index)
     {
+        const int NextOwnerOffset = 1;
+
         if (index >= targets.Count)
         {
             return;
@@ -60,7 +64,7 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
         }
         finally
         {
-            await DisposeTargetsAsync(index + 1);
+            await DisposeTargetsAsync(index + NextOwnerOffset);
         }
     }
 
@@ -74,6 +78,8 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
 
     private async Task DisposeUnownedClientsAsync(int index)
     {
+        const int NextOwnerOffset = 1;
+
         if (index >= unownedClients.Count)
         {
             return;
@@ -85,7 +91,7 @@ internal sealed class TimeSeriesComparisonTargetOwner(IOptions<KeyLoadClientExec
         }
         finally
         {
-            await DisposeUnownedClientsAsync(index + 1);
+            await DisposeUnownedClientsAsync(index + NextOwnerOffset);
         }
     }
 

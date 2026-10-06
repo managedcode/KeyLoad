@@ -5,6 +5,9 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Forwards canonical UTF-8 bytes to a caller-owned incremental hash.</summary>
 internal sealed class CanonicalHashStream : Stream
 {
+    private const int AdjacentElementOffset = 1;
+    private const int FirstElementIndex = 0;
+
     private readonly IncrementalHash hash;
     private bool disposed;
 
@@ -46,8 +49,8 @@ internal sealed class CanonicalHashStream : Stream
 
     public override void WriteByte(byte value)
     {
-        Span<byte> buffer = stackalloc byte[1];
-        buffer[0] = value;
+        Span<byte> buffer = stackalloc byte[AdjacentElementOffset];
+        buffer[FirstElementIndex] = value;
         Write(buffer);
     }
 

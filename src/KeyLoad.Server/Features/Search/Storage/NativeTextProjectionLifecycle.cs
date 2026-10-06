@@ -1,27 +1,31 @@
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionLifecycle
 {
+    private readonly IOptions<NativeTextExecutionOptions> executionOptions;
+
     private readonly DatabaseLimits limits;
+    private readonly IOptions<DatabaseLimits> limitsOptions;
     private readonly NativeTextProjectionState state;
     private readonly NativeTextProjectionPhysicalGate physicalGate;
     private readonly Action<NativeTextFaultStage>? faultObserver;
     private readonly NativeTextProjectionShutdown shutdown;
 
-    internal NativeTextProjectionLifecycle(string root, DatabaseLimits limits, Guid sourceNodeId,
-        NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate,
-        Action<NativeTextFaultStage>? faultObserver)
+    internal NativeTextProjectionLifecycle(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, NativeTextProjectionState state, NativeTextProjectionPhysicalGate physicalGate, Action<NativeTextFaultStage>? faultObserver, IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        this.executionOptions = executionOptions;
         Root = root;
         SourceNodeId = sourceNodeId;
-        this.limits = limits;
+        this.limitsOptions = limitsOptions;
+        limits = limitsOptions.Value;
         this.state = state;
         this.physicalGate = physicalGate;
         this.faultObserver = faultObserver;
-        shutdown = new(root, limits, sourceNodeId, state, physicalGate, faultObserver);
+        shutdown = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions);
     }
 
     internal string Root { get; }
@@ -38,15 +42,15 @@ internal sealed class NativeTextProjectionLifecycle
             physicalGate.Run(() =>
             {
                 state.CaptureSlots(out var first, out var second, out var third);
-                NativeTextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, limits, first, second, third);
+                NativeTextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, limits, first: first, second: second, third: third, executionOptions: executionOptions);
                 state.MarkOwnerCreated(slot);
             });
             faultObserver?.Invoke(NativeTextFaultStage.OwnerFlushed);
             budget.Check();
-            var provider = new NativeTextFileStreamProvider(Root, leaf, SourceNodeId);
+            var provider = new NativeTextFileStreamProvider(Root, leaf, SourceNodeId, executionOptions: executionOptions);
             generation = physicalGate.Run(() =>
             {
-                var created = new NativeTextGeneration(Root, leaf, SourceNodeId, scope, limits, provider);
+                var created = new NativeTextGeneration(Root, leaf, SourceNodeId, scope, limitsOptions, provider, executionOptions: executionOptions);
                 state.AttachGeneration(slot, created);
                 return created;
             });
@@ -72,10 +76,10 @@ internal sealed class NativeTextProjectionLifecycle
     {
         var files = physicalGate.Run(() => generation.CloseAndCapture(budget));
         NativeTextSettlement.ThrowDeferredBudgetFailure(generation);
-        physicalGate.Run(() => NativeTextFiles.CheckGenerationBound(generation.Path, budget));
+        physicalGate.Run(() => NativeTextFiles.CheckGenerationBound(generation.Path, budget: budget, executionOptions: executionOptions));
         budget.Check();
         physicalGate.Run(() => NativeTextFiles.WritePendingManifest(Root, generation.Leaf, generation.Scope,
-            generation.SealRecords(), files, limits, budget));
+            generation.SealRecords(), files, limits, budget: budget, executionOptions: executionOptions));
         budget.Check();
         faultObserver?.Invoke(NativeTextFaultStage.NativeInventoryFlushed);
         budget.Check();
@@ -95,7 +99,7 @@ internal sealed class NativeTextProjectionLifecycle
             {
                 var generation = slot.Generation ?? throw NativeTextErrors.Corrupt();
                 generation.DisposeIndex();
-                NativeTextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, limits);
+                NativeTextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, limits, executionOptions: executionOptions);
             }
             catch (Exception error)
             {
@@ -116,7 +120,7 @@ internal sealed class NativeTextProjectionLifecycle
         physicalGate.Run(() =>
         {
             state.CaptureSlots(out var first, out var second, out var third);
-            NativeTextPhysicalBudget.Check(Root, first, second, third, budget);
+            NativeTextPhysicalBudget.Check(Root, first, second, third, budget, executionOptions: executionOptions);
         });
     }
 
@@ -159,7 +163,7 @@ internal sealed class NativeTextProjectionLifecycle
             {
                 var previousGeneration = previous.Generation ?? throw NativeTextErrors.Corrupt();
                 previousGeneration.DisposeIndex();
-                NativeTextFiles.DeleteOwnedGeneration(Root, previousGeneration.Leaf, SourceNodeId, limits);
+                NativeTextFiles.DeleteOwnedGeneration(Root, previousGeneration.Leaf, SourceNodeId, limits, executionOptions: executionOptions);
                 state.CompleteReplacement(previous, generation);
             }
             catch (Exception)
@@ -182,7 +186,7 @@ internal sealed class NativeTextProjectionLifecycle
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() =>
             {
-                NativeTextFiles.DeleteBuildingGeneration(Root, leaf, SourceNodeId, limits);
+                NativeTextFiles.DeleteBuildingGeneration(Root, leaf, SourceNodeId, limits, executionOptions: executionOptions);
                 state.ClearFailedBuild(slot);
             }), failures);
         }

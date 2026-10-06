@@ -17,11 +17,13 @@ public sealed partial class DatabaseEngine
     private MutationReceipt ApplyGraphReverseDelivery(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef targetPartition, ApplyCrossPartitionReverseEdge request)
     {
+        const string InvalidDeliveryTarget = "The graph delivery target does not match its command partition.";
+
         GraphCrossPartitionValidation.ValidateLocator(request.SourcePartition, request.Graph, request.EdgeId,
             request.Destination, request.ExpectedRevision);
         if (targetPartition != request.Destination.Partition || targetPartition == request.SourcePartition)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The graph delivery target does not match its command partition.");
+            throw Errors.Fail(ErrorCode.Validation, InvalidDeliveryTarget);
         }
         RequireGraphWrite(tx, principal, request.SourcePartition, targetPartition, request.Graph);
         RequireSameGraphOwner(tx, request.SourcePartition, targetPartition);
@@ -82,11 +84,13 @@ public sealed partial class DatabaseEngine
     private MutationReceipt CompleteGraphReverseDelivery(IAtomicTransaction tx,
         PrincipalRecord principal, PartitionRef sourcePartition, CompleteCrossPartitionReverseEdge request)
     {
+        const string InvalidCompletionSource = "The graph completion source does not match its command partition.";
+
         GraphCrossPartitionValidation.ValidateLocator(request.SourcePartition, request.Graph, request.EdgeId,
             request.Destination, request.ExpectedRevision);
         if (sourcePartition != request.SourcePartition || sourcePartition == request.Destination.Partition)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The graph completion source does not match its command partition.");
+            throw Errors.Fail(ErrorCode.Validation, InvalidCompletionSource);
         }
         RequireGraphWrite(tx, principal, sourcePartition, request.Destination.Partition, request.Graph);
         RequireSameGraphOwner(tx, sourcePartition, request.Destination.Partition);

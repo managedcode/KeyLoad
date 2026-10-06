@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Server;
 
 /// <summary>Bounds MCP retained memory using independent byte pools without execution or identity quotas.</summary>
@@ -11,16 +13,13 @@ internal sealed class McpMemoryBudget
     private readonly long[] retained;
 
     /// <summary>Creates independent memory pools for data, control and unclassified ingress.</summary>
-    /// <param name="dataBytes">The positive retained-memory capacity for data operations.</param>
-    /// <param name="controlBytes">The positive retained-memory capacity reserved for control operations.</param>
-    /// <param name="ingressBytes">The positive retained-memory capacity for unclassified protocol parsing.</param>
+    /// <param name="options">The centrally validated capacities shared by every MCP memory lane.</param>
     /// <exception cref="ArgumentOutOfRangeException">Any pool capacity is zero or negative.</exception>
-    public McpMemoryBudget(long dataBytes, long controlBytes, long ingressBytes)
+    public McpMemoryBudget(IOptions<McpMemoryLimits> options)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(dataBytes);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(controlBytes);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(ingressBytes);
-        limits = [dataBytes, controlBytes, ingressBytes];
+        var snapshot = options.Value;
+        snapshot.Validate();
+        limits = [snapshot.DataBytes, snapshot.ControlBytes, snapshot.IngressBytes];
         retained = new long[limits.Length];
     }
 

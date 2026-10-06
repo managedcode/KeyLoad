@@ -4,6 +4,8 @@ namespace KeyLoad.Core;
 
 internal static class AdminReadAuthority
 {
+    private const int InitialAdminReadPosition = 0;
+
     private const string AdministratorRequired = "Cluster administration is required.";
     private const string InvalidPageLimit = "The administration page limit must be between one and one hundred.";
 
@@ -16,12 +18,14 @@ internal static class AdminReadAuthority
 
     internal static void ValidatePage(int limit, string? cursor)
     {
-        if (limit is < 1 or > AdminDashboardProtocol.MaximumPageSize)
+        const int MinimumAdminPageRecords = 1;
+
+        if (limit is < MinimumAdminPageRecords or > AdminDashboardProtocol.MaximumPageSize)
         { throw Errors.Fail(ErrorCode.Validation, InvalidPageLimit); }
         if (cursor is not null)
         { JsonData.Identifier(cursor); }
     }
 
     internal static long Position(IKeyValueView view) => view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } value
-        ? NativeSerialization.Deserialize<long>(value) : 0;
+        ? NativeSerialization.Deserialize<long>(value) : InitialAdminReadPosition;
 }

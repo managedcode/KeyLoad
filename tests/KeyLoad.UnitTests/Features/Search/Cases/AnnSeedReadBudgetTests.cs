@@ -14,11 +14,11 @@ internal sealed class AnnSeedReadBudgetTests
         using var database = AnnSeedTestSupport.Create(8);
         var measured = AnnSeedTestSupport.Capture(database);
         var position = database.Store.Position;
-        var exactBudget = new ReadExecutionBudget(database.Database.Limits with
-        { MaxQueryReadBytes = measured.ReadBytes });
+        var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
+        { MaxQueryReadBytes = measured.ReadBytes }));
         var exact = AnnSeedTestSupport.Capture(database, budget: exactBudget);
-        var shortBudget = new ReadExecutionBudget(database.Database.Limits with
-        { MaxQueryReadBytes = measured.ReadBytes - 1 });
+        var shortBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
+        { MaxQueryReadBytes = measured.ReadBytes - 1 }));
         var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal, budget: shortBudget);
 
         await Assert.That(measured.ReadBytes).IsGreaterThan(0L);
@@ -32,7 +32,7 @@ internal sealed class AnnSeedReadBudgetTests
     {
         using var database = CreateVisibilitySource();
         var expectedBytes = MeasureSourceBytes(database);
-        var budget = new ReadExecutionBudget(database.Database.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var seed = AnnSeedTestSupport.Capture(database, budget: budget);
 
         await Assert.That(seed.Records.Select(record => record.DocumentId).ToArray())
@@ -46,7 +46,7 @@ internal sealed class AnnSeedReadBudgetTests
     {
         using var database = AnnSeedTestSupport.Create(3, new() { MaxScanRecords = 2 });
         var position = database.Store.Position;
-        var budget = new ReadExecutionBudget(database.Database.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var expectedBytes = MeasureSourceBytes(database, maxScanRecords: 2);
         var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal, budget: budget);
 
@@ -139,7 +139,7 @@ internal sealed class AnnSeedReadBudgetTests
             MaxQueryReadBytes = MaxCumulativeSourceBytes
         };
         using var database = AnnSeedTestSupport.Create(10_000, limits);
-        var budget = new ReadExecutionBudget(limits, TimeProvider.System);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), TimeProvider.System);
         var started = TimeProvider.System.GetTimestamp();
         var calls = 0;
         var successfulReadDeltasPositive = true;
@@ -170,7 +170,7 @@ internal sealed class AnnSeedReadBudgetTests
         await Assert.That(calls).IsLessThan(MaxCaptureCalls);
         await Assert.That(budget.ReadBytes).IsLessThanOrEqualTo(MaxCumulativeSourceBytes);
         await Assert.That(TimeProvider.System.GetElapsedTime(started)).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(1));
-        var healthyBudget = new ReadExecutionBudget(limits with { QueryDeadlineSeconds = 30 });
+        var healthyBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits with { QueryDeadlineSeconds = 30 }));
         var healthy = AnnSeedTestSupport.Capture(database, budget: healthyBudget);
         await Assert.That(healthy.Records.Length).IsEqualTo(10_000);
     }

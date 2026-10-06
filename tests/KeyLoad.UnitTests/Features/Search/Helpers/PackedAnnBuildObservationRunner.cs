@@ -28,7 +28,7 @@ internal static class PackedAnnBuildObservationRunner
         var allocatedBytes = 0L;
         try
         {
-            index = PackedAnnIndex.Build(space, records, options, budget);
+            index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), budget);
         }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {

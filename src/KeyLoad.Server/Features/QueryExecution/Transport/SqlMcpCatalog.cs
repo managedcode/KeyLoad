@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -14,15 +15,12 @@ internal static class SqlMcpCatalog
         SqlOperationProtocol.Route, null, null, Description,
         McpSchemaFactory.CreateInput(typeof(SqlOperationRequest), false),
         McpSchemaFactory.CreateOutput(typeof(JsonElement), true), new(false, false, true),
-        Decode, adapter: true);
-
-    internal static McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments, int maximumPayloadBytes)
-        => Decode(arguments, maximumPayloadBytes, new DatabaseLimits(), CancellationToken.None);
+        null, adapter: true);
 
     internal static McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments, int maximumPayloadBytes,
-        DatabaseLimits limits, CancellationToken cancellationToken)
+        IOptions<DatabaseLimits> limitsOptions, CancellationToken cancellationToken)
     {
         var request = McpArgumentDecoder.Request<SqlOperationRequest>(arguments, false);
-        return SqlOperationCompiler.Compile(request, limits, maximumPayloadBytes, cancellationToken);
+        return SqlOperationCompiler.Compile(request, limitsOptions, maximumPayloadBytes, cancellationToken);
     }
 }

@@ -13,7 +13,7 @@ internal sealed class FilteredSearchBudgetTests
     {
         using var database = FilteredSearchTestSupport.Create(new() { MaxScanRecords = 1 });
         FilteredSearchTestSupport.AddCorpus(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var position = database.Store.Position;
         var malformed = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             engine.SearchAsync("absent-principal", VectorRequest(default), Token())))!;
@@ -33,13 +33,13 @@ internal sealed class FilteredSearchBudgetTests
         var serializedBytes = JsonDefaults.Serialize(request).Length;
         using var exact = FilteredSearchTestSupport.Create(new() { MaxQueryBytes = serializedBytes });
         FilteredSearchTestSupport.AddCorpus(exact);
-        var accepted = await new SearchEngine(exact.Database).SearchAsync(Root, request, Token());
+        var accepted = await new SearchEngine(exact.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Root, request, Token());
         await Assert.That(accepted.Select(result => result.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { "a" }, CollectionOrdering.Matching);
 
         using var excess = FilteredSearchTestSupport.Create(new() { MaxQueryBytes = serializedBytes - 1 });
         FilteredSearchTestSupport.AddCorpus(excess);
-        var failure = await Failure(new SearchEngine(excess.Database), request);
+        var failure = await Failure(new SearchEngine(excess.Database, UnitExecutionOptions.QueryExecution()), request);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -48,7 +48,7 @@ internal sealed class FilteredSearchBudgetTests
     {
         using var database = FilteredSearchTestSupport.Create();
         FilteredSearchTestSupport.AddCorpus(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         using var canceled = new CancellationTokenSource();
         await canceled.CancelAsync();
 

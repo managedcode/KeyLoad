@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -12,31 +13,34 @@ internal static class McpFrameBounds
     /// <param name="payload">The private complete UTF-8 wire buffer.</param>
     /// <param name="maximumBytes">The inclusive wire-byte ceiling.</param>
     /// <returns>Counts used for retained-body admission.</returns>
-    internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, int maximumBytes)
-        => InspectCore(payload, maximumBytes, requireObject: true);
+    internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
+        => InspectCore(payload, maximumBytes, options, requireObject: true);
 
     /// <summary>Checks one arbitrary canonical result value using the same framing ceilings.</summary>
     /// <param name="payload">The owned complete canonical UTF-8 result.</param>
     /// <param name="maximumBytes">The inclusive byte ceiling for this result lane.</param>
     /// <returns>Counts used before native result DOM allocation.</returns>
-    internal static McpFrameShape InspectValue(ReadOnlySpan<byte> payload, int maximumBytes)
-        => InspectCore(payload, maximumBytes, requireObject: false);
+    internal static McpFrameShape InspectValue(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
+        => InspectCore(payload, maximumBytes, options, requireObject: false);
 
     /// <summary>Checks a canonical result with room for the three native response wrappers.</summary>
     /// <param name="payload">The actual owned canonical result bytes.</param>
     /// <param name="maximumBytes">The inclusive canonical result ceiling.</param>
     /// <returns>The bounded result shape before native output ownership is allocated.</returns>
-    internal static McpFrameShape InspectReply(ReadOnlySpan<byte> payload, int maximumBytes)
+    internal static McpFrameShape InspectReply(ReadOnlySpan<byte> payload, int maximumBytes, IOptions<McpExecutionOptions> options)
     {
-        var shape = InspectValue(payload, maximumBytes);
-        if (shape.Depth > McpFramingProtocol.MaximumReplyDepth)
+        var shape = InspectValue(payload, maximumBytes, options);
+        if (shape.Depth > options.Value.MaximumReplyDepth)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
         return shape;
     }
 
-    private static McpFrameShape InspectCore(ReadOnlySpan<byte> payload, int maximumBytes, bool requireObject)
+    private static McpFrameShape InspectCore(ReadOnlySpan<byte> payload, int maximumBytes,
+        IOptions<McpExecutionOptions> options, bool requireObject)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(maximumBytes, 1);
+        const int OtherSingleItemCount = 1;
+
+        ArgumentOutOfRangeException.ThrowIfLessThan(maximumBytes, OtherSingleItemCount);
         if (payload.Length > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
@@ -44,7 +48,8 @@ internal static class McpFrameBounds
         try
         {
             _ = StrictUtf8.GetCharCount(payload);
-            return InspectJson(payload, requireObject);
+            options.Value.Validate();
+            return InspectJson(payload, requireObject, options);
         }
         catch (JsonException)
         {
@@ -56,11 +61,13 @@ internal static class McpFrameBounds
         }
     }
 
-    private static McpFrameShape InspectJson(ReadOnlySpan<byte> payload, bool requireObject)
+    private static McpFrameShape InspectJson(ReadOnlySpan<byte> payload, bool requireObject, IOptions<McpExecutionOptions> options)
     {
+        const int MaximumDepthStep = 1;
+
         var reader = new Utf8JsonReader(payload, new JsonReaderOptions
         {
-            MaxDepth = McpFramingProtocol.MaximumDepth + 1,
+            MaxDepth = options.Value.MaximumDepth + MaximumDepthStep,
             CommentHandling = JsonCommentHandling.Disallow,
             AllowTrailingCommas = false
         });
@@ -68,7 +75,7 @@ internal static class McpFrameBounds
         {
             throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame);
         }
-        var inspection = new McpFrameInspection(requireObject);
+        var inspection = new McpFrameInspection(requireObject, options);
         do
         { inspection.Visit(ref reader); }
         while (reader.Read());

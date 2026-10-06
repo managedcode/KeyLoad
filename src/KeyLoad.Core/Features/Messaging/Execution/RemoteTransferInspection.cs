@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
     public QueueTransferInspection? InspectQueueTransfer(string principalId, QueueLaneRef source, Guid transferId,
         CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         JsonData.Identifier(principalId);
         ValidateTransferLane(source);
@@ -48,7 +48,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(destination);
         ArgumentNullException.ThrowIfNull(source);
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         JsonData.Identifier(principalId);
         ValidateTransferPair(source, destination);

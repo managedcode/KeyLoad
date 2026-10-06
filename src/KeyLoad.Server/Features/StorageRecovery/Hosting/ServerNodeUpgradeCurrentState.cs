@@ -6,6 +6,8 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeCurrentState
 {
+    private const int HasInvalidCurrentProgressStateSnapshotIndexValidationBoundary = 0;
+
     internal static void VerifyPersisted(IAtomicStore replica)
     {
         if (replica.Read(view => view.ReadOwnedValue(KeyCodec.Encode(ReplicaProtocol.StateKey))) is null)
@@ -15,9 +17,12 @@ internal static class ServerNodeUpgradeCurrentState
     internal static void Verify(ServerNodeUpgradeReceipt receipt, DatabaseEngine canonical,
         IAtomicStore replica, ReplicaHardState state, ServerNodeUpgradeAuthority authority, bool published)
     {
+        const int VerifyAbsentCount = 0;
+        const int VerifyPresentCount = 1;
+
         VerifyIdentities(receipt, canonical.Store.Identity, replica.Identity, authority, published);
         var original = receipt.OriginalReplicaHardState;
-        var minimumReplica = checked(receipt.ReplicaPhysicalPositionBefore + (original.Snapshot is null ? 0 : 1));
+        var minimumReplica = checked(receipt.ReplicaPhysicalPositionBefore + (original.Snapshot is null ? VerifyAbsentCount : VerifyPresentCount));
         if (HasInvalidCurrentProgress(receipt, canonical, replica, state, original, minimumReplica)
             || HasUnexpectedUnpublishedState(receipt, canonical, replica, state, original, minimumReplica, published))
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
@@ -27,7 +32,7 @@ internal static class ServerNodeUpgradeCurrentState
         IAtomicStore replica, ReplicaHardState state, ReplicaHardState original, long minimumReplica)
         => canonical.Store.Position < receipt.CanonicalPosition || replica.Position < minimumReplica
             || canonical.LastApplied < receipt.CanonicalAppliedPosition || canonical.LastApplied > state.CommittedIndex
-            || canonical.LastApplied < (state.Snapshot?.Index ?? 0) || state.Term < original.Term
+            || canonical.LastApplied < (state.Snapshot?.Index ?? HasInvalidCurrentProgressStateSnapshotIndexValidationBoundary) || state.Term < original.Term
             || state.CommittedIndex < original.CommittedIndex || state.LastIndex < original.LastIndex;
 
     private static bool HasUnexpectedUnpublishedState(ServerNodeUpgradeReceipt receipt, DatabaseEngine canonical,

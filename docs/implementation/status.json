@@ -4,7 +4,12 @@
     "status": "in_progress",
     "feature": "docs/Features/ClusterRouting/ExecutionPrimitives.md",
     "decision": "docs/ADR/ADR-110-native-orleans-execution-primitives.md",
-    "sourceStage": "per_method_and_broad_capability_review_contract_runtime_unchanged",
+    "sourceStage": "due_apply_wake_native_telemetry_rf3_journaling_and_native_saga_jobs_join_in_progress",
+    "runtimeAdoption": "docs/Features/ClusterRouting/RuntimeAdoption.md",
+    "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
+    "restorePassed": true,
+    "canonicalBuildPassed": false,
+    "verificationStage": "canonical_join_build_failed_2026_10_06_own_repairs_and_unrelated_quality_migration_open",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -14,10 +19,12 @@
     "remaining": [
       "Freeze concrete interchangeable computation and bounded worker keys/quotas before native worker adoption",
       "Freeze actual long-operation control and disposable hint methods before selective interleaving or OneWay adoption",
-      "Resolve versioned native Durable Jobs persistent provider and atomic enqueue/reconciliation contract",
+      "Finish native journal/provider/job source joins and all introduced compiler/analyzer repairs",
+      "Obtain passing final canonical solution build and formatting after the shared quality migration",
+      "Qualify reader upgrade/backup/rollback with a frozen old executable, native job replay and owner adoption",
       "Freeze concrete native Streams outbox/provider/subscription and transaction-storage/visibility contracts before adoption",
       "Qualify per-silo lifecycle, native telemetry and measured collection/queue/repartitioner resource contracts",
-      "Real operation Aspire unit/scalar/recovery/RF3 and exact-source Linux fault/resource/performance evidence"
+      "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
     ]
   },
   "NUGET-REFRESH-001": {
@@ -835,7 +842,8 @@
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "docs/implementation/command-outcome-pin-development-2026-10-05.json",
       "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json",
-      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
+      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json",
+      "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     ],
     "runtimeQualified": false,
     "allAcceptanceClosed": false,
@@ -2201,9 +2209,10 @@
       "docs/ADR/ADR-103-scaled-fair-comparisons.md",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs",
-      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
+      "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json",
+      "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     ],
-    "sourceStage": "native_R8_options_open_loop_library_host_dispatch_and_nine_actual_host_flows_joined_Aspire_native_case_resource_sidecar_and_Linux_cohort_pending",
+    "sourceStage": "native_R10_library_R5_Aspire_selection_cases_resource_sidecar_lifecycle_and_provenance_options_joined_native_build_tests_and_Linux_cohort_pending",
     "qualification": {
       "allAcceptanceClosed": false,
       "nativeCohortQualified": false,
@@ -2221,13 +2230,14 @@
       1000000
     ],
     "openLoopDevelopment": {
-      "sourcePacket": "R8_38_files_root_reviewed_and_live_joined",
+      "sourcePacket": "R10_44_files_and_guarded_case_resource_lifecycle_options_joins_reviewed",
       "executionOptions": "native_validated_IOptions_host_binding_joined",
-      "aspireSelection": "corrected_private_R5_actual_CLI_model_flows_pending_join",
-      "originalCancellationProof": "native_library_authored_and_host_dispatch_joined_no_actual_native_run",
+      "aspireSelection": "R5_actual_CLI_model_flows_joined_native_gate_pending",
+      "originalCancellationProof": "native_original1024_marker_compared_against_exact_parent_observation_and_independent_accounting_source_joined_native_run_pending",
       "sourceQualified": false,
       "runtimeQualified": false,
-      "sourceReceipt": "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json"
+      "sourceReceipt": "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json",
+      "resourceSidecar": "original_measured_or_proof_bytes_SHA256_bound_native_collector_joined_real_observations_pending"
     }
   },
   "KL-076": {
@@ -2717,7 +2727,8 @@
       "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
       "Directory.Build.targets",
       "docs/implementation/runtime-qualification-37060131271.json",
-      "docs/implementation/performance-source-r11.json"
+      "docs/implementation/performance-source-r11.json",
+      "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     ],
     "codeQuality": {
       "status": "in_progress",
@@ -3653,6 +3664,16 @@
       "tombstoneRepair": "actual_null_empty_missing_journal_snapshot_and_frame_boundaries_pass_all_three_OSes_exactad594642",
       "queueReadWork": "bounded_ready_visitor_one_claim_FIFO_expiry_and256_ceiling_cases_pass_all_three_OSes_exactfa80c701",
       "timeSeriesPartialEvidence": "exactc48648_samples20_attempts_checks_native_completion_failed_unqualified_one_timed_attempt_different_ACK_topologies"
+    },
+    "functionalCoverageDevelopment": {
+      "loadTestsExcluded": true,
+      "completeWorkflowTestsRequired": true,
+      "sameCompilationIdentity": "source_joined_static_private_producer_and_rejection_checks_only",
+      "currentCoveragePercent": null,
+      "scope": "Query_first_profile_complete16_module_and_RF3_server_collection_pending",
+      "fullBuildPassed": false,
+      "currentNativeCollectionPassed": false,
+      "sourceReceipt": "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     }
   },
   "AdminDashboard": {
@@ -4832,6 +4853,22 @@
       "KeyLoad vector scale cells are explicitly unavailable until persisted-vector readback and native numeric predicates exist",
       "Pass final canonical build, formatting and Aspire-owned required suites",
       "Retain actual complete authenticated Linux Benchmarks originals and website publication evidence"
+    ]
+  },
+  "GENERAL-RUNTIME-OPTIONS-001": {
+    "title": "General runtime literals and centralized native options",
+    "status": "in_progress",
+    "feature": "docs/Features/CodeQuality.md",
+    "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
+    "sourceStage": "general_error_rules_and_native_options_owners_written_constructor_and_native_build_joins_in_progress",
+    "canonicalBuildPassed": false,
+    "runtimeQualified": false,
+    "fullTaskComplete": false,
+    "remaining": [
+      "Close all literal/policy and required-options call joins without changing defaults or protocol identities",
+      "Pass final canonical Release build and scoped formatting",
+      "Run actual Aspire-owned full analyzers/unit/scalar/recovery/RF3 and required coverage gates",
+      "Retain exact delivered-source Linux qualification"
     ]
   }
 }

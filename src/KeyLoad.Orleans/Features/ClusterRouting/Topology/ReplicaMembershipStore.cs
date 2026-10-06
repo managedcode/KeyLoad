@@ -29,11 +29,13 @@ internal sealed class ReplicaMembershipStore
 
     internal async Task<ReplicaMembershipSnapshot> ReadAsync(CancellationToken cancellationToken)
     {
+        const int MaximumRowsValidationBoundary = 0;
+
         cancellationToken.ThrowIfCancellationRequested();
         await consensus.ReadControlBarrierAsync(cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         var record = database.Store.Read(view => view.GetRecord<MembershipRecord>(Key));
-        if (maximumRows > 0 && record is not null
+        if (maximumRows > MaximumRowsValidationBoundary && record is not null
             && record.Payload.Length > ReplicaMembershipAuthorityProtocol.MaximumSnapshotBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.MembershipCapacity); }
         return ReplicaMembershipSnapshot.Read(record, maximumRows);

@@ -25,8 +25,11 @@ internal static class CacheControlFieldEncoding
 
     internal static void NullableBinding(ref CacheControlWriter writer, ushort id, CachePhysicalBinding? value)
     {
+        const int NullableBindingEmptyCount = 0;
+        const int NullableBindingSingleItemCount = 1;
+
         writer.Id(id);
-        writer.Byte(value is null ? (byte)0 : (byte)1);
+        writer.Byte(value is null ? (byte)NullableBindingEmptyCount : (byte)NullableBindingSingleItemCount);
         if (value is not null)
         {
             writer.UInt32(checked((uint)CacheControlCoreEncoding.BindingSize(value)));
@@ -36,8 +39,11 @@ internal static class CacheControlFieldEncoding
 
     internal static void NullableProof(ref CacheControlWriter writer, ushort id, CacheReadyProof? value)
     {
+        const int NullableProofEmptyCount = 0;
+        const int NullableProofSingleItemCount = 1;
+
         writer.Id(id);
-        writer.Byte(value is null ? (byte)0 : (byte)1);
+        writer.Byte(value is null ? (byte)NullableProofEmptyCount : (byte)NullableProofSingleItemCount);
         if (value is not null)
         {
             writer.UInt32(checked((uint)CacheControlCoreEncoding.ProofSize(value)));
@@ -47,8 +53,11 @@ internal static class CacheControlFieldEncoding
 
     internal static void NullableCorrelation(ref CacheControlWriter writer, ushort id, CacheReplyCorrelation? value)
     {
+        const int NullableCorrelationEmptyCount = 0;
+        const int NullableCorrelationSingleItemCount = 1;
+
         writer.Id(id);
-        writer.Byte(value is null ? (byte)0 : (byte)1);
+        writer.Byte(value is null ? (byte)NullableCorrelationEmptyCount : (byte)NullableCorrelationSingleItemCount);
         if (value is not null)
         {
             writer.UInt32(checked((uint)CacheControlCoreEncoding.CorrelationSize(value)));

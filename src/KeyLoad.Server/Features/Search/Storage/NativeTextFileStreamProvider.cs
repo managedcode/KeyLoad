@@ -1,15 +1,17 @@
+using Microsoft.Extensions.Options;
 using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId)
+internal sealed class NativeTextFileStreamProvider(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
     : IFileStreamProvider
 {
+    private const int NativeDefaultStreamBufferBytes = 4_096;
     private readonly LocalFileStreamProvider inner = new();
-    private readonly NativeTextPathAccess pathAccess = new(root, leaf, sourceNodeId);
+    private readonly NativeTextPathAccess pathAccess = new(root, leaf, sourceNodeId, executionOptions: executionOptions);
 
     public IFileStream CreateFileStream(string path, FileMode mode, FileAccess access, FileShare share,
-        int bufferSize = 4096, FileOptions options = FileOptions.None)
+        int bufferSize = NativeDefaultStreamBufferBytes, FileOptions options = FileOptions.None)
     {
         var full = pathAccess.Resolve(path);
         var exists = File.Exists(full);
@@ -63,7 +65,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
     public void DeleteFile(string path)
     {
         var full = pathAccess.Resolve(path);
-        NativeTextFiles.RequireNativePath(root, leaf, sourceNodeId, full, directory: false);
+        NativeTextFiles.RequireNativePath(root, leaf, sourceNodeId, full, directory: false, executionOptions: executionOptions);
         if (File.Exists(full))
         {
             pathAccess.Require(full, directory: false);
@@ -78,7 +80,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
         if (recursive)
         {
             NativeTextFiles.ValidateTrackedNativeLayout(Path.Combine(root, leaf),
-                NativeTextFiles.ReadOwnerForProvider(root, leaf, sourceNodeId));
+                NativeTextFiles.ReadOwnerForProvider(root, leaf, sourceNodeId, executionOptions: executionOptions), executionOptions: executionOptions);
         }
         inner.DeleteDirectory(full, recursive);
     }
@@ -87,7 +89,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
     {
         var full = pathAccess.Resolve(path);
         pathAccess.Require(full, directory: false);
-        NativeTextFileIO.VerifyBoundedFile(full);
+        NativeTextFileIO.VerifyBoundedFile(full, executionOptions: executionOptions);
         return inner.ReadAllText(full);
     }
 
@@ -95,7 +97,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
     {
         var full = pathAccess.Resolve(path);
         pathAccess.Require(full, directory: false);
-        NativeTextFileIO.VerifyBoundedFile(full);
+        NativeTextFileIO.VerifyBoundedFile(full, executionOptions: executionOptions);
         return inner.ReadAllBytes(full);
     }
 
@@ -125,10 +127,10 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
     {
         var full = pathAccess.Resolve(path);
         pathAccess.Require(full, directory: true);
-        var directories = new List<string>(NativeTextProtocol.MaximumDirectories);
+        var directories = new List<string>(executionOptions.Value.MaximumDirectories);
         foreach (var child in Directory.EnumerateDirectories(full))
         {
-            if (directories.Count == NativeTextProtocol.MaximumDirectories)
+            if (directories.Count == executionOptions.Value.MaximumDirectories)
             {
                 throw NativeTextErrors.BoundExceeded();
             }

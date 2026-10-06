@@ -2,6 +2,13 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnLayerSearch
 {
+    private const int FirstElementIndex = 0;
+    private const int FirstOrdinal = 1;
+    private const int CandidateComparisonWork = 2;
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int SingleWorkUnit = 1;
+
     internal static double Score<TSimilarity>(PackedAnnVectors vectors, int node, in TSimilarity similarity,
         int dimension, AnnWorkBudget budget) where TSimilarity : IPackedAnnSimilarity
     {
@@ -20,7 +27,7 @@ internal static class PackedAnnLayerSearch
             var next = current;
             var nextScore = currentScore;
             var count = graph.NeighborCount(current, layer, budget);
-            for (var offset = 0; offset < count; offset++)
+            for (var offset = FirstElementIndex; offset < count; offset++)
             {
                 budget.ChargeEdge();
                 var candidate = graph.Neighbor(current, layer, offset);
@@ -46,17 +53,17 @@ internal static class PackedAnnLayerSearch
         where TSimilarity : IPackedAnnSimilarity
     {
         buffers.BeginVisitPass(budget);
-        var count = 1;
-        budget.Charge(2);
-        buffers.Nodes[0] = entry;
-        buffers.Scores[0] = Score(vectors, entry, in similarity, dimension, budget);
-        PackedAnnCandidateHeaps.AddRetained(buffers, 0, budget);
+        var count = FirstOrdinal;
+        budget.Charge(CandidateComparisonWork);
+        buffers.Nodes[FirstElementIndex] = entry;
+        buffers.Scores[FirstElementIndex] = Score(vectors, entry, in similarity, dimension, budget);
+        PackedAnnCandidateHeaps.AddRetained(buffers, EmptyElementCount, budget);
         buffers.MarkVisited(entry);
         while (true)
         {
             budget.Check();
             var best = PackedAnnCandidateHeaps.PopBest(buffers, budget);
-            if (best < 0)
+            if (best < EmptyElementCount)
             {
                 break;
             }
@@ -74,7 +81,7 @@ internal static class PackedAnnLayerSearch
     {
         var node = buffers.Nodes[slot];
         var neighborCount = graph.NeighborCount(node, layer, budget);
-        for (var offset = 0; offset < neighborCount; offset++)
+        for (var offset = FirstElementIndex; offset < neighborCount; offset++)
         {
             budget.ChargeEdge();
             var candidate = graph.Neighbor(node, layer, offset);
@@ -94,18 +101,18 @@ internal static class PackedAnnLayerSearch
     {
         if (count < capacity)
         {
-            budget.Charge(2);
+            budget.Charge(CandidateComparisonWork);
             buffers.Nodes[count] = node;
             buffers.Scores[count] = score;
             PackedAnnCandidateHeaps.AddRetained(buffers, count, budget);
-            return count + 1;
+            return count + AdjacentElementOffset;
         }
-        var worst = buffers.WorstHeapSlots[0];
-        budget.Charge(1);
+        var worst = buffers.WorstHeapSlots[FirstElementIndex];
+        budget.Charge(SingleWorkUnit);
         if (Better(score, node, buffers.Scores[worst], buffers.Nodes[worst], budget))
         {
             PackedAnnCandidateHeaps.RemoveBestIfPresent(buffers, worst, budget);
-            budget.Charge(2);
+            budget.Charge(CandidateComparisonWork);
             buffers.Nodes[worst] = node;
             buffers.Scores[worst] = score;
             PackedAnnCandidateHeaps.ReplaceWorstRoot(buffers, budget);
@@ -116,20 +123,20 @@ internal static class PackedAnnLayerSearch
 
     private static void SortCandidates(PackedAnnLayerBuffers buffers, int count, AnnWorkBudget budget)
     {
-        for (var index = 1; index < count; index++)
+        for (var index = FirstOrdinal; index < count; index++)
         {
             var node = buffers.Nodes[index];
             var score = buffers.Scores[index];
             var cursor = index;
-            while (cursor > 0)
+            while (cursor > EmptyElementCount)
             {
-                budget.Charge(1);
-                if (!Better(score, node, buffers.Scores[cursor - 1], buffers.Nodes[cursor - 1], budget))
+                budget.Charge(SingleWorkUnit);
+                if (!Better(score, node, buffers.Scores[cursor - AdjacentElementOffset], buffers.Nodes[cursor - AdjacentElementOffset], budget))
                 {
                     break;
                 }
-                buffers.Nodes[cursor] = buffers.Nodes[cursor - 1];
-                buffers.Scores[cursor] = buffers.Scores[cursor - 1];
+                buffers.Nodes[cursor] = buffers.Nodes[cursor - AdjacentElementOffset];
+                buffers.Scores[cursor] = buffers.Scores[cursor - AdjacentElementOffset];
                 cursor--;
             }
             buffers.Nodes[cursor] = node;
@@ -144,7 +151,7 @@ internal static class PackedAnnLayerSearch
         {
             return leftScore > rightScore;
         }
-        budget.Charge(1);
+        budget.Charge(SingleWorkUnit);
         return leftNode < rightNode;
     }
 

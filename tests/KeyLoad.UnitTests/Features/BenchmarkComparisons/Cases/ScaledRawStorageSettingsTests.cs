@@ -26,7 +26,7 @@ internal sealed class ScaledRawStorageSettingsTests
         var expectedCapacity = expectedKeysAndOrder + expectedValues + expectedScratch
             + ScaledRawStorageMemoryGuard.RequiredHeadroomBytes;
 
-        await Assert.That(ScaledRawStorageSettings.CapacityBound(recordCount, payloadBytes))
+        await Assert.That(ScaledRawStorageSettings.CapacityBound(recordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage().Value.RequiredHeadroomBytes))
             .IsEqualTo(expectedCapacity);
         await Assert.That(expectedCapacity - expectedKeysAndOrder - expectedValues - expectedScratch)
             .IsEqualTo(ScaledRawStorageMemoryGuard.RequiredHeadroomBytes);

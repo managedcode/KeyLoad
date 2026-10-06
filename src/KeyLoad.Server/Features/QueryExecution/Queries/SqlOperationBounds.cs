@@ -1,16 +1,19 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Bounds text, complete serialized ingress and parameter structure before typed target decode.</summary>
 internal static class SqlOperationBounds
 {
-    internal static void Validate(SqlOperationRequest request, DatabaseLimits limits, int maximumPayloadBytes,
+    internal static void Validate(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions, int maximumPayloadBytes,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        var limits = limitsOptions.Value;
+        limits.Validate();
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumPayloadBytes);
         if (request is null || string.IsNullOrEmpty(request.Sql))
         { throw SqlOperationSyntax.InvalidInput(); }
@@ -27,7 +30,7 @@ internal static class SqlOperationBounds
         { JsonSerializer.Serialize(counter, request, JsonDefaults.Options); }
         catch (JsonException)
         { throw SqlOperationSyntax.InvalidInput(); }
-        var structure = new SqlOperationParameterBounds(limits, cancellationToken);
+        var structure = new SqlOperationParameterBounds(limitsOptions, cancellationToken);
         IEnumerable<JsonElement> values = request.Parameters is { } parameters ? parameters.Values : [];
         foreach (var parameter in values)
         { structure.Visit(parameter); }

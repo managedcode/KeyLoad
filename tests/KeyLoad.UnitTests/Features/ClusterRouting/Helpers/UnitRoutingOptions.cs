@@ -22,6 +22,13 @@ internal static class UnitRoutingOptions
         return Options.Create(value);
     }
 
+    internal static IOptions<ReplicaReplayLimits> Replay(ReplicaReplayLimits? configured = null)
+    {
+        var value = configured ?? new ReplicaReplayLimits();
+        value.Validate(3);
+        return Options.Create(value);
+    }
+
     internal static IOptions<ReplicaTransportOptions> Transport(ReplicaTransportOptions? configured = null)
     {
         var value = configured ?? new ReplicaTransportOptions();

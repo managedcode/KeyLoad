@@ -21,15 +21,15 @@ internal sealed class NativeTextProjectionSettlementTests
         var nodeId = database.Store.Identity.NodeId;
         var scope = CaptureScope(database);
         var root = NativeTextFiles.InitializeRoot(Path.Combine(database.Directory, "native-text-settlement"),
-            nodeId, database.Database.Limits);
+            nodeId, database.Database.Limits, UnitNativeTextOptions.Execution());
         var leaf = NativeTextValidation.GenerationLeaf();
-        NativeTextFiles.WriteOwner(root, leaf, nodeId, scope, database.Database.Limits);
+        NativeTextFiles.WriteOwner(root, leaf, nodeId, scope, database.Database.Limits, UnitNativeTextOptions.Execution());
         NativeTextGeneration? generation = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            generation = new NativeTextGeneration(root, leaf, nodeId, scope, database.Database.Limits,
-                new NativeTextFileStreamProvider(root, leaf, nodeId));
+            generation = new NativeTextGeneration(root, leaf, nodeId, scope, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+                new NativeTextFileStreamProvider(root, leaf, nodeId, UnitNativeTextOptions.Execution()), UnitNativeTextOptions.Execution());
             var foreignPath = Path.Combine(generation.Path, NativeTextProtocol.NativeDirectory, "foreign-entry.bin");
             var foreignBytes = new byte[] { 0x4b, 0x4c, 0x01, 0xff };
             await File.WriteAllBytesAsync(foreignPath, foreignBytes, TestContext.Current!.Execution.CancellationToken);
@@ -37,7 +37,7 @@ internal sealed class NativeTextProjectionSettlementTests
             var sourceBytes = ReadCanonicalDocument(database);
             using var canceled = new CancellationTokenSource();
             await canceled.CancelAsync();
-            var budget = new ReadExecutionBudget(database.Database.Limits, cancellationToken: canceled.Token);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: canceled.Token);
 
             var failure = Assert.ThrowsExactly<AggregateException>(() => generation.CloseAndCapture(budget));
             var cancellationRetained = failure.InnerExceptions.Any(exception => exception is OperationCanceledException);

@@ -11,6 +11,10 @@ namespace KeyLoad.Core;
 /// <summary>Validates canonical JSON and builds stable operation fingerprints and scalar paths.</summary>
 public static class JsonData
 {
+    private const int NoRetainedBytes = 0;
+    private const int EmptyElementCount = 0;
+    private const int LastComponentFromEnd = 1;
+
     private const string UnsupportedScalarFieldDetail = "This field is not a scalar value.";
     private const string PayloadLimitDetail = "The JSON payload exceeds its byte limit.";
     private const string ObjectRequiredDetail = "The JSON payload must be an object.";
@@ -56,7 +60,7 @@ public static class JsonData
                 CanonicalJsonWriter.Write(writer, document.RootElement);
             }
             return bytes is null ? json
-                : Encoding.UTF8.GetString(bytes.GetBuffer().AsSpan(0, checked((int)bytes.Length)));
+                : Encoding.UTF8.GetString(bytes.GetBuffer().AsSpan(NoRetainedBytes, checked((int)bytes.Length)));
         }
         catch (JsonException)
         {
@@ -145,12 +149,12 @@ public static class JsonData
         foreach (var patch in patches)
         {
             var segments = PathSegments(patch.Path);
-            if (segments.Length == 0 || segments.Any(segment => segment == WildcardPathSegment))
+            if (segments.Length == EmptyElementCount || segments.Any(segment => segment == WildcardPathSegment))
             {
                 throw Errors.Fail(ErrorCode.Validation, ConcretePatchDetail);
             }
             JsonNode parent = root;
-            foreach (var segment in segments[..^1])
+            foreach (var segment in segments[..^LastComponentFromEnd])
             {
                 if (parent is not JsonObject obj || obj[segment] is not { } child)
                 {
@@ -162,7 +166,7 @@ public static class JsonData
             {
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedArrayPatchDetail);
             }
-            var field = segments[^1];
+            var field = segments[^LastComponentFromEnd];
             if (patch.Kind == PatchKind.Remove)
             {
                 target.Remove(field);

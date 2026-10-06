@@ -22,7 +22,7 @@ internal sealed class NativeTextGenerationCapacityTests
         var leaves = CreateOwnerLeaves(root, database, scope, 3).Order(StringComparer.Ordinal).ToArray();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.WriteOwner(root,
-            NativeTextValidation.GenerationLeaf(), database.Store.Identity.NodeId, scope, database.Database.Limits));
+            NativeTextValidation.GenerationLeaf(), database.Store.Identity.NodeId, scope, database.Database.Limits, UnitNativeTextOptions.Execution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(GenerationPaths(root).SequenceEqual(leaves)).IsTrue();
@@ -45,10 +45,10 @@ internal sealed class NativeTextGenerationCapacityTests
         var projection = cleanup.TrackProjection(OpenForRestart(root, database));
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var request = new SearchRequest(database.Partition, Collection, Field, "needle");
-        var original = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         var retired = Path.Combine(root, GenerationPaths(root).Single());
         var oldScope = CaptureScope(database);
-        var oldBudget = new ReadExecutionBudget(database.Database.Limits);
+        var oldBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var oldLease = cleanup.TrackLease(projection.Acquire(oldScope, oldBudget));
         oldLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         oldLease.ObserveToken("needle");
@@ -57,7 +57,7 @@ internal sealed class NativeTextGenerationCapacityTests
         await AssertForeignRetirementAndShutdownAsync(cleanup, projection, oldLease, root, retired);
         var restarted = await AssertThirdLeafRestartAsync(database, cleanup, root, retired, cancellation);
         cleanup.ShutdownProjection(projection);
-        var healthy = await new SearchEngine(database.Database, restarted).SearchAsync("root", request, cancellation);
+        var healthy = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), restarted).SearchAsync("root", request, cancellation);
         await Assert.That(healthy).HasSingleItem();
         await Assert.That(healthy[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
     }
@@ -66,7 +66,7 @@ internal sealed class NativeTextGenerationCapacityTests
         SearchRequest request, CancellationToken cancellation)
     {
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
-        var replacement = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var replacement = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         await Assert.That(replacement).HasSingleItem();
     }
 
@@ -95,7 +95,7 @@ internal sealed class NativeTextGenerationCapacityTests
         var existingLeaves = GenerationPaths(root);
         var thirdLeaf = NativeTextValidation.GenerationLeaf();
         NativeTextFiles.WriteOwner(root, thirdLeaf, database.Store.Identity.NodeId, CaptureScope(database),
-            database.Database.Limits);
+            database.Database.Limits, UnitNativeTextOptions.Execution());
         var expectedLeaves = existingLeaves.Append(thirdLeaf).Order(StringComparer.Ordinal).ToArray();
         await Assert.That(expectedLeaves.Length).IsEqualTo(3);
         await Assert.That(GenerationPaths(root).SequenceEqual(expectedLeaves)).IsTrue();
@@ -113,7 +113,7 @@ internal sealed class NativeTextGenerationCapacityTests
 
     private static string InitializeRoot(TestDatabase database)
         => NativeTextFiles.InitializeRoot(Path.Combine(database.Directory, "native-text-generation-capacity"),
-            database.Store.Identity.NodeId, database.Database.Limits);
+            database.Store.Identity.NodeId, database.Database.Limits, UnitNativeTextOptions.Execution());
 
     private static string[] CreateOwnerLeaves(string root, TestDatabase database, TextProjectionScope scope, int count)
     {
@@ -122,7 +122,7 @@ internal sealed class NativeTextGenerationCapacityTests
         {
             leaves[index] = NativeTextValidation.GenerationLeaf();
             NativeTextFiles.WriteOwner(root, leaves[index], database.Store.Identity.NodeId, scope,
-                database.Database.Limits);
+                database.Database.Limits, UnitNativeTextOptions.Execution());
         }
         return leaves;
     }
@@ -134,7 +134,7 @@ internal sealed class NativeTextGenerationCapacityTests
             .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal).ToArray();
 
     private static NativeTextProjection OpenForRestart(string root, TestDatabase database)
-        => new(root, database.Database.Limits, database.Store.Identity.NodeId);
+        => new(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
 
     private static TextProjectionScope CaptureScope(TestDatabase database)
     {

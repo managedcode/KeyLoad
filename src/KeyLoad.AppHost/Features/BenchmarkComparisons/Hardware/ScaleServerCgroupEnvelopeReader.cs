@@ -4,6 +4,11 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class ScaleServerCgroupEnvelopeReader
 {
+    private const char WhitespaceSeparator = ' ';
+    private const int PeriodFieldIndex = 1;
+    private const int NoLimit = 0;
+    private const int CpuLimitFieldCount = 2;
+
     private const string CpuMaximum = "cpu.max";
     private const string MemoryMaximum = "memory.max";
     private const string Unlimited = "max";
@@ -80,24 +85,24 @@ internal static class ScaleServerCgroupEnvelopeReader
 
     private static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)
     {
-        var parts = cpuText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (isRoot && parts.Length == 1 && parts[0] == Unlimited)
+        var parts = cpuText.Split(WhitespaceSeparator, StringSplitOptions.RemoveEmptyEntries);
+        if (isRoot && parts.Length == PeriodFieldIndex && parts[NoLimit] == Unlimited)
         {
             return true;
         }
 
-        if (parts.Length != 2 || !long.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture,
-                out var period) || period <= 0)
+        if (parts.Length != CpuLimitFieldCount || !long.TryParse(parts[PeriodFieldIndex], NumberStyles.None, CultureInfo.InvariantCulture,
+                out var period) || period <= NoLimit)
         {
             return false;
         }
 
-        if (parts[0] == Unlimited)
+        if (parts[NoLimit] == Unlimited)
         {
             return true;
         }
 
-        if (!long.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= 0)
+        if (!long.TryParse(parts[NoLimit], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= NoLimit)
         {
             return false;
         }
@@ -115,7 +120,7 @@ internal static class ScaleServerCgroupEnvelopeReader
             return true;
         }
 
-        if (!long.TryParse(limitText, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= 0)
+        if (!long.TryParse(limitText, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= NoLimit)
         {
             return false;
         }

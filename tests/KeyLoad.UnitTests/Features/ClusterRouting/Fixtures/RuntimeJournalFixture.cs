@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
@@ -13,7 +14,11 @@ internal sealed class RuntimeJournalFixture : IDisposable
     {
         database = new TestDatabase();
         var options = configured ?? new RuntimeJournalOptions();
-        if (!options.IsValid()) throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));
+        if (!options.IsValid())
+        {
+            throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));
+        }
+
         database.Store.RequireReaderContract(KeyLoad.Storage.StoreReaderContract.RuntimeJournal);
         database.Database.ConfigureRuntimeJournal(Options.Create(options));
         Bootstrap();
@@ -38,7 +43,8 @@ internal sealed class RuntimeJournalFixture : IDisposable
     internal static RuntimeJournalMutation Mutation(RuntimeJournalAction action, RuntimeJournalSnapshot snapshot,
         byte[]? data = null, string? etag = null, Dictionary<string, string>? set = null, string[]? remove = null)
         => new(action, snapshot.JournalName, snapshot.InstanceId, snapshot.OwnerGeneration, snapshot.ContentRevision,
-            etag, data is null ? ReadOnlyMemory<byte>.Empty : data, set ?? new(StringComparer.Ordinal), remove ?? []);
+            etag, data is null ? ReadOnlyMemory<byte>.Empty : data, set ?? new(StringComparer.Ordinal),
+            remove?.ToImmutableArray() ?? []);
 
     public void Dispose() => database.Dispose();
 }

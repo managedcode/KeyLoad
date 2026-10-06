@@ -121,10 +121,10 @@ internal sealed class SampleChunkStoreFixture : IDisposable
     }
 
     internal static ReadExecutionBudget NewBudget(TestDatabase database, CancellationToken cancellationToken = default)
-        => new(database.Database.Limits, database.Database.EvaluationClock, cancellationToken);
+        => new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Database.EvaluationClock, cancellationToken);
 
     private static ReadExecutionBudget NewBudget(DatabaseEngine database)
-        => new(database.Limits, database.EvaluationClock);
+        => new(UnitExecutionOptions.DatabaseLimits(database.Limits), database.EvaluationClock);
 
     private static SampleRecord[] ReadSamples(PartitionRef partition, IKeyValueView view, ReadExecutionBudget budget)
     {

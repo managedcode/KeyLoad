@@ -35,8 +35,7 @@ internal sealed class ReplicaControlPayloadSecurityTests
             MaxControlPayloadBytes = payloadBytes - ExcessPayloadBytes,
             ReplayLimits = fixture.Options.ReplayLimits with { CriticalPerVoter = ReservedCapacity }
         };
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System,
-            canonicalDatabase: fixture.Database);
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(),             canonicalDatabase: fixture.Database);
         var request = method == ReplicaRpc.Forward ? fixture.Forward(kind) : fixture.Append(kind);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -64,8 +63,7 @@ internal sealed class ReplicaControlPayloadSecurityTests
             MaxControlPayloadBytes = exactBytes,
             ReplayLimits = fixture.Options.ReplayLimits with { CriticalPerVoter = ReservedCapacity }
         };
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System,
-            canonicalDatabase: fixture.Database);
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(),             canonicalDatabase: fixture.Database);
         var request = fixture.Request(ReplicaRpc.Forward, operation);
         await RejectOneByteShort(fixture, options, request);
         receiver.VerifyRequest(request);
@@ -76,9 +74,7 @@ internal sealed class ReplicaControlPayloadSecurityTests
 
     private static async Task RejectOneByteShort(ReplicaSecurityFixture fixture, ReplicaPeerOptions options, ReplicaPeerEnvelope request)
     {
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration,
-            options with { MaxControlPayloadBytes = options.MaxControlPayloadBytes - 1 }, fixture.Discovery,
-            TimeProvider.System, canonicalDatabase: fixture.Database);
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration,             options with { MaxControlPayloadBytes = options.MaxControlPayloadBytes - 1 }, fixture.Discovery,             TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(request));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         var reply = receiver.CreateReply(request, ReadOnlyMemory<byte>.Empty, failure.Code, failure.Message);

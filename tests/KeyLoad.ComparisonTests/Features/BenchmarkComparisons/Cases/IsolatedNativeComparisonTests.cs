@@ -5,5 +5,6 @@ internal sealed class IsolatedNativeComparisonTests
     // AC-ISO-002/003/005/006: exactly one real engine/node/scenario cell per GitHub VM.
     [Test]
     public async Task SelectedNativeCaseRunsCommonIntensiveWorkload()
-        => await IsolatedNativeCase.RunAsync(TestContext.Current!.Execution.CancellationToken);
+        => await IsolatedNativeCase.RunAsync(IsolatedNativeCaseIntent.ClosedLoop,
+            TestContext.Current!.Execution.CancellationToken);
 }

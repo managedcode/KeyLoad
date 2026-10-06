@@ -12,10 +12,14 @@ internal static class McpSchemaProjection
     /// <returns>A read-only options copy used exclusively by the JSON Schema exporter.</returns>
     internal static JsonSerializerOptions Create()
     {
+        const int ByteMatchesInitialValue = 0;
+        const int ArrayMatchesInitialValue = 0;
+        const int IndexValidationBoundary = 0;
+
         var options = new JsonSerializerOptions(JsonDefaults.Options);
-        var byteMatches = 0;
-        var arrayMatches = 0;
-        for (var index = options.Converters.Count - RequiredFamilyMatches; index >= 0; index--)
+        var byteMatches = ByteMatchesInitialValue;
+        var arrayMatches = ArrayMatchesInitialValue;
+        for (var index = options.Converters.Count - RequiredFamilyMatches; index >= IndexValidationBoundary; index--)
         {
             var converter = options.Converters[index];
             var bytes = converter.CanConvert(typeof(ReadOnlyMemory<byte>));

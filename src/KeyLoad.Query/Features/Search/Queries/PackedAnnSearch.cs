@@ -4,8 +4,17 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnSearch
 {
+    private const int BitmapRemainderMask = 63;
+    private const int BitmapWordBits = 64;
+    private const int MinimumNonEmptyCapacity = 1;
+    private const int EmptyElementCount = 0;
+    private const int NoRetainedBytes = 0;
+    private const int InitialSequence = 0;
+    private const int MinimumPositiveCount = 1;
+    private const int FirstElementIndex = 0;
+    private const int AdjacentElementOffset = 1;
+
     private const string InvalidQuery = "The packed ANN query, result limit or eligibility bitmap is invalid.";
-    private const int MaximumBreadth = 4_096;
 
     internal static AnnSearchResult Run(PackedAnnState state, ReadOnlyMemory<float> query, int limit,
         ReadOnlyMemory<ulong>? eligibility, AnnWorkBudget budget)
@@ -15,7 +24,7 @@ internal static class PackedAnnSearch
         var startedWork = budget.WorkUnits;
         var startedDistances = budget.DistanceEvaluations;
         var startedEdges = budget.EdgeVisits;
-        var words = checked((state.Count + 63) / 64);
+        var words = checked((state.Count + BitmapRemainderMask) / BitmapWordBits);
         ValidateRequest(state, query, limit, eligibility, words);
         var initialBytes = PackedAnnReservations.InitialQueryScratch(state.Space.Dimension, words,
             eligibility is not null);
@@ -23,14 +32,14 @@ internal static class PackedAnnSearch
         var copiedQuery = CopyQuery(state, query, budget);
         var similarity = PrepareSimilarity(state, copiedQuery, budget);
         var copiedEligibility = CopyEligibility(state.Count, eligibility, words, budget, out var eligibleCount);
-        var capacity = Math.Max(1, Math.Min(state.Count, MaximumBreadth));
+        var capacity = Math.Max(MinimumNonEmptyCapacity, Math.Min(state.Count, state.Options.MaximumSearchBreadth));
         var plan = FilteredVectorPlanner.Create(state.Count, limit, eligibleCount,
             state.Options.ExactThreshold, state.Options.EfSearch, capacity, budget);
-        if (eligibleCount == 0)
+        if (eligibleCount == EmptyElementCount)
         {
-            var emptyReservation = PackedAnnReservations.ExactQueryScratch(initialBytes, 0);
+            var emptyReservation = PackedAnnReservations.ExactQueryScratch(initialBytes, NoRetainedBytes);
             PackedAnnReservations.RequireScratch(emptyReservation, state.Options.MaxScratchBytes);
-            return Result([], AnnSearchMode.ExactSmallSet, emptyReservation, plan, 0, 0,
+            return Result([], AnnSearchMode.ExactSmallSet, emptyReservation, plan, EmptyElementCount, InitialSequence,
                 budget, startedWork, startedDistances, startedEdges);
         }
         if (plan.UseExact)
@@ -49,7 +58,7 @@ internal static class PackedAnnSearch
         var reservation = PackedAnnReservations.ExactQueryScratch(initialBytes, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
         var candidates = PackedAnnExactSearch.Run(state, similarity, eligibility, plan.ResultCount, budget);
-        return Result(candidates, AnnSearchMode.ExactSmallSet, reservation, plan, 0, 0,
+        return Result(candidates, AnnSearchMode.ExactSmallSet, reservation, plan, EmptyElementCount, InitialSequence,
             budget, startedWork, startedDistances, startedEdges);
     }
 
@@ -57,7 +66,7 @@ internal static class PackedAnnSearch
         ulong[]? eligibility, FilteredVectorPlan plan, long initialBytes, AnnWorkBudget budget,
         long startedWork, long startedDistances, long startedEdges)
     {
-        var visitWords = checked((state.Count + 63) / 64);
+        var visitWords = checked((state.Count + BitmapRemainderMask) / BitmapWordBits);
         var reservation = PackedAnnReservations.ApproximateQueryScratch(initialBytes, visitWords,
             plan.Capacity, plan.ResultCount);
         PackedAnnReservations.RequireScratch(reservation, state.Options.MaxScratchBytes);
@@ -70,7 +79,7 @@ internal static class PackedAnnSearch
     private static void ValidateRequest(PackedAnnState state, ReadOnlyMemory<float> query, int limit,
         ReadOnlyMemory<ulong>? eligibility, int expectedBitmapWords)
     {
-        if (limit is < 1 or > 1_000 || query.Length != state.Space.Dimension
+        if (limit < MinimumPositiveCount || limit > state.Options.MaximumSearchResults || query.Length != state.Space.Dimension
             || eligibility is { } bitmap && bitmap.Length != expectedBitmapWords)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidQuery);
@@ -109,14 +118,14 @@ internal static class PackedAnnSearch
 
     private static int CountEligible(int count, ulong[] bitmap, AnnWorkBudget budget)
     {
-        var eligible = 0;
-        for (var index = 0; index < bitmap.Length; index++)
+        var eligible = EmptyElementCount;
+        for (var index = FirstElementIndex; index < bitmap.Length; index++)
         {
             budget.Check();
             var bits = bitmap[index];
             budget.Charge(sizeof(ulong));
-            var remainder = count & 63;
-            if (index == bitmap.Length - 1 && remainder != 0 && (bits >> remainder) != 0)
+            var remainder = count & BitmapRemainderMask;
+            if (index == bitmap.Length - AdjacentElementOffset && remainder != EmptyElementCount && (bits >> remainder) != EmptyElementCount)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidQuery);
             }

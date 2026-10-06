@@ -23,7 +23,7 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission journalAdmission)
     : GrainService(id, silo, loggerFactory), IRecurringDueGrainService
 {
-    private readonly DueCoordinationOptions settings = options.Value;
+    private const int NoRejectedDueHints = 0;
     private Task? loop;
 
     /// <summary>Completes native per-silo grain-service initialization.</summary>
@@ -68,8 +68,8 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
                 var observedPosition = consensus.AppliedPosition;
                 cursor = await RunCycleAsync(cursor, cancellationToken).ConfigureAwait(true);
                 await RecurringDueWait.WaitForChangeOrFallbackAsync(consensus, observedPosition,
-                    settings.PollInterval, clock, cancellationToken).ConfigureAwait(true);
-                await RecurringDueWait.WaitForMinimumCadenceAsync(cycleStarted, settings.MinimumCycleCadence,
+                    options.Value.PollInterval, clock, cancellationToken).ConfigureAwait(true);
+                await RecurringDueWait.WaitForMinimumCadenceAsync(cycleStarted, options.Value.MinimumCycleCadence,
                     clock, cancellationToken).ConfigureAwait(true);
             }
         }
@@ -98,7 +98,7 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
         {
             var page = await ReadAndDispatchPage(cursor, cancellationToken).ConfigureAwait(true);
             cursor = page.Cursor;
-            if (page.Rejected.Length > 0)
+            if (page.Rejected.Length > NoRejectedDueHints)
             {
                 RecurringDueDiagnostics.PageRejected(diagnostics, page.Rejected.Length);
             }
@@ -144,7 +144,7 @@ public sealed class RecurringDueGrainService(GrainId id, Silo silo,
     private async Task Dispatch(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var dispatchDeadline = settings.DispatchDeadline;
+        var dispatchDeadline = options.Value.DispatchDeadline;
         deadline.CancelAfter(dispatchDeadline);
         try
         {

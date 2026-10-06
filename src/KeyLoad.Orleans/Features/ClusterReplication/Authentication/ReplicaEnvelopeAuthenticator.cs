@@ -25,13 +25,18 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
     /// <param name="local">The actual local Orleans runtime generation.</param>
     /// <param name="clock">The system clock used for envelope freshness.</param>
     /// <param name="transportOptions">Centrally validated envelope freshness and retry settings.</param>
+    /// <param name="replayOptions">The same centrally validated replay capacities supplied to the peer boundary.</param>
     /// <param name="logger">Optional closed numeric replay-admission diagnostics.</param>
     /// <param name="canonicalDatabase">Optional borrowed canonical authority; required for non-null native operations.</param>
     public ReplicaEnvelopeAuthenticator(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
         ReplicaSiloDiscoveryState local, TimeProvider clock, IOptions<ReplicaTransportOptions> transportOptions,
+        IOptions<ReplicaReplayLimits> replayOptions,
         ILogger<ReplicaEnvelopeAuthenticator>? logger = null,
         DatabaseEngine? canonicalDatabase = null)
     {
+        ArgumentNullException.ThrowIfNull(configurationOptions);
+        ArgumentNullException.ThrowIfNull(peerOptions);
+        ArgumentNullException.ThrowIfNull(replayOptions);
         var configuration = configurationOptions.Value;
         var options = peerOptions.Value;
         ArgumentNullException.ThrowIfNull(options);
@@ -48,12 +53,12 @@ public sealed class ReplicaEnvelopeAuthenticator : IDisposable
         this.canonicalDatabase = canonicalDatabase;
         voters = new(configuration.VoterIds, StringComparer.Ordinal);
         mac = new(options.Secret, options.ClusterId);
-        replay = new(configuration.VoterIds, peerOptions, transportOptions);
+        replay = new(configuration.VoterIds, replayOptions, transportOptions);
         maximumControlPayloadBytes = options.MaxControlPayloadBytes;
         if (logger is not null)
         {
             diagnostics = new(logger, configuration.VoterIds.Length, transportOptions);
-            diagnostics.Configured(options.ReplayLimits);
+            diagnostics.Configured(replayOptions.Value);
         }
     }
 

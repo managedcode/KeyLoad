@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -11,14 +12,14 @@ internal static class McpNativeOutput
     /// <param name="message">The genuine native response with any already injected metadata.</param>
     /// <param name="maximumBytes">The inclusive native frame ceiling, fully reserved by the caller before allocation.</param>
     /// <exception cref="KeyLoadException">The native message exceeds its byte or structural capacity.</exception>
-    internal static void Validate(JsonRpcMessage message, int maximumBytes)
+    internal static void Validate(JsonRpcMessage message, int maximumBytes, IOptions<McpExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(message);
         using var stream = new McpBoundedWriteStream(maximumBytes);
         try
         {
             JsonSerializer.Serialize(stream, message, McpJsonUtilities.DefaultOptions);
-            _ = McpFrameBounds.InspectValue(stream.BorrowBuffer().Span[..stream.WrittenBytes], maximumBytes);
+            _ = McpFrameBounds.InspectValue(stream.BorrowBuffer().Span[..stream.WrittenBytes], maximumBytes, options);
         }
         catch (JsonException)
         {

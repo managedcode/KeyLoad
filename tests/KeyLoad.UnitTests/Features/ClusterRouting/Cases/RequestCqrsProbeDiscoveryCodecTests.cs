@@ -13,8 +13,8 @@ internal sealed class RequestCqrsProbeDiscoveryCodecTests
     public async Task DiscoveryRecordRoundTripsTheActualTransportFlagAndOnlyWhitelistedFields()
     {
         var record = CreateRecord(transportReady: true);
-        var bytes = RequestCqrsProbeJson.WriteDiscovery(record);
-        var actual = RequestCqrsProbeJson.ReadDiscovery(bytes);
+        var bytes = UnitRequestProbeOptions.Json.WriteDiscovery(record);
+        var actual = UnitRequestProbeOptions.Json.ReadDiscovery(bytes);
         await Assert.That(actual).IsEqualTo(record);
         var json = Encoding.UTF8.GetString(bytes);
         await Assert.That(json).Contains("\"TransportReady\":true");
@@ -26,7 +26,7 @@ internal sealed class RequestCqrsProbeDiscoveryCodecTests
     [Test]
     public async Task DiscoveryRecordRejectsMalformedIdentityShapeAndCompatibleObservations()
     {
-        var bytes = RequestCqrsProbeJson.WriteDiscovery(CreateRecord(transportReady: false));
+        var bytes = UnitRequestProbeOptions.Json.WriteDiscovery(CreateRecord(transportReady: false));
         var json = Encoding.UTF8.GetString(bytes);
         foreach (var invalid in new[]
         {
@@ -41,7 +41,7 @@ internal sealed class RequestCqrsProbeDiscoveryCodecTests
         })
         {
             var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
-                RequestCqrsProbeJson.ReadDiscovery(Encoding.UTF8.GetBytes(invalid)));
+                UnitRequestProbeOptions.Json.ReadDiscovery(Encoding.UTF8.GetBytes(invalid)));
             await Assert.That(error.Message).IsEqualTo(RequestCqrsProbeProtocol.InvalidRecord);
         }
     }

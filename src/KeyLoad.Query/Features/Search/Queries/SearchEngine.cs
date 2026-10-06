@@ -1,11 +1,30 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Query;
 
 /// <summary>Runs exact text, vector and hybrid ranking within one authorized read cut.</summary>
-public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textProjection = null)
+public sealed class SearchEngine
 {
+    private readonly DatabaseEngine database;
+    private readonly ITextProjection? textProjection;
+    private readonly QueryExecutionOptions execution;
+
+    /// <summary>Creates an authorized search owner with one frozen native execution policy.</summary>
+    /// <param name="database">Node-owned canonical database.</param>
+    /// <param name="options">Centrally validated query and text execution budgets.</param>
+    /// <param name="textProjection">Optional native derived text projection.</param>
+    public SearchEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options, ITextProjection? textProjection = null)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(options);
+        execution = options.Value;
+        execution.Validate();
+        this.database = database;
+        this.textProjection = textProjection;
+    }
+
     private const string UnsafeSynchronousSearch = "Await SearchAsync when native text search runs on a scheduler or synchronization context.";
 
     /// <summary>Returns exact fused ranks with selected documents projected by persisted policy.</summary>
@@ -21,7 +40,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
         {
             throw new InvalidOperationException(UnsafeSynchronousSearch);
         }
-        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return SearchCore(principalId, request, budget);
@@ -35,7 +54,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
     public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await Task.Run(() => SearchCore(principalId, request, budget), cancellationToken).ConfigureAwait(false);
@@ -50,17 +69,17 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.Limits, cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, cancellationToken: cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await Task.Run(() => GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget),
+        return await Task.Run(() => GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution),
             cancellationToken).ConfigureAwait(false);
     }
 
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)
     {
         budget.Check();
-        SearchRequestValidation.Validate(request, database.Limits, false);
+        SearchRequestValidation.Validate(request, database.Limits, false, execution);
         FilteredSearchEligibility.ValidateRequest(request.AllowedIds, database.Limits, budget);
         var similarity = request.Vector is { } vector
             ? PreparedSimilarity.Create(vector.AsMemory(), request.Space!.Metric) : null;
@@ -86,7 +105,7 @@ public sealed class SearchEngine(DatabaseEngine database, ITextProjection? textP
             if (request.Text is not null)
             {
                 fusion.AddBranch(FilteredSearchBranch.Apply(
-                    SearchBranchExecution.RankText(database, textProjection, view, principal, resource, request, budget),
+                    SearchBranchExecution.RankText(database, textProjection, view, principal, resource, request, budget, execution),
                     eligibility, budget), request.TextWeight);
             }
             if (similarity is not null)

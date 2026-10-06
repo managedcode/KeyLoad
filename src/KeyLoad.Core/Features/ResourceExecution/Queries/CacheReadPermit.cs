@@ -5,6 +5,8 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Maintains one receiver-local finite cache eligibility lease without granting read authority.</summary>
 public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
 {
+    private const int InitialSequence = 0;
+
     private sealed record Lease(Guid GrantId, CacheReadPermitAcceptance Acceptance, long PreparedTimestamp);
     private sealed record State(Lease? Lease, long LastSequence, bool Closed);
 
@@ -12,7 +14,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     private readonly TimeProvider clock;
     private readonly TimeSpan prepareValidity;
     private readonly TimeSpan leaseValidity;
-    private State state = new(null, 0, false);
+    private State state = new(null, InitialSequence, false);
 
     /// <summary>Creates a cold receiver-local permit that evaluates leases with the supplied monotonic clock.</summary>
     /// <param name="clock">The receiver clock used for preparation age and eligibility.</param>
@@ -35,7 +37,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
         lock (writer)
         {
             var current = Volatile.Read(ref state);
-            if (current.Closed || grantId == Guid.Empty || sequence <= current.LastSequence || sequence <= 0)
+            if (current.Closed || grantId == Guid.Empty || sequence <= current.LastSequence || sequence <= InitialSequence)
             {
                 return false;
             }
@@ -75,7 +77,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
         var current = Volatile.Read(ref state);
         if (current.Closed || current.Lease is not { } lease || !IsEligible(lease, clock.GetTimestamp()))
         {
-            revision = 0;
+            revision = InitialSequence;
             return false;
         }
         revision = lease.Acceptance.Revision;
@@ -85,7 +87,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     /// <summary>Rechecks one captured revision against the current immutable lease and its prepare-based lifetime.</summary>
     public bool IsCurrent(long revision)
     {
-        if (revision <= 0)
+        if (revision <= InitialSequence)
         {
             return false;
         }
@@ -98,7 +100,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     public bool IsCurrentAcceptance(CacheReadPermitAcceptance acceptance)
     {
         var current = Volatile.Read(ref state);
-        return acceptance.Revision > 0 && !current.Closed && current.Lease is { } lease
+        return acceptance.Revision > InitialSequence && !current.Closed && current.Lease is { } lease
             && lease.Acceptance == acceptance && IsEligible(lease, clock.GetTimestamp());
     }
 
@@ -121,7 +123,7 @@ public sealed class CacheReadPermit : ICacheReadPermit, IDisposable
     private bool TryElapsed(long preparedTimestamp, long now, out TimeSpan elapsed)
     {
         elapsed = default;
-        if (now < preparedTimestamp || preparedTimestamp < 0 && now > long.MaxValue + preparedTimestamp)
+        if (now < preparedTimestamp || preparedTimestamp < InitialSequence && now > long.MaxValue + preparedTimestamp)
         {
             return false;
         }

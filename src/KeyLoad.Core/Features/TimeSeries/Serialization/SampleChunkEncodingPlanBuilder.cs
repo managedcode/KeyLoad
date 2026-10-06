@@ -30,11 +30,14 @@ internal sealed class SampleChunkEncodingPlanBuilder
 
     internal void Add(SampleRecord? record, int index, ReadExecutionBudget budget)
     {
+        const int EmptyIndex = 0;
+        const int RecordCountSingleItemCount = 1;
+
         var ownedRecord = record ?? throw Errors.Fail(ErrorCode.Validation, SampleChunkWire.InvalidContent);
         ValidateRecord(ownedRecord);
         var sample = ownedRecord.Sample;
         seriesId ??= ownedRecord.SeriesId;
-        if (index == 0)
+        if (index == EmptyIndex)
         {
             seriesBytes = SampleChunkText.FramedSize(seriesId, budget);
         }
@@ -48,7 +51,7 @@ internal sealed class SampleChunkEncodingPlanBuilder
         }
         ValidateOrdering(ownedRecord, index);
         AddColumnLengths(ownedRecord, index, budget);
-        CheckCumulativeSize(index + 1);
+        CheckCumulativeSize(index + RecordCountSingleItemCount);
         previousTicks = sample.Timestamp.UtcTicks;
         previousSequence = ownedRecord.Sequence;
         previousValueBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(sample.Value));
@@ -57,10 +60,12 @@ internal sealed class SampleChunkEncodingPlanBuilder
 
     internal SampleChunkEncodingPlan Complete(ReadExecutionBudget budget)
     {
+        const long TotalInitialValue = 0L;
+
         budget.Check();
         var offsetsBytes = checked(count * sizeof(short));
         var tagCountBytes = SampleChunkWire.VarUIntLength((ulong)tagDictionary.Count);
-        var total = 0L;
+        var total = TotalInitialValue;
         SampleChunkWire.AddSize(ref total, ticksBytes);
         SampleChunkWire.AddSize(ref total, offsetsBytes);
         SampleChunkWire.AddSize(ref total, sequencesBytes);
@@ -91,13 +96,16 @@ internal sealed class SampleChunkEncodingPlanBuilder
 
     private void ValidateOrdering(SampleRecord record, int index)
     {
+        const int IndexValidationBoundary = 0;
+        const int SequenceValidationBoundary = 0;
+
         var ticks = record.Sample.Timestamp.UtcTicks;
-        if (index > 0 && (ticks < previousTicks
+        if (index > IndexValidationBoundary && (ticks < previousTicks
             || ticks == previousTicks && record.Sequence <= previousSequence))
         {
             throw Errors.Fail(ErrorCode.Validation, SampleChunkWire.InvalidContent);
         }
-        if (record.Sequence <= 0)
+        if (record.Sequence <= SequenceValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidSequence);
         }
@@ -109,14 +117,17 @@ internal sealed class SampleChunkEncodingPlanBuilder
 
     private void AddColumnLengths(SampleRecord record, int index, ReadExecutionBudget budget)
     {
+        const int EmptyIndex = 0;
+        const int FirstValueRecordIndex = 0;
+
         var ticks = record.Sample.Timestamp.UtcTicks;
-        var tickValue = index == 0 ? (ulong)ticks : (ulong)(ticks - previousTicks);
-        var sequenceValue = index == 0 ? (ulong)record.Sequence
+        var tickValue = index == EmptyIndex ? (ulong)ticks : (ulong)(ticks - previousTicks);
+        var sequenceValue = index == EmptyIndex ? (ulong)record.Sequence
             : SampleChunkWire.ZigZag(record.Sequence - previousSequence);
         var valueBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(record.Sample.Value));
         ticksBytes += SampleChunkWire.VarUIntLength(tickValue);
         sequencesBytes += SampleChunkWire.VarUIntLength(sequenceValue);
-        valuesBytes += SampleChunkWire.VarUIntLength(index == 0 ? valueBits : valueBits ^ previousValueBits);
+        valuesBytes += SampleChunkWire.VarUIntLength(index == FirstValueRecordIndex ? valueBits : valueBits ^ previousValueBits);
         eventIdsBytes += SampleChunkText.FramedSize(record.Sample.EventId, budget);
         if (!tagIndexes.TryGetValue(record.TagsJson, out var tagIndex))
         {
@@ -130,7 +141,9 @@ internal sealed class SampleChunkEncodingPlanBuilder
 
     private void CheckCumulativeSize(int recordCount)
     {
-        var total = 0L;
+        const long TotalInitialValue = 0L;
+
+        var total = TotalInitialValue;
         SampleChunkWire.AddSize(ref total, ticksBytes);
         SampleChunkWire.AddSize(ref total, checked(recordCount * sizeof(short)));
         SampleChunkWire.AddSize(ref total, sequencesBytes);

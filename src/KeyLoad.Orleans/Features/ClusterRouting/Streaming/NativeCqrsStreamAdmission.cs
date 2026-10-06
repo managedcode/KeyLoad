@@ -15,12 +15,14 @@ internal sealed class NativeCqrsStreamAdmission(
     internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         CancellationToken cancellationToken)
     {
+        const int CountStep = 1;
+
         if (terminal)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
 
-        var nextCount = checked(count + 1);
+        var nextCount = checked(count + CountStep);
         if (nextCount > GrainRequestStreamProtocol.MaximumChunks)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
@@ -72,7 +74,10 @@ internal sealed class NativeCqrsStreamAdmission(
     private void ValidateStartedShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         int nextCount)
     {
-        if (nextCount != 1 || chunk.Sequence != 1 || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
+        const int EmptyNextCount = 1;
+        const int EmptySequence = 1;
+
+        if (nextCount != EmptyNextCount || chunk.Sequence != EmptySequence || chunk.ProgressResult is not { IsSuccess: true, Value: not null }
             || chunk.ProgressResult.Value.Problem is not null
             || chunk.ProgressResult.Value.Value.RequestId != requestId || chunk.Final is not null
             || chunk.Message is not null || chunk.EventId is not null
@@ -85,9 +90,16 @@ internal sealed class NativeCqrsStreamAdmission(
     private static void ValidateFinalShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
         int nextCount)
     {
-        var earlyFailure = chunk.Kind == CqrsStreamChunkKind.Failed && nextCount == 1;
-        var expectedSequence = earlyFailure ? 1 : 2;
-        if (nextCount is < 1 or > 2 || (!earlyFailure && nextCount != 2)
+        const int EmptyNextCount = 1;
+        const int ValidateFinalShapePresentCount = 1;
+        const int StartedAndTerminalChunkCount = 2;
+        const int NextCountFirstCount = 1;
+        const int NextCountValidationBound = 2;
+        const int ValidateFinalShapeEmptyNextCount = 2;
+
+        var earlyFailure = chunk.Kind == CqrsStreamChunkKind.Failed && nextCount == EmptyNextCount;
+        var expectedSequence = earlyFailure ? ValidateFinalShapePresentCount : StartedAndTerminalChunkCount;
+        if (nextCount is < NextCountFirstCount or > NextCountValidationBound || (!earlyFailure && nextCount != ValidateFinalShapeEmptyNextCount)
             || chunk.Sequence != expectedSequence || chunk.ProgressResult is not null
             || chunk.Final is not { } final || chunk.Message is not null || chunk.EventId is not null
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))

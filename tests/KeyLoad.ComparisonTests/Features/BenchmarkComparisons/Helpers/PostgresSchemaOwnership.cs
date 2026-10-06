@@ -22,7 +22,7 @@ internal static class PostgresSchemaOwnership
         var disposeStarted = false;
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
             await MarkForeignOwnerAsync(connectionString, schema, cancellationToken);
             disposeStarted = true;
             await PostgresSchemaSupport.DisposeTargetAsync(target);
@@ -54,7 +54,7 @@ internal static class PostgresSchemaOwnership
         var disposeStarted = false;
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
             await ClearOwnerCommentAsync(connectionString, schema, cancellationToken);
             disposeStarted = true;
             await PostgresSchemaSupport.DisposeTargetAsync(target);
@@ -84,7 +84,7 @@ internal static class PostgresSchemaOwnership
         var disposeStarted = false;
         try
         {
-            await target.InitializeAsync(new BenchmarkDataset(PostgresSchemaSupport.Options(2)), cancellationToken);
+            await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
             await DropOwnedSchemaAsync(connectionString, schema, cancellationToken);
             disposeStarted = true;
             await PostgresSchemaSupport.DisposeTargetAsync(target);

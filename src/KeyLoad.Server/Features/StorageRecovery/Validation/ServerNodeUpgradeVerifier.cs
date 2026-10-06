@@ -6,13 +6,15 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeVerifier
 {
+    private const string Path2Text = "prior";
+
     internal static ReplicaHardState Verify(string directory, ServerNodeUpgradeReceipt receipt, ServerRuntimeOptions options, bool published)
         => ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(receipt.FinalDestination)!, verifier =>
         {
-            ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Canonical);
-            ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Replica);
-            var oldCopies = Path.Combine(verifier, "prior");
-            ServerNodeUpgradeAuthority.CopyInputs(receipt.OriginalSource, oldCopies);
+            ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Canonical, executionOptions: options.NodeUpgrade);
+            ServerNodeUpgradeAuthority.CopyStore(directory, verifier, ServerNodeUpgradeProtocol.Replica, executionOptions: options.NodeUpgrade);
+            var oldCopies = Path.Combine(verifier, Path2Text);
+            ServerNodeUpgradeAuthority.CopyInputs(receipt.OriginalSource, oldCopies, executionOptions: options.NodeUpgrade);
             var authority = ServerNodeUpgradeAuthority.VerifyCopies(oldCopies, options);
             return VerifyCopies(directory, verifier, receipt, options, authority, published);
         });
@@ -21,13 +23,14 @@ internal static class ServerNodeUpgradeVerifier
         ServerRuntimeOptions options, ServerNodeUpgradeAuthority authority, bool published)
         => ServerNodeUpgradeStores.Run(verifier, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
             var configuration = ServerNodeUpgradeConfiguration.Replica(options, verifier);
             ServerNodeUpgradeCurrentState.VerifyPersisted(stores.Replica);
             using var log = new DurableReplicaLog(stores.Replica, configuration, canonicalDatabase: database);
             ServerNodeUpgradeCurrentState.Verify(receipt, database, stores.Replica, log.State, authority, published);
-            ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration.Value.MaxSnapshotBytes,
-                Path.Combine(verifier, "verified-images"));
+            ServerNodeUpgradeCurrentImages.Verify(original, stores.Canonical, log.State, configuration,
+                Path.Combine(verifier, "verified-images"), executionOptions: options.NodeUpgrade,
+                recoveryOptions: options.OfflineRecovery);
             return log.State;
         });
 }

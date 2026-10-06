@@ -10,13 +10,15 @@ public sealed partial class DatabaseEngine
     internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedQuery(
         IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
     {
+        const string ReadAtomicPartitionPlacementForAuthorizedQueryDetailText = "The physical shard catalog is not initialized.";
+
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(grant);
         ValidatePartition(partition);
 
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view, grant)
-            ?? throw Errors.Fail(ErrorCode.NotFound, "The physical shard catalog is not initialized.");
+            ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementForAuthorizedQueryDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
         var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);

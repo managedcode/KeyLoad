@@ -6,6 +6,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int RemoteTransferCommandsSingleElementCount = 1;
+    private const int RemoteTransferCommandsTransferIdentifierSeparatorCount = 2;
+    private const int RemoteTransferCommandsNoRetainedBytes = 0;
+
     private const string TransferInvalidMessage = "The queue transfer request is invalid.";
     private const string TransferConflictMessage = "The transfer identity was reused with different content.";
     private const string TransferMissingMessage = "The source transfer intent is unavailable.";
@@ -34,7 +38,7 @@ public sealed partial class DatabaseEngine
         {
             RequireExistingIntent(tx, existing, request, principal.Id, fingerprint);
             RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
-            return TransferMutationReceipt(RemoteTransferProtocol.CreateReceiptKind, request.SourceQueue, request.TransferId, 1);
+            return TransferMutationReceipt(RemoteTransferProtocol.CreateReceiptKind, request.SourceQueue, request.TransferId, RemoteTransferCommandsSingleElementCount);
         }
 
         ValidateTransferMessage(request.Message, request.Destination, now);
@@ -50,7 +54,7 @@ public sealed partial class DatabaseEngine
         RemoteTransferStorage.RequireCapacity(capacity, recordBytes, Limits);
         tx.PutRecord(key, record);
         tx.PutRecord(RemoteTransferStorage.SourceCapacityKey(request.SourceQueue), RemoteTransferStorage.Add(capacity, recordBytes));
-        return TransferMutationReceipt(RemoteTransferProtocol.CreateReceiptKind, request.SourceQueue, request.TransferId, 1);
+        return TransferMutationReceipt(RemoteTransferProtocol.CreateReceiptKind, request.SourceQueue, request.TransferId, RemoteTransferCommandsSingleElementCount);
     }
 
     internal MutationReceipt ApplyAcceptQueueTransfer(IAtomicTransaction tx, PrincipalRecord principal,
@@ -127,7 +131,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, TransferReceiptInvalidMessage);
             }
-            return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue, request.TransferId, 2);
+            return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue, request.TransferId, RemoteTransferCommandsTransferIdentifierSeparatorCount);
         }
 
         if (existing.State != QueueTransferState.OutputPending)
@@ -142,7 +146,7 @@ public sealed partial class DatabaseEngine
         var nextCapacity = RemoteTransferStorage.Replace(capacity, oldBytes, newBytes, Limits);
         tx.PutRecord(key, updated);
         tx.PutRecord(RemoteTransferStorage.SourceCapacityKey(request.SourceQueue), nextCapacity);
-        return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue, request.TransferId, 2);
+        return TransferMutationReceipt(RemoteTransferProtocol.CompleteReceiptKind, request.SourceQueue, request.TransferId, RemoteTransferCommandsTransferIdentifierSeparatorCount);
     }
 
     private int ReceiptReservationBytes(IKeyValueView view, QueueLaneRef source, Guid transferId, QueueLaneRef destination,
@@ -304,7 +308,7 @@ public sealed partial class DatabaseEngine
         QueueLaneRef source, Guid transferId)
         => record.Source != source || record.TransferId != transferId || record.TransferId == Guid.Empty
             || record.Destination is null || record.PrincipalId is null || record.Message is null || record.IntentToken is null
-            || record.ReceiptReservationBytes < 0 || record.Fingerprint is null;
+            || record.ReceiptReservationBytes < RemoteTransferCommandsNoRetainedBytes || record.Fingerprint is null;
 
     private static void ValidateIntentRecordState(RemoteTransferIntentRecord record)
     {

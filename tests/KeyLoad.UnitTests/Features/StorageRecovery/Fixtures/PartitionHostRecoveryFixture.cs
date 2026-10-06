@@ -138,8 +138,10 @@ internal sealed class HostReplicaStores : IDisposable
             replica = Open(options, ReplicaProtocol.ReplicaDirectory);
             try
             {
+                Canonical.RequireReaderContract(StoreReaderContract.RuntimeJournal);
+                replica.RequireReaderContract(StoreReaderContract.RuntimeJournal);
                 Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(Configuration));
-                Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+                Database = new(Canonical, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
                 Snapshots = new(Canonical, Log, UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitExecutionOptions.ReplicaExecution());
             }
             catch (Exception) { replica.Dispose(); throw; }

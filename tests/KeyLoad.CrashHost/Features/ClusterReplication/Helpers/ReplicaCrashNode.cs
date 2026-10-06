@@ -32,7 +32,7 @@ internal sealed class ReplicaCrashNode : IDisposable
             replicaStore = new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
             try
             {
-                Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
+                Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
                 Log = new(replicaStore, CrashExecutionOptions.Configuration(Configuration), observer, canonicalDatabase: Database);
                 Bootstrap();
                 Snapshots = new(Canonical, Log, CrashExecutionOptions.Configuration(Configuration), CrashExecutionOptions.Replica(), observer);

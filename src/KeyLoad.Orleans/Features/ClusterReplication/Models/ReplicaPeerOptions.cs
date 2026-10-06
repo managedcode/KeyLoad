@@ -21,6 +21,8 @@ public sealed record ReplicaPeerOptions(Dictionary<string, Uri> Endpoints, ReadO
     /// <summary>Checks the discovery configuration against the durable replica scope.</summary>
     public void Validate(ReplicaConfiguration configuration)
     {
+        const int MaxControlPayloadBytesValidationBoundary = 1;
+
         ArgumentNullException.ThrowIfNull(configuration);
         configuration.Validate();
         if (ReplayLimits is null)
@@ -31,7 +33,7 @@ public sealed record ReplicaPeerOptions(Dictionary<string, Uri> Endpoints, ReadO
         ReplayLimits.Validate(configuration.VoterIds.Length);
         if (Secret is not { Length: ReplicaTransportProtocol.SecretBytes }
             || string.IsNullOrWhiteSpace(ClusterId) || ClusterId.Length > ReplicaTransportProtocol.MaximumClusterCharacters
-            || MaxControlPayloadBytes < 1 || MaxControlPayloadBytes > configuration.MaxAppendBytes
+            || MaxControlPayloadBytes < MaxControlPayloadBytesValidationBoundary || MaxControlPayloadBytes > configuration.MaxAppendBytes
             || configuration.MaxAppendBytes > int.MaxValue - ReplicaTransportProtocol.MaximumMetadataBytes
                 - ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes
             || ConnectTimeout <= TimeSpan.Zero || ConnectTimeout >= configuration.RpcTimeout
@@ -45,6 +47,8 @@ public sealed record ReplicaPeerOptions(Dictionary<string, Uri> Endpoints, ReadO
 
     private bool ValidEndpoint(string voter)
     {
+        const int PortValidationBoundary = 0;
+
         if (voter.Length > ReplicaTransportProtocol.MaximumIdentityCharacters
             || !Endpoints.TryGetValue(voter, out var endpoint) || endpoint is null || !endpoint.IsAbsoluteUri)
         {
@@ -53,6 +57,6 @@ public sealed record ReplicaPeerOptions(Dictionary<string, Uri> Endpoints, ReadO
 
         return (endpoint.Scheme == Uri.UriSchemeHttp || endpoint.Scheme == Uri.UriSchemeHttps)
             && string.IsNullOrEmpty(endpoint.UserInfo) && string.IsNullOrEmpty(endpoint.Query)
-            && string.IsNullOrEmpty(endpoint.Fragment) && endpoint.Port > 0;
+            && string.IsNullOrEmpty(endpoint.Fragment) && endpoint.Port > PortValidationBoundary;
     }
 }

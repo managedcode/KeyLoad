@@ -4,9 +4,7 @@ namespace KeyLoad.Core;
 
 internal static class DueWorkProtocol
 {
-    internal const int MaximumRecordsPerPage = 32;
     internal const int MaximumKeyBytes = 4_096;
-    internal const long NativeRangeByteCeiling = 67_108_864;
     internal const string ScheduleSpace = RecurringSagaProtocol.ScheduleSpace;
     internal const string SagaSpace = RecurringSagaProtocol.SagaSpace;
     internal const string InvalidWakeInstant = "The due-work wake instant must be UTC.";

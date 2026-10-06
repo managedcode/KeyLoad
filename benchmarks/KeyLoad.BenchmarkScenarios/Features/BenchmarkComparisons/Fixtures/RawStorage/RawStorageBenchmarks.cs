@@ -2,6 +2,7 @@ using System.Runtime.ExceptionServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
@@ -11,12 +12,10 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [Config(typeof(RawStorageUnrollConfiguration))]
 public class RawStorageBenchmarks : IDisposable
 {
-    private const string EngineEnvironmentVariable = "KEYLOAD_RAW_STORAGE_ENGINE";
     private const string ZoneTreeLabel = "zonetree";
     private const int BenchmarkRecordCount = 4096;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
-    private const int MaximumWrites = 65_536;
     private const int CreateDeleteOperationsPerInvoke = 2;
     private const string CreateDeletePairDescription = "one transient-key create/delete pair";
     private const string ActiveSetupMessage = "The raw storage benchmark already has an active fixture.";
@@ -31,6 +30,7 @@ public class RawStorageBenchmarks : IDisposable
     private RawStorageFixture? fixture;
     private bool disposed;
     private bool nextOverwriteAlternate = true;
+    private IOptions<BenchmarkScenarioSelectionOptions>? selection;
 
     /// <summary>Gets or sets the one lowercase ZoneTree label selected for the generated runner.</summary>
     [ParamsSource(nameof(Engines))]
@@ -45,7 +45,7 @@ public class RawStorageBenchmarks : IDisposable
     public int RecordCount { get; set; } = BenchmarkRecordCount;
 
     /// <summary>Returns exactly one engine selected by the process environment.</summary>
-    public IEnumerable<string> Engines => [SelectEngine()];
+    public IEnumerable<string> Engines => [(selection ??= BenchmarkScenarioSelectionRegistration.ReadRaw()).Value.Engine];
 
     /// <summary>Creates and verifies the actual engine fixture before measurement begins.</summary>
     [GlobalSetup]
@@ -58,7 +58,7 @@ public class RawStorageBenchmarks : IDisposable
         }
 
         ValidateEngine(Engine);
-        var candidate = new RawStorageFixture(RecordCount, PayloadBytes, MaximumWrites);
+        var candidate = new RawStorageFixture(RecordCount, PayloadBytes, RawStorageExecutionRegistration.Read());
         try
         {
             VerifySetupOracle(candidate);
@@ -75,13 +75,15 @@ public class RawStorageBenchmarks : IDisposable
     [Benchmark]
     public byte PointRead()
     {
+        const int IndexEmptyCount = 0;
+
         var active = RequireFixture();
-        if (!active.TryRead(0, out var value))
+        if (!active.TryRead(IndexEmptyCount, out var value))
         {
             throw new InvalidOperationException(SetupReadFailureMessage);
         }
 
-        return value.Span[0];
+        return value.Span[IndexEmptyCount];
     }
 
     /// <summary>Returns the actual found flag for the reserved unseeded missing key.</summary>
@@ -101,17 +103,21 @@ public class RawStorageBenchmarks : IDisposable
     [Benchmark]
     public void Overwrite()
     {
+        const int IndexEmptyCount = 0;
+
         var alternate = nextOverwriteAlternate;
         nextOverwriteAlternate = !nextOverwriteAlternate;
-        RequireFixture().Upsert(0, alternate);
+        RequireFixture().Upsert(IndexEmptyCount, alternate);
     }
 
     /// <summary>Creates and removes the reserved transient key as one explicitly labeled pair.</summary>
     [Benchmark(OperationsPerInvoke = CreateDeleteOperationsPerInvoke, Description = CreateDeletePairDescription)]
     public bool CreateDelete()
     {
+        const int RecordCountStep = 1;
+
         var active = RequireFixture();
-        var transientIndex = RecordCount + 1;
+        var transientIndex = RecordCount + RecordCountStep;
         active.Upsert(transientIndex, alternate: true);
         var deleted = active.Delete(transientIndex);
         if (!deleted)
@@ -152,13 +158,6 @@ public class RawStorageBenchmarks : IDisposable
         fixture = null;
     }
 
-    private static string SelectEngine()
-    {
-        var selected = Environment.GetEnvironmentVariable(EngineEnvironmentVariable) ?? ZoneTreeLabel;
-        ValidateEngine(selected);
-        return selected;
-    }
-
     private static void ValidateEngine(string label)
     {
         if (label != ZoneTreeLabel)
@@ -169,12 +168,14 @@ public class RawStorageBenchmarks : IDisposable
 
     private static void VerifySetupOracle(RawStorageFixture candidate)
     {
-        if (!candidate.TryRead(0, out var actual))
+        const int IndexEmptyCount = 0;
+
+        if (!candidate.TryRead(IndexEmptyCount, out var actual))
         {
             throw new InvalidOperationException(SetupReadFailureMessage);
         }
 
-        if (!actual.Span.SequenceEqual(candidate.Corpus.Value(0).Span))
+        if (!actual.Span.SequenceEqual(candidate.Corpus.Value(IndexEmptyCount).Span))
         {
             throw new InvalidOperationException(SetupValueFailureMessage);
         }
@@ -208,7 +209,9 @@ public class RawStorageBenchmarks : IDisposable
 
 internal sealed class RawStorageUnrollConfiguration : ManualConfig
 {
+    private const int CtorFactorSingleItemCount = 1;
+
     /// <summary>Keeps the frozen default loop unroll without overriding the requested invocation count.</summary>
     public RawStorageUnrollConfiguration()
-        => AddJob(Job.Default.WithUnrollFactor(1).AsMutator());
+        => AddJob(Job.Default.WithUnrollFactor(CtorFactorSingleItemCount).AsMutator());
 }

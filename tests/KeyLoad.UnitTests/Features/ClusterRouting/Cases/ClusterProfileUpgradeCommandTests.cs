@@ -13,7 +13,7 @@ internal sealed class ClusterProfileUpgradeCommandTests
         var originalMode = ReadMode(fixture.ProfilePath);
         var exitCode = await KeyLoadAppHostApplication.RunAsync(
             [ClusterProfileUpgradeCommand.UpgradeFlag, ClusterProfileUpgradeCommand.DataRootFlag, fixture.Root]);
-        var upgraded = ClusterProfileStore.Open(fixture.Root);
+        var upgraded = ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution());
         var backup = Path.Combine(fixture.Root, ClusterProfileStore.LegacyBackupName);
 
         await Assert.That(exitCode).IsEqualTo(0);

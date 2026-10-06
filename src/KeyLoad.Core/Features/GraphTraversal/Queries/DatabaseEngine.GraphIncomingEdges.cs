@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
         ReadIncomingGraphEdgesRequestV1 request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, timeProvider ?? Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, timeProvider ?? Clock, cancellationToken);
         budget.Check();
         GraphCrossPartitionValidation.ValidateIncoming(request, Limits, budget);
         return Store.Read(view =>

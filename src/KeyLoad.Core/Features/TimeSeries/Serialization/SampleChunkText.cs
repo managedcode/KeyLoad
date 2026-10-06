@@ -11,16 +11,20 @@ internal static class SampleChunkText
 
     internal static long FramedSize(string value, ReadExecutionBudget budget)
     {
+        const int EncodingFlagBits = 1;
+
         var byteLength = MeasureText(value, budget, out var encoding);
-        var prefix = checked(((ulong)byteLength << 1) | encoding);
+        var prefix = checked(((ulong)byteLength << EncodingFlagBits) | encoding);
         return SampleChunkWire.VarUIntLength(prefix) + byteLength;
     }
 
     internal static void WriteFramed(string value, Span<byte> destination, ref int position,
         ReadExecutionBudget budget)
     {
+        const int EncodingFlagBits = 1;
+
         var byteLength = MeasureText(value, budget, out var encoding);
-        var prefix = checked(((ulong)byteLength << 1) | encoding);
+        var prefix = checked(((ulong)byteLength << EncodingFlagBits) | encoding);
         SampleChunkWire.WriteVarUInt(destination, ref position, prefix);
         var target = destination.Slice(position, byteLength);
         budget.Check();
@@ -38,9 +42,12 @@ internal static class SampleChunkText
 
     internal static long ValidateFramed(ref SampleChunkReader reader, ReadExecutionBudget budget)
     {
+        const int EncodingFlagMask = 1;
+        const int PrefixBitOffset = 1;
+
         var prefix = reader.ReadVarUInt();
-        var encoding = (byte)(prefix & 1);
-        var byteLength = prefix >> 1;
+        var encoding = (byte)(prefix & EncodingFlagMask);
+        var byteLength = prefix >> PrefixBitOffset;
         SampleChunkWire.Require(byteLength <= int.MaxValue);
         var bytes = reader.ReadSpan((int)byteLength);
         ValidateBytes(bytes, encoding, budget);
@@ -49,9 +56,12 @@ internal static class SampleChunkText
 
     internal static string ReadFramed(ref SampleChunkReader reader, ReadExecutionBudget budget)
     {
+        const int EncodingFlagMask = 1;
+        const int PrefixBitOffset = 1;
+
         var prefix = reader.ReadVarUInt();
-        var encoding = (byte)(prefix & 1);
-        var byteLength = prefix >> 1;
+        var encoding = (byte)(prefix & EncodingFlagMask);
+        var byteLength = prefix >> PrefixBitOffset;
         SampleChunkWire.Require(byteLength <= int.MaxValue);
         var bytes = reader.ReadSpan((int)byteLength);
         ValidateBytes(bytes, encoding, budget);
@@ -63,19 +73,24 @@ internal static class SampleChunkText
 
     private static int MeasureText(string value, ReadExecutionBudget budget, out byte encoding)
     {
+        const int Utf8LengthInitialValue = 0;
+        const int NextCheckInitialValue = 0;
+        const int IndexInitialValue = 0;
+        const int CancellationCheckStrideMask = 0x3FFF;
+
         if (value.Length > SampleChunkWire.MaximumEncodedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkWire.ExcessBytes);
         }
         var hasUnpairedSurrogate = false;
-        long utf8Length = 0;
-        var nextCheck = 0;
-        for (var index = 0; index < value.Length; index++)
+        long utf8Length = Utf8LengthInitialValue;
+        var nextCheck = NextCheckInitialValue;
+        for (var index = IndexInitialValue; index < value.Length; index++)
         {
             if (index >= nextCheck)
             {
                 budget.Check();
-                nextCheck = index + 0x3FFF;
+                nextCheck = index + CancellationCheckStrideMask;
             }
             utf8Length += MeasureCodeUnit(value, ref index, ref hasUnpairedSurrogate);
         }
@@ -86,18 +101,28 @@ internal static class SampleChunkText
 
     private static int MeasureCodeUnit(string value, ref int index, ref bool hasUnpairedSurrogate)
     {
+        const int NextCodeUnitOffset = 1;
+        const int LowSurrogateOffset = 1;
+        const int SurrogatePairUtf8Bytes = 4;
+        const int UnpairedSurrogateUtf8Bytes = 0;
+        const int OneByteUtf8MaximumCodeUnit = 0x7F;
+        const int OneByteUtf8Length = 1;
+        const int TwoByteUtf8MaximumCodeUnit = 0x7FF;
+        const int TwoByteUtf8Length = 2;
+        const int ThreeByteUtf8Length = 3;
+
         var current = value[index];
-        if (char.IsHighSurrogate(current) && index + 1 < value.Length && char.IsLowSurrogate(value[index + 1]))
+        if (char.IsHighSurrogate(current) && index + NextCodeUnitOffset < value.Length && char.IsLowSurrogate(value[index + LowSurrogateOffset]))
         {
             index++;
-            return 4;
+            return SurrogatePairUtf8Bytes;
         }
         if (char.IsHighSurrogate(current) || char.IsLowSurrogate(current))
         {
             hasUnpairedSurrogate = true;
-            return 0;
+            return UnpairedSurrogateUtf8Bytes;
         }
-        return current <= 0x7F ? 1 : current <= 0x7FF ? 2 : 3;
+        return current <= OneByteUtf8MaximumCodeUnit ? OneByteUtf8Length : current <= TwoByteUtf8MaximumCodeUnit ? TwoByteUtf8Length : ThreeByteUtf8Length;
     }
 
     private static void ValidateBytes(ReadOnlySpan<byte> bytes, byte encoding, ReadExecutionBudget budget)
@@ -114,17 +139,21 @@ internal static class SampleChunkText
 
     private static void ValidateUtf8(ReadOnlySpan<byte> bytes, ReadExecutionBudget budget)
     {
-        var offset = 0;
-        var nextCheck = SampleChunkWire.HashChunkBytes / 2;
+        const int OffsetInitialValue = 0;
+        const int Utf16CodeUnitBytes = 2;
+        const int NoConsumedUtf8Bytes = 0;
+
+        var offset = OffsetInitialValue;
+        var nextCheck = SampleChunkWire.HashChunkBytes / Utf16CodeUnitBytes;
         while (offset < bytes.Length)
         {
             if (offset >= nextCheck)
             {
                 budget.Check();
-                nextCheck = offset + SampleChunkWire.HashChunkBytes / 2;
+                nextCheck = offset + SampleChunkWire.HashChunkBytes / Utf16CodeUnitBytes;
             }
             var status = Rune.DecodeFromUtf8(bytes[offset..], out _, out var consumed);
-            SampleChunkWire.Require(status == OperationStatus.Done && consumed > 0);
+            SampleChunkWire.Require(status == OperationStatus.Done && consumed > NoConsumedUtf8Bytes);
             offset += consumed;
         }
         budget.Check();

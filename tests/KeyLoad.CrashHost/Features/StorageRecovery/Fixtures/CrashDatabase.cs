@@ -11,8 +11,8 @@ internal static class CrashDatabase
         string tenantId = CrashFixtureValues.System)
     {
         var database = boundOutbox
-            ? new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource())
-            : new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
+            ? new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(new() { MaxOutboxRecords = 1 }), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution())
+            : new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
         database.Bootstrap(new(CrashFixtureValues.Principal, tenantId,
                 [new(CrashFixtureValues.Wildcard, CrashFixtureValues.Wildcard, Capability.All)], [CrashFixtureValues.Wildcard])
         { ClusterAdministrator = true },

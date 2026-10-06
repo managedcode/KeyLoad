@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
@@ -11,8 +12,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [Config(typeof(ScaledStorageReadUnrollConfiguration))]
 public class ScaledStorageReadBenchmarks : IDisposable
 {
-    private const string EngineEnvironmentVariable = "KEYLOAD_RAW_STORAGE_ENGINE";
-    private const string RecordCountEnvironmentVariable = "KEYLOAD_SCALED_STORAGE_RECORD_COUNT";
     private const string ZoneTreeLabel = "zonetree";
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
@@ -31,6 +30,7 @@ public class ScaledStorageReadBenchmarks : IDisposable
     private const string ChecksumMessage = "A scaled benchmark checksum differs from the exact full-index oracle.";
     private ScaledRawStorageFixture? _fixture;
     private bool _disposed;
+    private IOptions<BenchmarkScenarioSelectionOptions>? selection;
 
     /// <summary>Gets or sets the one exact lowercase ZoneTree selection.</summary>
     [ParamsSource(nameof(Engines))]
@@ -45,10 +45,10 @@ public class ScaledStorageReadBenchmarks : IDisposable
     public int RecordCount { get; set; } = HundredThousand;
 
     /// <summary>Provides exactly one process-selected engine.</summary>
-    public IEnumerable<string> Engines => [SelectEngine()];
+    public IEnumerable<string> Engines => [Selection.Value.Engine];
 
     /// <summary>Provides exactly one process-selected qualification count.</summary>
-    public IEnumerable<int> RecordCounts => [SelectRecordCount()];
+    public IEnumerable<int> RecordCounts => [BenchmarkScenarioSelectionRegistration.RecordCount(Selection.Value)];
 
     /// <summary>Creates the real bounded engine and completes its full setup oracle.</summary>
     [GlobalSetup]
@@ -73,9 +73,12 @@ public class ScaledStorageReadBenchmarks : IDisposable
     [Benchmark(OperationsPerInvoke = ReadsPerInvocation)]
     public ulong SequentialRead()
     {
+        const int ChecksumInitialValue = 0;
+        const int OperationInitialValue = 0;
+
         var fixture = RequireFixture();
-        ulong checksum = 0;
-        for (var operation = 0; operation < ReadsPerInvocation; operation++)
+        ulong checksum = ChecksumInitialValue;
+        for (var operation = OperationInitialValue; operation < ReadsPerInvocation; operation++)
         {
             var identity = fixture.ReadNextSequential();
             if (identity != (ulong)(operation % RecordCount))
@@ -93,9 +96,12 @@ public class ScaledStorageReadBenchmarks : IDisposable
     [Benchmark(OperationsPerInvoke = ReadsPerInvocation)]
     public ulong RandomRead()
     {
+        const int ChecksumInitialValue = 0;
+        const int OperationInitialValue = 0;
+
         var fixture = RequireFixture();
-        ulong checksum = 0;
-        for (var operation = 0; operation < ReadsPerInvocation; operation++)
+        ulong checksum = ChecksumInitialValue;
+        for (var operation = OperationInitialValue; operation < ReadsPerInvocation; operation++)
         {
             var identity = fixture.ReadNextRandom();
             checksum += identity;
@@ -137,12 +143,8 @@ public class ScaledStorageReadBenchmarks : IDisposable
         _disposed = true;
     }
 
-    private static string SelectEngine()
-    {
-        var selected = Environment.GetEnvironmentVariable(EngineEnvironmentVariable) ?? ZoneTreeLabel;
-        ValidateEngine(selected);
-        return selected;
-    }
+    private IOptions<BenchmarkScenarioSelectionOptions> Selection
+        => selection ??= BenchmarkScenarioSelectionRegistration.ReadScaled();
 
     private static void ValidateEngine(string label)
     {
@@ -150,24 +152,6 @@ public class ScaledStorageReadBenchmarks : IDisposable
         {
             throw new ArgumentException(InvalidEngineMessage, nameof(label));
         }
-    }
-
-    private static int SelectRecordCount()
-    {
-        var configured = Environment.GetEnvironmentVariable(RecordCountEnvironmentVariable);
-        if (configured is null)
-        {
-            return HundredThousand;
-        }
-
-        if (int.TryParse(configured, System.Globalization.NumberStyles.None,
-                System.Globalization.CultureInfo.InvariantCulture, out var count)
-            && count is HundredThousand or OneMillion)
-        {
-            return count;
-        }
-
-        throw new InvalidOperationException(InvalidCountMessage);
     }
 
     private ScaledRawStorageFixture RequireFixture()
@@ -178,8 +162,11 @@ public class ScaledStorageReadBenchmarks : IDisposable
 
     private ulong ValidateChecksum(ulong actual)
     {
+        const int RecordCountStep = 1;
+        const ulong ArithmeticSeriesDivisor = 2UL;
+
         var cycles = (ulong)(ReadsPerInvocation / RecordCount);
-        var expected = checked(cycles * (ulong)RecordCount * (ulong)(RecordCount - 1) / 2UL);
+        var expected = checked(cycles * (ulong)RecordCount * (ulong)(RecordCount - RecordCountStep) / ArithmeticSeriesDivisor);
         if (actual != expected)
         {
             throw new InvalidOperationException(ChecksumMessage);

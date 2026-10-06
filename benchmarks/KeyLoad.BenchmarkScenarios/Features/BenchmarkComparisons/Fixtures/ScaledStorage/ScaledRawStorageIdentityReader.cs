@@ -59,10 +59,13 @@ internal static class ScaledRawStorageSeedRunner
         byte[] scratch, int recordCount, long deadlineStart, ref long attempts,
         ref long successfulWrites, CancellationToken token, TimeSpan preparationTimeout)
     {
+        const int IndexInitialValue = 0;
+        const int EmptyIndexCancellationCheckStride = 0;
+
         var started = Stopwatch.GetTimestamp();
-        for (var index = 0; index < recordCount; index++)
+        for (var index = IndexInitialValue; index < recordCount; index++)
         {
-            if (index % CancellationCheckStride == 0)
+            if (index % CancellationCheckStride == EmptyIndexCancellationCheckStride)
             {
                 ScaledRawStoragePreparationGuard.Check(deadlineStart, token, preparationTimeout);
             }

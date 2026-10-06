@@ -23,15 +23,15 @@ internal sealed class McpUnknownLengthAdmissionTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
         var principalBytes = NativeSerialization.Serialize(new GrainValue(principal));
         var limits = new McpMemoryLimits();
-        var memory = new McpMemoryBudget(limits.DataBytes, limits.ControlBytes, limits.IngressBytes);
+        var memory = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = limits.DataBytes, ControlBytes = limits.ControlBytes, IngressBytes = limits.IngressBytes }));
         var governor = new HttpAdmissionGovernor(UnitAdmissionOptions.Http());
         var wire = Encoding.UTF8.GetBytes(DiscoveryFrame);
 
-        using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, CancellationToken.None))
+        using (var state = new McpRequestState(governor, memory, DefaultHttpBodyLimitBytes, CancellationToken.None, UnitMcpOptions.Execution()))
         {
             state.Authenticate(principalBytes, CancellationToken.None);
             using var source = new MemoryStream(wire, writable: false);
-            using var body = await McpFrameBody.ReadAsync(source, null, DefaultHttpBodyLimitBytes);
+            using var body = await McpFrameBody.ReadAsync(source, null, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
             await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
             await Assert.That(body.RetainedCapacity).IsLessThanOrEqualTo(InitialFrameCapacityBytes);
             await Assert.That(body.RetainedCapacity).IsLessThan(DefaultHttpBodyLimitBytes);
@@ -57,7 +57,7 @@ internal sealed class McpUnknownLengthAdmissionTests
         var wire = Encoding.UTF8.GetBytes("{\"method\":\"server/discover\"}");
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        using var body = await McpFrameBody.ReadAsync(input, null, DefaultHttpBodyLimitBytes);
+        using var body = await McpFrameBody.ReadAsync(input, null, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
 
         await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
         await Assert.That(body.RetainedCapacity).IsLessThanOrEqualTo(InitialFrameCapacityBytes);
@@ -78,7 +78,7 @@ internal sealed class McpUnknownLengthAdmissionTests
         await Assert.That(wire.Length).IsEqualTo(UnknownLengthLimitBytes);
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        using var body = await McpFrameBody.ReadAsync(input, null, UnknownLengthLimitBytes);
+        using var body = await McpFrameBody.ReadAsync(input, null, UnknownLengthLimitBytes, UnitMcpOptions.Execution());
 
         await Assert.That(body.WireBytes).IsEqualTo(UnknownLengthLimitBytes);
         await Assert.That(body.RetainedCapacity).IsGreaterThan(InitialFrameCapacityBytes);

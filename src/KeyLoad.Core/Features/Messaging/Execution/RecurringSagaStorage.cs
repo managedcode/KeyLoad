@@ -4,6 +4,10 @@ namespace KeyLoad.Core.Features.Messaging;
 
 internal static class RecurringSagaStorage
 {
+    private const int InitialSequence = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int NoRetainedBytes = 0;
+
     private const string CorruptCapacity = "Persisted recurring schedule and saga capacity is inconsistent.";
 
     internal static byte[] ScheduleKey(QueueLaneRef lane, Guid scheduleId)
@@ -18,7 +22,7 @@ internal static class RecurringSagaStorage
         => KeySpace.Partition(RecurringSagaProtocol.CapacitySpace, lane.Partition, lane.Queue);
 
     internal static RecurringSagaCapacity Capacity(IKeyValueView view, QueueLaneRef lane)
-        => view.GetRecord<RecurringSagaCapacity>(CapacityKey(lane)) ?? new(0, 0);
+        => view.GetRecord<RecurringSagaCapacity>(CapacityKey(lane)) ?? new(InitialSequence, InitialSequence);
 
     internal static RecurringSagaCapacity RequireCapacity(IKeyValueView view, QueueLaneRef lane)
         => Require(view.GetRecord<RecurringSagaCapacity>(CapacityKey(lane)));
@@ -28,9 +32,9 @@ internal static class RecurringSagaStorage
     internal static RecurringSagaCapacity Add(RecurringSagaCapacity current, long bytes, DatabaseLimits limits)
     {
         RequireCounter(current);
-        var records = checked(current.Records + 1);
+        var records = checked(current.Records + AdjacentElementOffset);
         var totalBytes = checked(current.Bytes + bytes);
-        if (records > limits.MaxScanRecords || bytes < 0 || totalBytes > limits.MaxBatchBytes)
+        if (records > limits.MaxScanRecords || bytes < NoRetainedBytes || totalBytes > limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, RecurringSagaProtocol.CapacityExhausted);
         }
@@ -41,7 +45,7 @@ internal static class RecurringSagaStorage
         DatabaseLimits limits)
     {
         RequireCounter(current);
-        if (oldBytes < 0 || newBytes < 0 || oldBytes > current.Bytes)
+        if (oldBytes < NoRetainedBytes || newBytes < NoRetainedBytes || oldBytes > current.Bytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
         }
@@ -65,7 +69,7 @@ internal static class RecurringSagaStorage
 
     private static void RequireCounter(RecurringSagaCapacity capacity)
     {
-        if (capacity is null || capacity.Records < 0 || capacity.Bytes < 0)
+        if (capacity is null || capacity.Records < InitialSequence || capacity.Bytes < NoRetainedBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
         }

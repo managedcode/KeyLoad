@@ -12,7 +12,7 @@ internal static class ServerNodeUpgradeBuilder
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, Action<NodeFormatUpgradeStage>? observer)
     {
         var inputs = Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Inputs);
-        ServerNodeUpgradeAuthority.CopyInputs(paths.Source, inputs);
+        ServerNodeUpgradeAuthority.CopyInputs(paths.Source, inputs, executionOptions: options.NodeUpgrade);
         var authority = ServerNodeUpgradeAuthority.VerifyCopies(inputs, options);
         if (authority.Canonical.NodeId == authority.Replica.NodeId)
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
@@ -20,24 +20,24 @@ internal static class ServerNodeUpgradeBuilder
             || authority.Canonical.FormatVersion is not (ServerNodeUpgradeProtocol.Native5SourceEpoch
                 or ServerNodeUpgradeProtocol.Native6SourceEpoch))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
-        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.SourceVerified, observer);
+        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.SourceVerified, observer: observer, executionOptions: options.NodeUpgrade);
         ConvertStores(inputs, paths.Stage, options);
-        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.StoresConverted, observer);
+        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.StoresConverted, observer: observer, executionOptions: options.NodeUpgrade);
         var preparation = Preflight(paths, options, original, owner, authority.Canonical.FormatVersion);
         var images = PrepareImages(paths, options, original, authority.Canonical.FormatVersion);
-        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.ImagesConverted, observer);
+        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.ImagesConverted, observer: observer, executionOptions: options.NodeUpgrade);
         PublishImages(preparation.Plan, paths, options, images);
-        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.DescriptorFlushed, observer);
+        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.DescriptorFlushed, observer: observer, executionOptions: options.NodeUpgrade);
         ServerNodeUpgradeStage.RemoveInputs(paths.Stage, owner, options);
         Directory.Delete(Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.PreparedImages));
-        ServerNodeUpgradeLayout.VerifyTarget(ServerNodeUpgradeInventory.Capture(paths.Stage), allowInputs: false);
-        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.TargetVerified);
+        ServerNodeUpgradeLayout.VerifyTarget(ServerNodeUpgradeInventory.Capture(paths.Stage, executionOptions: options.NodeUpgrade), allowInputs: false);
+        ServerNodeUpgradeProgressFile.Seal(paths.Stage, owner, NodeFormatUpgradeStage.TargetVerified, executionOptions: options.NodeUpgrade);
         var prepared = preparation.Receipt with
         {
-            PreparedTargetInventorySha256 = ServerNodeUpgradeInventory.Capture(paths.Stage, excludePreparedReceipt: true).Sha256
+            PreparedTargetInventorySha256 = ServerNodeUpgradeInventory.Capture(paths.Stage, excludePreparedReceipt: true, executionOptions: options.NodeUpgrade).Sha256
         };
         ServerNodeUpgradeReceiptFile.Write(Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.PreparedReceipt), prepared,
-            ServerNodeUpgradeProtocol.PreparedMagic);
+            ServerNodeUpgradeProtocol.PreparedMagic, executionOptions: options.NodeUpgrade);
         return prepared;
     }
 
@@ -54,7 +54,7 @@ internal static class ServerNodeUpgradeBuilder
         ServerNodeUpgradeInventory original, ServerNodeUpgradeOwner owner, int sourceDataEpoch)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
             var configuration = ServerNodeUpgradeConfiguration.Replica(options, paths.Stage);
             var plan = ReplicaSnapshotFormatUpgrade.Preflight(database, stores.Replica, configuration,
                 Path.Combine(paths.Source, ServerNodeUpgradeProtocol.Snapshots),
@@ -85,7 +85,7 @@ internal static class ServerNodeUpgradeBuilder
         Dictionary<string, StorageSnapshot> images)
         => ServerNodeUpgradeStores.Run(paths.Stage, options, stores =>
         {
-            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution);
+            var database = new DatabaseEngine(stores.Canonical, new AuthorizationPolicy(), options.Core.DatabaseLimits, options.Core.DueWork, options.Core.EventSource, options.Core.Messaging, options.Core.GraphExecution, options.Core.ChangeFeedExecution, options.Core.TimeSeriesExecution);
             ReplicaSnapshotFormatUpgrade.Upgrade(plan, database, stores.Replica,
                 ServerNodeUpgradeConfiguration.Replica(options, paths.Stage), Path.Combine(paths.Stage, ServerNodeUpgradeProtocol.Snapshots),
                 (source, destination) =>

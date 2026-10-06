@@ -10,6 +10,11 @@ internal static class BlobQuotaOperations
 
     internal static void ValidatePolicy(ResourceDefinition definition)
     {
+        const int MaxBlobBytesValidationBoundary = 1;
+        const int MaxObjectKeysFirstCount = 1;
+        const int MaxVersionsFirstCount = 1;
+        const int MaxUploadsFirstCount = 1;
+
         ArgumentNullException.ThrowIfNull(definition);
         if (definition.Kind != ResourceKind.BlobStore)
         {
@@ -19,10 +24,10 @@ internal static class BlobQuotaOperations
         }
         var policy = definition.BlobPolicy ?? new BlobPolicy();
         if (!definition.Indexes.IsEmpty || !definition.FieldPolicies.IsEmpty || !definition.HeaderPolicies.IsEmpty
-            || definition.Authority != DocumentAuthority.Document || policy.MaxBlobBytes < 1
+            || definition.Authority != DocumentAuthority.Document || policy.MaxBlobBytes < MaxBlobBytesValidationBoundary
             || policy.MaxBlobBytes > BlobLimits.MaximumBlobBytes || policy.MaxReservedBytes < policy.MaxBlobBytes
-            || policy.MaxReservedBytes > BlobLimits.StoreMaxReservedBytes || policy.MaxObjectKeys is < 1 or > BlobLimits.StoreMaxObjectKeys
-            || policy.MaxVersions is < 1 or > BlobLimits.StoreMaxVersions || policy.MaxUploads is < 1 or > BlobLimits.StoreMaxUploads
+            || policy.MaxReservedBytes > BlobLimits.StoreMaxReservedBytes || policy.MaxObjectKeys is < MaxObjectKeysFirstCount or > BlobLimits.StoreMaxObjectKeys
+            || policy.MaxVersions is < MaxVersionsFirstCount or > BlobLimits.StoreMaxVersions || policy.MaxUploads is < MaxUploadsFirstCount or > BlobLimits.StoreMaxUploads
             || policy.UploadTtlSeconds is < BlobLimits.MinimumUploadTtlSeconds or > BlobLimits.MaximumUploadTtlSeconds)
         { throw BlobErrors.Validation(); }
     }
@@ -53,9 +58,12 @@ internal static class BlobQuotaOperations
 
     internal static void ProveEmpty(IKeyValueView view)
     {
+        const int MaxRecordsSingleItemCount = 1;
+        const int EmptyRecords = 0;
+
         foreach (var space in FeatureSpaces)
         {
-            if (view.VisitRange(KeyCodec.Encode(space), 1, static (_, _) => false).Records != 0)
+            if (view.VisitRange(KeyCodec.Encode(space), MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRecords)
             { throw BlobErrors.Corruption(); }
         }
         var existing = false;
@@ -80,14 +88,22 @@ internal static class BlobQuotaOperations
 
     internal static void Validate(BlobQuota quota, Guid incarnation)
     {
+        const int ReservedBytesEmptyCount = 0;
+        const int ObjectKeysEmptyCount = 0;
+        const int VersionsEmptyCount = 0;
+        const int UploadsValidationBoundary = 0;
+        const int EmptyObjectKeys = 0;
+        const int EmptyVersions = 0;
+        const int EmptyReservedBytes = 0;
+
         BlobRecordReader.Version(quota.FormatVersion);
         if (quota.Incarnation != incarnation)
         { throw Errors.Fail(ErrorCode.RecoveryRequired, BlobErrors.Fenced); }
-        if (quota.ReservedBytes is < 0 or > BlobLimits.StoreMaxReservedBytes
-            || quota.ObjectKeys is < 0 or > BlobLimits.StoreMaxObjectKeys
-            || quota.Versions is < 0 or > BlobLimits.StoreMaxVersions
-            || quota.Uploads < 0 || quota.Uploads > quota.Versions || quota.Uploads > BlobLimits.StoreMaxUploads
-            || quota.ObjectKeys == 0 && quota.Versions != 0 || quota.Versions == 0 && quota.ReservedBytes != 0)
+        if (quota.ReservedBytes is < ReservedBytesEmptyCount or > BlobLimits.StoreMaxReservedBytes
+            || quota.ObjectKeys is < ObjectKeysEmptyCount or > BlobLimits.StoreMaxObjectKeys
+            || quota.Versions is < VersionsEmptyCount or > BlobLimits.StoreMaxVersions
+            || quota.Uploads < UploadsValidationBoundary || quota.Uploads > quota.Versions || quota.Uploads > BlobLimits.StoreMaxUploads
+            || quota.ObjectKeys == EmptyObjectKeys && quota.Versions != EmptyVersions || quota.Versions == EmptyVersions && quota.ReservedBytes != EmptyReservedBytes)
         { throw BlobErrors.Corruption(); }
     }
 
@@ -111,6 +127,11 @@ internal static class BlobQuotaOperations
 
     internal static BlobQuota Adjust(BlobQuota quota, long bytes, int keys, int versions, int uploads)
     {
+        const int ReservedBytesValidationBoundary = 0;
+        const int ObjectKeysValidationBoundary = 0;
+        const int VersionsValidationBoundary = 0;
+        const int UploadsValidationBoundary = 0;
+
         var updated = quota with
         {
             ReservedBytes = checked(quota.ReservedBytes + bytes),
@@ -118,7 +139,7 @@ internal static class BlobQuotaOperations
             Versions = checked(quota.Versions + versions),
             Uploads = checked(quota.Uploads + uploads)
         };
-        if (updated.ReservedBytes < 0 || updated.ObjectKeys < 0 || updated.Versions < 0 || updated.Uploads < 0)
+        if (updated.ReservedBytes < ReservedBytesValidationBoundary || updated.ObjectKeys < ObjectKeysValidationBoundary || updated.Versions < VersionsValidationBoundary || updated.Uploads < UploadsValidationBoundary)
         { throw BlobErrors.Corruption(); }
         if (updated.ReservedBytes > BlobLimits.StoreMaxReservedBytes || updated.ObjectKeys > BlobLimits.StoreMaxObjectKeys
             || updated.Versions > BlobLimits.StoreMaxVersions || updated.Uploads > BlobLimits.StoreMaxUploads)

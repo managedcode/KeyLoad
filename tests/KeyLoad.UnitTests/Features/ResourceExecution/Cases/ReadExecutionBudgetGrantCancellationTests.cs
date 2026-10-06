@@ -14,7 +14,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
         var observed = 0;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(new(), cancellationToken: cancellation.Token);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
             var grant = budget.CreateReadGrant(64, 2);
             return grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 2, (_, _) =>
             {
@@ -23,7 +23,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
                 return true;
             });
         }));
-        var following = database.Store.Read(view => new ReadExecutionBudget(new()).Scan(view,
+        var following = database.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).Scan(view,
             ReadExecutionBudgetGrantSeed.Prefix, 2));
 
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
@@ -40,7 +40,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
         var visited = 0;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }, clock);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = QueryDeadlineSeconds }), clock);
             var grant = budget.CreateReadGrant(64, 2);
             return grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 2, (_, _) =>
             {

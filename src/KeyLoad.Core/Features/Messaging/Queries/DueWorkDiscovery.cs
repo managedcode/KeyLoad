@@ -7,6 +7,9 @@ namespace KeyLoad.Core;
 /// <summary>Reads disposable due-work hints from the canonical schedule and saga prefixes.</summary>
 internal static class DueWorkDiscovery
 {
+    private const int EmptyElementCount = 0;
+    private const int InitialSequence = 0;
+
     private static readonly byte[] SchedulePrefix = KeyCodec.Encode(DueWorkProtocol.ScheduleSpace);
     private static readonly byte[] SagaPrefix = KeyCodec.Encode(DueWorkProtocol.SagaSpace);
 
@@ -20,8 +23,8 @@ internal static class DueWorkDiscovery
             throw Errors.Fail(ErrorCode.Validation, DueWorkProtocol.InvalidWakeInstant);
         }
 
-        var state = new DuePageState(database.Limits, wakeAt, Stopwatch.GetTimestamp(), database.DueDiscoveryDeadline,
-            cancellationToken);
+        var state = new DuePageState(database.OperationLimitsOptions, wakeAt, Stopwatch.GetTimestamp(), database.DueDiscoveryDeadline,
+            database.DueExecution.MaximumRecordsPerPage, database.DueExecution.MaximumRangeBytes, cancellationToken);
         var page = database.Store.Read(view =>
         {
             var cursor = DueWorkCursor.Match(database.Store.Identity, supplied);
@@ -34,7 +37,7 @@ internal static class DueWorkDiscovery
     internal static DueWorkPage EmptyPage(DueSweepCursor? supplied, StoreIdentity identity)
     {
         var matched = DueWorkCursor.Match(identity, supplied);
-        return new([], [], matched, matched.NextPrefix, false, 0, 0, 0);
+        return new([], [], matched, matched.NextPrefix, false, EmptyElementCount, InitialSequence, InitialSequence);
     }
 
     private static byte[] Prefix(DueWorkKind kind) => kind == DueWorkKind.Schedule ? SchedulePrefix : SagaPrefix;

@@ -15,7 +15,7 @@ internal static class PostgresSchemaDuplicateTargets
     private static async Task VerifySequentialAsync(string connectionString, CancellationToken cancellationToken)
     {
         var runId = Guid.NewGuid().ToString("D");
-        var dataset = new BenchmarkDataset(PostgresSchemaSupport.Options(2));
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2)));
         var winner = new PostgresTarget(connectionString, runId, "comparison-test-image");
         var loser = new PostgresTarget(connectionString, runId, "comparison-test-image");
         var loserDisposeStarted = false;
@@ -48,7 +48,7 @@ internal static class PostgresSchemaDuplicateTargets
     private static async Task VerifyConcurrentAsync(string connectionString, CancellationToken cancellationToken)
     {
         var runId = Guid.NewGuid().ToString("D");
-        var dataset = new BenchmarkDataset(PostgresSchemaSupport.Options(2));
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2)));
         var first = new PostgresTarget(connectionString, runId, "comparison-test-image");
         var second = new PostgresTarget(connectionString, runId, "comparison-test-image");
         var firstDisposeStarted = false;

@@ -1,4 +1,3 @@
-using System.Globalization;
 using KeyLoad;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.Options;
@@ -22,60 +21,54 @@ internal sealed record TestSuiteSettings(
     bool LocalRf3ImageEnabled,
     ScaledComparisonProfile? ScaleProfile)
 {
-    private const string WorkloadOverrideNamesResultText = "Documents";
-    private const string WorkloadOverrideNamesWorkloadOverrideNamesResultText = "Operations";
+    private const string ConflictingTestProfilesMessage = "Scale and vector test profiles cannot be combined.";
+    private const string ConflictingExecutionModesMessage = "Test and benchmark modes cannot be combined.";
+    private const string InvalidTestFilterMessage = "The test filter is invalid.";
+    private const string InvalidResultsDirectoryMessage = "The results directory is invalid.";
+    private const string InvalidCoverageSettingsPathMessage = "The coverage settings path is invalid.";
+    private const string InvalidCoverageOutputPathMessage = "The coverage output path is invalid.";
+    private const string IncompleteCoverageSettingsMessage = "Coverage settings and output must be configured together.";
+
     private const string GetResourceNameComparisonText = "tests-";
 
     internal VectorComparisonProfile? VectorProfile { get; init; }
-    internal const string VectorProfileSetting = "KeyLoadTests:VectorProfile";
-    internal const string VectorProfileEnvironment = "KeyLoadTests__VectorProfile";
-    internal const string SuiteSetting = "KeyLoadTests:Suite";
-    internal const string SuiteEnvironment = "KeyLoadTests__Suite";
-    internal const string ScaleProfileSetting = "KeyLoadTests:ScaleProfile";
-    internal const string ScaleProfileEnvironment = "KeyLoadTests__ScaleProfile";
-    private const string BenchmarkEnabledSetting = "Benchmarks:Enabled";
-    private const string FilterSetting = "KeyLoadTests:Filter";
-    private const string TimeoutSetting = "KeyLoadTests:TimeoutMinutes";
+    internal int? OpenLoopRate { get; init; }
+    internal const string VectorProfileSetting = TestSuiteProtocol.VectorProfileSetting;
+    internal const string VectorProfileEnvironment = TestSuiteProtocol.VectorProfileEnvironment;
+    internal const string SuiteSetting = TestSuiteProtocol.SuiteSetting;
+    internal const string SuiteEnvironment = TestSuiteProtocol.SuiteEnvironment;
+    internal const string ScaleProfileSetting = TestSuiteProtocol.ScaleProfileSetting;
+    internal const string ScaleProfileEnvironment = TestSuiteProtocol.ScaleProfileEnvironment;
+    internal const string BenchmarkEnabledSetting = TestSuiteProtocol.BenchmarkEnabledSetting;
+    internal const string FilterSetting = TestSuiteProtocol.FilterSetting;
+    internal const string TimeoutSetting = TestSuiteProtocol.TimeoutSetting;
     private const string ResultsDirectorySetting = "KeyLoadTests:ResultsDirectory";
     private const string ReportTrxSetting = "KeyLoadTests:ReportTrx";
     private const string CoverageSettingsSetting = "KeyLoadTests:CoverageSettings";
     private const string CoverageOutputSetting = "KeyLoadTests:CoverageOutput";
-    private const int MaximumFilterLength = 4096;
     private static readonly string[] WorkloadOverrideNames =
-        [WorkloadOverrideNamesResultText, WorkloadOverrideNamesWorkloadOverrideNamesResultText, "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Seed", "Dimensions",
-            "TopK", "TimeoutSeconds", "GraphVertices", "GraphFanOut", "GraphDepth"];
-    private const int MaximumPathLength = 4096;
+        [TestSuiteProtocol.DocumentsWorkloadSettingName, TestSuiteProtocol.OperationsWorkloadSettingName,
+            TestSuiteProtocol.WarmupWorkloadSettingName, TestSuiteProtocol.RepetitionsWorkloadSettingName,
+            TestSuiteProtocol.ConcurrencyWorkloadSettingName, TestSuiteProtocol.PayloadBytesWorkloadSettingName,
+            TestSuiteProtocol.SeedWorkloadSettingName, TestSuiteProtocol.DimensionsWorkloadSettingName,
+            TestSuiteProtocol.TopKWorkloadSettingName, TestSuiteProtocol.TimeoutSecondsWorkloadSettingName,
+            TestSuiteProtocol.GraphVerticesWorkloadSettingName, TestSuiteProtocol.GraphFanOutWorkloadSettingName,
+            TestSuiteProtocol.GraphDepthWorkloadSettingName];
 
     internal string ResourceName => GetResourceNameComparisonText + Suite;
 
     internal static bool Requested(string[] args)
     {
-        const string ComparisonText = "--";
-        const string RequestedComparisonText = "=";
-        const string PredicateText = "--";
-        const string MessageText = "The vector-profile test selection is invalid.";
-        const string RequestedMessageText = "The scale-profile test selection is invalid.";
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+        using var configurationLifetime = configuration as IDisposable;
+        return Requested(args, AppHostOptionsRegistration.BindTestBootstrap(configuration));
+    }
 
-        var vectorArgument = ComparisonText + VectorProfileSetting + RequestedComparisonText;
-        if (args.Any(argument => argument == PredicateText + VectorProfileSetting || argument == vectorArgument))
-        {
-            throw new InvalidOperationException(MessageText);
-        }
-        var scaleArgument = ComparisonText + ScaleProfileSetting + RequestedComparisonText;
-        if (args.Any(argument => argument == PredicateText + ScaleProfileSetting || argument == scaleArgument))
-        {
-            throw new InvalidOperationException(RequestedMessageText);
-        }
-
-        return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(SuiteEnvironment))
-            || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(VectorProfileEnvironment))
-            || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ScaleProfileEnvironment))
-            || args.Any(argument => argument == PredicateText + SuiteSetting
-                || argument.StartsWith(TestSuiteProtocol.ArgumentPrefix + SuiteSetting + TestSuiteProtocol.ArgumentValueSeparator, StringComparison.Ordinal)
-                || argument == PredicateText + ScaleProfileSetting
-                || argument.StartsWith(scaleArgument, StringComparison.Ordinal)
-                || argument == PredicateText + VectorProfileSetting
-                || argument.StartsWith(vectorArgument, StringComparison.Ordinal));
+    internal static bool Requested(string[] args, IOptions<TestBootstrapOptions> options)
+    {
+        var selectors = options.Value;
+        return TestSuiteSelectionValidator.Requested(args, selectors.Suite, selectors.VectorProfile,
+            selectors.ScaleProfile, selectors.OpenLoopRate);
     }
 
     internal static TestSuiteSettings? Read(IConfiguration configuration)
@@ -83,138 +76,116 @@ internal sealed record TestSuiteSettings(
 
     internal static TestSuiteSettings? Read(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
     {
-        const string MessageText = "The scale-profile test selection is invalid.";
-        const string ReadMessageText = "The vector-profile test selection is invalid.";
-        const string ResultText = "KeyLoad.Analyzers.Tests";
-        const string ReadResultText = "KeyLoad.UnitTests";
-
         var suite = configuration[SuiteSetting];
+        var filter = configuration[FilterSetting];
+        var openLoopRate = TestSuiteSelectionValidator.ReadOpenLoopRate(
+            configuration[TestSuiteSelectionValidator.OpenLoopRateSetting],
+            configuration[ComparisonWorkerSelection.OpenLoopRateSetting], suite, filter,
+            configuration[TestSuiteSelectionValidator.OpenLoopCancellationProofSetting] is not null);
         if (string.IsNullOrWhiteSpace(suite))
         {
-            _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, configuration[FilterSetting]);
-            if (!string.IsNullOrEmpty(configuration[ScaleProfileSetting]))
-            {
-                throw new InvalidOperationException(MessageText);
-            }
-            if (!string.IsNullOrEmpty(configuration[VectorProfileSetting]))
-            {
-                throw new InvalidOperationException(ReadMessageText);
-            }
-            return null;
+            return ReadWithoutSuite(configuration, suite, filter);
         }
-        var project = suite switch
+        return ReadSelectedSuite(configuration, execution.Value, suite, filter, openLoopRate);
+    }
+
+    private static TestSuiteSettings? ReadWithoutSuite(IConfiguration configuration, string? suite, string? filter)
+    {
+        const string InvalidScaleProfile = "The scale-profile test selection is invalid.";
+        const string InvalidVectorProfile = "The vector-profile test selection is invalid.";
+        _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
+        if (!string.IsNullOrEmpty(configuration[ScaleProfileSetting]))
         {
-            TestSuiteProtocol.AnalyzersSuite => ResultText,
-            TestSuiteProtocol.UnitSuite or TestSuiteProtocol.ScalarUnitSuite => ReadResultText,
-            TestSuiteProtocol.RecoverySuite => "KeyLoad.RecoveryTests",
-            TestSuiteProtocol.Rf3Suite => "KeyLoad.IntegrationTests",
-            TestSuiteProtocol.ComparisonSuite => "KeyLoad.ComparisonTests",
-            TestSuiteProtocol.SiteSuite => "KeyLoad.SiteTests",
-            _ => throw new InvalidOperationException("The Aspire test suite is not supported.")
-        };
+            throw new InvalidOperationException(InvalidScaleProfile);
+        }
+        if (!string.IsNullOrEmpty(configuration[VectorProfileSetting]))
+        {
+            throw new InvalidOperationException(InvalidVectorProfile);
+        }
+        return null;
+    }
+
+    private static TestSuiteSettings ReadSelectedSuite(IConfiguration configuration, TestExecutionOptions execution,
+        string suite, string? filter, int? openLoopRate)
+    {
+        var project = TestSuiteSelectionValidator.ProjectForSuite(suite);
         var comparisonTarget = configuration[ComparisonWorkerSelection.TargetSetting];
-        var scaleProfile = ReadScaleProfile(configuration, suite, comparisonTarget);
-        var vectorProfile = VectorTestSuiteSelection.Read(configuration, suite, comparisonTarget, HasWorkloadOverride(configuration));
+        var workloadOverrides = HasWorkloadOverride(configuration);
+        var expectedFilter = TestSuiteSelectionValidator.ExpectedScaleFilter(openLoopRate, filter);
+        var scaleProfile = TestSuiteSelectionValidator.ReadScaleProfile(configuration, suite, comparisonTarget,
+            expectedFilter, workloadOverrides);
+        var vectorProfile = VectorTestSuiteSelection.Read(configuration, suite, comparisonTarget, workloadOverrides);
+        TestSuiteSelectionValidator.ValidateOpenLoop(openLoopRate, suite, comparisonTarget, filter, scaleProfile,
+            vectorProfile is not null,
+            configuration[VectorProfileSetting] is not null
+                || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null,
+            workloadOverrides, configuration[TestSuiteProtocol.AppHostBenchmarkProfileSetting],
+            configuration[ComparisonWorkerSelection.NodeCountSetting],
+            configuration[ComparisonWorkerSelection.ScenarioSetting]);
         if (scaleProfile is not null && vectorProfile is not null)
         {
-            throw new InvalidOperationException("Scale and vector test profiles cannot be combined.");
+            throw new InvalidOperationException(ConflictingTestProfilesMessage);
         }
         if (configuration.GetValue<bool>(BenchmarkEnabledSetting)
             || comparisonTarget is not null && suite != TestSuiteProtocol.ComparisonSuite)
         {
-            throw new InvalidOperationException("Test and benchmark modes cannot be combined.");
+            throw new InvalidOperationException(ConflictingExecutionModesMessage);
         }
-        var filter = configuration[FilterSetting];
-        ValidateBoundedValue(filter, MaximumFilterLength, "The test filter is invalid.", allowBlank: true);
+        ValidateBoundedValue(filter, execution.MaximumFilterCharacters,
+            InvalidTestFilterMessage, allowBlank: true);
         var localRf3ImageEnabled = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
         if (localRf3ImageEnabled && (scaleProfile is not null || vectorProfile is not null))
         {
-            throw new InvalidOperationException("Test and benchmark modes cannot be combined.");
+            throw new InvalidOperationException(ConflictingExecutionModesMessage);
         }
+        return CreateSettings(configuration, execution, suite, project, filter, comparisonTarget,
+            localRf3ImageEnabled, scaleProfile, vectorProfile, openLoopRate);
+    }
+
+    private static TestSuiteSettings CreateSettings(IConfiguration configuration, TestExecutionOptions execution,
+        string suite, string project, string? filter, string? comparisonTarget, bool localRf3ImageEnabled,
+        ScaledComparisonProfile? scaleProfile, VectorComparisonProfile? vectorProfile, int? openLoopRate)
+    {
         var resultsDirectory = configuration[ResultsDirectorySetting];
         var coverageSettings = configuration[CoverageSettingsSetting];
         var coverageOutput = configuration[CoverageOutputSetting];
-        ValidateBoundedValue(resultsDirectory, MaximumPathLength, "The results directory is invalid.");
-        ValidateBoundedValue(coverageSettings, MaximumPathLength, "The coverage settings path is invalid.");
-        ValidateBoundedValue(coverageOutput, MaximumPathLength, "The coverage output path is invalid.");
+        ValidateBoundedValue(resultsDirectory, execution.MaximumPathCharacters,
+            InvalidResultsDirectoryMessage);
+        ValidateBoundedValue(coverageSettings, execution.MaximumPathCharacters,
+            InvalidCoverageSettingsPathMessage);
+        ValidateBoundedValue(coverageOutput, execution.MaximumPathCharacters,
+            InvalidCoverageOutputPathMessage);
         if ((coverageSettings is null) != (coverageOutput is null))
         {
-            throw new InvalidOperationException("Coverage settings and output must be configured together.");
+            throw new InvalidOperationException(IncompleteCoverageSettingsMessage);
         }
-        var policy = execution.Value;
-        var timeout = configuration[TimeoutSetting] is not null
-            ? TimeSpan.FromMinutes(configuration.GetValue<int>(TimeoutSetting))
-            : scaleProfile is not null || vectorProfile is not null ? policy.IntensiveTimeout
-            : suite is TestSuiteProtocol.Rf3Suite or TestSuiteProtocol.ComparisonSuite ? policy.ClusterTimeout : policy.OrdinaryTimeout;
-        if (!TestExecutionOptions.Bounded(timeout))
-        { throw new ArgumentOutOfRangeException(nameof(timeout)); }
+        var timeout = ReadTimeout(configuration, execution, suite, scaleProfile, vectorProfile);
         return new(suite, project, filter, timeout, resultsDirectory,
             configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, comparisonTarget,
-            localRf3ImageEnabled, scaleProfile) { VectorProfile = vectorProfile };
+            localRf3ImageEnabled, scaleProfile) { VectorProfile = vectorProfile, OpenLoopRate = openLoopRate };
     }
 
-    private static ScaledComparisonProfile? ReadScaleProfile(IConfiguration configuration, string suite, string? target)
+    private static TimeSpan ReadTimeout(IConfiguration configuration, TestExecutionOptions execution, string suite,
+        ScaledComparisonProfile? scaleProfile, VectorComparisonProfile? vectorProfile)
     {
-        const string MessageText = "The scale-profile test selection is invalid.";
-
-        var value = configuration[ScaleProfileSetting];
-        if (string.IsNullOrEmpty(value))
+        var timeout = configuration[TimeoutSetting] is not null
+            ? TimeSpan.FromMinutes(configuration.GetValue<int>(TimeoutSetting))
+            : scaleProfile is not null || vectorProfile is not null ? execution.IntensiveTimeout
+            : suite is TestSuiteProtocol.Rf3Suite or TestSuiteProtocol.ComparisonSuite
+                ? execution.ClusterTimeout : execution.OrdinaryTimeout;
+        if (!TestExecutionOptions.Bounded(timeout))
         {
-            return null;
+            throw new ArgumentOutOfRangeException(nameof(timeout));
         }
-        if (suite != TestSuiteProtocol.ComparisonSuite || target is null
-            || !IsolatedComparisonContract.Current.Targets.Contains(target, StringComparer.Ordinal)
-            || configuration.GetValue<bool>(BenchmarkEnabledSetting)
-            || configuration[TimeoutSetting] is { } timeout && timeout != TestSuiteProtocol.ProfileTimeoutMinutesText
-            || configuration[ComparisonWorkerSelection.ProfileSetting] is not { } evidenceProfile
-            || configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null
-            || configuration[FilterSetting] != TestSuiteProtocol.IsolatedComparisonFilter
-            || !HasValidScaleWorkload(configuration)
-            || HasWorkloadOverride(configuration))
-        {
-            throw new InvalidOperationException(MessageText);
-        }
-        try
-        {
-            var profile = ScaledComparisonProfileParser.Parse(value);
-            if (!string.Equals(profile.Id, evidenceProfile, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException(MessageText);
-            }
-            return profile;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            throw new InvalidOperationException(MessageText);
-        }
-    }
-
-    private static bool HasValidScaleWorkload(IConfiguration configuration)
-    {
-        if (!int.TryParse(configuration[ComparisonWorkerSelection.NodeCountSetting], NumberStyles.None,
-                CultureInfo.InvariantCulture, out var nodeCount)
-            || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodeCount))
-        {
-            return false;
-        }
-
-        var text = configuration[ComparisonWorkerSelection.ScenarioSetting];
-        if (!Enum.TryParse<Scenario>(text, out var scenario) || !Enum.IsDefined(scenario)
-            || !string.Equals(text, scenario.ToString(), StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        return scenario is Scenario.PointRead or Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete;
+        return timeout;
     }
 
     private static bool HasWorkloadOverride(IConfiguration configuration)
     {
-        const string KeyText = "Benchmarks:";
-
         foreach (var name in WorkloadOverrideNames)
         {
-            if (configuration[KeyText + name] is not null)
+            if (configuration[TestSuiteProtocol.BenchmarkConfigurationSection
+                + TestSuiteProtocol.ConfigurationKeySeparator + name] is not null)
             {
                 return true;
             }
@@ -230,7 +201,8 @@ internal sealed record TestSuiteSettings(
         {
             return;
         }
-        if (value.Length > maximumLength || value.Contains(NullCharacter, StringComparison.Ordinal) || !allowBlank && string.IsNullOrWhiteSpace(value))
+        if (value.Length > maximumLength || value.Contains(NullCharacter, StringComparison.Ordinal)
+            || !allowBlank && string.IsNullOrWhiteSpace(value))
         {
             throw new InvalidOperationException(message);
         }

@@ -43,7 +43,6 @@ internal static class ComparisonHostConstants
     internal const string FailedStatus = "failed";
     internal const int SuccessfulExitCode = 0;
     internal const int FailedExitCode = 1;
-    internal const int LifetimeHours = 2;
     internal const int TargetCount = 6;
     internal const int KeyLoadEndpointCount = 3;
     internal const int HttpClientCount = 6;

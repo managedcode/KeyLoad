@@ -1,21 +1,17 @@
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text.Json;
 using KeyLoad.Comparisons;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
     ComparisonWorkerSelection selection, string output, CancellationToken applicationStopping,
-    IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions)
+    IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions,
+    OpenLoopResourceSelection? openLoop = null)
 {
     private const string RunnerName = "comparisons";
     private const string BootstrapFragment = "bootstrap";
-    private const string SidecarName = "server-resource-evidence.json";
-    private const string Schema = "server-resource-evidence.v2";
     private readonly ScaleServerResourceOptions _settings = executionOptions.Value;
-    private readonly BenchmarkProvenanceOptions _provenance = provenanceOptions.Value;
     private readonly CancellationTokenSource _stop = new();
     private readonly CancellationToken _applicationStopping = applicationStopping;
     private readonly ScaleServerResourceEvidenceCompletion _completion = new(executionOptions);
@@ -160,88 +156,36 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             && !_applicationStopping.IsCancellationRequested && !deadlineToken.IsCancellationRequested
             && failure.CancellationToken == observationToken;
 
-    private async Task WriteAsync(CancellationToken token)
+    private Task WriteAsync(CancellationToken token)
     {
-        const string Path2Text = "worker.json";
-        const int EmptyValue = 0;
-        const string MessageText = "Server resource evidence exceeded its bound.";
+        var observations = CaptureSnapshot();
+        var unsupported = IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
+            item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount));
+        if (openLoop is not null && !unsupported)
+        {
+            return OpenLoopResourceEvidenceWriter.WriteAsync(selection, openLoop, output, observations,
+                executionOptions, provenanceOptions, token);
+        }
+        return ScaleServerResourceEvidenceWriter.WriteAsync(selection, output, observations,
+            executionOptions, provenanceOptions, token);
+    }
 
-        var workerPath = Path.Combine(output, Path2Text);
-        if (!File.Exists(workerPath))
-        {
-            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-            return;
-        }
-        if (new FileInfo(workerPath).Length > _settings.MaxWorkerBytes)
-        {
-            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-            return;
-        }
-        var workerHash = await HashAsync(workerPath, token);
+    private ScaleServerObservationSnapshot CaptureSnapshot()
+    {
+        const int EmptyValue = 0;
         var records = _samplers.Select(sampler => sampler.ToRecord()).Where(record => record is not null)
             .Select(record => record!).ToArray();
-        if (records.Length != selection.NodeCount || _samplers.Any(sampler => sampler.Invalidated))
+        if (records.Length != selection.NodeCount || _samplers.Any(sampler => sampler.Invalidated)
+            || records.Any(record => record.SampleCount < ScaleServerResourceBounds.MinimumSamples))
         {
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
         }
-
-        if (records.Any(record => record.SampleCount < ScaleServerResourceBounds.MinimumSamples))
-        {
-            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-        }
-
-        if (records.Any(record => record.WritableMounts.Length == EmptyValue) || _samplers.Any(sampler => sampler.StorageUnavailable))
+        if (records.Any(record => record.WritableMounts.Length == EmptyValue)
+            || _samplers.Any(sampler => sampler.StorageUnavailable))
         {
             _missing.Add(ScaleServerResourceBounds.StorageMissing);
         }
-
-        var document = new ScaleServerResourceEvidence(Schema, _provenance.SourceRevision,
-            _provenance.WorkflowRunId,
-            _provenance.RunAttempt,
-            _provenance.JobId,
-            selection.Target, selection.NodeCount, selection.Scenario.ToString(), selection.Profile, workerHash,
-            _hardware, _envelope, records, [.. _missing.Order(StringComparer.Ordinal)], _missing.Count == EmptyValue, ScaleServerObservationPolicySnapshot.Capture(executionOptions));
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(document, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        if (bytes.Length > _settings.MaxSidecarBytes)
-        {
-            throw new InvalidDataException(MessageText);
-        }
-
-        Directory.CreateDirectory(output);
-        await using var stream = new FileStream(Path.Combine(output, SidecarName), FileMode.CreateNew,
-            FileAccess.Write, FileShare.None, _settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
-        await stream.WriteAsync(bytes, token);
-        await stream.FlushAsync(token);
-    }
-
-    private async Task<string> HashAsync(string path, CancellationToken token)
-    {
-        const int TotalInitialValue = 0;
-        const int EmptyValue = 0;
-        const string MessageText = "The isolated worker report exceeded its bound.";
-        const int OffsetValue = 0;
-
-        await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            _settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = new byte[_settings.NativeReadBufferBytes];
-        long total = TotalInitialValue;
-        while (true)
-        {
-            var count = await stream.ReadAsync(buffer, token);
-            if (count == EmptyValue)
-            {
-                break;
-            }
-
-            if (total > _settings.MaxWorkerBytes - count)
-            {
-                throw new InvalidDataException(MessageText);
-            }
-
-            total += count;
-            hash.AppendData(buffer, OffsetValue, count);
-        }
-        return Convert.ToHexStringLower(hash.GetHashAndReset());
+        return new(_hardware, _envelope, records, [.. _missing.Order(StringComparer.Ordinal)],
+            _missing.Count == EmptyValue, ScaleServerObservationPolicySnapshot.Capture(executionOptions));
     }
 }

@@ -6,6 +6,17 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryMerge
 {
+    private const int FirstElementIndex = 0;
+    private const string PartitionQueryMergeExceedsItsReservedBudgetDetail = "The partition query merge exceeds its reserved budget.";
+    private const int EmptyElementCount = 0;
+    private const int NoRetainedBytes = 0;
+    private const int InitialSequence = 0;
+    private const int MinimumPositiveCount = 1;
+    private const int VersionOne = 1;
+    private const string PartitionQueryLeafExceededItsReservedBudgetDetail = "The partition query leaf exceeded its reserved budget.";
+    private const int EqualOrder = 0;
+    private const int AdjacentElementOffset = 1;
+
     private const int Version = 1;
     private const string InvalidResultMessage = "A partition query leaf result is invalid.";
     private const string InconsistentOwnerMessage = "Partition query leaves do not share one owner and policy epoch.";
@@ -25,12 +36,12 @@ internal static class PartitionQueryMerge
         }
 
         var totals = ValidateLeaves(plan, leaves, partitions, owner, budget);
-        var query = plan.Leaves[0].Request.Query;
+        var query = plan.Leaves[FirstElementIndex].Request.Query;
         var rows = MergeRuns(leaves, query.Order, plan.Limit, budget);
         var retainedBytes = RetainedBytes(leaves, rows.Length, budget);
         if (retainedBytes > plan.MaxRetainedBytes)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The partition query merge exceeds its reserved budget.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionQueryMergeExceedsItsReservedBudgetDetail);
         }
 
         return new(Version, true, leaves, rows, totals.ExaminedRecords, totals.ReadBytes, retainedBytes);
@@ -40,11 +51,11 @@ internal static class PartitionQueryMerge
         PartitionQueryPlanV1 plan, ImmutableArray<PartitionQueryLeafResultV1> leaves,
         PartitionRef[] partitions, StoreIdentity owner, ReadExecutionBudget budget)
     {
-        var examined = 0;
-        long readBytes = 0;
-        long retained = 0;
+        var examined = EmptyElementCount;
+        long readBytes = NoRetainedBytes;
+        long retained = NoRetainedBytes;
         long? policyEpoch = null;
-        for (var index = 0; index < leaves.Length; index++)
+        for (var index = FirstElementIndex; index < leaves.Length; index++)
         {
             budget.Check();
             var leaf = leaves[index];
@@ -65,7 +76,7 @@ internal static class PartitionQueryMerge
             if (examined > plan.MaxExaminedRecords || readBytes > plan.MaxReadBytes
                 || retained > plan.MaxRetainedBytes)
             {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The partition query merge exceeds its reserved budget.");
+                throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionQueryMergeExceedsItsReservedBudgetDetail);
             }
         }
         return (examined, readBytes, retained);
@@ -102,9 +113,9 @@ internal static class PartitionQueryMerge
 
     private static void ValidateLeafShape(PartitionQueryLeafResultV1 result)
     {
-        if (result.Version != Version || result.CutPosition < 0 || result.PolicyEpoch < 1
-            || result.SchemaVersion < 1 || result.ExaminedRecords < 0 || result.ReadBytes < 0
-            || result.RetainedBytes < 0 || string.IsNullOrEmpty(result.AccessPath) || result.Candidates.IsDefault)
+        if (result.Version != Version || result.CutPosition < InitialSequence || result.PolicyEpoch < MinimumPositiveCount
+            || result.SchemaVersion < VersionOne || result.ExaminedRecords < EmptyElementCount || result.ReadBytes < NoRetainedBytes
+            || result.RetainedBytes < NoRetainedBytes || string.IsNullOrEmpty(result.AccessPath) || result.Candidates.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
         }
@@ -115,7 +126,7 @@ internal static class PartitionQueryMerge
         if (result.Candidates.Length > plan.MaxCandidates || result.ExaminedRecords > plan.MaxExaminedRecords
             || result.ReadBytes > plan.MaxReadBytes || result.RetainedBytes > plan.MaxRetainedBytes)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, "The partition query leaf exceeded its reserved budget.");
+            throw Errors.Fail(ErrorCode.BudgetExceeded, PartitionQueryLeafExceededItsReservedBudgetDetail);
         }
     }
 
@@ -128,14 +139,14 @@ internal static class PartitionQueryMerge
             budget.Check();
             if (candidate is null || candidate.Version != Version || candidate.Reference is null
                 || candidate.Row is null || candidate.Reference.Partition != partition
-                || candidate.Row.EntityId != candidate.Reference.Id || candidate.Row.Revision < 1
+                || candidate.Row.EntityId != candidate.Reference.Id || candidate.Row.Revision < MinimumPositiveCount
                 || candidate.OrderKeys.IsDefault || candidate.OrderKeys.Length != plan.Request.Query.Order.Length
                 || candidate.OrderKeys.Any(key => key.IsDefault))
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
             }
 
-            if (previous is not null && PartitionQueryOrder.Compare(previous, candidate, plan.Request.Query.Order) > 0)
+            if (previous is not null && PartitionQueryOrder.Compare(previous, candidate, plan.Request.Query.Order) > EqualOrder)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidResultMessage);
             }
@@ -152,7 +163,7 @@ internal static class PartitionQueryMerge
             PartitionQueryOrder.Compare(left, right, order));
         var queue = new PriorityQueue<MergeCursor, PartitionQueryCandidateV1>(comparer);
         var seen = new HashSet<EntityRef>();
-        var candidateCount = 0;
+        var candidateCount = EmptyElementCount;
         foreach (var leaf in leaves)
         {
             budget.Check();
@@ -166,11 +177,11 @@ internal static class PartitionQueryMerge
                 }
             }
         }
-        for (var index = 0; index < leaves.Length; index++)
+        for (var index = FirstElementIndex; index < leaves.Length; index++)
         {
             if (!leaves[index].Candidates.IsEmpty)
             {
-                queue.Enqueue(new(index, 0), leaves[index].Candidates[0]);
+                queue.Enqueue(new(index, EmptyElementCount), leaves[index].Candidates[FirstElementIndex]);
             }
         }
         var output = ImmutableArray.CreateBuilder<PartitionQueryCandidateV1>(Math.Min(maximumRows, candidateCount));
@@ -178,7 +189,7 @@ internal static class PartitionQueryMerge
         {
             budget.Check();
             output.Add(leaves[cursor.Leaf].Candidates[cursor.Index]);
-            var next = cursor.Index + 1;
+            var next = cursor.Index + AdjacentElementOffset;
             if (next < leaves[cursor.Leaf].Candidates.Length)
             {
                 queue.Enqueue(new(cursor.Leaf, next), leaves[cursor.Leaf].Candidates[next]);
@@ -190,7 +201,7 @@ internal static class PartitionQueryMerge
     private static long RetainedBytes(ImmutableArray<PartitionQueryLeafResultV1> leaves, int resultRows,
         ReadExecutionBudget budget)
     {
-        long candidates = 0;
+        long candidates = InitialSequence;
         var current = checked((long)PartitionQueryRetention.RootDescriptorBytes
             + (long)PartitionQueryRetention.LeafDescriptorBytes * leaves.Length
             + (long)PartitionQueryRetention.HeapEntryBytes * leaves.Length

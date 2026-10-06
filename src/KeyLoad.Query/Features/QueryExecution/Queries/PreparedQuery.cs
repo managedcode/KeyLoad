@@ -9,6 +9,15 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Owns decoded field paths and the bounded, worst-first query prefix.</summary>
 internal sealed class PreparedQuery
 {
+    private const int AdjacentElementOffset = 1;
+    private const int FirstElementIndex = 0;
+    private const int InitialSequence = 0;
+    private const int EmptyElementCount = 0;
+    private const int EqualOrder = 0;
+    private const int NoRetainedBytes = 0;
+    private const int VersionOne = 1;
+    private const int HeapChildCount = 2;
+
     private readonly Dictionary<string, string[]> paths;
     private readonly ImmutableArray<Ordering> order;
     private readonly PriorityQueue<PreparedRow, PreparedRow>? ordinaryRows;
@@ -41,7 +50,7 @@ internal sealed class PreparedQuery
         }
         if (ordinalFullReferenceOrder)
         {
-            partitionRows = new PreparedRow?[capacity + 1];
+            partitionRows = new PreparedRow?[capacity + AdjacentElementOffset];
         }
         else
         {
@@ -56,13 +65,13 @@ internal sealed class PreparedQuery
     {
         EligibleCount++;
         var keys = new byte[order.Length][];
-        for (var index = 0; index < order.Length; index++)
+        for (var index = FirstElementIndex; index < order.Length; index++)
         {
             keys[index] = KeyCodec.Encode(PredicateEvaluator.FieldValue(order[index].Path, document, json, paths));
         }
 
         var reference = ordinalFullReferenceOrder ? null : KeyCodec.Encode(document.Reference.Id);
-        var pending = new PreparedRow(document, keys, reference, null, 0);
+        var pending = new PreparedRow(document, keys, reference, null, InitialSequence);
         if (!ordinalFullReferenceOrder)
         {
             var queue = ordinaryRows!;
@@ -70,7 +79,7 @@ internal sealed class PreparedQuery
             {
                 queue.Enqueue(pending, pending);
             }
-            else if (capacity > 0 && Compare(pending, queue.Peek()) < 0)
+            else if (capacity > EmptyElementCount && Compare(pending, queue.Peek()) < EqualOrder)
             {
                 queue.Dequeue();
                 queue.Enqueue(pending, pending);
@@ -81,11 +90,11 @@ internal sealed class PreparedQuery
         {
             Insert(Retain(pending));
         }
-        else if (capacity > 0 && Compare(pending, partitionRows![0]!) < 0)
+        else if (capacity > EmptyElementCount && Compare(pending, partitionRows![FirstElementIndex]!) < EqualOrder)
         {
             var retained = Retain(pending);
             var removed = RemoveWorst();
-            if (removed.ReservedBytes > 0)
+            if (removed.ReservedBytes > NoRetainedBytes)
             {
                 releaseCandidate?.Invoke(removed.ReservedBytes);
             }
@@ -97,9 +106,9 @@ internal sealed class PreparedQuery
     internal PreparedRow[] Page(int offset, int limit, ReadExecutionBudget budget)
     {
         var available = ordinalFullReferenceOrder ? rowCount : ordinaryRows!.Count;
-        var count = Math.Min(limit, Math.Max(0, available - offset));
+        var count = Math.Min(limit, Math.Max(EmptyElementCount, available - offset));
         var page = new PreparedRow[count];
-        for (var index = count - 1; index >= 0; index--)
+        for (var index = count - AdjacentElementOffset; index >= EmptyElementCount; index--)
         {
             budget.Check();
             page[index] = ordinalFullReferenceOrder ? RemoveWorst() : ordinaryRows!.Dequeue();
@@ -120,7 +129,7 @@ internal sealed class PreparedQuery
         reserveArray(PartitionQueryRetention.CandidateArrayBytes(count));
         var candidates = ImmutableArray.CreateBuilder<PartitionQueryCandidateV1>(count);
         candidates.Count = count;
-        for (var index = count - 1; index >= 0; index--)
+        for (var index = count - AdjacentElementOffset; index >= EmptyElementCount; index--)
         {
             budget.Check();
             candidates[index] = RemoveWorst().Candidate ?? throw new InvalidOperationException();
@@ -131,25 +140,7 @@ internal sealed class PreparedQuery
     }
 
     private int Compare(PreparedRow left, PreparedRow right)
-    {
-        for (var index = 0; index < order.Length; index++)
-        {
-            var result = GetOrderKey(left, index).SequenceCompareTo(GetOrderKey(right, index));
-            if (result != 0)
-            {
-                return order[index].Descending ? -Math.Sign(result) : Math.Sign(result);
-            }
-        }
-        if (ordinalFullReferenceOrder)
-        {
-            return PartitionQueryOrder.CompareReference(left.Reference, right.Reference);
-        }
-
-        return left.IdKey!.AsSpan().SequenceCompareTo(right.IdKey!);
-    }
-
-    private static ReadOnlySpan<byte> GetOrderKey(PreparedRow row, int index) =>
-        row.Candidate is { } candidate ? candidate.OrderKeys[index].AsSpan() : row.PendingOrderKeys![index];
+        => PartitionQueryOrder.Compare(left, right, order, ordinalFullReferenceOrder);
 
     private PreparedRow Retain(PreparedRow row)
     {
@@ -159,7 +150,7 @@ internal sealed class PreparedQuery
         reserveCandidate!(retainedBytes);
         var keys = ImmutableArray.CreateRange(pendingKeys.Select(static key =>
             ImmutableCollectionsMarshal.AsImmutableArray(key)));
-        var candidate = new PartitionQueryCandidateV1(1, row.Document.Reference, projected, keys);
+        var candidate = new PartitionQueryCandidateV1(VersionOne, row.Document.Reference, projected, keys);
         var retained = row with
         {
             SourceDocument = null,
@@ -174,10 +165,10 @@ internal sealed class PreparedQuery
     {
         var values = partitionRows!;
         var index = rowCount++;
-        while (index > 0)
+        while (index > EmptyElementCount)
         {
-            var parent = (index - 1) / 2;
-            if (Compare(row, values[parent]!) <= 0)
+            var parent = (index - AdjacentElementOffset) / HeapChildCount;
+            if (Compare(row, values[parent]!) <= EqualOrder)
             {
                 break;
             }
@@ -191,29 +182,29 @@ internal sealed class PreparedQuery
     private PreparedRow RemoveWorst()
     {
         var values = partitionRows!;
-        var removed = values[0]!;
+        var removed = values[FirstElementIndex]!;
         var replacement = values[--rowCount]!;
         values[rowCount] = null;
-        if (rowCount == 0)
+        if (rowCount == EmptyElementCount)
         {
             return removed;
         }
 
-        var index = 0;
+        var index = FirstElementIndex;
         while (true)
         {
-            var child = index * 2 + 1;
+            var child = index * HeapChildCount + AdjacentElementOffset;
             if (child >= rowCount)
             {
                 break;
             }
 
-            if (child + 1 < rowCount && Compare(values[child + 1]!, values[child]!) > 0)
+            if (child + AdjacentElementOffset < rowCount && Compare(values[child + AdjacentElementOffset]!, values[child]!) > EqualOrder)
             {
                 child++;
             }
 
-            if (Compare(replacement, values[child]!) >= 0)
+            if (Compare(replacement, values[child]!) >= EqualOrder)
             {
                 break;
             }

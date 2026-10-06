@@ -81,7 +81,7 @@ internal static class SampleChunkTestData
 
     internal static ReadExecutionBudget Budget(DatabaseLimits? limits = null,
         CancellationToken cancellationToken = default)
-        => new(limits ?? new DatabaseLimits(), cancellationToken: cancellationToken);
+        => new(UnitExecutionOptions.DatabaseLimits(limits ?? new DatabaseLimits()), cancellationToken: cancellationToken);
 
     internal static ReadExecutionBudget ChargedDecodeBudget(ReadOnlySpan<byte> bytes,
         DatabaseLimits? limits = null, CancellationToken cancellationToken = default)

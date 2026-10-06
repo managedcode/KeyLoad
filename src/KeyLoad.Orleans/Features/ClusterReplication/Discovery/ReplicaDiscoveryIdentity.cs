@@ -23,6 +23,8 @@ internal static class ReplicaDiscoveryIdentity
     private static SiloAddress ValidateDiscovery(string voterId, ReplicaSiloDiscovery discovered,
         ReplicaConfiguration configuration, ReplicaPeerOptions options)
     {
+        const int PortValidationBoundary = 0;
+
         if (discovered.VoterId != voterId || discovered.ClusterId != options.ClusterId
             || discovered.Incarnation != configuration.Incarnation
             || string.IsNullOrWhiteSpace(discovered.SiloAddress)
@@ -41,7 +43,7 @@ internal static class ReplicaDiscoveryIdentity
             throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidDiscovery);
         }
 
-        if (address.Endpoint.Port <= 0 || address.ToParsableString() != discovered.SiloAddress)
+        if (address.Endpoint.Port <= PortValidationBoundary || address.ToParsableString() != discovered.SiloAddress)
         {
             throw Errors.Fail(ErrorCode.Validation, ReplicaTransportProtocol.InvalidDiscovery);
         }

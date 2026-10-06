@@ -22,14 +22,17 @@ internal sealed class RawStorageCorpus
     /// <summary>Creates a corpus containing every seeded and reserved valid index.</summary>
     public RawStorageCorpus(int recordCount, int valueBytes)
     {
+        const int RecordCountStep = 2;
+        const int IndexInitialValue = 0;
+
         Validate(recordCount, valueBytes);
         RecordCount = recordCount;
         ValueBytes = valueBytes;
-        var validIndexCount = checked(recordCount + 2);
+        var validIndexCount = checked(recordCount + RecordCountStep);
         keys = new Memory<byte>[validIndexCount];
         originalValues = new Memory<byte>[validIndexCount];
         alternateValues = new Memory<byte>[validIndexCount];
-        for (var index = 0; index < validIndexCount; index++)
+        for (var index = IndexInitialValue; index < validIndexCount; index++)
         {
             keys[index] = CreateKey(index);
             originalValues[index] = CreateValue(index, valueBytes, alternate: false);
@@ -75,23 +78,34 @@ internal sealed class RawStorageCorpus
 
     private static Memory<byte> CreateKey(int index)
     {
+        const int StartEmptyCount = 0;
+
         var key = GC.AllocateArray<byte>(KeyLength, pinned: true);
-        BinaryPrimitives.WriteUInt64LittleEndian(key.AsSpan(0, sizeof(ulong)), Seed);
+        BinaryPrimitives.WriteUInt64LittleEndian(key.AsSpan(StartEmptyCount, sizeof(ulong)), Seed);
         BinaryPrimitives.WriteUInt64LittleEndian(key.AsSpan(sizeof(ulong), sizeof(ulong)), (ulong)index);
         return key;
     }
 
     private static Memory<byte> CreateValue(int index, int valueBytes, bool alternate)
     {
+        const int CreateValueAbsentCount = 0;
+        const int ValueFirstIndex = 0;
+        const int ValueSecondIndex = 1;
+        const int ValueComponentIndex = 2;
+        const int ValueEmptyCount = 0;
+        const int CreateValueValueComponentIndex = 3;
+        const int IndexScaleFactor = 31;
+        const int OffsetScaleFactor = 17;
+
         var value = new byte[valueBytes];
-        var salt = alternate ? AlternateSalt : 0;
-        value[0] = unchecked((byte)(Seed + index + salt));
-        value[1] = alternate ? (byte)AlternateMarker : (byte)OriginalMarker;
-        value[2] = 0;
-        value[3] = byte.MaxValue;
+        var salt = alternate ? AlternateSalt : CreateValueAbsentCount;
+        value[ValueFirstIndex] = unchecked((byte)(Seed + index + salt));
+        value[ValueSecondIndex] = alternate ? (byte)AlternateMarker : (byte)OriginalMarker;
+        value[ValueComponentIndex] = ValueEmptyCount;
+        value[CreateValueValueComponentIndex] = byte.MaxValue;
         for (var offset = ValueSeedBytes; offset < value.Length; offset++)
         {
-            value[offset] = unchecked((byte)(Seed + (index * 31) + (offset * 17) + salt));
+            value[offset] = unchecked((byte)(Seed + (index * IndexScaleFactor) + (offset * OffsetScaleFactor) + salt));
         }
 
         return value;

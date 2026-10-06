@@ -22,8 +22,8 @@ internal sealed class HybridQualityRealStoreTests
         HybridQualityCorpus.ValidateDefinitions();
         HybridQualityCorpus.Seed(database);
         using var projection = CreateProjection(database);
-        var exactEngine = new SearchEngine(database.Database);
-        var nativeEngine = new SearchEngine(database.Database, projection);
+        var exactEngine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var nativeEngine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var initialPosition = database.Store.Position;
         var initialAuthority = CaptureAuthority(database);
         string? generation = null;
@@ -113,8 +113,8 @@ internal sealed class HybridQualityRealStoreTests
     }
 
     private static NativeTextProjection CreateProjection(TestDatabase database)
-        => new(Path.Combine(database.Directory, ProjectionFolder), database.Database.Limits,
-            database.Store.Identity.NodeId);
+        => new(Path.Combine(database.Directory, ProjectionFolder), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
 
     private static byte[] CaptureAuthority(TestDatabase database)
     {

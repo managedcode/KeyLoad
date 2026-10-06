@@ -19,7 +19,7 @@ internal static class IsolatedTimeSeriesKeyLoadResources
         ArgumentNullException.ThrowIfNull(context);
         var image = RuntimeContainerImage.Read(context.Builder, RuntimeContainerImage.ServerConfiguration);
         var directory = context.DataDirectory(DataDirectory);
-        var profile = ClusterProfileStore.Open(directory);
+        var profile = ClusterProfileStore.Open(directory, KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder).Profile);
         var nodes = ClusterResources.Add(context.Builder, profile, directory, ephemeral: true,
             benchmarkNodeCount: context.NodeCount);
         var admin = context.Builder.CreateResourceBuilder(context.Builder.Resources.OfType<ParameterResource>()

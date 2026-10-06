@@ -21,12 +21,12 @@ internal static class NativeTextGenerationCensusOverlap
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle original\"}"));
         using var pause = new NativeTextGenerationPause();
         var root = Path.Combine(database.Directory, Collection);
-        using var projection = new NativeTextProjection(root, database.Database.Limits,
-            database.Store.Identity.NodeId, faultObserver: pause.Observe);
+        using var projection = new NativeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution(), faultObserver: pause.Observe);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var engine = new SearchEngine(database.Database, projection);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var original = await engine.SearchAsync("root", request, cancellation);
-        using var lease = projection.Acquire(CaptureScope(database), new(database.Database.Limits));
+        using var lease = projection.Acquire(CaptureScope(database), new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
         lease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         lease.ObserveToken(Query);
         await RunReplacementAsync(database, engine, request, root, original, lease, pause,

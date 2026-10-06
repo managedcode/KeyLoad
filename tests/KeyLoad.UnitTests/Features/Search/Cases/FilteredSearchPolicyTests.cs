@@ -40,8 +40,8 @@ internal sealed class FilteredSearchPolicyTests
             [FilteredSearchTestSupport.TextUseGrant, FilteredSearchTestSupport.VectorUseGrant], Alice, restrictRows: true);
 
         var request = FilteredSearchTestSupport.Request(ImmutableArray.Create(OwnedId, HiddenId, StaleId, DeletedId, "absent"));
-        var hybrid = await new SearchEngine(database.Database).SearchAsync(Reader, request, Token());
-        var vector = await new SearchEngine(database.Database).SearchAsync(Reader, VectorOnly(request.AllowedIds), Token());
+        var hybrid = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Reader, request, Token());
+        var vector = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Reader, VectorOnly(request.AllowedIds), Token());
 
         await Assert.That(hybrid.Select(row => row.Document.Reference.Id).ToArray())
             .IsEquivalentTo(new[] { OwnedId, StaleId }, CollectionOrdering.Matching);
@@ -57,7 +57,7 @@ internal sealed class FilteredSearchPolicyTests
         FilteredSearchTestSupport.PersistReader(database, Reader, Capability.None, []);
         FilteredSearchTestSupport.PersistReader(database, RevokedReader, Capability.VectorSearch,
             [FilteredSearchTestSupport.VectorUseGrant], revoked: true);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var empty = ImmutableArray<string>.Empty;
 
         var capabilityFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>

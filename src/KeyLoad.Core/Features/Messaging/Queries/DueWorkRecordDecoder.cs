@@ -5,6 +5,9 @@ namespace KeyLoad.Core;
 
 internal static class DueWorkRecordDecoder
 {
+    private const int InitialSequence = 0;
+    private const int MinimumPositiveCount = 1;
+
     internal static DueWorkHint? Read(DatabaseEngine database, DueWorkKind kind, ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
         => kind switch
@@ -54,7 +57,7 @@ internal static class DueWorkRecordDecoder
         ValidateSaga(database, key, record);
         return record.Phase == SagaPhase.Waiting && record.Deadline is { } dueAt && dueAt <= wakeAt
             ? new(DueWorkKind.Saga, record.Lane, record.SagaId, record.CreatorPrincipalId,
-                record.Revision, 0, 0, dueAt)
+                record.Revision, InitialSequence, InitialSequence, dueAt)
             : null;
     }
 
@@ -81,8 +84,8 @@ internal static class DueWorkRecordDecoder
 
     private static bool HasInvalidScheduleIdentity(RecurringScheduleRecord record)
         => record is null || record.Lane is null || record.Lane.Partition is null || record.Definition is null
-            || record.CreatorPrincipalId is null || record.ScheduleId == Guid.Empty || record.Revision < 1
-            || record.Generation < 1 || record.NextOrdinal < 0 || record.Lane != record.Definition.Lane
+            || record.CreatorPrincipalId is null || record.ScheduleId == Guid.Empty || record.Revision < MinimumPositiveCount
+            || record.Generation < MinimumPositiveCount || record.NextOrdinal < InitialSequence || record.Lane != record.Definition.Lane
             || record.ScheduleId != record.Definition.ScheduleId;
 
     private static bool HasInvalidScheduleDefinition(RecurringScheduleRecord record)
@@ -96,7 +99,7 @@ internal static class DueWorkRecordDecoder
     private static void ValidateSaga(DatabaseEngine database, ReadOnlySpan<byte> key, SagaRecord record)
     {
         if (record is null || record.Lane is null || record.Lane.Partition is null
-            || record.CreatorPrincipalId is null || record.SagaId == Guid.Empty || record.Revision < 1
+            || record.CreatorPrincipalId is null || record.SagaId == Guid.Empty || record.Revision < MinimumPositiveCount
             || !Enum.IsDefined(record.Phase) || record.StateJson is null
             || (record.Deadline is null) != (record.Timeout is null)
             || record.Deadline is { } deadline && deadline.Offset != TimeSpan.Zero

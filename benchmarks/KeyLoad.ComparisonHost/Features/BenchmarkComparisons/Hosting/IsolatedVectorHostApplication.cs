@@ -59,7 +59,7 @@ internal static class IsolatedVectorHostApplication
         ComparisonReport? report, CancellationToken cancellationToken)
         => IsolatedHostReportWriter.WriteAsync(new IsolatedComparisonReport(
             IsolatedComparisonContract.Current.WorkerSchemaVersion, settings.Worker, status, reason, report),
-            settings.OutputDirectory, cancellationToken);
+            settings.OutputDirectory, settings.HostExecution, cancellationToken);
 
     internal static void ValidateNativeVectorReport(ComparisonReport report, IsolatedHostSettings settings)
     {

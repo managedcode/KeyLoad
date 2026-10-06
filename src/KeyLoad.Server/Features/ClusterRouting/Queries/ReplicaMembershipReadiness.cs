@@ -6,6 +6,9 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal static class ReplicaMembershipReadiness
 {
+    private const char HostColonCharacter = ':';
+    private const string EndpointKeyComparisonText = ":";
+
     private const int ExpectedActiveSilos = 6;
     private const int MaximumRows = 48;
     private const int MaximumAddressBytes = 256;
@@ -29,6 +32,10 @@ internal static class ReplicaMembershipReadiness
     internal static async Task<MembershipReadinessSnapshot?> ReadAsync(IMembershipTable table, NodeOptions options,
         SiloAddress localAddress, CancellationToken token)
     {
+        const int IndexInitialValue = 0;
+        const int EmptyCanonicalLength = 0;
+        const int VersionSingleItemCount = 1;
+
         var expected = await ExpectedEndpointsAsync(options, token).ConfigureAwait(false);
         if (expected.Count != ExpectedActiveSilos)
         { return null; }
@@ -39,13 +46,13 @@ internal static class ReplicaMembershipReadiness
         { return null; }
         var addresses = new string[ExpectedActiveSilos];
         var observedEndpoints = new HashSet<string>(StringComparer.Ordinal);
-        for (var index = 0; index < active.Length; index++)
+        for (var index = IndexInitialValue; index < active.Length; index++)
         {
             var address = active[index].Item1.SiloAddress;
             var canonical = address.ToParsableString();
             if (SiloAddress.FromParsableString(canonical).ToParsableString() != canonical)
             { return null; }
-            if (canonical.Length == 0 || Encoding.UTF8.GetByteCount(canonical) > MaximumAddressBytes
+            if (canonical.Length == EmptyCanonicalLength || Encoding.UTF8.GetByteCount(canonical) > MaximumAddressBytes
                 || !expected.Contains(EndpointKey(address.Endpoint.Address, address.Endpoint.Port))
                 || !observedEndpoints.Add(EndpointKey(address.Endpoint.Address, address.Endpoint.Port)))
             { return null; }
@@ -54,7 +61,7 @@ internal static class ReplicaMembershipReadiness
         if (!observedEndpoints.SetEquals(expected))
         { return null; }
         var fingerprint = ReplicaMembershipFingerprint.Compute(addresses);
-        return new(1, ExpectedActiveSilos, view.Members.Count, fingerprint);
+        return new(VersionSingleItemCount, ExpectedActiveSilos, view.Members.Count, fingerprint);
     }
 
     private static async Task<HashSet<string>> ExpectedEndpointsAsync(NodeOptions options, CancellationToken token)
@@ -74,8 +81,8 @@ internal static class ReplicaMembershipReadiness
         return endpoints;
     }
 
-    private static string Host(string endpoint) => endpoint[..endpoint.LastIndexOf(':')];
+    private static string Host(string endpoint) => endpoint[..endpoint.LastIndexOf(HostColonCharacter)];
 
-    private static string EndpointKey(IPAddress address, int port) => address + ":" +
+    private static string EndpointKey(IPAddress address, int port) => address + EndpointKeyComparisonText +
         port.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

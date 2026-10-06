@@ -44,7 +44,9 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
 
     private static Dictionary<string, JsonElement>? ToJsonArguments(AIFunctionArguments arguments)
     {
-        if (arguments.Count == 0)
+        const int EmptyArgumentsCount = 0;
+
+        if (arguments.Count == EmptyArgumentsCount)
         {
             return null;
         }

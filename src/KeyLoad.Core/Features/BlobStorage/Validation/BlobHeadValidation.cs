@@ -24,8 +24,11 @@ internal static class BlobHeadValidation
 
     private static void ValidateMetadata(BlobMetadata metadata, BlobRef blob)
     {
-        if (metadata is null || metadata.Blob != blob || metadata.Access is null || metadata.Revision < 0
-            || metadata.Length is < 0 or > BlobLimits.MaximumBlobBytes
+        const int RevisionValidationBoundary = 0;
+        const int MetadataLengthEmptyCount = 0;
+
+        if (metadata is null || metadata.Blob != blob || metadata.Access is null || metadata.Revision < RevisionValidationBoundary
+            || metadata.Length is < MetadataLengthEmptyCount or > BlobLimits.MaximumBlobBytes
             || metadata.PartCount != BlobRecordReader.PartCount(metadata.Length))
         {
             throw BlobErrors.Corruption();
@@ -34,7 +37,9 @@ internal static class BlobHeadValidation
 
     private static void ValidatePublished(BlobMetadata metadata, Guid id)
     {
-        if (id == Guid.Empty || metadata.Revision == 0 || metadata.Deleted || metadata.IntegrityHash is null)
+        const int EmptyRevision = 0;
+
+        if (id == Guid.Empty || metadata.Revision == EmptyRevision || metadata.Deleted || metadata.IntegrityHash is null)
         {
             throw BlobErrors.Corruption();
         }
@@ -43,8 +48,12 @@ internal static class BlobHeadValidation
 
     private static void ValidateUnpublished(BlobMetadata metadata)
     {
-        if (metadata.Length != 0 || metadata.PartCount != 0 || metadata.IntegrityHash is not null
-            || metadata.Revision > 0 && !metadata.Deleted)
+        const int EmptyMetadataLength = 0;
+        const int EmptyPartCount = 0;
+        const int RevisionValidationBoundary = 0;
+
+        if (metadata.Length != EmptyMetadataLength || metadata.PartCount != EmptyPartCount || metadata.IntegrityHash is not null
+            || metadata.Revision > RevisionValidationBoundary && !metadata.Deleted)
         {
             throw BlobErrors.Corruption();
         }

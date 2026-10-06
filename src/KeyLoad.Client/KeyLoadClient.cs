@@ -1,6 +1,3 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
 using KeyLoad.Client.Features.ClientApi;
 using KeyLoad.Query;
 using ManagedCode.Communication;
@@ -11,10 +8,7 @@ namespace KeyLoad.Client;
 /// <summary>HTTP SDK. Writes keep caller command IDs; a timeout is an unknown outcome, never an automatic new write.</summary>
 public sealed partial class KeyLoadClient
 {
-    private const string CommandIdHeader = "X-KeyLoad-Command-Id";
-    private readonly HttpClient http;
-    private readonly string apiKey;
-    private readonly KeyLoadClientExecutionOptions execution;
+    private readonly KeyLoadClientTransport transport;
 
     /// <summary>Creates the authenticated transport with one validated native policy snapshot.</summary>
     /// <param name="http">The caller-owned HTTP transport.</param>
@@ -22,47 +16,15 @@ public sealed partial class KeyLoadClient
     /// <param name="executionOptions">The caller's centrally bound transport budget.</param>
     public KeyLoadClient(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions)
     {
-        this.http = http;
-        this.apiKey = apiKey;
-        execution = executionOptions.Value;
-        execution.Validate();
+        ArgumentNullException.ThrowIfNull(http);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        transport = new KeyLoadClientTransport(http, apiKey, executionOptions);
     }
 
-    internal async Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
-    {
-        using var message = new HttpRequestMessage(request is null ? HttpMethod.Get : HttpMethod.Post, path);
-        message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
-        if (id is { } command)
-        {
-            message.Headers.Add(CommandIdHeader, command.ToString());
-        }
+    internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 
-        if (request is not null)
-        {
-            message.Content = JsonContent.Create(request, request.GetType(), options: JsonDefaults.Options);
-        }
-
-        try
-        {
-            using var response = await http.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-                .ConfigureAwait(false);
-            if (!response.IsSuccessStatusCode)
-            {
-                var problem = await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options, cancellationToken,
-                    execution.MaximumProblemBodyBytes)
-                    .ConfigureAwait(false);
-                return problem ?? Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, ClientTransportMessages.ServerResponseUnavailable);
-            }
-            await using var body = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            var value = await JsonSerializer.DeserializeAsync<T>(body, JsonDefaults.Options, cancellationToken).ConfigureAwait(false);
-            return Result<T>.Succeed(value!);
-        }
-        catch (Exception exception) when (exception is HttpRequestException or IOException or OperationCanceledException or JsonException)
-        {
-            return Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : cancellationToken.IsCancellationRequested ? ErrorCode.Cancelled : ErrorCode.OwnershipLost,
-                write ? ClientTransportMessages.WriteResponseUnavailable : ClientTransportMessages.ReadResponseUnavailable);
-        }
-    }
+    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken)
+        => transport.Send<T>(path, request, write, id, cancellationToken);
     /// <summary>Submits one atomic command using its stable idempotency identifier.</summary>
     /// <param name="command">Typed command and caller-owned stable command identifier.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>

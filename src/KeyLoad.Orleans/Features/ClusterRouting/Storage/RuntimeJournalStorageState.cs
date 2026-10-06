@@ -1,43 +1,32 @@
+#pragma warning disable ORLEANSEXP005
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 using Orleans.Journaling;
 
 namespace KeyLoad.Orleans;
 
-internal sealed class RuntimeJournalStorageState
+internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, JournalId journalId,
+    IOptions<RuntimeJournalOptions> options, string format, IOptions<GrainRoutingOptions> routingOptions,
+    SemaphoreSlim[] gates, int gateIndex)
 {
-    private readonly SemaphoreSlim gate = new(1, 1);
-    private readonly RuntimeJournalClient client;
-    private readonly IOptions<GrainRoutingOptions> routingOptions;
     private bool retired;
 
-    internal RuntimeJournalStorageState(RuntimeJournalClient client, JournalId journalId,
-        RuntimeJournalOptions options, string format, IOptions<GrainRoutingOptions> routingOptions)
-    {
-        this.client = client;
-        JournalId = journalId;
-        Options = options;
-        Format = format;
-        this.routingOptions = routingOptions;
-    }
-
-    internal JournalId JournalId { get; }
-    internal RuntimeJournalOptions Options { get; }
-    internal string Format { get; }
+    internal JournalId JournalId { get; } = journalId;
+    internal IOptions<RuntimeJournalOptions> Options { get; } = options;
+    internal string Format { get; } = format;
     internal RuntimeJournalSnapshot? Captured { get; private set; }
 
     internal async ValueTask<Lease> EnterAsync(CancellationToken cancellationToken)
     {
-        var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(routingOptions.Value.ExecutionLifetime);
+        var lease = new Lease(gates[gateIndex], routingOptions.Value.ExecutionLifetime, cancellationToken);
         try
         {
-            await gate.WaitAsync(deadline.Token).ConfigureAwait(false);
-            return new(gate, deadline);
+            await lease.AcquireAsync().ConfigureAwait(false);
+            return lease;
         }
-        catch
+        catch (Exception)
         {
-            deadline.Dispose();
+            lease.Dispose();
             throw;
         }
     }
@@ -55,6 +44,18 @@ internal sealed class RuntimeJournalStorageState
         }
 
         return Captured;
+    }
+
+    internal async Task<RuntimeJournalSnapshot?> ObserveAsync(CancellationToken cancellationToken)
+    {
+        if (retired)
+        {
+            return null;
+        }
+
+        var observed = await client.GetHeaderAsync(JournalId.Value, cancellationToken).ConfigureAwait(false);
+        CaptureInitial(observed);
+        return observed;
     }
 
     internal void CaptureInitial(RuntimeJournalSnapshot? snapshot)
@@ -104,14 +105,41 @@ internal sealed class RuntimeJournalStorageState
 
     internal void Retire() => retired = true;
 
-    internal sealed class Lease(SemaphoreSlim gate, CancellationTokenSource deadline) : IDisposable
+    internal sealed class Lease(SemaphoreSlim gate, TimeSpan timeout, CancellationToken callerToken) : IDisposable
     {
+        private readonly CancellationTokenSource deadline = CreateDeadline(timeout, callerToken);
+        private bool acquired;
+
         internal CancellationToken Token => deadline.Token;
+
+        internal async ValueTask AcquireAsync()
+        {
+            await gate.WaitAsync(deadline.Token).ConfigureAwait(false);
+            acquired = true;
+        }
 
         public void Dispose()
         {
-            gate.Release();
-            deadline.Dispose();
+            try
+            {
+                if (acquired)
+                {
+                    acquired = false;
+                    gate.Release();
+                }
+            }
+            finally
+            {
+                deadline.Dispose();
+            }
+        }
+
+        private static CancellationTokenSource CreateDeadline(TimeSpan timeout, CancellationToken callerToken)
+        {
+            var source = CancellationTokenSource.CreateLinkedTokenSource(callerToken);
+            source.CancelAfter(timeout);
+            return source;
         }
     }
 }
+#pragma warning restore ORLEANSEXP005

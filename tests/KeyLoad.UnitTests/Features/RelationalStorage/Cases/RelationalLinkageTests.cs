@@ -35,7 +35,7 @@ internal sealed class RelationalLinkageTests
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
         await Assert.That(graph.Vertices).IsEquivalentTo(new[] { first, second }, CollectionOrdering.Matching);
         await Assert.That(graph.Edges).HasSingleItem();
-        var ranked = await new SearchEngine(database.Database).SearchAsync(RelationalTestData.Root,
+        var ranked = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(RelationalTestData.Root,
             new(database.Partition, RelationalTestData.Table, VectorField: VectorField, Vector: [1, 0], Space: space),
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(ranked).HasSingleItem();

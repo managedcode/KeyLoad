@@ -6,10 +6,15 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 [ConfigurationOptions]
 internal sealed record BenchmarkProvenanceOptions
 {
-    public string SourceRevision { get; set; } = string.Empty;
-    public string WorkflowRunId { get; set; } = string.Empty;
-    public string RunAttempt { get; set; } = string.Empty;
-    public string JobId { get; set; } = string.Empty;
+    public string? SourceRevision { get; set; }
+    public string? WorkflowRunId { get; set; }
+    public string? RunAttempt { get; set; }
+    public string? JobId { get; set; }
+    public string? Repository { get; set; }
+    public string? Reference { get; set; }
+    public string? Workflow { get; set; }
+    public string? Actions { get; set; }
+    public string? ImageReceipt { get; set; }
     public string? DockerHost { get; set; }
     public string? DockerContext { get; set; }
 }

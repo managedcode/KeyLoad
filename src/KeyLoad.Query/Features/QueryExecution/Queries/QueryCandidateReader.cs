@@ -9,6 +9,8 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
     PartitionQueryLeafReadGrant? leafGrant = null)
 {
+    private const int EmptyElementCount = 0;
+
     private const string PointPath = "point";
     private const string IndexPathPrefix = "index:";
     private const string FullScanPath = "bounded-full-scan";
@@ -55,7 +57,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
         {
             var prefixFields = index.Fields.TakeWhile(equality.ContainsKey).ToArray();
-            if (prefixFields.Length == 0)
+            if (prefixFields.Length == EmptyElementCount)
             {
                 continue;
             }

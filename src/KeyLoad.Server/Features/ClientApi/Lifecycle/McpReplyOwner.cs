@@ -1,12 +1,15 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using ModelContextProtocol.Protocol;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Owns one complete reply wrapper and its borrowed native structured-content document until response draining.</summary>
 internal sealed class McpReplyOwner : IDisposable
 {
+    private const int ThrowIfDisposedEmptyRead = 0;
+
     private readonly byte[] bytes;
     private readonly JsonDocument document;
     private readonly bool isError;
@@ -30,9 +33,10 @@ internal sealed class McpReplyOwner : IDisposable
     /// <param name="requestId">The actual database execution identity.</param>
     /// <param name="maximumBytes">The inclusive complete wrapper ceiling and private writer capacity.</param>
     /// <returns>An owner that must survive native response serialization and draining.</returns>
-    internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid? requestId, int maximumBytes)
+    internal static McpReplyOwner Success(ReadOnlyMemory<byte> canonical, Guid? requestId, int maximumBytes,
+        IOptions<McpExecutionOptions> options)
     {
-        _ = McpFrameBounds.InspectReply(canonical.Span, maximumBytes);
+        _ = McpFrameBounds.InspectReply(canonical.Span, maximumBytes, options);
         return Open(McpReplyWriter.Success(canonical.Span, requestId, maximumBytes), isError: false);
     }
 
@@ -60,7 +64,10 @@ internal sealed class McpReplyOwner : IDisposable
     /// <summary>Closes the borrowed document and clears the complete owned UTF-8 array exactly once.</summary>
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        const int ValueSingleItemCount = 1;
+        const int EmptyExchange = 0;
+
+        if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
         { return; }
         try
         { document.Dispose(); }
@@ -83,5 +90,5 @@ internal sealed class McpReplyOwner : IDisposable
         }
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != ThrowIfDisposedEmptyRead, this);
 }

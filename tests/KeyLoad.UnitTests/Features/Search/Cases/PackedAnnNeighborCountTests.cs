@@ -139,7 +139,7 @@ internal sealed class PackedAnnNeighborCountTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var canceled = new AnnWorkBudget(new ReadExecutionBudget(database.Database.Limits,
+        var canceled = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
             TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() => state.Graph.NeighborCount(slot.Source, slot.Layer, canceled));
     }
@@ -155,7 +155,7 @@ internal sealed class PackedAnnNeighborCountTests
     private static async Task AssertCandidatesMatchPublicExactAsync(VectorSpace space, VectorRecord[] records,
         PackedAnnOptions options, DistanceMetric metric, TestDatabase database)
     {
-        var index = PackedAnnIndex.Build(space, records, options, PackedAnnIndexTestSupport.Budget(database));
+        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database));
         var query = PackedAnnTestData.Vector(1_001, Dimension, Seed);
         var actual = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget(database));
         var exact = records.Select((record, ordinal) => new AnnCandidate(ordinal, record.DocumentId,

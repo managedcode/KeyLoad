@@ -4,4 +4,4 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 internal sealed record ScaleServerObservationPolicy(double CadenceMilliseconds, double MaximumObservationMilliseconds,
     double CleanupThresholdMilliseconds, double ProcessSettlementMilliseconds, int MaxProcesses, int MaxMounts,
     int MaxFileBytes, int MinimumCommandBytes, int MaxHardwareBytes, int MaxSampleMetadataBytes, int MaxSidecarBytes,
-    int MaxWorkerBytes, int MaxSamples, int MaxCgroupAncestors, int NativeReadBufferBytes, int MaxNativeOutputBytes);
+    int MaxWorkerBytes, int MaxSamples, int MaxCgroupAncestors, int NativeReadBufferBytes, int MaxNativeOutputBytes, int StandardErrorOutputDivisor);

@@ -23,20 +23,20 @@ internal sealed class NativeTextProjectionRestartTests
             new PutDocument(Collection, "two", "{\"text\":\"needle other\"}"));
         var indexDirectory = Path.Combine(database.Directory, "native-text");
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 10);
-        var expected = await new SearchEngine(database.Database).SearchAsync("root", request,
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
-        var beforeRestart = new NativeTextProjection(indexDirectory, database.Database.Limits,
-            database.Store.Identity.NodeId);
-        var firstResult = await new SearchEngine(database.Database, beforeRestart).SearchAsync("root", request,
+        var beforeRestart = new NativeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        var firstResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), beforeRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await AssertEquivalentAsync(expected, firstResult);
         await AssertRecognizedNativeGenerationAsync(indexDirectory, database);
         beforeRestart.Dispose();
 
-        using var afterRestart = new NativeTextProjection(indexDirectory, database.Database.Limits,
-            database.Store.Identity.NodeId);
-        var rebuiltResult = await new SearchEngine(database.Database, afterRestart).SearchAsync("root", request,
+        using var afterRestart = new NativeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        var rebuiltResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), afterRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         await AssertEquivalentAsync(expected, rebuiltResult);
@@ -51,10 +51,10 @@ internal sealed class NativeTextProjectionRestartTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "native-text");
-        using (var projection = new NativeTextProjection(indexDirectory, database.Database.Limits,
-                   database.Store.Identity.NodeId))
+        using (var projection = new NativeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+                   database.Store.Identity.NodeId, UnitNativeTextOptions.Execution()))
         {
-            _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
+            _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
         }
         var generation = Directory.EnumerateDirectories(indexDirectory)
@@ -99,10 +99,10 @@ internal sealed class NativeTextProjectionRestartTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "native-text");
-        using (var projection = new NativeTextProjection(indexDirectory, database.Database.Limits,
-                   database.Store.Identity.NodeId))
+        using (var projection = new NativeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+                   database.Store.Identity.NodeId, UnitNativeTextOptions.Execution()))
         {
-            _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
+            _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
         }
         var generation = Directory.EnumerateDirectories(indexDirectory)
@@ -154,8 +154,8 @@ internal sealed class NativeTextProjectionRestartTests
 
     private static void OpenForRestart(string indexDirectory, TestDatabase database)
     {
-        using var projection = new NativeTextProjection(indexDirectory, database.Database.Limits,
-            database.Store.Identity.NodeId);
+        using var projection = new NativeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
     }
 
     private static async Task AssertEquivalentAsync(RankedDocument[] expected, RankedDocument[] actual)

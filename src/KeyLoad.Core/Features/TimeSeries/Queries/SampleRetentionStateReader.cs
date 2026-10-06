@@ -49,13 +49,15 @@ internal static class SampleRetentionStateReader
 
     internal static void Validate(SampleRetentionState state)
     {
+        const int PurgedCountValidationBoundary = 0;
+
         if (state.FormatVersion != CurrentFormatVersion)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UnsupportedFormat);
         }
 
         if (state.BeforeUtcTicks < DateTimeOffset.MinValue.UtcTicks
-            || state.BeforeUtcTicks > DateTimeOffset.MaxValue.UtcTicks || state.PurgedCount < 0)
+            || state.BeforeUtcTicks > DateTimeOffset.MaxValue.UtcTicks || state.PurgedCount < PurgedCountValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptState);
         }

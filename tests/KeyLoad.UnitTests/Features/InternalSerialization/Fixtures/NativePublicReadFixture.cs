@@ -79,7 +79,7 @@ internal static class NativePublicReadFixture
         PhysicalShardRecord expectedOwner)
     {
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
-        return await new GrainQueryReadCapabilities(new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()), new SearchEngine(database.Database),
+        return await new GrainQueryReadCapabilities(new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()), new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()),
             TimeProvider.System, expectedOwner).ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id,
             request.Payload, CancellationToken.None).ConfigureAwait(false);
     }

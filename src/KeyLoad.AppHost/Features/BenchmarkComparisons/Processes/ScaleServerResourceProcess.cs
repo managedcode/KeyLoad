@@ -8,6 +8,9 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static partial class ScaleServerResourceProcess
 {
+    private const int RunAsyncFirstPositiveCount = 1;
+    private const string ProcessAndCleanupFailureMessage = "Server resource process failed and cleanup also failed.";
+
     private const string ScaleServerResourceProcessMetadataName = "libc";
     private const string ScaleServerResourceProcessScaleServerResourceProcessMetadataName = "kill";
 
@@ -37,7 +40,7 @@ internal static partial class ScaleServerResourceProcess
         ScaleServerResourceSampleBudget budget, int? maximumOutputBytes = null)
     {
         const string MessageText = "Server resource sample exceeded its bound.";
-        const int InspectFieldCount = 0;
+        const int SuccessfulExitCode = 0;
         const string RunAsyncMessageText = "Server resource process cancellation cleanup failed.";
 
         using var process = new Process
@@ -55,13 +58,13 @@ internal static partial class ScaleServerResourceProcess
             process.StartInfo.ArgumentList.Add(argument);
         }
 
-        var limit = Math.Min(budget.Remaining, maximumOutputBytes ?? budget.Settings.MaxHardwareBytes);
+        var limit = Math.Min(budget.Remaining, maximumOutputBytes ?? budget.Settings.MaxNativeOutputBytes);
         if (limit < budget.Settings.MinimumCommandBytes)
         {
             throw new InvalidDataException(MessageText);
         }
 
-        var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(1, limit / 8));
+        var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(RunAsyncFirstPositiveCount, limit / budget.Settings.StandardErrorOutputDivisor));
         var outputLimit = limit - errorLimit;
         process.Start();
         var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.NativeReadBufferBytes, token);
@@ -79,7 +82,7 @@ internal static partial class ScaleServerResourceProcess
             await readers;
             var bytes = await output;
             budget?.Charge(bytes.Length + error.Result);
-            return process.ExitCode == InspectFieldCount ? Encoding.UTF8.GetString(bytes) : null;
+            return process.ExitCode == SuccessfulExitCode ? Encoding.UTF8.GetString(bytes) : null;
         }
         catch (OperationCanceledException failure)
         {
@@ -100,7 +103,7 @@ internal static partial class ScaleServerResourceProcess
             catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
             catch (Exception cleanupFailure)
             {
-                throw new AggregateException("Server resource process failed and cleanup also failed.", failure, cleanupFailure);
+                throw new AggregateException(ProcessAndCleanupFailureMessage, failure, cleanupFailure);
             }
             ExceptionDispatchInfo.Capture(failure).Throw();
             throw;
@@ -143,7 +146,7 @@ internal static partial class ScaleServerResourceProcess
     {
         const int BoundaryValue = 1;
         const string MessageText = "Server resource sample exceeded its bound.";
-        const int InspectFieldCount = 0;
+        const int EndOfStreamReadCount = 0;
         const int OffsetValue = 0;
 
         if (maximum < BoundaryValue)
@@ -156,7 +159,7 @@ internal static partial class ScaleServerResourceProcess
         while (true)
         {
             var count = await stream.ReadAsync(chunk, token);
-            if (count == InspectFieldCount)
+            if (count == EndOfStreamReadCount)
             {
                 return buffer.ToArray();
             }
@@ -176,7 +179,7 @@ internal static partial class ScaleServerResourceProcess
         const string MessageText = "Server resource sample exceeded its bound.";
         const int TotalInitialValue = 0;
         const int StartValue = 0;
-        const int InspectFieldCount = 0;
+        const int EndOfStreamReadCount = 0;
         const string DrainBoundedAsyncMessageText = "Server resource diagnostic exceeded its bound.";
 
         if (maximum < BoundaryValue)
@@ -189,7 +192,7 @@ internal static partial class ScaleServerResourceProcess
         while (true)
         {
             var count = await stream.ReadAsync(buffer.AsMemory(StartValue, buffer.Length - total), token);
-            if (count == InspectFieldCount)
+            if (count == EndOfStreamReadCount)
             {
                 return total;
             }

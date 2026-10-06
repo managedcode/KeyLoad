@@ -32,14 +32,18 @@ internal static class AggregateSnapshotPersistence
 
     internal static AggregateSnapshotState Deserialize(ReadOnlySpan<byte> value, DatabaseLimits limits)
     {
+        const int SnapshotVersionValidationBoundary = 1;
+        const int SourceRevisionValidationBoundary = 0;
+        const int StateSchemaVersionValidationBoundary = 1;
+
         var envelope = NativeSerialization.Deserialize<AggregateSnapshotEnvelope>(value);
         if (envelope.FormatVersion != CurrentFormatVersion)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UnknownFormatMessage);
         }
         var snapshot = envelope.Snapshot;
-        if (snapshot.SnapshotVersion < 1 || snapshot.SourceRevision < 0
-            || snapshot.StateSchemaVersion < 1 || string.IsNullOrWhiteSpace(snapshot.ReducerVersion)
+        if (snapshot.SnapshotVersion < SnapshotVersionValidationBoundary || snapshot.SourceRevision < SourceRevisionValidationBoundary
+            || snapshot.StateSchemaVersion < StateSchemaVersionValidationBoundary || string.IsNullOrWhiteSpace(snapshot.ReducerVersion)
             || snapshot.StateJson is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidSnapshotMessage);

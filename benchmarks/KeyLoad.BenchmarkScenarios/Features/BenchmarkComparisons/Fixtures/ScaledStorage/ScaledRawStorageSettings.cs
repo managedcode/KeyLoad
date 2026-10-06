@@ -16,7 +16,9 @@ internal static class ScaledRawStorageSettings
 
     internal static void ValidateInput(int recordCount, int payloadBytes)
     {
-        if (recordCount is <= 0 or > OneMillion)
+        const int RecordCountEmptyCount = 0;
+
+        if (recordCount is <= RecordCountEmptyCount or > OneMillion)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount), InvalidCountMessage);
         }

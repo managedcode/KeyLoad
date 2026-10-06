@@ -6,6 +6,9 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Writes the existing canonical JSON ordering and numeric representation incrementally.</summary>
 internal static class CanonicalJsonWriter
 {
+    private const int FirstOrdinal = 1;
+    private const int AdjacentElementOffset = 1;
+
     private const string DuplicateProperty = "Duplicate JSON property names are not allowed.";
     private const string DecimalRequired = "JSON numbers must fit the decimal numeric policy.";
     private const string DecimalFormat = "G29";
@@ -49,9 +52,9 @@ internal static class CanonicalJsonWriter
         var properties = element.EnumerateObject()
             .Select(property => new NamedProperty(property.Name, property.Value)).ToArray();
         Array.Sort(properties, static (left, right) => StringComparer.Ordinal.Compare(left.Name, right.Name));
-        for (var index = 1; index < properties.Length; index++)
+        for (var index = FirstOrdinal; index < properties.Length; index++)
         {
-            if (StringComparer.Ordinal.Equals(properties[index - 1].Name, properties[index].Name))
+            if (StringComparer.Ordinal.Equals(properties[index - AdjacentElementOffset].Name, properties[index].Name))
             {
                 throw Errors.Fail(ErrorCode.Validation, DuplicateProperty);
             }

@@ -3,7 +3,7 @@ using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageReadObserver? observer,
-    CancellationToken cancellationToken, int maximumRecords, long maximumWorkBytes)
+    int maximumRecords, long maximumWorkBytes, CancellationToken cancellationToken)
 {
     private const int NoMarkerBytes = 0;
 

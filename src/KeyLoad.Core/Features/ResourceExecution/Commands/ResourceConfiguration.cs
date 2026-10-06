@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int ResourceConfigurationMinimumPositiveCount = 1;
+
     private const int MaxResourceIndexes = 32;
     private const int MaxResourceFieldPolicies = 256;
     private const int MaxIndexFields = 8;
@@ -65,7 +67,7 @@ public sealed partial class DatabaseEngine
         foreach (var index in definition.Indexes)
         {
             JsonData.Identifier(index.Name);
-            if (index.Fields.Length is < 1 or > MaxIndexFields)
+            if (index.Fields.Length is < ResourceConfigurationMinimumPositiveCount or > MaxIndexFields)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidIndexFieldsMessage);
             }
@@ -84,13 +86,13 @@ public sealed partial class DatabaseEngine
     private static void ValidateResourcePolicies(ResourceDefinition definition)
     {
         var q = definition.QueuePolicy;
-        if (definition.EventRetention.MaxEvents < 1 || definition.EventRetention.MaxBytes < 1)
+        if (definition.EventRetention.MaxEvents < ResourceConfigurationMinimumPositiveCount || definition.EventRetention.MaxBytes < ResourceConfigurationMinimumPositiveCount)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidEventQuotaMessage);
         }
 
-        if (q.MaxAttempts < 1 || q.MaxLeaseSeconds is < 1 or > MaxConfiguredQueueLeaseSeconds || q.MaxStoredMessages < 1 || q.MaxStoredBytes < 1
-            || q.MaxInFlightMessages < 1 || q.MaxInFlightBytes < 1 || q.RetryBaseMilliseconds < 1 || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds)
+        if (q.MaxAttempts < ResourceConfigurationMinimumPositiveCount || q.MaxLeaseSeconds is < ResourceConfigurationMinimumPositiveCount or > MaxConfiguredQueueLeaseSeconds || q.MaxStoredMessages < ResourceConfigurationMinimumPositiveCount || q.MaxStoredBytes < ResourceConfigurationMinimumPositiveCount
+            || q.MaxInFlightMessages < ResourceConfigurationMinimumPositiveCount || q.MaxInFlightBytes < ResourceConfigurationMinimumPositiveCount || q.RetryBaseMilliseconds < ResourceConfigurationMinimumPositiveCount || q.RetryMaxMilliseconds < q.RetryBaseMilliseconds)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidQueuePolicyMessage);
         }

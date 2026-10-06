@@ -92,10 +92,10 @@ internal sealed class ReplicaMembershipNativeStoreTests
             silo.Services.Configure<EndpointOptions>(endpoint =>
             { endpoint.AdvertisedIPAddress = IPAddress.Loopback; endpoint.SiloPort = SiloPort; endpoint.GatewayPort = 0; });
             silo.Services.AddSingleton<IMembershipTable>(new ReplicaMembershipTable(fixture.Database, coordinator,
-                consensus, ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System, linked.Token,
+                consensus, ClusterId, ClusterPrincipalPolicy.InternalPrincipalId, TimeProvider.System,
                 UnitExecutionOptions.Validated(new OrleansMembershipOptions(), static settings =>
                 { if (!settings.IsValid()) throw new InvalidOperationException(OrleansMembershipOptions.ValidationMessage); }),
-                ReplicaExecutionTestOptions.Execution()));
+                ReplicaExecutionTestOptions.Execution(), linked.Token));
         }).Build();
         var configurationOptions = ReplicaExecutionTestOptions.Configuration(configuration);
         var discoveryOptions = UnitExecutionOptions.Validated(new PeerDiscoveryOptions(), static settings => settings.Validate());
@@ -105,9 +105,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
         var transportOptions = UnitExecutionOptions.Validated(new ReplicaTransportOptions(), static settings =>
         { if (!settings.IsValid()) throw new InvalidOperationException(ReplicaTransportOptions.ValidationMessage); });
         var local = new ReplicaSiloDiscoveryState(configurationOptions, peerOptions, host.Services.GetRequiredService<ILocalSiloDetails>());
-        using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System,
-            transportOptions,
-            canonicalDatabase: fixture.Database);
+        using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System,             transportOptions, UnitRoutingOptions.Replay(),             canonicalDatabase: fixture.Database);
         using var discovery = new ReplicaSiloDiscoveryClient(configurationOptions, peerOptions, local, authentication, TimeProvider.System,
             discoveryOptions);
         await coordinator.StartAsync(linked.Token);

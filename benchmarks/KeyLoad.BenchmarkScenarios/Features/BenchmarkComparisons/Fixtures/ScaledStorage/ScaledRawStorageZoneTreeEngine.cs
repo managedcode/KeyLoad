@@ -81,12 +81,16 @@ internal sealed class ScaledRawStorageZoneTreeEngine : IDisposable
 
     public ScaledRawStorageNativeSnapshot Capture()
     {
+        const int EmptyReadOnlySegmentsCount = 0;
+        const int EmptyReadOnlySegmentsRecordCount = 0;
+        const int EmptyDiskRecords = 0;
+
         var maintenance = _tree!.Maintenance;
         var resident = maintenance.InMemoryRecordCount;
         var diskRecords = maintenance.TotalRecordCount - resident;
         if (resident != _corpus.RecordCount || maintenance.TotalRecordCount != _corpus.RecordCount
-            || maintenance.ReadOnlySegmentsCount != 0 || maintenance.MutableSegmentRecordCount != resident
-            || maintenance.ReadOnlySegmentsRecordCount != 0 || diskRecords != 0)
+            || maintenance.ReadOnlySegmentsCount != EmptyReadOnlySegmentsCount || maintenance.MutableSegmentRecordCount != resident
+            || maintenance.ReadOnlySegmentsRecordCount != EmptyReadOnlySegmentsRecordCount || diskRecords != EmptyDiskRecords)
         {
             throw new InvalidOperationException(ResidenceMessage);
         }

@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
@@ -8,10 +9,12 @@ internal sealed class SampleChunkBenchmarkState
     private readonly SampleRecord[] records;
     private readonly byte[][] nativeValues;
     private readonly byte[] chunk;
+    private readonly IOptions<DatabaseLimits> limitsOptions;
 
-    internal SampleChunkBenchmarkState(SampleRecord[] records)
+    internal SampleChunkBenchmarkState(SampleRecord[] records, IOptions<DatabaseLimits> limitsOptions)
     {
         this.records = records;
+        this.limitsOptions = limitsOptions;
         nativeValues = NativeEncode();
         chunk = ChunkEncode();
         RequireExact(records, NativeDecode());
@@ -26,9 +29,11 @@ internal sealed class SampleChunkBenchmarkState
 
     internal byte[][] NativeEncode()
     {
+        const int IndexInitialValue = 0;
+
         var budget = Budget();
         var values = new byte[records.Length][];
-        for (var index = 0; index < records.Length; index++)
+        for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
             values[index] = NativeSerialization.Serialize(records[index]);
@@ -41,9 +46,11 @@ internal sealed class SampleChunkBenchmarkState
 
     internal SampleRecord[] NativeDecode()
     {
+        const int IndexInitialValue = 0;
+
         var budget = Budget();
         var decoded = new SampleRecord[records.Length];
-        for (var index = 0; index < records.Length; index++)
+        for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.ChargeBytes(nativeValues[index].Length);
             decoded[index] = NativeSerialization.Deserialize<SampleRecord>(nativeValues[index]);
@@ -59,15 +66,18 @@ internal sealed class SampleChunkBenchmarkState
         return SampleChunkCodec.Decode(chunk, budget);
     }
 
-    private static ReadExecutionBudget Budget() => new(new DatabaseLimits());
+    private ReadExecutionBudget Budget() => new(limitsOptions);
 
     private static void RequireExact(SampleRecord[] expected, SampleRecord[] actual)
     {
+        const string RequireExactFailureMessage = "The sample chunk benchmark corpus failed exact roundtrip verification.";
+        const int IndexInitialValue = 0;
+
         if (actual.Length != expected.Length)
         {
-            throw new InvalidOperationException("The sample chunk benchmark corpus failed exact roundtrip verification.");
+            throw new InvalidOperationException(RequireExactFailureMessage);
         }
-        for (var index = 0; index < expected.Length; index++)
+        for (var index = IndexInitialValue; index < expected.Length; index++)
         {
             var left = expected[index];
             var right = actual[index];
@@ -77,7 +87,7 @@ internal sealed class SampleChunkBenchmarkState
                 || left.Sample.Timestamp.Offset != right.Sample.Timestamp.Offset
                 || BitConverter.DoubleToInt64Bits(left.Sample.Value) != BitConverter.DoubleToInt64Bits(right.Sample.Value))
             {
-                throw new InvalidOperationException("The sample chunk benchmark corpus failed exact roundtrip verification.");
+                throw new InvalidOperationException(RequireExactFailureMessage);
             }
         }
     }

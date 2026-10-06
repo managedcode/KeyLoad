@@ -23,6 +23,10 @@ public sealed class OrleansMembershipOptions
     private const int ReplaySkewWindows = 2;
     private const int DefaultMembershipRefreshSeconds = 5;
     private const int DefaultShutdownSeconds = 30;
+    private static readonly TimeSpan MaximumStartupTimeout = TimeSpan.FromMinutes(MaximumStartupMinutes);
+    private static readonly TimeSpan MaximumInterval = TimeSpan.FromMinutes(MaximumIntervalMinutes);
+    private static readonly TimeSpan MaximumClockSkew = TimeSpan.FromSeconds(MaximumClockSkewSeconds);
+    private static readonly TimeSpan MaximumShutdownTimeout = TimeSpan.FromSeconds(DefaultStartupSeconds);
 
     /// <summary>Gets or sets the bounded membership initialization lifetime.</summary>
     public TimeSpan StartupTimeout { get; set; } = TimeSpan.FromSeconds(DefaultStartupSeconds);
@@ -47,18 +51,18 @@ public sealed class OrleansMembershipOptions
 
     /// <summary>Checks startup bounds without changing membership or persisted state.</summary>
     /// <returns>Whether every duration and capacity satisfies the frozen safety bounds.</returns>
-    public bool IsValid() => PositiveAtMost(StartupTimeout, TimeSpan.FromMinutes(MaximumStartupMinutes))
-        && PositiveAtMost(StartupRetryDelay, TimeSpan.FromMinutes(MaximumIntervalMinutes))
+    public bool IsValid() => PositiveAtMost(StartupTimeout, MaximumStartupTimeout)
+        && PositiveAtMost(StartupRetryDelay, MaximumInterval)
         && StartupRetryDelay <= StartupTimeout
-        && PositiveAtMost(ConnectTimeout, TimeSpan.FromMinutes(MaximumIntervalMinutes))
+        && PositiveAtMost(ConnectTimeout, MaximumInterval)
         && HeartbeatAttempts is >= MinimumPositiveCount and <= MaximumHeartbeatAttempts
         && MaximumAdmissions is >= MinimumPositiveCount and <= MaximumAdmittedRequests
-        && PositiveAtMost(ClockSkew, TimeSpan.FromSeconds(MaximumClockSkewSeconds))
-        && PositiveAtMost(ReplayLifetime, TimeSpan.FromMinutes(MaximumStartupMinutes))
+        && PositiveAtMost(ClockSkew, MaximumClockSkew)
+        && PositiveAtMost(ReplayLifetime, MaximumStartupTimeout)
         && ReplayLifetime.Ticks >= ClockSkew.Ticks * ReplaySkewWindows
         && ReplayNonceCapacity is >= MinimumPositiveCount and <= MaximumRetainedNonces
-        && PositiveAtMost(MembershipRefresh, TimeSpan.FromMinutes(MaximumIntervalMinutes))
-        && PositiveAtMost(ShutdownTimeout, TimeSpan.FromSeconds(DefaultStartupSeconds));
+        && PositiveAtMost(MembershipRefresh, MaximumInterval)
+        && PositiveAtMost(ShutdownTimeout, MaximumShutdownTimeout);
 
     private static bool PositiveAtMost(TimeSpan duration, TimeSpan maximum)
         => duration > TimeSpan.Zero && duration <= maximum;

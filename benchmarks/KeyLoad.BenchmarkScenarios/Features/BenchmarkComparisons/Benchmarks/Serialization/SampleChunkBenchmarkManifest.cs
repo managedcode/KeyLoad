@@ -2,34 +2,43 @@ using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 internal static class SampleChunkBenchmarkManifest
 {
+    private const int DescribeSingleItemCount = 1;
+    private const string DescribeResultText = "development_codec_microbenchmark_control_only";
+    private const string DescribeDescribeResultText = "SHA256_seed_sample_lane_Int32LE";
+
     internal const string DirectoryEnvironment = "KEYLOAD_CHUNK_BENCHMARK_MANIFEST_DIRECTORY";
     internal const string SourceHeadEnvironment = "KEYLOAD_CHUNK_SOURCE_HEAD";
     internal const string SourceInventoryEnvironment = "KEYLOAD_CHUNK_SOURCE_INVENTORY_SHA256";
-    private const string InvalidSourceMessage = "The sample chunk measurement source identity is missing or malformed.";
 
-    internal static void Write(int records, string corpus, SampleChunkBenchmarkState state)
+    internal static void Write(int records, string corpus, SampleChunkBenchmarkState state,
+        IOptions<BenchmarkArtifactOptions> artifactOptions)
     {
-        var directory = Environment.GetEnvironmentVariable(DirectoryEnvironment);
+        const string WritePath2Text = "-";
+        const string JsonFileExtension = ".json";
+        const string WriteFailureMessage = "The sample chunk corpus manifest already belongs to a different source or corpus.";
+
+        var settings = artifactOptions.Value;
+        var directory = settings.SampleChunkDirectory;
         if (string.IsNullOrWhiteSpace(directory))
         {
             return;
         }
-        var head = RequireHex(SourceHeadEnvironment, 40);
-        var sourceInventory = RequireHex(SourceInventoryEnvironment, 64);
-        var output = Describe(records, corpus, state, head, sourceInventory);
+        _ = settings.IsValid();
+        var output = Describe(records, corpus, state, settings.SourceHead!, settings.SourceInventorySha256!);
         var bytes = JsonSerializer.SerializeToUtf8Bytes(output, JsonDefaults.Options);
         Directory.CreateDirectory(directory);
-        var path = Path.Combine(directory, records.ToString(System.Globalization.CultureInfo.InvariantCulture) + "-" + corpus + ".json");
+        var path = Path.Combine(directory, records.ToString(System.Globalization.CultureInfo.InvariantCulture) + WritePath2Text + corpus + JsonFileExtension);
         if (File.Exists(path))
         {
             if (!File.ReadAllBytes(path).AsSpan().SequenceEqual(bytes))
             {
-                throw new InvalidOperationException("The sample chunk corpus manifest already belongs to a different source or corpus.");
+                throw new InvalidOperationException(WriteFailureMessage);
             }
             return;
         }
@@ -41,14 +50,14 @@ internal static class SampleChunkBenchmarkManifest
         string head, string sourceInventory)
         => new
         {
-            schemaVersion = 1,
-            scope = "development_codec_microbenchmark_control_only",
+            schemaVersion = DescribeSingleItemCount,
+            scope = DescribeResultText,
             fixture = nameof(SampleChunkSerializationBenchmarks),
             sourceHead = head,
             sourceInventorySha256 = sourceInventory,
             corpus,
             seed = SampleChunkBenchmarkCorpus.Seed,
-            corpusGenerator = "SHA256_seed_sample_lane_Int32LE",
+            corpusGenerator = DescribeDescribeResultText,
             actualRecordCount = records,
             nativeValueBytes = state.NativeBytes,
             chunkValueBytes = state.ChunkBytes,
@@ -83,13 +92,4 @@ internal static class SampleChunkBenchmarkManifest
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 
-    private static string RequireHex(string environment, int length)
-    {
-        var value = Environment.GetEnvironmentVariable(environment);
-        if (value is null || value.Length != length || value.Any(character => !char.IsAsciiHexDigit(character)))
-        {
-            throw new InvalidOperationException(InvalidSourceMessage);
-        }
-        return value;
-    }
 }

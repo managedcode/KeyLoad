@@ -16,14 +16,12 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     ILocalDurableJobManager durableJobs, RuntimeJournalAdmission runtimeJournalAdmission)
     : Grain, IRecurringDueCoordinatorGrain, IDurableJobHandler
 {
-    private readonly DueCoordinationOptions settings = options.Value;
-
     public async Task<DueDispatchResult> ProcessDueAsync(DueWorkHint hint, CancellationToken cancellationToken)
     {
         using var admission = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             runtimeJournalAdmission.SchedulingToken);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(admission.Token);
-        deadline.CancelAfter(settings.DispatchDeadline);
+        deadline.CancelAfter(options.Value.DispatchDeadline);
         var token = deadline.Token;
         ValidateHint(hint);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
@@ -33,15 +31,9 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
             var eligibility = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
             if (eligibility.IsEligible)
             {
-                await durableJobs.ScheduleJobAsync(new ScheduleJobRequest
-                {
-                    Target = this.GetGrainId(),
-                    JobName = NativeSagaTimeoutJobContract.JobName,
-                    DueTime = clock.GetUtcNow(),
-                    Metadata = NativeSagaTimeoutJobContract.Create(hint),
-                    TraceParent = string.Empty,
-                    TraceState = string.Empty
-                }, token).ConfigureAwait(true);
+                var schedule = NativeSagaTimeoutJobContract.CreateScheduleRequest(this.GetGrainId(),
+                    clock.GetUtcNow(), hint);
+                await durableJobs.ScheduleJobAsync(schedule, token).ConfigureAwait(true);
             }
 
             return new(null);
@@ -64,7 +56,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
     {
         var hint = DecodeJob(context);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken);
-        deadline.CancelAfter(settings.DispatchDeadline);
+        deadline.CancelAfter(options.Value.DispatchDeadline);
         var token = deadline.Token;
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         var state = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
@@ -114,7 +106,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
             return;
         }
 
-        if (result.Error is ErrorCode.RevisionConflict or ErrorCode.UnknownWriteOutcome)
+        if (result.Error is ErrorCode.NotFound or ErrorCode.RevisionConflict or ErrorCode.UnknownWriteOutcome)
         {
             await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
             var current = NativeSagaTimeoutEligibility.Read(database, hint, clock.GetUtcNow());
@@ -124,7 +116,13 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
             }
         }
 
-        throw Errors.Fail(result.Error.Value, NativeSagaTimeoutJobContract.InvalidJob);
+        var detail = result.Error switch
+        {
+            ErrorCode.RevisionConflict => RecurringSagaProtocol.RevisionConflict,
+            ErrorCode.UnknownWriteOutcome => NativeSagaTimeoutJobContract.UnresolvedOutcome,
+            _ => result.SafeDetail ?? NativeSagaTimeoutJobContract.InvalidJob
+        };
+        throw Errors.Fail(result.Error.Value, detail);
     }
 
     private async Task<GrainOperationReply> DispatchWithOneUncertaintyRetry(PrincipalRecord principal,
@@ -133,7 +131,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         var requestId = Guid.NewGuid();
         var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
         if (first.Error != ErrorCode.UnknownWriteOutcome
-            || settings.UncertaintyRetryCount == DueCoordinationOptions.NoUncertaintyRetries)
+            || options.Value.UncertaintyRetryCount == DueCoordinationOptions.NoUncertaintyRetries)
         {
             return first;
         }
@@ -149,8 +147,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Data
         var signed = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId, payload);
         var request = GrainFactory.GetGrain<IRequestGrain>(requestId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            token => request.ExecuteStreamAsync(signed, token), chunkSerializer, requestId, clock,
-            cancellationToken, routingOptions).ConfigureAwait(true);
+            createStream: token => request.ExecuteStreamAsync(signed, token), serializer: chunkSerializer, requestId: requestId, clock: clock,
+            cancellationToken: cancellationToken, options: routingOptions).ConfigureAwait(true);
     }
 
     private void ValidateHint(DueWorkHint hint)

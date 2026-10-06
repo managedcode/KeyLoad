@@ -5,6 +5,9 @@ namespace KeyLoad.Core;
 
 internal static class DueWorkCursor
 {
+    private const int EmptyElementCount = 0;
+    private const int EqualOrder = 0;
+
     internal static DueSweepCursor Match(StoreIdentity identity, DueSweepCursor? supplied)
     {
         if (supplied is null || supplied.Incarnation != identity.Incarnation
@@ -44,11 +47,11 @@ internal static class DueWorkCursor
 
     private static bool Valid(DuePrefixCursor? cursor)
         => cursor is not null && (cursor.HasUpperBound
-            ? cursor.UpperKey is { Length: > 0 and <= DueWorkProtocol.MaximumKeyBytes }
+            ? cursor.UpperKey is { Length: > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes }
             : cursor.UpperKey is null && cursor.LastKey is null)
-            && (cursor.LastKey is null || cursor.LastKey.Length is > 0 and <= DueWorkProtocol.MaximumKeyBytes)
+            && (cursor.LastKey is null || cursor.LastKey.Length is > EmptyElementCount and <= DueWorkProtocol.MaximumKeyBytes)
             && (cursor.LastKey is null || cursor.UpperKey is not null
-                && cursor.LastKey.AsSpan().SequenceCompareTo(cursor.UpperKey) <= 0);
+                && cursor.LastKey.AsSpan().SequenceCompareTo(cursor.UpperKey) <= EqualOrder);
 
     private static DuePrefixCursor Clone(DuePrefixCursor prefix)
         => prefix with { UpperKey = prefix.UpperKey?.ToArray(), LastKey = prefix.LastKey?.ToArray() };

@@ -9,6 +9,11 @@ namespace KeyLoad.Query;
 /// <summary>A bounded Q1 parser. Unsupported syntax is rejected, never passed through to storage.</summary>
 public sealed class SqlParser
 {
+    private const int MinimumPositiveCount = 1;
+    private const long FirstOrdinalLong = 1L;
+    private const int FirstElementIndex = 0;
+    private const int SinglePathSegment = 1;
+
     private readonly SqlTokenCursor cursor;
     private readonly DatabaseLimits limits;
     private readonly QueryExecutionOptions execution;
@@ -39,7 +44,7 @@ public sealed class SqlParser
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.ByteBudgetDetail);
         }
-        cursor = new(SqlTokenizer.Lex(sql, limits.MaxQueryTokens, limits.MaxQueryDepth, budget));
+        cursor = new(SqlTokenizer.Lex(sql, limits.MaxQueryTokens, limits.MaxQueryDepth, execution.SqlBudgetCheckInterval, budget));
     }
 
     /// <summary>Parses the SQL text into a typed, bounded query.</summary>
@@ -61,7 +66,7 @@ public sealed class SqlParser
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SqlSyntax.UnsupportedSyntaxDetail);
         }
-        if (limit < 1 || limit > limits.MaxResults || projection.Count > execution.MaximumProjection || order.Count > execution.MaximumOrdering
+        if (limit < MinimumPositiveCount || limit > limits.MaxResults || projection.Count > execution.MaximumProjection || order.Count > execution.MaximumOrdering
             || projection.Select(p => p.Alias).Distinct(StringComparer.Ordinal).Count() != projection.Count)
         {
             throw SqlSyntax.Invalid();
@@ -82,12 +87,12 @@ public sealed class SqlParser
             var streamSet = StringArgument();
             cursor.Need(SqlSyntax.Comma);
             var streamId = StringArgument();
-            var generation = 1L;
+            var generation = FirstOrdinalLong;
             if (cursor.Eat(SqlSyntax.Comma))
             {
                 if (cursor.Current.Kind != SqlTokenKind.Number
                     || !long.TryParse(cursor.Current.Text, NumberStyles.None, CultureInfo.InvariantCulture, out generation)
-                    || generation < 1)
+                    || generation < MinimumPositiveCount)
                 {
                     throw SqlSyntax.Invalid();
                 }
@@ -163,11 +168,11 @@ public sealed class SqlParser
             return path;
         }
         var parts = JsonData.PathSegments(path).ToList();
-        if (alias is not null && parts.Count > 1 && parts[0] == alias)
+        if (alias is not null && parts.Count > MinimumPositiveCount && parts[FirstElementIndex] == alias)
         {
-            parts.RemoveAt(0);
+            parts.RemoveAt(FirstElementIndex);
         }
-        return parts.Count == 1 && parts[0] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision ? SqlSyntax.MetadataPrefix + parts[0] : JsonData.Path(parts.ToArray());
+        return parts.Count == SinglePathSegment && parts[FirstElementIndex] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision ? SqlSyntax.MetadataPrefix + parts[FirstElementIndex] : JsonData.Path(parts.ToArray());
     }
 
     private List<Ordering> ReadOrder()

@@ -23,18 +23,16 @@ internal sealed class SqlBetweenBudgetAndAuthorityTests
         var byteCount = Encoding.UTF8.GetByteCount(RangeSql);
         var exact = new DatabaseLimits { MaxQueryBytes = byteCount, MaxQueryTokens = 10 };
 
-        await Assert.That(new SqlParser(RangeSql, exact).Parse().Filter).IsTypeOf<Logical>();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql,
-            exact with { MaxQueryBytes = byteCount - 1 }).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql,
-            exact with { MaxQueryTokens = 9 }).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact), UnitExecutionOptions.QueryExecution()).Parse().Filter).IsTypeOf<Logical>();
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(exact with { MaxQueryTokens = 9 }), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
     public async Task AcSqlc006AExpandedPositiveAndNegatedTreesMeetExactNormalizerNodeAndDepthLimits()
     {
-        var positive = Request(new SqlParser(RangeSql, new()).Parse().Filter!);
-        var negative = Request(new SqlParser("SELECT * FROM orders WHERE number NOT BETWEEN 1 AND 9", new()).Parse().Filter!);
+        var positive = Request(new SqlParser(RangeSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!);
+        var negative = Request(new SqlParser("SELECT * FROM orders WHERE number NOT BETWEEN 1 AND 9", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!);
         var positiveTree = positive.Query.Filter;
         var negativeTree = negative.Query.Filter;
 

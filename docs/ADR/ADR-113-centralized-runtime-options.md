@@ -68,6 +68,40 @@ owns analyzer/tests/tooling;003 owns core/storage/replication;004 owns server an
 Orleans execution plus clients/benchmarks, excluding lead's central binding files.
 No delegated boundary implementation starts before this contract is available.
 
+The integrated ownership extends002 to shared UnitTests API joins,003 to the
+Comparison library's immutable identities and adapter policies, and lead to the
+ComparisonHost startup/native-option factories and IntegrationTests joins.004
+retains Server/Orleans/Client/CLI/BenchmarkScenarios. These are disjoint portions
+of the same general migration; they do not add database features.
+
+The native registries group actual owners: Core database/due-work/messaging/query/
+graph/change-feed/time-series/search/cache execution; Server node-derived authority,
+replica/discovery/transport/membership/routing/admission/MCP/probe/text/upgrade/admin
+execution; AppHost startup/selectors/test/process/image/profile/RF3 composition/
+benchmark deployment and observation. CLI and comparison hosts use native
+OptionsFactory/OptionsManager before client or file construction. Strict immutable
+comparison connection/identity snapshots use the native factory's CreateInstance
+hook with the existing validating parser, preserving unknown-input diagnostics and
+secrets. No temporary provider or Options.Create fallback supplies runtime defaults.
+
+AppHost's native bootstrap selectors are admitted before dashboard selection.
+Private-profile byte/path/buffer/depth options reach reads, parsing and writes;
+oversized writes fail before creating a staged file. Source/run/attempt/job identity
+remains original environment provenance. Resource observation emits version2 with
+the actual primitive policy; aggregation validates it, enforces its sample/mount
+ceilings and rejects different policies within a comparable cohort. Existing
+version1 evidence remains historical input. This metadata schema change does not
+change persisted database formats or qualify new performance measurements.
+
+Verification order is a real full Release build, scoped native formatting and a
+final full build, then Aspire-owned analyzers/unit/scalar/recovery/RF3 plus the
+existing coverage/architecture gates. Configured behavior tests include
+CentralAppHostOptionsTests, PhysicalShardProfileBoundedReadTests, native resource
+policy/mismatch cases in ScaleServerResourceEvidenceParserTests, and the real
+DueCoordination/ReplicaExecution/ZoneTreeStorage execution regressions. Each suite
+must retain its original native outcome and exact source; compiler previews remain
+diagnostic tools only.
+
 Dependencies use centrally pinned native Microsoft.Extensions.Options/Binder
 packages already present or explicitly added in the canonical package manifest;
 do not copy framework or ManagedCode implementations. Native Options.Create is

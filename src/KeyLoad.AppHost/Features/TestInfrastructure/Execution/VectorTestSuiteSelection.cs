@@ -8,6 +8,10 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 [ConfigurationBinding]
 internal static class VectorTestSuiteSelection
 {
+    private const string BenchmarkEnabledKey = "Benchmarks:Enabled";
+    private const string TestTimeoutKey = "KeyLoadTests:TimeoutMinutes";
+    private const string TestFilterKey = "KeyLoadTests:Filter";
+
     internal static VectorComparisonProfile? Read(IConfiguration configuration, string suite, string? target, bool overrides)
     {
         const string MessageText = "The vector-profile test selection is invalid.";
@@ -20,12 +24,12 @@ internal static class VectorTestSuiteSelection
 
         if (suite != TestSuiteProtocol.ComparisonSuite || target is null
             || !IsolatedComparisonContract.Current.Targets.Contains(target, StringComparer.Ordinal)
-            || configuration.GetValue<bool>("Benchmarks:Enabled")
-            || configuration["KeyLoadTests:TimeoutMinutes"] is { } timeout && timeout != TestSuiteProtocol.ProfileTimeoutMinutesText
+            || configuration.GetValue<bool>(BenchmarkEnabledKey)
+            || configuration[TestTimeoutKey] is { } timeout && timeout != TestSuiteProtocol.ProfileTimeoutMinutesText
             || configuration[TestSuiteSettings.ScaleProfileSetting] is not null
             || configuration[ComparisonWorkerSelection.ScaleProfileSetting] is not null
             || configuration[ComparisonWorkerSelection.VectorProfileSetting] is not null
-            || configuration["KeyLoadTests:Filter"] != TestSuiteProtocol.IsolatedComparisonFilter
+            || configuration[TestFilterKey] != TestSuiteProtocol.IsolatedComparisonFilter
             || configuration[ComparisonWorkerSelection.ScenarioSetting] != nameof(Scenario.VectorExact)
             || !int.TryParse(configuration[ComparisonWorkerSelection.NodeCountSetting], NumberStyles.None,
                 CultureInfo.InvariantCulture, out var nodes) || !IsolatedComparisonContract.Current.NodeCounts.Contains(nodes)

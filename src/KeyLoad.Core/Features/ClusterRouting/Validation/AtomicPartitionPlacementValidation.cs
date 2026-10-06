@@ -12,14 +12,18 @@ internal static class AtomicPartitionPlacementValidation
 
     internal static void ValidateEncodedRequestLength(int encodedLength)
     {
-        if (encodedLength < 0 || encodedLength > AtomicPartitionPlacementProtocol.MaximumEncodedBytes)
+        const int EncodedLengthValidationBoundary = 0;
+
+        if (encodedLength < EncodedLengthValidationBoundary || encodedLength > AtomicPartitionPlacementProtocol.MaximumEncodedBytes)
         { throw Errors.Fail(ErrorCode.Validation, OversizedRequest); }
     }
 
     internal static void ValidateRequest(BindAtomicPartitionPlacementRequest? request)
     {
+        const int ExpectedRevisionValidationBoundary = 0;
+
         if (request is null || request.Version != AtomicPartitionPlacementProtocol.CurrentVersion
-            || request.ExpectedRevision < 0 || request.PhysicalShardId == Guid.Empty || request.Partition is null)
+            || request.ExpectedRevision < ExpectedRevisionValidationBoundary || request.PhysicalShardId == Guid.Empty || request.Partition is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
@@ -42,8 +46,11 @@ internal static class AtomicPartitionPlacementValidation
 
     internal static void ValidateDirectory(AtomicPartitionPlacementDirectoryV1? directory)
     {
+        const int RevisionValidationBoundary = 0;
+        const int ExplicitAssignmentCountFirstCount = 1;
+
         if (directory is null || directory.Version != AtomicPartitionPlacementProtocol.CurrentVersion
-            || directory.Revision <= 0 || directory.ExplicitAssignmentCount is < 1
+            || directory.Revision <= RevisionValidationBoundary || directory.ExplicitAssignmentCount is < ExplicitAssignmentCountFirstCount
             or > AtomicPartitionPlacementProtocol.MaximumExplicitAssignments
             || directory.Revision < directory.ExplicitAssignmentCount)
         {
@@ -54,8 +61,10 @@ internal static class AtomicPartitionPlacementValidation
     internal static void ValidateRow(AtomicPartitionPlacementV1? row, PartitionRef requestedPartition,
         PhysicalShardRecord defaultShard)
     {
+        const int RevisionValidationBoundary = 0;
+
         if (row is null || row.Version != AtomicPartitionPlacementProtocol.CurrentVersion
-            || row.Partition is null || row.PhysicalShardId == Guid.Empty || row.Revision <= 0
+            || row.Partition is null || row.PhysicalShardId == Guid.Empty || row.Revision <= RevisionValidationBoundary
             || row.Partition != requestedPartition || row.PhysicalShardId != defaultShard.PhysicalShardId
             || row.Incarnation != defaultShard.Incarnation || row.VoterIds.IsDefaultOrEmpty
             || !row.VoterIds.SequenceEqual(defaultShard.VoterIds, StringComparer.Ordinal)

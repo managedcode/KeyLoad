@@ -12,6 +12,7 @@ public sealed class ReplicaTransportOptions
     private const int MaximumLifetimeSeconds = 30;
     private const int MinimumAttempts = 1;
     private const int MaximumSafeAttempts = 2;
+    private static readonly TimeSpan MaximumLifetime = TimeSpan.FromSeconds(MaximumLifetimeSeconds);
 
     /// <summary>Gets or sets the accepted signed peer clock skew and replay retention interval.</summary>
     public TimeSpan EnvelopeLifetime { get; set; } = TimeSpan.FromSeconds(MaximumLifetimeSeconds);
@@ -23,8 +24,8 @@ public sealed class ReplicaTransportOptions
     /// <summary>Checks the accepted freshness and retry ceiling before native transport startup.</summary>
     /// <returns>Whether both values stay within the frozen safety bounds.</returns>
     public bool IsValid() => EnvelopeLifetime > TimeSpan.Zero
-        && EnvelopeLifetime <= TimeSpan.FromSeconds(MaximumLifetimeSeconds)
+        && EnvelopeLifetime <= MaximumLifetime
         && MaximumAttempts is >= MinimumAttempts and <= MaximumSafeAttempts
         && ReplayDiagnosticInterval > TimeSpan.Zero
-        && ReplayDiagnosticInterval <= TimeSpan.FromSeconds(MaximumLifetimeSeconds);
+        && ReplayDiagnosticInterval <= MaximumLifetime;
 }

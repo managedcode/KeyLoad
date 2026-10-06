@@ -1,11 +1,11 @@
 using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Owns a bounded private wire buffer through native protocol replay and response draining.</summary>
 internal sealed class McpFrameBody : IDisposable
 {
-    private const int ScratchCapacityBytes = 16_384;
     private readonly MemoryStream buffer;
     private readonly McpFrameShape shape;
     private MemoryStream? reader;
@@ -38,7 +38,9 @@ internal sealed class McpFrameBody : IDisposable
     /// <summary>Gets borrowed checked bytes that must not survive this owner's disposal.</summary>
     internal ReadOnlyMemory<byte> Bytes
     {
-        get { ThrowIfDisposed(); return buffer.GetBuffer().AsMemory(0, WireBytes); }
+        get {
+            const int StartEmptyCount = 0;
+ ThrowIfDisposed(); return buffer.GetBuffer().AsMemory(StartEmptyCount, WireBytes); }
     }
 
     /// <summary>Reads and checks one complete bounded wire frame without retaining an overrun byte.</summary>
@@ -48,25 +50,30 @@ internal sealed class McpFrameBody : IDisposable
     /// <param name="cancellationToken">Cancels the read without converting cancellation to a protocol failure.</param>
     /// <returns>A private owner that clears its bytes after the native request and response drain.</returns>
     internal static async Task<McpFrameBody> ReadAsync(Stream source, long? declaredLength,
-        int maximumBytes, CancellationToken cancellationToken = default)
+        int maximumBytes, IOptions<McpExecutionOptions> options, CancellationToken cancellationToken = default)
     {
+        const int DeclaredLengthEmptyCount = 0;
+        const int StartEmptyCount = 0;
+
         ArgumentNullException.ThrowIfNull(source);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
-        if (declaredLength is < 0 || declaredLength > maximumBytes)
+        if (declaredLength is < DeclaredLengthEmptyCount || declaredLength > maximumBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
         cancellationToken.ThrowIfCancellationRequested();
+        var settings = options.Value;
+        settings.Validate();
         var initialCapacity = declaredLength.HasValue
             ? checked((int)declaredLength.Value)
-            : Math.Min(maximumBytes, ScratchCapacityBytes);
+            : Math.Min(maximumBytes, settings.IngressScratchBytes);
         var retained = new MemoryStream(initialCapacity);
         var transferred = false;
         try
         {
             await ReadBoundedAsync(source, retained, checked((int)(declaredLength ?? maximumBytes)),
-                maximumBytes, !declaredLength.HasValue, cancellationToken).ConfigureAwait(false);
+                maximumBytes, !declaredLength.HasValue, settings.IngressScratchBytes, cancellationToken).ConfigureAwait(false);
             if (declaredLength.HasValue && declaredLength.Value != retained.Length)
             { throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame); }
-            var checkedShape = McpFrameBounds.Inspect(retained.GetBuffer().AsSpan(0, checked((int)retained.Length)), maximumBytes);
+            var checkedShape = McpFrameBounds.Inspect(retained.GetBuffer().AsSpan(StartEmptyCount, checked((int)retained.Length)), maximumBytes, options);
             var body = new McpFrameBody(retained, checkedShape);
             transferred = true;
             return body;
@@ -82,9 +89,11 @@ internal sealed class McpFrameBody : IDisposable
     /// <returns>The current owner-managed reader; closing it does not close the private buffer.</returns>
     internal Stream OpenReader()
     {
+        const int IndexEmptyCount = 0;
+
         ThrowIfDisposed();
         reader?.Dispose();
-        reader = new MemoryStream(buffer.GetBuffer(), 0, WireBytes, writable: false, publiclyVisible: false);
+        reader = new MemoryStream(buffer.GetBuffer(), IndexEmptyCount, WireBytes, writable: false, publiclyVisible: false);
         return reader;
     }
 
@@ -99,20 +108,24 @@ internal sealed class McpFrameBody : IDisposable
     }
 
     private static async Task ReadBoundedAsync(Stream source, MemoryStream retained,
-        int wireLimitBytes, int maximumBytes, bool mayGrow, CancellationToken cancellationToken)
+        int wireLimitBytes, int maximumBytes, bool mayGrow, int scratchCapacityBytes, CancellationToken cancellationToken)
     {
-        var scratch = new byte[ScratchCapacityBytes];
+        const int RemainingStep = 1;
+        const int StartEmptyCount = 0;
+        const int EmptyRead = 0;
+
+        var scratch = new byte[scratchCapacityBytes];
         try
         {
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var remaining = wireLimitBytes - retained.Length;
-                var count = checked((int)Math.Min(scratch.Length, remaining + 1));
-                var read = await source.ReadAsync(scratch.AsMemory(0, count), cancellationToken).ConfigureAwait(false);
-                if (read == 0)
+                var count = checked((int)Math.Min(scratch.Length, remaining + RemainingStep));
+                var read = await source.ReadAsync(scratch.AsMemory(StartEmptyCount, count), cancellationToken).ConfigureAwait(false);
+                if (read == EmptyRead)
                 { return; }
-                AppendWithinDeclaration(retained, scratch.AsSpan(0, read), remaining,
+                AppendWithinDeclaration(retained, scratch.AsSpan(StartEmptyCount, read), remaining,
                     maximumBytes, mayGrow);
             }
         }

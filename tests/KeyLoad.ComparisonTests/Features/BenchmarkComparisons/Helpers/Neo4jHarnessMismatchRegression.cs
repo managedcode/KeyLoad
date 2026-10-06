@@ -10,7 +10,7 @@ internal static class Neo4jHarnessMismatchRegression
     internal static async Task VerifyAsync(Uri endpoint, string password, string image, CancellationToken cancellationToken)
     {
         var options = Neo4jHarnessConstants.SmallOptions() with { Warmup = 0, Repetitions = 1 };
-        var dataset = new BenchmarkDataset(options);
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         var runId = Guid.NewGuid().ToString("D");
         var failures = new List<Exception>();
         await Neo4jHarnessFailureCollector.AttemptAsync(
@@ -56,7 +56,7 @@ internal static class Neo4jHarnessMismatchRegression
         await using var reports = new Neo4jHarnessReportFiles();
         await Neo4jHarnessFailureCollector.AttemptAsync(async () =>
         {
-            var report = await new ComparisonRunner(options, observer.Observe)
+            var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(options), NativeExecutionPolicyFixture.Read(), observer.Observe)
                 .RunAsync([target], SourceRevision, cancellationToken);
             await Neo4jHarnessReportAssertions.VerifyMismatchRunAsync(report, observer);
             await reports.VerifyAsync(report, Neo4jHarnessConstants.MismatchCsvLineCount, cancellationToken);

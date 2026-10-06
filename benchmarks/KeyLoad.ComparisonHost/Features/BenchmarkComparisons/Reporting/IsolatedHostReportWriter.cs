@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
@@ -15,9 +16,12 @@ internal static class IsolatedHostReportWriter
         }
     }
 
-    internal static async Task WriteAsync(IsolatedComparisonReport report, string directory, CancellationToken cancellationToken)
+    internal static async Task WriteAsync(IsolatedComparisonReport report, string directory,
+        IOptions<ComparisonHostExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (!executionOptions.Value.IsValid())
+        { throw new OptionsValidationException(Options.DefaultName, typeof(ComparisonHostExecutionOptions), [ComparisonHostExecutionOptions.InvalidSettings]); }
         ValidateDestination(directory);
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, IsolatedHostConstants.PendingPrefix + Guid.NewGuid().ToString(ComparisonHostConstants.GuidFormat)
@@ -25,7 +29,7 @@ internal static class IsolatedHostReportWriter
         var created = false;
         try
         {
-            await using (var stream = CreatePending(pending))
+            await using (var stream = CreatePending(pending, executionOptions))
             {
                 created = true;
                 await WritePendingAsync(report, stream, cancellationToken);
@@ -42,13 +46,13 @@ internal static class IsolatedHostReportWriter
         }
     }
 
-    private static FileStream CreatePending(string pending)
+    private static FileStream CreatePending(string pending, IOptions<ComparisonHostExecutionOptions> executionOptions)
         => new(pending, new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
             Access = FileAccess.Write,
             Share = FileShare.None,
-            BufferSize = IsolatedHostConstants.FileBufferBytes,
+            BufferSize = executionOptions.Value.FileBufferBytes,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
 

@@ -10,16 +10,16 @@ internal static class PackedAnnIndexTestSupport
 
     internal static AnnWorkBudget Budget(TestDatabase database, long maxWorkUnits = GenerousWorkLimit,
         CancellationToken token = default)
-        => new(new ReadExecutionBudget(database.Database.Limits, cancellationToken: token), maxWorkUnits);
+        => new(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: token), maxWorkUnits);
 
     internal static PackedAnnIndex Build(TestDatabase database, DistanceMetric metric, VectorRecord[] records,
         PackedAnnOptions? options = null, AnnWorkBudget? budget = null)
         => PackedAnnIndex.Build(PackedAnnTestData.Space(metric, records.FirstOrDefault()?.Values.Length ?? 1), records,
-            options ?? new(), budget ?? Budget(database));
+            UnitExecutionOptions.PackedAnn(options ?? new()), budget ?? Budget(database));
 
     internal static PackedAnnIndex Build(VectorSpace space, IReadOnlyList<VectorRecord> records,
         PackedAnnOptions options, AnnWorkBudget budget)
-        => PackedAnnIndex.Build(space, records, options, budget);
+        => PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), budget);
 
     internal static void PersistVectors(TestDatabase database, VectorSpace space, string field,
         IReadOnlyList<float[]> vectors)

@@ -2,6 +2,17 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PackedAnnLayerBuffers
 {
+    private const int BitmapRemainderMask = 63;
+    private const int BitmapWordBits = 64;
+    private const int LayerScratchArrayCount = 5;
+    private const int EmptyElementCount = 0;
+    private const int FirstElementIndex = 0;
+    private const int SingleWorkUnit = 1;
+    private const int UnassignedHeapPosition = -1;
+    private const int AdjacentElementOffset = 1;
+    private const int BitmapWordShift = 6;
+    private const ulong LowestBitmapBit = 1UL;
+
     private readonly bool useVisitBitmap;
     private readonly int[]? marks;
     private readonly ulong[]? visitBitmap;
@@ -9,8 +20,8 @@ internal sealed class PackedAnnLayerBuffers
     internal PackedAnnLayerBuffers(int count, int capacity, bool useBitmap, AnnWorkBudget budget)
     {
         useVisitBitmap = useBitmap;
-        var words = checked((count + 63) / 64);
-        budget.Charge(checked((long)(useBitmap ? words : count) + (long)capacity * 5));
+        var words = checked((count + BitmapRemainderMask) / BitmapWordBits);
+        budget.Charge(checked((long)(useBitmap ? words : count) + (long)capacity * LayerScratchArrayCount));
         marks = useBitmap ? null : new int[count];
         visitBitmap = useBitmap ? new ulong[words] : null;
         Nodes = new int[capacity];
@@ -31,12 +42,12 @@ internal sealed class PackedAnnLayerBuffers
 
     internal void BeginVisitPass(AnnWorkBudget budget)
     {
-        BestHeapCount = 0;
-        WorstHeapCount = 0;
-        for (var index = 0; index < BestHeapPositions.Length; index++)
+        BestHeapCount = EmptyElementCount;
+        WorstHeapCount = EmptyElementCount;
+        for (var index = FirstElementIndex; index < BestHeapPositions.Length; index++)
         {
-            budget.Charge(1);
-            BestHeapPositions[index] = -1;
+            budget.Charge(SingleWorkUnit);
+            BestHeapPositions[index] = UnassignedHeapPosition;
         }
         if (useVisitBitmap)
         {
@@ -46,7 +57,7 @@ internal sealed class PackedAnnLayerBuffers
         if (Epoch == int.MaxValue)
         {
             ClearEpochMarks(budget);
-            Epoch = 1;
+            Epoch = AdjacentElementOffset;
         }
         else
         {
@@ -56,14 +67,14 @@ internal sealed class PackedAnnLayerBuffers
 
     internal bool IsVisited(int node)
         => useVisitBitmap
-            ? (visitBitmap![node >> 6] & (1UL << (node & 63))) != 0
+            ? (visitBitmap![node >> BitmapWordShift] & (LowestBitmapBit << (node & BitmapRemainderMask))) != EmptyElementCount
             : marks![node] == Epoch;
 
     internal void MarkVisited(int node)
     {
         if (useVisitBitmap)
         {
-            visitBitmap![node >> 6] |= 1UL << (node & 63);
+            visitBitmap![node >> BitmapWordShift] |= LowestBitmapBit << (node & BitmapRemainderMask);
         }
         else
         {
@@ -74,20 +85,20 @@ internal sealed class PackedAnnLayerBuffers
     private void ClearVisitBitmap(AnnWorkBudget budget)
     {
         var bits = visitBitmap!;
-        for (var index = 0; index < bits.Length; index++)
+        for (var index = FirstElementIndex; index < bits.Length; index++)
         {
-            budget.Charge(1);
-            bits[index] = 0;
+            budget.Charge(SingleWorkUnit);
+            bits[index] = EmptyElementCount;
         }
     }
 
     private void ClearEpochMarks(AnnWorkBudget budget)
     {
         var values = marks!;
-        for (var index = 0; index < values.Length; index++)
+        for (var index = FirstElementIndex; index < values.Length; index++)
         {
-            budget.Charge(1);
-            values[index] = 0;
+            budget.Charge(SingleWorkUnit);
+            values[index] = EmptyElementCount;
         }
     }
 }

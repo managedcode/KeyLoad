@@ -53,7 +53,7 @@ internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
             case OrleansRuntimeTelemetryMutation.Baggage:
                 for (var index = 0; index <= baggageLimit; index++)
                 {
-                    activity.SetBaggageItem(OrleansRuntimeTelemetryTokens.LateBaggagePrefix
+                    activity.SetBaggage(OrleansRuntimeTelemetryTokens.LateBaggagePrefix
                         + index.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         OrleansRuntimeTelemetryTokens.SentinelValue);
                 }

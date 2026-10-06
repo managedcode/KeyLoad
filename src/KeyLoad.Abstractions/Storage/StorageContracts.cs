@@ -100,10 +100,12 @@ public interface IAtomicTransaction : IKeyValueView
 /// <param name="Durability">Acknowledgement guarantee supplied by the provider.</param>
 /// <param name="DispatchPaused">Whether restored dispatch remains paused.</param>
 /// <param name="ReadGeneration">Generation fencing restored or replaced read authority.</param>
+/// <param name="MinimumReaderContract">Required reader capability persisted before native journal adoption.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(NativeContractAliases.StoreIdentity)]
 public sealed record StoreIdentity([property: Orleans.Id(0)] int FormatVersion, [property: Orleans.Id(1)] int KeyCodecVersion, [property: Orleans.Id(2)] Guid NodeId, [property: Orleans.Id(3)] Guid Incarnation,
-    [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = StoreIdentity.DefaultReadGeneration)
+    [property: Orleans.Id(4)] ReadOnlyMemory<byte> SigningKey, [property: Orleans.Id(5)] DurabilityProfile Durability, [property: Orleans.Id(6)] bool DispatchPaused = false, [property: Orleans.Id(7)] long ReadGeneration = StoreIdentity.DefaultReadGeneration,
+    [property: Orleans.Id(8)] int MinimumReaderContract = StoreReaderContract.Legacy)
 {
     private const int DefaultReadGeneration = 0;
 }

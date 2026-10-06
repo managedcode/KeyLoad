@@ -8,6 +8,15 @@ public sealed record RuntimeJournalOptions
     public const string SectionName = "KeyLoad:RuntimeJournal";
     /// <summary>The safe startup validation failure.</summary>
     public const string ValidationMessage = "Runtime journal limits exceed the bounded native recovery contract.";
+    private const int MinimumJournalCount = 1;
+    private const int MinimumJournalLength = 1;
+    private const long MinimumCatalogLength = 1;
+    private const int MinimumChunkLength = 1;
+    private const int MinimumMetadataLength = 1;
+    private const int MinimumNameLength = 1;
+    private const int MinimumMetadataEntryCount = 1;
+    private const int NoUncertaintyRetries = 0;
+    private const int MaximumUncertaintyRetries = 1;
     private const int MaximumJournalCount = 32;
     private const int MaximumJournalLength = 2_097_152;
     private const long MaximumTotalLength = 67_108_864;
@@ -41,13 +50,13 @@ public sealed record RuntimeJournalOptions
     /// <returns>Whether the configuration is admissible.</returns>
     public bool IsValid()
         => (ReaderUpgradeBackupDirectory is null || Path.IsPathFullyQualified(ReaderUpgradeBackupDirectory))
-            && MaximumJournals is > 0 and <= MaximumJournalCount
-            && MaximumJournalBytes is > 0 and <= MaximumJournalLength
-            && MaximumTotalBytes is > 0 and <= MaximumTotalLength
-            && ChunkBytes is > 0 and <= MaximumChunkLength
+            && MaximumJournals is >= MinimumJournalCount and <= MaximumJournalCount
+            && MaximumJournalBytes is >= MinimumJournalLength and <= MaximumJournalLength
+            && MaximumTotalBytes is >= MinimumCatalogLength and <= MaximumTotalLength
+            && ChunkBytes is >= MinimumChunkLength and <= MaximumChunkLength
             && ChunkBytes <= MaximumJournalBytes && MaximumJournalBytes <= MaximumTotalBytes
-            && MaximumMetadataBytes is > 0 and <= MaximumMetadataLength
-            && MaximumNameBytes is > 0 and <= MaximumNameLength
-            && MaximumMetadataEntries is > 0 and <= MaximumMetadataEntryCount
-            && UncertaintyRetryCount is >= 0 and <= 1;
+            && MaximumMetadataBytes is >= MinimumMetadataLength and <= MaximumMetadataLength
+            && MaximumNameBytes is >= MinimumNameLength and <= MaximumNameLength
+            && MaximumMetadataEntries is >= MinimumMetadataEntryCount and <= MaximumMetadataEntryCount
+            && UncertaintyRetryCount is >= NoUncertaintyRetries and <= MaximumUncertaintyRetries;
 }

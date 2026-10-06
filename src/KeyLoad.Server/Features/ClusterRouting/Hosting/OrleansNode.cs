@@ -2,9 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using KeyLoad.Orleans;
 using KeyLoad.Server.Features.ClusterRouting;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
@@ -19,9 +17,11 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     INodeAdministration administration, ILoggerFactory loggerFactory, ReplicaMembershipAuthorityOwner membershipAuthority,
     ServerRuntimeOptions runtimeOptions) : IAsyncDisposable
 {
-    private readonly NodeOptions options = nodeOptions.Value;
+    private NodeOptions Options => nodeOptions.Value;
     private readonly Lock lifecycle = new();
     private readonly NativeRequestWorkOwner requestWork = new(runtimeOptions.GrainRouting);
+    private readonly OrleansNodeRequestExecutor requests = new(runtimeOptions.GrainRouting,
+        loggerFactory.CreateLogger<OrleansNode>());
     private IHost? host;
     private IGrainFactory? grains;
     private Task? shutdown;
@@ -40,12 +40,13 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
 
     internal bool CatalogReady => Grains is not null && Volatile.Read(ref physicalShardCatalog)?.IsReady == true;
 
-    internal bool DatabaseReady => options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local && CatalogReady;
+    internal bool DatabaseReady => Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local
+        && CatalogReady && Volatile.Read(ref host)?.Services.GetRequiredService<RuntimeJournalAdmission>().IsReady == true;
 
-    internal bool SiloJoined => Volatile.Read(ref siloJoined) == 1;
+    internal bool SiloJoined => Volatile.Read(ref siloJoined) == OrleansNodeProtocol.JoinedSilo;
 
     internal Task<MembershipReadinessSnapshot?> MembershipReadyAsync(CancellationToken cancellationToken)
-        => ReplicaMembershipReadiness.ReadNodeAsync(SiloJoined, Volatile.Read(ref host), options, cancellationToken);
+        => ReplicaMembershipReadiness.ReadNodeAsync(SiloJoined, Volatile.Read(ref host), Options, cancellationToken);
 
     /// <summary>Authenticator for exact discovery response bytes.</summary>
     public ReplicaEnvelopeAuthenticator? Authentication => Volatile.Read(ref host)?.Services.GetRequiredService<ReplicaEnvelopeAuthenticator>();
@@ -92,27 +93,32 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     {
         await registered.ConfigureAwait(false);
         var address = await ResolveAddressAsync(cancellationToken).ConfigureAwait(false);
-        var built = OrleansSiloConfiguration.Build(partition, options, administration, loggerFactory, requestWork,
+        var built = OrleansSiloConfiguration.Build(partition, Options, administration, loggerFactory, requestWork,
             address, cancellationToken, runtimeOptions);
         Volatile.Write(ref host, built);
         await built.StartAsync(cancellationToken).ConfigureAwait(false);
-        Volatile.Write(ref siloJoined, 1);
+        Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
         Volatile.Write(ref grains, built.Services.GetRequiredService<IGrainFactory>());
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Proxy)
         { return; }
         var catalog = new PhysicalShardCatalogStartup(this, partition, nodeOptions,
             built.Services.GetRequiredService<TimeProvider>(), runtimeOptions.GrainRouting);
         Volatile.Write(ref physicalShardCatalog, catalog);
-        await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
+        var administrator = await catalog.InitializeAsync(cancellationToken).ConfigureAwait(false);
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Local)
+        {
+            await RuntimeJournalStartup.InitializeAsync(built.Services, partition, administrator, Options,
+                runtimeOptions, cancellationToken).ConfigureAwait(false);
+        }
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
         { membershipAuthority.Publish(built.Services.GetRequiredService<IMembershipTable>()); }
     }
 
     private async Task<IPAddress> ResolveAddressAsync(CancellationToken cancellationToken)
     {
-        var addresses = IPAddress.TryParse(options.SiloAddress, out var literal) ? [literal]
-            : await Dns.GetHostAddressesAsync(options.SiloAddress, cancellationToken).ConfigureAwait(false);
-        var allowLoopback = options.Peers.All(peer => new Uri(peer).IsLoopback);
+        var addresses = IPAddress.TryParse(Options.SiloAddress, out var literal) ? [literal]
+            : await Dns.GetHostAddressesAsync(Options.SiloAddress, cancellationToken).ConfigureAwait(false);
+        var allowLoopback = Options.Peers.All(peer => new Uri(peer).IsLoopback);
         return addresses.FirstOrDefault(address => address.AddressFamily == AddressFamily.InterNetwork
             && !address.Equals(IPAddress.Any) && (allowLoopback || !IPAddress.IsLoopback(address)))
             ?? throw new InvalidOperationException(OrleansNodeProtocol.InvalidSiloAddress);
@@ -132,44 +138,17 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         string signedRequest, bool command, CancellationToken cancellationToken)
         => ExecuteCoreAsync(requestId, signedRequest, command, requireCatalogAdmission: false, cancellationToken);
 
-    private async Task<GrainOperationReply> ExecuteCoreAsync(Guid requestId, string signedRequest, bool command,
+    private Task<GrainOperationReply> ExecuteCoreAsync(Guid requestId, string signedRequest, bool command,
         bool requireCatalogAdmission, CancellationToken cancellationToken)
     {
-        if (requireCatalogAdmission && options.MembershipAuthority.Mode != MembershipAuthoritySettingsProtocol.Local)
+        if (requireCatalogAdmission && !DatabaseReady)
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var services = RuntimeServices;
-        var clock = services.GetRequiredService<TimeProvider>();
-        var executionLifetime = runtimeOptions.GrainRouting.Value.ExecutionLifetime;
-        using var deadline = new CancellationTokenSource(executionLifetime, clock);
-        using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         var catalog = requireCatalogAdmission ? Volatile.Read(ref physicalShardCatalog) : null;
         if (requireCatalogAdmission && (catalog is null || !catalog.IsReady))
         { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-        await EnsureCompatibleCohortAsync(execution.Token).ConfigureAwait(false);
-        if (requireCatalogAdmission)
-        {
-            catalog = Volatile.Read(ref physicalShardCatalog);
-            if (catalog is null || !catalog.IsReady)
-            { throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady); }
-            await catalog.EnsureAdmissionAsync(execution.Token).ConfigureAwait(false);
-        }
-        GrainOperationReply reply;
-        try
-        {
-            reply = await GrainRequestStreamConsumer.DrainAsync(
-                token => factory.GetGrain<IRequestGrain>(requestId).ExecuteStreamAsync(signedRequest, token),
-                services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId, clock, execution.Token, runtimeOptions.GrainRouting).ConfigureAwait(false);
-        }
-        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        {
-            throw OrleansRpcFailure.Translate(failure, command, requestId, loggerFactory.CreateLogger<OrleansNode>(),
-                cancellationToken);
-        }
-        if (reply.Error is { } error)
-        { throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected); }
-        return reply;
+        return requests.ExecuteAsync(factory, RuntimeServices, catalog, requestId, signedRequest, command,
+            cancellationToken);
     }
 
     /// <summary>Joins native request work before stopping membership, replica lifecycles or physical owners.</summary>
@@ -181,6 +160,7 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
             if (shutdown is null)
             {
                 Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
+                Volatile.Read(ref host)?.Services.GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
                 var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
                 shutdown = StopCoreAsync(registered.Task, startup);
                 registered.SetResult();
@@ -192,26 +172,22 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
     private async Task StopCoreAsync(Task registered, Task? starting)
     {
         await registered.ConfigureAwait(false);
-        var drain = requestWork.DrainAsync();
         if (starting is not null)
         { await starting.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing); }
         Volatile.Read(ref physicalShardCatalog)?.CloseAdmission();
-        Volatile.Write(ref grains, null);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => drain, failures).ConfigureAwait(false);
-        if (!requestWork.IsJoined)
-        {
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
-        }
         var stopping = Volatile.Read(ref host);
-        if (options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
+        if (Options.MembershipAuthority.Mode == MembershipAuthoritySettingsProtocol.Authority)
         {
             await membershipAuthority.StopAdmissionJoinAndClearProviderAsync(failures).ConfigureAwait(false);
         }
         if (stopping is not null)
         {
             await StopHostAsync(stopping, failures).ConfigureAwait(false);
+        }
+        else
+        {
+            await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
         }
         try
         {
@@ -233,6 +209,14 @@ internal sealed class OrleansNode(PartitionHost partition, IOptions<NodeOptions>
         var shutdownTimeout = runtimeOptions.Membership.Value.ShutdownTimeout;
         using var deadline = new CancellationTokenSource(shutdownTimeout);
         await ServerFailureObserver.ObserveAsync(() => stopping.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(requestWork.DrainAsync, failures).ConfigureAwait(false);
+        if (!requestWork.IsJoined)
+        {
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RequestWorkNotJoined);
+        }
+        stopping.Services.GetRequiredService<RuntimeJournalAdmission>().Close();
+        Volatile.Write(ref grains, null);
         // A failed native Start has no lifecycle rollback. Drain the endpoint while its transport still exists.
         ServerFailureObserver.Observe(() => stopping.Services.GetService<ReplicaSiloDiscoveryState>()?.StopDiscovery(), failures);
         await ServerFailureObserver.ObserveAsync(() => partition.Consensus.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);

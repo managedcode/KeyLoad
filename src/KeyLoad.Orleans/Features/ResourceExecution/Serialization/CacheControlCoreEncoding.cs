@@ -4,56 +4,91 @@ internal static class CacheControlCoreEncoding
 {
     internal static void Binding(ref CacheControlWriter writer, CachePhysicalBinding value)
     {
+        const int SlotFieldId = 0;
+        const int NodeIdFieldId = 1;
+        const int IncarnationFieldId = 2;
+        const int SiloAddressFieldId = 3;
+        const int RuntimeIdFieldId = 4;
+        const int RoleFieldId = 5;
+
         writer.String(CacheControlNames.PhysicalBinding);
-        writer.ByteField(0, (byte)value.Slot);
-        writer.GuidField(1, value.NodeId);
-        writer.GuidField(2, value.Incarnation);
-        writer.StringField(3, value.SiloAddress);
-        writer.GuidField(4, value.RuntimeId);
-        writer.ByteField(5, (byte)value.Role);
+        writer.ByteField(SlotFieldId, (byte)value.Slot);
+        writer.GuidField(NodeIdFieldId, value.NodeId);
+        writer.GuidField(IncarnationFieldId, value.Incarnation);
+        writer.StringField(SiloAddressFieldId, value.SiloAddress);
+        writer.GuidField(RuntimeIdFieldId, value.RuntimeId);
+        writer.ByteField(RoleFieldId, (byte)value.Role);
     }
 
     internal static void Header(ref CacheControlWriter writer, CacheControlHeader value)
     {
+        const int VersionFieldId = 0;
+        const int OperationFieldId = 1;
+        const int ScopeHashFieldId = 2;
+        const int PolicyHashFieldId = 3;
+        const int PolicyRevisionFieldId = 4;
+        const int OriginSlotFieldId = 5;
+        const int TargetSlotFieldId = 6;
+        const int CoordinatorSessionIdFieldId = 7;
+        const int RoundNonceFieldId = 8;
+        const int RequestNonceFieldId = 9;
+        const int SentUnixMillisecondsFieldId = 10;
+
         writer.String(CacheControlNames.Header);
-        writer.ByteField(0, value.Version);
-        writer.ByteField(1, (byte)value.Operation);
-        writer.DigestField(2, value.ScopeHash);
-        writer.DigestField(3, value.PolicyHash);
-        writer.Int64Field(4, value.PolicyRevision);
-        writer.ByteField(5, (byte)value.OriginSlot);
-        writer.NullableSlotField(6, value.TargetSlot);
-        writer.GuidField(7, value.CoordinatorSessionId);
-        writer.GuidField(8, value.RoundNonce);
-        writer.GuidField(9, value.RequestNonce);
-        writer.Int64Field(10, value.SentUnixMilliseconds);
+        writer.ByteField(VersionFieldId, value.Version);
+        writer.ByteField(OperationFieldId, (byte)value.Operation);
+        writer.DigestField(ScopeHashFieldId, value.ScopeHash);
+        writer.DigestField(PolicyHashFieldId, value.PolicyHash);
+        writer.Int64Field(PolicyRevisionFieldId, value.PolicyRevision);
+        writer.ByteField(OriginSlotFieldId, (byte)value.OriginSlot);
+        writer.NullableSlotField(TargetSlotFieldId, value.TargetSlot);
+        writer.GuidField(CoordinatorSessionIdFieldId, value.CoordinatorSessionId);
+        writer.GuidField(RoundNonceFieldId, value.RoundNonce);
+        writer.GuidField(RequestNonceFieldId, value.RequestNonce);
+        writer.Int64Field(SentUnixMillisecondsFieldId, value.SentUnixMilliseconds);
     }
 
     internal static void Proof(ref CacheControlWriter writer, CacheReadyProof value, bool includeMac = true)
     {
+        const int VersionFieldId = 0;
+        const int ScopeHashFieldId = 1;
+        const int PolicyHashFieldId = 2;
+        const int PolicyRevisionFieldId = 3;
+        const int OriginSlotFieldId = 4;
+        const int CoordinatorSessionIdFieldId = 5;
+        const int RoundNonceFieldId = 6;
+        const int ChallengeIdFieldId = 7;
+        const int ChallengeSequenceFieldId = 8;
+        const int BindingFieldId = 9;
+        const int StatusFieldId = 10;
+        const int MacFieldId = 11;
+
         writer.String(CacheControlNames.ReadyProof);
-        writer.ByteField(0, value.Version);
-        writer.DigestField(1, value.ScopeHash);
-        writer.DigestField(2, value.PolicyHash);
-        writer.Int64Field(3, value.PolicyRevision);
-        writer.ByteField(4, (byte)value.OriginSlot);
-        writer.GuidField(5, value.CoordinatorSessionId);
-        writer.GuidField(6, value.RoundNonce);
-        writer.GuidField(7, value.ChallengeId);
-        writer.Int64Field(8, value.ChallengeSequence);
-        CacheControlFieldEncoding.Binding(ref writer, 9, value.Binding);
-        writer.ByteField(10, (byte)value.Status);
+        writer.ByteField(VersionFieldId, value.Version);
+        writer.DigestField(ScopeHashFieldId, value.ScopeHash);
+        writer.DigestField(PolicyHashFieldId, value.PolicyHash);
+        writer.Int64Field(PolicyRevisionFieldId, value.PolicyRevision);
+        writer.ByteField(OriginSlotFieldId, (byte)value.OriginSlot);
+        writer.GuidField(CoordinatorSessionIdFieldId, value.CoordinatorSessionId);
+        writer.GuidField(RoundNonceFieldId, value.RoundNonce);
+        writer.GuidField(ChallengeIdFieldId, value.ChallengeId);
+        writer.Int64Field(ChallengeSequenceFieldId, value.ChallengeSequence);
+        CacheControlFieldEncoding.Binding(ref writer, BindingFieldId, value.Binding);
+        writer.ByteField(StatusFieldId, (byte)value.Status);
         if (includeMac)
         {
-            writer.DigestField(11, value.Mac);
+            writer.DigestField(MacFieldId, value.Mac);
         }
     }
 
     internal static void Correlation(ref CacheControlWriter writer, CacheReplyCorrelation value)
     {
+        const int HeaderFieldId = 0;
+        const int SignedRequestDigestFieldId = 1;
+
         writer.String(CacheControlNames.ReplyCorrelation);
-        CacheControlFieldEncoding.Header(ref writer, 0, value.Header);
-        writer.DigestField(1, value.SignedRequestDigest);
+        CacheControlFieldEncoding.Header(ref writer, HeaderFieldId, value.Header);
+        writer.DigestField(SignedRequestDigestFieldId, value.SignedRequestDigest);
     }
 
     internal static int BindingSize(CachePhysicalBinding value)

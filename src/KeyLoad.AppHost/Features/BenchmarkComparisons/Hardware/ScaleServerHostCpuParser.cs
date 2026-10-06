@@ -128,7 +128,7 @@ internal static class ScaleServerHostCpuParser
         const char ColonCharacter = ':';
         const int BoundaryValue = 1;
         const int SecondIndex = 1;
-        const int RangeEndpointCount = 0;
+        const int NoCores = 0;
         const char SeparatorCharacter = ',';
 
         var pairs = new HashSet<string>(StringComparer.Ordinal);
@@ -171,7 +171,7 @@ internal static class ScaleServerHostCpuParser
             }
         }
 
-        return pairs.Count == RangeEndpointCount ? (string.Empty, []) :
+        return pairs.Count == NoCores ? (string.Empty, []) :
             (string.Join(SeparatorCharacter, logical.Order(StringComparer.Ordinal)), pairs.Order(StringComparer.Ordinal).ToArray());
     }
 

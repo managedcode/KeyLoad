@@ -24,7 +24,7 @@ internal static class ZoneTreeBackupRestoreRestore
         {
             var identity = CreateRestoredIdentity(ZoneTreeBackupRestoreFiles.ReadAndVerify(backup, staging, policy),
                 newIncarnation, newSigningKey);
-            ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity);
+            ZoneTreeIdentityFile.Write(Path.Combine(staging, IdentityFileName), identity, policy.IdentityBufferBytes);
             var restoredIdentity = ApplyRestoreAuthorityState(staging, policy);
             Publish(staging, destinationPath);
             return restoredIdentity;

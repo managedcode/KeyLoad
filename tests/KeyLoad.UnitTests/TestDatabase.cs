@@ -36,8 +36,7 @@ internal sealed class TestDatabase : IDisposable
         try
         {
             Store = acquired = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits),
-                UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+            Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
             Database.Bootstrap(new(RootPrincipalId, SystemTenantId, [new(Wildcard, Wildcard, Capability.All)], [Wildcard]) { ClusterAdministrator = true },
                 DatabaseEngine.Credential(RootPrincipalId, RootPrincipalId, RootCredential));
             if (bootstrapPhysicalShardCatalog)

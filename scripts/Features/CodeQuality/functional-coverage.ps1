@@ -14,6 +14,7 @@ param(
 
 . (Join-Path $PSScriptRoot 'functional-coverage.shared.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.compiled-identity.ps1')
+. (Join-Path $PSScriptRoot 'functional-coverage.compile-identity.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.test-identity.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.image-manifests.ps1')
 . (Join-Path $PSScriptRoot 'functional-coverage.inventory.ps1')

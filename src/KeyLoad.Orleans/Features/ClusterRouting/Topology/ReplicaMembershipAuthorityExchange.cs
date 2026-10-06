@@ -60,9 +60,15 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
     private async Task<ReplicaMembershipAuthorityReplyV1> SendOneAsync(Uri endpoint,
         ReplicaMembershipAuthorityCallV1 call, byte[] body, CancellationToken cancellationToken)
     {
+        const char TrimCharCharacter = '=';
+        const char OldCharCharacter = '+';
+        const char NewCharCharacter = '-';
+        const char SlashCharacter = '/';
+        const char UnderscoreCharacter = '_';
+
         var timestamp = options.Clock.GetUtcNow().UtcDateTime.Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var nonceBytes = RandomNumberGenerator.GetBytes(ReplicaMembershipAuthorityProtocol.NonceBytes);
-        var nonce = Convert.ToBase64String(nonceBytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        var nonce = Convert.ToBase64String(nonceBytes).TrimEnd(TrimCharCharacter).Replace(OldCharCharacter, NewCharCharacter).Replace(SlashCharacter, UnderscoreCharacter);
         CryptographicOperations.ZeroMemory(nonceBytes);
         var cluster = options.ClusterId;
         var authorityPhysical = options.AuthorityPhysicalShardId.ToString(ReplicaMembershipAuthorityProtocol.IdentityFormat);
@@ -113,16 +119,21 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
 
     private static async Task<byte[]> ReadBoundedAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
+        const int MaximumReplyBytesStep = 1;
+        const int CountInitialValue = 0;
+        const int EmptyRead = 0;
+        const int StartEmptyCount = 0;
+
         if (response.Content.Headers.ContentLength is > ReplicaMembershipAuthorityProtocol.MaximumReplyBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.ReplyTooLarge); }
-        var buffer = new byte[ReplicaMembershipAuthorityProtocol.MaximumReplyBytes + 1];
+        var buffer = new byte[ReplicaMembershipAuthorityProtocol.MaximumReplyBytes + MaximumReplyBytesStep];
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        var count = 0;
+        var count = CountInitialValue;
         while (count < buffer.Length)
         {
             var read = await stream.ReadAsync(buffer.AsMemory(count), cancellationToken).ConfigureAwait(false);
-            if (read == 0)
-            { return buffer.AsSpan(0, count).ToArray(); }
+            if (read == EmptyRead)
+            { return buffer.AsSpan(StartEmptyCount, count).ToArray(); }
             count += read;
         }
         throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.ReplyTooLarge);
@@ -156,11 +167,13 @@ internal sealed class ReplicaMembershipAuthorityExchange : IDisposable
 
     private static void ValidateOptions(ReplicaMembershipAuthorityExchangeOptions options)
     {
+        const int EmptyAuthorityEndpointsCount = 3;
+
         if (string.IsNullOrWhiteSpace(options.ClusterId) || options.AuthorityPhysicalShardId == Guid.Empty
             || options.AuthorityIncarnation == Guid.Empty || options.CallerPhysicalShardId == Guid.Empty
             || options.CallerIncarnation == Guid.Empty || string.IsNullOrWhiteSpace(options.CallerVoterId)
             || string.IsNullOrWhiteSpace(options.CallerSiloAddress) || options.AuthorityEndpoints is null
-            || options.AuthorityEndpoints.Count != 3 || options.AuthorityEndpoints.Any(endpoint => endpoint is null)
+            || options.AuthorityEndpoints.Count != EmptyAuthorityEndpointsCount || options.AuthorityEndpoints.Any(endpoint => endpoint is null)
             || options.CallerPeerSecret.Length != ReplicaTransportProtocol.SecretBytes
             || options.AuthorityPeerSecret.Length != ReplicaTransportProtocol.SecretBytes || options.Clock is null)
         { throw new ArgumentException(ReplicaMembershipAuthorityText.InvalidOptions); }

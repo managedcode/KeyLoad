@@ -5,6 +5,17 @@ namespace KeyLoad.Core.Features.GraphTraversal.Validation;
 
 internal static class GraphCrossPartitionValidation
 {
+    private const int AbsentRevision = 0;
+    private const int MinimumPolicyEpoch = 0;
+    private const int FingerprintHexCharacters = System.Security.Cryptography.SHA256.HashSizeInBytes * HexCharactersPerByte;
+    private const int HexCharactersPerByte = 2;
+    private const char LastHexDigit = '9';
+    private const char FirstHexLetter = 'a';
+    private const char LastHexLetter = 'f';
+    private const long EmptyRecordCount = 0;
+    private const long EmptyEncodedBytes = 0;
+    private const char FirstHexDigit = '0';
+
     private const string InvalidRequest = "The graph cross-partition request is invalid.";
     private const string InvalidStoredRecord = "A committed graph cross-partition record is malformed.";
 
@@ -12,7 +23,7 @@ internal static class GraphCrossPartitionValidation
         EntityRef destination, long expectedRevision)
     {
         if (source is null || graph is null || edgeId is null || destination is null
-            || destination.Partition is null || expectedRevision <= 0
+            || destination.Partition is null || expectedRevision <= AbsentRevision
             || HasNullPartitionPart(source) || HasNullPartitionPart(destination.Partition)
             || destination.Collection is null || destination.Id is null)
         {
@@ -36,9 +47,11 @@ internal static class GraphCrossPartitionValidation
     internal static void ValidateIncoming(ReadIncomingGraphEdgesRequestV1 request, DatabaseLimits limits,
         ReadExecutionBudget budget)
     {
+        const int MinimumResultCount = 1;
+
         if (request is null || request.Version != GraphCrossPartitionProtocol.CurrentVersion
             || request.Target is null || request.Target.Partition is null || request.Graph is null
-            || request.Limit < 1 || request.Limit > limits.MaxResults
+            || request.Limit < MinimumResultCount || request.Limit > limits.MaxResults
             || HasNullPartitionPart(request.Target.Partition) || request.Target.Collection is null
             || request.Target.Id is null)
         {
@@ -69,7 +82,7 @@ internal static class GraphCrossPartitionValidation
 
     internal static void ValidateOwnerVersion(GraphEdgeOwnerVersionV1? record)
     {
-        if (record is null || record.Version != GraphCrossPartitionProtocol.CurrentVersion || record.Revision <= 0)
+        if (record is null || record.Version != GraphCrossPartitionProtocol.CurrentVersion || record.Revision <= AbsentRevision)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
@@ -97,11 +110,11 @@ internal static class GraphCrossPartitionValidation
             || intent.SourcePartition is null || HasNullPartitionPart(intent.SourcePartition)
             || intent.Destination != destination || intent.Destination.Partition is null
             || HasNullPartitionPart(intent.Destination.Partition) || intent.Destination.Collection is null
-            || intent.Destination.Id is null || intent.Revision <= 0 || intent.Edge is null
+            || intent.Destination.Id is null || intent.Revision <= AbsentRevision || intent.Edge is null
             || intent.SourcePartition == intent.Destination.Partition;
 
     private static bool HasInvalidIntentPolicy(GraphCrossPartitionDeliveryIntentV1 intent)
-        => string.IsNullOrWhiteSpace(intent.OriginalPrincipalId) || intent.OriginalPolicyEpoch < 0
+        => string.IsNullOrWhiteSpace(intent.OriginalPrincipalId) || intent.OriginalPolicyEpoch < MinimumPolicyEpoch
             || !ValidFingerprint(intent.Fingerprint);
 
     private static bool HasInvalidIntentEdge(GraphCrossPartitionDeliveryIntentV1 intent,
@@ -118,7 +131,7 @@ internal static class GraphCrossPartitionValidation
             || state.SourcePartition is null || HasNullPartitionPart(state.SourcePartition)
             || state.Destination != destination || state.Destination.Partition is null
             || HasNullPartitionPart(state.Destination.Partition) || state.Destination.Collection is null
-            || state.Destination.Id is null || state.Revision <= 0 || !ValidFingerprint(state.Fingerprint)
+            || state.Destination.Id is null || state.Revision <= AbsentRevision || !ValidFingerprint(state.Fingerprint)
             || state.SourcePartition == state.Destination.Partition)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
@@ -132,7 +145,7 @@ internal static class GraphCrossPartitionValidation
     {
         if (capacity is null || capacity.Version != GraphCrossPartitionProtocol.CurrentVersion
             || !Enum.IsDefined(capacity.Direction) || capacity.Direction != direction
-            || capacity.RecordCount < 0 || capacity.EncodedBytes < 0)
+            || capacity.RecordCount < EmptyRecordCount || capacity.EncodedBytes < EmptyEncodedBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
@@ -143,12 +156,12 @@ internal static class GraphCrossPartitionValidation
            || partition.TransactionDomainId is null || partition.PartitionKey is null;
 
     private static bool ValidFingerprint(string? value)
-        => value is { Length: 64 } && value.All(static character => character is >= '0' and <= '9' or >= 'a' and <= 'f');
+        => value is { Length: FingerprintHexCharacters } && value.All(static character => character is >= FirstHexDigit and <= LastHexDigit or >= FirstHexLetter and <= LastHexLetter);
 
     internal static void ValidateEdge(EdgeRecord edge, DatabaseLimits limits)
     {
         if (edge.From is null || edge.To is null || edge.From.Partition is null || edge.To.Partition is null
-            || edge.Id is null || edge.Label is null || edge.AttributesJson is null || edge.Revision <= 0)
+            || edge.Id is null || edge.Label is null || edge.AttributesJson is null || edge.Revision <= AbsentRevision)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }

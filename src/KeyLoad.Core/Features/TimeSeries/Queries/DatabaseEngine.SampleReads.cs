@@ -4,6 +4,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int DefaultSampleReadLimit = 1_000;
+
     /// <summary>Reads projected samples in an inclusive UTC timestamp range.</summary>
     /// <param name="principalId">Persisted caller identity.</param>
     /// <param name="partition">Atomic partition containing the series.</param>
@@ -15,9 +17,9 @@ public sealed partial class DatabaseEngine
     /// <param name="cancellationToken">Cancellation throughout storage and projection.</param>
     /// <returns>Owned projected samples in timestamp and sequence order.</returns>
     public SampleRecord[] ReadSamples(string principalId, PartitionRef partition, string set, string seriesId,
-        DateTimeOffset from, DateTimeOffset until, int limit = 1_000, CancellationToken cancellationToken = default)
+        DateTimeOffset from, DateTimeOffset until, int limit = DefaultSampleReadLimit, CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(Limits, Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, Clock, cancellationToken);
         budget.Check();
         var request = new ReadSamplesRequest(partition, set, seriesId, from, until, limit);
         return Store.Read(view => SampleRangeReader.Read(this, Clock, view, principalId, request, budget));

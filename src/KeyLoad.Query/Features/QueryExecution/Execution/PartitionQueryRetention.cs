@@ -4,6 +4,10 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryRetention
 {
+    private const int EmptyElementCount = 0;
+    private const int InitialSequence = 0;
+    private const int AdjacentElementOffset = 1;
+
     internal const long PointerBytes = 8;
     internal const long ArrayDescriptorBytes = 32;
     internal const long StringDescriptorBytes = 32;
@@ -27,7 +31,7 @@ internal static class PartitionQueryRetention
         bytes = AddString(bytes, reference.Collection);
         bytes = AddString(bytes, reference.Id);
         bytes = AddString(bytes, row.Json);
-        var redacted = row.RedactedFields?.Length ?? 0;
+        var redacted = row.RedactedFields?.Length ?? EmptyElementCount;
         bytes = checked(bytes + StringDescriptorBytes + (long)PointerBytes * redacted);
         if (row.RedactedFields is { } fields)
         {
@@ -55,7 +59,7 @@ internal static class PartitionQueryRetention
         bytes = AddString(bytes, reference.Collection);
         bytes = AddString(bytes, reference.Id);
         bytes = AddString(bytes, row.Json);
-        var redacted = row.RedactedFields?.Length ?? 0;
+        var redacted = row.RedactedFields?.Length ?? EmptyElementCount;
         bytes = checked(bytes + StringDescriptorBytes + (long)PointerBytes * redacted);
         if (row.RedactedFields is { } fields)
         {
@@ -75,7 +79,7 @@ internal static class PartitionQueryRetention
 
     internal static long RootMergeReserve(PartitionQueryPlanV1 plan)
     {
-        long candidates = 0;
+        long candidates = InitialSequence;
         foreach (var leaf in plan.Leaves)
         {
             candidates = checked(candidates + leaf.MaxCandidates);
@@ -90,7 +94,7 @@ internal static class PartitionQueryRetention
             + CandidateArrayBytes(resultLimit));
 
     internal static long LeafHeapReserve(int limit)
-        => checked(ArrayDescriptorBytes + (long)PointerBytes * (limit + 1));
+        => checked(ArrayDescriptorBytes + (long)PointerBytes * (limit + AdjacentElementOffset));
 
     internal static long CandidateArrayBytes(int count)
         => checked(ArrayDescriptorBytes + (long)PointerBytes * count);

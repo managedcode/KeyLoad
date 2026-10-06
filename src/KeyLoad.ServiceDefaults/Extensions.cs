@@ -1,11 +1,12 @@
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -49,7 +50,8 @@ public static class KeyLoadServiceDefaultsExtensions
                 .AddHttpClientInstrumentation()
                 .AddSource(OrleansTelemetryPolicy.ApplicationActivitySourceName,
                     OrleansTelemetryPolicy.LifecycleActivitySourceName)
-                .AddProcessor<OrleansTelemetryPrivacyProcessor>());
+                .AddProcessor(services => new OrleansTelemetryPrivacyProcessor(
+                    services.GetRequiredService<IOptions<OrleansTelemetryOptions>>())));
         builder.Logging.AddOpenTelemetry(options => { options.IncludeFormattedMessage = true; options.IncludeScopes = true; });
         if (!string.IsNullOrEmpty(builder.Configuration[OtlpExporterEndpointConfigurationKey]))
         {

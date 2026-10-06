@@ -90,6 +90,8 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
 
     private async Task<IMcpGatewayInstance> BuildInstanceAsync(CancellationToken cancellationToken)
     {
+        const int EmptyGraphNodeCount = 0;
+
         var entries = McpGatewayCatalogValidation.CreateEntries(McpOperationCatalog.Entries);
         cancellationToken.ThrowIfCancellationRequested();
         var instance = _factory.Create(CreateOptions(entries));
@@ -97,7 +99,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         {
             var result = await instance.Gateway.BuildIndexAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            if (!result.IsGraphSearchEnabled || result.ToolCount != entries.Length || result.GraphNodeCount == 0)
+            if (!result.IsGraphSearchEnabled || result.ToolCount != entries.Length || result.GraphNodeCount == EmptyGraphNodeCount)
             {
                 throw new InvalidOperationException(IndexFailure);
             }

@@ -31,17 +31,18 @@ public static class RelationalRowValidation
     /// <param name="definition">Persisted authoritative resource schema.</param>
     /// <param name="id">Canonical entity identifier required to equal the primary-key value.</param>
     /// <param name="json">Original final-image JSON, preserving numeric precision.</param>
-    /// <param name="limits">Configured original JSON byte and nesting bounds; null selects database defaults.</param>
-    public static void ValidateRow(ResourceDefinition definition, string id, string json, DatabaseLimits? limits = null)
+    /// <param name="limits">Configured original JSON byte and nesting bounds; the snapshot belongs to the calling database owner.</param>
+    public static void ValidateRow(ResourceDefinition definition, string id, string json, DatabaseLimits limits)
     {
         ArgumentNullException.ThrowIfNull(definition);
         if (definition.RelationalSchema is null)
         {
             return;
         }
+        ArgumentNullException.ThrowIfNull(limits);
         JsonData.Identifier(id);
         var columns = RelationalSchemaRules.Columns(definition);
-        using var document = Parse(json, limits ?? new());
+        using var document = Parse(json, limits);
         var seen = ValidateProperties(document.RootElement, columns);
         foreach (var column in columns.Values)
         {
@@ -59,9 +60,12 @@ public static class RelationalRowValidation
     /// <summary>Checks raw patch scalar values before ordinary patch canonicalization can round numbers.</summary>
     /// <param name="definition">Persisted authoritative resource schema.</param>
     /// <param name="patches">Bounded field changes; final required-column and primary-key checks follow separately.</param>
-    /// <param name="limits">Configured original scalar JSON byte and nesting bounds; null selects database defaults.</param>
-    public static void ValidatePatchValues(ResourceDefinition definition, ImmutableArray<FieldPatch> patches, DatabaseLimits? limits = null)
+    /// <param name="limits">Configured original scalar JSON byte and nesting bounds; the snapshot belongs to the calling database owner.</param>
+    public static void ValidatePatchValues(ResourceDefinition definition, ImmutableArray<FieldPatch> patches, DatabaseLimits limits)
     {
+        const int ColumnPathSegments = 1;
+        const int ColumnPathIndex = 0;
+
         ArgumentNullException.ThrowIfNull(definition);
         if (definition.RelationalSchema is null)
         {
@@ -72,7 +76,8 @@ public static class RelationalRowValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidPatch);
         }
         var columns = RelationalSchemaRules.Columns(definition);
-        var selectedLimits = limits ?? new();
+        ArgumentNullException.ThrowIfNull(limits);
+        var selectedLimits = limits;
         foreach (var patch in patches)
         {
             if (patch is null)
@@ -80,7 +85,7 @@ public static class RelationalRowValidation
                 throw Errors.Fail(ErrorCode.Validation, InvalidPatch);
             }
             var path = JsonData.PathSegments(patch.Path);
-            if (path.Length != 1 || !columns.TryGetValue(path[0], out var column) || !Enum.IsDefined(patch.Kind))
+            if (path.Length != ColumnPathSegments || !columns.TryGetValue(path[ColumnPathIndex], out var column) || !Enum.IsDefined(patch.Kind))
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidPatch);
             }

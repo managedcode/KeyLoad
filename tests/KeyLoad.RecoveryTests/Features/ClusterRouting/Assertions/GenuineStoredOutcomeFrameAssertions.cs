@@ -33,7 +33,7 @@ internal static class GenuineStoredOutcomeFrameAssertions
     internal static async Task AssertCurrentReadAsync(ZoneTreeStore store, StoredOutcome prior, byte[] frame,
         string principalId, Guid commandId)
     {
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         database.Bootstrap(new(principalId, "system", [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential("outcome-probe-key", principalId,
             "epoch-outcome-probe-owned-admin-key-2026"));

@@ -1,3 +1,4 @@
+using System.Globalization;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
@@ -6,6 +7,23 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 
 internal static class TestSuiteResources
 {
+    private const string GithubRevisionEnvironment = "GITHUB_SHA";
+    private const string GithubActionsEnvironment = "GITHUB_ACTIONS";
+    private const string BenchmarkTargetEnvironment = "Benchmarks__Target";
+    private const string BenchmarkScaleEnvironment = "Benchmarks__ScaleProfile";
+    private const string BenchmarkVectorEnvironment = "Benchmarks__VectorProfile";
+    private const string IntrinsicsEnvironment = "DOTNET_EnableHWIntrinsic";
+    private const string NoBuildArgument = "--no-build";
+    private const string NoRestoreArgument = "--no-restore";
+    private const string ConfigurationArgument = "--configuration";
+    private const string ReleaseConfiguration = "Release";
+    private const string ResultsDirectoryArgument = "--results-directory";
+    private const string CoverageSettingsArgument = "--coverage-settings";
+    private const string CoverageFormatArgument = "--coverage-output-format";
+    private const string CoberturaFormat = "cobertura";
+    private const string CoverageOutputArgument = "--coverage-output";
+    private const string TestFilterArgument = "--treenode-filter";
+
     internal static void Add(IDistributedApplicationBuilder builder, TestSuiteSettings settings)
     {
         const string Path2Text = "../..";
@@ -29,7 +47,8 @@ internal static class TestSuiteResources
         var runner = builder.AddExecutable(settings.ResourceName, CommandText, root, arguments)
             .WithEnvironment(TestSuiteSettings.SuiteEnvironment, EmptyText)
             .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, EmptyText)
-            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, EmptyText);
+            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, EmptyText)
+            .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, EmptyText);
         if (settings.LocalRf3ImageEnabled)
         {
             var execution = LocalRf3ImageExecution.Create(root);
@@ -41,8 +60,8 @@ internal static class TestSuiteResources
                 .WithEnvironment(NameText, ValueText)
                 .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
                 .WithEnvironment(AddNameText, string.Empty)
-                .WithEnvironment("GITHUB_SHA", string.Empty)
-                .WithEnvironment("GITHUB_ACTIONS", string.Empty);
+                .WithEnvironment(GithubRevisionEnvironment, string.Empty)
+                .WithEnvironment(GithubActionsEnvironment, string.Empty);
         }
         if (settings.Suite == PriorProbeResources.RecoverySuite)
         {
@@ -55,19 +74,24 @@ internal static class TestSuiteResources
         }
         if (settings.Suite == TestSuiteProtocol.ComparisonSuite && settings.ComparisonTarget is not null)
         {
-            runner.WithEnvironment("Benchmarks__Target", settings.ComparisonTarget);
+            runner.WithEnvironment(BenchmarkTargetEnvironment, settings.ComparisonTarget);
         }
         if (settings.ScaleProfile is not null)
         {
-            runner.WithEnvironment("Benchmarks__ScaleProfile", settings.ScaleProfile.Id);
+            runner.WithEnvironment(BenchmarkScaleEnvironment, settings.ScaleProfile.Id);
         }
         if (settings.VectorProfile is not null)
         {
-            runner.WithEnvironment("Benchmarks__VectorProfile", settings.VectorProfile.Id);
+            runner.WithEnvironment(BenchmarkVectorEnvironment, settings.VectorProfile.Id);
+        }
+        if (settings.OpenLoopRate is { } rate)
+        {
+            runner.WithEnvironment(TestSuiteSelectionValidator.OpenLoopNativeRateEnvironment,
+                rate.ToString(CultureInfo.InvariantCulture));
         }
         if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)
         {
-            runner.WithEnvironment("DOTNET_EnableHWIntrinsic", AddValueText);
+            runner.WithEnvironment(IntrinsicsEnvironment, AddValueText);
         }
     }
 
@@ -82,8 +106,8 @@ internal static class TestSuiteResources
         var arguments = new List<string>
         {
             ResultText, BuildArgumentsResultText, Path.Combine(root, Path2Text, settings.Project),
-            "--no-build", "--no-restore", "--configuration", "Release",
-            "--results-directory", resultsDirectory
+            NoBuildArgument, NoRestoreArgument, ConfigurationArgument, ReleaseConfiguration,
+            ResultsDirectoryArgument, resultsDirectory
         };
         if (settings.ReportTrx)
         {
@@ -92,16 +116,16 @@ internal static class TestSuiteResources
         if (settings.CoverageSettings is not null && settings.CoverageOutput is not null)
         {
             arguments.Add(BuildArgumentsItemText);
-            arguments.Add("--coverage-settings");
+            arguments.Add(CoverageSettingsArgument);
             arguments.Add(ResolvePath(root, settings.CoverageSettings));
-            arguments.Add("--coverage-output-format");
-            arguments.Add("cobertura");
-            arguments.Add("--coverage-output");
+            arguments.Add(CoverageFormatArgument);
+            arguments.Add(CoberturaFormat);
+            arguments.Add(CoverageOutputArgument);
             arguments.Add(ResolvePath(root, settings.CoverageOutput));
         }
         if (!string.IsNullOrWhiteSpace(settings.Filter))
         {
-            arguments.Add("--treenode-filter");
+            arguments.Add(TestFilterArgument);
             arguments.Add(settings.Filter);
         }
         return [.. arguments];

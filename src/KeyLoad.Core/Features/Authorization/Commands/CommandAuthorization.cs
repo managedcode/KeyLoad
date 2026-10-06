@@ -96,13 +96,15 @@ public sealed partial class DatabaseEngine
     }
     private AtomicPartitionPlacementResolution AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
     {
+        const int EmptyMutationsLength = 0;
+
         var placement = ReadPlacementWitness(view, request.Partition);
         if (request.OwnershipEpoch != placement.PlacementEpoch)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
         }
 
-        if (!allowEmpty && request.Mutations.Length == 0 || request.Mutations.Length > Limits.MaxBatchMutations)
+        if (!allowEmpty && request.Mutations.Length == EmptyMutationsLength || request.Mutations.Length > Limits.MaxBatchMutations)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, MutationCountBudgetMessage);
         }

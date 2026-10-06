@@ -1,10 +1,12 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, Action<string>? progress)
+internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
 {
+    private const int RequiredLatencySampleCount = 4_096;
     private static readonly Scenario[] Scenarios = [Scenario.PointRead, Scenario.DocumentWrite, Scenario.DocumentUpdate, Scenario.DocumentDelete];
 
     internal async Task<ComparisonReport> RunAsync(IComparisonTarget[] targets, string? sourceRevision,
@@ -61,7 +63,7 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, Ac
                     continue;
                 }
                 cases.Add(await ScaledComparisonCaseRunner.RunAsync(target, corpus, scenario, failure,
-                    progress, cancellationToken).ConfigureAwait(false));
+                    progress, cancellationToken, executionOptions).ConfigureAwait(false));
             }
         }
         return cases;
@@ -70,7 +72,7 @@ internal sealed class ScaledComparisonRunner(ScaledComparisonProfile profile, Ac
     private static ComparisonCase Cancelled(IComparisonTarget target, Scenario scenario, ScaledComparisonProfile profile)
     {
         var accounting = new ScaledOperationAccounting(profile.Operations, 0, 0, 0, 0, 0,
-            profile.Operations, "evenly-spaced-operation-indices.v1", 4_096, 0, 4_096);
+            profile.Operations, "evenly-spaced-operation-indices.v1", RequiredLatencySampleCount, 0, RequiredLatencySampleCount);
         return new(target.Profile.Name, scenario, 0, ComparisonStatuses.Failed, "Cancelled before this case started.", null, [])
         {
             Scaled = accounting

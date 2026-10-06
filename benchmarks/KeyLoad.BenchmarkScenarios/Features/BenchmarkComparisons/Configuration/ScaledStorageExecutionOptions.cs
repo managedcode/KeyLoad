@@ -16,6 +16,8 @@ public sealed class ScaledStorageExecutionOptions
     private const long DefaultQualificationCapacityBytes = 15_032_385_536;
     private const int DefaultMutableSegmentRecords = 1000;
     private const int MaximumPreparationHours = 24;
+    private const int MinimumPositiveBudget = 0;
+    private static readonly TimeSpan MaximumPreparationTimeout = TimeSpan.FromHours(MaximumPreparationHours);
 
     /// <summary>The full preparation deadline including capacity admission and verification.</summary>
     public TimeSpan PreparationTimeout { get; set; } = TimeSpan.FromMinutes(DefaultPreparationMinutes);
@@ -31,11 +33,11 @@ public sealed class ScaledStorageExecutionOptions
     /// <summary>Checks consistent, positive memory admission and a native timer-safe deadline.</summary>
     /// <returns>Whether native fixture ownership can begin.</returns>
     public bool IsValid() => PreparationTimeout > TimeSpan.Zero
-        && PreparationTimeout <= TimeSpan.FromHours(MaximumPreparationHours)
-        && MaximumProcessBytes > 0 && RequiredHeadroomBytes > 0
+        && PreparationTimeout <= MaximumPreparationTimeout
+        && MaximumProcessBytes > MinimumPositiveBudget && RequiredHeadroomBytes > MinimumPositiveBudget
         && MaximumProcessBytes <= long.MaxValue - RequiredHeadroomBytes
         && MinimumQualificationCapacityBytes >= MaximumProcessBytes + RequiredHeadroomBytes
-        && MinimumMutableSegmentRecords > 0;
+        && MinimumMutableSegmentRecords > MinimumPositiveBudget;
 
     /// <summary>Rejects invalid standalone composition before storage allocation.</summary>
     public void Validate()

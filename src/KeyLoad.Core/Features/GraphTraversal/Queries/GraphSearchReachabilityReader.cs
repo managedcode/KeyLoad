@@ -57,6 +57,8 @@ internal sealed class GraphSearchReachabilityReader(
 
     private void AddSeeds()
     {
+        const int SeedDepth = 0;
+
         foreach (var seed in walk.Seeds)
         {
             budget.Check();
@@ -65,15 +67,17 @@ internal sealed class GraphSearchReachabilityReader(
                 continue;
             }
             visibility.RequireStart(seed);
-            AddVertex(seed, 0);
+            AddVertex(seed, SeedDepth);
         }
     }
 
     private void VisitAdjacency(GraphSearchReachability current)
     {
+        const int OverflowProbeRows = 1;
+
         var prefix = KeySpace.Partition(AdjacencySpace, partition, walk.Graph, OutDirection,
             current.Reference.Collection, current.Reference.Id);
-        var remaining = Math.Min(walk.MaxEdges, walk.MaxEdges - examinedEdges + 1);
+        var remaining = Math.Min(walk.MaxEdges, walk.MaxEdges - examinedEdges + OverflowProbeRows);
         var scan = budget.VisitRange(view, prefix, remaining, (_, value) => VisitEdge(value, current));
         if (scan.HasMore)
         {
@@ -83,6 +87,8 @@ internal sealed class GraphSearchReachabilityReader(
 
     private bool VisitEdge(ReadOnlySpan<byte> value, GraphSearchReachability current)
     {
+        const int HopIncrement = 1;
+
         budget.Check();
         if (++examinedEdges > walk.MaxEdges)
         {
@@ -101,7 +107,7 @@ internal sealed class GraphSearchReachabilityReader(
         }
         if (visibility.CanVisit(edge.To))
         {
-            AddVertex(edge.To, checked(current.ShortestHops + 1));
+            AddVertex(edge.To, checked(current.ShortestHops + HopIncrement));
         }
         return true;
     }
@@ -129,8 +135,10 @@ internal sealed class GraphSearchReachabilityReader(
 
     private GraphSearchReachability[] ToOrderedArray()
     {
+        const int FirstResultIndex = 0;
+
         var entries = new GraphSearchReachability[shortestHops.Count];
-        var index = 0;
+        var index = FirstResultIndex;
         foreach (var (reference, depth) in shortestHops)
         {
             budget.Check();

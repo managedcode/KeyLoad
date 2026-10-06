@@ -34,6 +34,8 @@ internal sealed class SampleChunkEncodingPlan
     internal static SampleChunkEncodingPlan Create(ReadOnlySpan<SampleRecord> records,
         ReadExecutionBudget budget)
     {
+        const int IndexInitialValue = 0;
+
         if (records.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Validation, Empty);
@@ -44,7 +46,7 @@ internal sealed class SampleChunkEncodingPlan
         }
 
         var builder = new SampleChunkEncodingPlanBuilder(records.Length);
-        for (var index = 0; index < records.Length; index++)
+        for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
             builder.Add(records[index], index, budget);

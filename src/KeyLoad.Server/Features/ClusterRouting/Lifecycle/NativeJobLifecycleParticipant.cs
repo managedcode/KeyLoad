@@ -16,24 +16,27 @@ internal sealed class NativeJobLifecycleParticipant(ILifecycleParticipant<ISiloL
 internal sealed class NativeJobLifecycleForwarder(ISiloLifecycle lifecycle, NativeRequestWorkOwner requests)
     : ISiloLifecycle
 {
+    private const int SingleSubscription = 1;
+    private const string ExactObserverRequired = "The native job lifecycle must have exactly one Active observer.";
+    private const string MissingObserver = "The native job lifecycle did not register its Active observer.";
     private int subscriptions;
     public int HighestCompletedStage => lifecycle.HighestCompletedStage;
     public int LowestStoppedStage => lifecycle.LowestStoppedStage;
 
     public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
     {
-        if (stage != ServiceLifecycleStage.Active || ++subscriptions != 1)
+        if (stage != ServiceLifecycleStage.Active || ++subscriptions != SingleSubscription)
         {
-            throw new InvalidOperationException("The native job lifecycle must have exactly one Active observer.");
+            throw new InvalidOperationException(ExactObserverRequired);
         }
         return lifecycle.Subscribe(observerName, stage, new NativeJobShutdownObserver(observer, requests));
     }
 
     internal void RequireSingleSubscription()
     {
-        if (subscriptions != 1)
+        if (subscriptions != SingleSubscription)
         {
-            throw new InvalidOperationException("The native job lifecycle did not register its Active observer.");
+            throw new InvalidOperationException(MissingObserver);
         }
     }
 }

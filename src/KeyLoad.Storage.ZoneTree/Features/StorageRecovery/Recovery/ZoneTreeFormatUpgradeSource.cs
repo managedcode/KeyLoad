@@ -9,9 +9,11 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
     private const int NoFileAttributes = 0;
 
     private readonly FileStream ownership;
+    private readonly int maximumIdentityFileBytes;
+    private readonly int fileBufferBytes;
 
     private ZoneTreeFormatUpgradeSource(string directory, StoreIdentity identity, string identityDigest,
-        string journalDigest, long position, FileStream ownership)
+        string journalDigest, long position, FileStream ownership, int maximumIdentityFileBytes, int fileBufferBytes)
     {
         Directory = directory;
         Identity = identity;
@@ -19,6 +21,8 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         JournalDigest = journalDigest;
         Position = position;
         this.ownership = ownership;
+        this.maximumIdentityFileBytes = maximumIdentityFileBytes;
+        this.fileBufferBytes = fileBufferBytes;
     }
 
     internal string Directory { get; }
@@ -36,10 +40,10 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         var journalPath = Path.Combine(Directory, ZoneTreePersistenceFormat.JournalFileName);
         VerifyRegularFile(identityPath);
         VerifyRegularFile(journalPath);
-        var identity = ZoneTreeMetadataFile.Read(identityPath, ZoneTreePersistenceFormat.MaximumIdentityFileBytes,
+        var identity = ZoneTreeMetadataFile.Read(identityPath, maximumIdentityFileBytes,
             ZoneTreePersistenceFormat.IdentityFormatUnsupported);
         using var journal = new FileStream(journalPath, FileMode.Open, FileAccess.Read, FileShare.Read,
-            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
+            fileBufferBytes, FileOptions.SequentialScan);
         if (!string.Equals(Digest(identity.Span), IdentityDigest, StringComparison.Ordinal)
             || !string.Equals(Digest(journal), JournalDigest, StringComparison.Ordinal))
         {
@@ -73,17 +77,17 @@ internal sealed class ZoneTreeFormatUpgradeSource : IDisposable
         var journalPath = Path.Combine(directory, ZoneTreePersistenceFormat.JournalFileName);
         VerifyRegularFile(identityPath);
         VerifyRegularFile(journalPath);
-        var identityBytes = ZoneTreeMetadataFile.Read(identityPath, ZoneTreePersistenceFormat.MaximumIdentityFileBytes,
+        var identityBytes = ZoneTreeMetadataFile.Read(identityPath, options.MaximumIdentityFileBytes,
             ZoneTreePersistenceFormat.IdentityFormatUnsupported);
         var identity = ZoneTreeIdentityFile.ReadStoppedSourceForUpgrade(identityBytes.Span);
         VerifyAuthority(identity, options);
         using var journal = new FileStream(journalPath, FileMode.Open, FileAccess.Read, FileShare.Read,
-            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
+            options.FileBufferBytes, FileOptions.SequentialScan);
         var position = ZoneTreeFormatUpgradeJournal.ValidateSource(journal, options, identity.Incarnation,
             identity.FormatVersion);
         journal.Position = FileStartPosition;
         var journalDigest = Digest(journal);
-        return new(directory, identity, Digest(identityBytes.Span), journalDigest, position, ownership);
+        return new(directory, identity, Digest(identityBytes.Span), journalDigest, position, ownership, options.MaximumIdentityFileBytes, options.FileBufferBytes);
     }
 
     private static void VerifyAuthority(StoreIdentity identity, ZoneTreeStoreOptions options)

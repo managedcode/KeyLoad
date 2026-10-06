@@ -18,9 +18,12 @@ internal static class McpArgumentDecoder
     internal static McpDecodedOperation NoBody(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
         int maximumPayloadBytes)
     {
-        if (arguments is { Count: > 0 })
+        const int ArgumentsEmptyCount = 0;
+        const int ValueEmptyCount = 0;
+
+        if (arguments is { Count: > ArgumentsEmptyCount })
         { throw InvalidArguments(); }
-        return new McpDecodedOperation(kind, null, Guid.Empty, InternalNativePayload.Serialize(0, maximumPayloadBytes));
+        return new McpDecodedOperation(kind, null, Guid.Empty, InternalNativePayload.Serialize(ValueEmptyCount, maximumPayloadBytes));
     }
 
     internal static McpDecodedOperation Command<TRequest>(IDictionary<string, JsonElement>? arguments,

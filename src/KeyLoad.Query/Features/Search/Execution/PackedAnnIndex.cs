@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PackedAnnIndex
@@ -12,7 +14,7 @@ internal sealed class PackedAnnIndex
     internal long BuildScratchBytesUpperBound => state.BuildScratchBytesUpperBound;
 
     internal static PackedAnnIndex Build(VectorSpace space, IReadOnlyList<VectorRecord> records,
-        PackedAnnOptions options, AnnWorkBudget budget)
+        IOptions<PackedAnnOptions> options, AnnWorkBudget budget)
         => new(PackedAnnBuilder.Build(space, records, options, budget));
 
     internal AnnSearchResult Search(ReadOnlyMemory<float> query, int limit, ReadOnlyMemory<ulong>? eligibility,
@@ -24,7 +26,7 @@ internal sealed class PackedAnnState
 {
     internal PackedAnnState(VectorSpace space, string[] ids, long[] revisions, byte[] levels,
         PackedAnnGraph graph, PackedAnnVectors vectors, int entryPoint, int maximumLevel,
-        PackedAnnOptions options, long retainedBytesUpperBound, long buildScratchBytesUpperBound)
+        IOptions<PackedAnnOptions> options, long retainedBytesUpperBound, long buildScratchBytesUpperBound)
     {
         Space = space;
         Ids = ids;
@@ -34,7 +36,8 @@ internal sealed class PackedAnnState
         Vectors = vectors;
         EntryPoint = entryPoint;
         MaximumLevel = maximumLevel;
-        Options = options;
+        policy = options.Value;
+        policy.Validate();
         RetainedBytesUpperBound = retainedBytesUpperBound;
         BuildScratchBytesUpperBound = buildScratchBytesUpperBound;
     }
@@ -47,7 +50,8 @@ internal sealed class PackedAnnState
     internal PackedAnnVectors Vectors { get; }
     internal int EntryPoint { get; }
     internal int MaximumLevel { get; }
-    internal PackedAnnOptions Options { get; }
+    private readonly PackedAnnOptions policy;
+    internal PackedAnnOptions Options => policy;
     internal int Count => Ids.Length;
     internal long RetainedBytesUpperBound { get; }
     internal long BuildScratchBytesUpperBound { get; }

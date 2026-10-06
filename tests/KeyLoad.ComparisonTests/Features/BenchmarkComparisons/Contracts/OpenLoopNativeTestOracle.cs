@@ -1,0 +1,63 @@
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
+
+/// <summary>Independent immutable expectations for native open-loop artifacts and their test oracles.</summary>
+internal static class OpenLoopNativeTestOracle
+{
+    internal const int SchemaVersion = 1;
+    internal const int MaximumArtifactBytes = 4_194_304;
+    internal const int PlannedOperations = 100_000;
+    internal const int SampleCapacity = 4_096;
+    internal const int PayloadBytes = 1_024;
+    internal const int KeyLoadNodeCount = 3;
+    internal const int QueueCapacity = 64;
+    internal const int ConcurrentSessions = 16;
+    internal const int MaximumNodes = 3;
+    internal const int OperationDeadlineMilliseconds = 30_000;
+    internal const int DrainMilliseconds = 30_000;
+    internal const int ControlPollMilliseconds = 100;
+    internal const int SpinWindowMicroseconds = 200;
+    internal const int MinimumMilestoneCompleted = 1_024;
+    internal const long NanosecondsPerSecond = 1_000_000_000;
+    internal const int MinimumPositiveIdentity = 1;
+    internal const int MinimumArtifactBytes = 1;
+    internal const int FinalSampleOffset = 1;
+    internal const int FirstIndex = 0;
+    internal const int NoFileAttributes = 0;
+    internal const int SuccessfulRunnerExitCode = 0;
+    internal const int SecondIndex = 1;
+    internal const int ThirdIndex = 2;
+    internal const int NoMissingSamples = 0;
+    internal const int NoSuccessfulLatencySamples = 0;
+    internal const int NoObservedSamples = 0;
+    internal const double NoLatencyMilliseconds = 0d;
+    internal const int NoElapsedSeconds = 0;
+    internal const int NoSuccessfulOperationsPerSecond = 0;
+    internal const long NoHealthyReadRevision = 0;
+    internal const int NoObservedBytes = 0;
+    internal const int NoMissingCategories = 0;
+    internal const int NoOfferedCalls = 0;
+    internal const int NoFailures = 0;
+    internal const int NoRejectedHarnessCalls = 0;
+    internal const int NoTimeouts = 0;
+    internal const int NoUnfinishedCalls = 0;
+    internal const int NoWritableMounts = 0;
+    internal const int MaximumMissingCategories = 4;
+    internal const string KeyLoadTarget = "KeyLoad";
+    internal const string GuidFormat = "N";
+    internal const string EvidenceMissing = "Open-loop evidence is missing.";
+    internal const string WorkerIdentityMissing = "Open-loop worker identity is missing.";
+    internal const string RunIdentityMissing = "Open-loop run identity is missing.";
+    internal const string RunIdentityInvalid = "Open-loop run identity is invalid.";
+    internal const string ProofMissing = "Cancellation proof is missing.";
+    internal const string ProofIdentityMissing = "Cancellation proof identity is missing.";
+    internal const string ProofFieldsMissing = "Cancellation proof fields are missing.";
+    internal const string ProofReadbackInvalid = "Cancellation proof readback oracle is invalid.";
+    internal const string ProofIdentityInvalid = "Cancellation proof worker or milestone identity is invalid.";
+    internal const string ProofPolicyInvalid = "Cancellation proof execution policy is invalid.";
+    internal const string ExecutionPolicyMissing = "Open-loop execution policy is missing.";
+    internal const string ProofAccountingInvalid = "Cancellation proof accounting or settlement is invalid.";
+    internal const string SidecarInvalid = "Open-loop server resource evidence is invalid.";
+    internal const string ObservationsInvalid = "Native server observations do not match their bounded policy.";
+    internal const string CollectorUnavailable = "Scale server evidence collector is not registered.";
+    internal const string MarkerUnavailable = "The owned cancellation marker is missing.";
+}

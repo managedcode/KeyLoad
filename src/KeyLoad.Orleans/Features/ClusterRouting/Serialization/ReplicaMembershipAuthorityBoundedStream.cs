@@ -16,13 +16,18 @@ internal sealed class ReplicaMembershipAuthorityBoundedStream(int maximumBytes) 
 
     public override void WriteByte(byte value)
     {
-        Check(1);
+        const int CountSingleItemCount = 1;
+
+        Check(CountSingleItemCount);
         base.WriteByte(value);
     }
 
     private void Check(int count)
     {
-        if (count < 0 || Length > maximumBytes - count)
-        { throw new InvalidOperationException("The membership authority payload is too large."); }
+        const int CountValidationBoundary = 0;
+        const string CheckFailureMessage = "The membership authority payload is too large.";
+
+        if (count < CountValidationBoundary || Length > maximumBytes - count)
+        { throw new InvalidOperationException(CheckFailureMessage); }
     }
 }

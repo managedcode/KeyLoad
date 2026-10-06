@@ -6,6 +6,8 @@ namespace KeyLoad.Orleans;
 
 internal static class GrainReplyFactory
 {
+    private const int RejectedDetailEmptyCount = 0;
+
     private const int MaximumDetailCharacters = 4_096;
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
@@ -94,6 +96,6 @@ internal static class GrainReplyFactory
     private static GrainOperationReply Rejected(ErrorCode code, string? detail) => new()
     {
         Error = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost,
-        SafeDetail = detail is { Length: > 0 and <= MaximumDetailCharacters } ? detail : Unavailable
+        SafeDetail = detail is { Length: > RejectedDetailEmptyCount and <= MaximumDetailCharacters } ? detail : Unavailable
     };
 }

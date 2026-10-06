@@ -12,9 +12,10 @@ internal static class RuntimeJournalStorePreparation
     private const string BackupMismatch = "The verified reader-upgrade backup does not match the current physical store cut.";
     private const string CanonicalBackup = "canonical";
     private const string ReplicaBackup = "replica";
+    private const string GuidFormat = "N";
+    private const long FreshStorePosition = 0;
 
-    internal static void Prepare(PartitionStores stores, IOptions<RuntimeJournalOptions> options,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+    internal static void Prepare(PartitionStores stores, IOptions<RuntimeJournalOptions> options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
         var settings = options.Value;
         var backup = settings.ReaderUpgradeBackupDirectory;
@@ -24,7 +25,7 @@ internal static class RuntimeJournalStorePreparation
             {
                 throw Errors.Fail(ErrorCode.FormatUnsupported, BackupRequired);
             }
-            var directory = Path.Combine(backup, stores.Canonical.Identity.NodeId.ToString("N"));
+            var directory = Path.Combine(backup, stores.Canonical.Identity.NodeId.ToString(GuidFormat));
             VerifyBackup(stores.Canonical, Path.Combine(directory, CanonicalBackup), executionOptions);
             VerifyBackup(stores.Replica, Path.Combine(directory, ReplicaBackup), executionOptions);
         }
@@ -43,10 +44,9 @@ internal static class RuntimeJournalStorePreparation
     }
 
     private static bool NeedsBackup(ZoneTreeStore store)
-        => store.Identity.MinimumReaderContract == StoreReaderContract.Legacy && store.Position > 0;
+        => store.Identity.MinimumReaderContract == StoreReaderContract.Legacy && store.Position > FreshStorePosition;
 
-    private static void VerifyBackup(ZoneTreeStore store, string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+    private static void VerifyBackup(ZoneTreeStore store, string directory, IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
         if (!Directory.Exists(directory))
         {

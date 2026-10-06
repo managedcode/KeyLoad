@@ -4,6 +4,25 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class GeneralRuntimeNumericTests
 {
     [Test]
+    public async Task AMarkedOptionsConstructorCannotHideExecutableNumericArgumentsAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy
+            {
+                internal int Capacity { get; }
+                internal Policy()
+                {
+                    Capacity = 64;
+                    System.Console.WriteLine([|1|]);
+                }
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertDurationAsync(source);
+    }
+
+    [Test]
     [Arguments("return [|0|] + [|1|] - [|1|];")]
     [Arguments("return -[|2147483648|];")]
     [Arguments("return new byte[[|32|]];")]

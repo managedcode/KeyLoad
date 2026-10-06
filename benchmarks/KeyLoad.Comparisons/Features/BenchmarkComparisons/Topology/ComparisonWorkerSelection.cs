@@ -1,6 +1,5 @@
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
@@ -48,6 +47,16 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
         }
     }
 
+    /// <summary>Creates validated native execution options from the authenticated immutable manifest.</summary>
+    /// <returns>The snapshot supplied to one complete comparison operation.</returns>
+    [ConfigurationBinding]
+    public IOptions<ComparisonOptions> CreateExecutionOptions()
+    {
+        var snapshot = Options;
+        snapshot.Validate();
+        return Microsoft.Extensions.Options.Options.Create(snapshot);
+    }
+
     /// <summary>Validates the closed engine/node/scenario/profile inventory before allocating resources.</summary>
     public void Validate()
     {
@@ -72,7 +81,11 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     public static ComparisonWorkerSelection Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        var selection = ReadSelection(configuration).Value;
+        return ParseSelection(ReadSelection(configuration).Value);
+    }
+
+    private static ComparisonWorkerSelection ParseSelection(ComparisonWorkerSelectionOptions selection)
+    {
         var text = selection.Scenario;
         if (!int.TryParse(selection.NodeCount, NumberStyles.None, CultureInfo.InvariantCulture, out var nodes)
             || !Enum.TryParse<Scenario>(text, out var scenario) || !Enum.IsDefined(scenario) || text != scenario.ToString())
@@ -105,12 +118,13 @@ public sealed record ComparisonWorkerSelection(string Target, int NodeCount, Sce
     [ConfigurationBinding]
     private static IOptions<ComparisonWorkerSelectionOptions> ReadSelection(IConfiguration configuration)
     {
-        var services = new ServiceCollection();
-        services.AddOptions<ComparisonWorkerSelectionOptions>()
-            .Bind(configuration.GetSection(ComparisonWorkerSelectionOptions.SectionName));
-        using var provider = services.BuildServiceProvider();
-        return Microsoft.Extensions.Options.Options.Create(
-            provider.GetRequiredService<IOptions<ComparisonWorkerSelectionOptions>>().Value);
+        var options = new OptionsManager<ComparisonWorkerSelectionOptions>(new OptionsFactory<ComparisonWorkerSelectionOptions>(
+            [new ConfigureFromConfigurationOptions<ComparisonWorkerSelectionOptions>(
+                configuration.GetSection(ComparisonWorkerSelectionOptions.SectionName))], [],
+            [new ValidateOptions<ComparisonWorkerSelectionOptions>(Microsoft.Extensions.Options.Options.DefaultName,
+                settings => { _ = ParseSelection(settings); return true; }, InvalidSelection)]));
+        _ = options.Value;
+        return options;
     }
 
     private static ScaledComparisonProfile ParseScaledProfile(string id)

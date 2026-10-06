@@ -19,13 +19,13 @@ internal sealed class GraphSearchBudgetTests
         using var exact = new TestDatabase(new() { MaxQueryBytes = exactBytes });
         GraphSearchTestSupport.Configure(exact);
         GraphSearchTestSupport.AddPath(exact);
-        var accepted = await new SearchEngine(exact.Database).GraphSearchAsync("root", request, Token());
+        var accepted = await new SearchEngine(exact.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token());
 
         using var excess = new TestDatabase(new() { MaxQueryBytes = exactBytes - 1 });
         GraphSearchTestSupport.Configure(excess);
         GraphSearchTestSupport.AddPath(excess);
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(excess.Database).GraphSearchAsync("root", request, Token())))!;
+            new SearchEngine(excess.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token())))!;
 
         await Assert.That(accepted.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
             .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
@@ -39,7 +39,7 @@ internal sealed class GraphSearchBudgetTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var limited = new GraphSearchRequest(1,
             new(database.Partition, GraphSearchTestSupport.Documents),
@@ -65,7 +65,7 @@ internal sealed class GraphSearchBudgetTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents);
         var seed = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var versionFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
@@ -89,7 +89,7 @@ internal sealed class GraphSearchBudgetTests
         var request = new GraphSearchRequest(1, null!, Retriever: new(GraphSearchTestSupport.Walk(root)));
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(database.Database).GraphSearchAsync("root", request, Token())))!;
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token())))!;
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
     }

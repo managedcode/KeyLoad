@@ -6,6 +6,9 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int QueueReadyClaimsVersionOne = 1;
+    private const int QueueReadyClaimsAdjacentElementOffset = 1;
+
     private const string MissingReadyMetadata = "Queue metadata is absent.";
     private const string MissingReadyBody = "Queue body is absent.";
 
@@ -22,7 +25,7 @@ public sealed partial class DatabaseEngine
         ReceiveRequest request, ResourceDefinition resource, DateTimeOffset now, long position)
     {
         var state = new ReadyClaimState();
-        tx.VisitRange(QueueKey(ReadyQueueSpace, request.Lane), QueueScanPageSize,
+        tx.VisitRange(QueueKey(ReadyQueueSpace, request.Lane), messagingExecution.QueueScanPageSize,
             (key, value) => CaptureReadyItem(tx, principal, request, resource, now, key, value, state));
         ApplyReadyInputs(tx, state.TransitionInputs);
         if (state.CountersChanged)
@@ -47,7 +50,7 @@ public sealed partial class DatabaseEngine
         if (metadata.ExpiresAt <= now)
         {
             AddExpiredReadyInput(key, bodyKey, metadataKey, metadata, body.Bytes, state);
-            return state.TransitionInputs.Count < QueueScanPageSize;
+            return state.TransitionInputs.Count < messagingExecution.QueueScanPageSize;
         }
 
         if (state.ReceivedBytes + body.Bytes > request.MaxBytes
@@ -59,19 +62,19 @@ public sealed partial class DatabaseEngine
 
         AddLeaseReadyInput(principal, request, resource, now, key, metadataKey, metadata, body, state);
         return state.Deliveries.Count < request.MaxMessages
-            && state.TransitionInputs.Count < QueueScanPageSize;
+            && state.TransitionInputs.Count < messagingExecution.QueueScanPageSize;
     }
 
     private static void AddExpiredReadyInput(ReadOnlySpan<byte> key, byte[] bodyKey, byte[] metadataKey,
         MessageMetadata metadata, long bodyBytes, ReadyClaimState state)
     {
-        var expired = metadata with { State = MessageState.Expired, StateVersion = metadata.StateVersion + 1 };
+        var expired = metadata with { State = MessageState.Expired, StateVersion = metadata.StateVersion + QueueReadyClaimsVersionOne };
         state.TransitionInputs.Add(new(ReadyKey: key.ToArray(), MetadataKey: metadataKey, Metadata: expired,
             TransitionKey: bodyKey, DeletesBody: true));
         var counters = state.Counters!;
         state.Counters = counters with
         {
-            StoredMessages = counters.StoredMessages - 1,
+            StoredMessages = counters.StoredMessages - QueueReadyClaimsAdjacentElementOffset,
             StoredBytes = counters.StoredBytes - bodyBytes
         };
         state.CountersChanged = true;
@@ -82,12 +85,12 @@ public sealed partial class DatabaseEngine
         MessageMetadata metadata, StoredMessageBody body, ReadyClaimState state)
     {
         var deadline = now.AddSeconds(request.LeaseSeconds);
-        var version = checked(metadata.LeaseVersion + 1);
+        var version = checked(metadata.LeaseVersion + QueueReadyClaimsVersionOne);
         var updated = metadata with
         {
             State = MessageState.Leased,
-            Attempts = metadata.Attempts + 1,
-            StateVersion = metadata.StateVersion + 1,
+            Attempts = metadata.Attempts + QueueReadyClaimsAdjacentElementOffset,
+            StateVersion = metadata.StateVersion + QueueReadyClaimsVersionOne,
             LeaseVersion = version,
             LeaseOwner = principal.Id,
             LeaseUntil = deadline
@@ -98,7 +101,7 @@ public sealed partial class DatabaseEngine
         var counters = state.Counters!;
         state.Counters = counters with
         {
-            InFlightMessages = counters.InFlightMessages + 1,
+            InFlightMessages = counters.InFlightMessages + QueueReadyClaimsAdjacentElementOffset,
             InFlightBytes = counters.InFlightBytes + body.Bytes
         };
         state.CountersChanged = true;

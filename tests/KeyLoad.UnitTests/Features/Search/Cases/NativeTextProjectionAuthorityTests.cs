@@ -24,9 +24,8 @@ internal sealed class NativeTextProjectionAuthorityTests
         SeedProtectedRows(database);
         PersistReader(database, ReaderId, [UseGrant]);
         PersistReader(database, DeniedId, []);
-        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"),
-            database.Database.Limits, database.Store.Identity.NodeId);
-        var search = new SearchEngine(database.Database, projection);
+        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var request = new SearchRequest(database.Partition, Collection, TextPath, "needle", Limit: 10);
         var token = TestContext.Current!.Execution.CancellationToken;
 

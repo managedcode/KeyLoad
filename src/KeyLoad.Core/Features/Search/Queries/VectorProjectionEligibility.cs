@@ -7,6 +7,18 @@ namespace KeyLoad.Core.Features.Search;
 /// <summary>Revalidates the current source authority for a derived vector inside its read cut.</summary>
 internal static class VectorProjectionEligibility
 {
+    private const char HexNineDigit = '9';
+    private const char HexLowerADigit = 'a';
+    private const char HexLowerFDigit = 'f';
+
+    private const int HasInvalidSourceLineageGenerationValidationBoundary = 1;
+    private const int HasInvalidSourceLineageSourceEventRevisionValidationBoundary = 1;
+    private const int HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary = 1;
+    private const int HasInvalidSourceLineageSourceSchemaVersionValidationBoundary = 1;
+    private const int HasInvalidSourceLineageSourcePolicyEpochValidationBoundary = 0;
+    private const int HasInvalidSourceLineageTargetSchemaVersionValidationBoundary = 1;
+    private const int HasInvalidSourceLineageReducerGenerationValidationBoundary = 1;
+
     private const string LineageCorrupt = "The stored vector projection lineage is corrupt.";
     private const string EffectCorrupt = "The stored vector projection effect is corrupt.";
 
@@ -123,10 +135,10 @@ internal static class VectorProjectionEligibility
 
     private static bool HasInvalidSourceLineage(VectorProjectionLineage lineage, PartitionRef partition)
         => lineage.SourceStream?.Partition != partition || lineage.SourceDocument?.Partition != partition
-            || lineage.SourceStream.Generation < 1 || lineage.SourceEventRevision < 1
-            || lineage.SourceDocumentRevision < 1 || lineage.SourceSchemaVersion < 1
-            || lineage.SourcePolicyEpoch < 0 || lineage.TargetSchemaVersion < 1
-            || lineage.ReducerGeneration < 1 || lineage.SourceEventId is null
+            || lineage.SourceStream.Generation < HasInvalidSourceLineageGenerationValidationBoundary || lineage.SourceEventRevision < HasInvalidSourceLineageSourceEventRevisionValidationBoundary
+            || lineage.SourceDocumentRevision < HasInvalidSourceLineageSourceDocumentRevisionValidationBoundary || lineage.SourceSchemaVersion < HasInvalidSourceLineageSourceSchemaVersionValidationBoundary
+            || lineage.SourcePolicyEpoch < HasInvalidSourceLineageSourcePolicyEpochValidationBoundary || lineage.TargetSchemaVersion < HasInvalidSourceLineageTargetSchemaVersionValidationBoundary
+            || lineage.ReducerGeneration < HasInvalidSourceLineageReducerGenerationValidationBoundary || lineage.SourceEventId is null
             || lineage.InputField is null || lineage.ReducerId is null || lineage.ReducerVersion is null
             || lineage.TargetCollection is null || lineage.TargetId is null || lineage.TargetField is null
             || lineage.TargetSpace is null || lineage.SourceClassifications.IsDefault;
@@ -142,6 +154,9 @@ internal static class VectorProjectionEligibility
 
     private static void ValidateIdentifiers(VectorProjectionLineage lineage)
     {
+        const int DimensionFirstCount = 1;
+        const int DimensionValidationBound = 4_096;
+
         try
         {
             JsonData.Identifier(lineage.SourceStream.StreamSet);
@@ -164,7 +179,7 @@ internal static class VectorProjectionEligibility
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
 
-        if (lineage.TargetSpace.Dimension is < 1 or > 4_096 || !Enum.IsDefined(lineage.TargetSpace.Metric))
+        if (lineage.TargetSpace.Dimension is < DimensionFirstCount or > DimensionValidationBound || !Enum.IsDefined(lineage.TargetSpace.Metric))
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
@@ -172,11 +187,13 @@ internal static class VectorProjectionEligibility
 
     private static void ValidateClassifications(ImmutableArray<string> classifications)
     {
+        const int CompareOrdinalValidationBoundary = 0;
+
         string? previous = null;
         foreach (var classification in classifications)
         {
             if (string.IsNullOrEmpty(classification)
-                || previous is not null && string.CompareOrdinal(previous, classification) >= 0)
+                || previous is not null && string.CompareOrdinal(previous, classification) >= CompareOrdinalValidationBoundary)
             {
                 throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
             }
@@ -186,8 +203,10 @@ internal static class VectorProjectionEligibility
 
     private static void ValidateResource(ResourceDefinition resource, string expectedName, PartitionRef partition)
     {
+        const int SchemaVersionValidationBoundary = 1;
+
         if (resource.Name != expectedName || resource.Kind != ResourceKind.Collection
-            || resource.TransactionDomainId != partition.TransactionDomainId || resource.SchemaVersion < 1)
+            || resource.TransactionDomainId != partition.TransactionDomainId || resource.SchemaVersion < SchemaVersionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
@@ -196,8 +215,11 @@ internal static class VectorProjectionEligibility
     private static void ValidateEffect(VectorProjectionEffect? effect, VectorProjectionLineage lineage,
         VectorRecord vector)
     {
-        if (effect is null || effect.Fingerprint is null || effect.Fingerprint.Length != 64
-            || effect.Fingerprint.Any(character => character is not (>= '0' and <= '9' or >= 'a' and <= 'f'))
+        const int Sha256HexDigestCharacters = 64;
+        const char HexZeroDigit = '0';
+
+        if (effect is null || effect.Fingerprint is null || effect.Fingerprint.Length != Sha256HexDigestCharacters
+            || effect.Fingerprint.Any(character => character is not (>= HexZeroDigit and <= HexNineDigit or >= HexLowerADigit and <= HexLowerFDigit))
             || effect.Receipt is null || effect.Receipt.Kind != MutationDiscriminatorNames.ApplyVectorProjection
             || effect.Receipt.Resource != lineage.TargetCollection || effect.Receipt.Id != lineage.TargetId
             || effect.Receipt.Revision != vector.DocumentRevision)

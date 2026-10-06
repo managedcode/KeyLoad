@@ -50,12 +50,12 @@ internal sealed class WalFileFixture : IDisposable
 
     internal Task WriteIdentityAsync(StoreIdentity identity)
     {
-        ZoneTreeIdentityFile.Write(IdentityPath, identity);
+        ZoneTreeIdentityFile.Write(IdentityPath, identity, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         return Task.CompletedTask;
     }
 
     internal Task<StoreIdentity> ReadIdentityAsync()
-        => Task.FromResult(ZoneTreeIdentityFile.Read(IdentityPath));
+        => Task.FromResult(ZoneTreeIdentityFile.Read(IdentityPath, UnitExecutionOptions.StorageExecution().Value.MaximumIdentityFileBytes));
 
     // This independent JSON envelope is exclusively the historical format refusal fixture.
     internal async Task WriteLegacyJsonIdentityAsync(StoreIdentity identity)

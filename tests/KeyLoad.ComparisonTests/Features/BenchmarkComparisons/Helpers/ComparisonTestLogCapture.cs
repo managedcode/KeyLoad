@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
+using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -11,6 +13,7 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private const int MaximumNodeLines = 2_000;
     private const int MaximumResourceBytes = 1_048_576;
     private const int MaximumLineBytes = 16_384;
+    private const string StopFailureMessage = "Comparison log capture stop failed.";
     private const string ResourceLogSuffix = ".log";
     private const string ComparisonResourceName = "comparisons";
     private readonly DistributedApplication application;
@@ -19,14 +22,17 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private readonly ConcurrentDictionary<string, Task> logCaptures = new(StringComparer.Ordinal);
     private readonly Task capture;
     private readonly ComparisonProgressFile? progress;
+    private readonly Action<string>? nativeLineObserver;
     private readonly System.Threading.Lock stopGate = new();
+    private readonly System.Threading.Lock disposeGate = new();
     private Task? stopping;
-    private int disposed;
+    private Task? disposing;
 
     public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null,
-        string? progressPath = null)
+        string? progressPath = null, Action<string>? nativeLineObserver = null)
     {
         this.application = application;
+        this.nativeLineObserver = nativeLineObserver;
         var names = (selectedResources ?? []).Append(ComparisonResourceName).Distinct(StringComparer.Ordinal).ToArray();
         if (names.Any(name => name.Length is < 1 or > 100 || name.Any(character =>
             !char.IsAsciiLetterOrDigit(character) && character != '-')))
@@ -58,33 +64,19 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private async Task StopCoreAsync(Task registered)
     {
         await registered;
-        try
-        {
-            await lifetime.CancelAsync();
-        }
-        finally
-        {
-            try
-            {
-                await JoinCapturesAsync();
-            }
-            finally
-            {
-                await (progress?.StopAsync() ?? Task.CompletedTask);
-            }
-        }
+        var failures = new List<Exception>();
+        await CollectFailureAsync(lifetime.CancelAsync, failures);
+        await CollectFailureAsync(JoinCapturesAsync, failures);
+        await CollectFailureAsync(() => progress?.StopAsync() ?? Task.CompletedTask, failures);
+        ThrowFailures(failures);
     }
 
     private async Task JoinCapturesAsync()
     {
-        try
-        {
-            await capture;
-        }
-        finally
-        {
-            await Task.WhenAll(logCaptures.Values);
-        }
+        var failures = new List<Exception>();
+        await CollectFailureAsync(() => capture, failures);
+        await CollectFailureAsync(() => Task.WhenAll(logCaptures.Values), failures);
+        ThrowFailures(failures);
     }
 
     internal bool HasCapturedLine(string resource, string marker)
@@ -106,20 +98,55 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        if (Interlocked.Exchange(ref disposed, 1) != 0)
+        lock (disposeGate)
         {
-            return;
+            if (disposing is null)
+            {
+                var registered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                disposing = DisposeAndJoinAsync(registered.Task);
+                registered.SetResult();
+            }
+            return new ValueTask(disposing);
         }
-        try
-        {
-            await StopAsync();
-        }
-        finally
-        {
-            lifetime.Dispose();
-        }
+    }
+
+    private async Task DisposeAndJoinAsync(Task registered)
+    {
+        await registered;
+        var failures = new List<Exception>();
+        await CollectFailureAsync(() => StopAsync(), failures);
+        try { lifetime.Dispose(); }
+        catch (Exception failure) { AddDistinct(failures, failure); }
+        ThrowFailures(failures);
+    }
+
+    private static void AddDistinct(List<Exception> failures, Exception failure)
+    {
+        if (!failures.Any(existing => ReferenceEquals(existing, failure))) { failures.Add(failure); }
+    }
+
+    private static async Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
+    {
+        try { await operation(); }
+        catch (Exception failure) { AddDistinct(failures, failure); }
+    }
+
+    private static void ThrowFailures(List<Exception> failures)
+    {
+        var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(error => error is not null);
+        if (fatal is not null) { ThrowFatalFirst(fatal, failures); }
+        if (failures.Count == 1) { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        if (failures.Count > 1) { throw new AggregateException(StopFailureMessage, failures); }
+    }
+
+    private static void ThrowFatalFirst(Exception fatal, List<Exception> failures)
+    {
+        var ordered = new List<Exception> { fatal };
+        foreach (var failure in failures) { AddDistinct(ordered, failure); }
+        if (ordered.Count == 1) { ExceptionDispatchInfo.Capture(fatal).Throw(); }
+        throw new AggregateException(StopFailureMessage, ordered);
     }
 
     private async Task CaptureResourcesAsync(ResourceLoggerService logger)
@@ -160,6 +187,10 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private void CaptureLine(string name, string line)
     {
         logs[name].Add(line);
+        if (name == ComparisonResourceName)
+        {
+            nativeLineObserver?.Invoke(line);
+        }
         if (name == ComparisonResourceName && ComparisonProgressLine.TryFromNativeLog(line, out var marker))
         {
             progress?.Observe(marker);

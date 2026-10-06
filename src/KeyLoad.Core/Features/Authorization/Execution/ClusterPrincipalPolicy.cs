@@ -7,6 +7,12 @@ namespace KeyLoad.Core;
 /// <summary>Protects the persisted internal identity used for cluster membership operations.</summary>
 public static class ClusterPrincipalPolicy
 {
+    private const int BootstrapPolicyEpoch = 1;
+    private const int IsProtectedPrincipalGrantsEmptyCount = 0;
+    private const int IsProtectedPrincipalFieldGrantsEmptyCount = 0;
+    private const int IsProtectedPrincipalProjectsEmptyCount = 0;
+    private const int ProtectedPolicyEpoch = 1;
+
     /// <summary>The stable principal identifier reserved for trusted cluster membership operations.</summary>
     public const string InternalPrincipalId = "keyload-internal-cluster";
 
@@ -22,13 +28,15 @@ public static class ClusterPrincipalPolicy
     /// <exception cref="KeyLoadException">The protected record is missing or invalid after the apply cut has advanced.</exception>
     public static void Initialize(DatabaseEngine database)
     {
+        const int EmptyPolicyEpoch = 0;
+
         ArgumentNullException.ThrowIfNull(database);
 
         database.Store.Commit((transaction, _) =>
         {
             var appliedCut = transaction.ReadOwnedValue(KeySpace.AppliedBytes) is { } appliedBytes
                 ? NativeSerialization.Deserialize<long>(appliedBytes)
-                : 0;
+                : EmptyPolicyEpoch;
 
             PrincipalRecord? principal;
             try
@@ -46,7 +54,7 @@ public static class ClusterPrincipalPolicy
 
             if (principal is null)
             {
-                if (appliedCut != 0)
+                if (appliedCut != EmptyPolicyEpoch)
                 {
                     throw RecoveryRequired();
                 }
@@ -128,21 +136,21 @@ public static class ClusterPrincipalPolicy
         => new(InternalPrincipalId, SystemTenantId, [], [])
         {
             ClusterAdministrator = true,
-            PolicyEpoch = 1
+            PolicyEpoch = BootstrapPolicyEpoch
         };
 
     private static bool IsProtectedPrincipal(PrincipalRecord principal)
         => principal.Id == InternalPrincipalId
            && principal.TenantId == SystemTenantId
            && principal.ClusterAdministrator
-           && principal.Grants is { Length: 0 }
-           && principal.FieldGrants is { Length: 0 }
+           && principal.Grants is { Length: IsProtectedPrincipalGrantsEmptyCount }
+           && principal.FieldGrants is { Length: IsProtectedPrincipalFieldGrantsEmptyCount }
            && principal.OwnerId is null
-           && principal.Projects is { Length: 0 }
+           && principal.Projects is { Length: IsProtectedPrincipalProjectsEmptyCount }
            && !principal.RestrictRows
            && !principal.Revoked
            && principal.ExpiresAt is null
-           && principal.PolicyEpoch == 1;
+           && principal.PolicyEpoch == ProtectedPolicyEpoch;
 
     private static KeyLoadException RecoveryRequired()
         => Errors.Fail(ErrorCode.RecoveryRequired, RecoveryRequiredError);

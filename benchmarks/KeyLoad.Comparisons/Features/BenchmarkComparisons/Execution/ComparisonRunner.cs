@@ -8,23 +8,31 @@ namespace KeyLoad.Comparisons;
 public sealed class ComparisonRunner
 {
     private readonly ComparisonOptions options = null!;
+    private readonly IOptions<ComparisonOptions> workloadOptions = null!;
     private readonly ScaledComparisonProfile? scaledProfile;
     private readonly VectorComparisonProfile? vectorProfile;
     private readonly IOptions<NativeComparisonExecutionOptions>? vectorExecution;
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions;
     private readonly Action<string>? progress;
 
     /// <summary>Creates a runner for the unchanged materialized control workload.</summary>
     /// <param name="options">Validated bounded control settings.</param>
+    /// <param name="executionOptions">Native process observation and progress policy.</param>
     /// <param name="progress">Optional progress observer.</param>
-    public ComparisonRunner(ComparisonOptions options, Action<string>? progress = null)
+    public ComparisonRunner(IOptions<ComparisonOptions> options, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
     {
-        this.options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+        this.options = options.Value;
+        this.options.Validate();
+        workloadOptions = options;
+        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
         this.progress = progress;
     }
 
-    private ComparisonRunner(ScaledComparisonProfile scaledProfile, Action<string>? progress)
+    private ComparisonRunner(ScaledComparisonProfile scaledProfile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress)
     {
         this.scaledProfile = scaledProfile;
+        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
         this.progress = progress;
     }
 
@@ -32,15 +40,17 @@ public sealed class ComparisonRunner
     {
         this.vectorProfile = vectorProfile;
         vectorExecution = executionOptions;
+        this.executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
         this.progress = progress;
     }
 
     /// <summary>Creates a runner for one exact typed scaled profile without manufacturing control options.</summary>
     /// <param name="profile">The closed accepted scaled profile.</param>
+    /// <param name="executionOptions">Native process observation and progress policy.</param>
     /// <param name="progress">Optional progress observer.</param>
     /// <returns>The shared comparison runner with its bounded scale path selected.</returns>
-    public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, Action<string>? progress = null)
-        => new(profile ?? throw new ArgumentNullException(nameof(profile)), progress);
+    public static ComparisonRunner ForScaled(ScaledComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions, Action<string>? progress = null)
+        => new(profile ?? throw new ArgumentNullException(nameof(profile)), executionOptions, progress);
 
     /// <summary>Creates a runner for one exact native vector profile.</summary>
     /// <param name="profile">The immutable bounded vector profile.</param>
@@ -88,16 +98,16 @@ public sealed class ComparisonRunner
         }
         if (scaledProfile is { } profile)
         {
-            return await new ScaledComparisonRunner(profile, progress).RunAsync(targets, sourceRevision,
+            return await new ScaledComparisonRunner(profile, executionOptions, progress).RunAsync(targets, sourceRevision,
                 storage, scenario, cancellationToken).ConfigureAwait(false);
         }
         ValidateTargets(targets, scenario);
 
         var started = TimeProvider.System.GetUtcNow();
-        await using var observer = new ComparisonProgressObserver(progress);
+        await using var observer = new ComparisonProgressObserver(progress, executionOptions);
         observer.Begin(ComparisonProgressPhase.Oracle, ComparisonRunnerValues.FirstIndex);
         cancellationToken.ThrowIfCancellationRequested();
-        var dataset = new BenchmarkDataset(options);
+        var dataset = new BenchmarkDataset(workloadOptions);
         var cases = new List<ComparisonCase>();
         PrepareOracle(dataset, scenario, observer, cancellationToken);
         for (var repetition = ComparisonRunnerValues.FirstIndex; repetition < options.Repetitions; repetition++)
@@ -205,7 +215,7 @@ public sealed class ComparisonRunner
 
         ComparisonCase result;
         try
-        { result = await new ComparisonMeasurer(options, observer).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
+        { result = await new ComparisonMeasurer(workloadOptions, observer, executionOptions).MeasureAsync(target, dataset, scenario, repetition, cancellationToken); }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested)
         { result = new(target.Profile.Name, scenario, repetition, ComparisonStatuses.Failed, ComparisonErrors.Safe(error), null, []); }
         await ComparisonFailureDiagnostics.ObserveAsync(target, result, cancellationToken);

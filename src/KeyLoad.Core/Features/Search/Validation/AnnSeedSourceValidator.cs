@@ -11,13 +11,18 @@ internal static class AnnSeedSourceValidator
     internal static void Validate(VectorRecord vector, DocumentRecord document,
         PartitionRef partition, string collection, string field, AnnSeedWork work)
     {
-        if (vector.Space is null || vector.Values.IsDefault || vector.DocumentRevision < 1
+        const int DocumentRevisionValidationBoundary = 1;
+        const int DimensionFirstCount = 1;
+        const int DimensionValidationBound = 4_096;
+        const int RevisionValidationBoundary = 1;
+
+        if (vector.Space is null || vector.Values.IsDefault || vector.DocumentRevision < DocumentRevisionValidationBoundary
             || vector.DocumentId is null || vector.Field is null || vector.Space.Id is null
             || vector.Space.Model is null || vector.Space.Version is null
             || document.Reference is null || document.Reference.Partition is null
             || document.Reference.Collection is null || document.Reference.Id is null
-            || vector.Space.Dimension is < 1 or > 4_096 || !Enum.IsDefined(vector.Space.Metric)
-            || vector.Values.Length != vector.Space.Dimension || document.Revision < 1
+            || vector.Space.Dimension is < DimensionFirstCount or > DimensionValidationBound || !Enum.IsDefined(vector.Space.Metric)
+            || vector.Values.Length != vector.Space.Dimension || document.Revision < RevisionValidationBoundary
             || vector.DocumentRevision != document.Revision)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
@@ -50,7 +55,9 @@ internal static class AnnSeedSourceValidator
     private static void RequireMatches(VectorRecord vector, EntityRef reference,
         PartitionRef partition, string collection, string field, AnnSeedWork work)
     {
-        if (vector.DocumentId.Length == 0 || !OrdinalEquals(vector.DocumentId, reference.Id, work)
+        const int EmptyDocumentIdLength = 0;
+
+        if (vector.DocumentId.Length == EmptyDocumentIdLength || !OrdinalEquals(vector.DocumentId, reference.Id, work)
             || !PartitionMatches(reference.Partition, partition, work)
             || !OrdinalEquals(reference.Collection, collection, work)
             || !OrdinalEquals(vector.Field, field, work))
@@ -61,7 +68,9 @@ internal static class AnnSeedSourceValidator
 
     private static void ValidateComponents(VectorRecord vector, AnnSeedWork work)
     {
-        for (var index = 0; index < vector.Values.Length; index++)
+        const int IndexInitialValue = 0;
+
+        for (var index = IndexInitialValue; index < vector.Values.Length; index++)
         {
             work.Charge();
             if (!float.IsFinite(vector.Values[index]))
@@ -83,10 +92,12 @@ internal static class AnnSeedSourceValidator
 
     internal static bool SpaceMatches(VectorSpace left, VectorSpace right, AnnSeedWork work)
     {
+        const int KeySpaceComparisonWorkUnits = 3;
+
         var idMatches = OrdinalEquals(left.Id, right.Id, work);
         var modelMatches = OrdinalEquals(left.Model, right.Model, work);
         var versionMatches = OrdinalEquals(left.Version, right.Version, work);
-        work.Charge(3);
+        work.Charge(KeySpaceComparisonWorkUnits);
         return idMatches && modelMatches && versionMatches
             && left.Dimension == right.Dimension && left.Metric == right.Metric;
     }
@@ -99,9 +110,11 @@ internal static class AnnSeedSourceValidator
 
     private static bool OrdinalEquals(string left, string right, AnnSeedWork work)
     {
+        const int IndexInitialValue = 0;
+
         work.Charge();
         var common = Math.Min(left.Length, right.Length);
-        for (var index = 0; index < common; index++)
+        for (var index = IndexInitialValue; index < common; index++)
         {
             work.Charge();
             if (left[index] != right[index])
@@ -115,11 +128,13 @@ internal static class AnnSeedSourceValidator
 
     private static void ValidateCanonicalIdentifier(string value, AnnSeedWork work)
     {
+        const int MaximumUtf8BytesPerCharacter = 4;
+
         if (value is null || value.Length > MaximumIdentifierCharacters)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
         }
-        work.Charge(checked((long)value.Length * 4));
+        work.Charge(checked((long)value.Length * MaximumUtf8BytesPerCharacter));
         int byteCount;
         try
         {

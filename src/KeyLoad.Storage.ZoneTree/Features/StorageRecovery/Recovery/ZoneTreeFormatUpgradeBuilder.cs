@@ -12,10 +12,10 @@ internal static class ZoneTreeFormatUpgradeBuilder
     internal static StoreIdentity Rebuild(ZoneTreeFormatUpgradeSource source, string stagePath,
         ZoneTreeStoreOptions destinationOptions)
     {
-        ZoneTreeFormatUpgradeStage.VerifySourceCopies(stagePath, source);
+        ZoneTreeFormatUpgradeStage.VerifySourceCopies(stagePath, source, destinationOptions);
         var stageOptions = StageOptions(destinationOptions, stagePath, source.Identity);
         var identity = source.Identity with { FormatVersion = ZoneTreePersistenceFormat.CurrentDataEpoch };
-        ZoneTreeIdentityFile.Write(Path.Combine(stagePath, ZoneTreePersistenceFormat.IdentityFileName), identity);
+        ZoneTreeIdentityFile.Write(Path.Combine(stagePath, ZoneTreePersistenceFormat.IdentityFileName), identity, destinationOptions.IdentityBufferBytes);
         var runtime = new ZoneTreeStoreRuntime(stageOptions);
         var checkpointPath = Path.Combine(stagePath, ZoneTreeFormatUpgradeStage.CheckpointTemporaryFileName);
         BuildTree(runtime, source, stagePath, stageOptions, checkpointPath);
@@ -65,7 +65,7 @@ internal static class ZoneTreeFormatUpgradeBuilder
     {
         var sourceJournal = ZoneTreeFormatUpgradeStage.SourceCopyPath(stagePath, ZoneTreePersistenceFormat.JournalFileName);
         using var journal = new FileStream(sourceJournal, FileMode.Open, FileAccess.Read, FileShare.None,
-            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
+            options.FileBufferBytes, FileOptions.SequentialScan);
         if (!string.Equals(ZoneTreeFormatUpgradeStage.Digest(journal), source.JournalDigest, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);
@@ -121,10 +121,10 @@ internal static class ZoneTreeFormatUpgradeBuilder
         ZoneTreeFormatUpgradeReceiptFile.VerifyRegularFile(ownerPath);
         using var ownership = new FileStream(ownerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         var identityPath = Path.Combine(directory, ZoneTreePersistenceFormat.IdentityFileName);
-        var identity = ZoneTreeIdentityFile.Read(identityPath);
+        var identity = ZoneTreeIdentityFile.Read(identityPath, options.MaximumIdentityFileBytes);
         VerifyIdentity(sourceIdentity, identity, allowMaintenanceChanges);
         using (var journal = new FileStream(Path.Combine(directory, ZoneTreePersistenceFormat.JournalFileName),
-            FileMode.Open, FileAccess.Read, FileShare.Read, ZoneTreePersistenceFormat.FileBufferBytes,
+            FileMode.Open, FileAccess.Read, FileShare.Read, options.FileBufferBytes,
             FileOptions.SequentialScan))
         {
             var position = ZoneTreeFormatUpgradeJournal.ValidateCurrent(journal, options, identity.Incarnation);

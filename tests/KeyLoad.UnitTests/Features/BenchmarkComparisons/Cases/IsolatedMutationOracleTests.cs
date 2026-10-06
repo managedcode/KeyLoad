@@ -7,7 +7,7 @@ internal sealed class IsolatedMutationOracleTests
     [Test]
     public void AcIso005UpdateRequiresTheExactFinalBodyAndDeleteRequiresAbsence()
     {
-        var data = new BenchmarkDataset(ComparisonHarnessInputs.Small);
+        var data = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small));
         var input = data.Input(Scenario.DocumentUpdate, 0, 0, false);
         var initial = BenchmarkDataset.InitialMutationState(Scenario.DocumentUpdate, input);
         ComparisonMutationOracle.RequireFinalState(Scenario.DocumentUpdate, new(input.Id, input.Json), input);
@@ -25,7 +25,7 @@ internal sealed class IsolatedMutationOracleTests
     [Test]
     public void AcIso005MutationOracleRejectsAnUnrelatedOperation()
     {
-        var input = new BenchmarkDataset(ComparisonHarnessInputs.Small).Documents[0];
+        var input = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small)).Documents[0];
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             ComparisonMutationOracle.RequireFinalState(Scenario.PointRead, null, input));
     }

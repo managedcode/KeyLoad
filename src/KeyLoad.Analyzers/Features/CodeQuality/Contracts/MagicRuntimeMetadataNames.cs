@@ -2,6 +2,7 @@ namespace KeyLoad.Analyzers.Features.CodeQuality;
 
 internal static class MagicRuntimeMetadataNames
 {
+    internal const string FriendAssemblyAttribute = "System.Runtime.CompilerServices.InternalsVisibleToAttribute";
     internal const string TimeSpan = "System.TimeSpan";
     internal const string Task = "System.Threading.Tasks.Task";
     internal const string GenericTask = "System.Threading.Tasks.Task`1";

@@ -30,13 +30,13 @@ internal sealed class SqlBetweenRejectionTests
         await RejectValidation(RepeatedNot);
         await RejectValidation(Symmetric);
         await RejectValidation(Arithmetic);
-        var second = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SecondStatement, new()).Parse());
+        var second = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SecondStatement, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         await Assert.That(second.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
 
     private static async Task RejectValidation(string sql)
     {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(sql, new()).Parse());
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(sql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
     }
 }

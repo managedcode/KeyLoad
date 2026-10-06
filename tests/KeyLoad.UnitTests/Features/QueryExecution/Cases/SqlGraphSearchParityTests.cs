@@ -18,7 +18,7 @@ internal sealed class SqlGraphSearchParityTests
                 FusionConstant: SqlGraphSearchTestSupport.Fusion), Retriever: new(walk));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, SqlGraphSearchTestSupport.RetrieverSql()), cancellationToken);
 
@@ -46,7 +46,7 @@ internal sealed class SqlGraphSearchParityTests
             + "DEPTH 4 VERTICES 20 EDGES 40 LIMIT 10 FUSION 60";
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
@@ -76,7 +76,7 @@ internal sealed class SqlGraphSearchParityTests
             + "VERTICES 20 EDGES 40 LABELS ('related') LIMIT 10 FUSION 60";
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
@@ -96,7 +96,7 @@ internal sealed class SqlGraphSearchParityTests
         var sql = SqlGraphSearchTestSupport.RetrieverSql(weight: "0");
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql), cancellationToken);
 
@@ -139,7 +139,7 @@ internal sealed class SqlGraphSearchParityTests
             ("hit", GraphSearchTestSupport.FirstHit));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct, cancellationToken);
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct, cancellationToken);
         var actual = await new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, sql, parameters), cancellationToken);
 
@@ -172,7 +172,7 @@ internal sealed class SqlGraphSearchParityTests
             SqlGraphSearchTestSupport.Request(database.Partition,
                 SqlGraphSearchTestSupport.RetrieverSql(allowedIds: "")),
             TestContext.Current!.Execution.CancellationToken);
-        var expected = await new SearchEngine(database.Database).GraphSearchAsync("root", direct,
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", direct,
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

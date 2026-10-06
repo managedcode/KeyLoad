@@ -20,19 +20,19 @@ internal static class ZoneTreeFormatUpgradeStage
         CheckpointTemporaryFileName
     };
 
-    internal static void CreateOrReset(string path, ZoneTreeFormatUpgradeReceipt receipt)
+    internal static void CreateOrReset(string path, ZoneTreeFormatUpgradeReceipt receipt, ZoneTreeStoreOptions options)
     {
         ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(path, allowMissingFinal: true);
         if (!Directory.Exists(path))
         {
             ZoneTreeStoreFiles.CreatePrivateDirectory(path);
-            ZoneTreeFormatUpgradeReceiptFile.Write(Path.Combine(path, ReceiptFileName), receipt);
+            ZoneTreeFormatUpgradeReceiptFile.Write(Path.Combine(path, ReceiptFileName), receipt, options.MaximumUpgradeReceiptBytes, options.IdentityBufferBytes);
             return;
         }
 
         VerifyDirectory(path);
         var receiptPath = Path.Combine(path, ReceiptFileName);
-        var existing = ZoneTreeFormatUpgradeReceiptFile.Read(receiptPath);
+        var existing = ZoneTreeFormatUpgradeReceiptFile.Read(receiptPath, options.MaximumUpgradeReceiptBytes);
         if (existing != receipt)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);
@@ -41,26 +41,26 @@ internal static class ZoneTreeFormatUpgradeStage
         DeleteOwnedEntries(path);
     }
 
-    internal static void CopySources(ZoneTreeFormatUpgradeSource source, string stagePath)
+    internal static void CopySources(ZoneTreeFormatUpgradeSource source, string stagePath, ZoneTreeStoreOptions options)
     {
         ZoneTreeFormatUpgradePathSafety.VerifyNoLinks(source.Directory, allowMissingFinal: false);
         VerifyDirectory(stagePath);
         var copyDirectory = Path.Combine(stagePath, SourceCopyDirectory);
         ZoneTreeStoreFiles.CreatePrivateDirectory(copyDirectory);
         CopyVerified(Path.Combine(source.Directory, ZoneTreePersistenceFormat.IdentityFileName),
-            Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest);
+            Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest, options.FileBufferBytes);
         CopyVerified(Path.Combine(source.Directory, ZoneTreePersistenceFormat.JournalFileName),
-            Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest);
+            Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest, options.FileBufferBytes);
     }
 
-    internal static void VerifySourceCopies(string stagePath, ZoneTreeFormatUpgradeSource source)
+    internal static void VerifySourceCopies(string stagePath, ZoneTreeFormatUpgradeSource source, ZoneTreeStoreOptions options)
     {
         VerifyDirectory(stagePath);
         VerifyEntries(stagePath);
         var copyDirectory = Path.Combine(stagePath, SourceCopyDirectory);
         VerifyDirectory(copyDirectory);
-        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest);
-        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest);
+        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.IdentityFileName), source.IdentityDigest, options.FileBufferBytes);
+        VerifyDigest(Path.Combine(copyDirectory, ZoneTreePersistenceFormat.JournalFileName), source.JournalDigest, options.FileBufferBytes);
     }
 
     internal static string SourceCopyPath(string stagePath, string fileName)
@@ -77,10 +77,10 @@ internal static class ZoneTreeFormatUpgradeStage
         }
     }
 
-    internal static void VerifyPublishable(string stagePath, ZoneTreeFormatUpgradeReceipt receipt)
+    internal static void VerifyPublishable(string stagePath, ZoneTreeFormatUpgradeReceipt receipt, ZoneTreeStoreOptions options)
     {
         VerifyDirectory(stagePath);
-        var actual = ZoneTreeFormatUpgradeReceiptFile.Read(Path.Combine(stagePath, ReceiptFileName));
+        var actual = ZoneTreeFormatUpgradeReceiptFile.Read(Path.Combine(stagePath, ReceiptFileName), options.MaximumUpgradeReceiptBytes);
         if (actual != receipt || Directory.Exists(Path.Combine(stagePath, SourceCopyDirectory)))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);
@@ -113,12 +113,12 @@ internal static class ZoneTreeFormatUpgradeStage
         }
     }
 
-    private static void CopyVerified(string source, string destination, string expectedDigest)
+    private static void CopyVerified(string source, string destination, string expectedDigest, int fileBufferBytes)
     {
         ZoneTreeFormatUpgradeReceiptFile.VerifyRegularFile(source);
         File.Copy(source, destination, overwrite: false);
         using var copy = new FileStream(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
-            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.WriteThrough);
+            fileBufferBytes, FileOptions.WriteThrough);
         copy.Flush(true);
         copy.Position = FileStartPosition;
         var digest = Digest(copy);
@@ -128,11 +128,11 @@ internal static class ZoneTreeFormatUpgradeStage
         }
     }
 
-    private static void VerifyDigest(string path, string expectedDigest)
+    private static void VerifyDigest(string path, string expectedDigest, int fileBufferBytes)
     {
         ZoneTreeFormatUpgradeReceiptFile.VerifyRegularFile(path);
         using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None,
-            ZoneTreePersistenceFormat.FileBufferBytes, FileOptions.SequentialScan);
+            fileBufferBytes, FileOptions.SequentialScan);
         if (!string.Equals(Digest(file), expectedDigest, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.BackupFileVerificationFailed);

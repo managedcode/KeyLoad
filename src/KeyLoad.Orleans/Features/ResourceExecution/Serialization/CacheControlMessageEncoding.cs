@@ -2,8 +2,13 @@ namespace KeyLoad.Orleans.Features.ResourceExecution;
 
 internal static class CacheControlMessageEncoding
 {
+    private const int ReadyProofOpcode = 5;
+    private const string OpcodeFailureMessage = "Unknown cache control shape.";
+
     internal static void Object(ref CacheControlWriter writer, ICacheControlMessage message, bool includeMac)
     {
+        const string ObjectFailureMessage = "Unknown cache control shape.";
+
         switch (message)
         {
             case CacheReadyProof value:
@@ -34,18 +39,20 @@ internal static class CacheControlMessageEncoding
                 CacheControlReplyEncoding.Refresh(ref writer, value, includeMac);
                 break;
             default:
-                throw new ArgumentException("Unknown cache control shape.", nameof(message));
+                throw new ArgumentException(ObjectFailureMessage, nameof(message));
         }
     }
 
     internal static void SigningPrefix(ref CacheControlWriter writer, ICacheControlMessage message)
     {
+        const string SigningPrefixFailureMessage = "Unknown cache control shape.";
+
         var purpose = message switch
         {
             CacheReadyProof => CacheControlNames.ProofPurpose,
             ICacheControlRequest => CacheControlNames.RequestPurpose,
             ICacheControlReply => CacheControlNames.ReplyPurpose,
-            _ => throw new ArgumentException("Unknown cache control shape.", nameof(message))
+            _ => throw new ArgumentException(SigningPrefixFailureMessage, nameof(message))
         };
         writer.String(purpose);
         writer.Byte(Opcode(message));
@@ -58,7 +65,7 @@ internal static class CacheControlMessageEncoding
             CacheGrantRequest or CacheGrantReply => (byte)CacheControlOperation.Grant,
             CacheRevokeRequest or CacheRevokeReply => (byte)CacheControlOperation.Revoke,
             CacheRefreshHint or CacheRefreshReceipt => (byte)CacheControlOperation.Refresh,
-            CacheReadyProof => 5,
-            _ => throw new ArgumentException("Unknown cache control shape.", nameof(message))
+            CacheReadyProof => ReadyProofOpcode,
+            _ => throw new ArgumentException(OpcodeFailureMessage, nameof(message))
         };
 }

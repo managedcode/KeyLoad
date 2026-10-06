@@ -34,9 +34,11 @@ internal static class McpAuthenticationNativeFields
 
     internal static McpAuthenticationReference? Reference<TInput>(ref Reader<TInput> reader, Type expected)
     {
+        const int EmptyReference = 0;
+
         ReferenceCodec.MarkValueField(reader.Session);
         var reference = reader.ReadVarUInt32();
-        if (reference == 0)
+        if (reference == EmptyReference)
         { return null; }
         var value = reader.Session.ReferencedObjects.TryGetReferencedObject(reference) as McpAuthenticationReference;
         Require(value is not null && value.NativeType == expected);

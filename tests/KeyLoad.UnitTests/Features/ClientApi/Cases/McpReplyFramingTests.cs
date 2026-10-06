@@ -30,7 +30,7 @@ internal sealed class McpReplyFramingTests
     public async Task ReplyReportsActualValueShape(string json, int tokens, int properties, int depth)
     {
         var wire = Encoding.UTF8.GetBytes(json);
-        var shape = McpFrameBounds.InspectReply(wire, MaximumWireBytes);
+        var shape = McpFrameBounds.InspectReply(wire, MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(shape.TokenCount).IsEqualTo(tokens);
         await Assert.That(shape.PropertyCount).IsEqualTo(properties);
         await Assert.That(shape.Depth).IsEqualTo(depth);
@@ -40,10 +40,10 @@ internal sealed class McpReplyFramingTests
     [Test]
     public async Task ReplyDepthAccepts61AndRejects62()
     {
-        var exact = McpFrameBounds.InspectReply(McpResponseBoundaryTestData.NestedArrays(MaximumReplyDepth), MaximumWireBytes);
+        var exact = McpFrameBounds.InspectReply(McpResponseBoundaryTestData.NestedArrays(MaximumReplyDepth), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exact.Depth).IsEqualTo(MaximumReplyDepth);
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectReply(McpResponseBoundaryTestData.NestedArrays(MaximumReplyDepth + 1), MaximumWireBytes));
+            McpFrameBounds.InspectReply(McpResponseBoundaryTestData.NestedArrays(MaximumReplyDepth + 1), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -51,8 +51,8 @@ internal sealed class McpReplyFramingTests
     [Test]
     public async Task InboundAndValueInspectionRetainDepth64()
     {
-        var inbound = McpFrameBounds.Inspect(McpResponseBoundaryTestData.NestedObject(MaximumInboundDepth), MaximumWireBytes);
-        var value = McpFrameBounds.InspectValue(McpResponseBoundaryTestData.NestedArrays(MaximumInboundDepth), MaximumWireBytes);
+        var inbound = McpFrameBounds.Inspect(McpResponseBoundaryTestData.NestedObject(MaximumInboundDepth), MaximumWireBytes, UnitMcpOptions.Execution());
+        var value = McpFrameBounds.InspectValue(McpResponseBoundaryTestData.NestedArrays(MaximumInboundDepth), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(inbound.Depth).IsEqualTo(MaximumInboundDepth);
         await Assert.That(value.Depth).IsEqualTo(MaximumInboundDepth);
     }
@@ -62,11 +62,11 @@ internal sealed class McpReplyFramingTests
     public async Task ReplyPreservesWireAndDuplicateBounds()
     {
         var wire = Encoding.UTF8.GetBytes(StringJson);
-        var accepted = McpFrameBounds.InspectReply(wire, wire.Length);
+        var accepted = McpFrameBounds.InspectReply(wire, wire.Length, UnitMcpOptions.Execution());
         await Assert.That(accepted.TokenCount).IsEqualTo(1);
-        var over = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.InspectReply(wire, wire.Length - 1));
+        var over = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.InspectReply(wire, wire.Length - 1, UnitMcpOptions.Execution()));
         var duplicate = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpFrameBounds.InspectReply(Encoding.UTF8.GetBytes(DuplicateJson), MaximumWireBytes));
+            McpFrameBounds.InspectReply(Encoding.UTF8.GetBytes(DuplicateJson), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(over.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Validation);
     }

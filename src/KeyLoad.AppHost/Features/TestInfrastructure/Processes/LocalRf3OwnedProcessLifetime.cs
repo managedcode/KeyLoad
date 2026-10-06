@@ -8,6 +8,8 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
 internal static partial class LocalRf3OwnedProcessLifetime
 {
+    private const int ObservedTaskCapacity = 4;
+
     private const string LocalRf3OwnedProcessLifetimeMetadataName = "libc";
     private const string LocalRf3OwnedProcessLifetimeLocalRf3OwnedProcessLifetimeMetadataName = "kill";
 
@@ -53,7 +55,7 @@ internal static partial class LocalRf3OwnedProcessLifetime
                 return;
             }
 
-            var pending = new List<Task>(4) { canceled };
+            var pending = new List<Task>(ObservedTaskCapacity) { canceled };
             if (!observed.Contains(exit))
             {
                 pending.Add(exit);

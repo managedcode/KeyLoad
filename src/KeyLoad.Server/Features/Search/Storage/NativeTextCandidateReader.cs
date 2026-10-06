@@ -65,11 +65,14 @@ internal static class NativeTextCandidateReader
     private static void AddCandidate(NativeTextGeneration generation, ulong id,
         HashSet<EntityRef> candidates, int maximumCandidates)
     {
-        if (id is 0 || id > (ulong)generation.Records.Count)
+        const int IdEmptyCount = 0;
+        const int RecordsSecondIndex = 1;
+
+        if (id is IdEmptyCount || id > (ulong)generation.Records.Count)
         {
             throw NativeTextErrors.Corrupt();
         }
-        candidates.Add(generation.Records[checked((int)id - 1)].Reference);
+        candidates.Add(generation.Records[checked((int)id - RecordsSecondIndex)].Reference);
         if (candidates.Count > maximumCandidates)
         {
             throw NativeTextErrors.BoundExceeded();
@@ -79,6 +82,8 @@ internal static class NativeTextCandidateReader
     private static void VerifyPositives(NativeTextGeneration generation, HashSet<EntityRef> positives,
         HashSet<EntityRef> candidates, Action markInvalid, ReadExecutionBudget budget)
     {
+        const int EmptyPositivesCount = 0;
+
         foreach (var record in generation.Records)
         {
             budget.Check();
@@ -88,7 +93,7 @@ internal static class NativeTextCandidateReader
                 throw NativeTextErrors.Corrupt();
             }
         }
-        if (positives.Count != 0)
+        if (positives.Count != EmptyPositivesCount)
         {
             markInvalid();
             throw NativeTextErrors.Mismatch();

@@ -7,6 +7,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int FallbackRevisionEmptyCount = 0;
+
     private const string PlacementAdminRequired = "Cluster administration is required.";
     private const string OrphanPlacement = "An atomic partition placement row exists without its directory header.";
 
@@ -21,6 +23,8 @@ public sealed partial class DatabaseEngine
     internal AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(IKeyValueView view,
         string principalId, AtomicPartitionPlacementReadRequest request)
     {
+        const string ReadAtomicPartitionPlacementDetailText = "The physical shard catalog is not initialized.";
+
         ArgumentNullException.ThrowIfNull(view);
         AtomicPartitionPlacementValidation.ValidateReadRequest(request);
         var partition = request.Partition;
@@ -32,7 +36,7 @@ public sealed partial class DatabaseEngine
         }
 
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
-            ?? throw Errors.Fail(ErrorCode.NotFound, "The physical shard catalog is not initialized.");
+            ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         return ResolvePlacement(view, partition, catalog.DefaultShard);
     }
@@ -40,10 +44,12 @@ public sealed partial class DatabaseEngine
     internal static AtomicPartitionPlacementResolution ReadPlacementWitness(IKeyValueView view,
         PartitionRef partition)
     {
+        const string ReadPlacementWitnessDetailText = "The physical shard catalog is not initialized.";
+
         ArgumentNullException.ThrowIfNull(view);
         ValidatePartition(partition);
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
-            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, "The physical shard catalog is not initialized.");
+            ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReadPlacementWitnessDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         return ResolvePlacement(view, partition, catalog.DefaultShard);
     }
@@ -60,6 +66,8 @@ public sealed partial class DatabaseEngine
         PhysicalShardRecord defaultShard, AtomicPartitionPlacementDirectoryV1? directory,
         AtomicPartitionPlacementV1? row)
     {
+        const int DirectoryRevisionValidationBoundary = 0;
+
         if (directory is null && row is not null)
         {
             throw Errors.Fail(ErrorCode.Corruption, OrphanPlacement);
@@ -70,7 +78,7 @@ public sealed partial class DatabaseEngine
             AtomicPartitionPlacementValidation.ValidateDirectory(directory);
         }
 
-        var directoryRevision = directory?.Revision ?? 0;
+        var directoryRevision = directory?.Revision ?? DirectoryRevisionValidationBoundary;
         return row is null ? Fallback(partition, defaultShard, directoryRevision)
             : Explicit(partition, row, directory!, defaultShard, directoryRevision);
     }
@@ -78,16 +86,18 @@ public sealed partial class DatabaseEngine
     private static AtomicPartitionPlacementResolution Fallback(PartitionRef partition,
         PhysicalShardRecord defaultShard, long directoryRevision)
         => new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, defaultShard.PhysicalShardId,
-            defaultShard.Incarnation, defaultShard.VoterIds, defaultShard.PlacementEpoch, directoryRevision, 0, true);
+            defaultShard.Incarnation, defaultShard.VoterIds, defaultShard.PlacementEpoch, directoryRevision, FallbackRevisionEmptyCount, true);
 
     private static AtomicPartitionPlacementResolution Explicit(PartitionRef partition,
         AtomicPartitionPlacementV1 row, AtomicPartitionPlacementDirectoryV1 directory,
         PhysicalShardRecord defaultShard, long directoryRevision)
     {
+        const string ExplicitDetailText = "A placement row revision exceeds its directory revision.";
+
         AtomicPartitionPlacementValidation.ValidateRow(row, partition, defaultShard);
         if (row.Revision > directory.Revision)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "A placement row revision exceeds its directory revision.");
+            throw Errors.Fail(ErrorCode.Corruption, ExplicitDetailText);
         }
 
         return new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, row.PhysicalShardId,

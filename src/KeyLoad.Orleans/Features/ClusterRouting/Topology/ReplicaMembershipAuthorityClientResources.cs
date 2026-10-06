@@ -73,7 +73,10 @@ internal sealed class ReplicaMembershipAuthorityClientResources : IAsyncDisposab
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref disposed, 1) != 0)
+            const int ValueSingleItemCount = 1;
+            const int EmptyExchange = 0;
+
+            if (Interlocked.Exchange(ref disposed, ValueSingleItemCount) != EmptyExchange)
             {
                 return;
             }

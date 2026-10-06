@@ -40,7 +40,7 @@ internal static class ZoneTreeCheckpointGeneration
             FormatVersion = CurrentDataEpoch,
             ReadGeneration = replaceTree ? checked(runtime.Identity.ReadGeneration + NextReadGenerationIncrement) : runtime.Identity.ReadGeneration
         };
-        ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity);
+        ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity, runtime.Options.IdentityBufferBytes);
         runtime.Journal.Flush(true);
         if (!replaceTree)
         {

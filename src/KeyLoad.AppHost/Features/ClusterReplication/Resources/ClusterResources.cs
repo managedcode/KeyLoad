@@ -6,6 +6,8 @@ using KeyLoad.AppHost.Features.ClusterRouting;
 
 internal static class ClusterResources
 {
+    private const string ThirdVoterName = "node3";
+
     private const string NodeNamesResultText = "node1";
     private const string NodeNamesNodeNamesResultText = "node2";
 
@@ -44,7 +46,7 @@ internal static class ClusterResources
     private const int SiloPort = 11111;
     private const int FirstPublicPort = 5101;
     private const int MinimumBenchmarkNodes = 1;
-    private static readonly string[] NodeNames = [NodeNamesResultText, NodeNamesNodeNamesResultText, "node3"];
+    private static readonly string[] NodeNames = [NodeNamesResultText, NodeNamesNodeNamesResultText, ThirdVoterName];
 
     /// <summary>Adds RF3 Docker nodes, or an explicitly selected benchmark fixed group, with independent storage.</summary>
     internal static IResourceBuilder<ContainerResource>[] Add(IDistributedApplicationBuilder builder,

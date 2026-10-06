@@ -22,7 +22,7 @@ internal sealed class GraphShortestPathCancellationTests
         GraphShortestPathTestSupport.PersistVertices(database, [source]);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var budget = new ReadExecutionBudget(database.Database.Limits, cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
         var request = GraphShortestPathTestSupport.Request(database, source, target);
         var position = database.Store.Position;
 
@@ -52,12 +52,12 @@ internal sealed class GraphShortestPathCancellationTests
         var probeRequest = GraphShortestPathTestSupport.Request(database, probe, target,
             maxDepth: 1, maxVertices: 1_000, maxEdges: CandidateCount,
             labels: [GraphShortestPathTestSupport.Walk]);
-        var probeBudget = new ReadExecutionBudget(database.Database.Limits);
+        var probeBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         _ = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, probeRequest, probeBudget);
         var sourcePosition = database.Store.Position;
         using var cancellation = new CancellationTokenSource();
         using var started = new ManualResetEventSlim(false);
-        var budget = new ReadExecutionBudget(database.Database.Limits, cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
         var observer = new GraphShortestPathCancellationObserver(budget, cancellation, started, probeBudget.ReadBytes);
         Exception? primary = null;
         OperationCanceledException? canceled = null;

@@ -18,11 +18,15 @@ public sealed partial class DatabaseEngine
     private DocumentMutationResult Put(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition,
         PutDocument put, DateTimeOffset now, DocumentMutationContext context)
     {
+        const int ActualEmptyCount = 0;
+        const int PreviousRevisionValidationBoundary = 0;
+        const int PreviousRevisionStep = 1;
+
         JsonData.Identifier(put.Id);
         var resource = Resource(tx, partition, put.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
-        CheckRevision(previous?.Revision ?? 0, put.ExpectedRevision);
+        CheckRevision(previous?.Revision ?? ActualEmptyCount, put.ExpectedRevision);
         if (previous is { Deleted: false })
         {
             Authorization.RequireWriteRow(principal, previous.Access);
@@ -39,7 +43,7 @@ public sealed partial class DatabaseEngine
         var access = put.Access ?? previous?.Access ?? new RowAccess();
         Authorization.RequireWriteRow(principal, access);
         var document = new DocumentRecord(new(partition, put.Collection, put.Id),
-            checked((previous?.Revision ?? 0) + 1), json, access, now);
+            checked((previous?.Revision ?? PreviousRevisionValidationBoundary) + PreviousRevisionStep), json, access, now);
         UpdateIndexes(tx, principal, resource, previous is { Deleted: false } ? previous : null, document);
         tx.PutRecord(context.Key, document);
         return new(new(PutDocumentMutationKind, put.Collection, put.Id, document.Revision), document);
@@ -48,7 +52,10 @@ public sealed partial class DatabaseEngine
     private DocumentMutationResult Patch(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition,
         PatchDocument patch, DateTimeOffset now, DocumentMutationContext context)
     {
-        if (patch.Patches.Length is < 1 or > MaximumPatchOperations)
+        const int PatchesLengthFirstCount = 1;
+        const int RevisionStep = 1;
+
+        if (patch.Patches.Length is < PatchesLengthFirstCount or > MaximumPatchOperations)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, PatchOperationBudgetMessage);
         }
@@ -72,7 +79,7 @@ public sealed partial class DatabaseEngine
         var updated = previous with
         {
             Json = JsonData.Patch(previous.Json, patch.Patches, Limits),
-            Revision = checked(previous.Revision + 1),
+            Revision = checked(previous.Revision + RevisionStep),
             UpdatedAt = now
         };
         Features.RelationalStorage.RelationalRowValidation.ValidateRow(resource, patch.Id, updated.Json, Limits);
@@ -84,6 +91,8 @@ public sealed partial class DatabaseEngine
     private DocumentMutationResult Delete(IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition,
         DeleteDocument delete, DateTimeOffset now, DocumentMutationContext context)
     {
+        const int RevisionStep = 1;
+
         var resource = Resource(tx, partition, delete.Collection, ResourceKind.Collection);
         RequireDocumentAuthority(resource);
         var previous = context.Before;
@@ -99,7 +108,7 @@ public sealed partial class DatabaseEngine
         {
             Json = DeletedDocumentJson,
             Deleted = true,
-            Revision = checked(previous.Revision + 1),
+            Revision = checked(previous.Revision + RevisionStep),
             UpdatedAt = now
         };
         tx.PutRecord(context.Key, tombstone);

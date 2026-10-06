@@ -1,11 +1,13 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Owns only active-object name sets while scanning a bounded wire buffer.</summary>
-internal sealed class McpFrameInspection(bool boundIdentifier)
+internal sealed class McpFrameInspection(bool boundIdentifier, IOptions<McpExecutionOptions> options)
 {
-    private readonly HashSet<string>?[] names = new HashSet<string>?[McpFramingProtocol.MaximumDepth];
+    private readonly McpExecutionOptions settings = options.Value;
+    private readonly HashSet<string>?[] names = new HashSet<string>?[options.Value.MaximumDepth];
     private int tokens;
     private int properties;
     private int maximumDepth;
@@ -15,10 +17,13 @@ internal sealed class McpFrameInspection(bool boundIdentifier)
 
     internal void Visit(ref Utf8JsonReader reader)
     {
+        const int VisitPresentCount = 1;
+        const int VisitAbsentCount = 0;
+
         var containerStart = reader.TokenType is JsonTokenType.StartObject or JsonTokenType.StartArray;
-        var depth = reader.CurrentDepth + (containerStart ? 1 : 0);
+        var depth = reader.CurrentDepth + (containerStart ? VisitPresentCount : VisitAbsentCount);
         maximumDepth = Math.Max(maximumDepth, depth);
-        if (++tokens > McpFramingProtocol.MaximumTokens || depth > McpFramingProtocol.MaximumDepth)
+        if (++tokens > settings.MaximumTokens || depth > settings.MaximumDepth)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
         }
@@ -43,22 +48,25 @@ internal sealed class McpFrameInspection(bool boundIdentifier)
     private void CheckIdentifier(ref Utf8JsonReader reader)
     {
         if (boundIdentifier && rootIdentifier && reader.TokenType == JsonTokenType.String
-            && reader.ValueSpan.Length > McpFramingProtocol.MaximumIdentifierBytes)
+            && reader.ValueSpan.Length > settings.MaximumIdentifierBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded); }
         rootIdentifier = false;
     }
 
     private void AddProperty(ref Utf8JsonReader reader)
     {
-        if (++properties > McpFramingProtocol.MaximumProperties
-            || reader.ValueSpan.Length > McpFramingProtocol.MaximumPropertyNameBytes)
+        const int EmptyCurrentDepth = 1;
+        const int NamesSecondIndex = 1;
+
+        if (++properties > settings.MaximumProperties
+            || reader.ValueSpan.Length > settings.MaximumPropertyNameBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
         }
         var name = McpFrameStrings.Decode(ref reader);
-        rootIdentifier = reader.CurrentDepth == 1
+        rootIdentifier = reader.CurrentDepth == EmptyCurrentDepth
             && string.Equals(name, McpFramingProtocol.Identifier, StringComparison.Ordinal);
-        if (!names[reader.CurrentDepth - 1]!.Add(name))
+        if (!names[reader.CurrentDepth - NamesSecondIndex]!.Add(name))
         {
             throw Errors.Fail(ErrorCode.Validation, McpFramingProtocol.InvalidFrame);
         }

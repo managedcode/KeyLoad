@@ -1,27 +1,30 @@
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
 using ZoneTree.FullTextSearch.Index;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextGeneration
 {
+    private readonly IOptions<NativeTextExecutionOptions> executionOptions;
+
     private readonly string root;
     private readonly Guid sourceNodeId;
     private List<NativeTextRecord>? pendingRecords = [];
     private NativeTextRecord[]? sealedRecords;
     private HashSet<EntityRef>? references = [];
 
-    internal NativeTextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope,
-        DatabaseLimits limits, NativeTextFileStreamProvider provider)
+    internal NativeTextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, IOptions<DatabaseLimits> limitsOptions, NativeTextFileStreamProvider provider, IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        this.executionOptions = executionOptions;
         this.root = root;
         this.sourceNodeId = sourceNodeId;
         Leaf = leaf;
         Path = System.IO.Path.Combine(root, leaf);
         Scope = scope;
-        Limits = limits;
-        CurrentIndex = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory), provider);
+        Limits = limitsOptions.Value;
+        CurrentIndex = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory), provider, executionOptions: executionOptions);
     }
 
     internal string Leaf { get; }
@@ -42,16 +45,19 @@ internal sealed class NativeTextGeneration
 
     internal void AddRecord(EntityRef reference, long revision, ReadExecutionBudget budget)
     {
+        const int RevisionValidationBoundary = 0;
+        const int PendingRecordsCountStep = 1;
+
         if (pendingRecords!.Count >= Limits.MaxScanRecords)
         {
             throw NativeTextErrors.BoundExceeded();
         }
-        if (revision < 0 || reference.Partition != Scope.Partition || reference.Collection != Scope.Collection
+        if (revision < RevisionValidationBoundary || reference.Partition != Scope.Partition || reference.Collection != Scope.Collection
             || string.IsNullOrEmpty(reference.Id) || !references!.Add(reference))
         {
             throw NativeTextErrors.Corrupt();
         }
-        var record = new NativeTextRecord((ulong)pendingRecords.Count + 1, reference, revision);
+        var record = new NativeTextRecord((ulong)pendingRecords.Count + PendingRecordsCountStep, reference, revision);
         budget.ChargeBytes(NativeSerialization.Measure(record));
         pendingRecords.Add(record);
     }
@@ -71,10 +77,10 @@ internal sealed class NativeTextGeneration
     internal NativeTextFile[] CloseAndCapture(ReadExecutionBudget? budget)
     {
         CloseIndex();
-        var owner = NativeTextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId);
+        var owner = NativeTextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions);
         try
         {
-            Files = NativeTextInventory.Capture(Path, owner.OwnedPaths, budget);
+            Files = NativeTextInventory.Capture(Path, owner.OwnedPaths, budget: budget, executionOptions: executionOptions);
         }
         catch (OperationCanceledException error)
         {
@@ -108,9 +114,11 @@ internal sealed class NativeTextGeneration
 
     private void CaptureForSettlement(NativeTextOwnerReceipt owner, Exception primaryFailure)
     {
+        const int FailuresCountValidationBoundary = 0;
+
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => Files = NativeTextInventory.Capture(Path, owner.OwnedPaths), failures);
-        if (failures.Count > 0)
+        ServerFailureObserver.Observe(() => Files = NativeTextInventory.Capture(Path, owner.OwnedPaths, executionOptions: executionOptions), failures);
+        if (failures.Count > FailuresCountValidationBoundary)
         {
             ClearDeferredBudgetFailure();
             throw new AggregateException(new[] { primaryFailure }.Concat(failures));
@@ -123,12 +131,12 @@ internal sealed class NativeTextGeneration
         {
             return;
         }
-        var manifest = NativeTextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, Limits, budget);
+        var manifest = NativeTextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, Limits, budget, executionOptions: executionOptions);
         VerifyRecords(manifest.Records, budget);
         VerifyFiles(manifest.Files, budget);
         budget.Check();
         CurrentIndex = NativeTextIndex.Open(System.IO.Path.Combine(Path, NativeTextProtocol.NativeDirectory),
-            new NativeTextFileStreamProvider(root, Leaf, sourceNodeId));
+            new NativeTextFileStreamProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions), executionOptions: executionOptions);
     }
 
     internal void MarkPublished()
@@ -150,11 +158,13 @@ internal sealed class NativeTextGeneration
 
     private void VerifyRecords(NativeTextRecord[] actual, ReadExecutionBudget budget)
     {
+        const int IndexInitialValue = 0;
+
         if (actual.Length != Records.Count)
         {
             throw NativeTextErrors.Corrupt();
         }
-        for (var index = 0; index < actual.Length; index++)
+        for (var index = IndexInitialValue; index < actual.Length; index++)
         {
             budget.Check();
             if (actual[index] != Records[index])
@@ -166,11 +176,13 @@ internal sealed class NativeTextGeneration
 
     private void VerifyFiles(NativeTextFile[] actual, ReadExecutionBudget budget)
     {
+        const int IndexInitialValue = 0;
+
         if (actual.Length != Files.Length)
         {
             throw NativeTextErrors.Corrupt();
         }
-        for (var index = 0; index < actual.Length; index++)
+        for (var index = IndexInitialValue; index < actual.Length; index++)
         {
             budget.Check();
             if (actual[index].RelativePath != Files[index].RelativePath || actual[index].Length != Files[index].Length

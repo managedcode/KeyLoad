@@ -31,9 +31,9 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
         Action settled = phaseSettlement is null ? DeactivateOnIdle
             : () => phaseSettlement.Settle(((IGrainBase)this).GrainContext, DeactivateOnIdle);
         return NativeCqrsStreamLifetime.Run(
-            token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
+            createStream: token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteCapabilityAsync(signedRequest, requestId, writer, phaseSettlement), token),
-            chunkSerializer, requestId, clock, settled, cancellationToken, options, workOwner);
+            serializer: chunkSerializer, requestId: requestId, clock: clock, settled: settled, cancellationToken: cancellationToken, options: options, owner: workOwner);
     }
 
     private async ValueTask<Result<GrainOperationReply>> ExecuteCapabilityAsync(string signedRequest, Guid requestId,

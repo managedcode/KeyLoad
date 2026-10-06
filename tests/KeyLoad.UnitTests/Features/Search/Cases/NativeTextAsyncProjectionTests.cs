@@ -21,8 +21,8 @@ internal sealed class NativeTextAsyncProjectionTests
         database.Commit(new PutDocument(Collection, FirstId, "{\"text\":\"needle\"}"),
             new PutDocument(Collection, SecondId, "{\"text\":\"other\"}"));
         using var projection = CreateProjection(database);
-        var native = new SearchEngine(database.Database, projection);
-        var canonical = new SearchEngine(database.Database);
+        var native = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
+        var canonical = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(database.Partition, Collection, TextPath, InitialText);
         var token = TestContext.Current!.Execution.CancellationToken;
 
@@ -58,8 +58,8 @@ internal sealed class NativeTextAsyncProjectionTests
     }
 
     private static NativeTextProjection CreateProjection(TestDatabase database)
-        => new(Path.Combine(database.Directory, "native-text"), database.Database.Limits,
-            database.Store.Identity.NodeId);
+        => new(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
 
     private static int GenerationCount(TestDatabase database)
         => Directory.EnumerateDirectories(Path.Combine(database.Directory, "native-text"))

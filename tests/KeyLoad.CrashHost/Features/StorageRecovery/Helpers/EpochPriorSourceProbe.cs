@@ -172,7 +172,7 @@ internal static class EpochPriorSourceProbe
         using var input = File.OpenRead(request.Snapshot ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
         var snapshot = ZoneTreeCheckpointReader.Read(input, new ZoneTreeStoreOptions(request.Directory));
         var identity = ZoneTreeIdentityFile.Read(Path.Combine(request.Directory,
-            ZoneTreePersistenceFormat.IdentityFileName));
+            ZoneTreePersistenceFormat.IdentityFileName), CrashExecutionOptions.StorageExecution().Value.MaximumIdentityFileBytes);
         return EpochPriorSourceReply.Succeeded(identity, snapshot.Position, snapshot.AppliedPosition);
     }
 

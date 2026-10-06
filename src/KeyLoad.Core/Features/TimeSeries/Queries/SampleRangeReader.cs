@@ -12,7 +12,10 @@ internal static class SampleRangeReader
     internal static SampleRecord[] Read(DatabaseEngine database, TimeProvider clock, IKeyValueView view,
         string principalId, ReadSamplesRequest request, ReadExecutionBudget budget)
     {
-        if (request.From > request.Until || request.Limit < 1 || request.Limit > database.Limits.MaxResults)
+        const int LimitValidationBoundary = 1;
+        const long ResultBytesInitialValue = 0L;
+
+        if (request.From > request.Until || request.Limit < LimitValidationBoundary || request.Limit > database.Limits.MaxResults)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidSampleReadBudget);
         }
@@ -26,7 +29,7 @@ internal static class SampleRangeReader
         var after = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId, from);
         var until = SampleUpperBound(request);
         var records = new List<SampleRecord>();
-        var resultBytes = 0L;
+        var resultBytes = ResultBytesInitialValue;
         budget.VisitRange(view, prefix, request.Limit, (key, value) =>
         {
             var sample = NativeSerialization.Deserialize<SampleRecord>(value);

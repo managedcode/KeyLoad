@@ -15,13 +15,11 @@ internal sealed class NodeEpochReplicaUnownedOutputTests
         var replicaPosition = fixture.ReplicaStore.Position;
         var output = Path.Combine(fixture.DestinationSnapshots, ConflictingOutput);
 
-        var failure = Assert.ThrowsExactly<AggregateException>(() => ReplicaSnapshotFormatUpgrade.Upgrade(
-            plan, fixture.Database, fixture.ReplicaStore, fixture.Configuration,
-            fixture.DestinationSnapshots, (_, _) =>
+        var failure = Assert.ThrowsExactly<AggregateException>(() => ReplicaSnapshotFormatUpgrade.Upgrade(            plan, fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration),             fixture.DestinationSnapshots, (_, _) =>
             {
                 File.WriteAllBytes(output, OutputBytes);
                 throw new IOException("Injected converter conflict.");
-            }));
+            }, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution()));
 
         await Assert.That(failure.InnerExceptions[0].Message).IsEqualTo("Injected converter conflict.");
         await Assert.That(await File.ReadAllBytesAsync(output)).IsEquivalentTo(OutputBytes);

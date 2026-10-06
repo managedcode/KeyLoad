@@ -14,6 +14,8 @@ public static class AggregateReplayWorkerOptionsRegistration
     public static IServiceCollection AddKeyLoadAggregateReplayWorkerOptions(this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
         services.AddOptions<AggregateReplayWorkerLimits>()
             .Bind(configuration.GetSection(AggregateReplayWorkerLimits.SectionName))
             .Validate(options => options.IsValid(), AggregateReplayWorkerLimits.ValidationMessage)

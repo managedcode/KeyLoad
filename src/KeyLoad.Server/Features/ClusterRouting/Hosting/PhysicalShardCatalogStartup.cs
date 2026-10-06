@@ -5,15 +5,17 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHost partition, IOptions<NodeOptions> nodeOptions,
-    TimeProvider clock, IOptions<GrainRoutingOptions> routingOptions)
+    TimeProvider clock, IOptions<GrainRoutingOptions> routingOptions, IOptions<McpExecutionOptions> mcpExecutionOptions)
 {
+    private const int AdmissionClosed = 0;
+    private const int AdmissionReady = 1;
     private readonly NodeOptions options = nodeOptions.Value;
     private string? administratorId;
     private int ready;
 
-    internal bool IsReady => Volatile.Read(ref ready) == 1;
+    internal bool IsReady => Volatile.Read(ref ready) == AdmissionReady;
 
-    internal async Task InitializeAsync(CancellationToken cancellationToken)
+    internal async Task<PrincipalRecord> InitializeAsync(CancellationToken cancellationToken)
     {
         var executionLifetime = routingOptions.Value.ExecutionLifetime;
         using var deadline = new CancellationTokenSource(executionLifetime, clock);
@@ -23,6 +25,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         await SubmitBootstrapAsync(administrator, token).ConfigureAwait(false);
         await VerifyCatalogAsync(administrator.Id, token).ConfigureAwait(false);
         node.OpenCatalogAdmission(this, administrator.Id, token);
+        return administrator;
     }
 
     internal async Task EnsureAdmissionAsync(CancellationToken cancellationToken)
@@ -37,10 +40,10 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
     internal void OpenAdmission(string principalId)
     {
         Volatile.Write(ref administratorId, principalId);
-        Volatile.Write(ref ready, 1);
+        Volatile.Write(ref ready, AdmissionReady);
     }
 
-    internal void CloseAdmission() => Volatile.Write(ref ready, 0);
+    internal void CloseAdmission() => Volatile.Write(ref ready, AdmissionClosed);
 
     private async Task<PrincipalRecord> AuthenticateAdministratorAsync(CancellationToken cancellationToken)
     {
@@ -55,7 +58,7 @@ internal sealed class PhysicalShardCatalogStartup(OrleansNode node, PartitionHos
         using var requestContext = node.OpenRequestContext(null, requestId, Guid.Empty, cancellationToken);
         var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
-        var principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span, cancellationToken);
+        var principal = McpNativeAuthentication.ReadPrincipal(reply.Payload.Span, cancellationToken, mcpExecutionOptions);
         if (!principal.ClusterAdministrator)
         { throw Errors.Fail(ErrorCode.PermissionDenied, PhysicalShardCatalogFence.AdministratorRequired); }
         return principal;

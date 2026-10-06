@@ -4,33 +4,37 @@ internal static class SampleChunkTextValidator
 {
     internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget)
     {
-        var textBytes = 0L;
+        const long TextBytesInitialValue = 0L;
+        const int EmptySeriesBytes = 0;
+        const int IndexInitialValue = 0;
+
+        var textBytes = TextBytesInitialValue;
         var series = new SampleChunkReader(payload.Series.Span);
         var seriesBytes = SampleChunkText.ValidateFramed(ref series, budget);
-        SampleChunkWire.Require(seriesBytes > 0);
+        SampleChunkWire.Require(seriesBytes > EmptySeriesBytes);
         textBytes += seriesBytes;
         series.RequireEnd();
 
         var events = new SampleChunkReader(payload.EventIds.Span);
-        for (var index = 0; index < payload.RecordCount; index++)
+        for (var index = IndexInitialValue; index < payload.RecordCount; index++)
         {
             budget.Check();
             var eventBytes = SampleChunkText.ValidateFramed(ref events, budget);
-            SampleChunkWire.Require(eventBytes > 0);
+            SampleChunkWire.Require(eventBytes > EmptySeriesBytes);
             textBytes += eventBytes;
         }
         events.RequireEnd();
 
         var tags = new SampleChunkReader(payload.Tags.Span);
         var dictionaryCount = tags.ReadVarUInt();
-        SampleChunkWire.Require(dictionaryCount is > 0 and <= SampleChunkWire.MaximumRecords
+        SampleChunkWire.Require(dictionaryCount is > EmptySeriesBytes and <= SampleChunkWire.MaximumRecords
             && dictionaryCount <= (ulong)payload.RecordCount);
         var count = (int)dictionaryCount;
-        for (var index = 0; index < count; index++)
+        for (var index = IndexInitialValue; index < count; index++)
         {
             budget.Check();
             var tagBytes = SampleChunkText.ValidateFramed(ref tags, budget);
-            SampleChunkWire.Require(tagBytes > 0);
+            SampleChunkWire.Require(tagBytes > EmptySeriesBytes);
             textBytes += tagBytes;
         }
         ValidateTagIndexes(ref tags, payload.RecordCount, count, budget);
@@ -42,18 +46,26 @@ internal static class SampleChunkTextValidator
     private static void ValidateTagIndexes(ref SampleChunkReader reader, int recordCount, int dictionaryCount,
         ReadExecutionBudget budget)
     {
-        Span<ulong> used = stackalloc ulong[4];
+        const int TagIndexWordCount = 4;
+        const int NextFirstIndexInitialValue = 0;
+        const int RecordInitialValue = 0;
+        const int BitsPerTagWord = 64;
+        const ulong FirstTagBit = 1UL;
+        const int BitsPerTagWordForMask = 64;
+        const int EmptyUsedWordMask = 0;
+
+        Span<ulong> used = stackalloc ulong[TagIndexWordCount];
         used.Clear();
-        var nextFirstIndex = 0;
-        for (var record = 0; record < recordCount; record++)
+        var nextFirstIndex = NextFirstIndexInitialValue;
+        for (var record = RecordInitialValue; record < recordCount; record++)
         {
             budget.Check();
             var indexValue = reader.ReadVarUInt();
             SampleChunkWire.Require(indexValue < (ulong)dictionaryCount);
             var index = (int)indexValue;
-            var word = index / 64;
-            var mask = 1UL << (index % 64);
-            if ((used[word] & mask) == 0)
+            var word = index / BitsPerTagWord;
+            var mask = FirstTagBit << (index % BitsPerTagWordForMask);
+            if ((used[word] & mask) == EmptyUsedWordMask)
             {
                 SampleChunkWire.Require(index == nextFirstIndex++);
                 used[word] |= mask;

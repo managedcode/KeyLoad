@@ -65,7 +65,7 @@ public sealed class KurrentTarget : IComparisonTarget
         }
         try
         {
-            ownership = new KurrentStreamOwnership(dataset.Options);
+            ownership = new KurrentStreamOwnership(dataset.ExecutionOptions);
             setupStage = KurrentSetupStage.MemberVerification;
             var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
             var proof = await KurrentClusterVerifier.VerifyAsync(connectionString, nodeHttpClients, topology, timeout, cancellationToken, lifecycleOptions);

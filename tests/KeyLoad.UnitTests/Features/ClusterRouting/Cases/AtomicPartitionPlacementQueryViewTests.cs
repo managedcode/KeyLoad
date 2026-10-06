@@ -10,7 +10,7 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
     {
         using var fixture = new AtomicPartitionPlacementQueryViewFixture();
         var exactBytes = fixture.ExpectedReadBytes();
-        var budget = new ReadExecutionBudget(fixture.Engine.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits));
         var grant = budget.CreateReadGrant(exactBytes, 3);
         var resolution = fixture.Query(grant);
 
@@ -34,7 +34,7 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
     {
         using var fixture = new AtomicPartitionPlacementQueryViewFixture(bindPartition: false);
         var exactBytes = fixture.ExpectedReadBytes();
-        var grant = new ReadExecutionBudget(fixture.Engine.Limits).CreateReadGrant(exactBytes, 3);
+        var grant = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits)).CreateReadGrant(exactBytes, 3);
         var resolution = fixture.Query(grant);
 
         await Assert.That(resolution.IsFallback).IsTrue();
@@ -51,7 +51,7 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
         using var fixture = new AtomicPartitionPlacementQueryViewFixture();
         var before = fixture.CaptureMetadata();
         var exactBytes = fixture.ExpectedReadBytes();
-        var grant = new ReadExecutionBudget(fixture.Engine.Limits).CreateReadGrant(exactBytes - 1, 3);
+        var grant = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits)).CreateReadGrant(exactBytes - 1, 3);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Query(grant));
         var after = fixture.CaptureMetadata();
@@ -67,14 +67,14 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
         using var fixture = new AtomicPartitionPlacementQueryViewFixture();
         using var cancellation = new CancellationTokenSource();
         var before = fixture.CaptureMetadata();
-        var budget = new ReadExecutionBudget(fixture.Engine.Limits, cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits), cancellationToken: cancellation.Token);
         var grant = budget.CreateReadGrant(fixture.ExpectedReadBytes(), 3);
         await cancellation.CancelAsync();
         var canceled = Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Query(grant));
         await Assert.That(canceled).IsNotNull();
         await Assert.That(grant.ExaminedRecords).IsEqualTo(0);
 
-        var denied = new ReadExecutionBudget(fixture.Engine.Limits).CreateReadGrant(fixture.ExpectedReadBytes(), 3);
+        var denied = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits)).CreateReadGrant(fixture.ExpectedReadBytes(), 3);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Engine.WithQueryView(
             AtomicPartitionPlacementQueryViewFixture.DeniedId,
             AtomicPartitionPlacementQueryViewFixture.Partition, AtomicPartitionPlacementQueryViewFixture.Collection,
@@ -92,7 +92,7 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
         using var fixture = new AtomicPartitionPlacementQueryViewFixture();
         fixture.DeleteDirectory();
         var before = fixture.CaptureMetadata();
-        var grant = new ReadExecutionBudget(fixture.Engine.Limits).CreateReadGrant(24_576, 3);
+        var grant = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits)).CreateReadGrant(24_576, 3);
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Query(grant));
 
@@ -134,7 +134,7 @@ internal sealed class AtomicPartitionPlacementQueryViewTests
         }
 
         var before = fixture.CaptureMetadata();
-        var grant = new ReadExecutionBudget(fixture.Engine.Limits).CreateReadGrant(24_576, 3);
+        var grant = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Engine.Limits)).CreateReadGrant(24_576, 3);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Query(grant));
         var after = fixture.CaptureMetadata();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption);

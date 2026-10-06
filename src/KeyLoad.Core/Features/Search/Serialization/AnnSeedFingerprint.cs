@@ -15,6 +15,10 @@ internal static class AnnSeedFingerprint
     internal static string Compute(AnnSeedScope scope, ImmutableArray<VectorRecord> records,
         AnnSeedWork work, byte[] scratch)
     {
+        const int RowInitialValue = 0;
+        const int Sha256DigestBytes = 32;
+        const int HexDigestCharacters = 64;
+
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         AppendText(hash, scratch, Domain, work);
         AppendText(hash, scratch, scope.Field, work);
@@ -24,7 +28,7 @@ internal static class AnnSeedFingerprint
         AppendText(hash, scratch, scope.Space.Model, work);
         AppendText(hash, scratch, scope.Space.Version, work);
         AppendInt32(hash, records.Length, work);
-        for (var row = 0; row < records.Length; row++)
+        for (var row = RowInitialValue; row < records.Length; row++)
         {
             work.Check();
             var record = records[row];
@@ -33,17 +37,20 @@ internal static class AnnSeedFingerprint
             AppendFloatBlocks(hash, scratch, record.Values, work);
         }
         work.Check();
-        Span<byte> digest = stackalloc byte[32];
+        Span<byte> digest = stackalloc byte[Sha256DigestBytes];
         if (!hash.TryGetHashAndReset(digest, out var written) || written != digest.Length)
         {
             throw new InvalidOperationException(DigestFailure);
         }
-        work.Charge(64);
+        work.Charge(HexDigestCharacters);
         return Convert.ToHexStringLower(digest);
     }
 
     private static void AppendText(IncrementalHash hash, byte[] scratch, string value, AnnSeedWork work)
     {
+        const int StartEmptyCount = 0;
+        const int OffsetEmptyCount = 0;
+
         var length = StrictUtf8.GetByteCount(value);
         AppendInt32(hash, length, work);
         work.Check();
@@ -51,20 +58,24 @@ internal static class AnnSeedFingerprint
         {
             throw new InvalidOperationException(TextTooLong);
         }
-        var written = StrictUtf8.GetBytes(value.AsSpan(), scratch.AsSpan(0, length));
+        var written = StrictUtf8.GetBytes(value.AsSpan(), scratch.AsSpan(StartEmptyCount, length));
         work.Charge(written);
-        hash.AppendData(scratch, 0, written);
+        hash.AppendData(scratch, OffsetEmptyCount, written);
     }
 
     private static void AppendFloatBlocks(IncrementalHash hash, byte[] scratch,
         ImmutableArray<float> values, AnnSeedWork work)
     {
-        var first = 0;
+        const int FirstInitialValue = 0;
+        const int OffsetInitialValue = 0;
+        const int OffsetEmptyCount = 0;
+
+        var first = FirstInitialValue;
         while (first < values.Length)
         {
             work.Check();
             var count = Math.Min(scratch.Length / sizeof(int), values.Length - first);
-            for (var offset = 0; offset < count; offset++)
+            for (var offset = OffsetInitialValue; offset < count; offset++)
             {
                 work.Charge();
                 var bits = BitConverter.SingleToInt32Bits(values[first + offset]);
@@ -72,7 +83,7 @@ internal static class AnnSeedFingerprint
             }
             var byteCount = checked(count * sizeof(int));
             work.Charge(byteCount);
-            hash.AppendData(scratch, 0, byteCount);
+            hash.AppendData(scratch, OffsetEmptyCount, byteCount);
             first += count;
         }
     }

@@ -22,9 +22,11 @@ internal sealed class NativeSerializationBenchmarkState<T>
 
     private void RequireContent(T decoded)
     {
+        const string RequireContentFailureMessage = "The typed native/JSON benchmark corpus changed during roundtrip.";
+
         if (!JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonBytes))
         {
-            throw new InvalidOperationException("The typed native/JSON benchmark corpus changed during roundtrip.");
+            throw new InvalidOperationException(RequireContentFailureMessage);
         }
     }
 }

@@ -5,6 +5,8 @@ namespace KeyLoad.Orleans;
 /// <summary>Owns bounded active native request producers and verified capability frames for one silo.</summary>
 public sealed class NativeRequestWorkOwner : IAsyncDisposable
 {
+    private const int GetIsJoinedEmptyRead = 0;
+
     private readonly Lock gate = new();
     private readonly CancellationTokenSource shutdown = new();
     private readonly CancellationToken shutdownToken;
@@ -21,6 +23,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     /// <param name="options">The centrally validated request and capability admission limits.</param>
     public NativeRequestWorkOwner(IOptions<GrainRoutingOptions> options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         settings = options.Value;
         shutdownToken = shutdown.Token;
     }
@@ -29,7 +32,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     internal CancellationToken ShutdownToken => shutdownToken;
 
     /// <summary>Gets whether cancellation and every originally admitted frame have settled.</summary>
-    internal bool IsJoined => Volatile.Read(ref isJoined) != 0;
+    internal bool IsJoined => Volatile.Read(ref isJoined) != GetIsJoinedEmptyRead;
 
     /// <summary>Admits one unique request frame while the owner is open.</summary>
     /// <param name="requestId">The native request identity.</param>
@@ -37,6 +40,8 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
     /// <returns>The lease which releases this exact admission.</returns>
     internal NativeRequestWorkLease Acquire(Guid requestId, NativeRequestWorkKind kind)
     {
+        const int EmptyActiveCount = 0;
+
         if (requestId == Guid.Empty || !Enum.IsDefined(kind))
         {
             throw Errors.Fail(ErrorCode.Validation, NativeRequestWorkLimits.InvalidIdentityMessage);
@@ -57,7 +62,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
                 throw Errors.Fail(ErrorCode.ResourceExhausted, NativeRequestWorkLimits.CapacityMessage);
             }
 
-            if (active.Count == 0)
+            if (active.Count == EmptyActiveCount)
             {
                 zeroFrames = new(TaskCreationOptions.RunContinuationsAsynchronously);
             }
@@ -122,10 +127,12 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
 
     private async Task CompleteDrainAsync(Task start, Task frames)
     {
+        const int ValueSingleItemCount = 1;
+
         await start.ConfigureAwait(false);
         var cancelFailure = await NativeRequestWorkSettlement.CancelAsync(shutdown).ConfigureAwait(false);
         var frameFailure = await NativeRequestWorkSettlement.JoinAsync(frames).ConfigureAwait(false);
-        Volatile.Write(ref isJoined, 1);
+        Volatile.Write(ref isJoined, ValueSingleItemCount);
         NativeRequestWorkSettlement.Rethrow(NativeRequestWorkSettlement.Preserve(cancelFailure, frameFailure));
     }
 
@@ -152,6 +159,8 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
 
     internal void Release(NativeRequestWorkLease lease)
     {
+        const int EmptyActiveCount = 0;
+
         ArgumentNullException.ThrowIfNull(lease);
         TaskCompletionSource? drained = null;
         lock (gate)
@@ -168,7 +177,7 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable
                 requestProducers--;
             }
 
-            if (active.Count == 0)
+            if (active.Count == EmptyActiveCount)
             {
                 drained = zeroFrames;
                 zeroFrames = null;

@@ -33,11 +33,14 @@ internal sealed class ServerNodeUpgradeStores : IDisposable
 
     public void Dispose()
     {
+        const int FailuresCountValidationBoundary = 0;
+        const int IndexEmptyCount = 0;
+
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(Replica.Dispose, failures);
         ServerFailureObserver.Observe(Canonical.Dispose, failures);
-        if (failures.Count > 0 && primaryFailure is not null)
-        { failures.Insert(0, primaryFailure); }
+        if (failures.Count > FailuresCountValidationBoundary && primaryFailure is not null)
+        { failures.Insert(IndexEmptyCount, primaryFailure); }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

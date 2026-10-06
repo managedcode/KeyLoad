@@ -19,6 +19,7 @@ public static class AggregateReplayReduction
         IEnumerable<EventUpcaster>? upcasters = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(limitsOptions);
         var limits = limitsOptions.Value;
         cancellationToken.ThrowIfCancellationRequested();
         AggregateReplayValidation.ValidateLimits(limits);

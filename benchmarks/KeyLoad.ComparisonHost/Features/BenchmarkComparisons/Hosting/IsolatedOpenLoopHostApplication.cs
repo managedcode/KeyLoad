@@ -5,6 +5,8 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <summary>Uses the existing target owner for separate open-loop measurement and proof artifacts.</summary>
 internal static class IsolatedOpenLoopHostApplication
 {
+    private const int NoFailedOperations = 0;
+
     internal static async Task<int> RunAsync(IsolatedHostTargetOwner owner, IsolatedHostSettings settings,
         IsolatedOpenLoopSettings openLoop, CancellationToken cancellationToken)
     {
@@ -29,7 +31,7 @@ internal static class IsolatedOpenLoopHostApplication
 
     private static bool HasFailedMeasurement(OpenLoopComparisonReport report)
         => report.CallerCancelled || report.DrainExpired || !report.SessionsClosed || !report.ScheduleComplete
-            || report.Accounting.Failed > 0 || report.Accounting.HarnessRejected > 0
-            || report.Accounting.TimedOutBeforeStart > 0 || report.Accounting.TimedOutAfterStart > 0
-            || report.Accounting.UnfinishedQueued > 0 || report.Accounting.UnfinishedStarted > 0;
+            || report.Accounting.Failed > NoFailedOperations || report.Accounting.HarnessRejected > NoFailedOperations
+            || report.Accounting.TimedOutBeforeStart > NoFailedOperations || report.Accounting.TimedOutAfterStart > NoFailedOperations
+            || report.Accounting.UnfinishedQueued > NoFailedOperations || report.Accounting.UnfinishedStarted > NoFailedOperations;
 }

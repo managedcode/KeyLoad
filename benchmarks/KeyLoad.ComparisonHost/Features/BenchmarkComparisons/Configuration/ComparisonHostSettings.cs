@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Validated settings required to execute the existing comparison workload.</summary>
-/// <param name="Options">Validated workload options.</param>
+/// <param name="WorkloadOptions">Validated workload options.</param>
 /// <param name="RunId">Unique identifier used to isolate target data.</param>
 /// <param name="KeyLoadEndpoint">KeyLoad endpoint.</param>
 /// <param name="KeyLoadEndpoints">Immutable KeyLoad RF3 peer endpoints, including the primary endpoint.</param>
@@ -28,8 +29,9 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <param name="OutputDirectory">Absolute report output directory.</param>
 /// <param name="Storage">Storage profile description.</param>
 /// <param name="SourceRevision">Optional source revision.</param>
+[KeyLoad.ConfigurationBinding]
 internal sealed record ComparisonHostSettings(
-    ComparisonOptions Options,
+    IOptions<ComparisonOptions> WorkloadOptions,
     string RunId,
     Uri KeyLoadEndpoint,
     ImmutableArray<Uri> KeyLoadEndpoints,
@@ -53,6 +55,8 @@ internal sealed record ComparisonHostSettings(
     string Storage,
     string? SourceRevision)
 {
+    internal ComparisonOptions Options => WorkloadOptions.Value;
+
     /// <summary>Gets the optional validated GitHub identity for container-backed execution.</summary>
     internal ComparisonExecutionIdentity? ExecutionIdentity { get; init; }
 
@@ -60,6 +64,12 @@ internal sealed record ComparisonHostSettings(
     /// <param name="configuration">Comparison host configuration.</param>
     /// <returns>Validated settings, before client allocation.</returns>
     internal static ComparisonHostSettings Read(IConfiguration configuration)
+        => ReadOptions(configuration).Value;
+
+    internal static IOptions<ComparisonHostSettings> ReadOptions(IConfiguration configuration)
+        => ComparisonHostOptionsRegistration.Bind(() => ReadValidated(configuration));
+
+    private static ComparisonHostSettings ReadValidated(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var options = ComparisonOptions.Read(configuration);
@@ -91,7 +101,7 @@ internal sealed record ComparisonHostSettings(
             postgresImage, qdrantImage, rabbitImage, redisImage, neo4jImage,
             output, storage, sourceRevision)
         {
-            ExecutionIdentity = ComparisonExecutionIdentity.Read(configuration, sourceRevision, options.Topology)
+            ExecutionIdentity = ComparisonExecutionIdentity.Read(configuration, sourceRevision, options.Value.Topology)
         };
     }
 

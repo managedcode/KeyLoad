@@ -46,8 +46,8 @@ internal static class KeyLoadAppHostApplication
     internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var twoRf3 = runtimeOptions.Control.Value.TwoRf3;
         var runtimeOptions = AppHostOptionsRegistration.Get(builder);
+        var twoRf3 = runtimeOptions.Control.Value.TwoRf3;
         var tests = runtimeOptions.Control.Value.Tests;
         var scaleSelected = runtimeOptions.Control.Value.ScaleSelected;
         if (scaleSelected && (tests is not null
@@ -68,7 +68,7 @@ internal static class KeyLoadAppHostApplication
             return;
         }
         var configuration = global::AppHostConfiguration.Read(builder);
-        var profile = global::ClusterProfileStore.Open(configuration.DataRoot);
+        var profile = global::ClusterProfileStore.Open(configuration.DataRoot, AppHostOptionsRegistration.Get(builder).Profile);
         if (twoRf3)
         {
             _ = TwoRf3ClusterResources.Add(builder, profile, configuration.DataRoot);

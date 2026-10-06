@@ -112,7 +112,7 @@ internal static class McpTransportGuardTestData
             envelope[MethodField] = method;
         }
         var bytes = JsonDefaults.Serialize(envelope);
-        _ = McpFrameBounds.Inspect(bytes, MaximumWireBytes);
+        _ = McpFrameBounds.Inspect(bytes, MaximumWireBytes, UnitMcpOptions.Execution());
         return bytes;
     }
 

@@ -10,12 +10,14 @@ internal sealed class ScaledRawStorageValueArena
     /// <summary>Generates each seeded value once into bounded contiguous chunks.</summary>
     public ScaledRawStorageValueArena(ScaledRawStorageCorpus corpus, CancellationToken cancellationToken = default)
     {
+        const int RecordCountRecordsPerChunkStep = 1;
+
         ArgumentNullException.ThrowIfNull(corpus);
         cancellationToken.ThrowIfCancellationRequested();
         RecordCount = corpus.RecordCount;
         ValueBytes = corpus.ValueBytes;
         RetainedValueBytes = (long)RecordCount * ValueBytes;
-        chunks = new byte[(RecordCount + RecordsPerChunk - 1) / RecordsPerChunk][];
+        chunks = new byte[(RecordCount + RecordsPerChunk - RecordCountRecordsPerChunkStep) / RecordsPerChunk][];
         FillChunks(corpus, cancellationToken);
     }
 
@@ -43,9 +45,12 @@ internal sealed class ScaledRawStorageValueArena
 
     private void FillChunks(ScaledRawStorageCorpus corpus, CancellationToken cancellationToken)
     {
+        const int OperationInitialValue = 0;
+        const int ChunkIndexInitialValue = 0;
+
         var scratch = GC.AllocateUninitializedArray<byte>(ValueBytes);
-        var operation = 0;
-        for (var chunkIndex = 0; chunkIndex < chunks.Length; chunkIndex++)
+        var operation = OperationInitialValue;
+        for (var chunkIndex = ChunkIndexInitialValue; chunkIndex < chunks.Length; chunkIndex++)
         {
             var firstIndex = chunkIndex * RecordsPerChunk;
             var recordsInChunk = Math.Min(RecordsPerChunk, RecordCount - firstIndex);
@@ -60,9 +65,12 @@ internal sealed class ScaledRawStorageValueArena
     private void FillChunk(ScaledRawStorageCorpus corpus, byte[] scratch, byte[] chunk,
         int firstIndex, int recordsInChunk, ref int operation, CancellationToken cancellationToken)
     {
-        for (var localIndex = 0; localIndex < recordsInChunk; localIndex++)
+        const int LocalIndexInitialValue = 0;
+        const int EmptyOperationCancellationCheckStride = 0;
+
+        for (var localIndex = LocalIndexInitialValue; localIndex < recordsInChunk; localIndex++)
         {
-            if (operation++ % CancellationCheckStride == 0)
+            if (operation++ % CancellationCheckStride == EmptyOperationCancellationCheckStride)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }

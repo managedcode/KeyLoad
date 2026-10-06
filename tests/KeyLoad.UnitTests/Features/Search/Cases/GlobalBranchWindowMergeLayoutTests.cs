@@ -84,7 +84,7 @@ internal sealed class GlobalBranchWindowMergeLayoutTests
             GlobalBranchTestSupport.Window("one", [first, second]),
             GlobalBranchTestSupport.Window("two", [first]));
         var merged = GlobalBranchTestSupport.Merge(request, windows);
-        var fusion = new SearchRankFusion(13, 10, new(new DatabaseLimits()));
+        var fusion = new SearchRankFusion(13, 10, new(UnitExecutionOptions.DatabaseLimits()));
         fusion.AddBranch(merged.Candidates.Select(candidate => new SearchScore(candidate.Reference, candidate.Score)).ToArray(), 1);
         var actual = fusion.Select();
         var independentScore = 1d / 14;
@@ -105,15 +105,15 @@ internal sealed class GlobalBranchWindowMergeLayoutTests
         ]);
         var branch = candidates.Select(candidate => new SearchScore(candidate.Reference, candidate.Score)).ToArray();
         var validated = GlobalBranchSinglePartitionAdapter.Prepare(branch);
-        var fusion = new SearchRankFusion(13, 2, new(new DatabaseLimits()));
+        var fusion = new SearchRankFusion(13, 2, new(UnitExecutionOptions.DatabaseLimits()));
         fusion.AddBranch(branch, 1);
 
         await Assert.That(ReferenceEquals(validated, branch)).IsTrue();
         await Assert.That(fusion.Select().Select(candidate => candidate.Reference).ToArray())
             .IsEquivalentTo(candidates.Select(candidate => candidate.Reference).ToArray(), CollectionOrdering.Matching);
-        GlobalBranchSinglePartitionAdapter.ValidateAt(branch, 0, new(new()));
+        GlobalBranchSinglePartitionAdapter.ValidateAt(branch, 0, new(UnitExecutionOptions.DatabaseLimits()));
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => new SearchRankFusion(13, 2,
-            new(new DatabaseLimits())).AddBranch(branch.Reverse().ToArray(), 1));
+            new(UnitExecutionOptions.DatabaseLimits())).AddBranch(branch.Reverse().ToArray(), 1));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Corruption);
     }
 }

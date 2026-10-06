@@ -17,7 +17,7 @@ internal sealed class QueryAdapterContractTests
         const string sql = "SELECT d.id, d.number FROM orders d WHERE d.number >= 2.00 ORDER BY d.id LIMIT 1";
         var first = engine.Execute("root", new(db.Partition, sql, AllowFullScan: true));
         await Assert.That(System.Linq.Enumerable.Single(first.Rows).EntityId).IsEqualTo("a");
-        var json = QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql.Replace("2.00", "2", StringComparison.Ordinal), new()).Parse(),
+        var json = QueryAdapterTestSupport.RoundTrip(new(db.Partition, new SqlParser(sql.Replace("2.00", "2", StringComparison.Ordinal), UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse(),
             new(), true, first.Cursor));
         var second = engine.ExecuteAst("root", json);
         await Assert.That(System.Linq.Enumerable.Single(second.Rows).EntityId).IsEqualTo("b");

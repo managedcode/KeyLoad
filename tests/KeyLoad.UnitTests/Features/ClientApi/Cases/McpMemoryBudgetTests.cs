@@ -28,7 +28,7 @@ internal sealed class McpMemoryBudgetTests
         string expectedParameterName)
     {
         var error = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            _ = new McpMemoryBudget(dataBytes, controlBytes, ingressBytes));
+            _ = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = dataBytes, ControlBytes = controlBytes, IngressBytes = ingressBytes })));
         await Assert.That(error.ParamName).IsEqualTo(expectedParameterName);
     }
 
@@ -36,7 +36,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task LanesRemainIndependentAtTheirCapacityBoundaries()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var data = budget.Reserve(McpMemoryLane.Data, DataCapacity);
         using var control = budget.Reserve(McpMemoryLane.Control, ControlCapacity);
         using var ingress = budget.Reserve(McpMemoryLane.Ingress, IngressCapacity);
@@ -52,7 +52,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task ZeroByteLeaseDoesNotConsumeCapacity()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var empty = budget.Reserve(McpMemoryLane.Data, 0);
         empty.GrowTo(0);
         using var full = budget.Reserve(McpMemoryLane.Data, DataCapacity);
@@ -65,7 +65,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task MaximumLongCapacityDoesNotOverflowOnAdditionalReservation()
     {
-        var budget = new McpMemoryBudget(long.MaxValue, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = long.MaxValue, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var full = budget.Reserve(McpMemoryLane.Data, long.MaxValue);
 
         var exhausted = Assert.ThrowsExactly<KeyLoadException>(() => budget.Reserve(McpMemoryLane.Data, 1));
@@ -76,7 +76,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task NegativeReservationAndGrowthSizesAreRejected()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         var reserveError = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => budget.Reserve(McpMemoryLane.Data, -1));
         await Assert.That(reserveError.ParamName).IsEqualTo("retainedBytes");
         using var lease = budget.Reserve(McpMemoryLane.Data, 6);
@@ -92,7 +92,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task FailedGrowthRetainsOriginalReservation()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var original = budget.Reserve(McpMemoryLane.Data, 6);
         var error = Assert.ThrowsExactly<KeyLoadException>(() => original.GrowTo(DataCapacity + 1));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
@@ -112,7 +112,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task CancelledGrowthRetainsOriginalReservation()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var lease = budget.Reserve(McpMemoryLane.Data, 6);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
@@ -127,7 +127,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task CancelledReservationDoesNotConsumeCapacity()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
 
@@ -141,7 +141,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task UndefinedLaneIsRejected()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         var error = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             budget.Reserve((McpMemoryLane)int.MaxValue, 1));
         await Assert.That(error.ParamName).IsEqualTo("lane");
@@ -151,7 +151,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task ShrinkingLeaseIsRejectedWithoutReleasingCapacity()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var lease = budget.Reserve(McpMemoryLane.Data, 6);
         Assert.ThrowsExactly<InvalidOperationException>(() => lease.GrowTo(5));
 
@@ -164,7 +164,7 @@ internal sealed class McpMemoryBudgetTests
     [Test]
     public async Task DisposeIsIdempotentAndMakesLeaseUnavailable()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         var lease = budget.Reserve(McpMemoryLane.Data, DataCapacity);
         lease.Dispose();
         lease.Dispose();
@@ -187,7 +187,7 @@ internal sealed class McpMemoryBudgetGrowthTests
     [Test]
     public async Task DisposeAfterGrowthReleasesFullReservation()
     {
-        var budget = new McpMemoryBudget(DataCapacity, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = DataCapacity, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         var lease = budget.Reserve(McpMemoryLane.Data, 6);
         lease.GrowTo(DataCapacity);
         lease.Dispose();
@@ -201,7 +201,7 @@ internal sealed class McpMemoryBudgetGrowthTests
     [Test]
     public async Task GrowthToMaximumLongDoesNotOverflow()
     {
-        var budget = new McpMemoryBudget(long.MaxValue, ControlCapacity, IngressCapacity);
+        var budget = new McpMemoryBudget(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Server.McpMemoryLimits { DataBytes = long.MaxValue, ControlBytes = ControlCapacity, IngressBytes = IngressCapacity }));
         using var lease = budget.Reserve(McpMemoryLane.Data, 1);
         lease.GrowTo(long.MaxValue);
 

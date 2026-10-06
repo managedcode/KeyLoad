@@ -4,19 +4,23 @@ internal static class RequestCqrsProbePaths
 {
     internal static void RequireDirectory(string path)
     {
+        const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
+
         RequirePathAncestors(path);
         var info = new DirectoryInfo(path);
-        if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (!info.Exists || (info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
         { throw Invalid(); }
         RequirePrivateMode(path, RequestCqrsProbeProtocol.PrivateDirectoryMode);
     }
 
     private static void RequirePathAncestors(string path)
     {
+        const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
+
         if (!Path.IsPathFullyQualified(path) || Path.GetFullPath(path) != RequestCqrsProbeProtocol.FixedRoot)
         { throw Invalid(); }
         var info = new DirectoryInfo(path);
-        if ((info.Attributes & FileAttributes.ReparsePoint) != 0)
+        if ((info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
         { throw Invalid(); }
     }
 

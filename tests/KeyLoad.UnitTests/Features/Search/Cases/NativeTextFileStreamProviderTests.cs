@@ -90,7 +90,7 @@ internal sealed class NativeTextFileStreamProviderTests
             ?? throw new InvalidOperationException("The native generation has no manager root.");
         var leaf = Path.GetFileName(generation);
         var native = Path.Combine(generation, NativeTextProtocol.NativeDirectory);
-        return (new NativeTextFileStreamProvider(root, leaf, database.Store.Identity.NodeId), root, native);
+        return (new NativeTextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, UnitNativeTextOptions.Execution()), root, native);
     }
 
     private static void WriteOwned(NativeTextFileStreamProvider provider, string path, byte[] value)

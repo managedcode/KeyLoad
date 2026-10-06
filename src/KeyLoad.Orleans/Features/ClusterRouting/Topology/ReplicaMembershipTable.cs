@@ -27,16 +27,20 @@ public sealed class ReplicaMembershipTable : IMembershipTable
     /// <param name="membershipOptions">Centrally validated native membership scheduling and admission.</param>
     /// <param name="executionOptions">Centrally validated quorum command and read deadlines.</param>
     public ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,
-        string clusterId, string internalPrincipal, TimeProvider clock, CancellationToken startupCancellation,
-        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
+        string clusterId, string internalPrincipal, TimeProvider clock, IOptions<OrleansMembershipOptions> membershipOptions,
+        IOptions<ReplicaExecutionOptions> executionOptions, CancellationToken startupCancellation)
         : this(database, coordinator, endpoint, clusterId, internalPrincipal, clock,
-            ReplicaMembershipProtocol.UnboundedRows, startupCancellation, membershipOptions, executionOptions) { }
+            ReplicaMembershipProtocol.UnboundedRows,
+            membershipOptions ?? throw new ArgumentNullException(nameof(membershipOptions)),
+            executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), startupCancellation) { }
 
     /// <summary>Creates a profile-bounded authority provider without changing the default provider contract.</summary>
     internal ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,
-        string clusterId, string internalPrincipal, TimeProvider clock, int maximumRows, CancellationToken startupCancellation,
-        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions)
+        string clusterId, string internalPrincipal, TimeProvider clock, int maximumRows,
+        IOptions<OrleansMembershipOptions> membershipOptions, IOptions<ReplicaExecutionOptions> executionOptions, CancellationToken startupCancellation)
     {
+        ArgumentNullException.ThrowIfNull(membershipOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(coordinator);
         replica = endpoint ?? throw new ArgumentNullException(nameof(endpoint));

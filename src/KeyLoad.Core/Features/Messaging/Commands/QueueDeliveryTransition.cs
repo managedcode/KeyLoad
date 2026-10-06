@@ -5,6 +5,11 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int QueueDeliveryTransitionMinimumPositiveCount = 1;
+    private const int QueueDeliveryTransitionVersionOne = 1;
+    private const int QueueDeliveryTransitionAdjacentElementOffset = 1;
+    private const int QueueDeliveryTransitionRetryExponentialBase = 2;
+
     private const int DefaultRenewalSeconds = 30;
 
     private CommitReceipt ApplyDeliveryTransition(IAtomicTransaction tx, DeliveryCommand command,
@@ -17,19 +22,19 @@ public sealed partial class DatabaseEngine
         if (command.Action == DeliveryAction.Renew)
         {
             var seconds = command.LeaseSeconds ?? DefaultRenewalSeconds;
-            if (seconds < 1 || seconds > resource.QueuePolicy.MaxLeaseSeconds)
+            if (seconds < QueueDeliveryTransitionMinimumPositiveCount || seconds > resource.QueuePolicy.MaxLeaseSeconds)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRenewal);
             }
             var deadline = now.AddSeconds(seconds);
-            updated = metadata with { LeaseUntil = deadline, StateVersion = metadata.StateVersion + 1 };
+            updated = metadata with { LeaseUntil = deadline, StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne };
             tx.PutRecord(QueueKey(LeasedQueueSpace, command.Lane, deadline, metadata.Id), metadata.Id);
         }
         else
         {
             counters = counters with
             {
-                InFlightMessages = counters.InFlightMessages - 1,
+                InFlightMessages = counters.InFlightMessages - QueueDeliveryTransitionAdjacentElementOffset,
                 InFlightBytes = counters.InFlightBytes - lease.BodyBytes
             };
             updated = CompleteDeliveryAction(tx, command.Lane, resource.QueuePolicy, command.Action,
@@ -48,14 +53,14 @@ public sealed partial class DatabaseEngine
         {
             counters = counters with
             {
-                StoredMessages = counters.StoredMessages - 1,
+                StoredMessages = counters.StoredMessages - QueueDeliveryTransitionAdjacentElementOffset,
                 StoredBytes = counters.StoredBytes - bodyBytes
             };
             tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
             return metadata with
             {
                 State = MessageState.Acked,
-                StateVersion = metadata.StateVersion + 1,
+                StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne,
                 LeaseOwner = null,
                 LeaseUntil = null
             };
@@ -66,20 +71,20 @@ public sealed partial class DatabaseEngine
             return metadata with
             {
                 State = MessageState.DeadLettered,
-                StateVersion = metadata.StateVersion + 1,
+                StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne,
                 LeaseOwner = null,
                 LeaseUntil = null,
                 SafeFailureCode = AttemptsExhausted
             };
         }
         var delay = Math.Min(policy.RetryMaxMilliseconds,
-            policy.RetryBaseMilliseconds * Math.Pow(2, Math.Min(metadata.Attempts - 1, messagingExecution.MaximumRetryExponent)));
+            policy.RetryBaseMilliseconds * Math.Pow(QueueDeliveryTransitionRetryExponentialBase, Math.Min(metadata.Attempts - QueueDeliveryTransitionAdjacentElementOffset, messagingExecution.MaximumRetryExponent)));
         var available = now.AddMilliseconds(delay);
         tx.PutRecord(QueueKey(ScheduledQueueSpace, lane, available, metadata.Id), metadata.Id);
         return metadata with
         {
             State = MessageState.Scheduled,
-            StateVersion = metadata.StateVersion + 1,
+            StateVersion = metadata.StateVersion + QueueDeliveryTransitionVersionOne,
             LeaseOwner = null,
             LeaseUntil = null,
             NotBefore = available,

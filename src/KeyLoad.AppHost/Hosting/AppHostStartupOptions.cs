@@ -12,6 +12,7 @@ internal sealed class AppHostStartupOptions
     private const string ContainerIdentityOutputCharactersKey = "KeyLoad:ContainerIdentityOutputCharacters";
     private const string BenchmarkModeKey = "Benchmarks:Enabled";
     private const string BenchmarkProfileKey = "Benchmarks:Profile";
+    private const string BenchmarkOutputKey = "Benchmarks:Output";
     private const string BenchmarkRootKey = "Benchmarks:DataRoot";
     private const string DataRootKey = "KeyLoad:DataRoot";
     private const string EphemeralKey = "KeyLoad:Ephemeral";
@@ -31,6 +32,8 @@ internal sealed class AppHostStartupOptions
     public bool BenchmarkMode { get; set; }
     [ConfigurationKeyName(BenchmarkProfileKey)]
     public string BenchmarkProfile { get; set; } = global::AppHostConfiguration.GeneralBenchmarkProfile;
+    [ConfigurationKeyName(BenchmarkOutputKey)]
+    public string? BenchmarkOutput { get; set; }
     [ConfigurationKeyName(BenchmarkRootKey)]
     public string? BenchmarkRoot { get; set; }
     [ConfigurationKeyName(DataRootKey)]

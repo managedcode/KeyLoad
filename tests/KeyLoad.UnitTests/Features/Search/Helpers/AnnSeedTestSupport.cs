@@ -72,7 +72,7 @@ internal static class AnnSeedTestSupport
     internal static AnnSeed Capture(TestDatabase database, string principalId = Principal,
         VectorSpace? space = null, AnnSeedOptions? options = null, ReadExecutionBudget? budget = null)
         => AnnSeedCollector.Capture(database.Database, principalId, database.Partition, Collection, Field,
-            space ?? Space(), options ?? new(), budget ?? new(database.Database.Limits));
+            space ?? Space(), Microsoft.Extensions.Options.Options.Create(options ?? new()), budget ?? new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
 
     internal static KeyLoadException CaptureFailure(TestDatabase database, string principalId,
         VectorSpace? space = null, AnnSeedOptions? options = null, ReadExecutionBudget? budget = null)

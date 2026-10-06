@@ -37,11 +37,19 @@ internal static class BlobKeys
 
     internal static BlobRef DecodeScope(ReadOnlySpan<byte> key, string space, int expected)
     {
+        const int PrefixComponentIndex = 0;
+        const int TenantComponentIndex = 1;
+        const int DatabaseComponentIndex = 2;
+        const int DomainComponentIndex = 3;
+        const int PartitionComponentIndex = 4;
+        const int ResourceComponentIndex = 5;
+        const int IdComponentIndex = 6;
+
         var components = KeyCodec.Decode(key);
-        if (components.Length != expected || components[0] is not string prefix || prefix != space
-            || components[1] is not string tenant || components[2] is not string database
-            || components[3] is not string domain || components[4] is not string partition
-            || components[5] is not string resource || components[6] is not string id)
+        if (components.Length != expected || components[PrefixComponentIndex] is not string prefix || prefix != space
+            || components[TenantComponentIndex] is not string tenant || components[DatabaseComponentIndex] is not string database
+            || components[DomainComponentIndex] is not string domain || components[PartitionComponentIndex] is not string partition
+            || components[ResourceComponentIndex] is not string resource || components[IdComponentIndex] is not string id)
         { throw BlobErrors.Corruption(); }
         var blob = new BlobRef(new(tenant, database, domain, partition), resource, id);
         Validate(blob);

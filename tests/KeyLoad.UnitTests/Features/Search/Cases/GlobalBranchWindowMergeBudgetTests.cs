@@ -27,7 +27,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             MaxScanRecords = ExaminedCandidates,
             MaxResults = SelectedLimit
         };
-        var budget = new ReadExecutionBudget(limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
 
         var result = GlobalBranchWindowMerger.Merge(request, windows, limits, budget);
 
@@ -76,7 +76,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             MaxScanRecords = MaximumCandidates,
             MaxResults = SelectedLimit
         };
-        var budget = new ReadExecutionBudget(limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(request,
             windows, limits, budget));
@@ -97,13 +97,13 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             GlobalBranchTestSupport.Candidate("c", 0.7)
         };
         var candidateFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(
-            candidateRequest, [GlobalBranchTestSupport.Window("w", candidates)], limits, new(limits)));
+            candidateRequest, [GlobalBranchTestSupport.Window("w", candidates)], limits, new(UnitExecutionOptions.DatabaseLimits(limits))));
         var windowFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(
-            GlobalBranchTestSupport.Request(["a", "b", "c"], limit: MaximumCandidates), [], limits, new(limits)));
+            GlobalBranchTestSupport.Request(["a", "b", "c"], limit: MaximumCandidates), [], limits, new(UnitExecutionOptions.DatabaseLimits(limits))));
         var receivedWindowFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(
             GlobalBranchTestSupport.Request(["a", "b"], limit: MaximumCandidates),
             [GlobalBranchTestSupport.Window("a", []), GlobalBranchTestSupport.Window("b", []),
-                GlobalBranchTestSupport.Window("a", [])], limits, new(limits)));
+                GlobalBranchTestSupport.Window("a", [])], limits, new(UnitExecutionOptions.DatabaseLimits(limits))));
 
         await Assert.That(candidateFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(windowFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -118,7 +118,7 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
             [GlobalBranchTestSupport.Candidate("a", 1)]));
         using var canceled = new CancellationTokenSource();
         await canceled.CancelAsync();
-        var canceledBudget = new ReadExecutionBudget(new(), cancellationToken: canceled.Token);
+        var canceledBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: canceled.Token);
 
         Assert.ThrowsExactly<OperationCanceledException>(() => GlobalBranchWindowMerger.Merge(request,
             windows, new(), canceledBudget));

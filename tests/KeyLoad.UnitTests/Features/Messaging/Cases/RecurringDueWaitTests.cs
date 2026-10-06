@@ -1,5 +1,3 @@
-using KeyLoad.Replication;
-
 namespace KeyLoad.UnitTests;
 
 /// <summary>AC-ORL-011: due discovery waits on real canonical apply with a joined clock fallback.</summary>
@@ -62,5 +60,22 @@ internal sealed class RecurringDueWaitTests
 
         await fixture.AssertDocument(ReplicaAppliedPositionWaitTests.FirstDocument);
         await Assert.That(fixture.Consensus.AppliedPosition).IsEqualTo(1L);
+    }
+
+    /// <summary>A malformed committed replica entry faults the real apply worker and the due wait joins its fallback.</summary>
+    [Test]
+    public async Task ApplyLogFailureWakesDueWaitAndPreservesRecoveryFence()
+    {
+        await using var fixture = new ReplicaAppliedPositionWaitFixture();
+        using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        var pending = RecurringDueWait.WaitForChangeOrFallbackAsync(fixture.Consensus, 0,
+            TimeSpan.FromSeconds(10), TimeProvider.System, linked.Token);
+
+        fixture.CommitCorruptedNoOpEntry();
+
+        var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => pending.WaitAsync(linked.Token));
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.RecoveryRequired);
     }
 }

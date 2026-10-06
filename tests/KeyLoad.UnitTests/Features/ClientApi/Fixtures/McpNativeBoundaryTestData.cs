@@ -55,5 +55,5 @@ internal static class McpNativeBoundaryTestData
     /// <returns>The reply owner retained throughout native replacement and serialization.</returns>
     internal static McpReplyOwner Reply(bool failure) => failure
         ? McpReplyOwner.Failure(ErrorCode.PermissionDenied, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes)
-        : McpReplyOwner.Success(JsonDefaults.Serialize(UnicodeName), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes);
+        : McpReplyOwner.Success(JsonDefaults.Serialize(UnicodeName), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
 }

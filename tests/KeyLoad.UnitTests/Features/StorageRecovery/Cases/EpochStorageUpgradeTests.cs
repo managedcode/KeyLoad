@@ -60,8 +60,7 @@ internal sealed class EpochStorageUpgradeTests
         var identity = await fixture.CreateNativeSourceAsync(checkpoint: false, sourceEpoch);
         if (version != sourceEpoch)
         {
-            ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),
-                identity with { FormatVersion = version });
+            ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),                 identity with { FormatVersion = version }, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         }
         var before = await EpochStorageFixture.CaptureAsync(fixture.Source);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -159,8 +158,7 @@ internal sealed class EpochStorageUpgradeTests
 
     private static Task SetUnknownIdentityAsync(EpochStorageFixture fixture, StoreIdentity identity)
     {
-        ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),
-            identity with { FormatVersion = 8 });
+        ZoneTreeIdentityFile.Write(Path.Combine(fixture.Source, "identity.json"),             identity with { FormatVersion = 8 }, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         return Task.CompletedTask;
     }
 

@@ -44,7 +44,7 @@ internal static class IsolatedTimeSeriesTimescaleResources
         var primaryName = NodePrefix + PrimaryOrdinal;
         var primary = AddPrimary(context, primaryName, password, privateGroup);
         IsolatedPostgresBootstrap.Configure(primary, context.DataDirectory(primaryName), scripts, password, null,
-            context.NodeCount - PrimaryNodeCount, primaryName);
+            context.NodeCount - PrimaryNodeCount, KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder).Deployment, primaryName);
         context.BindSetting(Connection, primary.Resource.ConnectionStringExpression);
         context.BindEndpoint(FirstEndpointIndex, primary, Tcp);
         AddStandbys(context, primary, password, scripts, privateGroup, primaryName);
@@ -78,7 +78,7 @@ internal static class IsolatedTimeSeriesTimescaleResources
             .WithImageSHA256(Digest[DigestPrefixLength..]).WithContainerName(name + ContainerSeparator + privateGroup)
             .WithContainerNetworkAlias(name).WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp).WaitFor(primary);
         IsolatedPostgresBootstrap.Configure(standby, context.DataDirectory(name), scripts, password, ordinal,
-            context.NodeCount - PrimaryNodeCount, primaryName);
+            context.NodeCount - PrimaryNodeCount, KeyLoad.AppHost.Hosting.AppHostOptionsRegistration.Get(context.Builder).Deployment, primaryName);
         context.BindEndpoint(index, standby, Tcp);
     }
 }

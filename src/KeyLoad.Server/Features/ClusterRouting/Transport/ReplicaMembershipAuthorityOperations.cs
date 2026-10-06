@@ -6,6 +6,11 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions> nodeOptions, ReplicaMembershipAuthorityMac mac)
 {
+    private const int DataReplyErrorDetailCodeEmptyCount = 0;
+    private const int AppliedReplyErrorDetailCodeEmptyCount = 0;
+    private const int AppliedReplyTableVersionEmptyCount = 0;
+    private const int FailedTableVersionEmptyCount = 0;
+
     private readonly NodeOptions options = nodeOptions.Value;
     internal async Task<ReplicaMembershipAuthorityReplyV1> ExecuteAsync(IMembershipTable provider,
         ReplicaMembershipAuthorityCallV1 call, CancellationToken cancellationToken)
@@ -71,13 +76,13 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
 
     private ReplicaMembershipAuthorityReplyV1 DataReply(ReplicaMembershipAuthorityCallV1 call, MembershipTableData data)
         => new(ReplicaMembershipAuthorityProtocol.Version, options.PhysicalShardId, options.Incarnation,
-            call.RequestId, string.Empty, (int)ReplicaMembershipAuthorityResultKind.Completed, null, 0, false,
+            call.RequestId, string.Empty, (int)ReplicaMembershipAuthorityResultKind.Completed, null, DataReplyErrorDetailCodeEmptyCount, false,
             data.Version.Version, data.Version.VersionEtag, ReplicaMembershipAuthorityMapping.ToWireRows(data));
 
     private ReplicaMembershipAuthorityReplyV1 AppliedReply(ReplicaMembershipAuthorityCallV1 call, bool applied)
         => new(ReplicaMembershipAuthorityProtocol.Version, options.PhysicalShardId, options.Incarnation,
-            call.RequestId, string.Empty, (int)ReplicaMembershipAuthorityResultKind.Completed, null, 0, applied,
-            0, string.Empty, ImmutableArray<ReplicaMembershipAuthorityEntryV1>.Empty);
+            call.RequestId, string.Empty, (int)ReplicaMembershipAuthorityResultKind.Completed, null, AppliedReplyErrorDetailCodeEmptyCount, applied,
+            AppliedReplyTableVersionEmptyCount, string.Empty, ImmutableArray<ReplicaMembershipAuthorityEntryV1>.Empty);
 
     private static TableVersion Version(ReplicaMembershipAuthorityCallV1 call)
         => new(call.ExpectedTableVersion, call.ExpectedTableVersionETag!);
@@ -85,7 +90,7 @@ internal sealed class ReplicaMembershipAuthorityOperations(IOptions<NodeOptions>
     internal ReplicaMembershipAuthorityReplyV1 Failed(ReplicaMembershipAuthorityCallV1 call, string nonce, KeyLoadException error)
         => new(ReplicaMembershipAuthorityProtocol.Version, options.PhysicalShardId, options.Incarnation,
             call.RequestId, nonce, (int)ReplicaMembershipAuthorityResultKind.Failed, error.Code,
-            (int)ReplicaMembershipAuthorityMapping.Detail(error.Code), false, 0, string.Empty,
+            (int)ReplicaMembershipAuthorityMapping.Detail(error.Code), false, FailedTableVersionEmptyCount, string.Empty,
             ImmutableArray<ReplicaMembershipAuthorityEntryV1>.Empty);
 
     internal void VerifyCallHeaderBinding(ReplicaMembershipAuthorityCallV1 call,

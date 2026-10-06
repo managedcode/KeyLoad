@@ -5,6 +5,9 @@ namespace KeyLoad.Orleans;
 
 internal sealed class ReplicaMembershipSnapshot
 {
+    private const int DeleteVersionStep = 1;
+    private const int NextVersionVersionStep = 1;
+
     private readonly ReplicaMembershipTableSnapshot snapshot;
 
     private ReplicaMembershipSnapshot(long expectedVersion, ReplicaMembershipTableSnapshot snapshot)
@@ -17,9 +20,12 @@ internal sealed class ReplicaMembershipSnapshot
 
     internal static ReplicaMembershipSnapshot Read(MembershipRecord? record, int maximumRows = 0)
     {
-        var snapshot = record is null ? new ReplicaMembershipTableSnapshot(0, [])
+        const int VersionEmptyCount = 0;
+        const int RecordVersionValidationBoundary = 0;
+
+        var snapshot = record is null ? new ReplicaMembershipTableSnapshot(VersionEmptyCount, [])
             : NativeSerialization.Deserialize<ReplicaMembershipTableSnapshot>(record.Payload.Span);
-        var result = new ReplicaMembershipSnapshot(record?.Version ?? 0, snapshot);
+        var result = new ReplicaMembershipSnapshot(record?.Version ?? RecordVersionValidationBoundary, snapshot);
         result.ValidateCapacity(maximumRows);
         return result;
     }
@@ -36,18 +42,22 @@ internal sealed class ReplicaMembershipSnapshot
 
     internal ReplicaMembershipSnapshot? Insert(MembershipEntry entry, TableVersion tableVersion, int maximumRows = 0)
     {
+        const int EtagSingleItemCount = 1;
+
         if (!NextVersion(tableVersion) || snapshot.Rows.Any(row => row.Address == entry.SiloAddress.ToParsableString()))
         {
             return null;
         }
         CheckCanAdd(entry, maximumRows);
-        var next = Next(new(tableVersion.Version, snapshot.Rows.Append(ReplicaMembershipRow.From(entry, 1)).ToArray()));
+        var next = Next(new(tableVersion.Version, snapshot.Rows.Append(ReplicaMembershipRow.From(entry, EtagSingleItemCount)).ToArray()));
         next.ValidateCapacity(maximumRows);
         return next;
     }
 
     internal ReplicaMembershipSnapshot? Update(MembershipEntry entry, string etag, TableVersion tableVersion, int maximumRows = 0)
     {
+        const int ETagStep = 1;
+
         var previous = snapshot.Rows.FirstOrDefault(row => row.Address == entry.SiloAddress.ToParsableString());
         if (previous is null || etag != Version(previous.ETag) || !NextVersion(tableVersion))
         {
@@ -55,7 +65,7 @@ internal sealed class ReplicaMembershipSnapshot
         }
 
         // A status update based on an older read cannot move the heartbeat backwards.
-        var updated = ReplicaMembershipRow.From(entry, checked(previous.ETag + 1)) with
+        var updated = ReplicaMembershipRow.From(entry, checked(previous.ETag + ETagStep)) with
         { Alive = entry.IAmAliveTime > previous.Alive ? entry.IAmAliveTime : previous.Alive };
         var next = Next(new(tableVersion.Version, snapshot.Rows.Select(row => row.Address == previous.Address ? updated : row).ToArray()));
         next.ValidateCapacity(maximumRows);
@@ -78,14 +88,16 @@ internal sealed class ReplicaMembershipSnapshot
         return next;
     }
 
-    internal ReplicaMembershipSnapshot Delete() => Next(new(checked(snapshot.Version + 1), []));
+    internal ReplicaMembershipSnapshot Delete() => Next(new(checked(snapshot.Version + DeleteVersionStep), []));
 
     internal ReplicaMembershipSnapshot? Cleanup(DateTimeOffset beforeDate, int maximumRows = 0)
     {
+        const int VersionStep = 1;
+
         var retained = snapshot.Rows.Where(row => row.Status != SiloStatus.Dead || row.Alive >= beforeDate.UtcDateTime).ToArray();
         if (retained.Length == snapshot.Rows.Length)
         { return null; }
-        var next = Next(new(checked(snapshot.Version + 1), retained));
+        var next = Next(new(checked(snapshot.Version + VersionStep), retained));
         next.ValidateCapacity(maximumRows);
         return next;
     }
@@ -109,14 +121,17 @@ internal sealed class ReplicaMembershipSnapshot
 
     private void CheckCanAdd(MembershipEntry entry, int maximumRows)
     {
-        if (maximumRows > 0 && snapshot.Rows.Length >= maximumRows)
+        const int MaximumRowsValidationBoundary = 0;
+        const string CheckCanAddEtagText = "0";
+
+        if (maximumRows > MaximumRowsValidationBoundary && snapshot.Rows.Length >= maximumRows)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaMembershipAuthorityText.MembershipCapacity); }
-        if (maximumRows > 0)
-        { ReplicaMembershipAuthorityValidation.Entry(ReplicaMembershipAuthorityMapping.ToWire(entry, "0")); }
+        if (maximumRows > MaximumRowsValidationBoundary)
+        { ReplicaMembershipAuthorityValidation.Entry(ReplicaMembershipAuthorityMapping.ToWire(entry, CheckCanAddEtagText)); }
     }
 
     private bool NextVersion(TableVersion tableVersion) => snapshot.Version < long.MaxValue
-        && tableVersion.Version == snapshot.Version + 1 && tableVersion.VersionEtag == Version(snapshot.Version);
+        && tableVersion.Version == snapshot.Version + NextVersionVersionStep && tableVersion.VersionEtag == Version(snapshot.Version);
 
     private ReplicaMembershipSnapshot Next(ReplicaMembershipTableSnapshot updated) => new(ExpectedVersion, updated);
 

@@ -166,7 +166,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         {
             runtime.Check();
             runtime.Identity = runtime.Identity with { DispatchPaused = paused };
-            ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity);
+            ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory, IdentityFileName), runtime.Identity, runtime.Options.IdentityBufferBytes);
         }
         finally
         {
@@ -190,7 +190,11 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <returns>The original persisted identity and verified local journal position.</returns>
     public static (StoreIdentity Identity, long Position) VerifyBackup(string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
-        => ZoneTreeBackupVerification.Verify(directory, executionOptions);
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directory);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        return ZoneTreeBackupVerification.Verify(directory, executionOptions);
+    }
 
     /// <summary>Restores a verified backup under a new node identity with dispatch paused.</summary>
     /// <param name="backup">Directory containing the verified backup manifest and files.</param>

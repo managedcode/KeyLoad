@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 
@@ -30,7 +31,9 @@ internal static class TypedOptionsFlowRegistration
             .Configure<IConfiguration>(static (policy, configuration) => configuration.Bind(policy))
             .Validate(static policy => policy.AdmissionCapacity > 0 && policy.Deadline > TimeSpan.Zero, InvalidPolicy);
         services.AddSingleton(state);
-        services.AddSingleton<TypedOptionsFlowConsumer>();
+        services.AddSingleton(static provider => new TypedOptionsFlowConsumer(
+            provider.GetRequiredService<IOptions<TypedOptionsFlowSettings>>(),
+            provider.GetRequiredService<TypedOptionsFlowState>()));
         return services.BuildServiceProvider();
     }
 }

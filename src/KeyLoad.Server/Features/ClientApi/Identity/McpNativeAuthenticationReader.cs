@@ -3,20 +3,24 @@ using KeyLoad.Orleans;
 using Orleans.Serialization.Buffers;
 using Orleans.Serialization.Codecs;
 using Orleans.Serialization.WireProtocol;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, CancellationToken cancellationToken)
+internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, CancellationToken cancellationToken,
+    IOptions<McpExecutionOptions> options)
 {
     private const uint FirstField = 0;
     private const uint NextField = 1;
     private const uint NativePayloadValueDelta = 1;
     // Explicit property Ids belong to one body scope after the empty constructor scope.
-    private readonly McpAuthenticationProjection projection = new(enforceMcpBounds);
-    private readonly McpNativeAuthenticationCollections collections = new(enforceMcpBounds, cancellationToken);
+    private readonly McpAuthenticationProjection projection = new(enforceMcpBounds, options);
+    private readonly McpNativeAuthenticationCollections collections = new(enforceMcpBounds, cancellationToken, options);
 
     internal McpFrameShape Read<TInput>(ref Reader<TInput> reader)
     {
+        const int EmptyRemaining = 0;
+
         cancellationToken.ThrowIfCancellationRequested();
         NativePayloadHeader.Validate(NativeFieldHeaderReader.Read(ref reader));
         var reference = ReferenceCodec.CreateRecordPlaceholder(reader.Session);
@@ -27,7 +31,7 @@ internal sealed class McpNativeAuthenticationReader(bool enforceMcpBounds, Cance
         McpAuthenticationNativeFields.Require(field.FieldType == typeof(GrainValue));
         var shape = Grain(ref reader, field);
         McpAuthenticationNativeFields.End(ref reader);
-        McpAuthenticationNativeFields.Require(reader.Remaining == 0);
+        McpAuthenticationNativeFields.Require(reader.Remaining == EmptyRemaining);
         McpAuthenticationNativeFields.Record(ref reader, reference, typeof(NativePayload), shape);
         cancellationToken.ThrowIfCancellationRequested();
         return shape;

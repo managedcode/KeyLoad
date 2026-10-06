@@ -53,11 +53,13 @@ internal ref struct CacheControlWriter(Span<byte> destination, bool measureOnly 
 
     internal void GuidField(ushort id, Guid value)
     {
+        const int GuidEncodedByteCount = 16;
+
         Id(id);
-        var offset = Advance(16);
+        var offset = Advance(GuidEncodedByteCount);
         if (!sizing)
         {
-            _ = value.TryWriteBytes(buffer.Slice(offset, 16), bigEndian: true, out _);
+            _ = value.TryWriteBytes(buffer.Slice(offset, GuidEncodedByteCount), bigEndian: true, out _);
         }
     }
 
@@ -95,8 +97,11 @@ internal ref struct CacheControlWriter(Span<byte> destination, bool measureOnly 
 
     internal void NullableStringField(ushort id, string? value)
     {
+        const int NullableStringFieldEmptyCount = 0;
+        const int NullableStringFieldSingleItemCount = 1;
+
         Id(id);
-        Byte(value is null ? (byte)0 : (byte)1);
+        Byte(value is null ? (byte)NullableStringFieldEmptyCount : (byte)NullableStringFieldSingleItemCount);
         if (value is not null)
         {
             String(value);
@@ -105,8 +110,11 @@ internal ref struct CacheControlWriter(Span<byte> destination, bool measureOnly 
 
     internal void NullableSlotField(ushort id, CacheVoterSlot? value)
     {
+        const int NullableSlotFieldSingleItemCount = 1;
+        const int NullableSlotFieldEmptyCount = 0;
+
         Id(id);
-        Byte(value.HasValue ? (byte)1 : (byte)0);
+        Byte(value.HasValue ? (byte)NullableSlotFieldSingleItemCount : (byte)NullableSlotFieldEmptyCount);
         if (value is { } slot)
         {
             Byte((byte)slot);

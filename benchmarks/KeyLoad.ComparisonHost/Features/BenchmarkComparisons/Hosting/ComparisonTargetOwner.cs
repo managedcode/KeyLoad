@@ -21,9 +21,11 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
     /// <returns>The target list consumed by the existing runner.</returns>
     internal IComparisonTarget[] CreateTargets(ComparisonHostSettings settings)
     {
+        const int KeyLoadClientsFirstIndex = 0;
+
         ArgumentNullException.ThrowIfNull(settings);
         var keyLoadClients = CreateClients(settings.KeyLoadEndpoints);
-        var keyLoadClient = keyLoadClients[0];
+        var keyLoadClient = keyLoadClients[KeyLoadClientsFirstIndex];
         var qdrantClient = CreateClient(settings.QdrantEndpoint);
         qdrantClient.DefaultRequestHeaders.Add(ComparisonHostConstants.QdrantApiKeyHeader, settings.QdrantApiKey);
         var neo4jClient = CreateClient(settings.Neo4jEndpoint);
@@ -52,9 +54,11 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {
+        const int FirstOwnerIndex = 0;
+
         try
         {
-            await DisposeTargetsAsync(0);
+            await DisposeTargetsAsync(FirstOwnerIndex);
         }
         finally
         {
@@ -66,7 +70,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
             {
                 try
                 {
-                    await DisposeUnownedClientsAsync(0);
+                    await DisposeUnownedClientsAsync(FirstOwnerIndex);
                 }
                 finally
                 {
@@ -78,6 +82,8 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
 
     private async Task DisposeTargetsAsync(int index)
     {
+        const int NextOwnerOffset = 1;
+
         if (index >= targets.Count)
         {
             return;
@@ -89,7 +95,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         }
         finally
         {
-            await DisposeTargetsAsync(index + 1);
+            await DisposeTargetsAsync(index + NextOwnerOffset);
         }
     }
 
@@ -139,6 +145,8 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
 
     private async Task DisposeUnownedClientsAsync(int index)
     {
+        const int NextOwnerOffset = 1;
+
         if (index >= unownedClients.Count)
         {
             return;
@@ -150,7 +158,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         }
         finally
         {
-            await DisposeUnownedClientsAsync(index + 1);
+            await DisposeUnownedClientsAsync(index + NextOwnerOffset);
         }
     }
 
@@ -200,8 +208,10 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
 
     private HttpClient[] CreateClients(IReadOnlyList<Uri> endpoints)
     {
+        const int FirstEntryIndex = 0;
+
         var clients = new HttpClient[ComparisonHostConstants.KeyLoadEndpointCount];
-        for (var index = 0; index < clients.Length; index++)
+        for (var index = FirstEntryIndex; index < clients.Length; index++)
         {
             clients[index] = CreateClient(endpoints[index]);
         }

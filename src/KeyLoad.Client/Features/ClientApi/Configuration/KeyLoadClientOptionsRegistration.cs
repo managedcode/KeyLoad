@@ -14,6 +14,8 @@ public static class KeyLoadClientOptionsRegistration
     public static IServiceCollection AddKeyLoadClientExecutionOptions(this IServiceCollection services,
         IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
         services.AddOptions<KeyLoadClientExecutionOptions>()
             .Bind(configuration.GetSection(KeyLoadClientExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoadClientExecutionOptions.ValidationMessage)

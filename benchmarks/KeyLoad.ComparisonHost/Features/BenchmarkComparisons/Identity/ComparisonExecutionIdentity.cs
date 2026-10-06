@@ -9,6 +9,7 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 /// <param name="Provenance">The actual workflow run and evidence profile.</param>
 /// <param name="KeyLoadImage">The configured KeyLoad server image reference.</param>
 /// <param name="LoadGeneratorImage">The configured comparison runner image reference.</param>
+[KeyLoad.ConfigurationBinding]
 internal sealed record ComparisonExecutionIdentity(
     GitHubProvenance Provenance,
     string KeyLoadImage,
@@ -96,8 +97,9 @@ internal sealed record ComparisonExecutionIdentity(
         var profile = Required(configuration, isIntensiveTimeSeries
             ? TimeSeriesIntensiveSelection.EvidenceProfileSetting : EvidenceProfileSetting);
 
-        if (!ComparisonExecutionIdentityImageReference.IsValid(keyLoadImage)
-            || !ComparisonExecutionIdentityImageReference.IsValid(loadGeneratorImage)
+        var hostExecution = NativeComparisonExecutionRegistration.ReadHost(configuration);
+        if (!ComparisonExecutionIdentityImageReference.IsValid(keyLoadImage, hostExecution)
+            || !ComparisonExecutionIdentityImageReference.IsValid(loadGeneratorImage, hostExecution)
             || !IsRevision(sourceRevision)
             || !string.Equals(sourceRevision, configuredRevision, StringComparison.Ordinal)
             || !IsRevision(gitHubSha)

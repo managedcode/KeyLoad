@@ -5,6 +5,20 @@ namespace KeyLoad.Orleans;
 
 internal static class ReplicaMembershipAuthorityValidation
 {
+    private const int IsValidReadAllEmptyExpectedTableVersion = 0;
+    private const int IsValidReadAllEmptyCleanupBeforeUtcTicks = 0;
+    private const int IsValidReadRowEmptyExpectedTableVersion = 0;
+    private const int IsValidReadRowEmptyCleanupBeforeUtcTicks = 0;
+    private const int IsValidInsertRowEmptyCleanupBeforeUtcTicks = 0;
+    private const int IsValidUpdateRowEmptyCleanupBeforeUtcTicks = 0;
+    private const int IsValidUpdateIAmAliveEmptyExpectedTableVersion = 0;
+    private const int IsValidUpdateIAmAliveEmptyCleanupBeforeUtcTicks = 0;
+    private const int IsValidCleanupDefunctEmptyExpectedTableVersion = 0;
+    private const int ValidTableVersionExpectedTableVersionETagEmptyCount = 0;
+    private const int ValidTableVersionParsedValidationBoundary = 0;
+    private const int ValidRowEtagParsedValidationBoundary = 0;
+    private const int IsValidCleanupCutoffTicksValidationBoundary = 0;
+
     private static readonly UTF8Encoding Utf8 = new(false, true);
     private const string InvalidRequest = "The membership authority request is invalid.";
     private const string InvalidReply = "The membership authority reply is invalid.";
@@ -31,8 +45,10 @@ internal static class ReplicaMembershipAuthorityValidation
 
     internal static void Entry(ReplicaMembershipAuthorityEntryV1 entry)
     {
+        const int ProxyPortEmptyCount = 0;
+
         if (entry is null || !CanonicalAddress(entry.Address) || !Bounded(entry.Host) || !Bounded(entry.Name)
-            || !Enum.IsDefined(entry.Status) || entry.ProxyPort is < 0 or > IPEndPoint.MaxPort
+            || !Enum.IsDefined(entry.Status) || entry.ProxyPort is < ProxyPortEmptyCount or > IPEndPoint.MaxPort
             || !ValidRowEtag(entry.RowETag)
             || entry.Suspects.IsDefault || entry.Suspects.Length > ReplicaMembershipAuthorityProtocol.MaximumSuspects)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
@@ -57,10 +73,13 @@ internal static class ReplicaMembershipAuthorityValidation
 
     private static void ValidateReplyEnvelope(ReplicaMembershipAuthorityReplyV1 reply)
     {
+        const int ErrorDetailCodeEmptyCount = 0;
+        const int ErrorDetailCodeValidationBound = 12;
+
         if (reply.Version != ReplicaMembershipAuthorityProtocol.Version || reply.AuthorityPhysicalShardId == Guid.Empty
             || reply.AuthorityIncarnation == Guid.Empty || reply.RequestId == Guid.Empty
             || !ValidNonceText(reply.RequestNonce) || !Enum.IsDefined((ReplicaMembershipAuthorityResultKind)reply.ResultKind)
-            || reply.ErrorDetailCode is < 0 or > 12
+            || reply.ErrorDetailCode is < ErrorDetailCodeEmptyCount or > ErrorDetailCodeValidationBound
             || reply.ErrorCode is { } error && !Enum.IsDefined(error)
             || reply.TableVersionETag is null
             || reply.Rows.IsDefault || reply.Rows.Length > ReplicaMembershipAuthorityProtocol.MaximumRows)
@@ -75,16 +94,23 @@ internal static class ReplicaMembershipAuthorityValidation
 
     private static void ValidateReplyOutcome(ReplicaMembershipAuthorityReplyV1 reply)
     {
+        const int EmptyErrorDetailCode = 0;
+        const int EmptyTableVersion = 0;
+        const int EmptyTableVersionETagLength = 0;
+
         var failed = (ReplicaMembershipAuthorityResultKind)reply.ResultKind == ReplicaMembershipAuthorityResultKind.Failed;
-        if (failed && (reply.ErrorCode is null || reply.ErrorDetailCode == 0 || reply.Applied || !reply.Rows.IsEmpty
-                || reply.TableVersion != 0 || reply.TableVersionETag.Length != 0)
-            || !failed && (reply.ErrorCode is not null || reply.ErrorDetailCode != 0))
+        if (failed && (reply.ErrorCode is null || reply.ErrorDetailCode == EmptyErrorDetailCode || reply.Applied || !reply.Rows.IsEmpty
+                || reply.TableVersion != EmptyTableVersion || reply.TableVersionETag.Length != EmptyTableVersionETagLength)
+            || !failed && (reply.ErrorCode is not null || reply.ErrorDetailCode != EmptyErrorDetailCode))
         { throw Errors.Fail(ErrorCode.Corruption, InvalidReply); }
     }
 
     private static void ValidateOperation(ReplicaMembershipAuthorityOperation operation, ReplicaMembershipAuthorityCallV1 call)
     {
-        var defaults = call.ExpectedTableVersion >= 0 && call.CleanupBeforeUtcTicks >= 0;
+        const int ExpectedTableVersionValidationBoundary = 0;
+        const int CleanupBeforeUtcTicksValidationBoundary = 0;
+
+        var defaults = call.ExpectedTableVersion >= ExpectedTableVersionValidationBoundary && call.CleanupBeforeUtcTicks >= CleanupBeforeUtcTicksValidationBoundary;
         var valid = defaults && ValidateOperationShape(operation, call);
         if (!valid)
         { throw Errors.Fail(ErrorCode.Validation, InvalidRequest); }
@@ -108,44 +134,44 @@ internal static class ReplicaMembershipAuthorityValidation
 
     private static bool IsValidReadAll(ReplicaMembershipAuthorityCallV1 call)
         => call.TargetSiloAddress is null && call.CandidateEntry is null
-            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-            && call.CleanupBeforeUtcTicks == 0;
+            && call.ExpectedTableVersion == IsValidReadAllEmptyExpectedTableVersion && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == IsValidReadAllEmptyCleanupBeforeUtcTicks;
 
     private static bool IsValidReadRow(ReplicaMembershipAuthorityCallV1 call)
         => call.TargetSiloAddress is not null && call.CandidateEntry is null
-            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-            && call.CleanupBeforeUtcTicks == 0;
+            && call.ExpectedTableVersion == IsValidReadRowEmptyExpectedTableVersion && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == IsValidReadRowEmptyCleanupBeforeUtcTicks;
 
     private static bool IsValidInsertRow(ReplicaMembershipAuthorityCallV1 call)
         => call.TargetSiloAddress is null && call.CandidateEntry is not null
-            && ValidTableVersion(call) && call.ExpectedRowETag is null && call.CleanupBeforeUtcTicks == 0;
+            && ValidTableVersion(call) && call.ExpectedRowETag is null && call.CleanupBeforeUtcTicks == IsValidInsertRowEmptyCleanupBeforeUtcTicks;
 
     private static bool IsValidUpdateRow(ReplicaMembershipAuthorityCallV1 call)
         => call.TargetSiloAddress is not null && call.CandidateEntry is not null
             && ValidTableVersion(call) && call.ExpectedRowETag is not null
-            && call.ExpectedRowETag == call.CandidateEntry.RowETag && call.CleanupBeforeUtcTicks == 0;
+            && call.ExpectedRowETag == call.CandidateEntry.RowETag && call.CleanupBeforeUtcTicks == IsValidUpdateRowEmptyCleanupBeforeUtcTicks;
 
     private static bool IsValidUpdateIAmAlive(ReplicaMembershipAuthorityCallV1 call)
         => call.TargetSiloAddress is null && call.CandidateEntry is not null
-            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
-            && call.CleanupBeforeUtcTicks == 0;
+            && call.ExpectedTableVersion == IsValidUpdateIAmAliveEmptyExpectedTableVersion && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.CleanupBeforeUtcTicks == IsValidUpdateIAmAliveEmptyCleanupBeforeUtcTicks;
 
     private static bool IsValidCleanupDefunct(ReplicaMembershipAuthorityCallV1 call)
         => call.CandidateEntry is null && call.TargetSiloAddress is null
-            && call.ExpectedTableVersion == 0 && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
+            && call.ExpectedTableVersion == IsValidCleanupDefunctEmptyExpectedTableVersion && call.ExpectedTableVersionETag is null && call.ExpectedRowETag is null
             && IsValidCleanupCutoff(call.CleanupBeforeUtcTicks);
 
     private static bool ValidTableVersion(ReplicaMembershipAuthorityCallV1 call)
-        => call.ExpectedTableVersionETag is { Length: > 0 } value
+        => call.ExpectedTableVersionETag is { Length: > ValidTableVersionExpectedTableVersionETagEmptyCount } value
             && long.TryParse(value, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var parsed)
-            && parsed >= 0 && parsed.ToString(System.Globalization.CultureInfo.InvariantCulture) == value;
+            && parsed >= ValidTableVersionParsedValidationBoundary && parsed.ToString(System.Globalization.CultureInfo.InvariantCulture) == value;
 
     private static bool ValidRowEtag(string value)
         => long.TryParse(value, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture,
-            out var parsed) && parsed >= 0 && parsed.ToString(System.Globalization.CultureInfo.InvariantCulture) == value;
+            out var parsed) && parsed >= ValidRowEtagParsedValidationBoundary && parsed.ToString(System.Globalization.CultureInfo.InvariantCulture) == value;
 
     private static bool IsValidCleanupCutoff(long ticks)
-        => ticks > 0 && ticks <= DateTime.MaxValue.Ticks;
+        => ticks > IsValidCleanupCutoffTicksValidationBoundary && ticks <= DateTime.MaxValue.Ticks;
 
     internal static bool Bounded(string? value)
     {
@@ -171,13 +197,23 @@ internal static class ReplicaMembershipAuthorityValidation
 
     internal static bool ValidNonce(string? value)
     {
+        const char PredicateCharacter = '-';
+        const char UnderscoreCharacter = '_';
+        const char OldCharCharacter = '-';
+        const char NewCharCharacter = '+';
+        const char SlashCharacter = '/';
+        const string ValidNonceComparisonText = "==";
+        const char TrimCharCharacter = '=';
+        const char ValidNonceOldCharCharacter = '+';
+        const char ValidNonceNewCharCharacter = '-';
+
         if (value is not { Length: ReplicaMembershipAuthorityProtocol.NonceCharacters }
-            || value.Any(character => !char.IsAsciiLetterOrDigit(character) && character is not '-' and not '_'))
+            || value.Any(character => !char.IsAsciiLetterOrDigit(character) && character is not PredicateCharacter and not UnderscoreCharacter))
         { return false; }
         Span<byte> bytes = stackalloc byte[ReplicaMembershipAuthorityProtocol.NonceBytes];
-        var encoded = value.Replace('-', '+').Replace('_', '/') + "==";
+        var encoded = value.Replace(OldCharCharacter, NewCharCharacter).Replace(UnderscoreCharacter, SlashCharacter) + ValidNonceComparisonText;
         return Convert.TryFromBase64String(encoded, bytes, out var count) && count == bytes.Length
-            && string.Equals(Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_'),
+            && string.Equals(Convert.ToBase64String(bytes).TrimEnd(TrimCharCharacter).Replace(ValidNonceOldCharCharacter, ValidNonceNewCharCharacter).Replace(SlashCharacter, UnderscoreCharacter),
                 value, StringComparison.Ordinal);
     }
 

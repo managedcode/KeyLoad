@@ -9,6 +9,9 @@ namespace KeyLoad.Query;
 /// <summary>Reads bounded scalar, vector, seed and list values from a graph-search token cursor.</summary>
 internal sealed class SqlGraphSearchValueReader
 {
+    private const int EmptyElementCount = 0;
+    private const int MinimumPositiveCount = 1;
+
     private readonly SqlTokenCursor cursor;
     private readonly QueryRequest query;
     private readonly ReadExecutionBudget budget;
@@ -34,7 +37,7 @@ internal sealed class SqlGraphSearchValueReader
             cursor.Need(SqlSyntax.CloseParen);
         } while (cursor.Eat(SqlSyntax.Comma));
         cursor.Need(SqlSyntax.CloseParen);
-        return seeds.Count == 0 ? throw SqlGraphSearchSyntax.Invalid() : seeds.ToImmutable();
+        return seeds.Count == EmptyElementCount ? throw SqlGraphSearchSyntax.Invalid() : seeds.ToImmutable();
     }
 
     internal ImmutableArray<string>? ReadOptionalLabels()
@@ -72,7 +75,7 @@ internal sealed class SqlGraphSearchValueReader
         var parameters = query.Parameters;
         if (token.Kind != SqlTokenKind.Parameter || parameters is null
             || !parameters.TryGetValue(token.Text, out var value) || value.ValueKind != JsonValueKind.Array
-            || value.GetArrayLength() is < 1 or > SqlGraphSearchSyntax.MaximumVectorDimension)
+            || value.GetArrayLength() is < MinimumPositiveCount or > SqlGraphSearchSyntax.MaximumVectorDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.ParameterDetail);
         }
@@ -104,7 +107,7 @@ internal sealed class SqlGraphSearchValueReader
         var version = cursor.Identifier();
         cursor.Need(SqlSyntax.CloseParen);
         if (!Enum.TryParse<DistanceMetric>(metricName, ignoreCase: true, out var metric)
-            || !Enum.IsDefined(metric) || dimension is < 1 or > SqlGraphSearchSyntax.MaximumVectorDimension)
+            || !Enum.IsDefined(metric) || dimension is < MinimumPositiveCount or > SqlGraphSearchSyntax.MaximumVectorDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.VectorSpaceDetail);
         }
@@ -141,7 +144,7 @@ internal sealed class SqlGraphSearchValueReader
         }
         if (cursor.Current.Kind != SqlTokenKind.Number
             || !double.TryParse(cursor.Current.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
-            || !double.IsFinite(value) || value < 0)
+            || !double.IsFinite(value) || value < EmptyElementCount)
         {
             throw SqlGraphSearchSyntax.Invalid();
         }

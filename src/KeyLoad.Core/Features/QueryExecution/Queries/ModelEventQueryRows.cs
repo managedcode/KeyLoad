@@ -17,19 +17,26 @@ internal static class ModelEventQueryRows
         ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, bool explain,
         Action<DocumentRecord> accept)
     {
+        const int GenerationValidationBoundary = 1;
+        const string VisitDetailText = "The event source generation must be positive.";
+        const int TailRevisionEmptyCount = 0;
+        const int FirstAvailableRevisionSingleItemCount = 1;
+        const int GenerationSingleItemCount = 1;
+        const int EmptyTailRevision = 0;
+
         JsonData.Identifier(source.Item);
-        if (source.Generation < 1)
+        if (source.Generation < GenerationValidationBoundary)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The event source generation must be positive.");
+            throw Errors.Fail(ErrorCode.Validation, VisitDetailText);
         }
         var headKey = KeySpace.Partition(HeadSpace, partition, resource.Name, source.Item);
-        var head = budget.ReadRecord<StreamHead>(view, headKey) ?? new StreamHead(0, 1, 1);
+        var head = budget.ReadRecord<StreamHead>(view, headKey) ?? new StreamHead(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, GenerationSingleItemCount);
         if (head.Generation != source.Generation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, StaleGeneration);
         }
         ValidateHead(head);
-        if (explain || head.TailRevision == 0)
+        if (explain || head.TailRevision == EmptyTailRevision)
         {
             return;
         }
@@ -39,8 +46,12 @@ internal static class ModelEventQueryRows
 
     private static void ValidateHead(StreamHead head)
     {
-        if (head.TailRevision < 0 || head.FirstAvailableRevision < 1
-            || head.TailRevision < long.MaxValue && head.FirstAvailableRevision > head.TailRevision + 1)
+        const int TailRevisionValidationBoundary = 0;
+        const int FirstAvailableRevisionValidationBoundary = 1;
+        const int TailRevisionStep = 1;
+
+        if (head.TailRevision < TailRevisionValidationBoundary || head.FirstAvailableRevision < FirstAvailableRevisionValidationBoundary
+            || head.TailRevision < long.MaxValue && head.FirstAvailableRevision > head.TailRevision + TailRevisionStep)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventCorrupt);
         }
@@ -50,6 +61,9 @@ internal static class ModelEventQueryRows
         ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, StreamHead head,
         Action<DocumentRecord> accept)
     {
+        const ulong EmptyRetainedEventCount = 0UL;
+        const int InclusiveRevisionRangeOffset = 1;
+
         var state = new EventScanState(head.FirstAvailableRevision);
         var prefix = KeySpace.Partition(EventSpace, partition, resource.Name, source.Item, source.Generation);
         var scan = budget.VisitRange(view, prefix, database.Limits.MaxScanRecords,
@@ -60,7 +74,7 @@ internal static class ModelEventQueryRows
         }
 
         var expectedCount = head.TailRevision < head.FirstAvailableRevision
-            ? 0UL : (ulong)head.TailRevision - (ulong)head.FirstAvailableRevision + 1;
+            ? EmptyRetainedEventCount : (ulong)head.TailRevision - (ulong)head.FirstAvailableRevision + InclusiveRevisionRangeOffset;
         if ((ulong)state.Count != expectedCount)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventCorrupt);
@@ -115,7 +129,9 @@ internal static class ModelEventQueryRows
     private static void ValidateIdentity(IKeyValueView view, PartitionRef partition, ResourceDefinition resource,
         ModelQuerySource source, ReadExecutionBudget budget, long revision, string eventId)
     {
-        var identityKey = KeySpace.Partition("event-id", partition, resource.Name, source.Item,
+        const string EventIdentityKeySpace = "event-id";
+
+        var identityKey = KeySpace.Partition(EventIdentityKeySpace, partition, resource.Name, source.Item,
             source.Generation, eventId);
         var identity = budget.ReadRecord<EventIdentity>(view, identityKey);
         if (identity is null || identity.StreamId != source.Item || identity.Generation != source.Generation

@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 /// <param name="database">Borrowed canonical engine.</param>
 public sealed class AdminQueueReader(DatabaseEngine database)
 {
+    private const int LastQueueMessageOffset = 1;
+
     private const string CounterSpace = "queue-counters";
     private const string MetadataSpace = "message-meta";
 
@@ -21,16 +23,22 @@ public sealed class AdminQueueReader(DatabaseEngine database)
         DatabaseEngine.ValidatePartition(request.Lane.Partition);
         JsonData.Identifier(request.Lane.Queue);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterId);
-        var budget = new ReadExecutionBudget(database.Limits, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
         return database.Store.Read(view => ReadPage(budget.CreateView(view), budget, principalId, request));
     }
 
     private AdminQueuePage ReadPage(IKeyValueView view, ReadExecutionBudget budget, string principalId, AdminQueueRequest request)
     {
+        const int StoredMessagesEmptyCount = 0;
+        const int StoredBytesEmptyCount = 0;
+        const int InFlightMessagesEmptyCount = 0;
+        const int InFlightBytesEmptyCount = 0;
+        const int NextReadySequenceEmptyCount = 0;
+
         AdminReadAuthority.Require(database, view, principalId);
         var lane = request.Lane;
         _ = database.Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
-        var counters = view.GetRecord<QueueCounters>(KeySpace.Partition(CounterSpace, lane.Partition, lane.Queue)) ?? new(0, 0, 0, 0, 0);
+        var counters = view.GetRecord<QueueCounters>(KeySpace.Partition(CounterSpace, lane.Partition, lane.Queue)) ?? new(StoredMessagesEmptyCount, StoredBytesEmptyCount, InFlightMessagesEmptyCount, InFlightBytesEmptyCount, NextReadySequenceEmptyCount);
         var items = new List<AdminQueueItem>();
         var after = request.AfterId is null ? null : KeySpace.Partition(MetadataSpace, lane.Partition, lane.Queue, request.AfterId);
         var scan = view.VisitRange(KeySpace.Partition(MetadataSpace, lane.Partition, lane.Queue), request.Limit,
@@ -41,7 +49,7 @@ public sealed class AdminQueueReader(DatabaseEngine database)
                     metadata.NotBefore, metadata.ExpiresAt, metadata.LeaseUntil));
                 return true;
             }, after, cancellationToken: budget.Cancellation);
-        var page = new AdminQueuePage(counters, [.. items], scan.HasMore ? items[^1].Id : null, AdminReadAuthority.Position(view));
+        var page = new AdminQueuePage(counters, [.. items], scan.HasMore ? items[^LastQueueMessageOffset].Id : null, AdminReadAuthority.Position(view));
         budget.CheckResult(page);
         return page;
     }

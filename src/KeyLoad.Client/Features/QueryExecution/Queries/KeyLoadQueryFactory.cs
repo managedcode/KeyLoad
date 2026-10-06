@@ -19,6 +19,7 @@ public static class KeyLoadQuery
     {
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
+        ArgumentNullException.ThrowIfNull(translationOptions);
         var query = new SelectQuery(collection, null, [new(DefaultProjectionPath, DefaultProjectionPath)], null,
             [], translationOptions.Value.DefaultQueryLimit);
         return new(partition, query, translationOptions);

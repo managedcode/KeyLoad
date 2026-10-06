@@ -67,7 +67,7 @@ internal sealed class AnnSeedFingerprintTests
 
         var first = AnnSeedTestSupport.Capture(database, "root", AnnSeedTestSupport.Space());
         var second = AnnSeedCollector.Capture(database.Database, "root", database.Partition, OtherCollection,
-            AnnSeedTestSupport.Field, alternateSpace, new(), new(database.Database.Limits));
+            AnnSeedTestSupport.Field, alternateSpace, UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
         var firstExpected = new VectorRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
             AnnSeedTestSupport.Space(), ImmutableArray.Create(0.25f, 1f, -0.5f), 1);
         var secondExpected = firstExpected with { Space = alternateSpace };

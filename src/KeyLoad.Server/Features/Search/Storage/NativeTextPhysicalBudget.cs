@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 
 namespace KeyLoad.Server.Features.Search;
@@ -6,18 +7,19 @@ internal static class NativeTextPhysicalBudget
 {
     internal const int MaximumGenerations = 3;
 
-    internal static void Check(string root, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second,
-        NativeTextGenerationSlot? third, ReadExecutionBudget? budget)
+    internal static void Check(string root, NativeTextGenerationSlot? first, NativeTextGenerationSlot? second, NativeTextGenerationSlot? third, ReadExecutionBudget? budget, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        var files = 0;
-        long bytes = 0;
-        Accumulate(root, first, ref files, ref bytes, budget);
-        Accumulate(root, second, ref files, ref bytes, budget);
-        Accumulate(root, third, ref files, ref bytes, budget);
+        const int FilesInitialValue = 0;
+        const int BytesInitialValue = 0;
+
+        var files = FilesInitialValue;
+        long bytes = BytesInitialValue;
+        Accumulate(root, first, ref files, ref bytes, budget, executionOptions: executionOptions);
+        Accumulate(root, second, ref files, ref bytes, budget, executionOptions: executionOptions);
+        Accumulate(root, third, ref files, ref bytes, budget, executionOptions: executionOptions);
     }
 
-    private static void Accumulate(string root, NativeTextGenerationSlot? slot, ref int files, ref long bytes,
-        ReadExecutionBudget? budget)
+    private static void Accumulate(string root, NativeTextGenerationSlot? slot, ref int files, ref long bytes, ReadExecutionBudget? budget, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         if (slot is null)
         {
@@ -34,10 +36,10 @@ internal static class NativeTextPhysicalBudget
             throw NativeTextErrors.Corrupt();
         }
         budget?.Check();
-        var measured = NativeTextFileIO.MeasureRegularFiles(path, NativeTextProtocol.MaximumFiles,
-            NativeTextProtocol.MaximumDiskBytes, budget);
-        if (measured.Files > NativeTextProtocol.MaximumFiles - files
-            || measured.Bytes > NativeTextProtocol.MaximumDiskBytes - bytes)
+        var measured = NativeTextFileIO.MeasureRegularFiles(path, executionOptions.Value.MaximumFiles,
+            executionOptions.Value.MaximumDiskBytes, budget: budget, executionOptions: executionOptions);
+        if (measured.Files > executionOptions.Value.MaximumFiles - files
+            || measured.Bytes > executionOptions.Value.MaximumDiskBytes - bytes)
         {
             throw NativeTextErrors.BoundExceeded();
         }

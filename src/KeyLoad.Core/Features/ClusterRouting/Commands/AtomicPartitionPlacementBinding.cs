@@ -28,8 +28,11 @@ public sealed partial class DatabaseEngine
     private static OperationResult BindPlacement(IAtomicTransaction transaction,
         BindAtomicPartitionPlacementRequest request)
     {
+        const string BindPlacementDetailText = "The physical shard catalog is not initialized.";
+        const int DirectoryRevisionValidationBoundary = 0;
+
         var catalog = PhysicalShardCatalogRecordSerialization.Read(transaction)
-            ?? throw Errors.Fail(ErrorCode.NotFound, "The physical shard catalog is not initialized.");
+            ?? throw Errors.Fail(ErrorCode.NotFound, BindPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
         if (request.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
         {
@@ -42,7 +45,7 @@ public sealed partial class DatabaseEngine
             AtomicPartitionPlacementValidation.ValidateDirectory(directory);
         }
 
-        var revision = directory?.Revision ?? 0;
+        var revision = directory?.Revision ?? DirectoryRevisionValidationBoundary;
         if (request.ExpectedRevision != revision)
         {
             throw Errors.Fail(ErrorCode.Conflict, PlacementRevisionConflict);
@@ -57,20 +60,25 @@ public sealed partial class DatabaseEngine
         BindAtomicPartitionPlacementRequest request, AtomicPartitionPlacementDirectoryV1? directory,
         PhysicalShardRecord defaultShard)
     {
-        var count = directory?.ExplicitAssignmentCount ?? 0;
+        const int DirectoryExplicitAssignmentCountValidationBoundary = 0;
+        const int CountStep = 1;
+        const int DirectoryRevisionValidationBoundary = 0;
+        const int CurrentRevisionStep = 1;
+
+        var count = directory?.ExplicitAssignmentCount ?? DirectoryExplicitAssignmentCountValidationBoundary;
         if (count >= AtomicPartitionPlacementProtocol.MaximumExplicitAssignments)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PlacementCapacityExceeded);
         }
 
-        var nextCount = checked(count + 1);
-        var currentRevision = directory?.Revision ?? 0;
+        var nextCount = checked(count + CountStep);
+        var currentRevision = directory?.Revision ?? DirectoryRevisionValidationBoundary;
         if (currentRevision == long.MaxValue)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PlacementRevisionExhausted);
         }
 
-        var nextRevision = checked(currentRevision + 1);
+        var nextRevision = checked(currentRevision + CurrentRevisionStep);
         var row = new AtomicPartitionPlacementV1(AtomicPartitionPlacementProtocol.CurrentVersion,
             request.Partition, request.PhysicalShardId, AtomicPartitionPlacementProtocol.InitialRowRevision,
             defaultShard.Incarnation, defaultShard.VoterIds, defaultShard.PlacementEpoch);
@@ -87,15 +95,18 @@ public sealed partial class DatabaseEngine
         BindAtomicPartitionPlacementRequest request, AtomicPartitionPlacementDirectoryV1? directory,
         PhysicalShardRecord defaultShard)
     {
+        const string MissingPlacementDirectoryDetail = "A placement row exists without its directory header.";
+        const string PlacementRevisionBeyondDirectoryDetail = "A placement row revision exceeds its directory revision.";
+
         if (directory is null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "A placement row exists without its directory header.");
+            throw Errors.Fail(ErrorCode.Corruption, MissingPlacementDirectoryDetail);
         }
 
         AtomicPartitionPlacementValidation.ValidateRow(row, request.Partition, defaultShard);
         if (row.Revision > directory.Revision)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "A placement row revision exceeds its directory revision.");
+            throw Errors.Fail(ErrorCode.Corruption, PlacementRevisionBeyondDirectoryDetail);
         }
 
         return Result(true);

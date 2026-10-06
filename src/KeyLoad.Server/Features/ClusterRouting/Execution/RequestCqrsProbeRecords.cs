@@ -1,9 +1,10 @@
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
 internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, byte[] ownerBytes,
-    RequestCqrsProbeDiscoveryPolicy discoveryPolicy)
+    RequestCqrsProbeDiscoveryPolicy discoveryPolicy, IOptions<RequestProbeExecutionOptions> executionOptions, RequestCqrsProbeJson json)
 {
     private readonly Dictionary<Guid, (byte[] Bytes, RequestCqrsProbeArmRecord Record)> knownArms = [];
     private readonly HashSet<Guid> retiredArms = [];
@@ -16,7 +17,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     {
         if (name == RequestCqrsProbeProtocol.OwnerFile)
         {
-            if (!CryptographicOperations.FixedTimeEquals(ownerBytes, RequestCqrsProbeFiles.ReadRecord(path)))
+            if (!CryptographicOperations.FixedTimeEquals(ownerBytes, RequestCqrsProbeFiles.ReadRecord(path, executionOptions)))
             { throw Invalid(); }
             return;
         }
@@ -27,10 +28,10 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             return;
         }
 
-        var bytes = RequestCqrsProbeFiles.ReadRecord(path);
+        var bytes = RequestCqrsProbeFiles.ReadRecord(path, executionOptions);
         if (name.StartsWith(RequestCqrsProbeProtocol.ArmFilePrefix, StringComparison.Ordinal))
         {
-            var arm = RequestCqrsProbeJson.ReadArm(bytes);
+            var arm = json.ReadArm(bytes);
             if (arm.SessionId != sessionId || name != RequestCqrsProbeFiles.ArmName(arm))
             { throw Invalid(); }
             arms.Add(new RequestCqrsProbeLoadedArm(arm, bytes));
@@ -38,7 +39,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         }
         if (name.StartsWith(RequestCqrsProbeProtocol.ReleaseFilePrefix, StringComparison.Ordinal))
         {
-            var release = RequestCqrsProbeJson.ReadRelease(bytes);
+            var release = json.ReadRelease(bytes);
             if (release.SessionId != sessionId || name != RequestCqrsProbeFiles.ReleaseName(release))
             { throw Invalid(); }
             RegisterImmutable(name, bytes);
@@ -48,7 +49,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         }
         if (name.StartsWith(RequestCqrsProbeProtocol.MarkerFilePrefix, StringComparison.Ordinal))
         {
-            var marker = RequestCqrsProbeJson.ReadMarker(bytes);
+            var marker = json.ReadMarker(bytes);
             if (marker.SessionId != sessionId || marker.Voter != voter || name != RequestCqrsProbeFiles.MarkerName(marker))
             { throw Invalid(); }
             RegisterImmutable(name, bytes);
@@ -65,7 +66,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     private void ReadDiscovery(string name, byte[] bytes, HashSet<string> presentControls,
         List<RequestCqrsProbeDiscoveryRecord> loadedDiscoveries)
     {
-        var discovery = RequestCqrsProbeJson.ReadDiscovery(bytes);
+        var discovery = json.ReadDiscovery(bytes);
         discoveryPolicy.Validate(sessionId, voter, discovery);
         var slot = discoveryPolicy.GetSlot(discovery.PeerVoterId);
         if (name != RequestCqrsProbeFiles.DiscoveryName(slot))
@@ -99,9 +100,9 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     internal void ValidateInventory(IReadOnlyList<RequestCqrsProbeMarkerRecord> markers)
     {
         var retainedIdCount = knownArms.Keys.Concat(retiredArms).Distinct().Count();
-        if (retainedIdCount > RequestCqrsProbeProtocol.MaximumArms
+        if (retainedIdCount > executionOptions.Value.MaximumArms
             || markers.GroupBy(marker => (marker.ArmId, marker.RequestId))
-                .Any(group => group.Count() > RequestCqrsProbeProtocol.MaximumMarkersPerRequest))
+                .Any(group => group.Count() > executionOptions.Value.MaximumMarkersPerRequest))
         { throw Invalid(); }
     }
 
@@ -116,7 +117,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         var newlyRetired = knownArms.Keys.Concat(markers.Select(marker => marker.ArmId))
             .Concat(releases.Select(release => release.ArmId)).Where(armId => !active.Contains(armId)).Distinct().ToArray();
         var retainedIds = knownArms.Keys.Concat(retiredArms).Concat(newlyRetired).Concat(active).Distinct().Count();
-        if (retainedIds > RequestCqrsProbeProtocol.MaximumArms)
+        if (retainedIds > executionOptions.Value.MaximumArms)
         { throw Invalid(); }
         retiredArms.UnionWith(newlyRetired);
         foreach (var arm in arms)
@@ -129,10 +130,12 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     internal void ValidateCrossRecords(IReadOnlyList<RequestCqrsProbeLoadedArm> arms,
         IReadOnlyList<RequestCqrsProbeReleaseRecord> releases, IReadOnlyList<RequestCqrsProbeMarkerRecord> markers)
     {
+        const int DistinctCountValidationBoundary = 1;
+
         var armMap = knownArms.ToDictionary(pair => pair.Key, pair => pair.Value.Record);
         foreach (var arm in arms)
         { armMap[arm.Record.ArmId] = arm.Record; }
-        if (markers.GroupBy(marker => marker.ArmId).Any(group => group.Select(marker => marker.RequestId).Distinct().Count() > 1))
+        if (markers.GroupBy(marker => marker.ArmId).Any(group => group.Select(marker => marker.RequestId).Distinct().Count() > DistinctCountValidationBoundary))
         { throw Invalid(); }
         foreach (var marker in markers)
         {
@@ -142,7 +145,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             { throw Invalid(); }
         }
         if (releases.GroupBy(release => release.ArmId)
-            .Any(group => group.Select(release => release.RequestId).Distinct().Count() > 1))
+            .Any(group => group.Select(release => release.RequestId).Distinct().Count() > DistinctCountValidationBoundary))
         { throw Invalid(); }
         foreach (var release in releases)
         {
@@ -172,7 +175,7 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         var validArm = marker.Phase == RequestCqrsProbePhase.ProducerDisposed
             ? activeClaim || retiredProducerClaim
             : producerClaim is null && active is not null;
-        if (group.Length >= RequestCqrsProbeProtocol.MaximumMarkersPerRequest || !validArm)
+        if (group.Length >= executionOptions.Value.MaximumMarkersPerRequest || !validArm)
         { throw Invalid(); }
     }
 

@@ -12,7 +12,7 @@ internal sealed class IsolatedSetupFailureTests
     public async Task AcIso006UnsupportedCapabilityCannotHideNativeInitializationFailure()
     {
         await using var target = new RedisTarget(InvalidRedisConfiguration, Guid.NewGuid().ToString(), string.Empty, UnitBenchmarkOptions.Lifecycle());
-        var runner = new ComparisonRunner(ComparisonHarnessInputs.Small);
+        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small), UnitBenchmarkOptions.Native());
         var report = await runner.RunAsync([target], null, CancellationToken.None, scenario: Scenario.VectorExact);
         await Assert.That(report.Cases.Length).IsEqualTo(ComparisonHarnessInputs.Small.Repetitions);
         foreach (var result in report.Cases)

@@ -9,6 +9,11 @@ internal sealed class BlobPublicationCommands(DatabaseEngine database)
 
     internal BlobMetadata Complete(IAtomicTransaction tx, CompleteBlobUploadRequest request, DateTimeOffset now)
     {
+        const int BytesEmptyCount = 0;
+        const int KeysEmptyCount = 0;
+        const int VersionsEmptyCount = 0;
+        const int UploadsRemovalDelta = -1;
+
         var state = Reader.State(tx, request.Blob, request.UploadId) ?? throw BlobErrors.Token();
         BlobUploadCommands.RequireActive(state, now);
         if (state.StoredBytes != state.DeclaredLength || state.NextOrdinal != BlobRecordReader.PartCount(state.DeclaredLength))
@@ -24,7 +29,7 @@ internal sealed class BlobPublicationCommands(DatabaseEngine database)
         var headBytes = BlobMetadataRules.Encode(new BlobHead(BlobKeys.FormatVersion, Incarnation, metadata));
         var stateBytes = BlobMetadataRules.Encode(state with { Status = BlobUploadStatus.Complete });
         Retire(tx, head);
-        BlobQuotaOperations.Change(tx, request.Blob, Incarnation, policy, 0, 0, 0, -1);
+        BlobQuotaOperations.Change(tx, request.Blob, Incarnation, policy, BytesEmptyCount, KeysEmptyCount, VersionsEmptyCount, UploadsRemovalDelta);
         tx.Put(BlobKeys.Head(request.Blob), headBytes);
         tx.Put(BlobKeys.State(request.Blob, request.UploadId), stateBytes);
         return metadata;
@@ -32,7 +37,11 @@ internal sealed class BlobPublicationCommands(DatabaseEngine database)
 
     internal BlobMetadata Delete(IAtomicTransaction tx, DeleteBlobRequest request, DateTimeOffset now)
     {
-        if (request.ExpectedRevision <= 0)
+        const int ExpectedRevisionValidationBoundary = 0;
+        const int LengthEmptyCount = 0;
+        const int PartCountEmptyCount = 0;
+
+        if (request.ExpectedRevision <= ExpectedRevisionValidationBoundary)
         { throw BlobErrors.Validation(); }
         var head = Reader.Head(tx, request.Blob);
         if (head is null || head.Metadata.VersionId is null)
@@ -44,8 +53,8 @@ internal sealed class BlobPublicationCommands(DatabaseEngine database)
         {
             Revision = NextRevision(head.Metadata.Revision),
             VersionId = null,
-            Length = 0,
-            PartCount = 0,
+            Length = LengthEmptyCount,
+            PartCount = PartCountEmptyCount,
             IntegrityHash = null,
             UpdatedAt = now,
             Deleted = true
@@ -64,8 +73,10 @@ internal sealed class BlobPublicationCommands(DatabaseEngine database)
 
     private static long NextRevision(long revision)
     {
+        const int RevisionStep = 1;
+
         if (revision == long.MaxValue)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, BlobErrors.Capacity); }
-        return revision + 1;
+        return revision + RevisionStep;
     }
 }

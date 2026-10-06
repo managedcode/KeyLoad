@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 
 namespace KeyLoad.Server.Features.Search;
@@ -9,56 +10,67 @@ internal static class NativeTextFileIO
 
     internal static T ReadEnvelope<T>(string path, long maximumBytes)
     {
+        const int InfoLengthEmptyCount = 0;
+
         VerifyRegularFile(path);
         var info = new FileInfo(path);
-        if (info.Length is <= 0 || info.Length > maximumBytes)
+        if (info.Length is <= InfoLengthEmptyCount || info.Length > maximumBytes)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         return NativeTextEnvelopeCodec.Decode<T>(File.ReadAllBytes(path));
     }
 
-    internal static void WriteEnvelope<T>(string path, T value, long maximumBytes)
+    internal static void WriteEnvelope<T>(string path, T value, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         var bytes = NativeTextEnvelopeCodec.Encode(value);
-        WriteEncodedEnvelope(path, bytes, maximumBytes);
+        WriteEncodedEnvelope(path, bytes, maximumBytes, executionOptions: executionOptions);
     }
 
-    internal static void WriteEncodedEnvelope(string path, byte[] bytes, long maximumBytes)
+    internal static void WriteEncodedEnvelope(string path, byte[] bytes, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions)
     {
-        if (bytes.LongLength is <= 0 || bytes.LongLength > maximumBytes)
+        const int LongLengthEmptyCount = 0;
+
+        if (bytes.LongLength is <= LongLengthEmptyCount || bytes.LongLength > maximumBytes)
         {
             throw NativeTextErrors.BoundExceeded();
         }
         using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-            4_096, FileOptions.WriteThrough);
+            executionOptions.Value.FileBufferBytes, FileOptions.WriteThrough);
         output.Write(bytes);
         output.Flush(true);
         SetPrivateFileMode(path);
     }
 
-    internal static (int Files, long Bytes) MeasureRegularFiles(string directory, int maximumFiles,
-        long maximumBytes, ReadExecutionBudget? budget = null)
+    internal static (int Files, long Bytes) MeasureRegularFiles(string directory, int maximumFiles, long maximumBytes, IOptions<NativeTextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null)
     {
+        const int FilesInitialValue = 0;
+        const int DirectoriesInitialValue = 0;
+        const int BytesInitialValue = 0;
+        const string AllEntriesSearchPattern = "*";
+        const int RelativeCountStep = 1;
+        const int EmptyAttributesFileAttributesReparsePoint = 0;
+        const int EmptyAttributesFileAttributesDirectory = 0;
+
         VerifyDirectory(directory);
-        var files = 0;
-        var directories = 0;
-        long bytes = 0;
-        foreach (var entry in Directory.EnumerateFileSystemEntries(directory, "*", SearchOption.AllDirectories))
+        var files = FilesInitialValue;
+        var directories = DirectoriesInitialValue;
+        long bytes = BytesInitialValue;
+        foreach (var entry in Directory.EnumerateFileSystemEntries(directory, AllEntriesSearchPattern, SearchOption.AllDirectories))
         {
             budget?.Check();
             var relative = Path.GetRelativePath(directory, entry);
-            if (relative.Count(character => character == Path.DirectorySeparatorChar) + 1
-                > NativeTextProtocol.MaximumDepth)
+            if (relative.Count(character => character == Path.DirectorySeparatorChar) + RelativeCountStep
+                > executionOptions.Value.MaximumDepth)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
             var attributes = File.GetAttributes(entry);
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
+            if ((attributes & FileAttributes.ReparsePoint) != EmptyAttributesFileAttributesReparsePoint)
             {
                 throw NativeTextErrors.Ownership();
             }
-            if ((attributes & FileAttributes.Directory) == 0)
+            if ((attributes & FileAttributes.Directory) == EmptyAttributesFileAttributesDirectory)
             {
                 if (++files > maximumFiles)
                 {
@@ -71,7 +83,7 @@ internal static class NativeTextFileIO
                 }
                 bytes += length;
             }
-            else if (++directories > NativeTextProtocol.MaximumDirectories)
+            else if (++directories > executionOptions.Value.MaximumDirectories)
             {
                 throw NativeTextErrors.BoundExceeded();
             }
@@ -79,10 +91,10 @@ internal static class NativeTextFileIO
         return (files, bytes);
     }
 
-    internal static void VerifyBoundedFile(string path)
+    internal static void VerifyBoundedFile(string path, IOptions<NativeTextExecutionOptions> executionOptions)
     {
         VerifyRegularFile(path);
-        if (new FileInfo(path).Length > NativeTextProtocol.MaximumDiskBytes)
+        if (new FileInfo(path).Length > executionOptions.Value.MaximumDiskBytes)
         {
             throw NativeTextErrors.BoundExceeded();
         }
@@ -90,7 +102,9 @@ internal static class NativeTextFileIO
 
     internal static void VerifyDirectory(string path)
     {
-        if (!Directory.Exists(path) || (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        const int EmptyFileGetAttributesPathFileAttributesReparsePoint = 0;
+
+        if (!Directory.Exists(path) || (File.GetAttributes(path) & FileAttributes.ReparsePoint) != EmptyFileGetAttributesPathFileAttributesReparsePoint)
         {
             throw NativeTextErrors.Ownership();
         }
@@ -98,8 +112,10 @@ internal static class NativeTextFileIO
 
     internal static void VerifyRegularFile(string path)
     {
+        const int NoDisallowedFileAttributes = 0;
+
         if (!File.Exists(path) || (File.GetAttributes(path)
-            & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+            & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != NoDisallowedFileAttributes)
         {
             throw NativeTextErrors.Ownership();
         }

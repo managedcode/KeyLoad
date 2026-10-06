@@ -9,6 +9,9 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     ResourceDefinition resource, PartitionRef partition, string graph, EntityRef start, int maxDepth,
     int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
 {
+    private const int EmptyLabelCount = 0;
+    private const long NoReplacementBytes = 0;
+
     private const string AdjacencySpace = "adjacency";
     private const string EdgeSpace = "edge";
     private const string OutDirection = "out";
@@ -20,15 +23,17 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     private readonly HashSet<EntityRef> visited = [];
     private readonly Dictionary<string, (EdgeRecord Record, long Bytes)> edges = new(StringComparer.Ordinal);
     private readonly Queue<(EntityRef Vertex, int Depth)> pending = new();
-    private readonly HashSet<string>? labelSet = labels is { Length: > 0 } ? new(labels, StringComparer.Ordinal) : null;
+    private readonly HashSet<string>? labelSet = labels is { Length: > EmptyLabelCount } ? new(labels, StringComparer.Ordinal) : null;
     private long resultLowerBound;
     private int examinedEdges;
 
     /// <summary>Returns deterministic qualified vertices and projected edges after exact response accounting.</summary>
     internal GraphTraversalResult Read()
     {
+        const int StartVertexDepth = 0;
+
         visibility.RequireStart(start);
-        AddVertex(start, 0);
+        AddVertex(start, StartVertexDepth);
         while (pending.TryDequeue(out var item))
         {
             budget.Check();
@@ -47,9 +52,11 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
 
     private void VisitAdjacency((EntityRef Vertex, int Depth) item)
     {
+        const int OverflowProbeRows = 1;
+
         var prefix = KeySpace.Partition(AdjacencySpace, partition, graph, OutDirection,
             item.Vertex.Collection, item.Vertex.Id);
-        var remaining = Math.Min(maxEdges, maxEdges - examinedEdges + 1);
+        var remaining = Math.Min(maxEdges, maxEdges - examinedEdges + OverflowProbeRows);
         var scan = budget.VisitRange(view, prefix, remaining, (_, value) => VisitEdge(value, item.Depth));
         if (scan.HasMore)
         {
@@ -59,6 +66,8 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
 
     private bool VisitEdge(ReadOnlySpan<byte> value, int depth)
     {
+        const int HopIncrement = 1;
+
         if (++examinedEdges > maxEdges)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
@@ -75,12 +84,14 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
             return true;
         }
         AddEdge(edge);
-        AddVertex(edge.To, depth + 1);
+        AddVertex(edge.To, depth + HopIncrement);
         return true;
     }
 
     private void AddEdge(EdgeRecord edge)
     {
+        const int NoReplacedBytes = 0;
+
         var replacing = edges.TryGetValue(edge.Id, out var previous);
         if (edges.Count >= maxEdges && !replacing)
         {
@@ -91,7 +102,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
             AttributesJson = database.Authorization.Project(principal, resource.FieldPolicies, edge.AttributesJson, out _)
         };
         var bytes = budget.MeasureResult(projected);
-        AddResultBytes(bytes, replacing ? previous.Bytes : 0);
+        AddResultBytes(bytes, replacing ? previous.Bytes : NoReplacedBytes);
         edges[edge.Id] = (projected, bytes);
     }
 
@@ -110,7 +121,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         pending.Enqueue((vertex, depth));
     }
 
-    private void AddResultBytes(long bytes, long replacedBytes = 0)
+    private void AddResultBytes(long bytes, long replacedBytes = NoReplacementBytes)
     {
         var retainedBytes = resultLowerBound - replacedBytes;
         if (bytes > database.Limits.MaxBatchBytes - retainedBytes)

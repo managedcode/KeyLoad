@@ -8,7 +8,7 @@ internal sealed class IsolatedKeyLoadMutationTests
     [Test]
     public async Task AcIso005KeyLoadMutationsRequireFreshCreateAndExistingRevisionForUpdateDelete()
     {
-        var input = new BenchmarkDataset(ComparisonHarnessInputs.Small).Documents[0];
+        var input = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(ComparisonHarnessInputs.Small)).Documents[0];
         var create = (PutDocument)KeyLoadDocumentOperations.CreateMutation(Scenario.DocumentWrite, input);
         var update = (PutDocument)KeyLoadDocumentOperations.CreateMutation(Scenario.DocumentUpdate, input);
         var delete = (DeleteDocument)KeyLoadDocumentOperations.CreateMutation(Scenario.DocumentDelete, input);

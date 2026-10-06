@@ -83,6 +83,13 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateProjectionRequest(PartitionRef partition, ApplyVectorProjection request)
     {
+        const int GenerationValidationBoundary = 1;
+        const int SourceEventRevisionValidationBoundary = 1;
+        const int SourceDocumentRevisionValidationBoundary = 1;
+        const int ReducerGenerationValidationBoundary = 1;
+        const int DimensionFirstCount = 1;
+        const int DimensionValidationBound = 4_096;
+
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.SourceStream);
         ArgumentNullException.ThrowIfNull(request.SourceDocument);
@@ -92,8 +99,8 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(request.SourceStream.Partition);
         ArgumentNullException.ThrowIfNull(request.SourceDocument.Partition);
         if (request.SourceStream.Partition != partition || request.SourceDocument.Partition != partition
-            || request.SourceStream.Generation < 1 || request.SourceEventRevision < 1
-            || request.SourceDocumentRevision < 1 || request.ReducerGeneration < 1)
+            || request.SourceStream.Generation < GenerationValidationBoundary || request.SourceEventRevision < SourceEventRevisionValidationBoundary
+            || request.SourceDocumentRevision < SourceDocumentRevisionValidationBoundary || request.ReducerGeneration < ReducerGenerationValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidProjectionMessage);
         }
@@ -112,7 +119,7 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(request.Target.Space.Model);
         JsonData.Identifier(request.Target.Space.Version);
         if (!Enum.IsDefined(request.Target.Space.Metric)
-            || request.Target.Space.Dimension is < 1 or > 4_096
+            || request.Target.Space.Dimension is < DimensionFirstCount or > DimensionValidationBound
             || request.Target.Values.IsDefault || request.Target.Values.Length != request.Target.Space.Dimension
             || request.Target.Values.Any(value => !float.IsFinite(value)))
         {
@@ -123,12 +130,16 @@ public sealed partial class DatabaseEngine
     private static void ValidateProjectionEvent(IKeyValueView view, PartitionRef partition,
         ApplyVectorProjection request)
     {
+        const int TailRevisionEmptyCount = 0;
+        const int FirstAvailableRevisionSingleItemCount = 1;
+        const int GenerationSingleItemCount = 1;
+
         const string EventSpace = "event";
         const string EventIdentitySpace = "event-id";
         var stream = request.SourceStream;
         var headKey = KeySpace.Partition(AggregateReplayReader.StreamHeadKeySpace, partition,
             stream.StreamSet, stream.StreamId);
-        var head = view.GetRecord<StreamHead>(headKey) ?? new StreamHead(0, 1, 1);
+        var head = view.GetRecord<StreamHead>(headKey) ?? new StreamHead(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, GenerationSingleItemCount);
         AggregateReplayReader.ValidateHead(head);
         if (head.Generation != stream.Generation)
         {
@@ -159,8 +170,11 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateProjectionEventRecord(ApplyVectorProjection request, EventRecord record)
     {
+        const int EventSequenceValidationBoundary = 1;
+        const int SchemaVersionValidationBoundary = 1;
+
         if (record.Stream != request.SourceStream || record.Revision != request.SourceEventRevision
-            || record.EventSequence < 1 || record.Data is null || record.Data.SchemaVersion < 1)
+            || record.EventSequence < EventSequenceValidationBoundary || record.Data is null || record.Data.SchemaVersion < SchemaVersionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, ProjectionLineageCorruptMessage);
         }
@@ -267,8 +281,10 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateEffectReceipt(MutationReceipt receipt, PutVector target)
     {
+        const int RevisionValidationBoundary = 1;
+
         if (receipt is null || receipt.Kind != ProjectionKind || receipt.Resource != target.Collection
-            || receipt.Id != target.Id || receipt.Revision < 1)
+            || receipt.Id != target.Id || receipt.Revision < RevisionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, ProjectionEffectCorruptMessage);
         }

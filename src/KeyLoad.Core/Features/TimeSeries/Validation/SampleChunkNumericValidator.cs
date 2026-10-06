@@ -4,6 +4,14 @@ internal static class SampleChunkNumericValidator
 {
     internal static void Validate(SampleChunkPayload payload, ReadExecutionBudget budget)
     {
+        const int PriorTicksInitialValue = 0;
+        const int PriorSequenceInitialValue = 0;
+        const int PriorOrderedSequenceInitialValue = 0;
+        const int PriorValueInitialValue = 0;
+        const int IndexInitialValue = 0;
+        const int IndexValidationBoundary = 0;
+        const int EmptyIndex = 0;
+
         var count = payload.RecordCount;
         SampleChunkWire.Require(payload.UtcTicks.Length >= count
             && payload.Offsets.Length == count * sizeof(short)
@@ -12,11 +20,11 @@ internal static class SampleChunkNumericValidator
         var offsets = new SampleChunkReader(payload.Offsets.Span);
         var sequences = new SampleChunkReader(payload.Sequences.Span);
         var values = new SampleChunkReader(payload.Values.Span);
-        long priorTicks = 0;
-        long priorSequence = 0;
-        long priorOrderedSequence = 0;
-        ulong priorValue = 0;
-        for (var index = 0; index < count; index++)
+        long priorTicks = PriorTicksInitialValue;
+        long priorSequence = PriorSequenceInitialValue;
+        long priorOrderedSequence = PriorOrderedSequenceInitialValue;
+        ulong priorValue = PriorValueInitialValue;
+        for (var index = IndexInitialValue; index < count; index++)
         {
             budget.Check();
             var tickPart = ticks.ReadVarUInt();
@@ -24,12 +32,12 @@ internal static class SampleChunkNumericValidator
             var offsetMinutes = offsets.ReadInt16LittleEndian();
             ValidateOffset(currentTicks, offsetMinutes);
             var currentSequence = DecodeSequence(sequences.ReadVarUInt(), index, priorSequence);
-            if (index > 0 && currentTicks == priorTicks && currentSequence <= priorOrderedSequence)
+            if (index > IndexValidationBoundary && currentTicks == priorTicks && currentSequence <= priorOrderedSequence)
             {
                 SampleChunkWire.Require(false);
             }
             var valuePart = values.ReadVarUInt();
-            var valueBits = index == 0 ? valuePart : valuePart ^ priorValue;
+            var valueBits = index == EmptyIndex ? valuePart : valuePart ^ priorValue;
             SampleChunkWire.Require(double.IsFinite(BitConverter.Int64BitsToDouble(unchecked((long)valueBits))));
             priorTicks = currentTicks;
             priorSequence = currentSequence;
@@ -45,8 +53,10 @@ internal static class SampleChunkNumericValidator
 
     internal static long DecodeTicks(ulong encoded, int index, long previous)
     {
+        const int EmptyIndex = 0;
+
         var maximum = (ulong)DateTimeOffset.MaxValue.UtcTicks;
-        if (index == 0)
+        if (index == EmptyIndex)
         {
             SampleChunkWire.Require(encoded <= maximum);
             return (long)encoded;
@@ -57,26 +67,34 @@ internal static class SampleChunkNumericValidator
 
     internal static long DecodeSequence(ulong encoded, int index, long previous)
     {
-        if (index == 0)
+        const int EmptyIndex = 0;
+        const int EmptyEncodedSequence = 0;
+        const int DeltaValidationBoundary = 0;
+        const int FirstSequence = 1;
+
+        if (index == EmptyIndex)
         {
-            SampleChunkWire.Require(encoded is > 0 and <= long.MaxValue);
+            SampleChunkWire.Require(encoded is > EmptyEncodedSequence and <= long.MaxValue);
             return (long)encoded;
         }
         var delta = SampleChunkWire.UnZigZag(encoded);
-        if (delta > 0)
+        if (delta > DeltaValidationBoundary)
         {
             SampleChunkWire.Require(previous <= long.MaxValue - delta);
         }
         else
         {
-            SampleChunkWire.Require(delta >= 1 - previous);
+            SampleChunkWire.Require(delta >= FirstSequence - previous);
         }
         return previous + delta;
     }
 
     private static void ValidateOffset(long utcTicks, short offsetMinutes)
     {
-        SampleChunkWire.Require(offsetMinutes is >= -840 and <= 840);
+        const int MinimumNativeUtcOffsetMinutes = -840;
+        const int MaximumNativeUtcOffsetMinutes = 840;
+
+        SampleChunkWire.Require(offsetMinutes is >= MinimumNativeUtcOffsetMinutes and <= MaximumNativeUtcOffsetMinutes);
         var localTicks = utcTicks + (long)offsetMinutes * TimeSpan.TicksPerMinute;
         SampleChunkWire.Require(localTicks >= DateTimeOffset.MinValue.Ticks
             && localTicks <= DateTimeOffset.MaxValue.Ticks);

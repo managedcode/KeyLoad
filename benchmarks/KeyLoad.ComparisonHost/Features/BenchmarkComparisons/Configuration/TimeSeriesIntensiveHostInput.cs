@@ -7,6 +7,7 @@ using Npgsql;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
+[KeyLoad.ConfigurationBinding]
 internal static class TimeSeriesIntensiveHostInput
 {
     internal static InvalidOperationException Invalid() => new(TimeSeriesIntensiveHostConstants.InvalidCode);

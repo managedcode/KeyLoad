@@ -6,8 +6,8 @@ internal static class AggregateReplayUpcast
 {
     internal static Dictionary<int, EventUpcaster> BuildMap(
         IEnumerable<EventUpcaster>? upcasters,
-        CancellationToken cancellationToken,
-        int maximumRegisteredUpcasters)
+        int maximumRegisteredUpcasters,
+        CancellationToken cancellationToken)
     {
         Dictionary<int, EventUpcaster> result = [];
         if (upcasters is null)

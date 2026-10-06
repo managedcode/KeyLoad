@@ -38,5 +38,5 @@ internal static class PackedAnnConstructionValueFixture
     }
 
     internal static AnnWorkBudget Budget(TestDatabase database)
-        => new(new ReadExecutionBudget(database.Database.Limits), WorkLimit);
+        => new(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)), WorkLimit);
 }

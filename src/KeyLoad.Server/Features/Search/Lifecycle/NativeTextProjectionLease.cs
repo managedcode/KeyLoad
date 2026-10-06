@@ -8,7 +8,9 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
     Action<NativeTextFaultStage>? faultObserver,
     bool building) : ITextProjectionLease
 {
-    private int recordIndex = -1;
+    private const int RecordIndexSingleItemCount = -1;
+
+    private int recordIndex = RecordIndexSingleItemCount;
     private ulong previousToken;
     private int postingsSinceBoundCheck;
     private bool recordOpen;
@@ -19,6 +21,8 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
 
     public void BeginRecord(EntityRef reference, long revision)
     {
+        const int PreviousTokenEmptyCount = 0;
+
         budget.Check();
         if (disposed || completed)
         {
@@ -36,12 +40,16 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
             invalid = true;
             throw NativeTextErrors.Mismatch();
         }
-        previousToken = 0;
+        previousToken = PreviousTokenEmptyCount;
         recordOpen = true;
     }
 
     public void ObserveToken(string token)
     {
+        const int RecordIndexStep = 1;
+        const int PostingsSinceBoundCheckValidationBoundary = 64;
+        const int PostingsSinceBoundCheckEmptyCount = 0;
+
         budget.Check();
         if (disposed || completed || !recordOpen || string.IsNullOrEmpty(token))
         {
@@ -52,17 +60,17 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
             return;
         }
         var hash = tokenHash(token);
-        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + 1, previousToken));
+        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + RecordIndexStep, previousToken));
         if (!postingObserved)
         {
             postingObserved = true;
             faultObserver?.Invoke(NativeTextFaultStage.NativePostingWritten);
         }
         previousToken = hash;
-        if (++postingsSinceBoundCheck >= 64)
+        if (++postingsSinceBoundCheck >= PostingsSinceBoundCheckValidationBoundary)
         {
             owner.CheckPhysical(budget);
-            postingsSinceBoundCheck = 0;
+            postingsSinceBoundCheck = PostingsSinceBoundCheckEmptyCount;
         }
     }
 
@@ -110,12 +118,14 @@ internal sealed class NativeTextProjectionLease(NativeTextProjection owner, Nati
 
     private void VerifyCompleteVisit()
     {
+        const int RecordIndexStep = 1;
+
         if (building)
         {
             owner.CheckPhysical(budget);
             return;
         }
-        if (recordIndex + 1 != generation.Records.Count)
+        if (recordIndex + RecordIndexStep != generation.Records.Count)
         {
             invalid = true;
             throw NativeTextErrors.Mismatch();

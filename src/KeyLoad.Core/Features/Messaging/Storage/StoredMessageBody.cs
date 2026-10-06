@@ -10,13 +10,15 @@ internal readonly record struct StoredMessageBody(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Body)] MessageBody Body,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.StoredMessageBodyFields.Bytes)] long Bytes)
 {
+    private const int NoRetainedBytes = 0;
+
     /// <summary>Decodes borrowed bytes once without retaining the storage-owned span.</summary>
     internal static StoredMessageBody? Read(IKeyValueView view, byte[] key)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(key);
         MessageBody? body = null;
-        long bytes = 0;
+        long bytes = NoRetainedBytes;
         if (!view.ReadValue(key, borrowed =>
         {
             bytes = borrowed.Length;

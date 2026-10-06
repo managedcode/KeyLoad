@@ -70,7 +70,7 @@ public sealed class OpenLoopComparisonRunner(ScaledComparisonProfile profile, in
         await ScaledComparisonOperationSetup.WarmupAsync(execution.Sessions, inputs, execution.Profile,
             cancellationToken).ConfigureAwait(false);
         StartMeasurement(execution);
-        await using var sampler = new ClientResourceSampler();
+        await using var sampler = new ClientResourceSampler(executionOptions);
         try
         {
             execution.DrainExpired = await MeasureAsync(execution, inputs, cancellationToken).ConfigureAwait(false);

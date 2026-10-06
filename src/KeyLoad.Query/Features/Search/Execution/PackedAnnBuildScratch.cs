@@ -2,14 +2,19 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PackedAnnBuildScratch
 {
-    internal PackedAnnBuildScratch(int count, PackedAnnOptions options, AnnWorkBudget budget)
+    private const int EmptyElementCount = 0;
+    private const int BidirectionalDegreeMultiplier = 2;
+    private const int SingleWorkUnit = 1;
+    private const int AdjacentElementOffset = 1;
+
+    internal PackedAnnBuildScratch(int count, int connections, int efConstruction, AnnWorkBudget budget)
     {
-        var degree = count == 0 ? 0 : checked(options.Connections * 2);
-        var ef = Math.Min(count, options.EfConstruction);
-        budget.Charge(checked((long)(degree + 1) * 2 + (long)degree * 2));
+        var degree = count == EmptyElementCount ? EmptyElementCount : checked(connections * BidirectionalDegreeMultiplier);
+        var ef = Math.Min(count, efConstruction);
+        budget.Charge(checked((long)(degree + SingleWorkUnit) * BidirectionalDegreeMultiplier + (long)degree * BidirectionalDegreeMultiplier));
         Layer = new PackedAnnLayerBuffers(count, ef, false, budget);
-        NeighborNodes = new int[degree + 1];
-        NeighborScores = new double[degree + 1];
+        NeighborNodes = new int[degree + AdjacentElementOffset];
+        NeighborScores = new double[degree + AdjacentElementOffset];
         SelectedNeighbors = new int[degree];
         ConnectionTargets = new int[degree];
         budget.Check();

@@ -13,7 +13,7 @@ internal sealed class McpReplyOwnerTests
     public async Task SuccessPreservesCanonicalResultAndExecutionIdentity()
     {
         var canonical = Encoding.UTF8.GetBytes(McpOutputTestData.CanonicalJson);
-        using var owner = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes);
+        using var owner = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         var tool = owner.ToolResult();
         var root = tool.StructuredContent!.Value;
         using var original = JsonDocument.Parse(canonical);
@@ -76,11 +76,11 @@ internal sealed class McpReplyOwnerTests
     public async Task CompleteWrapperHasExactByteBoundary()
     {
         var canonical = Encoding.UTF8.GetBytes(McpOutputTestData.CanonicalJson);
-        using var measured = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes);
-        using var exact = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, measured.Bytes.Length);
+        using var measured = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
+        using var exact = McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, measured.Bytes.Length, UnitMcpOptions.Execution());
         await Assert.That(exact.Bytes.Span.SequenceEqual(measured.Bytes.Span)).IsTrue();
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, measured.Bytes.Length - 1));
+            McpReplyOwner.Success(canonical, McpOutputTestData.ExecutionId, measured.Bytes.Length - 1, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(error.Message).DoesNotContain(McpOutputTestData.Marker);
         using var failure = McpReplyOwner.Failure(ErrorCode.Validation, null, McpOutputTestData.MaximumBytes);
@@ -94,10 +94,8 @@ internal sealed class McpReplyOwnerTests
     [Test]
     public async Task InvalidCanonicalReplyCannotBecomeStructuredContent()
     {
-        var invalid = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(
-            Encoding.UTF8.GetBytes(McpOutputTestData.InvalidJson), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes));
-        var deep = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(
-            McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.OverReplyDepth), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes));
+        var invalid = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(            Encoding.UTF8.GetBytes(McpOutputTestData.InvalidJson), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
+        var deep = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(            McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.OverReplyDepth), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(deep.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(invalid.Message).DoesNotContain(McpOutputTestData.Marker);

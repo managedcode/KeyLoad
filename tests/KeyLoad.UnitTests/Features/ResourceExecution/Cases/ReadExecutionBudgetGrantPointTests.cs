@@ -14,7 +14,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
         var maximumBytes = key.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(new());
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
             var grant = budget.CreateReadGrant(maximumBytes, 1);
             var bytesAtReader = 0L;
             var found = grant.ReadValue(view, key, _ => bytesAtReader = budget.ReadBytes);
@@ -34,7 +34,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var key = ReadExecutionBudgetGrantSeed.MissingKey;
-        var budget = new ReadExecutionBudget(new());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
         var grant = budget.CreateReadGrant(key.Length, 1);
         var found = database.Store.Read(view => grant.ReadValue(view, key, static _ => { }));
 
@@ -48,7 +48,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
     public async Task ZeroRecordGrantRejectsMissingPointBeforeItsReader()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
-        var budget = new ReadExecutionBudget(new());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
         var grant = budget.CreateReadGrant(ReadExecutionBudgetGrantSeed.MissingKey.Length, 0);
         var consumed = false;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
@@ -67,7 +67,7 @@ internal sealed class ReadExecutionBudgetGrantPointTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var key = ReadExecutionBudgetGrantSeed.FirstKey;
         var maximumBytes = key.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length - 1;
-        var budget = new ReadExecutionBudget(new());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
         var grant = budget.CreateReadGrant(maximumBytes, 1);
         var consumed = false;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>

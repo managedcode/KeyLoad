@@ -1,11 +1,14 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KeyLoad.Comparisons;
 
-internal sealed class ComparisonMeasurer(ComparisonOptions options, ComparisonProgressObserver observer)
+internal sealed class ComparisonMeasurer(IOptions<ComparisonOptions> workloadOptions, ComparisonProgressObserver observer,
+    IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
+    private readonly ComparisonOptions options = workloadOptions.Value;
     private const string FailedAttemptDetail = "Failed attempts remain in raw samples and latency; useful throughput counts verified successes.";
 
     public async Task<ComparisonCase> MeasureAsync(IComparisonTarget target, BenchmarkDataset dataset, Scenario scenario,
@@ -40,7 +43,7 @@ internal sealed class ComparisonMeasurer(ComparisonOptions options, ComparisonPr
         await ComparisonMutationPreparation.PrepareAsync(sessions, inputs, scenario, options.TimeoutSeconds, cancellationToken);
         var samples = new OperationSample[options.Operations];
         var outputs = new OperationResult?[options.Operations];
-        await using var resources = new ClientResourceSampler();
+        await using var resources = new ClientResourceSampler(executionOptions);
         observer.Begin(ComparisonProgressPhase.Measure, repetition + 1, options.Operations);
         var clock = Stopwatch.StartNew();
         await ExecuteBatchAsync(sessions, inputs, scenario, samples, outputs, clock, cancellationToken);

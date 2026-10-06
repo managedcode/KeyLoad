@@ -33,7 +33,7 @@ public sealed partial class DatabaseEngine
     public (DocumentRecord Document, VectorRecord Vector)[] ReadVisibleVectors(IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, string field, ReadExecutionBudget? budget = null)
     {
-        budget ??= new(Limits, timeProvider: Clock);
+        budget ??= new(OperationLimitsOptions, timeProvider: Clock);
         var eligible = new List<(DocumentRecord, VectorRecord)>();
         VisitVisibleVectors(view, principal, partition, collection, field, budget,
             (document, vector) => eligible.Add((document, vector)));

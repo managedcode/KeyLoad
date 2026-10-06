@@ -118,7 +118,7 @@ internal sealed record LocalRf3ImageRequest
         var localSection = configuration.GetSection(LocalSectionSetting);
         var localChildren = localSection.GetChildren().Take(CountValue).ToArray();
         if (localSection.Value is not null || localChildren.Length > BoundaryValue
-            || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(1).Any())
+            || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(HasProtocolCohortSelectorCountValue).Any())
             || configuration.GetSection(EnabledSetting).GetChildren().Any())
         {
             throw new InvalidOperationException(Invalid);

@@ -1,4 +1,5 @@
 using System.Runtime.ExceptionServices;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
@@ -6,8 +7,6 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 internal sealed class RawStorageFixture : IDisposable
 {
     private const int MinimumMaximumWrites = 1;
-    private const int MaximumWritesLimit = 65_536;
-    private const int MaximumRecordCount = 4096;
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
     private const string UnavailableMessage = "The raw storage fixture cannot continue after an incomplete native operation.";
@@ -19,11 +18,12 @@ internal sealed class RawStorageFixture : IDisposable
     private int attemptedWrites;
 
     /// <summary>Creates the real ZoneTree engine after validating all caller-supplied bounds.</summary>
-    public RawStorageFixture(int recordCount, int valueBytes,
-        int maximumWrites = MaximumWritesLimit)
+    public RawStorageFixture(int recordCount, int valueBytes, IOptions<RawStorageExecutionOptions> executionOptions)
     {
-        ValidateArguments(recordCount, valueBytes, maximumWrites);
-        this.maximumWrites = maximumWrites;
+        var settings = executionOptions.Value;
+        settings.Validate();
+        ValidateArguments(recordCount, valueBytes, settings.MaximumWrites, settings.MaximumRecords);
+        maximumWrites = settings.MaximumWrites;
         Corpus = new(recordCount, valueBytes);
         readScratch = GC.AllocateArray<byte>(valueBytes, pinned: true);
         try
@@ -107,9 +107,9 @@ internal sealed class RawStorageFixture : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private static void ValidateArguments(int recordCount, int valueBytes, int maximumWrites)
+    private static void ValidateArguments(int recordCount, int valueBytes, int maximumWrites, int maximumRecords)
     {
-        if (recordCount is < 1 or > MaximumRecordCount)
+        if (recordCount < MinimumMaximumWrites || recordCount > maximumRecords)
         {
             throw new ArgumentOutOfRangeException(nameof(recordCount));
         }
@@ -119,7 +119,7 @@ internal sealed class RawStorageFixture : IDisposable
             throw new ArgumentOutOfRangeException(nameof(valueBytes));
         }
 
-        if (maximumWrites is < MinimumMaximumWrites or > MaximumWritesLimit || maximumWrites < recordCount)
+        if (maximumWrites < MinimumMaximumWrites || maximumWrites < recordCount)
         {
             throw new ArgumentOutOfRangeException(nameof(maximumWrites));
         }
@@ -127,7 +127,9 @@ internal sealed class RawStorageFixture : IDisposable
 
     private void SeedCorpus()
     {
-        for (var index = 0; index < Corpus.RecordCount; index++)
+        const int IndexInitialValue = 0;
+
+        for (var index = IndexInitialValue; index < Corpus.RecordCount; index++)
         {
             Upsert(index);
         }
@@ -145,13 +147,15 @@ internal sealed class RawStorageFixture : IDisposable
 
     private void EnsureUsable(int index)
     {
+        const int RecordCountStep = 2;
+
         ObjectDisposedException.ThrowIf(disposed, this);
         if (faulted)
         {
             throw new InvalidOperationException(UnavailableMessage);
         }
 
-        if ((uint)index >= (uint)(Corpus.RecordCount + 2))
+        if ((uint)index >= (uint)(Corpus.RecordCount + RecordCountStep))
         {
             throw new ArgumentOutOfRangeException(nameof(index));
         }

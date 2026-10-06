@@ -13,6 +13,9 @@ internal static class AnnSeedValidation
     internal static void ValidateRequest(string principalId, PartitionRef partition,
         string collection, string field, VectorSpace space, AnnSeedWork work)
     {
+        const int DimensionFirstCount = 1;
+        const int DimensionValidationBound = 4_096;
+
         if (partition is null || space is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
@@ -35,7 +38,7 @@ internal static class AnnSeedValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
 
-        if (space.Dimension is < 1 or > 4_096 || !Enum.IsDefined(space.Metric))
+        if (space.Dimension is < DimensionFirstCount or > DimensionValidationBound || !Enum.IsDefined(space.Metric))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
@@ -56,10 +59,21 @@ internal static class AnnSeedValidation
     internal static void ValidateCut(StoreIdentity identity, long position, long applied, OutboxHead head,
         PrincipalRecord principal, ResourceDefinition resource)
     {
+        const int FormatVersionValidationBoundary = 0;
+        const int KeyCodecVersionValidationBoundary = 0;
+        const int ReadGenerationValidationBoundary = 0;
+        const int PositionValidationBoundary = 0;
+        const int AppliedValidationBoundary = 0;
+        const int TailValidationBoundary = 0;
+        const int FirstAvailableValidationBoundary = 1;
+        const int FirstAvailableStep = 1;
+        const int PolicyEpochValidationBoundary = 1;
+        const int SchemaVersionValidationBoundary = 1;
+
         if (identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty
-            || identity.FormatVersion <= 0 || identity.KeyCodecVersion <= 0 || identity.ReadGeneration < 0
-            || position < 0 || applied < 0 || head.Tail < 0 || head.FirstAvailable < 1
-            || head.FirstAvailable - 1 > head.Tail || principal.PolicyEpoch < 1 || resource.SchemaVersion < 1)
+            || identity.FormatVersion <= FormatVersionValidationBoundary || identity.KeyCodecVersion <= KeyCodecVersionValidationBoundary || identity.ReadGeneration < ReadGenerationValidationBoundary
+            || position < PositionValidationBoundary || applied < AppliedValidationBoundary || head.Tail < TailValidationBoundary || head.FirstAvailable < FirstAvailableValidationBoundary
+            || head.FirstAvailable - FirstAvailableStep > head.Tail || principal.PolicyEpoch < PolicyEpochValidationBoundary || resource.SchemaVersion < SchemaVersionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptSource);
         }
@@ -67,11 +81,13 @@ internal static class AnnSeedValidation
 
     private static void ValidateIdentifier(string value, AnnSeedWork work)
     {
+        const int MaximumUtf8BytesPerCharacter = 4;
+
         if (value is null || value.Length > MaximumIdentifierCharacters)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
-        work.Charge(checked((long)value.Length * 4));
+        work.Charge(checked((long)value.Length * MaximumUtf8BytesPerCharacter));
         JsonData.Identifier(value);
         try
         {

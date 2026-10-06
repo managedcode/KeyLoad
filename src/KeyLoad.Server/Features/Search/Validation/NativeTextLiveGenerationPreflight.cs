@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
 internal static class NativeTextLiveGenerationPreflight
@@ -36,7 +37,6 @@ internal static class NativeTextLiveGenerationPreflight
         }
     }
 
-    internal static void Validate(NativeTextGeneration generation, string path, string root, string leaf,
-        Guid sourceNodeId, DatabaseLimits limits)
-        => NativeTextLiveGenerationMetadata.Validate(generation, path, root, leaf, sourceNodeId, limits);
+    internal static void Validate(NativeTextGeneration generation, string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<NativeTextExecutionOptions> executionOptions)
+        => NativeTextLiveGenerationMetadata.Validate(generation, path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
 }

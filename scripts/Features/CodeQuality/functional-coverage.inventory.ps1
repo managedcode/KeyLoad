@@ -90,6 +90,7 @@ function Invoke-FcPrepare([string] $Root, [string] $EvidenceRoot, [string] $Cont
         deployment = @($deployment)
         compiledProduct = $images.product
         compiledTestsManifest = $testImageBinding
+        compilationProducer = $images.compilationProducer
         scripts = @(Get-FcScriptInventory)
         settingsTemplateSha256 = Get-FcHash $TemplatePath
         runtime = [Environment]::Version.ToString()

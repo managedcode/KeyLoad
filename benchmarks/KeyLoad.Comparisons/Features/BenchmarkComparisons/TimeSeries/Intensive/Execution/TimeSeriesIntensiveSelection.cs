@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
@@ -32,22 +33,39 @@ internal sealed record TimeSeriesIntensiveSelection(TimeSeriesIntensiveTargetKin
     internal static TimeSeriesIntensiveSelection Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        if (configuration[RouteSetting] != Route || configuration[ComparisonWorkerSelection.TargetSetting] is not null
-            || configuration[ComparisonWorkerSelection.NodeCountSetting] is not null
-            || configuration[ComparisonWorkerSelection.ScenarioSetting] is not null
-            || !int.TryParse(configuration[NodeCountSetting], NumberStyles.None, CultureInfo.InvariantCulture, out var nodes)
-            || configuration[NodeCountSetting] != nodes.ToString(CultureInfo.InvariantCulture))
+        return ParseSelection(ReadSelection(configuration).Value);
+    }
+
+    private static TimeSeriesIntensiveSelection ParseSelection(TimeSeriesIntensiveSelectionOptions selection)
+    {
+        var cell = selection.TimeSeries;
+        if (selection.Profile != Route || selection.Target is not null || selection.NodeCount is not null
+            || selection.Scenario is not null || cell is null
+            || !int.TryParse(cell.NodeCount, NumberStyles.None, CultureInfo.InvariantCulture, out var nodes)
+            || cell.NodeCount != nodes.ToString(CultureInfo.InvariantCulture))
         {
             throw new InvalidOperationException(Invalid);
         }
-        var target = ReadEnum<TimeSeriesIntensiveTargetKind>(configuration[TargetSetting]);
-        var phase = ReadEnum<TimeSeriesIntensiveCellPhase>(configuration[PhaseSetting]);
-        var scenarioText = configuration[ScenarioSetting];
+        var target = ReadEnum<TimeSeriesIntensiveTargetKind>(cell.Target);
+        var phase = ReadEnum<TimeSeriesIntensiveCellPhase>(cell.Phase);
+        var scenarioText = cell.Scenario;
         TimeSeriesIntensiveScenario? scenario = scenarioText is null ? null : ReadEnum<TimeSeriesIntensiveScenario>(scenarioText);
         var result = new TimeSeriesIntensiveSelection(target, nodes, phase, scenario,
-            configuration[EvidenceProfileSetting] ?? string.Empty);
+            cell.EvidenceProfile ?? string.Empty);
         result.Validate();
         return result;
+    }
+
+    [ConfigurationBinding]
+    private static IOptions<TimeSeriesIntensiveSelectionOptions> ReadSelection(IConfiguration configuration)
+    {
+        var options = new OptionsManager<TimeSeriesIntensiveSelectionOptions>(new OptionsFactory<TimeSeriesIntensiveSelectionOptions>(
+            [new ConfigureFromConfigurationOptions<TimeSeriesIntensiveSelectionOptions>(
+                configuration.GetSection(TimeSeriesIntensiveSelectionOptions.SectionName))], [],
+            [new ValidateOptions<TimeSeriesIntensiveSelectionOptions>(Options.DefaultName,
+                settings => { _ = ParseSelection(settings); return true; }, Invalid)]));
+        _ = options.Value;
+        return options;
     }
 
     private static T ReadEnum<T>(string? text) where T : struct, Enum

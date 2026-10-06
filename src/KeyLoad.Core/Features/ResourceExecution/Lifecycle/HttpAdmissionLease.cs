@@ -3,6 +3,8 @@ namespace KeyLoad.Core;
 /// <summary>Owns node and verified-principal reservations for one admitted HTTP request.</summary>
 public sealed class HttpAdmissionLease : IDisposable
 {
+    private const int EmptyElementCount = 0;
+
     private const string AlreadyBoundDetail = "The HTTP request is already bound to its verified principal.";
 
     private readonly Lock gate = new();
@@ -37,7 +39,7 @@ public sealed class HttpAdmissionLease : IDisposable
                 throw new InvalidOperationException(AlreadyBoundDetail);
             }
 
-            scopeLease = scopes.Reserve(kind, verifiedPrincipal, 0, 0, cancellationToken);
+            scopeLease = scopes.Reserve(kind, verifiedPrincipal, EmptyElementCount, EmptyElementCount, cancellationToken);
         }
     }
 

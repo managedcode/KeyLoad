@@ -50,6 +50,9 @@ internal static class RelationalSchemaRules
 
     internal static void Indexes(ResourceDefinition definition, Dictionary<string, RelationalColumn> columns)
     {
+        const int ColumnPathSegments = 1;
+        const int ColumnPathIndex = 0;
+
         if (definition.Indexes.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidIndex);
@@ -67,7 +70,7 @@ internal static class RelationalSchemaRules
                     throw Errors.Fail(ErrorCode.Validation, InvalidIndex);
                 }
                 var path = JsonData.PathSegments(field);
-                if (path.Length != 1 || !columns.ContainsKey(path[0]))
+                if (path.Length != ColumnPathSegments || !columns.ContainsKey(path[ColumnPathIndex]))
                 {
                     throw Errors.Fail(ErrorCode.Validation, InvalidIndex);
                 }

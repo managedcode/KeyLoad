@@ -4,16 +4,20 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBudget budget)
 {
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int EqualOrder = 0;
+
     private readonly Dictionary<EntityRef, double> scores = [];
 
     public void AddBranch(SearchScore[] branch, double weight)
     {
         branch = GlobalBranchSinglePartitionAdapter.Prepare(branch);
-        for (var rank = 0; rank < branch.Length; rank++)
+        for (var rank = EmptyElementCount; rank < branch.Length; rank++)
         {
             GlobalBranchSinglePartitionAdapter.ValidateAt(branch, rank, budget);
             var reference = branch[rank].Reference;
-            scores[reference] = scores.GetValueOrDefault(reference) + weight / ((double)constant + rank + 1);
+            scores[reference] = scores.GetValueOrDefault(reference) + weight / ((double)constant + rank + AdjacentElementOffset);
         }
     }
 
@@ -29,7 +33,7 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
             {
                 selected.Enqueue(candidate, candidate);
             }
-            else if (comparer.Compare(candidate, selected.Peek()) > 0)
+            else if (comparer.Compare(candidate, selected.Peek()) > EqualOrder)
             {
                 selected.Dequeue();
                 selected.Enqueue(candidate, candidate);

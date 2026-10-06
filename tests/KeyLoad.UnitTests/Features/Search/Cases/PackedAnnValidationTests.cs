@@ -23,12 +23,12 @@ internal sealed class PackedAnnValidationTests
         ];
         foreach (var options in invalid)
         {
-            await AssertValidation(() => PackedAnnIndex.Build(space, records, options, budget));
+            await AssertValidation(() => PackedAnnIndex.Build(space, records, Microsoft.Extensions.Options.Options.Create(options), budget));
         }
-        await AssertValidation(() => PackedAnnIndex.Build(space with { Dimension = 0 }, records, new(), budget));
-        await AssertValidation(() => PackedAnnIndex.Build(space with { Dimension = 4_097 }, records, new(), budget));
-        await AssertValidation(() => PackedAnnIndex.Build(space with { Metric = (DistanceMetric)int.MaxValue }, records, new(), budget));
-        await AssertValidation(() => PackedAnnIndex.Build(space with { Id = "\u0001bad" }, records, new(), budget));
+        await AssertValidation(() => PackedAnnIndex.Build(space with { Dimension = 0 }, records, UnitExecutionOptions.PackedAnn(new()), budget));
+        await AssertValidation(() => PackedAnnIndex.Build(space with { Dimension = 4_097 }, records, UnitExecutionOptions.PackedAnn(new()), budget));
+        await AssertValidation(() => PackedAnnIndex.Build(space with { Metric = (DistanceMetric)int.MaxValue }, records, UnitExecutionOptions.PackedAnn(new()), budget));
+        await AssertValidation(() => PackedAnnIndex.Build(space with { Id = "\u0001bad" }, records, UnitExecutionOptions.PackedAnn(new()), budget));
     }
 
     [Test]
@@ -48,12 +48,12 @@ internal sealed class PackedAnnValidationTests
         ];
         foreach (var record in malformed)
         {
-            await AssertValidation(() => PackedAnnIndex.Build(space, [record], new(), PackedAnnIndexTestSupport.Budget(database)));
+            await AssertValidation(() => PackedAnnIndex.Build(space, [record], UnitExecutionOptions.PackedAnn(new()), PackedAnnIndexTestSupport.Budget(database)));
         }
         await AssertValidation(() => PackedAnnIndex.Build(space,
-            [valid, records[1] with { Field = "another-field" }], new(), PackedAnnIndexTestSupport.Budget(database)));
-        await AssertValidation(() => PackedAnnIndex.Build(space, [records[1], records[0]], new(), PackedAnnIndexTestSupport.Budget(database)));
-        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0], records[0]], new(), PackedAnnIndexTestSupport.Budget(database)));
+[valid, records[1] with { Field = "another-field" }], UnitExecutionOptions.PackedAnn(new()), PackedAnnIndexTestSupport.Budget(database)));
+        await AssertValidation(() => PackedAnnIndex.Build(space, [records[1], records[0]], UnitExecutionOptions.PackedAnn(new()), PackedAnnIndexTestSupport.Budget(database)));
+        await AssertValidation(() => PackedAnnIndex.Build(space, [records[0], records[0]], UnitExecutionOptions.PackedAnn(new()), PackedAnnIndexTestSupport.Budget(database)));
     }
 
     [Test]
@@ -74,7 +74,7 @@ internal sealed class PackedAnnValidationTests
             MaxIndexBytes = 32_768,
             MaxScratchBytes = 4_096
         };
-        var index = PackedAnnIndex.Build(space, records, bounded, PackedAnnIndexTestSupport.Budget(database));
+        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(bounded), PackedAnnIndexTestSupport.Budget(database));
         await Assert.That(index.Count).IsEqualTo(1);
         await Assert.That(index.RetainedBytesUpperBound <= bounded.MaxIndexBytes).IsTrue();
         var result = index.Search(new float[] { 1f }, 1, null, PackedAnnIndexTestSupport.Budget(database));
@@ -92,9 +92,9 @@ internal sealed class PackedAnnValidationTests
             [new float[4_096], new float[4_096]]);
         var records = PackedAnnTestData.Load(database, metric);
         await AssertBudgetExceeded(() => PackedAnnIndex.Build(space, records,
-            new() { MaxRecords = 1 }, PackedAnnIndexTestSupport.Budget(database)));
+            UnitExecutionOptions.PackedAnn(new() { MaxRecords = 1 }), PackedAnnIndexTestSupport.Budget(database)));
         await AssertBudgetExceeded(() => PackedAnnIndex.Build(space, records,
-            new() { MaxIndexBytes = 1_024 }, PackedAnnIndexTestSupport.Budget(database)));
+            UnitExecutionOptions.PackedAnn(new() { MaxIndexBytes = 1_024 }), PackedAnnIndexTestSupport.Budget(database)));
         var queryScratchLimited = new PackedAnnOptions
         {
             Connections = 4,
@@ -105,7 +105,7 @@ internal sealed class PackedAnnValidationTests
             MaxIndexBytes = 1_000_000,
             MaxScratchBytes = 4_096
         };
-        var index = PackedAnnIndex.Build(space, records, queryScratchLimited, PackedAnnIndexTestSupport.Budget(database));
+        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(queryScratchLimited), PackedAnnIndexTestSupport.Budget(database));
         await AssertBudgetExceeded(() => index.Search(new float[4_096], 1, null,
             PackedAnnIndexTestSupport.Budget(database)));
     }
@@ -122,13 +122,13 @@ internal sealed class PackedAnnValidationTests
         var options = new PackedAnnOptions();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var canceledBuildBudget = new AnnWorkBudget(new ReadExecutionBudget(database.Database.Limits,
+        var canceledBuildBudget = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
             TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() =>
-            PackedAnnIndex.Build(space, records, options, canceledBuildBudget));
+            PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), canceledBuildBudget));
 
-        var index = PackedAnnIndex.Build(space, records, options, PackedAnnIndexTestSupport.Budget(database));
-        var canceledSearchBudget = new AnnWorkBudget(new ReadExecutionBudget(database.Database.Limits,
+        var index = PackedAnnIndex.Build(space, records, UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database));
+        var canceledSearchBudget = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
             TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() =>
             index.Search(new float[] { 1f, 0f }, 1, null, canceledSearchBudget));
@@ -141,7 +141,7 @@ internal sealed class PackedAnnValidationTests
         PackedAnnTestData.Configure(database);
         var metric = DistanceMetric.DotProduct;
         var records = PackedAnnTestData.Load(database, metric);
-        var index = PackedAnnIndex.Build(PackedAnnTestData.Space(metric, 1), records, new(),
+        var index = PackedAnnIndex.Build(PackedAnnTestData.Space(metric, 1), records, UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database));
         await AssertValidation(() => index.Search(new float[] { float.NaN }, 1, null,
             PackedAnnIndexTestSupport.Budget(database)));
@@ -149,7 +149,7 @@ internal sealed class PackedAnnValidationTests
             PackedAnnIndexTestSupport.Budget(database)));
 
         var populated = SeedRecords(database, metric, PackedAnnTestData.Space(metric, 1));
-        var populatedIndex = PackedAnnIndex.Build(PackedAnnTestData.Space(metric, 1), populated, new(),
+        var populatedIndex = PackedAnnIndex.Build(PackedAnnTestData.Space(metric, 1), populated, UnitExecutionOptions.PackedAnn(new()),
             PackedAnnIndexTestSupport.Budget(database));
         var noEligible = new ulong[] { 0 };
         await AssertValidation(() => populatedIndex.Search(new float[2], 1, noEligible,

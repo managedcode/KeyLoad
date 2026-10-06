@@ -3,6 +3,13 @@ $script:FcCoverageImages = [ordered]@{
     InvalidBinding = 'Functional coverage has no current native product and test-image binding.'
 }
 
+function Get-FcCompilationProducerBinding([string] $Root) {
+    $relative = $script:FcTestIdentity.CompilationProducer
+    $path = Resolve-FcPath $Root $relative
+    if (-not [IO.File]::Exists($path)) { throw $script:FcCoverageImages.InvalidBinding }
+    [ordered]@{ path = $relative; sha256 = Get-FcHash $path }
+}
+
 function Get-FcPreparedImages([string] $Root, [object] $Contract, [object[]] $Sources) {
     $dll = $Contract.deploymentDirectory + '/' + $Contract.moduleFile
     $pdb = [IO.Path]::ChangeExtension($dll, '.pdb')
@@ -12,7 +19,12 @@ function Get-FcPreparedImages([string] $Root, [object] $Contract, [object[]] $So
         throw $script:FcCoverageImages.InvalidBinding
     }
     $tests = Get-FcTestIdentitySnapshot $Root
-    [ordered]@{ product = $product; tests = $tests }
+    $producer = Get-FcCompilationProducerBinding $Root
+    if ($tests.compiledIdentity.compileReceipt.producer.path -cne $producer.path -or
+        $tests.compiledIdentity.compileReceipt.producer.sha256 -cne $producer.sha256) {
+        throw $script:FunctionalCoverage.ErrorDrift
+    }
+    [ordered]@{ product = $product; tests = $tests; compilationProducer = $producer }
 }
 
 function Write-FcTestImageManifest([string] $EvidenceRoot, [object] $Snapshot) {
@@ -40,7 +52,8 @@ function Write-FcTestImageManifest([string] $EvidenceRoot, [object] $Snapshot) {
 
 function Assert-FcPreparedImages([string] $Root, [string] $EvidenceRoot, [object] $Contract,
     [object] $Manifest, [object[]] $Sources) {
-    if (-not $Manifest.Contains('compiledProduct') -or -not $Manifest.Contains('compiledTestsManifest')) {
+    if (-not $Manifest.Contains('compiledProduct') -or -not $Manifest.Contains('compiledTestsManifest') -or
+        -not $Manifest.Contains('compilationProducer')) {
         throw $script:FcCoverageImages.InvalidBinding
     }
     $binding = $Manifest.compiledTestsManifest
@@ -52,6 +65,14 @@ function Assert-FcPreparedImages([string] $Root, [string] $EvidenceRoot, [object
     $testPath = Resolve-FcEvidenceFile $EvidenceRoot (Join-Path $EvidenceRoot $binding.fileName)
     if ((Get-FcHash $testPath) -cne $binding.sha256) { throw $script:FunctionalCoverage.ErrorDrift }
     $testIdentity = Read-FcTestIdentityManifest $testPath $Root
+    $producer = $Manifest.compilationProducer
+    $currentProducer = Get-FcCompilationProducerBinding $Root
+    if ($producer -isnot [Collections.IDictionary] -or $producer.Count -ne 2 -or
+        $producer.path -cne $currentProducer.path -or $producer.sha256 -cne $currentProducer.sha256 -or
+        $testIdentity.compiledIdentity.compileReceipt.producer.path -cne $producer.path -or
+        $testIdentity.compiledIdentity.compileReceipt.producer.sha256 -cne $producer.sha256) {
+        throw $script:FunctionalCoverage.ErrorDrift
+    }
     $dll = $Contract.deploymentDirectory + '/' + $Contract.moduleFile
     $pdb = [IO.Path]::ChangeExtension($dll, '.pdb')
     $product = Read-FcCompiledIdentity $Root $dll $pdb $Sources

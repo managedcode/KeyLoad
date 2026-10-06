@@ -35,7 +35,7 @@ internal static class AggregateReplayValidation
         var initialState = page.Snapshot is { } snapshot
             ? ValidateSnapshot(page, snapshot, reducer, limits, input)
             : ValidateInitialState(page, reducer, limits, input);
-        var upcasterMap = AggregateReplayUpcast.BuildMap(upcasters, cancellationToken, limits.MaximumRegisteredUpcasters);
+        var upcasterMap = AggregateReplayUpcast.BuildMap(upcasters, limits.MaximumRegisteredUpcasters, cancellationToken);
         var paths = ValidateEvents(page, reducer, upcasterMap, limits, input, cancellationToken);
         return new(initialState, paths);
     }

@@ -8,6 +8,8 @@ internal readonly record struct CacheControlMeasurement(int CompleteBytes, int S
 
     internal static bool TryGet(ICacheControlMessage? message, out CacheControlMeasurement result)
     {
+        const int TryGetAbsentCount = 0;
+
         result = default;
         if (!CacheControlShape.Valid(message))
         {
@@ -24,7 +26,7 @@ internal readonly record struct CacheControlMeasurement(int CompleteBytes, int S
             var correlationBytes = message is ICacheControlRequest
                 ? checked(sizeof(uint) + CacheControlValidation.StrictUtf8.GetByteCount(CacheControlNames.CorrelationPurpose)
                     + sizeof(byte) + complete.Position)
-                : 0;
+                : TryGetAbsentCount;
             if (complete.Position > MaximumBytes || signing.Position > MaximumBytes || correlationBytes > MaximumBytes)
             {
                 return false;

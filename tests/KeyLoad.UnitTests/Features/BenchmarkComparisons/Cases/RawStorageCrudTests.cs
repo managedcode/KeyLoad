@@ -14,7 +14,7 @@ internal sealed class RawStorageCrudTests
     [Arguments(1024)]
     public async Task AcGe002ZoneTreePreservesBinaryCrudAtBothPayloadSizes(int valueBytes)
     {
-        using var fixture = new RawStorageFixture(RecordCount, valueBytes, WriteBudget);
+        using var fixture = new RawStorageFixture(RecordCount, valueBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = WriteBudget }));
         var originals = SnapshotCorpus(fixture.Corpus);
         await AssertCorpusMatchesIndependentVectorAsync(fixture.Corpus, originals, valueBytes);
         await Assert.That(fixture.Corpus.RecordCount).IsEqualTo(RecordCount);
@@ -49,7 +49,7 @@ internal sealed class RawStorageCrudTests
     [Test]
     public async Task AcGe002ZoneTreeStartsWithEverySeededRecordAndIndependentBinaryBytes()
     {
-        using var fixture = new RawStorageFixture(RecordCount, 32, WriteBudget);
+        using var fixture = new RawStorageFixture(RecordCount, 32, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = WriteBudget }));
         var originals = SnapshotCorpus(fixture.Corpus);
         for (var index = 0; index < RecordCount; index++)
         {

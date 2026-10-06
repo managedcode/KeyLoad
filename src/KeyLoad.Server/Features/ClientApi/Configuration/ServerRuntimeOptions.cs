@@ -3,6 +3,7 @@ using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using KeyLoad.Server.Features.ClusterRouting;
+using KeyLoad.Server.Features.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -21,11 +22,16 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ReplicaReplayLimits> Replay,
     IOptions<CommandAdmissionLimits> CommandAdmission,
     IOptions<HttpAdmissionLimits> HttpAdmission,
+    IOptions<McpMemoryLimits> McpMemory,
+    IOptions<McpExecutionOptions> McpExecution,
     IOptions<ZoneTreeStorageExecutionOptions> StorageExecution,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
     IOptions<RequestProbeExecutionOptions> RequestProbeExecution,
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
+    IOptions<AdminObservationOptions> AdminObservation,
+    IOptions<ServerNodeUpgradeExecutionOptions> NodeUpgrade,
+    IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<ServerExecutionOptions> ServerExecution,
     CoreRuntimeOptions Core)
 {
@@ -43,11 +49,16 @@ internal sealed record ServerRuntimeOptions(
         _ = Peer.Value;
         _ = CommandAdmission.Value;
         _ = HttpAdmission.Value;
+        _ = McpMemory.Value;
+        _ = McpExecution.Value;
         _ = StorageExecution.Value;
         _ = PointCache.Value;
         _ = RequestProbeExecution.Value;
         _ = Membership.Value;
         _ = GrainRouting.Value;
+        _ = AdminObservation.Value;
+        _ = NodeUpgrade.Value;
+        _ = NativeText.Value;
         _ = ServerExecution.Value;
         Core.ValidateBeforePhysicalOwnership();
     }
@@ -66,11 +77,16 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(Replay);
         services.AddSingleton(CommandAdmission);
         services.AddSingleton(HttpAdmission);
+        services.AddSingleton(McpMemory);
+        services.AddSingleton(McpExecution);
         services.AddSingleton(StorageExecution);
         services.AddSingleton(PointCache);
         services.AddSingleton(RequestProbeExecution);
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
+        services.AddSingleton(AdminObservation);
+        services.AddSingleton(NodeUpgrade);
+        services.AddSingleton(NativeText);
         services.AddSingleton(ServerExecution);
         Core.RegisterBorrowed(services);
     }

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.Features.ClusterRouting.Commands;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
@@ -21,7 +22,10 @@ public sealed class RuntimeJournalOperations
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(configured);
         options = configured.Value with { };
-        if (!options.IsValid()) throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));
+        if (!options.IsValid())
+        {
+            throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));
+        }
         this.database = database;
     }
 
@@ -32,7 +36,7 @@ public sealed class RuntimeJournalOperations
         ArgumentNullException.ThrowIfNull(transaction);
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(mutation);
-        RuntimeJournalCommandRules.RequireCollections(mutation);
+        RuntimeJournalMutationValidation.RequireCollections(mutation);
         RuntimeJournalIdentity.RequireOperation(principal, OperationKind.RuntimeJournal, mutation);
         return mutation.Action == RuntimeJournalAction.BootstrapIdentity
             ? Bootstrap(transaction, principal, mutation)
@@ -69,7 +73,7 @@ public sealed class RuntimeJournalOperations
             var headers = RuntimeJournalRecordAccess.ReadCatalog(view, options, cancellationToken);
             var header = headers.FirstOrDefault(candidate => candidate.Name == request.JournalName)
                 ?? throw Errors.Fail(ErrorCode.NotFound, RuntimeJournalProtocol.Missing);
-            RuntimeJournalCommandRules.RequireCaptured(header, request.InstanceId, request.OwnerGeneration, request.ContentRevision);
+            RuntimeJournalMutationValidation.RequireCaptured(header, request.InstanceId, request.OwnerGeneration, request.ContentRevision);
             return RuntimeJournalRecordAccess.ReadPage(view, header, request.Offset, options.ChunkBytes, cancellationToken);
         });
     }
@@ -91,10 +95,12 @@ public sealed class RuntimeJournalOperations
     private RuntimeJournalMutationResult Bootstrap(IAtomicTransaction transaction, PrincipalRecord principal,
         RuntimeJournalMutation mutation)
     {
-        RuntimeJournalCommandRules.RequireBootstrapShape(mutation);
+        RuntimeJournalMutationValidation.RequireBootstrapShape(mutation);
         var current = database.Principal(transaction, principal.Id, database.EvaluationClock.GetUtcNow());
         if (!current.ClusterAdministrator || current.Id == RuntimeJournalIdentity.ProtectedPrincipalId)
+        {
             throw Errors.Fail(ErrorCode.PermissionDenied, RuntimeJournalProtocol.InvalidRequest);
+        }
         var principalKey = KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId);
         var existingPrincipal = RuntimeJournalRecordAccess.ReadRecord<PrincipalRecord>(transaction, principalKey);
         var marker = RuntimeJournalRecordAccess.ReadRecord<RuntimeJournalCatalogMarkerV1>(transaction, RuntimeJournalKeys.Catalog());
@@ -147,7 +153,9 @@ public sealed class RuntimeJournalOperations
             KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId));
         if (marker?.Version != RuntimeJournalProtocol.CurrentVersion || quota?.Version != RuntimeJournalProtocol.CurrentVersion
             || principal is null)
+        {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);
+        }
         RuntimeJournalIdentity.RequireProtected(principal);
     }
 
@@ -155,9 +163,19 @@ public sealed class RuntimeJournalOperations
         RuntimeJournalQuotaV1? quota)
     {
         if (principal is null || marker?.Version != RuntimeJournalProtocol.CurrentVersion
-            || quota?.Version != RuntimeJournalProtocol.CurrentVersion) return false;
-        try { RuntimeJournalIdentity.RequireProtected(principal); return true; }
-        catch (KeyLoadException) { return false; }
+            || quota?.Version != RuntimeJournalProtocol.CurrentVersion)
+        {
+            return false;
+        }
+        try
+        {
+            RuntimeJournalIdentity.RequireProtected(principal);
+            return true;
+        }
+        catch (KeyLoadException)
+        {
+            return false;
+        }
     }
 
     private static RuntimeJournalSnapshot Snapshot(RuntimeJournalHeaderV1 header)

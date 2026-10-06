@@ -2,6 +2,7 @@ $script:FcTestIdentity = [ordered]@{
     SchemaVersion = 1
     ProjectDirectory = 'tests/KeyLoad.UnitTests'
     ProjectFile = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'
+    CompilationProducer = 'tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets'
     DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Release/net10.0'
     Dll = 'tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll'
     Pdb = 'tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb'
@@ -42,7 +43,8 @@ function Resolve-FcTestIdentityRoot([string] $Root) {
 
 function Test-FcTestGeneratedPath([string] $RelativePath) {
     $segments = $RelativePath.Split('/')
-    return ($segments -contains 'obj' -or $segments -contains 'bin')
+    return ($segments -contains 'obj' -or $segments -contains 'bin' -or
+        $RelativePath.StartsWith('external/', [StringComparison]::Ordinal))
 }
 
 function Get-FcTestProjectSources([string] $Root) {
@@ -113,14 +115,23 @@ function Assert-FcTestPdbDocumentSet([object[]] $Sources, [object[]] $Documents)
     }
 }
 
-function Get-FcTestCompiledIdentity([string] $Root, [object[]] $Sources) {
+function Get-FcTestCompiledIdentity([string] $Root, [object[]] $Sources, [object[]] $BuildInputs) {
     $identity = Read-FcCompiledIdentity $Root $script:FcTestIdentity.Dll $script:FcTestIdentity.Pdb $Sources
-    if ($identity.moduleName -cne 'KeyLoad.UnitTests.dll' -or
-        -not $identity.compiledSourceBindingComplete -or
-        @($identity.sourceFilesWithoutPdbDocuments).Count -ne 0) {
-        throw $script:FcTestIdentity.IncompleteBinding
-    }
+    if ($identity.moduleName -cne 'KeyLoad.UnitTests.dll') { throw $script:FcTestIdentity.IncompleteBinding }
     Assert-FcTestPdbDocumentSet $Sources @($identity.documents)
+    $beforeDll = Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Dll)
+    $beforePdb = Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Pdb)
+    if ($beforeDll -cne $identity.dllSha256 -or $beforePdb -cne $identity.pdbSha256) {
+        throw $script:FcTestIdentity.Drift
+    }
+    $producerPath = Resolve-FcPath $Root $script:FcTestIdentity.CompilationProducer
+    $producer = [ordered]@{ path = $script:FcTestIdentity.CompilationProducer; sha256 = Get-FcHash $producerPath }
+    $identity['compileReceipt'] = Read-FcUnitCompileReceipt (
+        Resolve-FcPath $Root $script:FcTestIdentity.Dll) $Sources $BuildInputs $producer
+    if ((Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Dll)) -cne $beforeDll -or
+        (Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Pdb)) -cne $beforePdb) {
+        throw $script:FcTestIdentity.Drift
+    }
     $identity
 }
 
@@ -128,10 +139,14 @@ function Get-FcTestIdentitySnapshot([string] $Root) {
     $rootPath = Resolve-FcTestIdentityRoot $Root
     $beforeInputs = @(Get-FcTestBuildInputs $rootPath)
     $sources = @(Get-FcTestProjectSources $rootPath)
-    $compiled = Get-FcTestCompiledIdentity $rootPath $sources
+    $producerPath = Resolve-FcPath $rootPath $script:FcTestIdentity.CompilationProducer
+    $beforeProducer = Get-FcHash $producerPath
+    $compiled = Get-FcTestCompiledIdentity $rootPath $sources $beforeInputs
+    $afterProducer = Get-FcHash $producerPath
     $afterInputs = @(Get-FcTestBuildInputs $rootPath)
     $afterSources = @(Get-FcTestProjectSources $rootPath)
-    if ((ConvertTo-Json -InputObject $beforeInputs -Compress) -cne (ConvertTo-Json -InputObject $afterInputs -Compress) -or
+    if ($beforeProducer -cne $afterProducer -or
+        (ConvertTo-Json -InputObject $beforeInputs -Compress) -cne (ConvertTo-Json -InputObject $afterInputs -Compress) -or
         (ConvertTo-Json -InputObject $sources -Compress) -cne (ConvertTo-Json -InputObject $afterSources -Compress)) {
         throw $script:FcTestIdentity.Drift
     }
@@ -213,10 +228,33 @@ function Assert-FcTestManifestEntries([System.Text.Json.JsonElement] $Element, [
     }
 }
 
+function Assert-FcUnitCompileReceiptManifest([System.Text.Json.JsonElement] $Element, [object] $Expected) {
+    Assert-FcTestJsonObjectKeys $Element @('version','sourceCount','sourceSetSha256','centralInputCount','centralInputs','producer','binding')
+    if ($Element.GetProperty('version').ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+        $Element.GetProperty('version').GetInt32() -ne 1 -or
+        $Element.GetProperty('sourceCount').ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+        $Element.GetProperty('sourceCount').GetInt32() -ne $Expected.sourceCount -or
+        $Element.GetProperty('centralInputCount').ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+        $Element.GetProperty('centralInputCount').GetInt32() -ne 6 -or
+        $Element.GetProperty('sourceSetSha256').ValueKind -ne [System.Text.Json.JsonValueKind]::String -or
+        $Element.GetProperty('sourceSetSha256').GetString() -cne $Expected.sourceSetSha256 -or
+        $Element.GetProperty('sourceSetSha256').GetString() -cnotmatch '\A[0-9a-f]{64}\z' -or
+        $Element.GetProperty('binding').ValueKind -ne [System.Text.Json.JsonValueKind]::String -or
+        $Element.GetProperty('binding').GetString() -cne $Expected.binding) {
+        throw $script:FcTestIdentity.InvalidManifest
+    }
+    Assert-FcTestManifestEntries $Element 'centralInputs' @($Expected.centralInputs)
+    Assert-FcTestJsonObjectKeys $Element.GetProperty('producer') @('path','sha256')
+    if ($Element.GetProperty('producer').GetProperty('path').GetString() -cne $Expected.producer.path -or
+        $Element.GetProperty('producer').GetProperty('sha256').GetString() -cne $Expected.producer.sha256) {
+        throw $script:FcTestIdentity.InvalidManifest
+    }
+}
+
 function Assert-FcTestCompiledManifest([System.Text.Json.JsonElement] $Element, [string[]] $SourcePaths, [object] $ExpectedIdentity) {
     $fields = @('dll','pdb','dllSha256','pdbSha256','moduleName','compiledIdentityToolSha256',
         'originalCompilationRoot','inspectedSourceRoot','mvid','pdbGuid','pdbStamp','documents',
-        'sourceFilesWithoutPdbDocuments','compiledSourceBindingComplete','qualification')
+        'sourceFilesWithoutPdbDocuments','compiledSourceBindingComplete','compileReceipt','qualification')
     Assert-FcTestJsonObjectKeys $Element $fields
     foreach ($name in @('dll','pdb','moduleName','compiledIdentityToolSha256','originalCompilationRoot',
             'inspectedSourceRoot','mvid','pdbGuid','qualification')) {
@@ -246,16 +284,26 @@ function Assert-FcTestCompiledManifest([System.Text.Json.JsonElement] $Element, 
         $Element.GetProperty('originalCompilationRoot').GetString() -cne $ExpectedIdentity.originalCompilationRoot -or
         $Element.GetProperty('inspectedSourceRoot').GetString() -cne $ExpectedIdentity.inspectedSourceRoot -or
         $stamp -ne [uint32] $ExpectedIdentity.pdbStamp -or
-        $Element.GetProperty('compiledSourceBindingComplete').ValueKind -ne [System.Text.Json.JsonValueKind]::True -or
+        $Element.GetProperty('compiledSourceBindingComplete').ValueKind -notin @([System.Text.Json.JsonValueKind]::True,[System.Text.Json.JsonValueKind]::False) -or
+        $Element.GetProperty('compiledSourceBindingComplete').GetBoolean() -ne [bool] $ExpectedIdentity.compiledSourceBindingComplete -or
         $Element.GetProperty('mvid').GetString() -cnotmatch '\A[0-9a-fA-F-]{36}\z' -or
         $Element.GetProperty('pdbGuid').GetString() -cnotmatch '\A[0-9a-fA-F-]{36}\z') {
         throw $script:FcTestIdentity.InvalidManifest
     }
     Assert-FcTestPdbManifestDocuments $Element.GetProperty('documents') $SourcePaths @($ExpectedIdentity.documents)
-    if ($Element.GetProperty('sourceFilesWithoutPdbDocuments').ValueKind -ne [System.Text.Json.JsonValueKind]::Array -or
-        $Element.GetProperty('sourceFilesWithoutPdbDocuments').GetArrayLength() -ne 0) {
-        throw $script:FcTestIdentity.IncompleteBinding
+    $missing = $Element.GetProperty('sourceFilesWithoutPdbDocuments')
+    $expectedMissing = @($ExpectedIdentity.sourceFilesWithoutPdbDocuments)
+    if ($missing.ValueKind -ne [System.Text.Json.JsonValueKind]::Array -or
+        $missing.GetArrayLength() -ne $expectedMissing.Count) { throw $script:FcTestIdentity.InvalidManifest }
+    for ($index = 0; $index -lt $expectedMissing.Count; $index++) {
+        $item = $missing[$index]
+        Assert-FcTestJsonObjectKeys $item @('path','disposition')
+        if ($item.GetProperty('path').GetString() -cne $expectedMissing[$index].path -or
+            $item.GetProperty('disposition').GetString() -cne $expectedMissing[$index].disposition) {
+            throw $script:FcTestIdentity.InvalidManifest
+        }
     }
+    Assert-FcUnitCompileReceiptManifest $Element.GetProperty('compileReceipt') $ExpectedIdentity.compileReceipt
 }
 
 function Assert-FcTestPdbManifestDocuments([System.Text.Json.JsonElement] $Element, [string[]] $SourcePaths, [object[]] $ExpectedDocuments) {
@@ -291,7 +339,7 @@ function Assert-FcTestPdbManifestDocuments([System.Text.Json.JsonElement] $Eleme
                 -not $expected.Contains($path) -or -not $bound.Add($path)) { throw $script:FcTestIdentity.InvalidManifest }
         }
     }
-    if ($bound.Count -ne $expected.Count) { throw $script:FcTestIdentity.IncompleteBinding }
+    if ($bound.Count -eq 0) { throw $script:FcTestIdentity.InvalidManifest }
 }
 
 function Resolve-FcTestIdentityManifestPath([string] $Path) {

@@ -7,6 +7,8 @@ namespace KeyLoad.Orleans;
 /// <summary>Tracks a verified capability phase and joins its exact silo-local work lease.</summary>
 internal sealed class NativeCapabilityWorkLifetime : IDisposable
 {
+    private const int NoPhaseStarted = -1;
+
     private readonly CancellationToken requestToken;
     private NativeRequestWorkLease? lease;
     private CancellationTokenSource? linkedCancellation;
@@ -17,7 +19,7 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
     internal GrainFailureStage Stage { get; set; } = GrainFailureStage.EnvelopeVerification;
     internal Guid RequestId { get; set; }
     internal DatabasePhaseKind Phase { get; private set; } = DatabasePhaseKind.AuthorizedReadCapability;
-    internal long PhaseStarted { get; private set; } = -1;
+    internal long PhaseStarted { get; private set; } = NoPhaseStarted;
     internal bool PhaseActive { get; private set; }
     internal Exception? PrimaryError { get; set; }
     internal CancellationToken Token => linkedCancellation?.Token ?? requestToken;
@@ -95,11 +97,13 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
     internal static void Settle(Exception? primary, NativeCapabilityWorkLifetime? lifetime,
         Action? telemetry, Action? activation)
     {
+        const int FailuresCountValidationBoundary = 0;
+
         var failures = default(NativeCapabilityCleanupFailures);
         Capture(telemetry, ref failures);
         Capture(activation, ref failures);
         lifetime?.CaptureRelease(ref failures);
-        if (failures.Count > 0)
+        if (failures.Count > FailuresCountValidationBoundary)
         {
             ThrowCombined(primary, failures);
         }
@@ -189,6 +193,9 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
 
     private static void ThrowCombined(Exception? primary, NativeCapabilityCleanupFailures cleanup)
     {
+        const int EmptyFailuresCount = 1;
+        const int IndexEmptyCount = 0;
+
         var fatal = CqrsRuntimeFailures.FindFatal(primary) ?? cleanup.FindFatal();
         if (fatal is not null)
         {
@@ -201,9 +208,9 @@ internal sealed class NativeCapabilityWorkLifetime : IDisposable
             failures.Add(primary);
         }
         cleanup.AppendDistinct(primary, failures);
-        if (failures.Count == 1)
+        if (failures.Count == EmptyFailuresCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();
         }
         throw new AggregateException(failures);
     }
@@ -223,18 +230,23 @@ internal struct NativeCapabilityCleanupFailures
 
     internal void Add(Exception error)
     {
+        const int FirstCleanupFailureIndex = 0;
+        const int SecondCleanupFailureIndex = 1;
+        const int ThirdCleanupFailureIndex = 2;
+        const int FourthCleanupFailureIndex = 3;
+
         switch (Count++)
         {
-            case 0:
+            case FirstCleanupFailureIndex:
                 first = error;
                 break;
-            case 1:
+            case SecondCleanupFailureIndex:
                 second = error;
                 break;
-            case 2:
+            case ThirdCleanupFailureIndex:
                 third = error;
                 break;
-            case 3:
+            case FourthCleanupFailureIndex:
                 fourth = error;
                 break;
             default:

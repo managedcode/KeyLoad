@@ -5,14 +5,19 @@ namespace KeyLoad.Core.Features.TimeSeries;
 
 internal static class SampleAggregateWindowReader
 {
+    private const int ExclusiveUpperTickOffset = 1;
+    private const int MinimumRequestedWindows = 1;
+
     private const string InvalidWidth = "The time-series window width must be positive.";
     private const string InvalidWindowBudget = "The time-series window budget is invalid.";
     private const string WindowBudgetExceeded = "The time-series window budget is exceeded.";
-    private static readonly long AfterMaximumUtcTicks = DateTimeOffset.MaxValue.UtcTicks + 1;
+    private static readonly long AfterMaximumUtcTicks = DateTimeOffset.MaxValue.UtcTicks + ExclusiveUpperTickOffset;
 
     internal static SampleAggregateWindowsResult Read(DatabaseEngine database, IKeyValueView view,
         string principalId, AggregateSampleWindowsRequest request, ReadExecutionBudget budget)
     {
+        const int EmptyWindowCount = 0;
+
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         SampleAggregateReader.ValidateRange(request.From, request.UntilExclusive);
@@ -26,7 +31,7 @@ internal static class SampleAggregateWindowReader
         var endTicks = request.UntilExclusive?.UtcTicks ?? AfterMaximumUtcTicks;
         var windowCount = CountWindows(request.From.UtcTicks, endTicks, request.Width.Ticks);
         ValidateCalculatedCount(windowCount, request.MaxWindows, database.Limits.MaxResults);
-        if (windowCount == 0)
+        if (windowCount == EmptyWindowCount)
         {
             budget.Check();
             return new(ImmutableArray<SampleAggregateWindow>.Empty);
@@ -62,7 +67,7 @@ internal static class SampleAggregateWindowReader
 
     private static void ValidateWindowLimit(int maxWindows, int serverMaximum)
     {
-        if (maxWindows < 1 || maxWindows > serverMaximum)
+        if (maxWindows < MinimumRequestedWindows || maxWindows > serverMaximum)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidWindowBudget);
         }
@@ -70,9 +75,12 @@ internal static class SampleAggregateWindowReader
 
     private static long CountWindows(long fromTicks, long endTicks, long widthTicks)
     {
+        const int EmptySpanWidthTicks = 0;
+        const int CompleteStep = 1;
+
         var span = endTicks - fromTicks;
         var complete = span / widthTicks;
-        return span % widthTicks == 0 ? complete : checked(complete + 1);
+        return span % widthTicks == EmptySpanWidthTicks ? complete : checked(complete + CompleteStep);
     }
 
     private static void ValidateCalculatedCount(long count, int callerMaximum, int serverMaximum)

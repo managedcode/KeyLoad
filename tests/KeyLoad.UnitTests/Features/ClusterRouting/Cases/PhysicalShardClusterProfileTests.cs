@@ -15,9 +15,9 @@ internal sealed class PhysicalShardClusterProfileTests
     public async Task NewProfileHasExactV2FieldsAndStableOpaqueIdentityAcrossReopen()
     {
         using var fixture = ProfileFixture.Create();
-        var first = ClusterProfileStore.Open(fixture.Root);
+        var first = ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution());
         var bytes = await File.ReadAllBytesAsync(fixture.ProfilePath);
-        var reopened = ClusterProfileStore.Open(fixture.Root);
+        var reopened = ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution());
         await AssertProfileFieldsAsync(bytes);
         await Assert.That(first.Version).IsEqualTo(2);
         await Assert.That(first.PhysicalShardId).IsNotEqualTo(Guid.Empty);
@@ -34,7 +34,7 @@ internal sealed class PhysicalShardClusterProfileTests
         using var fixture = ProfileFixture.Create();
         var original = await fixture.WriteLegacyAsync();
         var originalMode = ReadMode(fixture.ProfilePath);
-        var error = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(fixture.Root));
+        var error = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution()));
         await Assert.That(error.Message).IsEqualTo("The private cluster profile is missing required identity or credential fields, or is invalid.");
         await Assert.That(BytesEqual(await File.ReadAllBytesAsync(fixture.ProfilePath), original)).IsTrue();
         await AssertModePreservedAsync(fixture.ProfilePath, originalMode);
@@ -48,9 +48,9 @@ internal sealed class PhysicalShardClusterProfileTests
         using var fixture = ProfileFixture.Create();
         var original = await fixture.WriteLegacyAsync();
         var originalMode = ReadMode(fixture.ProfilePath);
-        var upgraded = ClusterProfileStore.UpgradeLegacyOffline(fixture.Root);
+        var upgraded = ClusterProfileStore.UpgradeLegacyOffline(fixture.Root, UnitProfileOptions.Execution());
         var backup = Path.Combine(fixture.Root, ClusterProfileStore.LegacyBackupName);
-        var reopened = ClusterProfileStore.Open(fixture.Root);
+        var reopened = ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution());
         await AssertProfileFieldsAsync(await File.ReadAllBytesAsync(fixture.ProfilePath));
         await Assert.That(upgraded.Version).IsEqualTo(2);
         await Assert.That(upgraded.PhysicalShardId).IsNotEqualTo(Guid.Empty);
@@ -72,8 +72,8 @@ internal sealed class PhysicalShardClusterProfileTests
         { return; }
         using var fixture = ProfileFixture.Create();
         var original = await fixture.WriteLegacyAsync(UnixFileMode.UserRead);
-        var upgraded = ClusterProfileStore.UpgradeLegacyOffline(fixture.Root);
-        await Assert.That(ClusterProfileStore.Open(fixture.Root)).IsEqualTo(upgraded);
+        var upgraded = ClusterProfileStore.UpgradeLegacyOffline(fixture.Root, UnitProfileOptions.Execution());
+        await Assert.That(ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution())).IsEqualTo(upgraded);
         await Assert.That(BytesEqual(await File.ReadAllBytesAsync(Path.Combine(fixture.Root,
             ClusterProfileStore.LegacyBackupName)), original)).IsTrue();
         await Assert.That(File.GetUnixFileMode(fixture.ProfilePath)).IsEqualTo(UnixFileMode.UserRead);
@@ -89,7 +89,7 @@ internal sealed class PhysicalShardClusterProfileTests
             using var fixture = ProfileFixture.Create();
             await File.WriteAllBytesAsync(fixture.ProfilePath, bytes);
             PhysicalShardProfileTestData.SetPrivateFileMode(fixture.ProfilePath);
-            var error = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(fixture.Root));
+            var error = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(fixture.Root, UnitProfileOptions.Execution()));
             await Assert.That(error.Message).IsEqualTo("The private cluster profile is missing required identity or credential fields, or is invalid.");
             await Assert.That(BytesEqual(await File.ReadAllBytesAsync(fixture.ProfilePath), bytes)).IsTrue();
             await AssertPrivateModeAsync(fixture.ProfilePath, PrivateFile);

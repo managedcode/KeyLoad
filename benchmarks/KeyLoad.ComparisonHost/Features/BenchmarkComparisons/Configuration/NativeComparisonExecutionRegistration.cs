@@ -1,7 +1,6 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Client;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
@@ -14,12 +13,13 @@ internal static class NativeComparisonExecutionRegistration
 
     internal static IOptions<NativeComparisonExecutionOptions> Read(IConfiguration configuration)
     {
-        var services = new ServiceCollection();
-        services.AddOptions<NativeComparisonExecutionOptions>()
-            .Bind(configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName));
-        using var provider = services.BuildServiceProvider();
-        var policy = provider.GetRequiredService<IOptions<NativeComparisonExecutionOptions>>().Value.Validate();
-        return Options.Create(policy);
+        IOptions<NativeComparisonExecutionOptions> options = new OptionsManager<NativeComparisonExecutionOptions>(
+            new OptionsFactory<NativeComparisonExecutionOptions>([new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(
+                configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName))], [],
+                [new ValidateOptions<NativeComparisonExecutionOptions>(Options.DefaultName,
+                    value => { value.Validate(); return true; }, ComparisonHostConstants.MissingSettingPrefix)]));
+        _ = options.Value;
+        return options;
     }
 
     internal static IOptions<ComparisonLifecycleOptions> ReadLifecycle(IConfiguration configuration)
@@ -29,6 +29,17 @@ internal static class NativeComparisonExecutionRegistration
                 configuration.GetSection(ComparisonLifecycleOptions.SectionName))], [],
             [new ValidateOptions<ComparisonLifecycleOptions>(Options.DefaultName,
                 settings => settings.IsValid(), ComparisonLifecycleOptions.ValidationMessage)]));
+        _ = options.Value;
+        return options;
+    }
+
+    internal static IOptions<ComparisonHostExecutionOptions> ReadHost(IConfiguration configuration)
+    {
+        IOptions<ComparisonHostExecutionOptions> options = new OptionsManager<ComparisonHostExecutionOptions>(
+            new OptionsFactory<ComparisonHostExecutionOptions>([new ConfigureFromConfigurationOptions<ComparisonHostExecutionOptions>(
+                configuration.GetSection(ComparisonHostExecutionOptions.SectionName))], [],
+                [new ValidateOptions<ComparisonHostExecutionOptions>(Options.DefaultName,
+                    value => value.IsValid(), ComparisonHostExecutionOptions.InvalidSettings)]));
         _ = options.Value;
         return options;
     }

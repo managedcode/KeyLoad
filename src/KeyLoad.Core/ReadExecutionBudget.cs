@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
@@ -8,6 +9,8 @@ namespace KeyLoad.Core;
 /// <summary>Bounds logical storage work, output bytes and elapsed time within one consistent read cut.</summary>
 public sealed class ReadExecutionBudget
 {
+    private const int EmptyElementCount = 0;
+
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     private const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
     private const string ExaminedRecordsExceeded = "The read execution examined-record budget is exceeded.";
@@ -24,13 +27,14 @@ public sealed class ReadExecutionBudget
     private long textTokens;
 
     /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
-    /// <param name="limits">Configured operation resource limits.</param>
+    /// <param name="options">Native centrally validated operation limits, captured once for this read.</param>
     /// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
     /// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
-    public ReadExecutionBudget(DatabaseLimits limits, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
+    public ReadExecutionBudget(IOptions<DatabaseLimits> options, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(limits);
-        this.limits = limits;
+        ArgumentNullException.ThrowIfNull(options);
+        limits = options.Value;
+        limits.Validate();
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
         started = clock.GetTimestamp();
@@ -97,7 +101,7 @@ public sealed class ReadExecutionBudget
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }
-        if (grant.RemainingRecords == 0 || reservedGrantRecords == 0
+        if (grant.RemainingRecords == EmptyElementCount || reservedGrantRecords == EmptyElementCount
             || examinedGrantRecords >= limits.MaxScanRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExaminedRecordsExceeded);

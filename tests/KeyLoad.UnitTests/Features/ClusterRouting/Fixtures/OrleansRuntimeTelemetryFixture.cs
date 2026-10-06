@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using KeyLoad.Orleans;
 using KeyLoad.ServiceDefaults;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,9 +36,15 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
     {
         var activities = new OrleansActivityCaptureExporter();
         var metrics = new OrleansMetricCaptureExporter();
+        var captureDefaults = new OrleansTelemetryCaptureOptions();
         var builder = Host.CreateApplicationBuilder();
         builder.AddServiceDefaults();
         builder.Services.AddOptions<OrleansTelemetryCaptureOptions>()
+            .Configure(options =>
+            {
+                options.MaximumRecords = captureDefaults.MaximumRecords;
+                options.FlushTimeoutMilliseconds = captureDefaults.FlushTimeoutMilliseconds;
+            })
             .Validate(options => options.IsValid(), OrleansTelemetryCaptureOptions.ValidationMessage)
             .ValidateOnStart();
         builder.Services.AddOpenTelemetry()
@@ -47,15 +55,15 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         var host = builder.Build();
         try
         {
-            var captureOptions = host.Services.GetRequiredService<IOptions<OrleansTelemetryCaptureOptions>>().Value;
+            var captureOptions = host.Services.GetRequiredService<IOptions<OrleansTelemetryCaptureOptions>>();
             activities.Configure(captureOptions);
             metrics.Configure(captureOptions);
             await host.StartAsync();
-            return new(host, activities, metrics, captureOptions);
+            return new(host, activities, metrics, captureOptions.Value);
         }
-        catch
+        catch (Exception startupFailure)
         {
-            await host.DisposeAsync();
+            await DisposeAfterStartupFailureAsync(host, startupFailure).ConfigureAwait(false);
             throw;
         }
     }
@@ -102,6 +110,22 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
                     parentSource.Dispose();
                 }
             }
+        }
+    }
+
+    private static async Task DisposeAfterStartupFailureAsync(IHost failedHost, Exception startupFailure)
+    {
+        try
+        {
+            await failedHost.DisposeAsync().ConfigureAwait(false);
+        }
+        catch (Exception cleanupFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanupFailure))
+        {
+            throw new AggregateException(startupFailure, cleanupFailure);
+        }
+        catch (Exception cleanupFailure) when (!NativeCqrsBoundaryErrors.IsNonFatal(cleanupFailure))
+        {
+            throw new AggregateException(startupFailure, cleanupFailure);
         }
     }
 }

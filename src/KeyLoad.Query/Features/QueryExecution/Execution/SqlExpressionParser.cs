@@ -7,19 +7,26 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Parses Q1 predicates and operands with the established precedence and depth budget.</summary>
 internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<DatabaseLimits> limitsOptions, int maximumInValues, string? alias)
 {
+    private const int LowestPrecedence = 0;
+    private const int OrPrecedence = 1;
+    private const int AndPrecedence = 2;
+    private const int NotPrecedence = 3;
+    private const int SinglePathSegment = 1;
+    private const int FirstPathSegment = 0;
+
     private readonly DatabaseLimits limits = limitsOptions.Value;
     private int depth;
 
     internal Predicate Parse() => Expression();
 
-    private Predicate Expression(int precedence = 0)
+    private Predicate Expression(int precedence = LowestPrecedence)
     {
         if (++depth > limits.MaxQueryDepth)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SqlSyntax.DepthBudgetDetail);
         }
         var left = Primary();
-        while ((cursor.Is(SqlSyntax.Or) ? 1 : cursor.Is(SqlSyntax.And) ? 2 : 0) is var priority && priority > precedence)
+        while ((cursor.Is(SqlSyntax.Or) ? OrPrecedence : cursor.Is(SqlSyntax.And) ? AndPrecedence : LowestPrecedence) is var priority && priority > precedence)
         {
             var operation = cursor.Current.Text.ToUpperInvariant();
             cursor.Advance();
@@ -33,7 +40,7 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
     {
         if (cursor.Eat(SqlSyntax.Not))
         {
-            return new Negation(Expression(3));
+            return new Negation(Expression(NotPrecedence));
         }
         if (cursor.Eat(SqlSyntax.OpenParen))
         {
@@ -138,11 +145,11 @@ internal sealed class SqlExpressionParser(SqlTokenCursor cursor, IOptions<Databa
     private FieldOperand Field()
     {
         var parts = cursor.Path();
-        if (alias is not null && parts.Count > 1 && parts[0] == alias)
+        if (alias is not null && parts.Count > SinglePathSegment && parts[FirstPathSegment] == alias)
         {
-            parts.RemoveAt(0);
+            parts.RemoveAt(FirstPathSegment);
         }
-        return new FieldOperand(parts.Count == 1 && parts[0] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision
-            ? SqlSyntax.MetadataPrefix + parts[0] : JsonData.Path(parts.ToArray()));
+        return new FieldOperand(parts.Count == SinglePathSegment && parts[FirstPathSegment] is SqlSyntax.MetadataId or SqlSyntax.MetadataRevision
+            ? SqlSyntax.MetadataPrefix + parts[FirstPathSegment] : JsonData.Path(parts.ToArray()));
     }
 }

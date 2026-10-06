@@ -20,6 +20,8 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
 
     internal IComparisonTarget Create(IsolatedHostSettings settings)
     {
+        const int PrimaryEndpointIndex = 0;
+
         if (target is not null)
         {
             throw new InvalidOperationException(IsolatedHostConstants.Failure);
@@ -29,15 +31,15 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
-            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
-            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions),
+            IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions),
             IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
-            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, 0)),
+            IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex)),
             IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, [.. native.Replicas]),
-            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, 0), settings.RunId, native.Image, lifecycleOptions),
+            IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions),
             IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions),
-            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, 0), settings.RunId, native.Image, topology, lifecycleOptions),
+            IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions),
             IsolatedHostConstants.Kurrent => new KurrentTarget(native.Connection!, CreateClients(native), settings.RunId, native.Image, topology, lifecycleOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
@@ -47,6 +49,8 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
 
     internal IVectorComparisonTarget CreateVector(IsolatedHostSettings settings)
     {
+        const int PrimaryEndpointIndex = 0;
+
         if (target is not null || vectorTarget is not null)
         {
             throw new InvalidOperationException(IsolatedHostConstants.Failure);
@@ -56,10 +60,10 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         vectorTarget = settings.Selection.Target switch
         {
             IsolatedHostConstants.Postgres => new PostgresNativeVectorTarget(native.Connection!, settings.RunId, native.Image, settings.Selection.Options.Topology, executionOptions, lifecycleOptions),
-            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, 0), settings.RunId, native.Image, executionOptions, lifecycleOptions,
+            IsolatedHostConstants.Qdrant => new QdrantTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, lifecycleOptions,
                 settings.Selection.Options.Topology, CreateClients(native)),
-            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
-            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, 0), native.Image, settings.RunId, executionOptions),
+            IsolatedHostConstants.SurrealDb => new SurrealDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions),
+            IsolatedHostConstants.HelixDb => new HelixDbVectorTarget(CreateClient(native, PrimaryEndpointIndex), native.Image, settings.RunId, executionOptions),
             _ => throw new InvalidOperationException(IsolatedHostConstants.Failure)
         };
         unownedClients.Clear();
@@ -68,21 +72,27 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
 
     private KeyLoadTarget CreateKeyLoad(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
+        const int ClientsFirstIndex = 0;
+
         var clients = CreateClients(native);
-        return new(clients[0], native.AdminKey!, settings.RunId, lifecycleOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
+        return new(clients[ClientsFirstIndex], native.AdminKey!, settings.RunId, lifecycleOptions, clientOptions, translationOptions, native.Image, clients, settings.Selection.NodeCount)
         { RequireIsolatedAdmission = true };
     }
 
     private QdrantTarget CreateQdrant(IsolatedHostSettings settings, IsolatedHostNativeSettings native)
     {
+        const int ClientsFirstIndex = 0;
+
         var clients = CreateClients(native);
-        return new(clients[0], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients);
+        return new(clients[ClientsFirstIndex], settings.RunId, native.Image, executionOptions, lifecycleOptions, settings.Selection.Options.Topology, clients);
     }
 
     private HttpClient[] CreateClients(IsolatedHostNativeSettings native)
     {
+        const int FirstEntryIndex = 0;
+
         var clients = new HttpClient[native.Endpoints.Length];
-        for (var index = 0; index < clients.Length; index++)
+        for (var index = FirstEntryIndex; index < clients.Length; index++)
         {
             clients[index] = CreateClient(native, index);
         }

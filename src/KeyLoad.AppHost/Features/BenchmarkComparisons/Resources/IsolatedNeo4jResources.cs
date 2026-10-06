@@ -1,3 +1,5 @@
+using KeyLoad.AppHost.Hosting;
+using System.Globalization;
 using System.Security.Cryptography;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -22,9 +24,7 @@ internal static class IsolatedNeo4jResources
     private const string InitialHeapEnvironment = "NEO4J_server_memory_heap_initial__size";
     private const string MaximumHeapEnvironment = "NEO4J_server_memory_heap_max__size";
     private const string PageCacheEnvironment = "NEO4J_server_memory_pagecache_size";
-    private const string InitialHeap = "256m";
-    private const string MaximumHeap = "512m";
-    private const string PageCache = "256m";
+    private const string MegabyteUnit = "m";
     private const string UnsupportedSelection = "IsolatedNeo4jSelectionInvalid";
     private const int SecretBytes = 32;
     private const int HttpPort = 7474;
@@ -43,6 +43,7 @@ internal static class IsolatedNeo4jResources
         {
             throw new InvalidOperationException(UnsupportedSelection);
         }
+        var deployment = AppHostOptionsRegistration.Get(context.Builder).Deployment.Value;
         var directory = context.DataDirectory(Name);
         ClusterProfileStore.PrepareDirectory(directory);
         var password = context.Builder.AddParameter(PasswordParameter,
@@ -50,9 +51,9 @@ internal static class IsolatedNeo4jResources
         var node = context.Builder.AddContainer(Name, Image, Version)
             .WithImageSHA256(BenchmarkResources.Neo4jDigest[ElementIndex..]).WithContainerNetworkAlias(Name)
             .WithBindMount(directory, DataMount).WithHttpEndpoint(targetPort: HttpPort, name: HttpEndpoint)
-            .WithEnvironment(AuthenticationEnvironment, ReferenceExpression.Create($"{Name}/{password}"))
-            .WithEnvironment(InitialHeapEnvironment, InitialHeap).WithEnvironment(MaximumHeapEnvironment, MaximumHeap)
-            .WithEnvironment(PageCacheEnvironment, PageCache).WithHttpHealthCheck(ReadyPath);
+            .WithEnvironment(AuthenticationEnvironment, ReferenceExpression.Create($"{Name}{ReadyPath}{password}"))
+            .WithEnvironment(InitialHeapEnvironment, deployment.Neo4jInitialHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithEnvironment(MaximumHeapEnvironment, deployment.Neo4jMaximumHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit)
+            .WithEnvironment(PageCacheEnvironment, deployment.Neo4jPageCacheMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithHttpHealthCheck(ReadyPath);
         if (ClusterContainerUser.Resolve(context.Builder) is { } user)
         {
             node.WithContainerRuntimeArgs(UserArgument, user);

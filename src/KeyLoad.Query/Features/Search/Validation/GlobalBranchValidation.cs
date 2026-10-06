@@ -5,6 +5,8 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class GlobalBranchValidation
 {
+    private const int MinimumPositiveCount = 1;
+
     private const string InvalidRequest = "The global branch merge request is invalid.";
     private const string InvalidWindow = "A global branch window is malformed or incomparable.";
     private const string ResourceExceeded = "The global branch merge exceeds its configured bounds.";
@@ -17,7 +19,7 @@ internal static class GlobalBranchValidation
         ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         if (!Enum.IsDefined(request.Kind) || request.Scope is null || request.ExpectedWindowIds.IsDefault
-            || windows.IsDefault || request.Limit < 1 || request.Limit > limits.MaxResults
+            || windows.IsDefault || request.Limit < MinimumPositiveCount || request.Limit > limits.MaxResults
             || request.Limit > limits.MaxScanRecords)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
@@ -73,7 +75,7 @@ internal static class GlobalBranchValidation
     internal static void ValidateCandidate(GlobalBranchCandidate candidate)
     {
         ValidateCandidateEncodingBounds(candidate);
-        if (candidate.Revision < 1 || !double.IsFinite(candidate.Score))
+        if (candidate.Revision < MinimumPositiveCount || !double.IsFinite(candidate.Score))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidWindow);
         }

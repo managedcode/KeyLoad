@@ -55,9 +55,9 @@ internal sealed class ReplicaSecurityFixture : IDisposable
             credential, ClusterId)
         { ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
         Discovery = new(Configuration, Options, local);
-        Receiver = new(Configuration, Options, Discovery, TimeProvider.System, canonicalDatabase: Database);
+        Receiver = new(Configuration, Options, Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: Database);
         var senderConfiguration = Configuration with { LocalId = VoterA };
-        Sender = new(senderConfiguration, Options, new(senderConfiguration, Options, local), TimeProvider.System, canonicalDatabase: Database);
+        Sender = new(senderConfiguration, Options, new(senderConfiguration, Options, local), TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: Database);
         OtherGeneration = SiloAddress.New(local.SiloAddress.Endpoint, checked(local.SiloAddress.Generation + 1)).ToParsableString();
         mac = new(Options.Secret, Options.ClusterId);
     }

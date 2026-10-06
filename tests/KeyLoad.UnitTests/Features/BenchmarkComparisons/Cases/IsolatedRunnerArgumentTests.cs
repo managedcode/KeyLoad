@@ -7,7 +7,7 @@ internal sealed class IsolatedRunnerArgumentTests
     [Test]
     public async Task AcIso002UndefinedSelectedScenarioFailsBeforeTargetInitialization()
     {
-        var runner = new ComparisonRunner(new());
+        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Comparisons.ComparisonOptions()), UnitBenchmarkOptions.Native());
         await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() => runner.RunAsync([], null,
             CancellationToken.None, scenario: (Scenario)100));
     }
@@ -15,7 +15,7 @@ internal sealed class IsolatedRunnerArgumentTests
     [Test]
     public async Task AcIso002SelectedScenarioRejectsMultipleOrMissingTargetBeforeAllocation()
     {
-        var runner = new ComparisonRunner(new());
+        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(new KeyLoad.Comparisons.ComparisonOptions()), UnitBenchmarkOptions.Native());
         await Assert.ThrowsExactlyAsync<ArgumentException>(() => runner.RunAsync([], null,
             CancellationToken.None, scenario: Scenario.PointRead));
         await Assert.ThrowsExactlyAsync<ArgumentException>(() => runner.RunAsync(new IComparisonTarget[2], null,

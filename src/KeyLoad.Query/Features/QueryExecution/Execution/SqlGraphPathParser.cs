@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.QueryExecution;
@@ -5,13 +6,16 @@ namespace KeyLoad.Query.Features.QueryExecution;
 /// <summary>Compiles only the frozen Q1.GraphPath.v1 expression into the canonical Core request.</summary>
 internal static class SqlGraphPathParser
 {
-    internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request, DatabaseLimits limits,
-        ReadExecutionBudget budget, int maximumParameters, int maximumLabels)
+    internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request, IOptions<DatabaseLimits> limitsOptions,
+        ReadExecutionBudget budget, int maximumParameters, int maximumLabels, int sqlBudgetCheckInterval)
     {
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        var limits = limitsOptions.Value;
+        limits.Validate();
         ValidateEnvelope(request);
         SqlGraphPathRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget);
         budget.Check();
-        return new SqlGraphPathStatementReader(request.Query, limits, budget, maximumLabels).Parse();
+        return new SqlGraphPathStatementReader(request.Query, limitsOptions, budget, maximumLabels, sqlBudgetCheckInterval).Parse();
     }
 
     private static void ValidateEnvelope(SqlGraphPathRequest request)
@@ -30,15 +34,19 @@ internal static class SqlGraphPathParser
 /// <summary>Consumes the fixed function argument list and rejects every alternate SQL shape.</summary>
 internal sealed class SqlGraphPathStatementReader
 {
+    private readonly DatabaseLimits limits;
     private readonly QueryRequest query;
     private readonly SqlGraphPathValueReader values;
     private readonly SqlTokenCursor cursor;
 
-    internal SqlGraphPathStatementReader(QueryRequest query, DatabaseLimits limits, ReadExecutionBudget budget,
-        int maximumLabels)
+    internal SqlGraphPathStatementReader(QueryRequest query, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget,
+        int maximumLabels, int sqlBudgetCheckInterval)
     {
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        limits = limitsOptions.Value;
+        limits.Validate();
         this.query = query;
-        cursor = new(SqlTokenizer.Lex(query.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, budget));
+        cursor = new(SqlTokenizer.Lex(query.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, sqlBudgetCheckInterval, budget));
         values = new(cursor, query, budget, maximumLabels);
     }
 

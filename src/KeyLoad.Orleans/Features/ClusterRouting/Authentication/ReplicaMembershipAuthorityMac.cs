@@ -6,6 +6,8 @@ namespace KeyLoad.Orleans;
 
 internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credential) : IDisposable
 {
+    private const string SignRequestFieldsText = "POST";
+
     private static readonly UTF8Encoding Utf8 = new(false, true);
     private readonly byte[] secret = credential.ToArray();
 
@@ -13,7 +15,7 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
         string callerPhysical, string callerIncarnation, string callerVoter, string callerSilo,
         string timestamp, string nonce, ReadOnlySpan<byte> body)
         => Sign(ReplicaMembershipAuthorityProtocol.RequestPurpose,
-            ["POST", ReplicaMembershipAuthorityProtocol.Path, cluster, authorityPhysical, authorityIncarnation,
+            [SignRequestFieldsText, ReplicaMembershipAuthorityProtocol.Path, cluster, authorityPhysical, authorityIncarnation,
                 callerPhysical, callerIncarnation, callerVoter, callerSilo, timestamp, nonce], body);
 
     internal bool VerifyRequest(string cluster, string authorityPhysical, string authorityIncarnation,
@@ -34,9 +36,13 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
 
     private string Sign(string purpose, string[] fields, ReadOnlySpan<byte> body)
     {
+        const char LineFeedCharacter = '\n';
+        const string SignFailureMessage = "The membership authority authentication metadata is too large.";
+        const int StartEmptyCount = 0;
+
         using var buffer = new MemoryStream(512);
         buffer.Write(Utf8.GetBytes(purpose));
-        buffer.WriteByte((byte)'\n');
+        buffer.WriteByte((byte)LineFeedCharacter);
         foreach (var field in fields)
         { WriteField(buffer, field); }
         Span<byte> bodyLength = stackalloc byte[sizeof(ulong)];
@@ -44,8 +50,8 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
         buffer.Write(bodyLength);
         buffer.Write(SHA256.HashData(body));
         if (buffer.Length > ReplicaMembershipAuthorityProtocol.MaximumHeaderBytes)
-        { throw new InvalidOperationException("The membership authority authentication metadata is too large."); }
-        return Convert.ToBase64String(HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(0, checked((int)buffer.Length))));
+        { throw new InvalidOperationException(SignFailureMessage); }
+        return Convert.ToBase64String(HMACSHA256.HashData(secret, buffer.GetBuffer().AsSpan(StartEmptyCount, checked((int)buffer.Length))));
     }
 
     private static void WriteField(Stream destination, string field)
@@ -59,7 +65,9 @@ internal sealed class ReplicaMembershipAuthorityMac(ReadOnlyMemory<byte> credent
 
     private static bool Verify(string expected, string signature)
     {
-        Span<byte> supplied = stackalloc byte[32];
+        const int VerifyElementCount = 32;
+
+        Span<byte> supplied = stackalloc byte[VerifyElementCount];
         return Convert.TryFromBase64String(signature, supplied, out var written) && written == supplied.Length
             && CryptographicOperations.FixedTimeEquals(Convert.FromBase64String(expected), supplied);
     }

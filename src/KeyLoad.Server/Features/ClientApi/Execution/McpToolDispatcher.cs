@@ -2,6 +2,7 @@ using System.Text.Json;
 using KeyLoad.Orleans;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -56,7 +57,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             { throw Errors.Fail(ErrorCode.UnsupportedCapability, McpCatalogProtocol.InvalidOperation); }
             var operation = descriptor.IsAdapter
                 ? SqlMcpCatalog.Decode(arguments, state.MaximumPayloadBytes,
-                    context.RequestServices.GetRequiredService<KeyLoad.Core.DatabaseEngine>().Limits, cancellationToken)
+                    context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
                 operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);

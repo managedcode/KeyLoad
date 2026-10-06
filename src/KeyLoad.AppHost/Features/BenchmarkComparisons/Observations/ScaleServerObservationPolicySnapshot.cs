@@ -12,6 +12,6 @@ internal static class ScaleServerObservationPolicySnapshot
             value.CleanupThreshold.TotalMilliseconds, value.ProcessSettlement.TotalMilliseconds,
             value.MaxProcesses, value.MaxMounts, value.MaxFileBytes, value.MinimumCommandBytes, value.MaxHardwareBytes,
             value.MaxSampleMetadataBytes, value.MaxSidecarBytes, value.MaxWorkerBytes, value.MaxSamples,
-            value.MaxCgroupAncestors, value.NativeReadBufferBytes, value.MaxNativeOutputBytes);
+            value.MaxCgroupAncestors, value.NativeReadBufferBytes, value.MaxNativeOutputBytes, value.StandardErrorOutputDivisor);
     }
 }

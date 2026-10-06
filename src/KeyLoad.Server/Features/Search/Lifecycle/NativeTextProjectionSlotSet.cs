@@ -4,6 +4,9 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionSlotSet
 {
+    private const int GetCountAbsentCount = 0;
+    private const int GetCountPresentCount = 1;
+
     private NativeTextGenerationSlot? current;
     private NativeTextGenerationSlot? staged;
     private NativeTextGenerationSlot? retired;
@@ -16,7 +19,7 @@ internal sealed class NativeTextProjectionSlotSet
     internal bool CleanupActive => current?.CleanupActive == true || retired?.CleanupActive == true
         || staged?.CleanupActive == true;
     internal bool HasUnleasedRetired => retired is { LeaseActive: false };
-    internal int Count => (current is null ? 0 : 1) + (staged is null ? 0 : 1) + (retired is null ? 0 : 1);
+    internal int Count => (current is null ? GetCountAbsentCount : GetCountPresentCount) + (staged is null ? GetCountAbsentCount : GetCountPresentCount) + (retired is null ? GetCountAbsentCount : GetCountPresentCount);
     internal NativeTextGenerationSlot? RetiredCandidate
         => retired is { LeaseActive: false } && staged is null && !transition ? retired : null;
 

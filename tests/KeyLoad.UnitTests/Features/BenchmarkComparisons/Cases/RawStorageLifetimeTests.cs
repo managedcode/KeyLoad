@@ -30,7 +30,7 @@ internal sealed class RawStorageLifetimeTests
     [Test]
     public async Task AcGe003SeedConsumesQuotaAndExcessMutationsLeaveDataUnchanged()
     {
-        using var fixture = new RawStorageFixture(1, ValidPayloadBytes, maximumWrites: 2);
+        using var fixture = new RawStorageFixture(1, ValidPayloadBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = 2 }));
         var alternate = fixture.Corpus.Value(0, alternate: true).ToArray();
 
         await Assert.That(fixture.TryRead(0, out _)).IsTrue();
@@ -45,7 +45,7 @@ internal sealed class RawStorageLifetimeTests
     [Test]
     public async Task AcGe003OutOfRangeIndicesFailWithoutChangingSeededRecords()
     {
-        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, MaximumWrites);
+        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = MaximumWrites }));
         var original = fixture.Corpus.Value(0).ToArray();
 
         await Assert.That(() => fixture.TryRead(-1, out _)).Throws<ArgumentOutOfRangeException>();
@@ -61,7 +61,7 @@ internal sealed class RawStorageLifetimeTests
     [Test]
     public async Task AcGe003DisposedFixtureRejectsOperationsAndCleanupRepeats()
     {
-        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, MaximumWrites);
+        using var fixture = new RawStorageFixture(ValidRecordCount, ValidPayloadBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = MaximumWrites }));
         var storageDirectory = fixture.Directory;
         await Assert.That(storageDirectory is not null).IsTrue();
         await Assert.That(System.IO.Directory.Exists(storageDirectory)).IsTrue();
@@ -80,5 +80,5 @@ internal sealed class RawStorageLifetimeTests
     }
 
     private static RawStorageFixture CreateFixture(int recordCount, int payloadBytes, int maximumWrites)
-        => new(recordCount, payloadBytes, maximumWrites);
+        => new(recordCount, payloadBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = maximumWrites }));
 }

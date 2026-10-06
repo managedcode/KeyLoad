@@ -25,7 +25,7 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
             "root." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32))));
         Validate(profile);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(profile.Value, ClusterProfileStore.Json);
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(profile.Value, ClusterProfileStore.CreateJson(IntegrationProfileOptions.Execution()));
         var path = Path.Combine(priorRoot, NodeEpochRf3Protocol.ProfileFile);
         await using var output = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
             NodeEpochRf3Protocol.MaximumProfileBytes, FileOptions.Asynchronous | FileOptions.WriteThrough);
@@ -44,7 +44,7 @@ internal sealed record NodeEpochRf3Profile(LocalProfile Value)
         if (info.Length is < 1 or > NodeEpochRf3Protocol.MaximumProfileBytes)
         { throw new InvalidDataException("The prior local profile exceeds its bounded size."); }
         var bytes = await ReadBoundedAsync(path, cancellationToken).ConfigureAwait(false);
-        var profile = new NodeEpochRf3Profile(ClusterProfileStore.DeserializeCurrent(bytes));
+        var profile = new NodeEpochRf3Profile(ClusterProfileStore.DeserializeCurrent(bytes, IntegrationProfileOptions.Execution()));
         Validate(profile);
         return (profile, bytes, Convert.ToHexStringLower(SHA256.HashData(bytes)));
     }

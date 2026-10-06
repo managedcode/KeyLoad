@@ -62,13 +62,15 @@ internal static class SampleChunkCodec
 
     private static void ValidatePayloadShape(SampleChunkPayload payload)
     {
+        const int EmptyColumnCount = 0;
+
         if (payload.RecordCount > SampleChunkWire.MaximumRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkWire.ExcessRecords);
         }
-        SampleChunkWire.Require(payload.RecordCount > 0 && payload.UtcTicks.Length > 0
-            && payload.Offsets.Length > 0 && payload.Sequences.Length > 0 && payload.Values.Length > 0
-            && payload.Series.Length > 0 && payload.EventIds.Length > 0 && payload.Tags.Length > 0);
+        SampleChunkWire.Require(payload.RecordCount > EmptyColumnCount && payload.UtcTicks.Length > EmptyColumnCount
+            && payload.Offsets.Length > EmptyColumnCount && payload.Sequences.Length > EmptyColumnCount && payload.Values.Length > EmptyColumnCount
+            && payload.Series.Length > EmptyColumnCount && payload.EventIds.Length > EmptyColumnCount && payload.Tags.Length > EmptyColumnCount);
         var columns = (long)payload.UtcTicks.Length + payload.Offsets.Length + payload.Sequences.Length
             + payload.Values.Length + payload.Series.Length + payload.EventIds.Length + payload.Tags.Length;
         SampleChunkWire.Require(columns <= MaximumEncodedBytes - SampleChunkWire.ChecksumBytes);

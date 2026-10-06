@@ -18,12 +18,12 @@ internal static class NativeTextGenerationInvalidationOverlap
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle original\"}"));
         var root = Path.Combine(database.Directory, Collection);
-        using var projection = new NativeTextProjection(root, database.Database.Limits,
-            database.Store.Identity.NodeId);
+        using var projection = new NativeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, Field, Query);
-        var engine = new SearchEngine(database.Database, projection);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var original = await engine.SearchAsync("root", request, cancellation);
-        var retiredBudget = new ReadExecutionBudget(database.Database.Limits);
+        var retiredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         using var retiredLease = projection.Acquire(CaptureScope(database), retiredBudget);
         retiredLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         retiredLease.ObserveToken(Query);
@@ -37,7 +37,7 @@ internal static class NativeTextGenerationInvalidationOverlap
     {
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
         var current = await engine.SearchAsync("root", request, cancellation);
-        using var invalidated = projection.Acquire(CaptureScope(database), new(database.Database.Limits));
+        using var invalidated = projection.Acquire(CaptureScope(database), new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
         var mismatch = Assert.ThrowsExactly<KeyLoadException>(() => invalidated.BeginRecord(
             new(database.Partition, Collection, "missing"), current[0].Document.Revision));
         await Assert.That(mismatch.Code).IsEqualTo(ErrorCode.HistoryUnavailable);

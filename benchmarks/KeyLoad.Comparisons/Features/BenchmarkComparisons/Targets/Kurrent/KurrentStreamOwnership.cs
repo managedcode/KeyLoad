@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class KurrentStreamOwnership
@@ -5,9 +7,10 @@ internal sealed class KurrentStreamOwnership
     private readonly System.Threading.Lock gate = new();
     private readonly Dictionary<string, KurrentStreamOwnershipEntry> entries = new(StringComparer.Ordinal);
 
-    internal KurrentStreamOwnership(ComparisonOptions options)
+    internal KurrentStreamOwnership(IOptions<ComparisonOptions> workloadOptions)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(workloadOptions);
+        var options = workloadOptions.Value;
         options.Validate();
         Capacity = checked(options.Documents + options.Repetitions * checked(options.Warmup + options.Operations)
             + KurrentConstants.OwnershipProbeCount);

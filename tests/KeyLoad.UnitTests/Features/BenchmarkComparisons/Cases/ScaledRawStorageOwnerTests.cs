@@ -17,7 +17,7 @@ internal sealed class ScaledRawStorageOwnerTests
     {
         await AssertNoRetainedFailedOwnerAsync();
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes), async first =>
+            () => new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes, UnitBenchmarkOptions.ScaledStorage()), async first =>
             {
                 var beforeCompetition = first.Capture();
                 await AssertInitialSnapshotAsync(beforeCompetition);
@@ -35,7 +35,7 @@ internal sealed class ScaledRawStorageOwnerTests
 
         await AssertNoRetainedFailedOwnerAsync();
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes),
+            () => new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes, UnitBenchmarkOptions.ScaledStorage()),
             AssertReplacementReadAsync);
         await AssertNoRetainedFailedOwnerAsync();
     }
@@ -58,7 +58,7 @@ internal sealed class ScaledRawStorageOwnerTests
         {
             await Assert.That(() =>
             {
-                unexpectedFixture = new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes);
+                unexpectedFixture = new ScaledRawStorageFixture(MiniRecordCount, MiniValueBytes, UnitBenchmarkOptions.ScaledStorage());
             }).Throws<InvalidOperationException>();
             bodyCompleted = true;
         }

@@ -37,6 +37,8 @@ internal sealed class RawStorageFixtureZoneTreeEngine : IDisposable
 
     public bool TryRead(int index, out ReadOnlyMemory<byte> value)
     {
+        const int StartEmptyCount = 0;
+
         if (!tree!.TryGet(corpus.Key(index), out var stored) || stored.IsEmpty)
         {
             value = ReadOnlyMemory<byte>.Empty;
@@ -49,7 +51,7 @@ internal sealed class RawStorageFixtureZoneTreeEngine : IDisposable
         }
 
         stored.Span.CopyTo(readScratch);
-        value = readScratch.AsMemory(0, stored.Length);
+        value = readScratch.AsMemory(StartEmptyCount, stored.Length);
         return true;
     }
 

@@ -28,7 +28,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         using var fixture = new ReplicaSecurityFixture();
         var configuration = fixture.Configuration with { MaxAppendBytes = ReceiverAppendBytes };
         var options = Options(fixture.Options);
-        using var receiver = new ReplicaEnvelopeAuthenticator(configuration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
+        using var receiver = new ReplicaEnvelopeAuthenticator(configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
         using var sender = Sender(fixture, configuration, options);
         var maximumPayloadBytes = ReceiverMaximumPayloadBytes(configuration);
         await Assert.That(receiver.MaximumPayloadBytes).IsEqualTo(maximumPayloadBytes);

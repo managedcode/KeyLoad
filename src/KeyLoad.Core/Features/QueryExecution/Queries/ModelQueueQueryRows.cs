@@ -16,9 +16,12 @@ internal static class ModelQueueQueryRows
         PartitionRef partition, ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget,
         bool explain, Action<DocumentRecord> accept)
     {
-        if (source.Generation != 1 || source.Item != resource.Name)
+        const int QueueSourceGeneration = 1;
+        const string VisitDetailText = "The queue model source does not match its configured resource.";
+
+        if (source.Generation != QueueSourceGeneration || source.Item != resource.Name)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The queue model source does not match its configured resource.");
+            throw Errors.Fail(ErrorCode.Validation, VisitDetailText);
         }
         if (explain)
         {
@@ -62,6 +65,9 @@ internal static class ModelQueueQueryRows
     private static void ValidateMetadata(PartitionRef partition, ResourceDefinition resource,
         ReadOnlySpan<byte> key, MessageMetadata metadata)
     {
+        const int StateVersionValidationBoundary = 1;
+        const int AttemptsValidationBoundary = 0;
+
         if (metadata is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueCorrupt);
@@ -71,7 +77,7 @@ internal static class ModelQueueQueryRows
             throw Errors.Fail(ErrorCode.Corruption, QueueCorrupt);
         }
         var expected = KeySpace.Partition(MetadataSpace, partition, resource.Name, metadata.Id);
-        if (!Enum.IsDefined(metadata.State) || metadata.StateVersion < 1 || metadata.Attempts < 0
+        if (!Enum.IsDefined(metadata.State) || metadata.StateVersion < StateVersionValidationBoundary || metadata.Attempts < AttemptsValidationBoundary
             || !key.SequenceEqual(expected))
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueCorrupt);

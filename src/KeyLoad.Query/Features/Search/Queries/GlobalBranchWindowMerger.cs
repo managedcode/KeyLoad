@@ -5,6 +5,11 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class GlobalBranchWindowMerger
 {
+    private const int FirstElementIndex = 0;
+    private const int EmptyElementCount = 0;
+    private const int NoRetainedBytes = 0;
+    private const int EqualOrder = 0;
+
     private const string ResourceExceeded = "The global branch merge exceeds its configured bounds.";
     private const string ConflictingDuplicate = "A global branch candidate has conflicting revision or score evidence.";
     private const string InvalidOrder = "A global branch window is not in canonical score order.";
@@ -42,7 +47,7 @@ internal static class GlobalBranchWindowMerger
             && allExhaustive;
         var selectedCount = Math.Min(ordered.Length, request.Limit);
         var selectedBuilder = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(selectedCount);
-        for (var index = 0; index < selectedCount; index++)
+        for (var index = FirstElementIndex; index < selectedCount; index++)
         {
             budget.Check();
             selectedBuilder.Add(ordered[index]);
@@ -55,7 +60,7 @@ internal static class GlobalBranchWindowMerger
     private static int PreflightWindows(ImmutableArray<GlobalBranchWindow> windows, int maximumRecords,
         ReadExecutionBudget budget)
     {
-        var records = 0;
+        var records = EmptyElementCount;
         foreach (var window in windows)
         {
             budget.Check();
@@ -71,7 +76,7 @@ internal static class GlobalBranchWindowMerger
     private static void PreflightCandidates(ImmutableArray<GlobalBranchWindow> windows, int expectedCount,
         ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
     {
-        var examined = 0;
+        var examined = NoRetainedBytes;
         foreach (var window in windows)
         {
             GlobalBranchCandidate? previous = null;
@@ -81,7 +86,7 @@ internal static class GlobalBranchWindowMerger
                 GlobalBranchValidation.ValidateCandidateEncodingBounds(candidate);
                 bytes.Accept(NativeSerialization.Measure(candidate));
                 GlobalBranchValidation.ValidateCandidate(candidate);
-                if (previous is not null && GlobalBranchOrder.CompareCandidates(previous, candidate) > 0)
+                if (previous is not null && GlobalBranchOrder.CompareCandidates(previous, candidate) > EqualOrder)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, InvalidOrder);
                 }
@@ -114,7 +119,7 @@ internal static class GlobalBranchWindowMerger
     private static void RequireStrictCompleteness(GlobalBranchMergeRequest request,
         ImmutableArray<string> missing, bool complete, bool approximate, bool truncated)
     {
-        if (!request.AllowIncomplete && (missing.Length > 0 || !complete))
+        if (!request.AllowIncomplete && (missing.Length > EmptyElementCount || !complete))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, MissingWindow);
         }

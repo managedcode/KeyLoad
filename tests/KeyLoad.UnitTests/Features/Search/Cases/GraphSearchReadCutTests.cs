@@ -18,7 +18,7 @@ internal sealed class GraphSearchReadCutTests
             Retriever: new(walk),
             Expansion: new(GraphSearchTestSupport.Graph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20));
 
-        var result = await new SearchEngine(store.Database).GraphSearchAsync(RootPrincipal, request,
+        var result = await new SearchEngine(store.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(RootPrincipal, request,
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(store.ReadCalls).IsEqualTo(1);

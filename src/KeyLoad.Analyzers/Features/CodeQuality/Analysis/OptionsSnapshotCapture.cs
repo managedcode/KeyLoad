@@ -14,7 +14,37 @@ internal static class OptionsSnapshotCapture
         HasSingleCapture(compilation, field, cancellationToken);
 
     internal static bool IsCaptured(Compilation compilation, IPropertySymbol property, CancellationToken cancellationToken) =>
-        !property.IsStatic && property.SetMethod is null && HasSingleCapture(compilation, property, cancellationToken);
+        !property.IsStatic && property.SetMethod is null &&
+        (HasSingleCapture(compilation, property, cancellationToken) || IsReadonlyExport(compilation, property, cancellationToken));
+
+    private static bool IsReadonlyExport(Compilation compilation, IPropertySymbol property, CancellationToken cancellationToken) =>
+        property.DeclaringSyntaxReferences.Any(reference =>
+            reference.GetSyntax(cancellationToken) is PropertyDeclarationSyntax declaration &&
+            FindGetter(declaration) is { } expression &&
+            compilation.GetSemanticModel(expression.SyntaxTree).GetOperation(expression, cancellationToken) is { } operation &&
+            IsFrozenField(compilation, operation, cancellationToken));
+
+    private static ExpressionSyntax? FindGetter(PropertyDeclarationSyntax property) =>
+        property.ExpressionBody?.Expression ?? property.AccessorList?.Accessors
+            .Where(static accessor => accessor.IsKind(SyntaxKind.GetAccessorDeclaration))
+            .Select(static accessor => accessor.ExpressionBody?.Expression ??
+                (accessor.Body?.Statements is [ReturnStatementSyntax statement] ? statement.Expression : null))
+            .FirstOrDefault();
+
+    private static bool IsFrozenField(Compilation compilation, IOperation operation, CancellationToken cancellationToken) => operation switch
+    {
+        IFieldReferenceOperation field => IsCaptured(compilation, field.Field, cancellationToken),
+        IConversionOperation conversion => IsFrozenField(compilation, conversion.Operand, cancellationToken),
+        ICoalesceOperation coalesce when IsThrow(coalesce.WhenNull) => IsFrozenField(compilation, coalesce.Value, cancellationToken),
+        _ => false
+    };
+
+    private static bool IsThrow(IOperation operation) => operation switch
+    {
+        IThrowOperation => true,
+        IConversionOperation conversion => IsThrow(conversion.Operand),
+        _ => false
+    };
 
     private static bool HasSingleCapture(Compilation compilation, ISymbol symbol, CancellationToken cancellationToken)
     {

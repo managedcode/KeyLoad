@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
@@ -17,7 +16,8 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
     {
         Canonical = new TestDatabase(bootstrapPhysicalShardCatalog: false);
         Configuration = new(RootPrincipal, [RootPrincipal], Path.Combine(Canonical.Directory, ReplicaKey),
-            Canonical.Store.Identity.Incarnation) { BenchmarkTopology = true };
+            Canonical.Store.Identity.Incarnation)
+        { BenchmarkTopology = true };
         replica = new(new(Configuration.Directory)
         {
             Incarnation = Configuration.Incarnation,
@@ -25,10 +25,10 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
         var execution = ReplicaExecutionTestOptions.Execution();
-        Log = new(replica, UnitExecutionOptions.ReplicaConfiguration(configuration), canonicalDatabase: Canonical.Database);
+        Log = new(replica, configuration, canonicalDatabase: Canonical.Database);
         Materializer = new(Canonical.Database, Log,
-            new ReplicaSnapshotStore(Canonical.Store, Log, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution()), execution);
-        Consensus = new(Materializer, UnitExecutionOptions.ReplicaConfiguration(configuration), UnitExecutionOptions.ReplicaExecution(), execution, TimeProvider.System);
+            new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution()), execution);
+        Consensus = new(Materializer, configuration, UnitExecutionOptions.ReplicaExecution(), execution, TimeProvider.System);
     }
 
     internal TestDatabase Canonical { get; }
@@ -62,6 +62,22 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         }
         Log.Append(entries);
         Materializer.Commit(nextIndex - 1);
+    }
+
+    internal void CommitCorruptedNoOpEntry()
+    {
+        var index = checked(Log.State.LastIndex + 1);
+        if (Log.State.Term == 0)
+        {
+            Log.SaveTermAndVote(1, RootPrincipal);
+        }
+        Log.Append([new(index, Log.State.Term, null)]);
+        replica.Commit((transaction, _) =>
+        {
+            transaction.Put(ReplicaProtocol.EntryStorageKey(index), new byte[] { byte.MaxValue });
+            return true;
+        });
+        Materializer.Commit(index);
     }
 
     internal async Task AssertDocument(string documentId)

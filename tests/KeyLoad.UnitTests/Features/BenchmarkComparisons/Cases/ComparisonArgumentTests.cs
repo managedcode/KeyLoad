@@ -51,7 +51,7 @@ internal sealed class ComparisonArgumentTests
     [Test]
     public async Task AcCq007MissingOracleInputsRejectEvenWhenTheActualResultIsAbsent()
     {
-        var dataset = new BenchmarkDataset(SmallOptions());
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(SmallOptions()));
         await AssertParameterAsync(() => dataset.Reachable(null!, GraphDepth), StartParameter);
         await AssertParameterAsync(() => dataset.ExactNeighbors(null!), QueryParameter);
         await AssertParameterAsync(() => BenchmarkDataset.SameDocument(null, null!), ExpectedParameter);
@@ -62,7 +62,7 @@ internal sealed class ComparisonArgumentTests
     [Test]
     public async Task AcCq007AbsentResultsRemainFalseAndActualCorpusResultsStillMatch()
     {
-        var dataset = new BenchmarkDataset(SmallOptions());
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(SmallOptions()));
         var document = dataset.Documents[0];
         var found = new FoundDocument(document.Id, document.Json);
         var foundEvent = new FoundEvent(BenchmarkDataset.EventId(document), 1, document.Json);
@@ -72,13 +72,13 @@ internal sealed class ComparisonArgumentTests
         await Assert.That(BenchmarkDataset.SameDocument(found, document)).IsTrue();
         await Assert.That(BenchmarkDataset.SameEvent(foundEvent, document)).IsTrue();
         await Assert.That(dataset.ExactNeighbors(document)[0].Id).IsEqualTo(document.Id);
-        await Assert.That(new BenchmarkDataset(SmallOptions()).Sha256).IsEqualTo(dataset.Sha256);
+        await Assert.That(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(SmallOptions())).Sha256).IsEqualTo(dataset.Sha256);
     }
 
     [Test]
     public async Task AcCq007MissingTargetsRejectBeforeInvalidCorpusOptionsAreUsed()
     {
-        var runner = new ComparisonRunner(SmallOptions() with { Dimensions = InvalidDimensions });
+        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
             runner.RunAsync(null!, null, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.ParamName).IsEqualTo(TargetsParameter);
@@ -87,7 +87,7 @@ internal sealed class ComparisonArgumentTests
     [Test]
     public async Task AcCq007EmptyTargetsRetainTheExistingRejectionBeforeCorpusConstruction()
     {
-        var runner = new ComparisonRunner(SmallOptions() with { Dimensions = InvalidDimensions });
+        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
             runner.RunAsync([], null, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.ParamName).IsEqualTo(TargetsParameter);

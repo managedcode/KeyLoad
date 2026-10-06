@@ -5,6 +5,11 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int SagaCommandsAdjacentElementOffset = 1;
+    private const int SagaCommandsInitialSequence = 0;
+    private const int SagaCommandsMinimumPositiveCount = 1;
+    private const string SagaCommandsReceiptIdentitySeparator = "-";
+
     private const long MaximumTimeoutTtlTicks = RecurringSagaProtocol.MaximumMessageTimeToLiveTicks;
 
     internal MutationReceipt ApplyCompareExchangeSaga(IAtomicTransaction tx, PrincipalRecord principal,
@@ -55,7 +60,7 @@ public sealed partial class DatabaseEngine
         RequireScheduleWriteAuthority(principal, timeout.Queue, destination);
         var message = SagaTimeoutMessage(record, timeout, deadline);
         _ = Enqueue(tx, principal, partition, message, now);
-        var next = record with { Revision = checked(record.Revision + 1), Phase = SagaPhase.TimedOut };
+        var next = record with { Revision = checked(record.Revision + SagaCommandsAdjacentElementOffset), Phase = SagaPhase.TimedOut };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
         var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record),
             RecurringSagaStorage.SerializedBytes(next), Limits);
@@ -82,7 +87,7 @@ public sealed partial class DatabaseEngine
     private CompareExchangeSaga NormalizeSagaRequest(CompareExchangeSaga request, PartitionRef partition,
         DateTimeOffset now)
     {
-        if (request.SagaId == Guid.Empty || request.ExpectedRevision < 0 || !Enum.IsDefined(request.Phase))
+        if (request.SagaId == Guid.Empty || request.ExpectedRevision < SagaCommandsInitialSequence || !Enum.IsDefined(request.Phase))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
@@ -147,7 +152,7 @@ public sealed partial class DatabaseEngine
     private void RequireSagaCas(long expectedRevision, SagaPhase nextPhase, SagaRecord? existing,
         QueueLaneRef lane, Guid sagaId)
     {
-        if (expectedRevision < 0 || (existing is null ? expectedRevision != 0 : expectedRevision != existing.Revision))
+        if (expectedRevision < SagaCommandsInitialSequence || (existing is null ? expectedRevision != SagaCommandsInitialSequence : expectedRevision != existing.Revision))
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
@@ -168,7 +173,7 @@ public sealed partial class DatabaseEngine
 
     private static SagaRecord NewSagaRecord(SagaRecord? existing, CompareExchangeSaga request, string principalId)
     {
-        var revision = existing is null ? 1 : checked(existing.Revision + 1);
+        var revision = existing is null ? SagaCommandsAdjacentElementOffset : checked(existing.Revision + SagaCommandsAdjacentElementOffset);
         var deadline = request.Phase == SagaPhase.Waiting ? request.Deadline : null;
         var timeout = request.Phase == SagaPhase.Waiting ? request.Timeout : null;
         return new(request.Lane, request.SagaId, existing?.CreatorPrincipalId ?? principalId,
@@ -177,7 +182,7 @@ public sealed partial class DatabaseEngine
 
     private static void RequireSagaRevision(long expectedRevision, SagaRecord record)
     {
-        if (expectedRevision < 1 || expectedRevision != record.Revision)
+        if (expectedRevision < SagaCommandsMinimumPositiveCount || expectedRevision != record.Revision)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
         }
@@ -194,7 +199,7 @@ public sealed partial class DatabaseEngine
     private void ValidateSagaRecord(SagaRecord record, QueueLaneRef lane, Guid sagaId)
     {
         if (record.Lane is null || record.CreatorPrincipalId is null || record.SagaId != sagaId || record.Lane != lane
-            || record.Revision < 1 || !Enum.IsDefined(record.Phase) || record.StateJson is null
+            || record.Revision < SagaCommandsMinimumPositiveCount || !Enum.IsDefined(record.Phase) || record.StateJson is null
             || (record.Deadline is null) != (record.Timeout is null)
             || record.Phase == SagaPhase.TimedOut && record.Deadline is null
             || record.Phase is SagaPhase.Completed or SagaPhase.Cancelled && record.Deadline is not null)
@@ -213,7 +218,7 @@ public sealed partial class DatabaseEngine
         DateTimeOffset deadline)
     {
         var messageId = string.Concat(RecurringSagaProtocol.SagaTimeoutPrefix,
-            record.SagaId.ToString(RecurringSagaProtocol.IdentifierFormat), "-",
+            record.SagaId.ToString(RecurringSagaProtocol.IdentifierFormat), SagaCommandsReceiptIdentitySeparator,
             record.Revision.ToString(RecurringSagaProtocol.HexOrdinalFormat,
                 System.Globalization.CultureInfo.InvariantCulture));
         return new(timeout.Queue.Queue, messageId, timeout.PayloadJson, timeout.HeadersJson,

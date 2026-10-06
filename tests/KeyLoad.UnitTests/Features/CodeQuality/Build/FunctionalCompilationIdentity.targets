@@ -1,0 +1,137 @@
+<Project>
+  <PropertyGroup>
+    <_KeyLoadCompileIdentityRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../..'))</_KeyLoadCompileIdentityRoot>
+    <_KeyLoadCompileIdentityMaximumSources>5000</_KeyLoadCompileIdentityMaximumSources>
+  </PropertyGroup>
+
+  <Target Name="CaptureKeyLoadFunctionalCompilationIdentity" BeforeTargets="CoreCompile"
+          Condition="'$(Configuration)' == 'Release' and '$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true' and '$(TargetFramework)' == 'net10.0'">
+    <ItemGroup>
+      <_KeyLoadCompileIdentityTUnitVersion Include="@(PackageVersion)" Condition="'%(PackageVersion.Identity)' == 'TUnit'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_KeyLoadCompileIdentityGeneratedFile>$(IntermediateOutputPath)KeyLoad.FunctionalCompilationIdentity.g.cs</_KeyLoadCompileIdentityGeneratedFile>
+      <_KeyLoadCompileIdentityTUnitPackageVersion>@(_KeyLoadCompileIdentityTUnitVersion->'%(Version)')</_KeyLoadCompileIdentityTUnitPackageVersion>
+      <_KeyLoadCompileIdentityTUnitDirectory>$([System.IO.Path]::GetFullPath('$(NuGetPackageRoot)tunit.core/$(_KeyLoadCompileIdentityTUnitPackageVersion)/buildTransitive/$(TargetFramework)/'))</_KeyLoadCompileIdentityTUnitDirectory>
+      <_KeyLoadCompileIdentityTUnitProps>$(_KeyLoadCompileIdentityTUnitDirectory)TUnit.Core.props</_KeyLoadCompileIdentityTUnitProps>
+      <_KeyLoadCompileIdentityTUnitSource>$(_KeyLoadCompileIdentityTUnitDirectory)TUnit.Core.GeneratedNamespace.cs</_KeyLoadCompileIdentityTUnitSource>
+      <_KeyLoadCompileIdentityTUnitGenerated Condition="Exists('$(_KeyLoadCompileIdentityTUnitProps)') and Exists('$(_KeyLoadCompileIdentityTUnitSource)')">$([System.IO.File]::ReadAllText('$(_KeyLoadCompileIdentityTUnitSource)').StartsWith('// &lt;auto-generated/&gt;'))</_KeyLoadCompileIdentityTUnitGenerated>
+    </PropertyGroup>
+    <ItemGroup>
+      <_KeyLoadCompileIdentityCandidate Include="@(Compile)"
+          Condition="'%(Compile.Extension)' == '.cs' and '%(Compile.AutoGen)' != 'true' and '%(Compile.DesignTime)' != 'true' and '%(Compile.FullPath)' != '' and '%(Compile.FullPath)' != '$(_KeyLoadCompileIdentityGeneratedFile)'">
+        <RepositoryPath>$([System.String]::Copy($([System.IO.Path]::GetRelativePath('$(_KeyLoadCompileIdentityRoot)', '%(Compile.FullPath)'))).Replace('\','/'))</RepositoryPath>
+        <PathTooLong Condition="$([System.String]::Copy($([System.IO.Path]::GetRelativePath('$(_KeyLoadCompileIdentityRoot)', '%(Compile.FullPath)'))).Length) &gt; 4096">true</PathTooLong>
+        <!-- Match the original import metadata per item; a same-path counterfeit must not inherit an exclusion. -->
+        <NativeTUnitGenerated>false</NativeTUnitGenerated>
+        <NativeTUnitGenerated Condition="'$(_KeyLoadCompileIdentityTUnitGenerated)' == 'true' and '%(Compile.FullPath)' == '$(_KeyLoadCompileIdentityTUnitSource)' and '%(Compile.DefiningProjectFullPath)' == '$(_KeyLoadCompileIdentityTUnitProps)' and '%(Compile.DefiningProjectDirectory)' == '$(_KeyLoadCompileIdentityTUnitDirectory)' and '%(Compile.Link)' == 'TUnit.Core.GeneratedNamespace.cs' and '%(Compile.Visible)' == 'false'">true</NativeTUnitGenerated>
+      </_KeyLoadCompileIdentityCandidate>
+      <_KeyLoadCompileIdentityUserCandidate Include="@(_KeyLoadCompileIdentityCandidate)"
+          Condition="'%(RepositoryPath)' != '' and '%(NativeTUnitGenerated)' != 'true' and !$([System.String]::Copy('%(RepositoryPath)').Contains('/obj/')) and !$([System.String]::Copy('%(RepositoryPath)').Contains('/bin/'))">
+        <Path>%(RepositoryPath)</Path>
+      </_KeyLoadCompileIdentityUserCandidate>
+      <_KeyLoadCompileIdentitySource Include="@(_KeyLoadCompileIdentityUserCandidate)"
+          Condition="$([System.String]::Copy('%(RepositoryPath)').StartsWith('tests/KeyLoad.UnitTests/'))">
+        <Path>%(RepositoryPath)</Path>
+      </_KeyLoadCompileIdentitySource>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../global.json"><Path>global.json</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../Directory.Build.props"><Path>Directory.Build.props</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../Directory.Build.targets"><Path>Directory.Build.targets</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../Directory.Packages.props"><Path>Directory.Packages.props</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectDirectory)/../../KeyLoad.slnx"><Path>KeyLoad.slnx</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityCentral Include="$(MSBuildProjectFullPath)"><Path>tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj</Path></_KeyLoadCompileIdentityCentral>
+      <_KeyLoadCompileIdentityProducer Include="$(MSBuildProjectDirectory)/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets"><Path>tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets</Path></_KeyLoadCompileIdentityProducer>
+    </ItemGroup>
+
+    <Error Condition="'@(_KeyLoadCompileIdentitySource-&gt;Count())' == '0' or '@(_KeyLoadCompileIdentitySource-&gt;Count())' &gt; '$(_KeyLoadCompileIdentityMaximumSources)'"
+           Text="The UnitTests compilation source inventory is absent or oversized." />
+    <Error Condition="'@(_KeyLoadCompileIdentityCandidate-&gt;AnyHaveMetadataValue('PathTooLong','true'))' == 'true'"
+           Text="A UnitTests compilation source path exceeds the identity bound." />
+    <Error Condition="'@(_KeyLoadCompileIdentityUserCandidate-&gt;Count())' != '@(_KeyLoadCompileIdentitySource-&gt;Count())'"
+           Text="A non-generated UnitTests compile source is outside the owned project tree or uses an unsupported path." />
+    <Error Condition="'@(_KeyLoadCompileIdentityCentral-&gt;Count())' != '6'"
+           Text="The UnitTests central compilation inputs are incomplete." />
+
+    <GetFileHash Files="@(_KeyLoadCompileIdentitySource)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityHashedSource" />
+    </GetFileHash>
+    <GetFileHash Files="@(_KeyLoadCompileIdentityCentral)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityHashedCentral" />
+    </GetFileHash>
+    <GetFileHash Files="@(_KeyLoadCompileIdentityProducer)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityHashedProducer" />
+    </GetFileHash>
+    <ItemGroup>
+      <_KeyLoadCompileIdentityHashedSource Update="@(_KeyLoadCompileIdentityHashedSource)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityHashedSource>
+      <_KeyLoadCompileIdentityHashedCentral Update="@(_KeyLoadCompileIdentityHashedCentral)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityHashedCentral>
+      <_KeyLoadCompileIdentityHashedProducer Update="@(_KeyLoadCompileIdentityHashedProducer)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityHashedProducer>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_KeyLoadCompileIdentityAttributeMetadata Include="_Parameter1" />
+      <_KeyLoadCompileIdentityAttributeMetadata Include="_Parameter2" />
+      <_KeyLoadCompileIdentityAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.Version</_Parameter1><_Parameter2>1</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+      <_KeyLoadCompileIdentityAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.SourceCount</_Parameter1><_Parameter2>@(_KeyLoadCompileIdentityHashedSource-&gt;Count())</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+      <_KeyLoadCompileIdentityAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.CentralCount</_Parameter1><_Parameter2>6</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+      <_KeyLoadCompileIdentityAttribute Include="@(_KeyLoadCompileIdentityHashedProducer->'System.Reflection.AssemblyMetadataAttribute')" KeepMetadata="@(_KeyLoadCompileIdentityAttributeMetadata)">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.Producer</_Parameter1><_Parameter2>%(_KeyLoadCompileIdentityHashedProducer.Path)|%(_KeyLoadCompileIdentityHashedProducer.CanonicalHash)</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+      <_KeyLoadCompileIdentityAttribute Include="@(_KeyLoadCompileIdentityHashedSource->'System.Reflection.AssemblyMetadataAttribute')" KeepMetadata="@(_KeyLoadCompileIdentityAttributeMetadata)">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.Source</_Parameter1><_Parameter2>%(_KeyLoadCompileIdentityHashedSource.Path)|%(_KeyLoadCompileIdentityHashedSource.CanonicalHash)</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+      <_KeyLoadCompileIdentityAttribute Include="@(_KeyLoadCompileIdentityHashedCentral->'System.Reflection.AssemblyMetadataAttribute')" KeepMetadata="@(_KeyLoadCompileIdentityAttributeMetadata)">
+        <_Parameter1>KeyLoad.FunctionalCompileIdentity.Central</_Parameter1><_Parameter2>%(_KeyLoadCompileIdentityHashedCentral.Path)|%(_KeyLoadCompileIdentityHashedCentral.CanonicalHash)</_Parameter2>
+      </_KeyLoadCompileIdentityAttribute>
+    </ItemGroup>
+
+    <WriteCodeFragment Language="C#" AssemblyAttributes="@(_KeyLoadCompileIdentityAttribute)" OutputFile="$(_KeyLoadCompileIdentityGeneratedFile)">
+      <Output TaskParameter="OutputFile" ItemName="_KeyLoadCompileIdentityGenerated" />
+    </WriteCodeFragment>
+    <ItemGroup>
+      <Compile Include="@(_KeyLoadCompileIdentityGenerated)" AutoGen="true" DesignTime="true" Visible="false" />
+      <FileWrites Include="$(_KeyLoadCompileIdentityGeneratedFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="VerifyKeyLoadFunctionalCompilationIdentityInputs" AfterTargets="CoreCompile"
+          Condition="'$(Configuration)' == 'Release' and '$(IsCrossTargetingBuild)' != 'true' and '$(DesignTimeBuild)' != 'true' and '$(TargetFramework)' == 'net10.0'">
+    <GetFileHash Files="@(_KeyLoadCompileIdentitySource)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityVerifiedSource" />
+    </GetFileHash>
+    <GetFileHash Files="@(_KeyLoadCompileIdentityCentral)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityVerifiedCentral" />
+    </GetFileHash>
+    <GetFileHash Files="@(_KeyLoadCompileIdentityProducer)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_KeyLoadCompileIdentityVerifiedProducer" />
+    </GetFileHash>
+    <ItemGroup>
+      <_KeyLoadCompileIdentityVerifiedSource Update="@(_KeyLoadCompileIdentityVerifiedSource)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityVerifiedSource>
+      <_KeyLoadCompileIdentityVerifiedCentral Update="@(_KeyLoadCompileIdentityVerifiedCentral)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityVerifiedCentral>
+      <_KeyLoadCompileIdentityVerifiedProducer Update="@(_KeyLoadCompileIdentityVerifiedProducer)">
+        <CanonicalHash>$([System.String]::Copy('%(FileHash)').ToLowerInvariant())</CanonicalHash>
+      </_KeyLoadCompileIdentityVerifiedProducer>
+    </ItemGroup>
+    <Error Condition="'@(_KeyLoadCompileIdentityHashedSource->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedSource->'%(Path)|%(CanonicalHash)', ';')'"
+           Text="UnitTests sources changed during compilation; the embedded identity is not authoritative." />
+    <Error Condition="'@(_KeyLoadCompileIdentityHashedCentral->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedCentral->'%(Path)|%(CanonicalHash)', ';')'"
+           Text="Central UnitTests build inputs changed during compilation; the embedded identity is not authoritative." />
+    <Error Condition="'@(_KeyLoadCompileIdentityHashedProducer->'%(Path)|%(CanonicalHash)', ';')' != '@(_KeyLoadCompileIdentityVerifiedProducer->'%(Path)|%(CanonicalHash)', ';')'"
+           Text="The UnitTests compile-identity producer changed during compilation; the embedded identity is not authoritative." />
+  </Target>
+</Project>

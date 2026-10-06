@@ -15,6 +15,12 @@ internal sealed record IsolatedOpenLoopSettings(ScaledComparisonProfile Profile,
     private const int ProofNodeCount = 3;
 
     internal static IsolatedOpenLoopSettings? Read(IConfiguration configuration, ComparisonWorkerSelection selection)
+        => ReadOptions(configuration, selection).Value.Selected;
+
+    internal static IOptions<IsolatedOpenLoopSelection> ReadOptions(IConfiguration configuration, ComparisonWorkerSelection selection)
+        => ComparisonHostOptionsRegistration.Bind(() => new IsolatedOpenLoopSelection(ReadValidated(configuration, selection)));
+
+    private static IsolatedOpenLoopSettings? ReadValidated(IConfiguration configuration, ComparisonWorkerSelection selection)
     {
         var proofText = configuration[ProofSetting];
         if (selection.OpenLoopRate is not { } rate)
@@ -35,3 +41,5 @@ internal sealed record IsolatedOpenLoopSettings(ScaledComparisonProfile Profile,
 
     private static InvalidOperationException Invalid() => new(IsolatedHostConstants.Failure);
 }
+
+internal sealed record IsolatedOpenLoopSelection(IsolatedOpenLoopSettings? Selected);

@@ -4,9 +4,11 @@ internal static class ServerNodeUpgradeLayout
 {
     internal static void VerifySource(ServerNodeUpgradeInventory inventory)
     {
+        const char SlashCharacter = '/';
+
         foreach (var entry in inventory.Entries)
         {
-            if (!entry.Path.Contains('/', StringComparison.Ordinal))
+            if (!entry.Path.Contains(SlashCharacter, StringComparison.Ordinal))
             { RequireRoot(entry, allowReceipts: false, allowInputs: false); }
             ServerNodeUpgradeSourceLayout.Verify(entry);
             RefuseIncoming(entry);
@@ -15,9 +17,11 @@ internal static class ServerNodeUpgradeLayout
 
     internal static void VerifyTarget(ServerNodeUpgradeInventory inventory, bool allowInputs)
     {
+        const char SlashCharacter = '/';
+
         foreach (var entry in inventory.Entries)
         {
-            if (!entry.Path.Contains('/', StringComparison.Ordinal))
+            if (!entry.Path.Contains(SlashCharacter, StringComparison.Ordinal))
             { RequireRoot(entry, allowReceipts: true, allowInputs); }
             ServerNodeUpgradeSourceLayout.Verify(entry, allowNestedReceipt: allowInputs);
             RefuseIncoming(entry);
@@ -37,15 +41,20 @@ internal static class ServerNodeUpgradeLayout
 
     private static void RefuseIncoming(ServerNodeUpgradeEntry entry)
     {
+        const int PathSecondIndex = 1;
+        const char SlashCharacter = '/';
+        const string SnapshotFileExtension = ".snapshot";
+        const string CompactIdentityFormat = "N";
+
         if (!entry.Path.StartsWith(ServerNodeUpgradeProtocol.Snapshots + ServerNodeUpgradeProtocol.PathSeparator, StringComparison.Ordinal))
         { return; }
-        var name = entry.Path[(ServerNodeUpgradeProtocol.Snapshots.Length + 1)..];
+        var name = entry.Path[(ServerNodeUpgradeProtocol.Snapshots.Length + PathSecondIndex)..];
         if (name is ServerNodeUpgradeProtocol.IncomingMetadata or ServerNodeUpgradeProtocol.IncomingSnapshot or ServerNodeUpgradeProtocol.IncomingMetadataTemporary or ServerNodeUpgradeProtocol.IncomingSnapshotTemporary
             || name.EndsWith(ServerNodeUpgradeProtocol.SnapshotTemporarySuffix, StringComparison.Ordinal))
         { throw Errors.Fail(ErrorCode.RecoveryRequired, ServerNodeUpgradeProtocol.Pending); }
-        if (entry.Directory || name.Contains('/', StringComparison.Ordinal)
+        if (entry.Directory || name.Contains(SlashCharacter, StringComparison.Ordinal)
             || !name.EndsWith(ServerNodeUpgradeProtocol.SnapshotSuffix, StringComparison.Ordinal)
-            || !Guid.TryParseExact(name[..^".snapshot".Length], "N", out _))
+            || !Guid.TryParseExact(name[..^SnapshotFileExtension.Length], CompactIdentityFormat, out _))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
     }
 }

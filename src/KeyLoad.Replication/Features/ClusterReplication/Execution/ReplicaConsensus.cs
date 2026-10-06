@@ -59,7 +59,7 @@ public sealed class ReplicaConsensus : IReplicaEndpoint, IAsyncDisposable
         snapshots = new(state);
         maintenance = new(state, election, leader, logger);
         dispatcher = new(election, appends, leader, snapshots, configurationOptions);
-        reads = new(state, rpc, leader, activity, transportReady.Task, stoppingToken, settings.ReadBarrierTimeout);
+        reads = new(state, rpc, leader, activity, transportReady.Task, settings.ReadBarrierTimeout, stoppingToken);
     }
 
     /// <inheritdoc />

@@ -68,7 +68,8 @@ stack traces, status description and tracestate. Normalize span display names
 and retained service/method/type values to closed named protocol constants; no
 arbitrary tag string may become an exported value. Preserve native trace/span/
 parent identity and success/error status. Native baggage is not exported.
-Guard work is bounded to32 tags,24 events and zero links. Only reviewed native
+The central typed telemetry options bound work to32 tags,24 events,8 baggage
+items,256 characters per inspected tag value and zero links. Only reviewed native
 lifecycle event names with zero attributes survive. Immutable unexpected events,
 links or oversized metadata suppress that span by clearing Recorded before the
 actual OTel1.19.1 export processor; report a fixed low-cardinality suppression
@@ -99,8 +100,10 @@ Native mechanism fixtures remain unit evidence; SDK/MCP RF3 is still mandatory.
 
 Implement and author tests together, then run runtime validation after the
 coherent implementation/self-review, as required by the latest root correction.
-Initial canonical build is in progress; preexisting failures remain attributable
-to their actual owners. No source-only result closes a runtime criterion.
+The 2026-10-06 canonical join build failed. Introduced compiler/analyzer repairs
+and the concurrent repository-wide literal/options migration remain open.
+Restore succeeded, but no runtime test, coverage result or successful final build
+is claimed for this joined source. No source-only result closes a runtime criterion.
 After code joins: `dotnet build KeyLoad.slnx --no-restore --configuration Release`,
 `dotnet format KeyLoad.slnx --verify-no-changes --no-restore`, and the root
 Aspire-owned entry for unit, unit-scalar, recovery and rf3. Focused filters are
@@ -111,8 +114,10 @@ mocks, manual Docker topology or property-only tests.
 Rollout changes no current persisted/public/generated contract for the due wake.
 Rollback joins all admitted work before restoring the previous clock-only wait;
 canonical schedules, creator identity, receipts and recovery journals stay intact.
-Native provider/transaction/worker stages require their exact additional contracts
-here before code, and remain open until their own actual proof exists.
+The native provider and initial already-due saga handoff now follow the accepted
+[RuntimeJournal](RuntimeJournal.md) contract. Their source joins, reader upgrade,
+startup/shutdown and actual native tests are in progress and unqualified.
+Transaction/worker stages still require concrete additional contracts and proof.
 
 ```mermaid
 flowchart LR

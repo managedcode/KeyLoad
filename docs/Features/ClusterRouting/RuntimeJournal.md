@@ -69,13 +69,18 @@ Each journal has a nonempty instance GUID, owner generation, independent content
 revision and metadata ETag. Create is atomic and idempotent; delete/recreate has
 a new instance. Append/replace/delete compare the captured instance, owner
 generation and content revision under the atomic apply gate. Metadata writes use
-full ETag CAS; mismatches return null through the native metadata API. Body
-fencing failures map to native InconsistentStateException. Changes to
+full ETag CAS; mismatches return null through the native metadata API.
+An explicitly null metadata ETag preserves the native unconditional-update
+contract under the same atomic gate; it never refreshes a stale body-writer fence.
+Metadata reads return a fresh snapshot without replacing that captured fence.
+Body fencing failures map to native InconsistentStateException. Changes to
 the tagged native `DurableJobsOwner` property increment owner generation, including
 release/reclaim, and poison transitions also advance this fence. Same-owner `DurableJobsClosed`, adoption bookkeeping and format
 updates do not fence the current writer. Every successful content write advances
 its captured revision; an old handle cannot refresh itself into a new owner.
 Reads pin the header/content revision across bounded pages and fail on change.
+One native ArcBufferWriter retains incomplete binary entries across page boundaries
+until the consumer reports completion; retained bytes are bounded by journal capacity.
 Stable command identity resolves unknown write outcomes through existing receipts.
 
 Native payload bytes remain opaque and never use JSON fallback. The centrally
@@ -83,6 +88,12 @@ validated RuntimeJournalOptions admits at most32 journals,2MiB per journal,
 64MiB total data,64KiB chunks/read pages and8KiB UTF8 metadata per journal.
 Journal names and metadata keys/values have explicit byte limits. Admission and
 catalog reads enforce those limits on actual committed state, not only callers.
+The provider owns a bounded striped asynchronous gate set sized by the validated
+maximum journal count. Handles for the same journal borrow the same gate; each
+retains its own captured instance, owner generation and content revision. Native
+`IJournalStorage` has no disposal contract, so handles must not allocate an owned
+disposable gate. Provider disposal follows native shutdown and joined work, and
+idempotently releases the gate set without retaining every created handle.
 The native catalog materializes all selected entries before its claim budget,
 so the provider returns the whole bounded catalog or a terminal error; truncation
 must never pretend recovery completeness. Delete releases capacity atomically.
@@ -101,6 +112,10 @@ restart. Immediate future-deadline registration and single persisted job handles
 remain a separate stage requiring an atomic wake-intent/uncertainty contract.
 Job metadata contains only canonical IDs, revision and deadline; no roles,
 credentials, signed envelopes, user JSON or timeout message content.
+Each schedule request supplies a fresh valid unsampled W3C trace parent and an
+empty trace state, independent of the ambient activity. In Orleans v10.4.0 an
+empty trace parent triggers ambient inheritance, so empty strings cannot opt out.
+The actual native returned job must prove that caller trace state was not retained.
 
 The existing RecurringDueCoordinatorGrain also implements native IDurableJobHandler.
 The native receiver extension may AlwaysInterleave. Handler state is invocation
@@ -128,6 +143,31 @@ unknown-outcome receipt resolution and actual native job execution. Process
 restart/adoption, no-quorum, creator revocation, schedule-ACK uncertainty and
 single timeout effect must pass through Aspire RF3 and real SDK/official MCP.
 No source or native local fixture closes those gates.
+
+The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Orleans/Features/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
+[RuntimeJournalStartup](../../../src/KeyLoad.Server/Features/ClusterRouting/Hosting/RuntimeJournalStartup.cs),
+[OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/Features/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs),
+the exact native lifecycle registration/observer, and both store reader fences.
+The executor retains the existing cohort check, catalog admission, execution
+deadline and complete native CQRS stream; it adds no dispatch or storage owner.
+
+Authored AC-ORL-013 development cases are mapped to
+[native storage and binary DurableGrain replay across confirmed new activations](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalNativeStorageTests.cs),
+[canonical quota and protected identity](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalQuotaAndIdentityTests.cs),
+[journal reopen](../../../tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RuntimeJournalReopenTests.cs),
+[reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderLifecycleTests.cs),
+[reader rejection](../../../tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs),
+and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Features/Messaging/Cases/NativeSagaTimeoutFunctionalTests.cs).
+These cases have not executed. A retained-job process restart/adoption assertion,
+schedule-ACK uncertainty, frozen old-binary probe and complete Aspire SDK/MCP
+RF3 fault/resource evidence remain required before acceptance.
+
+Development checkpoint, 2026-10-06: matching packages restored. Backend, native
+adapter, startup/reader fencing, selective lifecycle join and native saga-handler
+sources/tests are being integrated. The canonical solution join build failed;
+introduced errors and unrelated literal/options migration diagnostics are tracked
+separately. No native test execution or final successful build is claimed. A frozen
+old-binary reader rejection probe and all Aspire RF3/fault/resource gates remain open.
 
 | Task | Ownership and dependency | Required join/evidence |
 |---|---|---|

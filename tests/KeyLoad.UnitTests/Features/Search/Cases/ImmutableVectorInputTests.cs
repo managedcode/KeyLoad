@@ -26,7 +26,7 @@ internal sealed class ImmutableVectorInputTests
         db.Commit(new PutVector(Collection, Hit, VectorField, stored, Space, 1));
         db.Commit(new PutVector(Collection, Rival, VectorField, [0.5f, 0], Space, 1));
         source[0] = 0;
-        var search = new SearchEngine(db.Database);
+        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var invalid = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.SearchAsync(Principal,
             new(db.Partition, Collection, VectorField: VectorField,
                 Vector: default(ImmutableArray<float>), Space: Space))))!;

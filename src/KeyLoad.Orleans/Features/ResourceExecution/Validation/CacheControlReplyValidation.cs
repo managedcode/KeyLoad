@@ -27,10 +27,13 @@ internal static class CacheControlReplyValidation
 
     internal static bool Grant(CacheGrantReply reply)
     {
+        const int EmptyAcceptedSequence = 0;
+        const int AcceptedSequenceValidationBoundary = 0;
+
         if (reply.Correlation is null)
         {
             return Flat(reply) && reply.GrantId == Guid.Empty
-                && reply.AcceptedBinding is null && reply.AcceptedSequence == 0;
+                && reply.AcceptedBinding is null && reply.AcceptedSequence == EmptyAcceptedSequence;
         }
 
         if (!CacheControlValidation.Correlation(reply.Correlation, CacheControlOperation.Grant)
@@ -41,11 +44,11 @@ internal static class CacheControlReplyValidation
 
         if (reply.Status is CacheControlStatus.AcceptedActive or CacheControlStatus.AcceptedCold)
         {
-            return CacheControlValidation.Binding(reply.AcceptedBinding) && reply.AcceptedSequence > 0
+            return CacheControlValidation.Binding(reply.AcceptedBinding) && reply.AcceptedSequence > AcceptedSequenceValidationBoundary
                 && reply.AcceptedBinding!.Slot == reply.Correlation.Header.TargetSlot;
         }
 
-        return reply.AcceptedBinding is null && reply.AcceptedSequence == 0;
+        return reply.AcceptedBinding is null && reply.AcceptedSequence == EmptyAcceptedSequence;
     }
 
     internal static bool Revoke(CacheRevokeReply reply)

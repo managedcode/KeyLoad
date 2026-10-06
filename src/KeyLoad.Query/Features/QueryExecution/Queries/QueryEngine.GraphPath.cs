@@ -14,7 +14,7 @@ public sealed partial class QueryEngine
     public GraphShortestPathResult ShortestPathSql(string principalId, SqlGraphPathRequest request,
         TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
-        var budget = new ReadExecutionBudget(database.Limits, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
         budget.Check();
         if (request is null)
         {
@@ -22,7 +22,7 @@ public sealed partial class QueryEngine
         }
         using var admission = database.AdmitQuery(cancellationToken);
         budget.Check();
-        var graphRequest = SqlGraphPathParser.Parse(request, database.Limits, budget, execution.MaximumParameters, database.GraphExecution.MaximumLabels);
+        var graphRequest = SqlGraphPathParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters, database.GraphExecution.MaximumLabels, execution.SqlBudgetCheckInterval);
         budget.Check();
         return database.ShortestPath(principalId, graphRequest, budget);
     }

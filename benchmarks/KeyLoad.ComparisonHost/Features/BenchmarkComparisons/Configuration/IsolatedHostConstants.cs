@@ -35,6 +35,4 @@ internal static class IsolatedHostConstants
     internal const string RootPath = "/";
     internal const string Basic = "Basic";
     internal const string CredentialSeparator = ":";
-    internal const int FileBufferBytes = 65_536;
-    internal const int CleanupTimeoutSeconds = 30;
 }

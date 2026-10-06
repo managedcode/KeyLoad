@@ -20,7 +20,7 @@ internal static class ZoneTreeReaderContractPublication
             try
             {
                 ZoneTreeIdentityFile.Write(Path.Combine(runtime.Options.Directory,
-                    ZoneTreePersistenceFormat.IdentityFileName), upgraded);
+                    ZoneTreePersistenceFormat.IdentityFileName), upgraded, runtime.Options.IdentityBufferBytes);
                 runtime.Identity = upgraded;
             }
             catch (Exception)

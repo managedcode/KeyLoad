@@ -21,7 +21,7 @@ internal sealed class GraphSearchOperatorTests
             Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))));
 
-        var result = await new SearchEngine(database.Database).GraphSearchAsync(
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
             "root", request, TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
@@ -44,7 +44,7 @@ internal sealed class GraphSearchOperatorTests
         var request = new GraphSearchRequest(1,
             new(database.Partition, GraphSearchTestSupport.Documents), Retriever: new(walk, Weight: 0));
 
-        var result = await new SearchEngine(database.Database).GraphSearchAsync("root", request,
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits).IsEmpty();
@@ -63,7 +63,7 @@ internal sealed class GraphSearchOperatorTests
             GraphSearchTestSupport.TextField, "needle", Limit: 10,
             AllowedIds: [GraphSearchTestSupport.FirstHit]);
 
-        var result = await new SearchEngine(database.Database).GraphSearchAsync(
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
             GraphSearchTestSupport.Reader, new(1, search, Scope: scope), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits).HasSingleItem();
@@ -87,7 +87,7 @@ internal sealed class GraphSearchOperatorTests
             GraphSearchTestSupport.TextField, "needle", VectorField, [1, 0], Space,
             Limit: 10, FusionConstant: FusionConstant);
 
-        var result = await new SearchEngine(database.Database).GraphSearchAsync("root",
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root",
             new(1, search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
@@ -113,7 +113,7 @@ internal sealed class GraphSearchOperatorTests
             GraphSearchTestSupport.TextField, "needle");
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(database.Database).GraphSearchAsync(GraphSearchTestSupport.Reader,
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(GraphSearchTestSupport.Reader,
                 new(1, search, Scope: scope), TestContext.Current!.Execution.CancellationToken)))!;
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);

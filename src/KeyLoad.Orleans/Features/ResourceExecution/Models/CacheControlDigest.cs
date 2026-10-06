@@ -14,27 +14,35 @@ internal readonly record struct CacheControlDigest(
 
     public static CacheControlDigest FromBytes(ReadOnlySpan<byte> bytes)
     {
+        const string FromBytesFailureMessage = "A digest requires exactly 32 bytes.";
+        const int BytesComponentIndex = 8;
+        const int FromBytesBytesComponentIndex = 16;
+
         if (bytes.Length != ByteLength)
         {
-            throw new ArgumentException("A digest requires exactly 32 bytes.", nameof(bytes));
+            throw new ArgumentException(FromBytesFailureMessage, nameof(bytes));
         }
 
         return new(BinaryPrimitives.ReadUInt64LittleEndian(bytes),
-            BinaryPrimitives.ReadUInt64LittleEndian(bytes[8..]),
-            BinaryPrimitives.ReadUInt64LittleEndian(bytes[16..]),
+            BinaryPrimitives.ReadUInt64LittleEndian(bytes[BytesComponentIndex..]),
+            BinaryPrimitives.ReadUInt64LittleEndian(bytes[FromBytesBytesComponentIndex..]),
             BinaryPrimitives.ReadUInt64LittleEndian(bytes[24..]));
     }
 
     public void WriteBytes(Span<byte> bytes)
     {
+        const string WriteBytesFailureMessage = "A digest requires exactly 32 bytes.";
+        const int BytesComponentIndex = 8;
+        const int WriteBytesBytesComponentIndex = 16;
+
         if (bytes.Length != ByteLength)
         {
-            throw new ArgumentException("A digest requires exactly 32 bytes.", nameof(bytes));
+            throw new ArgumentException(WriteBytesFailureMessage, nameof(bytes));
         }
 
         BinaryPrimitives.WriteUInt64LittleEndian(bytes, Word0);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes[8..], Word1);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes[16..], Word2);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes[BytesComponentIndex..], Word1);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes[WriteBytesBytesComponentIndex..], Word2);
         BinaryPrimitives.WriteUInt64LittleEndian(bytes[24..], Word3);
     }
 

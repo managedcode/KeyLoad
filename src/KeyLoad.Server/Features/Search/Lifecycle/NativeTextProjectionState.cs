@@ -1,17 +1,21 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Query.Features.Search;
 
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextProjectionState
 {
+    private readonly IOptions<NativeTextExecutionOptions> executionOptions;
+
     private readonly Lock sync = new();
     private readonly NativeTextProjectionWork work = new();
     private readonly NativeTextProjectionSlotSet slots = new();
     private readonly NativeTextProjectionInvalidation invalidation;
     private readonly NativeTextProjectionShutdownState shutdown;
 
-    internal NativeTextProjectionState()
+    internal NativeTextProjectionState(IOptions<NativeTextExecutionOptions> executionOptions)
     {
+        this.executionOptions = executionOptions;
         invalidation = new(sync, slots);
         shutdown = new(sync, work, slots);
     }
@@ -31,8 +35,8 @@ internal sealed class NativeTextProjectionState
                 ReserveLease(existing);
                 return new(existing, false);
             }
-            if (slots.Building || work.ActiveLeases >= 2 || slots.HasUnleasedRetired
-                || slots.Count >= NativeTextPhysicalBudget.MaximumGenerations)
+            if (slots.Building || work.ActiveLeases >= executionOptions.Value.MaximumActiveLeases || slots.HasUnleasedRetired
+                || slots.Count >= executionOptions.Value.MaximumGenerations)
             {
                 throw NativeTextErrors.Busy();
             }
@@ -121,6 +125,8 @@ internal sealed class NativeTextProjectionState
 
     internal NativeTextGenerationSlot? CompleteLease(NativeTextGenerationSlot slot, Exception? failure)
     {
+        const int EmptyActiveLeases = 0;
+
         lock (sync)
         {
             if (!slot.LeaseActive)
@@ -134,7 +140,7 @@ internal sealed class NativeTextProjectionState
                 slot.Unsettled = true;
             }
             slots.CompleteLease(slot, failure);
-            var cleanup = failure is null && work.ActiveLeases == 0 ? ReserveRetiredCleanup() : null;
+            var cleanup = failure is null && work.ActiveLeases == EmptyActiveLeases ? ReserveRetiredCleanup() : null;
             return cleanup;
         }
     }
@@ -159,7 +165,7 @@ internal sealed class NativeTextProjectionState
 
     private void ReserveLease(NativeTextGenerationSlot slot)
     {
-        if (slot.LeaseActive || slot.Unsettled || work.ActiveLeases >= 2)
+        if (slot.LeaseActive || slot.Unsettled || work.ActiveLeases >= executionOptions.Value.MaximumActiveLeases)
         {
             throw slot.Unsettled ? NativeTextErrors.Corrupt() : NativeTextErrors.Busy();
         }
@@ -169,7 +175,9 @@ internal sealed class NativeTextProjectionState
 
     private NativeTextGenerationSlot? ReserveRetiredCleanup()
     {
-        if (work.ActiveLeases != 0 || slots.RetiredCandidate is not { } retired
+        const int EmptyActiveLeases = 0;
+
+        if (work.ActiveLeases != EmptyActiveLeases || slots.RetiredCandidate is not { } retired
             || !slots.BeginRetirement(retired))
         {
             return null;

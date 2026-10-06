@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -12,9 +13,10 @@ internal static class McpHttpPipeline
     internal static async Task RunAsync(HttpContext context, RequestDelegate next)
     {
         var governor = context.RequestServices.GetRequiredService<HttpAdmissionGovernor>();
+        var executionOptions = context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>();
         var capacity = Capacity(context.Request, governor.Limits.MaxBodyBytes);
         using var state = new McpRequestState(governor, context.RequestServices.GetRequiredService<McpMemoryBudget>(),
-            capacity, context.RequestAborted);
+            capacity, context.RequestAborted, executionOptions);
         var principal = await DatabaseCredentialResolver.ReadAsync(context).ConfigureAwait(false);
         state.Authenticate(principal, context.RequestAborted);
         var originalBody = context.Request.Body;
@@ -28,7 +30,7 @@ internal static class McpHttpPipeline
             {
                 SetBodyLimit(context, governor.Limits.MaxBodyBytes);
                 pendingBody = await McpFrameBody.ReadAsync(originalBody, context.Request.ContentLength,
-                    governor.Limits.MaxBodyBytes, context.RequestAborted).ConfigureAwait(false);
+                    governor.Limits.MaxBodyBytes, executionOptions, context.RequestAborted).ConfigureAwait(false);
                 McpTransportGuard.Inspect(pendingBody.Bytes, headers);
                 context.Request.Body = pendingBody.OpenReader();
                 state.Attach(pendingBody);

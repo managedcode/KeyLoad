@@ -5,6 +5,11 @@ namespace KeyLoad.Core;
 
 internal static class DuePrefixScanner
 {
+    private const int SingleElementCount = 1;
+    private const int AdjacentElementOffset = 1;
+    private const int EmptyElementCount = 0;
+    private const int NoRetainedBytes = 0;
+
     internal static DueWorkPage Read(DatabaseEngine database, IKeyValueView view, DueSweepCursor cursor,
         DuePageState state, byte[] prefix)
     {
@@ -25,7 +30,7 @@ internal static class DuePrefixScanner
     private static DuePrefixCursor CaptureUpper(IKeyValueView view, byte[] prefix, DuePageState state)
     {
         byte[]? upper = null;
-        _ = view.VisitReverseRange(prefix, 1, (key, _) =>
+        _ = view.VisitReverseRange(prefix, SingleElementCount, (key, _) =>
         {
             state.Check();
             state.ExamineRecord();
@@ -39,15 +44,15 @@ internal static class DuePrefixScanner
         DueSweepCursor cursor, DueWorkKind kind, DuePrefixCursor bounds, byte[] upper, byte[] prefix,
         DuePageState state)
     {
-        var remaining = DueWorkProtocol.MaximumRecordsPerPage - state.ExaminedRecords - 1;
-        if (remaining <= 0)
+        var remaining = state.MaximumRecordsPerPage - state.ExaminedRecords - AdjacentElementOffset;
+        if (remaining <= EmptyElementCount)
         {
             return DuePrefixScanState.EmptyPage(cursor, kind, bounds, upper, state);
         }
         var scanState = new DuePrefixScanState(database, cursor, kind, bounds, upper, state);
         var scan = view.VisitRange(prefix, remaining, scanState.Visit, bounds.LastKey,
             observer: state.ObserveBytes, cancellationToken: state.CancellationToken);
-        if (scan.Records == 0 && !scan.HasMore && !scan.StoppedByVisitor)
+        if (scan.Records == EmptyElementCount && !scan.HasMore && !scan.StoppedByVisitor)
         {
             return CompletePage(cursor, kind, state);
         }
@@ -61,6 +66,6 @@ internal static class DuePrefixScanner
     private static DueWorkPage CompletePage(DueSweepCursor cursor, DueWorkKind kind, DuePageState state)
     {
         var next = DueWorkCursor.Complete(cursor, kind);
-        return new([], [], next, kind, true, state.ExaminedRecords, state.ExaminedBytes, 0);
+        return new([], [], next, kind, true, state.ExaminedRecords, state.ExaminedBytes, NoRetainedBytes);
     }
 }

@@ -13,13 +13,30 @@ internal sealed record SqlToken(SqlTokenKind Kind, string Text, bool Quoted = fa
 /// <summary>Lexes Q1 SQL without evaluating application expressions.</summary>
 internal static class SqlTokenizer
 {
-    private const int BudgetCheckInterval = 256;
+    private const int FirstElementIndex = 0;
+    private const char SqlStringQuote = '\'';
+    private const char SqlIdentifierQuote = '"';
+    private const char IdentifierSeparator = '_';
+    private const char ParameterPrefix = '@';
+    private const char MinusCharacter = '-';
+    private const int AdjacentElementOffset = 1;
+    private const char DecimalPoint = '.';
+    private const char LowerExponentMarker = 'e';
+    private const char UpperExponentMarker = 'E';
+    private const char PlusCharacter = '+';
+    private const char GreaterCharacter = '>';
+    private const char LessCharacter = '<';
+    private const char NotCharacter = '!';
+    private const char EqualCharacter = '=';
+    private const int EmptyElementCount = 0;
+    private const int BudgetCheckRemainder = 0;
 
-    internal static List<SqlToken> Lex(string sql, int maximum, int maximumDepth, ReadExecutionBudget? budget = null)
+    internal static List<SqlToken> Lex(string sql, int maximum, int maximumDepth, int budgetCheckInterval,
+        ReadExecutionBudget? budget = null)
     {
         var result = new List<SqlToken>();
         var triviaState = default(SqlTriviaState);
-        for (var index = 0; index < sql.Length;)
+        for (var index = FirstElementIndex; index < sql.Length;)
         {
             budget?.Check();
             var status = ReadTrivia(sql, ref index, ref triviaState, maximumDepth, budget);
@@ -42,10 +59,10 @@ internal static class SqlTokenizer
             }
             result.Add(current switch
             {
-                '\'' or '"' => Quoted(sql, ref index, budget),
-                _ when char.IsLetter(current) || current is '_' or '@' => Identifier(sql, ref index, budget),
-                _ when char.IsDigit(current) || current == '-' && index + 1 < sql.Length && char.IsDigit(sql[index + 1])
-                    => Number(sql, ref index, budget),
+                SqlStringQuote or SqlIdentifierQuote => Quoted(sql, ref index, budget, budgetCheckInterval),
+                _ when char.IsLetter(current) || current is IdentifierSeparator or ParameterPrefix => Identifier(sql, ref index, budget, budgetCheckInterval),
+                _ when char.IsDigit(current) || current == MinusCharacter && index + AdjacentElementOffset < sql.Length && char.IsDigit(sql[index + AdjacentElementOffset])
+                    => Number(sql, ref index, budget, budgetCheckInterval),
                 _ => Symbol(sql, ref index)
             });
         }
@@ -68,14 +85,14 @@ internal static class SqlTokenizer
         return status;
     }
 
-    private static SqlToken Quoted(string sql, ref int index, ReadExecutionBudget? budget)
+    private static SqlToken Quoted(string sql, ref int index, ReadExecutionBudget? budget, int budgetCheckInterval)
     {
         var quote = sql[index++];
         var value = new StringBuilder();
         var closed = false;
         while (index < sql.Length)
         {
-            CheckBudget(budget, index);
+            CheckBudget(budget, index, budgetCheckInterval);
             if (sql[index] != quote)
             {
                 value.Append(sql[index++]);
@@ -97,42 +114,42 @@ internal static class SqlTokenizer
         {
             throw SqlSyntax.Invalid();
         }
-        return new(quote == '\'' ? SqlTokenKind.String : SqlTokenKind.Identifier, value.ToString(), quote == '"');
+        return new(quote == SqlStringQuote ? SqlTokenKind.String : SqlTokenKind.Identifier, value.ToString(), quote == SqlIdentifierQuote);
     }
 
-    private static SqlToken Identifier(string sql, ref int index, ReadExecutionBudget? budget)
+    private static SqlToken Identifier(string sql, ref int index, ReadExecutionBudget? budget, int budgetCheckInterval)
     {
         var start = index++;
-        while (index < sql.Length && (char.IsLetterOrDigit(sql[index]) || sql[index] == '_'))
+        while (index < sql.Length && (char.IsLetterOrDigit(sql[index]) || sql[index] == IdentifierSeparator))
         {
             index++;
-            CheckBudget(budget, index);
+            CheckBudget(budget, index, budgetCheckInterval);
         }
-        var parameter = sql[start] == '@';
+        var parameter = sql[start] == ParameterPrefix;
         return new(parameter ? SqlTokenKind.Parameter : SqlTokenKind.Identifier,
-            sql[(parameter ? start + 1 : start)..index]);
+            sql[(parameter ? start + AdjacentElementOffset : start)..index]);
     }
 
-    private static SqlToken Number(string sql, ref int index, ReadExecutionBudget? budget)
+    private static SqlToken Number(string sql, ref int index, ReadExecutionBudget? budget, int budgetCheckInterval)
     {
         var start = index++;
         while (index < sql.Length && !StartsLineComment(sql, index)
-            && (char.IsDigit(sql[index]) || sql[index] is '.' or 'e' or 'E' or '+' or '-'))
+            && (char.IsDigit(sql[index]) || sql[index] is DecimalPoint or LowerExponentMarker or UpperExponentMarker or PlusCharacter or MinusCharacter))
         {
             index++;
-            CheckBudget(budget, index);
+            CheckBudget(budget, index, budgetCheckInterval);
         }
         return new(SqlTokenKind.Number, sql[start..index]);
     }
 
     private static bool StartsLineComment(string sql, int index)
-        => sql[index] == SqlTriviaSyntax.Dash && index + 1 < sql.Length && sql[index + 1] == SqlTriviaSyntax.Dash;
+        => sql[index] == SqlTriviaSyntax.Dash && index + AdjacentElementOffset < sql.Length && sql[index + AdjacentElementOffset] == SqlTriviaSyntax.Dash;
 
     private static SqlToken Symbol(string sql, ref int index)
     {
         var current = sql[index++];
         var text = current.ToString();
-        if (index < sql.Length && (current is '>' or '<' or '!' && sql[index] == '=' || current == '<' && sql[index] == '>'))
+        if (index < sql.Length && (current is GreaterCharacter or LessCharacter or NotCharacter && sql[index] == EqualCharacter || current == LessCharacter && sql[index] == GreaterCharacter))
         {
             text += sql[index++];
         }
@@ -143,9 +160,9 @@ internal static class SqlTokenizer
         return new(SqlTokenKind.Symbol, text);
     }
 
-    private static void CheckBudget(ReadExecutionBudget? budget, int index)
+    private static void CheckBudget(ReadExecutionBudget? budget, int index, int budgetCheckInterval)
     {
-        if (index > 0 && index % BudgetCheckInterval == 0)
+        if (index > EmptyElementCount && index % budgetCheckInterval == BudgetCheckRemainder)
         {
             budget?.Check();
         }

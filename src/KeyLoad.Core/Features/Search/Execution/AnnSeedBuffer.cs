@@ -5,8 +5,16 @@ namespace KeyLoad.Core.Features.Search;
 
 internal sealed class AnnSeedBuffer
 {
+    private const int EmptyRecordCapacity = 0;
+    private const int RecordArrayGrowthFactor = 2;
+    private const int ReferenceSlotBytes = 8;
+    private const int FirstRecordIndex = 0;
+
     private const string CorruptSource = "The canonical ANN seed source is inconsistent.";
-    private readonly AnnSeedOptions options;
+    private readonly int maximumRecords;
+    private readonly long maximumOwnedBytes;
+    private readonly long maximumPeakBytes;
+    private readonly int initialRecordCapacity;
     private readonly ReadExecutionBudget budget;
     private readonly AnnSeedWork work;
     private VectorRecord[] records;
@@ -18,12 +26,18 @@ internal sealed class AnnSeedBuffer
     private AnnSeedCut cut;
     private bool hasCut;
 
-    internal AnnSeedBuffer(AnnSeedOptions options, ReadExecutionBudget budget, AnnSeedWork work)
+    internal AnnSeedBuffer(int maximumRecords, long maximumOwnedBytes, long maximumPeakBytes, int initialRecordCapacity,
+        ReadExecutionBudget budget, AnnSeedWork work)
     {
-        this.options = options;
+        const int LengthEmptyCount = 0;
+
+        this.maximumRecords = maximumRecords;
+        this.maximumOwnedBytes = maximumOwnedBytes;
+        this.maximumPeakBytes = maximumPeakBytes;
+        this.initialRecordCapacity = initialRecordCapacity;
         this.budget = budget;
         this.work = work;
-        owned = checked(AnnSeedAccounting.FixedBytes + AnnSeedAccounting.ArrayAllowance(8, 0));
+        owned = checked(AnnSeedAccounting.FixedBytes + AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, LengthEmptyCount));
         peak = owned;
         Admit(owned, owned);
         HashScratch = new byte[AnnSeedAccounting.HashScratchBytes];
@@ -60,24 +74,27 @@ internal sealed class AnnSeedBuffer
     internal void Observe(DocumentRecord document, VectorRecord vector, PartitionRef partition,
         string collection, string field, VectorSpace requestedSpace)
     {
+        const long VectorRowObjectAllowanceBytes = 64L;
+        const int SingleValueBytes = 4;
+
         work.Check();
         AnnSeedSourceValidator.Validate(vector, document, partition, collection, field, work);
         if (!AnnSeedSourceValidator.SpaceMatches(vector.Space, requestedSpace, work))
         {
             return;
         }
-        if (count >= options.MaxRecords)
+        if (count >= maximumRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnnSeedAccounting.RecordLimit);
         }
-        var rowBytes = checked(64L + AnnSeedAccounting.ArrayAllowance(4, vector.Values.Length));
+        var rowBytes = checked(VectorRowObjectAllowanceBytes + AnnSeedAccounting.ArrayAllowance(SingleValueBytes, vector.Values.Length));
         var idAllowance = AnnSeedAccounting.StringAllowance(vector.DocumentId);
         PreflightRow(rowBytes, idAllowance);
         EnsureCapacity();
         ReserveOwned(rowBytes);
         var id = CopyString(vector.DocumentId);
         var values = new float[vector.Values.Length];
-        for (var index = 0; index < values.Length; index++)
+        for (var index = FirstRecordIndex; index < values.Length; index++)
         {
             work.Charge();
             var value = vector.Values[index];
@@ -111,16 +128,17 @@ internal sealed class AnnSeedBuffer
 
     private VectorRecord[] Trim()
     {
+
         if (records.Length == count)
         {
             return records;
         }
-        var finalAllowance = AnnSeedAccounting.ArrayAllowance(8, count);
-        var currentAllowance = AnnSeedAccounting.ArrayAllowance(8, records.Length);
+        var finalAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, count);
+        var currentAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, records.Length);
         var finalOwned = checked(owned - currentAllowance + finalAllowance);
         Admit(finalOwned, checked(owned + finalAllowance));
         var exact = new VectorRecord[count];
-        for (var index = 0; index < count; index++)
+        for (var index = FirstRecordIndex; index < count; index++)
         {
             work.Charge();
             exact[index] = records[index];
@@ -141,13 +159,14 @@ internal sealed class AnnSeedBuffer
 
     private void PreflightRow(long rowBytes, long idAllowance)
     {
+
         var nextOwned = owned;
         var growthPeak = owned;
         if (count == records.Length)
         {
             var next = NextCapacity();
-            var nextAllowance = AnnSeedAccounting.ArrayAllowance(8, next);
-            var oldAllowance = AnnSeedAccounting.ArrayAllowance(8, records.Length);
+            var nextAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, next);
+            var oldAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, records.Length);
             nextOwned = checked(owned - oldAllowance + nextAllowance);
             growthPeak = checked(owned + nextAllowance);
         }
@@ -156,8 +175,8 @@ internal sealed class AnnSeedBuffer
     }
 
     private int NextCapacity()
-        => records.Length == 0 ? Math.Min(32, options.MaxRecords)
-            : Math.Min(options.MaxRecords, checked(records.Length * 2));
+        => records.Length == EmptyRecordCapacity ? Math.Min(initialRecordCapacity, maximumRecords)
+            : Math.Min(maximumRecords, checked(records.Length * RecordArrayGrowthFactor));
 
     private void EnsureCapacity()
     {
@@ -166,13 +185,13 @@ internal sealed class AnnSeedBuffer
             return;
         }
         var next = NextCapacity();
-        var nextAllowance = AnnSeedAccounting.ArrayAllowance(8, next);
-        var oldAllowance = AnnSeedAccounting.ArrayAllowance(8, records.Length);
+        var nextAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, next);
+        var oldAllowance = AnnSeedAccounting.ArrayAllowance(ReferenceSlotBytes, records.Length);
         var nextOwned = checked(owned - oldAllowance + nextAllowance);
         var nextPeak = checked(owned + nextAllowance);
         Admit(nextOwned, nextPeak);
         var expanded = new VectorRecord[next];
-        for (var index = 0; index < count; index++)
+        for (var index = FirstRecordIndex; index < count; index++)
         {
             work.Charge();
             expanded[index] = records[index];
@@ -184,7 +203,7 @@ internal sealed class AnnSeedBuffer
     private void ReserveOwned(long amount)
     {
         var next = checked(owned + amount);
-        if (next > options.MaxOwnedBytes)
+        if (next > maximumOwnedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnnSeedAccounting.ByteLimit);
         }
@@ -195,7 +214,7 @@ internal sealed class AnnSeedBuffer
     private void Admit(long ownedCandidate, long peakCandidate)
     {
         budget.Check();
-        if (ownedCandidate > options.MaxOwnedBytes || peakCandidate > options.MaxPeakBytes)
+        if (ownedCandidate > maximumOwnedBytes || peakCandidate > maximumPeakBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnnSeedAccounting.ByteLimit);
         }

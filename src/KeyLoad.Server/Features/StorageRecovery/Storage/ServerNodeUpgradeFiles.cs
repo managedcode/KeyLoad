@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeFiles
@@ -18,14 +19,14 @@ internal static class ServerNodeUpgradeFiles
         { File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); }
     }
 
-    internal static FileStream CreatePrivateFile(string path)
+    internal static FileStream CreatePrivateFile(string path, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         var options = new FileStreamOptions
         {
             Mode = FileMode.CreateNew,
             Access = FileAccess.Write,
             Share = FileShare.None,
-            BufferSize = ServerNodeUpgradeProtocol.BufferBytes,
+            BufferSize = executionOptions.Value.FileBufferBytes,
             Options = FileOptions.WriteThrough
         };
         if (!OperatingSystem.IsWindows())
@@ -33,25 +34,25 @@ internal static class ServerNodeUpgradeFiles
         return new(path, options);
     }
 
-    internal static void Copy(string source, string destination)
+    internal static void Copy(string source, string destination, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         RequireRegularFile(source);
-        using var input = OpenRead(source);
-        using var output = CreatePrivateFile(destination);
-        input.CopyTo(output, ServerNodeUpgradeProtocol.BufferBytes);
+        using var input = OpenRead(source, executionOptions: executionOptions);
+        using var output = CreatePrivateFile(destination, executionOptions: executionOptions);
+        input.CopyTo(output, executionOptions.Value.FileBufferBytes);
         output.Flush(true);
     }
 
-    internal static void CreateEmpty(string path)
+    internal static void CreateEmpty(string path, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
-        using var file = CreatePrivateFile(path);
+        using var file = CreatePrivateFile(path, executionOptions: executionOptions);
         file.Flush(true);
     }
 
-    internal static FileStream OpenRead(string path)
+    internal static FileStream OpenRead(string path, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         ServerNodeUpgradePaths.CheckAncestors(path, false);
         return KeyLoad.Storage.IO.OfflineRegularFile.Open(path, FileAccess.Read, FileShare.Read,
-            ServerNodeUpgradeProtocol.BufferBytes);
+            executionOptions.Value.FileBufferBytes);
     }
 }

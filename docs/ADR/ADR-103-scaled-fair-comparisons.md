@@ -170,3 +170,40 @@ workers own only guarded new test Cases/Assertions/Helpers. Preserve the current
 IOptions observation policy and closed resource schema v2. Native measured/proof
 execution and the independent792-cell Linux cohort remain unqualified until
 actually executed; source joins do not mark this ADR Implemented.
+
+The parent retains the actual first Completed=1024 marker and verifies all its
+typed identity/counter fields against the proof milestone. A cancellation-callback
+failure still requires joining each retained original task before disposal;
+concurrent duplicate disposal returns the same settlement task. Meaningful tests
+exercise these actual lifecycle operations and their completion/failure states.
+These corrections preserve the original RF3, control, resource and provenance
+contracts and cannot relabel prior source-only packets as native proof.
+
+TASK-SCALE-OPENLOOP-NATIVE-OPTIONS-001 follows ADR-113 using the existing native
+provenance registration at case composition and typed options passed into the
+artifact assertions. Preserve each original identity and independent oracle;
+do not substitute a raw environment read or duplicate execution policy.
+ScalingQualification owns the exact file/agent join and six-case verification
+contract. This source migration leaves every native and Linux gate open.
+
+TASK-SCALE-OPENLOOP-INVENTORY-001 freezes the separate792-measurement/six-proof
+canonical plan in ScalingQualification before workflow or evidence changes.
+A Luna worker owns only its new plan module and real process-flow test packet;
+root owns all shared CLI, matrix, workload, workflow and artifact joins. Preserve
+the old composite schema and original control/scaled/vector rows. An exact
+inventory is static tooling evidence; it cannot qualify a database workload or
+publish new website metrics.
+
+TASK-SCALE-OPENLOOP-RESOURCE-OPTIONS-091F adds the existing centrally validated
+NativeComparisonExecutionOptions dependency to the open-loop runner and proof
+entry, preserving all v1 report, resource and cancellation contracts. Related
+requirements are REQ-CQ-013/AC-CQ-034/038 and AC-SCALE-018..021. The required
+runner argument precedes optional observers; the proof argument precedes the
+final cancellation token. The existing ClientResourceSampler owns its operational
+policy and receives the original IOptions instance. No parallel policy defaults,
+sampler, raw configuration or synthetic resource evidence is admitted. Stages:
+freeze this contract; Luna prepares a guarded private runner/proof packet; root
+joins both host callers using IsolatedHostTargetOwner.ExecutionOptions; build
+with native analyzers, run actual host/measurement/cancellation flows through
+Aspire, retain current-source resource results. Rollback restores the coherent
+caller/signature pair; all full-suite and Linux gates remain mandatory.

@@ -5,6 +5,10 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryPublicValidation
 {
+    private const int FirstElementIndex = 0;
+    private const int FirstOrdinal = 1;
+    private const int AdjacentElementOffset = 1;
+
     private const int RequestVersion = 1;
     private const string InvalidRequest = "The partition query request is invalid.";
     private const string UnsupportedQuery = "The partition query contains unsupported query options.";
@@ -17,7 +21,7 @@ internal static class PartitionQueryPublicValidation
         ValidateHeader(request);
         var partitions = OrderPartitions(request!.Partitions, execution.MaximumPartitions);
         ValidateOptions(request.Query);
-        var ast = new AstQueryRequest(partitions[0], request.Query, request.Parameters,
+        var ast = new AstQueryRequest(partitions[FirstElementIndex], request.Query, request.Parameters,
             request.AllowFullScan, AstVersion: request.AstVersion);
         var normalized = QueryValidation.Normalize(ast, limits, execution);
         var boundedRequest = request with
@@ -65,9 +69,9 @@ internal static class PartitionQueryPublicValidation
             .ThenBy(item => item.DatabaseId, StringComparer.Ordinal)
             .ThenBy(item => item.TransactionDomainId, StringComparer.Ordinal)
             .ThenBy(item => item.PartitionKey, StringComparer.Ordinal).ToImmutableArray();
-        for (var index = 1; index < ordered.Length; index++)
+        for (var index = FirstOrdinal; index < ordered.Length; index++)
         {
-            if (ordered[index] == ordered[index - 1])
+            if (ordered[index] == ordered[index - AdjacentElementOffset])
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
             }

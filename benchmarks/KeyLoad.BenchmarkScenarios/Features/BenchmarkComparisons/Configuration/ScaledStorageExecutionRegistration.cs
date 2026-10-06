@@ -9,7 +9,8 @@ internal static class ScaledStorageExecutionRegistration
 {
     internal static IOptions<ScaledStorageExecutionOptions> Read()
     {
-        using var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+        using var configurationLifetime = configuration as IDisposable;
         return BenchmarkScenarioOptionsRegistration.Read<ScaledStorageExecutionOptions>(configuration,
             ScaledStorageExecutionOptions.SectionName, settings => settings.IsValid(),
             ScaledStorageExecutionOptions.ValidationMessage);

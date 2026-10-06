@@ -1,8 +1,72 @@
+using System.Globalization;
+using KeyLoad.AppHost.Hosting;
 using System.Security.Cryptography;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class BenchmarkResources
 {
+    private const string ExternalDataDirectoryName = "external";
+    private const string PostgresResourceName = "benchmark-postgres-server";
+    private const string PostgresImageName = "pgvector/pgvector";
+    private const string PostgresImageTag = "0.8.6-pg18";
+    private const int DigestPrefixLength = 7;
+    private const string PostgresDirectoryName = "postgres";
+    private const string PostgresDataMount = "/var/lib/postgresql";
+    private const string PostgresConfigurationArgument = "-c";
+    private const string PostgresFsyncArgument = "fsync=on";
+    private const string PostgresSynchronousCommitArgument = "synchronous_commit=on";
+    private const string PostgresDatabaseName = "benchmark-postgres";
+    private const string QdrantKeyParameterName = "benchmark-qdrant-key";
+    private const int QdrantKeyEntropyBytes = 32;
+    private const string QdrantResourceName = "benchmark-qdrant";
+    private const string QdrantImageTag = "v1.17.1";
+    private const string QdrantDirectoryName = "qdrant";
+    private const string RabbitResourceName = "benchmark-rabbit";
+    private const string RabbitImageTag = "4.2.4-management";
+    private const string RabbitDirectoryName = "rabbit";
+    private const string RedisResourceName = "benchmark-redis";
+    private const string RedisImageTag = "8.4.0";
+    private const string RedisDirectoryName = "redis";
+    private const string RedisAppendOnlyArgument = "--appendonly";
+    private const string RedisAppendOnlyValue = "yes";
+    private const string RedisAppendFsyncArgument = "--appendfsync";
+    private const string RedisAppendFsyncValue = "always";
+    private const string Neo4jPasswordParameterName = "benchmark-neo4j-password";
+    private const int Neo4jPasswordEntropyBytes = 24;
+    private const string Neo4jResourceName = "benchmark-neo4j";
+    private const string Neo4jImageAndDirectoryName = "neo4j";
+    private const string Neo4jImageTag = "2026.09.0";
+    private const string Neo4jDataMount = "/data";
+    private const int Neo4jHttpPort = 7474;
+    private const string HttpEndpointName = "http";
+    private const string Neo4jAuthenticationEnvironment = "NEO4J_AUTH";
+    private const string Neo4jAuthenticationPrefix = "neo4j/";
+    private const string Neo4jInitialHeapEnvironment = "NEO4J_server_memory_heap_initial__size";
+    private const string MegabyteUnit = "m";
+    private const string Neo4jMaximumHeapEnvironment = "NEO4J_server_memory_heap_max__size";
+    private const string Neo4jPageCacheEnvironment = "NEO4J_server_memory_pagecache_size";
+    private const string RootHealthPath = "/";
+    private const string ReportsDirectoryName = "reports";
+    private const string KeyLoadEndpointEnvironment = "Benchmarks__KeyLoadEndpoint";
+    private const int FirstNodeIndex = 0;
+    private const string AdminKeyEnvironment = "Benchmarks__AdminKey";
+    private const string QdrantEndpointEnvironment = "Benchmarks__QdrantEndpoint";
+    private const string QdrantKeyEnvironment = "Benchmarks__QdrantApiKey";
+    private const string Neo4jEndpointEnvironment = "Benchmarks__Neo4jEndpoint";
+    private const string Neo4jPasswordEnvironment = "Benchmarks__Neo4jPassword";
+    private const string StorageEnvironment = "Benchmarks__Storage";
+    private const string StorageDescription = "isolated host directories; containers use host bind mounts";
+    private const string PostgresImageEnvironment = "Benchmarks__Images__Postgres";
+    private const string PostgresImageReferencePrefix = "docker.io/pgvector/pgvector:0.8.6-pg18@";
+    private const string QdrantImageEnvironment = "Benchmarks__Images__Qdrant";
+    private const string QdrantImageReferencePrefix = "docker.io/qdrant/qdrant:v1.17.1@";
+    private const string RabbitImageEnvironment = "Benchmarks__Images__Rabbit";
+    private const string RabbitImageReferencePrefix = "docker.io/library/rabbitmq:4.2.4-management@";
+    private const string RedisImageEnvironment = "Benchmarks__Images__Redis";
+    private const string RedisImageReferencePrefix = "docker.io/library/redis:8.4.0@";
+    private const string Neo4jImageEnvironment = "Benchmarks__Images__Neo4j";
+    private const string Neo4jImageReferencePrefix = "docker.io/library/neo4j:2026.09.0@";
+
     private const string OutputConfiguration = "Benchmarks:Output";
     private const string ConfigurationPrefix = "Benchmarks:";
     private const string EnvironmentPrefix = "Benchmarks__";
@@ -24,49 +88,51 @@ internal static class BenchmarkResources
     public static void Add(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource>[] nodes,
         IResourceBuilder<ParameterResource> admin, string root)
     {
+        var options = AppHostOptionsRegistration.Get(builder);
+        var deployment = options.Deployment.Value;
         string DataDirectory(string name)
         {
-            var directory = Path.Combine(root, "external", name);
+            var directory = Path.Combine(root, ExternalDataDirectoryName, name);
             Directory.CreateDirectory(directory);
             return directory;
         }
-        var postgres = builder.AddPostgres("benchmark-postgres-server")
-            .WithImage("pgvector/pgvector").WithImageTag("0.8.6-pg18").WithImageSHA256(PostgresDigest[7..])
+        var postgres = builder.AddPostgres(PostgresResourceName)
+            .WithImage(PostgresImageName).WithImageTag(PostgresImageTag).WithImageSHA256(PostgresDigest[DigestPrefixLength..])
             // The pgvector tag is not a PostgreSQL SemVer tag: explicitly select the PG18 data root.
-            .WithBindMount(DataDirectory("postgres"), "/var/lib/postgresql")
-            .WithArgs("-c", "fsync=on", "-c", "synchronous_commit=on");
-        var database = postgres.AddDatabase("benchmark-postgres");
-        var qdrantKey = builder.AddParameter("benchmark-qdrant-key", Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)), secret: true);
-        var qdrant = builder.AddQdrant("benchmark-qdrant", qdrantKey).WithImageTag("v1.17.1").WithImageSHA256(QdrantDigest[7..])
-            .WithDataBindMount(DataDirectory("qdrant"));
-        var rabbit = builder.AddRabbitMQ("benchmark-rabbit").WithManagementPlugin()
-            .WithImageTag("4.2.4-management").WithImageSHA256(RabbitDigest[7..]).WithDataBindMount(DataDirectory("rabbit"));
-        var redis = builder.AddRedis("benchmark-redis").WithImageTag("8.4.0").WithImageSHA256(RedisDigest[7..])
-            .WithDataBindMount(DataDirectory("redis"))
-            .WithArgs("--appendonly", "yes", "--appendfsync", "always");
-        var neo4jPassword = builder.AddParameter("benchmark-neo4j-password", Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(24)), secret: true);
-        var neo4j = builder.AddContainer("benchmark-neo4j", "neo4j", "2026.09.0").WithImageSHA256(Neo4jDigest[7..])
-            .WithBindMount(DataDirectory("neo4j"), "/data").WithHttpEndpoint(targetPort: 7474, name: "http")
-            .WithEnvironment("NEO4J_AUTH", ReferenceExpression.Create($"neo4j/{neo4jPassword}"))
-            .WithEnvironment("NEO4J_server_memory_heap_initial__size", "256m").WithEnvironment("NEO4J_server_memory_heap_max__size", "512m")
-            .WithEnvironment("NEO4J_server_memory_pagecache_size", "256m").WithHttpHealthCheck("/");
+            .WithBindMount(DataDirectory(PostgresDirectoryName), PostgresDataMount)
+            .WithArgs(PostgresConfigurationArgument, PostgresFsyncArgument, PostgresConfigurationArgument, PostgresSynchronousCommitArgument);
+        var database = postgres.AddDatabase(PostgresDatabaseName);
+        var qdrantKey = builder.AddParameter(QdrantKeyParameterName, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(QdrantKeyEntropyBytes)), secret: true);
+        var qdrant = builder.AddQdrant(QdrantResourceName, qdrantKey).WithImageTag(QdrantImageTag).WithImageSHA256(QdrantDigest[DigestPrefixLength..])
+            .WithDataBindMount(DataDirectory(QdrantDirectoryName));
+        var rabbit = builder.AddRabbitMQ(RabbitResourceName).WithManagementPlugin()
+            .WithImageTag(RabbitImageTag).WithImageSHA256(RabbitDigest[DigestPrefixLength..]).WithDataBindMount(DataDirectory(RabbitDirectoryName));
+        var redis = builder.AddRedis(RedisResourceName).WithImageTag(RedisImageTag).WithImageSHA256(RedisDigest[DigestPrefixLength..])
+            .WithDataBindMount(DataDirectory(RedisDirectoryName))
+            .WithArgs(RedisAppendOnlyArgument, RedisAppendOnlyValue, RedisAppendFsyncArgument, RedisAppendFsyncValue);
+        var neo4jPassword = builder.AddParameter(Neo4jPasswordParameterName, Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(Neo4jPasswordEntropyBytes)), secret: true);
+        var neo4j = builder.AddContainer(Neo4jResourceName, Neo4jImageAndDirectoryName, Neo4jImageTag).WithImageSHA256(Neo4jDigest[DigestPrefixLength..])
+            .WithBindMount(DataDirectory(Neo4jImageAndDirectoryName), Neo4jDataMount).WithHttpEndpoint(targetPort: Neo4jHttpPort, name: HttpEndpointName)
+            .WithEnvironment(Neo4jAuthenticationEnvironment, ReferenceExpression.Create($"{Neo4jAuthenticationPrefix}{neo4jPassword}"))
+            .WithEnvironment(Neo4jInitialHeapEnvironment, deployment.Neo4jInitialHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithEnvironment(Neo4jMaximumHeapEnvironment, deployment.Neo4jMaximumHeapMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit)
+            .WithEnvironment(Neo4jPageCacheEnvironment, deployment.Neo4jPageCacheMegabytes.ToString(CultureInfo.InvariantCulture) + MegabyteUnit).WithHttpHealthCheck(RootHealthPath);
         var runner = BenchmarkRunnerContainer.Create(builder,
-                builder.Configuration[OutputConfiguration] ?? Path.Combine(root, "reports"))
+                AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectoryName))
             .WithReference(database).WaitFor(database).WithReference(rabbit).WaitFor(rabbit).WithReference(redis).WaitFor(redis)
             .WithReference(qdrant).WaitFor(qdrant)
             .WaitFor(neo4j)
-            .WithEnvironment("Benchmarks__KeyLoadEndpoint", nodes[0].GetEndpoint("http"))
-            .WithEnvironment("Benchmarks__AdminKey", admin)
-            .WithEnvironment("Benchmarks__QdrantEndpoint", qdrant.GetEndpoint("http"))
-            .WithEnvironment("Benchmarks__QdrantApiKey", qdrantKey)
-            .WithEnvironment("Benchmarks__Neo4jEndpoint", neo4j.GetEndpoint("http"))
-            .WithEnvironment("Benchmarks__Neo4jPassword", neo4jPassword)
-            .WithEnvironment("Benchmarks__Storage", "isolated host directories; containers use host bind mounts")
-            .WithEnvironment("Benchmarks__Images__Postgres", "docker.io/pgvector/pgvector:0.8.6-pg18@" + PostgresDigest)
-            .WithEnvironment("Benchmarks__Images__Qdrant", "docker.io/qdrant/qdrant:v1.17.1@" + QdrantDigest)
-            .WithEnvironment("Benchmarks__Images__Rabbit", "docker.io/library/rabbitmq:4.2.4-management@" + RabbitDigest)
-            .WithEnvironment("Benchmarks__Images__Redis", "docker.io/library/redis:8.4.0@" + RedisDigest)
-            .WithEnvironment("Benchmarks__Images__Neo4j", "docker.io/library/neo4j:2026.09.0@" + Neo4jDigest);
+            .WithEnvironment(KeyLoadEndpointEnvironment, nodes[FirstNodeIndex].GetEndpoint(HttpEndpointName))
+            .WithEnvironment(AdminKeyEnvironment, admin)
+            .WithEnvironment(QdrantEndpointEnvironment, qdrant.GetEndpoint(HttpEndpointName))
+            .WithEnvironment(QdrantKeyEnvironment, qdrantKey)
+            .WithEnvironment(Neo4jEndpointEnvironment, neo4j.GetEndpoint(HttpEndpointName))
+            .WithEnvironment(Neo4jPasswordEnvironment, neo4jPassword)
+            .WithEnvironment(StorageEnvironment, StorageDescription)
+            .WithEnvironment(PostgresImageEnvironment, PostgresImageReferencePrefix + PostgresDigest)
+            .WithEnvironment(QdrantImageEnvironment, QdrantImageReferencePrefix + QdrantDigest)
+            .WithEnvironment(RabbitImageEnvironment, RabbitImageReferencePrefix + RabbitDigest)
+            .WithEnvironment(RedisImageEnvironment, RedisImageReferencePrefix + RedisDigest)
+            .WithEnvironment(Neo4jImageEnvironment, Neo4jImageReferencePrefix + Neo4jDigest);
         BenchmarkCallerBindings.Apply(runner, nodes, rabbit);
         ConfigureRunner(builder, runner, nodes);
     }
@@ -78,12 +144,17 @@ internal static class BenchmarkResources
         {
             runner.WaitFor(node);
         }
-        foreach (var setting in new[] { "Profile", "EvidenceProfile", "Seed", "Documents", "Operations", "Warmup", "Repetitions", "Concurrency", "PayloadBytes", "Dimensions", "TopK", "TimeoutSeconds", "SourceRevision", "GraphVertices", "GraphFanOut", "GraphDepth" })
+        var options = AppHostOptionsRegistration.Get(builder);
+        var workload = options.BenchmarkWorkload!.Value;
+        foreach (var property in typeof(KeyLoad.Comparisons.ComparisonOptions).GetProperties().Where(property => property.CanRead))
         {
-            if (builder.Configuration[ConfigurationPrefix + setting] is { } value)
-            {
-                runner.WithEnvironment(EnvironmentPrefix + setting, value);
-            }
+            runner.WithEnvironment(EnvironmentPrefix + property.Name, Convert.ToString(property.GetValue(workload), CultureInfo.InvariantCulture));
         }
+        runner.WithEnvironment(EnvironmentPrefix + Profile, options.Startup.Value.BenchmarkProfile);
+        if (options.BenchmarkRelay.Value.EvidenceProfile is { } evidenceProfile)
+        { runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.EvidenceProfile), evidenceProfile); }
+        if (options.BenchmarkRelay.Value.SourceRevision is { } sourceRevision)
+        { runner.WithEnvironment(EnvironmentPrefix + nameof(BenchmarkRelayOptions.SourceRevision), sourceRevision); }
     }
+    private const string Profile = "Profile";
 }

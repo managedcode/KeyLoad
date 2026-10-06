@@ -9,6 +9,8 @@ internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget
 
     public int Compare(GraphIncomingEdgeRowV1? left, GraphIncomingEdgeRowV1? right)
     {
+        const int EqualOrderIdentity = 0;
+
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
         try
@@ -26,17 +28,17 @@ internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget
             throw;
         }
         var partition = ComparePartition(left.Edge.From.Partition, right.Edge.From.Partition);
-        if (partition != 0)
+        if (partition != EqualOrderIdentity)
         {
             return partition;
         }
         var collection = StringComparer.Ordinal.Compare(left.Edge.From.Collection, right.Edge.From.Collection);
-        if (collection != 0)
+        if (collection != EqualOrderIdentity)
         {
             return collection;
         }
         var vertex = StringComparer.Ordinal.Compare(left.Edge.From.Id, right.Edge.From.Id);
-        return vertex != 0 ? vertex : StringComparer.Ordinal.Compare(left.Edge.Id, right.Edge.Id);
+        return vertex != EqualOrderIdentity ? vertex : StringComparer.Ordinal.Compare(left.Edge.Id, right.Edge.Id);
     }
 
     internal void RethrowOwnedBudgetFailure(InvalidOperationException wrapper)
@@ -49,17 +51,19 @@ internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget
 
     private static int ComparePartition(PartitionRef left, PartitionRef right)
     {
+        const int EqualOrderIdentity = 0;
+
         var tenant = StringComparer.Ordinal.Compare(left.TenantId, right.TenantId);
-        if (tenant != 0)
+        if (tenant != EqualOrderIdentity)
         {
             return tenant;
         }
         var database = StringComparer.Ordinal.Compare(left.DatabaseId, right.DatabaseId);
-        if (database != 0)
+        if (database != EqualOrderIdentity)
         {
             return database;
         }
         var domain = StringComparer.Ordinal.Compare(left.TransactionDomainId, right.TransactionDomainId);
-        return domain != 0 ? domain : StringComparer.Ordinal.Compare(left.PartitionKey, right.PartitionKey);
+        return domain != EqualOrderIdentity ? domain : StringComparer.Ordinal.Compare(left.PartitionKey, right.PartitionKey);
     }
 }

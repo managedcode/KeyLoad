@@ -4,7 +4,7 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private readonly AnalyticalReadGate analyticalReadGate = new((limits ?? new DatabaseLimits()).MaxConcurrentQueries);
+    private readonly AnalyticalReadGate analyticalReadGate;
 
     /// <summary>Gets the number of currently admitted analytical operations on this engine.</summary>
     public int QueryReadsInFlight => analyticalReadGate.InFlight;

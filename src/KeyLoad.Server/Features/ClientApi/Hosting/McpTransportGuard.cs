@@ -11,11 +11,14 @@ internal static class McpTransportGuard
     /// <returns>Checked optional routing hints for field comparison only.</returns>
     internal static McpTransportHeaders ReadHeaders(IHeaderDictionary headers)
     {
+        const int EmptyRevisionCount = 1;
+        const int IndexEmptyCount = 0;
+
         ArgumentNullException.ThrowIfNull(headers);
         var revision = headers[McpTransportProtocol.RevisionHeader];
-        if (revision.Count != 1)
+        if (revision.Count != EmptyRevisionCount)
         { throw InvalidTransport(McpTransportStage.ProtocolRevisionCount); }
-        if (revision[0] != McpTransportProtocol.Revision)
+        if (revision[IndexEmptyCount] != McpTransportProtocol.Revision)
         { throw InvalidTransport(McpTransportStage.ProtocolRevisionValue); }
         if (headers.ContainsKey(McpTransportProtocol.SessionHeader))
         { throw InvalidTransport(McpTransportStage.SessionHeaderPresence); }
@@ -55,16 +58,23 @@ internal static class McpTransportGuard
     private static string? ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
         McpTransportStage shapeStage, McpTransportStage encodingStage)
     {
+        const int EmptyValuesCount = 1;
+        const int IndexEmptyCount = 0;
+        const int EmptyTrimmedLength = 0;
+        const char TabCharacter = '\t';
+        const char SpaceCharacter = ' ';
+        const char ReadRoutingHeaderCharacterToken = '~';
+
         if (!headers.TryGetValue(name, out var values))
         { return null; }
-        if (values.Count != 1 || values[0] is not { } value)
+        if (values.Count != EmptyValuesCount || values[IndexEmptyCount] is not { } value)
         { throw InvalidTransport(shapeStage); }
         var trimmed = value.Trim();
-        if (trimmed.Length == 0 || trimmed.Length > maximumCharacters)
+        if (trimmed.Length == EmptyTrimmedLength || trimmed.Length > maximumCharacters)
         { throw InvalidTransport(shapeStage); }
         foreach (var character in trimmed)
         {
-            if (character != '\t' && (character < ' ' || character > '~'))
+            if (character != TabCharacter && (character < SpaceCharacter || character > ReadRoutingHeaderCharacterToken))
             { throw InvalidTransport(encodingStage); }
         }
         return trimmed;
@@ -79,6 +89,11 @@ internal static class McpTransportGuard
 
     private static string? ReadTargetHeader(IHeaderDictionary headers)
     {
+        const int EmptyDecodedLength = 0;
+        const char TabCharacter = '\t';
+        const char SpaceCharacter = ' ';
+        const char ReadTargetHeaderCharacterToken = '\u007F';
+
         var encoded = ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, McpTransportProtocol.MaximumNameCharacters,
             McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding);
         if (encoded is null)
@@ -87,11 +102,11 @@ internal static class McpTransportGuard
             && !encoded.EndsWith(McpTransportProtocol.EncodedHeaderSuffix, StringComparison.Ordinal))
         { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
         var decoded = McpHeaderEncoder.DecodeValue(encoded);
-        if (decoded is null || decoded.Length == 0 || decoded.Length > McpTransportProtocol.MaximumNameCharacters)
+        if (decoded is null || decoded.Length == EmptyDecodedLength || decoded.Length > McpTransportProtocol.MaximumNameCharacters)
         { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
         foreach (var character in decoded)
         {
-            if (character != '\t' && (character < ' ' || character == '\u007F'))
+            if (character != TabCharacter && (character < SpaceCharacter || character == ReadTargetHeaderCharacterToken))
             { throw InvalidTransport(McpTransportStage.NameHeaderEncoding); }
         }
         return decoded;

@@ -15,12 +15,14 @@ internal static class GraphCrossPartitionIntentWriter
         PrincipalRecord principal, PartitionRef source, string graph, string edgeId,
         EdgeRecord? previous, EdgeRecord? next, long nextRevision, DatabaseLimits limits)
     {
+        const int EmptyUpdateCount = 0;
+
         var desired = ReadPendingTargets(transaction, source, graph, edgeId, limits);
         AddPriorTarget(desired, source, previous, next, nextRevision);
         AddCurrentTarget(desired, source, next);
         var updates = BuildUpdates(database, transaction, principal, source, graph,
             desired, next, nextRevision, limits);
-        if (updates.Count > 0)
+        if (updates.Count > EmptyUpdateCount)
         {
             GraphCrossPartitionCapacityWriter.Apply(transaction, source,
                 GraphCrossPartitionCapacityDirection.PendingIntents,
@@ -31,9 +33,11 @@ internal static class GraphCrossPartitionIntentWriter
     private static Dictionary<EntityRef, EdgeRecord> ReadPendingTargets(IAtomicTransaction transaction,
         PartitionRef source, string graph, string edgeId, DatabaseLimits limits)
     {
+        const int NoEncodedBytes = 0;
+
         var targets = new Dictionary<EntityRef, EdgeRecord>();
         var prefix = GraphCrossPartitionKeys.IntentEdgePrefix(source, graph, edgeId);
-        long encodedBytes = 0;
+        long encodedBytes = NoEncodedBytes;
         var scan = transaction.VisitRange(prefix, limits.MaxScanRecords, (key, bytes) =>
         {
             AcceptRowBytes(key, bytes, limits.MaxBatchBytes, ref encodedBytes);
@@ -110,6 +114,8 @@ internal static class GraphCrossPartitionIntentWriter
         PrincipalRecord principal, PartitionRef source, string graph, EdgeRecord edge,
         EntityRef target, bool deleted, DatabaseLimits limits)
     {
+        const int FirstTargetIndex = 0;
+
         var fingerprint = GraphCrossPartitionRecords.Fingerprint(source, graph, edge.Id,
             target, edge.Revision, deleted, edge);
         var intent = new GraphCrossPartitionDeliveryIntentV1(GraphCrossPartitionProtocol.CurrentVersion,
@@ -119,7 +125,7 @@ internal static class GraphCrossPartitionIntentWriter
         var value = GraphCrossPartitionRecords.Encode(intent, limits.MaxBatchBytes);
         var index = updates.FindIndex(write => write.Key.AsSpan().SequenceEqual(key));
         var replacement = new GraphCrossPartitionRecordWrite(key, value);
-        if (index < 0)
+        if (index < FirstTargetIndex)
         {
             updates.Add(replacement);
         }

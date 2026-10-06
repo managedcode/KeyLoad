@@ -18,11 +18,11 @@ internal sealed class McpNativeOutputTests
     {
         using var owner = failure
             ? McpReplyOwner.Failure(ErrorCode.PermissionDenied, McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes)
-            : McpReplyOwner.Success(JsonDefaults.Serialize(McpOutputTestData.Marker), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes);
+            : McpReplyOwner.Success(JsonDefaults.Serialize(McpOutputTestData.Marker), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         JsonRpcMessage message = McpOutputTestData.Response(owner.ToolResult());
         var encoded = JsonSerializer.SerializeToUtf8Bytes(message, McpJsonUtilities.DefaultOptions);
-        McpNativeOutput.Validate(message, encoded.Length);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(message, encoded.Length - 1));
+        McpNativeOutput.Validate(message, encoded.Length, UnitMcpOptions.Execution());
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(message, encoded.Length - 1, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(error.Message).DoesNotContain(McpOutputTestData.Marker);
         using var stream = new McpBoundedWriteStream(encoded.Length);
@@ -41,8 +41,8 @@ internal sealed class McpNativeOutputTests
             Error = new JsonRpcErrorDetail { Code = (int)McpErrorCode.InvalidParams, Message = McpOutputTestData.SafeProtocolError }
         };
         var encoded = JsonSerializer.SerializeToUtf8Bytes(message, McpJsonUtilities.DefaultOptions);
-        McpNativeOutput.Validate(message, encoded.Length);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(message, encoded.Length - 1));
+        McpNativeOutput.Validate(message, encoded.Length, UnitMcpOptions.Execution());
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(message, encoded.Length - 1, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
@@ -55,13 +55,13 @@ internal sealed class McpNativeOutputTests
             Id = new RequestId(McpOutputTestData.NativeIdentifier),
             Result = JsonNode.Parse(McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.NativeResultDepth))
         };
-        McpNativeOutput.Validate(exact, McpOutputTestData.MaximumBytes);
+        McpNativeOutput.Validate(exact, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         JsonRpcMessage over = new JsonRpcResponse
         {
             Id = new RequestId(McpOutputTestData.NativeIdentifier),
             Result = JsonNode.Parse(McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.NativeResultDepth + 1))
         };
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(over, McpOutputTestData.MaximumBytes));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpNativeOutput.Validate(over, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(error.Message).DoesNotContain(McpOutputTestData.Marker);
     }
@@ -76,7 +76,7 @@ internal sealed class McpNativeOutputTests
             Id = new RequestId(McpOutputTestData.NativeIdentifier),
             Result = JsonNode.Parse(encoded)
         };
-        McpNativeOutput.Validate(message, McpOutputTestData.MaximumBytes);
+        McpNativeOutput.Validate(message, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution());
         await Assert.That(((JsonRpcResponse)message).Result![McpOutputTestData.IdentifierField]!.GetValue<string>().Length)
             .IsEqualTo(McpOutputTestData.LongBusinessIdentifierBytes);
     }

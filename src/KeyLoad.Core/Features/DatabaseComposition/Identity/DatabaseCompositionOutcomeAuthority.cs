@@ -7,16 +7,20 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int BaseReferencesPerMutation = 2;
+
     private const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     private const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
     private CompositionOutcomeAuthority? CaptureCompositionOutcome(ReplicatedOperation operation, OperationResult result)
     {
+        const int EmptyReverseLength = 0;
+
         if (result.Error is not null || !TryCompositionInput(operation, out var partition, out var mutations))
         {
             return null;
         }
         var reverse = mutations.OfType<GraphToQueueMutation>().ToArray();
-        if (!mutations.Any(mutation => mutation is QueueToGraph) && reverse.Length == 0)
+        if (!mutations.Any(mutation => mutation is QueueToGraph) && reverse.Length == EmptyReverseLength)
         {
             return null;
         }
@@ -77,7 +81,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority);
         }
-        var budget = new ReadExecutionBudget(Limits, CompositionTimeProvider.Instance);
+        var budget = new ReadExecutionBudget(OperationLimitsOptions, CompositionTimeProvider.Instance);
         foreach (var reference in references)
         {
             ValidateCompositionReference(reference, partition);
@@ -103,10 +107,12 @@ public sealed partial class DatabaseEngine
     private void AddCompositionReference(EntityRef reference, PartitionRef partition,
         HashSet<EntityRef> distinct, ImmutableArray<EntityRef>.Builder references)
     {
+        const int MaxBatchMutationsScaleFactor = 3;
+
         ValidateCompositionReference(reference, partition);
         if (distinct.Add(reference))
         {
-            if (references.Count >= checked(3 * Limits.MaxBatchMutations))
+            if (references.Count >= checked(MaxBatchMutationsScaleFactor * Limits.MaxBatchMutations))
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidCompositionAuthority);
             }
@@ -125,5 +131,5 @@ public sealed partial class DatabaseEngine
     }
 
     private int MaximumSavedCompositionReferences(ImmutableArray<Mutation> mutations)
-        => checked(2 * Limits.MaxBatchMutations + mutations.Count(mutation => mutation is GraphToQueueMutation));
+        => checked(BaseReferencesPerMutation * Limits.MaxBatchMutations + mutations.Count(mutation => mutation is GraphToQueueMutation));
 }

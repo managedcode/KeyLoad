@@ -1,24 +1,28 @@
 using System.Diagnostics;
 using System.Security;
 using KeyLoad.Replication;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 internal static class AdminStorageObserver
 {
-    internal const int MaximumEntries = 2_048;
-    internal const int MaximumFiles = 200;
-    internal const int MaximumMilliseconds = 250;
+    private const int MissingObservedFilesEmptyCount = 0;
+
     private const string Unavailable = "Node storage observation is unavailable.";
 
-    internal static AdminStorageSnapshot Read(string directory, CancellationToken cancellationToken)
+    internal static AdminStorageSnapshot Read(string directory, CancellationToken cancellationToken,
+        IOptions<AdminObservationOptions> options)
     {
+        const int EmptyRootAttributesFileAttributesReparsePoint = 0;
+
         cancellationToken.ThrowIfCancellationRequested();
-        var scan = new AdminStorageScan(directory, cancellationToken);
+        options.Value.Validate();
+        var scan = new AdminStorageScan(directory, cancellationToken, options);
         try
         {
             var root = new DirectoryInfo(directory);
-            if (!root.Exists || (root.Attributes & FileAttributes.ReparsePoint) != 0)
+            if (!root.Exists || (root.Attributes & FileAttributes.ReparsePoint) != EmptyRootAttributesFileAttributesReparsePoint)
             { return Missing(); }
             scan.Run(root);
             return scan.Snapshot();
@@ -29,11 +33,13 @@ internal static class AdminStorageObserver
 
     internal static bool FileFailure(Exception error) => error is IOException or UnauthorizedAccessException or SecurityException;
 
-    private static AdminStorageSnapshot Missing() => new(null, null, null, null, 0, false, [], Unavailable);
+    private static AdminStorageSnapshot Missing() => new(null, null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
 }
 
-internal sealed class AdminStorageScan(string rootPath, CancellationToken cancellationToken)
+internal sealed class AdminStorageScan(string rootPath, CancellationToken cancellationToken,
+    IOptions<AdminObservationOptions> options)
 {
+    private readonly AdminObservationOptions settings = options.Value;
     private const string Canonical = "canonical";
     private const string Replica = "replica";
     private const string Backup = "backup";
@@ -53,8 +59,10 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
 
     internal void Run(DirectoryInfo root)
     {
+        const int DirectoriesCountValidationBoundary = 0;
+
         directories.Push(root);
-        while (directories.Count > 0 && WithinBudget())
+        while (directories.Count > DirectoriesCountValidationBoundary && WithinBudget())
         { VisitDirectory(directories.Pop()); }
         _ = WithinBudget();
     }
@@ -62,8 +70,8 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
     private bool WithinBudget()
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (entries < AdminStorageObserver.MaximumEntries
-            && Stopwatch.GetElapsedTime(started).TotalMilliseconds < AdminStorageObserver.MaximumMilliseconds)
+        if (entries < settings.MaximumEntries
+            && Stopwatch.GetElapsedTime(started) < settings.ScanDeadline)
         { return true; }
         complete = false;
         return false;
@@ -71,9 +79,11 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
 
     private void VisitDirectory(DirectoryInfo directory)
     {
+        const int EmptyDirectoryAttributesFileAttributesReparsePoint = 0;
+
         try
         {
-            if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
+            if ((directory.Attributes & FileAttributes.ReparsePoint) != EmptyDirectoryAttributesFileAttributesReparsePoint)
             { complete = false; return; }
             using var iterator = directory.EnumerateFileSystemInfos().GetEnumerator();
             while (WithinBudget() && iterator.MoveNext())
@@ -88,9 +98,11 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
 
     private void VisitEntry(FileSystemInfo entry)
     {
+        const int EmptyEntryAttributesFileAttributesReparsePoint = 0;
+
         try
         {
-            if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+            if ((entry.Attributes & FileAttributes.ReparsePoint) != EmptyEntryAttributesFileAttributesReparsePoint)
             { complete = false; return; }
             if (entry is DirectoryInfo directory)
             { directories.Push(directory); return; }
@@ -103,8 +115,10 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
 
     private void ObserveFile(FileInfo file)
     {
+        const char SlashCharacter = '/';
+
         cancellationToken.ThrowIfCancellationRequested();
-        var relative = Path.GetRelativePath(rootPath, file.FullName).Replace(Path.DirectorySeparatorChar, '/');
+        var relative = Path.GetRelativePath(rootPath, file.FullName).Replace(Path.DirectorySeparatorChar, SlashCharacter);
         var category = Category(relative);
         var length = file.Length;
         totalBytes = checked(totalBytes + length);
@@ -121,14 +135,17 @@ internal sealed class AdminStorageScan(string rootPath, CancellationToken cancel
                 backupBytes = checked(backupBytes + length);
                 break;
         }
-        if (files.Count < AdminStorageObserver.MaximumFiles)
+        if (files.Count < settings.MaximumRetainedFiles)
         { files.Add(new(relative, category, length)); }
     }
 
     private static string Category(string relative)
     {
-        var separator = relative.IndexOf('/', StringComparison.Ordinal);
-        var parent = separator < 0 ? relative : relative[..separator];
+        const char SlashCharacter = '/';
+        const int SeparatorValidationBoundary = 0;
+
+        var separator = relative.IndexOf(SlashCharacter, StringComparison.Ordinal);
+        var parent = separator < SeparatorValidationBoundary ? relative : relative[..separator];
         return parent switch
         {
             PartitionStoreProtocol.CanonicalDirectory => Canonical,

@@ -360,6 +360,13 @@ native report preservation and complete-operation test requirements.
 
 Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch). KeyLoad then ranks the results it finds and checks permissions on each one.
 
+Native Orleans [runtime adoption](docs/Features/ClusterRouting/RuntimeAdoption.md)
+and [journal-backed Durable Jobs](docs/Features/ClusterRouting/RuntimeJournal.md)
+are being integrated. The source includes due-work wakeups, bounded telemetry,
+local lifecycle ownership and saga timeout jobs; its final build and runtime
+tests remain blocked by the current shared compiler/analyzer migration. Native
+job restart/adoption and real SDK/MCP RF3 fault qualification remain open.
+
 For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
 
 Website publication runs independently in CI when source changes. It uses the newest completed benchmark run with a verified aggregate when available; otherwise it publishes the product site without performance figures. A completed benchmark run triggers a fresh website build. [ADR-112](docs/ADR/ADR-112-independent-website-publication.md) records the source, artifact and publication checks; the revised route still needs delivered-source Linux CI and Pages verification.

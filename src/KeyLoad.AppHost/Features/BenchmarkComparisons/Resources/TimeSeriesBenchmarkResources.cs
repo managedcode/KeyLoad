@@ -1,7 +1,14 @@
+using KeyLoad.AppHost.Hosting;
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class TimeSeriesBenchmarkResources
 {
+    private const string DigestSeparator = "@";
+    private const string KeyLoadEndpointEnvironment = "Benchmarks__KeyLoadEndpoint";
+    private const string HttpEndpointName = "http";
+    private const string AdminKeyEnvironment = "Benchmarks__AdminKey";
+    private const string StorageEnvironment = "Benchmarks__Storage";
+
     private const string TimescaleName = "benchmark-timescale-server";
     private const string DatabaseName = "benchmark-timescale";
     private const string TimescaleImage = "timescale/timescaledb";
@@ -30,17 +37,17 @@ internal static class TimeSeriesBenchmarkResources
             .WithImageSHA256(TimescaleDigest[DigestPrefixLength..])
             .WithArgs(ResultText, AddResultText)
             .AddDatabase(DatabaseName);
-        var imageReference = ComparisonText + TimescaleImage + AddComparisonText + TimescaleImageTag + "@" + TimescaleDigest;
-        var output = Path.GetFullPath(builder.Configuration[OutputSetting]
+        var imageReference = ComparisonText + TimescaleImage + AddComparisonText + TimescaleImageTag + DigestSeparator + TimescaleDigest;
+        var output = Path.GetFullPath(AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput
             ?? Path.Combine(benchmarkRoot, DefaultOutputDirectory));
         var runner = BenchmarkRunnerContainer.Create(builder, output)
             .WithReference(database)
             .WaitFor(database)
             .WithEnvironment(NameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
             .WithEnvironment(AddNameText, AppHostConfiguration.TimeSeriesBenchmarkProfile)
-            .WithEnvironment("Benchmarks__KeyLoadEndpoint", nodes[FirstIndex].GetEndpoint("http"))
-            .WithEnvironment("Benchmarks__AdminKey", admin)
-            .WithEnvironment("Benchmarks__Storage", ValueText)
+            .WithEnvironment(KeyLoadEndpointEnvironment, nodes[FirstIndex].GetEndpoint(HttpEndpointName))
+            .WithEnvironment(AdminKeyEnvironment, admin)
+            .WithEnvironment(StorageEnvironment, ValueText)
             .WithEnvironment(TimescaleImageSetting, imageReference);
         foreach (var node in nodes)
         {

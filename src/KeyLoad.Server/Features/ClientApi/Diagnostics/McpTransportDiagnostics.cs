@@ -44,8 +44,11 @@ internal static class McpTransportDiagnostics
 
     private static McpTransportMethodCategory MethodCategory(IHeaderDictionary headers)
     {
+        const int EmptyValuesCount = 1;
+        const int IndexEmptyCount = 0;
+
         var values = headers[McpTransportProtocol.MethodHeader];
-        if (values.Count != 1 || values[0] is not { } raw)
+        if (values.Count != EmptyValuesCount || values[IndexEmptyCount] is not { } raw)
         {
             return McpTransportMethodCategory.Other;
         }

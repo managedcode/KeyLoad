@@ -36,7 +36,7 @@ internal sealed class SearchResourceTests
         await AssertStoredTimesAsync(db, LargeCollection, evaluatedAt);
         var addedStoredBytes = StoredBytes(LargeCollection) - StoredBytes(SmallCollection);
         var addedJsonBytes = StoredJsonBytes(db, LargeCollection) - StoredJsonBytes(db, SmallCollection);
-        var search = new SearchEngine(db.Database);
+        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var small = new SearchRequest(db.Partition, SmallCollection, TextPath, SearchTerm, Limit: 1);
         var large = new SearchRequest(db.Partition, LargeCollection, TextPath, SearchTerm, Limit: 1);
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -111,10 +111,10 @@ internal sealed class SearchResourceTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle\"}"));
         var request = new SearchRequest(db.Partition, Collection, TextPath, SearchTerm);
-        var expected = await new SearchEngine(db.Database).SearchAsync("root", request);
+        var expected = await new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
         var exactBytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
-        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()));
+        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactBytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var position = db.Store.Position;
 
         var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
@@ -135,7 +135,7 @@ internal sealed class SearchResourceTests
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle other\"}"),
             new PutVector(Collection, HitId, VectorPath, [1, 0], Space, 1));
-        var search = new SearchEngine(db.Database);
+        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var position = db.Store.Position;
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.SearchAsync("root",

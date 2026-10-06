@@ -29,17 +29,21 @@ internal sealed class GraphShortestPathReader
     internal GraphShortestPathReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition graph, GraphShortestPathRequest request, string[]? labels, ReadExecutionBudget budget)
     {
+        const int EmptyLabelCount = 0;
+
         this.view = view;
         this.request = request;
         this.budget = budget;
-        retention = new(database.Limits, budget);
+        retention = new(database.OperationLimitsOptions, budget);
         visibility = new(database, view, principal, budget, retention.AdmitVertex, retention.AdmitCollection);
         projector = new(database, view, principal, graph, request, budget, retention);
-        labelSet = labels is { Length: > 0 } ? new(labels, StringComparer.Ordinal) : null;
+        labelSet = labels is { Length: > EmptyLabelCount } ? new(labels, StringComparer.Ordinal) : null;
     }
 
     internal GraphShortestPathResult Read()
     {
+        const int EmptyFrontierCount = 0;
+
         visibility.RequireStart(request.From);
         visited.Add(request.From);
         if (request.From == request.To)
@@ -48,7 +52,7 @@ internal sealed class GraphShortestPathReader
             return FoundResult(ZeroHops);
         }
         var frontier = new List<EntityRef> { request.From };
-        for (var depth = ZeroHops; depth < request.MaxDepth && frontier.Count > 0; depth++)
+        for (var depth = ZeroHops; depth < request.MaxDepth && frontier.Count > EmptyFrontierCount; depth++)
         {
             budget.Check();
             var next = new List<EntityRef>();
@@ -95,7 +99,9 @@ internal sealed class GraphShortestPathReader
     private bool VisitEdge(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, EntityRef source, int depth,
         List<EntityRef> next)
     {
-        examinedEdges = checked(examinedEdges + 1);
+        const int ExaminedEdgeIncrement = 1;
+
+        examinedEdges = checked(examinedEdges + ExaminedEdgeIncrement);
         if (examinedEdges > request.MaxEdges)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeBudgetExceeded);
@@ -134,6 +140,8 @@ internal sealed class GraphShortestPathReader
 
     private EntityRef[] ReconstructVertices(EntityRef target, int hops)
     {
+        const int StartVertexIndex = 0;
+
         var path = new EntityRef[checked(hops + OneHop)];
         var current = target;
         for (var index = hops; index > ZeroHops; index--)
@@ -142,7 +150,7 @@ internal sealed class GraphShortestPathReader
             path[index] = current;
             current = predecessors[current].Previous;
         }
-        path[0] = current;
+        path[StartVertexIndex] = current;
         return path;
     }
 

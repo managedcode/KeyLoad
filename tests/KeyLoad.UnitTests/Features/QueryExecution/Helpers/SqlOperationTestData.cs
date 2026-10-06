@@ -37,7 +37,7 @@ internal static class SqlOperationTestData
 
     internal static McpDecodedOperation Compile(SqlOperationRequest request, DatabaseLimits? limits = null,
         int maximumPayloadBytes = MaximumPayloadBytes, CancellationToken cancellationToken = default) =>
-        SqlOperationCompiler.Compile(request, limits ?? Limits, maximumPayloadBytes, cancellationToken);
+        SqlOperationCompiler.Compile(request, Microsoft.Extensions.Options.Options.Create(limits ?? Limits), maximumPayloadBytes, cancellationToken);
 
     internal static McpOperationDescriptor Find(string name) => McpOperationCatalog.TryGet(name, out var descriptor)
         ? descriptor : throw new InvalidOperationException(name);

@@ -9,6 +9,8 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, string scriptPath,
     IOptions<TestExecutionOptions> options)
 {
+    private const string ImageAndProcessCleanupFailureMessage = "Local RF3 image cleanup and process settlement failed.";
+
     private readonly TestExecutionOptions policy = options.Value;
 
     internal async Task CleanupAsync(CancellationToken cancellationToken)
@@ -57,7 +59,7 @@ internal sealed class LocalRf3ImageCleanup(LocalRf3ImageExecution execution, str
             {
                 throw;
             }
-            throw new AggregateException("Local RF3 image cleanup and process settlement failed.", failures);
+            throw new AggregateException(ImageAndProcessCleanupFailureMessage, failures);
         }
     }
 }

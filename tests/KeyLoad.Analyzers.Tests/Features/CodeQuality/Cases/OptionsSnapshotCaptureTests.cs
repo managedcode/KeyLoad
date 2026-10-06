@@ -4,6 +4,25 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class OptionsSnapshotCaptureTests
 {
     [Test]
+    [Arguments("snapshot")]
+    [Arguments("snapshot ?? throw new System.InvalidOperationException()")]
+    public async Task AReadonlyExportRetainsTheSingleActualValueCaptureAsync(string getter)
+    {
+        var source = $$"""
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy { public int Capacity { get; set; } }
+            internal sealed class Subject
+            {
+                private readonly Policy snapshot;
+                internal Subject(Microsoft.Extensions.Options.IOptions<Policy> options) => snapshot = options.Value;
+                public Policy Limits => {{getter}};
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+    }
+
+    [Test]
     public async Task AnUnassignedLocalAliasAndReadonlyRecordCloneRetainTheNativeValueSourceAsync()
     {
         const string source = """

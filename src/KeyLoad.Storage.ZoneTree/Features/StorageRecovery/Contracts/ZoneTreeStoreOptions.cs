@@ -51,6 +51,11 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     private int? maximumReadCutRecords;
     private long? maximumReadCutExaminedBytes;
     private TimeSpan? maximumReadCutElapsed;
+    private int? fileBufferBytes;
+    private int? identityBufferBytes;
+    private int? maximumBackupManifestBytes;
+    private int? maximumIdentityFileBytes;
+    private int? maximumUpgradeReceiptBytes;
     /// <summary>Optional stable node incarnation required when reopening an existing store.</summary>
     public Guid? Incarnation { get; init; }
     /// <summary>Optional private signing key; caller bytes are copied before becoming store identity.</summary>
@@ -80,6 +85,11 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     internal int MaximumReadCutRecords => maximumReadCutRecords ?? throw UnresolvedExecution();
     internal long MaximumReadCutExaminedBytes => maximumReadCutExaminedBytes ?? throw UnresolvedExecution();
     internal TimeSpan MaximumReadCutElapsed => maximumReadCutElapsed ?? throw UnresolvedExecution();
+    internal int FileBufferBytes => fileBufferBytes ?? throw UnresolvedExecution();
+    internal int IdentityBufferBytes => identityBufferBytes ?? throw UnresolvedExecution();
+    internal int MaximumBackupManifestBytes => maximumBackupManifestBytes ?? throw UnresolvedExecution();
+    internal int MaximumIdentityFileBytes => maximumIdentityFileBytes ?? throw UnresolvedExecution();
+    internal int MaximumUpgradeReceiptBytes => maximumUpgradeReceiptBytes ?? throw UnresolvedExecution();
     private static InvalidOperationException UnresolvedExecution() => new(ExecutionOptionsRequired);
     private const string ExecutionOptionsRequired = "Store execution policy must be resolved before opening native storage.";
 
@@ -115,6 +125,11 @@ public sealed record ZoneTreeStoreOptions(string Directory)
         resolved.maximumReadCutRecords = effective.MaximumReadCutRecords;
         resolved.maximumReadCutExaminedBytes = effective.MaximumReadCutExaminedBytes;
         resolved.maximumReadCutElapsed = effective.MaximumReadCutElapsed;
+        resolved.fileBufferBytes = effective.FileBufferBytes;
+        resolved.identityBufferBytes = effective.IdentityBufferBytes;
+        resolved.maximumBackupManifestBytes = effective.MaximumBackupManifestBytes;
+        resolved.maximumIdentityFileBytes = effective.MaximumIdentityFileBytes;
+        resolved.maximumUpgradeReceiptBytes = effective.MaximumUpgradeReceiptBytes;
         return resolved;
     }
 }

@@ -48,7 +48,7 @@ internal static class NativeRuntimeJournalRegistration
         native.ShardActivationBufferPeriod = TimeSpan.Zero;
         native.ShardLoadLookaheadPeriod = TimeSpan.Zero;
         native.ShardCheckInterval = settings.ShardCheckInterval;
-        native.ShardStripeCount = 1;
+        native.ShardStripeCount = settings.ShardStripeCount;
         native.JobStatusPollInterval = settings.JobStatusPollInterval;
         native.MaxConcurrentJobsPerSilo = settings.MaximumConcurrentJobs;
         native.OverloadBackoffDelay = settings.OverloadBackoffDelay;
@@ -64,8 +64,11 @@ internal static class NativeRuntimeJournalRegistration
     private static DateTimeOffset? Retry(IJobRunContext context, Exception error, NativeDurableJobOptions settings)
     {
         if (context.DequeueCount >= settings.MaximumAttempts
-            || error is KeyLoadException { Code: ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
-                or ErrorCode.Validation or ErrorCode.Corruption or ErrorCode.FormatUnsupported })
+            || error is KeyLoadException
+            {
+                Code: ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
+                or ErrorCode.Validation or ErrorCode.Corruption or ErrorCode.FormatUnsupported
+            })
         {
             return null;
         }

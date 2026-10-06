@@ -51,12 +51,16 @@ internal static class ServerFailureObserver
     /// <param name="failures">Terminal failures collected from the actual cleanup stages.</param>
     internal static void ThrowIfAny(IReadOnlyList<Exception> failures)
     {
+        const int EmptyFailuresCount = 1;
+        const int IndexEmptyCount = 0;
+        const int FailuresCountValidationBoundary = 1;
+
         ArgumentNullException.ThrowIfNull(failures);
-        if (failures.Count == 1)
+        if (failures.Count == EmptyFailuresCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();
         }
-        if (failures.Count > 1)
+        if (failures.Count > FailuresCountValidationBoundary)
         {
             throw new AggregateException(failures);
         }

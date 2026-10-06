@@ -1,19 +1,15 @@
+using System.Globalization;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad;
 using KeyLoad.Orleans;
 
 internal static class ClusterResourceSettings
 {
-    private const string SnapshotConfiguration = "KeyLoad:SnapshotThreshold";
     private const string SnapshotEnvironment = "KeyLoad__SnapshotThreshold";
-    private const string DefaultSnapshotThreshold = "1024";
-    private const string CommandConfiguration = "KeyLoad:CommandAdmission:";
     private const string CommandEnvironment = "KeyLoad__CommandAdmission__";
-    private const string HttpConfiguration = "KeyLoad:HttpAdmission:";
     private const string HttpEnvironment = "KeyLoad__HttpAdmission__";
-    private const string ReplayConfiguration = "KeyLoad:ReplayAdmission:";
     private const string ReplayEnvironment = "KeyLoad__ReplayAdmission__";
     private const string LogEnvironment = "Logging__LogLevel__Default";
-    private const string LogLevel = "Warning";
     private const string ContainerUserArgument = "--user";
     private static readonly string[] CommandOptions =
     [
@@ -40,22 +36,23 @@ internal static class ClusterResourceSettings
 
     internal static void Apply(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource> resource, string? containerUser)
     {
-        resource.WithEnvironment(SnapshotEnvironment, builder.Configuration[SnapshotConfiguration] ?? DefaultSnapshotThreshold)
-            .WithEnvironment(LogEnvironment, LogLevel);
-        Copy(builder, resource, CommandOptions, CommandConfiguration, CommandEnvironment);
-        Copy(builder, resource, HttpOptions, HttpConfiguration, HttpEnvironment);
-        Copy(builder, resource, ReplayOptions, ReplayConfiguration, ReplayEnvironment);
+        var options = AppHostOptionsRegistration.Get(builder);
+        resource.WithEnvironment(SnapshotEnvironment, options.Cluster.Value.SnapshotThreshold.ToString(CultureInfo.InvariantCulture))
+            .WithEnvironment(LogEnvironment, options.Cluster.Value.LoggingLevel);
+        Copy(resource, options.CommandAdmission.Value, CommandOptions, CommandEnvironment);
+        Copy(resource, options.HttpAdmission.Value, HttpOptions, HttpEnvironment);
+        Copy(resource, options.ReplayAdmission.Value, ReplayOptions, ReplayEnvironment);
         if (containerUser is not null)
         { resource.WithContainerRuntimeArgs(ContainerUserArgument, containerUser); }
     }
 
-    private static void Copy(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource> resource,
-        string[] options, string configurationPrefix, string environmentPrefix)
+    private static void Copy<T>(IResourceBuilder<ContainerResource> resource, T snapshot,
+        string[] options, string environmentPrefix) where T : class
     {
         foreach (var option in options)
         {
-            if (builder.Configuration[configurationPrefix + option] is { } value)
-            { resource.WithEnvironment(environmentPrefix + option, value); }
+            var value = typeof(T).GetProperty(option)!.GetValue(snapshot);
+            resource.WithEnvironment(environmentPrefix + option, Convert.ToString(value, CultureInfo.InvariantCulture));
         }
     }
 }

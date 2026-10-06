@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.Query;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Orleans;
@@ -9,16 +10,13 @@ namespace KeyLoad.Orleans;
 /// <param name="codec">Signed request verifier bound to this actor's GUID.</param>
 /// <param name="database">Borrowed canonical database; this actor never owns its files or apply gate.</param>
 /// <param name="coordinator">Node-owned quorum barrier and canonical apply boundary.</param>
-/// <param name="queries">Existing authorized query and live-query engine.</param>
-/// <param name="search">Existing authorized text, vector and hybrid search engine.</param>
-/// <param name="expectedOwner">Immutable physical-owner tuple from fenced host configuration.</param>
-/// <param name="administration">Borrowed physical-node capabilities guarded by persisted administrator authority.</param>
+/// <param name="services">Borrowed capability services resolved only after the authorized operation is selected.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry and query deadlines.</param>
 /// <param name="workOwner">Silo-local admission and cancellation owner for verified reads.</param>
 /// <param name="diagnostics">Unexpected failure diagnostics; public replies contain only safe typed errors.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.ReadAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
-    QueryEngine queries, SearchEngine search, PhysicalShardRecord expectedOwner, INodeAdministration administration,
+    IServiceProvider services,
     TimeProvider clock, NativeRequestWorkOwner workOwner,
     ILogger<DatabaseReadGrain> diagnostics)
     : Grain, IDatabaseReadGrain
@@ -27,7 +25,10 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
     private readonly TimeProvider runtimeClock = clock;
     private readonly NativeRequestWorkOwner requestWorkOwner = workOwner;
     private readonly GrainCoreReadCapabilities core = new(database);
-    private readonly GrainQueryReadCapabilities query = new(queries, search, clock, expectedOwner);
+    private GrainQueryReadCapabilities? query;
+    private GrainQueryReadCapabilities Query => query ??= new(services.GetRequiredService<QueryEngine>(),
+        services.GetRequiredService<SearchEngine>(), runtimeClock, services.GetRequiredService<PhysicalShardRecord>());
+    private INodeAdministration Administration => services.GetRequiredService<INodeAdministration>();
     private readonly GrainBlobReadCapabilities blobs = new(database);
 
     /// <inheritdoc />
@@ -137,7 +138,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         }
         if (GrainAdminDashboardCapabilities.Handles(kind))
         {
-            return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, administration, principal,
+            return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, Administration, principal,
                 kind, request.Payload, cancellationToken).ConfigureAwait(true);
         }
         if (GrainBlobReadCapabilities.Handles(kind))
@@ -151,7 +152,7 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
 
         if (kind is not (GrainReadKind.Backup or GrainReadKind.Admission or GrainReadKind.NodeStatus))
         {
-            return await query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
+            return await Query.ExecuteAsync(kind, principal.Id, request.Payload, cancellationToken).ConfigureAwait(true);
         }
 
         GrainNativePayload.RequireNoDto(request.Payload);
@@ -159,9 +160,9 @@ public sealed class DatabaseReadGrain(GrainRequestCodec codec, DatabaseEngine da
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
         {
-            GrainReadKind.Backup => await administration.BackupAsync(cancellationToken).ConfigureAwait(true),
-            GrainReadKind.Admission => administration.Admission(),
-            GrainReadKind.NodeStatus => await administration.StatusAsync(cancellationToken).ConfigureAwait(true),
+            GrainReadKind.Backup => await Administration.BackupAsync(cancellationToken).ConfigureAwait(true),
+            GrainReadKind.Admission => Administration.Admission(),
+            GrainReadKind.NodeStatus => await Administration.StatusAsync(cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

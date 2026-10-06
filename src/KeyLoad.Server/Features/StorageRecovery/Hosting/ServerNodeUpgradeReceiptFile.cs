@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 
@@ -7,13 +8,13 @@ internal static class ServerNodeUpgradeReceiptFile
 {
     private const int HeaderBytes = sizeof(ulong) + sizeof(int);
 
-    internal static void Write<T>(string path, T receipt, ulong magic)
+    internal static void Write<T>(string path, T receipt, ulong magic, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         var payload = NativeSerialization.Serialize(receipt);
         var envelope = NativeSerialization.Serialize(new ServerNodeUpgradeEnvelope(payload, SHA256.HashData(payload)));
         if (envelope.Length > ServerNodeUpgradeProtocol.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.ResourceExhausted, ServerNodeUpgradeProtocol.Limit); }
-        using var file = ServerNodeUpgradeFiles.CreatePrivateFile(path);
+        using var file = ServerNodeUpgradeFiles.CreatePrivateFile(path, executionOptions: executionOptions);
         Span<byte> header = stackalloc byte[HeaderBytes];
         BinaryPrimitives.WriteUInt64LittleEndian(header, magic);
         BinaryPrimitives.WriteInt32LittleEndian(header[sizeof(ulong)..], envelope.Length);
@@ -22,16 +23,18 @@ internal static class ServerNodeUpgradeReceiptFile
         file.Flush(true);
     }
 
-    internal static T Read<T>(string path, ulong magic)
+    internal static T Read<T>(string path, ulong magic, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
+        const int LengthValidationBoundary = 0;
+
         ServerNodeUpgradeFiles.RequireRegularFile(path);
-        using var file = ServerNodeUpgradeFiles.OpenRead(path);
+        using var file = ServerNodeUpgradeFiles.OpenRead(path, executionOptions: executionOptions);
         if (file.Length <= HeaderBytes || file.Length > HeaderBytes + ServerNodeUpgradeProtocol.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         Span<byte> header = stackalloc byte[HeaderBytes];
         file.ReadExactly(header);
         var length = BinaryPrimitives.ReadInt32LittleEndian(header[sizeof(ulong)..]);
-        if (BinaryPrimitives.ReadUInt64LittleEndian(header) != magic || length <= 0
+        if (BinaryPrimitives.ReadUInt64LittleEndian(header) != magic || length <= LengthValidationBoundary
             || length != file.Length - HeaderBytes || length > ServerNodeUpgradeProtocol.MaximumReceiptBytes)
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         var encoded = new byte[length];

@@ -32,6 +32,10 @@ public sealed record ReplicaSiloDiscovery(
 public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerOptions,
     ILocalSiloDetails localSilo, int runtimeJournalReaderContract = StoreReaderContract.Legacy)
 {
+    private const int ReadEmptyRead = 0;
+    private const int MarkTransportReadyValueSingleItemCount = 1;
+    private const int StopDiscoveryValueEmptyCount = 0;
+
     private readonly ReplicaConfiguration configuration = configurationOptions.Value;
     private readonly ReplicaPeerOptions options = peerOptions.Value;
     private int ready;
@@ -43,14 +47,14 @@ public sealed class ReplicaSiloDiscoveryState(IOptions<ReplicaConfiguration> con
     /// <summary>Returns a bounded description of the currently initialized silo generation.</summary>
     /// <returns>The local voter, cluster, incarnation, runtime address and readiness state.</returns>
     public ReplicaSiloDiscovery Read() => new(configuration.LocalId, options.ClusterId, configuration.Incarnation,
-        RuntimeAddress, Volatile.Read(ref ready) != 0, GrainRoutingProtocol.RequestInterfaceVersion,
+        RuntimeAddress, Volatile.Read(ref ready) != ReadEmptyRead, GrainRoutingProtocol.RequestInterfaceVersion,
         ReplicaTransportProtocol.Version, runtimeJournalReaderContract);
 
     /// <summary>Marks the per-silo replica endpoint available without waiting for a quorum.</summary>
     /// <remarks>The node-local endpoint must already be attached before this state is published.</remarks>
-    public void MarkTransportReady() => Volatile.Write(ref ready, 1);
+    public void MarkTransportReady() => Volatile.Write(ref ready, MarkTransportReadyValueSingleItemCount);
 
     /// <summary>Withdraws discovery after membership has finished its shutdown.</summary>
     /// <remarks>The later lifecycle callback drains endpoint maintenance while Orleans transport remains active.</remarks>
-    public void StopDiscovery() => Volatile.Write(ref ready, 0);
+    public void StopDiscovery() => Volatile.Write(ref ready, StopDiscoveryValueEmptyCount);
 }

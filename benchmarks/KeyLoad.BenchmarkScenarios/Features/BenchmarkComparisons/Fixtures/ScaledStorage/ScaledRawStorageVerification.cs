@@ -15,10 +15,13 @@ internal static class ScaledRawStorageVerification
         ScaledRawStorageZoneTreeEngine engine, byte[] expectedScratch, int recordCount, ref long readCalls,
         long deadlineStart, bool enforceBudget, CancellationToken token, TimeSpan preparationTimeout)
     {
+        const long VerifiedInitialValue = 0L;
+        const int IndexInitialValue = 0;
+
         var started = Stopwatch.GetTimestamp();
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var verified = 0L;
-        for (var index = 0; index < recordCount; index++)
+        var verified = VerifiedInitialValue;
+        for (var index = IndexInitialValue; index < recordCount; index++)
         {
             CheckBoundary(index, deadlineStart, enforceBudget, token, preparationTimeout);
             readCalls++;
@@ -53,7 +56,9 @@ internal static class ScaledRawStorageVerification
 
     private static void CheckBoundary(int operation, long deadlineStart, bool enforceBudget, CancellationToken token, TimeSpan preparationTimeout)
     {
-        if (!enforceBudget || operation % CancellationCheckStride != 0)
+        const int EmptyOperationCancellationCheckStride = 0;
+
+        if (!enforceBudget || operation % CancellationCheckStride != EmptyOperationCancellationCheckStride)
         {
             return;
         }

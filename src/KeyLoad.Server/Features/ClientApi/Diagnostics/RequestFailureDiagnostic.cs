@@ -5,6 +5,7 @@ namespace KeyLoad.Server;
 /// <summary>Stores and emits bounded dispatch evidence only when a request fails.</summary>
 internal static class RequestFailureDiagnostic
 {
+    private const string FailureUtcFormat = "O";
     private static readonly object PhaseItemKey = new();
     private static readonly object CredentialDispatchValue = RequestFailurePhase.CredentialDispatch;
     private static readonly object ReadDispatchValue = RequestFailurePhase.ReadDispatch;
@@ -97,8 +98,6 @@ internal enum RequestFailureCategory
 /// <summary>Owns the stable event ID and strongly typed, bounded failure log template.</summary>
 internal static class RequestFailureDiagnosticLog
 {
-    private const string FailureUtcFormat = "O";
-
     private const string FailureLog = "Database request failed at {FailurePhase} with {FailureCategory} for operation {OperationId} at {FailureUtc}.";
     private const int FailureEventId = 1001;
 

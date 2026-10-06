@@ -11,6 +11,9 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int AtomicCommandCommitFirstElementIndex = 0;
+    private const int AtomicCommandCommitInitialSequence = 0;
+
     private const string InvalidCommandBudgetMessage = "The operation ID or byte budget is invalid.";
     private const string PreviousCommandIncarnationMessage = "This command belongs to a previous database incarnation.";
     private const string CommandContentConflictMessage = "The command ID was already used with different content.";
@@ -22,7 +25,7 @@ public sealed partial class DatabaseEngine
     /// <param name="operation">Authenticated operation with its evaluated business time.</param>
     /// <param name="replicationIndex">Optional committed replica position.</param>
     /// <returns>The durable logical result, including a stored domain failure.</returns>
-    public OperationResult Apply(ReplicatedOperation operation, long replicationIndex = 0)
+    public OperationResult Apply(ReplicatedOperation operation, long replicationIndex = AtomicCommandCommitFirstElementIndex)
     {
         ArgumentNullException.ThrowIfNull(operation);
         if (operation.Id == Guid.Empty || Encoding.UTF8.GetByteCount(operation.PayloadJson) > Limits.MaxBatchBytes)
@@ -55,7 +58,7 @@ public sealed partial class DatabaseEngine
     private static OperationResult? ReadAlreadyAppliedOutcome(IAtomicTransaction transaction, ReplicatedOperation operation,
         long replicationIndex, CommandOutcomePartitionScope scope)
     {
-        if (replicationIndex <= 0 || transaction.ReadOwnedValue(KeySpace.AppliedBytes) is not { } appliedBytes
+        if (replicationIndex <= AtomicCommandCommitInitialSequence || transaction.ReadOwnedValue(KeySpace.AppliedBytes) is not { } appliedBytes
             || NativeSerialization.Deserialize<long>(appliedBytes) < replicationIndex)
         {
             return null;
@@ -77,7 +80,7 @@ public sealed partial class DatabaseEngine
         var authorized = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.PrincipalId, operation.Id, partitionScope);
         persistOutcome = true;
-        long policyEpoch = 0;
+        long policyEpoch = AtomicCommandCommitInitialSequence;
         BlobOutcomeAuthority? blobAuthority = null;
         OperationResult result;
         global::KeyLoad.Core.Features.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
@@ -94,17 +97,11 @@ public sealed partial class DatabaseEngine
                 replayed = true;
                 return previous;
             }
-            else
-            {
-                ValidateCommandClock(transaction, operation.EvaluatedAt);
-                if (BlobStorageOperations.Handles(operation.Kind))
-                {
-                    blobAuthority = new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation);
-                }
-                result = Execute(transaction, principal, operation, replicationIndex > 0 ? replicationIndex : position,
-                    placement);
-                compositionAuthority = CaptureCompositionOutcome(operation, result);
-            }
+            ValidateCommandClock(transaction, operation.EvaluatedAt);
+            blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
+            result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
+                placement);
+            compositionAuthority = CaptureCompositionOutcome(operation, result);
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported
             or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
@@ -125,6 +122,11 @@ public sealed partial class DatabaseEngine
         }
         return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope);
     }
+
+    private BlobOutcomeAuthority? CaptureBlobOutcomeAuthority(IAtomicTransaction transaction,
+        PrincipalRecord principal, ReplicatedOperation operation)
+        => BlobStorageOperations.Handles(operation.Kind)
+            ? new BlobStorageOperations(this).CaptureOutcomeAuthority(transaction, principal, operation) : null;
 
     private StoredOutcome BuildStoredOutcome(string fingerprint, long policyEpoch, OperationResult result,
         BlobOutcomeAuthority? blobAuthority,
@@ -152,7 +154,7 @@ public sealed partial class DatabaseEngine
         }
         CommandOutcomeKeyResolver.ValidateSelectedScope(transaction, operation, selection);
         ValidateCachedResult(transaction, principal, operation, previous);
-        if (replicationIndex > 0)
+        if (replicationIndex > AtomicCommandCommitInitialSequence)
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
         }
@@ -184,7 +186,7 @@ public sealed partial class DatabaseEngine
                     operation.PrincipalId, operation.Id);
             }
         }
-        if (replicationIndex > 0)
+        if (replicationIndex > AtomicCommandCommitInitialSequence)
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
         }

@@ -19,7 +19,7 @@ internal sealed class StreamCorpusTests
     [Test]
     public async Task StreamMutationsNeverReuseSeedWarmupOrEarlierRepetitionIds()
     {
-        var dataset = new BenchmarkDataset(Options);
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options));
         var ids = dataset.Documents.Select(document => document.Id).ToHashSet(StringComparer.Ordinal);
         for (var repetition = 0; repetition < Options.Repetitions; repetition++)
         {
@@ -40,7 +40,7 @@ internal sealed class StreamCorpusTests
     public async Task EventOracleChecksIdentityRevisionAndCompletePayload()
     {
         const string EmptyPayload = "{}";
-        var dataset = new BenchmarkDataset(Options);
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options));
         var document = dataset.Documents[0];
         var expected = new FoundEvent(BenchmarkDataset.EventId(document), 1, document.Json);
         await Assert.That(BenchmarkDataset.SameEvent(expected, document)).IsTrue();
@@ -53,8 +53,8 @@ internal sealed class StreamCorpusTests
     [Test]
     public async Task TopologyDoesNotChangeCorpusOrLogicalEventIdentity()
     {
-        var single = new BenchmarkDataset(Options with { Topology = ComparisonTopology.Standalone });
-        var replicated = new BenchmarkDataset(Options with { Topology = ComparisonTopology.Replicated });
+        var single = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with { Topology = ComparisonTopology.Standalone }));
+        var replicated = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Options with { Topology = ComparisonTopology.Replicated }));
         await Assert.That(single.Sha256).IsEqualTo(replicated.Sha256);
         await Assert.That(BenchmarkDataset.EventId(single.Documents[0])).IsEqualTo(BenchmarkDataset.EventId(replicated.Documents[0]));
         await Assert.That(BenchmarkDataset.EventId(single.Documents[0])).IsNotEqualTo(BenchmarkDataset.EventId(single.Documents[1]));

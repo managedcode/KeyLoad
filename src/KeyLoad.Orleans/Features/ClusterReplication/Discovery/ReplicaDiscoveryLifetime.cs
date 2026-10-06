@@ -60,6 +60,8 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
 
     internal Task StopAsync()
     {
+        const int EmptyActive = 0;
+
         Task work;
         lock (sync)
         {
@@ -69,7 +71,7 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
             }
 
             shutdownStarted = true;
-            if (active == 0)
+            if (active == EmptyActive)
             {
                 drained.TrySetResult();
             }
@@ -151,10 +153,12 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
 
     private void Exit()
     {
+        const int EmptyActive = 0;
+
         lock (sync)
         {
             active--;
-            if (active == 0 && shutdownStarted)
+            if (active == EmptyActive && shutdownStarted)
             {
                 drained.TrySetResult();
             }
@@ -163,12 +167,16 @@ internal sealed class ReplicaDiscoveryLifetime : IAsyncDisposable
 
     internal static void ThrowIfAny(List<Exception> failures)
     {
-        if (failures.Count == 1)
+        const int EmptyFailuresCount = 1;
+        const int IndexEmptyCount = 0;
+        const int FailuresCountValidationBoundary = 1;
+
+        if (failures.Count == EmptyFailuresCount)
         {
-            ExceptionDispatchInfo.Capture(failures[0]).Throw();
+            ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();
         }
 
-        if (failures.Count > 1)
+        if (failures.Count > FailuresCountValidationBoundary)
         {
             throw new AggregateException(failures);
         }

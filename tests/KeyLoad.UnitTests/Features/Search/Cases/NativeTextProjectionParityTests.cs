@@ -18,8 +18,8 @@ internal sealed class NativeTextProjectionParityTests
         using var database = new TestDatabase();
         SeedCorpus(database);
         using var projection = CreateProjection(database);
-        var oracle = new SearchEngine(database.Database);
-        var native = new SearchEngine(database.Database, projection);
+        var oracle = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var native = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var token = TestContext.Current!.Execution.CancellationToken;
         var textRequest = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
         var hybridRequest = textRequest with
@@ -60,9 +60,9 @@ internal sealed class NativeTextProjectionParityTests
         SeedCorpus(database);
         using var projection = CreateProjection(database, _ => tokenHash);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
-        var expected = await new SearchEngine(database.Database).SearchAsync("root", request,
+        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
-        var actual = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
+        var actual = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
         await AssertEquivalentAsync(expected, actual);
@@ -88,8 +88,8 @@ internal sealed class NativeTextProjectionParityTests
     }
 
     private static NativeTextProjection CreateProjection(TestDatabase database, Func<string, ulong>? tokenHash = null)
-        => new(Path.Combine(database.Directory, "native-text"), database.Database.Limits,
-            database.Store.Identity.NodeId, tokenHash);
+        => new(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            database.Store.Identity.NodeId, UnitNativeTextOptions.Execution(), tokenHash);
 
     private static string CurrentGeneration(TestDatabase database)
         => Directory.EnumerateDirectories(Path.Combine(database.Directory, "native-text"))

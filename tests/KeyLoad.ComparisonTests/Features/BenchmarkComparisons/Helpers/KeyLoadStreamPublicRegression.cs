@@ -60,7 +60,7 @@ internal static class KeyLoadStreamPublicRegression
             GraphFanOut = 1,
             GraphDepth = 1
         };
-        var dataset = new BenchmarkDataset(options);
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         await target.InitializeAsync(dataset, cancellationToken);
         await using var session = await target.OpenSessionAsync(cancellationToken);
         await AssertEventAsync(await session.ReadEventAsync(dataset.Documents[SeededDocumentIndex], cancellationToken),

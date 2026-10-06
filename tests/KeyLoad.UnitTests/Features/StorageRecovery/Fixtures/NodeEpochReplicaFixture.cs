@@ -32,7 +32,7 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
         Directory.CreateDirectory(root);
         CanonicalStore = Open(CanonicalDirectory);
         ReplicaStore = Open(ReplicaDirectory);
-        Database = new(CanonicalStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        Database = new(CanonicalStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         if (publishSnapshot)
         { SourceCut = CreateSourceMetadataAndPointer(); }
         else
@@ -54,7 +54,7 @@ internal sealed class NodeEpochReplicaFixture : IDisposable
     internal byte[] SourceImageBytes { get; } = [0x53, 0x52, 0x43];
 
     internal ReplicaSnapshotUpgradePlan Preflight()
-        => ReplicaSnapshotFormatUpgrade.Preflight(Database, ReplicaStore, Configuration, SourceSnapshots, _ => SourceCut);
+        => ReplicaSnapshotFormatUpgrade.Preflight(Database, ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(Configuration), SourceSnapshots, _ => SourceCut, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution());
 
     internal StorageSnapshot Convert(string _, string destination)
         => CanonicalStore.CreateSnapshot(destination, SourceCut.AppliedPosition);

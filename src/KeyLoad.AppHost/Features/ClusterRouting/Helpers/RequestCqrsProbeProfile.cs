@@ -7,6 +7,8 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 /// <summary>Admits the private per-voter phase-control mount only for an ephemeral RF3 host.</summary>
 internal sealed class RequestCqrsProbeProfile
 {
+    private const int ThirdVoterIndex = 2;
+
     private const string DiscoveryCaptureVoter = "node1";
 
     internal const string Section = "KeyLoadTests:RequestCqrsProbe";
@@ -42,7 +44,7 @@ internal sealed class RequestCqrsProbeProfile
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
         ArgumentNullException.ThrowIfNull(images);
         ValidateImages(images, settings.DiscoveryCaptureMode);
-        var nodeRoots = RequestCqrsProbeProfilePaths.Validate(settings.Root, settings.SessionId, dataRoot);
+        var nodeRoots = RequestCqrsProbeProfilePaths.Validate(settings.Root, settings.SessionId, dataRoot, AppHostOptionsRegistration.Get(builder).RequestProbeFiles);
         return new(settings.SessionId, settings.DiscoveryCaptureMode, nodeRoots);
     }
 
@@ -72,7 +74,7 @@ internal sealed class RequestCqrsProbeProfile
         if (string.IsNullOrWhiteSpace(reference))
         { throw new InvalidOperationException(InvalidConfiguration); }
         var second = images[voters[ValidateImagesIndexValue]].Reference;
-        var third = images[voters[2]].Reference;
+        var third = images[voters[ThirdVoterIndex]].Reference;
         var sameImage = string.Equals(second, reference, StringComparison.Ordinal)
             && string.Equals(third, reference, StringComparison.Ordinal);
         var exactMixed = discoveryCaptureMode == MixedMode

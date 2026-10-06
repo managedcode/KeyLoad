@@ -1,11 +1,14 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server.Features.Search;
 
-internal sealed class NativeTextPathAccess(string root, string leaf, Guid sourceNodeId)
+internal sealed class NativeTextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<NativeTextExecutionOptions> executionOptions)
 {
     private readonly Lock gate = new();
 
     internal string Resolve(string path)
     {
+        const int EmptyFileGetAttributesFullFileAttributesReparsePoint = 0;
+
         var full = Path.GetFullPath(path);
         var nativeRoot = Path.GetFullPath(Path.Combine(root, leaf, NativeTextProtocol.NativeDirectory));
         if (!NativeTextPath.IsWithin(nativeRoot, full))
@@ -15,7 +18,7 @@ internal sealed class NativeTextPathAccess(string root, string leaf, Guid source
         NativeTextPath.VerifyContainedAncestors(nativeRoot, full);
         try
         {
-            if ((File.GetAttributes(full) & FileAttributes.ReparsePoint) != 0)
+            if ((File.GetAttributes(full) & FileAttributes.ReparsePoint) != EmptyFileGetAttributesFullFileAttributesReparsePoint)
             {
                 throw NativeTextErrors.Ownership();
             }
@@ -31,7 +34,7 @@ internal sealed class NativeTextPathAccess(string root, string leaf, Guid source
 
     internal void Require(string path, bool directory)
     {
-        NativeTextFiles.RequireNativePath(root, leaf, sourceNodeId, path, directory);
+        NativeTextFiles.RequireNativePath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions);
         if (directory)
         {
             NativeTextFileIO.VerifyDirectory(path);
@@ -46,7 +49,7 @@ internal sealed class NativeTextPathAccess(string root, string leaf, Guid source
     {
         lock (gate)
         {
-            NativeTextFiles.TrackNativePath(root, leaf, sourceNodeId, path, directory);
+            NativeTextFiles.TrackNativePath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions);
         }
     }
 

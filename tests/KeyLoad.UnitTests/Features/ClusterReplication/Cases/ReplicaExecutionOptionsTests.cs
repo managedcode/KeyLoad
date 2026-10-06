@@ -1,4 +1,5 @@
 using KeyLoad.Replication;
+using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
@@ -48,6 +49,55 @@ internal sealed class ReplicaExecutionOptionsTests
         await Assert.That(fixture.Database.LastApplied).IsEqualTo((long)AppliedEntries);
         await Assert.That(fixture.Log.State.CommittedIndex).IsEqualTo((long)AppliedEntries);
         await Assert.That(fixture.Configuration.MaxAppendEntries).IsEqualTo(SingleAppendEntry);
+    }
+
+    /// <summary>A stalled native canonical flush coalesces many commit notifications and still applies the complete durable prefix.</summary>
+    [Test]
+    public async Task CoalescedWakeSignalsDrainAllCommittedEntriesAfterNativeFlushResumes()
+    {
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var release = new ManualResetEventSlim();
+        var intercepted = 0;
+        void Observe(CommitStage stage, long position, int mutation)
+        {
+            if (stage != CommitStage.JournalFlushed || Interlocked.CompareExchange(ref intercepted, SingleAppendEntry, 0) != 0)
+            {
+                return;
+            }
+            entered.SetResult();
+            if (!release.Wait(TimeSpan.FromSeconds(ApplyTimeoutSeconds)))
+            {
+                throw new TimeoutException("The test-owned native canonical flush was not released.");
+            }
+        }
+
+        await using var fixture = new ReplicaLifecycleFixture(maximumAppendEntries: SingleAppendEntry,
+            canonicalObserver: Observe);
+        var caller = TestContext.Current!.Execution.CancellationToken;
+        fixture.Log.SaveTermAndVote(CurrentTerm, fixture.Configuration.LocalId);
+        for (var index = SingleAppendEntry; index <= AppliedEntries; index++)
+        {
+            fixture.Log.Append([new(index, CurrentTerm, null)]);
+        }
+        try
+        {
+            fixture.Materializer.Commit(SingleAppendEntry);
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), caller);
+            for (var index = SingleAppendEntry + SingleAppendEntry; index <= AppliedEntries; index++)
+            {
+                fixture.Materializer.Commit(index);
+            }
+            await Assert.That(fixture.Log.State.CommittedIndex).IsEqualTo((long)AppliedEntries);
+        }
+        finally
+        {
+            release.Set();
+        }
+
+        await fixture.Materializer.WaitForApplyAsync(AppliedEntries, caller)
+            .WaitAsync(TimeSpan.FromSeconds(ApplyTimeoutSeconds), caller);
+        await Assert.That(fixture.Database.LastApplied).IsEqualTo((long)AppliedEntries);
+        await Assert.That(intercepted).IsEqualTo(SingleAppendEntry);
     }
 
     /// <summary>Invalid native options are rejected by the actual owner before canonical recovery or worker publication.</summary>

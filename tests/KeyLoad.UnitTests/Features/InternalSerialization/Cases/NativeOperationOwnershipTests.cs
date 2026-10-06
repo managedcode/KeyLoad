@@ -49,7 +49,7 @@ internal sealed class NativeOperationOwnershipTests
     {
         using var database = new TestDatabase();
         var operation = NativeAuthorityFixture.Create(database);
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits with { MaxBatchBytes = operation.NativePayload.Length - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits with { MaxBatchBytes = operation.NativePayload.Length - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var before = database.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.VerifyOperationAuthority(operation));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);

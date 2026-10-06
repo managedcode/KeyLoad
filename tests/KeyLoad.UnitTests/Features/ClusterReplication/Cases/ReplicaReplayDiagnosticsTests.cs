@@ -27,8 +27,7 @@ internal sealed class ReplicaReplayDiagnosticsTests
         using var fixture = new ReplicaSecurityFixture();
         using var capture = new ReplicaReplayLogCapture();
         using var factory = LoggerFactory.Create(builder => builder.AddProvider(capture));
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, fixture.Options,
-            fixture.Discovery, TimeProvider.System, factory.CreateLogger<ReplicaEnvelopeAuthenticator>());
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, fixture.Options,             fixture.Discovery, TimeProvider.System, factory.CreateLogger<ReplicaEnvelopeAuthenticator>(), UnitRoutingOptions.Replay());
         var request = fixture.Request(ReplicaRpc.ReadProbe,
             new AppendRequest(ReplicaSecurityFixture.VoterA, 1, 0, 0, 0, []));
         receiver.VerifyRequest(request);
@@ -57,8 +56,7 @@ internal sealed class ReplicaReplayDiagnosticsTests
         using var fixture = new ReplicaSecurityFixture();
         using var capture = new ReplicaReplayLogCapture();
         using var factory = LoggerFactory.Create(builder => builder.AddProvider(capture));
-        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, fixture.Options,
-            fixture.Discovery, TimeProvider.System, factory.CreateLogger<ReplicaEnvelopeAuthenticator>());
+        using var receiver = new ReplicaEnvelopeAuthenticator(fixture.Configuration, fixture.Options,             fixture.Discovery, TimeProvider.System, factory.CreateLogger<ReplicaEnvelopeAuthenticator>(), UnitRoutingOptions.Replay());
         var request = fixture.Read();
         receiver.VerifyRequest(request);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => receiver.VerifyRequest(request)).Code)

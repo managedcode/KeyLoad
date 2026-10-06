@@ -23,13 +23,15 @@ internal sealed class ReplicaCohortAdmission
     {
         get
         {
+            const int CompatibleInitialValue = 1;
+
             var local = observations.ReadLocal();
             if (!local.Compatible)
             {
                 return false;
             }
 
-            var compatible = 1;
+            var compatible = CompatibleInitialValue;
             foreach (var voterId in configuration.VoterIds)
             {
                 if (voterId == configuration.LocalId || !observations.TryFresh(voterId, out var observation))
@@ -54,6 +56,8 @@ internal sealed class ReplicaCohortAdmission
 
     internal async Task EnsureCompatibleCohortAsync(CancellationToken cancellationToken)
     {
+        const int CompatibleInitialValue = 1;
+
         cancellationToken.ThrowIfCancellationRequested();
         var local = observations.ReadLocal();
         if (!local.TransportReady)
@@ -66,7 +70,7 @@ internal sealed class ReplicaCohortAdmission
             throw Incompatible();
         }
 
-        var compatible = 1;
+        var compatible = CompatibleInitialValue;
         var incompatible = false;
         foreach (var voterId in configuration.VoterIds)
         {

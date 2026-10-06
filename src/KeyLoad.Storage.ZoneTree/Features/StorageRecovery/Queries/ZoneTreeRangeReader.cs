@@ -16,7 +16,7 @@ internal static class ZoneTreeRangeReader
         byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken, bool reverse = false)
     {
         runtime.ReadCounters.RangeAttempt();
-        Validate(prefix, maxRecords, visitor, cancellationToken, runtime.Options.MaximumRangeRecords);
+        Validate(prefix, maxRecords, visitor, runtime.Options.MaximumRangeRecords, cancellationToken);
         var lower = afterKey is not null && BinaryKeyComparer.Instance.Compare(afterKey, prefix) > EqualKeys ? afterKey : prefix;
         var prefixSuccessor = reverse ? ZoneTreeRangeBounds.PrefixSuccessor(prefix) : null;
         if ((untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= EqualKeys)
@@ -27,8 +27,8 @@ internal static class ZoneTreeRangeReader
         }
 
         var upper = reverse ? ZoneTreeRangeBounds.Minimum(untilKey, prefixSuccessor) : untilKey;
-        var work = new ZoneTreeRangeWork(runtime.ReadCounters, observer, cancellationToken,
-            runtime.Options.MaximumRangeRecords, runtime.Options.MaximumRangeWorkBytes);
+        var work = new ZoneTreeRangeWork(runtime.ReadCounters, observer, runtime.Options.MaximumRangeRecords,
+            runtime.Options.MaximumRangeWorkBytes, cancellationToken);
         using var baseline = new ZoneTreeBaselineCursor(runtime.Tree, lower, upper, prefix, afterKey, untilKey, work, reverse);
         using var staged = new ZoneTreeStagedCursor(changes, lower, upper, prefix, afterKey, untilKey, work, reverse);
         return VisitMerged(baseline, staged, work, maxRecords, visitor, reverse);
@@ -96,7 +96,7 @@ internal static class ZoneTreeRangeReader
     }
 
     private static void Validate(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
-        CancellationToken cancellationToken, int maximumRecords)
+        int maximumRecords, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(visitor);

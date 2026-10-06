@@ -6,6 +6,9 @@ namespace KeyLoad.Orleans;
 
 internal static class NativeSagaTimeoutEligibility
 {
+    private const string InconsistentSagaDetail = "Persisted saga state is inconsistent.";
+    private const string InconsistentTimeoutDetail = "Persisted saga timeout state is inconsistent.";
+
     internal static NativeSagaTimeoutState Read(DatabaseEngine database, DueWorkHint hint, DateTimeOffset now)
         => database.Store.Read(view => Read(view, database, hint, now));
 
@@ -19,12 +22,13 @@ internal static class NativeSagaTimeoutEligibility
         }
 
         if (record.Lane is null || record.CreatorPrincipalId is null || record.SagaId != hint.Id
-            || record.Lane != hint.Lane || record.Revision < 1 || !Enum.IsDefined(record.Phase)
+            || record.Lane != hint.Lane || record.Revision < DueCoordinatorFields.FirstRevision
+            || !Enum.IsDefined(record.Phase)
             || record.StateJson is null || (record.Deadline is null) != (record.Timeout is null)
             || record.Phase == SagaPhase.TimedOut && record.Deadline is null
             || record.Phase is SagaPhase.Completed or SagaPhase.Cancelled && record.Deadline is not null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "Persisted saga state is inconsistent.");
+            throw Errors.Fail(ErrorCode.Corruption, InconsistentSagaDetail);
         }
 
         _ = JsonData.Validate(record.StateJson, database.Limits);
@@ -33,7 +37,7 @@ internal static class NativeSagaTimeoutEligibility
             if (timeout.Queue is null || timeout.Queue.Partition != hint.Lane.Partition
                 || timeout.Queue.Queue is null)
             {
-                throw Errors.Fail(ErrorCode.Corruption, "Persisted saga timeout state is inconsistent.");
+                throw Errors.Fail(ErrorCode.Corruption, InconsistentTimeoutDetail);
             }
             JsonData.Identifier(timeout.Queue.Queue);
         }

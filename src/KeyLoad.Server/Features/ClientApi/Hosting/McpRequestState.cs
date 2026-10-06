@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using ModelContextProtocol.Protocol;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -8,6 +9,8 @@ internal sealed class McpRequestState : IDisposable
 {
     private readonly McpRequestAdmission admission;
     private readonly int capacity;
+    private readonly IOptions<McpExecutionOptions> options;
+    private readonly McpExecutionOptions settings;
     private readonly List<McpReplyOwner> replies = [];
     private ReadOnlyMemory<byte> authentication;
     private McpFrameShape authenticationShape;
@@ -15,10 +18,12 @@ internal sealed class McpRequestState : IDisposable
     private bool disposed;
 
     internal McpRequestState(HttpAdmissionGovernor governor, McpMemoryBudget memory, int capacity,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IOptions<McpExecutionOptions> options)
     {
         this.capacity = capacity;
-        admission = new(governor, memory, capacity, cancellationToken);
+        this.options = options;
+        settings = options.Value;
+        admission = new(governor, memory, capacity, cancellationToken, options);
     }
 
     /// <summary>Gets the current database-resolved principal; native sessions cannot cache it.</summary>
@@ -31,15 +36,16 @@ internal sealed class McpRequestState : IDisposable
     internal int MaximumPayloadBytes => admission.MaximumPayloadBytes;
     /// <summary>Gets the classified canonical result bound.</summary>
     internal int MaximumReplyBytes => admission.MaximumReplyBytes;
+    internal IOptions<McpExecutionOptions> ExecutionOptions => options;
 
     /// <summary>Grows authentication ownership before creating the actual persisted principal DTO.</summary>
     internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
     {
         admission.CoverAuthenticationScan(capacity, reply.Length, cancellationToken);
-        authenticationShape = McpNativeAuthentication.Inspect(reply.Span, cancellationToken);
+        authenticationShape = McpNativeAuthentication.Inspect(reply.Span, cancellationToken, options);
         admission.CoverAuthentication(capacity, reply.Length, authenticationShape, cancellationToken);
         authentication = reply;
-        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(reply.Span, cancellationToken);
+        Principal = McpNativeAuthentication.ReadAdmittedPrincipal(reply.Span, cancellationToken, options);
     }
 
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>
@@ -55,8 +61,10 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Admits one raw native message before typed parameter conversion.</summary>
     internal void Admit(McpGatewayMetaSelection selection, CancellationToken cancellationToken)
     {
+        const int BodyWireBytesValidationBoundary = 0;
+
         var descriptor = selection.CanonicalOperation;
-        var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? 0,
+        var input = new McpInputMemory(body?.RetainedCapacity ?? capacity, body?.WireBytes ?? BodyWireBytesValidationBoundary,
             body?.Shape ?? default,
             0, authentication.Length, authenticationShape);
         admission.Acquire(Principal, descriptor, input, cancellationToken);
@@ -68,10 +76,10 @@ internal sealed class McpRequestState : IDisposable
     internal CallToolResult Success(DispatchedOperationReply reply, CancellationToken cancellationToken)
     {
         admission.CoverReplyScan(reply.Payload.Length, cancellationToken);
-        var shape = McpFrameBounds.InspectReply(reply.Payload.Span, MaximumReplyBytes);
+        var shape = McpFrameBounds.InspectReply(reply.Payload.Span, MaximumReplyBytes, options);
         admission.CoverReply(reply.Payload.Length, shape, cancellationToken);
         var owner = McpReplyOwner.Success(reply.Payload, reply.RequestId,
-            checked(reply.Payload.Length + McpFramingProtocol.EnvelopeAllowanceBytes));
+            checked(reply.Payload.Length + settings.EnvelopeAllowanceBytes), options);
         replies.Add(owner);
         return owner.ToolResult();
     }
@@ -83,10 +91,10 @@ internal sealed class McpRequestState : IDisposable
         try
         {
             admission.CoverReplyScan(canonical.Length, cancellationToken);
-            var shape = McpFrameBounds.InspectReply(canonical, MaximumReplyBytes);
+            var shape = McpFrameBounds.InspectReply(canonical, MaximumReplyBytes, options);
             admission.CoverReply(canonical.Length, shape, cancellationToken);
             var owner = McpReplyOwner.Success(canonical, null,
-                checked(canonical.Length + McpFramingProtocol.EnvelopeAllowanceBytes));
+                checked(canonical.Length + settings.EnvelopeAllowanceBytes), options);
             var retained = false;
             try
             {
@@ -107,7 +115,7 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Creates only fixed safe error content, retaining null or actual execution identity.</summary>
     internal CallToolResult Failure(ErrorCode code, Guid? requestId)
     {
-        var owner = McpReplyOwner.Failure(code, requestId, McpFramingProtocol.MaximumControlReplyBytes);
+        var owner = McpReplyOwner.Failure(code, requestId, settings.MaximumControlReplyBytes);
         replies.Add(owner);
         return owner.ToolResult();
     }

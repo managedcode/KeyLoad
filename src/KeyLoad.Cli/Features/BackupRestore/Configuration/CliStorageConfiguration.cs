@@ -46,7 +46,8 @@ internal static class CliStorageConfiguration
     {
         var values = propertyNames.Select(name => new KeyValuePair<string, string?>(name,
             Environment.GetEnvironmentVariable(prefix + name.ToUpperInvariant())));
-        using var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        using var configurationLifetime = configuration as IDisposable;
         var options = new OptionsManager<T>(new OptionsFactory<T>(
             [new ConfigureFromConfigurationOptions<T>(configuration)], [],
             [new ValidateOptions<T>(Options.DefaultName, validate, message)]));

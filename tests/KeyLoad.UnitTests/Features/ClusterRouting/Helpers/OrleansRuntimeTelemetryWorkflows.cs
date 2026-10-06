@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
 
@@ -72,7 +71,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         await Assert.That(record).IsNotNull();
         await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
         await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);
-        return [createReply.Parent, new(parent.TraceId, parent.SpanId)];
+        return [createReply.Parent, new OrleansTelemetryOperationParent(parent.TraceId, parent.SpanId)];
     }
 
     private static async Task<(GrainOperationReply Reply, OrleansTelemetryOperationParent Parent)> WriteWithParentAsync(
@@ -88,7 +87,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
             commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
         await AssertDocumentRevisionAsync(fixture, id, 1);
-        return (reply, new(parent.TraceId, parent.SpanId));
+        return (reply, new OrleansTelemetryOperationParent(parent.TraceId, parent.SpanId));
     }
 
     private static async Task FailRevokedWriteAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal)

@@ -7,11 +7,16 @@ namespace KeyLoad.Query;
 
 internal static class GraphSearchExecutor
 {
+    private const int EmptyElementCount = 0;
+    private const double DefaultBranchWeight = 1d;
+    private const int AdjacentElementOffset = 1;
+    private const int ZeroScore = 0;
+
     internal static GraphSearchResult Execute(DatabaseEngine database, ITextProjection? textProjection,
-        string principalId, GraphSearchRequest request, ReadExecutionBudget budget)
+        string principalId, GraphSearchRequest request, ReadExecutionBudget budget, QueryExecutionOptions execution)
     {
         budget.Check();
-        GraphSearchValidation.Validate(request, database.Limits, budget, database.GraphExecution);
+        GraphSearchValidation.Validate(request, database.Limits, budget, database.GraphExecution, execution);
         FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
         FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, database.Limits, budget);
         var similarity = request.Search.Vector is { } vector
@@ -19,18 +24,19 @@ internal static class GraphSearchExecutor
         var eligibility = FilteredSearchEligibility.Create(request.Search.AllowedIds, budget);
         return database.WithQueryView(principalId, request.Search.Partition, request.Search.Collection,
             (view, principal, resource) => ExecuteInCut(database, textProjection, principal, resource, view,
-                request, similarity, eligibility, budget));
+                request, similarity, eligibility, budget, execution));
     }
 
     private static GraphSearchResult ExecuteInCut(DatabaseEngine database, ITextProjection? textProjection,
         PrincipalRecord principal, ResourceDefinition resource, IKeyValueView view, GraphSearchRequest request,
-        PreparedSimilarity? similarity, FilteredSearchEligibility eligibility, ReadExecutionBudget budget)
+        PreparedSimilarity? similarity, FilteredSearchEligibility eligibility, ReadExecutionBudget budget,
+        QueryExecutionOptions execution)
     {
         AuthorizeBranches(database, principal, resource, request.Search, similarity);
         var scoped = request.Scope is null ? null : ReadWalk(database, view, principal, request.Search.Partition,
             request.Scope.Walk, budget);
         var fusion = new SearchRankFusion(request.Search.FusionConstant, request.Search.Limit, budget);
-        AddTextBranch(database, textProjection, principal, resource, view, request.Search, eligibility, scoped, fusion, budget);
+        AddTextBranch(database, textProjection, principal, resource, view, request.Search, eligibility, scoped, fusion, budget, execution);
         AddVectorBranch(database, principal, view, request.Search, similarity, eligibility, scoped, fusion, budget);
         AddRetrieverBranch(database, principal, view, request, scoped, eligibility, fusion, budget);
         var selected = fusion.Select();
@@ -59,14 +65,14 @@ internal static class GraphSearchExecutor
     private static void AddTextBranch(DatabaseEngine database, ITextProjection? textProjection,
         PrincipalRecord principal, ResourceDefinition resource, IKeyValueView view, SearchRequest search,
         FilteredSearchEligibility eligibility, HashSet<EntityRef>? scoped, SearchRankFusion fusion,
-        ReadExecutionBudget budget)
+        ReadExecutionBudget budget, QueryExecutionOptions execution)
     {
         if (search.Text is null || eligibility.IsEmpty)
         {
             return;
         }
-        var branch = SearchBranchExecution.RankText(database, textProjection, view, principal, resource, search, budget);
-        if (search.TextWeight > 0)
+        var branch = SearchBranchExecution.RankText(database, textProjection, view, principal, resource, search, budget, execution);
+        if (search.TextWeight > EmptyElementCount)
         {
             fusion.AddBranch(FilterScope(FilteredSearchBranch.Apply(branch, eligibility, budget), scoped, budget),
                 search.TextWeight);
@@ -82,7 +88,7 @@ internal static class GraphSearchExecutor
             return;
         }
         var branch = VectorRanker.Rank(database, view, principal, search, similarity, budget, eligibility);
-        if (search.VectorWeight > 0)
+        if (search.VectorWeight > EmptyElementCount)
         {
             fusion.AddBranch(FilterScope(branch, scoped, budget), search.VectorWeight);
         }
@@ -105,11 +111,11 @@ internal static class GraphSearchExecutor
             if (item.Reference.Collection == request.Search.Collection && eligibility.Allows(item.Reference.Id)
                 && (scoped is null || scoped.Contains(item.Reference)))
             {
-                candidates.Add(new(item.Reference, 1d / (1 + item.ShortestHops)));
+                candidates.Add(new(item.Reference, DefaultBranchWeight / (AdjacentElementOffset + item.ShortestHops)));
             }
         }
         candidates.Sort(GraphRetrieverOrder.Instance);
-        if (request.Retriever.Weight > 0)
+        if (request.Retriever.Weight > ZeroScore)
         {
             fusion.AddBranch([.. candidates], request.Retriever.Weight);
         }
@@ -153,17 +159,19 @@ internal static class GraphSearchExecutor
 
     private sealed class GraphRetrieverOrder : IComparer<SearchScore>
     {
+        private const int EqualOrder = 0;
+
         internal static GraphRetrieverOrder Instance { get; } = new();
 
         public int Compare(SearchScore left, SearchScore right)
         {
             var score = right.Score.CompareTo(left.Score);
-            if (score != 0)
+            if (score != EqualOrder)
             {
                 return score;
             }
             var collection = StringComparer.Ordinal.Compare(left.Reference.Collection, right.Reference.Collection);
-            return collection != 0 ? collection : StringComparer.Ordinal.Compare(left.Reference.Id, right.Reference.Id);
+            return collection != EqualOrder ? collection : StringComparer.Ordinal.Compare(left.Reference.Id, right.Reference.Id);
         }
     }
 }

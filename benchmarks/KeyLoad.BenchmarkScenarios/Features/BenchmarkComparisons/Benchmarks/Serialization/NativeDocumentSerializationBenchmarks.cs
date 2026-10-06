@@ -5,10 +5,12 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Measures full native and historical typed JSON serialization of document results.</summary>
 [MemoryDiagnoser]
-[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 2, warmupCount: 3, iterationCount: 6, id: "NativeSerialization")]
+[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 2, warmupCount: 3, iterationCount: 6, id: nameof(NativeSerialization))]
 [IterationTime(200)]
 public class NativeDocumentSerializationBenchmarks
 {
+    private const string RequireStateFailureMessage = "The native serialization fixture is not initialized.";
+
     private NativeSerializationBenchmarkState<DocumentResult>? state;
 
     /// <summary>Gets or sets the exact UTF-8 byte length of the embedded document JSON; envelope overhead is additional.</summary>
@@ -19,12 +21,14 @@ public class NativeDocumentSerializationBenchmarks
     [GlobalSetup]
     public void Setup()
     {
+        const string SetupFailureMessage = "The native serialization fixture is already initialized.";
+
         if (state is not null)
         {
-            throw new InvalidOperationException("The native serialization fixture is already initialized.");
+            throw new InvalidOperationException(SetupFailureMessage);
         }
         var candidate = new NativeSerializationBenchmarkState<DocumentResult>(NativeSerializationBenchmarkCorpus.Document(PayloadBytes));
-        NativeSerializationBenchmarkManifest.Write(nameof(NativeDocumentSerializationBenchmarks), PayloadBytes, candidate);
+        NativeSerializationBenchmarkManifest.Write(nameof(NativeDocumentSerializationBenchmarks), PayloadBytes, candidate, BenchmarkArtifactRegistration.ReadNativeSerialization());
         state = candidate;
     }
 
@@ -53,5 +57,5 @@ public class NativeDocumentSerializationBenchmarks
     public void Cleanup() => state = null;
 
     private NativeSerializationBenchmarkState<DocumentResult> RequireState()
-        => state ?? throw new InvalidOperationException("The native serialization fixture is not initialized.");
+        => state ?? throw new InvalidOperationException(RequireStateFailureMessage);
 }

@@ -7,16 +7,16 @@ namespace KeyLoad.Server;
 /// <summary>Immutable version-one metadata and typed decoder for one canonical public operation.</summary>
 internal sealed record McpOperationDescriptor
 {
-    private readonly Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation> decoder;
+    private readonly Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation>? decoder;
 
     internal McpOperationDescriptor(string name, string route, GrainReadKind? readKind, OperationKind? commandKind,
         string description, JsonElement inputSchema, JsonElement outputSchema, McpToolHints hints,
-        Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation> decoder, bool adapter = false)
+        Func<IDictionary<string, JsonElement>?, int, McpDecodedOperation>? decoder, bool adapter = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(route);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
-        ArgumentNullException.ThrowIfNull(decoder);
+        if (!adapter) { ArgumentNullException.ThrowIfNull(decoder); }
         if (adapter ? readKind.HasValue || commandKind.HasValue : readKind.HasValue == commandKind.HasValue)
         {
             throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(readKind));
@@ -66,7 +66,8 @@ internal sealed record McpOperationDescriptor
         int maximumPayloadBytes = ServerProtocol.KestrelMaximumBodyBytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumPayloadBytes);
-        return decoder(arguments, maximumPayloadBytes);
+        return decoder is { } contextualDecoder ? contextualDecoder(arguments, maximumPayloadBytes)
+            : throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
     }
 
     /// <summary>Creates fresh native mutable discovery metadata without exposing shared mutable tools.</summary>

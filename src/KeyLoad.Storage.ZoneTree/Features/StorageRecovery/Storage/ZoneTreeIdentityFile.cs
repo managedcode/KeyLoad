@@ -12,7 +12,7 @@ internal static class ZoneTreeIdentityFile
         var path = Path.Combine(options.Directory, IdentityFileName);
         if (File.Exists(path))
         {
-            var existing = Read(path);
+            var existing = Read(path, options.MaximumIdentityFileBytes);
             Validate(existing, options);
             return existing;
         }
@@ -23,7 +23,7 @@ internal static class ZoneTreeIdentityFile
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
             DurabilityProfile.ProcessDurable);
         Validate(identity, options);
-        Write(path, identity);
+        Write(path, identity, options.IdentityBufferBytes);
 
         return identity;
     }
@@ -51,7 +51,7 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity OpenExisting(ZoneTreeStoreOptions options, Guid expectedNodeId)
     {
-        var identity = Read(Path.Combine(options.Directory, IdentityFileName));
+        var identity = Read(Path.Combine(options.Directory, IdentityFileName), options.MaximumIdentityFileBytes);
         Validate(identity, options);
         if (identity.FormatVersion != CurrentDataEpoch)
         {
@@ -80,9 +80,9 @@ internal static class ZoneTreeIdentityFile
         }
     }
 
-    internal static StoreIdentity Read(string path)
+    internal static StoreIdentity Read(string path, int maximumIdentityBytes)
     {
-        var bytes = ZoneTreeMetadataFile.Read(path, MaximumIdentityFileBytes, IdentityFormatUnsupported);
+        var bytes = ZoneTreeMetadataFile.Read(path, maximumIdentityBytes, IdentityFormatUnsupported);
         return Read(bytes.Span);
     }
 
@@ -110,14 +110,14 @@ internal static class ZoneTreeIdentityFile
         return identity;
     }
 
-    internal static void Write(string path, StoreIdentity identity)
+    internal static void Write(string path, StoreIdentity identity, int identityBufferBytes)
     {
         var payload = NativeSerialization.Serialize(identity);
         var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeIdentityReaderContract.WriteMagic(identity));
         var temporary = path + TemporaryFileSuffix;
         using (var file = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None,
-            IdentityBufferBytes, FileOptions.WriteThrough))
+            identityBufferBytes, FileOptions.WriteThrough))
         {
             file.Write(bytes);
             file.Flush(true);

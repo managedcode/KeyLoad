@@ -13,7 +13,7 @@ internal sealed class RequestCqrsProbeAppHostPathTests
     {
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
         {
-            var nodes = RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot);
+            var nodes = RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles());
             await Assert.That(nodes.Count).IsEqualTo(3);
             foreach (var voter in new[] { "node1", "node2", "node3" })
             {
@@ -31,13 +31,13 @@ internal sealed class RequestCqrsProbeAppHostPathTests
         {
             var nestedData = Path.Combine(fixture.Root, "data");
             Directory.CreateDirectory(nestedData);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, nestedData));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, nestedData, UnitProfileOptions.ProbeFiles()));
             Directory.Delete(nestedData);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.Parent));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.Parent, UnitProfileOptions.ProbeFiles()));
             var extra = Path.Combine(fixture.Root, "extra");
             Directory.CreateDirectory(extra);
             RequestCqrsProbeAppHostNativeFiles.SetMode(extra, PrivateDirectory);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             Directory.Delete(extra);
         });
     }
@@ -52,13 +52,13 @@ internal sealed class RequestCqrsProbeAppHostPathTests
             var outside = Path.Combine(fixture.Parent, "outside-owner.json");
             await File.WriteAllTextAsync(outside, "{}", CancellationToken.None);
             File.CreateSymbolicLink(owner, outside);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             File.Delete(owner);
             Directory.CreateDirectory(owner);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             Directory.Delete(owner);
             RequestCqrsProbeAppHostNativeFiles.CreateFifo(owner);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             File.Delete(owner);
         });
     }
@@ -70,12 +70,12 @@ internal sealed class RequestCqrsProbeAppHostPathTests
         {
             var node = fixture.Node("node2");
             RequestCqrsProbeAppHostNativeFiles.SetMode(node, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             RequestCqrsProbeAppHostNativeFiles.SetMode(node, PrivateDirectory);
             fixture.WriteOwner("node2", session: "00000000000000000000000000000001");
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             fixture.WriteOwner("node2", ownerVoter: "http://other:8080");
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
         });
     }
 
@@ -86,15 +86,15 @@ internal sealed class RequestCqrsProbeAppHostPathTests
         {
             var owner = fixture.Owner("node1");
             File.Delete(owner);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             fixture.WriteOwner("node1");
             RequestCqrsProbeAppHostNativeFiles.SetMode(owner, UnixFileMode.UserRead);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
             RequestCqrsProbeAppHostNativeFiles.SetMode(owner, PrivateFile);
             fixture.WriteOwner("node1");
             await File.WriteAllTextAsync(owner, "{} {} ", CancellationToken.None);
             RequestCqrsProbeAppHostNativeFiles.SetMode(owner, PrivateFile);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
         });
     }
 
@@ -104,9 +104,9 @@ internal sealed class RequestCqrsProbeAppHostPathTests
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
         {
             fixture.WriteOwner("node1", bytes: 8_192);
-            await Assert.That(RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot).Count).IsEqualTo(3);
+            await Assert.That(RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()).Count).IsEqualTo(3);
             fixture.WriteOwner("node1", bytes: 8_193);
-            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot));
+            await AssertRejectedAsync(() => RequestCqrsProbeProfilePaths.Validate(fixture.Root, fixture.SessionId, fixture.DataRoot, UnitProfileOptions.ProbeFiles()));
         });
     }
 

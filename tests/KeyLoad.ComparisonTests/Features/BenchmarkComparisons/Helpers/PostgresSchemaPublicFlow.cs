@@ -17,7 +17,7 @@ internal static class PostgresSchemaPublicFlow
         foreach (var dimensions in new[] { 2, 1_024 })
         {
             var options = PostgresSchemaSupport.Options(dimensions);
-            var dataset = new BenchmarkDataset(options);
+            var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
             await VerifyTargetAsync(connectionString, dimensions, dataset, cancellationToken);
         }
     }

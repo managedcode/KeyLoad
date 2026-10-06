@@ -18,10 +18,12 @@ internal static class SampleChunkTextDecoder
 
     private static string[] DecodeEventIds(SampleChunkPayload payload, ReadExecutionBudget budget)
     {
+        const int IndexInitialValue = 0;
+
         var result = new string[payload.RecordCount];
         var unique = new HashSet<string>(payload.RecordCount, StringComparer.Ordinal);
         var reader = new SampleChunkReader(payload.EventIds.Span);
-        for (var index = 0; index < result.Length; index++)
+        for (var index = IndexInitialValue; index < result.Length; index++)
         {
             budget.Check();
             var eventId = SampleChunkText.ReadFramed(ref reader, budget);
@@ -35,11 +37,13 @@ internal static class SampleChunkTextDecoder
     private static (string[] Dictionary, int[] Indexes) DecodeTags(SampleChunkPayload payload,
         ReadExecutionBudget budget)
     {
+        const int IndexInitialValue = 0;
+
         var reader = new SampleChunkReader(payload.Tags.Span);
         var count = (int)reader.ReadVarUInt();
         var dictionary = new string[count];
         var unique = new HashSet<string>(count, StringComparer.Ordinal);
-        for (var index = 0; index < dictionary.Length; index++)
+        for (var index = IndexInitialValue; index < dictionary.Length; index++)
         {
             budget.Check();
             var text = SampleChunkText.ReadFramed(ref reader, budget);
@@ -47,7 +51,7 @@ internal static class SampleChunkTextDecoder
             dictionary[index] = text;
         }
         var indexes = new int[payload.RecordCount];
-        for (var index = 0; index < indexes.Length; index++)
+        for (var index = IndexInitialValue; index < indexes.Length; index++)
         {
             budget.Check();
             indexes[index] = (int)reader.ReadVarUInt();

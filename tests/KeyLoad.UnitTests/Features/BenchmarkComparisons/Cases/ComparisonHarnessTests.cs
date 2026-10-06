@@ -24,7 +24,7 @@ internal sealed class ComparisonHarnessTests
         using var handler = new QueryFailureHandler();
         using var http = new HttpClient(handler, disposeHandler: false) { BaseAddress = new Uri("http://localhost/") };
         await using var target = new Neo4jTarget(http, Guid.NewGuid().ToString("N"), "test-image", UnitBenchmarkOptions.Lifecycle());
-        var error = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => target.InitializeAsync(new BenchmarkDataset(Small), TestContext.Current!.Execution.CancellationToken));
+        var error = await Assert.ThrowsExactlyAsync<ComparisonFailureException>(() => target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(Small)), TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.Message).IsEqualTo("Neo4j:Neo.ClientError.Statement.SyntaxError");
         await Assert.That(error!.Message).DoesNotContain("sensitive-query");
     }
@@ -45,7 +45,7 @@ internal sealed class ComparisonHarnessTests
         await using var incorrect = new ReadTarget("incorrect", wrongPayload: true);
         await using var setupFailed = new ReadTarget("setup-failed", failSetup: true);
         IComparisonTarget[] targets = [correct, incorrect, setupFailed];
-        var report = await new ComparisonRunner(options).RunAsync(targets, null, TestContext.Current!.Execution.CancellationToken);
+        var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(options), UnitBenchmarkOptions.Native()).RunAsync(targets, null, TestContext.Current!.Execution.CancellationToken);
         var good = await Assert.That(report.Cases).HasSingleItem(item => item.Target == "correct" && item.Scenario == Scenario.PointRead);
         await Assert.That(good.Measurement!.Successes).IsEqualTo(options.Operations);
         var bad = await Assert.That(report.Cases).HasSingleItem(item => item.Target == "incorrect" && item.Scenario == Scenario.PointRead);
@@ -64,7 +64,7 @@ internal sealed class ComparisonHarnessTests
     public async Task WarmupExcludedRepetitionsRetainedAndCsvContainsEveryAttempt()
     {
         await using var target = new ReadTarget("correct");
-        var report = await new ComparisonRunner(Small).RunAsync([target], "test-revision", TestContext.Current!.Execution.CancellationToken);
+        var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(Small), UnitBenchmarkOptions.Native()).RunAsync([target], "test-revision", TestContext.Current!.Execution.CancellationToken);
         await Assert.That(report.Cases.Count(item => item.Status == "measured")).IsEqualTo(Small.Repetitions);
         foreach (var item in report.Cases.Where(item => item.Measurement is not null))
         {

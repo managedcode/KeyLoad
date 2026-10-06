@@ -6,17 +6,22 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryPlanFactory
 {
+    private const int FirstElementIndex = 0;
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int EqualOrder = 0;
+
     private const int Version = 1;
     private const string InvalidPartitionsMessage = "The partition query leaf set is invalid.";
     private const string GrantBudgetMessage = "The partition query grants exceed the configured budget.";
 
     internal static PartitionQueryPlanV1 Create(AstQueryRequest request, StoreIdentity owner,
-        ImmutableArray<PartitionRef> partitions, DatabaseLimits limits)
+        ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(limits);
-        var sorted = ValidateAndOrderPartitions(partitions);
+        var sorted = ValidateAndOrderPartitions(partitions, execution.MaximumPartitions);
 
         var limit = request.Query.Limit;
         var mergeReserve = PartitionQueryRetention.RootMergeReserve(sorted.Length,
@@ -33,7 +38,7 @@ internal static class PartitionQueryPlanFactory
         var readBytes = Divide(limits.MaxQueryReadBytes, sorted.Length);
         var retained = Divide(remainingRetained, sorted.Length);
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlanV1>(sorted.Length);
-        for (var index = 0; index < sorted.Length; index++)
+        for (var index = FirstElementIndex; index < sorted.Length; index++)
         {
             var leafRequest = request with { Partition = sorted[index], Cursor = null };
             leaves.Add(new(Version, sorted[index], leafRequest, examined[index], readBytes[index],
@@ -43,9 +48,9 @@ internal static class PartitionQueryPlanFactory
             limit, limits.MaxScanRecords, limits.MaxQueryReadBytes, limits.MaxBatchBytes);
     }
 
-    private static PartitionRef[] ValidateAndOrderPartitions(ImmutableArray<PartitionRef> partitions)
+    private static PartitionRef[] ValidateAndOrderPartitions(ImmutableArray<PartitionRef> partitions, int maximumPartitions)
     {
-        if (partitions.IsDefaultOrEmpty || partitions.Length > 8)
+        if (partitions.IsDefaultOrEmpty || partitions.Length > maximumPartitions)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPartitionsMessage);
         }
@@ -63,9 +68,9 @@ internal static class PartitionQueryPlanFactory
             .ThenBy(static item => item.DatabaseId, StringComparer.Ordinal)
             .ThenBy(static item => item.TransactionDomainId, StringComparer.Ordinal)
             .ThenBy(static item => item.PartitionKey, StringComparer.Ordinal).ToArray();
-        for (var index = 0; index < sorted.Length; index++)
+        for (var index = FirstElementIndex; index < sorted.Length; index++)
         {
-            if (index > 0 && PartitionQueryOrder.ComparePartition(sorted[index - 1], sorted[index]) == 0)
+            if (index > EmptyElementCount && PartitionQueryOrder.ComparePartition(sorted[index - AdjacentElementOffset], sorted[index]) == EqualOrder)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidPartitionsMessage);
             }
@@ -77,13 +82,13 @@ internal static class PartitionQueryPlanFactory
     {
         var quotient = total / parts;
         var remainder = total % parts;
-        return Enumerable.Range(0, parts).Select(index => quotient + (index < remainder ? 1 : 0)).ToArray();
+        return Enumerable.Range(FirstElementIndex, parts).Select(index => quotient + (index < remainder ? AdjacentElementOffset : EmptyElementCount)).ToArray();
     }
 
     private static long[] Divide(long total, int parts)
     {
         var quotient = total / parts;
         var remainder = total % parts;
-        return Enumerable.Range(0, parts).Select(index => quotient + (index < remainder ? 1 : 0)).ToArray();
+        return Enumerable.Range(FirstElementIndex, parts).Select(index => quotient + (index < remainder ? AdjacentElementOffset : EmptyElementCount)).ToArray();
     }
 }

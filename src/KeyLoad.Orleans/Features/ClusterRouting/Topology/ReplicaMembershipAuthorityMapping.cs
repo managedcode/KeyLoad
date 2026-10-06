@@ -4,6 +4,9 @@ namespace KeyLoad.Orleans;
 
 internal static class ReplicaMembershipAuthorityMapping
 {
+    private const int ParseEtagValueValidationBoundary = 0;
+    private const string ParseEtagFailureMessage = "The persisted membership ETag is invalid.";
+
     internal static ReplicaMembershipAuthorityEntryV1 ToWire(MembershipEntry entry, string etag)
     {
         var row = ReplicaMembershipRow.From(entry, ParseEtag(etag));
@@ -44,6 +47,6 @@ internal static class ReplicaMembershipAuthorityMapping
 
     private static long ParseEtag(string etag)
         => long.TryParse(etag, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture,
-            out var value) && value >= 0 ? value : throw Errors.Fail(ErrorCode.Corruption,
-            "The persisted membership ETag is invalid.");
+            out var value) && value >= ParseEtagValueValidationBoundary ? value : throw Errors.Fail(ErrorCode.Corruption,
+            ParseEtagFailureMessage);
 }

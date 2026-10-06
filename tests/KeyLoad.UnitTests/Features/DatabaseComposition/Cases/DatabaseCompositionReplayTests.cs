@@ -167,7 +167,7 @@ internal sealed class DatabaseCompositionReplayTests
             var original = db.Database.Apply(operation).Get<CommitReceipt>();
             db.Store.Dispose();
             using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+            var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
             var retry = engine.Apply(operation).Get<CommitReceipt>();
             var resolved = engine.ResolveOutcome(operation).Get<CommitReceipt>();

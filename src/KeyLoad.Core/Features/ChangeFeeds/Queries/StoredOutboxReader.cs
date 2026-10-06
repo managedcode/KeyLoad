@@ -17,13 +17,16 @@ internal static class StoredOutboxReader
     public static IEnumerable<StoredOutboxEntry> ReadRange(IKeyValueView view, PartitionRef partition,
         long after, long tail, int limit)
     {
+        const int OffsetInitialValue = 1;
+        const int StoredBytesInitialValue = 0;
+
         var partitionId = partition.AtomicPartitionId;
-        for (var offset = 1; offset <= limit && offset <= tail - after; offset++)
+        for (var offset = OffsetInitialValue; offset <= limit && offset <= tail - after; offset++)
         {
             var sequence = checked(after + offset);
             var key = KeySpace.Partition(OutboxSpace, partition, sequence);
             OutboxEntry? entry = null;
-            var storedBytes = 0;
+            var storedBytes = StoredBytesInitialValue;
             if (!view.ReadValue(key, value =>
             {
                 storedBytes = value.Length;

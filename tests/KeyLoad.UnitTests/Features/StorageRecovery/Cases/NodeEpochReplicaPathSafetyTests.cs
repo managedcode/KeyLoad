@@ -13,9 +13,7 @@ internal sealed class NodeEpochReplicaPathSafetyTests
         var replicaPosition = fixture.ReplicaStore.Position;
         var canonicalPosition = fixture.CanonicalStore.Position;
 
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaSnapshotFormatUpgrade.Preflight(
-            fixture.Database, fixture.ReplicaStore, fixture.Configuration, fixture.DestinationSnapshots,
-            _ => fixture.SourceCut));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaSnapshotFormatUpgrade.Preflight(            fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), fixture.DestinationSnapshots,             _ => fixture.SourceCut, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.ReplicaStore.Position).IsEqualTo(replicaPosition);
@@ -31,8 +29,7 @@ internal sealed class NodeEpochReplicaPathSafetyTests
         Directory.CreateSymbolicLink(linked, fixture.SourceSnapshots);
         var replicaPosition = fixture.ReplicaStore.Position;
 
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaSnapshotFormatUpgrade.Preflight(
-            fixture.Database, fixture.ReplicaStore, fixture.Configuration, linked, _ => fixture.SourceCut));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaSnapshotFormatUpgrade.Preflight(            fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), linked, _ => fixture.SourceCut, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(fixture.ReplicaStore.Position).IsEqualTo(replicaPosition);

@@ -5,6 +5,11 @@ namespace KeyLoad.Core;
 /// <summary>Reserves request-body, working-set, and verified-principal capacity before HTTP deserialization.</summary>
 public sealed class HttpAdmissionGovernor
 {
+    private const char PathSeparator = '/';
+    private const int InitialSequence = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int BodyAndWorkingReservationScale = 2;
+
     private const string IngressIdentity = "http-ingress";
     private const string BodyLimitDetail = "The HTTP body exceeds its admission byte budget.";
     private const string DeliveryPath = "/v1/queues/delivery";
@@ -26,17 +31,18 @@ public sealed class HttpAdmissionGovernor
     private readonly CommandAdmissionGovernor scopes;
 
     /// <summary>Gets the immutable HTTP admission limits used by this governor.</summary>
-    public HttpAdmissionLimits Limits { get; }
+    public HttpAdmissionLimits Limits => limits;
+    private readonly HttpAdmissionLimits limits;
 
     /// <summary>Creates an HTTP governor with validated limits.</summary>
     /// <param name="options">Centrally validated HTTP limits, frozen for this admission owner.</param>
     public HttpAdmissionGovernor(IOptions<HttpAdmissionLimits> options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        Limits = options.Value;
-        Limits.Validate();
-        node = CreateNodeGovernor(Limits);
-        scopes = CreateScopeGovernor(Limits, node.Limits);
+        limits = options.Value;
+        limits.Validate();
+        node = CreateNodeGovernor(limits);
+        scopes = CreateScopeGovernor(limits);
     }
 
     /// <summary>Validates framing and reserves request capacity before body deserialization.</summary>
@@ -48,7 +54,7 @@ public sealed class HttpAdmissionGovernor
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(path);
-        var normalizedPath = path.TrimEnd('/');
+        var normalizedPath = path.TrimEnd(PathSeparator);
         var control = IsControlPath(normalizedPath);
         var maxBody = control ? Limits.MaxControlBodyBytes : Limits.MaxBodyBytes;
         ValidateContentLength(contentLength, maxBody);
@@ -63,33 +69,15 @@ public sealed class HttpAdmissionGovernor
     public HttpAdmissionStatus Status() => new(Limits, node.Snapshot(), scopes.Snapshot());
 
     private static CommandAdmissionGovernor CreateNodeGovernor(HttpAdmissionLimits limits)
-    {
-        var settings = new CommandAdmissionLimits
-        {
-            MaxCommands = limits.MaxRequests,
-            MaxRetainedBytes = limits.MaxReservedBytes,
-            MaxTenantCommands = limits.MaxRequests,
-            MaxPrincipalCommands = limits.MaxRequests,
-            ReservedControlCommands = limits.ReservedControlRequests,
-            ReservedControlBytes = limits.ReservedControlBytes,
-            MaxControlPayloadBytes = limits.MaxControlBodyBytes,
-            MaxTenantControlCommands = limits.ReservedControlRequests,
-            MaxPrincipalControlCommands = limits.ReservedControlRequests
-        };
-        return CommandAdmissionGovernor.CreateDerivedHttpPool(settings);
-    }
+        => CommandAdmissionGovernor.CreateDerivedHttpPool(limits.MaxRequests, limits.MaxReservedBytes,
+            limits.MaxRequests, limits.MaxRequests, limits.ReservedControlRequests, limits.ReservedControlBytes,
+            limits.MaxControlBodyBytes, limits.ReservedControlRequests, limits.ReservedControlRequests);
 
-    private static CommandAdmissionGovernor CreateScopeGovernor(HttpAdmissionLimits limits, CommandAdmissionLimits nodeLimits)
-    {
-        var settings = nodeLimits with
-        {
-            MaxTenantCommands = limits.MaxTenantRequests,
-            MaxPrincipalCommands = limits.MaxPrincipalRequests,
-            MaxTenantControlCommands = limits.MaxTenantControlRequests,
-            MaxPrincipalControlCommands = limits.MaxPrincipalControlRequests
-        };
-        return CommandAdmissionGovernor.CreateDerivedHttpPool(settings);
-    }
+    private static CommandAdmissionGovernor CreateScopeGovernor(HttpAdmissionLimits limits)
+        => CommandAdmissionGovernor.CreateDerivedHttpPool(limits.MaxRequests, limits.MaxReservedBytes,
+            limits.MaxTenantRequests, limits.MaxPrincipalRequests, limits.ReservedControlRequests,
+            limits.ReservedControlBytes, limits.MaxControlBodyBytes, limits.MaxTenantControlRequests,
+            limits.MaxPrincipalControlRequests);
 
     private static bool IsControlPath(string path)
         => path.Equals(DeliveryPath, StringComparison.OrdinalIgnoreCase)
@@ -113,18 +101,18 @@ public sealed class HttpAdmissionGovernor
 
     private static void ValidateContentLength(long? contentLength, int maxBody)
     {
-        if (contentLength is < 0 || contentLength > maxBody)
+        if (contentLength is < InitialSequence || contentLength > maxBody)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, BodyLimitDetail);
         }
     }
 
     private static long GetWorkingSetReservation(HttpAdmissionLimits limits, bool control, string path)
-        => control ? 0 : IsHeavyReadPath(path) ? limits.HeavyReadReservedBytes : limits.OtherReservedBytes;
+        => control ? InitialSequence : IsHeavyReadPath(path) ? limits.HeavyReadReservedBytes : limits.OtherReservedBytes;
 
     private CommandAdmissionLease ReserveRequest(OperationKind kind, int body, long working, CancellationToken cancellationToken)
     {
-        var bodyAndWorking = checked(body + (int)((working + 1) / 2));
+        var bodyAndWorking = checked(body + (int)((working + AdjacentElementOffset) / BodyAndWorkingReservationScale));
         return node.Reserve(kind, Unverified, bodyAndWorking, body, cancellationToken);
     }
 }

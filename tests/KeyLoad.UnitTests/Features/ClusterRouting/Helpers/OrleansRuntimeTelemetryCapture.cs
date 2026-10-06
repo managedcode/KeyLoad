@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 
@@ -8,11 +9,10 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 {
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansActivityCapture> records = [];
-    private int maximumRecords;
-    private bool truncated;
+    private IOptions<OrleansTelemetryCaptureOptions>? configuredOptions;
 
-    internal void Configure(OrleansTelemetryCaptureOptions options)
-        => maximumRecords = options.MaximumRecords;
+    internal void Configure(IOptions<OrleansTelemetryCaptureOptions> options)
+        => configuredOptions = options;
 
     internal bool WasTruncated
     {
@@ -20,9 +20,11 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
         {
             lock (gate)
             {
-                return truncated;
+                return field;
             }
         }
+
+        private set;
     }
 
     internal OrleansActivityCapture[] Snapshot()
@@ -39,9 +41,9 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
         {
             foreach (var activity in batch)
             {
-                if (records.Count >= maximumRecords)
+                if (records.Count >= CaptureLimit)
                 {
-                    truncated = true;
+                    WasTruncated = true;
                     break;
                 }
 
@@ -51,17 +53,19 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 
         return ExportResult.Success;
     }
+
+    private int CaptureLimit => configuredOptions?.Value.MaximumRecords
+        ?? throw new InvalidOperationException("The native activity exporter has no validated capture options.");
 }
 
 internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
 {
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansMetricPointCapture> records = [];
-    private int maximumRecords;
-    private bool truncated;
+    private IOptions<OrleansTelemetryCaptureOptions>? configuredOptions;
 
-    internal void Configure(OrleansTelemetryCaptureOptions options)
-        => maximumRecords = options.MaximumRecords;
+    internal void Configure(IOptions<OrleansTelemetryCaptureOptions> options)
+        => configuredOptions = options;
 
     internal bool WasTruncated
     {
@@ -69,9 +73,11 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
         {
             lock (gate)
             {
-                return truncated;
+                return field;
             }
         }
+
+        private set;
     }
 
     internal OrleansMetricPointCapture[] Snapshot()
@@ -88,32 +94,71 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
         {
             foreach (var metric in batch)
             {
-                foreach (var point in metric.GetMetricPoints())
+                if (!CaptureMetric(metric))
                 {
-                    if (records.Count >= maximumRecords)
-                    {
-                        truncated = true;
-                        return ExportResult.Success;
-                    }
-
-                    var exemplarTags = new List<KeyValuePair<string, string?>>();
-                    if (point.TryGetExemplars(out var exemplars))
-                    {
-                        foreach (var exemplar in exemplars)
-                        {
-                            exemplarTags.AddRange(exemplar.FilteredTags.Select(static tag =>
-                                new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())));
-                        }
-                    }
-
-                    records.Add(new(metric.MeterName, metric.Name,
-                        point.Tags.Select(static tag => new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())).ToArray(),
-                        exemplarTags.ToArray()));
+                    return ExportResult.Success;
                 }
             }
         }
 
         return ExportResult.Success;
+    }
+
+    private int CaptureLimit => configuredOptions?.Value.MaximumRecords
+        ?? throw new InvalidOperationException("The native metric exporter has no validated capture options.");
+
+    private bool CaptureMetric(Metric metric)
+    {
+        foreach (var point in metric.GetMetricPoints())
+        {
+            if (!CapturePoint(metric, point))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool CapturePoint(Metric metric, MetricPoint point)
+    {
+        if (records.Count >= CaptureLimit)
+        {
+            WasTruncated = true;
+            return false;
+        }
+
+        records.Add(new OrleansMetricPointCapture(metric.MeterName, metric.Name,
+            CaptureTags(point.Tags), CaptureExemplarTags(point)));
+        return true;
+    }
+
+    private static KeyValuePair<string, string?>[] CaptureTags(ReadOnlyTagCollection tags)
+    {
+        var result = new List<KeyValuePair<string, string?>>(tags.Count);
+        foreach (var tag in tags)
+        {
+            result.Add(new(tag.Key, tag.Value?.ToString()));
+        }
+
+        return result.ToArray();
+    }
+
+    private static KeyValuePair<string, string?>[] CaptureExemplarTags(MetricPoint point)
+    {
+        var tags = new List<KeyValuePair<string, string?>>();
+        if (!point.TryGetExemplars(out var exemplars))
+        {
+            return [];
+        }
+
+        foreach (var exemplar in exemplars)
+        {
+            tags.AddRange(exemplar.FilteredTags.Select(static tag =>
+                new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())));
+        }
+
+        return tags.ToArray();
     }
 }
 

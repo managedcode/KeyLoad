@@ -139,7 +139,7 @@ internal sealed class EventProjectionFixture : IDisposable
         => KeySpace.Partition("vector", Partition, TargetCollection, field, id);
 
     internal Task<RankedDocument[]> SearchAsync()
-        => new KeyLoad.Query.SearchEngine(Database).SearchAsync(ReaderId,
+        => new KeyLoad.Query.SearchEngine(Database, UnitExecutionOptions.QueryExecution()).SearchAsync(ReaderId,
             new(Partition, TargetCollection, VectorField: VectorField, Vector: [1, 0], Space: Space),
             TestContext.Current!.Execution.CancellationToken);
 
@@ -252,6 +252,6 @@ internal sealed class EventProjectionHarness : IDisposable
             throw new InvalidOperationException("The projection fixture must own a fresh directory.");
         }
         Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
     }
 }

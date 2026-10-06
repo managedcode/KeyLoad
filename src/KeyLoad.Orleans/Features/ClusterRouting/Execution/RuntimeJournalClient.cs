@@ -7,41 +7,20 @@ using Orleans.Serialization;
 namespace KeyLoad.Orleans;
 
 /// <summary>Routes every journal operation through a fresh protected native request.</summary>
-internal sealed class RuntimeJournalClient
+internal sealed class RuntimeJournalClient(
+    IGrainFactory grains,
+    GrainRequestCodec codec,
+    DatabaseEngine database,
+    ICommitCoordinator coordinator,
+    IServiceProvider services,
+    TimeProvider clock,
+    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
+    IOptions<GrainRoutingOptions> routingOptions,
+    IOptions<RuntimeJournalOptions> configuredJournalOptions,
+    RuntimeJournalAdmission admission)
 {
-    private readonly IGrainFactory grains;
-    private readonly GrainRequestCodec codec;
-    private readonly DatabaseEngine database;
-    private readonly ICommitCoordinator coordinator;
-    private readonly IServiceProvider services;
-    private readonly TimeProvider clock;
-    private readonly Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer;
-    private readonly IOptions<GrainRoutingOptions> routingOptions;
-    private readonly RuntimeJournalOptions journalOptions;
-    private readonly RuntimeJournalAdmission admission;
-
-    internal RuntimeJournalClient(IGrainFactory grains, GrainRequestCodec codec, DatabaseEngine database,
-        ICommitCoordinator coordinator, IServiceProvider services, TimeProvider clock,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
-        IOptions<GrainRoutingOptions> routingOptions, IOptions<RuntimeJournalOptions> journalOptions,
-        RuntimeJournalAdmission admission)
-    {
-        this.grains = grains;
-        this.codec = codec;
-        this.database = database;
-        this.coordinator = coordinator;
-        this.services = services;
-        this.clock = clock;
-        this.chunkSerializer = chunkSerializer;
-        this.routingOptions = routingOptions;
-        this.journalOptions = journalOptions.Value with { };
-        this.admission = admission;
-        if (!this.journalOptions.IsValid()
-            || this.journalOptions.MaximumJournalBytes > database.Limits.MaxBatchBytes - GrainRoutingProtocol.EnvelopeMetadataBytes)
-        {
-            throw new InvalidOperationException(RuntimeJournalStoragePolicy.InvalidLimits);
-        }
-    }
+    private readonly IOptions<RuntimeJournalOptions> journalOptions = ValidateOptions(configuredJournalOptions,
+        database.Limits.MaxBatchBytes);
 
     internal async Task<RuntimeJournalSnapshot?> GetHeaderAsync(string name, CancellationToken cancellationToken)
     {
@@ -67,7 +46,8 @@ internal sealed class RuntimeJournalClient
         var commandId = Guid.NewGuid();
         var reply = await SendCommandAsync(payload, commandId, cancellationToken).ConfigureAwait(false);
         if (reply.Error == ErrorCode.UnknownWriteOutcome
-            && journalOptions.UncertaintyRetryCount > 0 && !cancellationToken.IsCancellationRequested)
+            && journalOptions.Value.UncertaintyRetryCount > RuntimeJournalStoragePolicy.NoUncertaintyRetryCount
+            && !cancellationToken.IsCancellationRequested)
         {
             reply = await SendCommandAsync(payload, commandId, cancellationToken).ConfigureAwait(false);
         }
@@ -97,8 +77,8 @@ internal sealed class RuntimeJournalClient
             Guid.Empty, token);
         var actor = grains.GetGrain<IRequestGrain>(requestId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
-            streamToken => actor.ExecuteStreamAsync(signed, streamToken), chunkSerializer, requestId,
-            clock, token, routingOptions).ConfigureAwait(false);
+            createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+            clock: clock, cancellationToken: token, options: routingOptions).ConfigureAwait(false);
         return Decode<T>(reply, allowNull);
     }
 
@@ -113,8 +93,8 @@ internal sealed class RuntimeJournalClient
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token);
         var actor = grains.GetGrain<IRequestGrain>(requestId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            streamToken => actor.ExecuteStreamAsync(signed, streamToken), chunkSerializer, requestId,
-            clock, token, routingOptions).ConfigureAwait(false);
+            createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+            clock: clock, cancellationToken: token, options: routingOptions).ConfigureAwait(false);
     }
 
     private async Task<PrincipalRecord> PrepareAsync(CancellationToken cancellationToken)
@@ -155,5 +135,18 @@ internal sealed class RuntimeJournalClient
         }
 
         return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
+    }
+
+    private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions,
+        int maximumBatchBytes)
+    {
+        var options = configuredOptions.Value;
+        if (!options.IsValid()
+            || options.MaximumJournalBytes > maximumBatchBytes - GrainRoutingProtocol.EnvelopeMetadataBytes)
+        {
+            throw new InvalidOperationException(RuntimeJournalStoragePolicy.InvalidLimits);
+        }
+
+        return configuredOptions;
     }
 }

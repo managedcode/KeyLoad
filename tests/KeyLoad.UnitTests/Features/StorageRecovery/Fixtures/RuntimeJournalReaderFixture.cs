@@ -6,8 +6,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class RuntimeJournalReaderFixture : IDisposable
 {
     internal const ulong LegacyIdentityMagic = 0x354449444C4BUL;
-    internal const int IdentityMagicBytes = sizeof(ulong);
-    internal const int ChangedMagicBit = 1;
+    internal const ulong RuntimeJournalIdentityMagic = 0x364449444C4BUL;
     internal const string GuidFormat = "N";
     internal const string RuntimeJournalNamespace = StoreReaderContract.RuntimeJournalKeySpace;
     internal const string PayloadName = "reader-contract-test";
@@ -26,24 +25,27 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal string SnapshotPath => Path.Combine(root, "transfer.snapshot");
     internal string BackupPath => Path.Combine(root, "backup");
     internal string RestorePath => Path.Combine(root, "restored");
-    internal string IdentityPath(string directory) => Path.Combine(directory, "identity.json");
-    internal byte[] RuntimeJournalKey => KeyCodec.Encode(RuntimeJournalNamespace, PayloadName);
-    internal byte[] FollowupKey => KeyCodec.Encode(RuntimeJournalNamespace, FollowupName);
+    internal static string IdentityPath(string directory) => Path.Combine(directory, "identity.json");
+    internal static byte[] RuntimeJournalKey => KeyCodec.Encode(RuntimeJournalNamespace, PayloadName);
+    internal static byte[] FollowupKey => KeyCodec.Encode(RuntimeJournalNamespace, FollowupName);
     internal const string FollowupName = "reader-contract-followup";
-    internal byte[] RuntimeJournalValue => [0x52, 0x4A, 0x31, 0xA7];
-    internal byte[] FollowupValue => [0x52, 0x4A, 0x32, 0xB8];
+    internal static byte[] RuntimeJournalValue => [0x52, 0x4A, 0x31, 0xA7];
+    internal static byte[] FollowupValue => [0x52, 0x4A, 0x32, 0xB8];
+    internal static byte[] CanonicalDocumentKey => [0x11];
+    internal static byte[] CanonicalDocumentValue => [0xA1];
+    internal static byte[] ReplicaDocumentKey => [0x22];
+    internal static byte[] ReplicaDocumentValue => [0xB2];
+    internal static byte[] PartialCanonicalValue => [0xC3];
+    internal static byte[] PartialReplicaValue => [0xD4];
+    internal static byte[] PartialCanonicalKey => [0x33];
+    internal static byte[] PartialReplicaKey => [0x44];
+    internal static byte[] TargetDocumentKey => [0x70];
+    internal static byte[] TargetDocumentValue => [0x80];
 
-    internal ZoneTreeStore Open(string directory)
+    internal ZoneTreeStore Open(string directory, Guid? incarnation = null)
     {
-        var options = new ZoneTreeStoreOptions(directory) { Incarnation = Incarnation };
+        var options = new ZoneTreeStoreOptions(directory) { Incarnation = incarnation ?? Incarnation };
         return new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-    }
-
-    internal string CreateDirectory(string name)
-    {
-        var directory = Path.Combine(root, name);
-        Directory.CreateDirectory(directory);
-        return directory;
     }
 
     internal static void WriteRuntimeRecord(ZoneTreeStore store, byte[] key, byte[] value)

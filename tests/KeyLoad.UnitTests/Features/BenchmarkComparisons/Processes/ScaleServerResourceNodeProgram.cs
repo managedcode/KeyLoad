@@ -26,11 +26,31 @@ internal static class ScaleServerResourceNodeProgram
           nodeCount: cell.nodeCount, scenario: cell.scenario, profile: cell.profile, workerSha256: workerSha,
           hardware: structuredClone(hardware), appHostEnvelope: structuredClone(envelope),
           containers: [structuredClone(container)], missingEvidence: [], qualified: true });
+        const configuredEvidence = () => ({ ...evidence(), schema: 'server-resource-evidence.v2', observationPolicy: {
+          cadenceMilliseconds: 100, maximumObservationMilliseconds: 1000, cleanupThresholdMilliseconds: 1000,
+          processSettlementMilliseconds: 100, maxProcesses: 16, maxMounts: 2, maxFileBytes: 512,
+          minimumCommandBytes: 8, maxHardwareBytes: 1024, maxSampleMetadataBytes: 2048, maxSidecarBytes: 8192,
+          maxWorkerBytes: 65536, maxSamples: 10, maxCgroupAncestors: 8, nativeReadBufferBytes: 128,
+          maxNativeOutputBytes: 256, standardErrorOutputDivisor: 4 } });
         const expectRejected = value => {
           try { validateServerResourceEvidence(value, sidecarSha, workerSha, cell, cohort, 456, true); process.exitCode = 1; }
           catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }
         };
-        if (scenario === 'valid') validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
+        if (scenario === 'configured-policy') validateServerResourceEvidence(configuredEvidence(), sidecarSha, workerSha, cell, cohort, 456, true);
+        else if (scenario === 'invalid-configured-policy') {
+          const value = configuredEvidence(); value.observationPolicy.cadenceMilliseconds = 0; expectRejected(value);
+        } else if (scenario === 'configured-sample-overflow') {
+          const value = configuredEvidence(); value.containers[0].sampleCount = 11; expectRejected(value);
+        } else if (scenario === 'mismatched-configured-policy') {
+          const left = validateServerResourceEvidence(configuredEvidence(), sidecarSha, workerSha, cell, cohort, 456, true);
+          const value = configuredEvidence(); value.jobId = '457'; value.target = otherTargetCell.target;
+          value.observationPolicy.cadenceMilliseconds = 200;
+          const right = validateServerResourceEvidence(value, '1'.repeat(64), workerSha, otherTargetCell, cohort, 457, true);
+          try { requireComparableScaleProfiles([{ profile: cell.profile, workers: [
+            { ...cell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: left.comparison },
+            { ...otherTargetCell, disposition: 'measured', serverResourceQualified: true, resourceEquivalence: right.comparison }] }]); process.exitCode = 1; }
+          catch (error) { if (error.message !== 'Isolated GitHub evidence rejected.') process.exitCode = 1; }
+        } else if (scenario === 'valid') validateServerResourceEvidence(evidence(), sidecarSha, workerSha, cell, cohort, 456, true);
         else if (scenario === 'missing') {
           const value = evidence(); value.hardware = null; value.missingEvidence = ['hardwareClass']; value.qualified = false;
           validateServerResourceEvidence(value, sidecarSha, workerSha, cell, cohort, 456, true);

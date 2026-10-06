@@ -9,12 +9,12 @@ internal static class GrainRequestStreamConsumer
     internal static async Task<GrainOperationReply> DrainAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, CancellationToken cancellationToken, IOptions<GrainRoutingOptions> options)
+        Guid requestId, TimeProvider clock, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
         GrainOperationReply? terminal = null;
         var bounded = NativeCqrsStreamLifetime.Run(
-            token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
-            serializer, requestId, clock, static () => { }, cancellationToken, options);
+            createStream: token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
+            serializer: serializer, requestId: requestId, clock: clock, settled: static () => { }, cancellationToken: cancellationToken, options: options, owner: null);
         await foreach (var chunk in bounded.ConfigureAwait(false))
         {
             if (chunk.Kind == CqrsStreamChunkKind.Completed)

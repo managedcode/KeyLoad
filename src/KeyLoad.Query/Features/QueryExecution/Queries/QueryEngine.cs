@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.ChangeFeeds;
 using KeyLoad.Query.Features.QueryExecution;
@@ -13,6 +12,13 @@ namespace KeyLoad.Query;
 /// <summary>Executes authorized bounded SQL and AST queries.</summary>
 public sealed partial class QueryEngine
 {
+    private const int InitialSequence = 0;
+    private const int FirstElementIndex = 0;
+    private const string QueryCursorIsInvalidDetail = "The query cursor is invalid.";
+    private const int InitialCursorOffset = 0;
+    private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
+    private const long NoRetainedBytesLong = 0L;
+
     private const string CursorPurpose = "query-page";
     internal const string ExplainId = "explain";
     internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
@@ -40,7 +46,7 @@ public sealed partial class QueryEngine
         executionOptions = options;
         cursorLifetime = execution.CursorLifetime;
         this.database = database;
-        graphSearch = searchEngine ?? new SearchEngine(database);
+        graphSearch = searchEngine ?? new SearchEngine(database, options);
         liveQueries = new(database, this);
         modelQueries = new(database, this);
     }
@@ -73,14 +79,11 @@ public sealed partial class QueryEngine
     public QueryPage ExecuteAst(string principalId, AstQueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
     /// <summary>Describes the supported query language and configured budgets.</summary>
-    public QueryCapabilityManifest Capabilities => new(1, 1, "Q1", "atomicPartition", "decimal", "distinctFromNull",
-        ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS MISSING"],
-        database.Limits.MaxResults, database.Limits.MaxScanRecords, database.Limits.MaxQueryBytes, database.Limits.MaxQueryDepth, true, true,
-        database.Limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViewsV1", SqlGraphSearchSyntax.ProfileName, SqlGraphPathSyntax.VersionProfile]);
+    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(database.Limits);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(database.Limits, timeProvider, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();
@@ -125,7 +128,7 @@ public sealed partial class QueryEngine
         }).Visit();
         if (query.Explain)
         {
-            var explain = new QueryPage([new(ExplainId, 0, JsonSerializer.Serialize(new { AccessPath = accessPath,
+            var explain = new QueryPage([new(ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,
                 AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords },
                 JsonDefaults.Options))], null, cursor.Cut, accessPath);
             budget.CheckResult(explain);
@@ -137,7 +140,7 @@ public sealed partial class QueryEngine
     private CursorState ResolveCursor(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, TimeProvider clock)
     {
-        var offset = 0;
+        var offset = FirstElementIndex;
         var cut = database.Store.Position;
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
         if (request.Cursor is { } cursor)
@@ -146,15 +149,15 @@ public sealed partial class QueryEngine
             try
             { claims = database.Verify<QueryCursorClaims>(cursor); }
             catch (KeyLoadException exception) when (exception.Code == ErrorCode.TokenInvalidated)
-            { throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor is invalid."); }
+            { throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail); }
             if (claims.Purpose != CursorPurpose || claims.Incarnation != database.Store.Identity.Incarnation
                 || claims.NodeId != database.Store.Identity.NodeId || claims.ReadGeneration != database.Store.Identity.ReadGeneration
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
-                || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < 0 || claims.CutPosition > database.Store.Position
+                || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < InitialSequence || claims.CutPosition > database.Store.Position
                 || claims.ExpiresAt < clock.GetUtcNow()
-                || claims.Offset < 0 || claims.Offset > database.Limits.MaxScanRecords)
+                || claims.Offset < InitialCursorOffset || claims.Offset > database.Limits.MaxScanRecords)
             {
-                throw Errors.Fail(ErrorCode.CursorExpired, "The query cursor no longer has a valid authorized read cut.");
+                throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
             }
             offset = claims.Offset;
             cut = claims.CutPosition;
@@ -167,7 +170,7 @@ public sealed partial class QueryEngine
     {
         var query = request.Query;
         var rows = new List<QueryRow>();
-        var minimumResultBytes = 0L;
+        var minimumResultBytes = NoRetainedBytesLong;
         foreach (var row in prepared.Page(cursor.Offset, query.Limit, budget))
         {
             budget.Check();
@@ -189,21 +192,6 @@ public sealed partial class QueryEngine
         return result;
     }
     internal QueryRow Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document,
-        ImmutableArray<Selection> selections,
-        IReadOnlyDictionary<string, string[]>? paths = null)
-    {
-        var safe = database.Project(principal, resource, document);
-        if (selections.Length == 1 && selections[0].Path == SqlSyntax.Star)
-        {
-            return new(document.Reference.Id, document.Revision, safe.Json, safe.Redacted, safe.RedactedFields);
-        }
-        using var json = JsonDocument.Parse(safe.Json);
-        var result = new JsonObject();
-        foreach (var selection in selections)
-        {
-            var value = PredicateEvaluator.FieldValue(selection.Path, document, json.RootElement, paths);
-            result[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
-        }
-        return new(document.Reference.Id, document.Revision, result.ToJsonString(), safe.Redacted, safe.RedactedFields);
-    }
+        ImmutableArray<Selection> selections, IReadOnlyDictionary<string, string[]>? paths = null)
+        => QueryRowProjection.Project(database, principal, resource, document, selections, paths);
 }

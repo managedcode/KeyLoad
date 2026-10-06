@@ -2,11 +2,14 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnConstruction
 {
+    private const int EmptyElementCount = 0;
+    private const int FirstElementIndex = 0;
+
     internal static void Insert(PackedAnnGraph graph, PackedAnnVectors vectors, VectorSpace space,
         int ordinal, int level, ref int entryPoint, ref int maximumLevel, PackedAnnBuildScratch scratch,
         AnnWorkBudget budget)
     {
-        if (entryPoint < 0)
+        if (entryPoint < EmptyElementCount)
         {
             entryPoint = ordinal;
             maximumLevel = level;
@@ -21,14 +24,14 @@ internal static class PackedAnnConstruction
                 space.Dimension, budget);
         }
         var finalLayer = Math.Min(level, maximumLevel);
-        for (var layer = finalLayer; layer >= 0; layer--)
+        for (var layer = finalLayer; layer >= EmptyElementCount; layer--)
         {
             var ef = Math.Min(ordinal, scratch.Layer.Nodes.Length);
             var found = PackedAnnLayerSearch.SearchLayer(graph, vectors, similarity, current, layer,
                 ef, space.Dimension, scratch.Layer, budget);
             PackedAnnNeighborSelection.Connect(graph, vectors, space.Metric, space.Dimension,
                 ordinal, layer, found, scratch, budget);
-            current = scratch.Layer.Nodes[0];
+            current = scratch.Layer.Nodes[FirstElementIndex];
         }
         if (level > maximumLevel)
         {

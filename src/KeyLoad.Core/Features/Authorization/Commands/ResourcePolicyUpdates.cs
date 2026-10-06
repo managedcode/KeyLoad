@@ -16,6 +16,8 @@ internal static class ResourcePolicyUpdates
     /// <param name="expectedVersion">The expected current version, or null for legacy semantics.</param>
     internal static void Validate(ResourceDefinition? previous, ResourceDefinition replacement, long? expectedVersion)
     {
+        const int SchemaVersionStep = 1;
+
         ArgumentNullException.ThrowIfNull(replacement);
         if (previous is null)
         {
@@ -43,7 +45,7 @@ internal static class ResourcePolicyUpdates
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, VersionExhaustedMessage);
         }
-        if (replacement.SchemaVersion != previous.SchemaVersion + 1)
+        if (replacement.SchemaVersion != previous.SchemaVersion + SchemaVersionStep)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVersionMessage);
         }
@@ -59,8 +61,10 @@ internal static class ResourcePolicyUpdates
 
     private static bool SameNonPolicyDefinition(ResourceDefinition previous, ResourceDefinition replacement)
     {
-        var previousShape = previous with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = 0 };
-        var replacementShape = replacement with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = 0 };
+        const int SchemaVersionEmptyCount = 0;
+
+        var previousShape = previous with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
+        var replacementShape = replacement with { FieldPolicies = [], HeaderPolicies = [], SchemaVersion = SchemaVersionEmptyCount };
         return JsonData.Fingerprint(previousShape) == JsonData.Fingerprint(replacementShape);
     }
 

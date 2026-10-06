@@ -11,7 +11,7 @@ internal static class BoundedProblemReader
     private const int BodyStart = 0;
 
     public static async Task<Problem?> ReadAsync(HttpContent content, JsonSerializerOptions options,
-        CancellationToken cancellationToken, int maximumProblemBodyBytes)
+        int maximumProblemBodyBytes, CancellationToken cancellationToken)
     {
         if (content.Headers.ContentLength > maximumProblemBodyBytes)
         {

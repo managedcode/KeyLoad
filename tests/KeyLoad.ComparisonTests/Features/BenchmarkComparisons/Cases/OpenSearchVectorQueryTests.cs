@@ -91,7 +91,7 @@ internal sealed class OpenSearchVectorQueryTests
         await Assert.That(parameters.GetProperty(TopK).GetInt32()).IsEqualTo(topK);
     }
 
-    internal static BenchmarkDataset WitnessDataset() => new(new ComparisonOptions
+    internal static BenchmarkDataset WitnessDataset() => new(Microsoft.Extensions.Options.Options.Create(new ComparisonOptions
     {
         Seed = 1729,
         Documents = WitnessDocuments,
@@ -101,7 +101,7 @@ internal sealed class OpenSearchVectorQueryTests
         Warmup = 0,
         Repetitions = 1,
         Concurrency = 1
-    });
+    }));
 
     private static double IndependentCosine(ImmutableArray<float> query, ImmutableArray<float> candidate)
     {

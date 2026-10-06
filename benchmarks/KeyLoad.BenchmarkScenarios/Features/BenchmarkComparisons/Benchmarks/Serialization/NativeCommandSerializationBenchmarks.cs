@@ -5,10 +5,12 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
 /// <summary>Measures full native and historical typed JSON serialization of polymorphic command requests.</summary>
 [MemoryDiagnoser]
-[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 2, warmupCount: 3, iterationCount: 6, id: "NativeSerialization")]
+[SimpleJob(RuntimeMoniker.Net10_0, launchCount: 2, warmupCount: 3, iterationCount: 6, id: nameof(NativeSerialization))]
 [IterationTime(200)]
 public class NativeCommandSerializationBenchmarks
 {
+    private const string RequireStateFailureMessage = "The native serialization fixture is not initialized.";
+
     private NativeSerializationBenchmarkState<CommandRequest>? state;
 
     /// <summary>Gets or sets the document JSON byte length and vector backing byte length; envelope overhead is additional.</summary>
@@ -19,12 +21,14 @@ public class NativeCommandSerializationBenchmarks
     [GlobalSetup]
     public void Setup()
     {
+        const string SetupFailureMessage = "The native serialization fixture is already initialized.";
+
         if (state is not null)
         {
-            throw new InvalidOperationException("The native serialization fixture is already initialized.");
+            throw new InvalidOperationException(SetupFailureMessage);
         }
         var candidate = new NativeSerializationBenchmarkState<CommandRequest>(NativeSerializationBenchmarkCorpus.Command(PayloadBytes));
-        NativeSerializationBenchmarkManifest.Write(nameof(NativeCommandSerializationBenchmarks), PayloadBytes, candidate);
+        NativeSerializationBenchmarkManifest.Write(nameof(NativeCommandSerializationBenchmarks), PayloadBytes, candidate, BenchmarkArtifactRegistration.ReadNativeSerialization());
         state = candidate;
     }
 
@@ -53,5 +57,5 @@ public class NativeCommandSerializationBenchmarks
     public void Cleanup() => state = null;
 
     private NativeSerializationBenchmarkState<CommandRequest> RequireState()
-        => state ?? throw new InvalidOperationException("The native serialization fixture is not initialized.");
+        => state ?? throw new InvalidOperationException(RequireStateFailureMessage);
 }

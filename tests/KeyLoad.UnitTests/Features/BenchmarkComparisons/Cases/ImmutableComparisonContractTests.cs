@@ -175,7 +175,7 @@ internal sealed class ImmutableComparisonContractTests
     public async Task AcBct001CorpusIdentifiersAndCachedOraclesRemainStableAndReuseStorage()
     {
         var options = new ComparisonOptions { Documents = 4, TopK = 2, Dimensions = 4, PayloadBytes = 128, GraphVertices = 4 };
-        var dataset = new BenchmarkDataset(options);
+        var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(options));
         var expectedIds = new[] { "d000000000", "d000000001", "d000000002", "d000000003" };
         await Assert.That(dataset.Documents.Select(document => document.Id).ToArray())
             .IsEquivalentTo(expectedIds, TUnit.Assertions.Enums.CollectionOrdering.Matching);

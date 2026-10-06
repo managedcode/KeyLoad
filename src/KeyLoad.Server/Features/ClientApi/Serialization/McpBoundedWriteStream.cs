@@ -110,8 +110,10 @@ internal sealed class McpBoundedWriteStream : Stream
     /// <returns>A view that remains owned here and observes clearing on disposal.</returns>
     internal ReadOnlyMemory<byte> BorrowBuffer()
     {
+        const int StartEmptyCount = 0;
+
         ThrowIfDisposed();
-        return buffer.GetBuffer().AsMemory(0, maximumBytes);
+        return buffer.GetBuffer().AsMemory(StartEmptyCount, maximumBytes);
     }
 
     /// <summary>Gets the actual written range without allocating a returned copy of the private buffer.</summary>

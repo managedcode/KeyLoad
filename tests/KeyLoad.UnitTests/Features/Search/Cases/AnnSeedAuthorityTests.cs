@@ -70,14 +70,13 @@ internal sealed class AnnSeedAuthorityTests
         };
         database.Submit(OperationKind.ConfigureResource, new ConfigureResourceRequest(ForeignTenant,
             foreignPartition.DatabaseId, foreignResource)).Get<ResourceDefinition>();
-        var budget = new ReadExecutionBudget(database.Database.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
 
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(database.Database,
             AnnSeedTestSupport.Principal, foreignPartition, AnnSeedTestSupport.Collection,
-            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), new(), budget));
+            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), UnitAnnSeedOptions.Execution(new()), budget));
         var administratorSeed = AnnSeedCollector.Capture(database.Database, "root", foreignPartition,
-            AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), new(),
-            new(database.Database.Limits));
+            AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
 
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(administratorSeed.Scope.PrincipalId).IsEqualTo("root");
@@ -87,11 +86,11 @@ internal sealed class AnnSeedAuthorityTests
         var wrongDomain = database.Partition with { TransactionDomainId = OtherDomain };
         var domainFailure = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(
             database.Database, AnnSeedTestSupport.Principal, wrongDomain, AnnSeedTestSupport.Collection,
-            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), new(), new(database.Database.Limits)));
+            AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))));
         await Assert.That(domainFailure.Code).IsEqualTo(ErrorCode.Conflict);
         var absentResource = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(
             database.Database, "root", database.Partition, "absent-collection", AnnSeedTestSupport.Field,
-            AnnSeedTestSupport.Space(), new(), new(database.Database.Limits)));
+            AnnSeedTestSupport.Space(), UnitAnnSeedOptions.Execution(new()), new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))));
         await Assert.That(absentResource.Code).IsEqualTo(ErrorCode.NotFound);
     }
 

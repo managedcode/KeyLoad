@@ -9,7 +9,7 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
 
     internal T Cut<T>(string principalId, Func<IKeyValueView, PrincipalRecord, T> read, CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(database.Limits, clock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
         return database.Store.Read(view =>
         {
             var bounded = budget.CreateView(view);
@@ -22,12 +22,14 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
 
     internal BlobMetadata? Metadata(IKeyValueView view, PrincipalRecord principal, BlobMetadataRequest request)
     {
+        const int EmptyRevision = 0;
+
         _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
         var head = Reader.Head(view, request.Blob);
         if (head is null)
         { return null; }
         Authority.ReadRow(principal, head.Metadata.Access);
-        if (head.Metadata.Revision == 0)
+        if (head.Metadata.Revision == EmptyRevision)
         { return null; }
         return head.Metadata;
     }
@@ -47,7 +49,11 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
 
     internal BlobReadResult Range(IKeyValueView view, PrincipalRecord principal, BlobReadRequest request)
     {
-        if (request.ExpectedRevision <= 0 || request.Offset < 0 || request.Count is < 0 or > BlobLimits.MaxRangeBytes)
+        const int ExpectedRevisionValidationBoundary = 0;
+        const int OffsetValidationBoundary = 0;
+        const int RequestCountEmptyCount = 0;
+
+        if (request.ExpectedRevision <= ExpectedRevisionValidationBoundary || request.Offset < OffsetValidationBoundary || request.Count is < RequestCountEmptyCount or > BlobLimits.MaxRangeBytes)
         { throw BlobErrors.Validation(); }
         _ = Authority.Scope(view, principal, request.Blob, Capability.BlobRead);
         var head = Reader.Head(view, request.Blob);
@@ -66,7 +72,9 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
 
     private static void CopyParts(IKeyValueView view, BlobState state, long offset, byte[] result)
     {
-        var copied = 0;
+        const int CopiedInitialValue = 0;
+
+        var copied = CopiedInitialValue;
         while (copied < result.Length)
         {
             var position = offset + copied;
@@ -83,7 +91,9 @@ internal sealed class BlobReads(DatabaseEngine database, TimeProvider clock)
 
     internal BlobListPage List(IKeyValueView view, PrincipalRecord principal, BlobListRequest request)
     {
-        if (request.Limit is < 1 or > BlobLimits.MaxListItems)
+        const int LimitFirstCount = 1;
+
+        if (request.Limit is < LimitFirstCount or > BlobLimits.MaxListItems)
         { throw BlobErrors.Validation(); }
         if (request.AfterId is not null)
         { JsonData.Identifier(request.AfterId); }
@@ -107,12 +117,14 @@ internal sealed class BlobListAccumulator(DatabaseEngine database, PrincipalReco
 
     internal bool Visit(IKeyValueView view, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
+        const int RevisionValidationBoundary = 0;
+
         var blob = BlobKeys.DecodeScope(key, BlobKeys.HeadSpace, BlobKeys.ScopeComponents);
         var head = BlobRecordReader.Decode<BlobHead>(value);
         BlobRecordReader.ValidateHead(head, blob, database.Store.Identity.Incarnation);
         visited++;
         LastId = blob.Id;
-        if (head.Metadata.Revision > 0 && !head.Metadata.Deleted
+        if (head.Metadata.Revision > RevisionValidationBoundary && !head.Metadata.Deleted
             && database.Authorization.CanReadRow(principal, head.Metadata.Access))
         {
             _ = new BlobRecordReader(database.Store.Identity.Incarnation).Current(view, head);

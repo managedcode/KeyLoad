@@ -1,5 +1,4 @@
-using KeyLoad;
-using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -9,13 +8,20 @@ internal sealed class RuntimeJournalLifecycleTests
     private const string JournalName = "native-journal";
     private const string FirstInstance = "11223344-5566-7788-99aa-bbccddeeff00";
     private const string SecondInstance = "22334455-6677-8899-aabb-ccddeeff0011";
+    private const string OriginProperty = "origin";
+    private const string StaleProperty = "other";
+    private const string TestOrigin = "test";
+    private const string SiloA = "silo-a";
+    private const string ClosedValue = "true";
+    private const string MembershipVersion = "2";
+    private const string AdoptedCount = "3";
     private const int MultiPageLength = 80_000;
 
     [Test]
     public async Task RealStoreCreatesAppendsReplacesReadsAndDeletesOpaqueContent()
     {
         using var fixture = new RuntimeJournalFixture();
-        var created = fixture.Create(JournalName, FirstInstance, new(StringComparer.Ordinal) { ["origin"] = "test" });
+        var created = fixture.Create(JournalName, FirstInstance, new(StringComparer.Ordinal) { [OriginProperty] = TestOrigin });
         var content = Enumerable.Range(0, MultiPageLength).Select(index => (byte)(index % byte.MaxValue)).ToArray();
         var appended = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, created, content)).Snapshot!;
         await Assert.That(appended.ContentRevision).IsEqualTo(1L);
@@ -56,33 +62,34 @@ internal sealed class RuntimeJournalLifecycleTests
         using var fixture = new RuntimeJournalFixture();
         var created = fixture.Create(JournalName, FirstInstance);
         var claimed = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created,
-            etag: created.MetadataETag, set: new(StringComparer.Ordinal) { ["DurableJobsOwner"] = "silo-a" })).Snapshot!;
+            etag: created.MetadataETag, set: new(StringComparer.Ordinal) { [RuntimeJournalProtocol.OwnerProperty] = SiloA })).Snapshot!;
         await Assert.That(claimed.OwnerGeneration).IsEqualTo(created.OwnerGeneration + 1);
         var staleEtag = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(
             RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created, etag: created.MetadataETag,
-                set: new(StringComparer.Ordinal) { ["other"] = "stale" }))));
+                set: new(StringComparer.Ordinal) { [StaleProperty] = "stale" }))));
         await Assert.That(staleEtag.Code).IsEqualTo(ErrorCode.Conflict);
 
         var sameOwner = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, claimed,
             etag: claimed.MetadataETag, set: new(StringComparer.Ordinal)
             {
-                ["DurableJobsOwner"] = "silo-a",
-                ["DurableJobsClosed"] = "true",
-                ["DurableJobsMembershipVersion"] = "2",
-                ["DurableJobsAdoptedCount"] = "3"
+                [RuntimeJournalProtocol.OwnerProperty] = SiloA,
+                [RuntimeJournalProtocol.ClosedProperty] = ClosedValue,
+                [RuntimeJournalProtocol.MembershipProperty] = MembershipVersion,
+                [RuntimeJournalProtocol.AdoptedProperty] = AdoptedCount
             })).Snapshot!;
         await Assert.That(sameOwner.OwnerGeneration).IsEqualTo(claimed.OwnerGeneration);
-        await Assert.That(sameOwner.Properties["DurableJobsClosed"]).IsEqualTo("true");
-        await Assert.That(sameOwner.Properties["DurableJobsMembershipVersion"]).IsEqualTo("2");
-        await Assert.That(sameOwner.Properties["DurableJobsAdoptedCount"]).IsEqualTo("3");
+        await Assert.That(sameOwner.Properties[RuntimeJournalProtocol.ClosedProperty]).IsEqualTo(ClosedValue);
+        await Assert.That(sameOwner.Properties[RuntimeJournalProtocol.MembershipProperty]).IsEqualTo(MembershipVersion);
+        await Assert.That(sameOwner.Properties[RuntimeJournalProtocol.AdoptedProperty]).IsEqualTo(AdoptedCount);
 
         var poisoned = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, sameOwner,
-            etag: sameOwner.MetadataETag, set: new(StringComparer.Ordinal) { ["DurableJobsPoisoned"] = "true" })).Snapshot!;
+            etag: sameOwner.MetadataETag, set: new(StringComparer.Ordinal)
+            { [RuntimeJournalProtocol.PoisonedProperty] = ClosedValue })).Snapshot!;
         await Assert.That(poisoned.OwnerGeneration).IsEqualTo(sameOwner.OwnerGeneration + 1);
         var unpoisoned = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, poisoned,
-            etag: poisoned.MetadataETag, remove: ["DurableJobsPoisoned"])).Snapshot!;
+            etag: poisoned.MetadataETag, remove: [RuntimeJournalProtocol.PoisonedProperty])).Snapshot!;
         await Assert.That(unpoisoned.OwnerGeneration).IsEqualTo(poisoned.OwnerGeneration + 1);
-        await Assert.That(unpoisoned.Properties["DurableJobsOwner"]).IsEqualTo("silo-a");
+        await Assert.That(unpoisoned.Properties[RuntimeJournalProtocol.OwnerProperty]).IsEqualTo(SiloA);
         var stale = RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, claimed, [1]);
         await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(stale)));
         await Assert.That(fixture.Engine.GetRuntimeJournalHeader(RuntimeJournalFixture.JournalPrincipal, JournalName)?.OwnerGeneration)

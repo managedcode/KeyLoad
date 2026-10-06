@@ -7,8 +7,15 @@ using Microsoft.Extensions.Configuration;
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Validates endpoints and credentials required by the comparison host callers.</summary>
+[KeyLoad.ConfigurationBinding]
 internal static class ComparisonEndpointBindings
 {
+    private const int IsHttpOriginEmptyUserInfoLength = 0;
+    private const int IsHttpOriginEmptyQueryLength = 0;
+    private const int IsHttpOriginEmptyFragmentLength = 0;
+    private const char ContainsLineBreakCarriageReturnCharacter = '\r';
+    private const char ContainsLineBreakLineFeedCharacter = '\n';
+
     private const string HttpScheme = "http";
     private const string HttpsScheme = "https";
     private const string UriRootPath = "/";
@@ -19,10 +26,13 @@ internal static class ComparisonEndpointBindings
 
     internal static ImmutableArray<Uri> ReadKeyLoadEndpoints(IConfiguration configuration, Uri primary)
     {
+        const int FirstEntryIndex = 0;
+        const string ConfigurationKeySeparator = ":";
+
         var endpoints = ImmutableArray.CreateBuilder<Uri>(ComparisonHostConstants.KeyLoadEndpointCount);
-        for (var index = 0; index < ComparisonHostConstants.KeyLoadEndpointCount; index++)
+        for (var index = FirstEntryIndex; index < ComparisonHostConstants.KeyLoadEndpointCount; index++)
         {
-            var key = ComparisonHostConstants.KeyLoadEndpoints + ":" + index.ToString(CultureInfo.InvariantCulture);
+            var key = ComparisonHostConstants.KeyLoadEndpoints + ConfigurationKeySeparator + index.ToString(CultureInfo.InvariantCulture);
             if (!TryParseHttpOrigin(ComparisonHostSettings.RequiredValue(configuration, key), out var endpoint))
             {
                 throw InvalidKeyLoadEndpoints();
@@ -100,8 +110,8 @@ internal static class ComparisonEndpointBindings
     private static bool IsHttpOrigin(Uri endpoint)
         => (string.Equals(endpoint.Scheme, HttpScheme, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(endpoint.Scheme, HttpsScheme, StringComparison.OrdinalIgnoreCase)) &&
-            !string.IsNullOrWhiteSpace(endpoint.Host) && endpoint.UserInfo.Length == 0 &&
-            endpoint.Query.Length == 0 && endpoint.Fragment.Length == 0 &&
+            !string.IsNullOrWhiteSpace(endpoint.Host) && endpoint.UserInfo.Length == IsHttpOriginEmptyUserInfoLength &&
+            endpoint.Query.Length == IsHttpOriginEmptyQueryLength && endpoint.Fragment.Length == IsHttpOriginEmptyFragmentLength &&
             string.Equals(endpoint.AbsolutePath, UriRootPath, StringComparison.Ordinal);
 
     private static bool SameOrigin(Uri left, Uri right)
@@ -109,7 +119,7 @@ internal static class ComparisonEndpointBindings
             StringComparison.OrdinalIgnoreCase);
 
     private static bool ContainsLineBreak(string value)
-        => value.Contains('\r', StringComparison.Ordinal) || value.Contains('\n', StringComparison.Ordinal);
+        => value.Contains(ContainsLineBreakCarriageReturnCharacter, StringComparison.Ordinal) || value.Contains(ContainsLineBreakLineFeedCharacter, StringComparison.Ordinal);
 
     private static InvalidOperationException InvalidKeyLoadEndpoints()
         => new(ComparisonHostConstants.KeyLoadEndpointInvalidCode);

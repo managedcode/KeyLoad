@@ -74,8 +74,8 @@ internal sealed class SampleAggregateBudgetTests
             SampleAggregateTestData.Start.AddTicks(1));
         var expected = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
         var exactLength = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactLength }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactLength - SampleAggregateTestData.ExactBatchExtraByte }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactLength }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = exactLength - SampleAggregateTestData.ExactBatchExtraByte }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
         var actual = exact.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
         var failure = SampleAggregateTestData.Failure(() => oneByteShort.AggregateSamples(
@@ -99,8 +99,8 @@ internal sealed class SampleAggregateBudgetTests
         var after = db.Store.GetReadDiagnostics();
         var readBytes = after.PointExaminedBytes - before.PointExaminedBytes
             + after.RangeExaminedBytes - before.RangeExaminedBytes;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = readBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = readBytes - SampleAggregateTestData.ExactBatchExtraByte }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = readBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = readBytes - SampleAggregateTestData.ExactBatchExtraByte }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
         var actual = exact.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
         var failure = SampleAggregateTestData.Failure(() => oneByteShort.AggregateSamples(
@@ -119,14 +119,14 @@ internal sealed class SampleAggregateBudgetTests
         var request = new AggregateSamplesRequest(db.Partition, SampleAggregateTestData.Set,
             SampleAggregateTestData.EmptySeries, SampleAggregateTestData.Start,
             SampleAggregateTestData.Start.Add(SampleAggregateTestData.Minute));
-        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = SampleAggregateTestData.TinyReadBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = SampleAggregateTestData.TinyReadBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var readFailure = SampleAggregateTestData.Failure(() => limited.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var cancellation = Assert.ThrowsExactly<OperationCanceledException>(() => limited.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request, cancelled.Token));
-        var expired = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var expired = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var deadlineFailure = SampleAggregateTestData.Failure(() => expired.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
         var healthy = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);

@@ -21,17 +21,16 @@ internal sealed class NativeTextProjectionScopeTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"),
             new PutDocument(Collection, "two", "{\"text\":\"needle\"}"));
-        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"),
-            database.Database.Limits, database.Store.Identity.NodeId);
+        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var oracle = await new SearchEngine(database.Database).SearchAsync("root", request);
-        var search = new SearchEngine(database.Database, projection);
+        var oracle = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var canonical = await search.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
         var canonicalGeneration = CurrentGeneration(database);
         var scope = CaptureScope(database);
         var alteredSchemaScope = scope with { SchemaVersion = checked(scope.SchemaVersion + 1) };
         var documents = ReadCanonicalDocuments(database);
-        var budget = new ReadExecutionBudget(database.Database.Limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         using (var lease = projection.Acquire(alteredSchemaScope, budget))
         {
             ObserveCanonicalCorpus(lease, documents);

@@ -16,24 +16,24 @@ internal sealed class McpMemoryInspectionProjectionTests
     public async Task InspectionMatchesWorstShapeComponentsForActualByteCapacity()
     {
         var expected = InspectionComponents(SmallWireBytes);
-        var actual = McpMemoryProjection.Inspection(SmallWireBytes);
+        var actual = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Inspection(SmallWireBytes);
         var zeroShapeExpected = InspectionComponents(0);
 
         await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(McpMemoryProjection.Inspection(0)).IsEqualTo(zeroShapeExpected);
-        await Assert.That(McpMemoryProjection.Inspection(SmallWireBytes * 2)).IsGreaterThan(actual);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Inspection(0)).IsEqualTo(zeroShapeExpected);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Inspection(SmallWireBytes * 2)).IsGreaterThan(actual);
     }
 
     /// <summary>Authentication inspection is covered before parsing and includes its already-retained canonical bytes.</summary>
     [Test]
     public async Task AuthenticationScanAddsActualReplyInspectionToIngressBeforeDecode()
     {
-        var expected = McpMemoryProjection.Ingress(SmallWireBytes) + SmallWireBytes + InspectionComponents(SmallWireBytes);
-        var actual = McpMemoryProjection.AuthenticationScan(SmallWireBytes, SmallWireBytes);
-        var maximum = McpMemoryProjection.AuthenticationScan(0, MaximumAuthenticationBytes);
+        var expected = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(SmallWireBytes) + SmallWireBytes + InspectionComponents(SmallWireBytes);
+        var actual = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(SmallWireBytes, SmallWireBytes);
+        var maximum = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(0, MaximumAuthenticationBytes);
 
         await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(maximum > McpMemoryProjection.Ingress(0)).IsTrue();
+        await Assert.That(maximum > new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).Ingress(0)).IsTrue();
     }
 
     /// <summary>Authentication scan accepts its inclusive canonical ceiling and rejects the first excess byte.</summary>
@@ -41,13 +41,13 @@ internal sealed class McpMemoryInspectionProjectionTests
     public void AuthenticationScanValidatesActualBytesAndRequestCapacity()
     {
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.AuthenticationScan(-1, 0));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(-1, 0));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.AuthenticationScan(0, -1));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(0, -1));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.AuthenticationScan(0, MaximumAuthenticationBytes + 1));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(0, MaximumAuthenticationBytes + 1));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.AuthenticationScan(MaximumFrameBytes + 1, 0));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).AuthenticationScan(MaximumFrameBytes + 1, 0));
     }
 
     /// <summary>Reply scanning grows the current lease by actual bounded-byte inspection costs without shrinking it.</summary>
@@ -55,11 +55,11 @@ internal sealed class McpMemoryInspectionProjectionTests
     public async Task ReplyScanAddsInspectionForActualCanonicalResultBeforeWrapperCreation()
     {
         var expected = HeldBytes + InspectionComponents(SmallWireBytes);
-        var actual = McpMemoryProjection.ReplyScan(HeldBytes, SmallWireBytes);
+        var actual = new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(HeldBytes, SmallWireBytes);
 
         await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(McpMemoryProjection.ReplyScan(HeldBytes, SmallWireBytes * 2)).IsGreaterThan(actual);
-        await Assert.That(McpMemoryProjection.ReplyScan(HeldBytes, 0)).IsGreaterThan(HeldBytes);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(HeldBytes, SmallWireBytes * 2)).IsGreaterThan(actual);
+        await Assert.That(new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(HeldBytes, 0)).IsGreaterThan(HeldBytes);
     }
 
     /// <summary>Reply scan rejects negative and over-ceiling values before computing a reservation.</summary>
@@ -67,18 +67,18 @@ internal sealed class McpMemoryInspectionProjectionTests
     public void ReplyScanValidatesHeldBytesAndCanonicalReplyCeiling()
     {
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.ReplyScan(-1, 0));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(-1, 0));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.ReplyScan(HeldBytes, -1));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(HeldBytes, -1));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            McpMemoryProjection.ReplyScan(HeldBytes, MaximumReplyBytes + 1));
+new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(HeldBytes, MaximumReplyBytes + 1));
     }
 
     /// <summary>Overflow in held ownership is reported instead of returning an undercount.</summary>
     [Test]
     public void ReplyScanRejectsOverflow()
     {
-        Assert.ThrowsExactly<OverflowException>(() => McpMemoryProjection.ReplyScan(long.MaxValue, 0));
+        Assert.ThrowsExactly<OverflowException>(() => new KeyLoad.Server.McpMemoryProjection(UnitMcpOptions.Execution()).ReplyScan(long.MaxValue, 0));
     }
 
     private static long InspectionComponents(int bytes)

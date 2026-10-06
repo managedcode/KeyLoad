@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -8,13 +9,17 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
     internal static ServerNodeUpgradeOwner Bind(ServerNodeUpgradePaths paths, ServerNodeUpgradeInventory original,
         ServerRuntimeOptions options)
     {
+        const int EntryLengthValidationBoundary = 4_096;
+        const string BindPathText = "database/identity.json";
+        const string BindBindPathText = "database/commands.wal";
+
         if (original.Entries.Any(entry => entry.Path is ServerNodeUpgradeProtocol.CanonicalIdentityPath or ServerNodeUpgradeProtocol.ReplicaIdentityPath
-            && entry.Length > 4_096))
+            && entry.Length > EntryLengthValidationBoundary))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         var authority = ServerNodeUpgradePrivateDirectory.Run(Path.GetDirectoryName(paths.Destination)!, directory =>
         {
             var inputs = Path.Combine(directory, ServerNodeUpgradeProtocol.Inputs);
-            CopyInputs(paths.Source, inputs);
+            CopyInputs(paths.Source, inputs, executionOptions: options.NodeUpgrade);
             return VerifyCopies(inputs, options);
         });
         var canonical = authority.Canonical;
@@ -24,7 +29,7 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
                 or ServerNodeUpgradeProtocol.Native6SourceEpoch))
         { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
         return new(ServerNodeUpgradeProtocol.OwnerFormatVersion, paths.Source, paths.Destination, original.Sha256,
-            original.FileDigest("database/identity.json"), original.FileDigest("database/commands.wal"),
+            original.FileDigest(BindPathText), original.FileDigest(BindBindPathText),
             original.FileDigest("replica/identity.json"), original.FileDigest("replica/commands.wal"),
             canonical.FormatVersion, ServerNodeUpgradeProtocol.TargetEpoch);
     }
@@ -40,19 +45,19 @@ internal sealed record ServerNodeUpgradeAuthority(StoreIdentity Canonical, Store
             SigningKey = Convert.FromBase64String(options.Node.Value.SigningKey)
         }.ResolveExecutionOptions(options.StorageExecution);
 
-    internal static void CopyInputs(string source, string inputs)
+    internal static void CopyInputs(string source, string inputs, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         ServerNodeUpgradeFiles.CreatePrivateDirectory(inputs);
-        CopyStore(source, inputs, ServerNodeUpgradeProtocol.Canonical);
-        CopyStore(source, inputs, ServerNodeUpgradeProtocol.Replica);
+        CopyStore(source, inputs, ServerNodeUpgradeProtocol.Canonical, executionOptions: executionOptions);
+        CopyStore(source, inputs, ServerNodeUpgradeProtocol.Replica, executionOptions: executionOptions);
     }
 
-    internal static void CopyStore(string source, string inputs, string name)
+    internal static void CopyStore(string source, string inputs, string name, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
         var destination = Path.Combine(inputs, name);
         ServerNodeUpgradeFiles.CreatePrivateDirectory(destination);
         foreach (var file in new[] { ServerNodeUpgradeProtocol.Identity, ServerNodeUpgradeProtocol.Journal })
-        { ServerNodeUpgradeFiles.Copy(Path.Combine(source, name, file), Path.Combine(destination, file)); }
-        ServerNodeUpgradeFiles.CreateEmpty(Path.Combine(destination, ServerNodeUpgradeProtocol.StoreOwner));
+        { ServerNodeUpgradeFiles.Copy(Path.Combine(source, name, file), Path.Combine(destination, file), executionOptions: executionOptions); }
+        ServerNodeUpgradeFiles.CreateEmpty(Path.Combine(destination, ServerNodeUpgradeProtocol.StoreOwner), executionOptions: executionOptions);
     }
 }

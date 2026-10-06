@@ -16,7 +16,7 @@ internal sealed class McpFrameBodyTests
         var wire = Encoding.UTF8.GetBytes("{\"value\":\"é\"}");
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        using var body = await McpFrameBody.ReadAsync(input, wire.Length, MaximumBodyBytes);
+        using var body = await McpFrameBody.ReadAsync(input, wire.Length, MaximumBodyBytes, UnitMcpOptions.Execution());
 
         await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
         await Assert.That(body.Shape.TokenCount).IsEqualTo(4);
@@ -44,7 +44,7 @@ internal sealed class McpFrameBodyTests
         var wire = Encoding.UTF8.GetBytes("{\"items\":[1,2]}");
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        using var body = await McpFrameBody.ReadAsync(input, null, MaximumBodyBytes);
+        using var body = await McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, UnitMcpOptions.Execution());
 
         await Assert.That(body.WireBytes).IsEqualTo(wire.Length);
         await Assert.That(body.Shape.PropertyCount).IsEqualTo(1);
@@ -60,7 +60,7 @@ internal sealed class McpFrameBodyTests
         await Assert.That(wire.Length).IsEqualTo(MaximumBodyBytes);
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        using var body = await McpFrameBody.ReadAsync(input, MaximumBodyBytes, MaximumBodyBytes);
+        using var body = await McpFrameBody.ReadAsync(input, MaximumBodyBytes, MaximumBodyBytes, UnitMcpOptions.Execution());
 
         await Assert.That(body.WireBytes).IsEqualTo(MaximumBodyBytes);
         await Assert.That(body.Bytes.Span.SequenceEqual(wire)).IsTrue();
@@ -73,7 +73,7 @@ internal sealed class McpFrameBodyTests
         using var source = new TemporaryFrameFile(Encoding.UTF8.GetBytes("{}"));
         using var input = source.OpenRead();
 
-        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() => McpFrameBody.ReadAsync(input, null, 0));
+        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(() => McpFrameBody.ReadAsync(input, null, 0, UnitMcpOptions.Execution()));
         await Assert.That(input.Position).IsEqualTo(0);
     }
 
@@ -88,7 +88,7 @@ internal sealed class McpFrameBodyTests
         using var input = source.OpenRead();
 
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            McpFrameBody.ReadAsync(input, declaredLength, MaximumBodyBytes)) ?? throw new InvalidOperationException();
+            McpFrameBody.ReadAsync(input, declaredLength, MaximumBodyBytes, UnitMcpOptions.Execution())) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(input.Position).IsEqualTo(0);
     }
@@ -104,11 +104,11 @@ internal sealed class McpFrameBodyTests
         using var input = source.OpenRead();
 
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            McpFrameBody.ReadAsync(input, declaredLength, MaximumBodyBytes)) ?? throw new InvalidOperationException();
+            McpFrameBody.ReadAsync(input, declaredLength, MaximumBodyBytes, UnitMcpOptions.Execution())) ?? throw new InvalidOperationException();
         using var malformedSource = new TemporaryFrameFile(Encoding.UTF8.GetBytes("{\"invalid\":]}"));
         using var malformedInput = malformedSource.OpenRead();
         var malformed = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            McpFrameBody.ReadAsync(malformedInput, null, MaximumBodyBytes)) ?? throw new InvalidOperationException();
+            McpFrameBody.ReadAsync(malformedInput, null, MaximumBodyBytes, UnitMcpOptions.Execution())) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).IsEqualTo(malformed.Message);
     }
@@ -122,7 +122,7 @@ internal sealed class McpFrameBodyTests
         using var input = source.OpenRead();
 
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes)) ?? throw new InvalidOperationException();
+            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, UnitMcpOptions.Execution())) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(input.Position).IsLessThanOrEqualTo(MaximumBodyBytes + 1L);
     }
@@ -135,7 +135,7 @@ internal sealed class McpFrameBodyTests
         using var input = source.OpenRead();
 
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes)) ?? throw new InvalidOperationException();
+            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, UnitMcpOptions.Execution())) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(error.Message).DoesNotContain(SecretMarker);
     }
@@ -150,7 +150,7 @@ internal sealed class McpFrameBodyTests
         await cancelled.CancelAsync();
 
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() =>
-            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, cancelled.Token));
+            McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, UnitMcpOptions.Execution(), cancelled.Token));
         await Assert.That(input.Position).IsEqualTo(0);
     }
 
@@ -171,7 +171,7 @@ internal sealed class McpFrameBodyTests
         var wire = Encoding.UTF8.GetBytes("{\"private\":\"payload\"}");
         using var source = new TemporaryFrameFile(wire);
         using var input = source.OpenRead();
-        var body = await McpFrameBody.ReadAsync(input, wire.Length, MaximumBodyBytes);
+        var body = await McpFrameBody.ReadAsync(input, wire.Length, MaximumBodyBytes, UnitMcpOptions.Execution());
         var borrowed = body.Bytes;
         await Assert.That(borrowed.Span.SequenceEqual(wire)).IsTrue();
 
@@ -187,7 +187,7 @@ internal sealed class McpFrameBodyTests
     private static async Task<McpFrameBody> DisposeThenReadAsync(FileStream input)
     {
         await input.DisposeAsync();
-        return await McpFrameBody.ReadAsync(input, null, MaximumBodyBytes);
+        return await McpFrameBody.ReadAsync(input, null, MaximumBodyBytes, UnitMcpOptions.Execution());
     }
 }
 

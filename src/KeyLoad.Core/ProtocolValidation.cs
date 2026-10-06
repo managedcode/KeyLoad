@@ -2,13 +2,24 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int ProtocolValidationEmptyElementCount = 0;
+    private const int PrincipalFormatMaximumGrants = 256;
+    private const int PrincipalFormatMaximumFieldGrants = 256;
+    private const int PrincipalFormatMaximumProjects = 256;
+    private const string ProtocolValidationPrincipalScopeExceedsItsBudgetOrContainsAnInvalidGrantDetail = "The principal scope exceeds its budget or contains an invalid grant.";
+    private const string ProtocolValidationMutationResourceAndCanonicalOwnerDifferDetail = "The mutation resource and canonical owner differ.";
+    private const string ProtocolValidationNestedMutationEntryOrEnumValueIsInvalidDetail = "A nested mutation entry or enum value is invalid.";
+    private const string ProtocolValidationMutationIsUnsupportedDetail = "The mutation is unsupported.";
+
     private static void ValidatePrincipalStructure(PrincipalRecord principal)
     {
         if (principal.Grants.IsDefault || principal.FieldGrants.IsDefault || principal.Projects.IsDefault
-            || principal.Grants.Length > 256 || principal.FieldGrants.Length > 256 || principal.Projects.Length > 256
-            || principal.Grants.Any(grant => grant is null || (grant.Capabilities & ~Capability.All) != 0))
+            || principal.Grants.Length > PrincipalFormatMaximumGrants
+            || principal.FieldGrants.Length > PrincipalFormatMaximumFieldGrants
+            || principal.Projects.Length > PrincipalFormatMaximumProjects
+            || principal.Grants.Any(grant => grant is null || (grant.Capabilities & ~Capability.All) != ProtocolValidationEmptyElementCount))
         {
-            throw Errors.Fail(ErrorCode.Validation, "The principal scope exceeds its budget or contains an invalid grant.");
+            throw Errors.Fail(ErrorCode.Validation, ProtocolValidationPrincipalScopeExceedsItsBudgetOrContainsAnInvalidGrantDetail);
         }
 
         foreach (var grant in principal.Grants)
@@ -39,7 +50,7 @@ public sealed partial class DatabaseEngine
 
         if (mutation.Resource != CanonicalMutationOwner(mutation))
         {
-            throw Errors.Fail(ErrorCode.Validation, "The mutation resource and canonical owner differ.");
+            throw Errors.Fail(ErrorCode.Validation, ProtocolValidationMutationResourceAndCanonicalOwnerDifferDetail);
         }
 
         var invalid = mutation switch
@@ -55,7 +66,7 @@ public sealed partial class DatabaseEngine
         };
         if (invalid)
         {
-            throw Errors.Fail(ErrorCode.Validation, "A nested mutation entry or enum value is invalid.");
+            throw Errors.Fail(ErrorCode.Validation, ProtocolValidationNestedMutationEntryOrEnumValueIsInvalidDetail);
         }
     }
 
@@ -87,7 +98,7 @@ public sealed partial class DatabaseEngine
             CancelRecurringSchedule schedule => schedule.Lane.Queue,
             CompareExchangeSaga saga => saga.Lane.Queue,
             ExpireSaga saga => saga.Lane.Queue,
-            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "The mutation is unsupported.")
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, ProtocolValidationMutationIsUnsupportedDetail)
         };
 
     private static void ValidateExtendedMutationStructure(Mutation mutation)

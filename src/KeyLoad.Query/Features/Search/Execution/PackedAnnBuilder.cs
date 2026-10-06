@@ -1,18 +1,31 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.Search;
 
 internal static class PackedAnnBuilder
 {
+    private const int LevelArrayPairCount = 2;
+    private const int SingleWorkUnit = 1;
+    private const int UnassignedEntryPoint = -1;
+    private const int FirstElementIndex = 0;
+    private const int InitialSequence = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int VectorSpaceIdentityPartCount = 3;
+    private const int EqualOrder = 0;
+    private const long IdentifierTerminatorWork = 1L;
+    private const int FirstOrdinal = 1;
+
     private const string InvalidRecords = "The packed ANN source records are invalid or unordered.";
     private const string LevelsChanged = "The deterministic ANN levels changed during admitted construction.";
 
     internal static PackedAnnState Build(VectorSpace space, IReadOnlyList<VectorRecord> records,
-        PackedAnnOptions options, AnnWorkBudget budget)
+        IOptions<PackedAnnOptions> configuredOptions, AnnWorkBudget budget)
     {
         ArgumentNullException.ThrowIfNull(space);
         ArgumentNullException.ThrowIfNull(records);
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(configuredOptions);
+        var options = configuredOptions.Value;
         ArgumentNullException.ThrowIfNull(budget);
         PackedAnnAdmission.ValidateOptions(options);
         PackedAnnAdmission.ValidateRecordCount(records.Count, options);
@@ -24,40 +37,40 @@ internal static class PackedAnnBuilder
         var ids = CopyIds(records, budget);
         ValidateOwnedIds(ids, budget);
         var revisions = CopyRevisions(records, budget);
-        budget.Charge(checked((long)plan.Count * 2 + 1));
+        budget.Charge(checked((long)plan.Count * LevelArrayPairCount + SingleWorkUnit));
         var levels = new byte[plan.Count];
         var upperOffsets = new int[plan.UpperOffsetLength];
         FillLevelsAndOffsets(plan, options, levels, upperOffsets, budget);
         var graph = new PackedAnnGraph(plan.Count, options.Connections, levels, upperOffsets,
             plan.BaseSlots, plan.UpperSlots);
-        var vectors = PackedAnnVectors.Copy(records, plan, budget);
-        var entryPoint = -1;
-        var maximumLevel = -1;
-        var scratch = new PackedAnnBuildScratch(plan.Count, options, budget);
-        for (var ordinal = 0; ordinal < plan.Count; ordinal++)
+        var vectors = PackedAnnVectors.Copy(records, plan, budget, options.VectorBudgetCheckInterval);
+        var entryPoint = UnassignedEntryPoint;
+        var maximumLevel = UnassignedEntryPoint;
+        var scratch = new PackedAnnBuildScratch(plan.Count, options.Connections, options.EfConstruction, budget);
+        for (var ordinal = FirstElementIndex; ordinal < plan.Count; ordinal++)
         {
             budget.Check();
             var level = levels[ordinal];
             PackedAnnConstruction.Insert(graph, vectors, ownedSpace, ordinal, level,
                 ref entryPoint, ref maximumLevel, scratch, budget);
         }
-        return new(ownedSpace, ids, revisions, levels, graph, vectors, entryPoint, maximumLevel, options,
+        return new(ownedSpace, ids, revisions, levels, graph, vectors, entryPoint, maximumLevel, configuredOptions,
             plan.RetainedBytes, plan.BuildScratchBytes);
     }
 
     private static void FillLevelsAndOffsets(PackedAnnAdmission plan, PackedAnnOptions options,
         byte[] levels, int[] upperOffsets, AnnWorkBudget budget)
     {
-        long sumLevels = 0;
-        long edgeOffset = 0;
-        for (var ordinal = 0; ordinal < levels.Length; ordinal++)
+        long sumLevels = InitialSequence;
+        long edgeOffset = FirstElementIndex;
+        for (var ordinal = FirstElementIndex; ordinal < levels.Length; ordinal++)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             var level = PackedAnnLevels.For(options.Seed, ordinal, options.Connections, options.MaxLevel, budget);
             levels[ordinal] = checked((byte)level);
             sumLevels = checked(sumLevels + level);
             edgeOffset = checked(edgeOffset + (long)level * options.Connections);
-            upperOffsets[ordinal + 1] = checked((int)edgeOffset);
+            upperOffsets[ordinal + AdjacentElementOffset] = checked((int)edgeOffset);
         }
         if (sumLevels != plan.SumLevels || edgeOffset != plan.UpperSlots)
         {
@@ -69,19 +82,19 @@ internal static class PackedAnnBuilder
     {
         string? previousId = null;
         string? field = null;
-        for (var ordinal = 0; ordinal < records.Count; ordinal++)
+        for (var ordinal = FirstElementIndex; ordinal < records.Count; ordinal++)
         {
             budget.Check();
             var record = records[ordinal] ?? throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
-            budget.Charge(checked((long)space.Id.Length + space.Model.Length + space.Version.Length + 3));
-            if (record.Values.IsDefault || record.Space != space || record.DocumentRevision <= 0
+            budget.Charge(checked((long)space.Id.Length + space.Model.Length + space.Version.Length + VectorSpaceIdentityPartCount));
+            if (record.Values.IsDefault || record.Space != space || record.DocumentRevision <= InitialSequence
                 || record.Values.Length != space.Dimension)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
             }
             CheckIdentifier(record.DocumentId, budget);
             CheckIdentifier(record.Field, budget);
-            if (previousId is not null && StringComparer.Ordinal.Compare(previousId, record.DocumentId) >= 0
+            if (previousId is not null && StringComparer.Ordinal.Compare(previousId, record.DocumentId) >= EqualOrder
                 || field is not null && !StringComparer.Ordinal.Equals(field, record.Field))
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
@@ -94,9 +107,9 @@ internal static class PackedAnnBuilder
 
     private static void ValidateValues(ReadOnlySpan<float> values, AnnWorkBudget budget)
     {
-        for (var index = 0; index < values.Length; index++)
+        for (var index = FirstElementIndex; index < values.Length; index++)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             if (!float.IsFinite(values[index]))
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
@@ -110,7 +123,7 @@ internal static class PackedAnnBuilder
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
         }
-        budget.Charge(checked(value.Length + 1L));
+        budget.Charge(checked(value.Length + IdentifierTerminatorWork));
         JsonData.Identifier(value);
     }
 
@@ -129,12 +142,12 @@ internal static class PackedAnnBuilder
 
     private static string[] CopyIds(IReadOnlyList<VectorRecord> records, AnnWorkBudget budget)
     {
-        for (var ordinal = 0; ordinal < records.Count; ordinal++)
+        for (var ordinal = FirstElementIndex; ordinal < records.Count; ordinal++)
         {
-            budget.Charge(checked(records[ordinal].DocumentId.Length + 1L));
+            budget.Charge(checked(records[ordinal].DocumentId.Length + IdentifierTerminatorWork));
         }
         var ids = new string[records.Count];
-        for (var ordinal = 0; ordinal < ids.Length; ordinal++)
+        for (var ordinal = FirstElementIndex; ordinal < ids.Length; ordinal++)
         {
             budget.Check();
             ids[ordinal] = new(records[ordinal].DocumentId.AsSpan());
@@ -144,10 +157,10 @@ internal static class PackedAnnBuilder
 
     private static void ValidateOwnedIds(string[] ids, AnnWorkBudget budget)
     {
-        for (var ordinal = 1; ordinal < ids.Length; ordinal++)
+        for (var ordinal = FirstOrdinal; ordinal < ids.Length; ordinal++)
         {
-            budget.Charge(checked((long)ids[ordinal - 1].Length + ids[ordinal].Length));
-            if (StringComparer.Ordinal.Compare(ids[ordinal - 1], ids[ordinal]) >= 0)
+            budget.Charge(checked((long)ids[ordinal - SingleWorkUnit].Length + ids[ordinal].Length));
+            if (StringComparer.Ordinal.Compare(ids[ordinal - AdjacentElementOffset], ids[ordinal]) >= EqualOrder)
             {
                 throw Errors.Fail(ErrorCode.Validation, InvalidRecords);
             }
@@ -158,7 +171,7 @@ internal static class PackedAnnBuilder
     {
         budget.Charge(records.Count);
         var revisions = new long[records.Count];
-        for (var ordinal = 0; ordinal < revisions.Length; ordinal++)
+        for (var ordinal = FirstElementIndex; ordinal < revisions.Length; ordinal++)
         {
             budget.Check();
             revisions[ordinal] = records[ordinal].DocumentRevision;

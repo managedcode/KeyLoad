@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.Search;
@@ -9,11 +10,13 @@ internal static class AnnSeedCollector
 
     internal static AnnSeed Capture(DatabaseEngine database, string principalId,
         PartitionRef partition, string collection, string field, VectorSpace space,
-        AnnSeedOptions options, ReadExecutionBudget readBudget)
+        IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(readBudget);
-        AnnSeedOptions.ValidateInput(options);
+        ArgumentNullException.ThrowIfNull(configuredOptions);
+        var options = configuredOptions.Value;
+        options.Validate();
         readBudget.Check();
         var work = new AnnSeedWork(readBudget, options.MaxWorkUnits);
         AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
@@ -34,7 +37,10 @@ internal static class AnnSeedCollector
         string principalId, PartitionRef partition, string collection, string field,
         VectorSpace space, AnnSeedOptions options, ReadExecutionBudget budget, AnnSeedWork work)
     {
-        var buffer = new AnnSeedBuffer(options, budget, work);
+        const int CaptureCutAbsentCount = 0;
+        const int AppliedValidationBoundary = 0;
+
+        var buffer = new AnnSeedBuffer(options.MaxRecords, options.MaxOwnedBytes, options.MaxPeakBytes, options.InitialRecordCapacity, budget, work);
         var now = database.EvaluationClock.GetUtcNow();
         var metadata = budget.CreateView(view);
         var principal = database.Principal(metadata, principalId, now);
@@ -51,8 +57,8 @@ internal static class AnnSeedCollector
         database.Authorization.RequireFieldUse(principal, resource, field);
         var head = database.ReadOutboxHead(metadata, partition);
         var appliedBytes = metadata.ReadOwnedValue(KeySpace.AppliedBytes);
-        var applied = appliedBytes is null ? 0 : NativeSerialization.Deserialize<long>(appliedBytes);
-        if (applied < 0)
+        var applied = appliedBytes is null ? CaptureCutAbsentCount : NativeSerialization.Deserialize<long>(appliedBytes);
+        if (applied < AppliedValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidAppliedPosition);
         }

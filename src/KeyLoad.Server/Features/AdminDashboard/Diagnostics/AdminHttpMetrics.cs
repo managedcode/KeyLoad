@@ -34,16 +34,21 @@ internal sealed class AdminHttpMetrics(TimeProvider? clock = null)
 
     private void Retain(AdminHttpFailureDetail detail, TimeSpan elapsed)
     {
+        const int NextFailureStep = 1;
+        const int RetainedFailuresStep = 1;
+
         failed++;
         failures[nextFailure] = new(time.GetUtcNow(), detail.Method, detail.Route, detail.StatusCode, detail.Aborted, elapsed.TotalMilliseconds);
-        nextFailure = (nextFailure + 1) % failures.Length;
-        retainedFailures = Math.Min(retainedFailures + 1, failures.Length);
+        nextFailure = (nextFailure + NextFailureStep) % failures.Length;
+        retainedFailures = Math.Min(retainedFailures + RetainedFailuresStep, failures.Length);
     }
 
     private ImmutableArray<AdminHttpFailure> NewestFirst()
     {
+        const int AgeInitialValue = 1;
+
         var builder = ImmutableArray.CreateBuilder<AdminHttpFailure>(retainedFailures);
-        for (var age = 1; age <= retainedFailures; age++)
+        for (var age = AgeInitialValue; age <= retainedFailures; age++)
         { builder.Add(failures[(nextFailure - age + failures.Length) % failures.Length]); }
         return builder.MoveToImmutable();
     }

@@ -31,6 +31,9 @@ internal sealed class GraphIncomingEdgesPageBuilder
 
     internal void Add(EdgeRecord edge, long deliveredRevision, ResourceDefinition graph)
     {
+        const int EmptyRowCount = 0;
+        const int NoCommaBytes = 0;
+
         if (rows.Count >= limit)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, TooManyIncoming);
@@ -42,7 +45,7 @@ internal sealed class GraphIncomingEdgesPageBuilder
         };
         var row = new GraphIncomingEdgeRowV1(projected, deliveredRevision);
         var rowBytes = budget.MeasureResult(row);
-        var addition = checked(rowBytes + (rows.Count > 0 ? CommaBytes : 0));
+        var addition = checked(rowBytes + (rows.Count > EmptyRowCount ? CommaBytes : NoCommaBytes));
         var adjusted = checked(retainedBytes - ArrayBracketsBytes);
         if (addition > database.Limits.MaxBatchBytes - adjusted)
         {

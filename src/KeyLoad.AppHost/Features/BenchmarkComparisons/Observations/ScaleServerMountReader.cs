@@ -4,6 +4,12 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class ScaleServerMountReader
 {
+    private const string FormatArgument = "--format";
+    private const string TargetArgument = "--target";
+    private const string OutputArgument = "--output";
+    private const string FilesystemSizeField = "size";
+    private const string FilesystemAvailableField = "avail";
+
     private const int ReadNonnegativeBoundaryValue = 0;
 
     private const string TargetField = "target";
@@ -18,7 +24,7 @@ internal static class ScaleServerMountReader
     internal static async Task<ScaleServerMount[]> ReadAsync(string text, string[] expectedTargets,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        const int SingleFilesystemCount = 0;
+        const int EmptyLength = 0;
         const int MountFieldCount = 3;
         const int FirstIndex = 0;
         const int ElementIndex = 2;
@@ -31,7 +37,7 @@ internal static class ScaleServerMountReader
             return [];
         }
 
-        if (expected.Count == SingleFilesystemCount)
+        if (expected.Count == EmptyLength)
         {
             return [];
         }
@@ -48,7 +54,7 @@ internal static class ScaleServerMountReader
             foreach (var row in text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries))
             {
                 var fields = row.Split(FieldSeparator, StringSplitOptions.None);
-                if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == SingleFilesystemCount
+                if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == EmptyLength
                     || mounts.Count >= budget.Settings.MaxMounts || !expected.Contains(fields[SecondIndex])
                     || !observed.Add(fields[SecondIndex]))
                 {
@@ -85,7 +91,7 @@ internal static class ScaleServerMountReader
         }
 
         var endpoint = await ScaleServerResourceProcess.RunAsync(Docker,
-            [ArgumentsText, IsLocalDockerAsyncArgumentsText, "--format", ContextFormat], token, budget, budget.Settings.MaxNativeOutputBytes);
+            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], token, budget, budget.Settings.MaxNativeOutputBytes);
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
     }
 
@@ -110,7 +116,7 @@ internal static class ScaleServerMountReader
         }
 
         var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
-            [ArgumentsText, ReadActualMountAsyncArgumentsText, "--target", canonicalSource, "--output", FindmntOutput], token, budget,
+            [ArgumentsText, ReadActualMountAsyncArgumentsText, TargetArgument, canonicalSource, OutputArgument, FindmntOutput], token, budget,
             budget.Settings.MaxNativeOutputBytes);
         if (json is null)
         {
@@ -134,8 +140,8 @@ internal static class ScaleServerMountReader
 
             var target = Path.GetFullPath(row.GetProperty(TargetField).GetString() ?? string.Empty);
             var fileSystem = row.GetProperty(ReadActualMountAsyncPropertyNameText).GetString();
-            var capacity = ReadNonnegative(row.GetProperty("size"));
-            var available = ReadNonnegative(row.GetProperty("avail"));
+            var capacity = ReadNonnegative(row.GetProperty(FilesystemSizeField));
+            var available = ReadNonnegative(row.GetProperty(FilesystemAvailableField));
             if (!IsPathWithin(canonicalSource, target) || string.IsNullOrWhiteSpace(fileSystem)
                 || capacity <= BoundaryValue || available < BoundaryValue || available > capacity)
             {
@@ -162,7 +168,7 @@ internal static class ScaleServerMountReader
         }
 
         var names = value.EnumerateObject().Select(item => item.Name).Order(StringComparer.Ordinal).ToArray();
-        return names.SequenceEqual([OtherText, HasExactMountFieldsOtherText, "size", "target"], StringComparer.Ordinal);
+        return names.SequenceEqual([OtherText, HasExactMountFieldsOtherText, FilesystemSizeField, TargetField], StringComparer.Ordinal);
     }
 
     private static long ReadNonnegative(JsonElement value)

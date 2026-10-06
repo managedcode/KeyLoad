@@ -5,6 +5,8 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal static class PartitionQueryPublicMapper
 {
+    private const int VersionOne = 1;
+
     private const int PageDescriptorBytes = 64;
     private const int ArrayDescriptorBytes = 32;
     private const int ReferenceBytes = 8;
@@ -27,7 +29,7 @@ internal static class PartitionQueryPublicMapper
 
         var rows = MapRows(result.Rows, budget);
         var leaves = MapLeaves(result.Leaves, budget);
-        var page = new PartitionQueryPageV1(1, rows, leaves, true);
+        var page = new PartitionQueryPageV1(VersionOne, rows, leaves, true);
         budget.CheckResult(page);
         return page;
     }

@@ -11,11 +11,14 @@ namespace KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 [CategoriesColumn]
 public class SampleChunkSerializationBenchmarks
 {
+    private const int DefaultControlRecordCount = 32;
+    private const string RequireStateFailureMessage = "The sample chunk benchmark is not initialized.";
+
     private SampleChunkBenchmarkState? state;
 
     /// <summary>Gets or sets the actual number of independently identified samples in each encoded batch.</summary>
     [Params(1, 32, 256)]
-    public int RecordCount { get; set; } = 32;
+    public int RecordCount { get; set; } = DefaultControlRecordCount;
 
     /// <summary>Gets or sets the deterministic timestamp/value/tag distribution, not a database dataset size.</summary>
     [Params(SampleChunkBenchmarkCorpus.Regular, SampleChunkBenchmarkCorpus.Late, SampleChunkBenchmarkCorpus.Random)]
@@ -25,12 +28,15 @@ public class SampleChunkSerializationBenchmarks
     [GlobalSetup]
     public void Setup()
     {
+        const string SetupFailureMessage = "The sample chunk benchmark is already initialized.";
+
         if (state is not null)
         {
-            throw new InvalidOperationException("The sample chunk benchmark is already initialized.");
+            throw new InvalidOperationException(SetupFailureMessage);
         }
-        var candidate = new SampleChunkBenchmarkState(SampleChunkBenchmarkCorpus.Create(RecordCount, Corpus));
-        SampleChunkBenchmarkManifest.Write(RecordCount, Corpus, candidate);
+        var candidate = new SampleChunkBenchmarkState(SampleChunkBenchmarkCorpus.Create(RecordCount, Corpus),
+            EmbeddedBenchmarkRuntimeRegistration.Read().Database);
+        SampleChunkBenchmarkManifest.Write(RecordCount, Corpus, candidate, BenchmarkArtifactRegistration.ReadSampleChunk());
         state = candidate;
     }
 
@@ -63,5 +69,5 @@ public class SampleChunkSerializationBenchmarks
     public void Cleanup() => state = null;
 
     private SampleChunkBenchmarkState RequireState()
-        => state ?? throw new InvalidOperationException("The sample chunk benchmark is not initialized.");
+        => state ?? throw new InvalidOperationException(RequireStateFailureMessage);
 }

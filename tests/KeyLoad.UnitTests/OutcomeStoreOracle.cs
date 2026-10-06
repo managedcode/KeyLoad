@@ -104,7 +104,7 @@ internal static class OutcomeStoreOracle
     {
         try
         {
-            var normalized = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource()).NormalizeOperation(operation);
+            var normalized = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()).NormalizeOperation(operation);
             var payload = NativeSerialization.Deserialize<NativeCommandPayload>(normalized.NativePayload.Span);
             return payload.Error is null && !payload.Value.IsEmpty;
         }

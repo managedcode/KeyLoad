@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -5,14 +6,22 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal static class RequestCqrsProbeJson
+internal sealed class RequestCqrsProbeJson
 {
-    private const int MaximumRecordBytes = 8_192;
     private const string InvalidRecord = "The private request probe record is invalid.";
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
-    private static readonly RequestCqrsProbeJsonContext Context = CreateContext();
+    private readonly IOptions<RequestProbeExecutionOptions> executionOptions;
+    private readonly RequestCqrsProbeJsonContext Context;
 
-    internal static RequestCqrsProbeOwnerRecord ReadOwner(ReadOnlySpan<byte> bytes)
+    internal RequestCqrsProbeJson(IOptions<RequestProbeExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        this.executionOptions = executionOptions;
+        Context = CreateContext();
+    }
+
+    internal RequestCqrsProbeOwnerRecord ReadOwner(ReadOnlySpan<byte> bytes)
     {
         var value = Read(bytes, RequestCqrsProbeRecordFields.Owner, Context.RequestCqrsProbeOwnerRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.OwnerKind
@@ -21,7 +30,7 @@ internal static class RequestCqrsProbeJson
         return value;
     }
 
-    internal static RequestCqrsProbeArmRecord ReadArm(ReadOnlySpan<byte> bytes)
+    internal RequestCqrsProbeArmRecord ReadArm(ReadOnlySpan<byte> bytes)
     {
         var value = Read(bytes, RequestCqrsProbeRecordFields.Arm, Context.RequestCqrsProbeArmRecord);
         var read = value.ReadKind.HasValue;
@@ -35,7 +44,7 @@ internal static class RequestCqrsProbeJson
         return value;
     }
 
-    internal static RequestCqrsProbeReleaseRecord ReadRelease(ReadOnlySpan<byte> bytes)
+    internal RequestCqrsProbeReleaseRecord ReadRelease(ReadOnlySpan<byte> bytes)
     {
         var value = Read(bytes, RequestCqrsProbeRecordFields.Release, Context.RequestCqrsProbeReleaseRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.ReleaseKind
@@ -44,7 +53,7 @@ internal static class RequestCqrsProbeJson
         return value;
     }
 
-    internal static RequestCqrsProbeMarkerRecord ReadMarker(ReadOnlySpan<byte> bytes)
+    internal RequestCqrsProbeMarkerRecord ReadMarker(ReadOnlySpan<byte> bytes)
     {
         var value = Read(bytes, RequestCqrsProbeRecordFields.Marker, Context.RequestCqrsProbeMarkerRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.MarkerKind
@@ -55,8 +64,11 @@ internal static class RequestCqrsProbeJson
         return value;
     }
 
-    internal static RequestCqrsProbeDiscoveryRecord ReadDiscovery(ReadOnlySpan<byte> bytes)
+    internal RequestCqrsProbeDiscoveryRecord ReadDiscovery(ReadOnlySpan<byte> bytes)
     {
+        const int ApplicationRpcVersionValidationBoundary = 0;
+        const int PeerEnvelopeVersionValidationBoundary = 0;
+
         var value = Read(bytes, RequestCqrsProbeRecordFields.Discovery, Context.RequestCqrsProbeDiscoveryRecord);
         if (value.Version != RequestCqrsProbeProtocol.Version
             || value.Kind != RequestCqrsProbeProtocol.DiscoveryKind
@@ -64,33 +76,33 @@ internal static class RequestCqrsProbeJson
             || string.IsNullOrWhiteSpace(value.ObserverVoterId)
             || string.IsNullOrWhiteSpace(value.PeerVoterId)
             || value.ObserverVoterId == value.PeerVoterId
-            || value.ApplicationRpcVersion < 0 || value.PeerEnvelopeVersion < 0
+            || value.ApplicationRpcVersion < ApplicationRpcVersionValidationBoundary || value.PeerEnvelopeVersion < PeerEnvelopeVersionValidationBoundary
             || value.ProtocolCompatible)
         { throw Invalid(); }
         return value;
     }
 
-    internal static byte[] WriteDiscovery(RequestCqrsProbeDiscoveryRecord value)
+    internal byte[] WriteDiscovery(RequestCqrsProbeDiscoveryRecord value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeDiscoveryRecord);
-        if (bytes.Length > MaximumRecordBytes)
+        if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
         { throw Invalid(); }
         return bytes;
     }
 
-    internal static byte[] WriteMarker(RequestCqrsProbeMarkerRecord value)
+    internal byte[] WriteMarker(RequestCqrsProbeMarkerRecord value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeMarkerRecord);
-        if (bytes.Length > MaximumRecordBytes)
+        if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
         { throw Invalid(); }
         return bytes;
     }
 
-    private static RequestCqrsProbeJsonContext CreateContext()
+    private RequestCqrsProbeJsonContext CreateContext()
     {
         var options = new JsonSerializerOptions
         {
-            MaxDepth = RequestCqrsProbeProtocol.MaximumJsonDepth,
+            MaxDepth = executionOptions.Value.MaximumJsonDepth,
             PropertyNameCaseInsensitive = false,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
             RespectNullableAnnotations = true,
@@ -103,9 +115,11 @@ internal static class RequestCqrsProbeJson
         return new RequestCqrsProbeJsonContext(options);
     }
 
-    private static void ValidateShape(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields)
+    private void ValidateShape(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields)
     {
-        if (bytes.IsEmpty || bytes.Length > MaximumRecordBytes)
+        const int IndexOfValidationBoundary = 0;
+
+        if (bytes.IsEmpty || bytes.Length > executionOptions.Value.MaximumRecordBytes)
         { throw Invalid(); }
         try
         { _ = StrictUtf8.GetCharCount(bytes); }
@@ -113,7 +127,7 @@ internal static class RequestCqrsProbeJson
         { throw Invalid(); }
         var reader = new Utf8JsonReader(bytes, new JsonReaderOptions
         {
-            MaxDepth = RequestCqrsProbeProtocol.MaximumJsonDepth,
+            MaxDepth = executionOptions.Value.MaximumJsonDepth,
             CommentHandling = JsonCommentHandling.Disallow,
             AllowTrailingCommas = false
         });
@@ -125,7 +139,7 @@ internal static class RequestCqrsProbeJson
             if (reader.TokenType != JsonTokenType.PropertyName || reader.ValueIsEscaped)
             { throw Invalid(); }
             var name = reader.GetString();
-            if (name is null || fields.IndexOf(name) < 0 || !seen.Add(name)
+            if (name is null || fields.IndexOf(name) < IndexOfValidationBoundary || !seen.Add(name)
                 || !reader.Read() || reader.TokenType is JsonTokenType.StartArray or JsonTokenType.StartObject
                 || reader.TokenType is JsonTokenType.EndArray or JsonTokenType.EndObject)
             { throw Invalid(); }
@@ -134,7 +148,7 @@ internal static class RequestCqrsProbeJson
         { throw Invalid(); }
     }
 
-    private static T Read<T>(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields, JsonTypeInfo<T> typeInfo) where T : struct
+    private T Read<T>(ReadOnlySpan<byte> bytes, ReadOnlySpan<string> fields, JsonTypeInfo<T> typeInfo) where T : struct
     {
         try
         {
@@ -147,12 +161,12 @@ internal static class RequestCqrsProbeJson
         { throw Invalid(); }
     }
 
-    private static bool ValidPrincipal(string value)
+    private bool ValidPrincipal(string value)
     {
         if (!value.StartsWith(RequestCqrsProbeProtocol.PrincipalPrefix, StringComparison.Ordinal))
         { return false; }
         try
-        { return StrictUtf8.GetByteCount(value) <= RequestCqrsProbeProtocol.MaximumPrincipalBytes; }
+        { return StrictUtf8.GetByteCount(value) <= executionOptions.Value.MaximumPrincipalBytes; }
         catch (EncoderFallbackException)
         { return false; }
     }

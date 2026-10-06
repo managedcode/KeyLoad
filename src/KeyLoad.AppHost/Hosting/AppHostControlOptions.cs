@@ -15,5 +15,7 @@ internal sealed class AppHostControlOptions
     internal bool Ephemeral { get; set; }
     internal bool BenchmarksEnabled { get; set; }
     internal bool TargetSelected { get; set; }
+    internal bool ProtocolCohortConfigured { get; set; }
+    internal bool ComparisonSelectorsPresent { get; set; }
     internal bool ScaleSelected { get; set; }
 }

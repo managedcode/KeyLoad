@@ -5,6 +5,9 @@ namespace KeyLoad.Orleans;
 
 internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, IAsyncDisposable
 {
+    private const int NewCallExpectedTableVersionEmptyCount = 0;
+    private const int NewCallCleanupBeforeUtcTicksEmptyCount = 0;
+
     private readonly ReplicaMembershipAuthorityClientResources resources;
     private readonly ReplicaMembershipAuthorityExchangeOptions options;
     private readonly TimeProvider clock;
@@ -128,7 +131,7 @@ internal sealed class ReplicaMembershipAuthorityClientTable : IMembershipTable, 
         => new(ReplicaMembershipAuthorityProtocol.Version, options.ClusterId, options.AuthorityPhysicalShardId,
             options.AuthorityIncarnation, options.CallerPhysicalShardId, options.CallerIncarnation,
             options.CallerVoterId, options.CallerSiloAddress, Guid.NewGuid(), (int)operation,
-            null, null, 0, null, null, 0);
+            null, null, NewCallExpectedTableVersionEmptyCount, null, null, NewCallCleanupBeforeUtcTicksEmptyCount);
 
     private static MembershipTableData Data(ReplicaMembershipAuthorityReplyV1 reply)
     {

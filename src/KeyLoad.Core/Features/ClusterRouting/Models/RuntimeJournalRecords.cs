@@ -1,7 +1,9 @@
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
+
 namespace KeyLoad.Core.Features.ClusterRouting.Models;
 
 [Orleans.GenerateSerializer]
-[Orleans.Alias("keyload.runtime-journal.header.v1")]
+[Orleans.Alias(RuntimeJournalProtocol.HeaderAlias)]
 internal sealed record RuntimeJournalHeaderV1(
     [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] string Name,
@@ -13,18 +15,18 @@ internal sealed record RuntimeJournalHeaderV1(
     [property: Orleans.Id(7)] Dictionary<string, string> Properties);
 
 [Orleans.GenerateSerializer]
-[Orleans.Alias("keyload.runtime-journal.chunk.v1")]
+[Orleans.Alias(RuntimeJournalProtocol.ChunkAlias)]
 internal sealed record RuntimeJournalChunkV1(
     [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] int Index,
     [property: Orleans.Id(2)] byte[] Data);
 
 [Orleans.GenerateSerializer]
-[Orleans.Alias("keyload.runtime-journal.catalog-marker.v1")]
+[Orleans.Alias(RuntimeJournalProtocol.CatalogMarkerAlias)]
 internal sealed record RuntimeJournalCatalogMarkerV1([property: Orleans.Id(0)] int Version);
 
 [Orleans.GenerateSerializer]
-[Orleans.Alias("keyload.runtime-journal.quota.v1")]
+[Orleans.Alias(RuntimeJournalProtocol.QuotaAlias)]
 internal sealed record RuntimeJournalQuotaV1(
     [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] int JournalCount,

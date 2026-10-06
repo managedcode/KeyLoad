@@ -22,6 +22,12 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
     private BlobRestoreMarker? Initialize()
     {
+        const int ReservedBytesEmptyCount = 0;
+        const int ObjectKeysEmptyCount = 0;
+        const int VersionsEmptyCount = 0;
+        const int ActiveUploadsEmptyCount = 0;
+        const int ResourcesEmptyCount = 0;
+
         return database.Store.Commit((tx, _) =>
         {
             var current = BlobRecordReader.Get<BlobRestoreMarker>(tx, BlobRestoreFence.MarkerKey);
@@ -45,7 +51,7 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             if (global.Incarnation == database.Store.Identity.Incarnation)
             { return null; }
             var marker = new BlobRestoreMarker(BlobKeys.FormatVersion, global.Incarnation,
-                database.Store.Identity.Incarnation, BlobRestorePhase.States, null, 0, 0, 0, 0, 0);
+                database.Store.Identity.Incarnation, BlobRestorePhase.States, null, ReservedBytesEmptyCount, ObjectKeysEmptyCount, VersionsEmptyCount, ActiveUploadsEmptyCount, ResourcesEmptyCount);
             tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
             return marker;
         });
@@ -53,16 +59,19 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
     private static List<KeyValueRecord> Collect(IKeyValueView view, BlobRestoreMarker marker)
     {
+        const long BytesInitialValue = 0L;
+        const int EmptyCollectedRecordCount = 0;
+
         var records = new List<KeyValueRecord>(BlobKeys.MetadataPageSize);
         var prefix = KeyCodec.Encode(BlobRestoreFence.Space(marker.Phase));
-        var bytes = 0L;
+        var bytes = BytesInitialValue;
         view.VisitRange(prefix, BlobKeys.MetadataPageSize, (key, value) =>
         {
             if (marker.Phase is BlobRestorePhase.States or BlobRestorePhase.Heads
                 or BlobRestorePhase.VerifyStates or BlobRestorePhase.VerifyHeads)
             { BlobMetadataRules.EncodedLength(value.Length); }
             var candidate = checked((long)key.Length + value.Length);
-            if (candidate > BlobKeys.RestorePageBytes - bytes && records.Count > 0)
+            if (candidate > BlobKeys.RestorePageBytes - bytes && records.Count > EmptyCollectedRecordCount)
             { return false; }
             if (candidate > BlobKeys.RestorePageBytes && marker.Phase != BlobRestorePhase.VerifyResources)
             { throw BlobErrors.Corruption(); }
@@ -75,6 +84,8 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
     private BlobRestoreMarker CommitPage(IAtomicTransaction tx, BlobRestoreMarker expected, List<KeyValueRecord> page)
     {
+        const int EmptyPageCount = 0;
+
         RequireMarker(tx, expected);
         var marker = expected;
         foreach (var record in page)
@@ -93,7 +104,7 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             marker = ApplyRecord(tx, marker, record);
             marker = marker with { ExclusiveCursor = record.Key };
         }
-        if (page.Count == 0)
+        if (page.Count == EmptyPageCount)
         { marker = marker with { Phase = Next(marker.Phase), ExclusiveCursor = null }; }
         BlobRestoreFence.Validate(marker);
         tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
@@ -102,6 +113,8 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
     private BlobRestoreMarker ApplyRecord(IAtomicTransaction tx, BlobRestoreMarker marker, KeyValueRecord record)
     {
+        const int ResourcesStep = 1;
+
         switch (marker.Phase)
         {
             case BlobRestorePhase.States:
@@ -110,7 +123,7 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
                 return new BlobRestoreHeadPage(database, marker).Process(tx, record, false);
             case BlobRestorePhase.Quotas:
                 new BlobRestoreAccounting(database, marker).VerifyQuota(tx, record);
-                return marker with { Resources = checked(marker.Resources + 1) };
+                return marker with { Resources = checked(marker.Resources + ResourcesStep) };
             case BlobRestorePhase.VerifyStates:
                 return new BlobRestoreStatePage(database, marker).Process(tx, record, true);
             case BlobRestorePhase.VerifyHeads:
@@ -135,27 +148,37 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
     private static BlobRestoreMarker VerifyResource(IKeyValueView view, BlobRestoreMarker marker, KeyValueRecord record)
     {
+        const int QuotaAccountSuffixComponents = 1;
+        const int TenantComponentIndex = 1;
+        const int DatabaseComponentIndex = 2;
+        const int ResourceComponentIndex = 3;
+        const int ResourcesValidationBoundary = 1;
+        const int ResourcesStep = 1;
+
         var definition = BlobRecordReader.Decode<ResourceDefinition>(record.Value.Span);
         if (definition.Kind != ResourceKind.BlobStore)
         { return marker; }
         var parts = KeyCodec.Decode(record.Key.Span);
-        if (parts.Length != BlobRestoreFence.QuotaComponents - 1 || parts[1] is not string tenant
-            || parts[2] is not string database || parts[3] is not string resource || resource != definition.Name)
+        if (parts.Length != BlobRestoreFence.QuotaComponents - QuotaAccountSuffixComponents || parts[TenantComponentIndex] is not string tenant
+            || parts[DatabaseComponentIndex] is not string database || parts[ResourceComponentIndex] is not string resource || resource != definition.Name)
         { throw BlobErrors.Corruption(); }
         BlobQuotaOperations.ValidatePolicy(definition);
         _ = BlobQuotaOperations.Read(view, BlobKeys.Quota(tenant, database, definition.TransactionDomainId, resource), marker.TargetIncarnation);
-        if (marker.Resources < 1)
+        if (marker.Resources < ResourcesValidationBoundary)
         { throw BlobErrors.Corruption(); }
-        return marker with { Resources = marker.Resources - 1 };
+        return marker with { Resources = marker.Resources - ResourcesStep };
     }
 
     private void Finish(BlobRestoreMarker marker)
     {
+        const int EmptyRestoreAccountingCount = 0;
+        const int MaxRecordsSingleItemCount = 1;
+
         database.Store.Commit((tx, _) =>
         {
             RequireMarker(tx, marker);
-            if (marker.Resources != 0 || marker.ActiveUploads != 0
-                || tx.VisitRange(BlobRestoreFence.Accounts, 1, static (_, _) => false).Records != 0)
+            if (marker.Resources != EmptyRestoreAccountingCount || marker.ActiveUploads != EmptyRestoreAccountingCount
+                || tx.VisitRange(BlobRestoreFence.Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRestoreAccountingCount)
             { throw BlobErrors.Corruption(); }
             var global = new BlobRestoreAccounting(database, marker).SourceQuota(tx, BlobKeys.Global);
             var aggregate = new BlobQuota(BlobKeys.FormatVersion, marker.TargetIncarnation,

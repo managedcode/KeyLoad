@@ -4,6 +4,14 @@ namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeReceiptValidation
 {
+    private const int HasInvalidReceiptPositionsCanonicalPositionValidationBoundary = 0;
+    private const int HasInvalidReceiptPositionsReplicaPhysicalPositionBeforeValidationBoundary = 0;
+    private const int HasInvalidReceiptPositionsCanonicalAppliedPositionValidationBoundary = 0;
+    private const int HasInvalidReceiptPositionsCanonicalReadGenerationValidationBoundary = 0;
+    private const int HasInvalidReceiptPositionsReplicaReadGenerationValidationBoundary = 0;
+    private const int HasInvalidReceiptPositionsSourceBackupDirectoryCountValidationBoundary = 0;
+    private const int IsDigestValueValidationBound = 64;
+
     internal static void Verify(ServerNodeUpgradeOwner owner, ServerNodeUpgradeReceipt receipt,
         NodeOptions options)
     {
@@ -33,19 +41,24 @@ internal static class ServerNodeUpgradeReceiptValidation
     private static bool HasInvalidReceiptPositions(ServerNodeUpgradeReceipt receipt, NodeOptions options)
         => receipt.CanonicalNodeId == Guid.Empty || receipt.ReplicaNodeId == Guid.Empty
             || receipt.CanonicalNodeId == receipt.ReplicaNodeId || receipt.Incarnation != options.Incarnation
-            || receipt.CanonicalPosition < 0 || receipt.ReplicaPhysicalPositionBefore < 0
-            || receipt.CanonicalAppliedPosition < 0 || receipt.CanonicalReadGeneration < 0 || receipt.ReplicaReadGeneration < 0
-            || receipt.SourceBackupDirectoryCount < 0 || !IsDigest(receipt.PreparedTargetInventorySha256);
+            || receipt.CanonicalPosition < HasInvalidReceiptPositionsCanonicalPositionValidationBoundary || receipt.ReplicaPhysicalPositionBefore < HasInvalidReceiptPositionsReplicaPhysicalPositionBeforeValidationBoundary
+            || receipt.CanonicalAppliedPosition < HasInvalidReceiptPositionsCanonicalAppliedPositionValidationBoundary || receipt.CanonicalReadGeneration < HasInvalidReceiptPositionsCanonicalReadGenerationValidationBoundary || receipt.ReplicaReadGeneration < HasInvalidReceiptPositionsReplicaReadGenerationValidationBoundary
+            || receipt.SourceBackupDirectoryCount < HasInvalidReceiptPositionsSourceBackupDirectoryCountValidationBoundary || !IsDigest(receipt.PreparedTargetInventorySha256);
 
-    internal static bool IsDigest(string? value) => value is { Length: 64 } && value.All(char.IsAsciiHexDigit);
+    internal static bool IsDigest(string? value) => value is { Length: IsDigestValueValidationBound } && value.All(char.IsAsciiHexDigit);
 
     private static void VerifyOriginalState(ServerNodeUpgradeReceipt receipt)
     {
+        const int TermValidationBoundary = 0;
+        const int LastIndexValidationBoundary = 0;
+        const int CommittedIndexValidationBoundary = 0;
+        const int StateSnapshotIndexValidationBoundary = 0;
+
         var state = receipt.OriginalReplicaHardState;
         if (state is null || state.Version != ReplicaProtocol.FormatVersion || state.Incarnation != receipt.Incarnation
-            || state.Term < 0 || state.LastIndex < 0 || state.CommittedIndex < 0 || state.CommittedIndex > state.LastIndex
+            || state.Term < TermValidationBoundary || state.LastIndex < LastIndexValidationBoundary || state.CommittedIndex < CommittedIndexValidationBoundary || state.CommittedIndex > state.LastIndex
             || receipt.CanonicalAppliedPosition > state.CommittedIndex
-            || receipt.CanonicalAppliedPosition < (state.Snapshot?.Index ?? 0))
+            || receipt.CanonicalAppliedPosition < (state.Snapshot?.Index ?? StateSnapshotIndexValidationBoundary))
         { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
     }
 }

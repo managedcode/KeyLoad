@@ -3,6 +3,8 @@ namespace KeyLoad.Core.Features.ResourceExecution;
 /// <summary>Admits a fixed number of analytical reads without a wait queue.</summary>
 internal sealed class AnalyticalReadGate
 {
+    private const int AdjacentElementOffset = 1;
+
     private const string Exhausted = "The query concurrency budget is exhausted.";
     private readonly int capacity;
     private int inFlight;
@@ -29,7 +31,7 @@ internal sealed class AnalyticalReadGate
                 cancellationToken.ThrowIfCancellationRequested();
                 throw Errors.Fail(ErrorCode.ResourceExhausted, Exhausted);
             }
-            if (Interlocked.CompareExchange(ref inFlight, count + 1, count) == count)
+            if (Interlocked.CompareExchange(ref inFlight, count + AdjacentElementOffset, count) == count)
             {
                 break;
             }

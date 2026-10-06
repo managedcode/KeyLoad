@@ -4,6 +4,11 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
 {
+    private const int ContainerImageFieldIndex = 4;
+    private const int ContainerIncarnationFieldIndex = 5;
+    private const string ProcDirectoryPrefix = "/proc/";
+    private const string ProcessStatusSuffix = "/status";
+
     private const int ToRecordEmptyValue = 0;
 
     private const string RunningContainerState = "running";
@@ -72,20 +77,20 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         _containerId = fields[FirstIndex];
         _imageId = fields[SecondIndex];
         _startedAt = fields[SampleAsyncElementIndex];
-        _state = fields[4];
+        _state = fields[ContainerImageFieldIndex];
         if (_state != RunningContainerState)
         {
             return InvalidateAfterStart();
         }
 
-        return await SampleRunningAsync(initPid, fields[5], budget, token);
+        return await SampleRunningAsync(initPid, fields[ContainerIncarnationFieldIndex], budget, token);
     }
 
     private async Task<bool> SampleRunningAsync(int initPid, string mountDescriptor,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const char SlashCharacter = '/';
-        const int InspectFieldCount = 0;
+        const int NoProcesses = 0;
 
         _path = await ReadCgroupPathAsync(initPid, budget, token);
         if (_path is null)
@@ -112,7 +117,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         }
 
         var pids = await ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token);
-        if (pids is null || pids.Length == InspectFieldCount || pids.Length > budget.Settings.MaxProcesses)
+        if (pids is null || pids.Length == NoProcesses || pids.Length > budget.Settings.MaxProcesses)
         {
             return InvalidateAfterStart();
         }
@@ -143,7 +148,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int BoundaryValue = 0;
-        const int InspectFieldCount = 0;
+        const int NoSamples = 0;
 
         var cpuLimit = await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), budget.Settings.MaxFileBytes, token, budget);
         var memoryLimit = await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), budget.Settings.MaxFileBytes, token, budget);
@@ -161,7 +166,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             return InvalidateAfterStart();
         }
 
-        if (_samples == InspectFieldCount)
+        if (_samples == NoSamples)
         {
             _firstCpuUsec = usage;
         }
@@ -219,7 +224,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
     {
         const char LineFeedCharacter = '\n';
 
-        var text = await BoundedText.ReadAsync($"/proc/{pid}/cgroup", budget.Settings.MaxFileBytes, token, budget);
+        var text = await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{Cgroup}", budget.Settings.MaxFileBytes, token, budget);
         var row = text?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedCgroupMarker, StringComparison.Ordinal));
         return row?[UnifiedCgroupMarker.Length..].Trim();
     }
@@ -260,7 +265,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         foreach (var pid in pids)
         {
             var before = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
-            var status = await BoundedText.ReadAsync($"/proc/{pid}/status", budget.Settings.MaxFileBytes, token, budget);
+            var status = await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{ProcessStatusSuffix}", budget.Settings.MaxFileBytes, token, budget);
             var after = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
             if (before is null || after is null || before != after || !TryRss(status, out var rss))
             {

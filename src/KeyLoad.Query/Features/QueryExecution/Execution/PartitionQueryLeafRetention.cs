@@ -2,6 +2,9 @@ namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class PartitionQueryLeafRetention
 {
+    private const int NoRetainedBytes = 0;
+    private const string PartitionQueryRetentionAccountingIsInvalidDetail = "The partition query retention accounting is invalid.";
+
     private const string RetainedBudgetExceeded = "The partition query retained-byte budget is exceeded.";
     private readonly long maximumBytes;
     private long fixedBytes;
@@ -22,7 +25,7 @@ internal sealed class PartitionQueryLeafRetention
 
     internal void Reserve(long bytes)
     {
-        if (bytes < 0 || bytes > maximumBytes - fixedBytes - currentBytes)
+        if (bytes < NoRetainedBytes || bytes > maximumBytes - fixedBytes - currentBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, RetainedBudgetExceeded);
         }
@@ -37,9 +40,9 @@ internal sealed class PartitionQueryLeafRetention
 
     internal void Release(long bytes)
     {
-        if (bytes < 0 || bytes > currentBytes)
+        if (bytes < NoRetainedBytes || bytes > currentBytes)
         {
-            throw Errors.Fail(ErrorCode.Corruption, "The partition query retention accounting is invalid.");
+            throw Errors.Fail(ErrorCode.Corruption, PartitionQueryRetentionAccountingIsInvalidDetail);
         }
 
         currentBytes -= bytes;

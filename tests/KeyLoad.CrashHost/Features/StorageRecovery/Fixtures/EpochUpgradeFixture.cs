@@ -34,7 +34,7 @@ internal static class EpochUpgradeFixture
     internal static byte[] CreateOutcomeFrame(ZoneTreeStore store, Guid commandId)
     {
         ArgumentNullException.ThrowIfNull(store);
-        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
+        var database = new DatabaseEngine(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
         store.Commit((transaction, _) =>
         {
             transaction.PutRecord(AppliedKey, 0L);
@@ -91,7 +91,7 @@ internal static class EpochUpgradeFixture
         { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         using var replica = new ZoneTreeStore(new(Path.Combine(directory, "replica"))
         { Incarnation = profile.Incarnation, SigningKey = signing }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
-        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource());
+        var database = new DatabaseEngine(canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
         BootstrapNode(database, profile.AdminKey);
         using var log = new DurableReplicaLog(replica, CrashExecutionOptions.Configuration(configuration), canonicalDatabase: database);
         var snapshots = new ReplicaSnapshotStore(canonical, log, CrashExecutionOptions.Configuration(configuration), CrashExecutionOptions.Replica());

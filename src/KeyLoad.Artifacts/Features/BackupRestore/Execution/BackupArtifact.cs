@@ -7,6 +7,15 @@ namespace KeyLoad.Artifacts;
 /// <summary>Optional regenerable archive. Cartograph is never used as the transaction journal.</summary>
 public static class BackupArtifact
 {
+    private const FileAttributes NoMatchingAttributes = 0;
+    private const int FirstCatalogRecordIndex = 0;
+    private const int MinimumFilePieceCount = 1;
+    private const int CeilingDivisionAdjustment = 1;
+    private const int UnavailableCatalogChecksum = 0;
+    private const int CanonicalFileSegmentIndex = 1;
+    private const long CatalogRecordOffset = 1L;
+    private const long EmptyFileBytes = 0;
+    private const long FirstFileOffset = 0;
     private const int DefaultPieceBytes = 268_435_456;
     private const int MinimumPieceBytes = 1_024;
     private const int MaximumPieceBytes = 1_073_741_824;
@@ -51,7 +60,7 @@ public static class BackupArtifact
     private static FileInfo[] GetCanonicalFiles(string root)
     {
         var files = CanonicalFileNames.Select(name => new FileInfo(Path.Combine(root, name))).ToArray();
-        if (files.Any(file => !file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != 0))
+        if (files.Any(file => !file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != NoMatchingAttributes))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidBackupDirectory);
         }
@@ -61,20 +70,20 @@ public static class BackupArtifact
     private static FileCatalog CreateCatalog(FileInfo[] files, int pieceBytes)
     {
         var entries = new List<CatalogEntry>();
-        var record = 0;
+        var record = FirstCatalogRecordIndex;
         foreach (var file in files)
         {
-            var count = checked((int)Math.Max(1, (file.Length + pieceBytes - 1) / pieceBytes));
+            var count = checked((int)Math.Max(MinimumFilePieceCount, (file.Length + pieceBytes - CeilingDivisionAdjustment) / pieceBytes));
             entries.Add(new()
             {
                 RelativePath = file.Name,
                 Length = file.Length,
                 RecordCount = count,
                 LastWriteUtcTicks = file.LastWriteTimeUtc.Ticks,
-                Checksum = 0,
-                SegmentIndex = 1,
+                Checksum = UnavailableCatalogChecksum,
+                SegmentIndex = CanonicalFileSegmentIndex,
                 RecordIndex = record,
-                GlobalIndex = 1L + record
+                GlobalIndex = CatalogRecordOffset + record
             });
             record = checked(record + count);
         }
@@ -94,11 +103,11 @@ public static class BackupArtifact
         var segment = writer.AddSegment();
         foreach (var file in files)
         {
-            if (file.Length == 0)
+            if (file.Length == EmptyFileBytes)
             {
                 segment.AddRecord(ReadOnlySpan<byte>.Empty);
             }
-            for (long offset = 0; offset < file.Length; offset += pieceBytes)
+            for (var offset = FirstFileOffset; offset < file.Length; offset += pieceBytes)
             {
                 segment.AddFileRecord(file.FullName, offset, Math.Min(pieceBytes, file.Length - offset));
             }

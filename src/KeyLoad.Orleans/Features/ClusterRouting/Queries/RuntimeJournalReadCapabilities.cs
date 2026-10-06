@@ -11,18 +11,18 @@ internal static class RuntimeJournalReadCapabilities
         return kind switch
         {
             GrainReadKind.RuntimeJournalHeader => database.GetRuntimeJournalHeader(principalId,
-                GrainNativePayload.Read<string>(payload)),
+                GrainNativePayload.Read<string>(payload), cancellationToken),
             GrainReadKind.RuntimeJournalPage => database.ReadRuntimeJournal(principalId,
-                GrainNativePayload.Read<RuntimeJournalReadRequest>(payload)),
-            GrainReadKind.RuntimeJournalCatalog => Catalog(database, principalId, payload),
+                GrainNativePayload.Read<RuntimeJournalReadRequest>(payload), cancellationToken),
+            GrainReadKind.RuntimeJournalCatalog => Catalog(database, principalId, payload, cancellationToken),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
 
     private static RuntimeJournalCatalog Catalog(DatabaseEngine database, string principalId,
-        ReadOnlyMemory<byte> payload)
+        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         GrainNativePayload.RequireNoDto(payload);
-        return database.ReadRuntimeJournalCatalog(principalId);
+        return database.ReadRuntimeJournalCatalog(principalId, cancellationToken);
     }
 }

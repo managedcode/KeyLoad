@@ -13,6 +13,7 @@ public static class ZoneTreeFormatUpgrade
     private const string ParentDirectorySegment = "..";
     /// <summary>Validates a private stopped native5 or native6 authority copy without opening or rebuilding its tree.</summary>
     /// <param name="sourceOptions">Private copied source and exact configured authority and finite budgets.</param>
+    /// <param name="executionOptions">Centrally validated storage execution and IO policy.</param>
     /// <returns>The actual verified source identity; signing credentials remain private to the caller.</returns>
     public static StoreIdentity VerifySource(ZoneTreeStoreOptions sourceOptions,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
@@ -28,6 +29,7 @@ public static class ZoneTreeFormatUpgrade
     /// <summary>Validates the existing native receipt for a converted store owned by an exact source copy.</summary>
     /// <param name="source">Private original native5 or native6 authority copy.</param>
     /// <param name="destinationOptions">Matching converted target and configured source authority.</param>
+    /// <param name="executionOptions">Centrally validated storage execution and IO policy.</param>
     public static void VerifyOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
@@ -37,13 +39,14 @@ public static class ZoneTreeFormatUpgrade
         ValidateOptions(destinationOptions);
         var paths = NormalizePaths(source, destinationOptions.Directory);
         using var lease = ZoneTreeFormatUpgradeSource.Open(paths.Source, destinationOptions);
-        ZoneTreeFormatUpgradeStage.VerifyPublishable(paths.Destination, CreateReceipt(paths, lease));
+        ZoneTreeFormatUpgradeStage.VerifyPublishable(paths.Destination, CreateReceipt(paths, lease), destinationOptions);
         lease.VerifyUnchanged();
     }
 
     /// <summary>Removes only the verified nested receipt after its owning node has captured complete authority.</summary>
     /// <param name="source">Private original native5 or native6 authority copy retained until node verification.</param>
     /// <param name="destinationOptions">The verified converted target.</param>
+    /// <param name="executionOptions">Centrally validated storage execution and IO policy.</param>
     public static void RemoveOwnedReceipt(string source, ZoneTreeStoreOptions destinationOptions,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
@@ -54,6 +57,7 @@ public static class ZoneTreeFormatUpgrade
     /// <summary>Performs the closed native5/WAL4/checkpoint3 or native6/WAL4/checkpoint4 to native7/WAL4/checkpoint5 offline copy.</summary>
     /// <param name="source">Existing source store directory, held under its canonical owner lock.</param>
     /// <param name="destinationOptions">Separate target directory, matching source authority and storage budgets.</param>
+    /// <param name="executionOptions">Centrally validated storage execution and IO policy.</param>
     /// <returns>The new current-format identity after verified atomic publication.</returns>
     public static StoreIdentity Upgrade(string source, ZoneTreeStoreOptions destinationOptions,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
@@ -92,13 +96,13 @@ public static class ZoneTreeFormatUpgrade
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);
         }
 
-        ZoneTreeFormatUpgradeStage.CreateOrReset(paths.Staging, receipt);
-        ZoneTreeFormatUpgradeStage.CopySources(sourceLease, paths.Staging);
+        ZoneTreeFormatUpgradeStage.CreateOrReset(paths.Staging, receipt, destinationOptions);
+        ZoneTreeFormatUpgradeStage.CopySources(sourceLease, paths.Staging, destinationOptions);
         destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePrepared, sourceLease.Position, ObserverNonMutationIndex);
         var stageOptions = TargetOptions(destinationOptions, paths.Staging, sourceLease.Identity);
         var identity = ZoneTreeFormatUpgradeBuilder.Rebuild(sourceLease, paths.Staging, stageOptions);
         ZoneTreeFormatUpgradeStage.RemoveSourceCopies(paths.Staging);
-        ZoneTreeFormatUpgradeStage.VerifyPublishable(paths.Staging, receipt);
+        ZoneTreeFormatUpgradeStage.VerifyPublishable(paths.Staging, receipt, destinationOptions);
         sourceLease.VerifyUnchanged();
         ZoneTreeFormatUpgradeStage.Publish(paths.Staging, paths.Destination);
         destinationOptions.FaultObserver?.Invoke(CommitStage.UpgradePublished, sourceLease.Position, ObserverNonMutationIndex);
@@ -110,7 +114,7 @@ public static class ZoneTreeFormatUpgrade
     {
         ZoneTreeFormatUpgradeStage.VerifyDirectory(destination);
         var actual = ZoneTreeFormatUpgradeReceiptFile.Read(
-            Path.Combine(destination, ZoneTreeFormatUpgradeStage.ReceiptFileName));
+            Path.Combine(destination, ZoneTreeFormatUpgradeStage.ReceiptFileName), options.MaximumUpgradeReceiptBytes);
         if (actual != expected)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 using KeyLoad.Storage.IO;
 
@@ -6,7 +7,6 @@ namespace KeyLoad.AppHost.Features.ClusterRouting;
 /// <summary>Validates the exact private Owner record with bounded native JSON parsing.</summary>
 internal static class RequestCqrsProbeOwnerReader
 {
-    internal const int MaximumOwnerBytes = 8_192;
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
     private const int MaximumJsonDepth = 1;
     private const int RequiredFieldCount = 4;
@@ -18,7 +18,7 @@ internal static class RequestCqrsProbeOwnerReader
     private const string OwnerKind = "Owner";
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
 
-    internal static RequestCqrsProbeOwnerRecord ReadFile(string path)
+    internal static RequestCqrsProbeOwnerRecord ReadFile(string path, IOptions<RequestProbeFileOptions> executionOptions)
     {
         const int StructuralValue = 0;
         const int MissingValue = -1;
@@ -26,11 +26,11 @@ internal static class RequestCqrsProbeOwnerReader
         if (OperatingSystem.IsWindows())
         { throw new InvalidOperationException(InvalidConfiguration); }
         var identity = OfflineRegularFile.Inspect(path);
-        if (identity.Length is <= StructuralValue or > MaximumOwnerBytes
+        if (identity.Length <= StructuralValue || identity.Length > executionOptions.Value.MaximumOwnerBytes
             || File.GetUnixFileMode(path) != PrivateFileMode)
         { throw new InvalidOperationException(InvalidConfiguration); }
         using var input = OfflineRegularFile.OpenWithIdentity(path, identity, FileAccess.Read,
-            FileShare.Read, bufferSize: 4_096);
+            FileShare.Read, bufferSize: executionOptions.Value.NativeReadBufferBytes);
         if (input.Length != identity.Length || File.GetUnixFileMode(path) != PrivateFileMode)
         { throw new InvalidOperationException(InvalidConfiguration); }
         var bytes = new byte[checked((int)identity.Length)];
@@ -38,15 +38,15 @@ internal static class RequestCqrsProbeOwnerReader
         if (input.ReadByte() != MissingValue || input.Length != identity.Length
             || OfflineRegularFile.Inspect(path) != identity)
         { throw new InvalidOperationException(InvalidConfiguration); }
-        return Read(bytes);
+        return Read(bytes, executionOptions);
     }
 
-    internal static RequestCqrsProbeOwnerRecord Read(byte[] bytes)
+    internal static RequestCqrsProbeOwnerRecord Read(byte[] bytes, IOptions<RequestProbeFileOptions> executionOptions)
     {
         const int StructuralValue = 0;
         const int VersionInitialValue = 0;
 
-        if (bytes.Length is <= StructuralValue or > MaximumOwnerBytes)
+        if (bytes.Length <= StructuralValue || bytes.Length > executionOptions.Value.MaximumOwnerBytes)
         { throw new InvalidOperationException(InvalidConfiguration); }
         using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = MaximumJsonDepth });
         if (document.RootElement.ValueKind != JsonValueKind.Object)

@@ -2,6 +2,12 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class PackedAnnVectors
 {
+    private const int MinimumPositiveCount = 1;
+    private const int CopyAndValidateWorkPerComponent = 2;
+    private const int FirstElementIndex = 0;
+    private const int BudgetCheckRemainder = 0;
+    private const int SingleWorkUnit = 1;
+
     private const int MaximumDimension = 4_096;
     private const string InvalidVectors = "The packed ANN vectors are invalid.";
     private const string InvalidCopiedVector = "The copied ANN vector contains a nonfinite component.";
@@ -32,19 +38,19 @@ internal sealed class PackedAnnVectors
         return new(blocks[ordinal / vectorsPerBlock], ordinal % vectorsPerBlock * dimension, dimension);
     }
 
-    internal static PackedAnnVectors Copy(IReadOnlyList<VectorRecord> records, PackedAnnAdmission layout, AnnWorkBudget budget)
+    internal static PackedAnnVectors Copy(IReadOnlyList<VectorRecord> records, PackedAnnAdmission layout, AnnWorkBudget budget, int budgetCheckInterval)
     {
         ArgumentNullException.ThrowIfNull(records);
         ArgumentNullException.ThrowIfNull(budget);
-        if (records.Count != layout.Count || layout.Dimension is < 1 or > MaximumDimension)
+        if (records.Count != layout.Count || layout.Dimension is < MinimumPositiveCount or > MaximumDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVectors);
         }
         var components = checked((long)layout.Count * layout.Dimension);
-        budget.Charge(checked(components * 2));
+        budget.Charge(checked(components * CopyAndValidateWorkPerComponent));
         var blocks = AllocateBlocks(layout, budget);
         var total = components;
-        for (long vectorOffset = 0; vectorOffset < total; vectorOffset += layout.Dimension)
+        for (long vectorOffset = FirstElementIndex; vectorOffset < total; vectorOffset += layout.Dimension)
         {
             budget.Check();
             var ordinal = checked((int)(vectorOffset / layout.Dimension));
@@ -57,9 +63,9 @@ internal sealed class PackedAnnVectors
             var block = blocks[ordinal / layout.VectorsPerBlock];
             var target = block.AsSpan(ordinal % layout.VectorsPerBlock * layout.Dimension, layout.Dimension);
             source.CopyTo(target);
-            for (var component = 0; component < target.Length; component++)
+            for (var component = FirstElementIndex; component < target.Length; component++)
             {
-                if ((component & 255) == 0)
+                if (component % budgetCheckInterval == BudgetCheckRemainder)
                 {
                     budget.Check();
                 }
@@ -74,7 +80,7 @@ internal sealed class PackedAnnVectors
 
     private void ValidateOrdinal(int ordinal)
     {
-        if (dimension is < 1 or > MaximumDimension || (uint)ordinal >= (uint)Count)
+        if (dimension is < MinimumPositiveCount or > MaximumDimension || (uint)ordinal >= (uint)Count)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVectors);
         }
@@ -85,9 +91,9 @@ internal sealed class PackedAnnVectors
         budget.Charge(layout.BlockCount);
         var blocks = new float[layout.BlockCount][];
         var remaining = layout.Count;
-        for (var index = 0; index < blocks.Length; index++)
+        for (var index = FirstElementIndex; index < blocks.Length; index++)
         {
-            budget.Charge(1);
+            budget.Charge(SingleWorkUnit);
             var vectors = Math.Min(layout.VectorsPerBlock, remaining);
             blocks[index] = new float[checked(vectors * layout.Dimension)];
             remaining -= vectors;

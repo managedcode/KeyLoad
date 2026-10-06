@@ -15,7 +15,7 @@ internal sealed class GraphSearchAuthorizationTests
         GraphSearchTestSupport.Configure(database);
         AddRestrictedGraph(database);
         GraphSearchTestSupport.PersistReader(database, restrictRows: true, ownerId: Alice);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var hiddenSeedWalk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle));
         var hiddenSeed = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
@@ -44,7 +44,7 @@ internal sealed class GraphSearchAuthorizationTests
         with
         { Labels = [GraphSearchTestSupport.Label] };
         var search = RetrievalRequest(database);
-        var engine = new SearchEngine(database.Database);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var denied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
             GraphSearchTestSupport.Reader, new(1, search, Retriever: new(walk)),

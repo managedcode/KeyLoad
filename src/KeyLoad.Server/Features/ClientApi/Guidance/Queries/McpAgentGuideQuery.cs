@@ -61,11 +61,13 @@ internal static class McpAgentGuideQuery
     internal static GetPromptResult GetPrompt(string? name, IDictionary<string, JsonElement>? arguments,
         CancellationToken cancellationToken)
     {
+        const int ArgumentsEmptyCount = 0;
+
         cancellationToken.ThrowIfCancellationRequested();
         ValidateContent();
         if (!string.Equals(name, McpAgentGuideContract.PromptName, StringComparison.Ordinal))
         { throw Protocol(McpAgentGuideContract.UnknownPrompt); }
-        if (arguments is { Count: > 0 })
+        if (arguments is { Count: > ArgumentsEmptyCount })
         { throw Protocol(McpAgentGuideContract.PromptArguments); }
         return new GetPromptResult
         {

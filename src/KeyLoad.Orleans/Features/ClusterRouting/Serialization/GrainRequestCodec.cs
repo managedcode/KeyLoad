@@ -28,6 +28,7 @@ public sealed partial class GrainRequestCodec
         ArgumentNullException.ThrowIfNull(clock);
         this.database = database;
         this.clock = clock;
+        ArgumentNullException.ThrowIfNull(options);
         settings = options.Value;
         var envelopeBytes = checked(database.Limits.MaxBatchBytes + GrainRoutingProtocol.EnvelopeMetadataBytes);
         maximumTokenCharacters = checked(Base64Url.GetEncodedLength(envelopeBytes)

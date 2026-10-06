@@ -12,6 +12,9 @@ public sealed record MessagingExecutionOptions
     private const int DefaultMaximumTopicEvents = 256;
     private const int DefaultMaximumOccurrenceCatchUp = 32;
     private const int DefaultMaximumRetryExponent = 20;
+    private const int DefaultQueueScanPageSize = 256;
+    private const int MaximumQueueScanPageSize = 100_000;
+    private const int DefaultMaximumDeliveryItems = 100;
     private const int MinimumWorkCount = 1;
     private const int MinimumRetryExponent = 0;
     private const int MaximumSafeRetryExponent = 20;
@@ -23,10 +26,21 @@ public sealed record MessagingExecutionOptions
     /// <summary>Gets the capped retry exponent before applying the persisted queue's maximum delay.</summary>
     public int MaximumRetryExponent { get; init; } = DefaultMaximumRetryExponent;
 
+    /// <summary>Gets the maximum scheduled or leased entries swept by one atomic queue operation.</summary>
+    public int QueueScanPageSize { get; init; } = DefaultQueueScanPageSize;
+
+    /// <summary>Maximum messages admitted to one queue receive request.</summary>
+    public int MaximumReceiveMessages { get; init; } = DefaultMaximumDeliveryItems;
+    /// <summary>Maximum events admitted to one subscription receive request.</summary>
+    public int MaximumReceiveEvents { get; init; } = DefaultMaximumDeliveryItems;
+
     /// <summary>Checks independent work budgets and the existing retry arithmetic safety ceiling.</summary>
     public bool IsValid() => MaximumTopicEvents >= MinimumWorkCount
         && MaximumOccurrenceCatchUp >= MinimumWorkCount
-        && MaximumRetryExponent >= MinimumRetryExponent && MaximumRetryExponent <= MaximumSafeRetryExponent;
+        && MaximumRetryExponent >= MinimumRetryExponent && MaximumRetryExponent <= MaximumSafeRetryExponent
+        && QueueScanPageSize >= MinimumWorkCount && QueueScanPageSize <= MaximumQueueScanPageSize
+        && MaximumReceiveMessages is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems
+        && MaximumReceiveEvents is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems;
 
     /// <summary>Rejects invalid settings before database recovery or command admission.</summary>
     public void Validate()

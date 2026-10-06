@@ -4,6 +4,9 @@ namespace KeyLoad.Server;
 [ConfigurationOptions]
 internal sealed record McpMemoryLimits
 {
+    internal const string SectionName = "KeyLoad:McpMemory";
+    internal const string ValidationMessage = "MCP retained-memory lane capacities must be positive.";
+    private const long EmptyCapacity = 0;
     private const long DefaultDataBytes = 2_147_483_648;
     private const long DefaultControlBytes = 134_217_728;
     private const long DefaultIngressBytes = 1_073_741_824;
@@ -14,6 +17,8 @@ internal sealed record McpMemoryLimits
     public long ControlBytes { get; init; } = DefaultControlBytes;
     /// <summary>Capacity for authenticated but not yet classified bounded wire processing.</summary>
     public long IngressBytes { get; init; } = DefaultIngressBytes;
+
+    internal bool IsValid() => DataBytes > EmptyCapacity && ControlBytes > EmptyCapacity && IngressBytes > EmptyCapacity;
 
     /// <summary>Rejects invalid configuration before the server opens its physical stores.</summary>
     public void Validate()

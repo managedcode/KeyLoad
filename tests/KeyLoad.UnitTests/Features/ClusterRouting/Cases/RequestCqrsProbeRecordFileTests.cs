@@ -23,19 +23,19 @@ internal sealed class RequestCqrsProbeRecordFileTests
         await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(RequestCqrsProbeRecordFileFixture.PrivateFileMode);
 
         byte[] expected = [0x00, 0x71, 0xFF, 0x18];
-        var actual = RequestCqrsProbeFiles.ReadRecord(path);
+        var actual = RequestCqrsProbeFiles.ReadRecord(path, UnitRequestProbeOptions.Execution);
         await Assert.That(actual.SequenceEqual(expected)).IsTrue();
 
-        var maximum = RequestCqrsProbeCodecInput.PadOwner(RequestCqrsProbeProtocol.MaximumRecordBytes);
+        var maximum = RequestCqrsProbeCodecInput.PadOwner(UnitRequestProbeOptions.Execution.Value.MaximumRecordBytes);
         var maximumPath = directory.CreateRegular(RequestCqrsProbeRecordFileFixture.MaximumName, maximum);
-        var maximumBytes = RequestCqrsProbeFiles.ReadRecord(maximumPath);
-        await Assert.That(maximumBytes.Length).IsEqualTo(RequestCqrsProbeProtocol.MaximumRecordBytes);
-        await Assert.That(RequestCqrsProbeJson.ReadOwner(maximumBytes).SessionId)
+        var maximumBytes = RequestCqrsProbeFiles.ReadRecord(maximumPath, UnitRequestProbeOptions.Execution);
+        await Assert.That(maximumBytes.Length).IsEqualTo(UnitRequestProbeOptions.Execution.Value.MaximumRecordBytes);
+        await Assert.That(UnitRequestProbeOptions.Json.ReadOwner(maximumBytes).SessionId)
             .IsEqualTo(RequestCqrsProbeCodecInput.SessionId);
 
         var oversized = directory.CreateRegular(RequestCqrsProbeRecordFileFixture.OversizedName,
-            new byte[RequestCqrsProbeProtocol.MaximumRecordBytes + 1]);
-        var invalid = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsProbeFiles.ReadRecord(oversized));
+            new byte[UnitRequestProbeOptions.Execution.Value.MaximumRecordBytes + 1]);
+        var invalid = Assert.ThrowsExactly<InvalidOperationException>(() => RequestCqrsProbeFiles.ReadRecord(oversized, UnitRequestProbeOptions.Execution));
         await Assert.That(invalid.Message).IsEqualTo(RequestCqrsProbeProtocol.InvalidFiles);
         await Assert.That(invalid.Message.Contains(oversized, StringComparison.Ordinal)).IsFalse();
     }
@@ -71,7 +71,7 @@ internal sealed class RequestCqrsProbeRecordFileTests
         Task<byte[]>? read = null;
         try
         {
-            read = Task.Factory.StartNew(() => RequestCqrsProbeFiles.ReadRecord(fifo), CancellationToken.None,
+            read = Task.Factory.StartNew(() => RequestCqrsProbeFiles.ReadRecord(fifo, UnitRequestProbeOptions.Execution), CancellationToken.None,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
             var completedWithoutWriter = await Task.WhenAny(read, Task.Delay(ProbeBound)) == read;
             await ServerFailureObserver.ObserveAsync(() => AssertFifoFailureAsync(read, fifo, completedWithoutWriter),
@@ -110,7 +110,7 @@ internal sealed class RequestCqrsProbeRecordFileTests
 
     private static async Task AssertRejectedWithoutDisclosureAsync(string path)
     {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => RequestCqrsProbeFiles.ReadRecord(path));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => RequestCqrsProbeFiles.ReadRecord(path, UnitRequestProbeOptions.Execution));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(failure.Message).IsEqualTo(SafeRegularFailure);
         await Assert.That(failure.Message.Contains(path, StringComparison.Ordinal)).IsFalse();

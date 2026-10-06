@@ -5,6 +5,10 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const int QueueSweepTransitionsNamespaceComponentFromEnd = 2;
+    private const int QueueSweepTransitionsAdjacentElementOffset = 1;
+    private const int QueueSweepTransitionsVersionOne = 1;
+
     private const string ScheduledQueueSpace = "scheduled";
     private const string LeasedQueueSpace = "lease";
     private const string ReadyQueueSpace = "ready";
@@ -32,9 +36,8 @@ public sealed partial class DatabaseEngine
     private const string InboxEffectConflict = "The inbox input was already completed with different effects.";
     private const string MissingIndexedMetadata = "A queue index points to absent metadata.";
     private const string MissingIndexedBody = "A queue message body is absent.";
-    private const int QueueScanPageSize = 256;
 
-    private static void SweepDueEntries(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now)
+    private void SweepDueEntries(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, DateTimeOffset now)
     {
         // Sweep transitions use the replicated command time and one in-gate counter value.
         QueueCounters? counters = null;
@@ -46,14 +49,14 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static QueueCounters? SweepDueSpace(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
+    private QueueCounters? SweepDueSpace(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy,
         DateTimeOffset now, string space, bool leased, QueueCounters? counters)
     {
-        var page = tx.Scan(QueueKey(space, lane), QueueScanPageSize);
+        var page = tx.Scan(QueueKey(space, lane), messagingExecution.QueueScanPageSize);
         foreach (var item in page.Records)
         {
             var components = KeyCodec.Decode(item.Key.Span);
-            if ((DateTimeOffset)components[^2]! > now)
+            if ((DateTimeOffset)components[^QueueSweepTransitionsNamespaceComponentFromEnd]! > now)
             {
                 break;
             }
@@ -77,7 +80,7 @@ public sealed partial class DatabaseEngine
         {
             current = current with
             {
-                InFlightMessages = current.InFlightMessages - 1,
+                InFlightMessages = current.InFlightMessages - QueueSweepTransitionsAdjacentElementOffset,
                 InFlightBytes = current.InFlightBytes - body.Bytes
             };
         }
@@ -93,14 +96,14 @@ public sealed partial class DatabaseEngine
         {
             counters = counters with
             {
-                StoredMessages = counters.StoredMessages - 1,
+                StoredMessages = counters.StoredMessages - QueueSweepTransitionsAdjacentElementOffset,
                 StoredBytes = counters.StoredBytes - bodyBytes
             };
             tx.Delete(QueueKey(MessageBodySpace, lane, metadata.Id));
             return metadata with
             {
                 State = MessageState.Expired,
-                StateVersion = metadata.StateVersion + 1,
+                StateVersion = metadata.StateVersion + QueueSweepTransitionsVersionOne,
                 LeaseOwner = null,
                 LeaseUntil = null
             };
@@ -111,20 +114,20 @@ public sealed partial class DatabaseEngine
             return metadata with
             {
                 State = MessageState.DeadLettered,
-                StateVersion = metadata.StateVersion + 1,
+                StateVersion = metadata.StateVersion + QueueSweepTransitionsVersionOne,
                 LeaseOwner = null,
                 LeaseUntil = null,
                 SafeFailureCode = AttemptsExhausted
             };
         }
-        var sequence = checked(counters.NextReadySequence + 1);
+        var sequence = checked(counters.NextReadySequence + QueueSweepTransitionsAdjacentElementOffset);
         counters = counters with { NextReadySequence = sequence };
         tx.PutRecord(QueueKey(ReadyQueueSpace, lane, sequence, metadata.Id), metadata.Id);
         return metadata with
         {
             State = MessageState.Ready,
             ReadySequence = sequence,
-            StateVersion = metadata.StateVersion + 1,
+            StateVersion = metadata.StateVersion + QueueSweepTransitionsVersionOne,
             LeaseOwner = null,
             LeaseUntil = null,
             NotBefore = null

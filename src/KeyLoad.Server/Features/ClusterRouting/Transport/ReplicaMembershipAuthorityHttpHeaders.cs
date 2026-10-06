@@ -20,13 +20,23 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
 
     internal static bool TryRead(HttpRequest request, out ReplicaMembershipAuthorityRequestHeaders headers)
     {
+        const int TotalInitialValue = 0;
+        const int IndexInitialValue = 0;
+        const int EmptySuppliedCount = 1;
+        const int IndexEmptyCount = 0;
+        const int EmptyValueLength = 0;
+        const int ValuesFirstIndex = 0;
+        const int ValuesSecondIndex = 1;
+        const int ValuesComponentIndex = 2;
+        const int TryReadValuesComponentIndex = 3;
+
         headers = null!;
-        var total = 0;
+        var total = TotalInitialValue;
         var values = new string[Names.Length];
-        for (var index = 0; index < Names.Length; index++)
+        for (var index = IndexInitialValue; index < Names.Length; index++)
         {
-            if (!request.Headers.TryGetValue(Names[index], out var supplied) || supplied.Count != 1
-                || supplied[0] is not { } value || value.Length == 0
+            if (!request.Headers.TryGetValue(Names[index], out var supplied) || supplied.Count != EmptySuppliedCount
+                || supplied[IndexEmptyCount] is not { } value || value.Length == EmptyValueLength
                 || Encoding.UTF8.GetByteCount(value) > ReplicaMembershipAuthorityProtocol.MaximumHeaderValueBytes)
             { return false; }
             total = checked(total + Encoding.UTF8.GetByteCount(Names[index]) + Encoding.UTF8.GetByteCount(value));
@@ -34,7 +44,7 @@ internal static class ReplicaMembershipAuthorityHttpHeaders
             { return false; }
             values[index] = value;
         }
-        headers = new(values[0], values[1], values[2], values[3], values[4], values[5], values[6],
+        headers = new(values[ValuesFirstIndex], values[ValuesSecondIndex], values[ValuesComponentIndex], values[TryReadValuesComponentIndex], values[4], values[5], values[6],
             values[7], values[8], values[9]);
         return true;
     }

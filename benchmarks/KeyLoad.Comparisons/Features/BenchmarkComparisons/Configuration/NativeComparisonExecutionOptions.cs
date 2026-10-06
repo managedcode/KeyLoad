@@ -10,6 +10,11 @@ public sealed class NativeComparisonExecutionOptions
     private const string NativeComparisonOperationalLimitsMustBePresentPositive = "Native comparison operational limits must be present, positive and consistent.";
     private const string DurationFormat = "c";
     private const int DefaultPostgresMinimumPoolSize = 10;
+    private const int DefaultResourceSampleIntervalMilliseconds = 50;
+    private const int DefaultProgressHeartbeatSeconds = 30;
+    private const int DefaultHostLifetimeHours = 2;
+    private const int MaximumResourceSampleIntervalMilliseconds = 1000;
+    private static readonly TimeSpan MaximumHostLifetime = TimeSpan.FromHours(DefaultHostLifetimeHours);
     /// <summary>The required source-controlled configuration section.</summary>
     public const string SectionName = "NativeComparisonExecution";
     /// <summary>The native operation deadline, equivalent to the frozen workload profile.</summary>
@@ -36,6 +41,12 @@ public sealed class NativeComparisonExecutionOptions
     public TimeSpan IndexBuildTimeout { get; set; }
     /// <summary>The interval between native index completion checks.</summary>
     public TimeSpan IndexPollInterval { get; set; }
+    /// <summary>The cadence of process resource observations, recorded with the actual samples.</summary>
+    public int ResourceSampleIntervalMilliseconds { get; set; } = DefaultResourceSampleIntervalMilliseconds;
+    /// <summary>The interval between progress lines while a workload phase is active.</summary>
+    public TimeSpan ProgressHeartbeatInterval { get; set; } = TimeSpan.FromSeconds(DefaultProgressHeartbeatSeconds);
+    /// <summary>The joined comparison host lifetime, retaining the current maximum deadline.</summary>
+    public TimeSpan HostLifetime { get; set; } = TimeSpan.FromHours(DefaultHostLifetimeHours);
 
     /// <summary>Validates the injected wrapper before any native target is created.</summary>
     /// <param name="options">The centrally bound options.</param>
@@ -51,7 +62,10 @@ public sealed class NativeComparisonExecutionOptions
     /// <returns>This validated policy.</returns>
     public NativeComparisonExecutionOptions Validate()
     {
-        if (OperationTimeout <= TimeSpan.Zero || PostgresMaxPoolSize <= MinimumPositiveLimit || PostgresMinimumPoolSize <= MinimumPositiveLimit || PostgresMaxAutoPrepare <= MinimumPositiveLimit || PostgresAutoPrepareMinUsages <= MinimumPositiveLimit || MaxResponseBytes <= MinimumPositiveLimit || ReadBufferBytes <= MinimumPositiveLimit || ReadBufferBytes > MaxResponseBytes || WriteBatchCapacity <= MinimumPositiveLimit || ReadbackBatchCapacity <= MinimumPositiveLimit || WriteBatchCapacity > MaxResponseBytes || ReadbackBatchCapacity > MaxResponseBytes || CleanupTimeout <= TimeSpan.Zero || IndexBuildTimeout <= TimeSpan.Zero || IndexPollInterval <= TimeSpan.Zero || IndexPollInterval >= IndexBuildTimeout)
+        if (OperationTimeout <= TimeSpan.Zero || PostgresMaxPoolSize <= MinimumPositiveLimit || PostgresMinimumPoolSize <= MinimumPositiveLimit || PostgresMaxAutoPrepare <= MinimumPositiveLimit || PostgresAutoPrepareMinUsages <= MinimumPositiveLimit || MaxResponseBytes <= MinimumPositiveLimit || ReadBufferBytes <= MinimumPositiveLimit || ReadBufferBytes > MaxResponseBytes || WriteBatchCapacity <= MinimumPositiveLimit || ReadbackBatchCapacity <= MinimumPositiveLimit || WriteBatchCapacity > MaxResponseBytes || ReadbackBatchCapacity > MaxResponseBytes || CleanupTimeout <= TimeSpan.Zero || IndexBuildTimeout <= TimeSpan.Zero || IndexPollInterval <= TimeSpan.Zero || IndexPollInterval >= IndexBuildTimeout
+            || ResourceSampleIntervalMilliseconds is <= MinimumPositiveLimit or > MaximumResourceSampleIntervalMilliseconds
+            || ProgressHeartbeatInterval <= TimeSpan.Zero || ProgressHeartbeatInterval > HostLifetime
+            || HostLifetime <= TimeSpan.Zero || HostLifetime > MaximumHostLifetime)
         {
             throw new OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions), [NativeComparisonOperationalLimitsMustBePresentPositive]);
         }

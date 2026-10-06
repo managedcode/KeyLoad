@@ -14,7 +14,9 @@ internal static class ReplicaDiscoveryEndpoints
 
     private static async Task<IResult> DiscoveryAsync(HttpContext context, PeerSecurity security, OrleansNode node)
     {
-        if (context.Request.ContentLength is > 0 || context.Request.QueryString.HasValue
+        const int ContentLengthEmptyCount = 0;
+
+        if (context.Request.ContentLength is > ContentLengthEmptyCount || context.Request.QueryString.HasValue
             || !await security.ValidateAsync(context.Request, context.RequestAborted).ConfigureAwait(false))
         {
             return Results.Unauthorized();

@@ -26,8 +26,12 @@ internal static class CoreNativeClaims
 
     internal static T Verify<T>(ReadOnlySpan<byte> key, string token, int maximumCharacters)
     {
+        const int MinimumTokenCharacters = 1;
+        const int PayloadSegmentIndex = 0;
+        const int SignatureSegmentIndex = 1;
+
         ArgumentNullException.ThrowIfNull(token);
-        ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, MinimumTokenCharacters);
         try
         {
             if (token.Length > maximumCharacters || !token.StartsWith(Prefix, StringComparison.Ordinal))
@@ -39,8 +43,8 @@ internal static class CoreNativeClaims
             {
                 throw new FormatException();
             }
-            var bytes = Convert.FromBase64String(Pad(parts[0]));
-            var mac = Convert.FromBase64String(Pad(parts[1]));
+            var bytes = Convert.FromBase64String(Pad(parts[PayloadSegmentIndex]));
+            var mac = Convert.FromBase64String(Pad(parts[SignatureSegmentIndex]));
             if (!CryptographicOperations.FixedTimeEquals(Signature(key, bytes), mac))
             {
                 throw new FormatException();
@@ -59,8 +63,10 @@ internal static class CoreNativeClaims
 
     private static byte[] Signature(ReadOnlySpan<byte> key, ReadOnlySpan<byte> bytes)
     {
+        const int PrefixByteOffset = 0;
+
         var authenticated = new byte[checked(PrefixBytes.Length + bytes.Length)];
-        PrefixBytes.CopyTo(authenticated, 0);
+        PrefixBytes.CopyTo(authenticated, PrefixByteOffset);
         bytes.CopyTo(authenticated.AsSpan(PrefixBytes.Length));
         return HMACSHA256.HashData(key, authenticated);
     }
@@ -69,7 +75,9 @@ internal static class CoreNativeClaims
         => Convert.ToBase64String(bytes).TrimEnd(Padding).Replace(StandardPlus, UrlMinus).Replace(StandardSlash, UrlUnderscore);
     private static string Pad(string value)
     {
+        const int QuantumRoundingAdjustment = 1;
+
         var padded = value.Replace(UrlMinus, StandardPlus).Replace(UrlUnderscore, StandardSlash);
-        return padded.PadRight((padded.Length + Base64Quantum - 1) / Base64Quantum * Base64Quantum, Padding);
+        return padded.PadRight((padded.Length + Base64Quantum - QuantumRoundingAdjustment) / Base64Quantum * Base64Quantum, Padding);
     }
 }

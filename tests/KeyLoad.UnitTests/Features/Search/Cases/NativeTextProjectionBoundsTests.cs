@@ -26,18 +26,19 @@ internal sealed class NativeTextProjectionBoundsTests
         var indexRoot = await CreateNativeGenerationAsync(database);
         var generation = FindGeneration(indexRoot);
         var native = Path.Combine(generation, NativeTextProtocol.NativeDirectory);
-        var inventory = NativeTextFileIO.MeasureRegularFiles(generation, NativeTextProtocol.MaximumFiles,
-            NativeTextProtocol.MaximumDiskBytes);
-        await Assert.That(inventory.Files).IsLessThan(NativeTextProtocol.MaximumFiles);
-        var addedFiles = await AddFilesAsync(native, inventory.Files, NativeTextProtocol.MaximumFiles,
+        var executionOptions = UnitNativeTextOptions.Execution();
+        var inventory = NativeTextFileIO.MeasureRegularFiles(generation, executionOptions.Value.MaximumFiles,
+            executionOptions.Value.MaximumDiskBytes, executionOptions);
+        await Assert.That(inventory.Files).IsLessThan(executionOptions.Value.MaximumFiles);
+        var addedFiles = await AddFilesAsync(native, inventory.Files, executionOptions.Value.MaximumFiles,
             TestContext.Current!.Execution.CancellationToken);
 
-        NativeTextFiles.CheckGenerationBound(generation);
+        NativeTextFiles.CheckGenerationBound(generation, executionOptions);
         var manifestPath = Path.Combine(generation, NativeTextProtocol.ManifestFile);
         var manifestBefore = await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken);
         var excess = Path.Combine(native, BoundFilePrefix + "excess");
         await File.WriteAllBytesAsync(excess, [], TestContext.Current!.Execution.CancellationToken);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation, executionOptions));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken))
@@ -56,18 +57,19 @@ internal sealed class NativeTextProjectionBoundsTests
         var indexRoot = await CreateNativeGenerationAsync(database);
         var generation = FindGeneration(indexRoot);
         var native = Path.Combine(generation, NativeTextProtocol.NativeDirectory);
-        var inventory = NativeTextFileIO.MeasureRegularFiles(generation, NativeTextProtocol.MaximumFiles,
-            NativeTextProtocol.MaximumDiskBytes);
-        var remainingBytes = NativeTextProtocol.MaximumDiskBytes - inventory.Bytes;
+        var executionOptions = UnitNativeTextOptions.Execution();
+        var inventory = NativeTextFileIO.MeasureRegularFiles(generation, executionOptions.Value.MaximumFiles,
+            executionOptions.Value.MaximumDiskBytes, executionOptions);
+        var remainingBytes = executionOptions.Value.MaximumDiskBytes - inventory.Bytes;
         await Assert.That(remainingBytes > 0).IsTrue();
         var sparseFile = Path.Combine(native, ExactDiskFile);
         SetSparseLength(sparseFile, remainingBytes);
 
-        NativeTextFiles.CheckGenerationBound(generation);
+        NativeTextFiles.CheckGenerationBound(generation, executionOptions);
         var manifestPath = Path.Combine(generation, NativeTextProtocol.ManifestFile);
         var manifestBefore = await File.ReadAllBytesAsync(manifestPath, TestContext.Current!.Execution.CancellationToken);
         SetSparseLength(sparseFile, remainingBytes + 1);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeTextFiles.CheckGenerationBound(generation, executionOptions));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(new FileInfo(sparseFile).Length).IsEqualTo(remainingBytes + 1);
@@ -87,10 +89,10 @@ internal sealed class NativeTextProjectionBoundsTests
         var bytes = await File.ReadAllBytesAsync(path, TestContext.Current!.Execution.CancellationToken);
         var manifest = NativeTextEnvelopeCodec.Decode<NativeTextManifest>(bytes);
         var exact = NativeTextFiles.ReadManifest(path, manifest.Scope,
-            new() { MaxQueryReadBytes = bytes.LongLength });
+            new() { MaxQueryReadBytes = bytes.LongLength }, UnitNativeTextOptions.Execution());
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             NativeTextFiles.ReadManifest(path, manifest.Scope,
-                new() { MaxQueryReadBytes = bytes.LongLength - 1 }));
+                new() { MaxQueryReadBytes = bytes.LongLength - 1 }, UnitNativeTextOptions.Execution()));
 
         await Assert.That(exact.Records.Length).IsEqualTo(1);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -106,10 +108,9 @@ internal sealed class NativeTextProjectionBoundsTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"),
             new PutDocument(Collection, "two", "{\"text\":\"needle\"}"));
-        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"),
-            database.Database.Limits, database.Store.Identity.NodeId);
+        using var projection = new NativeTextProjection(Path.Combine(database.Directory, "native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 10);
-        _ = await new SearchEngine(database.Database, projection).SearchAsync("root", request);
+        _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request);
         var scope = CaptureScope(database);
         var documents = ReadCanonicalDocuments(database);
         VerifyPostingWork(projection, scope, documents, ExactPostingBytes);
@@ -117,7 +118,7 @@ internal sealed class NativeTextProjectionBoundsTests
             VerifyPostingWork(projection, scope, documents, ExactPostingBytes - 1));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var following = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
+        var following = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(following.Length).IsEqualTo(2);
     }
@@ -133,15 +134,13 @@ internal sealed class NativeTextProjectionBoundsTests
         var documents = ReadCanonicalDocuments(database);
         var exactBytes = documents.Select((document, index) => (long)NativeSerialization.Measure(
             new NativeTextRecord((ulong)index + 1, document.Reference, document.Revision))).Sum();
-        using (var exactProjection = new NativeTextProjection(Path.Combine(database.Directory, "exact-native-text"),
-                   database.Database.Limits, database.Store.Identity.NodeId))
+        using (var exactProjection = new NativeTextProjection(Path.Combine(database.Directory, "exact-native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution()))
         {
-            using var exactLease = exactProjection.Acquire(scope, new(new() { MaxQueryReadBytes = exactBytes }));
+            using var exactLease = exactProjection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = exactBytes })));
             BeginAllRecords(exactLease, documents);
         }
-        using var boundedProjection = new NativeTextProjection(Path.Combine(database.Directory, "bounded-native-text"),
-            database.Database.Limits, database.Store.Identity.NodeId);
-        var budget = new ReadExecutionBudget(new() { MaxQueryReadBytes = exactBytes - 1 });
+        using var boundedProjection = new NativeTextProjection(Path.Combine(database.Directory, "bounded-native-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = exactBytes - 1 }));
         using var boundedLease = boundedProjection.Acquire(scope, budget);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => BeginAllRecords(boundedLease, documents));
 
@@ -152,8 +151,8 @@ internal sealed class NativeTextProjectionBoundsTests
     private static async Task<string> CreateNativeGenerationAsync(TestDatabase database)
     {
         var root = Path.Combine(database.Directory, "native-text");
-        using var projection = new NativeTextProjection(root, database.Database.Limits, database.Store.Identity.NodeId);
-        _ = await new SearchEngine(database.Database, projection).SearchAsync("root",
+        using var projection = new NativeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
+        _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
             new(database.Partition, Collection, TextPath, Query));
         return root;
     }
@@ -200,7 +199,7 @@ internal sealed class NativeTextProjectionBoundsTests
     private static void VerifyPostingWork(NativeTextProjection projection, TextProjectionScope scope,
         DocumentRecord[] documents, long maximumBytes)
     {
-        var budget = new ReadExecutionBudget(new() { MaxQueryReadBytes = maximumBytes });
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = maximumBytes }));
         using var lease = projection.Acquire(scope, budget);
         foreach (var document in documents)
         {

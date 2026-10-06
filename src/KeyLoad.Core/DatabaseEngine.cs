@@ -6,6 +6,12 @@ namespace KeyLoad.Core;
 /// <summary>Applies authorized database commands and reads through one node-owned atomic store.</summary>
 public sealed partial class DatabaseEngine
 {
+    private const int DatabaseEngineNoRetainedBytes = 0;
+    private const string DatabaseEngineResourceIsNotConfiguredDetail = "The resource is not configured.";
+    private const string DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail = "The resource belongs to a different transaction domain.";
+    private const string DatabaseEngineResourceHasADifferentKindDetail = "The resource has a different kind.";
+    private const int DatabaseEngineMinimumPositiveCount = 1;
+
     /// <summary>Creates a node-owned engine with centrally validated operation policy snapshots.</summary>
     /// <param name="store">The externally owned node-local atomic store.</param>
     /// <param name="authorization">Evaluator for persisted operation, row and field policy.</param>
@@ -14,10 +20,13 @@ public sealed partial class DatabaseEngine
     /// <param name="eventSourceOptions">Centrally validated event continuation policy.</param>
     /// <param name="messagingOptions">Centrally validated topic, catch-up and retry work limits.</param>
     /// <param name="graphOptions">Centrally validated shared graph traversal limits.</param>
+    /// <param name="changeFeedOptions">Centrally validated change cursor and projection policy.</param>
+    /// <param name="timeSeriesOptions">Centrally validated time-series append admission.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
         IOptions<MessagingExecutionOptions> messagingOptions, IOptions<GraphExecutionOptions> graphOptions,
+        IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<TimeSeriesExecutionOptions> timeSeriesOptions,
         TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(store);
@@ -31,23 +40,35 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(graphOptions);
         graphExecution = graphOptions.Value;
         graphExecution.Validate();
+        ArgumentNullException.ThrowIfNull(changeFeedOptions);
+        changeFeedExecution = changeFeedOptions.Value;
+        changeFeedExecution.Validate();
+        ArgumentNullException.ThrowIfNull(timeSeriesOptions);
+        timeSeriesExecution = timeSeriesOptions.Value;
+        timeSeriesExecution.Validate();
         OperationLimitsOptions = limits;
         GraphOptions = graphOptions;
         var operationLimits = limits.Value;
-        var dueSettings = dueWorkOptions.Value;
-        var eventSettings = eventSourceOptions.Value;
+        dueExecution = dueWorkOptions.Value;
+        eventSourceExecution = eventSourceOptions.Value;
         operationLimits.Validate();
-        dueSettings.Validate();
-        eventSettings.Validate();
+        dueExecution.Validate();
+        eventSourceExecution.Validate();
         Store = store;
         Authorization = authorization;
         Limits = operationLimits;
-        DueDiscoveryDeadline = dueSettings.DiscoveryDeadline;
-        eventSourceCursorLifetime = eventSettings.CursorLifetime;
+        analyticalReadGate = new(operationLimits.MaxConcurrentQueries);
+        DueDiscoveryDeadline = dueExecution.DiscoveryDeadline;
+        eventSourceCursorLifetime = eventSourceExecution.CursorLifetime;
         Clock = timeProvider ?? TimeProvider.System;
         Durability = store.Identity.Durability;
     }
 
+    private readonly ChangeFeedExecutionOptions changeFeedExecution;
+    private readonly TimeSeriesExecutionOptions timeSeriesExecution;
+    private readonly EventSourceExecutionOptions eventSourceExecution;
+    private readonly DueWorkExecutionOptions dueExecution;
+    internal DueWorkExecutionOptions DueExecution => dueExecution;
     private readonly MessagingExecutionOptions messagingExecution;
     private readonly GraphExecutionOptions graphExecution;
     internal IOptions<DatabaseLimits> OperationLimitsOptions { get; }
@@ -67,7 +88,7 @@ public sealed partial class DatabaseEngine
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
     public DurabilityProfile Durability { get; set; }
     /// <summary>Gets the canonical store's last applied replicated position.</summary>
-    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : 0);
+    public long LastApplied => Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes ? NativeSerialization.Deserialize<long>(bytes) : DatabaseEngineNoRetainedBytes);
 
     /// <summary>Reads a configured resource and checks its transaction domain and optional kind.</summary>
     /// <param name="view">Current gated storage view.</param>
@@ -80,15 +101,15 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
         var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name))
-            ?? throw Errors.Fail(ErrorCode.NotFound, "The resource is not configured.");
+            ?? throw Errors.Fail(ErrorCode.NotFound, DatabaseEngineResourceIsNotConfiguredDetail);
         if (resource.TransactionDomainId != partition.TransactionDomainId)
         {
-            throw Errors.Fail(ErrorCode.Conflict, "The resource belongs to a different transaction domain.");
+            throw Errors.Fail(ErrorCode.Conflict, DatabaseEngineResourceBelongsToADifferentTransactionDomainDetail);
         }
 
         if (kind is { } required && resource.Kind != required)
         {
-            throw Errors.Fail(ErrorCode.Validation, "The resource has a different kind.");
+            throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
         }
 
         return resource;
@@ -115,7 +136,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(token);
         var owner = ReadPlacementWitness(view, partition);
         if (token.Incarnation != owner.Incarnation || token.AtomicPartitionId != partition.AtomicPartitionId
-            || token.Position < 1 || token.OwnershipEpoch != owner.PlacementEpoch)
+            || token.Position < DatabaseEngineMinimumPositiveCount || token.OwnershipEpoch != owner.PlacementEpoch)
         {
             throw Errors.Fail(failureCode, safeDetail);
         }

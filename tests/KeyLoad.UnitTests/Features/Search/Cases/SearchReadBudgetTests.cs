@@ -34,7 +34,7 @@ internal sealed class SearchReadBudgetTests
             new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
         var position = database.Store.Position;
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(database.Database).SearchAsync("root", VectorRequest(database), TestContext.Current!.Execution.CancellationToken)))!;
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", VectorRequest(database), TestContext.Current!.Execution.CancellationToken)))!;
         await Assert.That(failure.Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(database.Store.Position).IsEqualTo(position);
@@ -50,8 +50,8 @@ internal sealed class SearchReadBudgetTests
         var documentBytes = Bytes(DocumentKeySpace, Orders);
         var vectorBytes = Bytes(VectorKeySpace, Orders, EmbeddingPath);
         var lineageBytes = KeySpace.Partition(LineageKeySpace, database.Partition, Orders, EmbeddingPath, "a").LongLength;
-        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var search = new SearchEngine(bounded);
+        var bounded = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = TwoDocuments * documentBytes + vectorBytes + lineageBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var search = new SearchEngine(bounded, UnitExecutionOptions.QueryExecution());
         var token = TestContext.Current!.Execution.CancellationToken;
 
         await Assert.That(await search.SearchAsync("root", new(database.Partition, Orders, TextPath, "alpha"), token)).HasSingleItem();
@@ -73,7 +73,7 @@ internal sealed class SearchReadBudgetTests
         database.Configure(Orders, ResourceKind.Collection);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha beta gamma\"}"),
             new PutDocument(Orders, "b", "{\"text\":\"alpha beta gamma\"}"));
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new SearchEngine(database.Database)
+        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution())
             .SearchAsync("root", new(database.Partition, Orders, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
         await Assert.That(failure.Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
@@ -89,7 +89,7 @@ internal sealed class SearchReadBudgetTests
             new PutDocument(Orders, "b", "{\"text\":\"café gamma\"}"),
             new PutDocument(Orders, "c", "{\"text\":\"delta beta beta beta\"}"),
             new PutDocument(Orders, "d", "{}"));
-        var result = await new SearchEngine(database.Database).SearchAsync("root",
+        var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root",
             new(database.Partition, Orders, TextPath, "ＣＡＦÉ beta"), TestContext.Current!.Execution.CancellationToken);
         await Assert.That(result.Select(row => row.Document.Reference.Id)).IsEquivalentTo(new[] { "a", "c", "b" }, CollectionOrdering.Matching);
         for (var index = 0; index < result.Length; index++)
@@ -105,7 +105,7 @@ internal sealed class SearchReadBudgetTests
         database.Configure(Orders, ResourceKind.Collection);
         database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha\"}"),
             new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
-        var result = await Assert.That(await new SearchEngine(database.Database).SearchAsync("root",
+        var result = await Assert.That(await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root",
             new(database.Partition, Orders, TextPath, "alpha", EmbeddingPath, [1, 0], Space,
                 TextWeight: double.MaxValue, VectorWeight: double.MaxValue, FusionConstant: int.MaxValue),
             TestContext.Current!.Execution.CancellationToken)).HasSingleItem();

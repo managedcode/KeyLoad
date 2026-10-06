@@ -1,10 +1,32 @@
+using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core.Features.Messaging;
+using Orleans.DurableJobs;
 
 namespace KeyLoad.Orleans;
 
 internal static class NativeSagaTimeoutJobContract
 {
+    private const int MetadataFieldCount = 11;
+    private const string GuidFormat = "N";
+    private const string UtcTimestampFormat = "O";
+    private const string TraceParentVersion = "00";
+    private const string TraceParentSeparator = "-";
+    private const string UnsampledTraceFlags = "00";
+    private static readonly HashSet<string> MetadataKeys = new(StringComparer.Ordinal)
+    {
+        SchemaKey,
+        KindKey,
+        LaneTenantKey,
+        LaneDatabaseKey,
+        LaneTransactionDomainKey,
+        LanePartitionKey,
+        LaneQueueKey,
+        IdKey,
+        CreatorKey,
+        RevisionKey,
+        DeadlineKey
+    };
     internal const string JobName = "keyload-saga-timeout-v1";
     internal const string SchemaKey = "schema";
     internal const string SchemaVersion = "1";
@@ -20,9 +42,10 @@ internal static class NativeSagaTimeoutJobContract
     internal const string RevisionKey = "saga.revision";
     internal const string DeadlineKey = "saga.deadline";
     internal const string InvalidJob = "The native saga timeout job metadata is invalid.";
+    internal const string UnresolvedOutcome = "The native saga timeout command outcome remains unresolved.";
 
     internal static IReadOnlyDictionary<string, string> Create(DueWorkHint hint)
-        => new Dictionary<string, string>(11, StringComparer.Ordinal)
+        => new Dictionary<string, string>(MetadataFieldCount, StringComparer.Ordinal)
         {
             [SchemaKey] = SchemaVersion,
             [KindKey] = SagaKind,
@@ -31,15 +54,28 @@ internal static class NativeSagaTimeoutJobContract
             [LaneTransactionDomainKey] = hint.Lane.Partition.TransactionDomainId,
             [LanePartitionKey] = hint.Lane.Partition.PartitionKey,
             [LaneQueueKey] = hint.Lane.Queue,
-            [IdKey] = hint.Id.ToString("N", CultureInfo.InvariantCulture),
+            [IdKey] = hint.Id.ToString(GuidFormat, CultureInfo.InvariantCulture),
             [CreatorKey] = hint.CreatorPrincipalId,
             [RevisionKey] = hint.Revision.ToString(CultureInfo.InvariantCulture),
-            [DeadlineKey] = hint.DueAt.ToString("O", CultureInfo.InvariantCulture)
+            [DeadlineKey] = hint.DueAt.ToString(UtcTimestampFormat, CultureInfo.InvariantCulture)
+        };
+
+    internal static ScheduleJobRequest CreateScheduleRequest(GrainId target, DateTimeOffset dueTime,
+        DueWorkHint hint)
+        => new()
+        {
+            Target = target,
+            JobName = JobName,
+            DueTime = dueTime,
+            Metadata = Create(hint),
+            TraceParent = CreateIsolatedTraceParent(),
+            TraceState = string.Empty
         };
 
     internal static DueWorkHint Parse(IReadOnlyDictionary<string, string>? metadata)
     {
-        if (metadata is null || metadata.Count != 11
+        if (metadata is null || metadata.Count != MetadataFieldCount
+            || metadata.Keys.Any(key => !MetadataKeys.Contains(key))
             || !metadata.TryGetValue(SchemaKey, out var schema) || schema != SchemaVersion
             || !metadata.TryGetValue(KindKey, out var kind) || kind != SagaKind
             || !TryValue(metadata, LaneTenantKey, out var tenant)
@@ -48,12 +84,12 @@ internal static class NativeSagaTimeoutJobContract
             || !TryValue(metadata, LanePartitionKey, out var partitionKey)
             || !TryValue(metadata, LaneQueueKey, out var queue)
             || !metadata.TryGetValue(IdKey, out var idText)
-            || !Guid.TryParseExact(idText, "N", out var id) || id == Guid.Empty
+            || !Guid.TryParseExact(idText, GuidFormat, out var id) || id == Guid.Empty
             || !TryValue(metadata, CreatorKey, out var creator)
             || !metadata.TryGetValue(RevisionKey, out var revisionText)
             || !long.TryParse(revisionText, NumberStyles.None, CultureInfo.InvariantCulture, out var revision)
             || !metadata.TryGetValue(DeadlineKey, out var deadlineText)
-            || !DateTimeOffset.TryParseExact(deadlineText, "O", CultureInfo.InvariantCulture,
+            || !DateTimeOffset.TryParseExact(deadlineText, UtcTimestampFormat, CultureInfo.InvariantCulture,
                 DateTimeStyles.None, out var deadline)
             || deadline.Offset != TimeSpan.Zero)
         {
@@ -67,4 +103,8 @@ internal static class NativeSagaTimeoutJobContract
 
     private static bool TryValue(IReadOnlyDictionary<string, string> metadata, string key, out string value)
         => metadata.TryGetValue(key, out value!) && !string.IsNullOrWhiteSpace(value);
+
+    private static string CreateIsolatedTraceParent()
+        => string.Concat(TraceParentVersion, TraceParentSeparator, ActivityTraceId.CreateRandom().ToHexString(),
+            TraceParentSeparator, ActivitySpanId.CreateRandom().ToHexString(), TraceParentSeparator, UnsampledTraceFlags);
 }

@@ -9,7 +9,7 @@ internal sealed record OrleansActivityCapture(string SourceName, string DisplayN
 
 internal sealed record OrleansActivityEventCapture(string Name, KeyValuePair<string, string?>[] Tags);
 
-internal sealed record OrleansMetricPointCapture(string MeterName, string MetricName,
+internal readonly record struct OrleansMetricPointCapture(string MeterName, string MetricName,
     KeyValuePair<string, string?>[] Tags, KeyValuePair<string, string?>[] ExemplarTags);
 
-internal sealed record OrleansTelemetryOperationParent(ActivityTraceId TraceId, ActivitySpanId ParentSpanId);
+internal readonly record struct OrleansTelemetryOperationParent(ActivityTraceId TraceId, ActivitySpanId ParentSpanId);

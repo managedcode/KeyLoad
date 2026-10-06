@@ -1,4 +1,4 @@
-using KeyLoad.Core;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

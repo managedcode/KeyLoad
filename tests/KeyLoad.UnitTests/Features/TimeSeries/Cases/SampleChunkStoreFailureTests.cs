@@ -44,7 +44,7 @@ internal sealed class SampleChunkStoreFailureTests
         var cut = fixture.CaptureCodecCut();
         var before = SampleChunkStoreFixture.CaptureCanonicalState(database);
         var limits = database.Database.Limits with { QueryDeadlineSeconds = 1 };
-        var budget = new ReadExecutionBudget(limits, database.Database.EvaluationClock);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), database.Database.EvaluationClock);
         budget.ChargeBytes(cut.Encoded.Length);
         await Task.Delay(TimeSpan.FromMilliseconds(1_100));
 

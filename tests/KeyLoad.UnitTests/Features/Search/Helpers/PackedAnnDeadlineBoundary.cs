@@ -128,7 +128,7 @@ internal static class PackedAnnDeadlineBoundary
     {
         var started = Stopwatch.GetTimestamp();
         var budget = new AnnWorkBudget(
-            new ReadExecutionBudget(limits, TimeProvider.System, cancellationToken),
+            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), TimeProvider.System, cancellationToken),
             PackedAnnIndexTestSupport.GenerousWorkLimit);
         observation.Start(started);
         ready.SetResult(budget);

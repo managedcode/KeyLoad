@@ -4,6 +4,26 @@ namespace KeyLoad.Analyzers.Tests.Features.CodeQuality;
 internal sealed class TypedConfigurationDurationTests
 {
     [Test]
+    public async Task CanonicalValidationComparesNamedPrimitiveBoundsWithoutExecutingADeadlineAsync()
+    {
+        const string source = """
+            [KeyLoad.ConfigurationOptions]
+            internal sealed class Policy
+            {
+                private const int DefaultDeadlineSeconds = 30;
+                private const long MinimumDeadlineTicks = System.TimeSpan.TicksPerSecond;
+                private const int MaximumDeadlineMinutes = 140;
+                private const long MaximumDeadlineTicks = MaximumDeadlineMinutes * System.TimeSpan.TicksPerMinute;
+                public System.TimeSpan Deadline { get; set; } = System.TimeSpan.FromSeconds(DefaultDeadlineSeconds);
+                internal bool IsValid() => Deadline.Ticks >= MinimumDeadlineTicks && Deadline.Ticks <= MaximumDeadlineTicks;
+            }
+            """;
+
+        await MagicRuntimeFixture.AssertConfigurationAsync(source);
+        await MagicRuntimeFixture.AssertDurationAsync(source);
+    }
+
+    [Test]
     public async Task ACanonicalOptionsDefaultMarkerDoesNotGrantRuntimeExecutionPolicyAsync()
     {
         const string source = """

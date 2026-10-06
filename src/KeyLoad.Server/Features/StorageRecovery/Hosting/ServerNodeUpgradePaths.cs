@@ -25,11 +25,13 @@ internal sealed record ServerNodeUpgradePaths(string Source, string Destination,
 
     internal static void CheckAncestors(string path, bool allowMissing)
     {
+        const int EmptyInfoAttributesFileAttributesReparsePoint = 0;
+
         var current = Path.GetFullPath(path);
         while (true)
         {
             var info = new FileInfo(current);
-            if (info.LinkTarget is not null || info.Exists && (info.Attributes & FileAttributes.ReparsePoint) != 0)
+            if (info.LinkTarget is not null || info.Exists && (info.Attributes & FileAttributes.ReparsePoint) != EmptyInfoAttributesFileAttributesReparsePoint)
             { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }
             if (!allowMissing && !File.Exists(current) && !Directory.Exists(current))
             { throw Errors.Fail(ErrorCode.FormatUnsupported, ServerNodeUpgradeProtocol.Invalid); }

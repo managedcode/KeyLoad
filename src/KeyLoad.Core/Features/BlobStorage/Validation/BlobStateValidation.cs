@@ -4,6 +4,8 @@ internal static class BlobStateValidation
 {
     internal static void Validate(BlobState state, BlobRef blob, Guid upload, Guid authority)
     {
+        const int EmptyNextOrdinal = 0;
+
         BlobRecordReader.Version(state.FormatVersion);
         if (state.Incarnation != authority)
         {
@@ -14,7 +16,7 @@ internal static class BlobStateValidation
         BlobMetadataRules.Access(state.Access, true);
         ValidateLifecycle(state);
         BlobRecordReader.Hash(state.IntegrityHash);
-        if (state.NextOrdinal == 0 && !BlobIntegrity.Matches(state.IntegrityHash,
+        if (state.NextOrdinal == EmptyNextOrdinal && !BlobIntegrity.Matches(state.IntegrityHash,
             BlobIntegrity.InitialHash(state.IntegrityIncarnation, blob, upload, state.DeclaredLength)))
         {
             throw BlobErrors.Corruption();
@@ -33,11 +35,18 @@ internal static class BlobStateValidation
 
     private static void ValidateCounters(BlobState state)
     {
-        if (state.DeclaredLength is < 0 or > BlobLimits.MaximumBlobBytes || state.ExpectedRevision < 0
-            || !Enum.IsDefined(state.Status) || state.NextOrdinal < 0
+        const int DeclaredLengthEmptyCount = 0;
+        const int ExpectedRevisionValidationBoundary = 0;
+        const int NextOrdinalValidationBoundary = 0;
+        const int ReclaimCursorValidationBoundary = 0;
+        const int StoredBytesValidationBoundary = 0;
+        const int RemainingReservationValidationBoundary = 0;
+
+        if (state.DeclaredLength is < DeclaredLengthEmptyCount or > BlobLimits.MaximumBlobBytes || state.ExpectedRevision < ExpectedRevisionValidationBoundary
+            || !Enum.IsDefined(state.Status) || state.NextOrdinal < NextOrdinalValidationBoundary
             || state.NextOrdinal > BlobRecordReader.PartCount(state.DeclaredLength)
-            || state.ReclaimCursor < 0 || state.ReclaimCursor > state.NextOrdinal || state.StoredBytes < 0
-            || state.RemainingReservation < 0 || state.StoredBytes > state.DeclaredLength
+            || state.ReclaimCursor < ReclaimCursorValidationBoundary || state.ReclaimCursor > state.NextOrdinal || state.StoredBytes < StoredBytesValidationBoundary
+            || state.RemainingReservation < RemainingReservationValidationBoundary || state.StoredBytes > state.DeclaredLength
             || state.RemainingReservation > state.DeclaredLength - state.StoredBytes)
         {
             throw BlobErrors.Corruption();
@@ -46,11 +55,14 @@ internal static class BlobStateValidation
 
     private static void ValidateLifecycle(BlobState state)
     {
+        const int EmptyReclaimCursor = 0;
+        const int EmptyRemainingReservation = 0;
+
         var accepted = Math.Min(state.DeclaredLength, (long)state.NextOrdinal * BlobLimits.RawPartBytes);
         var deleted = Math.Min(state.DeclaredLength, (long)state.ReclaimCursor * BlobLimits.RawPartBytes);
         if (state.StoredBytes != accepted - deleted || state.Retired && state.Status != BlobUploadStatus.Complete
-            || state.Status == BlobUploadStatus.Active && (state.ReclaimCursor != 0 || state.RemainingReservation != state.DeclaredLength - accepted)
-            || state.Status != BlobUploadStatus.Active && state.RemainingReservation != 0
+            || state.Status == BlobUploadStatus.Active && (state.ReclaimCursor != EmptyReclaimCursor || state.RemainingReservation != state.DeclaredLength - accepted)
+            || state.Status != BlobUploadStatus.Active && state.RemainingReservation != EmptyRemainingReservation
             || state.Status == BlobUploadStatus.Complete && state.NextOrdinal != BlobRecordReader.PartCount(state.DeclaredLength))
         {
             throw BlobErrors.Corruption();

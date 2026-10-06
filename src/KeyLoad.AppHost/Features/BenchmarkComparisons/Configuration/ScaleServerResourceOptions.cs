@@ -6,37 +6,55 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 [ConfigurationOptions]
 internal sealed record ScaleServerResourceOptions
 {
+    private const int NoCapacity = 0;
+    private const int MinimumErrorOutputDivisor = 2;
+    private const int MaximumErrorOutputDivisor = 4096;
+    private const int DefaultErrorOutputDivisor = 8;
+    private const int SupportedMaxProcesses = 128;
+    private const int SupportedMaxMounts = 8;
+    private const int SupportedMaxFileBytes = 4096;
+    private const int SupportedMinimumCommandBytes = 8;
+    private const int SupportedMaxHardwareBytes = 262144;
+    private const int SupportedMaxSampleMetadataBytes = 262144;
+    private const int SupportedMaxSidecarBytes = 65536;
+    private const int SupportedMaxWorkerBytes = 67108864;
+    private const int SupportedMaxSamples = 1680;
+    private const int SupportedMaxCgroupAncestors = 64;
+    private const int SupportedNativeReadBufferBytes = 4096;
+    private const int SupportedMaxNativeOutputBytes = 4096;
     private const int MaximumCadenceMinutes = 1;
     private const int MaximumObservationMinutes = 140;
     private const int MaximumCleanupSeconds = 30;
     internal const string SectionName = "Benchmarks:ServerResources";
     internal const string ValidationMessage = "Server resource observation policy is outside its qualified bounds.";
 
-    public int MaxProcesses { get; init; } = 128;
-    public int MaxMounts { get; init; } = 8;
-    public int MaxFileBytes { get; init; } = 4096;
-    public int MinimumCommandBytes { get; init; } = 8;
-    public int MaxHardwareBytes { get; init; } = 262144;
-    public int MaxSampleMetadataBytes { get; init; } = 262144;
-    public int MaxSidecarBytes { get; init; } = 65536;
-    public int MaxWorkerBytes { get; init; } = 67108864;
-    public int MaxSamples { get; init; } = 1680;
-    public int MaxCgroupAncestors { get; init; } = 64;
-    public int NativeReadBufferBytes { get; init; } = 4096;
-    public int MaxNativeOutputBytes { get; init; } = 4096;
+    public int MaxProcesses { get; init; } = SupportedMaxProcesses;
+    public int MaxMounts { get; init; } = SupportedMaxMounts;
+    public int MaxFileBytes { get; init; } = SupportedMaxFileBytes;
+    public int MinimumCommandBytes { get; init; } = SupportedMinimumCommandBytes;
+    public int MaxHardwareBytes { get; init; } = SupportedMaxHardwareBytes;
+    public int MaxSampleMetadataBytes { get; init; } = SupportedMaxSampleMetadataBytes;
+    public int MaxSidecarBytes { get; init; } = SupportedMaxSidecarBytes;
+    public int MaxWorkerBytes { get; init; } = SupportedMaxWorkerBytes;
+    public int MaxSamples { get; init; } = SupportedMaxSamples;
+    public int MaxCgroupAncestors { get; init; } = SupportedMaxCgroupAncestors;
+    public int NativeReadBufferBytes { get; init; } = SupportedNativeReadBufferBytes;
+    public int MaxNativeOutputBytes { get; init; } = SupportedMaxNativeOutputBytes;
+    public int StandardErrorOutputDivisor { get; init; } = DefaultErrorOutputDivisor;
     public TimeSpan Cadence { get; init; } = TimeSpan.FromSeconds(5);
     public TimeSpan MaximumObservation { get; init; } = TimeSpan.FromMinutes(140);
     public TimeSpan CleanupThreshold { get; init; } = TimeSpan.FromSeconds(30);
     public TimeSpan ProcessSettlement { get; init; } = TimeSpan.FromSeconds(1);
 
-    internal bool IsValid() => MaxProcesses is > 0 and <= 128 && MaxMounts is > 0 and <= 8
-        && MaxFileBytes is > 0 and <= 4096 && MinimumCommandBytes is >= 8 and <= 4096
-        && MinimumCommandBytes <= MaxFileBytes && MaxHardwareBytes is > 0 and <= 262144
-        && MaxSampleMetadataBytes is > 0 and <= 262144 && MaxHardwareBytes <= MaxSampleMetadataBytes
-        && MaxSidecarBytes is > 0 and <= 65536 && MaxWorkerBytes is > 0 and <= 67108864
-        && MaxSamples is >= ScaleServerResourceBounds.MinimumSamples and <= 1680
-        && MaxCgroupAncestors is > 0 and <= 64 && NativeReadBufferBytes is > 0 and <= 4096
-        && MaxNativeOutputBytes is > 0 and <= 4096 && NativeReadBufferBytes <= MaxFileBytes
+    internal bool IsValid() => MaxProcesses is > NoCapacity and <= SupportedMaxProcesses && MaxMounts is > NoCapacity and <= SupportedMaxMounts
+        && MaxFileBytes is > NoCapacity and <= SupportedMaxFileBytes && MinimumCommandBytes is >= SupportedMinimumCommandBytes and <= SupportedMaxFileBytes
+        && MinimumCommandBytes <= MaxFileBytes && MaxHardwareBytes is > NoCapacity and <= SupportedMaxHardwareBytes
+        && MaxSampleMetadataBytes is > NoCapacity and <= SupportedMaxSampleMetadataBytes && MaxHardwareBytes <= MaxSampleMetadataBytes
+        && MaxSidecarBytes is > NoCapacity and <= SupportedMaxSidecarBytes && MaxWorkerBytes is > NoCapacity and <= SupportedMaxWorkerBytes
+        && MaxSamples is >= ScaleServerResourceBounds.MinimumSamples and <= SupportedMaxSamples
+        && MaxCgroupAncestors is > NoCapacity and <= SupportedMaxCgroupAncestors && NativeReadBufferBytes is > NoCapacity and <= SupportedNativeReadBufferBytes
+        && MaxNativeOutputBytes is > NoCapacity and <= SupportedMaxNativeOutputBytes && NativeReadBufferBytes <= MaxFileBytes
+        && StandardErrorOutputDivisor is >= MinimumErrorOutputDivisor and <= MaximumErrorOutputDivisor
         && Positive(Cadence, MaximumCadenceMinutes * TimeSpan.TicksPerMinute) && Positive(MaximumObservation, MaximumObservationMinutes * TimeSpan.TicksPerMinute)
         && Cadence < MaximumObservation && Positive(CleanupThreshold, MaximumCleanupSeconds * TimeSpan.TicksPerSecond)
         && Positive(ProcessSettlement, MaximumCleanupSeconds * TimeSpan.TicksPerSecond);

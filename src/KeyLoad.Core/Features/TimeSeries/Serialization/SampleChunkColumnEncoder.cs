@@ -7,6 +7,8 @@ internal static class SampleChunkColumnEncoder
     internal static SampleChunkPayload CreatePayload(ReadOnlySpan<SampleRecord> records,
         SampleChunkEncodingPlan plan, ReadExecutionBudget budget)
     {
+        const int EmptyEncodedColumnBytes = 0;
+
         var utcTicks = new byte[plan.UtcTicksBytes];
         var offsets = new byte[plan.OffsetsBytes];
         var sequences = new byte[plan.SequencesBytes];
@@ -16,8 +18,8 @@ internal static class SampleChunkColumnEncoder
         var tags = new byte[plan.TagsBytes];
         WriteNumericColumns(records, utcTicks, offsets, sequences, values, budget);
         WriteTextColumns(records, plan, series, eventIds, tags, budget);
-        SampleChunkWire.Require(utcTicks.Length > 0 && offsets.Length > 0 && sequences.Length > 0
-            && values.Length > 0 && series.Length > 0 && eventIds.Length > 0 && tags.Length > 0);
+        SampleChunkWire.Require(utcTicks.Length > EmptyEncodedColumnBytes && offsets.Length > EmptyEncodedColumnBytes && sequences.Length > EmptyEncodedColumnBytes
+            && values.Length > EmptyEncodedColumnBytes && series.Length > EmptyEncodedColumnBytes && eventIds.Length > EmptyEncodedColumnBytes && tags.Length > EmptyEncodedColumnBytes);
         return new(SampleChunkWire.CurrentVersion, records.Length, utcTicks, offsets, sequences,
             values, series, eventIds, tags, ReadOnlyMemory<byte>.Empty);
     }
@@ -25,29 +27,40 @@ internal static class SampleChunkColumnEncoder
     private static void WriteNumericColumns(ReadOnlySpan<SampleRecord> records, byte[] utcTicks,
         byte[] offsets, byte[] sequences, byte[] values, ReadExecutionBudget budget)
     {
-        var tickPosition = 0;
-        var offsetPosition = 0;
-        var sequencePosition = 0;
-        var valuePosition = 0;
-        long priorTicks = 0;
-        long priorSequence = 0;
-        ulong priorValue = 0;
-        for (var index = 0; index < records.Length; index++)
+        const int TickPositionInitialValue = 0;
+        const int OffsetPositionInitialValue = 0;
+        const int SequencePositionInitialValue = 0;
+        const int ValuePositionInitialValue = 0;
+        const int PriorTicksInitialValue = 0;
+        const int PriorSequenceInitialValue = 0;
+        const int PriorValueInitialValue = 0;
+        const int IndexInitialValue = 0;
+        const int EmptyIndex = 0;
+        const int FirstNumericRecordIndex = 0;
+
+        var tickPosition = TickPositionInitialValue;
+        var offsetPosition = OffsetPositionInitialValue;
+        var sequencePosition = SequencePositionInitialValue;
+        var valuePosition = ValuePositionInitialValue;
+        long priorTicks = PriorTicksInitialValue;
+        long priorSequence = PriorSequenceInitialValue;
+        ulong priorValue = PriorValueInitialValue;
+        for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
             var record = records[index];
             var ticks = record.Sample.Timestamp.UtcTicks;
-            var tickDelta = index == 0 ? (ulong)ticks : (ulong)(ticks - priorTicks);
+            var tickDelta = index == EmptyIndex ? (ulong)ticks : (ulong)(ticks - priorTicks);
             SampleChunkWire.WriteVarUInt(utcTicks, ref tickPosition, tickDelta);
             var offsetMinutes = checked((short)(record.Sample.Timestamp.Offset.Ticks / TimeSpan.TicksPerMinute));
             BinaryPrimitives.WriteInt16LittleEndian(offsets.AsSpan(offsetPosition), offsetMinutes);
             offsetPosition += sizeof(short);
-            var sequenceDelta = index == 0 ? (ulong)record.Sequence
+            var sequenceDelta = index == EmptyIndex ? (ulong)record.Sequence
                 : SampleChunkWire.ZigZag(record.Sequence - priorSequence);
             SampleChunkWire.WriteVarUInt(sequences, ref sequencePosition, sequenceDelta);
             var valueBits = unchecked((ulong)BitConverter.DoubleToInt64Bits(record.Sample.Value));
             SampleChunkWire.WriteVarUInt(values, ref valuePosition,
-                index == 0 ? valueBits : valueBits ^ priorValue);
+                index == FirstNumericRecordIndex ? valueBits : valueBits ^ priorValue);
             priorTicks = ticks;
             priorSequence = record.Sequence;
             priorValue = valueBits;
@@ -59,11 +72,17 @@ internal static class SampleChunkColumnEncoder
     private static void WriteTextColumns(ReadOnlySpan<SampleRecord> records, SampleChunkEncodingPlan plan,
         byte[] series, byte[] eventIds, byte[] tags, ReadExecutionBudget budget)
     {
-        var seriesPosition = 0;
-        var eventPosition = 0;
-        var tagPosition = 0;
-        SampleChunkText.WriteFramed(records[0].SeriesId, series, ref seriesPosition, budget);
-        for (var index = 0; index < records.Length; index++)
+        const int SeriesPositionInitialValue = 0;
+        const int EventPositionInitialValue = 0;
+        const int TagPositionInitialValue = 0;
+        const int FirstSeriesRecordIndex = 0;
+        const int IndexInitialValue = 0;
+
+        var seriesPosition = SeriesPositionInitialValue;
+        var eventPosition = EventPositionInitialValue;
+        var tagPosition = TagPositionInitialValue;
+        SampleChunkText.WriteFramed(records[FirstSeriesRecordIndex].SeriesId, series, ref seriesPosition, budget);
+        for (var index = IndexInitialValue; index < records.Length; index++)
         {
             budget.Check();
             SampleChunkText.WriteFramed(records[index].Sample.EventId, eventIds, ref eventPosition, budget);

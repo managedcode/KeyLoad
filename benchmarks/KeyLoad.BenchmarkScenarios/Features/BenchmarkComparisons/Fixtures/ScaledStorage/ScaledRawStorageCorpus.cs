@@ -24,11 +24,13 @@ internal sealed class ScaledRawStorageCorpus
     /// <summary>Allocates one pinned key slab and fills each seeded and reserved key once.</summary>
     public ScaledRawStorageCorpus(int recordCount, int valueBytes, CancellationToken cancellationToken = default)
     {
+        const int RecordCountStep = 1;
+
         ValidateArguments(recordCount, valueBytes);
         cancellationToken.ThrowIfCancellationRequested();
         RecordCount = recordCount;
         ValueBytes = valueBytes;
-        var keyCount = checked(recordCount + 1);
+        var keyCount = checked(recordCount + RecordCountStep);
         keys = GC.AllocateArray<byte>(checked(keyCount * KeyBytes), pinned: true);
         FillKeys(keyCount, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
@@ -86,9 +88,12 @@ internal sealed class ScaledRawStorageCorpus
 
     private void FillKeys(int keyCount, CancellationToken cancellationToken)
     {
-        for (var index = 0; index < keyCount; index++)
+        const int IndexInitialValue = 0;
+        const int EmptyIndexCancellationCheckStride = 0;
+
+        for (var index = IndexInitialValue; index < keyCount; index++)
         {
-            if (index % CancellationCheckStride == 0)
+            if (index % CancellationCheckStride == EmptyIndexCancellationCheckStride)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -101,13 +106,15 @@ internal sealed class ScaledRawStorageCorpus
 
     private static void WriteHeader(int index, Span<byte> destination)
     {
+        const int DestinationComponentIndex = 2;
+
         var recordIndex = (ulong)index;
         BinaryPrimitives.WriteUInt64BigEndian(destination, recordIndex);
         BinaryPrimitives.WriteUInt64BigEndian(destination[sizeof(ulong)..], Seed);
-        BinaryPrimitives.WriteUInt32BigEndian(destination[(sizeof(ulong) * 2)..], Version);
-        BinaryPrimitives.WriteUInt32BigEndian(destination[((sizeof(ulong) * 2) + sizeof(uint))..],
+        BinaryPrimitives.WriteUInt32BigEndian(destination[(sizeof(ulong) * DestinationComponentIndex)..], Version);
+        BinaryPrimitives.WriteUInt32BigEndian(destination[((sizeof(ulong) * DestinationComponentIndex) + sizeof(uint))..],
             (uint)destination.Length);
-        BinaryPrimitives.WriteUInt64BigEndian(destination[((sizeof(ulong) * 2) + (sizeof(uint) * 2))..],
+        BinaryPrimitives.WriteUInt64BigEndian(destination[((sizeof(ulong) * DestinationComponentIndex) + (sizeof(uint) * DestinationComponentIndex))..],
             ~recordIndex);
     }
 

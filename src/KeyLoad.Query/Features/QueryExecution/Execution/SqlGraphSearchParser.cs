@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
@@ -7,16 +8,19 @@ namespace KeyLoad.Query;
 /// <summary>Parses the closed Q1.Search.v1 statement into the existing graph-search request.</summary>
 internal static class SqlGraphSearchParser
 {
-    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget,
-        int maximumParameters)
+    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget,
+        int maximumParameters, int sqlBudgetCheckInterval)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(limitsOptions);
         ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        var limits = limitsOptions.Value;
+        limits.Validate();
         ValidateEnvelope(request);
         SqlGraphSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget.Cancellation);
         budget.Check();
-        var reader = new SqlGraphSearchStatementReader(request.Query, limits, budget);
+        var reader = new SqlGraphSearchStatementReader(request.Query, limitsOptions, budget, sqlBudgetCheckInterval);
         return reader.Parse();
     }
 
@@ -34,14 +38,19 @@ internal static class SqlGraphSearchParser
 /// <summary>Consumes the ordered SEARCH grammar while retaining only its bounded typed operators.</summary>
 internal sealed class SqlGraphSearchStatementReader
 {
+    private readonly DatabaseLimits limits;
     private readonly QueryRequest query;
     private readonly SqlGraphSearchValueReader values;
     private readonly SqlTokenCursor cursor;
 
-    internal SqlGraphSearchStatementReader(QueryRequest query, DatabaseLimits limits, ReadExecutionBudget budget)
+    internal SqlGraphSearchStatementReader(QueryRequest query, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget,
+        int sqlBudgetCheckInterval)
     {
+        ArgumentNullException.ThrowIfNull(limitsOptions);
+        limits = limitsOptions.Value;
+        limits.Validate();
         this.query = query;
-        cursor = new(SqlTokenizer.Lex(query.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, budget));
+        cursor = new(SqlTokenizer.Lex(query.Sql, limits.MaxQueryTokens, limits.MaxQueryDepth, sqlBudgetCheckInterval, budget));
         values = new(cursor, query, budget);
     }
 

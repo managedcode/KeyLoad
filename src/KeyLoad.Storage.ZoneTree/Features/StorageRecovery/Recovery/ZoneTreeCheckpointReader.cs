@@ -14,8 +14,9 @@ internal static class ZoneTreeCheckpointReader
     internal static StorageSnapshot Read(
         FileStream input,
         ZoneTreeStoreOptions options,
-        Action<StorageMutation>? apply = null)
-        => Read(input, options, apply, CurrentFormat);
+        Action<StorageMutation>? apply = null,
+        Action<StorageMutation>? validate = null)
+        => Read(input, options, apply, CurrentFormat, validate: validate);
 
     internal static StorageSnapshot ReadNative3ForUpgrade(
         FileStream input,
@@ -36,7 +37,8 @@ internal static class ZoneTreeCheckpointReader
         ZoneTreeStoreOptions options,
         Action<StorageMutation>? apply,
         CheckpointFormat format,
-        Guid? expectedIncarnation = null)
+        Guid? expectedIncarnation = null,
+        Action<StorageMutation>? validate = null)
     {
         if (input.Length > options.MaxSnapshotBytes && apply is null)
         {
@@ -74,7 +76,7 @@ internal static class ZoneTreeCheckpointReader
                     throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointFrameTypeInvalid);
                 }
 
-                ApplyRecords(frame.Payload, appliedKey, apply, ref count, ref applied, ref previousKey);
+                ApplyRecords(frame.Payload, appliedKey, apply, validate, ref count, ref applied, ref previousKey);
             }
 
             digest.AppendData(frame.Header);
@@ -127,6 +129,7 @@ internal static class ZoneTreeCheckpointReader
         byte[] payload,
         ReadOnlyMemory<byte> appliedKey,
         Action<StorageMutation>? apply,
+        Action<StorageMutation>? validate,
         ref long count,
         ref long applied,
         ref ReadOnlyMemory<byte>? previousKey)
@@ -141,6 +144,7 @@ internal static class ZoneTreeCheckpointReader
             if (mutation is null || mutation.Key.Length == EmptyKeyLength || mutation.Value is null
                 || lastKey is { } priorKey && priorKey.Span.SequenceCompareTo(mutation.Key.Span) >= EqualKeys)
             { throw Errors.Fail(ErrorCode.Corruption, ZoneTreePersistenceFormat.CheckpointRecordsInvalid); }
+            validate?.Invoke(mutation);
             lastKey = mutation.Key;
             if (mutation.Key.Span.SequenceEqual(appliedKey.Span))
             {

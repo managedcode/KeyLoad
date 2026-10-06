@@ -25,19 +25,23 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOption
     /// <returns>The exact native reply bytes after authentication and error handling.</returns>
     public async Task<ReadOnlyMemory<byte>> InvokeAsync(string voterId, ReplicaRpc method, ReadOnlyMemory<byte> payloadBytes, CancellationToken cancellationToken)
     {
+        const int AttemptInitialValue = 0;
+        const int EmptyAttempt = 0;
+        const int AttemptStep = 1;
+
         var payload = EncodePayload(payloadBytes);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(configuration.RpcTimeout);
         try
         {
             var maximumAttempts = settings.MaximumAttempts;
-            for (var attempt = 0; attempt < maximumAttempts; attempt++)
+            for (var attempt = AttemptInitialValue; attempt < maximumAttempts; attempt++)
             {
                 try
                 {
-                    return await ExchangeAsync(voterId, method, payload, attempt != 0, deadline.Token).ConfigureAwait(false);
+                    return await ExchangeAsync(voterId, method, payload, attempt != EmptyAttempt, deadline.Token).ConfigureAwait(false);
                 }
-                catch (OrleansMessageRejectionException) when (attempt + 1 < maximumAttempts)
+                catch (OrleansMessageRejectionException) when (attempt + AttemptStep < maximumAttempts)
                 {
                     // Rediscover the generation once; operation bytes and stable command IDs remain identical.
                 }

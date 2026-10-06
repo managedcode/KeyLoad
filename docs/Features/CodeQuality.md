@@ -108,8 +108,9 @@ the build; never disable these rules merely to declare a green migration.
 | KLD0032 | Executable unit code lines at most50 | Error |
 | KLD0033 | Executable control-flow nesting at most3 | Error |
 | KLD0034 | Typed synchronization outside Orleans activation-owned state | Error |
-| KLD0035 | Named constants for runtime durations and timeout arguments | Error |
-| KLD0036 | Named constants for runtime string comparisons and format tokens | Error |
+| KLD0035 | Named constants for all runtime numeric literals, including zero and one | Error |
+| KLD0036 | Named identities for runtime strings, characters, interpolation text and format tokens | Error |
+| KLD0037 | Native typed options and owned configuration binding; operational policy cannot hide behind constants | Error |
 
 Excluded Prostir-specific rules: ProductCommandContract and ServerOwnedIdentity
 assume Prostir's typed product command/Studio lifecycle; EfCoreCosmosTopLevelAny
@@ -492,6 +493,16 @@ remain distinct; their configuration helpers follow the same native options path
   unit/scalar/recovery/RF3 suites, format and source-bound coverage retain all gates.
   Original narrow-stage findings and test artifacts remain historical evidence.
 
+Additional AC-CQ-034/035 regressions are `CentralAppHostOptionsTests` (native
+bootstrap snapshot, configured timeout/filter admission, actual resource charging
+and pre-resource startup failure), `PhysicalShardProfileBoundedReadTests` (configured
+exact byte cap and reject-before-file writer), and configured-policy scenarios in
+`ScaleServerResourceEvidenceParserTests` (valid native policy, invalid timing,
+sample overflow and incomparable policies). These are authored acceptance checks;
+they are not marked passing until the Aspire-owned suite runs against the rebuilt
+source. Existing byte preservation, atomic publication, authentication and RF3
+assertions remain mandatory when required constructor arguments are joined.
+
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
 | TASK-CQ-GENERAL-001 | Lead: contracts, central configuration markers/options registry integration, AppHost configuration, shared config/docs | Freeze034/035 and disjoint joins before worker writes |
@@ -499,6 +510,12 @@ remain distinct; their configuration helpers follow the same native options path
 | TASK-CQ-GENERAL-003 | Runtime worker: Abstractions/Core/Query/Replication/Storage*/Security plus new owning regression files | Central marker/options contract; all immutable literals and actual operational options; source-value parity |
 | TASK-CQ-GENERAL-004 | Runtime worker: Orleans/Server/Client/Cli/benchmarks, excluding AppHost configuration and central registry files | Central contract; DueCoordination first, then remaining options/immutable tokens; actual callers/tests |
 | TASK-CQ-GENERAL-005 | Lead: complete diff review, AppHost general literal migration, integrated gates and checkpoint |002..004 stable source; complete source-bound evidence, no skipped gate |
+
+Integration join ownership:002 additionally owns shared UnitTests calls and exact
+native package-generated source boundaries;003 owns Comparison library immutable
+identities and actual adapter policy; lead owns ComparisonHost and IntegrationTests.
+004 retains Server/Orleans/Client/CLI/BenchmarkScenarios. A dependency or test-call
+migration does not authorize weakening assertions, analyzer severity or any gate.
 
 Implementation order: central ownership and options marker/registration contract;
 DueCoordination screenshot regression and options path; native compiler general
@@ -521,15 +538,22 @@ project, including tests excluded from coverage contribution, and retain its
 actual SHA-256. Identity inventory and accepted contributor selection have
 different purposes: an inventoried load or shape-only case does not become a
 coverage contributor. Verify this complete project-source inventory against the
-actual UnitTests portable PDB through the existing native compiled-identity
-helper; reject source drift, unsafe links/paths, duplicate or unsupported
-identities and incomplete bindings. Retain generated documents as unmeasured.
+actual compiler inputs through a receipt emitted by the same UnitTests build;
+portable-PDB documents describe debug-source mappings, not every compiler input.
+Reject source drift, unsafe links/paths, duplicate or unsupported identities and
+incomplete compiler-input bindings. Retain generated and external debug documents
+under bounded closed provenance labels without resolving external names as
+repository files; they remain unmeasured. Verify every inventoried PDB row that
+exists against its actual source checksum. A source with no emitted debug mapping
+must still be present in the build's compiler-input receipt.
 Bound traversal and retained source inventory to 5000 entries before admitting
 the next entry, and do not follow directory symlinks.
 
 Also capture the actual SHA-256 of `global.json`, `Directory.Build.props`,
 `Directory.Build.targets`, `Directory.Packages.props`, `KeyLoad.slnx` and the
-UnitTests project file before and after collection. The new helper belongs to
+UnitTests project file before and after collection and in the same-build receipt.
+Prepare/Verify snapshots alone do not prove which central inputs built an image.
+The new helper belongs to
 `scripts/Features/CodeQuality/functional-coverage.test-identity.ps1`; it reuses
 the canonical path/hash/native metadata helpers and adds no alternative caller,
 test runner, parser dependency or coverage framework. A Luna worker owns only a
@@ -551,3 +575,35 @@ source, foreign/missing PDB, missing central input and unsafe-link controls.
 It remains static identity evidence. Fresh complete-flow TUnit collection still
 runs through Aspire after a successful current-source build; full unit/scalar,
 recovery, RF3 and sixteen-module/server coverage remain required independently.
+
+TASK-CQ-FUNCTIONAL-COMPILE-IDENTITY-001C preserves AC-CQ-018/020 while repairing
+the debug-document/compile-input distinction. Its UnitTests-local
+`Features/CodeQuality/Build/` target captures the actual non-generated owned
+`@(Compile)` items and the six central hashes immediately before `CoreCompile`.
+Emit that bounded canonical input identity into the compilation, for example as
+native assembly metadata, so it cannot be attached afterwards to an older DLL.
+Bind the producer target's own path/SHA-256 separately in that emitted receipt
+and in the outer source manifest; it does not replace or expand the six central
+inputs. The canonical native PE reader verifies the receipt from that same image and
+retains DLL/PDB hashes, MVID and matching PDB GUID/stamp together. Reject missing,
+duplicate, malformed, oversized, stale or unsupported receipts; preserve the
+complete source inventory and central-input drift checks. Build-generated receipt
+code is generated infrastructure, excluded from production coverage contribution.
+Root owns the feature/ADR contract, project import and Prepare/Verify joins; a Luna
+worker supplies a guarded private target/reader/helper packet. Use real build
+metadata and accepted/rejected native image flows to verify this task. Static
+inspection of an older image may reproduce a defect but cannot qualify new source.
+
+TASK-CQ-QUERY-COHESION-091F is a bounded continuation of TASK-CQ-REPAIR-001,
+REQ-CQ-004/006/007 and AC-CQ-022/038. Review the current Query source before
+repairing remaining KLD0031 findings; concurrent capability, row-projection and
+predicate-normalizer extractions are preserved. A Luna worker may extract the
+actual PreparedQuery ordering responsibility into a feature-local execution
+helper, preserving worst-first admission, exact ordering/ties, full entity
+references, allocation reservations, release, limit and read-budget behavior.
+Do not split the same oversized type into more partial files or suppress its
+diagnostic. New operational configuration continues through native IOptions;
+immutable ordering mathematics are named domain constants. Root owns live joins,
+current-source native build/format and existing complete query-operation,
+continuation, budget and failure flows through Aspire. Source-only review does
+not establish a passing test or coverage result.

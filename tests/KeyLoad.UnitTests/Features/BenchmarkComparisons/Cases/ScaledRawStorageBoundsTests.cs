@@ -23,7 +23,7 @@ internal sealed class ScaledRawStorageBoundsTests
     public async Task AcScale003InvalidPointReadsDoNotChargeAndTheMiniFixtureRemainsGenuine()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes),
+            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage()),
             AssertMiniReadBoundsAndOracleAsync);
     }
 
@@ -31,7 +31,7 @@ internal sealed class ScaledRawStorageBoundsTests
     public async Task AcScale003MiniFixtureReportsActualPeakAndHeadroom()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes),
+            () => new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage()),
             AssertMiniMemoryBoundsAsync);
     }
 
@@ -39,10 +39,7 @@ internal sealed class ScaledRawStorageBoundsTests
     public async Task AcScale003HundredThousandFixtureMeetsActualQualificationCapacity()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(
-                QualificationRecordCount,
-                SmallPayloadBytes,
-                TestContext.Current!.Execution.CancellationToken),
+            () => new ScaledRawStorageFixture(                QualificationRecordCount,                 SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(),                 TestContext.Current!.Execution.CancellationToken),
             AssertQualificationFixtureAsync);
     }
 

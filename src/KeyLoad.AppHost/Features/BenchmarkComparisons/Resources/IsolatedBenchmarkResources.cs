@@ -10,9 +10,6 @@ internal static class IsolatedBenchmarkResources
 {
     private const string DirectoryIdentityFormat = "N";
 
-    private const string EnabledSetting = "Benchmarks:Enabled";
-    private const string OutputSetting = "Benchmarks:Output";
-    private const string RootSetting = "Benchmarks:DataRoot";
     private const string TemporaryPrefix = "keyload-isolated-";
     private const string ReportsDirectory = "reports";
     private const string SettingSeparator = ":";
@@ -24,18 +21,20 @@ internal static class IsolatedBenchmarkResources
     internal static void Add(IDistributedApplicationBuilder builder)
     {
         var selection = ComparisonWorkerSelection.Read(builder.Configuration);
-        if (!bool.TryParse(builder.Configuration[EnabledSetting], out var enabled) || !enabled)
+        var openLoop = OpenLoopResourceSelectionBinding.Read(builder.Configuration, selection);
+        if (!AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkMode)
         {
             throw new InvalidOperationException(Disabled);
         }
-        var root = Path.GetFullPath(builder.Configuration[RootSetting]
+        var root = Path.GetFullPath(AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkRoot
             ?? Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString(DirectoryIdentityFormat)));
         var runner = BenchmarkRunnerContainer.Create(builder,
-            builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory));
+            AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectory));
         Bind(runner, ComparisonWorkerSelection.TargetSetting, selection.Target);
         Bind(runner, ComparisonWorkerSelection.NodeCountSetting, selection.NodeCount.ToString(CultureInfo.InvariantCulture));
         Bind(runner, ComparisonWorkerSelection.ScenarioSetting, selection.Scenario.ToString());
         Bind(runner, ComparisonWorkerSelection.ProfileSetting, selection.Profile);
+        OpenLoopResourceSelectionBinding.Apply(runner, selection, openLoop);
         if (selection.VectorProfile is { } vectorProfile)
         {
             Bind(runner, ComparisonWorkerSelection.VectorProfileSetting, vectorProfile.Id);
@@ -45,9 +44,10 @@ internal static class IsolatedBenchmarkResources
         if (selection.ScaledProfile is not null || selection.VectorProfile is not null)
         {
             builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
-                builder.Configuration[OutputSetting] ?? Path.Combine(root, ReportsDirectory),
+                AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectory),
                 serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
-                AppHostOptionsRegistration.Get(builder).ServerResources, AppHostOptionsRegistration.Get(builder).Provenance));
+                AppHostOptionsRegistration.Get(builder).ServerResources, AppHostOptionsRegistration.Get(builder).Provenance,
+                openLoop));
         }
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))

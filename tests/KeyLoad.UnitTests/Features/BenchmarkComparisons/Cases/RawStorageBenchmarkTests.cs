@@ -69,7 +69,7 @@ internal sealed class RawStorageBenchmarkTests
     [Arguments(1024)]
     public async Task AcGe004AllMethodsUseRealZoneTreeFixtureAndReturnTheirActualOperationResult(int payloadBytes)
     {
-        using var oracle = new RawStorageFixture(TestRecordCount, payloadBytes, WriteBudget);
+        using var oracle = new RawStorageFixture(TestRecordCount, payloadBytes, Microsoft.Extensions.Options.Options.Create(new KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.RawStorageExecutionOptions { MaximumWrites = WriteBudget }));
         var original = oracle.Corpus.Value(0, alternate: false).ToArray();
         var alternate = oracle.Corpus.Value(0, alternate: true).ToArray();
         var benchmark = new RawStorageBenchmarks

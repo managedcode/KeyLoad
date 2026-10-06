@@ -11,9 +11,11 @@ internal static class SampleChunkChecksum
 
     internal static byte[] Compute(SampleChunkPayload payload, ReadExecutionBudget budget)
     {
+        const int ChecksumHeaderFields = 2;
+
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         Append(hash, Domain, budget);
-        Span<byte> header = stackalloc byte[sizeof(int) * 2];
+        Span<byte> header = stackalloc byte[sizeof(int) * ChecksumHeaderFields];
         BinaryPrimitives.WriteInt32LittleEndian(header, payload.FormatVersion);
         BinaryPrimitives.WriteInt32LittleEndian(header[sizeof(int)..], payload.RecordCount);
         Append(hash, header, budget);
@@ -45,7 +47,9 @@ internal static class SampleChunkChecksum
 
     private static void Append(IncrementalHash hash, ReadOnlySpan<byte> value, ReadExecutionBudget budget)
     {
-        for (var offset = 0; offset < value.Length; offset += SampleChunkWire.HashChunkBytes)
+        const int OffsetInitialValue = 0;
+
+        for (var offset = OffsetInitialValue; offset < value.Length; offset += SampleChunkWire.HashChunkBytes)
         {
             budget.Check();
             hash.AppendData(value.Slice(offset, Math.Min(SampleChunkWire.HashChunkBytes, value.Length - offset)));

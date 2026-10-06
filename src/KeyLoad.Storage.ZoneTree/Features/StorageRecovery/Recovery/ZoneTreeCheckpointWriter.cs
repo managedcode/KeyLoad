@@ -63,7 +63,7 @@ internal static class ZoneTreeCheckpointWriter
             FileMode.CreateNew,
             FileAccess.Write,
             FileShare.None,
-            ZoneTreePersistenceFormat.FileBufferBytes,
+            options.FileBufferBytes,
             FileOptions.WriteThrough);
         SetPrivateMode(path);
         using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);

@@ -72,7 +72,7 @@ internal static class McpResponseBoundaryTestData
         if (!omitParameters)
         { envelope[ParametersField] = parameters; }
         var wire = JsonDefaults.Serialize(envelope);
-        _ = McpFrameBounds.Inspect(wire, MaximumWireBytes);
+        _ = McpFrameBounds.Inspect(wire, MaximumWireBytes, UnitMcpOptions.Execution());
         return wire;
     }
 

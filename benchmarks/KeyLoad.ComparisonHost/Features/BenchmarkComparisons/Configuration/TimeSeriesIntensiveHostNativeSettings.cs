@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
+[KeyLoad.ConfigurationBinding]
 internal sealed record TimeSeriesIntensiveHostNativeSettings(string Image, ImmutableArray<Uri> Endpoints,
     ImmutableArray<string> VoterIds, Guid? Incarnation, string? AdminKey, string? ConnectionString)
 {
@@ -17,7 +18,7 @@ internal sealed record TimeSeriesIntensiveHostNativeSettings(string Image, Immut
         {
             selection.Validate();
             TimeSeriesIntensiveHostInput.ValidateNativeSection(configuration, selection.Target);
-            if (!ComparisonExecutionIdentityImageReference.IsValid(image)
+            if (!ComparisonExecutionIdentityImageReference.IsValid(image, NativeComparisonExecutionRegistration.ReadHost(configuration))
                 || TimeSeriesIntensiveHostInput.Required(configuration, TimeSeriesIntensiveHostConstants.Image) != image)
             {
                 throw TimeSeriesIntensiveHostInput.Invalid();

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,6 +17,7 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     private const string MutationTextProperty = "text";
     private const string InitialMutationText = "KeyLoad initial value";
     private readonly ComparisonOptions options;
+    internal IOptions<ComparisonOptions> ExecutionOptions { get; }
     private readonly Dictionary<int, ImmutableArray<FoundDocument>> neighbors = [];
     private readonly Dictionary<(int Number, int Depth), ImmutableArray<string>> reachable = [];
     /// <summary>Gets the generated benchmark documents.</summary>
@@ -33,12 +35,13 @@ public sealed class BenchmarkDataset : IComparisonCorpus
     IReadOnlyList<BenchmarkEdge> IComparisonCorpus.Edges => Edges;
 
     /// <summary>Creates and hashes the deterministic corpus described by the supplied options.</summary>
-    /// <param name="options">The workload options used to generate documents, vectors, and graph edges.</param>
-    public BenchmarkDataset(ComparisonOptions options)
+    /// <param name="workloadOptions">The workload options used to generate documents, vectors, and graph edges.</param>
+    public BenchmarkDataset(IOptions<ComparisonOptions> workloadOptions)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(workloadOptions);
+        options = workloadOptions.Value;
         options.Validate();
-        this.options = options;
+        ExecutionOptions = workloadOptions;
         var documents = Enumerable.Range(0, options.Documents).Select(CreateDocument).ToArray();
         Documents = ImmutableCollectionsMarshal.AsImmutableArray(documents);
         // Two disconnected components, each with directed cycles and deterministic fan-out.

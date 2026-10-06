@@ -75,7 +75,7 @@ internal static class Neo4jHarnessRegression
         var target = new Neo4jTarget(client, fixture.RunId, image);
         await using (target)
         {
-            var report = await new ComparisonRunner(SmallOptions()).RunAsync([target], "test", cancellationToken);
+            var report = await new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions()), NativeExecutionPolicyFixture.Read()).RunAsync([target], "test", cancellationToken);
 
             await Assert.That(report.Cases.Length == Enum.GetValues<Scenario>().Length).IsTrue();
             foreach (var item in report.Cases)
@@ -98,7 +98,7 @@ internal static class Neo4jHarnessRegression
         await Assert.That(await fixture.ConstraintExistsAsync(cancellationToken)).IsTrue();
     }
 
-    private static BenchmarkDataset SmallDataset() => new(SmallOptions());
+    private static BenchmarkDataset SmallDataset() => new(Microsoft.Extensions.Options.Options.Create(SmallOptions()));
 
     private static ComparisonOptions SmallOptions() => new()
     {

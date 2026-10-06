@@ -87,8 +87,8 @@ internal sealed class GraphTraversalResourceTests
         db.Commit(new PutDocument(Collection, start.Id, "{}"));
         var expected = db.Database.Traverse(Root, db.Partition, Graph, start, maxDepth: 0);
         var bytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
-        var shortLimit = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource());
+        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var shortLimit = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxBatchBytes = bytes - 1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(exact.Traverse(Root, db.Partition, Graph, start, maxDepth: 0).Vertices)
             .IsEquivalentTo(expected.Vertices);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => shortLimit.Traverse(Root, db.Partition, Graph, start,

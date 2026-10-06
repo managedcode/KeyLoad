@@ -22,6 +22,8 @@ public sealed partial class DatabaseEngine
     private List<Mutation> ExpandQueueToGraph(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget)
     {
+        const int ExpectedRevisionEmptyCount = 0;
+
         AuthorizeComposition(tx, principal, partition, command);
         var lane = new QueueLaneRef(partition, command.Queue);
         var ids = new List<string>();
@@ -59,7 +61,7 @@ public sealed partial class DatabaseEngine
             var edgeId = command.EdgeIdPrefix + id;
             JsonData.Identifier(edgeId);
             effects.Add(new UpsertEdge(command.Graph, edgeId, link.From, link.To, link.Label,
-                link.AttributesJson, ExpectedRevision: 0));
+                link.AttributesJson, ExpectedRevision: ExpectedRevisionEmptyCount));
         }
         return effects;
     }

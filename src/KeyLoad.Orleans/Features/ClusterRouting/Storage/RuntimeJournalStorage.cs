@@ -2,7 +2,7 @@
 using System.Buffers;
 using KeyLoad.Core;
 using Orleans.Journaling;
-using Orleans.Storage;
+using Orleans.Serialization.Buffers;
 
 namespace KeyLoad.Orleans;
 
@@ -12,21 +12,24 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     private readonly RuntimeJournalStorageState state;
     private readonly RuntimeJournalStorageOperations operations;
 
-    internal RuntimeJournalStorage(RuntimeJournalClient client, JournalId journalId, RuntimeJournalOptions options,
-        string format, Microsoft.Extensions.Options.IOptions<GrainRoutingOptions> routingOptions)
+    internal RuntimeJournalStorage(RuntimeJournalClient client, JournalId journalId,
+        Microsoft.Extensions.Options.IOptions<RuntimeJournalOptions> options, string format,
+        Microsoft.Extensions.Options.IOptions<GrainRoutingOptions> routingOptions, SemaphoreSlim[] gates,
+        int gateIndex)
     {
-        state = new(client, journalId, options with { }, format, routingOptions);
+        state = new(client, journalId, options, format, routingOptions, gates, gateIndex);
         operations = new(client, state);
     }
 
-    public bool IsCompactionRequested => state.Options.RequestCompaction;
+    public bool IsCompactionRequested => state.Options.Value.RequestCompaction;
 
     public async ValueTask<bool> CreateIfNotExistsAsync(IReadOnlyDictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default)
     {
         using var lease = await state.EnterAsync(cancellationToken).ConfigureAwait(false);
-        var properties = RuntimeJournalStorageValidation.CopyProperties(metadata, state.Options);
-        if (await state.CaptureAsync(lease.Token).ConfigureAwait(false) is not null)
+        var properties = RuntimeJournalStorageValidation.CopyProperties(metadata, state.Options.Value);
+        var observed = await state.ObserveAsync(lease.Token).ConfigureAwait(false);
+        if (observed is not null || state.Captured is not null)
         {
             return false;
         }
@@ -40,7 +43,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     public async ValueTask<IJournalMetadata?> GetMetadataAsync(CancellationToken cancellationToken = default)
     {
         using var lease = await state.EnterAsync(cancellationToken).ConfigureAwait(false);
-        var snapshot = await state.CaptureAsync(lease.Token).ConfigureAwait(false);
+        var snapshot = await state.ObserveAsync(lease.Token).ConfigureAwait(false);
         return snapshot is null ? null : operations.Metadata(snapshot);
     }
 
@@ -56,8 +59,8 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
             return null;
         }
 
-        var properties = RuntimeJournalStorageValidation.CopyProperties(set, state.Options);
-        var removals = RuntimeJournalStorageValidation.CopyRemovals(remove, properties, state.Options);
+        var properties = RuntimeJournalStorageValidation.CopyProperties(set, state.Options.Value);
+        var removals = RuntimeJournalStorageValidation.CopyRemovals(remove, properties, state.Options.Value);
         return await operations.UpdateMetadataAsync(current, properties, removals, expectedETag, lease.Token)
             .ConfigureAwait(false);
     }
@@ -73,22 +76,39 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
             return;
         }
 
+        if (snapshot.Length > state.Options.Value.MaximumJournalBytes)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidPage);
+        }
+
         var metadata = operations.Metadata(snapshot);
-        var offset = 0L;
+        using var buffer = new ArcBufferWriter();
+        var offset = RuntimeJournalStoragePolicy.InitialReadOffset;
         while (true)
         {
             lease.Token.ThrowIfCancellationRequested();
             var page = await operations.ReadPageAsync(snapshot, offset, lease.Token).ConfigureAwait(false);
             if (!page.Data.IsEmpty)
             {
-                consumer.Read(page.Data, metadata, complete: false);
+                buffer.Write(page.Data.Span);
                 offset = checked(offset + page.Data.Length);
             }
 
             if (page.IsCompleted)
             {
-                consumer.Complete(metadata);
+                consumer.Read(new JournalBufferReader(buffer.Reader, isCompleted: true), metadata);
+                if (buffer.Length > RuntimeJournalStoragePolicy.NoBufferedBytes)
+                {
+                    throw new InvalidOperationException(RuntimeJournalStoragePolicy.ConsumerLeftUnreadData);
+                }
+
                 return;
+            }
+
+            consumer.Read(new JournalBufferReader(buffer.Reader, isCompleted: false), metadata);
+            if (buffer.Length > snapshot.Length || offset > snapshot.Length)
+            {
+                throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidPage);
             }
         }
     }

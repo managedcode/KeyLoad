@@ -17,11 +17,17 @@ public sealed partial class DatabaseEngine
     private MutationReceipt SaveAggregateSnapshot(IAtomicTransaction tx, PrincipalRecord principal,
         PartitionRef partition, StoreAggregateSnapshot request)
     {
+        const int TailRevisionEmptyCount = 0;
+        const int FirstAvailableRevisionSingleItemCount = 1;
+        const int GenerationSingleItemCount = 1;
+        const int CurrentSnapshotVersionValidationBoundary = 0;
+        const int VersionSingleItemCount = 1;
+
         ValidateSnapshotRequest(request);
         var resource = Resource(tx, partition, request.StreamSet, ResourceKind.StreamSet);
         Authorization.RequireReplayInput(principal, resource);
         var head = tx.GetRecord<StreamHead>(KeySpace.Partition(AggregateReplayReader.StreamHeadKeySpace, partition,
-            request.StreamSet, request.StreamId)) ?? new StreamHead(0, 1, 1);
+            request.StreamSet, request.StreamId)) ?? new StreamHead(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, GenerationSingleItemCount);
         AggregateReplayReader.ValidateHead(head);
         if (head.Generation != request.Generation)
         {
@@ -35,7 +41,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, SnapshotCorruptMessage);
         }
-        var currentVersion = current?.SnapshotVersion ?? 0;
+        var currentVersion = current?.SnapshotVersion ?? CurrentSnapshotVersionValidationBoundary;
         if (request.ExpectedSnapshotVersion != currentVersion)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, SnapshotVersionConflictMessage);
@@ -49,7 +55,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RevisionConflict, SnapshotVersionExhaustedMessage);
         }
 
-        var state = AggregateSnapshotPersistence.Create(stream, currentVersion + 1, request.SourceRevision,
+        var state = AggregateSnapshotPersistence.Create(stream, currentVersion + VersionSingleItemCount, request.SourceRevision,
             request.ReducerVersion, request.StateSchemaVersion, request.StateJson);
         tx.Put(key, AggregateSnapshotPersistence.Serialize(state));
         return new(SnapshotMutationKind, request.StreamSet, request.StreamId, state.SnapshotVersion);
@@ -57,12 +63,17 @@ public sealed partial class DatabaseEngine
 
     private void ValidateSnapshotRequest(StoreAggregateSnapshot request)
     {
+        const int GenerationValidationBoundary = 1;
+        const int SourceRevisionValidationBoundary = 0;
+        const int StateSchemaVersionValidationBoundary = 1;
+        const int ExpectedSnapshotVersionValidationBoundary = 0;
+
         ArgumentNullException.ThrowIfNull(request);
         JsonData.Identifier(request.StreamSet);
         JsonData.Identifier(request.StreamId);
         JsonData.Identifier(request.ReducerVersion);
-        if (request.Generation < 1 || request.SourceRevision < 0 || request.StateSchemaVersion < 1
-            || request.ExpectedSnapshotVersion < 0 || request.StateJson is null)
+        if (request.Generation < GenerationValidationBoundary || request.SourceRevision < SourceRevisionValidationBoundary || request.StateSchemaVersion < StateSchemaVersionValidationBoundary
+            || request.ExpectedSnapshotVersion < ExpectedSnapshotVersionValidationBoundary || request.StateJson is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidSnapshotSourceMessage);
         }
@@ -71,11 +82,13 @@ public sealed partial class DatabaseEngine
 
     private static void ValidateSnapshotSource(StoreAggregateSnapshot request, StreamHead head)
     {
+        const int FirstAvailableRevisionStep = 1;
+
         if (request.SourceRevision > head.TailRevision)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, SnapshotSourceAheadMessage);
         }
-        if (request.SourceRevision < head.FirstAvailableRevision - 1)
+        if (request.SourceRevision < head.FirstAvailableRevision - FirstAvailableRevisionStep)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SnapshotSourceBeforeFloorMessage);
         }

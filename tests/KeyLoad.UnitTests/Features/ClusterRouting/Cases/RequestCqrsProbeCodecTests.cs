@@ -9,14 +9,14 @@ internal sealed class RequestCqrsProbeCodecTests
     public async Task AcCrs004ReadsEveryPrivateRecordKindPhaseAndAction()
     {
         var owner = RequestCqrsProbeCodecInput.Owner();
-        var parsedOwner = RequestCqrsProbeJson.ReadOwner(owner);
+        var parsedOwner = UnitRequestProbeOptions.Json.ReadOwner(owner);
         await Assert.That(parsedOwner.Version).IsEqualTo(RequestCqrsProbeProtocol.Version);
         await Assert.That(parsedOwner.Kind).IsEqualTo(RequestCqrsProbeProtocol.OwnerKind);
         await Assert.That(parsedOwner.SessionId).IsEqualTo(RequestCqrsProbeCodecInput.SessionId);
 
-        var release = RequestCqrsProbeJson.ReadRelease(RequestCqrsProbeCodecInput.Release());
+        var release = UnitRequestProbeOptions.Json.ReadRelease(RequestCqrsProbeCodecInput.Release());
         await Assert.That(release.RequestId).IsEqualTo(RequestCqrsProbeCodecInput.RequestId);
-        var readMarker = RequestCqrsProbeJson.ReadMarker(
+        var readMarker = UnitRequestProbeOptions.Json.ReadMarker(
             RequestCqrsProbeCodecInput.Marker(commandId: Guid.Empty));
         await Assert.That(readMarker.CommandId).IsEqualTo(Guid.Empty);
 
@@ -24,7 +24,7 @@ internal sealed class RequestCqrsProbeCodecTests
         {
             foreach (var outcome in RequestCqrsProbeCodecInput.Outcomes)
             {
-                var marker = RequestCqrsProbeJson.ReadMarker(RequestCqrsProbeCodecInput.Marker(phase: phase, outcome: outcome));
+                var marker = UnitRequestProbeOptions.Json.ReadMarker(RequestCqrsProbeCodecInput.Marker(phase: phase, outcome: outcome));
                 await Assert.That(marker.Phase).IsEqualTo(phase);
                 await Assert.That(marker.Outcome).IsEqualTo(outcome);
             }
@@ -34,14 +34,14 @@ internal sealed class RequestCqrsProbeCodecTests
         {
             foreach (var action in RequestCqrsProbeCodecInput.Actions)
             {
-                var arm = RequestCqrsProbeJson.ReadArm(RequestCqrsProbeCodecInput.Arm(phase, action));
+                var arm = UnitRequestProbeOptions.Json.ReadArm(RequestCqrsProbeCodecInput.Arm(phase, action));
                 await Assert.That(arm.Phase).IsEqualTo(phase);
                 await Assert.That(arm.Action).IsEqualTo(action);
                 await Assert.That(arm.CommandId).IsEqualTo(RequestCqrsProbeCodecInput.CommandId);
             }
         }
 
-        var readArm = RequestCqrsProbeJson.ReadArm(RequestCqrsProbeCodecInput.Arm(
+        var readArm = UnitRequestProbeOptions.Json.ReadArm(RequestCqrsProbeCodecInput.Arm(
             RequestCqrsProbePhase.RequestStarted, RequestCqrsProbeAction.Hold, Guid.Empty, GrainReadKind.Document));
         await Assert.That(readArm.CommandId).IsEqualTo(Guid.Empty);
         await Assert.That(readArm.ReadKind).IsEqualTo(GrainReadKind.Document);
@@ -111,17 +111,17 @@ internal sealed class RequestCqrsProbeCodecTests
         await RequestCqrsProbeCodecAssertions.InvalidOwnerAsync(owner[..^1]);
         await RequestCqrsProbeCodecAssertions.InvalidOwnerAsync(RequestCqrsProbeCodecInput.Append(owner, RequestCqrsProbeCodecInput.TrailingObject));
         var maxPrincipal = RequestCqrsProbeCodecInput.Arm(principalId: RequestCqrsProbeCodecInput.MaximumPrincipal);
-        var parsed = RequestCqrsProbeJson.ReadArm(maxPrincipal);
+        var parsed = UnitRequestProbeOptions.Json.ReadArm(maxPrincipal);
         await Assert.That(parsed.PrincipalId).IsEqualTo(RequestCqrsProbeCodecInput.MaximumPrincipal);
     }
 
     [Test]
     public async Task AcCrs004Accepts8192BytesAndRejects8193Bytes()
     {
-        var exactlyMaximum = RequestCqrsProbeCodecInput.PadOwner(RequestCqrsProbeProtocol.MaximumRecordBytes);
-        var parsed = RequestCqrsProbeJson.ReadOwner(exactlyMaximum);
+        var exactlyMaximum = RequestCqrsProbeCodecInput.PadOwner(UnitRequestProbeOptions.Execution.Value.MaximumRecordBytes);
+        var parsed = UnitRequestProbeOptions.Json.ReadOwner(exactlyMaximum);
         await Assert.That(parsed.SessionId).IsEqualTo(RequestCqrsProbeCodecInput.SessionId);
-        await Assert.That(exactlyMaximum.Length).IsEqualTo(RequestCqrsProbeProtocol.MaximumRecordBytes);
+        await Assert.That(exactlyMaximum.Length).IsEqualTo(UnitRequestProbeOptions.Execution.Value.MaximumRecordBytes);
 
         var excess = RequestCqrsProbeCodecInput.Append(exactlyMaximum, RequestCqrsProbeCodecInput.Space);
         await RequestCqrsProbeCodecAssertions.InvalidOwnerAsync(excess);

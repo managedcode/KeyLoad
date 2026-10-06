@@ -1,9 +1,11 @@
 using System.Globalization;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
+[KeyLoad.ConfigurationBinding]
 internal sealed record TimeSeriesIntensiveHostSettings(TimeSeriesIntensiveSelection Selection,
     TimeSeriesIntensiveFamilyCell Cell, string ContractSha256, ComparisonExecutionIdentity Identity,
     long JobId, string Image, string OutputDirectory, string Storage, string RunId,
@@ -12,6 +14,12 @@ internal sealed record TimeSeriesIntensiveHostSettings(TimeSeriesIntensiveSelect
     public override string ToString() => nameof(TimeSeriesIntensiveHostSettings);
 
     internal static TimeSeriesIntensiveHostSettings Read(IConfiguration configuration)
+        => ReadOptions(configuration).Value;
+
+    internal static IOptions<TimeSeriesIntensiveHostSettings> ReadOptions(IConfiguration configuration)
+        => ComparisonHostOptionsRegistration.Bind(() => ReadBound(configuration));
+
+    private static TimeSeriesIntensiveHostSettings ReadBound(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         try
@@ -47,7 +55,7 @@ internal sealed record TimeSeriesIntensiveHostSettings(TimeSeriesIntensiveSelect
         var identity = ComparisonExecutionIdentity.ReadTimeSeriesIntensive(configuration, source);
         var job = TimeSeriesIntensiveHostInput.ReadJob(configuration);
         var image = TimeSeriesIntensiveHostInput.Required(configuration, TimeSeriesIntensiveHostConstants.Image);
-        if (!ComparisonExecutionIdentityImageReference.IsValid(image)
+        if (!ComparisonExecutionIdentityImageReference.IsValid(image, NativeComparisonExecutionRegistration.ReadHost(configuration))
             || selection.Target == TimeSeriesIntensiveTargetKind.KeyLoad && image != identity.KeyLoadImage)
         {
             throw TimeSeriesIntensiveHostInput.Invalid();

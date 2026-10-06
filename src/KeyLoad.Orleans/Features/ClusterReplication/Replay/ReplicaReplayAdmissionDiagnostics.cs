@@ -6,6 +6,8 @@ namespace KeyLoad.Orleans;
 internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, int voterCount,
     IOptions<ReplicaTransportOptions> transportOptions)
 {
+    private const int RatesStartEmptyCount = 0;
+
     private const int CapacityEvent = 2101;
     private const int ConfigurationEvent = 2102;
     private readonly long intervalMilliseconds = checked((long)transportOptions.Value.ReplayDiagnosticInterval.TotalMilliseconds);
@@ -16,7 +18,7 @@ internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, 
         + "read={Read} data={Data} nodeMaximum={NodeMaximum}";
     private static readonly int PoolCount = Enum.GetValues<ReplicaReplayPool>().Length;
     private readonly Lock gate = new();
-    private readonly Rate[] rates = Enumerable.Range(0, checked(voterCount * PoolCount)).Select(_ => new Rate()).ToArray();
+    private readonly Rate[] rates = Enumerable.Range(RatesStartEmptyCount, checked(voterCount * PoolCount)).Select(_ => new Rate()).ToArray();
 
     internal void Configured(ReplicaReplayLimits limits)
     {
@@ -30,6 +32,8 @@ internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, 
 
     internal void Report(ReplicaReplayAdmissionFailure failure)
     {
+        const int SuppressedEmptyCount = 0;
+
         long suppressed;
         lock (gate)
         {
@@ -43,7 +47,7 @@ internal sealed partial class ReplicaReplayAdmissionDiagnostics(ILogger logger, 
             suppressed = rate.Suppressed;
             rate.Emitted = true;
             rate.Last = failure.ObservedUnixMilliseconds;
-            rate.Suppressed = 0;
+            rate.Suppressed = SuppressedEmptyCount;
         }
         Emit(failure, suppressed);
     }

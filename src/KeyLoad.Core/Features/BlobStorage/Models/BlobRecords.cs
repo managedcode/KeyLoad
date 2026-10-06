@@ -51,7 +51,12 @@ internal sealed record BlobQuota(
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobQuotaFields.Versions)] int Versions,
     [property: global::Orleans.Id(global::KeyLoad.Core.Features.InternalSerialization.BlobQuotaFields.Uploads)] int Uploads)
 {
-    internal static BlobQuota Empty(Guid incarnation) => new(BlobKeys.FormatVersion, incarnation, 0, 0, 0, 0);
+    private const int EmptyReservedBytes = 0;
+    private const int EmptyObjectKeys = 0;
+    private const int EmptyVersions = 0;
+    private const int EmptyUploads = 0;
+
+    internal static BlobQuota Empty(Guid incarnation) => new(BlobKeys.FormatVersion, incarnation, EmptyReservedBytes, EmptyObjectKeys, EmptyVersions, EmptyUploads);
 }
 
 /// <summary>Binds a successful cached blob outcome to one immutable upload lifetime.</summary>

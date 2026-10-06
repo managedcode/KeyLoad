@@ -1,23 +1,24 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Server;
 
 internal static class ServerNodeUpgradeStageValidation
 {
-    internal static void VerifyReset(string stage, ServerNodeUpgradeOwner owner, NodeOptions options)
+    internal static void VerifyReset(string stage, ServerNodeUpgradeOwner owner, NodeOptions options, IOptions<ServerNodeUpgradeExecutionOptions> executionOptions)
     {
-        var inventory = ServerNodeUpgradeInventory.Capture(stage);
+        var inventory = ServerNodeUpgradeInventory.Capture(stage, executionOptions: executionOptions);
         ServerNodeUpgradeLayout.VerifyTarget(inventory, allowInputs: true);
         if (File.Exists(Path.Combine(stage, ServerNodeUpgradeProtocol.PreparedReceipt)))
         {
-            var receipt = ServerNodeUpgradeStage.ReadPrepared(stage);
+            var receipt = ServerNodeUpgradeStage.ReadPrepared(stage, executionOptions: executionOptions);
             ServerNodeUpgradeReceiptValidation.Verify(owner, receipt, options);
-            if (ServerNodeUpgradeInventory.Capture(stage, excludePreparedReceipt: true).Sha256
+            if (ServerNodeUpgradeInventory.Capture(stage, excludePreparedReceipt: true, executionOptions: executionOptions).Sha256
                 != receipt.PreparedTargetInventorySha256)
             { throw Errors.Fail(ErrorCode.Corruption, ServerNodeUpgradeProtocol.Corrupt); }
             return;
         }
         if (File.Exists(Path.Combine(stage, ServerNodeUpgradeProtocol.ProgressReceipt)))
         {
-            ServerNodeUpgradeProgressFile.Verify(stage, owner);
+            ServerNodeUpgradeProgressFile.Verify(stage, owner, executionOptions: executionOptions);
             return;
         }
         foreach (var entry in inventory.Entries)
@@ -30,6 +31,6 @@ internal static class ServerNodeUpgradeStageValidation
         }
         var inputs = Path.Combine(stage, ServerNodeUpgradeProtocol.Inputs);
         if (Directory.Exists(inputs))
-        { ServerNodeUpgradeInputValidation.Verify(inputs, owner, allowPartial: true); }
+        { ServerNodeUpgradeInputValidation.Verify(inputs, owner, allowPartial: true, executionOptions: executionOptions); }
     }
 }

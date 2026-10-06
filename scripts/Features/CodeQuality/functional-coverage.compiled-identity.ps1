@@ -65,9 +65,26 @@ function Get-FcPdbSourcePath([string] $Root, [string] $Name, [string] $Compilati
     if ([string]::IsNullOrWhiteSpace($Name) -or $Name.Length -gt $script:FcCompiledIdentity.MaximumPathCharacters) {
         throw $script:FcCompiledIdentity.InvalidDocument
     }
-    $relative = if ([IO.Path]::IsPathRooted($Name)) { [IO.Path]::GetRelativePath($CompilationRoot, $Name) } else { $Name }
+    $foreignRooted = $Name -match '\A[A-Za-z]:[\\/]' -or $Name.StartsWith('\\', [StringComparison]::Ordinal)
+    if ($foreignRooted -and -not [IO.Path]::IsPathRooted($Name)) {
+        $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($Name))).ToLowerInvariant()
+        return "external/$digest"
+    }
+    $full = if ([IO.Path]::IsPathRooted($Name)) {
+        [IO.Path]::GetFullPath($Name)
+    }
+    else {
+        [IO.Path]::GetFullPath([IO.Path]::Combine($CompilationRoot, $Name))
+    }
+    $relative = [IO.Path]::GetRelativePath($CompilationRoot, $full)
+    if ([IO.Path]::IsPathRooted($relative) -or $relative -eq '..' -or
+        $relative.StartsWith('..' + [IO.Path]::DirectorySeparatorChar, [StringComparison]::Ordinal) -or
+        $relative.StartsWith('..' + [IO.Path]::AltDirectorySeparatorChar, [StringComparison]::Ordinal)) {
+        $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($full))).ToLowerInvariant()
+        return "external/$digest"
+    }
     $resolved = Resolve-FcPath $Root $relative
-    [IO.Path]::GetRelativePath($Root, $resolved).Replace([IO.Path]::DirectorySeparatorChar, '/')
+    $relative.Replace([IO.Path]::DirectorySeparatorChar, '/')
 }
 
 function Read-FcPdbDocuments([string] $Root, [object] $Reader, [string] $CompilationRoot) {
@@ -82,8 +99,11 @@ function Read-FcPdbDocuments([string] $Root, [object] $Reader, [string] $Compila
         $checksum = [byte[]] $Reader.GetBlobBytes($document.Hash)
         if (-not $seen.Add($path) -or $Reader.GetGuid($document.HashAlgorithm) -ne $script:FcCompiledIdentity.Sha256Algorithm -or
             $checksum.Length -ne 32) { throw $script:FcCompiledIdentity.InvalidDocument }
-        $generated = $path.Split('/') -contains 'obj' -or $path.Split('/') -contains 'bin'
-        $disposition = if ($generated) { $script:FcCompiledIdentity.GeneratedDisposition } else { 'native source document' }
+        $external = $path.StartsWith('external/', [StringComparison]::Ordinal)
+        $generated = $external -or $path.Split('/') -contains 'obj' -or $path.Split('/') -contains 'bin'
+        $disposition = if ($external) { 'external PDB document; retained native checksum, path replaced by bounded digest' }
+            elseif ($generated) { $script:FcCompiledIdentity.GeneratedDisposition }
+            else { 'native source document' }
         $documents.Add([ordered]@{ path = $path; sha256 = [Convert]::ToHexString($checksum).ToLowerInvariant(); generated = $generated; disposition = $disposition })
     }
     @($documents | Sort-Object path)

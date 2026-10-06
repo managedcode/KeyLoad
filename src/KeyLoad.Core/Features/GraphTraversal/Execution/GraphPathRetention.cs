@@ -1,8 +1,19 @@
+using Microsoft.Extensions.Options;
 namespace KeyLoad.Core.Features.GraphTraversal;
 
 /// <summary>Reserves conservative in-memory metadata before path state is retained.</summary>
-internal sealed class GraphPathRetention(DatabaseLimits limits, ReadExecutionBudget budget)
+internal sealed class GraphPathRetention
 {
+    private readonly DatabaseLimits limits;
+    private readonly ReadExecutionBudget budget;
+
+    internal GraphPathRetention(IOptions<DatabaseLimits> options, ReadExecutionBudget budget)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        limits = options.Value;
+        limits.Validate();
+        this.budget = budget;
+    }
     private const long JsonMetadataMultiplier = 2;
     private const long FixedMetadataBytes = 128;
     private const string RetentionExceeded = "The graph path metadata budget was exhausted.";

@@ -4,6 +4,9 @@ namespace KeyLoad.Core;
 /// <remarks>Callers serialize every operation with the inbox gate.</remarks>
 internal sealed class CommandInboxLanes
 {
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+
     private const int MaximumControlBurst = 8;
     private const string SignalMismatchDetail = "The command queue signal is inconsistent.";
 
@@ -25,14 +28,14 @@ internal sealed class CommandInboxLanes
     /// <returns>The next command, or null when stopped and empty.</returns>
     public AdmittedCommand? Dequeue(bool stopped)
     {
-        if (controls.Count > 0 && (commands.Count == 0 || controlBurst < MaximumControlBurst))
+        if (controls.Count > EmptyElementCount && (commands.Count == EmptyElementCount || controlBurst < MaximumControlBurst))
         {
-            controlBurst = Math.Min(controlBurst + 1, MaximumControlBurst);
+            controlBurst = Math.Min(controlBurst + AdjacentElementOffset, MaximumControlBurst);
             return controls.Dequeue();
         }
-        if (commands.Count > 0)
+        if (commands.Count > EmptyElementCount)
         {
-            controlBurst = 0;
+            controlBurst = EmptyElementCount;
             return commands.Dequeue();
         }
         if (stopped)

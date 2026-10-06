@@ -51,8 +51,9 @@ internal static class NativeTextCrashScenario
         SeedDatabase(database, partition);
         var boundary = new NativeTextCrashBoundary(stage) { Armed = !replacement };
         using var projection = new NativeTextProjection(Path.Combine(directory, "search-indexes"),
-            database.Limits, store.Identity.NodeId, faultObserver: boundary.Observe);
-        var search = new SearchEngine(database, projection);
+            CrashExecutionOptions.DatabaseLimits(database.Limits), store.Identity.NodeId, CrashExecutionOptions.NativeText(),
+            faultObserver: boundary.Observe);
+        var search = new SearchEngine(database, CrashExecutionOptions.QueryExecution(), projection);
         if (replacement)
         {
             _ = await search.SearchAsync(CrashFixtureValues.Principal,

@@ -1,15 +1,16 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
 internal static class ScaledComparisonCaseRunner
 {
-    private const int SampleCapacity = 4_096;
+    private const int RequiredLatencySampleCount = 4_096;
     private const string SampleAlgorithm = "evenly-spaced-operation-indices.v1";
     private const string FailureDetail = "Scaled case failed; latency values are a bounded deterministic sample.";
 
     internal static async Task<ComparisonCase> RunAsync(IComparisonTarget target, IComparisonCorpus corpus,
-        Scenario scenario, string? setupFailure, Action<string>? progress, CancellationToken cancellationToken)
+        Scenario scenario, string? setupFailure, Action<string>? progress, CancellationToken cancellationToken, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
         if (!target.Supports(scenario))
         {
@@ -23,7 +24,7 @@ internal static class ScaledComparisonCaseRunner
         var inputs = new ScaledOperationInputs(corpus, scenario);
         var settings = corpus.Settings;
         var sessions = await ScaledComparisonOperationSetup.OpenSessionsAsync(target, settings.Concurrency, cancellationToken).ConfigureAwait(false);
-        var run = await RunSessionsAsync(target, scenario, sessions, inputs, settings, progress, cancellationToken).ConfigureAwait(false);
+        var run = await RunSessionsAsync(target, scenario, sessions, inputs, settings, progress, cancellationToken, executionOptions).ConfigureAwait(false);
         var result = run.Closed ? run.Result : run.Result with { Status = ComparisonStatuses.Failed, Detail = ComparisonSessionCleanup.Failure };
         if (result.Status == ComparisonStatuses.Failed && !cancellationToken.IsCancellationRequested)
         {
@@ -34,13 +35,13 @@ internal static class ScaledComparisonCaseRunner
 
     private static async Task<(ComparisonCase Result, bool Closed)> RunSessionsAsync(IComparisonTarget target,
         Scenario scenario, List<IComparisonSession> sessions, ScaledOperationInputs inputs,
-        IComparisonSettings settings, Action<string>? progress, CancellationToken cancellationToken)
+        IComparisonSettings settings, Action<string>? progress, CancellationToken cancellationToken, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
         ComparisonCase result;
         bool closed;
         try
         {
-            result = await ExecuteAsync(target, scenario, sessions, inputs, settings, progress, cancellationToken).ConfigureAwait(false);
+            result = await ExecuteAsync(target, scenario, sessions, inputs, settings, progress, cancellationToken, executionOptions).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -59,12 +60,12 @@ internal static class ScaledComparisonCaseRunner
 
     private static async Task<ComparisonCase> ExecuteAsync(IComparisonTarget target, Scenario scenario,
         List<IComparisonSession> sessions, ScaledOperationInputs inputs, IComparisonSettings settings,
-        Action<string>? progress, CancellationToken cancellationToken)
+        Action<string>? progress, CancellationToken cancellationToken, IOptions<NativeComparisonExecutionOptions> executionOptions)
     {
         await ScaledComparisonOperationSetup.PrepareAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
         await ScaledComparisonOperationSetup.WarmupAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
         progress?.Invoke($"scale:{target.Profile.Name}:{scenario}:measure");
-        var measured = await ScaledComparisonMeasurementExecutor.MeasureAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
+        var measured = await ScaledComparisonMeasurementExecutor.MeasureAsync(sessions, inputs, settings, cancellationToken, executionOptions).ConfigureAwait(false);
         var result = CreateCase(target, scenario, settings, measured, cancellationToken.IsCancellationRequested);
         var validationFailure = await ValidateMutationResultsAsync(sessions, inputs, settings, cancellationToken).ConfigureAwait(false);
         return validationFailure is null ? result : result with { Status = ComparisonStatuses.Failed, Detail = validationFailure };
@@ -106,8 +107,8 @@ internal static class ScaledComparisonCaseRunner
             };
         var accounting = new ScaledOperationAccounting(settings.Operations, measured.Attempted,
             measured.Successes, measured.Failures, measured.DeadlineTimeouts, measured.Rejections,
-            settings.Operations - measured.Attempted, SampleAlgorithm, SampleCapacity,
-            measured.Samples.Length, SampleCapacity - measured.Samples.Length);
+            settings.Operations - measured.Attempted, SampleAlgorithm, RequiredLatencySampleCount,
+            measured.Samples.Length, RequiredLatencySampleCount - measured.Samples.Length);
         var failed = measured.Failures != 0 || accounting.Unfinished != 0 || accounting.MissingSamples != 0 || cancelled;
         return new(target.Profile.Name, scenario, 0, failed ? ComparisonStatuses.Failed : ComparisonStatuses.Measured,
             failed ? FailureDetail : null, measurement, measured.Samples.ToImmutableArray())
@@ -124,7 +125,7 @@ internal static class ScaledComparisonCaseRunner
         IComparisonSettings settings, string detail)
     {
         var accounting = new ScaledOperationAccounting(settings.Operations, 0, 0, 0, 0, 0,
-            settings.Operations, SampleAlgorithm, SampleCapacity, 0, SampleCapacity);
+            settings.Operations, SampleAlgorithm, RequiredLatencySampleCount, 0, RequiredLatencySampleCount);
         return new(target.Profile.Name, scenario, 0, ComparisonStatuses.Failed, detail, null, []) { Scaled = accounting };
     }
 }

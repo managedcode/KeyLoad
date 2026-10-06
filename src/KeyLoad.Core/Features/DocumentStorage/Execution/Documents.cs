@@ -6,6 +6,8 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
+    private const string UniqueIndexSpace = "unique";
+
     private static byte[] DocumentKey(PartitionRef partition, string collection, string id) => DocumentStorageKeys.RecordKey(partition, collection, id);
     /// <summary>Reads the persisted document visibility epoch at the current storage cut.</summary>
     /// <param name="view">Current gated storage view.</param>
@@ -14,21 +16,29 @@ public sealed partial class DatabaseEngine
     /// <returns>The persisted epoch, or zero before the first change.</returns>
     public long DocumentEpoch(IKeyValueView view, PartitionRef partition, string collection)
     {
+        const string DocumentEpochSpaceText = "document-epoch";
+        const int InitialDocumentEpoch = 0;
+
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(collection);
-        return view.ReadOwnedValue(KeySpace.Partition("document-epoch", partition, collection)) is { } bytes
-            ? NativeSerialization.Deserialize<long>(bytes) : 0;
+        return view.ReadOwnedValue(KeySpace.Partition(DocumentEpochSpaceText, partition, collection)) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : InitialDocumentEpoch;
     }
     private static void CheckRevision(long actual, long? expected)
     {
-        if (expected is { } value && (value < 0 || value != actual))
+        const int ValueValidationBoundary = 0;
+        const string CheckRevisionDetailText = "The expected revision does not match.";
+
+        if (expected is { } value && (value < ValueValidationBoundary || value != actual))
         {
-            throw Errors.Fail(ErrorCode.RevisionConflict, "The expected revision does not match.");
+            throw Errors.Fail(ErrorCode.RevisionConflict, CheckRevisionDetailText);
         }
     }
     private void UpdateIndexes(IAtomicTransaction tx, PrincipalRecord principal, ResourceDefinition resource, DocumentRecord? before, DocumentRecord? after)
     {
+        const string UpdateIndexesDetailText = "A partition-scoped unique index value is already present.";
+
         foreach (var index in resource.Indexes)
         {
             foreach (var field in index.Fields)
@@ -54,7 +64,7 @@ public sealed partial class DatabaseEngine
                 var uniqueKey = UniqueKey(after.Reference.Partition, resource.Name, index, values);
                 if (tx.ReadOwnedValue(uniqueKey) is { } occupant && NativeSerialization.Deserialize<string>(occupant) != after.Reference.Id)
                 {
-                    throw Errors.Fail(ErrorCode.Conflict, "A partition-scoped unique index value is already present.");
+                    throw Errors.Fail(ErrorCode.Conflict, UpdateIndexesDetailText);
                 }
 
                 tx.PutRecord(uniqueKey, after.Reference.Id);
@@ -69,9 +79,9 @@ public sealed partial class DatabaseEngine
         return values.Any(v => v is null && !index.IncludeNull || v is MissingValue && !index.IncludeMissing) ? null : values;
     }
     private static byte[] IndexKey(PartitionRef partition, string collection, IndexDefinition index, object?[] values, string id)
-        => KeySpace.Partition("index", partition, new object?[] { collection, index.Name }.Concat(values).Append(id).ToArray());
+        => KeySpace.Partition(nameof(index), partition, new object?[] { collection, index.Name }.Concat(values).Append(id).ToArray());
     private static byte[] UniqueKey(PartitionRef partition, string collection, IndexDefinition index, object?[] values)
-        => KeySpace.Partition("unique", partition, new object?[] { collection, index.Name }.Concat(values).ToArray());
+        => KeySpace.Partition(UniqueIndexSpace, partition, new object?[] { collection, index.Name }.Concat(values).ToArray());
     /// <summary>Reads one document after row and field authorization.</summary>
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="reference">Document identity.</param>
@@ -91,11 +101,13 @@ public sealed partial class DatabaseEngine
     /// <returns>An owned projected document result.</returns>
     public DocumentResult Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord record)
     {
+        const int RedactedEmptyCount = 0;
+
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(record);
         var json = Authorization.Project(principal, resource.FieldPolicies, record.Json, out var omitted);
-        return new(record.Reference, record.Revision, json, omitted.Length != 0, [.. omitted]);
+        return new(record.Reference, record.Revision, json, omitted.Length != RedactedEmptyCount, [.. omitted]);
     }
     /// <summary>Runs one authorized query callback inside a consistent storage read gate.</summary>
     /// <typeparam name="T">Owned callback result type.</typeparam>
@@ -159,7 +171,7 @@ public sealed partial class DatabaseEngine
     public DocumentRecord[] ReadVisibleDocuments(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection,
         ReadExecutionBudget? budget = null)
     {
-        budget ??= new(Limits, timeProvider: Clock);
+        budget ??= new(OperationLimitsOptions, timeProvider: Clock);
         var records = new List<DocumentRecord>();
         VisitVisibleDocuments(view, principal, partition, collection, budget, records.Add);
         return records.ToArray();

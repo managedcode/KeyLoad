@@ -21,28 +21,27 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
     private const int HexCharactersPerByte = 2;
 
     private const string InvalidReceipt = "The offline format upgrade receipt is invalid.";
-    private const int MaximumReceiptBytes = 65_536;
 
-    internal static void Write(string path, ZoneTreeFormatUpgradeReceipt receipt)
+    internal static void Write(string path, ZoneTreeFormatUpgradeReceipt receipt, int maximumReceiptBytes, int identityBufferBytes)
     {
         Validate(receipt);
         var payload = NativeSerialization.Serialize(receipt);
         var envelope = new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload));
         var bytes = ZoneTreeMetadataBinary.Write(envelope, ZoneTreePersistenceFormat.FormatUpgradeReceiptMagic);
-        if (bytes.Length > MaximumReceiptBytes)
+        if (bytes.Length > maximumReceiptBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidReceipt);
         }
         using var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None,
-            ZoneTreePersistenceFormat.IdentityBufferBytes, FileOptions.WriteThrough);
+            identityBufferBytes, FileOptions.WriteThrough);
         file.Write(bytes);
         file.Flush(true);
     }
 
-    internal static ZoneTreeFormatUpgradeReceipt Read(string path)
+    internal static ZoneTreeFormatUpgradeReceipt Read(string path, int maximumReceiptBytes)
     {
         VerifyRegularFile(path);
-        var bytes = ZoneTreeMetadataFile.Read(path, MaximumReceiptBytes, InvalidReceipt);
+        var bytes = ZoneTreeMetadataFile.Read(path, maximumReceiptBytes, InvalidReceipt);
         var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes.Span,
             ZoneTreePersistenceFormat.FormatUpgradeReceiptMagic, InvalidReceipt);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))

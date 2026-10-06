@@ -89,9 +89,12 @@ internal sealed record NodeOptions
 
     private void ValidatePeers()
     {
+        const int PeersCountValidationBoundary = 2;
+        const int EmptyPeersCount = 0;
+
         if (Peers is null || (BenchmarkTopology
                 ? Peers.Count is < NodeDefaults.MinimumBenchmarkVoters or > NodeDefaults.MaximumBenchmarkVoters
-                : Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % 2 == 0)
+                : Peers.Count < NodeDefaults.MinimumVoters || Peers.Count % PeersCountValidationBoundary == EmptyPeersCount)
             || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
             || !Peers.Contains(PublicEndpoint, StringComparer.Ordinal)
             || string.IsNullOrWhiteSpace(DataDirectory) || string.IsNullOrWhiteSpace(SiloAddress))
@@ -120,10 +123,13 @@ internal sealed record NodeOptions
 
     private static int SecretLength(string? encoded)
     {
+        const int SecretLengthEmptyResult = 0;
+        const int SecretLengthAbsentCount = 0;
+
         if (encoded is null)
-        { return 0; }
+        { return SecretLengthEmptyResult; }
         Span<byte> bytes = stackalloc byte[ReplicaTransportProtocol.SecretBytes];
-        return Convert.TryFromBase64String(encoded, bytes, out var count) ? count : 0;
+        return Convert.TryFromBase64String(encoded, bytes, out var count) ? count : SecretLengthAbsentCount;
     }
 
     /// <summary>Creates the immutable replica scope without storage or an Orleans client.</summary>

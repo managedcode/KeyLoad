@@ -9,6 +9,7 @@ namespace KeyLoad.Artifacts;
 /// <summary>Copies a backup archive to the configured file-storage destination.</summary>
 public static class ArtifactTransfer
 {
+    private const FileAttributes NoMatchingAttributes = 0;
     private const string InvalidArchiveSource = "The archive source must be a regular file.";
     private const string ArchiveMimeType = "application/octet-stream";
 
@@ -21,7 +22,7 @@ public static class ArtifactTransfer
         CancellationToken cancellationToken = default)
     {
         var file = new FileInfo(Path.GetFullPath(artifactPath));
-        if (!file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != 0)
+        if (!file.Exists || (file.Attributes & FileAttributes.ReparsePoint) != NoMatchingAttributes)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidArchiveSource);
         }

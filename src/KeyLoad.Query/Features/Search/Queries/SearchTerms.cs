@@ -5,21 +5,22 @@ namespace KeyLoad.Query.Features.Search;
 
 internal static class SearchTerms
 {
+    private const int EmptyElementCount = 0;
+    private const int BudgetCheckRemainder = 0;
+
     private const string DocumentTokenExceeded = "The document text token budget is exceeded.";
     private const string WordExceeded = "The text token budget is exceeded.";
-    private const int CheckInterval = 512;
-    private const int MaxWords = 65_536;
-    private const int MaxWordLength = 4_096;
 
-    public static IEnumerable<string> Enumerate(string text, ReadExecutionBudget budget)
+    public static IEnumerable<string> Enumerate(string text, ReadExecutionBudget budget, int checkInterval,
+        int maximumWords, int maximumWordLength)
     {
         budget.Check();
         var word = new StringBuilder();
-        var words = 0;
-        var runes = 0;
+        var words = EmptyElementCount;
+        var runes = EmptyElementCount;
         foreach (var rune in text.Normalize(NormalizationForm.FormKC).EnumerateRunes())
         {
-            if (++runes % CheckInterval == 0)
+            if (++runes % checkInterval == BudgetCheckRemainder)
             {
                 budget.Check();
             }
@@ -27,28 +28,28 @@ internal static class SearchTerms
             {
                 word.Append(Rune.ToLowerInvariant(rune));
             }
-            else if (word.Length != 0)
+            else if (word.Length != EmptyElementCount)
             {
-                ChargeToken(ref words, budget);
+                ChargeToken(ref words, budget, maximumWords);
                 yield return word.ToString();
                 word.Clear();
             }
-            if (word.Length > MaxWordLength)
+            if (word.Length > maximumWordLength)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, WordExceeded);
             }
         }
-        if (word.Length != 0)
+        if (word.Length != EmptyElementCount)
         {
-            ChargeToken(ref words, budget);
+            ChargeToken(ref words, budget, maximumWords);
             yield return word.ToString();
         }
         budget.Check();
     }
 
-    private static void ChargeToken(ref int words, ReadExecutionBudget budget)
+    private static void ChargeToken(ref int words, ReadExecutionBudget budget, int maximumWords)
     {
-        if (++words > MaxWords)
+        if (++words > maximumWords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DocumentTokenExceeded);
         }

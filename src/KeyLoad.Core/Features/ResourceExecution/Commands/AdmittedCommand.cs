@@ -3,6 +3,9 @@ namespace KeyLoad.Core;
 /// <summary>Owns one dispatched operation and its completion until the consumer reports an outcome.</summary>
 public sealed class AdmittedCommand : IDisposable
 {
+    private const int SingleElementCount = 1;
+    private const int EqualOrder = 0;
+
     private readonly TaskCompletionSource<OperationResult> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private CommandAdmissionLease? lease;
     private int finalized;
@@ -58,7 +61,7 @@ public sealed class AdmittedCommand : IDisposable
 
     private bool TryFinalize()
     {
-        if (Interlocked.CompareExchange(ref finalized, 1, 0) != 0)
+        if (Interlocked.CompareExchange(ref finalized, SingleElementCount, EqualOrder) != EqualOrder)
         {
             return false;
         }

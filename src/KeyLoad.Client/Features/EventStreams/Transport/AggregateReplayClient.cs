@@ -17,6 +17,6 @@ public static class AggregateReplayClient
     {
         ArgumentNullException.ThrowIfNull(client);
         ArgumentNullException.ThrowIfNull(request);
-        return client.Send<AggregateReplayPage>(AggregateReplayProtocol.Route, request, false, null, cancellationToken);
+        return client.Send<AggregateReplayPage>(global::KeyLoad.AggregateReplayProtocol.Route, request, false, null, cancellationToken);
     }
 }

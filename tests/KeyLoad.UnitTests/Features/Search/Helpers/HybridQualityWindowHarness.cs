@@ -31,7 +31,7 @@ internal static class HybridQualityWindowHarness
     private static HybridQualityWindowObservation EvaluateWidth(ImmutableArray<HybridQualityBranch> branches,
         HybridQualityQuery query, ImmutableArray<HybridQualityJudgment> judgments, DatabaseLimits limits, int width)
     {
-        var budget = new ReadExecutionBudget(limits);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
         var fusion = new SearchRankFusion(HybridQualityCorpus.FusionConstant,
             HybridQualityCorpus.ResultLimit, budget);
         var union = new HashSet<string>(StringComparer.Ordinal);

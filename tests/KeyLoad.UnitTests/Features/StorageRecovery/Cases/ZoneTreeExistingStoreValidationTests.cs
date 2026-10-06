@@ -29,7 +29,7 @@ internal sealed class ZoneTreeExistingStoreValidationTests
     public async Task AcSg009001LegacyIdentityIsRejectedWithoutPromotion()
     {
         using var files = new ZoneTreeExistingStoreFixture();
-        ZoneTreeIdentityFile.Write(files.IdentityPath, files.Identity with { FormatVersion = ZoneTreeExistingStoreFixture.LegacyFormat });
+        ZoneTreeIdentityFile.Write(files.IdentityPath, files.Identity with { FormatVersion = ZoneTreeExistingStoreFixture.LegacyFormat }, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         var original = await File.ReadAllBytesAsync(files.IdentityPath);
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.FormatUnsupported, ExistingStoreInspectionExpectedFailures.KeyLoad);

@@ -29,10 +29,10 @@ internal sealed class NativeTextGenerationLifetimeTests
         var projection = cleanup.TrackProjection(NewProjection(database, root));
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var original = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         var originalGeneration = GenerationPaths(root).Single();
         var oldScope = CaptureScope(database);
-        var oldBudget = new ReadExecutionBudget(database.Database.Limits);
+        var oldBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var oldLease = cleanup.TrackLease(projection.Acquire(oldScope, oldBudget));
         oldLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         oldLease.ObserveToken(Query);
@@ -46,7 +46,7 @@ internal sealed class NativeTextGenerationLifetimeTests
         await Assert.That(GenerationPaths(root)).Contains(originalGeneration);
         cleanup.SettleLease(oldLease);
         await Assert.That(GenerationPaths(root).Length).IsEqualTo(1);
-        var current = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var current = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         await Assert.That(current).HasSingleItem();
         await Assert.That(current[0].Document.Revision).IsEqualTo(final[0].Document.Revision);
     }
@@ -56,16 +56,16 @@ internal sealed class NativeTextGenerationLifetimeTests
             NativeTextGenerationFixtureLifetime cleanup, SearchRequest request, CancellationToken cancellation)
     {
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
-        var replacement = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
+        var replacement = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
             cancellation);
         var generations = GenerationPaths(Path.Combine(database.Directory, "native-text-generation-lifetime"));
-        var currentLease = cleanup.TrackLease(projection.Acquire(CaptureScope(database), new(database.Database.Limits)));
+        var currentLease = cleanup.TrackLease(projection.Acquire(CaptureScope(database), new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))));
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle final\"}"));
         var saturated = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new SearchEngine(database.Database, projection).Search("root", request, cancellation));
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).Search("root", request, cancellation));
         await Assert.That(saturated.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         cleanup.SettleLease(currentLease);
-        var final = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var final = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         return (replacement, final, generations.Length);
     }
 
@@ -86,14 +86,14 @@ internal sealed class NativeTextGenerationLifetimeTests
         var projection = cleanup.TrackProjection(NewProjection(database, root));
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var original = await new SearchEngine(database.Database, projection).SearchAsync("root", request, cancellation);
+        var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         var retired = GenerationPaths(root).Single();
-        var oldBudget = new ReadExecutionBudget(database.Database.Limits);
+        var oldBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var oldLease = cleanup.TrackLease(projection.Acquire(CaptureScope(database), oldBudget));
         oldLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         oldLease.ObserveToken(Query);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle revised\"}"));
-        var replacement = await new SearchEngine(database.Database, projection).SearchAsync("root", request,
+        var replacement = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
             cancellation);
         await AssertRetirementDeniedAsync(cleanup, oldLease, retired, original[0].Document.Reference,
             oldBudget, cancellation);
@@ -102,7 +102,7 @@ internal sealed class NativeTextGenerationLifetimeTests
         await Assert.That(Directory.Exists(root)).IsTrue();
         await Assert.That(GenerationPaths(root).Length).IsEqualTo(1);
         var recovered = cleanup.TrackProjection(NewProjection(database, root));
-        var healthy = await new SearchEngine(database.Database, recovered).SearchAsync("root", request, cancellation);
+        var healthy = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), recovered).SearchAsync("root", request, cancellation);
         await Assert.That(healthy).HasSingleItem();
         await Assert.That(healthy[0].Document.Revision).IsEqualTo(replacement[0].Document.Revision);
     }
@@ -136,10 +136,10 @@ internal sealed class NativeTextGenerationLifetimeTests
         var projection = cleanup.TrackProjection(NewProjection(database, root));
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
-        var engine = new SearchEngine(database.Database, projection);
+        var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var original = await engine.SearchAsync("root", request, cancellation);
         var originalPath = GenerationPaths(root).Single();
-        var leaseBudget = new ReadExecutionBudget(database.Database.Limits);
+        var leaseBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         var lease = cleanup.TrackLease(projection.Acquire(CaptureScope(database), leaseBudget));
         lease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         lease.ObserveToken(Query);
@@ -177,7 +177,7 @@ internal sealed class NativeTextGenerationLifetimeTests
         => await NativeTextGenerationInvalidationOverlap.RunAsync(TestContext.Current!.Execution.CancellationToken);
 
     private static NativeTextProjection NewProjection(TestDatabase database, string root)
-        => new(root, database.Database.Limits, database.Store.Identity.NodeId);
+        => new(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitNativeTextOptions.Execution());
 
     private static string[] GenerationPaths(string root)
         => Directory.EnumerateDirectories(root)

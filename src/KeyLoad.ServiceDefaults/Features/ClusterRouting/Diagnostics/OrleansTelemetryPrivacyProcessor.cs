@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
+using KeyLoad.ServiceDefaults.Features.ClusterRouting.Contracts;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -9,15 +9,15 @@ using OpenTelemetry.Metrics;
 namespace KeyLoad.ServiceDefaults.Features.ClusterRouting.Diagnostics;
 
 /// <summary>Scrubs native Orleans activities before they reach any configured exporter.</summary>
-internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
+internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetryOptions> configuredOptions)
+    : BaseProcessor<Activity>
 {
     private static readonly Meter PrivacyMeter = new(OrleansTelemetryPolicy.PrivacyMeterName);
     private static readonly Counter<long> SuppressedSpans = PrivacyMeter.CreateCounter<long>(
         OrleansTelemetryPolicy.SuppressedSpanCounterName);
-    private readonly OrleansTelemetryOptions options;
-
-    public OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetryOptions> configuredOptions)
-        => options = configuredOptions.Value;
+    private const int InitialItemCount = 0;
+    private const long SuppressedSpanIncrement = 1;
+    private OrleansTelemetryOptions Options => configuredOptions.Value;
 
     public override void OnStart(Activity data)
     {
@@ -40,7 +40,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
             return;
         }
 
-        if ((data.ActivityTraceFlags & ActivityTraceFlags.Recorded) == 0)
+        if ((data.ActivityTraceFlags & ActivityTraceFlags.Recorded) == ActivityTraceFlags.None)
         {
             return;
         }
@@ -52,40 +52,12 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
             return;
         }
 
-        var tagCount = 0;
-        foreach (var _ in data.TagObjects)
+        if (SuppressExcessTags(data) || SuppressUnsafeEvents(data) || SuppressLinkedActivity(data))
         {
-            if (++tagCount > options.MaximumTags)
-            {
-                Suppress(data, OrleansTelemetryPolicy.SuppressionTagLimit);
-                return;
-            }
-        }
-
-        var eventCount = 0;
-        foreach (var activityEvent in data.Events)
-        {
-            if (++eventCount > options.MaximumEvents)
-            {
-                Suppress(data, OrleansTelemetryPolicy.SuppressionEventLimit);
-                return;
-            }
-
-            if (data.Source.Name != OrleansTelemetryPolicy.LifecycleActivitySourceName
-                || !IsSafeLifecycleEvent(activityEvent))
-            {
-                Suppress(data, OrleansTelemetryPolicy.SuppressionUnsafeEvent);
-                return;
-            }
-        }
-
-        if (data.Links.Any())
-        {
-            Suppress(data, OrleansTelemetryPolicy.SuppressionLinksPresent);
             return;
         }
 
-        OrleansTelemetryTagSanitizer.Scrub(data);
+        OrleansTelemetryTagSanitizer.Scrub(data, Options.MaximumTagValueCharacters);
         data.DisplayName = data.Source.Name == OrleansTelemetryPolicy.ApplicationActivitySourceName
             ? OrleansTelemetryPolicy.ApplicationDisplayName
             : OrleansTelemetryPolicy.LifecycleDisplayName;
@@ -118,14 +90,14 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
 
     private bool ClearBoundedBaggage(Activity activity)
     {
-        var keys = new List<string>(options.MaximumBaggageItems);
+        var keys = new List<string>(Options.MaximumBaggageItems);
         foreach (var (key, _) in activity.Baggage)
         {
-            if (keys.Count == options.MaximumBaggageItems)
+            if (keys.Count == Options.MaximumBaggageItems)
             {
                 foreach (var existingKey in keys)
                 {
-                    activity.SetBaggageItem(existingKey, null);
+                    activity.SetBaggage(existingKey, null);
                 }
 
                 return true;
@@ -136,7 +108,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
 
         foreach (var key in keys)
         {
-            activity.SetBaggageItem(key, null);
+            activity.SetBaggage(key, null);
         }
 
         return false;
@@ -151,7 +123,59 @@ internal sealed class OrleansTelemetryPrivacyProcessor : BaseProcessor<Activity>
     private static void Suppress(Activity activity, string reason)
     {
         activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-        SuppressedSpans.Add(1, new KeyValuePair<string, object?>(
+        SuppressedSpans.Add(SuppressedSpanIncrement, new KeyValuePair<string, object?>(
             OrleansTelemetryPolicy.SuppressionReasonTag, reason));
+    }
+
+    private bool SuppressExcessTags(Activity activity)
+    {
+        var count = InitialItemCount;
+        foreach (var _ in activity.TagObjects)
+        {
+            if (++count <= Options.MaximumTags)
+            {
+                continue;
+            }
+
+            Suppress(activity, OrleansTelemetryPolicy.SuppressionTagLimit);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool SuppressUnsafeEvents(Activity activity)
+    {
+        var count = InitialItemCount;
+        foreach (var activityEvent in activity.Events)
+        {
+            if (++count > Options.MaximumEvents)
+            {
+                Suppress(activity, OrleansTelemetryPolicy.SuppressionEventLimit);
+                return true;
+            }
+
+            if (activity.Source.Name == OrleansTelemetryPolicy.LifecycleActivitySourceName
+                && IsSafeLifecycleEvent(activityEvent))
+            {
+                continue;
+            }
+
+            Suppress(activity, OrleansTelemetryPolicy.SuppressionUnsafeEvent);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool SuppressLinkedActivity(Activity activity)
+    {
+        if (!activity.Links.Any())
+        {
+            return false;
+        }
+
+        Suppress(activity, OrleansTelemetryPolicy.SuppressionLinksPresent);
+        return true;
     }
 }

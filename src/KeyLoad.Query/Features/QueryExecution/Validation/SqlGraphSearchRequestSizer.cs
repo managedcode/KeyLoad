@@ -32,7 +32,7 @@ internal static class SqlGraphSearchRequestSizer
         }
     }
 
-    private sealed class BoundedCountingStream(int maximumBytes, int maximumParameters, CancellationToken cancellationToken) : Stream
+    private sealed class BoundedCountingStream(int maximumBytes, CancellationToken cancellationToken) : Stream
     {
         private long written;
         public override bool CanRead => false;

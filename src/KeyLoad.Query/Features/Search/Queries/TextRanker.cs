@@ -5,12 +5,21 @@ namespace KeyLoad.Query.Features.Search;
 
 internal sealed class TextRanker
 {
+    private const int EqualOrder = 0;
+    private const int EmptyElementCount = 0;
+    private const int AdjacentElementOffset = 1;
+    private const int MinimumAverageDocumentLength = 1;
+    private const int ZeroScore = 0;
+
     private const double Bm25FrequencyScale = 2.2;
     private const double Bm25LengthScale = 1.2;
     private const double Bm25LengthBase = 0.25;
     private const double Bm25LengthWeight = 0.75;
     private const double IdfSmoothing = 0.5;
     private readonly ReadExecutionBudget budget;
+    private readonly int budgetCheckInterval;
+    private readonly int maximumDocumentWords;
+    private readonly int maximumWordCharacters;
     private ITextProjectionLease? projection;
     private readonly string[] terms;
     private readonly Dictionary<string, int> lookup;
@@ -20,17 +29,21 @@ internal sealed class TextRanker
     private int corpusCount;
     private long totalLength;
 
-    public TextRanker(string query, string field, ReadExecutionBudget budget)
+    public TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
+        int maximumDocumentWords, int maximumWordCharacters)
     {
         this.budget = budget;
-        terms = SearchTerms.Enumerate(query, budget).Distinct(StringComparer.Ordinal).ToArray();
+        this.budgetCheckInterval = budgetCheckInterval;
+        this.maximumDocumentWords = maximumDocumentWords;
+        this.maximumWordCharacters = maximumWordCharacters;
+        terms = SearchTerms.Enumerate(query, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters).Distinct(StringComparer.Ordinal).ToArray();
         lookup = terms.Select((term, index) => (term, index))
             .ToDictionary(pair => pair.term, pair => pair.index, StringComparer.Ordinal);
         frequency = new int[terms.Length];
-        path = terms.Length == 0 ? [] : JsonData.PathSegments(field);
+        path = terms.Length == EqualOrder ? [] : JsonData.PathSegments(field);
     }
 
-    public bool HasTerms => lookup.Count != 0;
+    public bool HasTerms => lookup.Count != EmptyElementCount;
     public IReadOnlyList<string> Terms => terms;
 
     public void AttachProjection(ITextProjectionLease lease)
@@ -44,16 +57,16 @@ internal sealed class TextRanker
         using var json = JsonDocument.Parse(document.Json);
         var value = JsonData.Scalar(json.RootElement, path);
         var counts = new Dictionary<int, int>();
-        var length = 0;
+        var length = EmptyElementCount;
         if (value is string content)
         {
-            foreach (var term in SearchTerms.Enumerate(content, budget))
+            foreach (var term in SearchTerms.Enumerate(content, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters))
             {
                 projection?.ObserveToken(term);
                 length++;
                 if (lookup.TryGetValue(term, out var index))
                 {
-                    counts[index] = counts.GetValueOrDefault(index) + 1;
+                    counts[index] = counts.GetValueOrDefault(index) + AdjacentElementOffset;
                 }
             }
         }
@@ -62,7 +75,7 @@ internal sealed class TextRanker
             frequency[index]++;
         }
         totalLength += length;
-        if (counts.Count != 0)
+        if (counts.Count != EmptyElementCount)
         {
             candidates.Add(new(document.Reference, length, counts));
         }
@@ -70,25 +83,25 @@ internal sealed class TextRanker
 
     public SearchScore[] Rank()
     {
-        if (corpusCount == 0)
+        if (corpusCount == EmptyElementCount)
         {
             return [];
         }
-        var average = Math.Max(1, (double)totalLength / corpusCount);
+        var average = Math.Max(MinimumAverageDocumentLength, (double)totalLength / corpusCount);
         var ranked = new List<SearchScore>(candidates.Count);
         foreach (var candidate in candidates)
         {
             budget.Check();
-            double score = 0;
+            double score = ZeroScore;
             foreach (var index in candidate.Counts.Keys.Order())
             {
                 var count = candidate.Counts[index];
-                var idf = Math.Log(1 + (corpusCount - frequency[index] + IdfSmoothing)
+                var idf = Math.Log(AdjacentElementOffset + (corpusCount - frequency[index] + IdfSmoothing)
                     / (frequency[index] + IdfSmoothing));
                 score += idf * count * Bm25FrequencyScale
                     / (count + Bm25LengthScale * (Bm25LengthBase + Bm25LengthWeight * candidate.Length / average));
             }
-            if (score > 0)
+            if (score > ZeroScore)
             {
                 ranked.Add(new(candidate.Reference, score));
             }
