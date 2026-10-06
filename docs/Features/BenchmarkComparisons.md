@@ -1290,9 +1290,14 @@ for the current website rather than a newly admitted measurement source.
 
 | Producer | Aggregate job | Original source |
 |---|---|---|
+| 37261761162/1 | 111661187694 | fb586bfcf05c18e79f892c5ecaf5c1092811aaf8 |
 | 37303831415/1 | 111789704230 | 55fb4e3704bd30b5e57b8173953e6e017c0f8333 |
 | 37292025104/1 | 111747139519 | 1e8833c027cf232e35fe012cd3eed41c61a17f89 |
+| 37257873745/1 | 111632167471 | a3136fb90f7cbaaad8935fdc04984372167e6d4c |
+| 37249197758/1 | 111604106769 | f8b3ba68da2f28660da1a36db396882ba2f72b7d |
 | 37242346637/1 | 111579241125 | 5fa61f27a34b5c573579fca3a84b8e5201dbd82e |
+| 37232926362/1 | 111546308960 | 3985008b0d360dd7e1bd9d26aae572e5e6368128 |
+| 37224468826/1 | 111525368980 | 37a9da0394b7219b4fa05edd21ee41ec614e604f |
 | 37215426617/1 | 111499247110 | bb16152827b38dc4533a1d7830e664b4ecd11267 |
 | 37206566979/1 | 111478923031 | 377886f35928866f083806062b446056d64539e3 |
 | 37192832037/1 | 111425227628 | 873cd1a36ad14ab966065c924c71a292ea681083 |
@@ -1350,3 +1355,19 @@ syntax/graph, governance and diff checks passed. The shared canonical format che
 still reports unrelated BackupRestore `AtomicPartitionRosterFixture.cs:134`
 whitespace. Linux delivered-source qualification and Pages remain pending; these
 local development receipts are not provider or current database qualification.
+
+First standalone source `6c20cf4f` run37480759611 confirmed the independent
+Website graph but failed optional capture at another original old-generation
+successful aggregate: run37261761162/1 (#82), job111661187694, sourcefb586bfc.
+Its original retained steps/wrappers match the same exact unsupported contract.
+Extend only the source-bound generation inventory and preserve the original
+metadata as a native selection regression. Audit the remaining original producer
+inventory before the next publication attempt; no provider pass is claimed.
+
+The authenticated audit is complete through the first compatible legacy cohort
+run37184989107/1 (#53), source73aebfd3f72695357834599e813aba77b9e274ad.
+The thirteen exact unavailable source generations above and in the earlier c16/ce2
+contracts retain identical successful owned/native steps. Skipped jobs without
+steps and cancelled runs do not become unavailable-generation pins. The compatible
+cohort remains subject to original archive, source, provenance and freshness
+qualification; API artifact availability alone does not qualify publication.

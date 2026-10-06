@@ -34,6 +34,12 @@ internal static class SiteOptionalBenchmarkSelectionNodeProgram
           } else if (scenario === 'retained-unready') {
             const result = runs.selectSiteAggregateJob(unavailableRun, [unavailableJob]);
             assert(!result.successful && result.run.id === unavailableRun.id);
+          } else if (scenario === 'retained-fb-unready') {
+            const run = runs.validateSiteRun(await read('SiteOptionalRetainedFbRun.json'), workflow);
+            const job = await read('SiteOptionalRetainedFbAggregate.json');
+            const before = JSON.stringify({ run, job });
+            assert(!runs.selectSiteAggregateJob(run, [job]).successful);
+            assert(JSON.stringify({ run, job }) === before && runs.selectSiteAggregateJob(readyRun, [readyJob]).successful);
           } else if (scenario === 'failed-aggregate') {
             const failed = { ...readyJob, status: 'completed', conclusion: 'failure' };
             assert(!runs.selectSiteAggregateJob(readyRun, [failed]).successful);

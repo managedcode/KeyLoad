@@ -4879,7 +4879,7 @@
         "buildAndTestsDependency": false,
         "benchmarkSuccessDependency": false,
         "qualification": "existing_content_only_or_complete_measured_qualification_and_freshness_preserved",
-        "providerPublication": "pending",
+        "providerPublication": "first_standalone_run_failed_old_generation_capture_repair_verified_next_native_run_pending",
         "siteTestsBuild": "passed_zero_warnings_zero_errors",
         "siteTestsFormat": "passed",
         "canonicalBuild": "passed_zero_warnings_zero_errors_final_source",
@@ -4901,12 +4901,21 @@
         "alwaysRunExecutorRegressions": {
           "status": "passed_development_only",
           "suite": "Aspire_unit_SiteOptionalBenchmarkSelectionTests",
-          "tests": 21,
-          "passed": 21,
+          "tests": 22,
+          "passed": 22,
           "skipped": 0,
           "executorCases": 3,
-          "trxSha256": "9432e030119757663722244c78d40215a87cdb149e8d89cc338c469ab8620452"
-        }
+          "trxSha256": "df3991c8bd94b90a3a95a9ba952e68478111e3f09764f6787b4a4cdb46ddb94d"
+        },
+        "firstNativeRun": {
+          "source": "6c20cf4fba946afc123fd2fd29960d7995c248f4",
+          "runId": 37480759611,
+          "conclusion": "failure",
+          "stage": "optional_benchmark_capture",
+          "independentWorkflowStarted": true,
+          "pagesPublished": false
+        },
+        "unavailableProducerGenerations": 13
       }
     }
   },

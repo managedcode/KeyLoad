@@ -6,6 +6,7 @@ internal sealed class SiteOptionalBenchmarkSelectionTests
     [Test]
     [Arguments("retained-success", true)]
     [Arguments("retained-unready", true)]
+    [Arguments("retained-fb-unready", true)]
     [Arguments("failed-aggregate", true)]
     [Arguments("no-aggregate", true)]
     [Arguments("current-success", true)]
