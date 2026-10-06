@@ -27,8 +27,8 @@
     "runtimeAdoption": "docs/Features/ClusterRouting/RuntimeAdoption.md",
     "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
     "restorePassed": true,
-    "canonicalBuildPassed": false,
-    "verificationStage": "R105_current_source_build_in_progress_formatter_and_Aspire_regressions_pending_after_four_fixture_joins_R104_build_format_passed_full_unit4023_of4044_with21_failures_exact_source_Linux_qualification_pending",
+    "canonicalBuildPassed": true,
+    "verificationStage": "R106_current_source_full_build_and_format_passed_zero_drift_actual_Aspire_focused235_executed229_passed6_failed_full_unit_rerun_and_exact_source_Linux_qualification_pending",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -44,7 +44,7 @@
       "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
     ],
     "canonicalFormatterPassed": true,
-    "localDevelopmentReceipt": "R104 source-bound development build/formatter and actual Aspire StorageRecovery190/190 passed; full Aspire unit4044 executed4023 passed21 failed with zero skips and source/assembly drift. R105 fixture repairs joined, fresh build/regressions pending. Coverage binary exists but full coverage/CRAP and Linux delivery remain unqualified."
+    "localDevelopmentReceipt": "R106 full Release build and native formatter passed with 4,101 compile inputs, zero source drift, warnings or errors. Actual Aspire focused groups: ClusterRouting213/218, document mutations2/2, replica persistence8/8, reader capability2/2, native saga jobs4/5; zero skips and source/assembly drift. Six failures remain. Prior full R104 unit4023/4044 with21 failures remains red; a complete current rerun is pending. R104 unfiltered coverage includes performance child processes and is not qualifying functional coverage. Full coverage/CRAP and Linux delivery remain open."
   },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",
@@ -3778,18 +3778,35 @@
         "closure": "only full mapped criteria and required evidence close an acceptance"
       },
       "codeDelivery": {
-        "currentBuild": "R105 full Release verification in progress after four reviewed current-fixture joins; R104 passed 4,101 inputs with zero source drift and zero warnings/errors",
-        "formatter": "R105 current-source formatter pending; R104 full dotnet format passed with zero source drift",
+        "currentBuild": "R106 full Release passed: 4,101 compile inputs, zero source drift, zero warnings/errors; original log SHA2569d494dae978bec8022ac81beedfef15f19d21813efb79b4b73971cf08a0adfc8",
+        "formatter": "R106 full native dotnet format passed with zero source drift after current fixture joins",
         "verificationScope": "local source-bound development; Linux delivered-source gates remain open"
+      },
+      "currentArchitectureDecisions": {
+        "reviewed": 111,
+        "mermaidFences": 116,
+        "actualSvgRendersPassed": 116,
+        "indexEntriesVerified": 111,
+        "activeOldWorkflowFilenameReferences": 0,
+        "sourceBinding": "R5 binds all current ADR bytes and reuses verified R4 SVGs only after exact equality of all116 fence bodies; no new render or database qualification inferred"
       },
       "nativeQualification": {
         "physicalNativeId8Omission": "passed",
         "physicalRF3Id7MissingFieldFlow": "open",
-        "functionalCoverageAndCRAP": "open",
+        "functionalCoverageAndCRAP": "open; R104 unfiltered binary is ineligible because native performance children can contribute. R106 focused functional binaries are partial evidence only; full source-bound coverage and CRAP remain unmeasured",
         "scalarRecoveryRF3AndLinuxDelivery": "open",
         "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
-        "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; current full R104 unit completed with21 failures overall, R105 qualification pending",
-        "completeUnit": "R104 actual Aspire full unit completed: 4,044 executed, 4,023 passed, 21 failed, zero skipped and zero source/assembly drift. Four current-fixture repairs for 18 failures joined; three remaining failures under diagnosis. R105 rerun pending."
+        "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
+        "completeUnit": "Prior R104 actual Aspire full unit: 4,044 executed, 4,023 passed, 21 failed, zero skipped and source/assembly drift. R106 focused235 executed229 passed6 failed; these are not a complete suite. Full unfiltered ordinary unit rerun pending, separately from functional coverage.",
+        "focusedCurrentFixtures": {
+          "ClusterRouting": "213/218 passed; four C1 receipt/lifetime failures and one diagnostics failure remain",
+          "DocumentMutationImageReads": "2/2 passed",
+          "ReplicaNativePersistence": "8/8 passed",
+          "ReaderCapability": "2/2 passed",
+          "NativeSagaJobs": "4/5 passed; exact concrete coordinator/journal request Graph transition remains under diagnosis",
+          "sourceAndAssemblyDrift": 0,
+          "skipped": 0
+        }
       }
     }
   },

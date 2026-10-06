@@ -45,7 +45,7 @@ tuple (including the no-producer state); a changed or newly available tuple requ
 fresh qualification. Content-only success is not measured-cohort qualification.
 
 The four workflow boundaries and optional selection contract are implemented by
-`ci.yml`, `benchmarks.yml`, `website.yml`, `release.yml`, and the current selection,
+`build-and-tests.yml`, `benchmarks.yml`, `website.yml`, `release.yml`, and the current selection,
 receipt, proof, freshness and builder modules under `scripts/Features/BenchmarkComparisons/`
 and `site/Features/BenchmarkComparisons/`. Stable detailed acceptance remains in
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md), including these exact

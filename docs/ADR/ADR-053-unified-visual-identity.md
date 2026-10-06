@@ -140,10 +140,10 @@ Rollout, rollback and verification:
 - **Rollout:** a single release. The console and the site deploy independently.
 - **Rollback:** revert the assets and restore the three init properties with the original source. Stored data is untouched.
 - **Verification:**
-  - ci.yml unit tests: metrics ring and middleware.
+  - build-and-tests.yml unit tests: metrics ring and middleware.
   - RF3: failure-log route template and voter membership through the real SDK and official MCP.
   - Real Chrome console flow: existing hooks plus new views.
-  - pages.yml SiteTests: unchanged hooks, budgets and the parity test.
+  - website.yml SiteTests: unchanged hooks, budgets and the parity test.
   - Subjective beauty is judged from desktop/mobile screenshots of a real RF3 cluster (manual exception). It never replaces a functional gate.
 
 Join points: shared enum/DTO edits are lead-only, and backend and UI write scopes are disjoint. This ADR stays Accepted until exact-SHA unit, RF3 browser and site qualification pass.

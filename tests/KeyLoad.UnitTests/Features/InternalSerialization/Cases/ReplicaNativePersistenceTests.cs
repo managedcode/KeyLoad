@@ -115,7 +115,8 @@ internal sealed class ReplicaNativePersistenceTests
         Dictionary<string, byte[]?> rejectionImage;
         using (var store = files.Open())
         {
-            using (var initialized = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration))) { }
+            using (var initialized = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration)))
+            { }
             var identity = store.Identity;
             originalState = store.Read(view => view.ReadOwnedValue(stateKey))!;
             originalMembership = store.Read(view => view.ReadOwnedValue(membershipKey))!;

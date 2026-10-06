@@ -598,7 +598,7 @@ acceptance remain mandatory and open.
 ### Independent delivered-source analyzer coverage join
 
 TASK-CQ-GENERAL-CI-001 maps REQ-CQ-006/012/013 and AC-CQ-009/033..038 to the
-existing Linux `analyzer-rules` job in `.github/workflows/ci.yml`. Prepare the
+existing Linux `analyzer-rules` job in `.github/workflows/build-and-tests.yml`. Prepare the
 unchanged 54-source analyzer inventory and exact settings copy after the native
 Release build, run the complete analyzer suite through the existing Aspire
 entry with the native Cobertura collector, then verify the original report

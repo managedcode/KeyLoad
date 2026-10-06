@@ -36,6 +36,8 @@ internal sealed class NativeSagaTimeoutSiloConfigurator : ISiloConfigurator
         siloBuilder.AddOrleansGraph(configureGraph: graph => graph
             .AllowClientCallGrain<IRequestGrain>()
             .AllowClientCallGrain<IRecurringDueCoordinatorGrain>()
+            .AddGrainTransition<IRecurringDueCoordinatorGrain, IRequestGrain>()
+            .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
             .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
             .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
             .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()

@@ -13,9 +13,8 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
     public async Task ZeroAndUnknownReaderCapabilitiesRejectAndRecoverWithHealthyVoter()
     {
         using var deadline = new CancellationTokenSource(TestBound, TimeProvider.System);
-        await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, deadline.Token);
-        await VerifyNonCurrentMarkerAsync(scenario, StoreReaderContract.Unspecified, deadline.Token);
-        await VerifyNonCurrentMarkerAsync(scenario, UnknownReaderCapability, deadline.Token);
+        await VerifyNonCurrentMarkerAsync(runtime, StoreReaderContract.Unspecified, deadline.Token);
+        await VerifyNonCurrentMarkerAsync(runtime, UnknownReaderCapability, deadline.Token);
     }
 
     [Test]
@@ -49,14 +48,16 @@ internal sealed class RequestCqrsReaderCapabilityTests(RequestCqrsCohortRuntimeF
         await Assert.That(scenario.Client.HasCompatibleCohort).IsTrue();
     }
 
-    private static async Task VerifyNonCurrentMarkerAsync(RequestCqrsCohortScenario scenario,
+    private static async Task VerifyNonCurrentMarkerAsync(RequestCqrsCohortRuntimeFixture runtime,
         int readerCapability, CancellationToken cancellationToken)
     {
+        await using var scenario = await RequestCqrsCohortScenario.StartAsync(runtime, cancellationToken);
         scenario.PublishRemoteOneRecord(scenario.Discovery(RequestCqrsCohortScenario.FirstRemote, 1,
             runtimeJournalReaderContract: readerCapability));
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(
             () => scenario.Client.EnsureCompatibleCohortAsync(cancellationToken));
         await RequestCqrsReaderCapabilityAssertions.AssertIncompatibleAsync(failure);
+        await Assert.That(scenario.RemoteOne.Requests).IsGreaterThan(0);
         await Assert.That(scenario.Client.HasCompatibleCohort).IsFalse();
         var readsAfterAdmission = scenario.RemoteOne.Requests;
         var cachedFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
