@@ -99,7 +99,6 @@ const JOB_SCENARIOS = Object.freeze({
   GraphNeighbors: 'Graph neighbors', GraphTraverse: 'Graph traversal',
   StreamAppend: 'Stream append', StreamRead: 'Stream read',
 });
-const HISTORICAL_JOB_PREFIX = 'Benchmark / ';
 
 export function isolatedJobLabel(cell, preflight = false) {
   const nodes = `${cell.nodeCount} node${cell.nodeCount === 1 ? '' : 's'}`;
@@ -109,9 +108,7 @@ export function isolatedJobLabel(cell, preflight = false) {
 export const isolatedJobName = (cell, preflight = false) => `${cell.target} / ${isolatedJobLabel(cell, preflight)}`;
 export const isolatedEvidenceJobName = cell => isolatedJobName(cell) +
   (cell.profile === ISOLATED.profile ? '' : ` / ${cell.profile}`);
-// Original authenticated archives retain their exact historical display names.
-export const matchesIsolatedJobName = (name, cell) =>
-  name === isolatedJobName(cell) || name === HISTORICAL_JOB_PREFIX + cell.id;
+export const matchesIsolatedJobName = (name, cell) => name === isolatedJobName(cell);
 
 export function isolatedCells() {
   return ISOLATED.targets.flatMap(target => ISOLATED.nodes.flatMap(nodeCount =>

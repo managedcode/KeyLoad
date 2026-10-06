@@ -99,7 +99,6 @@ internal static class SiteCoverageSourceInventory
         "vector-isolated-plan",
         "scaled-cohort-",
         "server-resource-",
-        "historical-",
     ];
 
     public static bool IsTrackedEvidenceModule(string path) =>

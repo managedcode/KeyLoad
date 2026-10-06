@@ -53,7 +53,6 @@ internal static class SiteIsolatedGitHubFields
     public const string ImageInventory = "image-zip-inventory.txt";
     public const string ZipInventorySuffix = "-zip-inventory.txt";
     public const string BodySuffix = ".body";
-    public const string JobPrefix = "Benchmark / ";
     public const string CliOperation = "cli";
     public const string UnknownCommand = "controlled-unknown";
     public const string VerifyInputs = "verify-inputs";
@@ -68,9 +67,8 @@ internal static class SiteIsolatedGitHubFields
     public const string CloneOperation = "clone";
     public const string DetachOperation = "detach";
     public const string ExecutorAdmissionOperation = "executor-admission";
-    public const string UnavailableProducerGenerationOperation = "unavailable-producer-generation";
     public const string WebsiteExecutorIdentity = "website";
-    public const string LegacyCiIdentity = "legacy-ci";
+    public const string ForeignExecutorIdentity = "foreign-executor";
     public const string WrongWorkflowPathIdentity = "wrong-path";
     public const string CandidateAccepted = "candidateAccepted";
     public const string InputsPreserved = "inputsPreserved";
@@ -78,25 +76,11 @@ internal static class SiteIsolatedGitHubFields
     public const string NativeFixtureKey = "KeyLoad.SiteTests.IsolatedGitHubNativeFixture";
     public const string Repository = "repository";
     public const string WorkflowKey = "workflow";
-    public const string Action = "action";
     public const string Event = "event";
     public const string WorkflowRun = "workflow_run";
-    public const string NativeRepositoryName = "full_name";
     public const string NativeHeadRepository = "head_repository";
-    public const string NativeHeadBranch = "head_branch";
     public const string NativeHtmlUrl = "html_url";
     public const string NativeRunNumber = "run_number";
     public const string NativeJobs = "jobs";
-    public const string RepositoryIdCase = "repositoryId";
-    public const string RepositoryNameCase = "repositoryName";
-    public const string RunRepositoryIdCase = "runRepositoryId";
-    public const string RunRepositoryNameCase = "runRepositoryName";
-    public const string HeadRepositoryIdCase = "headRepositoryId";
-    public const string HeadRepositoryNameCase = "headRepositoryName";
-    public const string BranchCase = "branch";
-    public const string WorkflowNameCase = "workflowName";
-    public const string WorkflowPathCase = "workflowPath";
-    public const string ProducerEventCase = "producerEvent";
-    public const string MissingRunCase = "missingRun";
     public const string Cancelled = "cancelled";
 }

@@ -10,7 +10,7 @@ internal sealed class SiteIsolatedHttpTests
         await using var host = SiteStaticFileHost.Start(fixture.Root);
         var response = await Load(fixture, host.BaseUrl, false, TestContext.Current!.Execution.CancellationToken);
         await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
-        await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers(fixture.Inputs.Site.MeasuredRevision));
+        await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers());
     }
 
     /// <summary>AC-ISO-008: controlled malformed files are parser data; native HTTP/fetch/crypto remain genuine.</summary>

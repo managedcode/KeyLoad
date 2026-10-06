@@ -429,6 +429,46 @@ does not establish their coverage. CI collects the four owned profiles after one
 Release build, preserves the separate complete suites and always uploads raw
 reports before module-completeness admission. Missing modules remain unqualified.
 
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 expands this collection under
+REQ-CQ-009 and AC-CQ-018/020/021. Ordinary unit and scalar commands remain complete,
+unfiltered and without coverage. Functional coverage uses five explicit bounded
+positive selector groups in each mode, each with a separate results directory
+and native output. The current inventory names exact class/method/argument
+identities, owning test source and REQ/AC, with explicit exclusions for every
+BDN/load/stress/performance/comparison contributor, including cross-slice cases.
+The R104 proposal is preparation input; it cannot be adopted without reconciling
+the exact current source and original native case inventory. Keep each selector
+within the existing 4,096-character admission cap.
+
+Ownership: `.github/workflows/build-and-tests.yml`;
+`scripts/Features/CodeQuality/functional-coverage.unit-test-inventory.json`;
+`functional-coverage.native-product-descriptor.ps1`,
+`functional-coverage.native-merge.contributors.ps1`,
+`functional-coverage.native-merge.test-images.ps1`,
+`functional-coverage.native-merge.admission.ps1`, and only the required
+group-specific identity joins in `functional-coverage.native-merge.trx.ps1` and
+`functional-coverage.native-merge.functional-report.ps1` in that same slice.
+The generic merge executor retains its existing ownership and input contract.
+Existing NativeCoverageMergeTests and the necessary feature-local fixture/helper
+own actual processing of retained native evidence and rejected modified copies;
+do not introduce source-token or fabricated coverage tests.
+
+All ten unit groups, recovery and RF3 must succeed before merge. For each mode,
+require disjoint exact case sets whose union equals the full permitted inventory;
+reject missing/duplicate/overlapping/empty/excluded identities and skipped or
+failed results. Match the actual test image's compiler-input receipt, source
+inventory, DLL/PDB hashes, MVID and native report/TRX identities. Keep original
+reports immutable, all production-project classifications and RF3 server-process
+collection mandatory, and normal/scalar branch outcomes separate unless native
+evidence identifies the same individual branch outcome. Existing bounds,
+80/70/90 thresholds, no-decrease and CRAP requirements remain unchanged.
+
+Root freezes the feature/ADR before preparation, owns serialized live joins and
+canonical checks, and collects every profile through the existing Aspire entry.
+The Luna worker prepares guarded private code and operation regressions. The
+inventory and successful partial collection do not close full ordinary suites,
+numeric whole-product coverage, CRAP or any unexercised module acceptance.
+
 ### Compiled-source identity prerequisite
 
 TASK-CQ-FUNCTIONAL-COVERAGE-001A extends AC-CQ-018/020 with a native read-only

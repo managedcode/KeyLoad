@@ -21,20 +21,15 @@ internal static class SiteIsolatedGitHubArchivePaths
 
     public static HashSet<string> ExpectedSuite(JsonObject metadata)
     {
-        var historical = SiteIsolatedInventory.IsHistorical(metadata);
-        var result = new HashSet<string>(StringComparer.Ordinal) { SiteIsolatedGitHubTokens.Manifest };
-        if (!historical)
+        var result = new HashSet<string>(StringComparer.Ordinal) { SiteIsolatedGitHubTokens.Manifest, "cohort-receipt.json" };
+        foreach (var profile in Profiles())
         {
-            result.Add("cohort-receipt.json");
-            foreach (var profile in Profiles())
-            {
-                result.Add(FamilyRoot(profile) + SiteIsolatedGitHubTokens.Manifest);
-            }
+            result.Add(FamilyRoot(profile) + SiteIsolatedGitHubTokens.Manifest);
         }
         foreach (var worker in metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray())
         {
             var entry = worker ?? throw new InvalidDataException(SiteIsolatedGitHubTokens.InvalidReceipt);
-            var root = historical ? string.Empty : FamilyRoot(entry[ProfileField]!.GetValue<string>());
+            var root = FamilyRoot(entry[ProfileField]!.GetValue<string>());
             var directory = root + "workers/" + entry[SiteIsolatedGitHubTokens.Id]!.GetValue<string>() + "/";
             result.Add(directory + SiteIsolatedGitHubTokens.Raw);
             if (root.Length > 0)
@@ -46,12 +41,8 @@ internal static class SiteIsolatedGitHubArchivePaths
         return result;
     }
 
-    public static HashSet<string> ExpectedProvider(JsonObject? metadata = null)
+    public static HashSet<string> ExpectedProvider()
     {
-        if (metadata is not null && SiteIsolatedInventory.IsHistorical(metadata))
-        {
-            return new(ProviderFiles, StringComparer.Ordinal);
-        }
         var result = new HashSet<string>(ProviderFiles, StringComparer.Ordinal) { "composite-plan.json", "plans/intensive-1k-c16.json" };
         foreach (var profile in Profiles())
         {

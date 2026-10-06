@@ -1,8 +1,5 @@
 import { dirname, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { constants } from 'node:fs';
-import { open } from 'node:fs/promises';
-import { parseBytes, absolutePath, existingPath } from './aggregate-files.mjs';
 import { positive, shaPattern } from './isolated-github-contract.mjs';
 import { SITE_GH, requireSite } from './site-isolated-github-contract.mjs';
 
@@ -27,43 +24,6 @@ export function parseSiteCaptureArguments(argv) {
   if (Object.hasOwn(args, 'optional')) requireSite(args.optional === 'true' && args.mode === SITE_GH.publish);
   if (Object.hasOwn(args, 'requested-run')) requireSite(args.mode === SITE_GH.validate && /^[1-9][0-9]*$/.test(args['requested-run']));
   return args;
-}
-
-export async function readSiteProducerEvent(eventPath) {
-  absolutePath(eventPath);
-  const original = await existingPath(eventPath, false);
-  requireSite(original.size > 0 && original.size <= SITE_GH.eventBytes);
-  const handle = await open(eventPath, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
-  try {
-    const before = await handle.stat();
-    requireSite(before.isFile() && before.ino === original.ino && before.dev === original.dev
-      && before.size === original.size && before.mtimeMs === original.mtimeMs);
-    const bytes = Buffer.alloc(before.size + 1);
-    let count = 0;
-    while (count < bytes.length) {
-      const result = await handle.read(bytes, count, bytes.length - count, null);
-      if (result.bytesRead === 0) break;
-      count += result.bytesRead;
-    }
-    const after = await handle.stat();
-    const retained = await existingPath(eventPath, false);
-    requireSite(count === before.size && after.size === before.size && after.mtimeMs === before.mtimeMs
-      && retained.ino === before.ino && retained.dev === before.dev && retained.size === before.size && retained.mtimeMs === before.mtimeMs);
-    return validateSiteProducerEvent(parseBytes(bytes.subarray(0, count)));
-  } finally { await handle.close(); }
-}
-
-export function validateSiteProducerEvent(event) {
-  const run = event?.workflow_run;
-  requireSite(event?.action === 'completed' && event.repository?.id === SITE_GH.repositoryId
-    && event.repository.full_name === SITE_GH.repository && run?.repository?.id === SITE_GH.repositoryId
-    && run.repository.full_name === SITE_GH.repository && run.head_repository?.id === SITE_GH.repositoryId
-    && run.head_repository.full_name === SITE_GH.repository && run.head_branch === 'main'
-    && run.name === 'Benchmarks' && run.path === '.github/workflows/benchmarks.yml'
-    && run.status === 'completed' && SITE_GH.producerConclusions.includes(run.conclusion)
-    && SITE_GH.producerEvents.includes(run.event) && shaPattern.test(run.head_sha ?? '')
-    && positive(run.id) && positive(run.run_attempt));
-  return { runId: run.id, attempt: run.run_attempt, sourceRevision: run.head_sha, event: run.event, conclusion: run.conclusion };
 }
 
 export async function createSiteIsolatedContext(environment, args, platform = process.platform) {

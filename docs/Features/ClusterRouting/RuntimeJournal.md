@@ -135,13 +135,13 @@ Transient no-quorum/unknown results retry only within explicit bounded policy.
 
 Keep current default-deny ManagedCode.Graph rules and native Orleans-call tracking
 configuration. Extend the existing public DirectedGraph/GrainTransitionManager
-descriptor by copying every existing edge unchanged and adding only discovered
-native manager→IRequest and the concrete coordinator's exact
-ProcessDueAsync→IRequest.ExecuteStreamAsync and
-ExecuteJobAsync→IRequest.ExecuteStreamAsync method edges. Native ScheduleJobAsync
-can read/write its journal while ProcessDueAsync is the concrete caller; that
-provider work still uses the freshly signed protected journal request. Keep both
-coordinator source methods exact, with no AnyMethod allowance for the coordinator.
+descriptor by copying every existing edge unchanged and adding the provider's
+exact ReadCoreAsync→IRequest.ExecuteStreamAsync and
+SendCommandAsync→IRequest.ExecuteStreamAsync transitions. The native background
+journal loop establishes the actual RuntimeJournalClient caller identity through
+the supported scoped Graph API, independently of scheduling-grain context. Keep
+the concrete coordinator's exact ExecuteJobAsync→IRequest.ExecuteStreamAsync
+edge for its actual saga effect, with no AnyMethod coordinator allowance.
 Native receiver dispatch is handled by the unchanged native-call policy; never
 turn on AllowAll, replace the receiver extension or impersonate a GrainService.
 
@@ -195,9 +195,9 @@ concrete ExecuteJobAsync edge for the handler's actual separately authorized
 saga effect. Do not impersonate a coordinator or propagate a causal method
 which the native background loop does not preserve.
 
-The private agent packet owns Orleans Execution/RuntimeJournalClient.cs and
+Current source ownership is Orleans Execution/RuntimeJournalClient.cs and
 Server Hosting/NativeJobGraphRegistration.cs. Use closed method identities from
-the client rather than duplicated literals; root freezes, reviews and joins.
+the client rather than duplicated literals; root owns integration and evidence.
 Preserve signed protected journal identity, fresh request grains, persisted
 authorization, cancellation/deadline, native CQRS backpressure and RF3 receipts.
 NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout must execute real
@@ -208,6 +208,21 @@ denied wrong-method/target flows must preserve state and permit a healthy native
 follow-up. Add only genuine operation regressions where existing cases lack
 these outcomes. Process/RF3/Linux gates remain distinct. Rollback is the scoped
 source change, never an alternate journal route or data conversion.
+
+TASK-ORL-JOURNAL-GRAPH-014's real operation regression additionally owns the
+UnitTests ClusterRouting Fixtures/RuntimeJournalNativeFixture.cs graph join,
+Cases/RuntimeJournalGraphCallerTests.cs, Fixtures/RuntimeJournalGraphCallerProbe.cs,
+Contracts/RuntimeJournalGraphCallerContracts.cs and
+Helpers/RuntimeJournalGraphCallerSupport.cs, with actual activation construction
+in Helpers/RuntimeJournalReplayActivatorConfiguration.cs. Use the real native Orleans runtime,
+signed request stream and canonical ZoneTree journal. The probe observes bounded
+caller identities during actual journal operations and actual wrong-method or
+wrong-target calls; it must not replace a client, storage provider or graph filter.
+Verify unchanged committed content after rejection, restored prior context and
+real append/reopen/read follow-up. Register only the exact provider methods and
+required probe ingress; retire unused fixture caller allowances after checking
+their actual callers. No broad policy, fabricated exception or source-text test
+qualifies this contract. Root reviews the private packet and owns all live joins.
 
 | Task | Ownership and dependency | Required join/evidence |
 |---|---|---|

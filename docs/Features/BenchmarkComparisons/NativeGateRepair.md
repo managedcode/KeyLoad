@@ -1,187 +1,69 @@
 # BenchmarkComparisons native gate repair
 
-Status: Accepted staged contracts; reviewed source is delivered through bfb.
-Selected ca22 policy and f403 native preflight originals are qualified below;
-complete comparison and failure-path qualification remain pending.
-[ADR-068](../../ADR/ADR-068-native-benchmark-gate-repair.md) owns stages, exact paths,
-root/worker permissions, bounds, rollback and join conditions. All parent
-BenchmarkComparisons guarantees,1/2/3node cells and270scenario scope remain.
+Status: Accepted. Source repairs are present; exact-source Linux qualification of
+the current cohort, complete native failure paths, and provider publication remain
+pending. [ADR-068](../../ADR/ADR-068-native-benchmark-gate-repair.md) owns the
+native gate contracts. The current publication contract is defined by
+[ADR-076](../../ADR/ADR-076-current-cohort-publication.md),
+[ADR-080](../../ADR/ADR-080-benchmark-failure-isolation.md),
+[ADR-112](../../ADR/ADR-112-independent-website-publication.md), and the
+[BenchmarkComparisons feature](../BenchmarkComparisons.md).
 
-|Requirement|Acceptance and test trace|
+| Requirement | Acceptance contract and evidence |
 |---|---|
-|REQ-NGR-001 fresh executing-job authority|AC-NGR-001 / TASK-NGR-G1/G2: exact same-ID authenticated metadata and all identity/running checks preserved. G2 adds the current-job-only native `Cache-Control: no-cache, max-age=0` request header and, after the first exact queued response, at most one 60,000ms stale-response window with 1,000ms cancellation-aware cadence and at most61 total captures. The initial request retains its existing120,000ms native bound; subsequent requests/rate waits consume only the remaining stale window. Retain exact request/body/header originals. Captured queued/same-ETag/cache-header-to-running, exhaustion, cancellation, mismatch/terminal/auth/source/attempt and receipt-finalization regressions plus actual GitHub startup are required. Queued is never running; invalid/exhausted authority rejects before any database/timing.|
-|REQ-NGR-002 exact Kurrent event preservation|AC-NGR-002 / TASK-NGR-R2/K1: source-contract freeze then genuine SDK original/custom/system metadata equality and unchanged55,378owned-stream/foreign/cleanup proof on1/2/3. StageA source delivered; selected f403 native1/2/3 originals pass. Empty tracing characterization remains open; a hard-coded empty assumption is not a valid completeness oracle.|
-|REQ-NGR-003 actual native leader routing|AC-NGR-003 / TASK-NGR-R2/K1: pinned SDK/advertised-endpoint source freeze, actual leader/follower/native setup proof and observed members/copies/ACK. Selected f403 native1/2/3 preflight proof exists; D1 diagnostic source is delivered. Original routing cause and diagnostic failure-path qualification remain open; no guessed leader, independent nodes or measured write retry.|
-|REQ-NGR-004 genuine complete publication|AC-NGR-004 / TASK-NGR-Q1: full source/normal/scalar/recovery/RF3/native preflight270/cohort/site original source/run/attempt/upload/digest/report evidence. Failed/cancelled/skipped/unavailable data remains honest.|
-|REQ-NGR-005 settled resource-failure observation|AC-NGR-005 / TASK-NGR-E1: thirteen genuine classifier/formatter cases pass in each3ae unit mode; the7d1196 n1 delete original proves a numeric native failure observation. Complete1/2/3 failure-path and cancellation/settlement gates remain open. Preserve the authenticated SDK read outside timing and original result. No quotas, purge or retry changes.|
+| REQ-NGR-001: authenticate the exact executing job | AC-NGR-001 requires bounded authenticated discovery and revalidation of the same own-repository workflow, source, attempt, and job. Only strict `in_progress` with a null result admits native setup; queued, terminal, unknown, mismatched, exhausted, cancelled, transport-failed, or malformed state rejects before allocation or timing. The initial request is bounded to 120,000 ms. Only after an exact queued response may one 60,000 ms stale-response window run at a cancellation-aware 1,000 ms cadence, with no more than 61 total captures. Preserve exact request, body, and header behavior, including the current-job-only `Cache-Control: no-cache, max-age=0` refresh. No reselection, stale fallback, or workload retry. Real current-job authority cases and exact-source GitHub execution are required. |
+| REQ-NGR-002: preserve native Kurrent events | AC-NGR-002 requires exact original/custom/system metadata equality, a complete 55,378-item owned-stream oracle, foreign-resource noninterference, and owned cleanup across genuine one-, two-, and three-node cases. Empty tracing remains uncharacterized; tests must not assume an empty result. Genuine pinned-SDK and native Aspire evidence is required. |
+| REQ-NGR-003: prove native leader routing | AC-NGR-003 requires pinned SDK and advertised-endpoint validation, genuine leader/follower routing, and observed membership, copies, and acknowledgements. No guessed leader, standalone substitute, or measured write retry is allowed. Native preflight and complete workload results are separate evidence. |
+| REQ-NGR-003D: retain bounded private setup diagnostics | AC-NGR-003D preserves and rethrows the original failure. Emit at most one failure-only line of 4,096 bytes, with at most three causes, eight frames per cause, and 64-character identifiers. Include only a closed phase, exception type, and bounded type/method metadata. Exclude messages, stacks, paths, endpoints, credentials, and payloads. Diagnostics do not establish workload success. |
+| REQ-NGR-004: qualify the complete current publication | AC-NGR-004 requires exact source/run/attempt/job and archive provenance for the current plan: 1,386 workers (330 controls, 264 scaled CRUD, 792 vector) and 2,530 unique regular-file inputs (2,470 suite files and 60 provider files). Validate exact paths, sizes, hashes, original archive bytes, and source identities. Each slot is a measured result, an authenticated unsupported-topology disposition, or an authenticated terminal workload failure with its fixed safe reason and null report. Failed, cancelled, skipped, missing, mixed, or unavailable evidence is never numeric success. Full source, normal, scalar, recovery, RF3, native preflight, coverage, browser, freshness, and provider gates remain separate required predicates. The intensive TimeSeries family has its own ADR-050/059 plan and is not folded into this cohort. |
+| REQ-NGR-005: observe settled resource failures without changing results | AC-NGR-005 preserves the original case, timing, and samples. Only after an eligible exact `ResourceExhausted` case and its session settle may one authenticated outbox-status read inspect at most 64 consumer heads, outside the measured clock. Unknown or unavailable observations remain unavailable. No quota, purge, retention, or retry change follows from the observation. Native one-, two-, and three-node failure-path and cancellation/settlement proof remains required. |
 
 ```mermaid
 flowchart LR
-    Original[Retained actual failures] --> Contract[Frozen preserving repair]
-    Contract --> Tests[First authored real policy and native cases]
-    Tests --> GitHub[New exact source isolated jobs]
-    GitHub --> Proof[Complete original authenticated cohort]
-    Proof --> Site[Qualified generated metrics]
+    Authority[Authenticated exact current job] --> Native[Native preflight and workload]
+    Native --> Result[Original result and failure retained]
+    Result --> Observe[Bounded post-settlement observation when eligible]
+    Result --> Cohort[Current complete-cohort validation]
+    Observe --> Cohort
+    Cohort --> Gates[Source, recovery, RF3, coverage, browser, freshness]
+    Gates --> Publish[Independent Website publication]
 ```
 
-Canonical slice map: scripts Features/BenchmarkComparisons current-job helper/API/
-job; UnitTests Features/BenchmarkComparisons new IsolatedCurrentJob files;
-ComparisonTests Features/BenchmarkComparisons genuine Kurrent fixtures; benchmark
-native Kurrent adapter only after its separate contract freeze. Root owns docs,
-workflow/configuration/source joins/Git; coding workers own disjoint frozen files.
-Abstractions/backend/frontend changes are N/A for AC001: private startup proof
-keeps public schemas, engine operations and site values. Kurrent stage's precise
-paths are pending root freeze. Native transport is real and bounded; no doubles.
+## Verification and ownership
 
-Baseline is actual dbd01269 Bench37120639751 attempt1: RabbitMQ startup fails
-before native work, Kurrent1/3 post-run metadata fails and Kurrent2 setup fails.
-Original reports remain immutable. Pending/cancelled runs and development checks
-are not qualified results. Local tests/runtime are not used for this repair;
-canonical GitHub invocations follow root policy. Numeric coverage collector,
-full faults/endurance and complete TimeSeries family remain open.
+The owning slice is `BenchmarkComparisons`: current-job and diagnostic tooling in
+`scripts/Features/BenchmarkComparisons/`, real Node and unit regressions in
+`tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/`, native Kurrent cases in
+`tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/`, and the existing
+benchmark adapter/host and AppHost-owned topology. Root owns the workflow, shared
+source and evidence inventories, schema, documentation, final integration, and
+qualification joins. Tests must exercise production context and real native
+fixtures; source-name checks and fake executor or target behavior are not evidence.
 
-AC-NGR-002 stageA is frozen in ADR068: strengthen the existing genuine full-volume
-preflight oracle to exact original custom-metadata byte equality, using nonempty
-caller owner metadata and valid explicit tracing fields which pinnedSDK1.4.0
-preserves. Only the two canonical-volume fixture/helper files change; measured
-target data and every existing ownership/foreign/cleanup assertion remain. Empty
-caller tracing characterization and n2 routing stay pending. New source is not
-native qualification; all1/2/3 originals must join before this stage is proven.
+Qualification requires the canonical Release build, formatter and governance
+checks, the complete ordinary and scalar suites, process recovery, RF3, all native
+preflights and workloads, source/input immutability, current coverage/browser
+thresholds, final freshness checks, and actual provider receipts on the exact
+Linux source. A previously successful partial run, local development result,
+source review, or bounded diagnostic does not satisfy these gates. Keep ADR-068
+Accepted until its exact-source criteria pass.
 
-The source-stage receipt (report removed from repository)
-binds the integrated d500 prerequisite and reviewed files to the full Release,
-formatter and static governance checks. At source-stage delivery all nineteen policy cases and native
-metadata/readback/current-job transport behavior were GitHub-unqualified.
+## Original evidence references
 
-REQ-NGR-003 / AC-NGR-003D is the accepted bounded setup diagnostic stage in
-ADR068. Only a target-owned closed phase and at most4096-byte failure-only
-type/method stderr line are added before rethrowing the same caught exception.
-Pure genuine-thrown formatter tests map privacy/depth/chain/cancellation/bounds;
-the existing real1/2/3 preflight remains the native proof. No native errors are
-fabricated and no routing/retry/public result changes occur. Original setup
-callsite and full leader-routing qualification remain pending; an earlier
-verifier cleanup may still mask the original primary exception.
+These references identify retained original records. They describe their own
+source/run only; they do not establish qualification of the current source or
+current cohort.
 
-Original ca22 CI now proves nineteen policy-record cases passed, while its full
-CI gate failed; the exact receipt (report removed from repository)
-keeps normal/recovery/RF3 failures and skipped scalar explicit. Original f403
-Kurrent1/2/3 native preflights each passed one selected TUnit flow, with full
-metadata volume assertions on the existing path and observed native copies;
-the preflight receipt (report removed from repository)
-binds provider uploads, original ZIP/report/worker/teardown hashes. This does not
-qualify the new setup diagnostic, refresh exhaustion, routing cause, full270
-cohort, website publication or all fault/resource gates.
+| Original reference | Evidence retained |
+|---|---|
+| Source `dbd01269`, Benchmarks run `37120639751`, attempt 1 | Original RabbitMQ startup and Kurrent setup/post-run metadata failures. |
+| Original `ca22` CI and `f403` Kurrent preflight receipts | Policy-record and selected native one/two/three-node preflight records; the selected passes do not qualify later refresh, routing, full-cohort, or publication criteria. |
+| Original `ca7` CI/failure receipts and `3ae` CI receipt | Retained normal/scalar/recovery/RF3 outcomes and original failed/null workload evidence. Benchmarks run `37129421599` was cancelled before execution and supplies no measurements. |
+| Benchmarks run `37130907091`, attempt 1, job `111227060126`, source `7d9852` | Original Kurrent three-node setup failure; sealed source/run/upload/report/worker evidence SHA-256 `c50787a2279f9a8525df8794aaafa786e5a2cb2f7dd37bac623e36f524dd0a54`; verification receipt SHA-256 `f12f7c4f4e4fd068e6b78fb4c6d13aa77d0f12976f7c6fedc525a157a2d6f1cb`. |
+| Read-only K2R source analysis | Review SHA-256 `da2be25c51d66e5b242554ced508c58715732a94fc7ae74888b4439c8ed741de`; it found no proven routing cause or justified repair. |
+| Original `7d1196` Kurrent preflight and KeyLoad failures | Retained successor setup failure and native resource/ownership/fault observations. The KeyLoad source is `fabff69193f41c784f0b36b85c1f34d82fa9903d`; Benchmarks run `37166698745`; the OpenSearch VectorExact job is `111334162158`, with failed artifact `11291956733` (SHA-256 `1823f7fc876ad3b3a385056a8f75ab6bcd1de2cdb53bbef977a9e2d4313f5088`) and original qualification `11291373059` (SHA-256 `070fd453c92cf373666c3e993990f9e06bac07d111eac0795ebcdc03ed86d4d2`). The n1 delete observation retained 100,000 outbox entries and 192,581,709 bytes. These original observations do not prove a new passing cohort or website refresh. |
+| Original analysis records | [Pinned SDK source review](../../implementation/kurrent-sdk-routing-source-review.md); [exact delete source accounting](../../implementation/keyload-outbox-benchmark-source-review.md). These are explanatory source reviews, not workload or qualification evidence. |
 
-REQ-NGR-005 / AC-NGR-005 / TASK-NGR-E1 is the approved stageE private failure
-observation in ADR068: one bounded authenticated outbox-status read after an
-exact resource-failed case settles, only numeric redacted context, original
-case/timing/sample preservation. Pure classifier/typed formatter tests and
-actual native1/2/3 original runner/worker JSON form its trace. Source accounting
-is a hypothesis until real counters exist; no quota or retention policy change.
-
-The f403 failure receipt (report removed from repository)
-retains seven genuine failed jobs and the terminal cancellation after originals
-were preserved. The cohort never aggregated or published. OwnershipLost,
-UnknownWriteOutcome and ResourceExhausted remain failures with all original
-samples; outbox accounting and membership diagnostics are hypotheses until
-actual cause evidence joins.
-
-The ca7 CI receipt (report removed from repository)
-proves the two genuine same-instance native writer cases, five D1 formatter
-cases, and all67 RF3 cases, with194/194 recovery and118/118 unique analyzer
-cases. Normal is2573/2576 and scalar is skipped, so the whole CI fails. These
-selected successes do not qualify stageE observation or its native failure
-path, full SQL/protocol, FullTextSearch, complete comparison or publication.
-
-StageE source-stage receipt (report removed from repository)
-binds all seven source/test files to complete26-project Release/format/static
-checks and final independent review. At that delivery, thirteen new pure cases
-awaited GitHub execution; no native failure counters or acceleration were qualified. Initial
-270cell reports do not satisfy the additional mandatory100k/1m/5m dataset and
-at least100k measured-operation scale gates; those remain open.
-
-The ca7 failure receipt (report removed from repository)
-retains all eight actual failed KeyLoad cells across1/2/3nodes, with16 original
-ZIPs independently bound to source/run/attempt/job/upload/digest and exact reports,
-worker JSON and teardown. The126success/8failure/169cancelled/3skipped terminal
-job statuses do not qualify measurements. All270scenario jobs are96provider
-success/8failure/166cancelled; aggregation and site are cancelled. The n1 update/
-delete final preparation ResourceExhausted has no invented samples/timing; multi-
-node OwnershipLost/UnknownWriteOutcome retain every actual failed sample. Cause
-and numeric quota counters remain unproven. This source predates stageE observation.
-
-The 3ae original CI receipt (report removed from repository)
-now binds2637/2637 normal and2637/2637 scalar,194/194 process recovery,67/67 RF3
-and118/118 unique analyzer cases, with no nonpass cases. All thirteen stageE
-classifier/formatter cases pass in each mode. Root independently rehashed the
-provider ZIP digests, upload/job/source bindings and actual report/case bytes.
-This qualifies those pure diagnostic cases; native failed-case observation,
-numeric budget cause and the complete isolated cohort remain open. Automatic
-Benchmarks37129421599 cancelled all27 preflight and270 scenario jobs without
-steps, so it supplies no native measurement or website refresh. Later source
-changes and working-tree SQL BETWEEN are outside this exact3ae qualification.
-
-TASK-NGR-K2R / REQ-NGR-003 is read-only source diagnosis of the genuine7d9852
-KurrentDB3node preflight failure in Benchmarks37130907091/attempt1/job111227060126.
-Root independently verifies two original ZIPs and0/1 TUnit error; all five worker
-repetitions have null measurements and zero samples. First setup reports
-NoStreamSemantics/NotLeaderException; remaining repetitions record
-PreviousSetupFailure. Teardown retains primaryFailure=true and no failed stages.
-The source/run/upload/report/worker evidence is retained under seal
-c50787a2279f9a8525df8794aaafa786e5a2cb2f7dd37bac623e36f524dd0a54;
-root verification receiptf12f7c4f4e4fd068e6b78fb4c6d13aa77d0f12976f7c6fedc525a157a2d6f1cb.
-Bounded analysis worker reads the Kurrent client/setup/verifier/endpoint and
-Aspire topology paths, compares actual7d to current owned bytes, and returns
-precise causal evidence or an explicit uncertainty with candidate file ownership
-and real fault/test requirements. No implementation, retry/quorum/timeout change,
-package, runtime, Git mutation or provider control is authorized by this diagnostic task.
-Root owns the contract/review/qualification join before any repair. This failed
-native gate cannot qualify the complete cohort or website metrics.
-
-K2R source review is complete: eight inspected consumer/topology files match the
-failed revision; server logs show convergence near setup, but the sanitized
-original omits RPC status, selected destination and redirect details. Cause
-remains unknown, with no proven consumer or pinned-SDK defect. No implementation
-is justified by that packet. Root reviewed analysis SHA-256
-`da2be25c51d66e5b242554ced508c58715732a94fc7ae74888b4439c8ed741de`.
-The original7d985 receipt (report removed from repository)
-retains the green CI baseline and cancelled native cohort:26/27 preflight jobs
-have provider success, one genuine Kurrent setup failure;19/270 scenario jobs
-have provider success and251 are cancelled. These metadata counts do not prove
-complete case or measurement success. Nineteen cancelled jobs have failed result
-upload steps; no workload failure is inferred from upload failure. Full cohort,
-scale and website qualification remain open.
-
-The successor 7d1196 n2 preflight original (report removed from repository)
-also fails NoStreamSemantics with NotLeaderException and no measurements. Root
-independently verifies both original ZIPs; the repeated stage/type does not
-establish a shared cause. [Pinned SDK source review](../../implementation/kurrent-sdk-routing-source-review.md)
-confirms supported multi-seed settings and future-call route updates while the
-original failed append is surfaced. Selected destination/status/leader snapshot
-remain absent; no repair or replay is approved from this source review.
-
-The 7d1196 KeyLoad failure originals (report removed from repository)
-retain three later genuine failures from the same live run. The n1 delete's first
-four repetitions each complete10k operations; final preparation rejects with
-ResourceExhausted and the stageE SDK observation records100000 retained outbox
-entries and192581709 bytes. This reaches the exact default100000-record cap,
-below the1GiB byte cap. It qualifies that native numeric failure observation;
-fixture accounting, reclamation and a repair remain separate unresolved work.
-The n2 update completes its first10k operations, then four repetitions fail
-OwnershipLost before timed sample collection; warmup versus preparation and the
-underlying cause are absent. The n2 PointRead completes all50k
-samples, then its separate native fault check fails quorumAssertions. The harness
-erases the original exception and assigns receipt fields only after all SDK/MCP
-probes return: null/false defaults do not prove which probe failed or that MCP ran.
-Container restoration is observed, while logical fault recovery remains failed.
-Root independently verifies all six original ZIPs, provider/upload/source bindings,
-reports and raw case hashes. The live snapshot is bounded by its recorded time;
-later failures need fresh review. No new passing cohort, quota/retry change,
-required-scale result or website refresh is established.
-
-[Exact delete source accounting](../../implementation/keyload-outbox-benchmark-source-review.md)
-predicts95620 entries before fifth measured-input preparation and115620 for the
-unchanged complete fixture. The observed100000 count matches the guard; hidden
-ordinal and inner cause remain unexported. Server defaults have no current
-benchmark limit-injection seam. Any new setting requires a separate replicated
-resource/provenance/restart contract, not a change to stageE observation.
+The external job artifacts and sealed originals remain the source of truth for
+these records. Do not rewrite their bytes or treat their historical plan labels as
+current acceptance criteria.

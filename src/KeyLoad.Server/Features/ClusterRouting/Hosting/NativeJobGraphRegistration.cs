@@ -2,7 +2,6 @@ using KeyLoad.Orleans;
 using ManagedCode.Orleans.Graph;
 using ManagedCode.Orleans.Graph.Models;
 using Orleans.DurableJobs;
-using GraphConstants = ManagedCode.Orleans.Graph.Interfaces.Constants;
 
 namespace KeyLoad.Server;
 
@@ -19,7 +18,6 @@ internal static class NativeJobGraphRegistration
 
     internal static void Extend(IServiceCollection services)
     {
-        var nativeManager = ManagerType(services);
         var descriptor = services.Single(static value => !value.IsKeyedService
             && value.ServiceType == typeof(GrainTransitionManager));
         if (descriptor.ImplementationInstance is not GrainTransitionManager existing)
@@ -34,12 +32,12 @@ internal static class NativeJobGraphRegistration
                 graph.AddTransition(edge.Source, edge.Target, transition);
             }
         }
-        graph.AddTransition(nativeManager.FullName!, typeof(IRequestGrain).FullName!,
-            new GrainTransition(GraphConstants.AnyMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
         graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IRequestGrain).FullName!,
             new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IRequestGrain.ExecuteStreamAsync)));
-        graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IRequestGrain).FullName!,
-            new GrainTransition(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)));
+        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IRequestGrain).FullName!,
+            new GrainTransition(RuntimeJournalClient.ReadCoreCallerMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
+        graph.AddTransition(RuntimeJournalClient.CallerIdentity, typeof(IRequestGrain).FullName!,
+            new GrainTransition(RuntimeJournalClient.SendCommandCallerMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
         services.Remove(descriptor);
         services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }

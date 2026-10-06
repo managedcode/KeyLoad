@@ -15,7 +15,7 @@ internal sealed class SiteWebsiteExecutorAdmissionTests
     }
 
     [Test]
-    [Arguments(SiteIsolatedGitHubFields.LegacyCiIdentity)]
+    [Arguments(SiteIsolatedGitHubFields.ForeignExecutorIdentity)]
     [Arguments(SiteIsolatedGitHubFields.WrongWorkflowPathIdentity)]
     public async Task AcBcWeb006RejectsForeignExecutorAndKeepsHealthyFollowup(string identity)
     {

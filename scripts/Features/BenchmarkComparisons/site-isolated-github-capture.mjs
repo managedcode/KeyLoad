@@ -13,7 +13,6 @@ import { flattenSiteRuns, listSiteProducers, selectLatestSiteProducer, selectSit
   validateSiteRun, validateSiteWorkflow } from './site-isolated-github-runs.mjs';
 import { proveSiteIsolatedEvidence } from './site-isolated-github-proof.mjs';
 import { siteMetadataFiles } from './site-isolated-github-files.mjs';
-import { captureHistoricalContract } from './historical-site-evidence.mjs';
 
 async function captureSelectionRuns(directory, context, workflow) {
   if (context.requestedRun !== null) {
@@ -100,9 +99,6 @@ async function capture({ environment = process.env, args = process.argv.slice(3)
     requireSite(Buffer.byteLength(`${JSON.stringify(receipt, null, 2)}\n`) <= SITE_GH.jsonBytes);
     await writeJson(path.join(input, SITE_GH.metadataProof), receipt);
     return receipt;
-  }
-  if (SITE_GH.legacySources.includes(selected.run.head_sha)) {
-    await captureHistoricalContract(path.join(input, SITE_GH.metadata), context, selected.run.head_sha);
   }
   const receipt = await proveSiteIsolatedEvidence({ input, selection: selected, source: context.source, mode: context.mode });
   if (download) {

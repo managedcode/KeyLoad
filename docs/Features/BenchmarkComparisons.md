@@ -1235,192 +1235,55 @@ producer/engine work, never commit/push, and stop on contract ambiguity. Join on
 after each owned artifact is reviewed. No new database topology, measurement,
 dependency, DNS or release work.
 
-TASK-WEB-002's selection regression recognizes the exact successful historical
-aggregate step sequence on an unsupported source as unavailable for optional
-publication. It authenticates the original run/job and every required step;
-malformed inventories, failed required steps and invalid repository identities
-remain errors. It never admits that source's metrics or adds its revision to the
-historical allowlist. SiteUnsupportedProducerSelectionTests maps this real Node
-selection/rejection/healthy follow-up flow and the actual GitHub optional-capture
-child to AC-BC-WEB-002. Source review is not native site or publication evidence.
-
-The observed native producer generation at
-`c16a1d928d7d6941db74403e47f3dbcea206d86a` has five ordered owned steps:
-`Verify benchmark plan`, `Download benchmark results`,
-`Check all 270 benchmark results`, `Save combined benchmark results`, and
-`Save GitHub result verification`. Its completed successful native wrappers are
-exactly `Set up job`, `Download source code` before those steps, then
-`Post Download source code`, `Complete job`. Authenticate the original run,
-attempt, repository, branch, source, URL and successful aggregate job before
-classifying this exact generation as unavailable. Original run37371251640
-has a failed whole workflow and successful aggregate job112020779863; it
-supplies no admitted archives or metrics. This source is not a historical
-measurement allowlist entry. Unknown sources, failed or malformed owned/native
-steps, changed order, duplicate aggregate jobs and authentication/provider errors
-remain errors. The operation regressions must preserve the rejected input bytes,
-restore their owned controlled copies, and prove a healthy selection of the exact
-current run after each negative input. Unknown-source controls must change all
-three original summary/run/job identities consistently before the real Node
-operation; a mismatched identity rejection does not prove unknown-generation
-classification. Root maps these cases to REQ/AC-BC-WEB-002 before integration.
-
-Baseline: Pages settings are valid; original run37349838172 has217/270 worker
-artifacts and failed aggregation. Existing website capture fails before checkout
-on this unavailable producer; this cannot be converted to authenticated metrics.
-Current checkout includes concurrent active implementation and unverified build
-changes, preserved outside this repair. Verify static syntax/governance and
-source/diff first, then final canonical build/format and Aspire-owned relevant
-TUnit suites. Genuine Linux full applicable qualification and successful provider
-deployment remain required before claiming publication restored.
+TASK-WEB-002 uses the current authenticated producer workflow and exact source
+contract. Known unsupported sources become unavailable before reading their jobs
+or archives; unknown or malformed metadata remains an error. Current
+SiteUnsupportedProducerSelectionTests exercise the real optional capture,
+unchanged controlled inputs and healthy newest-ready selection under
+AC-BC-WEB-002. Original external run/artifact provenance remains immutable;
+previous producer formats are not executable publication inputs.
 
 ### Standalone Website acceptance, owner correction 2026-10-06
 
 REQ-BC-WEB-006 / AC-BC-WEB-006: expose Build and Tests, Benchmarks, Website and
 Release. Build and Tests runs the complete solution build and every existing
-ordinary/analyzer/scalar/recovery/Aspire RF3 test gate with no website jobs or
-Benchmarks completion trigger. Website alone runs the existing qualified site
-build/deployment on trusted main push/manual, including the final Benchmarks
-dispatch, with no dependency on Build and Tests or successful benchmarks.
-Optional metrics, rejection of invalid selected evidence and the no-data path
-remain AC-BC-WEB-001..005. Native executor authentication must accept only Website
-at `.github/workflows/website.yml` and reject the former CI executor.
+ordinary/analyzer/scalar/recovery/Aspire RF3 test gate. Website runs its qualified
+site build/deployment on trusted main push/manual, with independent source
+publication. Benchmarks has a final dispatch-only job as specified below.
+Optional metrics, strict selected-evidence rejection and the no-data path remain
+AC-BC-WEB-001..005. Native executor authentication admits only Website at
+`.github/workflows/website.yml` with the permitted event and job identity.
 
-Tests: actual TUnit native Node context operations assert accepted/rejected
-executor identity and preserved context; static actionlint and parsed YAML graph
-review validate delivery infrastructure without treating source-text tests as
-runtime behaviour. Genuine standalone GitHub run and Pages deployment are the
-required provider evidence. TASK-WEB-SEPARATE-001..005 and exact file ownership,
-ordered joins, rollout/rollback and checks are in ADR-112. Out of scope: engine,
-benchmark workloads, packages, product Release and DNS. Baseline: screenshot run
-37464086450 failed website qualification in the combined CI graph; current shared
-checkout contains unrelated uncommitted implementation. Preserve it and report
-its build failures separately. Quality skills retain dotnet format, unchanged
-SDK/owned analyzers and thresholds; CSharpier/third-party additions are N/A,
-CRAP is unmeasured without current functional coverage.
+The mandatory Aspire-owned SiteOptionalBenchmarkSelectionTests preparation gate
+has seven complete operation cases: push/manual admission; unsupported event,
+Build and Tests executor, foreign path and unsupported job rejection; strict
+optional arguments. It checks immutable inputs and successful healthy follow-up.
+The current SiteTests also exercise authenticated capture, unavailable producer
+classification, newest-ready selection, source freshness and complete archives.
+These pipeline metadata cases remain in the measured qualification group with
+its complete source/critical90 inventory.
 
-TASK-WEB-SEPARATE-002 also repairs the observed optional selector blocker from
-original Website baseline run37464086450. Authenticated Benchmarks run37328642737
-(source `ce2eace916b3660a4c7fe2976a012637600c3b28`) has successful aggregate
-job111915038450 with the same exact five owned steps and four successful native
-wrappers frozen above for the unsupported c16 generation. Add this exact source
-to that unavailable-generation contract; it supplies no admitted metrics and is
-not a historical measurement allowlist entry. Keep unknown sources, changed
-steps/wrappers, malformed identity and invalid selected archives rejected.
-REQ/AC-BC-WEB-002 maps to real retained-metadata selection/rejection and healthy
-follow-up TUnit cases, plus native optional capture in the standalone Website run.
+The current Website executed dependency closure contains exactly 80 regular
+source paths. The producer-only scaled-cohort-aggregate-cli.mjs remains owned by
+Benchmarks and is outside that executed closure. Validate the sorted unique
+manifest, actual imports and exact source bytes/hashes in both measured and
+content-only modes. Preserve every authored source and the native80/70/90
+thresholds; a manifest change cannot waive an executed source or coverage gate.
 
-Authenticated API review found the same complete old-format generation at these
-additional source-bound producer/job identities. They share the exact frozen
-five owned steps and four completed-success native wrappers; each is unavailable
-for the current website rather than a newly admitted measurement source.
+The closed SiteContent group retains its eight executed sources and five cases.
+Its actual browser flow checks desktop/mobile viewports, lazy scene navigation,
+menu opening and link/viewport closure, denied clipboard-write fallback and
+rejection of the protected site source as output. It checks the complete manifest
+for its actual mode. No clipboard substitution or receipt exclusion is allowed.
 
-| Producer | Aggregate job | Original source |
-|---|---|---|
-| 37261761162/1 | 111661187694 | fb586bfcf05c18e79f892c5ecaf5c1092811aaf8 |
-| 37303831415/1 | 111789704230 | 55fb4e3704bd30b5e57b8173953e6e017c0f8333 |
-| 37292025104/1 | 111747139519 | 1e8833c027cf232e35fe012cd3eed41c61a17f89 |
-| 37257873745/1 | 111632167471 | a3136fb90f7cbaaad8935fdc04984372167e6d4c |
-| 37249197758/1 | 111604106769 | f8b3ba68da2f28660da1a36db396882ba2f72b7d |
-| 37242346637/1 | 111579241125 | 5fa61f27a34b5c573579fca3a84b8e5201dbd82e |
-| 37232926362/1 | 111546308960 | 3985008b0d360dd7e1bd9d26aae572e5e6368128 |
-| 37224468826/1 | 111525368980 | 37a9da0394b7219b4fa05edd21ee41ec614e604f |
-| 37215426617/1 | 111499247110 | bb16152827b38dc4533a1d7830e664b4ecd11267 |
-| 37206566979/1 | 111478923031 | 377886f35928866f083806062b446056d64539e3 |
-| 37192832037/1 | 111425227628 | 873cd1a36ad14ab966065c924c71a292ea681083 |
-
-The additional native producer audits retain run37179484718/job111384783112
-(source0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3) and
-run37166698745/job111347065594 (sourcefabff69193f41c784f0b36b85c1f34d82fa9903d)
-as exact metadata fixtures. Their seven original aggregate steps authenticate
-unavailability; changed source or step contracts reject. The preparation gate
-now owns30 cases in `SiteOptionalBenchmarkSelectionTests`, with executable
-JavaScript helpers in `Processes/SiteOptionalBenchmarkSelectionNodeProgram.cs`,
-`SiteWebsiteAdmissionNodeProgram.cs` and `SiteHistoricalEligibilityNodeProgram.cs`.
-These controlled parser inputs do not claim provider capture or measured evidence.
-
-Automatic publication requires the complete current composite cohort and all
-existing archive/provenance gates. Frozen historical intensive microbenchmark
-sources remain validation-only under QualifySite/BuildIsolatedSite's existing
-no-historical-publication-fallback rule; authenticate their original run/job and
-exact source-bound aggregate steps before classifying them unavailable to live
-Website metrics. They do not supply the active 100k/1m dataset and minimum100k
-operation contract. Historical pins and incomplete-run overrides remain
-validation-only. An older ready current-composite revision remains eligible and
-distinct from current website/database source; it is never proof of current
-database qualification. If no compatible ready producer exists, use the complete
-content-only route. Unknown/malformed evidence and provider errors still reject.
-
-Local Aspire content-only execution exposed an existing before-session failure:
-`The authored production JavaScript inventory differs from the frozen site and
-evidence-tool sets.` No content test executed; the resulting 13 failures are
-startup failures, not behavioural test results. TASK-WEB-SEPARATE-005 must repair
-the mode-aware inventory validation without excluding authored sources or lowering
-coverage thresholds, then repeat the complete content-only entry. This maps to
-AC-BC-WEB-005 and precedes any deployment claim.
-
-The inventory root cause is the `scaled-cohort-` prefix including the producer-only
-`scaled-cohort-aggregate-cli.mjs` entry. That standalone Benchmarks CLI is absent
-from the actual 84-file Website executed dependency closure and never executes
-in Website. Exclude only that exact entry from website evidence-module discovery;
-retain its producer ownership, all actual website imports, the complete closed
-feature/evidence inventories and existing 80/70/90 thresholds. Both measured and
-content-only source inventory validation use this corrected ownership boundary.
-Full content-suite startup and actual manifest/coverage receipts are the regression
-proof for this existing setup failure; source review alone is not a pass.
-
-AC-BC-WEB-003/005's complete no-data browser flow also verifies real native menu
-opening, link/viewport-change closure and denied clipboard-write fallback. It
-does not substitute clipboard APIs or write the user's clipboard. Explicit
-desktop/mobile viewports keep poster assertions independent of Chrome defaults;
-the lazy scene request is required after hero navigation rather than before it.
-The unsafe-output case targets the actual protected `site/` source directory.
-The content browser checks the complete manifest for the current session mode so
-the same cases can participate in both content-only and full measured suites.
-SiteWebsiteExecutorAdmissionTests and SiteUnavailableProducerGenerationTests are
-pipeline metadata cases in the full measured qualification group, alongside the
-existing native provenance cases and their complete source/critical90 inventory.
-They do not belong to the closed `SiteContent*` artifact/browser group, which
-retains its original eight executed sources and all five original cases. No native
-receipt is ignored and no threshold is reduced. Both groups remain in the full
-measured suite. Extend the mandatory Aspire-owned SiteOptionalBenchmarkSelectionTests
-with actual native Website admission and CI/wrong-path rejection cases, including
-unchanged inputs and a healthy follow-up. These run on every Website, with or
-without metrics, alongside optional ready/absent selection. Genuine provider
-admission and freshness remain mandatory in both modes.
-
-Development verification of the joined standalone source: final canonical Release
-solution build passed with zero warnings/errors; the actual Aspire-owned unit
-selection/admission gate passed21/21 and closed content artifact/browser gate
-passed5/5 with native line93/branch78, builder critical96 and bootstrap critical92.
-No skips or reduced thresholds. Scoped SiteTests/unit-change format, workflow
-syntax/graph, governance and diff checks passed. The shared canonical format check
-still reports unrelated BackupRestore `AtomicPartitionRosterFixture.cs:134`
-whitespace. Linux delivered-source qualification and Pages remain pending; these
-local development receipts are not provider or current database qualification.
-
-First standalone source `6c20cf4f` run37480759611 confirmed the independent
-Website graph but failed optional capture at another original old-generation
-successful aggregate: run37261761162/1 (#82), job111661187694, sourcefb586bfc.
-Its original retained steps/wrappers match the same exact unsupported contract.
-Extend only the source-bound generation inventory and preserve the original
-metadata as a native selection regression. Audit the remaining original producer
-inventory before the next publication attempt; no provider pass is claimed.
-
-The authenticated audit is complete through the first compatible legacy cohort
-run37184989107/1 (#53), source73aebfd3f72695357834599e813aba77b9e274ad.
-The thirteen exact unavailable source generations above and in the earlier c16/ce2
-contracts retain identical successful owned/native steps. Skipped jobs without
-steps and cancelled runs do not become unavailable-generation pins. The compatible
-cohort remains subject to original archive, source, provenance and freshness
-qualification; API artifact availability alone does not qualify publication.
-
-Standalone sourcef2dd44e5 run37482351429 successfully captured the compatible
-original cohort and its archives. Its source/tool gate then rejected the unchanged
-84-entry dependency closure because the composite still required83 entries.
-Align that exact frozen count with the existing complete manifest, retaining byte
-comparison, sorted uniqueness, regular-path and per-file hash checks. This is a
-static workflow contract repair under AC-BC-WEB-004/005; no file or coverage source
-is removed and no provider pass is claimed until the next genuine run succeeds.
+Tests use real TUnit/Node/Chrome operations. Infrastructure review uses parsed
+YAML and actionlint without presenting source-text assertions as behavior.
+Current Linux site qualification and a genuine standalone Website/Pages provider
+run are required for publication closure. Earlier source-local passes do not
+qualify the changed inventory. TASK-WEB-SEPARATE-001..005, ownership and ordered
+joins are in ADR-112. Engine workloads, package changes, DNS and product Release
+are outside this Website change. Numeric product coverage/CRAP remains unmeasured
+until eligible current functional coverage exists.
 
 ### Final Benchmarks trigger, owner clarification 2026-10-06
 
@@ -1447,58 +1310,59 @@ ownership are in ADR-112 TASK-WEB-TRIGGER-001..003.
 ### Current Website capture source closure
 
 TASK-CURRENT-WEBSITE-EVENT-071 implements REQ/AC-BC-WEB-001/002/004/006/007 and
-AC-BC-FAIL-019 using only trusted push/manual executor admission, bounded
-authenticated optional-run waiting and current REST producer selection. Capture
-has no event-file input or event-payload parser/probe; remove their exclusive
-fixtures and cap. REST workflow_runs paging and artifact.workflow_run provenance
-remain separate mandatory authority checks, including rejection of unsupported
-producer-list events. No API/archive/request bound or coverage threshold changes.
+AC-BC-FAIL-019. The current capture admits trusted push/manual executors, performs
+bounded authenticated optional-run waiting, and selects producers through the
+current REST API. REST workflow_runs paging and artifact.workflow_run provenance
+remain mandatory authority checks, including unsupported producer-list event
+rejection. Capture has no executor event-file input. All API/archive/request
+bounds and coverage thresholds retain their original values.
 
-The source packet owns site-isolated-github-context.mjs, the parser-only cap in
+Current ownership is site-isolated-github-context.mjs and
 site-isolated-github-contract.mjs, SiteIsolatedGitHubNodeProgram and its fields,
-Website executor cases, and producer-selection cases/fixtures. Keep the two
-latest-selection whole flows under current AC-BC-WEB-002 ownership; keep actual
-authenticated AcPipe003 capture, no mutation and healthy follow-up, exact-source
-freshness, full source inventories and native Node/Chrome coverage. Root owns
-policy/docs, shared source closure, joins, canonical gates and Git. Preparation
-must account for the separately reviewed current archive-source packet before
-joining overlapping files; source review is not Linux or Pages evidence.
+Website executor cases, producer selection cases/fixtures and the six whole-flow
+latest-producer cases. Authenticated AcPipe003 capture, immutable inputs, healthy
+follow-up, exact-source freshness, complete source inventories and real Node/Chrome
+coverage remain required. Source integration and local development are distinct
+from exact-source Linux and actual provider qualification.
 
 ### Current archive consumer closure
 
 TASK-CURRENT-ARCHIVE-IMPLEMENTATION-070-CONSUMERS implements
 REQ/AC-BC-CURRENT-001..004 and REQ/AC-BC-WEB-002/004/006/007 alongside
-TASK-CURRENT-WEBSITE-EVENT-071. The current dependency manifest contains exactly
-80 source paths. QualifySite/action.yml must validate that exact current list and
-remove the deleted historical-contract path from its closed allowlist; preserve
-all remaining regular-path, byte/hash, archive, source, coverage and freshness
-checks. Root alone joins the composite-action change.
+TASK-CURRENT-WEBSITE-EVENT-071. QualifySite/action.yml validates the exact current
+80-path dependency manifest. Regular-path, byte/hash, archive, source, coverage
+and freshness checks remain strict. Current readers admit only the
+1,386-worker/2,530-input contract and its native schema; unsupported sources are
+classified before jobs/archive reads and cannot supply live metrics.
 
-Keep SiteOptionalBenchmarkSelectionTests as the mandatory Aspire-owned native
-Website preparation gate. Its Cases and Processes own complete push/manual
-admission, CI/foreign-path/unsupported-executor rejection, unchanged controlled
-inputs, healthy follow-up and strict optional-argument flows using the production
-context API. Delete HistoricalBenchmarkContractTests,
-SiteHistoricalEligibilityNodeProgram, SiteOptionalBenchmarkSelectionTokens and
-their eleven SiteOptionalRetained JSON metadata fixtures. They are exclusive
-old-plan code inputs, not immutable original measurement artifacts. Current
-authenticated producer capture, optional unavailability, newest-ready selection,
-strict selected-evidence rejection and healthy follow-up remain owned by the
-current SiteTests under AC-BC-WEB-002 and AC-BC-FAIL-019/020.
+SiteOptionalBenchmarkSelectionTests is the mandatory Aspire-owned native Website
+preparation gate for the seven current executor/argument flows defined above.
+Its Cases and Processes use the actual production context API. Current
+SiteTests retain authenticated capture, optional unavailability, newest-ready
+selection, strict selected-evidence rejection, unchanged inputs and healthy
+follow-up under AC-BC-WEB-002 and AC-BC-FAIL-019/020. SiteIsolatedInventory and all
+actual callers use current no-argument inventory functions; source authentication
+remains separately enforced.
 
-The exact unit modifications are Cases/SiteOptionalBenchmarkSelectionTests.cs
-and Processes/SiteOptionalBenchmarkSelectionNodeProgram.cs,
-SiteOptionalBenchmarkSelectionNodeProcess.cs and SiteWebsiteAdmissionNodeProgram.cs
-under Features/BenchmarkComparisons. Remove the unused fixture-directory
-argument. SiteIsolatedInventory and its real SiteTests callers must use current
-no-argument inventory functions; delete its unused Files helper. Do not retain
-ignored source/revision parameters as compatibility shims. Preserve the current
-1,386-worker/2,530-input contract and separate source authentication.
+Root owns shared source/coverage inventories, canonical build and formatter,
+Aspire unit/SiteTests, Linux/provider evidence and Git delivery. Run full ordinary
+unit tests separately from eligible functional coverage. Every original required
+qualification gate remains open until its original evidence exists; removed
+source and a passing local build do not establish publication qualification.
 
-Read the owning policies before preparation. Coding agents prepare only guarded
-private packets; root owns docs/policy, serialized joins, exact coverage/source
-inventories, canonical build/format, Aspire unit/SiteTests and Git. Join the
-archive packet before the dependent event packet, verify every live base hash,
-then run the full ordinary unit suite separately from functional coverage.
-Required exact-source Linux website/browser/provider gates remain open until
-their original evidence exists. Deletion is not a passing qualification result.
+### Current SampleChunk consumer source inventory
+
+TASK-CURRENT-SAMPLE-CHUNK-INVENTORY-REPAIR implements AC-CHUNK-006 under the
+existing source-bound consumer and ADR-033 verification contract. The owning
+sample-chunk-development-inventory.mjs derives a bounded current filesystem
+snapshot from validated Git paths: omit only absent paths reported by ENOENT,
+reject symlink parents and unsafe/nonregular present files, and retain exact
+per-file/total bounds, hashes and unchanged before/after source and Release
+inventories. A path disappearing during hashing still fails. No retired-path
+allowlist or ignored non-ENOENT failure is permitted.
+
+The existing SampleChunkBenchmarkConsumerTests regression executes the actual
+Node-to-BDN consumer, validates all 36 case identities and reports, and performs
+its mutation rejection oracle. Root joins the source-reviewed proposal and runs
+that gate through the unified Aspire entry; neither source review nor a build
+establishes consumer execution or comparative performance qualification.

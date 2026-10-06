@@ -23,12 +23,12 @@
     "status": "in_progress",
     "feature": "docs/Features/ClusterRouting/ExecutionPrimitives.md",
     "decision": "docs/ADR/ADR-110-native-orleans-execution-primitives.md",
-    "sourceStage": "due_apply_wake_native_telemetry_rf3_journaling_native_saga_jobs_and_runtime_reclaim_regression_source_joined_unqualified",
+    "sourceStage": "native_runtime_journal_exact_provider_caller_and_default_deny_graph_edges_joined_real_operation_regressions_passed_local_global_gates_open",
     "runtimeAdoption": "docs/Features/ClusterRouting/RuntimeAdoption.md",
     "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
     "restorePassed": true,
     "canonicalBuildPassed": true,
-    "verificationStage": "R107_current_source_build_format_cold_diagnostic1_and_ClusterRouting218_passed_native_saga4_of5_failed_background_journal_Graph_attribution_full_unit_and_Linux_qualification_pending",
+    "verificationStage": "R110_full_current_build_and_native_format_passed_R109_journal1_Saga5_ClusterRouting219_R110_Website_preparation7_content5_passed_full_unit_and_Linux_gates_open",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -44,7 +44,67 @@
       "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
     ],
     "canonicalFormatterPassed": true,
-    "localDevelopmentReceipt": "R107 full Release build and native formatter passed with4,101 compile inputs and zero source drift/warnings/errors. Actual fresh-process Aspire diagnostic1/1 and ClusterRouting218/218 passed; native saga4/5 retains the same Graph rejection during background journal recovery. Original focused TRX/source/assembly receipts retain zero skips/drift. R106 document mutations2/2, replica persistence8/8 and reader capability2/2 passed. Prior full R104 unit4023/4044 with21 failures remains red; complete current unfiltered rerun pending. R104 performance-child coverage is ineligible; current focused functional binaries are partial only. Full functional coverage/CRAP and Linux delivery remain open."
+    "localDevelopmentReceipt": "R110 current full Release build and native formatter passed with4,100 compile inputs, zero drift/warnings/errors; the only change after R109 functional proofs is imports ordering. R109 actual Aspire journal caller1/1, native Saga5/5 and ClusterRouting219/219 passed unchanged source/images. R110 actual Aspire Website preparation7/7 and content5/5 passed with4,151 source/192 assembly inputs unchanged. Complete ordinary/scalar/recovery/RF3, functional product coverage and exact-source Linux gates remain open.",
+    "currentProviderCallerRepair": {
+      "task": "TASK-ORL-JOURNAL-GRAPH-014",
+      "feature": "docs/Features/ClusterRouting/RuntimeJournal.md",
+      "scope": "native_RunWithCurrentCallerAsync_complete_CQRS_drain_exact_ReadCoreAsync_SendCommandAsync_graph_edges_default_deny",
+      "build": {
+        "passed": true,
+        "warnings": 0,
+        "errors": 0,
+        "compileInputs": 4100,
+        "inputDrift": 0,
+        "logSha256": "cb58828b7add771aa102a91881ef221d3709d5f2fdbb1380a7cf2889ed225501"
+      },
+      "localAspire": {
+        "journalCaller": {
+          "passed": 1,
+          "total": 1,
+          "trxSha256": "b0b33dfd88e1747ef44200637fbb9188a7d96cda548cf178abf0c683c60b62cb"
+        },
+        "nativeSaga": {
+          "passed": 5,
+          "total": 5,
+          "trxSha256": "8be76846caf484ba84ce604efed0d80f3710619aeb8461a96e6bb3a030c33f45"
+        },
+        "clusterRouting": {
+          "passed": 219,
+          "total": 219,
+          "trxSha256": "2b74a0298b1d0a6992c61105087c3bdaa54e9df3eab7003c5ddedc5c7b55f92a"
+        },
+        "sourceInputs": 4151,
+        "assemblyInputs": 190,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "skipped": 0
+      },
+      "qualification": "local_actual_operation_regressions_only_global_and_Linux_gates_open",
+      "runtimeQualified": false,
+      "currentBuild": {
+        "passed": true,
+        "compileInputs": 4100,
+        "sourceDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "logSha256": "ba7bc7a25f8e3daf44a9a6b55730f1fc0cf4da1908c65dd5e3a40ed6f2309127"
+      },
+      "currentFormatter": {
+        "passed": true,
+        "compileInputs": 4100,
+        "sourceDrift": 0,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "postFunctionalSourceChange": "imports_order_only_before_R110_current_full_suite_qualification"
+    },
+    "currentAdrSourceReview": {
+      "documents": 111,
+      "mermaidInputs": 116,
+      "originalNativeRenderVerified": true,
+      "mode": "exact_render_inputs_and_original_SVG_hashes_rebound_to_current_ADR_texts_not_new_render",
+      "bindingSha256": "c5171736c979c368ebc27b4299b7bcb261ed10c50ce7f5e9038d8c0962971618",
+      "qualification": "documentation_only_not_runtime_acceptance"
+    }
   },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",
@@ -757,7 +817,7 @@
       },
       "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "remaining": [
-        "complete_exact_source_Linux_Docker_Aspire_RF3_gate"
+        "exact_owned_source_Linux_normal_and_scalar18_case_parity_and_ADR005_recovery_open_existing_store_evidence"
       ],
       "earlierDeliveredSource": {
         "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
@@ -769,6 +829,42 @@
         "overallConclusion": "failure",
         "newNodeStageQualified": false,
         "originalReportsReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
+      },
+      "currentScalarDevelopment": {
+        "passed": 18,
+        "total": 18,
+        "skipped": 0,
+        "trxSha256": "dcc3820613e7ed8a27e50a070948f6910dc1603c1abf65568fa73637f5fdc684",
+        "sourceInputs": 4152,
+        "assemblyInputs": 190,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "qualification": "local_Aspire_scalar_development_only_Linux_task_acceptance_open"
+      },
+      "taskAcceptance": {
+        "requirements": [
+          "REQ-KEYCODEC-001",
+          "REQ-KEYCODEC-002",
+          "REQ-KEYCODEC-003",
+          "REQ-KEYCODEC-004"
+        ],
+        "criteria": [
+          "AC-KEYCODEC-001",
+          "AC-KEYCODEC-002",
+          "AC-KEYCODEC-003",
+          "AC-KEYCODEC-004"
+        ],
+        "mappedCaseCount": 18,
+        "ownedSourceClosureFiles": 33,
+        "ownedSourceClosureSha256": "428c81c5ba3db5f08bc79630fe18816fdc6d417ce12ecb89546d68579e327563",
+        "unrelatedSuiteFailuresCannotBeRelabelled": true,
+        "separateProductGates": [
+          "complete_storage_RF3",
+          "endurance",
+          "power_loss",
+          "measured_acceleration"
+        ],
+        "qualified": false
       }
     }
   },
@@ -5223,6 +5319,50 @@
             "publicationSha256": "7637a00e70384b7cdfba1ad24cae9d98af8537b5c22028bd4111a7129152904a"
           },
           "qualificationScope": "content_and_website_pipeline_only; complete_current_measured_cohort_and_global_database_acceptance_remain_pending"
+        },
+        "currentSourceClosure": {
+          "tasks": [
+            "TASK-CURRENT-ARCHIVE-IMPLEMENTATION-070-CONSUMERS",
+            "TASK-CURRENT-WEBSITE-EVENT-071"
+          ],
+          "implementation": "current_only_readers_and_inventory_joined_build_format_Website_preparation_and_content_development_passed_measured_and_Linux_provider_gates_open",
+          "dependencyPaths": 80,
+          "workers": 1386,
+          "inputFiles": 2530,
+          "suiteFiles": 2470,
+          "providerFiles": 60,
+          "mandatoryPreparationCases": 7,
+          "latestProducerCases": 6,
+          "executorEvents": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "nativeRestProvenancePreserved": true,
+          "coverageThresholdsUnchanged": true,
+          "runtimeQualified": false,
+          "publicationQualified": false,
+          "localAspirePreparation": {
+            "passed": 7,
+            "total": 7,
+            "skipped": 0,
+            "trxSha256": "2a5052ad491b19184fdd6038b921d1fc328691f6f26b428f408206f8d6da163d",
+            "sourceDrift": 0,
+            "assemblyDrift": 0
+          },
+          "localAspireContent": {
+            "passed": 5,
+            "total": 5,
+            "skipped": 0,
+            "trxSha256": "dd856169635fe8139317c861d843fac945a040256362a4895984df0c8722f762",
+            "coverageSha256": "1c645c5653c7091159bd34e2b00893b429fedf5d9f6e0c2791798a4d9576b4d3",
+            "linePercent": 93,
+            "branchPercent": 78,
+            "criticalBuilderPercent": 96,
+            "criticalBootstrapPercent": 92,
+            "sourceDrift": 0,
+            "assemblyDrift": 0,
+            "qualification": "local_content_only_real_Node_Chrome_not_measured_Linux_or_Pages_qualification"
+          }
         }
       },
       "currentProducerContract": {

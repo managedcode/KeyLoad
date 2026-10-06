@@ -4,9 +4,6 @@ import { isolatedEvidenceJobName, matchesIsolatedJobName } from './isolated-gith
 import { validateScaledPlan } from './scaled-isolated-plan.mjs';
 import { validateVectorPlan } from './vector-isolated-plan.mjs';
 import { validateScaleResourceProof } from './server-resource-evidence.mjs';
-import { SITE_GH } from './site-isolated-github-contract.mjs';
-import { validateHistoricalProof } from './historical-site-evidence.mjs';
-import { validateHistoricalPlan } from './historical-isolated-plan.mjs';
 
 const ERROR = AGGREGATE.errors.proof;
 const ARTIFACT_PREFIX = 'comparison-worker-';
@@ -36,11 +33,6 @@ function validateArtifact(artifact, cell, identities) {
 
 export function validateAggregateProof(value, plan) {
   const contract = readIsolatedContract();
-  const historical = SITE_GH.legacySources.includes(value?.cohort?.sourceRevision);
-  if (historical) {
-    const canonical = validateHistoricalPlan(plan, value.cohort.sourceRevision);
-    return validateHistoricalProof(value, canonical, value.cohort);
-  }
   const canonical = plan?.profile === contract.profile ? validateIsolatedPlan(plan, contract)
     : plan?.profile?.startsWith('vector-') ? validateVectorPlan(plan, contract) : validateScaledPlan(plan, contract);
   requireValue(canonical.profile === plan.profile, ERROR);

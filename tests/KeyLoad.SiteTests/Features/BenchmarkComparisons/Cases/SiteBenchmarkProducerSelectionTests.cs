@@ -125,8 +125,6 @@ internal sealed class SiteBenchmarkProducerSelectionTests
             mode = SiteIsolatedGitHubTokens.Publish,
             requestedRun = (string?)null,
             producer,
-            // Only parser revalidation of the original integrated archive admits its retained in-progress metadata.
-            legacyArchive = true,
             source = new
             {
                 website = source[SiteIsolatedGitHubTokens.Website]!.GetValue<string>(),
@@ -155,7 +153,7 @@ internal sealed class SiteBenchmarkProducerSelectionTests
     private static Task<JsonElement> SelectAsync(SiteIsolatedGitHubScope scope, string mode,
         string? requestedRun, object? producer, CancellationToken token) => SiteIsolatedGitHubScope.RunAsync(
         SiteIsolatedGitHubFields.SelectionOperation,
-        new { input = scope.Capture, mode, requestedRun, producer, legacyArchive = true }, token);
+        new { input = scope.Capture, mode, requestedRun, producer }, token);
 
     private static async Task AssertRejectedAsync(SiteIsolatedGitHubScope scope, string mode,
         string? requestedRun, object? producer, CancellationToken token)

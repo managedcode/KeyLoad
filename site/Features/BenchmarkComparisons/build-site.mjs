@@ -15,7 +15,7 @@ export const BUILD = Object.freeze({
   measuredAssets: ['isolated-contracts.mjs', 'isolated-metadata.mjs', 'isolated-metrics-validation.mjs',
     'isolated-report-validation.mjs', 'isolated-http.mjs', 'isolated-loader.mjs', 'isolated-measurements.mjs',
     'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'measurements.mjs', 'measurement-loader.mjs',
-    'composite-render.mjs', 'historical-contracts.mjs'],
+    'composite-render.mjs'],
   commonAssets: ['contracts.mjs', 'bootstrap.mjs', 'cluster-scene.mjs', 'scene-geometry.mjs',
     'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css',
     'assets/cluster-poster.svg', 'assets/cluster-poster-mobile.svg'],

@@ -28,7 +28,7 @@ internal sealed class SiteIsolatedGitHubIntegrityScope : IAsyncDisposable
                 new { input = inputs.Capture, output = capture }, token);
             if (!result.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean() ||
                 result.GetProperty(SiteIsolatedGitHubFields.Result).GetProperty(SiteIsolatedGitHubTokens.FileCountField).GetInt32() !=
-                    SiteIsolatedInventory.Files(inputs.Metadata))
+                    SiteIsolatedGitHubTokens.FileCount)
             {
                 throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
             }

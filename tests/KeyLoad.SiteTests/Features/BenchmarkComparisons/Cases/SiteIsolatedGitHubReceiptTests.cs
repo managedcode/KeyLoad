@@ -12,7 +12,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var result = await ProbeAsync(inputs.Metadata, token);
         await Assert.That(result).IsTrue();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedInventory.Workers(inputs.Metadata));
+            .IsEqualTo(SiteIsolatedInventory.Workers());
         var actualSite = SiteTestInputs.Read();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Source]![SiteIsolatedGitHubTokens.Website]!.GetValue<string>())
             .IsEqualTo(actualSite.SiteRevision);
@@ -50,21 +50,9 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var copy = inputs.Metadata.DeepClone().AsObject();
         await Assert.That(await ProbeAsync(copy, token)).IsTrue();
         var steps = copy[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]!.AsArray();
-        if (SiteIsolatedInventory.IsHistorical(inputs.Metadata))
-        {
-            await Assert.That(steps.Count).IsEqualTo(7);
-            foreach (var step in steps.Where(item => item![SiteIsolatedGitHubFields.Name]!.GetValue<string>()
-                is "Generate website benchmark data" or "Save website benchmark data").ToArray())
-            {
-                steps.Remove(step);
-            }
-        }
-        else
-        {
-            await Assert.That(steps.Count).IsEqualTo(6);
-            steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Generate website benchmark data", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
-            steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Save website benchmark data", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
-        }
+        await Assert.That(steps.Count).IsEqualTo(6);
+        steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage one", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+        steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage two", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
         await Assert.That(await ProbeAsync(copy, token)).IsFalse();
         await Assert.That(JsonNode.DeepEquals(inputs.Metadata, original)).IsTrue();
     }
@@ -80,7 +68,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Image],
             inputs.Metadata[SiteIsolatedGitHubFields.Image])).IsTrue();
         await Assert.That(copy[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedInventory.Workers(inputs.Metadata));
+            .IsEqualTo(SiteIsolatedInventory.Workers());
     }
 
     /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or image checks remain rejected.</summary>

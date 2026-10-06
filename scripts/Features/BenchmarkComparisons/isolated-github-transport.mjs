@@ -7,11 +7,8 @@ import { GH, requireGitHub } from './isolated-github-contract.mjs';
 import { writeCapture, writeJson } from './isolated-github-files.mjs';
 import { streamHttpToFile } from './isolated-github-stream.mjs';
 import { retryDelay } from './isolated-github-rate.mjs';
-import { HISTORICAL } from './historical-isolated-plan.mjs';
 
-export const isAllowedGitHubEndpoint = endpoint => typeof endpoint === 'string' &&
-  (endpoint.startsWith(GH.api + '/') || HISTORICAL.sourceRevisions.some(revision =>
-    endpoint === `repos/managedcode/KeyLoad/contents/${HISTORICAL.path}?ref=${revision}`));
+export const isAllowedGitHubEndpoint = endpoint => typeof endpoint === 'string' && endpoint.startsWith(GH.api + '/');
 
 export async function initializeTransport(context, root, directory) {
   const requests = await createDirectory(path.join(directory, 'requests'));

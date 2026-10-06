@@ -3,7 +3,7 @@ import path from 'node:path';
 import { GH, positive, shaPattern } from './isolated-github-contract.mjs';
 import { readJson } from './isolated-github-files.mjs';
 import { flattenPages, uniqueNamed, validateJobIdentity, validateSuccessfulJob } from './isolated-github-validation.mjs';
-import { SITE_GH, exact, requireSite, siteAggregateSteps, siteEvidencePlans } from './site-isolated-github-contract.mjs';
+import { SITE_GH, exact, isUnsupportedSiteSource, requireSite, siteAggregateSteps, siteEvidencePlans } from './site-isolated-github-contract.mjs';
 
 export function validateSiteWorkflow(workflow) {
   requireSite(workflow?.path === GH.workflowPath && workflow.name === GH.workflow && workflow.state === 'active' && positive(workflow.id));
@@ -38,7 +38,7 @@ export function flattenSiteRuns(pages) {
 }
 
 export function selectLatestSiteProducer(runs, workflow) {
-  const completed = listSiteProducers(runs, workflow);
+  const completed = listSiteProducers(runs, workflow).filter(run => !isUnsupportedSiteSource(run.head_sha));
   const run = completed[0];
   requireSite(run !== undefined && SITE_GH.producerConclusions.includes(run.conclusion));
   return siteProducer(run);
@@ -55,7 +55,7 @@ const siteProducer = run => ({ runId: run.id, attempt: run.run_attempt, sourceRe
   event: run.event, conclusion: run.conclusion });
 
 export const siteCohort = run => ({ sourceRevision: run.head_sha, runId: run.id, attempt: run.run_attempt,
-  repository: SITE_GH.repository, ref: 'refs/heads/main', workflow: GH.workflow, profile: siteEvidencePlans(run.head_sha)[0].profile });
+  repository: SITE_GH.repository, ref: 'refs/heads/main', workflow: GH.workflow, profile: siteEvidencePlans()[0].profile });
 
 async function readPair(input, summary, attempt, workflow) {
   const root = path.join(input, SITE_GH.metadata, 'attempts', String(summary.id), String(attempt));
@@ -81,60 +81,44 @@ export function selectSiteAggregateJob(run, jobs) {
   if (matches[0].status !== 'completed' || matches[0].conclusion !== 'success') return { successful: false, run, jobs };
   const cohort = siteCohort(run);
   const aggregate = matches[0];
-  const unavailableGeneration = SITE_GH.unavailableProducerGenerations.find(candidate => candidate.sourceRevision === run.head_sha);
-  if (unavailableGeneration !== undefined) {
-    requireSite(matchUnavailableProducerGeneration(run, aggregate) !== undefined);
-    validateSuccessfulJob(aggregate, cohort, SITE_GH.aggregateJob, unavailableGeneration.ownedSteps);
-    return { successful: false, run, jobs };
-  }
-  const steps = siteAggregateSteps(run.head_sha);
+  const steps = siteAggregateSteps();
   const inventory = aggregate.steps?.filter(step => steps.includes(step.name));
   if (inventory?.length !== steps.length || !inventory.every((step, index) => step.name === steps[index])) {
     requireSite(false);
   }
+  const job = validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), cohort, SITE_GH.aggregateJob, steps);
 
-  return { successful: true, run, jobs,
-    job: validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), cohort, SITE_GH.aggregateJob, steps) };
+  return { successful: true, run, jobs, job };
 }
 
-function matchUnavailableProducerGeneration(run, job) {
-  const generation = SITE_GH.unavailableProducerGenerations.find(candidate => candidate.sourceRevision === run.head_sha);
-  if (generation === undefined || !Array.isArray(job.steps)) return undefined;
-  const expected = [...generation.leadingNativeSteps, ...generation.ownedSteps, ...generation.trailingNativeSteps];
-  if (job.steps.length !== expected.length || !job.steps.every((step, index) => step?.name === expected[index])) return undefined;
-  const wrappers = [...job.steps.slice(0, generation.leadingNativeSteps.length), ...job.steps.slice(-generation.trailingNativeSteps.length)];
-  return wrappers.every(step => step.status === 'completed' && step.conclusion === 'success') ? generation : undefined;
-}
-
-async function selectCurrentSiteEvidence(input, workflow, runs, producer, legacyArchive, optional) {
+async function selectCurrentSiteEvidence(input, workflow, runs, producer, optional) {
   requireSite(exact(producer, SITE_GH.producerKeys) && positive(producer.runId) && positive(producer.attempt)
     && shaPattern.test(producer.sourceRevision ?? '') && SITE_GH.producerEvents.includes(producer.event));
-  const legacy = legacyArchive && SITE_GH.legacySources.includes(producer.sourceRevision);
-  requireSite(SITE_GH.producerConclusions.includes(producer.conclusion) || legacy && producer.conclusion === null);
+  requireSite(SITE_GH.producerConclusions.includes(producer.conclusion));
   const matches = runs.filter(run => run.id === producer.runId);
   requireSite(matches.length === 1);
   const summary = validateSiteRun(matches[0], workflow);
   requireSite(summary.run_attempt === producer.attempt && summary.head_sha === producer.sourceRevision
-    && summary.event === producer.event && summary.conclusion === producer.conclusion && completedProducer(summary, legacy));
+    && summary.event === producer.event && summary.conclusion === producer.conclusion && completedProducer(summary));
+  if (isUnsupportedSiteSource(summary.head_sha)) {
+    if (optional) return { state: 'unavailable', producer };
+    requireSite(false);
+  }
   const pair = await readPair(input, summary, producer.attempt, workflow);
   if (pair === null) return { state: 'needs_attempt', runId: summary.id, attempt: producer.attempt };
   if (!pair.successful) {
     if (optional) return { state: 'unavailable', producer };
     requireSite(false);
   }
-  requireSite(pair.run?.conclusion === producer.conclusion && completedProducer(pair.run, legacy));
-  // Frozen microbenchmark controls remain historical validation inputs, not the current composite cohort.
-  if (optional && SITE_GH.legacySources.includes(pair.run.head_sha)) return { state: 'unavailable', producer };
+  requireSite(pair.run?.conclusion === producer.conclusion && completedProducer(pair.run));
   return { state: 'selected', workflow, ...pair };
 }
 
-function completedProducer(run, legacyArchive) {
-  return run.status === 'completed' && SITE_GH.producerConclusions.includes(run.conclusion)
-    || legacyArchive && run.status === 'in_progress' && run.conclusion === null;
+function completedProducer(run) {
+  return run.status === 'completed' && SITE_GH.producerConclusions.includes(run.conclusion);
 }
 
-export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = null, producer = null, legacyArchive = false, optional = false }) {
-  requireSite(typeof legacyArchive === 'boolean');
+export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = null, producer = null, optional = false }) {
   requireSite(typeof optional === 'boolean');
   requireSite([SITE_GH.publish, SITE_GH.validate].includes(mode) && (requestedRun === null || (mode === SITE_GH.validate && /^[1-9][0-9]*$/.test(String(requestedRun)))));
   requireSite(mode === SITE_GH.publish || !optional);
@@ -142,7 +126,7 @@ export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = n
   const metadata = path.join(input, SITE_GH.metadata);
   const workflow = validateSiteWorkflow(await readJson(path.join(metadata, 'workflow.json')));
   const all = flattenSiteRuns(await readJson(path.join(metadata, 'workflow_runs-pages.json')));
-  if (mode === SITE_GH.publish) return selectCurrentSiteEvidence(input, workflow, all, producer, legacyArchive, optional);
+  if (mode === SITE_GH.publish) return selectCurrentSiteEvidence(input, workflow, all, producer, optional);
   const runs = requestedRun === null ? all : all.filter(run => String(run.id) === String(requestedRun));
   requireSite(requestedRun === null || runs.length === 1);
   runs.sort((left, right) => right.run_number - left.run_number);
@@ -151,6 +135,7 @@ export async function selectSiteIsolatedEvidence({ input, mode, requestedRun = n
     validateSiteRun(summary, workflow);
     for (let attempt = summary.run_attempt; attempt >= 1; attempt -= 1) {
       pairs += 1; requireSite(pairs <= SITE_GH.pairs);
+      if (isUnsupportedSiteSource(summary.head_sha)) continue;
       const pair = await readPair(input, summary, attempt, workflow);
       if (pair === null) return { state: 'needs_attempt', runId: summary.id, attempt };
       if (pair.successful) return { state: 'selected', workflow, ...pair };

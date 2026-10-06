@@ -71,7 +71,8 @@ export async function captureSourceInventory() {
   }
   const listing = await runGitBuffer(['ls-files', '--cached', '--others', '--exclude-standard', '-z']);
   const names = parseGitPaths(listing);
-  const files = await measureFiles(names, repositoryRoot);
+  const presentNames = await retainPresentSourcePaths(names, repositoryRoot);
+  const files = await measureFiles(presentNames, repositoryRoot);
   return snapshot('source', head.toLowerCase(), files);
 }
 
@@ -214,6 +215,22 @@ async function ensureArtifactParent() {
       if (!created.isDirectory() || created.isSymbolicLink()) throw new Error(`Unsafe artifact directory: ${current}`);
     }
   }
+}
+
+async function retainPresentSourcePaths(names, root) {
+  await ensurePlainDirectory(root);
+  const present = [];
+  for (const name of names) {
+    const absolute = path.join(root, ...name.split('/'));
+    try {
+      await verifyDirectoryChain(root, path.dirname(absolute));
+      await lstat(absolute);
+      present.push(name);
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+    }
+  }
+  return present;
 }
 
 function parseGitPaths(buffer) {

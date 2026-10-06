@@ -11,8 +11,8 @@ function validateArtifact(value, name, limit) {
   timestamp(value.createdAt);
 }
 
-function validateAggregateJob(job, run, artifacts, sourceRevision) {
-  const steps = siteAggregateSteps(sourceRevision);
+function validateAggregateJob(job, run, artifacts) {
+  const steps = siteAggregateSteps();
   requireSite(exact(job, ['id', 'name', 'url', 'startedAt', 'completedAt', 'steps']) && positive(job.id)
     && job.name === SITE_GH.aggregateJob && job.url === `https://github.com/${SITE_GH.repository}/actions/runs/${run.id}/job/${job.id}`
     && Array.isArray(job.steps) && job.steps.length === steps.length);
@@ -39,7 +39,7 @@ function validateFiles(files, expectedCount, prefix) {
   return paths;
 }
 
-function validateArchiveFields(receipt, plan) {
+function validateArchiveFields(receipt) {
   requireSite(exact(receipt.archives, ['suite', 'provider']));
   for (const name of ['suite', 'provider']) {
     const archive = receipt.archives[name];
@@ -47,13 +47,12 @@ function validateArchiveFields(receipt, plan) {
     requireSite(exact(archive, SITE_GH.fileKeys) && archive.path === `archives/${artifact.name}.zip`
       && archive.bytes === artifact.sizeInBytes && `sha256:${archive.sha256}` === artifact.digest);
   }
-  const source = receipt.source.measured;
-  const expected = [...siteEvidenceSuiteFiles(source).map(file => 'input/' + file),
-    ...siteEvidenceProviderFiles(source).map(file => 'input/' + file)];
+  const expected = [...siteEvidenceSuiteFiles().map(file => 'input/' + file),
+    ...siteEvidenceProviderFiles().map(file => 'input/' + file)];
   const files = validateFiles(receipt.inputFiles, expected.length, 'input/');
   requireSite(expected.every(file => files.has(file.toLowerCase())));
   requireSite(receipt.inputFiles.every(file => file.bytes <= (file.path.endsWith('/worker.json') ? SITE_GH.rawBytes : SITE_GH.jsonBytes)));
-  requireSite(receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).length === siteEvidenceWorkerCount(source)
+  requireSite(receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).length === siteEvidenceWorkerCount()
     && receipt.inputFiles.filter(file => file.path.endsWith('/worker.json')).reduce((sum, file) => sum + file.bytes, 0) <= SITE_GH.totalRawBytes);
 }
 
@@ -66,16 +65,14 @@ function validateProjectedJob(job, cohort, name, requiredSteps, worker = false) 
 }
 
 function validateWorkers(receipt, plan) {
-  const legacy = SITE_GH.legacySources.includes(receipt.source.measured);
-  const cells = new Map(siteEvidencePlans(receipt.source.measured).flatMap(item => item.cells).map(cell => [cell.id, cell]));
+  const cells = new Map(siteEvidencePlans().flatMap(item => item.cells).map(cell => [cell.id, cell]));
   const expected = new Set(cells.keys());
   requireSite(Array.isArray(receipt.workers) && receipt.workers.length === expected.size);
   for (const worker of receipt.workers) {
-    requireSite(exact(worker, legacy ? ['id', 'job', 'artifact'] : ['id', 'profile', 'job', 'artifact']) && expected.delete(worker.id)
-      && (legacy || worker.profile === cells.get(worker.id).profile));
-    requireSite(legacy ? matchesIsolatedJobName(worker.job?.name, cells.get(worker.id))
-      : worker.profile === plan.profile ? matchesIsolatedJobName(worker.job?.name, cells.get(worker.id))
-        : worker.job?.name === isolatedEvidenceJobName(cells.get(worker.id)));
+    requireSite(exact(worker, ['id', 'profile', 'job', 'artifact']) && expected.delete(worker.id)
+      && worker.profile === cells.get(worker.id).profile);
+    requireSite(worker.profile === plan.profile ? matchesIsolatedJobName(worker.job?.name, cells.get(worker.id))
+      : worker.job?.name === isolatedEvidenceJobName(cells.get(worker.id)));
     validateProjectedJob(worker.job, receipt.cohort, worker.job.name, GH.workerSteps, true);
     validateArtifact(worker.artifact, GH.artifactPrefix + worker.id, GH.workerZipBytes);
   }
@@ -101,10 +98,10 @@ export function validateSiteIsolatedReceipt(receipt) {
   requireSite(receipt.cohort.sourceRevision === receipt.source.measured && receipt.cohort.runId === receipt.run.id && receipt.cohort.attempt === receipt.run.attempt);
   requireSite(exact(receipt.artifacts, ['suite', 'provider']));
   for (const name of ['suite', 'provider']) validateArtifact(receipt.artifacts[name], SITE_GH[name], artifactLimit(SITE_GH[name]));
-  validateAggregateJob(receipt.aggregateJob, receipt.run, receipt.artifacts, receipt.source.measured);
+  validateAggregateJob(receipt.aggregateJob, receipt.run, receipt.artifacts);
   validateWorkers(receipt, plan);
   validateFiles(receipt.metadataFiles, null, 'metadata/');
-  if (receipt.state === SITE_GH.archiveState) validateArchiveFields(receipt, plan);
+  if (receipt.state === SITE_GH.archiveState) validateArchiveFields(receipt);
   else requireSite(receipt.archives === null && receipt.inputFiles === null);
   return receipt;
 }

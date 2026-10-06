@@ -15,7 +15,7 @@ internal sealed class SiteUnsupportedProducerSelectionTests
     private const string MetricsKey = "metrics";
 
     [Test]
-    public async Task AcBcWeb002SkipsIncompatibleOldAggregateAndKeepsCurrentProducerSelected()
+    public async Task AcBcWeb002SkipsUnsupportedProducerByRevisionAndKeepsCurrentProducerSelected()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
@@ -31,35 +31,15 @@ internal sealed class SiteUnsupportedProducerSelectionTests
         await Assert.That(unavailable.TryGetProperty(MetricsKey, out _)).IsFalse();
         var strict = await SiteUnsupportedProducerControls.SelectAsync(scope, candidates.Older, false, token);
         await Assert.That(strict.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
-        await SiteUnsupportedProducerAssertions.AssertCurrentSelectedAsync(scope, candidates.Current, token);
-
-        await SiteUnsupportedProducerControls.RejectMalformedNativeStepAsync(scope, candidates.Older, candidates.Current, token);
-        await SiteUnsupportedProducerControls.RejectUnauthenticatedCandidateAsync(scope, candidates.Older, candidates.Current, token);
-        await SiteUnsupportedProducerControls.RejectUnknownOwnedStepAsync(scope, candidates.Older, candidates.Current, token);
-        await SiteUnsupportedProducerControls.RejectMisorderedOwnedStepsAsync(scope, candidates.Older, candidates.Current, token);
-        await SiteUnsupportedProducerAssertions.AssertCurrentSelectedAsync(scope, candidates.Current, token);
+        var attempts = Path.Combine(scope.Capture, SiteIsolatedGitHubFields.MetadataDirectory,
+            SiteIsolatedGitHubFields.Attempts, candidates.Older.RunId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        await Assert.That(Directory.Exists(attempts)).IsFalse();
+        await AssertCurrentSelectedAsync(scope, candidates.Current, token);
+        await AssertLatestCurrentSelectedAsync(scope, candidates.Current, token);
     }
 
     [Test]
-    public async Task AcBcWeb002DoesNotClassifyTheSameInventoryForAnotherSourceAsUnavailable()
-    {
-        var token = TestContext.Current!.Execution.CancellationToken;
-        await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
-        var candidates = await SiteUnsupportedProducerFixture.InstallIncompatibleCandidateAsync(scope, token);
-        await SiteUnsupportedProducerControls.RejectUnknownSourceGenerationAsync(scope, candidates.Older, candidates.Current, token);
-    }
-
-    [Test]
-    public async Task AcBcWeb002DoesNotTreatCurrentStepsAsTheUnavailableOlderGeneration()
-    {
-        var token = TestContext.Current!.Execution.CancellationToken;
-        await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
-        var candidates = await SiteUnsupportedProducerFixture.InstallIncompatibleCandidateAsync(scope, token);
-        await SiteUnsupportedProducerControls.RejectCurrentInventoryForUnavailableSourceAsync(scope, candidates.Older, candidates.Current, token);
-    }
-
-    [Test]
-    public async Task AcBcWeb002OptionalCaptureSkipsIncompatibleProducerWithoutInventingMetrics()
+    public async Task AcBcWeb002OptionalCaptureSkipsUnsupportedProducerWithoutInventingMetrics()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var site = SiteTestInputs.Read();
@@ -101,6 +81,35 @@ internal sealed class SiteUnsupportedProducerSelectionTests
         using var receipt = JsonDocument.Parse(await File.ReadAllBytesAsync(receiptPath, token));
         await Assert.That(receipt.RootElement.GetProperty(SiteIsolatedGitHubFields.State).GetString())
             .IsEqualTo(state);
+    }
+
+    private static async Task AssertLatestCurrentSelectedAsync(SiteIsolatedGitHubScope scope,
+        SiteUnsupportedProducerCandidate current, CancellationToken token)
+    {
+        var site = SiteTestInputs.Read();
+        var response = await SiteIsolatedGitHubNodeProcess.RunAsync(site.Repository, new
+        {
+            operation = "latest-selection",
+            arguments = new { input = scope.Capture },
+        }, token);
+        await Assert.That(response.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
+        var result = response.GetProperty(SiteIsolatedGitHubFields.Result);
+        await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.State).GetString())
+            .IsEqualTo(SiteIsolatedGitHubFields.Selected);
+        await Assert.That(result.GetProperty(SiteIsolatedGitHubSelectionFields.RunId).GetInt64())
+            .IsEqualTo(current.RunId);
+    }
+
+    private static async Task AssertCurrentSelectedAsync(SiteIsolatedGitHubScope scope,
+        SiteUnsupportedProducerCandidate current, CancellationToken token)
+    {
+        var response = await SiteUnsupportedProducerControls.SelectAsync(scope, current, token);
+        await Assert.That(response.GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
+        var result = response.GetProperty(SiteIsolatedGitHubFields.Result);
+        await Assert.That(result.GetProperty(SiteIsolatedGitHubFields.State).GetString())
+            .IsEqualTo(SiteIsolatedGitHubFields.Selected);
+        await Assert.That(result.GetProperty(SiteIsolatedGitHubSelectionFields.RunId).GetInt64())
+            .IsEqualTo(current.RunId);
     }
 
     private static string RequiredRevisionEnvironment(string name)

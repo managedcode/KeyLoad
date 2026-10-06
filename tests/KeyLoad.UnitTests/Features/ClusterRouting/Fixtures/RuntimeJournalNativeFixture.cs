@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
+using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
@@ -202,10 +203,15 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             new RuntimeJournalReplayActivatorConfiguration(services.GetRequiredService<GrainClassMap>(), services));
         siloBuilder.Services.Configure<JournaledStateManagerOptions>(options =>
             options.JournalFormatKey = RuntimeJournalStoragePolicy.BinaryFormat);
-        siloBuilder.Configure<GrainTypeOptions>(options => options.AddClass(typeof(RuntimeJournalReplayGrain)));
+        siloBuilder.Configure<GrainTypeOptions>(options =>
+        {
+            options.AddClass(typeof(RuntimeJournalReplayGrain));
+            options.AddClass(typeof(RuntimeJournalGraphCallerProbeGrain));
+        });
         siloBuilder.AddJournalStorage<RuntimeJournalStorageProvider>(ProviderConstants.DEFAULT_STORAGE_PROVIDER_NAME,
             services => ActivatorUtilities.CreateInstance<RuntimeJournalStorageProvider>(services));
         ConfigureGraph(siloBuilder);
+        NativeJobGraphRegistration.Extend(siloBuilder.Services);
         siloBuilder.UseOrleansCommunication();
     }
 
@@ -215,14 +221,7 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         {
             graph.AllowClientCallGrain<IRequestGrain>()
                 .AllowClientCallGrain<IRuntimeJournalReplayGrain>()
-                .AddGrainTransition<RuntimeJournalReplayGrain, IRequestGrain>()
-                .AllSourceMethodsToSpecificTargetMethods(nameof(IRequestGrain.ExecuteStreamAsync)).And()
-                .AddGrainTransition<IRuntimeJournalReplayGrain, IRequestGrain>()
-                .MethodsByName(
-                    (nameof(IRuntimeJournalReplayGrain.SetAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
-                    (nameof(IRuntimeJournalReplayGrain.ReadAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
-                    (nameof(IRuntimeJournalReplayGrain.GetActivationTokenAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
-                    (nameof(IRuntimeJournalReplayGrain.DeleteAsync), nameof(IRequestGrain.ExecuteStreamAsync))).And()
+                .AllowClientCallGrain<IRuntimeJournalGraphCallerProbeGrain>()
                 .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
                 .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
                 .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()
@@ -242,7 +241,8 @@ internal sealed class RuntimeJournalNativeClientConfigurator : IClientBuilderCon
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         clientBuilder.AddOrleansGraph(configureGraph: graph =>
-            graph.AllowClientCallGrain<IRuntimeJournalReplayGrain>()).UseOrleansCommunication();
+            graph.AllowClientCallGrain<IRuntimeJournalReplayGrain>()
+                .AllowClientCallGrain<IRuntimeJournalGraphCallerProbeGrain>()).UseOrleansCommunication();
     }
 }
 #pragma warning restore ORLEANSEXP005

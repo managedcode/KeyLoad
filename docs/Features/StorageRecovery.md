@@ -4,12 +4,15 @@
 
 The accepted [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#2026-10-04-v1-validation-and-ownership-completion)
 preserves valid durable key bytes and defines explicit normalization, arity and
-safe malformed-input errors. The 2026-10-04 development receipt (report removed from repository)
-records14 new KeyCodec cases plus4 original cases in full Aspire normal/scalar
-suites at2889/2889 each, recovery228/228 and1000 unique atomic process cuts.
-Complete source/runtime inventories remain unchanged across those three suites.
-Exact delivered-source Linux and Docker/Aspire RF3 qualification remain pending;
-process-kill evidence does not qualify power-loss durability.
+safe malformed-input errors. KL-007 maps to the four measurable criteria below,
+with 18 exact KeyCodec cases and the owning codec/native storage source closure.
+Task closure requires all mapped cases on current-source Linux normal/scalar,
+matching identities and the ADR-005 recovery/open-existing-store CI check. A
+failure elsewhere remains a failed overall suite and cannot erase an independently
+verified mapped outcome. The StorageRecovery feature's Docker/Aspire RF3,
+endurance and power-loss gates remain separately mandatory and open; closing
+KL-007 cannot close or waive them. Current local normal/scalar operation results
+are supporting development evidence until the original Linux reports exist.
 
 | Requirement | Measurable acceptance and owned TUnit mapping |
 |---|---|

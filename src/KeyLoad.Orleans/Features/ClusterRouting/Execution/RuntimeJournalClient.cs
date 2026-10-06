@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using ManagedCode.Communication.CQRS;
+using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
@@ -21,6 +22,10 @@ internal sealed class RuntimeJournalClient(
 {
     private readonly IOptions<RuntimeJournalOptions> journalOptions = ValidateOptions(configuredJournalOptions,
         database.Limits.MaxBatchBytes);
+
+    internal static string CallerIdentity => typeof(RuntimeJournalClient).FullName!;
+    internal const string ReadCoreCallerMethod = nameof(ReadCoreAsync);
+    internal const string SendCommandCallerMethod = nameof(SendCommandAsync);
 
     internal TimeProvider Clock => clock;
 
@@ -79,9 +84,10 @@ internal sealed class RuntimeJournalClient(
         using var identity = new GrainRequestIdentityScope(services, principal, requestId,
             Guid.Empty, token);
         var actor = grains.GetGrain<IRequestGrain>(requestId);
-        var reply = await GrainRequestStreamConsumer.DrainAsync(
-            createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
-            clock: clock, cancellationToken: token, options: routingOptions).ConfigureAwait(false);
+        var reply = await DrainAsRuntimeJournalCallerAsync(ReadCoreCallerMethod, () =>
+            GrainRequestStreamConsumer.DrainAsync(
+                createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+                clock: clock, cancellationToken: token, options: routingOptions)).ConfigureAwait(false);
         return Decode<T>(reply, allowNull);
     }
 
@@ -96,9 +102,20 @@ internal sealed class RuntimeJournalClient(
         var signed = codec.CreateRuntimeJournalCommand(requestId, principal.Id, commandId, payload);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, token);
         var actor = grains.GetGrain<IRequestGrain>(requestId);
-        return await GrainRequestStreamConsumer.DrainAsync(
-            createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
-            clock: clock, cancellationToken: token, options: routingOptions).ConfigureAwait(false);
+        return await DrainAsRuntimeJournalCallerAsync(SendCommandCallerMethod, () =>
+            GrainRequestStreamConsumer.DrainAsync(
+                createStream: streamToken => actor.ExecuteStreamAsync(signed, streamToken), serializer: chunkSerializer, requestId: requestId,
+                clock: clock, cancellationToken: token, options: routingOptions)).ConfigureAwait(false);
+    }
+
+    private static async Task<T> DrainAsRuntimeJournalCallerAsync<T>(string callerMethod, Func<Task<T>> drain)
+    {
+        T result = default!;
+        await RequestContextHelper.RunWithCurrentCallerAsync(CallerIdentity, callerMethod, async () =>
+        {
+            result = await drain().ConfigureAwait(false);
+        }).ConfigureAwait(false);
+        return result;
     }
 
     private async Task<PrincipalRecord> PrepareAsync(CancellationToken cancellationToken)

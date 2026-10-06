@@ -74,3 +74,27 @@ Keep80/70/90 coverage thresholds, original counts/union and400/200/64/depth3 rul
 Rollback must retain a coherent source analyzer and strict native-report reader,
 never stale artifacts, skipped assertions or synthetic coverage. No database
 format, dependency, public API or topology changes belong to this quality stage.
+
+## Complete functional unit contributor partition
+
+TASK-CQ-FUNCTIONAL-UNIT-INVENTORY-043 implements REQ-CQ-009 and AC-CQ-018/020/021.
+Keep ordinary unit and scalar suites complete, unfiltered and without coverage.
+Collect functional unit coverage separately through five bounded positive
+selector groups in each mode, with one exact current case inventory. Every
+allowed case belongs to exactly one group; classify every excluded BDN, load,
+stress, performance or comparison case explicitly. Namespace membership alone
+does not authorize a contributor. Bind the inventory to current test sources,
+the same Release compiler-input/DLL/PDB/MVID identities and actual native TRX.
+
+Ordered stages: root freezes this contract and owning feature; a Luna worker
+prepares guarded source and meaningful merge-operation regressions; root joins,
+builds, formats and runs Aspire collection; verify all ten unit groups plus
+recovery and RF3 before report admission. Reject missing, duplicate, overlapping,
+empty, excluded, failed, skipped or source/image-mismatched contributors. Preserve
+native per-run branch evidence and every existing bound and80/70/90 threshold.
+
+Exact source ownership and required tests are in CodeQuality's matching task.
+Root owns workflow, inventory, identity and report joins. Roll out one coherent
+strict descriptor/validator/CI checkpoint; rollback restores that checkpoint's
+source/configuration pair, without an alternate reader or reduced qualification.
+No numeric coverage or module closure follows from preparing an inventory.

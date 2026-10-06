@@ -4,7 +4,7 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedStandaloneBrowserTests
 {
-    /// <summary>AC-ISO-008/009: actual standalone Chrome publication fetches compact270 evidence without legacy/raw preload.</summary>
+    /// <summary>AC-ISO-008/009: actual standalone Chrome publication fetches 330-control evidence without raw worker preload.</summary>
     [Test]
     public async Task AC_ISO_009_StandaloneChromeLoadsOnlyCompactIsolatedEvidence()
     {

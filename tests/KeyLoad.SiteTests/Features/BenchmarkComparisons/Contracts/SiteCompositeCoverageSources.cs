@@ -1,6 +1,6 @@
 namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
-/// <summary>Source-bound parser/projection closure for the complete and historical comparison families.</summary>
+/// <summary>Source-bound parser/projection closure for the complete current comparison cohort.</summary>
 internal static class SiteCompositeCoverageSources
 {
     internal static readonly string[] Entries =
@@ -11,9 +11,6 @@ internal static class SiteCompositeCoverageSources
         $"{SitePublicationTokens.EvidenceToolsPrefix}vector-isolated-plan.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}scaled-cohort-receipt.mjs",
         $"{SitePublicationTokens.EvidenceToolsPrefix}server-resource-evidence.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}historical-isolated-plan.mjs",
-        $"{SitePublicationTokens.EvidenceToolsPrefix}historical-site-evidence.mjs",
         $"{SiteAssetTokens.FeatureRelativePath}/composite-render.mjs",
-        $"{SiteAssetTokens.FeatureRelativePath}/historical-contracts.mjs",
     ];
 }

@@ -6,16 +6,25 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedGitHubArchiveTests
 {
+    private const int ProviderInputFiles = 60;
+    private const int SuiteInputFiles = 2470;
+
     [Test]
-    public async Task AC_ISO_007_ActualTwoArchivesHaveExact271AndSixSelectedFilesWithOriginalHashes()
+    public async Task AC_ISO_007_CurrentArchivesContainExact2530SelectedFilesWithOriginalHashes()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var receipt = JsonNode.Parse(await File.ReadAllBytesAsync(inputs.Receipt, token))!.AsObject();
         await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Suite, false, token);
         await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Provider, true, token);
-        await Assert.That(receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedInventory.Files(inputs.Metadata));
+        await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
+            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
+        var files = receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray();
+        await Assert.That(files.Count).IsEqualTo(SiteIsolatedGitHubTokens.FileCount);
+        await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
+            .StartsWith("input/provider/", StringComparison.Ordinal))).IsEqualTo(ProviderInputFiles);
+        await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
+            .StartsWith("input/aggregate/", StringComparison.Ordinal))).IsEqualTo(SuiteInputFiles);
     }
 
     [Test]
@@ -33,7 +42,7 @@ internal sealed class SiteIsolatedGitHubArchiveTests
     {
         await using var stream = File.OpenRead(Path.Combine(inputs.Capture, SiteIsolatedGitHubTokens.Archives, name));
         using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
-        var expected = provider ? SiteIsolatedGitHubArchivePaths.ExpectedProvider(inputs.Metadata) :
+        var expected = provider ? SiteIsolatedGitHubArchivePaths.ExpectedProvider() :
             SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata);
         var selected = await SiteIsolatedGitHubArchivePreflight.InspectAsync(archive, expected, provider, token,
             SiteIsolatedGitHubArchivePaths.CellIds(inputs.Metadata));

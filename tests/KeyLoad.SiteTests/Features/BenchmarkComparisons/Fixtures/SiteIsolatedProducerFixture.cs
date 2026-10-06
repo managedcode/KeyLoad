@@ -9,7 +9,6 @@ internal static class SiteIsolatedProducerFixture
     public static async Task<bool> CreateAsync(SiteIsolatedFixture fixture, string input, string corruption, CancellationToken token)
     {
         Directory.CreateDirectory(Path.Combine(input, "workers"));
-        await CopyHistoricalCompanionsAsync(fixture, input, token);
         var manifest = JsonNode.Parse(await File.ReadAllBytesAsync(
             Path.Combine(fixture.Inputs.Aggregate, "aggregate.json"), token))!.AsObject();
         var workers = manifest[SiteIsolatedFields.Workers]!.AsArray();
@@ -30,22 +29,6 @@ internal static class SiteIsolatedProducerFixture
         await CorruptAsync(fixture, input, manifest, corruption, token);
         await File.WriteAllTextAsync(Path.Combine(input, "aggregate.json"), manifest.ToJsonString(), token);
         return measured is not null;
-    }
-
-    private static async Task CopyHistoricalCompanionsAsync(SiteIsolatedFixture fixture,
-        string input, CancellationToken token)
-    {
-        if (!SiteIsolatedInventory.IsHistoricalSource(fixture.Inputs.Site.MeasuredRevision))
-        {
-            return;
-        }
-        foreach (var relative in new[] { "../../metadata/source-contract.json", "../provider/proof.json" })
-        {
-            var source = Path.GetFullPath(Path.Combine(fixture.Inputs.Aggregate, relative));
-            var target = Path.GetFullPath(Path.Combine(input, relative));
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            await File.WriteAllBytesAsync(target, await File.ReadAllBytesAsync(source, token), token);
-        }
     }
 
     private static async Task CorruptAsync(SiteIsolatedFixture fixture, string input, JsonObject manifest,
