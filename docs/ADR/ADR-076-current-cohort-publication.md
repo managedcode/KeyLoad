@@ -11,8 +11,7 @@ composite plan. The plan contains 330 control cells, two 132-cell CRUD profiles
 (100,000 and 1,000,000 records), and 24 vector profiles with 33 target/node
 cells each: 1,386 workers total. Applicable scaled workloads retain at least
 100,000 measured operations; vector profiles retain at least 100,000 measured
-queries. The 270-worker/277-file cohort belongs only to authentic historical
-receipts. It does not define current completeness or qualify current metrics.
+queries.
 
 The current composite evidence inventory is derived from the canonical plan:
 2,470 suite files and 60 provider files (2,530 total), including every planned

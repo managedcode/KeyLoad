@@ -85,6 +85,10 @@ flowchart TD
 2. Selection contributor owns site-isolated-github capture/runs/contract; builder
    contributor owns site/Features/BenchmarkComparisons/build-site.mjs. Preserve
    exact original artifacts, bounded native calls and source closure.
+   TASK-CURRENT-WEBSITE-EVENT-071 limits capture to current executor and REST
+   selection/wait inputs. It removes event-file parsing and its exclusive probe,
+   cap and fixtures, preserving REST workflow_runs and artifact.workflow_run
+   provenance, actual authenticated capture and latest-selection operation flows.
 3. Qualification contributor owns SiteContent cases/helpers/contracts and current
    coverage/source inventory joins. Native file/Node/Chrome flows prove successful
    admission, absence, foreign executor, corrupt evidence and healthy follow-up.

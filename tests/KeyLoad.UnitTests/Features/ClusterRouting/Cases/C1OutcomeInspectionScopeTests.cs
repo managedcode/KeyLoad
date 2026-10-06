@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
+using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -16,10 +17,14 @@ internal sealed class C1OutcomeInspectionScopeTests
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: true,
                 partition: fixture.OtherPartition);
             var absentPartition = fixture.Partition with { PartitionKey = "unseeded-partition" };
-            await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
-                absentPartition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId)))).IsNull();
-            await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
-                absentPartition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId)))).IsNull();
+            using (var reopenedStore = ZoneTreeExistingStore.Open(new ZoneTreeStoreOptions(fixture.DirectoryPath)
+            { Incarnation = fixture.Incarnation }, fixture.Identity.NodeId, UnitExecutionOptions.StorageExecution()))
+            {
+                await Assert.That(reopenedStore.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
+                    absentPartition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId)))).IsNull();
+                await Assert.That(reopenedStore.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocatorV2(
+                    absentPartition, C1OutcomeInspectionAssertions.AdminId, fixture.CommandId)))).IsNull();
+            }
             await C1OutcomeInspectionAssertions.AssertOutcomeAsync(fixture, expected: false,
                 partition: absentPartition);
             await C1OutcomeInspectionAssertions.AssertOuterOwnerReleasedAsync(fixture);

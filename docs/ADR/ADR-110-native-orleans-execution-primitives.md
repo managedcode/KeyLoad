@@ -154,6 +154,24 @@ RF3 bootstrap and verification complete. Both physical stores must already satis
 the current required reader contract before first journal admission; fresh stores
 are created with that contract and unsupported capabilities fail closed.
 
+The REQ/AC-ORL-013 call graph copies every existing default-deny edge and admits
+the native RuntimeJournalClient's exact ReadCoreAsync and SendCommandAsync calls
+to IRequestGrain.ExecuteStreamAsync. Native JournaledStateManager suppresses
+ExecutionContext for its background work loop, so provider callbacks establish
+their immediate caller identity with the supported RunWithCurrentCallerAsync
+API around the complete native CQRS stream drain and restore it on every exit.
+The coordinator's concrete ExecuteJobAsync edge remains scoped to its actual
+saga effect; remove the unused manager wildcard and speculative concrete
+ProcessDueAsync provider allowance. TASK-ORL-JOURNAL-GRAPH-014 freezes exact
+Orleans client/Server registration ownership, ordered guarded private preparation,
+root join and verification in the RuntimeJournal contract. Preserve signed
+protected identity, fresh separately authorized request grains, backpressure and
+RF3 authority. Actual native scheduling/journal callbacks, duplicate dispatch,
+single saga/message effect, caller restoration, denied method/target and healthy
+follow-up controls run through Aspire after build/format. No coordinator wildcard
+or alternate database path is admitted; complete process, RF3 and Linux
+qualification remains required.
+
 Native streamed-request telemetry join, 2026-10-06: TASK-ORL-TELEMETRY-STREAM-002
 in [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md) freezes the
 REQ/AC-ORL-012 client propagation and exact native stream-start classification

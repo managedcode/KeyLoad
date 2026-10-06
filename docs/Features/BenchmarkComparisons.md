@@ -1443,3 +1443,62 @@ rejection, unchanged inputs and a healthy follow-up. Static actionlint and YAML
 graph review verify infrastructure; a genuine final dispatch and separate
 workflow_dispatch Website/Pages run supply provider evidence. Ordered tasks and
 ownership are in ADR-112 TASK-WEB-TRIGGER-001..003.
+
+### Current Website capture source closure
+
+TASK-CURRENT-WEBSITE-EVENT-071 implements REQ/AC-BC-WEB-001/002/004/006/007 and
+AC-BC-FAIL-019 using only trusted push/manual executor admission, bounded
+authenticated optional-run waiting and current REST producer selection. Capture
+has no event-file input or event-payload parser/probe; remove their exclusive
+fixtures and cap. REST workflow_runs paging and artifact.workflow_run provenance
+remain separate mandatory authority checks, including rejection of unsupported
+producer-list events. No API/archive/request bound or coverage threshold changes.
+
+The source packet owns site-isolated-github-context.mjs, the parser-only cap in
+site-isolated-github-contract.mjs, SiteIsolatedGitHubNodeProgram and its fields,
+Website executor cases, and producer-selection cases/fixtures. Keep the two
+latest-selection whole flows under current AC-BC-WEB-002 ownership; keep actual
+authenticated AcPipe003 capture, no mutation and healthy follow-up, exact-source
+freshness, full source inventories and native Node/Chrome coverage. Root owns
+policy/docs, shared source closure, joins, canonical gates and Git. Preparation
+must account for the separately reviewed current archive-source packet before
+joining overlapping files; source review is not Linux or Pages evidence.
+
+### Current archive consumer closure
+
+TASK-CURRENT-ARCHIVE-IMPLEMENTATION-070-CONSUMERS implements
+REQ/AC-BC-CURRENT-001..004 and REQ/AC-BC-WEB-002/004/006/007 alongside
+TASK-CURRENT-WEBSITE-EVENT-071. The current dependency manifest contains exactly
+80 source paths. QualifySite/action.yml must validate that exact current list and
+remove the deleted historical-contract path from its closed allowlist; preserve
+all remaining regular-path, byte/hash, archive, source, coverage and freshness
+checks. Root alone joins the composite-action change.
+
+Keep SiteOptionalBenchmarkSelectionTests as the mandatory Aspire-owned native
+Website preparation gate. Its Cases and Processes own complete push/manual
+admission, CI/foreign-path/unsupported-executor rejection, unchanged controlled
+inputs, healthy follow-up and strict optional-argument flows using the production
+context API. Delete HistoricalBenchmarkContractTests,
+SiteHistoricalEligibilityNodeProgram, SiteOptionalBenchmarkSelectionTokens and
+their eleven SiteOptionalRetained JSON metadata fixtures. They are exclusive
+old-plan code inputs, not immutable original measurement artifacts. Current
+authenticated producer capture, optional unavailability, newest-ready selection,
+strict selected-evidence rejection and healthy follow-up remain owned by the
+current SiteTests under AC-BC-WEB-002 and AC-BC-FAIL-019/020.
+
+The exact unit modifications are Cases/SiteOptionalBenchmarkSelectionTests.cs
+and Processes/SiteOptionalBenchmarkSelectionNodeProgram.cs,
+SiteOptionalBenchmarkSelectionNodeProcess.cs and SiteWebsiteAdmissionNodeProgram.cs
+under Features/BenchmarkComparisons. Remove the unused fixture-directory
+argument. SiteIsolatedInventory and its real SiteTests callers must use current
+no-argument inventory functions; delete its unused Files helper. Do not retain
+ignored source/revision parameters as compatibility shims. Preserve the current
+1,386-worker/2,530-input contract and separate source authentication.
+
+Read the owning policies before preparation. Coding agents prepare only guarded
+private packets; root owns docs/policy, serialized joins, exact coverage/source
+inventories, canonical build/format, Aspire unit/SiteTests and Git. Join the
+archive packet before the dependent event packet, verify every live base hash,
+then run the full ordinary unit suite separately from functional coverage.
+Required exact-source Linux website/browser/provider gates remain open until
+their original evidence exists. Deletion is not a passing qualification result.

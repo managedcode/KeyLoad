@@ -38,6 +38,8 @@ internal static class NativeJobGraphRegistration
             new GrainTransition(GraphConstants.AnyMethod, nameof(IRequestGrain.ExecuteStreamAsync)));
         graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IRequestGrain).FullName!,
             new GrainTransition(nameof(IDurableJobHandler.ExecuteJobAsync), nameof(IRequestGrain.ExecuteStreamAsync)));
+        graph.AddTransition(typeof(RecurringDueCoordinatorGrain).FullName!, typeof(IRequestGrain).FullName!,
+            new GrainTransition(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)));
         services.Remove(descriptor);
         services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }

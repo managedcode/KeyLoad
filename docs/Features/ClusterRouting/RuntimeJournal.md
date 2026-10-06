@@ -32,33 +32,26 @@ bounded opaque byte page or the complete bounded catalog. No new public SDK/MCP
 tool, SQL opcode or parallel dispatcher is introduced.
 
 Generated header/chunk/capacity records use stable new v1 aliases and field IDs.
-Existing records, exact user content, storage codec, RF3 log and recovery journal
-remain unchanged. This is an additive private key family with a version1 marker,
-not a replacement storage format. Require homogeneous upgraded servers before
-bootstrap and the first journal write. Retain a verified pre-bootstrap backup;
-rollback after that write requires restoring that backup. Older binaries must not
-be used to open/replay journals they do not understand. Mixed-version native-job
-operation and cross-authority-group adoption are unqualified and unavailable.
+Exact user content, storage codec, RF3 log and recovery journal retain their
+current contracts. The private journal key family uses a version1 marker under
+the sole current native format in [CurrentFormat](../StorageRecovery/CurrentFormat.md).
+Cross-authority-group native-job adoption remains unqualified and unavailable.
 
-Before native journal bootstrap, mark both exclusively owned server stores with
-StoreIdentity Id8 MinimumReaderContract=1 and a distinct checked identity envelope
-magic. Canonical data epoch7 and key bytes stay unchanged; readers accept only
-legacy-magic/contract0 or journal-magic/contract1. Identity publication is monotonic,
-atomic and idempotent; uncertain publication closes the runtime until reopening.
-An existing nonempty unmarked store requires a verified pre-upgrade backup before
-marking. Mark both stores after any prepared format upgrade has completed and
-before snapshot recovery, consensus or silo admission. Checkpoint identity writes,
-backup and restore must preserve the requirement. A raw snapshot containing native
-journal records cannot be installed into an unmarked embedded store. Standalone
-old-binary snapshot import is unsupported, and is not established safe by an
-identity fence. A fresh authenticated all-voter reader1/transport-ready gate must
-precede first bootstrap; later RF3 quorum recovery preserves its one-fault contract.
+Both exclusively owned server stores are created with StoreIdentity Id8
+MinimumReaderContract=1 and current identity magic `0x364449444C4B`; data epoch7
+and key bytes remain exact. Startup validates both stores before snapshot
+recovery, consensus or silo admission, without modifying their reader identity.
+Missing, zero or unknown capabilities and unsupported magic reject before file
+mutation. Checkpoint, backup, restore and reopen preserve the required capability;
+snapshot installation into a non-current store rejects. A fresh authenticated
+all-voter reader1/transport-ready gate precedes first bootstrap. Existing-catalog
+RF3 quorum recovery retains its one-fault contract and current-capability check.
 
-The public JSON identity omits `MinimumReaderContract` only when its value is the
-legacy default0, preserving ADR-041's exact existing identity bytes. Contract1 is
-serialized and retained on JSON round-trip. Native Orleans Id8, binary identity
-fences and backup/checkpoint/reopen requirements are unchanged. The independent
-`ReadOnlyCollectionContractTests` legacy and contract1 goldens enforce both cases.
+Current JSON and generated native identity round-trips retain contract1 and Id8.
+A physically absent native field decodes as unsupported0; it must not inherit a
+permissive default. Actual rejection, unchanged-file and healthy current-store
+flows prove this boundary. No alternate reader, automatic promotion or conversion
+is part of native journal startup.
 
 Native startup begins background catalog discovery without awaiting it; async
 provider calls await a separate cancellable readiness gate. After silo and physical
@@ -143,7 +136,12 @@ Transient no-quorum/unknown results retry only within explicit bounded policy.
 Keep current default-deny ManagedCode.Graph rules and native Orleans-call tracking
 configuration. Extend the existing public DirectedGraph/GrainTransitionManager
 descriptor by copying every existing edge unchanged and adding only discovered
-native manager→IRequest and concrete coordinator ExecuteJobAsync→IRequest method edges.
+native manager→IRequest and the concrete coordinator's exact
+ProcessDueAsync→IRequest.ExecuteStreamAsync and
+ExecuteJobAsync→IRequest.ExecuteStreamAsync method edges. Native ScheduleJobAsync
+can read/write its journal while ProcessDueAsync is the concrete caller; that
+provider work still uses the freshly signed protected journal request. Keep both
+coordinator source methods exact, with no AnyMethod allowance for the coordinator.
 Native receiver dispatch is handled by the unchanged native-call policy; never
 turn on AllowAll, replace the receiver extension or impersonate a GrainService.
 
@@ -177,19 +175,39 @@ plus [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.
 The latter preserves the genuine store across two native runtimes and asserts
 the actual recovered shard, stable canonical journal instance, changed owner/fence,
 settled native work and exact timeout effect. It makes no process-restart claim.
-These cases have not executed. Retained-job process restart/adoption qualification,
-schedule-ACK uncertainty, frozen old-binary probe and complete Aspire SDK/MCP
-RF3 fault/resource evidence remain required before acceptance.
+Retained-job process restart/adoption, schedule-ACK uncertainty and complete
+Aspire SDK/MCP RF3 fault/resource qualification remain required before acceptance.
+Current local development evidence is recorded honestly in
+[status.json](../../implementation/status.json); a focused native operation, build
+or formatter pass does not qualify those complete gates.
 
-Development checkpoint, 2026-10-06: matching packages restored. Backend, native
-adapter, startup/reader fencing, selective lifecycle join and native saga-handler
-sources/tests are joined and unqualified. The final canonical build failed with456
-shared CrashHost/Comparisons diagnostics, and canonical formatting with1117;
-the104 reviewed stage paths had no reported finding in either check.
-The development receipt (report removed from repository)
-preserves the exact commands and distinguishes source review from acceptance.
-No native test execution or final successful build is claimed. A frozen
-old-binary reader rejection probe and all Aspire RF3/fault/resource gates remain open.
+TASK-ORL-JOURNAL-GRAPH-014 maps native provider caller identity to REQ/AC-ORL-013.
+JournaledStateManager starts a context-suppressed background work loop; its
+storage callbacks must not be classified as the scheduling grain's method.
+RuntimeJournalClient establishes its actual provider type and exact ReadCoreAsync
+or SendCommandAsync method through ManagedCode.Orleans.Graph's native
+RunWithCurrentCallerAsync API around the complete request-stream drain. The
+helper restores prior context on success, error and cancellation. Pair those
+identities with exact IRequestGrain.ExecuteStreamAsync graph transitions; copy
+all existing policy edges and retain default-deny. Remove the unused native
+manager wildcard and speculative concrete ProcessDueAsync allowance. Keep the
+concrete ExecuteJobAsync edge for the handler's actual separately authorized
+saga effect. Do not impersonate a coordinator or propagate a causal method
+which the native background loop does not preserve.
+
+The private agent packet owns Orleans Execution/RuntimeJournalClient.cs and
+Server Hosting/NativeJobGraphRegistration.cs. Use closed method identities from
+the client rather than duplicated literals; root freezes, reviews and joins.
+Preserve signed protected journal identity, fresh request grains, persisted
+authorization, cancellation/deadline, native CQRS backpressure and RF3 receipts.
+NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout must execute real
+scheduling, journal callbacks, duplicate dispatch and one canonical timeout and
+message effect. Full native saga, restart, identity/quota and stale/revoked/future
+controls run through Aspire after build/format; native caller restoration and
+denied wrong-method/target flows must preserve state and permit a healthy native
+follow-up. Add only genuine operation regressions where existing cases lack
+these outcomes. Process/RF3/Linux gates remain distinct. Rollback is the scoped
+source change, never an alternate journal route or data conversion.
 
 | Task | Ownership and dependency | Required join/evidence |
 |---|---|---|

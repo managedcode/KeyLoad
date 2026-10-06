@@ -28,7 +28,7 @@
     "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
     "restorePassed": true,
     "canonicalBuildPassed": true,
-    "verificationStage": "R106_current_source_full_build_and_format_passed_zero_drift_actual_Aspire_focused235_executed229_passed6_failed_full_unit_rerun_and_exact_source_Linux_qualification_pending",
+    "verificationStage": "R107_current_source_build_format_cold_diagnostic1_and_ClusterRouting218_passed_native_saga4_of5_failed_background_journal_Graph_attribution_full_unit_and_Linux_qualification_pending",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -44,7 +44,7 @@
       "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
     ],
     "canonicalFormatterPassed": true,
-    "localDevelopmentReceipt": "R106 full Release build and native formatter passed with 4,101 compile inputs, zero source drift, warnings or errors. Actual Aspire focused groups: ClusterRouting213/218, document mutations2/2, replica persistence8/8, reader capability2/2, native saga jobs4/5; zero skips and source/assembly drift. Six failures remain. Prior full R104 unit4023/4044 with21 failures remains red; a complete current rerun is pending. R104 unfiltered coverage includes performance child processes and is not qualifying functional coverage. Full coverage/CRAP and Linux delivery remain open."
+    "localDevelopmentReceipt": "R107 full Release build and native formatter passed with4,101 compile inputs and zero source drift/warnings/errors. Actual fresh-process Aspire diagnostic1/1 and ClusterRouting218/218 passed; native saga4/5 retains the same Graph rejection during background journal recovery. Original focused TRX/source/assembly receipts retain zero skips/drift. R106 document mutations2/2, replica persistence8/8 and reader capability2/2 passed. Prior full R104 unit4023/4044 with21 failures remains red; complete current unfiltered rerun pending. R104 performance-child coverage is ineligible; current focused functional binaries are partial only. Full functional coverage/CRAP and Linux delivery remain open."
   },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",
@@ -3778,8 +3778,8 @@
         "closure": "only full mapped criteria and required evidence close an acceptance"
       },
       "codeDelivery": {
-        "currentBuild": "R106 full Release passed: 4,101 compile inputs, zero source drift, zero warnings/errors; original log SHA2569d494dae978bec8022ac81beedfef15f19d21813efb79b4b73971cf08a0adfc8",
-        "formatter": "R106 full native dotnet format passed with zero source drift after current fixture joins",
+        "currentBuild": "R107 full Release passed4,101 inputs with zero source drift/warnings/errors; log SHA25673a047613fc36140ece8fb61d7400dcb1a24a3b18d4e5af6b064aca5e384ed2f",
+        "formatter": "R107 full native dotnet format passed4,101 inputs with zero source drift",
         "verificationScope": "local source-bound development; Linux delivered-source gates remain open"
       },
       "currentArchitectureDecisions": {
@@ -3788,22 +3788,23 @@
         "actualSvgRendersPassed": 116,
         "indexEntriesVerified": 111,
         "activeOldWorkflowFilenameReferences": 0,
-        "sourceBinding": "R5 binds all current ADR bytes and reuses verified R4 SVGs only after exact equality of all116 fence bodies; no new render or database qualification inferred"
+        "sourceBinding": "R7A binds all current111 ADR bytes after current-only narrative and journal-provider contract cleanup. All116 fence bodies and original R4 SVG hashes match exactly; index111 unique/resolved and obsolete workflow/cohort-plan scans pass. No new render or database qualification inferred"
       },
       "nativeQualification": {
         "physicalNativeId8Omission": "passed",
         "physicalRF3Id7MissingFieldFlow": "open",
-        "functionalCoverageAndCRAP": "open; R104 unfiltered binary is ineligible because native performance children can contribute. R106 focused functional binaries are partial evidence only; full source-bound coverage and CRAP remain unmeasured",
+        "functionalCoverageAndCRAP": "open; R104 unfiltered binary is ineligible because native performance children can contribute. R107 focused functional binaries are partial evidence only; full source-bound coverage and CRAP remain unmeasured",
         "scalarRecoveryRF3AndLinuxDelivery": "open",
         "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
         "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
-        "completeUnit": "Prior R104 actual Aspire full unit: 4,044 executed, 4,023 passed, 21 failed, zero skipped and source/assembly drift. R106 focused235 executed229 passed6 failed; these are not a complete suite. Full unfiltered ordinary unit rerun pending, separately from functional coverage.",
+        "completeUnit": "Prior R104 actual Aspire full unit:4,044 executed,4,023 passed,21 failed,zero skipped and source/assembly drift. R107 focused ClusterRouting218/218 and fresh diagnostic1/1 passed; native saga4/5 failed. These are separate focused runs, not a complete suite. Full unfiltered ordinary unit rerun pending, separately from functional coverage.",
         "focusedCurrentFixtures": {
-          "ClusterRouting": "213/218 passed; four C1 receipt/lifetime failures and one diagnostics failure remain",
-          "DocumentMutationImageReads": "2/2 passed",
-          "ReplicaNativePersistence": "8/8 passed",
-          "ReaderCapability": "2/2 passed",
-          "NativeSagaJobs": "4/5 passed; exact concrete coordinator/journal request Graph transition remains under diagnosis",
+          "ClusterRouting": "R107218/218 passed; TRX SHA256145e4fa04cebed567b59497f4d80b48429c1b6ef14510b48b1adb6f44b88087c",
+          "ColdDiagnostics": "R107 fresh-process1/1 passed; TRX SHA2569aa036e548dff39a9c999c8bfce173d5bc60ea8e2f25d506303446c678225666",
+          "DocumentMutationImageReads": "R1062/2 passed",
+          "ReplicaNativePersistence": "R1068/8 passed",
+          "ReaderCapability": "R1062/2 passed",
+          "NativeSagaJobs": "R1074/5 passed; TRX SHA2568971ea143c97d2718bc067d5e9a9cd3db5a10f6bd747a5c7e2ccbc236a57b0e2. Background journal work-loop method attribution needs observed confirmation; exact coordinator method edges did not repair it",
           "sourceAndAssemblyDrift": 0,
           "skipped": 0
         }

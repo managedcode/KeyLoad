@@ -65,8 +65,8 @@ internal static class C1OutcomeInspectionHealthyFollowUp
         await Assert.That(applied.Error).IsNull();
         await Assert.That(resolved.Error).IsNull();
         await Assert.That(stored).IsNotNull();
-        await Assert.That(stored!.Result).IsEqualTo(applied);
-        await Assert.That(stored.Result).IsEqualTo(resolved);
+        await AssertEquivalentResultAsync(applied, stored!.Result);
+        await AssertEquivalentResultAsync(resolved, stored.Result);
         await Assert.That(stored.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.Partition).IsEqualTo(partition);
         await Assert.That(stored.Result.Error).IsNull();
@@ -77,6 +77,49 @@ internal static class C1OutcomeInspectionHealthyFollowUp
             KeySpace.PartitionOutcome(partition, C1OutcomeInspectionAssertions.AdminId, commandId))).IsTrue();
         await Assert.That(EqualBytes(expectedCorruptOutcome, corruptOutcomeAfter)).IsTrue();
         await Assert.That(EqualBytes(expectedCorruptLocator, corruptLocatorAfter)).IsTrue();
+    }
+
+    private static async Task AssertEquivalentResultAsync(OperationResult expected, OperationResult actual)
+    {
+        await Assert.That(actual.Json).IsEqualTo(expected.Json);
+        await Assert.That(actual.Error).IsEqualTo(expected.Error);
+        await Assert.That(actual.SafeDetail).IsEqualTo(expected.SafeDetail);
+        await AssertEquivalentReceiptAsync(expected.Get<CommitReceipt>(), actual.Get<CommitReceipt>());
+    }
+
+    private static async Task AssertEquivalentReceiptAsync(CommitReceipt expected, CommitReceipt actual)
+    {
+        await Assert.That(actual.CommandId).IsEqualTo(expected.CommandId);
+        await Assert.That(actual.Token.Incarnation).IsEqualTo(expected.Token.Incarnation);
+        await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(expected.Token.AtomicPartitionId);
+        await Assert.That(actual.Token.Position).IsEqualTo(expected.Token.Position);
+        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(expected.Token.OwnershipEpoch);
+        await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
+        await Assert.That(actual.Mutations.Length).IsEqualTo(expected.Mutations.Length);
+        for (var index = 0; index < expected.Mutations.Length; index++)
+        {
+            await AssertEquivalentMutationAsync(expected.Mutations[index], actual.Mutations[index]);
+        }
+    }
+
+    private static async Task AssertEquivalentMutationAsync(MutationReceipt expected, MutationReceipt actual)
+    {
+        await Assert.That(actual.Kind).IsEqualTo(expected.Kind);
+        await Assert.That(actual.Resource).IsEqualTo(expected.Resource);
+        await Assert.That(actual.Id).IsEqualTo(expected.Id);
+        await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
+        await Assert.That(actual.CompositionReferences.Length).IsEqualTo(expected.CompositionReferences.Length);
+        for (var index = 0; index < expected.CompositionReferences.Length; index++)
+        {
+            var expectedReference = expected.CompositionReferences[index];
+            var actualReference = actual.CompositionReferences[index];
+            await Assert.That(actualReference.Partition.TenantId).IsEqualTo(expectedReference.Partition.TenantId);
+            await Assert.That(actualReference.Partition.DatabaseId).IsEqualTo(expectedReference.Partition.DatabaseId);
+            await Assert.That(actualReference.Partition.TransactionDomainId).IsEqualTo(expectedReference.Partition.TransactionDomainId);
+            await Assert.That(actualReference.Partition.PartitionKey).IsEqualTo(expectedReference.Partition.PartitionKey);
+            await Assert.That(actualReference.Collection).IsEqualTo(expectedReference.Collection);
+            await Assert.That(actualReference.Id).IsEqualTo(expectedReference.Id);
+        }
     }
 
     private static bool EqualBytes(byte[]? left, byte[]? right)

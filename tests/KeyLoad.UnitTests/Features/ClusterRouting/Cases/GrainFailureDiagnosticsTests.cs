@@ -83,13 +83,9 @@ internal sealed class GrainFailureDiagnosticsTests
 
     private static (GrainOperationReply Reply, string Output) RejectAndCapture(Exception error, Guid requestId, GrainFailureStage stage)
     {
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new EventSourceLogCapture();
-        GrainOperationReply reply;
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
-        {
-            reply = GrainReplyFactory.Failure(error, false, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), UnitRoutingOptions.Routing(), requestId, stage);
-        }
-
+        var reply = GrainReplyFactory.Failure(error, false, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), UnitRoutingOptions.Routing(), requestId, stage);
         return (reply, capture.Text);
     }
 }
