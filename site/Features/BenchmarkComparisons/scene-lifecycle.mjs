@@ -154,6 +154,7 @@ function renderFrame(state, time) {
     if (state.terminal) return;
     projectCoreImage(state);
     projectSiloLabels(state);
+    projectGraphLabels(state);
     recordFrame(state);
     state.rendererReady = true;
     configureMotionControl(state);
@@ -177,6 +178,14 @@ function projectCoreImage(state) {
 function projectSiloLabels(state) {
   const positions = state.graph.projectLabels(state.width, state.height);
   state.siloLabels.forEach((label, index) => {
+    label.style.left = positions[index].x + SCENE.core.pixels;
+    label.style.top = positions[index].y + SCENE.core.pixels;
+  });
+}
+
+function projectGraphLabels(state) {
+  const positions = state.graph.projectAnnotations(state.width, state.height);
+  state.graphLabels.forEach((label, index) => {
     label.style.left = positions[index].x + SCENE.core.pixels;
     label.style.top = positions[index].y + SCENE.core.pixels;
   });
@@ -222,6 +231,7 @@ function handlePointerMove(state, event) {
 }
 
 function recordFrame(state) {
+  state.host.dataset.sceneClients = String(state.graph.counts.clients);
   state.host.dataset.sceneSilos = String(state.graph.counts.silos);
   state.host.dataset.sceneGrains = String(state.graph.counts.grains);
   state.host.dataset.sceneLinks = String(state.graph.counts.links);

@@ -29,7 +29,12 @@ internal static class SiteBrowserVectorAssetAssertions
         var graph = await cdp.EvaluateAsync(SiteBrowserSceneTokens.ClusterGraphScript, false, token);
         await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.SilosField).GetInt32()).IsEqualTo(3);
         await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.GrainsField).GetInt32()).IsEqualTo(18);
-        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.LinksField).GetInt32()).IsEqualTo(30);
+        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.LinksField).GetInt32()).IsEqualTo(33);
+        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.ClientsField).GetInt32()).IsEqualTo(3);
+        await AssertGraphLabelsAsync(graph.GetProperty(SiteBrowserSceneTokens.ModelLabelsField),
+            SiteBrowserSceneTokens.ModelNames);
+        await AssertGraphLabelsAsync(graph.GetProperty(SiteBrowserSceneTokens.ClientLabelsField),
+            SiteBrowserSceneTokens.ClientNames);
         var description = graph.GetProperty(SiteBrowserSceneTokens.DescriptionField).GetString()!;
         await Assert.That(description.Contains("Orleans", StringComparison.OrdinalIgnoreCase)).IsTrue();
         await Assert.That(description.Contains("conceptual", StringComparison.OrdinalIgnoreCase)).IsTrue();
@@ -44,6 +49,23 @@ internal static class SiteBrowserVectorAssetAssertions
             await Assert.That(text.Contains("Node " + name, StringComparison.Ordinal)).IsTrue();
             await Assert.That(text.Contains("Grain activations", StringComparison.Ordinal)).IsTrue();
             await Assert.That(text.Contains("Node-local storage", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(label.GetProperty(SiteBrowserSceneTokens.VisibleField).GetBoolean()).IsTrue();
+            await Assert.That(label.GetProperty(SiteBrowserSceneTokens.ContainedField).GetBoolean()).IsTrue();
+        }
+    }
+
+    private static async Task AssertGraphLabelsAsync(JsonElement labels, string[] expectedNames)
+    {
+        var entries = labels.EnumerateArray().ToArray();
+        await Assert.That(entries.Length).IsEqualTo(expectedNames.Length);
+        foreach (var expected in expectedNames)
+        {
+            await Assert.That(entries.Count(label => string.Equals(label.GetProperty(SiteBrowserSceneTokens.TextField).GetString(),
+                expected, StringComparison.Ordinal))).IsEqualTo(SiteTokens.One);
+        }
+
+        foreach (var label in entries)
+        {
             await Assert.That(label.GetProperty(SiteBrowserSceneTokens.VisibleField).GetBoolean()).IsTrue();
             await Assert.That(label.GetProperty(SiteBrowserSceneTokens.ContainedField).GetBoolean()).IsTrue();
         }

@@ -70,3 +70,11 @@
 ## Owner correction: screenshot-identified animation, 2026-10-06
 
 - When the owner identifies an existing visual block in a screenshot and asks for another animation, replace that block's animation while preserving its surrounding landing layout. Do not infer a separate new block. A requested cluster illustration must show meaningful moving requests/grains/graph interactions, rather than a mostly static arrangement of cards or shapes.
+
+## Owner local visual review, 2026-10-07
+
+- For the current landing-animation iterations, show the completed local animated preview and obtain the owner's approval before the next commit/push. Prepare the implementation and verification first; approval is the final checkpoint for delivery.
+
+## Owner correction: clients and SQL in the cluster illustration, 2026-10-07
+
+- Show generic external clients connected to different silos in the hero cluster illustration. SQL belongs inside the database alongside its connected models; do not depict SQL or SDK as external client objects in this illustration.

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title description">
-  <title id="title">KeyLoad Orleans RF3 cluster</title>
-  <desc id="description">Conceptual Orleans cluster of three silos on Node A, Node B and Node C. Connected grain activations run inside each silo; node-local storage stays with each physical node. The canonical KeyLoad mark sits between the nodes. This illustration shows architecture, not live telemetry or replication timing.</desc>
+  <title id="title">KeyLoad Orleans RF3 cluster with connected clients</title>
+  <desc id="description">Conceptual Orleans cluster of three silos on Node A, Node B and Node C. Client 01, Client 02 and Client 03 each connect to a different silo. SQL is inside the database alongside grain activations representing Documents, Tables, Graphs, Vectors, Queues, Events, Blobs and Time series; node-local storage stays with each physical node. The canonical KeyLoad mark sits between the nodes. This illustration shows architecture, not live telemetry or replication timing.</desc>
   <defs>
     <linearGradient id="mark-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
     <linearGradient id="mark-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -19,18 +19,9 @@
       <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#mark-iris)"/>
       <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
-    <symbol id="grains" viewBox="0 0 200 130">
-      <g fill="none" stroke="#726778" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".63">
-        <path d="m34 33 63 29 65-32M34 33l13 66 50-37 62 37 3-69M47 99l112 0M97 62l0-43"/>
-      </g>
-      <g fill="#f7f5f3" stroke="#6e6475" stroke-width="1.8">
-        <circle cx="34" cy="33" r="9"/><circle cx="162" cy="30" r="9"/>
-        <circle cx="97" cy="62" r="14"/><circle cx="47" cy="99" r="9"/>
-        <circle cx="159" cy="99" r="9"/><circle cx="97" cy="19" r="6"/>
-      </g>
-      <circle cx="97" cy="62" r="5" fill="#8c7d98"/>
-    </symbol>
     <style>
+      .model{font-family:Arial,sans-serif;font-weight:600;fill:#49414f}
+      .client{font:600 20px Arial,sans-serif;fill:#423b48;letter-spacing:.5px}
       .heading{font:600 29px Arial,sans-serif;fill:#29272d;letter-spacing:-.6px}
       .node{font:600 22px Arial,sans-serif;fill:#36323b;letter-spacing:-.2px}
       .caption{font:20px Arial,sans-serif;fill:#68616d}
@@ -46,6 +37,21 @@
   <g fill="none" stroke="#a59aac" stroke-width="1.8" stroke-opacity=".65">
     <path d="M320 202 139 424M320 202l181 222M139 424h362"/>
   </g>
+  <!-- Client 01 connects to Silo A; Client 02 to Silo C; Client 03 to Silo B. Routes are conceptual. -->
+  <!-- Clients connect to the cluster; routes are conceptual, without timing claims. -->
+  <g fill="none" stroke="#b0a1b8" stroke-width="1.5">
+    <path d="M92 207v83q0 30 46 69"/>
+    <path d="M139 257 225 220"/>
+    <path d="M548 207v83q0 30-46 69"/>
+  </g>
+  <g>
+    <rect x="45" y="175" width="94" height="36" rx="10" fill="#ede5e9" stroke="#c7bbc9"/>
+    <text x="92" y="200" class="client" text-anchor="middle">Client 01</text>
+    <rect x="45" y="239" width="94" height="36" rx="10" fill="#ede5e9" stroke="#c7bbc9"/>
+    <text x="92" y="264" class="client" text-anchor="middle">Client 02</text>
+    <rect x="501" y="175" width="94" height="36" rx="10" fill="#ede5e9" stroke="#c7bbc9"/>
+    <text x="548" y="200" class="client" text-anchor="middle">Client 03</text>
+  </g>
   <!-- Silo C routes grains; the physical node retains its storage. -->
   <g>
     <ellipse cx="320.0" cy="351.95" rx="100.7" ry="15.161999999999999" fill="#3a333f" opacity=".055"/>
@@ -54,7 +60,7 @@
     <path d="M238 149v99" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
     <ellipse cx="320.0" cy="259" rx="95.0" ry="19.95" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
     <text x="320.0" y="169" class="node" text-anchor="middle">Silo C / Node C</text>
-    <use href="#grains" x="249.7" y="175" width="140.6" height="76"/>
+    <g><path d="M270 213 355 200 357 238" stroke="#8d8099" stroke-width="1.8"/><g><rect x="237" y="198" width="67" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="270.5" y="219" text-anchor="middle" class="model" font-size="17">Blobs</text></g><g><rect x="320" y="185" width="70" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="355" y="206" text-anchor="middle" class="model" font-size="17">SQL</text></g><g><rect x="310" y="223" width="94" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="357.0" y="244" text-anchor="middle" class="model" font-size="17">Time series</text></g></g>
     <path d="M225 274a95.0 19.95 0 0 1 190 0v45a95.0 19.95 0 0 1 -190 0Z" fill="url(#storage)"/>
     <ellipse cx="320.0" cy="274" rx="95.0" ry="19.95" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
     <path d="M241 315q79.0 29.924999999999997 158 0" fill="none" stroke="#fff" stroke-opacity=".13"/>
@@ -68,7 +74,7 @@
     <path d="M41 399v96" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
     <ellipse cx="138.0" cy="506" rx="110.0" ry="23.099999999999998" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
     <text x="138.0" y="419" class="node" text-anchor="middle">Silo A / Node A</text>
-    <use href="#grains" x="56.6" y="425" width="162.8" height="73"/>
+    <g><g fill="none" stroke="#8d8099" stroke-width="1.8"><path d="M94 445 142.5 481 197 445"/></g><g><rect x="40" y="430" width="108" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="94.0" y="451" text-anchor="middle" class="model" font-size="17">Documents</text></g><g><rect x="159" y="430" width="76" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="197.0" y="451" text-anchor="middle" class="model" font-size="17">Tables</text></g><g><rect x="100" y="466" width="85" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="142.5" y="487" text-anchor="middle" class="model" font-size="17">Graphs</text></g></g>
     <path d="M28 521a110.0 23.099999999999998 0 0 1 220 0v45a110.0 23.099999999999998 0 0 1 -220 0Z" fill="url(#storage)"/>
     <ellipse cx="138.0" cy="521" rx="110.0" ry="23.099999999999998" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
     <path d="M44 562q94.0 34.65 188 0" fill="none" stroke="#fff" stroke-opacity=".13"/>
@@ -82,7 +88,7 @@
     <path d="M405 399v96" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
     <ellipse cx="502.0" cy="506" rx="110.0" ry="23.099999999999998" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
     <text x="502.0" y="419" class="node" text-anchor="middle">Silo B / Node B</text>
-    <use href="#grains" x="420.6" y="425" width="162.8" height="73"/>
+    <g><g fill="none" stroke="#8d8099" stroke-width="1.8"><path d="M458 445 506.5 481 561 445"/></g><g><rect x="404" y="430" width="108" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="458.0" y="451" text-anchor="middle" class="model" font-size="17">Vectors</text></g><g><rect x="523" y="430" width="76" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="561.0" y="451" text-anchor="middle" class="model" font-size="17">Queues</text></g><g><rect x="464" y="466" width="85" height="30" rx="8" fill="#fff" fill-opacity=".75" stroke="#b9afc1"/><text x="506.5" y="487" text-anchor="middle" class="model" font-size="17">Events</text></g></g>
     <path d="M392 521a110.0 23.099999999999998 0 0 1 220 0v45a110.0 23.099999999999998 0 0 1 -220 0Z" fill="url(#storage)"/>
     <ellipse cx="502.0" cy="521" rx="110.0" ry="23.099999999999998" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
     <path d="M408 562q94.0 34.65 188 0" fill="none" stroke="#fff" stroke-opacity=".13"/>

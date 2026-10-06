@@ -20,6 +20,7 @@ function createState(host, motionButton, poster, statusElement) {
     host, motionButton, poster, statusElement, reducedMotion, coarsePointer,
     coreImage: host.querySelector(SCENE.core.selector),
     siloLabels: [...host.querySelectorAll('[data-silo-label]')],
+    graphLabels: [...host.querySelectorAll('[data-graph-label]')],
     renderer: null, graph: null, resizeObserver: null, intersectionObserver: null, animationFrame: SCENE.math.zero,
     initializationPending: false, rendererDisposalQueued: false, initialized: false, terminal: false,
     disposed: false, failed: false, visible: false, pageActive: true, rendererReady: false,

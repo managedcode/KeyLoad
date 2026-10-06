@@ -103,17 +103,29 @@
         <div class="scene-frame" id="cluster-scene" aria-label="Conceptual Orleans cluster: three silos host grains; storage remains node-local">
           <picture>
             <source media="(max-width: 760px)" srcset="./Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg">
-            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual Orleans cluster with three silos, grain activations and node-local storage.">
+            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual Orleans cluster: three clients reach different silos containing SQL, connected data-model grains and node-local storage.">
           </picture>
           <img class="cluster-core" src="./favicon.svg" alt="" aria-hidden="true" hidden>
           <div class="silo-label" data-silo-label><strong>Silo A <span>Node A</span></strong><small>Grain activations · Node-local storage</small></div>
           <div class="silo-label" data-silo-label><strong>Silo B <span>Node B</span></strong><small>Grain activations · Node-local storage</small></div>
           <div class="silo-label" data-silo-label><strong>Silo C <span>Node C</span></strong><small>Grain activations · Node-local storage</small></div>
+          <span class="model-label" data-graph-label>Documents</span>
+          <span class="model-label" data-graph-label>Tables</span>
+          <span class="model-label" data-graph-label>Graphs</span>
+          <span class="model-label" data-graph-label>Vectors</span>
+          <span class="model-label" data-graph-label>Queues</span>
+          <span class="model-label" data-graph-label>Events</span>
+          <span class="model-label" data-graph-label>Blobs</span>
+          <span class="model-label" data-graph-label>Time series</span>
+          <span class="model-label" data-graph-label>SQL</span>
+          <span class="client-label" data-graph-label><strong>Client 01</strong><small>Requests</small></span>
+          <span class="client-label" data-graph-label><strong>Client 02</strong><small>Requests</small></span>
+          <span class="client-label" data-graph-label><strong>Client 03</strong><small>Requests</small></span>
           <span class="scene-status" data-scene-status role="status">Static illustration.</span>
         </div>
         <ul class="stage-pins" aria-label="What the illustration stands for">
           <li><b>MCP</b> server built in</li>
-          <li><b>.NET SDK</b> typed client</li>
+          <li><b>SQL</b> shared language</li>
           <li><b>RF3</b> three replicas</li>
           <li><b>Orleans</b> grain per request</li>
         </ul>

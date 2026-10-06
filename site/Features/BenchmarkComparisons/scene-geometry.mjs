@@ -41,10 +41,12 @@ export const SCENE_TEXT = Object.freeze({
   motionUnavailable: 'Motion off',
 });
 
-const SILOS = Object.freeze([[-2.35, -0.45, 0.6], [2.35, -0.45, 0.6], [0, -0.1, -2.1]]);
+const SILOS = Object.freeze([[-2.35, -0.72, 0.6], [2.35, -0.72, 0.6], [0, -0.4, -2.1]]);
 const GRAINS = Object.freeze([[-0.55, 0.45, 0], [-0.18, 0.82, -0.22], [0.52, 0.55, -0.1],
   [-0.42, 1.14, 0.05], [0.36, 1.3, -0.26], [0.1, 0.32, 0.33]]);
 const EDGES = Object.freeze([[0, 1], [1, 2], [2, 5], [5, 0], [0, 3], [3, 1], [1, 4], [4, 2], [3, 4]]);
+const CLIENTS = Object.freeze([[-3.3, 1.55, 0.3], [3.3, 1.55, 0.3], [0, -1.28, 1.9]]);
+const MODEL_GRAINS = Object.freeze([0, 3, 4, 6, 9, 10, 12, 16, 14]);
 const COLORS = Object.freeze([0xeac8bd, 0xc7c5e7, 0xd2c1df]);
 
 export function createSceneGraph(THREE) {
@@ -67,14 +69,17 @@ export function createSceneGraph(THREE) {
   const white = new THREE.Color(0xffffff);
   root.add(grains);
   const links = SILOS.flatMap((_, silo) => EDGES.map(([a, b]) => [silo * GRAINS.length + a, silo * GRAINS.length + b]));
-  links.push([1, 13], [7, 16], [5, 11]);
+  links.push([1, 13], [7, 16], [5, 11], [18, 0], [19, 8], [20, 14]);
+  const clientPositions = CLIENTS.map(position => new THREE.Vector3(...position));
+  const endpoints = [...positions, ...clientPositions];
+  const clients = createClients(THREE, own, root, clientPositions, matrix);
   const geometry = own(new THREE.BufferGeometry());
-  const lines = new THREE.Float32BufferAttribute(new Float32Array((27 + 3 * 24) * 6), 3);
+  const lines = new THREE.Float32BufferAttribute(new Float32Array((27 + 6 * 24) * 6), 3);
   geometry.setAttribute('position', lines);
   root.add(new THREE.LineSegments(geometry,
     own(new THREE.LineBasicNodeMaterial({ color: 0x8b8299, transparent: true, opacity: 0.5 }))));
-  const packets = new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.085, 6, 4)),
-    own(new THREE.MeshBasicNodeMaterial({ color: 0xffffff })), 24);
+  const packets = new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.085, 6, 3)),
+    own(new THREE.MeshBasicNodeMaterial({ color: 0xffffff })), 48);
   own(packets);
   for (let index = 0; index < packets.count; index++) {
     color.setHex(0x8f7baa).lerp(white, (index % 8) / 9);
@@ -84,6 +89,8 @@ export function createSceneGraph(THREE) {
   const point = new THREE.Vector3();
   const projectLabels = createLabelProjection(THREE, root, camera);
   const projectCore = createCoreProjection(THREE, root, camera);
+  const projectAnnotations = createAnnotationProjection(THREE, root, camera,
+    [...MODEL_GRAINS.map(index => positions[index]), ...clientPositions]);
   const resize = aspect => {
     camera.aspect = aspect;
     camera.position.set(0, SCENE.world.cameraY, SCENE.world.cameraZ * Math.max(1, 1.65 / aspect));
@@ -92,8 +99,8 @@ export function createSceneGraph(THREE) {
   };
   const animate = seconds => {
     animateGrains(seconds, positions, grains, matrix, color, white);
-    updateLinks(links, positions, lines, point);
-    animatePackets(seconds, links, positions, packets, matrix, point);
+    updateLinks(links, endpoints, lines, point);
+    animatePackets(seconds, links, endpoints, packets, matrix, point);
     nodes.forEach((node, index) => {
       node.emissiveIntensity = Math.pow(Math.max(0, Math.sin(seconds * 2.1 - index * 0.35)), 8) * 0.7;
     });
@@ -101,8 +108,8 @@ export function createSceneGraph(THREE) {
   resize(1);
   animate(0);
   return {
-    scene, camera, root, projectCore, projectLabels, resize, animate,
-    counts: { silos: nodes.length, grains: positions.length, links: links.length },
+    scene, camera, root, projectCore, projectLabels, projectAnnotations, resize, animate,
+    counts: { silos: nodes.length, grains: positions.length, links: links.length, clients: clients.count },
     dispose: () => { for (const value of resources) value.dispose(); resources.clear(); },
   };
 }
@@ -150,7 +157,7 @@ function animatePackets(seconds, links, positions, packets, matrix, point) {
   for (let index = 0; index < packets.count; index++) {
     const route = Math.floor(index / 8);
     const trail = index % 8;
-    const progress = ((seconds * 0.34 + route / 3 - trail * 0.016) % 1 + 1) % 1;
+    const progress = ((seconds * 0.34 + route / 6 - trail * 0.016) % 1 + 1) % 1;
     const linkIndex = 27 + route;
     routePoint(links[linkIndex], positions, progress, linkIndex, point);
     const scale = 1 - trail * 0.115;
@@ -158,6 +165,44 @@ function animatePackets(seconds, links, positions, packets, matrix, point) {
     packets.setMatrixAt(index, matrix);
   }
   packets.instanceMatrix.needsUpdate = true;
+}
+
+function createClients(THREE, own, root, positions, matrix) {
+  const clients = new THREE.InstancedMesh(own(new THREE.BoxGeometry(0.84, 0.35, 0.07)),
+    own(new THREE.MeshStandardNodeMaterial({ color: 0x34343b, roughness: 0.35, metalness: 0.15 })), positions.length);
+  own(clients);
+  positions.forEach((position, index) => clients.setMatrixAt(index, matrix.makeTranslation(position.x, position.y, position.z)));
+  root.add(clients);
+  return clients;
+}
+
+function createAnnotationProjection(THREE, root, camera, positions) {
+  const point = new THREE.Vector3();
+  const result = positions.map(() => ({ x: 0, y: 0 }));
+  return (width, height) => {
+    positions.forEach((position, index) => {
+      point.copy(position).applyMatrix4(root.matrixWorld).project(camera);
+      const margin = index < MODEL_GRAINS.length ? 38 : (width < 600 ? 23 : 45);
+      result[index].x = Math.max(margin, Math.min(width - margin, (point.x + 1) * width / 2));
+      result[index].y = Math.max(34, Math.min(height - 34, (1 - point.y) * height / 2));
+    });
+    // Keep the callouts readable while their grain anchors move through the graph.
+    const gap = width < 600 ? 18 : 24;
+    for (let pass = 0; pass < 3; pass++) {
+      for (let left = 0; left < MODEL_GRAINS.length; left++) {
+        for (let right = left + 1; right < MODEL_GRAINS.length; right++) {
+          const a = result[left], b = result[right];
+          if (Math.abs(a.x - b.x) < 62 && Math.abs(a.y - b.y) < gap) {
+            const offset = (gap - Math.abs(a.y - b.y)) / 2;
+            const direction = a.y <= b.y ? -1 : 1;
+            a.y += offset * direction;
+            b.y -= offset * direction;
+          }
+        }
+      }
+    }
+    return result;
+  };
 }
 
 function createSilo(THREE, own, root, position, color) {
