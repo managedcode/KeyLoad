@@ -8,6 +8,7 @@ internal sealed class ServerOnlyImagePreparationTests
     private const string ComparisonField = "comparison";
     private const string RejectedField = "rejected";
     private const string OutputField = "output";
+    private const string EngineRejectedField = "engineRejected";
     private const string Probe = """
         import { pathToFileURL } from 'node:url';
         import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
@@ -23,12 +24,17 @@ internal sealed class ServerOnlyImagePreparationTests
           try { api.preparationImageKinds(args); } catch { rejected++; }
         }
         const evidence = await import(pathToFileURL(evidenceModule).href);
+        const engine = await import(pathToFileURL(path.join(path.dirname(preparationModule), 'image-engine.mjs')).href);
         const directory = await mkdtemp(path.join(os.tmpdir(), 'keyload-server-output-'));
         try {
+          await writeFile(path.join(directory, 'Dockerfile'), await readFile('Dockerfile'));
+          await engine.verifyDockerfilePins(directory, server);
+          let engineRejected = false;
+          try { await engine.verifyDockerfilePins(directory); } catch { engineRejected = true; }
           const output = path.join(directory, 'output');
           await writeFile(output, '');
           await evidence.appendImageOutputs({githubOutput: output}, 'server-reference');
-          process.stdout.write(JSON.stringify({server, comparison, rejected, output: await readFile(output, 'utf8')}));
+          process.stdout.write(JSON.stringify({server, comparison, rejected, engineRejected, output: await readFile(output, 'utf8')}));
         } finally { await rm(directory, {recursive: true, force: true}); }
         """;
 
@@ -45,6 +51,7 @@ internal sealed class ServerOnlyImagePreparationTests
             .Select(value => value.GetString()!).ToArray()).IsEquivalentTo(["server"]);
         await Assert.That(report.RootElement.GetProperty(ComparisonField).GetArrayLength()).IsEqualTo(2);
         await Assert.That(report.RootElement.GetProperty(RejectedField).GetInt32()).IsEqualTo(3);
+        await Assert.That(report.RootElement.GetProperty(EngineRejectedField).GetBoolean()).IsTrue();
         await Assert.That(report.RootElement.GetProperty(OutputField).GetString()).IsEqualTo("server-image=server-reference\n");
     }
 }

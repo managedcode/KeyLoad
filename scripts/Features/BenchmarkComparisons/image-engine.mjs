@@ -14,8 +14,9 @@ const linuxPlatform = 'linux';
 const dockerCommand = dockerArgument.docker;
 const expectedSchemaPins = Object.freeze([baseImage.sdk, baseImage.aspnet]);
 
-export async function verifyDockerfilePins(workspace) {
-  const dockerfiles = [imageBuild.serverDockerfile, imageBuild.runnerDockerfile];
+export async function verifyDockerfilePins(workspace, kinds = [imageKind.server, imageKind.comparisons]) {
+  const dockerfiles = kinds.map(kind => kind === imageKind.server
+    ? imageBuild.serverDockerfile : imageBuild.runnerDockerfile);
   for (const relativePath of dockerfiles) {
     const source = await readFile(path.join(workspace, relativePath), 'utf8').catch(() => emptyValue);
     if (expectedSchemaPins.some(pin => !source.includes(pin))) throw new Error(message.invalidWorkspace);

@@ -47,7 +47,7 @@ single test entry and partial-start cleanup. Source and qualification are pendin
 | REQ-TEST-011: RF3 is owned once and startup failure releases resources | AC-TEST-011: outer test model contains no idle duplicate nodes; tested child AppHost owns three Docker nodes and discovered SDK/MCP endpoints; every partial start is disposed before deleting only its owned directory | real Aspire model tests, ClusterFixture source lifetime review, actual Docker RF3/recovery artifacts |
 
 Canonical source: AppHost Features/TestInfrastructure; actual model regressions:
-ComparisonTests Features/TestInfrastructure; shared IntegrationTests fixture and
+ComparisonTests Features/BenchmarkComparisons/UnitContracts; functional infrastructure tests remain in UnitTests Features/TestInfrastructure. Shared IntegrationTests fixture and
 CI composition are root-owned joins. No public database or persisted format change.
 Local entry runs are development evidence; delivered-source Linux gates remain.
 

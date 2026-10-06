@@ -14,10 +14,13 @@
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
+    "localMovedContractTestsPassed": 27,
+    "compiledUnitBenchmarkTypes": 0,
+    "compiledComparisonBenchmarkTypes": 588,
     "verificationStage": "Projects and CI separated; full Release build, formatter, governance and focused Aspire regressions passed; full Linux suites remain unqualified",
     "remaining": [
       "Complete exact-source Linux unit/scalar/recovery/RF3 qualification",
-      "Local full unit was interrupted by an AppHost stop request; local recovery observed native text process argument failures outside the moved benchmark scope"
+      "Local complete suites remain failed/unqualified: Unix socket paths exceed the macOS limit; adaptive full-text fallback timed out; recovery native-text child arguments fail before the requested stage"
     ]
   },
   "TIME-PROVIDER-001": {

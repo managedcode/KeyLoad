@@ -18,7 +18,7 @@ export async function prepareImages(environment = process.env, argv = process.ar
   const context = createRunContext(environment, process.platform);
   await ensureEvidenceDirectory(context);
   await verifySourceCheckout(context);
-  await verifyDockerfilePins(context.workspace);
+  await verifyDockerfilePins(context.workspace, kinds);
   await verifyDockerEngine(context);
   await verifyBuildx(context);
 
