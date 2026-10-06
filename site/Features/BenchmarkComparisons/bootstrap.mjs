@@ -51,6 +51,12 @@ function start() {
       isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
     }).catch(() => {});
   }
+  // Resolve the initial fragment before observing the hero: smooth anchor travel
+  // must not initialize its renderer while visiting a lower section directly.
+  if (token === SCENE.nextGeneration && location.hash) {
+    document.getElementById(location.hash.slice(SCENE.nextGeneration))
+      ?.scrollIntoView({ behavior: 'instant' });
+  }
   deferred = setTimeout(() => startScene(token), SCENE.delay);
 }
 

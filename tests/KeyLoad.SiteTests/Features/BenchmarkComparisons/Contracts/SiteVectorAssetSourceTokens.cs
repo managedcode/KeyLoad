@@ -27,21 +27,13 @@ internal static class SiteVectorAssetSourceTokens
     public const string ProtocolRelativePrefix = "//";
     public const string ImportRuleMarker = "@import";
     public const string UrlFunctionPattern = "url\\s*\\(";
-    public const string HtmlImagePattern = "<img\\b[^>]*>";
-    public const string HtmlAttributePattern = """(?<name>[a-z-]+)\s*=\s*["'](?<value>[^"']*)["']""";
     public const string SvgUrlReferencePattern = """url\(\s*#(?<fragment>[^)\s'";]+)\s*\)""";
     public const string SvgHrefFragmentPattern = "^#(?<fragment>[^#\\s]+)$";
     public const string FragmentGroup = "fragment";
-    public const string RegexNameGroup = "name";
-    public const string RegexValueGroup = "value";
     public const string TextJoinSeparator = " ";
     public const string QueryReferenceFailure = "The vector poster contains an unresolved or ambiguous local reference.";
     public const string MobilePosterRelativePath = "site/Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg";
 
-    public static readonly Regex HtmlImageTag = new(HtmlImagePattern,
-        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-    public static readonly Regex HtmlAttribute = new(HtmlAttributePattern,
-        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     public static readonly Regex SvgUrlReference = new(SvgUrlReferencePattern,
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     public static readonly Regex SvgHrefFragment = new(SvgHrefFragmentPattern,

@@ -89,7 +89,7 @@
   <main>
     <section class="hero" id="product" aria-labelledby="page-title">
       <div class="hero-head">
-        <p class="hero-status"><span class="status-dot" aria-hidden="true"></span>Open&nbsp;source · Early&nbsp;development · .NET&nbsp;10 · Orleans</p>
+        <p class="hero-status"><span class="status-dot" aria-hidden="true"></span>Source&nbsp;available · Early&nbsp;development · .NET&nbsp;10 · Orleans</p>
         <h1 id="page-title">The database <span class="h1-break">for <span class="kl-mark">AI&nbsp;agents.</span></span></h1>
       </div>
       <div class="hero-lede">
@@ -100,12 +100,15 @@
         </div>
       </div>
       <figure class="stage" aria-labelledby="scene-caption">
-        <div class="scene-frame" id="cluster-scene" aria-label="Conceptual view of one engine holding every data shape an agent needs">
+        <div class="scene-frame" id="cluster-scene" aria-label="Conceptual Orleans cluster: three silos host grains; storage remains node-local">
           <picture>
             <source media="(max-width: 760px)" srcset="./Features/BenchmarkComparisons/assets/cluster-poster-mobile.svg">
-            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual illustration: cards for SQL, documents, graphs, events, vectors, queues, time series and blobs circle one KeyLoad engine.">
+            <img class="cluster-poster" src="./Features/BenchmarkComparisons/assets/cluster-poster.svg" alt="Conceptual Orleans cluster with three silos, grain activations and node-local storage.">
           </picture>
           <img class="cluster-core" src="./favicon.svg" alt="" aria-hidden="true" hidden>
+          <div class="silo-label" data-silo-label><strong>Silo A <span>Node A</span></strong><small>Grain activations · Node-local storage</small></div>
+          <div class="silo-label" data-silo-label><strong>Silo B <span>Node B</span></strong><small>Grain activations · Node-local storage</small></div>
+          <div class="silo-label" data-silo-label><strong>Silo C <span>Node C</span></strong><small>Grain activations · Node-local storage</small></div>
           <span class="scene-status" data-scene-status role="status">Static illustration.</span>
         </div>
         <ul class="stage-pins" aria-label="What the illustration stands for">
@@ -115,7 +118,7 @@
           <li><b>Orleans</b> grain per request</li>
         </ul>
         <div class="scene-caption-row">
-          <figcaption id="scene-caption"><span class="caption-kicker">One engine, every shape of agent data</span></figcaption>
+          <figcaption id="scene-caption"><span class="caption-kicker">One cluster. Many grains. Three storage owners.</span><small class="scene-reference">Conceptual Orleans cluster · Grains route work; storage stays with each node. <a href="https://learn.microsoft.com/dotnet/orleans/overview#what-are-grains" target="_blank" rel="noreferrer">Explore Orleans ↗</a></small></figcaption>
           <button class="motion-button" id="scene-motion" type="button" aria-pressed="false" aria-controls="cluster-scene" disabled>Pause motion</button>
         </div>
       </figure>

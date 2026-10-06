@@ -3,12 +3,9 @@ namespace KeyLoad.SiteTests.Features.BenchmarkComparisons;
 internal static class SiteVectorAssetTokens
 {
     public const string PosterRelativePath = "site/Features/BenchmarkComparisons/assets/cluster-poster.svg";
-    public const string IndexRelativePath = "site/Features/BenchmarkComparisons/index.html";
     public const string FaviconRelativePath = "site/favicon.svg";
     public const string PosterSelector = ".cluster-poster";
     public const string LiveMarkSelector = "img.cluster-core";
-    public const string LiveMarkClass = "cluster-core";
-    public const string CanonicalFaviconUrl = "./favicon.svg";
     public const string SvgNamespace = "http://www.w3.org/2000/svg";
     public const string HrefAttribute = "href";
     public const string XlinkHrefAttribute = "xlink:href";
@@ -21,24 +18,11 @@ internal static class SiteVectorAssetTokens
     public const string ScriptElement = "script";
     public const string FillAttribute = "fill";
     public const string StrokeAttribute = "stroke";
-    public const string SceneFallbackDescription = "time series and blobs circle one KeyLoad engine.";
     public const string MissingPosterFailure = "The committed scene poster must be a readable SVG document.";
-    public const string UnsafePosterFailure = "The scene poster must contain vector artwork without scripts or external assets.";
-    public const string MissingModelLabelFailure = "The scene poster must name all eight data models.";
-    public const string MissingLiveMarkFailure = "The page must contain one live cluster logo using the canonical favicon.";
-    public const string MissingCanonicalFaviconFailure = "The canonical favicon source must exist as an SVG asset.";
     public const string LiveMarkNotReadyFailure = "The ready scene must expose exactly one loaded, projected canonical SVG mark.";
     public const string PosterFallbackFailure = "The poster state must show the vector illustration and hide the live mark.";
-    public const string PosterLabelSql = "SQL";
-    public const string PosterLabelDocuments = "Documents";
-    public const string PosterLabelGraphs = "Graphs";
-    public const string PosterLabelEvents = "Events";
-    public const string PosterLabelVectors = "Vectors";
-    public const string PosterLabelQueues = "Queues";
-    public const string PosterLabelTimeSeries = "Time series";
-    public const string PosterLabelBlobs = "Blobs";
     public const string DataImageScript = "(() => { const img = document.querySelectorAll('img.cluster-core'); const node = img[0]; const style = node ? getComputedStyle(node) : null; const rect = node ? node.getBoundingClientRect() : null; const host = document.querySelector('#cluster-scene')?.getBoundingClientRect(); const poster = document.querySelector('.cluster-poster'); const posterStyle = poster ? getComputedStyle(poster) : null; return { count: img.length, loaded: !!node && node.complete && node.naturalWidth > 0 && node.naturalHeight > 0, source: node ? new URL(node.currentSrc || node.src, document.baseURI).pathname : '', display: style?.display || '', visibility: style?.visibility || '', opacity: style?.opacity || '', width: style?.width || '', height: style?.height || '', offsetWidth: node?.offsetWidth || 0, offsetHeight: node?.offsetHeight || 0, rectWidth: rect?.width || 0, rectHeight: rect?.height || 0, transform: style?.transform || '', posterVisibility: posterStyle?.visibility || '', bounds:{ contained: !!rect && !!host && rect.left >= host.left && rect.right <= host.right && rect.top >= host.top && rect.bottom <= host.bottom, centered: !!rect && !!host && Math.abs(rect.left + rect.width / 2 - host.left - host.width / 2) <= host.width / 10 } }; })()";
-    public const string PosterStateScript = "(() => { const poster = document.querySelector('.cluster-poster'); const mark = document.querySelector('img.cluster-core'); const p = poster ? getComputedStyle(poster) : null; const m = mark ? getComputedStyle(mark) : null; return { posterVisible: !!poster && p.display !== 'none' && p.visibility !== 'hidden' && Number(p.opacity) > 0, markVisible: !!mark && m.display !== 'none' && m.visibility !== 'hidden' && Number(m.opacity) > 0, markCount: document.querySelectorAll('img.cluster-core').length }; })()";
+    public const string PosterStateScript = "(() => { const poster = document.querySelector('.cluster-poster'); const mark = document.querySelector('img.cluster-core'); const p = poster ? getComputedStyle(poster) : null; const m = mark ? getComputedStyle(mark) : null; return { posterVisible: !!poster && p.display !== 'none' && p.visibility !== 'hidden' && Number(p.opacity) > 0, markVisible: !!mark && m.display !== 'none' && m.visibility !== 'hidden' && Number(m.opacity) > 0, markCount: document.querySelectorAll('img.cluster-core').length, description: poster?.alt || '', labelsHidden: [...document.querySelectorAll('[data-silo-label]')].every(label => { const style = getComputedStyle(label); return style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0; }) }; })()";
     public const string Matrix3dPrefix = "matrix3d(";
     public const string BoundsField = "bounds";
     public const string ContainedField = "contained";
@@ -70,16 +54,8 @@ internal static class SiteVectorAssetTokens
     public const string HiddenVisibility = "hidden";
     public const string CssNone = "none";
     public const string RepositoryRootFile = "site/scripts/build.mjs";
-    public const string HtmlImageTagPrefix = "<img";
-    public const string ClassAttributeName = "class";
-    public const string SourceAttributeName = "src";
-    public const string Quote = "\"";
-    public const string TagEnd = ">";
-    public const string Whitespace = " ";
     public const string CssPixelSuffix = "px";
     public const string ExpectedFaviconPath = "/favicon.svg";
-    public const string RegexNameGroup = "name";
-    public const string RegexValueGroup = "value";
     public const char MatrixClosingCharacter = ')';
     public const double PositiveSize = 0;
     public const double CssDimensionTolerance = 1;
@@ -89,13 +65,14 @@ internal static class SiteVectorAssetTokens
 
     public static readonly string[] RequiredLabels =
     [
-        PosterLabelSql,
-        PosterLabelDocuments,
-        PosterLabelGraphs,
-        PosterLabelEvents,
-        PosterLabelVectors,
-        PosterLabelQueues,
-        PosterLabelTimeSeries,
-        PosterLabelBlobs,
+        "Orleans",
+        "Silo A",
+        "Silo B",
+        "Silo C",
+        "Node A",
+        "Node B",
+        "Node C",
+        "Grain activations",
+        "Node-local storage",
     ];
 }

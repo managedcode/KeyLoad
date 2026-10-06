@@ -153,3 +153,7 @@ content when benchmark evidence is unavailable without inventing a numeric resul
 Rollback restores a coherent site asset/source set and retains the last verified
 publication and immutable inputs. It never restores a publisher bypass, synthetic
 metrics or weakened coverage, source, browser or provenance gates.
+
+## Orleans graph presentation contract, 2026-10-06
+
+REQ/AC/TASK-BC-SCENE-001 replaces the carousel with the conceptual Orleans graph described in BenchmarkComparisons.md. Preserve native pinned WebGPU/node materials, canonical vector logo, lifecycle and budgets. Three silos host eighteen illustrative activations; thirty routing links and three node-local storage bases explain ownership without claiming live cluster state. The feature spec freezes file ownership, automated browser/asset checks, delivery order and source-revert rollback. No database topology or public protocol changes.

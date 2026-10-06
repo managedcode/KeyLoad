@@ -15,10 +15,36 @@ internal static class SiteBrowserVectorAssetAssertions
         await Assert.That(CssNumber(state.GetProperty(SiteVectorAssetTokens.OpacityField).GetString()))
             .IsGreaterThan(SiteVectorAssetTokens.PositiveSize);
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.PosterVisibilityField).GetString()).IsEqualTo(SiteVectorAssetTokens.HiddenVisibility);
+        await AssertClusterGraphAsync(cdp, cancellationToken);
         await AssertProjectedDimensions(state);
         var transform = state.GetProperty(SiteVectorAssetTokens.TransformField).GetString() ?? string.Empty;
         await Assert.That(transform.StartsWith(SiteVectorAssetTokens.Matrix3dPrefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(transform.EndsWith(SiteVectorAssetTokens.MatrixClosingCharacter)).IsTrue();
+    }
+
+    private static async Task AssertClusterGraphAsync(SiteBrowserCdpClient cdp, CancellationToken token)
+    {
+        var graph = await cdp.EvaluateAsync(SiteBrowserSceneTokens.ClusterGraphScript, false, token);
+        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.SilosField).GetInt32()).IsEqualTo(3);
+        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.GrainsField).GetInt32()).IsEqualTo(18);
+        await Assert.That(graph.GetProperty(SiteBrowserSceneTokens.LinksField).GetInt32()).IsEqualTo(30);
+        var description = graph.GetProperty(SiteBrowserSceneTokens.DescriptionField).GetString()!;
+        await Assert.That(description.Contains("Orleans", StringComparison.OrdinalIgnoreCase)).IsTrue();
+        await Assert.That(description.Contains("conceptual", StringComparison.OrdinalIgnoreCase)).IsTrue();
+        var labels = graph.GetProperty(SiteBrowserSceneTokens.LabelsField).EnumerateArray().ToArray();
+        await Assert.That(labels.Length).IsEqualTo(3);
+        for (var index = 0; index < labels.Length; index++)
+        {
+            var label = labels[index];
+            var text = label.GetProperty(SiteBrowserSceneTokens.TextField).GetString()!;
+            var name = SiteBrowserSceneTokens.SiloNames[index];
+            await Assert.That(text.Contains("Silo " + name, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(text.Contains("Node " + name, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(text.Contains("Grain activations", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(text.Contains("Node-local storage", StringComparison.Ordinal)).IsTrue();
+            await Assert.That(label.GetProperty(SiteBrowserSceneTokens.VisibleField).GetBoolean()).IsTrue();
+            await Assert.That(label.GetProperty(SiteBrowserSceneTokens.ContainedField).GetBoolean()).IsTrue();
+        }
     }
 
     public static async Task AssertPosterFallbackAsync(SiteBrowserCdpClient cdp,
@@ -28,6 +54,10 @@ internal static class SiteBrowserVectorAssetAssertions
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.PosterVisibleField).GetBoolean()).IsTrue();
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.MarkVisibleField).GetBoolean()).IsFalse();
         await Assert.That(state.GetProperty(SiteVectorAssetTokens.MarkCountField).GetInt32()).IsEqualTo(SiteTokens.One);
+        await Assert.That(state.GetProperty(SiteBrowserSceneTokens.LabelsHiddenField).GetBoolean()).IsTrue();
+        var description = state.GetProperty(SiteBrowserSceneTokens.DescriptionField).GetString()!;
+        await Assert.That(description.Contains("Orleans", StringComparison.OrdinalIgnoreCase)).IsTrue();
+        await Assert.That(description.Contains("conceptual", StringComparison.OrdinalIgnoreCase)).IsTrue();
     }
 
     public static async Task<JsonElement> ReadMarkAsync(SiteBrowserCdpClient cdp,

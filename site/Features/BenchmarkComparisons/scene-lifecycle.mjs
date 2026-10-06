@@ -125,7 +125,7 @@ function resizeRenderer(state) {
   const ratio = Math.min(deviceRatio, areaRatio);
   state.renderer.setPixelRatio(ratio);
   state.renderer.setSize(state.width, state.height, false);
-  state.graph.camera.aspect = state.width / state.height;
+  state.graph.resize(state.width / state.height);
   state.graph.camera.updateProjectionMatrix();
   const pixels = state.renderer.domElement.width * state.renderer.domElement.height;
   if (pixels > SCENE.limits.maxBufferPixels) {
@@ -153,6 +153,7 @@ function renderFrame(state, time) {
     state.renderer.render(state.graph.scene, state.graph.camera);
     if (state.terminal) return;
     projectCoreImage(state);
+    projectSiloLabels(state);
     recordFrame(state);
     state.rendererReady = true;
     configureMotionControl(state);
@@ -171,6 +172,14 @@ function projectCoreImage(state) {
   state.coreImage.style.width = projection.size + SCENE.core.pixels;
   state.coreImage.style.height = projection.size + SCENE.core.pixels;
   state.coreImage.style.transform = projection.transform;
+}
+
+function projectSiloLabels(state) {
+  const positions = state.graph.projectLabels(state.width, state.height);
+  state.siloLabels.forEach((label, index) => {
+    label.style.left = positions[index].x + SCENE.core.pixels;
+    label.style.top = positions[index].y + SCENE.core.pixels;
+  });
 }
 
 function updateSceneMotion(state, time) {
@@ -213,6 +222,9 @@ function handlePointerMove(state, event) {
 }
 
 function recordFrame(state) {
+  state.host.dataset.sceneSilos = String(state.graph.counts.silos);
+  state.host.dataset.sceneGrains = String(state.graph.counts.grains);
+  state.host.dataset.sceneLinks = String(state.graph.counts.links);
   const metrics = state.renderer.info.render;
   const canvas = state.renderer.domElement;
   const bufferPixels = canvas.width * canvas.height;

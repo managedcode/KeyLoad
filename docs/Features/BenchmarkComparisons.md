@@ -1382,3 +1382,9 @@ real rendered bounding boxes in both the measured responsive browser case and
 `SiteContentBrowserTests` desktop/mobile case through the Aspire `site` entry.
 A missing lower-section stylesheet must fail these assertions. Native build,
 site qualification and actual Website/Pages delivery evidence remain required.
+
+## Orleans cluster illustration (2026-10-06)
+
+REQ-BC-SCENE-001 / AC-BC-SCENE-001 / TASK-BC-SCENE-001 replace the model-card carousel with three illustrative silo/node groups, eighteen distinct grain activations and thirty intra/inter-silo links. Each node retains its own storage base; grain routing must not suggest migration of storage handles or live telemetry. Desktop and mobile SVG posters convey the same concepts. Native projected DOM labels and the canonical SVG mark remain sharp across viewport/DPR changes. Motion, pause, reduced motion, visibility, disposal and existing renderer budgets remain mandatory.
+
+ADR-040 owns this presentation-only replacement. Files: scene-geometry.mjs owns topology and motion; scene-lifecycle.mjs/scene-observers.mjs project labels and report actual graph counts; index.html/scene.css own semantics and presentation; existing cluster-poster assets own fallback. SiteVectorAssetTests and SiteBrowserVectorAssetAssertions verify actual asset semantics, native graph counts, label containment and Retina poses through Aspire. Existing scene suites retain lifecycle/budget gates. Ordered delivery: specify, replace assets/graph, native browser qualification, scoped checkpoint, Website qualification and Pages verification. Rollback is a reviewed source revert; no alternative scene implementation is retained.

@@ -1,84 +1,97 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1827 794" role="img" aria-labelledby="title description">
-  <title id="title">Conceptual KeyLoad engine for AI agents</title>
-  <desc id="description">Cards for SQL, documents, graphs, events, vectors, queues, time series and blobs circle one KeyLoad engine.</desc>
+  <title id="title">KeyLoad Orleans RF3 cluster</title>
+  <desc id="description">Conceptual Orleans cluster of three silos on Node A, Node B and Node C. Connected grain activations run inside each silo; node-local storage stays with each physical node. The canonical KeyLoad mark sits between the nodes. This illustration shows architecture, not live telemetry or replication timing.</desc>
   <defs>
-    <linearGradient id="keyload-mark-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
-    <linearGradient id="keyload-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
-    <linearGradient id="keyload-iris" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".5" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
-    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d8c6c0" stop-opacity="0"/><stop offset=".5" stop-color="#c7b7bd" stop-opacity=".76"/><stop offset="1" stop-color="#d8c6c0" stop-opacity="0"/></linearGradient>
-    <!-- Canonical mark geometry copied from site/favicon.svg. -->
+    <linearGradient id="mark-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3d"/><stop offset="1" stop-color="#0d0e10"/></linearGradient>
+    <linearGradient id="mark-sheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="mark-iris" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb08a"/><stop offset=".5" stop-color="#e3a6ff"/><stop offset="1" stop-color="#9fb4ff"/></linearGradient>
+    <linearGradient id="glass-peach" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#fff" stop-opacity=".94"/><stop offset=".45" stop-color="#f1ded4" stop-opacity=".8"/><stop offset="1" stop-color="#dfcbc5" stop-opacity=".6"/></linearGradient>
+    <linearGradient id="glass-lilac" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#fff" stop-opacity=".94"/><stop offset=".45" stop-color="#e9deed" stop-opacity=".8"/><stop offset="1" stop-color="#cfc6db" stop-opacity=".6"/></linearGradient>
+    <linearGradient id="glass-iris" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#fff" stop-opacity=".94"/><stop offset=".45" stop-color="#e0e1ef" stop-opacity=".8"/><stop offset="1" stop-color="#c8cbdf" stop-opacity=".6"/></linearGradient>
+    <linearGradient id="storage" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#444149"/><stop offset="1" stop-color="#242329"/></linearGradient>
+    <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#bfb4be" stop-opacity="0"/><stop offset=".5" stop-color="#bfb4be" stop-opacity=".65"/><stop offset="1" stop-color="#bfb4be" stop-opacity="0"/></linearGradient>
+    <!-- Canonical vector geometry and colors from site/favicon.svg. -->
     <symbol id="keyload-mark" viewBox="0 0 40 40">
-      <rect width="40" height="40" rx="10" fill="url(#keyload-mark-gradient)"/>
-      <rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#keyload-sheen)" stroke="#fff" stroke-opacity=".14"/>
+      <rect width="40" height="40" rx="10" fill="url(#mark-gradient)"/>
+      <rect x=".5" y=".5" width="39" height="39" rx="9.5" fill="url(#mark-sheen)" stroke="#fff" stroke-opacity=".14"/>
       <rect x="10" y="9" width="5" height="6" rx="2" fill="#fff"/>
       <rect x="10" y="17" width="5" height="6" rx="2" fill="#fff"/>
-      <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#keyload-iris)"/>
+      <rect x="10" y="25" width="5" height="6" rx="2" fill="url(#mark-iris)"/>
       <path d="M29 9.5 19.5 20 29 30.5" fill="none" stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
-    <symbol id="i-sql" viewBox="0 0 48 48"><path d="M8 12.5c0-3 7.2-5.5 16-5.5s16 2.5 16 5.5S32.8 18 24 18 8 15.5 8 12.5Z"/><path d="M8 12.5v11c0 3 7.2 5.5 16 5.5 3.2 0 6.1-.4 8.6-1.1M40 12.5v8M8 23.5v11C8 37.5 15.2 40 24 40c2.1 0 4.1-.2 5.9-.5"/><path d="M8 23.5c0 3 7.2 5.5 16 5.5M33 27l7 4v7l-7 4-7-4v-7l7-4Z"/></symbol>
-    <symbol id="i-doc" viewBox="0 0 48 48"><path d="M12 6h16l9 9v27H12z"/><path d="M28 6v10h9M18 23h13M18 29h13M18 35h8"/></symbol>
-    <symbol id="i-graph" viewBox="0 0 48 48"><path d="m13 13 11 11 12-12M13 13l-1 23 23 0-11-12M24 24l12 12"/><circle cx="12" cy="12" r="4"/><circle cx="36" cy="12" r="4"/><circle cx="24" cy="24" r="4"/><circle cx="12" cy="36" r="4"/><circle cx="36" cy="36" r="4"/></symbol>
-    <symbol id="i-event" viewBox="0 0 48 48"><path d="M8 24h8l5-12 8 24 5-12h6"/><path d="M8 10v28M40 10v28"/></symbol>
-    <symbol id="i-vector" viewBox="0 0 48 48"><path d="M10 37 37 10M10 37l2-10M10 37l10-2M37 10l-2 10M37 10l-10 2"/><circle cx="10" cy="37" r="3"/><circle cx="37" cy="10" r="3"/><circle cx="24" cy="24" r="2"/></symbol>
-    <symbol id="i-queue" viewBox="0 0 48 48"><rect x="7" y="9" width="25" height="9" rx="4.5"/><rect x="7" y="21" width="25" height="9" rx="4.5"/><rect x="7" y="33" width="25" height="9" rx="4.5"/><path d="M35 16h6m-3-3 3 3-3 3M35 28h6m-3-3 3 3-3 3M35 40h6m-3-3 3 3-3 3"/></symbol>
-    <symbol id="i-time" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17"/><path d="M24 13v12l9 5M7 24h4m26 0h4M24 7v4"/></symbol>
-    <symbol id="i-blob" viewBox="0 0 48 48"><path d="M24 6c-5 8-14 17-14 24a14 14 0 0 0 28 0C38 23 29 14 24 6Z"/><path d="M17 31c1 4 4 6 8 6"/></symbol>
+    <symbol id="grains" viewBox="0 0 200 130">
+      <g fill="none" stroke="#726778" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".63">
+        <path d="m34 33 63 29 65-32M34 33l13 66 50-37 62 37 3-69M47 99l112 0M97 62l0-43"/>
+      </g>
+      <g fill="#f7f5f3" stroke="#6e6475" stroke-width="1.8">
+        <circle cx="34" cy="33" r="9"/><circle cx="162" cy="30" r="9"/>
+        <circle cx="97" cy="62" r="14"/><circle cx="47" cy="99" r="9"/>
+        <circle cx="159" cy="99" r="9"/><circle cx="97" cy="19" r="6"/>
+      </g>
+      <circle cx="97" cy="62" r="5" fill="#8c7d98"/>
+    </symbol>
     <style>
-      .label{font:600 22px Arial,sans-serif;fill:#302d32;letter-spacing:.2px}
-      .index{font:600 11px Arial,sans-serif;fill:#817980;letter-spacing:1.5px}
-      .icon{fill:none;stroke:#4d4750;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-      .card{stroke:#fff;stroke-opacity:.88;stroke-width:1.5}
-      .micro{font:600 12px Arial,sans-serif;fill:#857b82;letter-spacing:2.6px}
-      .hero{font:600 27px Arial,sans-serif;fill:#302d32;letter-spacing:.25px}
-      .caption{font:14px Arial,sans-serif;fill:#817980;letter-spacing:.15px}
+      .heading{font:600 38px Arial,sans-serif;fill:#29272d;letter-spacing:-.6px}
+      .node{font:600 29px Arial,sans-serif;fill:#36323b;letter-spacing:-.2px}
+      .caption{font:24px Arial,sans-serif;fill:#68616d}
+      .storage-label{font:21px Arial,sans-serif;fill:#f7f5f3}
+      .eyebrow{font:600 15px Arial,sans-serif;fill:#817883;letter-spacing:2.7px}
     </style>
   </defs>
   <rect width="1827" height="794" fill="#f7f5f3"/>
-  <path d="M74 58h1679" stroke="url(#rule)" stroke-width="1"/>
-  <text x="913.5" y="43" text-anchor="middle" class="micro">KEYLOAD  /  MODEL MAP</text>
-
-  <!-- Fine routes keep the model map connected without implying live traffic. -->
-  <g fill="none" stroke="#c8b8bf" stroke-width="1.4" stroke-dasharray="3 7" opacity=".7">
-    <path d="M390 159h300q66 0 104 54l27 38"/><path d="M710 159h42q47 0 69 37l12 25"/>
-    <path d="M1437 159h-300q-66 0-104 54l-27 38"/><path d="M1117 159h-42q-47 0-69 37l-12 25"/>
-    <path d="M390 600h300q66 0 104-54l27-38"/><path d="M710 600h42q47 0 69-37l12-25"/>
-    <path d="M1437 600h-300q-66 0-104-54l-27-38"/><path d="M1117 600h-42q-47 0-69-37l-12-25"/>
+  <text x="86" y="60" class="eyebrow">KEYLOAD / RF3</text>
+  <text x="86" y="108" class="heading">Orleans cluster</text>
+  <text x="1741" y="70" class="eyebrow" text-anchor="end">THREE PHYSICAL NODES</text>
+  <path d="M86 134h1655" stroke="url(#rule)"/>
+  <!-- Static undirected routes express cluster connectivity, not traffic. -->
+  <g fill="none" stroke="#a69aaa" stroke-width="2" stroke-opacity=".65">
+    <path d="M913.5 275 450 450M913.5 275 1377 450M450 450h927"/>
   </g>
-  <g fill="#b8a7b0" opacity=".85"><circle cx="821" cy="250" r="3"/><circle cx="1006" cy="250" r="3"/><circle cx="821" cy="533" r="3"/><circle cx="1006" cy="533" r="3"/></g>
-
-  <!-- Soft glass-like cards use translucent pastel fills and crisp outlines. -->
+  <!-- Silo C routes grains; the physical node retains its storage. -->
   <g>
-    <rect class="card" x="100" y="100" width="290" height="118" rx="18" fill="#f1d8cc" fill-opacity=".55"/>
-    <use href="#i-sql" x="122" y="132" width="52" height="52" class="icon"/>
-    <text x="190" y="148" class="index">01 / QUERY</text><text x="190" y="179" class="label">SQL</text>
-    <rect class="card" x="420" y="100" width="290" height="118" rx="18" fill="#eadcf0" fill-opacity=".58"/>
-    <use href="#i-doc" x="442" y="132" width="52" height="52" class="icon"/>
-    <text x="510" y="148" class="index">02 / CONTENT</text><text x="510" y="179" class="label">Documents</text>
-    <rect class="card" x="1117" y="100" width="290" height="118" rx="18" fill="#dedff1" fill-opacity=".63"/>
-    <use href="#i-graph" x="1139" y="132" width="52" height="52" class="icon"/>
-    <text x="1207" y="148" class="index">03 / RELATIONSHIPS</text><text x="1207" y="179" class="label">Graphs</text>
-    <rect class="card" x="1437" y="100" width="290" height="118" rx="18" fill="#f0dfd6" fill-opacity=".6"/>
-    <use href="#i-event" x="1459" y="132" width="52" height="52" class="icon"/>
-    <text x="1527" y="148" class="index">04 / CHANGE</text><text x="1527" y="179" class="label">Events</text>
+    <ellipse cx="913.5" cy="454.14" rx="142.04000000000002" ry="21.386400000000002" fill="#3a333f" opacity=".055"/>
+    <path d="M779.5 178a134.0 28.14 0 0 1 268 0v152a134.0 28.14 0 0 1 -268 0Z" fill="url(#glass-lilac)" stroke="#c0b4c5" stroke-opacity=".7" stroke-width="1.5"/>
+    <ellipse cx="913.5" cy="178" rx="134.0" ry="28.14" fill="#fff" fill-opacity=".7" stroke="#bcb1c2" stroke-opacity=".6" stroke-width="1.5"/>
+    <path d="M792.5 195v124" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="913.5" cy="330" rx="134.0" ry="28.14" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
+    <text x="913.5" y="227" class="node" text-anchor="middle">Silo C / Node C</text>
+    <use href="#grains" x="814.34" y="245" width="198.32" height="72"/>
+    <path d="M779.5 345a134.0 28.14 0 0 1 268 0v68a134.0 28.14 0 0 1 -268 0Z" fill="url(#storage)"/>
+    <ellipse cx="913.5" cy="345" rx="134.0" ry="28.14" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
+    <path d="M795.5 409q118.0 42.21 236 0" fill="none" stroke="#fff" stroke-opacity=".13"/>
+    <text x="913.5" y="387.15999999999997" class="storage-label" text-anchor="middle">Node-local storage</text>
   </g>
+  <!-- Silo A routes grains; the physical node retains its storage. -->
   <g>
-    <rect class="card" x="100" y="541" width="290" height="118" rx="18" fill="#dedff1" fill-opacity=".64"/>
-    <use href="#i-vector" x="122" y="573" width="52" height="52" class="icon"/>
-    <text x="190" y="589" class="index">05 / SIMILARITY</text><text x="190" y="620" class="label">Vectors</text>
-    <rect class="card" x="420" y="541" width="290" height="118" rx="18" fill="#f1d8cc" fill-opacity=".56"/>
-    <use href="#i-queue" x="442" y="573" width="52" height="52" class="icon"/>
-    <text x="510" y="589" class="index">06 / WORK</text><text x="510" y="620" class="label">Queues</text>
-    <rect class="card" x="1117" y="541" width="290" height="118" rx="18" fill="#eadcf0" fill-opacity=".58"/>
-    <use href="#i-time" x="1139" y="573" width="52" height="52" class="icon"/>
-    <text x="1207" y="589" class="index">07 / HISTORY</text><text x="1207" y="620" class="label">Time series</text>
-    <rect class="card" x="1437" y="541" width="290" height="118" rx="18" fill="#e0e5f0" fill-opacity=".64"/>
-    <use href="#i-blob" x="1459" y="573" width="52" height="52" class="icon"/>
-    <text x="1527" y="589" class="index">08 / OBJECTS</text><text x="1527" y="620" class="label">Blobs</text>
+    <ellipse cx="450.0" cy="716.05" rx="217.3" ry="32.717999999999996" fill="#3a333f" opacity=".055"/>
+    <path d="M245 368a205.0 43.05 0 0 1 410 0v209a205.0 43.05 0 0 1 -410 0Z" fill="url(#glass-peach)" stroke="#c0b4c5" stroke-opacity=".7" stroke-width="1.5"/>
+    <ellipse cx="450.0" cy="368" rx="205.0" ry="43.05" fill="#fff" fill-opacity=".7" stroke="#bcb1c2" stroke-opacity=".6" stroke-width="1.5"/>
+    <path d="M258 385v181" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="450.0" cy="577" rx="205.0" ry="43.05" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
+    <text x="450.0" y="417" class="node" text-anchor="middle">Silo A / Node A</text>
+    <use href="#grains" x="298.3" y="435" width="303.4" height="129"/>
+    <path d="M245 592a205.0 43.05 0 0 1 410 0v68a205.0 43.05 0 0 1 -410 0Z" fill="url(#storage)"/>
+    <ellipse cx="450.0" cy="592" rx="205.0" ry="43.05" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
+    <path d="M261 656q189.0 64.57499999999999 378 0" fill="none" stroke="#fff" stroke-opacity=".13"/>
+    <text x="450.0" y="634.16" class="storage-label" text-anchor="middle">Node-local storage</text>
   </g>
-
-  <use href="#keyload-mark" x="828" y="170" width="170" height="170"/>
-  <text x="913" y="390" text-anchor="middle" class="hero">One engine. Many models.</text>
-  <text x="913" y="420" text-anchor="middle" class="caption">One canonical KeyLoad database for connected data.</text>
-  <path d="M74 720h1679" stroke="url(#rule)" stroke-width="1"/>
-  <text x="913.5" y="754" text-anchor="middle" class="micro">A SHARED FOUNDATION FOR EVERY MODEL</text>
+  <!-- Silo B routes grains; the physical node retains its storage. -->
+  <g>
+    <ellipse cx="1377.0" cy="716.05" rx="217.3" ry="32.717999999999996" fill="#3a333f" opacity=".055"/>
+    <path d="M1172 368a205.0 43.05 0 0 1 410 0v209a205.0 43.05 0 0 1 -410 0Z" fill="url(#glass-iris)" stroke="#c0b4c5" stroke-opacity=".7" stroke-width="1.5"/>
+    <ellipse cx="1377.0" cy="368" rx="205.0" ry="43.05" fill="#fff" fill-opacity=".7" stroke="#bcb1c2" stroke-opacity=".6" stroke-width="1.5"/>
+    <path d="M1185 385v181" stroke="#fff" stroke-opacity=".88" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="1377.0" cy="577" rx="205.0" ry="43.05" fill="none" stroke="#bcb1c2" stroke-opacity=".5" stroke-width="1.5"/>
+    <text x="1377.0" y="417" class="node" text-anchor="middle">Silo B / Node B</text>
+    <use href="#grains" x="1225.3" y="435" width="303.4" height="129"/>
+    <path d="M1172 592a205.0 43.05 0 0 1 410 0v68a205.0 43.05 0 0 1 -410 0Z" fill="url(#storage)"/>
+    <ellipse cx="1377.0" cy="592" rx="205.0" ry="43.05" fill="#57525e" stroke="#fff" stroke-opacity=".27"/>
+    <path d="M1188 656q189.0 64.57499999999999 378 0" fill="none" stroke="#fff" stroke-opacity=".13"/>
+    <text x="1377.0" y="634.16" class="storage-label" text-anchor="middle">Node-local storage</text>
+  </g>
+  <use href="#keyload-mark" x="846.5" y="455" width="134" height="134"/>
+  <text x="913.5" y="633" class="caption" text-anchor="middle">Grain activations</text>
+  <path d="M86 717h1655" stroke="url(#rule)"/>
+  <text x="86" y="755" class="eyebrow">ORLEANS EXECUTION · NODE-LOCAL OWNERSHIP</text>
+  <text x="1741" y="755" class="eyebrow" text-anchor="end">CONCEPTUAL ARCHITECTURE</text>
 </svg>

@@ -48,6 +48,7 @@ internal sealed class SiteContentBrowserTests
             StringComparison.Ordinal))).IsTrue();
         await SiteContentInteractionAssertions.AssertNavigationAsync(cdp, token);
         await SiteContentInteractionAssertions.AssertClipboardUnavailableAsync(cdp, browser.BaseUrl, token);
+        await AssertSceneLifecycleAsync(browser.Chrome, browser.BaseUrl, token);
         await browser.CompleteAsync(token);
     }
 
@@ -133,6 +134,7 @@ internal sealed class SiteContentBrowserTests
         {
             await Assert.That(snapshot.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32())
                 .IsEqualTo(SiteBrowserTokens.One);
+            await SiteBrowserVectorAssetAssertions.AssertReadyMarkAsync(cdp, token);
         }
         else
         {
