@@ -18,6 +18,7 @@ internal sealed class SiteContentBrowserTests
         var cdp = browser.Chrome.Cdp;
         await Assert.That(await cdp.WaitForExpressionAsync(SiteContentBrowserTokens.ContentReadyPredicate, token)).IsTrue();
         await SiteBrowserVisualAssertions.AssertSceneIsLazyBeforeHeroNavigation(cdp, token);
+        await SiteBrowserVisualAssertions.AssertLowerSectionsAsync(cdp, token);
         var desktop = await ReadContentStateAsync(browser.Chrome.Cdp, token);
         await AssertContentStateAsync(desktop, SiteContentTokens.DesktopPosterSuffix);
         var desktopRequests = await AssertLocalRequestsAsync(browser.Chrome.Cdp, browser.BaseUrl, token);
@@ -38,6 +39,7 @@ internal sealed class SiteContentBrowserTests
             [SiteBrowserTokens.MobileField] = true,
         }, token);
         await browser.Chrome.NavigateAsync(browser.BaseUrl + SiteAssetTokens.IndexHtml + SiteBrowserTokens.PageHideFragment, token);
+        await SiteBrowserVisualAssertions.AssertLowerSectionsAsync(cdp, token);
         var mobile = await ReadContentStateAsync(browser.Chrome.Cdp, token);
         await AssertContentStateAsync(mobile, SiteContentTokens.MobilePosterSuffix);
         await Assert.That(mobile.GetProperty(SiteContentBrowserTokens.Mobile).GetBoolean()).IsTrue();

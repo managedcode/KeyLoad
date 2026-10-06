@@ -1366,3 +1366,19 @@ Node-to-BDN consumer, validates all 36 case identities and reports, and performs
 its mutation rejection oracle. Root joins the source-reviewed proposal and runs
 that gate through the unified Aspire entry; neither source review nor a build
 establishes consumer execution or comparative performance qualification.
+
+## Landing lower-section layout regression (2026-10-06)
+
+REQ-BC-LAYOUT-001 / AC-BC-LAYOUT-001: qualification status retains two desktop
+columns and one mobile column; methodology retains three desktop columns and
+stacked mobile steps. The reproduce command stays inset within its padded
+terminal, and footer links align with the main content without horizontal page
+overflow at the existing responsive viewport widths. TASK-BC-LAYOUT-001 restores
+only styles used by the current semantic landing. ADR-040 remains the owning
+design decision; no new boundary, dependency or public contract is introduced.
+
+Automated mapping: `SiteBrowserVisualAssertions.AssertLowerSectionsAsync` checks
+real rendered bounding boxes in both the measured responsive browser case and
+`SiteContentBrowserTests` desktop/mobile case through the Aspire `site` entry.
+A missing lower-section stylesheet must fail these assertions. Native build,
+site qualification and actual Website/Pages delivery evidence remain required.

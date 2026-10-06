@@ -13,6 +13,7 @@ internal static class SiteBrowserVisualAssertions
                 [SiteBrowserTokens.DeviceScaleFactorField] = SiteBrowserTokens.One,
                 [SiteBrowserTokens.MobileField] = false,
             }, cancellationToken);
+            await AssertLowerSectionsAsync(chrome.Cdp, cancellationToken);
             var overflow = await chrome.Cdp.EvaluateAsync(SiteBrowserUiTokens.OverflowScript, false, cancellationToken);
             await Assert.That(overflow.GetBoolean()).IsFalse();
             if (width <= SiteBrowserUiTokens.ViewportMobileWidth)
@@ -21,6 +22,28 @@ internal static class SiteBrowserVisualAssertions
                 await Assert.That(region.GetString()!.Contains(SiteBrowserUiTokens.ScrollLabelToken, StringComparison.OrdinalIgnoreCase)).IsTrue();
             }
         }
+    }
+
+    public static async Task AssertLowerSectionsAsync(SiteBrowserCdpClient cdp, CancellationToken token)
+    {
+        const string script = """
+            (() => {
+              const box = selector => document.querySelector(selector).getBoundingClientRect();
+              const desktop = innerWidth > 760;
+              const steps = [...document.querySelectorAll('.method-rail li')].map(x => x.getBoundingClientRect());
+              const claims = [...document.querySelectorAll('.ledger-col')].map(x => x.getBoundingClientRect());
+              const terminal = box('.reproduce-inner'), command = box('.command-box');
+              const footer = box('.site-footer'), links = box('.footer-links');
+              return steps.length === 3 && claims.length === 2 &&
+                (desktop ? steps.every(x => Math.abs(x.top - steps[0].top) < 1) && claims[1].left >= claims[0].right
+                  : steps[1].top >= steps[0].bottom && claims[1].top >= claims[0].bottom) &&
+                command.left > terminal.left && command.right < terminal.right &&
+                command.top > terminal.top && command.bottom < terminal.bottom &&
+                links.left >= box('.method-rail').left && footer.top >= terminal.bottom &&
+                document.documentElement.scrollWidth <= innerWidth;
+            })()
+            """;
+        await Assert.That((await cdp.EvaluateAsync(script, false, token)).GetBoolean()).IsTrue();
     }
 
     public static async Task AssertSceneLifecycle(SiteBrowserChrome chrome, string baseUrl,
