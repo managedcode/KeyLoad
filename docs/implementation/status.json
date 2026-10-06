@@ -4909,14 +4909,14 @@
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
     "sourceStage": "runtime_options_literals_locks_phase_health_semantics_native_test_admission_and_manifest_input_fix_complete_runtime_gates_in_progress",
-    "canonicalBuildPassed": true,
+    "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
       "Pass full Aspire unit/scalar/recovery and native RF3 suites with completed original reports",
       "Pass required source-bound functional coverage and exact delivered-source Linux qualification"
     ],
-    "canonicalFormatterPassed": true,
+    "canonicalFormatterPassed": false,
     "developmentEvidence": {
       "directory": "artifacts/code-quality/general-runtime-options-development-20261006",
       "canonicalRelease": "keyload-general-options-full-release-v5.log",
@@ -5323,8 +5323,44 @@
         "report": "analyzers-v36/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
         "sha256": "20a2d1cf983b13a606341ef4d5f7e6a2226d7176deacb07c2c9fcafbbd1dfd3c",
         "scope": "actual_completed_original_native_Aspire_full_analyzer_suite_current_local_source"
+      },
+      "deliveredLinux702": {
+        "headSha": "702f8474e2ae20df26402e06fe3251f6525ac3a5",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37447551298",
+        "repositoryRules": "passed",
+        "analyzers": {
+          "passed": 388,
+          "failed": 0,
+          "skipped": 0,
+          "nativeDurationMs": 143493.2535,
+          "report": "linux-ci702-analyzers/TestResults/analyzers/KeyLoad.Analyzers.Tests-linux-net10.0.tunit-report.json",
+          "sha256": "149ac41b9e4e9ecedab22c71cf4ca40b344500054840d3c86933cc412cedbb43",
+          "job": "https://github.com/managedcode/KeyLoad/actions/runs/37447551298/job/112215912345"
+        },
+        "build": "failed_seven_CA1031_IDE2000_diagnostics_in_three_ScaleServerResourceCancellation_helpers",
+        "runtimeSuites": "unit_scalar_recovery_RF3_and_product_coverage_not_started_after_build_failure",
+        "rf3Job": "https://github.com/managedcode/KeyLoad/actions/runs/37447551298/job/112215912152",
+        "qualification": "exact delivered-source Linux analyzer report passes; required complete runtime and source-bound coverage gates remain open"
+      },
+      "nativeCancellationBuildPrerequisite": {
+        "scope": [
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationFlow.cs",
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationNativeFixture.cs",
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationSettlement.cs"
+        ],
+        "sourceSha256": {
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationFlow.cs": "8ad309a68476936f74ce5b8435a13b3bd67e3e578d22660a6201c255b7e0de5b",
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationNativeFixture.cs": "82ca1345a4b9997a3e24bfcde2b46ea7e897a128c00b4720cfaf38a02cf04cf4",
+          "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerResourceCancellationSettlement.cs": "999f4e25e37c49c7b77e244cb7fd2d67ec2edf219ddccd73f6fdf6fb2fe5b098"
+        },
+        "review": "existing guarded invocation records original primary and cleanup exception objects; cancellation and both child joins retained; owned directory rejects substituted non-directory or reparse-point entry; no analyzer suppression",
+        "canonicalBuild": "full_release_v35_v36_v37_passed_including_these_exact_three_source_bytes",
+        "canonicalFormat": "format_v41_passed_including_these_exact_three_source_bytes",
+        "compiledReceipt": "keyload-general-options-compiled-inventory-audit-v38.log:19projects_3190inputs_mismatches_empty",
+        "nativeRegression": "unit_v34_AcScale016CancellationStopsAndJoinsTheOwnedNativeProbe_passed_5296.189ms_in_original_4133test_report",
+        "qualification": "prior successful local full-build snapshot and genuine child cancellation case; complete suite originally failed72other_tests; unrelated subsequent CLI_telemetry_coverage_source_changes_require_fresh_build_and_reports"
       }
     },
-    "verificationStage": "canonical_full_release_v37_format_v41_compiled_19_projects_3190_inputs_native_118_focus_4_admission_models_and_full388_analyzers_pass_remaining_full_runtime_coverage_Linux_gates_open"
+    "verificationStage": "Linux702_repository_rules_and388analyzers_pass_build_blocked_by_seven_native_cancellation_helper_diagnostics_reviewed_exact_byte_repairs_joined_remaining_full_runtime_coverage_gates_open"
   }
 }

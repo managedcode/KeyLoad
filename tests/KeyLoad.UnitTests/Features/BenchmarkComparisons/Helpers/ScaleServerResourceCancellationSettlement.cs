@@ -12,8 +12,10 @@ internal static class ScaleServerResourceCancellationSettlement
             return;
         }
 
-        await RequestCancellationAsync(original, cancellation, failures);
-        await ObserveOriginalAsync(original, cancellation, expectedCancellation, failures);
+        await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
+            () => RequestCancellationAsync(original, cancellation, failures), failures.Add);
+        await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
+            () => ObserveOriginalAsync(original, cancellation, expectedCancellation, failures), failures.Add);
     }
 
     private static async Task RequestCancellationAsync(Task original, CancellationTokenSource cancellation,
@@ -24,34 +26,68 @@ internal static class ScaleServerResourceCancellationSettlement
             return;
         }
 
-        try
+        Task? cancellationTask = null;
+        IsolatedAggregateNodeGuardedInvocation.Capture(
+            () => cancellationTask = cancellation.CancelAsync(), failures.Add);
+        if (cancellationTask is null)
         {
-            await cancellation.CancelAsync();
+            return;
         }
-        catch (Exception failure)
+
+        await cancellationTask.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        if (cancellationTask.Exception is { } cancellationFailures)
         {
-            failures.Add(failure);
+            foreach (var failure in cancellationFailures.InnerExceptions)
+            {
+                failures.Add(failure);
+            }
+        }
+        if (cancellationTask.IsCanceled)
+        {
+            try
+            {
+                await cancellationTask.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException failure)
+            {
+                failures.Add(failure);
+            }
         }
     }
 
     private static async Task ObserveOriginalAsync(Task<string?> original, CancellationTokenSource cancellation,
         OperationCanceledException? expectedCancellation, NativeSerializationBenchmarkFailures failures)
     {
+        await ((Task)original).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        if (original.Exception is { } originalFailures)
+        {
+            foreach (var failure in originalFailures.InnerExceptions)
+            {
+                failures.Add(failure);
+            }
+            return;
+        }
+        if (!original.IsCanceled)
+        {
+            return;
+        }
+
         try
         {
-            _ = await original;
+            _ = await original.ConfigureAwait(false);
         }
-        catch (OperationCanceledException failure) when (original.IsCanceled
-            && cancellation.IsCancellationRequested && failure.CancellationToken == cancellation.Token)
+        catch (OperationCanceledException failure)
         {
-            if (expectedCancellation is not null && !ReferenceEquals(expectedCancellation, failure))
+            if (cancellation.IsCancellationRequested && failure.CancellationToken == cancellation.Token)
             {
-                failures.Add(new InvalidOperationException(FailureIdentityMessage));
+                if (expectedCancellation is not null && !ReferenceEquals(expectedCancellation, failure))
+                {
+                    failures.Add(failure);
+                    failures.Add(new InvalidOperationException(FailureIdentityMessage));
+                }
+                return;
             }
-        }
-        catch (Exception failure)
-        {
-            failures.AddTaskFailures(original, failure);
+            failures.Add(failure);
         }
     }
 }

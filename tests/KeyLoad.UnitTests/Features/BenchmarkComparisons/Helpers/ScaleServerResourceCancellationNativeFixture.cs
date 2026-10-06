@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using System.Globalization;
 using System.Text;
+using KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -181,7 +181,6 @@ internal static class ScaleServerResourceCancellationNativeFixture
         return int.TryParse(marker.AsSpan(ProcessIdStart, processIdLength), NumberStyles.None, CultureInfo.InvariantCulture,
             out var processId) ? processId : null;
     }
-
 
 }
 

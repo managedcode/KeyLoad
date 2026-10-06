@@ -8,6 +8,7 @@ internal static class ScaleServerResourceCancellationFlow
     private const string HealthyOutput = "scale-native-healthy-follow-up";
     private const string TemporaryDirectoryPrefix = "keyload-scale-probe-cancel-";
     private const string GuidFormat = "N";
+    private const string OwnedDirectoryChangedMessage = "The owned native probe directory changed before cleanup.";
 
     internal static async Task RunAsync(CancellationToken testToken)
     {
@@ -15,18 +16,17 @@ internal static class ScaleServerResourceCancellationFlow
         var flow = new State(testToken);
         try
         {
-            System.IO.Directory.CreateDirectory(flow.Directory);
-            await ExecuteCompleteOperationAsync(flow, testToken);
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
+            await IsolatedAggregateNodeGuardedInvocation.CaptureAsync(async () =>
+            {
+                System.IO.Directory.CreateDirectory(flow.Directory);
+                await ExecuteCompleteOperationAsync(flow, testToken);
+            }, failures.Add);
         }
         finally
         {
             await CaptureSettlementAsync(flow.Original, flow.Cancellation, flow.OriginalCancellation, failures);
             await CaptureSettlementAsync(flow.Healthy, flow.HealthyCancellation, expectedCancellation: null, failures);
-            DeleteOwnedDirectory(flow, failures);
+            IsolatedAggregateNodeGuardedInvocation.Capture(() => DeleteOwnedDirectory(flow), failures.Add);
             flow.Dispose(failures);
         }
 
@@ -68,38 +68,37 @@ internal static class ScaleServerResourceCancellationFlow
         await Assert.That(healthyProbe.IsCompletedSuccessfully).IsTrue();
     }
 
-    private static async Task CaptureSettlementAsync(Task<string?>? operation, CancellationTokenSource cancellation,
+    private static Task CaptureSettlementAsync(Task<string?>? operation, CancellationTokenSource cancellation,
         OperationCanceledException? expectedCancellation, NativeSerializationBenchmarkFailures failures)
-    {
-        try
-        {
-            await ScaleServerResourceCancellationSettlement.SettleAsync(operation, cancellation,
-                expectedCancellation, failures);
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
-        }
-    }
+        => IsolatedAggregateNodeGuardedInvocation.CaptureAsync(
+            () => ScaleServerResourceCancellationSettlement.SettleAsync(operation, cancellation,
+                expectedCancellation, failures), failures.Add);
 
-    private static void DeleteOwnedDirectory(State flow, NativeSerializationBenchmarkFailures failures)
+    private static void DeleteOwnedDirectory(State flow)
     {
         if (flow.Original?.IsCompleted == false || flow.Healthy?.IsCompleted == false)
         {
             return;
         }
 
+        FileAttributes attributes;
         try
         {
-            if (Directory.Exists(flow.Directory))
-            {
-                Directory.Delete(flow.Directory, recursive: true);
-            }
+            attributes = File.GetAttributes(flow.Directory);
         }
-        catch (Exception failure)
+        catch (FileNotFoundException)
         {
-            failures.Add(failure);
+            return;
         }
+        catch (DirectoryNotFoundException)
+        {
+            return;
+        }
+        if ((attributes & FileAttributes.Directory) == 0 || (attributes & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new IOException(OwnedDirectoryChangedMessage);
+        }
+        Directory.Delete(flow.Directory, recursive: true);
     }
 
     private sealed class State
@@ -126,16 +125,7 @@ internal static class ScaleServerResourceCancellationFlow
         }
 
         private static void DisposeSource(CancellationTokenSource source, NativeSerializationBenchmarkFailures failures)
-        {
-            try
-            {
-                source.Dispose();
-            }
-            catch (Exception failure)
-            {
-                failures.Add(failure);
-            }
-        }
+            => IsolatedAggregateNodeGuardedInvocation.Capture(source.Dispose, failures.Add);
 
     }
 }
