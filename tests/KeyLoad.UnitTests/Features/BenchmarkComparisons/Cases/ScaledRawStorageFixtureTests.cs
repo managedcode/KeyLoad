@@ -77,7 +77,7 @@ internal sealed class ScaledRawStorageFixtureTests
     {
         await ScaledRawStorageTestLifetime.RunAsync(
             () => new ScaledRawStorageFixture(ScaledRecordCount, payloadBytes, ExecutionOptions,
-                TestContext.Current!.Execution.CancellationToken), async fixture =>
+                cancellationToken: TestContext.Current!.Execution.CancellationToken), async fixture =>
             {
                 var seeded = fixture.Capture();
 

@@ -1,18 +1,11 @@
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 
 /// <summary>Bounds child output and settles the original process and stream tasks on every failure path.</summary>
-internal static partial class LocalRf3OwnedProcessLifetime
+internal static class LocalRf3OwnedProcessLifetime
 {
-    private const string LocalRf3OwnedProcessLifetimeMetadataName = "libc";
-    private const string LocalRf3OwnedProcessLifetimeLocalRf3OwnedProcessLifetimeMetadataName = "kill";
-
-    private const int SignalTerminate = 15;
-
     internal static Task<string> ReadBoundedAsync(StreamReader reader, int maximumCharacters)
         => LocalRf3OwnedProcessObservation.ReadBoundedAsync(reader, maximumCharacters);
 
@@ -25,14 +18,14 @@ internal static partial class LocalRf3OwnedProcessLifetime
         const string MessageText = "Local RF3 image process and original stream readers did not settle within the cleanup threshold.";
 
         var policy = options.Value;
-        TrySendTerminate(process, failures);
+        LocalRf3OwnedProcessSignals.TrySendTerminate(process, failures);
         if (!HasExited(process, failures))
         {
             _ = await WaitThresholdAsync(exit, policy.TerminationGrace, timeProvider).ConfigureAwait(false);
         }
         if (!HasExited(process, failures))
         {
-            TryKill(process, failures);
+            LocalRf3OwnedProcessSignals.TryKill(process, failures);
         }
 
         var joined = Task.WhenAll(exit, output, error);
@@ -114,30 +107,6 @@ internal static partial class LocalRf3OwnedProcessLifetime
         OwnedProcessFailureObserver.Observe(reader.Close, failures);
     }
 
-    private static void TrySendTerminate(Process process, List<Exception> failures)
-    {
-        const int CompletionCount = 0;
-
-        OwnedProcessFailureObserver.Observe(() =>
-        {
-            if (process.HasExited || OperatingSystem.IsWindows())
-            { return; }
-            if (SendSignal(process.Id, SignalTerminate) != CompletionCount && !process.HasExited)
-            {
-                failures.Add(new Win32Exception(Marshal.GetLastPInvokeError()));
-            }
-        }, failures);
-    }
-
-    private static void TryKill(Process process, List<Exception> failures)
-    {
-        OwnedProcessFailureObserver.Observe(() =>
-        {
-            if (!process.HasExited)
-            { process.Kill(entireProcessTree: true); }
-        }, failures);
-    }
-
     private static async Task CollectFailureAsync(Task task, List<Exception> failures)
     {
         await task.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
@@ -156,8 +125,4 @@ internal static partial class LocalRf3OwnedProcessLifetime
             catch (OperationCanceledException error) { failures.Add(error); }
         }
     }
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport(LocalRf3OwnedProcessLifetimeMetadataName, EntryPoint = LocalRf3OwnedProcessLifetimeLocalRf3OwnedProcessLifetimeMetadataName, SetLastError = true)]
-    private static partial int SendSignal(int processId, int signal);
 }

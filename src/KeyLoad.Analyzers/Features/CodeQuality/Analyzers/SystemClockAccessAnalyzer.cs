@@ -33,6 +33,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzePropertyReference, Microsoft.CodeAnalysis.OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzeFieldReference, Microsoft.CodeAnalysis.OperationKind.FieldReference);
         context.RegisterOperationAction(AnalyzeInvocation, Microsoft.CodeAnalysis.OperationKind.Invocation);
         context.RegisterOperationAction(AnalyzeCreation, Microsoft.CodeAnalysis.OperationKind.ObjectCreation);
     }
@@ -69,6 +70,16 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
                property.ContainingType.ContainingNamespace.ToDisplayString() ==
                CodeQualitySourceNames.SystemNamespace &&
                property.Name is nameof(System.DateTimeOffset.Now) or nameof(System.DateTimeOffset.UtcNow);
+    }
+
+    private static void AnalyzeFieldReference(OperationAnalysisContext context)
+    {
+        var field = ((IFieldReferenceOperation)context.Operation).Field;
+        if (IsStopwatch(field.ContainingType))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, context.Operation.Syntax.GetLocation(),
+                field.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+        }
     }
 
     private static void AnalyzeInvocation(OperationAnalysisContext context)

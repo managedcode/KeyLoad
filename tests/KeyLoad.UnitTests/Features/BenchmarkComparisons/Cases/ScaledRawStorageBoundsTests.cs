@@ -39,7 +39,7 @@ internal sealed class ScaledRawStorageBoundsTests
     public async Task AcScale003HundredThousandFixtureMeetsActualQualificationCapacity()
     {
         await ScaledRawStorageTestLifetime.RunAsync(
-            () => new ScaledRawStorageFixture(QualificationRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(), TestContext.Current!.Execution.CancellationToken),
+            () => new ScaledRawStorageFixture(QualificationRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(), cancellationToken: TestContext.Current!.Execution.CancellationToken),
             AssertQualificationFixtureAsync);
     }
 

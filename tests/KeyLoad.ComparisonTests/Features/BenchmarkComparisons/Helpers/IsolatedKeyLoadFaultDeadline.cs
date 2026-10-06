@@ -13,7 +13,7 @@ internal sealed class IsolatedKeyLoadFaultDeadline : IDisposable
         {
             deadline = CancellationTokenSource.CreateLinkedTokenSource(caller, timeout.Token);
         }
-        catch
+        catch (Exception)
         {
             timeout.Dispose();
             throw;

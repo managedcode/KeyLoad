@@ -13,7 +13,7 @@ internal sealed class AspireFailureDeadline : IDisposable
         {
             Source = CancellationTokenSource.CreateLinkedTokenSource(caller, timeout.Token);
         }
-        catch
+        catch (Exception)
         {
             timeout.Dispose();
             throw;

@@ -17,7 +17,7 @@ internal sealed class AspireFailureNativeProcessTests
         var application = builder.Build();
         try
         {
-            await VerifyAndJoinFailureAsync(application, runner.Resource.Name, deadline);
+            await VerifyAndJoinFailureAsync(application, runner.Resource.Name, deadline.Source);
         }
         finally
         {

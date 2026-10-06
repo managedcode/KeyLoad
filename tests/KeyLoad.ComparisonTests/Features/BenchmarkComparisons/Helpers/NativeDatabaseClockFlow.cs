@@ -21,7 +21,7 @@ internal static class NativeDatabaseClockFlow
         NativeDatabaseFlowTimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var cancelled = new CancellationTokenSource();
-        cancelled.Cancel();
+        await cancelled.CancelAsync();
         var utcNowReads = timeProvider.UtcNowReads;
         var runner = ComparisonRunner.ForVector(profile, executionOptions, provider: timeProvider);
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => runner.RunAsync(target, null, cancelled.Token));

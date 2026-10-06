@@ -42,7 +42,7 @@ internal sealed class ScaledRawStorageFixtureLifetimeTests
 
     private static void CreateCancelledFixture(CancellationToken cancellationToken)
     {
-        using var fixture = new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(), cancellationToken);
+        using var fixture = new ScaledRawStorageFixture(MiniRecordCount, SmallPayloadBytes, UnitBenchmarkOptions.ScaledStorage(), cancellationToken: cancellationToken);
     }
 
     private static void CreateFixture(int recordCount, int payloadBytes)

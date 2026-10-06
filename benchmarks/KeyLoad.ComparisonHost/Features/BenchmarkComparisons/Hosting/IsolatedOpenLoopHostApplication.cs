@@ -20,7 +20,7 @@ internal static class IsolatedOpenLoopHostApplication
         }
 
         var runner = new OpenLoopComparisonRunner(openLoop.Profile, openLoop.Rate,
-            openLoop.ExecutionOptions, owner.ExecutionOptions, Console.WriteLine, owner.Clock);
+            openLoop.ExecutionOptions, owner.ExecutionOptions, Console.WriteLine, provider: owner.Clock);
         var report = await runner.RunAsync(target, settings.Worker, settings.Storage, cancellationToken)
             .ConfigureAwait(false);
         _ = await OpenLoopEvidenceWriter.WriteAsync(settings.OutputDirectory, report, owner.ExecutionOptions, cancellationToken)

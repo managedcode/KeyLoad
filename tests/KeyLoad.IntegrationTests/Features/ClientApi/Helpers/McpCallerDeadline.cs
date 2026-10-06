@@ -12,7 +12,7 @@ internal sealed class McpCallerDeadline : IDisposable
         {
             deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, timeout.Token);
         }
-        catch
+        catch (Exception)
         {
             timeout.Dispose();
             throw;
