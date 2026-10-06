@@ -8,13 +8,14 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal sealed class PhysicalShardProfileBoundedReadTests
 {
     private const int MaximumProfileBytes = 8192;
+    private const string MaximumProfileBytesSetting = ClusterProfileExecutionOptions.SectionName + ":" + nameof(ClusterProfileExecutionOptions.MaximumProfileBytes);
 
     [Test]
     public async Task NativeConfiguredByteCapControlsRealReopenWithoutChangingTheProfile()
     {
         using var fixture = ProfileFixture.Create();
         using var configuration = new ConfigurationManager();
-        configuration["KeyLoad:ClusterProfileExecution:MaximumProfileBytes"] = "512";
+        configuration[MaximumProfileBytesSetting] = "512";
         var options = AppHostOptionsRegistration.BindProfileExecution(configuration);
         var profile = CreateProfile();
         var bytes = PadProfile(profile, 512);
@@ -30,7 +31,7 @@ internal sealed class PhysicalShardProfileBoundedReadTests
     {
         using var fixture = ProfileFixture.Create();
         using var configuration = new ConfigurationManager();
-        configuration["KeyLoad:ClusterProfileExecution:MaximumProfileBytes"] = "64";
+        configuration[MaximumProfileBytesSetting] = "64";
         var options = AppHostOptionsRegistration.BindProfileExecution(configuration);
         Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.WriteStage(
             fixture.ProfilePath, new byte[65], null, options));

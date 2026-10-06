@@ -12,7 +12,7 @@ internal sealed class OpenLoopOriginalFailureWorkerTests
     [Test]
     public async Task FatalOperationAndProgressFailureRetainOriginalsAndJoinAllCancellationCallbacks()
     {
-        var fatal = new OutOfMemoryException();
+        var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(NativeFatalSibling);
         var operation = new AggregateException(new InvalidOperationException(NativeFatalWrapper, fatal), sibling);
         var observer = new IOException(ProgressFailure);
@@ -55,7 +55,7 @@ internal sealed class OpenLoopOriginalFailureWorkerTests
     [Test]
     public async Task FatalWithoutProgressStillCancelsOwnerAndRetainsWholeOriginalAggregate()
     {
-        var fatal = new OutOfMemoryException();
+        var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(NativeFatalSibling);
         var operation = new AggregateException(new InvalidOperationException(NativeFatalWrapper, fatal), sibling);
         using var lifetime = new CancellationTokenSource();
@@ -85,6 +85,22 @@ internal sealed class OpenLoopOriginalFailureWorkerTests
             OpenLoopWorker.PublishProgressAsync(Progress(), _ => throw observer, null, lifetime));
 
         await Assert.That(failure).IsSameReferenceAs(observer);
+        await Assert.That(callbackCount).IsEqualTo(1);
+        await Assert.That(lifetime.IsCancellationRequested).IsTrue();
+    }
+
+    [Test]
+    public async Task SoleFatalRethrowsOriginalObjectAfterOwnerCancellationSettles()
+    {
+        var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
+        using var lifetime = new CancellationTokenSource();
+        var callbackCount = 0;
+        using var registration = lifetime.Token.Register(() => Interlocked.Increment(ref callbackCount));
+
+        var failure = await Assert.ThrowsExactlyAsync<OutOfMemoryException>(() =>
+            OpenLoopWorker.PublishProgressAsync(null, null, fatal, lifetime));
+
+        await Assert.That(failure).IsSameReferenceAs(fatal);
         await Assert.That(callbackCount).IsEqualTo(1);
         await Assert.That(lifetime.IsCancellationRequested).IsTrue();
     }

@@ -11,16 +11,19 @@ internal sealed class AdminObservationOptions
     private const int MinimumPositiveCount = 1;
     private const int MaximumEntryCeiling = 2_048;
     private const int MaximumRetainedFileCeiling = 200;
+    private const int MaximumRecentFailureCeiling = 50;
     private const int MaximumScanMilliseconds = 250;
     private static readonly TimeSpan MaximumScanDeadline = TimeSpan.FromMilliseconds(MaximumScanMilliseconds);
 
     public int MaximumEntries { get; set; } = MaximumEntryCeiling;
     public int MaximumRetainedFiles { get; set; } = MaximumRetainedFileCeiling;
+    public int MaximumRecentFailures { get; set; } = MaximumRecentFailureCeiling;
     public TimeSpan ScanDeadline { get; set; } = TimeSpan.FromMilliseconds(MaximumScanMilliseconds);
 
     internal bool IsValid() => MaximumEntries is >= MinimumPositiveCount and <= MaximumEntryCeiling
         && MaximumRetainedFiles is >= MinimumPositiveCount and <= MaximumRetainedFileCeiling
         && MaximumRetainedFiles <= MaximumEntries
+        && MaximumRecentFailures is >= MinimumPositiveCount and <= MaximumRecentFailureCeiling
         && ScanDeadline > TimeSpan.Zero && ScanDeadline <= MaximumScanDeadline;
 
     internal void Validate()

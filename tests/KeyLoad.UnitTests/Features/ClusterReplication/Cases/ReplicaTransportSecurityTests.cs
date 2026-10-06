@@ -93,8 +93,8 @@ internal sealed class ReplicaTransportSecurityTests
         var request = fixture.Vote();
         var credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
         var options = fixture.Options with { Secret = credential };
-        using var wrongCredential = new ReplicaEnvelopeAuthenticator(fixture.Configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
-        using var wrongCluster = new ReplicaEnvelopeAuthenticator(fixture.Configuration,             fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
+        using var wrongCredential = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitRoutingOptions.Peers(fixture.Configuration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), canonicalDatabase: fixture.Database);
+        using var wrongCluster = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), UnitRoutingOptions.Peers(fixture.Configuration, fixture.Options with { ClusterId = ReplicaSecurityFixture.OtherClusterId }), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), canonicalDatabase: fixture.Database);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCredential.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => wrongCluster.VerifyRequest(request)).Code).IsEqualTo(ErrorCode.Unauthenticated);
         CryptographicOperations.ZeroMemory(credential);
@@ -270,7 +270,7 @@ internal sealed class ReplicaReplayLifetimeTests
     {
         using var fixture = new ReplicaSecurityFixture();
         var now = TimeProvider.System.GetUtcNow().ToUnixTimeMilliseconds();
-        var lifetime = checked((long)ReplicaTransportProtocol.EnvelopeLifetime.TotalMilliseconds);
+        var lifetime = checked((long)UnitRoutingOptions.Transport().Value.EnvelopeLifetime.TotalMilliseconds);
         var request = fixture.Vote();
         var expired = fixture.Resign(request with { Timestamp = now - lifetime - ReplicaSecurityFixture.TimeMarginMilliseconds });
         var future = fixture.Resign(request with { Timestamp = now + lifetime + ReplicaSecurityFixture.TimeMarginMilliseconds });
@@ -279,7 +279,7 @@ internal sealed class ReplicaReplayLifetimeTests
         var accepted = fixture.Resign(request with { Timestamp = now + lifetime / 2 });
         fixture.Receiver.VerifyRequest(accepted);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Receiver.VerifyRequest(accepted)).Code).IsEqualTo(ErrorCode.Unauthenticated);
-        var window = new ReplicaReplayWindow(fixture.Configuration.VoterIds, fixture.Options.ReplayLimits);
+        var window = new ReplicaReplayWindow(fixture.Configuration.VoterIds, UnitRoutingOptions.Replay(fixture.Options.ReplayLimits), UnitRoutingOptions.Transport());
         window.Admit(accepted.Sender, accepted.Nonce, accepted.Timestamp, now, ReplicaReplayPool.Critical);
         var expiry = accepted.Timestamp + lifetime;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => window.Admit(accepted.Sender, accepted.Nonce,

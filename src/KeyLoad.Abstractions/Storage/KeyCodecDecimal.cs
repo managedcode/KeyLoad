@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Numerics;
 using System.Text;
-using static KeyLoad.Storage.KeyCodecReadPrimitives;
 using static KeyLoad.Storage.KeyCodecDecimalTokens;
+using static KeyLoad.Storage.KeyCodecReadPrimitives;
 
 namespace KeyLoad.Storage;
 

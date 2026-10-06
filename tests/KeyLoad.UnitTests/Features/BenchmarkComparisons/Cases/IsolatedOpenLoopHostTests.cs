@@ -1,4 +1,3 @@
-using KeyLoad.Comparisons;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 

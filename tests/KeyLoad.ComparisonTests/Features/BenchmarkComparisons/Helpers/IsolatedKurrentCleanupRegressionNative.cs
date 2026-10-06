@@ -34,7 +34,7 @@ internal static class IsolatedKurrentCleanupRegressionNative
         await Assert.That(diagnostic.Outcome).IsEqualTo(KurrentCleanupOutcome.Succeeded);
         await Assert.That(diagnostic.Counts.Tracked).IsEqualTo(count);
         await Assert.That(diagnostic.Counts.IsComplete).IsTrue();
-        await Assert.That(diagnostic.Counts.PeakConcurrency <= KurrentConstants.CleanupConcurrency).IsTrue();
+        await Assert.That(diagnostic.Counts.PeakConcurrency <= NativeExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupConcurrency).IsTrue();
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(0);
     }
 }

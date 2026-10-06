@@ -1,7 +1,7 @@
 using System.ComponentModel;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Processes;
 

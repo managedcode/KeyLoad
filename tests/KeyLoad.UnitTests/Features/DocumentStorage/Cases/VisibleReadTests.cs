@@ -20,7 +20,7 @@ internal sealed class VisibleReadTests
         var acceptedBytes = db.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(db.Partition, Collection), 1)
             .Records.Sum(record => (long)record.Key.Length + record.Value.Length));
         var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueryReadBytes = acceptedBytes }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limited.Limits),             cancellationToken: TestContext.Current!.Execution.CancellationToken);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limited.Limits), cancellationToken: TestContext.Current!.Execution.CancellationToken);
         var visited = new List<string>();
         var position = db.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => limited.WithQueryView(RootPrincipal,
@@ -56,7 +56,7 @@ internal sealed class VisibleReadTests
         var vectors = new List<string>();
         db.Database.WithQueryView(ReaderPrincipal, db.Partition, Collection, (view, principal, _) =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),                 cancellationToken: TestContext.Current!.Execution.CancellationToken);
+            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits), cancellationToken: TestContext.Current!.Execution.CancellationToken);
             db.Database.VisitVisibleDocuments(view, principal, db.Partition, Collection, budget,
                 document => documents.Add(document.Reference.Id));
             db.Database.VisitVisibleVectors(view, principal, db.Partition, Collection, VectorField, budget,

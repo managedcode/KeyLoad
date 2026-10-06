@@ -27,7 +27,7 @@ internal static class PhysicalShardCatalogInterface34DeniedWriteOracle
     {
         var nodeRoot = Path.Combine(dataRoot, node);
         var options = NodeEpochRf3OfflineOptions.Create(nodeRoot, profile, node);
-        await using var host = new PartitionHost(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),             new CommandAdmissionGovernor(IntegrationAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System,             NullLogger<ReplicaConsensus>.Instance);
+        await using var host = new PartitionHost(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(), new CommandAdmissionGovernor(IntegrationAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System, NullLogger<ReplicaConsensus>.Instance);
         cancellationToken.ThrowIfCancellationRequested();
         if (host.Database.GetDocument(PartitionStoreProtocol.AdministratorId, reference) is not null)
         { throw new InvalidOperationException(InvalidStore); }

@@ -103,7 +103,7 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
             {
                 try
                 {
-                    await host.DisposeAsync();
+                    await DisposeHostAsync(host);
                 }
                 finally
                 {
@@ -113,11 +113,23 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
         }
     }
 
+    private static async ValueTask DisposeHostAsync(IHost ownedHost)
+    {
+        if (ownedHost is IAsyncDisposable asynchronousHost)
+        {
+            await asynchronousHost.DisposeAsync().ConfigureAwait(false);
+        }
+        else
+        {
+            ownedHost.Dispose();
+        }
+    }
+
     private static async Task DisposeAfterStartupFailureAsync(IHost failedHost, Exception startupFailure)
     {
         try
         {
-            await failedHost.DisposeAsync().ConfigureAwait(false);
+            await DisposeHostAsync(failedHost).ConfigureAwait(false);
         }
         catch (Exception cleanupFailure) when (NativeCqrsBoundaryErrors.IsNonFatal(cleanupFailure))
         {

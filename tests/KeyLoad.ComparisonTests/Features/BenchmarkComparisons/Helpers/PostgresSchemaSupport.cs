@@ -67,7 +67,8 @@ internal static class PostgresSchemaSupport
     }
 
     internal static Task DisposeTargetAsync(PostgresTarget target)
-        => target.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(15));
+        => PostgresSchemaOriginalTaskSettlement.JoinAsync(target.DisposeAsync().AsTask(),
+            NativeExecutionPolicyFixture.Harness().Value.PostgresTargetDisposeTimeout, CancellationToken.None);
 
     internal static async Task<Dictionary<string, (string Type, bool NotNull, string? Default)>> ColumnsAsync(
         NpgsqlConnection connection, string schema, string table, CancellationToken cancellationToken)

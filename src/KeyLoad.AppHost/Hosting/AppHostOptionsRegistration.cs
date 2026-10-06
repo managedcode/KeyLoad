@@ -1,9 +1,9 @@
-using KeyLoad.AppHost.Features.ClusterRouting;
 using System.Runtime.CompilerServices;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
+using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -64,7 +64,8 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Profile);
         services.AddSingleton(runtime.Deployment);
         services.AddSingleton(runtime.BenchmarkRelay);
-        if (runtime.BenchmarkWorkload is { } workload) { services.AddSingleton(workload); }
+        if (runtime.BenchmarkWorkload is { } workload)
+        { services.AddSingleton(workload); }
         services.AddSingleton(runtime.RequestProbeFiles);
         services.AddSingleton(runtime.LocalImage);
         services.AddSingleton(runtime.Images);
@@ -91,7 +92,8 @@ internal static class AppHostOptionsRegistration
 
     private static bool Validate(Action validate)
     {
-        try { validate(); return true; }
+        try
+        { validate(); return true; }
         catch (ArgumentException) { return false; }
         catch (InvalidOperationException) { return false; }
     }

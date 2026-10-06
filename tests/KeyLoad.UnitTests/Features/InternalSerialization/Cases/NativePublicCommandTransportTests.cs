@@ -23,7 +23,7 @@ internal sealed class NativePublicCommandTransportTests
         var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
             operation.Kind, operation.Id, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
-        var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System);
+        var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System, UnitRoutingOptions.Routing());
         var result = await SignedGrainRequestTestContext.ExecuteAsync(executor, request, actorKey, CancellationToken.None);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(NativePublicNormalizationFixture.Detail(shape));

@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 

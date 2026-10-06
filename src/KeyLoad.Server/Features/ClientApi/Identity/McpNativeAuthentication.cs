@@ -1,8 +1,8 @@
 using KeyLoad.Features.InternalSerialization;
 using KeyLoad.Orleans;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 using Orleans.Serialization.Buffers;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

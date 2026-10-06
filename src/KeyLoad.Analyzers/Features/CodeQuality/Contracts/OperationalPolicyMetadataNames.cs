@@ -21,6 +21,12 @@ internal static class OperationalPolicyMetadataNames
     internal const string HttpClientHandler = "System.Net.Http.HttpClientHandler";
     internal const string SocketsHttpHandler = "System.Net.Http.SocketsHttpHandler";
     internal const string Socket = "System.Net.Sockets.Socket";
+    internal const string FileStream = "System.IO.FileStream";
+    internal const string FileStreamOptions = "System.IO.FileStreamOptions";
+    internal const string StreamWriter = "System.IO.StreamWriter";
+    internal const string StreamReader = "System.IO.StreamReader";
+    internal const string FileBufferSizeProperty = nameof(System.IO.FileStreamOptions.BufferSize);
+    internal const string FileBufferSizeParameter = "bufferSize";
     internal const string RetryOptions = "Polly.Retry.RetryStrategyOptions";
     internal const string GenericRetryOptions = "Polly.Retry.RetryStrategyOptions`1";
     internal const string Timeout = "Timeout";

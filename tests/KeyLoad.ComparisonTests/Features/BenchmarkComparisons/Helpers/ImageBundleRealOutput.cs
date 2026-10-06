@@ -8,7 +8,7 @@ internal static class ImageBundleRealOutput
 {
     internal static async Task<string> ReadAsync(StreamReader reader, CancellationToken cancellationToken)
     {
-        var buffer = new char[ImageBundleRealProtocol.BufferCharacters];
+        var buffer = new char[NativeExecutionPolicyFixture.Harness().Value.ImageBundleReadBufferCharacters];
         var text = new StringBuilder();
         while (true)
         {
@@ -18,7 +18,7 @@ internal static class ImageBundleRealOutput
                 return text.ToString();
             }
 
-            if (text.Length + count > ImageBundleRealProtocol.MaximumOutputCharacters)
+            if (text.Length + count > NativeExecutionPolicyFixture.Harness().Value.ImageBundleMaximumOutputCharacters)
             {
                 throw new InvalidOperationException(ImageBundleRealProtocol.Failure);
             }

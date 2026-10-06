@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 

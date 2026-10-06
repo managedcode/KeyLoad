@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using KeyLoad.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.QueryExecution;
 

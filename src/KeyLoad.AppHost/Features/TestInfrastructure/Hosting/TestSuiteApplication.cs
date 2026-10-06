@@ -1,8 +1,8 @@
 using System.Runtime.ExceptionServices;
-using Microsoft.Extensions.Options;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 

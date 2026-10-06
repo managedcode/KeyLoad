@@ -6,7 +6,9 @@ namespace KeyLoad.CrashHost;
 /// <summary>Prepares only current-format positive recovery fixtures through the real native command path.</summary>
 internal static class RecoveryPhysicalShardBootstrap
 {
-    private static readonly Guid ShardId = Guid.Parse("778899aa-bbcc-ddee-ff00-112233445566");
+    private const string ShardIdShardIdInputText = "778899aa-bbcc-ddee-ff00-112233445566";
+
+    private static readonly Guid ShardId = Guid.Parse(ShardIdShardIdInputText);
 
     /// <summary>Creates or validates the fixture's independently identified canonical catalog.</summary>
     /// <param name="database">Actual node-owned canonical database.</param>
@@ -14,18 +16,22 @@ internal static class RecoveryPhysicalShardBootstrap
     /// <param name="voterIds">Exact ordered voter identities configured by this fixture.</param>
     internal static void Bootstrap(DatabaseEngine database, string principalId, ImmutableArray<string> voterIds)
     {
+        const int VersionSingleItemCount = 1;
+        const int ExpectedRevisionEmptyCount = 0;
+        const string BootstrapMessageText = "The recovery fixture catalog did not bootstrap.";
+
         ArgumentNullException.ThrowIfNull(database);
         var catalog = ReadExisting(database, principalId);
         if (catalog is null)
         {
-            var request = new BootstrapPhysicalShardCatalogRequest(1, 0, ShardId,
+            var request = new BootstrapPhysicalShardCatalogRequest(VersionSingleItemCount, ExpectedRevisionEmptyCount, ShardId,
                 database.Store.Identity.Incarnation, voterIds);
             var operation = database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
                 PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId), principalId,
                 DateTimeOffset.UnixEpoch, NativeSerialization.Serialize(request));
             if (!database.Apply(operation).Get<bool>())
             {
-                throw new InvalidOperationException("The recovery fixture catalog did not bootstrap.");
+                throw new InvalidOperationException(BootstrapMessageText);
             }
             catalog = database.ReadPhysicalShardCatalog(principalId);
         }
@@ -47,12 +53,17 @@ internal static class RecoveryPhysicalShardBootstrap
     private static void RequireExisting(DatabaseEngine database, PhysicalShardCatalog catalog,
         ImmutableArray<string> voterIds)
     {
+        const int EmptyVersion = 1;
+        const int EmptyRevision = 1;
+        const int EmptyPlacementEpoch = 1;
+        const string RequireExistingMessageText = "The persisted recovery fixture catalog changed.";
+
         var shard = catalog.DefaultShard;
-        if (catalog.Version != 1 || catalog.Revision != 1 || shard.PhysicalShardId != ShardId
-            || shard.Incarnation != database.Store.Identity.Incarnation || shard.PlacementEpoch != 1
+        if (catalog.Version != EmptyVersion || catalog.Revision != EmptyRevision || shard.PhysicalShardId != ShardId
+            || shard.Incarnation != database.Store.Identity.Incarnation || shard.PlacementEpoch != EmptyPlacementEpoch
             || !shard.VoterIds.SequenceEqual(voterIds, StringComparer.Ordinal))
         {
-            throw new InvalidOperationException("The persisted recovery fixture catalog changed.");
+            throw new InvalidOperationException(RequireExistingMessageText);
         }
     }
 }

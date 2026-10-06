@@ -3,8 +3,6 @@ using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Security;
 using KeyLoad.Storage;
-using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests;
 
@@ -14,7 +12,7 @@ internal static class OutcomeStoreOracle
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
 
-    internal static byte[] Key(ZoneTreeStore store, ReplicatedOperation operation)
+    internal static byte[] Key(IAtomicStore store, ReplicatedOperation operation)
     {
         if (!HasNativePayload(store, operation))
         {
@@ -39,13 +37,13 @@ internal static class OutcomeStoreOracle
     internal static byte[] UnknownKey(string principalId, Guid commandId)
         => KeyCodec.Encode(ScopedOutcomeSpace, UnknownOutcomeScope, principalId, commandId);
 
-    internal static OperationResult? Read(ZoneTreeStore store, ReplicatedOperation operation)
+    internal static OperationResult? Read(IAtomicStore store, ReplicatedOperation operation)
         => ReadStored(store, operation)?.Result;
 
-    internal static StoredOutcome? ReadStored(ZoneTreeStore store, ReplicatedOperation operation)
+    internal static StoredOutcome? ReadStored(IAtomicStore store, ReplicatedOperation operation)
         => store.Read(view => view.GetRecord<StoredOutcome>(Key(store, operation)));
 
-    internal static OperationResult? ReadPartition(ZoneTreeStore store, PartitionRef partition, string principalId, Guid commandId)
+    internal static OperationResult? ReadPartition(IAtomicStore store, PartitionRef partition, string principalId, Guid commandId)
         => store.Read(view => view.GetRecord<StoredOutcome>(PartitionKey(partition, principalId, commandId))?.Result);
 
     private static (PartitionRef? Partition, bool IsGlobal) ReadExpectedScope(ReplicatedOperation operation)
@@ -76,19 +74,9 @@ internal static class OutcomeStoreOracle
                 OperationKind.ReclaimBlob => Partition<ReclaimBlobRequest>(operation, static request => request.Blob?.Partition),
                 _ => null
             };
-            if (Valid(partition)) { return (partition, false); }
-            var global = operation.Kind switch
-            {
-                OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),
-                OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
-                OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
-                OperationKind.BootstrapPhysicalShardCatalog => IsNonNull<BootstrapPhysicalShardCatalogRequest>(operation),
-                OperationKind.BindAtomicPartitionPlacement => IsNonNull<BindAtomicPartitionPlacementRequest>(operation),
-                OperationKind.Membership => IsNonNull<MembershipMutation>(operation),
-                OperationKind.SetDispatch => IsBoolean(operation.PayloadJson),
-                _ => false
-            };
-            return (null, global);
+            if (Valid(partition))
+            { return (partition, false); }
+            return (null, IsGlobalOperation(operation));
         }
         catch (JsonException)
         {
@@ -100,7 +88,20 @@ internal static class OutcomeStoreOracle
         }
     }
 
-    private static bool HasNativePayload(ZoneTreeStore store, ReplicatedOperation operation)
+    private static bool IsGlobalOperation(ReplicatedOperation operation)
+        => operation.Kind switch
+        {
+            OperationKind.ConfigureResource => IsNonNull<ConfigureResourceRequest>(operation),
+            OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
+            OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
+            OperationKind.BootstrapPhysicalShardCatalog => IsNonNull<BootstrapPhysicalShardCatalogRequest>(operation),
+            OperationKind.BindAtomicPartitionPlacement => IsNonNull<BindAtomicPartitionPlacementRequest>(operation),
+            OperationKind.Membership => IsNonNull<MembershipMutation>(operation),
+            OperationKind.SetDispatch => IsBoolean(operation.PayloadJson),
+            _ => false
+        };
+
+    private static bool HasNativePayload(IAtomicStore store, ReplicatedOperation operation)
     {
         try
         {

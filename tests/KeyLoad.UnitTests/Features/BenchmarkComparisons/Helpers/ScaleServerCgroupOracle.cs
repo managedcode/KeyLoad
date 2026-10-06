@@ -43,36 +43,8 @@ internal static class ScaleServerCgroupOracle
         for (var depth = 0; depth < AncestorLimit; depth++)
         {
             var isRoot = directory == root;
-            var cpuText = isRoot ? ReadRootLimit(Path.Combine(directory, CpuFile)) : ReadBounded(Path.Combine(directory, CpuFile));
-            var cpuFields = cpuText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (!(isRoot && cpuFields.Length == 1 && cpuFields[0] == Unlimited))
-            {
-                if (cpuFields.Length != 2 || !long.TryParse(cpuFields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var period)
-                    || period <= 0)
-                {
-                    throw new InvalidDataException("Native cgroup CPU limit was malformed.");
-                }
-
-                if (cpuFields[0] != Unlimited)
-                {
-                    if (!long.TryParse(cpuFields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= 0)
-                    {
-                        throw new InvalidDataException("Native cgroup CPU quota was malformed.");
-                    }
-
-                    cpu = Math.Min(cpu, (decimal)quota / period);
-                }
-            }
-            var memoryText = (isRoot ? ReadRootLimit(Path.Combine(directory, MemoryFile)) : ReadBounded(Path.Combine(directory, MemoryFile))).Trim();
-            if (memoryText != Unlimited)
-            {
-                if (!long.TryParse(memoryText, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= 0)
-                {
-                    throw new InvalidDataException("Native cgroup memory limit was malformed.");
-                }
-
-                memory = Math.Min(memory, limit);
-            }
+            cpu = Math.Min(cpu, ReadCpuLimit(directory, isRoot));
+            memory = Math.Min(memory, ReadMemoryLimit(directory, isRoot));
             cpuSet ??= ReadBounded(Path.Combine(directory, CpuSetFile)).Trim();
             if (directory == root)
             {
@@ -88,6 +60,46 @@ internal static class ScaleServerCgroupOracle
 
         return new(cpu == decimal.MaxValue ? Unlimited : cpu.ToString(CultureInfo.InvariantCulture), cpuSet,
             memory == long.MaxValue ? Unlimited : memory.ToString(CultureInfo.InvariantCulture));
+    }
+
+    private static decimal ReadCpuLimit(string directory, bool isRoot)
+    {
+        var path = Path.Combine(directory, CpuFile);
+        var text = isRoot ? ReadRootLimit(path) : ReadBounded(path);
+        var fields = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (isRoot && fields.Length == 1 && fields[0] == Unlimited)
+        {
+            return decimal.MaxValue;
+        }
+        if (fields.Length != 2 || !long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var period)
+            || period <= 0)
+        {
+            throw new InvalidDataException("Native cgroup CPU limit was malformed.");
+        }
+        if (fields[0] == Unlimited)
+        {
+            return decimal.MaxValue;
+        }
+        if (!long.TryParse(fields[0], NumberStyles.None, CultureInfo.InvariantCulture, out var quota) || quota <= 0)
+        {
+            throw new InvalidDataException("Native cgroup CPU quota was malformed.");
+        }
+        return (decimal)quota / period;
+    }
+
+    private static long ReadMemoryLimit(string directory, bool isRoot)
+    {
+        var path = Path.Combine(directory, MemoryFile);
+        var text = (isRoot ? ReadRootLimit(path) : ReadBounded(path)).Trim();
+        if (text == Unlimited)
+        {
+            return long.MaxValue;
+        }
+        if (!long.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var limit) || limit <= 0)
+        {
+            throw new InvalidDataException("Native cgroup memory limit was malformed.");
+        }
+        return limit;
     }
 
     private static bool HasActualRoot()

@@ -17,8 +17,10 @@ internal static class C1OutcomeInspectionProcessStartInfo
 
     internal static ProcessStartInfo Create()
     {
+        const string CreateResultText = "bin";
+
         var root = FindRepositoryRoot();
-        var assembly = Path.Combine(root, TestsDirectory, CrashHostDirectory, "bin", ReleaseDirectory,
+        var assembly = Path.Combine(root, TestsDirectory, CrashHostDirectory, CreateResultText, ReleaseDirectory,
             FrameworkDirectory, AssemblyName);
         if (!File.Exists(assembly))
         { throw new FileNotFoundException(MissingHostMessage); }

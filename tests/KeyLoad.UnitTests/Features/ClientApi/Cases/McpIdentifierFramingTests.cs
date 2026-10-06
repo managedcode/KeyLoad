@@ -47,7 +47,7 @@ internal sealed class McpIdentifierFramingTests
         var encoded = McpResponseBoundaryTestData.EncodedIdentifier(McpIdentifierEncoding.Ascii, MaximumEncodedIdentifierBytes);
         var exact = McpFrameBounds.Inspect(McpResponseBoundaryTestData.IdentifierFrame(encoded, escapedKey: true), MaximumWireBytes, UnitMcpOptions.Execution());
         await Assert.That(exact.PropertyCount).IsEqualTo(1);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(            McpResponseBoundaryTestData.IdentifierFrame(encoded + McpResponseBoundaryTestData.Padding, escapedKey: true), MaximumWireBytes, UnitMcpOptions.Execution()));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => McpFrameBounds.Inspect(McpResponseBoundaryTestData.IdentifierFrame(encoded + McpResponseBoundaryTestData.Padding, escapedKey: true), MaximumWireBytes, UnitMcpOptions.Execution()));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 

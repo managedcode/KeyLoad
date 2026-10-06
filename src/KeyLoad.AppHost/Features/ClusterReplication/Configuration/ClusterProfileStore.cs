@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using Microsoft.Extensions.Options;
 
 internal static class ClusterProfileStore
 {

@@ -5,6 +5,12 @@ namespace KeyLoad.CrashHost;
 /// <summary>Deterministic real database commands shared by the child and its recovery assertions.</summary>
 internal static class ReplicaCrashModel
 {
+    private const int SnapshotDocumentCut = 4;
+    private const int TailDocumentCut = 5;
+
+    private const int BaseDocumentCut = 2;
+    private const int CommittedDocumentCut = 3;
+
     private const string Tenant = "replica-crash-tenant";
     private const string Database = "replica-crash-database";
     private const string Domain = "orders";
@@ -27,16 +33,24 @@ internal static class ReplicaCrashModel
     /// <param name="index">The original deterministic operation index, from one through five.</param>
     public static ReplicatedOperation Operation(int index)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(index, 1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(index, 5);
-        var id = new Guid(index, 0, 0, new byte[8]);
+        const int FirstOperationIndex = 1;
+        const int LastOperationIndex = 5;
+        const int GuidClockSequence = 0;
+        const int GuidVersionSequence = 0;
+        const int GuidTailBytes = 8;
+        const int ConfigureResourceOperation = 1;
+        const int DocumentOperationOffset = 2;
+
+        ArgumentOutOfRangeException.ThrowIfLessThan(index, FirstOperationIndex);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(index, LastOperationIndex);
+        var id = new Guid(index, GuidClockSequence, GuidVersionSequence, new byte[GuidTailBytes]);
         var timestamp = DateTimeOffset.UnixEpoch.AddTicks(index);
-        if (index == 1)
+        if (index == ConfigureResourceOperation)
         {
             var resource = new ConfigureResourceRequest(Tenant, Database, new(Collection, ResourceKind.Collection, Domain));
             return new(id, OperationKind.ConfigureResource, Principal, timestamp, Encode(resource));
         }
-        var request = new CommandRequest(id, Document.Partition, [new PutDocument(Collection, DocumentId, JsonAt(index), index - 2)]);
+        var request = new CommandRequest(id, Document.Partition, [new PutDocument(Collection, DocumentId, JsonAt(index), index - DocumentOperationOffset)]);
         return new(id, OperationKind.Batch, Principal, timestamp, Encode(request));
     }
 
@@ -44,10 +58,10 @@ internal static class ReplicaCrashModel
     /// <param name="index">The committed document operation whose exact JSON is required.</param>
     public static string JsonAt(long index) => index switch
     {
-        2 => BaseJson,
-        3 => CommittedJson,
-        4 => SnapshotJson,
-        5 => TailJson,
+        BaseDocumentCut => BaseJson,
+        CommittedDocumentCut => CommittedJson,
+        SnapshotDocumentCut => SnapshotJson,
+        TailDocumentCut => TailJson,
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 

@@ -15,7 +15,7 @@ internal sealed class PostgresVectorPayloadContractTests
     [Test]
     public async Task JsonbFieldReconstructionPreservesActualContentAndExcludesServerWhitespace()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"), UnitBenchmarkOptions.Native());
         var document = corpus.Create(42);
         using var fields = JsonDocument.Parse(document.Payload);
         var id = fields.RootElement.GetProperty(IdField).GetString()!;

@@ -20,7 +20,8 @@ internal static class BenchmarkScenarioSelectionRegistration
 
     internal static int RecordCount(BenchmarkScenarioSelectionOptions snapshot)
     {
-        if (snapshot.RecordCount is null) { return BenchmarkScenarioSelectionOptions.HundredThousandRecords; }
+        if (snapshot.RecordCount is null)
+        { return BenchmarkScenarioSelectionOptions.HundredThousandRecords; }
         if (int.TryParse(snapshot.RecordCount, NumberStyles.None, CultureInfo.InvariantCulture, out var count)
             && count is BenchmarkScenarioSelectionOptions.HundredThousandRecords or BenchmarkScenarioSelectionOptions.OneMillionRecords)
         { return count; }
@@ -45,7 +46,8 @@ internal static class BenchmarkScenarioSelectionRegistration
     private static bool Validate(BenchmarkScenarioSelectionOptions snapshot, bool scaled)
     {
         ValidateEngine(snapshot.Engine, scaled);
-        if (scaled) { _ = RecordCount(snapshot); }
+        if (scaled)
+        { _ = RecordCount(snapshot); }
         return true;
     }
 

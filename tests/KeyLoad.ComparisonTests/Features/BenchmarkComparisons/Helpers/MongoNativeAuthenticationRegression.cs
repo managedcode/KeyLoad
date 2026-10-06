@@ -17,9 +17,9 @@ internal static class MongoNativeAuthenticationRegression
     private const string UserField = "user", DatabaseField = "db", UserId = "userId";
     private const string ShowCredentials = "showCredentials", ShowCustomData = "showCustomData";
     private const string Credentials = "credentials", CustomData = "customData";
-    private const int MinimumNodes = 1, MaximumNodes = 3, MaximumPool = 4, CommandEnabled = 1, UuidBytes = 16;
+    private const int MinimumNodes = 1, MaximumNodes = 3, CommandEnabled = 1, UuidBytes = 16;
     private static readonly string[] NodeNames = ["isolated-mongo-1", "isolated-mongo-2", "isolated-mongo-3"];
-    private static readonly TimeSpan NativeTimeout = TimeSpan.FromSeconds(2);
+    private static TimeSpan NativeTimeout => NativeExecutionPolicyFixture.Harness().Value.MongoAuthenticationTimeout;
 
     /// <summary>AC-ISO-002/003/006: authenticate every real selected node and compare persisted user UUIDs without exporting user documents.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, string password, CancellationToken token)
@@ -100,7 +100,7 @@ internal static class MongoNativeAuthenticationRegression
             ConnectTimeout = NativeTimeout,
             ServerSelectionTimeout = NativeTimeout,
             SocketTimeout = NativeTimeout,
-            MaxConnectionPoolSize = MaximumPool,
+            MaxConnectionPoolSize = NativeExecutionPolicyFixture.Harness().Value.MongoAuthenticationMaximumPoolSize,
             ReadPreference = ReadPreference.Nearest
         };
     }

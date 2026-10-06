@@ -16,7 +16,8 @@ internal sealed record McpOperationDescriptor
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(route);
         ArgumentException.ThrowIfNullOrWhiteSpace(description);
-        if (!adapter) { ArgumentNullException.ThrowIfNull(decoder); }
+        if (!adapter)
+        { ArgumentNullException.ThrowIfNull(decoder); }
         if (adapter ? readKind.HasValue || commandKind.HasValue : readKind.HasValue == commandKind.HasValue)
         {
             throw new ArgumentException(McpCatalogProtocol.InvalidOperation, nameof(readKind));

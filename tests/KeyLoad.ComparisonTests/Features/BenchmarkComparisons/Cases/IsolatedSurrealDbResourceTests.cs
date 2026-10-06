@@ -5,6 +5,8 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedSurrealDbResourceTests
 {
+    private const string UserSetting = "SURREAL_USER";
+    private const string PasswordSetting = "SURREAL_PASS";
     [Test]
     public async Task SurrealDbUsesOnePinnedPersistentServerAndRunnerEndpoint()
     {
@@ -49,8 +51,8 @@ internal sealed class IsolatedSurrealDbResourceTests
         await Assert.That(mount.IsReadOnly).IsFalse();
         await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single(item => item.Name == "http").TargetPort).IsEqualTo(8000);
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-        await Assert.That(environment["SURREAL_USER"]).IsEqualTo("root");
-        await Assert.That(environment["SURREAL_PASS"]).IsEqualTo("{isolated-surrealdb-password.value}");
+        await Assert.That(environment[UserSetting]).IsEqualTo("root");
+        await Assert.That(environment[PasswordSetting]).IsEqualTo("{isolated-surrealdb-password.value}");
         var config = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
         await Assert.That(config.Arguments.Select(argument => argument.Value)).IsEquivalentTo(new[]
         {

@@ -1,3 +1,4 @@
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Assertions;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;

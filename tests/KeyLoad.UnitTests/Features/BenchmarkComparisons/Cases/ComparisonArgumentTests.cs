@@ -80,7 +80,7 @@ internal sealed class ComparisonArgumentTests
     {
         var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
-            runner.RunAsync(null!, null, TestContext.Current!.Execution.CancellationToken));
+            runner.RunAsync((IComparisonTarget[])null!, null, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.ParamName).IsEqualTo(TargetsParameter);
     }
 

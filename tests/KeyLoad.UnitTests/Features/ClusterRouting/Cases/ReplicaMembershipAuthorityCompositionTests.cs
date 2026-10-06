@@ -34,7 +34,7 @@ internal sealed class ReplicaMembershipAuthorityCompositionTests
 
     private static async Task VerifyMappedRouteAsync(WebApplication app)
     {
-        var routes = app.DataSources.SelectMany(source => source.Endpoints).OfType<RouteEndpoint>()
+        var routes = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints).OfType<RouteEndpoint>()
             .Where(endpoint => endpoint.RoutePattern.RawText == ReplicaMembershipAuthorityProtocol.Path).ToArray();
         await Assert.That(routes.Length).IsEqualTo(1);
         await Assert.That(routes[0].Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods.SingleOrDefault())

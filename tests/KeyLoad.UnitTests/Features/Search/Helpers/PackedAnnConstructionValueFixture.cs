@@ -22,7 +22,7 @@ internal static class PackedAnnConstructionValueFixture
     {
         var records = PackedAnnTestData.Load(database, metric);
         var state = PackedAnnBuilder.Build(PackedAnnTestData.Space(metric, Dimension), records,
-            new PackedAnnOptions(), Budget(database));
+            UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget(database));
         return (records, state);
     }
 
@@ -33,7 +33,7 @@ internal static class PackedAnnConstructionValueFixture
         PackedAnnIndexTestSupport.PersistVectors(database, space,
             PackedAnnTestData.Field(DistanceMetric.DotProduct), values);
         var records = PackedAnnTestData.Load(database, DistanceMetric.DotProduct);
-        var state = PackedAnnBuilder.Build(space, records, new PackedAnnOptions(), Budget(database));
+        var state = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget(database));
         return (records, state);
     }
 

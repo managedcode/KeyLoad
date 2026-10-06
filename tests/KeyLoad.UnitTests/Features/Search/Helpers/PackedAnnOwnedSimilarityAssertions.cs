@@ -11,7 +11,7 @@ internal static class PackedAnnOwnedSimilarityAssertions
         var budget = PackedAnnIndexTestSupport.Budget(database);
         var options = new PackedAnnOptions();
         var layout = PackedAnnAdmission.Create(space, records, options, budget);
-        var packed = PackedAnnVectors.Copy(records, layout, budget);
+        var packed = PackedAnnVectors.Copy(records, layout, budget, options.VectorBudgetCheckInterval);
         var originals = records.Select(record => record.Values.ToArray()).ToArray();
         var expected = ExactScores(metric, originals);
         var prepared = Enumerable.Range(0, records.Length)
@@ -20,7 +20,7 @@ internal static class PackedAnnOwnedSimilarityAssertions
         await AssertScoresAsync(packed, prepared, expected);
         PoisonSource(records);
         await AssertValidationAsync(() => PackedAnnVectors.Copy(records, layout,
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget(database), options.VectorBudgetCheckInterval));
         await AssertScoresAsync(packed, prepared, expected);
     }
 

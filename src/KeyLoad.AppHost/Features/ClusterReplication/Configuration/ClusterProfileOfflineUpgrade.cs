@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using Microsoft.Extensions.Options;
 
 internal static class ClusterProfileOfflineUpgrade
 {

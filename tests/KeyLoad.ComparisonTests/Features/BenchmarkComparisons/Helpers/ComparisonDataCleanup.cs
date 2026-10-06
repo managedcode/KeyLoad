@@ -41,7 +41,7 @@ internal static class ComparisonDataCleanup
         using var process = Process.Start(start) ?? throw new IOException("Cannot start comparison data cleanup.");
         var error = process.StandardError.ReadToEndAsync();
         var output = process.StandardOutput.ReadToEndAsync();
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var timeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.ComparisonDataCleanupTimeout);
         try
         {
             await process.WaitForExitAsync(timeout.Token);

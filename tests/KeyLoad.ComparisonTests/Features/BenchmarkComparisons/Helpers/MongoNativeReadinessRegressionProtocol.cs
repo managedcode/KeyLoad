@@ -35,11 +35,11 @@ internal static class MongoNativeReadinessRegressionProtocol
     internal const string LowerObserved = "MongoNativeReadinessLowerPrimaryObserved";
     internal const string ElectionPassed = "MongoNativeReadinessElectionPassed";
     internal const int MinimumNodes = 1, MaximumNodes = 3, SourceCharacters = 40, ContainerCharacters = 64;
-    internal const int ShortContainerCharacters = 12, OutputCharacters = 32_768, ErrorCharacters = 4_096;
+    internal const int ShortContainerCharacters = 12;
     internal const int IdentifierCharacters = 128, CommonNetworkCount = 1;
     internal const int JsonDepth = 12, DigestPrefixLength = 7, SuccessfulExit = 0, ExpectedMarkerCount = 1;
-    internal static readonly TimeSpan ParentDeadline = TimeSpan.FromSeconds(300);
-    internal static readonly TimeSpan CleanupDeadline = TimeSpan.FromSeconds(30);
+    internal static TimeSpan ParentDeadline => NativeExecutionPolicyFixture.Harness().Value.MongoReadinessTimeout;
+    internal static TimeSpan CleanupDeadline => NativeExecutionPolicyFixture.Harness().Value.MongoReadinessCleanupTimeout;
 
     internal static void Require(bool condition)
     {

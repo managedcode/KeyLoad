@@ -138,6 +138,12 @@ ordered primary then cleanup objects, and native ManagedCode fatal classificatio
 remains visible and takes priority. The receipt contains only the existing safe
 stage categories and primary-presence flag, never exception text or payloads.
 
+The synthetic out-of-memory regression and its oversized allocation helper were
+removed during the 2026-10-06 lifecycle repair. The genuine cancellation plus
+native copy-conflict flow remains required. Fatal-priority propagation is still
+part of this contract; source review of that path does not qualify a native
+runtime-fatal regression, and that evidence remains open.
+
 TASK-SCALE-ORIGINAL-TEARDOWN is owned by ComparisonTests BenchmarkComparisons
 Helpers (`IsolatedNativeCase`, `IsolatedNativeTeardown` and populated settlement
 helpers), with Cases/Helpers for real native regressions. The resource collector
@@ -668,6 +674,13 @@ via KeyLoadTests:OpenLoopRate and the existing ScaleProfile. Reject mixed vector
 control/rate/proof selectors before resource acquisition. The outer
 Benchmarks__OpenLoopRate key is not a substitute for the test entry. Absent-plan
 arguments and original129 matrix rows stay unchanged.
+
+The matrix supplies KEYLOAD_OPEN_LOOP_RATE and
+KEYLOAD_OPEN_LOOP_CANCELLATION_PROOF as explicit row selectors. Both must be
+absent/empty for an original row, or exactly match the canonical open-loop cell,
+its ID, target, node count, scenario and scale profile. Unknown/missing/mixed
+selectors reject before spawning the Aspire caller. The existing outer native
+rate/proof configuration keys remain forbidden at this dispatch boundary.
 
 Keep comparison-open-loop-worker- / comparison-open-loop-proof- archive prefixes
 and their separate comparison-open-loop-case-qualification- /

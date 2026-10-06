@@ -35,7 +35,7 @@ internal sealed class RequestCqrsProbeDiscoveryPolicyTests
     }
 
     private static RequestCqrsProbeRecords CreateRecords()
-        => new(Session, Local, [], new RequestCqrsProbeDiscoveryPolicy(Voters, Local, enabled: true));
+        => new(Session, Local, [], new RequestCqrsProbeDiscoveryPolicy(Voters, Local, enabled: true), UnitRequestProbeOptions.Execution, UnitRequestProbeOptions.Json);
 
     private static RequestCqrsProbeDiscoveryRecord CreateRecord(string peer, bool transportReady)
         => new(RequestCqrsProbeProtocol.Version, RequestCqrsProbeProtocol.DiscoveryKind, Session,

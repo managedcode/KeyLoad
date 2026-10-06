@@ -16,8 +16,6 @@ internal static class Neo4jHarnessConstants
     public const int AcceptedStatusCode = 202;
     public const int QueryErrorStatusCode = 400;
     public const int MaximumNativeCodeLength = 256;
-    public const int RequestTimeoutSeconds = 30;
-    public const int CleanupTimeoutSeconds = 15;
     public const int SupportedScenarioCount = 6;
     public const int UnsupportedScenarioCount = 4;
     public const int SuccessfulCaseCount = 12;

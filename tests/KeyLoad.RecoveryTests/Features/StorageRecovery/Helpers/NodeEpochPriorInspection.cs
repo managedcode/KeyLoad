@@ -12,13 +12,14 @@ internal static class NodeEpochPriorInspection
         var trial = Path.GetDirectoryName(source)
             ?? throw new InvalidDataException("The prior node has no owned trial directory.");
         var copy = Path.Combine(trial, "prior-reader-" + Guid.NewGuid().ToString("N"));
+        var executionOptions = RecoveryExecutionOptions.NodeUpgrade();
         ServerNodeUpgradeFiles.CreatePrivateDirectory(copy);
         foreach (var name in AuthorityFiles)
         {
             ServerNodeUpgradeFiles.Copy(Path.Combine(source, ServerNodeUpgradeProtocol.Canonical, name),
-                Path.Combine(copy, name));
+                Path.Combine(copy, name), executionOptions);
         }
-        ServerNodeUpgradeFiles.CreateEmpty(Path.Combine(copy, "owner.lock"));
+        ServerNodeUpgradeFiles.CreateEmpty(Path.Combine(copy, "owner.lock"), executionOptions);
         var copied = await EpochUpgradeFileInventory.CaptureAsync(copy, cancellationToken);
         foreach (var name in AuthorityFiles)
         {

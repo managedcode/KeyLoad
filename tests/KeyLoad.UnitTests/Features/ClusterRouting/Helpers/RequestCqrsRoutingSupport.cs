@@ -51,7 +51,7 @@ internal static class RequestCqrsRoutingCases
         await Assert.That(NativeSerialization.Serialize(ReadReceipt(retryReply))
             .SequenceEqual(firstReceiptBytes)).IsTrue();
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
-        var durableReceipt = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, writer.Id, commandId)?.Get<CommitReceipt>()
+        var durableReceipt = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, commandId)?.Get<CommitReceipt>()
             ?? throw new InvalidOperationException("The stable command outcome has no durable receipt.");
         await Assert.That(NativeSerialization.Serialize(durableReceipt).SequenceEqual(firstReceiptBytes)).IsTrue();
     }
@@ -76,7 +76,7 @@ internal static class RequestCqrsRoutingCases
             PostStartFailedSequence, expectedError: ErrorCode.Unauthenticated);
         await Assert.That(denied.Error).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(deniedPosition);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, writer.Id, commandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, commandId)).IsNull();
         await AssertDocumentMissingAsync(fixture, documentId);
 
         var root = GrainRequestAuthority.Reload(fixture.Database.Database, RequestCqrsRoutingTests.RootPrincipalId,
@@ -108,7 +108,7 @@ internal static class RequestCqrsRoutingCases
             commandId, EarlyFailedSequence, ErrorCode.TokenInvalidated);
         await Assert.That(missing.Error).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(beforeMissing);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, writer.Id, commandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, commandId)).IsNull();
         await AssertDocumentMissingAsync(fixture, documentId);
 
         var forged = PersistWriter(fixture, ForgedPrefix);
@@ -123,7 +123,7 @@ internal static class RequestCqrsRoutingCases
             forgedRequest, forgedCommandId, EarlyFailedSequence, expectedError: ErrorCode.Unauthenticated);
         await Assert.That(rejected.Error).IsEqualTo(ErrorCode.Unauthenticated);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(beforeForged);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, writer.Id, forgedCommandId)).IsNull();
+        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition, writer.Id, forgedCommandId)).IsNull();
         await AssertDocumentMissingAsync(fixture, forgedDocumentId);
     }
 

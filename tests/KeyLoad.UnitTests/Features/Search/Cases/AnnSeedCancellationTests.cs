@@ -10,7 +10,7 @@ internal sealed class AnnSeedCancellationTests
         using var database = AnnSeedTestSupport.Create(2);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),             cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             AnnSeedTestSupport.Capture(database, budget: budget));
 

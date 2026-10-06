@@ -19,6 +19,4 @@ internal static class VectorComparisonRunnerValues
     internal const int ReportSchemaVersion = 3;
     internal const string ClosedLoopVectorQueryThroughputIncludes = "closed-loop vector query throughput includes neighbor validation; update duration includes post-ack native readback and validation; ingestion, oracle, index build and warmup excluded";
     internal const int SingleElementOffset = 1;
-    internal const int CancellationChunkMask = 4095;
-    internal const int YieldBatchMask = 255;
 }

@@ -21,7 +21,7 @@ internal static class OperationalPolicyBindings
     internal static bool IsCoalescedWakeSignal(Compilation compilation, IObjectCreationOperation creation) =>
         MagicRuntimeOperations.IsNativeType(compilation, creation.Type, OperationalPolicyMetadataNames.BoundedChannel) &&
         creation.Arguments is [var capacity] && capacity.Value.ConstantValue is
-            { HasValue: true, Value: int slots } && slots == OperationalPolicyMetadataNames.WakeSignalCapacity &&
+        { HasValue: true, Value: int slots } && slots == OperationalPolicyMetadataNames.WakeSignalCapacity &&
         creation.Parent is IArgumentOperation { Parent: IInvocationOperation invocation } &&
         invocation.TargetMethod.Name == OperationalPolicyMetadataNames.CreateBounded &&
         MagicRuntimeOperations.IsNativeType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Channel) &&
@@ -55,6 +55,8 @@ internal static class OperationalPolicyBindings
         var type = property.ContainingType;
         return MagicRuntimeOperations.IsNativeType(compilation, type, OperationalPolicyMetadataNames.HttpClient) &&
                 property.Name == OperationalPolicyMetadataNames.Timeout ||
+            IsNativeFileType(compilation, type, OperationalPolicyMetadataNames.FileStreamOptions) &&
+                property.Name == OperationalPolicyMetadataNames.FileBufferSizeProperty ||
             MagicRuntimeOperations.IsNativeType(compilation, type, OperationalPolicyMetadataNames.BoundedChannel) &&
                 property.Name == OperationalPolicyMetadataNames.Capacity ||
             IsHttpHandler(compilation, type) && property.Name is
@@ -69,10 +71,22 @@ internal static class OperationalPolicyBindings
                 OperationalPolicyMetadataNames.MaxRetryAttempts or OperationalPolicyMetadataNames.Delay;
     }
 
+    internal static bool IsFileBufferArgument(Compilation compilation, IMethodSymbol method, IArgumentOperation argument) =>
+        method.MethodKind == MethodKind.Constructor && argument.ArgumentKind == ArgumentKind.Explicit &&
+        argument.Parameter?.Name == OperationalPolicyMetadataNames.FileBufferSizeParameter &&
+        (IsNativeFileType(compilation, method.ContainingType, OperationalPolicyMetadataNames.FileStream) ||
+         IsNativeFileType(compilation, method.ContainingType, OperationalPolicyMetadataNames.StreamWriter) ||
+         IsNativeFileType(compilation, method.ContainingType, OperationalPolicyMetadataNames.StreamReader));
+
+    private static bool IsNativeFileType(Compilation compilation, ITypeSymbol type, string metadataName) =>
+        MagicRuntimeOperations.IsNativeType(compilation, type, metadataName) &&
+        SymbolEqualityComparer.Default.Equals(type.ContainingAssembly,
+            compilation.GetSpecialType(SpecialType.System_Object).ContainingAssembly);
+
     private static bool IsStructuralMutex(ImmutableArray<IArgumentOperation> arguments) =>
         arguments.Length == OperationalPolicyMetadataNames.MutexConstructorArguments &&
         arguments.All(static argument => argument.Value.ConstantValue is
-            { HasValue: true, Value: int permits } && permits == OperationalPolicyMetadataNames.MutexPermits);
+        { HasValue: true, Value: int permits } && permits == OperationalPolicyMetadataNames.MutexPermits);
 
     private static bool IsHttpHandler(Compilation compilation, ITypeSymbol type) =>
         MagicRuntimeOperations.IsNativeType(compilation, type, OperationalPolicyMetadataNames.SocketsHttpHandler) ||

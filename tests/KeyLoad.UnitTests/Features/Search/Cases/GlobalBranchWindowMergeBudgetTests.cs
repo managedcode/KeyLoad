@@ -54,9 +54,9 @@ internal sealed class GlobalBranchWindowMergeBudgetTests
         var batchLimits = readLimits with { MaxBatchBytes = checked((int)exactBytes - 1), MaxQueryReadBytes = long.MaxValue };
 
         var readFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(request,
-            windows, readLimits, new(readLimits)));
+            windows, readLimits, new(UnitExecutionOptions.DatabaseLimits(readLimits))));
         var batchFailure = Assert.ThrowsExactly<KeyLoadException>(() => GlobalBranchWindowMerger.Merge(request,
-            windows, batchLimits, new(batchLimits)));
+            windows, batchLimits, new(UnitExecutionOptions.DatabaseLimits(batchLimits))));
 
         await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(batchFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);

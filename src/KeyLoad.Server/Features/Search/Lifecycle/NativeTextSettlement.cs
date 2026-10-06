@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Core;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.Search;
 

@@ -7,18 +7,17 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKurrentVolumeRegression
 {
-    private const int FixtureTimeoutSeconds = 900;
-
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
+        var harnessOptions = NativeExecutionPolicyFixture.Harness();
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromSeconds(FixtureTimeoutSeconds));
+        deadline.CancelAfter(harnessOptions.Value.KurrentVolumeTimeout);
         var selection = new ComparisonWorkerSelection(KurrentConstants.Name, nodeCount, Scenario.StreamAppend,
             IsolatedQuorumResourceTokens.Profile);
         var options = selection.Options;
         await IsolatedKurrentVolumeRegressionNative.RequireCanonicalProfileAsync(options);
         var endpoint = await IsolatedKurrentCleanupRegressionGossip.ReadLeaderAsync(app, nodeCount, deadline.Token);
-        var fixture = new IsolatedKurrentVolumeRegressionFixture(endpoint, options);
+        var fixture = new IsolatedKurrentVolumeRegressionFixture(endpoint, options, harnessOptions);
         ExceptionDispatchInfo? primary = null;
         try
         {

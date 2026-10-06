@@ -15,7 +15,7 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
     {
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
         timeout.CancelAfter(TimeSpan.FromMinutes(2));
-        using var recorder = CreateRecorder();
+        using var recorder = new RequestIdResponseRecorder();
         using var http = new HttpClient(recorder, disposeHandler: false)
         {
             BaseAddress = fixture.App.GetEndpoint("node1", "http"),
@@ -102,18 +102,4 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
 
     private static bool IsNonEmptyGuidN(string value) => Guid.TryParseExact(value, "N", out var id) && id != Guid.Empty;
 
-    private static RequestIdResponseRecorder CreateRecorder()
-    {
-        SocketsHttpHandler? transport = new();
-        try
-        {
-            var recorder = new RequestIdResponseRecorder(transport);
-            transport = null;
-            return recorder;
-        }
-        finally
-        {
-            transport?.Dispose();
-        }
-    }
 }

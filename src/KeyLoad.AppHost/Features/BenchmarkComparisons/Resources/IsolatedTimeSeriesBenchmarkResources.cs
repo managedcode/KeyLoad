@@ -1,5 +1,5 @@
-using KeyLoad.AppHost.Hosting;
 using System.Globalization;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;

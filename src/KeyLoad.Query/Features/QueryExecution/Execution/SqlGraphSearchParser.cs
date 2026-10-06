@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 

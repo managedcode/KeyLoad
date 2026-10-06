@@ -28,7 +28,7 @@ internal static class ReplicaProcessAssertions
     internal static async Task ReceiptAsync(ReplicaCrashNode node, int cut)
     {
         var operation = ReplicaCrashModel.Operation(cut);
-        var previous = OutcomeStoreOracle.Read(node.Store, operation)!.Get<CommitReceipt>();
+        var previous = OutcomeStoreOracle.Read(node.Canonical, operation)!.Get<CommitReceipt>();
         var replayed = node.Database.Apply(operation).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replayed)).IsEquivalentTo(JsonDefaults.Serialize(previous), CollectionOrdering.Matching);
         await Assert.That(replayed.CommandId).IsEqualTo(operation.Id);

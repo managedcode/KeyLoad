@@ -53,17 +53,17 @@ internal sealed class OpenLoopIsolatedPlanTests
             var before = await File.ReadAllBytesAsync(outputPath, token);
             var invalid = await File.ReadAllTextAsync(outputPath, token);
             var candidate = JsonNode.Parse(invalid)!.AsObject();
-            candidate["measurementCells"]![0]!["offeredRatePerSecond"] = OpenLoopPlanExpectedInventory.InvalidOfferedRate;
+            candidate[IsolatedPlanFields.MeasurementCells]![0]![IsolatedPlanFields.OfferedRatePerSecond] = OpenLoopPlanExpectedInventory.InvalidOfferedRate;
             await VerifyRejectedAsync(candidate, outputPath, before, executionOptions, token);
             candidate = JsonNode.Parse(invalid)!.AsObject();
-            var cells = candidate["measurementCells"]!.AsArray();
+            var cells = candidate[IsolatedPlanFields.MeasurementCells]!.AsArray();
             var first = cells[0]!.DeepClone();
             cells[0] = cells[1]!.DeepClone();
             cells[1] = first;
             await VerifyRejectedAsync(candidate, outputPath, before, executionOptions, token);
             candidate = JsonNode.Parse(invalid)!.AsObject();
-            var firstCell = candidate["measurementCells"]![0]!.AsObject();
-            candidate["measurementCells"]![0] = ReverseCellProperties(firstCell);
+            var firstCell = candidate[IsolatedPlanFields.MeasurementCells]![0]!.AsObject();
+            candidate[IsolatedPlanFields.MeasurementCells]![0] = ReverseCellProperties(firstCell);
             await VerifyRejectedAsync(candidate, outputPath, before, executionOptions, token);
             using var verified = JsonDocument.Parse(invalid);
             await OpenLoopPlanAssertions.VerifyCanonicalAsync(verified.RootElement, contractDocument.RootElement,
@@ -105,7 +105,7 @@ internal sealed class OpenLoopIsolatedPlanTests
             keepStandardInputOpen: false, ready: null, cancellationToken: cancellationToken);
         await Assert.That(validation.ExitCode).IsEqualTo(0);
         using var result = JsonDocument.Parse(validation.Output);
-        await Assert.That(result.RootElement.GetProperty("rejected").GetBoolean()).IsTrue();
+        await Assert.That(result.RootElement.GetProperty(IsolatedPlanFields.Rejected).GetBoolean()).IsTrue();
         await Assert.That(await File.ReadAllBytesAsync(outputPath, cancellationToken)).IsEquivalentTo(originalBytes,
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }

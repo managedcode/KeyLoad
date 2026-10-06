@@ -1,4 +1,3 @@
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
@@ -17,12 +16,7 @@ internal static class RequestCqrsLifecycleFailureObserver
         Action<RequestCqrsLifecycleStage>? observer, RequestCqrsLifecycleStage stage)
     {
         var previous = failures.Count;
-        try
-        { ServerFailureObserver.Observe(operation, failures); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        ServerFailureObserver.Observe(operation, failures);
         if (failures.Count > previous)
         { Notify(failures, observer, stage); }
     }
@@ -31,12 +25,7 @@ internal static class RequestCqrsLifecycleFailureObserver
         Action<RequestCqrsLifecycleStage>? observer, RequestCqrsLifecycleStage stage)
     {
         var previous = failures.Count;
-        try
-        { await ServerFailureObserver.ObserveAsync(operation, failures).ConfigureAwait(false); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        await ServerFailureObserver.ObserveAsync(operation, failures).ConfigureAwait(false);
         if (failures.Count > previous)
         { Notify(failures, observer, stage); }
     }
@@ -46,11 +35,6 @@ internal static class RequestCqrsLifecycleFailureObserver
     {
         if (observer is null)
         { return; }
-        try
-        { observer(stage); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        { failures.Add(error); }
+        ServerFailureObserver.Observe(() => observer(stage), failures);
     }
 }

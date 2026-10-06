@@ -10,6 +10,12 @@ internal static class CrashHostApplication
 {
     internal static async Task RunAsync(string[] args)
     {
+        const int ArgsFirstIndex = 0;
+        const int ArgsSecondIndex = 1;
+        const int ArgsComponentIndex = 2;
+        const int ArgsLengthValidationBoundary = 3;
+        const int RunAsyncArgsComponentIndex = 3;
+
         if (await EpochPriorSourceProbe.TryRunAsync(args) || await EpochUpgradeCrashScenario.TryRunAsync(args))
         {
             return;
@@ -27,10 +33,10 @@ internal static class CrashHostApplication
         {
             return;
         }
-        var directory = args[0];
-        var stage = Enum.Parse<CommitStage>(args[1]);
-        var mutationIndex = int.Parse(args[2], CultureInfo.InvariantCulture);
-        var mode = args.Length > 3 ? args[3] : CrashFixtureValues.CommitMode;
+        var directory = args[ArgsFirstIndex];
+        var stage = Enum.Parse<CommitStage>(args[ArgsSecondIndex]);
+        var mutationIndex = int.Parse(args[ArgsComponentIndex], CultureInfo.InvariantCulture);
+        var mode = args.Length > ArgsLengthValidationBoundary ? args[RunAsyncArgsComponentIndex] : CrashFixtureValues.CommitMode;
         var boundary = new CanonicalCrashBoundary(stage, mutationIndex, mode == CrashFixtureValues.CommitMode);
         using var store = new ZoneTreeStore(new(directory) { FaultObserver = boundary.Observe }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         await RunScenarioAsync(directory, store, boundary, mode);

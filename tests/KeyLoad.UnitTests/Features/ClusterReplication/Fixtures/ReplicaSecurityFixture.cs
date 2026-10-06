@@ -53,11 +53,11 @@ internal sealed class ReplicaSecurityFixture : IDisposable
         credential = RandomNumberGenerator.GetBytes(ReplicaTransportProtocol.SecretBytes);
         Options = new(new() { [VoterA] = new(VoterA), [VoterB] = new(VoterB), [VoterC] = new(VoterC) },
             credential, ClusterId)
-        { ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
-        Discovery = new(Configuration, Options, local);
-        Receiver = new(Configuration, Options, Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: Database);
+        { ConnectTimeout = TimeSpan.FromSeconds(1), ReplayLimits = limits ?? new() { CriticalPerVoter = ReservedCapacity, ForwardPerVoter = 1, ReadBarrierPerVoter = 1, DataAppendPerVoter = 1 } };
+        Discovery = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), local);
+        Receiver = new(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
         var senderConfiguration = Configuration with { LocalId = VoterA };
-        Sender = new(senderConfiguration, Options, new(senderConfiguration, Options, local), TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: Database);
+        Sender = new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, Options), local), TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits), canonicalDatabase: Database);
         OtherGeneration = SiloAddress.New(local.SiloAddress.Endpoint, checked(local.SiloAddress.Generation + 1)).ToParsableString();
         mac = new(Options.Secret, Options.ClusterId);
     }

@@ -21,7 +21,7 @@ internal sealed class ScaledCorpusReadbackTests
 
     }
 
-    private static async IAsyncEnumerable<FoundDocument> FirstRecords(IComparisonCorpus corpus, int count,
+    private static async IAsyncEnumerable<FoundDocument> FirstRecords(ScaledComparisonCorpus corpus, int count,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         for (var number = 0; number < count; number++)
@@ -41,7 +41,7 @@ internal sealed class ScaledCorpusReadbackTests
         var evidence = new CancellationEvidence();
         var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ScaledCorpusReadbackVerifier.VerifyAsync(
             evidence.Read(corpus, cancellation), corpus, cancellation.Token));
-        await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        await Assert.That(error!.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(evidence.Disposed).IsTrue();
     }
 
@@ -51,7 +51,7 @@ internal sealed class ScaledCorpusReadbackTests
         yield break;
     }
 
-    private static async IAsyncEnumerable<FoundDocument> ExtraRecord(IComparisonCorpus corpus,
+    private static async IAsyncEnumerable<FoundDocument> ExtraRecord(ScaledComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await foreach (var record in FirstRecords(corpus, corpus.Settings.Documents, cancellationToken))
@@ -66,7 +66,7 @@ internal sealed class ScaledCorpusReadbackTests
     {
         internal bool Disposed { get; private set; }
 
-        internal async IAsyncEnumerable<FoundDocument> Read(IComparisonCorpus corpus, CancellationTokenSource source,
+        internal async IAsyncEnumerable<FoundDocument> Read(ScaledComparisonCorpus corpus, CancellationTokenSource source,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             try
@@ -91,7 +91,7 @@ internal sealed class ScaledCorpusReadbackTests
         }
     }
 
-    private static async IAsyncEnumerable<FoundDocument> DuplicatedFirst(IComparisonCorpus corpus,
+    private static async IAsyncEnumerable<FoundDocument> DuplicatedFirst(ScaledComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -101,7 +101,7 @@ internal sealed class ScaledCorpusReadbackTests
         await Task.CompletedTask;
     }
 
-    private static async IAsyncEnumerable<FoundDocument> ChangedFirst(IComparisonCorpus corpus,
+    private static async IAsyncEnumerable<FoundDocument> ChangedFirst(ScaledComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();

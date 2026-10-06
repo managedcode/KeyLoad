@@ -112,7 +112,7 @@ internal sealed class AdminHttpMetricsMiddlewareTests
     [Test]
     public async Task AcVi004UnhandledFaultIsLoggedAsServerErrorAndStillPropagates()
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         var context = CreateContext(HttpMethods.Post, RoutePath, RawQuery);
         var middleware = new AdminHttpMetricsMiddleware(_ => throw new InvalidOperationException());
         await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => middleware.InvokeAsync(context, metrics));
@@ -136,7 +136,7 @@ internal sealed class AdminHttpMetricsMiddlewareTests
     private static async Task<AdminHttpSnapshot> InvokeAsync(string method, string path, string query, int status,
         RouteEndpoint? endpoint, bool routedInsideNext, bool aborted = false)
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         var context = CreateContext(method, path, query);
         if (aborted)
         { context.RequestAborted = new CancellationToken(true); }

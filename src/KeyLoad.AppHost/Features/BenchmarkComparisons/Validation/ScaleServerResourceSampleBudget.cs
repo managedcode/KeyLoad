@@ -18,7 +18,8 @@ internal sealed class ScaleServerResourceSampleBudget
         Provenance = provenance.Value;
         maximum = maximumBytes ?? Settings.MaxSampleMetadataBytes;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximum);
-        if (maximum > Settings.MaxSampleMetadataBytes) { throw new ArgumentOutOfRangeException(nameof(maximumBytes)); }
+        if (maximum > Settings.MaxSampleMetadataBytes)
+        { throw new ArgumentOutOfRangeException(nameof(maximumBytes)); }
     }
     internal int Remaining => maximum - _used;
 

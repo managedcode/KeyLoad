@@ -75,7 +75,7 @@ internal static class RequestCqrsProbeMarkerReader
             { continue; }
             if (match is not null)
             { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
-            var marker = RequestCqrsProbeJson.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
+            var marker = fixture.Json.ReadMarker(RequestCqrsProbeFileStore.ReadRecord(path));
             if (marker.ArmId != armId || marker.Phase != phase || marker.Outcome != matchedOutcome
                 || Path.GetFileName(path) != RequestCqrsProbeFileNames.Marker(marker))
             { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }

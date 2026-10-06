@@ -26,12 +26,14 @@ internal static class EpochUpgradeCrashScenario
 
     private static Task RunAsync(string sourceDirectory, string destinationDirectory, string stageText)
     {
+        const string RunAsyncMessageText = "The offline-upgrade crash stage is unsupported.";
+
         var requested = Enum.Parse<CommitStage>(stageText, ignoreCase: false);
         if (!Enum.IsDefined(requested) || requested < CommitStage.UpgradeSourceVerified
             || requested > CommitStage.UpgradePublished)
         {
             throw new ArgumentOutOfRangeException(nameof(stageText), stageText,
-                "The offline-upgrade crash stage is unsupported.");
+                RunAsyncMessageText);
         }
 
         var boundary = new EpochUpgradeCrashBoundary(requested);
@@ -50,19 +52,25 @@ internal static class EpochUpgradeCrashScenario
 
 internal sealed class EpochUpgradeCrashBoundary(CommitStage requestedStage)
 {
+    private const int GetObservedEmptyRead = 0;
+
     private int observed;
-    internal bool Observed => Volatile.Read(ref observed) != 0;
+    internal bool Observed => Volatile.Read(ref observed) != GetObservedEmptyRead;
 
     internal void Observe(CommitStage observedStage)
     {
+        const int ValueSingleItemCount = 1;
+        const int EmptyExchange = 0;
+        const string ObserveMessageText = "The requested offline-upgrade stage was observed more than once.";
+
         if (observedStage != requestedStage)
         {
             return;
         }
 
-        if (Interlocked.Exchange(ref observed, 1) != 0)
+        if (Interlocked.Exchange(ref observed, ValueSingleItemCount) != EmptyExchange)
         {
-            throw new InvalidOperationException("The requested offline-upgrade stage was observed more than once.");
+            throw new InvalidOperationException(ObserveMessageText);
         }
         CrashHostPause.AtBoundary();
     }

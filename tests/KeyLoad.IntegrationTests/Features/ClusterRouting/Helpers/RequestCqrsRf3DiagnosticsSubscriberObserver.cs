@@ -48,7 +48,7 @@ internal sealed class RequestCqrsRf3DiagnosticsSubscriberObserver : IAsyncDispos
             bool moved;
             try
             { moved = await pending.ConfigureAwait(false); }
-            catch
+            catch (Exception)
             {
                 lastMove = pending;
                 pendingMove = null;

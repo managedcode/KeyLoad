@@ -31,7 +31,7 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
         }
 
         var started = TimeProvider.System.GetUtcNow();
-        var corpus = new VectorComparisonCorpus(profile);
+        var corpus = new VectorComparisonCorpus(profile, executionOptions);
         var datasetHash = ComputeDatasetHash(corpus, cancellationToken);
         var loaded = await target.IngestAsync(StreamDocumentsAsync(corpus, cancellationToken), cancellationToken).ConfigureAwait(false);
         if (loaded != profile.RecordCount)
@@ -127,13 +127,14 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
     private static double Percentile(double[] sorted, double percentile)
         => sorted[Math.Clamp((int)Math.Ceiling(percentile * sorted.Length) - VectorComparisonRunnerValues.SingleElementOffset, VectorComparisonRunnerValues.FirstIndex, sorted.Length - VectorComparisonRunnerValues.SingleElementOffset)];
 
-    private static string ComputeDatasetHash(VectorComparisonCorpus corpus, CancellationToken cancellationToken)
+    private string ComputeDatasetHash(VectorComparisonCorpus corpus, CancellationToken cancellationToken)
     {
+        var cancellationMask = executionOptions.Value.VectorCancellationCheckMask;
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(Encoding.UTF8.GetBytes(corpus.Profile.Id));
         foreach (var document in corpus.StreamDocuments())
         {
-            if ((document.Number & VectorComparisonRunnerValues.CancellationChunkMask) == VectorComparisonRunnerValues.FirstIndex)
+            if ((document.Number & cancellationMask) == VectorComparisonRunnerValues.FirstIndex)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -145,14 +146,15 @@ public sealed class VectorComparisonRunner(VectorComparisonProfile profile, IOpt
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 
-    private static async IAsyncEnumerable<VectorDocument> StreamDocumentsAsync(VectorComparisonCorpus corpus,
+    private async IAsyncEnumerable<VectorDocument> StreamDocumentsAsync(VectorComparisonCorpus corpus,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        var yieldMask = executionOptions.Value.VectorYieldBatchMask;
         foreach (var document in corpus.StreamDocuments())
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return document;
-            if ((document.Number & VectorComparisonRunnerValues.YieldBatchMask) == VectorComparisonRunnerValues.YieldBatchMask)
+            if ((document.Number & yieldMask) == yieldMask)
             {
                 await Task.Yield();
             }

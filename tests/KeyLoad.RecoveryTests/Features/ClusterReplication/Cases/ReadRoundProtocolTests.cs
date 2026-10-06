@@ -71,7 +71,7 @@ internal sealed class ReadRoundProtocolTests
         await Assert.That(found).IsNotNull();
         await Assert.That(found!.Revision).IsEqualTo(1);
         await Assert.That(found.Json).IsEqualTo(ReplicaCrashModel.JsonAt(2));
-        await Assert.That(OutcomeStoreOracle.Read(node.Store, ReplicaCrashModel.Operation(2))!.Get<CommitReceipt>().Token)
+        await Assert.That(OutcomeStoreOracle.Read(node.Database.Store, ReplicaCrashModel.Operation(2))!.Get<CommitReceipt>().Token)
             .IsEqualTo(receipt.Token);
     }
 }

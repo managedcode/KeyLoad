@@ -23,7 +23,7 @@ internal static class PhysicalShardCatalogStoppedOracle
             var nodeRoot = Path.Combine(dataRoot, node);
             var options = NodeEpochRf3OfflineOptions.Create(nodeRoot, profile, node);
             var configured = options.CreateReplicaConfiguration(Path.GetFullPath(nodeRoot));
-            await using var host = new PartitionHost(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(),                 new CommandAdmissionGovernor(IntegrationAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System,                 NullLogger<ReplicaConsensus>.Instance);
+            await using var host = new PartitionHost(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(), new CommandAdmissionGovernor(IntegrationAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System, NullLogger<ReplicaConsensus>.Instance);
             var catalog = host.Database.ReadPhysicalShardCatalog(PartitionStoreProtocol.AdministratorId);
             await Assert.That(catalog.Version).IsEqualTo(CurrentCatalogVersion);
             await Assert.That(catalog.Revision).IsEqualTo(InitialCatalogRevision);

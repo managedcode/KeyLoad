@@ -10,7 +10,7 @@ internal sealed class NativeNodeUpgradeLockProbeTests
         await NodeEpochCoordinatorRejectionTests.WithNodeAsync(
             async (_, source, _, _, sourceInventory, cancellationToken) =>
             {
-                using (ServerNodeUpgradeLocks.Acquire(source))
+                using (ServerNodeUpgradeLocks.Acquire(source, RecoveryExecutionOptions.NodeUpgrade()))
                 {
                     var rejected = Assert.ThrowsExactly<IOException>(
                         () => NativeNodeUpgradeLockProbe.Verify(source, NativeNodeUpgradeLockBoundary.NegativeControl));

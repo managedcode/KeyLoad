@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 

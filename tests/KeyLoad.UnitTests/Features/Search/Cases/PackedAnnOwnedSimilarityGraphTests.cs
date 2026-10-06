@@ -15,7 +15,7 @@ internal sealed class PackedAnnOwnedSimilarityGraphTests
         var space = PackedAnnTestData.Space(metric, Dimension);
         PackedAnnTestData.Seed(database, RecordCount, Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
-        var state = PackedAnnBuilder.Build(space, records, new(), PackedAnnIndexTestSupport.Budget(database));
+        var state = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(new()), PackedAnnIndexTestSupport.Budget(database));
         await PackedAnnOwnedSimilarityAssertions.AssertGraphAdjacencyAsync(state,
             PackedAnnIndexTestSupport.Budget(database));
     }

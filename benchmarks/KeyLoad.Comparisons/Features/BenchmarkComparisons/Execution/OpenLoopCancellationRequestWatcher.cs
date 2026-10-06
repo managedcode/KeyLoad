@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
@@ -14,8 +15,9 @@ internal static class OpenLoopCancellationRequestWatcher
 
     internal static async Task<bool> WatchAndCancelAsync(string output,
         CancellationTokenSource runnerCancellation, OpenLoopExecutionPolicy policy,
-        CancellationToken stopToken)
+        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken stopToken)
     {
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions);
         var request = Path.Combine(output, OpenLoopCancellationProofContract.RequestFileName);
         try
         {
@@ -25,7 +27,7 @@ internal static class OpenLoopCancellationRequestWatcher
                 if (TryGetAttributes(request, out var attributes))
                 {
                     ValidateRequestAttributes(request, attributes);
-                    await ValidateRequestAsync(request, stopToken).ConfigureAwait(false);
+                    await ValidateRequestAsync(request, execution, stopToken).ConfigureAwait(false);
                     await runnerCancellation.CancelAsync().ConfigureAwait(false);
                     return true;
                 }
@@ -68,7 +70,8 @@ internal static class OpenLoopCancellationRequestWatcher
         }
     }
 
-    private static async Task ValidateRequestAsync(string path, CancellationToken cancellationToken)
+    private static async Task ValidateRequestAsync(string path,
+        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
         const int FirstElementIndex = 0;
@@ -80,7 +83,7 @@ internal static class OpenLoopCancellationRequestWatcher
         }
         var bytes = new byte[OpenLoopCancellationProofContract.RequestReadBufferBytes];
         await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            OpenLoopCancellationProofContract.RequestReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            executionOptions.Value.OpenLoopControlFileBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
         var read = NoObservedItems;
         while (read < bytes.Length)
         {

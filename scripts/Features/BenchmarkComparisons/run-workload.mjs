@@ -4,6 +4,7 @@ import { lstat, open } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
+import { openLoopWorkloadArguments, selectOpenLoopWorkload } from './open-loop-workload-selection.mjs';
 
 const intervalMilliseconds = 30_000;
 const maximumProgressBytes = 512;
@@ -58,17 +59,23 @@ export function selectedVectorProfile(environment) {
   return undefined;
 }
 
-export function workloadArguments(scaleProfile, vectorProfile) {
+export function workloadArguments(scaleProfile, vectorProfile, openLoopCell) {
   if (scaleProfile !== undefined && vectorProfile !== undefined) throw new Error('The native comparison profile identity is invalid.');
   const scaled = scaleProfile !== undefined;
   const vector = vectorProfile !== undefined;
+  const openLoop = openLoopCell === undefined ? undefined : openLoopWorkloadArguments(openLoopCell);
+  if (openLoop !== undefined && (!scaled || vector || openLoopCell.profile !== scaleProfile)) {
+    throw new Error('The native comparison profile identity is invalid.');
+  }
+  const filter = openLoop?.filter ?? '/*/*/IsolatedNativeComparisonTests/*';
   const arguments_ = [
     'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release', '--',
-    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*',
+    '--KeyLoadTests:Suite=comparison', '--KeyLoadTests:Filter=' + filter,
     `--KeyLoadTests:TimeoutMinutes=${vector || scaled ? 140 : 60}`
   ];
   if (scaled) arguments_.push(`--KeyLoadTests:ScaleProfile=${scaleProfile}`);
   if (vector) arguments_.push(`--KeyLoadTests:VectorProfile=${vectorProfile}`);
+  if (openLoop !== undefined) arguments_.push(openLoop.rateArgument);
   return arguments_;
 }
 
@@ -180,8 +187,9 @@ export async function runWorkload() {
   }
   const vectorProfile = selectedVectorProfile(process.env);
   const scaleProfile = selectedScaleProfile(process.env, vectorProfile);
+  const openLoopCell = selectOpenLoopWorkload(process.env, scaleProfile, vectorProfile);
   const progress = path.join(root, 'artifacts/comparisons/isolated/failures', cell, 'progress.log');
-  const arguments_ = workloadArguments(scaleProfile, vectorProfile);
+  const arguments_ = workloadArguments(scaleProfile, vectorProfile, openLoopCell);
   return await runProgressProcess('dotnet', arguments_, root, progress);
 }
 

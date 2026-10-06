@@ -40,7 +40,7 @@ internal sealed class TimeSeriesAspireProfileTests
         };
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, timeout.Token);
         await using var app = await builder.BuildAsync(timeout.Token);
-        await using var logs = new ComparisonTestLogCapture(app);
+        await using var logs = new ComparisonTestLogCapture(app, NativeExecutionPolicyFixture.Harness());
         string? cleanupImage = null;
         try
         {

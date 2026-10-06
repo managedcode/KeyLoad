@@ -4,11 +4,15 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal static class C1OutcomeInspection
 {
-    private const int InputChunkBytes = 1_024;
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (args.Length == 0 || !string.Equals(args[0], C1OutcomeInspectionProtocol.Mode, StringComparison.Ordinal))
+        const int EmptyArgsLength = 0;
+        const int ArgsFirstIndex = 0;
+        const int TryRunAsyncEmptyArgsLength = 1;
+        const int ExitCodeEmptyCount = 0;
+
+        if (args.Length == EmptyArgsLength || !string.Equals(args[ArgsFirstIndex], C1OutcomeInspectionProtocol.Mode, StringComparison.Ordinal))
         {
             return false;
         }
@@ -16,14 +20,14 @@ internal static class C1OutcomeInspection
         Console.SetError(TextWriter.Null);
         try
         {
-            if (args.Length != 1)
+            if (args.Length != TryRunAsyncEmptyArgsLength)
             { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
             var requestBytes = await ReadRequestBytesAsync().ConfigureAwait(false);
             var request = C1OutcomeInspectionJson.ReadRequest(requestBytes);
             var receipt = C1OutcomeInspectionOperation.Run(request);
             var receiptBytes = C1OutcomeInspectionJson.SerializeReceipt(receipt);
             await WriteReceiptBytesAsync(receiptBytes).ConfigureAwait(false);
-            Environment.ExitCode = 0;
+            Environment.ExitCode = ExitCodeEmptyCount;
         }
         catch (Exception failure) when (!C1OutcomeInspectionFailures.ContainsFatal(failure))
         {
@@ -55,23 +59,28 @@ internal static class C1OutcomeInspection
 
     private static async Task<byte[]> ReadInputAsync(Stream input)
     {
-        var retained = new byte[C1OutcomeInspectionProtocol.MaximumRequestBytes + 1];
-        var chunk = new byte[InputChunkBytes];
-        var length = 0;
+        const int MaximumRequestBytesStep = 1;
+        const int LengthInitialValue = 0;
+        const int EmptyCount = 0;
+        const int StartEmptyCount = 0;
+
+        var retained = new byte[C1OutcomeInspectionProtocol.MaximumRequestBytes + MaximumRequestBytesStep];
+        var chunk = new byte[CrashExecutionOptions.Child().Value.InspectionInputChunkBytes];
+        var length = LengthInitialValue;
         while (true)
         {
             var count = await input.ReadAsync(chunk.AsMemory()).ConfigureAwait(false);
-            if (count == 0)
+            if (count == EmptyCount)
             {
                 break;
             }
             var kept = Math.Min(count, retained.Length - length);
-            chunk.AsSpan(0, kept).CopyTo(retained.AsSpan(length));
+            chunk.AsSpan(StartEmptyCount, kept).CopyTo(retained.AsSpan(length));
             length += kept;
         }
         if (length > C1OutcomeInspectionProtocol.MaximumRequestBytes)
         { throw new InvalidDataException(C1OutcomeInspectionProtocol.InvalidRequest); }
-        return retained.AsSpan(0, length).ToArray();
+        return retained.AsSpan(StartEmptyCount, length).ToArray();
     }
 
     private static async Task WriteReceiptBytesAsync(byte[] receiptBytes)

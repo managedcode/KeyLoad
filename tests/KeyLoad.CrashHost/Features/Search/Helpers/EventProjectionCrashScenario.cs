@@ -6,6 +6,9 @@ namespace KeyLoad.CrashHost.Features.Search;
 
 internal static class EventProjectionCrashScenario
 {
+    private const int ProjectionRequestValuesSingleItemCount = 1;
+    private const int ProjectionRequestValuesEmptyCount = 0;
+
     internal const string Mode = "event-projection-process";
     internal const string OperationFile = "event-projection-operation.bin";
     internal const string PositionFile = "event-projection-before-position.bin";
@@ -63,6 +66,8 @@ internal static class EventProjectionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int PositionStep = 1;
+
         var database = CrashDatabase.Create(store);
         Seed(database);
         var request = ProjectionRequest();
@@ -70,7 +75,7 @@ internal static class EventProjectionCrashScenario
         var command = new CommandRequest(commandId, Partition, [request]);
         var operation = CrashDatabase.Operation(OperationKind.Batch, command, commandId);
         await PreserveBeforeCutAsync(directory, store, operation);
-        boundary.Position = store.Position + 1;
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         _ = database.Apply(operation).Get<CommitReceipt>();
         await CrashHostPause.WaitForKillAsync();
@@ -79,7 +84,7 @@ internal static class EventProjectionCrashScenario
     internal static ApplyVectorProjection ProjectionRequest()
         => new(Stream, EventRevision, EventId, new(Partition, Collection, SourceId), DocumentRevision,
             InputField, ReducerId, ReducerVersion, Generation,
-            new(Collection, TargetId, VectorField, [1, 0], Space, DocumentRevision));
+            new(Collection, TargetId, VectorField, [ProjectionRequestValuesSingleItemCount, ProjectionRequestValuesEmptyCount], Space, DocumentRevision));
 
     internal static byte[] DocumentKey(string id)
         => DocumentStorageKeys.RecordKey(Partition, Collection, id);
@@ -116,6 +121,9 @@ internal static class EventProjectionCrashScenario
 
     private static void Seed(DatabaseEngine database)
     {
+        const int ValuesEmptyCount = 0;
+        const int ValuesSingleItemCount = 1;
+
         CrashDatabase.Submit(database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
                 new(Collection, ResourceKind.Collection, Partition.TransactionDomainId)),
@@ -130,7 +138,7 @@ internal static class EventProjectionCrashScenario
             new PutDocument(Collection, SourceId, SourceDocumentJson),
             new PutDocument(Collection, TargetId, TargetDocumentJson),
             new PutDocument(Collection, BaselineId, BaselineDocumentJson),
-            new PutVector(Collection, BaselineId, VectorField, [0, 1], Space, DocumentRevision),
+            new PutVector(Collection, BaselineId, VectorField, [ValuesEmptyCount, ValuesSingleItemCount], Space, DocumentRevision),
             new AppendEvents(StreamSet, StreamId, [new(EventId, EventType, EventPayloadJson)],
                 ExpectedStreamRevision.NoStream, Generation)
         ]);
@@ -140,6 +148,8 @@ internal static class EventProjectionCrashScenario
     private static async Task PreserveBeforeCutAsync(string directory, ZoneTreeStore store,
         ReplicatedOperation operation)
     {
+        const string PreserveBeforeCutAsyncMessageText = "The projection target unexpectedly had a vector before the crash cut.";
+
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, PositionFile), NativeSerialization.Serialize(store.Position));
         await SaveRecordAsync(directory, store, OutboxHeadFile, OutboxHeadKey());
@@ -151,14 +161,16 @@ internal static class EventProjectionCrashScenario
         var initialVector = store.Read(view => view.ReadOwnedValue(VectorKey(TargetId)));
         if (initialVector is not null)
         {
-            throw new InvalidOperationException("The projection target unexpectedly had a vector before the crash cut.");
+            throw new InvalidOperationException(PreserveBeforeCutAsyncMessageText);
         }
     }
 
     private static async Task SaveRecordAsync(string directory, ZoneTreeStore store, string fileName, byte[] key)
     {
+        const string SaveRecordAsyncMessageText = "A required canonical seed record was missing.";
+
         var value = store.Read(view => view.ReadOwnedValue(key))
-            ?? throw new InvalidOperationException("A required canonical seed record was missing.");
+            ?? throw new InvalidOperationException(SaveRecordAsyncMessageText);
         await File.WriteAllBytesAsync(Path.Combine(directory, fileName), value);
     }
 }

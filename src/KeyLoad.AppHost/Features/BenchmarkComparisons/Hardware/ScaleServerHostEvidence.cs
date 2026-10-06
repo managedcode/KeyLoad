@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
@@ -29,9 +29,9 @@ internal static class ScaleServerHostEvidence
         }
 
         var budget = new ScaleServerResourceSampleBudget(settings, provenance);
-        var cpu = await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, token, budget);
-        var memory = await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, token, budget);
-        var online = await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, token, budget);
+        var cpu = await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, budget, token);
+        var memory = await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, budget, token);
+        var online = await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, budget, token);
         if (cpu is null || memory is null || online is null)
         {
             return (null, null);
@@ -44,7 +44,7 @@ internal static class ScaleServerHostEvidence
             return (null, null);
         }
 
-        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, [ArgumentsText], token, budget);
+        var kernel = await ScaleServerResourceProcess.RunAsync(KernelExecutable, [ArgumentsText], budget, token);
         if (string.IsNullOrWhiteSpace(kernel))
         {
             return (null, null);
@@ -97,7 +97,7 @@ internal static class ScaleServerHostEvidence
         const char SlashCharacter = '/';
         const string ReadEnvelopeAsyncPathText = "/sys/fs/cgroup";
 
-        var membership = await BoundedText.ReadAsync(PathText, budget.Settings.MaxFileBytes, token, budget);
+        var membership = await BoundedText.ReadAsync(PathText, budget.Settings.MaxFileBytes, budget, token);
         var row = membership?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
@@ -117,57 +117,5 @@ internal static class ScaleServerHostEvidence
         }
 
         return await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token);
-    }
-}
-
-internal static class BoundedText
-{
-    internal static async Task<string?> ReadAsync(string path, int maximum, CancellationToken token,
-        ScaleServerResourceSampleBudget budget)
-    {
-        const int BoundaryValue = 1;
-        const int TotalInitialValue = 0;
-        const int IndexValue = 0;
-        const int EmptyValue = 0;
-
-        try
-        {
-            await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
-                budget.Settings.NativeReadBufferBytes, FileOptions.Asynchronous | FileOptions.SequentialScan);
-            var limit = budget is null ? maximum : Math.Min(maximum, budget.Remaining);
-            if (limit < BoundaryValue || !stream.CanSeek || stream.Length > limit)
-            {
-                return null;
-            }
-
-            var buffer = new byte[limit];
-            var total = TotalInitialValue;
-            while (true)
-            {
-                if (total == limit)
-                {
-                    if (stream.Length != total)
-                    {
-                        return null;
-                    }
-
-                    budget?.Charge(total);
-                    return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
-                }
-                var count = await stream.ReadAsync(buffer.AsMemory(total, buffer.Length - total), token);
-                if (count == EmptyValue)
-                {
-                    budget?.Charge(total);
-                    return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
-                }
-                total += count;
-                if (total > limit)
-                {
-                    return null;
-                }
-            }
-        }
-        catch (IOException) { return null; }
-        catch (UnauthorizedAccessException) { return null; }
     }
 }

@@ -59,10 +59,10 @@ internal static class OpenLoopPlanJoinAssertions
         await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.Error);
         await Assert.That(result.Error).IsEqualTo(string.Empty);
         using var document = JsonDocument.Parse(result.Output);
-        await Assert.That(document.RootElement.GetProperty("rejected").GetBoolean()).IsEqualTo(rejected);
+        await Assert.That(document.RootElement.GetProperty(IsolatedPlanFields.Rejected).GetBoolean()).IsEqualTo(rejected);
         if (!rejected)
         {
-            var counts = document.RootElement.GetProperty("counts");
+            var counts = document.RootElement.GetProperty(IsolatedPlanFields.Counts);
             foreach (var group in WorkflowDatabaseGroups.Entries)
             {
                 var expectedCount = group.Name == OpenLoopPlanExpectedInventory.KeyLoadTarget ? 207 : 201;
@@ -86,7 +86,7 @@ internal static class OpenLoopPlanJoinAssertions
 
     private static async Task VerifyMatrixGroupsAsync(JsonObject matrices)
     {
-        await Assert.That(matrices.Count).IsEqualTo(WorkflowDatabaseGroups.Entries.Count);
+        await Assert.That(matrices.Count).IsEqualTo(WorkflowDatabaseGroups.Entries.Length);
         await Assert.That(matrices.Select(static entry => entry.Key)
             .SequenceEqual(WorkflowDatabaseGroups.Entries.Select(static entry => entry.Key))).IsTrue();
     }

@@ -9,12 +9,15 @@ internal static class C1OutcomeInspectionOperation
 {
     internal static C1OutcomeInspectionReceipt Run(C1OutcomeInspectionRequest request)
     {
+        const int FormatVersionInitialValue = 0;
+        const int PositionInitialValue = 0;
+
         var failures = new List<Exception>();
         ZoneTreeStore? store = null;
         Guid nodeId = default;
         Guid incarnation = default;
-        var formatVersion = 0;
-        long position = 0;
+        var formatVersion = FormatVersionInitialValue;
+        long position = PositionInitialValue;
         var outcomePresent = false;
         ServerFailureObserver.Observe(() =>
         {

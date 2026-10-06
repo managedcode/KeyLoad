@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 
@@ -15,7 +15,7 @@ internal static class GrainReplyFactory
 
     internal static GrainOperationReply Value(object? value, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
-        using var stream = new GrainBoundedPayloadStream(options.Value.MaximumReplyBytes, cancellationToken);
+        using var stream = new GrainBoundedPayloadStream(options.Value.MaximumReplyBytes, options, cancellationToken);
         NativeSerialization.Serialize(new GrainValue(value), stream);
         return new() { Payload = stream.Complete() };
     }

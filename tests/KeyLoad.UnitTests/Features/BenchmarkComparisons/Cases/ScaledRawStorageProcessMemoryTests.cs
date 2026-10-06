@@ -43,7 +43,7 @@ internal sealed class ScaledRawStorageProcessMemoryTests
         await Assert.That(() => ScaledRawStorageMemoryGuard.ValidateObserved(
                 peakBytes,
                 UnboundedAvailableBytes,
-                UnboundedCeilingBytes))
+                UnboundedCeilingBytes, UnitBenchmarkOptions.ScaledPreparation.Value.RequiredHeadroomBytes))
             .Throws<InvalidDataException>();
     }
 }

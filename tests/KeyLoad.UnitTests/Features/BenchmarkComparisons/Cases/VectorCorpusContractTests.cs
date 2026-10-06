@@ -15,7 +15,7 @@ internal sealed class VectorCorpusContractTests
     public async Task MixedUpdatesAreUniqueAndSpreadOverTheCompleteExcludedCorpus(string id)
     {
         var profile = VectorComparisonProfile.Parse(id);
-        var corpus = new VectorComparisonCorpus(profile);
+        var corpus = new VectorComparisonCorpus(profile, UnitBenchmarkOptions.Native());
         var numbers = new HashSet<int>();
         for (var ordinal = 0; ordinal < profile.UpdateCount; ordinal++)
         {
@@ -32,7 +32,7 @@ internal sealed class VectorCorpusContractTests
     [Test]
     public async Task ExactOracleIsScaleInvariantAndMatchesIndependentCosineOrdering()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), UnitBenchmarkOptions.Native());
         var query = corpus.CreateQueries()[0].ToArray();
         var scaled = query.Select(component => component * 8f).ToArray();
         var actual = corpus.ExactNeighborsBatch([query, scaled]);
@@ -50,7 +50,7 @@ internal sealed class VectorCorpusContractTests
     [Test]
     public async Task InvalidQueryNormDimensionsAndCancellationRejectBeforeReturningAnOracle()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-plain-c16"), UnitBenchmarkOptions.Native());
         await Assert.That(() => corpus.ExactNeighbors(new float[128])).Throws<ArgumentException>();
         await Assert.That(() => corpus.ExactNeighbors(new float[127])).Throws<ArgumentException>();
         var nonFinite = corpus.CreateQueries()[0].ToArray();
@@ -65,7 +65,7 @@ internal sealed class VectorCorpusContractTests
     [Test]
     public async Task PayloadHasCanonicalActualFieldsAndExactly1024Utf8Bytes()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-1m-exact-plain-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-1m-exact-plain-c16"), UnitBenchmarkOptions.Native());
         var document = corpus.Create(999999);
         await Assert.That(Encoding.UTF8.GetByteCount(document.Payload)).IsEqualTo(1024);
         using var payload = System.Text.Json.JsonDocument.Parse(document.Payload);

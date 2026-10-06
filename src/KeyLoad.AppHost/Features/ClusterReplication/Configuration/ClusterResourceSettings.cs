@@ -1,6 +1,6 @@
 using System.Globalization;
-using KeyLoad.AppHost.Hosting;
 using KeyLoad;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Orleans;
 
 internal static class ClusterResourceSettings

@@ -118,7 +118,7 @@ internal sealed class RequestCqrsRf3DiagnosticsTests
         await scope.StartAsync(caller.Token).ConfigureAwait(false);
         var originalAdmission = scope.WaitForSubscriberStateAsync(false);
         await Assert.That(originalAdmission.IsCompleted).IsFalse();
-        caller.Cancel();
+        await caller.CancelAsync().ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => originalAdmission, failures).ConfigureAwait(false);
         lifecycle.RecordFirstFailure();
         await scope.DisposeAsync().ConfigureAwait(false);

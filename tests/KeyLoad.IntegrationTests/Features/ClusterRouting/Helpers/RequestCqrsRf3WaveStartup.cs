@@ -13,8 +13,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictionary<string, string> images,
     bool configureCohort, bool requireHealthy, string? snapshotThresholdArgument, Guid diagnosticsWaveId,
     RequestCqrsProbeFixture? controls, string? physicalShardOverrideNode,
-    Guid? physicalShardOverrideId, CancellationToken cancellationToken,
-    RequestCqrsLifecycleEvidence? lifecycleEvidence) : IAsyncDisposable
+    Guid? physicalShardOverrideId, RequestCqrsLifecycleEvidence? lifecycleEvidence,
+    CancellationToken cancellationToken) : IAsyncDisposable
 {
     private const string MissingWaveMessage = "The C1 Aspire wave did not transfer its owned resources.";
     private const string IncompletePhysicalShardOverride = "The physical shard override requires both a node and identity.";
@@ -34,7 +34,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
     {
         await using var startup = new RequestCqrsRf3WaveStartup(dataRoot, images, configureCohort,
             requireHealthy, snapshotThresholdArgument, diagnosticsWaveId, controls,
-            physicalShardOverrideNode, physicalShardOverrideId, cancellationToken, lifecycleEvidence);
+            physicalShardOverrideNode, physicalShardOverrideId, lifecycleEvidence, cancellationToken);
         return await startup.RunAsync().ConfigureAwait(false);
     }
 

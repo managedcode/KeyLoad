@@ -29,8 +29,9 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         ArgumentNullException.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzeOperation, OperationKind.Invocation,
-            OperationKind.ObjectCreation, OperationKind.PropertyReference, OperationKind.SimpleAssignment);
+        context.RegisterOperationAction(AnalyzeOperation, Microsoft.CodeAnalysis.OperationKind.Invocation,
+            Microsoft.CodeAnalysis.OperationKind.ObjectCreation, Microsoft.CodeAnalysis.OperationKind.PropertyReference,
+            Microsoft.CodeAnalysis.OperationKind.SimpleAssignment);
         context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method, SymbolKind.Field, SymbolKind.Property);
     }
 
@@ -86,11 +87,19 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         IObjectCreationOperation creation when ConfigurationOwnership.IsOptionsType(context.Compilation, creation.Type) =>
             !ConfigurationOwnership.IsWithinBinding(context.Compilation, context.ContainingSymbol),
         IObjectCreationOperation { Constructor: { } constructor } creation when
+            creation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, constructor, argument)) =>
+            creation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, constructor, argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
+        IObjectCreationOperation { Constructor: { } constructor } creation when
             HardcodedDurationPolicy.IsDurationMethod(context.Compilation, constructor) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, constructor, creation.Arguments) =>
             !OperationalPolicyBindings.IsCoalescedWakeSignal(context.Compilation, creation) &&
             !ConfiguredCountingSignal.IsConfigured(context.Compilation, creation, context.CancellationToken) &&
             creation.Arguments.Any(argument => HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
+        IInvocationOperation invocation when
+            invocation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, invocation.TargetMethod, argument)) =>
+            invocation.Arguments.Any(argument => OperationalPolicyBindings.IsFileBufferArgument(context.Compilation, invocation.TargetMethod, argument) &&
+                HardcodedDurationPolicy.IsHardcoded(context.Compilation, argument.Value, context.CancellationToken)),
         IInvocationOperation invocation when HardcodedDurationPolicy.IsDurationMethod(context.Compilation, invocation.TargetMethod) ||
             OperationalPolicyBindings.IsCapacityMethod(context.Compilation, invocation.TargetMethod, invocation.Arguments) =>
             !OperationalPolicyBindings.IsNonblockingWait(context.Compilation, invocation) &&

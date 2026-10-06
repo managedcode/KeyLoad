@@ -64,7 +64,10 @@ internal static class IsolatedNativeOpenLoopAssertions
 
     private static async Task VerifyPolicyAsync(OpenLoopExecutionPolicy policy)
     {
-        if (policy is null) throw new InvalidDataException(OpenLoopNativeTestOracle.ExecutionPolicyMissing);
+        if (policy is null)
+        {
+            throw new InvalidDataException(OpenLoopNativeTestOracle.ExecutionPolicyMissing);
+        }
         await Assert.That(policy.QueueCapacity).IsEqualTo(OpenLoopNativeTestOracle.QueueCapacity);
         await Assert.That(policy.ConcurrentSessions).IsEqualTo(OpenLoopNativeTestOracle.ConcurrentSessions);
         await Assert.That(policy.MaximumNodes).IsEqualTo(OpenLoopNativeTestOracle.MaximumNodes);

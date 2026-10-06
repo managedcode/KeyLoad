@@ -1,9 +1,10 @@
+using System.Collections.Immutable;
 using System.Globalization;
+using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ internal static class IsolatedNativeCase
     {
         var plan = IsolatedNativeCaseSelection.Read(
             new ConfigurationBuilder().AddEnvironmentVariables().Build(), intent);
+        var execution = NativeExecutionPolicyFixture.Harness();
         var provenance = BenchmarkProvenanceRegistration.Bind();
         var evidence = IsolatedNativeReportAssertions.EvidenceDirectory();
         var root = Path.Combine(Path.GetTempPath(), TemporaryPrefix + Guid.NewGuid().ToString(OpenLoopNativeTestOracle.GuidFormat));
@@ -37,26 +39,44 @@ internal static class IsolatedNativeCase
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(args, timeout.Token);
         builder.Services.AddLogging(logging => logging.ClearProviders().AddConsole().SetMinimumLevel(LogLevel.Warning));
         var app = await builder.BuildAsync(timeout.Token);
+        await RunWithTeardownAsync(app, plan, output, evidence, root, provenance,
+            execution, timeout.Token);
+    }
+
+    private static async Task RunWithTeardownAsync(DistributedApplication app, IsolatedNativeCasePlan plan,
+        string output, string evidence, string root, IOptions<BenchmarkProvenanceOptions> provenance,
+        IOptions<NativeComparisonHarnessOptions> execution, CancellationToken token)
+    {
         ContainerResource[] containers = [];
-        ComparisonTestLogCapture? capture = null;
-        var work = new IsolatedNativeOwnedWork();
-        Exception? primaryFailure = null;
-        try
+        var work = new IsolatedNativeOwnedWork(execution);
+        var failures = new List<Exception>();
+        var teardownStarted = false;
+        async Task RunOwnedAsync()
         {
             containers = app.Services.GetRequiredService<DistributedApplicationModel>()
                 .Resources.OfType<ContainerResource>().ToArray();
             work.CancellationControl = plan.CancellationProof
-                ? new OpenLoopNativeCancellationControl(plan, output, timeout.Token) : null;
+                ? new OpenLoopNativeCancellationControl(plan, output, execution, token) : null;
             Action<string>? observer = work.CancellationControl is { } control ? control.Observe : null;
-            capture = new ComparisonTestLogCapture(app, containers.Select(container => container.Name),
-                ComparisonProgressLine.PathForEvidenceDirectory(evidence), observer);
-            await RunOwnedCaseAsync(app, containers, plan, output, root, work, provenance, timeout.Token);
+            await using var capture = new ComparisonTestLogCapture(app, execution,
+                containers.Select(container => container.Name), ComparisonProgressLine.PathForEvidenceDirectory(evidence), observer);
+            var original = RunOwnedCaseAsync(app, containers, plan, output, root, work, provenance, token);
+            var bodyFailures = new List<Exception>();
+            await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() => original, bodyFailures);
+            var primary = OpenLoopFailure.Combine(null, bodyFailures.ToImmutableArray());
+            teardownStarted = true;
+            await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() =>
+                IsolatedNativeTeardown.CompleteAsync(app, capture, output, evidence, root, containers, work, primary), failures);
         }
-        catch (Exception failure)
+        await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(RunOwnedAsync, failures);
+        if (!teardownStarted)
         {
-            primaryFailure = failure;
+            var primary = OpenLoopFailure.Combine(null, failures.ToImmutableArray());
+            await IsolatedNativeTeardownNativeSupport.CollectFailureAsync(() =>
+                IsolatedNativeTeardown.CompleteAsync(app, null, output, evidence, root, containers, work, primary), failures);
         }
-        await IsolatedNativeTeardown.CompleteAsync(app, capture, output, evidence, root, containers, work, primaryFailure);
+        if (OpenLoopFailure.Combine(null, failures.ToImmutableArray()) is { } failure)
+        { ExceptionDispatchInfo.Capture(failure).Throw(); }
     }
 
     private static string[] CreateArguments(IsolatedNativeCasePlan plan, string root, string output)

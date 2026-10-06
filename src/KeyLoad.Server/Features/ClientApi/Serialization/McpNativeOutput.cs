@@ -1,7 +1,7 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

@@ -23,15 +23,17 @@ internal static class C1OutcomeInspectionProcess
     internal static async Task<C1OutcomeInspectionProcessResult> RunAsync(
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken = default)
     {
+        const int InputLengthEmptyCount = 0;
+
         ArgumentException.ThrowIfNullOrWhiteSpace(outerOwnerLockPath);
-        if (input.Length is 0 or > MaximumInputBytes)
+        if (input.Length is InputLengthEmptyCount or > MaximumInputBytes)
         { throw new ArgumentOutOfRangeException(nameof(input)); }
         cancellationToken.ThrowIfCancellationRequested();
         var failures = new List<Exception>();
         C1OutcomeInspectionProcessResult? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var lifetime = new C1OutcomeInspectionProcessLifetime(input, outerOwnerLockPath, failures);
+            await using var lifetime = new C1OutcomeInspectionProcessLifetime(input, outerOwnerLockPath, failures, CrashExecutionOptions.Child());
             await ServerFailureObserver.ObserveAsync(() => lifetime.RunAsync(cancellationToken), failures).ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(() => lifetime.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
             if (!lifetime.DisposalAttemptCompleted)

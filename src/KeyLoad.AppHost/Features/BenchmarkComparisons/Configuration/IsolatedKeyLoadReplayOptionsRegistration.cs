@@ -1,5 +1,5 @@
-using KeyLoad.Orleans;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.Orleans;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -25,7 +25,8 @@ internal static class IsolatedKeyLoadReplayOptionsRegistration
 
     private static bool IsValid(ReplicaReplayLimits value)
     {
-        try { value.Validate(ClusterDeploymentOptions.VoterCount); }
+        try
+        { value.Validate(ClusterDeploymentOptions.VoterCount); }
         catch (InvalidOperationException) { return false; }
         return value.CriticalPerVoter <= DefaultCriticalCapacity && value.ForwardPerVoter <= DefaultForwardCapacity
             && value.ReadBarrierPerVoter <= DefaultReadBarrierCapacity && value.DataAppendPerVoter <= DefaultDataAppendCapacity;
@@ -39,8 +40,10 @@ internal static class IsolatedKeyLoadReplayOptionsRegistration
         protected override ReplicaReplayLimits CreateInstance(string name)
             => new()
             {
-                CriticalPerVoter = DefaultCriticalCapacity, ForwardPerVoter = DefaultForwardCapacity,
-                ReadBarrierPerVoter = DefaultReadBarrierCapacity, DataAppendPerVoter = DefaultDataAppendCapacity
+                CriticalPerVoter = DefaultCriticalCapacity,
+                ForwardPerVoter = DefaultForwardCapacity,
+                ReadBarrierPerVoter = DefaultReadBarrierCapacity,
+                DataAppendPerVoter = DefaultDataAppendCapacity
             };
     }
 }

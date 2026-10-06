@@ -105,14 +105,14 @@ internal sealed class ReplicaMembershipNativeStoreTests
         var peerOptions = Options.Create(peers);
         var transportOptions = UnitRoutingOptions.Transport();
         var local = new ReplicaSiloDiscoveryState(configurationOptions, peerOptions, host.Services.GetRequiredService<ILocalSiloDetails>());
-        using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System,             transportOptions, UnitRoutingOptions.Replay(),             canonicalDatabase: fixture.Database);
+        using var authentication = new ReplicaEnvelopeAuthenticator(configurationOptions, peerOptions, local, TimeProvider.System, transportOptions, UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
         using var discovery = new ReplicaSiloDiscoveryClient(configurationOptions, peerOptions, local, authentication, TimeProvider.System,
             discoveryOptions);
         await coordinator.StartAsync(linked.Token);
-        consensus.AttachTransport(new ReplicaGrainServiceClient(host.Services, configurationOptions, discovery, authentication));
+        consensus.AttachTransport(new ReplicaGrainServiceClient(host.Services, configurationOptions, discovery, authentication, transportOptions));
         local.MarkTransportReady();
         await ReadyLeaderAsync(consensus, linked.Token);
-        var store = new ReplicaMembershipStore(fixture.Database, coordinator, consensus, ClusterPrincipalPolicy.InternalPrincipalId);
+        var store = new ReplicaMembershipStore(fixture.Database, coordinator, consensus, ClusterPrincipalPolicy.InternalPrincipalId, UnitRoutingOptions.Membership());
         await verify(fixture, store, log, linked.Token);
     }
 

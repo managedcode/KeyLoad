@@ -11,12 +11,17 @@ internal static class ExistingStoreInspectorOperation
 
     internal static ExistingStoreInspectionReceipt Run(ExistingStoreInspectionRequest request)
     {
+        const int FormatInitialValue = 0;
+        const int PositionInitialValue = 0;
+        const int SuccessEmptyCount = 0;
+        const int RetainedBytesEmptyCount = 0;
+
         var failures = new List<Exception>();
         var inputs = new ExistingStoreInspectorInputs(request);
         ZoneTreeStore? store = null;
         Guid nodeId = default, incarnation = default;
-        var format = 0;
-        long position = 0;
+        var format = FormatInitialValue;
+        long position = PositionInitialValue;
         byte[]? value = null;
         try
         {
@@ -38,8 +43,8 @@ internal static class ExistingStoreInspectorOperation
             ZoneTreeExistingStoreCleanup.Capture(() => inputs.Budget?.Dispose(), failures);
         }
         var (types, code) = ExistingStoreInspectorFailures.Collect(failures);
-        return new(ExistingStoreInspectorProtocol.SchemaVersion, failures.Count == 0, nodeId, incarnation,
-            format, position, value, types, code, inputs.ObservedStages, inputs.Budget?.GetSnapshot().RetainedBytes ?? 0);
+        return new(ExistingStoreInspectorProtocol.SchemaVersion, failures.Count == SuccessEmptyCount, nodeId, incarnation,
+            format, position, value, types, code, inputs.ObservedStages, inputs.Budget?.GetSnapshot().RetainedBytes ?? RetainedBytesEmptyCount);
     }
 
     private static byte[]? ReadValue(ZoneTreeStore store)

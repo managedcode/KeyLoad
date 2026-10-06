@@ -36,8 +36,8 @@ internal sealed class ScaledComparisonProfileTests
         await Assert.That(restored).IsEqualTo(profile);
         using var document = JsonDocument.Parse(json);
         await Assert.That(document.RootElement.EnumerateObject().Count()).IsEqualTo(14);
-        await Assert.That(document.RootElement.GetProperty("id").GetString()).IsEqualTo(profile.Id);
-        await Assert.That(document.RootElement.GetProperty("documents").GetInt32()).IsEqualTo(1_000_000);
+        await Assert.That(document.RootElement.GetProperty(IsolatedPlanFields.Id).GetString()).IsEqualTo(profile.Id);
+        await Assert.That(document.RootElement.GetProperty(IsolatedPlanFields.Documents).GetInt32()).IsEqualTo(1_000_000);
         var altered = json.Replace("1000000", "5000000", StringComparison.Ordinal);
         Assert.ThrowsExactly<JsonException>(() => JsonSerializer.Deserialize<ScaledComparisonProfile>(altered));
         var extra = json[..^1] + ",\"Other\":1}";

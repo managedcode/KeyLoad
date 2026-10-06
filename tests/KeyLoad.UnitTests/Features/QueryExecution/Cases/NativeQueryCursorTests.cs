@@ -87,7 +87,7 @@ internal sealed class NativeQueryCursorTests
         await Assert.That(NativeSerialization.Deserialize<LiveCursorClaims>(NativeSerialization.Serialize(claims))).IsEqualTo(claims);
         await Assert.That(snapshot.Cursor.StartsWith(NativePrefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(claims.ChangeCursor.StartsWith(NativePrefix, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(claims.QueryHash).IsEqualTo(QueryEngine.QueryHash(QueryValidation.Normalize(query, fixture.Database.Limits)));
+        await Assert.That(claims.QueryHash).IsEqualTo(QueryEngine.QueryHash(QueryValidation.Normalize(query, fixture.Database.Limits, UnitExecutionOptions.QueryExecution().Value)));
         var cases = new[] { Tamper(snapshot.Cursor), Legacy(fixture, claims), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
         foreach (var invalid in cases)
         {

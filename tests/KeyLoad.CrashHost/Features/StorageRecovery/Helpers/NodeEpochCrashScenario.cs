@@ -13,10 +13,11 @@ internal static class NodeEpochCrashScenario
     private const int StageArgument = 2;
     private const int ModeArgument = 3;
     private const int MaximumInputCharacters = 16_384;
-    private const int InputChunkCharacters = 256;
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
+        const string TryRunAsyncMessageText = "The requested node-upgrade boundary was not reached.";
+
         ArgumentNullException.ThrowIfNull(args);
         if (args.Length != ArgumentCount || !string.Equals(args[ModeArgument], Mode, StringComparison.Ordinal))
         { return false; }
@@ -35,35 +36,43 @@ internal static class NodeEpochCrashScenario
             _ = ServerNodeFormatUpgrade.Prepare(args[SourceArgument], CrashServerRuntimeOptions.Runtime(options), boundary.Observe);
         }
         if (!boundary.Observed)
-        { throw new InvalidOperationException("The requested node-upgrade boundary was not reached."); }
+        { throw new InvalidOperationException(TryRunAsyncMessageText); }
         return true;
     }
 
     private static NodeFormatUpgradeStage ParseStage(string value)
     {
+        const string ParseStageMessageText = "The node-upgrade stage is unsupported.";
+
         if (!Enum.TryParse<NodeFormatUpgradeStage>(value, ignoreCase: false, out var stage)
             || !Enum.IsDefined(stage))
-        { throw new ArgumentOutOfRangeException(nameof(value), value, "The node-upgrade stage is unsupported."); }
+        { throw new ArgumentOutOfRangeException(nameof(value), value, ParseStageMessageText); }
         return stage;
     }
 
     private static async Task<EpochPriorNodeProfile> ReadProfileAsync()
     {
+        const int LengthInitialValue = 0;
+        const int EmptyCount = 0;
+        const int StartEmptyCount = 0;
+        const string ReadProfileAsyncMessageText = "The node-upgrade profile is invalid.";
+        const string ReadProfileAsyncReadProfileAsyncMessageText = "The node-upgrade profile exceeds its input bound.";
+
         var input = new char[MaximumInputCharacters];
-        var chunk = new char[InputChunkCharacters];
-        var length = 0;
+        var chunk = new char[CrashExecutionOptions.Child().Value.ProfileReadChunkCharacters];
+        var length = LengthInitialValue;
         while (true)
         {
             var count = await Console.In.ReadAsync(chunk.AsMemory());
-            if (count == 0)
+            if (count == EmptyCount)
             {
-                return JsonSerializer.Deserialize<EpochPriorNodeProfile>(input.AsSpan(0, length),
+                return JsonSerializer.Deserialize<EpochPriorNodeProfile>(input.AsSpan(StartEmptyCount, length),
                     EpochPriorSourceProbe.JsonOptions)
-                    ?? throw new InvalidDataException("The node-upgrade profile is invalid.");
+                    ?? throw new InvalidDataException(ReadProfileAsyncMessageText);
             }
             if (count > MaximumInputCharacters - length)
-            { throw new InvalidDataException("The node-upgrade profile exceeds its input bound."); }
-            chunk.AsSpan(0, count).CopyTo(input.AsSpan(length));
+            { throw new InvalidDataException(ReadProfileAsyncReadProfileAsyncMessageText); }
+            chunk.AsSpan(StartEmptyCount, count).CopyTo(input.AsSpan(length));
             length += count;
         }
     }
@@ -71,22 +80,33 @@ internal static class NodeEpochCrashScenario
 
 internal sealed class NodeEpochCrashBoundary(NodeFormatUpgradeStage requestedStage)
 {
+    private const int GetObservedEmptyRead = 0;
+
     private int observed;
-    internal bool Observed => Volatile.Read(ref observed) != 0;
+    internal bool Observed => Volatile.Read(ref observed) != GetObservedEmptyRead;
 
     internal void Observe(NodeFormatUpgradeStage stage)
     {
+        const int ValueSingleItemCount = 1;
+        const int EmptyExchange = 0;
+        const string ObserveMessageText = "The requested node-upgrade boundary was observed twice.";
+
         if (stage != requestedStage)
         { return; }
-        if (Interlocked.Exchange(ref observed, 1) != 0)
-        { throw new InvalidOperationException("The requested node-upgrade boundary was observed twice."); }
+        if (Interlocked.Exchange(ref observed, ValueSingleItemCount) != EmptyExchange)
+        { throw new InvalidOperationException(ObserveMessageText); }
         CrashHostPause.AtBoundary();
     }
 }
 
+[ConfigurationBinding]
 internal static class NodeEpochCrashSettings
 {
-    private static readonly Guid PhysicalShardId = Guid.Parse("a7c8e9b0-5162-4374-8a91-6d20e7f43519");
+    private const int PeerSecretBytes = 32;
+
+    private const string PhysicalShardIdPhysicalShardIdInputText = "a7c8e9b0-5162-4374-8a91-6d20e7f43519";
+
+    private static readonly Guid PhysicalShardId = Guid.Parse(PhysicalShardIdPhysicalShardIdInputText);
 
     internal static NodeOptions CreateOptions(EpochPriorNodeProfile profile, string destination)
         => new()
@@ -97,7 +117,7 @@ internal static class NodeEpochCrashSettings
             PhysicalShardId = PhysicalShardId,
             Incarnation = profile.Incarnation,
             SigningKey = profile.SigningKey,
-            PeerSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)),
+            PeerSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(PeerSecretBytes)),
             AdminKey = profile.AdminKey,
             AllowLoopbackHttp = true
         };

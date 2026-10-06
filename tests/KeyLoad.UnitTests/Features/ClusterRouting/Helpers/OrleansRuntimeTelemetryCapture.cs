@@ -154,8 +154,10 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
 
         foreach (var exemplar in exemplars)
         {
-            tags.AddRange(exemplar.FilteredTags.Select(static tag =>
-                new KeyValuePair<string, string?>(tag.Key, tag.Value?.ToString())));
+            foreach (var tag in exemplar.FilteredTags)
+            {
+                tags.Add(new(tag.Key, tag.Value?.ToString()));
+            }
         }
 
         return tags.ToArray();

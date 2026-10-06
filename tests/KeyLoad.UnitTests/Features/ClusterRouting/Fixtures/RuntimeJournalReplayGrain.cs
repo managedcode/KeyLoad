@@ -66,7 +66,7 @@ internal sealed class RuntimeJournalReplayGrain : DurableGrain, IRuntimeJournalR
 
     /// <inheritdoc />
     public async Task DeleteAsync()
-        => await StateManager.DeleteStateAsync(CancellationToken.None).ConfigureAwait(false);
+        => await ((IJournaledStateManager)StateManager).DeleteStateAsync(CancellationToken.None).ConfigureAwait(true);
 }
 
 internal static class RuntimeJournalReplayProtocol

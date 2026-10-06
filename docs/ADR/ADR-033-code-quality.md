@@ -901,3 +901,19 @@ Do not touch comparison/load contributors or published website figures to obtain
 coverage. The native command surface and supported formats were read from the
 actual cached18.11.2 CLI and [official native tool documentation](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-coverage);
 that inspection is not a collector execution, RF3 result or gate pass.
+
+TASK-CQ-PRODUCTION-IDENTITY-003 continues REQ-CQ-009 and AC-CQ-039..045 under
+the exact additive v3 schema and ordered ownership in CodeQuality. Preserve the
+Query v2 prototype as scoped history. Root owns the16-module native PE/PDB/source
+manifest, test-image compile receipts and AppHost/finalized artifact joins; Luna
+owns guarded native merge/export and actual image-materialization operation
+packets. Source/compiled identity is verified before launch and again after
+original settlement. Unit/scalar MTP runs require no RF3 topology; every actual
+admitted RF3 fixture contributes exactly three original node records. Do not merge
+unfinished current-test outputs or admit tooling/load/accessor cases as product
+contributors. Native repeated-input integer union, changed-input rejection and
+healthy follow-up remain required real operations, followed by complete-source
+Linux qualification and the unchanged80/70/90/no-decrease gates. This is a new
+versioned test-evidence format, with no persisted database/public-wire migration;
+rollback retains all originals and restores one coherent previous tooling route.
+The schema and implementation are not collected coverage. Status stays Accepted.

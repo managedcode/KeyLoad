@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using KeyLoad.Client;
 using KeyLoad.Comparisons;
-using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 

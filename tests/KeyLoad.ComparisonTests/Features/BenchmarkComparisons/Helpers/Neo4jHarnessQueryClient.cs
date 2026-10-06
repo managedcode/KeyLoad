@@ -7,7 +7,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class Neo4jHarnessQueryClient : IDisposable
 {
-    private const int RequestTimeoutSeconds = 30;
+    private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.Neo4jRequestTimeout;
     private const string DatabaseQueryPath = "db/neo4j/query/v2";
     private readonly HttpClient client;
 
@@ -22,7 +22,7 @@ internal sealed class Neo4jHarnessQueryClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(endpoint);
         ArgumentException.ThrowIfNullOrWhiteSpace(password);
-        var http = new HttpClient { BaseAddress = EnsureTrailingSlash(endpoint), Timeout = TimeSpan.FromSeconds(RequestTimeoutSeconds) };
+        var http = new HttpClient { BaseAddress = EnsureTrailingSlash(endpoint), Timeout = RequestTimeout };
         var credential = Convert.ToBase64String(Encoding.UTF8.GetBytes("neo4j:" + password));
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credential);
         return http;
@@ -33,7 +33,7 @@ internal sealed class Neo4jHarnessQueryClient : IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(statement);
         using var request = new HttpRequestMessage(HttpMethod.Post, DatabaseQueryPath)
         {
-            Content = JsonContent.Create(new { statement, parameters = parameters ?? new { }, maxExecutionTime = RequestTimeoutSeconds })
+            Content = JsonContent.Create(new { statement, parameters = parameters ?? new { }, maxExecutionTime = (int)RequestTimeout.TotalSeconds })
         };
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

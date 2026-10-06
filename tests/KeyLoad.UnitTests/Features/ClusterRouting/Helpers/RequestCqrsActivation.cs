@@ -2,6 +2,7 @@ using System.Security.Claims;
 using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Metadata;
 using Orleans.Serialization;
 
@@ -31,7 +32,8 @@ internal sealed class RequestCqrsProbeActivator(DefaultGrainActivator disposalAc
             services.GetRequiredService<RequestCqrsCapabilityLedger>(),
             services.GetRequiredService<Serializer<ClaimsPrincipal>>(),
             services.GetRequiredService<Serializer<GrainRequestContextState>>(),
-            services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>());
+            services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+            services.GetRequiredService<IOptions<GrainRoutingOptions>>());
     }
 
     public ValueTask DisposeInstance(IGrainContext context, object instance)

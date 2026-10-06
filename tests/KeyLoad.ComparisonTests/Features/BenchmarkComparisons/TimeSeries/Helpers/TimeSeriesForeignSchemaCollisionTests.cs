@@ -68,7 +68,7 @@ internal static class TimeSeriesForeignSchemaCollision
         CancellationToken cancellationToken)
     {
         var workload = TimeSeriesComparisonWorkloadFactory.Create(runId);
-        await using var target = new TimescaleTimeSeriesTarget(connectionString);
+        await using var target = new TimescaleTimeSeriesTarget(connectionString, NativeExecutionPolicyFixture.Lifecycle());
         InvalidOperationException? failure = null;
         try
         {

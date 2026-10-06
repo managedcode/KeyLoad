@@ -18,10 +18,10 @@ internal sealed class NativeSerializationBenchmarkManifestTests
             Environment.SetEnvironmentVariable(NativeSerializationBenchmarkManifest.DirectoryVariable, directory);
             var state = new NativeSerializationBenchmarkState<DocumentResult>(NativeSerializationBenchmarkCorpus.Document(1024));
             var name = nameof(NativeDocumentSerializationBenchmarks);
-            NativeSerializationBenchmarkManifest.Write(name, 1024, state);
+            NativeSerializationBenchmarkManifest.Write(name, 1024, state, Microsoft.Extensions.Options.Options.Create(new BenchmarkArtifactOptions { NativeSerializationDirectory = directory }));
             var path = Path.Combine(directory, name + "-1024.json");
             var first = await File.ReadAllBytesAsync(path, cancellationToken);
-            NativeSerializationBenchmarkManifest.Write(name, 1024, state);
+            NativeSerializationBenchmarkManifest.Write(name, 1024, state, Microsoft.Extensions.Options.Options.Create(new BenchmarkArtifactOptions { NativeSerializationDirectory = directory }));
             var second = await File.ReadAllBytesAsync(path, cancellationToken);
             await Assert.That(second.AsSpan().SequenceEqual(first)).IsTrue();
             using var receipt = JsonDocument.Parse(first);
@@ -32,7 +32,7 @@ internal sealed class NativeSerializationBenchmarkManifestTests
             await Assert.That(receipt.RootElement.GetProperty(NativeSerializationReportFields.NativeBytes).GetInt32()).IsEqualTo(state.NativeBytes.Length);
             await Assert.That(receipt.RootElement.GetProperty(NativeSerializationReportFields.JsonBytes).GetInt32()).IsEqualTo(state.JsonBytes.Length);
             state.NativeBytes[0] ^= 1;
-            await Assert.That(() => NativeSerializationBenchmarkManifest.Write(name, 1024, state)).Throws<InvalidOperationException>();
+            await Assert.That(() => NativeSerializationBenchmarkManifest.Write(name, 1024, state, Microsoft.Extensions.Options.Options.Create(new BenchmarkArtifactOptions { NativeSerializationDirectory = directory }))).Throws<InvalidOperationException>();
             await Assert.That(Directory.GetFiles(directory, "*.tmp").Length).IsEqualTo(0);
         }
         finally

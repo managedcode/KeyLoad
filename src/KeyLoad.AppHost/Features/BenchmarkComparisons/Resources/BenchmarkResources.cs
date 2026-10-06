@@ -1,7 +1,7 @@
 using System.Globalization;
-using KeyLoad.AppHost.Hosting;
 using System.Security.Cryptography;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.AppHost.Hosting;
 
 internal static class BenchmarkResources
 {

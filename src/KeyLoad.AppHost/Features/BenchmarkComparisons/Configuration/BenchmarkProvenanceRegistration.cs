@@ -54,7 +54,8 @@ internal static class BenchmarkProvenanceRegistration
 
     private static void Copy(IResourceBuilder<ContainerResource> resource, string name, string? value)
     {
-        if (value is not null) { resource.WithEnvironment(name, value); }
+        if (value is not null)
+        { resource.WithEnvironment(name, value); }
     }
 
     private static BenchmarkProvenanceOptions Read() => new()

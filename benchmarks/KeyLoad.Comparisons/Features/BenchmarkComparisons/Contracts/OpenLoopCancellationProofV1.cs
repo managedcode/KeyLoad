@@ -63,8 +63,6 @@ public static class OpenLoopCancellationProofContract
     public const string CompletionMarkerPrefix = "OpenLoopNativeCompletionV1";
     /// <summary>Gets the fixed request token bytes.</summary>
     public const string RequestText = "cancel-v1\n";
-    /// <summary>Gets the asynchronous JSON writer buffer size in bytes.</summary>
-    public const int JsonWriterBufferBytes = 8_192;
     /// <summary>Gets the maximum proof artifact size in bytes.</summary>
     public const int MaximumProofBytes = 4 * 1024 * 1024;
     /// <summary>Gets the maximum child marker length in ASCII bytes.</summary>

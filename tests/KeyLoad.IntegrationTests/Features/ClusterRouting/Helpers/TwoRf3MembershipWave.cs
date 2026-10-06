@@ -2,6 +2,7 @@ using Aspire.Hosting;
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
+using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -15,7 +16,9 @@ internal sealed class TwoRf3MembershipWave : IAsyncDisposable
     private bool nodeLocksReleased;
     private bool cleanupFailed;
 
-    internal NodeEpochRf3Profile Profile { get => field
+    internal NodeEpochRf3Profile Profile
+    {
+        get => field
         ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState); private set;
     }
     internal DistributedApplication Application => application

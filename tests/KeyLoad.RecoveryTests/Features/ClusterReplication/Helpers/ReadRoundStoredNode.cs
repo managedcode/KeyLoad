@@ -21,8 +21,8 @@ internal sealed class ReadRoundStoredNode : IAsyncDisposable
     {
         Configuration = new(voter, [.. voters], directory, incarnation) { BenchmarkTopology = voters.Length < 3 };
         stores = ReplicaMaterializerLifecycleStores.Open(
-            () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = signingKey }),
-            () => new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }));
+            () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, SigningKey = signingKey }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()),
+            () => new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
         DurableReplicaLog? openedLog = null;
         ReplicaMaterializer? openedMaterializer = null;
         try

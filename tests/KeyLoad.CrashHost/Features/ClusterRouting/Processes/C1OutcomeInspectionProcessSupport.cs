@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using KeyLoad.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting.Processes;
 
@@ -10,11 +11,12 @@ internal static class C1OutcomeInspectionDeadline
     private const string CleanupTimeoutMessage = "The outcome inspection process exceeded its cleanup deadline.";
 
     internal static async Task WaitAsync(Process process, Task all, List<Exception> failures,
-        CancellationToken cancellationToken)
+        IOptions<CrashHostExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
+        var settings = executionOptions.Value;
         using var timer = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var stopped = Task.Delay(Timeout.InfiniteTimeSpan, timer.Token);
-        var deadline = Task.Delay(TimeSpan.FromSeconds(C1OutcomeInspectionProcessBounds.ExecutionSeconds), timer.Token);
+        var deadline = Task.Delay(settings.InspectionExecutionTimeout, timer.Token);
         var first = await Task.WhenAny(all, stopped, deadline).ConfigureAwait(false);
         if (first == all)
         {
@@ -28,7 +30,7 @@ internal static class C1OutcomeInspectionDeadline
             : new TimeoutException(ExecutionTimeoutMessage));
         ServerFailureObserver.Observe(() => C1OutcomeInspectionProcessIo.Kill(process), failures);
         using var cleanupTimer = new CancellationTokenSource();
-        var cleanup = Task.Delay(TimeSpan.FromSeconds(C1OutcomeInspectionProcessBounds.CleanupSeconds), cleanupTimer.Token);
+        var cleanup = Task.Delay(settings.InspectionCleanupTimeout, cleanupTimer.Token);
         if (await Task.WhenAny(all, cleanup).ConfigureAwait(false) != all)
         {
             failures.Add(new TimeoutException(CleanupTimeoutMessage));
@@ -47,14 +49,6 @@ internal static class C1OutcomeInspectionDeadline
         { await timer.ConfigureAwait(false); }
         catch (OperationCanceledException) { }
     }
-}
-
-internal static class C1OutcomeInspectionProcessBounds
-{
-    internal const int OutputLimitBytes = 4096;
-    internal const int ExecutionSeconds = 30;
-    internal const int CleanupSeconds = 15;
-    internal const int ReadBufferBytes = 1024;
 }
 
 internal static class C1OutcomeInspectionProcessIo
@@ -82,25 +76,38 @@ internal static class C1OutcomeInspectionProcessIo
     }
 }
 
-internal sealed class C1OutcomeInspectionCapture(int maximumBytes)
+internal sealed class C1OutcomeInspectionCapture
 {
-    private readonly byte[] retained = new byte[maximumBytes];
-    private readonly byte[] buffer = new byte[C1OutcomeInspectionProcessBounds.ReadBufferBytes];
+    private const int GetBytesStartEmptyCount = 0;
+
+    private readonly CrashHostExecutionOptions settings;
+    private readonly byte[] retained;
+    private readonly byte[] buffer;
+
+    internal C1OutcomeInspectionCapture(IOptions<CrashHostExecutionOptions> executionOptions)
+    {
+        settings = executionOptions.Value;
+        retained = new byte[settings.InspectionMaximumOutputBytes];
+        buffer = new byte[settings.InspectionReadBufferBytes];
+    }
     private long observedBytes;
 
-    internal bool Exceeded => observedBytes > maximumBytes;
-    internal byte[] Bytes => retained.AsSpan(0, checked((int)Math.Min(observedBytes, maximumBytes))).ToArray();
+    internal bool Exceeded => observedBytes > settings.InspectionMaximumOutputBytes;
+    internal byte[] Bytes => retained.AsSpan(GetBytesStartEmptyCount, checked((int)Math.Min(observedBytes, settings.InspectionMaximumOutputBytes))).ToArray();
 
     internal async Task DrainAsync(Stream stream)
     {
+        const int EmptyRead = 0;
+        const int StartEmptyCount = 0;
+
         while (true)
         {
             var read = await stream.ReadAsync(buffer).ConfigureAwait(false);
-            if (read == 0)
+            if (read == EmptyRead)
             { return; }
-            var offset = checked((int)Math.Min(observedBytes, maximumBytes));
-            var copy = Math.Min(maximumBytes - offset, read);
-            buffer.AsSpan(0, copy).CopyTo(retained.AsSpan(offset));
+            var offset = checked((int)Math.Min(observedBytes, settings.InspectionMaximumOutputBytes));
+            var copy = Math.Min(settings.InspectionMaximumOutputBytes - offset, read);
+            buffer.AsSpan(StartEmptyCount, copy).CopyTo(retained.AsSpan(offset));
             observedBytes = checked(observedBytes + read);
         }
     }

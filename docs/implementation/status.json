@@ -2241,7 +2241,9 @@
       "resourceSidecar": "original_measured_or_proof_bytes_SHA256_bound_native_collector_joined_real_observations_pending",
       "canonicalMeasurementCells": 792,
       "canonicalProofCells": 6,
-      "workflowDelivery": "contract_frozen_new_modules_in_private_Luna_implementation_existing_root_joins_pending"
+      "workflowDelivery": "terminal_and_complete_cohort_modules_joined_actual_798_receipt_operation_cases_joined_native_execution_workflow_and_authenticated_intake_joins_pending",
+      "currentSourceReceipt": "docs/implementation/functional-coverage-flow-image-source-2026-10-06-r4.json",
+      "nativeFatalRegression": "synthetic_OOM_case_removed_authentic_runtime_fatal_evidence_pending"
     }
   },
   "KL-076": {
@@ -3675,11 +3677,14 @@
       "sameCompilationIdentity": "source_bound_native_manifest_and_central_tool_metadata_joined_actual_current_collection_pending",
       "currentCoveragePercent": null,
       "scope": "Query_exact25_cases_103_sources_reviewed_complete16_module_RF3_native_collection_and_binary_merge_pending",
-      "fullBuildPassed": false,
+      "fullBuildPassed": true,
       "currentNativeCollectionPassed": false,
       "sourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
       "exactCaseCount": 25,
-      "inventoriedQuerySourceFiles": 103
+      "inventoriedQuerySourceFiles": 103,
+      "currentSourceReceipt": "docs/implementation/functional-coverage-flow-image-source-2026-10-06-r4.json",
+      "cliBackupRestoreFlows": "two_real_Release_CLI_ZoneTree_archive_restore_and_rejected_restore_preserved_state_flows_joined_not_executed",
+      "nativeServerCollector": "source_bound_test_only_image_materializer_and_original_server_connect_collector_wrapper_joined_actual_Aspire_RF3_collection_and_merge_pending"
     }
   },
   "AdminDashboard": {

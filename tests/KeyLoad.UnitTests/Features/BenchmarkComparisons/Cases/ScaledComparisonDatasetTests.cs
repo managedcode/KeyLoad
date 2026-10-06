@@ -23,7 +23,7 @@ internal sealed class ScaledComparisonDatasetTests
             await Assert.That(Encoding.UTF8.GetByteCount(document.Json)).IsEqualTo(1_024);
             using var json = JsonDocument.Parse(document.Json);
             await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(4);
-            await Assert.That(json.RootElement.GetProperty("number").GetInt32()).IsEqualTo(number);
+            await Assert.That(json.RootElement.GetProperty(IsolatedPlanFields.Number).GetInt32()).IsEqualTo(number);
             await Assert.That(document.Vector.IsEmpty).IsTrue();
         }
         await Assert.That(corpus.Documents[42].Json).IsEqualTo(corpus.CreateDocument(42).Json);

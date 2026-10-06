@@ -90,7 +90,18 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         }
         disposed = true;
         var failures = new List<Exception>();
-        await runtime.StopAsync(failures, disposeDatabase: true);
+        try
+        {
+            await runtime.DisposeAsync();
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
+        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            failures.Add(error);
+        }
         Current = null;
         NativeSagaTimeoutCleanup.ThrowFailures(failures);
     }

@@ -2,11 +2,14 @@ namespace KeyLoad.CrashHost;
 
 internal static class ExistingStoreInspector
 {
-    private const int InputChunkCharacters = 256;
     private const string OversizedRequest = "The original store request exceeds its bounded protocol.";
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (args.Length != 1 || !string.Equals(args[0], ExistingStoreInspectorProtocol.Mode, StringComparison.Ordinal))
+        const int EmptyArgsLength = 1;
+        const int ArgsFirstIndex = 0;
+        const int IndexEmptyCount = 0;
+
+        if (args.Length != EmptyArgsLength || !string.Equals(args[ArgsFirstIndex], ExistingStoreInspectorProtocol.Mode, StringComparison.Ordinal))
         {
             return false;
         }
@@ -19,13 +22,15 @@ internal static class ExistingStoreInspector
         catch (AggregateException failure)
         {
             Environment.ExitCode = ExistingStoreInspectorProtocol.InvalidProtocolExitCode;
-            GC.KeepAlive(failure.InnerExceptions[0]);
+            GC.KeepAlive(failure.InnerExceptions[IndexEmptyCount]);
         }
         return true;
     }
 
     private static async Task InvokeModeAsync(TextWriter output, TextWriter error)
     {
+        const int ExitCodeEmptyCount = 0;
+
         try
         {
             Console.SetOut(TextWriter.Null);
@@ -42,7 +47,7 @@ internal static class ExistingStoreInspector
             var json = ExistingStoreInspectorProtocol.SerializeReceipt(receipt);
             await output.WriteLineAsync(json);
             await output.FlushAsync();
-            Environment.ExitCode = 0;
+            Environment.ExitCode = ExitCodeEmptyCount;
         }
         catch (Exception original)
         {
@@ -52,23 +57,28 @@ internal static class ExistingStoreInspector
 
     private static async Task<ExistingStoreInspectionRequest> ReadRequestAsync()
     {
+        const int LengthInitialValue = 0;
+        const int EmptyRead = 0;
+        const int StartIndexEmptyCount = 0;
+        const int StartEmptyCount = 0;
+
         var retained = new char[ExistingStoreInspectorProtocol.MaximumRequestCharacters];
-        var chunk = new char[InputChunkCharacters];
-        var length = 0;
+        var chunk = new char[CrashExecutionOptions.Child().Value.ProfileReadChunkCharacters];
+        var length = LengthInitialValue;
         var overflow = false;
         while (true)
         {
             var read = await Console.In.ReadAsync(chunk.AsMemory());
-            if (read == 0)
+            if (read == EmptyRead)
             {
                 if (overflow)
                 {
                     throw new InvalidDataException(OversizedRequest);
                 }
-                return ExistingStoreInspectorProtocol.DeserializeRequest(new string(retained, 0, length));
+                return ExistingStoreInspectorProtocol.DeserializeRequest(new string(retained, StartIndexEmptyCount, length));
             }
             var kept = Math.Min(read, retained.Length - length);
-            chunk.AsSpan(0, kept).CopyTo(retained.AsSpan(length));
+            chunk.AsSpan(StartEmptyCount, kept).CopyTo(retained.AsSpan(length));
             length += kept;
             overflow |= kept != read;
         }

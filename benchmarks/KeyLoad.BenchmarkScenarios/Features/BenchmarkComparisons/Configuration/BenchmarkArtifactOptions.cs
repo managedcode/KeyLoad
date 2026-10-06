@@ -15,7 +15,8 @@ internal sealed class BenchmarkArtifactOptions
 
     internal bool IsValid()
     {
-        if (string.IsNullOrWhiteSpace(SampleChunkDirectory)) { return true; }
+        if (string.IsNullOrWhiteSpace(SampleChunkDirectory))
+        { return true; }
         if (!IsHex(SourceHead, GitShaLength) || !IsHex(SourceInventorySha256, Sha256Length))
         { throw new InvalidOperationException(InvalidSource); }
         return true;

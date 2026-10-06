@@ -18,7 +18,7 @@ internal sealed class ReplicaMembershipAuthorityCapacityTests
         var snapshot = ReplicaMembershipSnapshot.Read(null, UnitRoutingOptions.Membership(), RowLimit);
         var first = snapshot.Insert(Entry(11111), new TableVersion((int)FirstVersion, InitialEtag), RowLimit)!;
         var second = first.Insert(Entry(11112), new TableVersion((int)SecondVersion, FirstEtag), RowLimit)!;
-        var third = await Assert.ThrowsExactly<KeyLoadException>(() =>
+        var third = Assert.ThrowsExactly<KeyLoadException>(() =>
             second.Insert(Entry(11113), new TableVersion(3, "2"), RowLimit));
         await Assert.That(third.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         var bytes = second.Serialize();
@@ -26,7 +26,7 @@ internal sealed class ReplicaMembershipAuthorityCapacityTests
         var unboundedLocalRead = ReplicaMembershipSnapshot.Read(new MembershipRecord(SecondVersion, bytes), UnitRoutingOptions.Membership());
         await Assert.That(boundedRead.RowCount).IsEqualTo(RowLimit);
         await Assert.That(unboundedLocalRead.RowCount).IsEqualTo(RowLimit);
-        var overBound = await Assert.ThrowsExactly<KeyLoadException>(() =>
+        var overBound = Assert.ThrowsExactly<KeyLoadException>(() =>
             ReplicaMembershipSnapshot.Read(new MembershipRecord(SecondVersion, bytes), UnitRoutingOptions.Membership(), RowLimit - 1));
         await Assert.That(overBound.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(second.Serialize().AsSpan().SequenceEqual(bytes)).IsTrue();

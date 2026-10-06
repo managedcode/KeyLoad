@@ -1,14 +1,17 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
 /// <summary>Produces profile-bound vectors and the independent streaming exact-search oracle.</summary>
 /// <param name="profile">The exact immutable profile.</param>
-public sealed class VectorComparisonCorpus(VectorComparisonProfile profile)
+/// <param name="executionOptions">The same native execution policy used by preparation and the exact oracle.</param>
+public sealed class VectorComparisonCorpus(VectorComparisonProfile profile, IOptions<NativeComparisonExecutionOptions> executionOptions)
 {
     /// <summary>Gets the profile that defines this corpus.</summary>
     public VectorComparisonProfile Profile { get; } = profile ?? throw new ArgumentNullException(nameof(profile));
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(executionOptions);
 
     /// <summary>Creates one deterministic record without retaining it in the corpus.</summary>
     /// <param name="number">The zero-based record number.</param>
@@ -92,7 +95,7 @@ public sealed class VectorComparisonCorpus(VectorComparisonProfile profile)
     /// <returns>Exact neighbors in query order.</returns>
     public IReadOnlyList<IReadOnlyList<VectorNeighbor>> ExactNeighborsBatch(
         IReadOnlyList<ReadOnlyMemory<float>> queries, CancellationToken cancellationToken = default)
-        => VectorExactOracle.Compute(this, queries, cancellationToken);
+        => VectorExactOracle.Compute(this, queries, executionOptions, cancellationToken);
 
     /// <summary>Returns the canonical eligibility predicate for a corpus number.</summary>
     /// <param name="number">The corpus number.</param>

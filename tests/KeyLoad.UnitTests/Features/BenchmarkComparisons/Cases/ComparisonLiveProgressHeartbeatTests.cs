@@ -24,7 +24,7 @@ internal sealed class ComparisonLiveProgressHeartbeatTests
                 releaseOutput.Wait(deadline.Token);
             }
         }
-        var observer = new ComparisonProgressObserver(Write);
+        var observer = new ComparisonProgressObserver(Write, UnitBenchmarkOptions.Native());
         Task? disposal = null;
         try
         {

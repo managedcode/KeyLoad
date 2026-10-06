@@ -28,7 +28,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         using var fixture = new ReplicaSecurityFixture();
         var configuration = fixture.Configuration with { MaxAppendBytes = ReceiverAppendBytes };
         var options = Options(fixture.Options);
-        using var receiver = new ReplicaEnvelopeAuthenticator(configuration, options, fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(), canonicalDatabase: fixture.Database);
+        using var receiver = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(configuration), UnitRoutingOptions.Peers(configuration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(options.ReplayLimits), canonicalDatabase: fixture.Database);
         using var sender = Sender(fixture, configuration, options);
         var maximumPayloadBytes = ReceiverMaximumPayloadBytes(configuration);
         await Assert.That(receiver.MaximumPayloadBytes).IsEqualTo(maximumPayloadBytes);
@@ -67,7 +67,7 @@ internal sealed class ReplicaApplicationPayloadBoundsTests
         ReplicaPeerOptions options)
     {
         var senderConfiguration = receiverConfiguration with { LocalId = ReplicaSecurityFixture.VoterA };
-        return new(senderConfiguration, options, fixture.Discovery, TimeProvider.System, canonicalDatabase: fixture.Database);
+        return new(UnitExecutionOptions.ReplicaConfiguration(senderConfiguration), UnitRoutingOptions.Peers(senderConfiguration, options), fixture.Discovery, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(options.ReplayLimits), canonicalDatabase: fixture.Database);
     }
 
     private static async Task AssertSenderBoundaryAsync(ReplicaSecurityFixture fixture, ReplicaEnvelopeAuthenticator sender, ReplicaRpc method,

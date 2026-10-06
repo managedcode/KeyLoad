@@ -154,7 +154,7 @@ internal sealed class RuntimeJournalNativeStorageTests(RuntimeJournalNativeFixtu
         var tooLarge = new byte[fixture.JournalOptions.Value.MaximumJournalBytes + 1];
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
             await storage.ReplaceAsync(new ReadOnlySequence<byte>(tooLarge), CancellationToken.None));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         using var replay = new RuntimeJournalNativeReadAccumulator();
         await storage.ReadAsync(replay, CancellationToken.None);
         await Assert.That(replay.ToArray()).IsEmpty();

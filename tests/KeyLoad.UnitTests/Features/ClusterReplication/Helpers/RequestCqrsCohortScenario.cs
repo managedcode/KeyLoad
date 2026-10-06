@@ -111,18 +111,18 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
         ConfigureSigner(remoteTwo);
         PublishCompatibleRemoteOne(1);
         remoteTwo.SetDiscovery(Authenticator(SecondRemote), Discovery(SecondRemote, 2));
-        var localState = new ReplicaSiloDiscoveryState(Configuration, Options, runtime.LocalSilo);
+        var localState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), runtime.LocalSilo);
         localState.MarkTransportReady();
-        var localAuthenticator = new ReplicaEnvelopeAuthenticator(Configuration, Options, localState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay());
+        var localAuthenticator = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), localState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
         authenticators.Add(localAuthenticator);
-        client = new ReplicaSiloDiscoveryClient(Configuration, Options, localState, localAuthenticator, TimeProvider.System);
+        client = new ReplicaSiloDiscoveryClient(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), localState, localAuthenticator, TimeProvider.System, UnitRoutingOptions.Discovery());
     }
 
     private void ConfigureSigner(RequestCqrsCohortEndpoint endpoint)
     {
         var remoteConfiguration = Configuration with { LocalId = endpoint.VoterId };
-        var remoteState = new ReplicaSiloDiscoveryState(remoteConfiguration, Options, runtime.LocalSilo);
-        var authentication = new ReplicaEnvelopeAuthenticator(remoteConfiguration, Options, remoteState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay());
+        var remoteState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration), UnitRoutingOptions.Peers(remoteConfiguration, Options), runtime.LocalSilo);
+        var authentication = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration), UnitRoutingOptions.Peers(remoteConfiguration, Options), remoteState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
         authenticators.Add(authentication);
         serverAuthenticators.Add(endpoint.VoterId, authentication);
         endpoint.SetDiscovery(authentication,

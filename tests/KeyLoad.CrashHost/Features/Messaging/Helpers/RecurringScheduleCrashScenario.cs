@@ -6,6 +6,19 @@ namespace KeyLoad.CrashHost;
 
 internal static class RecurringScheduleCrashScenario
 {
+    private const string FixtureTenant = "tenant";
+    private const string FixtureDatabase = "database";
+    private const string MessagingDomain = "messaging";
+    private const string ConfigureQueueCommandIdText = "509b9488-45b9-457c-9c92-a7c851956c64";
+    private const string ConfigureScheduleCommandIdText = "a0f9582f-f9af-4efa-8334-b7e8af4cba73";
+    private const string EmitCommandIdText = "563f51c8-dc8c-46f0-8af4-56d2e3bf0767";
+    private const string CompactGuidFormat = "N";
+    private const string IdentitySeparator = "-";
+    private const string CounterHexFormat = "x16";
+
+    private const int OccurrenceIntervalDays = 1;
+    [ImmutableTemporalData]
+    private static readonly TimeSpan OccurrenceInterval = TimeSpan.FromDays(OccurrenceIntervalDays);
     internal const string Mode = "recurring-schedule-crash";
     internal const string OperationFile = "recurring-schedule-operation.json";
     internal const string SeedTailFile = "recurring-schedule-seed-tail.txt";
@@ -20,17 +33,19 @@ internal static class RecurringScheduleCrashScenario
     internal const long Generation = 1;
     internal const long FirstOrdinal = 0;
     internal const int MaxOccurrences = 1;
-    internal static readonly PartitionRef Partition = new("tenant", "database", "messaging", PartitionId);
-    internal static readonly Guid ConfigureQueueCommandId = Guid.Parse("509b9488-45b9-457c-9c92-a7c851956c64");
-    internal static readonly Guid ConfigureCommandId = Guid.Parse("a0f9582f-f9af-4efa-8334-b7e8af4cba73");
-    internal static readonly Guid EmitCommandId = Guid.Parse("563f51c8-dc8c-46f0-8af4-56d2e3bf0767");
+    internal static readonly PartitionRef Partition = new(FixtureTenant, FixtureDatabase, MessagingDomain, PartitionId);
+    internal static readonly Guid ConfigureQueueCommandId = Guid.Parse(ConfigureQueueCommandIdText);
+    internal static readonly Guid ConfigureCommandId = Guid.Parse(ConfigureScheduleCommandIdText);
+    internal static readonly Guid EmitCommandId = Guid.Parse(EmitCommandIdText);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int DueOffsetMinutes = -1;
+
         var database = CrashDatabase.Create(store, tenantId: Partition.TenantId);
         var lane = new QueueLaneRef(Partition, Queue);
         ConfigureQueue(database);
-        var firstDue = TimeProvider.System.GetUtcNow().AddMinutes(-1);
+        var firstDue = TimeProvider.System.GetUtcNow().AddMinutes(DueOffsetMinutes);
         ConfigureSchedule(database, lane, firstDue);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
         var operation = CreateEmitOperation(lane);
@@ -41,8 +56,8 @@ internal static class RecurringScheduleCrashScenario
     }
 
     internal static string OccurrenceId(long generation, long ordinal)
-        => string.Concat(MessagePrefix, Guid.Parse(ScheduleIdText).ToString("N"), "-",
-            generation.ToString("x16", CultureInfo.InvariantCulture), "-", ordinal.ToString("x16", CultureInfo.InvariantCulture));
+        => string.Concat(MessagePrefix, Guid.Parse(ScheduleIdText).ToString(CompactGuidFormat), IdentitySeparator,
+            generation.ToString(CounterHexFormat, CultureInfo.InvariantCulture), IdentitySeparator, ordinal.ToString(CounterHexFormat, CultureInfo.InvariantCulture));
 
     private static void ConfigureQueue(DatabaseEngine database)
     {
@@ -54,9 +69,12 @@ internal static class RecurringScheduleCrashScenario
 
     private static void ConfigureSchedule(DatabaseEngine database, QueueLaneRef lane, DateTimeOffset firstDue)
     {
+        const string UtcTimeZone = "UTC";
+        const int NoScheduleRevision = 0;
+
         var definition = new RecurringScheduleDefinition(lane, Guid.Parse(ScheduleIdText), firstDue,
-            TimeSpan.FromDays(1), "UTC", RecurringMisfirePolicy.CatchUp, MessagePayload, MessageHeaders);
-        var command = new CommandRequest(ConfigureCommandId, Partition, [new ConfigureRecurringSchedule(definition, 0)]);
+            OccurrenceInterval, UtcTimeZone, RecurringMisfirePolicy.CatchUp, MessagePayload, MessageHeaders);
+        var command = new CommandRequest(ConfigureCommandId, Partition, [new ConfigureRecurringSchedule(definition, NoScheduleRevision)]);
         _ = CrashDatabase.Submit(database, OperationKind.Batch, command, ConfigureCommandId).Get<CommitReceipt>();
     }
 
@@ -75,7 +93,9 @@ internal static class RecurringScheduleCrashScenario
 
     private static void ArmBoundary(ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        boundary.Position = store.Position + 1;
+        const int PositionStep = 1;
+
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
     }
 }

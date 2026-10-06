@@ -53,5 +53,5 @@ internal sealed class VectorResponseContractTests
             .Throws<InvalidDataException>();
     }
 
-    private static VectorComparisonCorpus Corpus(string id) => new(VectorComparisonProfile.Parse(id));
+    private static VectorComparisonCorpus Corpus(string id) => new(VectorComparisonProfile.Parse(id), UnitBenchmarkOptions.Native());
 }

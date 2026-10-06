@@ -71,6 +71,8 @@ public sealed partial class NativeComparisonExecutionOptions
         }
 
         ValidateAdapterPolicy();
+        ValidateReportPolicy();
+        ValidateVectorPolicy();
         return this;
     }
 
@@ -92,5 +94,6 @@ public sealed partial class NativeComparisonExecutionOptions
         parameters[nameof(IndexBuildTimeout)] = IndexBuildTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
         parameters[nameof(IndexPollInterval)] = IndexPollInterval.ToString(DurationFormat, CultureInfo.InvariantCulture);
         RecordAdapterEvidence(parameters);
+        RecordVectorEvidence(parameters);
     }
 }

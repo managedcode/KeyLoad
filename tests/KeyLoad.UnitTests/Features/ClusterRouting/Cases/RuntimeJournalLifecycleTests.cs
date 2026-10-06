@@ -53,7 +53,7 @@ internal sealed class RuntimeJournalLifecycleTests
         await Assert.That(recreated.InstanceId).IsNotEqualTo(replaced.InstanceId);
         var stale = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(
             RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, replaced, [1]))));
-        await Assert.That(stale.Code).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(stale!.Code).IsEqualTo(ErrorCode.Conflict);
     }
 
     [Test]
@@ -67,7 +67,7 @@ internal sealed class RuntimeJournalLifecycleTests
         var staleEtag = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(
             RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created, etag: created.MetadataETag,
                 set: new(StringComparer.Ordinal) { [StaleProperty] = "stale" }))));
-        await Assert.That(staleEtag.Code).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(staleEtag!.Code).IsEqualTo(ErrorCode.Conflict);
 
         var sameOwner = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, claimed,
             etag: claimed.MetadataETag, set: new(StringComparer.Ordinal)

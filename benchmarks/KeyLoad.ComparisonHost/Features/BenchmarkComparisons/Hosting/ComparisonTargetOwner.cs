@@ -1,9 +1,9 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
-using Microsoft.Extensions.Options;
-using KeyLoad.Comparisons;
 using KeyLoad.Client;
+using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 

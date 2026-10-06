@@ -13,13 +13,13 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
         using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, liveNode);
         var sdk = new KeyLoadClient(http, admin, ComparisonClientOptions.Execution());
         string? writeCode;
-        using (var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token))
+        using (var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token))
         {
             var read = await sdk.GetAsync(seed.Sentinel, attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
             await IsolatedKeyLoadPublicRegressionAssertions.ErrorAsync(read, ErrorCode.OwnershipLost, admin);
         }
-        using (var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token))
+        using (var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token))
         {
             var write = await sdk.CommitAsync(command, attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
@@ -35,7 +35,7 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
     private static async Task<bool> McpAsync(DistributedApplication app, int node, string admin,
         IsolatedKeyLoadFaultRegressionSeed seed, CancellationToken token)
     {
-        using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token);
+        using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token);
         try
         {
             await using var mcp = await IsolatedKeyLoadPublicRegressionMcp.ConnectAsync(app, node, admin, attempt.Token);
@@ -53,10 +53,10 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
 
     internal static async Task<CommitReceipt> ResolveAsync(KeyLoadClient sdk, CommandRequest command, CancellationToken token)
     {
-        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.ReadinessSeconds, token);
+        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultReadinessTimeout, token);
         while (true)
         {
-            using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, deadline.Token);
+            using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, deadline.Token);
             var result = await sdk.CommitAsync(command, attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
             if (result.IsSuccess)
@@ -65,7 +65,7 @@ internal static class IsolatedKeyLoadFaultRegressionQuorum
             }
             IsolatedKeyLoadFaultRegressionProtocol.Require(result.Problem?.ErrorCode is nameof(ErrorCode.OwnershipLost)
                 or nameof(ErrorCode.UnknownWriteOutcome));
-            await Task.Delay(IsolatedKeyLoadFaultRegressionProtocol.PollMilliseconds, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
         }
     }
 }

@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
 using KeyLoad.Core;
 using KeyLoad.Query.Features.QueryExecution;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 

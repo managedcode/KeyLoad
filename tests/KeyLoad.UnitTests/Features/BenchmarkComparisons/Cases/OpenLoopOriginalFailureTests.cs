@@ -7,12 +7,12 @@ internal sealed class OpenLoopOriginalFailureTests
     private const string ReadFailure = "Original health read failed.";
     private const string DisposalFailure = "Original health session disposal failed.";
     private const string FatalReadSibling = "Original sibling of fatal health read failed.";
+    private const string FixturePartitionKey = "partition";
 
     [Test]
     public async Task SuccessfulReadReturnsOriginalResultOnlyAfterDisposalCompletes()
     {
-        var reference = new EntityRef(new("tenant", "database", "domain", "partition"), "documents", "document");
-        var result = new OpenLoopCancellationHealthRead(reference, new(reference, 1, "{}", false, []));
+        var result = ReadResult();
         await using var owner = new OpenLoopOriginalFailureReadFixture();
         owner.CompleteRead(result);
         await owner.DisposalStarted.WaitAsync(TestContext.Current!.Execution.CancellationToken);
@@ -23,6 +23,34 @@ internal sealed class OpenLoopOriginalFailureTests
         await Assert.That(owner.DisposeCalls).IsEqualTo(1);
         await Assert.That(owner.ReadCompletedBeforeDispose).IsTrue();
         await Assert.That(owner.DisposalCompleted).IsTrue();
+    }
+
+    [Test]
+    public async Task SoleReadFailureRethrowsOriginalObjectAfterSuccessfulDisposal()
+    {
+        var primary = new IOException(ReadFailure);
+        await using var owner = new OpenLoopOriginalFailureReadFixture();
+        owner.FailRead(primary);
+        await owner.DisposalStarted.WaitAsync(TestContext.Current!.Execution.CancellationToken);
+        owner.CompleteDisposal();
+
+        var failure = await Assert.ThrowsExactlyAsync<IOException>(() => owner.Completion);
+        await Assert.That(failure).IsSameReferenceAs(primary);
+        await AssertSettledAsync(owner);
+    }
+
+    [Test]
+    public async Task SoleDisposalFailureRethrowsOriginalObjectAfterSuccessfulRead()
+    {
+        var cleanup = new IOException(DisposalFailure);
+        await using var owner = new OpenLoopOriginalFailureReadFixture();
+        owner.CompleteRead(ReadResult());
+        await owner.DisposalStarted.WaitAsync(TestContext.Current!.Execution.CancellationToken);
+        owner.FailDisposal(cleanup);
+
+        var failure = await Assert.ThrowsExactlyAsync<IOException>(() => owner.Completion);
+        await Assert.That(failure).IsSameReferenceAs(cleanup);
+        await AssertSettledAsync(owner);
     }
 
     [Test]
@@ -49,7 +77,7 @@ internal sealed class OpenLoopOriginalFailureTests
     [Arguments(true)]
     public async Task WrappedFatalInEitherStageHasPriorityWhileOriginalFailuresRemain(bool fatalInDisposal)
     {
-        var fatal = new OutOfMemoryException();
+        var fatal = OpenLoopOriginalFailureReadFixture.RuntimeOversizeFailure();
         var sibling = new IOException(FatalReadSibling);
         var wrapped = new AggregateException(new InvalidOperationException(ReadFailure, fatal), sibling);
         var ordinary = new IOException(DisposalFailure);
@@ -120,5 +148,11 @@ internal sealed class OpenLoopOriginalFailureTests
         await Assert.That(owner.ReadCompletedBeforeDispose).IsTrue();
         await Assert.That(owner.DisposalCompleted).IsTrue();
         await Assert.That(owner.Completion.IsFaulted).IsTrue();
+    }
+
+    private static OpenLoopCancellationHealthRead ReadResult()
+    {
+        var reference = new EntityRef(new("tenant", "database", "domain", FixturePartitionKey), "documents", "document");
+        return new(reference, new(reference, 1, "{}", false, []));
     }
 }

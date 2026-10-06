@@ -10,7 +10,7 @@ internal sealed record IsolatedKeyLoadFaultRegressionMembership(int Index, strin
     internal static async Task<IsolatedKeyLoadFaultRegressionMembership[]> WaitAsync(DistributedApplication app,
         int nodeCount, string admin, long position, CancellationToken token)
     {
-        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.ReadinessSeconds, token);
+        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultReadinessTimeout, token);
         while (true)
         {
             deadline.Token.ThrowIfCancellationRequested();
@@ -19,7 +19,7 @@ internal sealed record IsolatedKeyLoadFaultRegressionMembership(int Index, strin
             {
                 return [.. nodes.OrderBy(item => item.Index)];
             }
-            await Task.Delay(IsolatedKeyLoadFaultRegressionProtocol.PollMilliseconds, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
         }
     }
 
@@ -31,7 +31,7 @@ internal sealed record IsolatedKeyLoadFaultRegressionMembership(int Index, strin
         for (var index = 1; index <= nodeCount; index++)
         {
             using var http = IsolatedKeyLoadPublicRegressionProtocol.CreateHttp(app, index);
-            using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.AttemptSeconds, token);
+            using var attempt = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultAttemptTimeout, token);
             var result = await new KeyLoadClient(http, admin, ComparisonClientOptions.Execution()).DashboardAsync(attempt.Token);
             attempt.Token.ThrowIfCancellationRequested();
             if (!result.IsSuccess)

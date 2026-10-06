@@ -19,7 +19,7 @@ internal sealed class ReplicaCheckpointProtocolPlanningScope
         this.node = node;
         this.cancellationToken = cancellationToken;
         this.timeout = timeout;
-        var state = new ReplicaState(node.Materializer, node.Configuration, TimeProvider.System);
+        var state = new ReplicaState(node.Materializer, RecoveryExecutionOptions.Configuration(node.Configuration), TimeProvider.System);
         completion = Task.Run(() => state.LockedAsync(CaptureAndHold, this.cancellationToken), CancellationToken.None);
     }
 

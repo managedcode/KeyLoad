@@ -46,7 +46,7 @@ internal static class UnitBenchmarkOptions
         var configuration = new ConfigurationBuilder().SetBasePath(root.FullName)
             .AddJsonFile("benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/native-execution.json", optional: false).Build();
         using var configurationLifetime = configuration as IDisposable;
-        IOptions<NativeComparisonExecutionOptions> options = new OptionsManager<NativeComparisonExecutionOptions>(
+        var options = new OptionsManager<NativeComparisonExecutionOptions>(
             new OptionsFactory<NativeComparisonExecutionOptions>([new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(
                 configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName))], [],
                 [new ValidateOptions<NativeComparisonExecutionOptions>(Options.DefaultName, value => { value.Validate(); return true; },

@@ -21,7 +21,7 @@ internal sealed class RuntimeJournalQuotaAndIdentityTests
         var filled = fixture.Submit(RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, header, [1, 2, 3, 4])).Snapshot!;
         var rejected = RuntimeJournalFixture.Mutation(RuntimeJournalAction.Append, filled, [5, 6, 7, 8, 9]);
         var exhausted = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(rejected)));
-        await Assert.That(exhausted.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(exhausted!.Code).IsEqualTo(ErrorCode.ResourceExhausted);
 
         var current = fixture.Engine.GetRuntimeJournalHeader(RuntimeJournalFixture.JournalPrincipal, FirstName)!;
         var page = fixture.Engine.ReadRuntimeJournal(RuntimeJournalFixture.JournalPrincipal,

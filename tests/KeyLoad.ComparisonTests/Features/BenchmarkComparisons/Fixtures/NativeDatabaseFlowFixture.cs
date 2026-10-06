@@ -20,8 +20,7 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private const string PasswordParameter = "isolated-surrealdb-password";
     private const string Basic = "Basic";
     private const string User = "root:";
-    private const int DeadlineMinutes = 5;
-    private static readonly TimeSpan Deadline = TimeSpan.FromMinutes(DeadlineMinutes);
+    private static TimeSpan Deadline => NativeExecutionPolicyFixture.Harness().Value.NativeDatabaseFlowTimeout;
 
     internal static IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
     internal string Image => target == Surreal ? "docker.io/surrealdb/surrealdb:v3.2.4@" + BenchmarkResources.SurrealDbDigest : "ghcr.io/helixdb/helixdb:v0.0.10@" + BenchmarkResources.HelixDbDigest;

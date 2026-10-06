@@ -4,16 +4,6 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKeyLoadFaultRegressionProtocol
 {
-    internal const int OverallMinutes = 10;
-    internal const int CliSeconds = 30;
-    internal const int ExitedSeconds = 20;
-    internal const int RestartSeconds = 120;
-    internal const int AttemptSeconds = 30;
-    internal const int ReadinessSeconds = 90;
-    internal const int PollMilliseconds = 250;
-    internal const int DrainSeconds = 5;
-    internal const int OutputCharacters = 16_384;
-    internal const int ErrorCharacters = 2_048;
     internal const string Admin = "admin-key";
     internal const string DataMount = "/data";
     internal const string Running = "running";
@@ -24,10 +14,10 @@ internal static class IsolatedKeyLoadFaultRegressionProtocol
     internal static string Resource(int node) => "node" + node.ToString(CultureInfo.InvariantCulture);
     internal static string Voter(int node) => "http://" + Resource(node) + ":8080";
 
-    internal static CancellationTokenSource Deadline(int seconds, CancellationToken token)
+    internal static CancellationTokenSource Deadline(TimeSpan budget, CancellationToken token)
     {
         var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromSeconds(seconds));
+        deadline.CancelAfter(budget);
         return deadline;
     }
 

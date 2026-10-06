@@ -34,20 +34,20 @@ public static class OpenLoopCancellationProofRunner
         var runner = new OpenLoopComparisonRunner(profile, rate, executionOptions, nativeExecutionOptions,
             nativeProgress: publish);
         var report = await RunRequestedMeasurementAsync(profile, rate, target, worker, storage,
-            output, emitMarker, runner, hostToken).ConfigureAwait(false);
+            output, emitMarker, runner, nativeExecutionOptions, hostToken).ConfigureAwait(false);
         var actualMilestone = milestone ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationMilestoneMissing);
         var corpus = new ScaledComparisonCorpus(profile);
         var health = await OpenLoopHealthyReadVerifier.ReadAndVerifyAsync(target, corpus, hostToken)
             .ConfigureAwait(false);
         var proof = CreateProof(report, actualMilestone, health);
-        _ = await OpenLoopCancellationProofWriter.WriteAsync(output, proof, hostToken).ConfigureAwait(false);
+        _ = await OpenLoopCancellationProofWriter.WriteAsync(output, proof, nativeExecutionOptions, hostToken).ConfigureAwait(false);
         return proof;
     }
 
     private static async Task<OpenLoopComparisonReport> RunRequestedMeasurementAsync(
         ScaledComparisonProfile profile, int rate, IComparisonTarget target, IsolatedComparisonWorker worker,
         string storage, string output, Action<string> emitMarker, OpenLoopComparisonRunner runner,
-        CancellationToken hostToken)
+        IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, CancellationToken hostToken)
     {
         var policy = runner.ExecutionPolicy;
         ValidateArguments(profile, rate, target, worker, storage, output, emitMarker, policy);
@@ -55,17 +55,17 @@ public static class OpenLoopCancellationProofRunner
         using var runnerCancellation = CancellationTokenSource.CreateLinkedTokenSource(hostToken);
         using var watcherStop = new CancellationTokenSource();
         return await RunAndSettleMeasurementAsync(target, worker, storage, output, runner, policy,
-            runnerCancellation, watcherStop, hostToken).ConfigureAwait(false);
+            runnerCancellation, watcherStop, nativeExecutionOptions, hostToken).ConfigureAwait(false);
     }
 
     private static async Task<OpenLoopComparisonReport> RunAndSettleMeasurementAsync(
         IComparisonTarget target, IsolatedComparisonWorker worker, string storage, string output,
         OpenLoopComparisonRunner runner, OpenLoopExecutionPolicy policy,
         CancellationTokenSource runnerCancellation, CancellationTokenSource watcherStop,
-        CancellationToken hostToken)
+        IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions, CancellationToken hostToken)
     {
         var watcher = OpenLoopCancellationRequestWatcher.WatchAndCancelAsync(output, runnerCancellation,
-            policy, watcherStop.Token);
+            policy, nativeExecutionOptions, watcherStop.Token);
         var measurement = runner.RunAsync(target, worker, storage, runnerCancellation.Token);
         OpenLoopComparisonReport? report = null;
         Exception? primary = null;

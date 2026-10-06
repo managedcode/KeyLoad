@@ -29,7 +29,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
     internal async Task RestartAsync(IsolatedKeyLoadFaultRegressionNativeReceipt receipt, CancellationToken token)
     {
         IsolatedKeyLoadFaultRegressionProtocol.Require(receipt.Exited is not null && receipt.Restored is null);
-        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.RestartSeconds, token);
+        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRestartTimeout, token);
         var node = nodes[receipt.Node - 1];
         var commands = app.Services.GetRequiredService<ResourceCommandService>();
         var result = await commands.ExecuteCommandAsync(node.Resource, KnownResourceCommands.StartCommand, deadline.Token);
@@ -57,7 +57,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
 
     private async Task RestoreWithDeadlineAsync(IsolatedKeyLoadFaultRegressionNativeReceipt receipt)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(IsolatedKeyLoadFaultRegressionProtocol.RestartSeconds));
+        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultRestartTimeout);
         await RestoreOneAsync(receipt, cleanup.Token);
     }
 
@@ -103,14 +103,14 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
             {
                 return current;
             }
-            await Task.Delay(IsolatedKeyLoadFaultRegressionProtocol.PollMilliseconds, token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, token);
         }
     }
 
     private static async Task<IsolatedKeyLoadFaultRegressionNativeIdentity> WaitExitedAsync(
         IsolatedKeyLoadFaultRegressionNativeNode node, IsolatedKeyLoadFaultRegressionNativeIdentity before, CancellationToken token)
     {
-        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.ExitedSeconds, token);
+        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultExitedTimeout, token);
         while (true)
         {
             var current = await node.InspectAsync(deadline.Token);
@@ -120,7 +120,7 @@ internal sealed class IsolatedKeyLoadFaultRegressionNative(DistributedApplicatio
                 ValidateExited(before, current);
                 return current;
             }
-            await Task.Delay(IsolatedKeyLoadFaultRegressionProtocol.PollMilliseconds, deadline.Token);
+            await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, deadline.Token);
         }
     }
 

@@ -32,10 +32,10 @@ internal sealed class IsolatedPlanCliTests
         var expectedVectors = (await IsolatedPlanNodeProcess.ProbeAsync("create-vectors"))[IsolatedPlanFields.Value]!;
         await Assert.That(JsonNode.DeepEquals(vectors, expectedVectors)).IsTrue();
         var composite = JsonNode.Parse(await File.ReadAllTextAsync(compositePath, token))!;
-        await Assert.That(composite["schemaVersion"]!.GetValue<int>()).IsEqualTo(3);
-        await Assert.That(JsonNode.DeepEquals(composite["control"], plan)).IsTrue();
-        await Assert.That(JsonNode.DeepEquals(composite["scaledProfiles"], scales)).IsTrue();
-        await Assert.That(JsonNode.DeepEquals(composite["vectorProfiles"], vectors)).IsTrue();
+        await Assert.That(composite[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(3);
+        await Assert.That(JsonNode.DeepEquals(composite[IsolatedPlanFields.Control], plan)).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(composite[IsolatedPlanFields.ScaledProfiles], scales)).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(composite[IsolatedPlanFields.VectorProfiles], vectors)).IsTrue();
         var lines = await File.ReadAllLinesAsync(githubPath, token);
         await Assert.That(lines.Length).IsEqualTo(2);
         await Assert.That(lines[0]).IsEqualTo("sentinel=preserved");

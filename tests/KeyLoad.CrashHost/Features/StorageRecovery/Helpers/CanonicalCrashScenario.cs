@@ -7,11 +7,15 @@ internal static class CanonicalCrashScenario
 {
     internal static void Run(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary, string mode)
     {
+        const int CompileEmptyCount = 0;
+        const int ValueEmptyCount = 0;
+        const int ValueSingleItemCount = 1;
+
         store.Commit((transaction, _) =>
         {
-            for (var index = 0; index < CrashFixtureValues.ItemCount; index++)
+            for (var index = CompileEmptyCount; index < CrashFixtureValues.ItemCount; index++)
             {
-                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), 0);
+                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), ValueEmptyCount);
             }
             if (mode == CrashFixtureValues.InstallMode)
             {
@@ -21,9 +25,9 @@ internal static class CanonicalCrashScenario
         });
         store.Commit((transaction, _) =>
         {
-            for (var index = 0; index < CrashFixtureValues.ItemCount; index++)
+            for (var index = CompileEmptyCount; index < CrashFixtureValues.ItemCount; index++)
             {
-                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), 1);
+                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), ValueSingleItemCount);
             }
             return true;
         });
@@ -42,6 +46,9 @@ internal static class CanonicalCrashScenario
 
     private static string CreateSnapshot(string directory, ZoneTreeStore store)
     {
+        const int CompileEmptyCount = 0;
+        const int ValueIdentity = 2;
+
         var snapshot = Path.Combine(directory, CrashFixtureValues.IncomingSnapshotFile);
         using var source = new ZoneTreeStore(new(Path.Combine(directory, CrashFixtureValues.SnapshotSourceDirectory))
         { Incarnation = store.Identity.Incarnation, SigningKey = store.Identity.SigningKey }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
@@ -52,9 +59,9 @@ internal static class CanonicalCrashScenario
         });
         source.Commit((transaction, _) =>
         {
-            for (var index = 0; index < CrashFixtureValues.ItemCount; index++)
+            for (var index = CompileEmptyCount; index < CrashFixtureValues.ItemCount; index++)
             {
-                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), 2);
+                transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.ItemKey, (long)index), ValueIdentity);
             }
             transaction.PutRecord(KeyCodec.Encode(CrashFixtureValues.System, CrashFixtureValues.AppliedKey), CrashFixtureValues.SnapshotCut);
             return true;

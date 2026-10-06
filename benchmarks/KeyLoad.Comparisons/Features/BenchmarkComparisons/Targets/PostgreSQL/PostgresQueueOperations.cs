@@ -1,7 +1,7 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 

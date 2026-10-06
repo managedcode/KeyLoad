@@ -18,8 +18,6 @@ internal static class IsolatedGitHubNativeProtocol
     internal const string InProgress = "in_progress";
     internal const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID=";
     internal const string Failure = "The actual GitHub current-job capture child failed its bound.";
-    internal const int TimeoutMinutes = 120;
-    internal const int CleanupSeconds = 10;
 
     internal static string Required(string name) => Environment.GetEnvironmentVariable(name)
         ?? throw new InvalidOperationException(Failure);

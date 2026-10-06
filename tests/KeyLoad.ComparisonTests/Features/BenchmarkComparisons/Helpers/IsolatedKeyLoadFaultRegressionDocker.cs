@@ -10,7 +10,7 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
     internal static async Task<string> RunAsync(string[] arguments, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(IsolatedKeyLoadFaultRegressionProtocol.CliSeconds, token);
+        using var deadline = IsolatedKeyLoadFaultRegressionProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout, token);
         var start = new ProcessStartInfo(Docker)
         { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var argument in arguments)
@@ -18,12 +18,12 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
             start.ArgumentList.Add(argument);
         }
         using var process = Process.Start(start) ?? throw new InvalidOperationException(IsolatedKeyLoadFaultRegressionProtocol.Failure);
-        var output = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardOutput, IsolatedKeyLoadFaultRegressionProtocol.OutputCharacters);
-        var error = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardError, IsolatedKeyLoadFaultRegressionProtocol.ErrorCharacters);
+        var output = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardOutput, NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultOutputCharacters);
+        var error = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardError, NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultErrorCharacters);
         try
         {
             await process.WaitForExitAsync(deadline.Token);
-            var readers = await Task.WhenAll(output, error).WaitAsync(TimeSpan.FromSeconds(IsolatedKeyLoadFaultRegressionProtocol.DrainSeconds), deadline.Token);
+            var readers = await Task.WhenAll(output, error).WaitAsync(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout, deadline.Token);
             IsolatedKeyLoadFaultRegressionProtocol.Require(process.ExitCode == 0 && readers.All(item => !item.Oversized));
             return readers[0].Text.Trim();
         }
@@ -42,7 +42,7 @@ internal static class IsolatedKeyLoadFaultRegressionDocker
             {
                 process.Kill(entireProcessTree: true);
             }
-            using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(IsolatedKeyLoadFaultRegressionProtocol.DrainSeconds));
+            using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultProcessDrainTimeout);
             await process.WaitForExitAsync(cleanup.Token);
             await Task.WhenAll(output, error).WaitAsync(cleanup.Token);
         }

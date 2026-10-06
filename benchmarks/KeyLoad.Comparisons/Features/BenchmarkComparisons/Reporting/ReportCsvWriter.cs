@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
@@ -12,23 +13,22 @@ internal static class ReportCsvWriter
     private const string DoubledQuote = "\"\"";
     private const char QuoteCharacter = '"';
     private const string Empty = "";
-    private const int FileBufferBytes = 65_536;
-    private const int WriterBufferCharacters = 16_384;
     private static readonly UTF8Encoding Utf8WithoutPreamble = new(false);
 
     internal static async Task WriteAsync(ComparisonReport report, string path, Func<double?, string> number,
-        CancellationToken cancellationToken)
+        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
+        var execution = NativeComparisonExecutionOptions.Require(executionOptions).Value;
         cancellationToken.ThrowIfCancellationRequested();
         await using var file = new FileStream(path, new FileStreamOptions
         {
             Mode = FileMode.Create,
             Access = FileAccess.Write,
             Share = FileShare.None,
-            BufferSize = FileBufferBytes,
+            BufferSize = execution.ReportFileBufferBytes,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
-        await using var writer = new StreamWriter(file, Utf8WithoutPreamble, WriterBufferCharacters, leaveOpen: true);
+        await using var writer = new StreamWriter(file, Utf8WithoutPreamble, execution.ReportWriterBufferCharacters, leaveOpen: true);
         await writer.WriteAsync(Header.AsMemory(), cancellationToken).ConfigureAwait(false);
         foreach (var item in report.Cases)
         {

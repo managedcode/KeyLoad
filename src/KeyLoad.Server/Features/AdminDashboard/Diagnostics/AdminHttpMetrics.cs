@@ -1,19 +1,30 @@
 using System.Collections.Immutable;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class AdminHttpMetrics(TimeProvider? clock = null)
+internal sealed class AdminHttpMetrics
 {
     private readonly Lock gate = new();
-    private readonly TimeProvider time = clock ?? TimeProvider.System;
-    private readonly DateTimeOffset startedAt = (clock ?? TimeProvider.System).GetUtcNow();
+    private readonly TimeProvider time;
+    private readonly DateTimeOffset startedAt;
     private readonly Guid processInstance = Guid.NewGuid();
-    private readonly AdminHttpFailure[] failures = new AdminHttpFailure[AdminDashboardProtocol.RecentFailureLimit];
+    private readonly AdminHttpFailure[] failures;
     private int nextFailure;
     private int retainedFailures;
     private long completed;
     private long failed;
     private double milliseconds;
+
+    public AdminHttpMetrics(IOptions<AdminObservationOptions> observationOptions, TimeProvider? clock = null)
+    {
+        ArgumentNullException.ThrowIfNull(observationOptions);
+        var observation = observationOptions.Value;
+        observation.Validate();
+        time = clock ?? TimeProvider.System;
+        startedAt = time.GetUtcNow();
+        failures = new AdminHttpFailure[observation.MaximumRecentFailures];
+    }
 
     internal void Record(TimeSpan elapsed, AdminHttpFailureDetail? failure)
     {

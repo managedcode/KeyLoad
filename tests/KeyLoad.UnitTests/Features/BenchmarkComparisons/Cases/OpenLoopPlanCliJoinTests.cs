@@ -152,12 +152,12 @@ internal sealed class OpenLoopPlanCliJoinTests
         var scenario = Mutate(canonical, cell => cell[OpenLoopPlanExpectedInventory.ScenarioProperty] = "not-a-scenario");
         foreach (var candidate in new[] { rate, target, scenario })
         {
-            var request = new JsonObject { ["openLoopPlan"] = candidate };
+            var request = new JsonObject { [IsolatedPlanFields.OpenLoopPlan] = candidate };
             var result = await OpenLoopPlanJoinNodeProcess.RunMatrixProbeAsync(executionOptions,
                 request.ToJsonString(), cancellationToken).ConfigureAwait(false);
             await OpenLoopPlanJoinAssertions.VerifyMatrixProbeAsync(result, rejected: true).ConfigureAwait(false);
         }
-        var validRequest = new JsonObject { ["openLoopPlan"] = canonical.DeepClone() };
+        var validRequest = new JsonObject { [IsolatedPlanFields.OpenLoopPlan] = canonical.DeepClone() };
         var valid = await OpenLoopPlanJoinNodeProcess.RunMatrixProbeAsync(executionOptions,
             validRequest.ToJsonString(), cancellationToken).ConfigureAwait(false);
         await OpenLoopPlanJoinAssertions.VerifyMatrixProbeAsync(valid, rejected: false).ConfigureAwait(false);

@@ -17,6 +17,7 @@ public sealed class GrainRoutingOptions
     private const int MaximumFrameCount = 128;
     private const int MinimumPositiveCount = 1;
     private const int MaximumReplyBytesCeiling = 16_777_216;
+    private const int MaximumInitialReplyBufferBytes = 4_096;
     private const int MaximumStartedBytesCeiling = 8_192;
     private const int MaximumFailedBytesCeiling = 65_536;
     private const int MaximumCompletedBytesCeiling = 16_842_752;
@@ -41,6 +42,9 @@ public sealed class GrainRoutingOptions
 
     /// <summary>Gets or sets the encoded capability reply bytes.</summary>
     public int MaximumReplyBytes { get; set; } = MaximumReplyBytesCeiling;
+
+    /// <summary>Gets or sets the initial encoded capability reply buffer reservation.</summary>
+    public int InitialReplyBufferBytes { get; set; } = MaximumInitialReplyBufferBytes;
 
     /// <summary>Gets or sets the native started chunk bytes.</summary>
     public int MaximumStartedBytes { get; set; } = MaximumStartedBytesCeiling;
@@ -77,6 +81,7 @@ public sealed class GrainRoutingOptions
         && MaximumTotalFrames is >= MinimumPositiveCount and <= MaximumFrameCount
         && MaximumRequestProducers <= MaximumTotalFrames
         && MaximumReplyBytes is >= MinimumPositiveCount and <= MaximumReplyBytesCeiling
+        && InitialReplyBufferBytes is >= MinimumPositiveCount and <= MaximumInitialReplyBufferBytes
         && MaximumStartedBytes is >= MinimumPositiveCount and <= MaximumStartedBytesCeiling
         && MaximumFailedBytes is >= MinimumPositiveCount and <= MaximumFailedBytesCeiling
         && MaximumCompletedBytes is >= MinimumPositiveCount and <= MaximumCompletedBytesCeiling

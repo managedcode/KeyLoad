@@ -1,7 +1,6 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost;
 
@@ -13,7 +12,7 @@ internal static class CrashServerRuntimeOptions
         node.Validate();
         var services = new ServiceCollection();
         services.AddRuntimeOptions(new ConfigurationBuilder().Build());
-        services.AddSingleton(Options.Create(node));
+        services.AddSingleton(CrashExecutionOptions.Node(node));
         using var provider = services.BuildServiceProvider();
         return provider.GetRequiredService<ServerRuntimeOptions>();
     }

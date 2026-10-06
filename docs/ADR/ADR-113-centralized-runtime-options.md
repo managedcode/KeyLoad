@@ -130,6 +130,23 @@ DueCoordination/ReplicaExecution/ZoneTreeStorage execution regressions. Each sui
 must retain its original native outcome and exact source; compiler previews remain
 diagnostic tools only.
 
+Native comparison CSV character buffers, report/proof/control file buffers and
+vector cancellation/yield cadences also belong to the centrally validated native
+execution group. Preserve their original defaults and inclusive ceilings, exact
+report bytes, corpus hashes and qualification criteria. Semantic enforcement
+includes actual framework file-buffer properties and constructor parameters;
+same-named source types must not impersonate those framework symbols.
+
+Executable ComparisonTests native lifecycle helpers consume the same central
+binding contract through `NativeExecutionPolicyFixture.Harness()` and a typed
+`KeyLoad:NativeComparisonHarness` section. Ownership is feature-local
+Configuration/NativeComparisonHarnessOptions, the fixture composition entry,
+and the actual PostgreSQL/Redis/Kurrent/teardown helper sinks. Preserve default
+native budgets, exact fixture isolation, independent assertions and original-task
+failure identity; do not turn their mutable timeouts/buffers/workers into protocol
+constants. Integration and Recovery API/ownership joins use the same actual
+rebuilt contracts and retain their original RF3/restart assertions.
+
 Dependencies use centrally pinned native Microsoft.Extensions.Options/Binder
 packages already present or explicitly added in the canonical package manifest;
 do not copy framework or ManagedCode implementations. Native Options.Create is

@@ -1,9 +1,9 @@
-using KeyLoad.AppHost.Hosting;
 using KeyLoad.AppHost.Features.CodeQuality;
-using Microsoft.Extensions.Options;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure;
 

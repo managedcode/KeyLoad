@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Configuration;
-using KeyLoad.AppHost.Hosting;
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Resources;
+using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication.Commands;
 

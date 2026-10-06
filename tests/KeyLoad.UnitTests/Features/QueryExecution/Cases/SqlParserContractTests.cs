@@ -73,9 +73,9 @@ internal sealed class SqlParserContractTests
         {
             MaxQueryTokens = 3
         }), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser(            "SELECT \"unterminated FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(            "SELECT * FROM orders LIMIT 0 DESC", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(            "SELECT * FROM orders WHERE (((status = 'x')))", UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 2 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser("SELECT \"unterminated FROM orders", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution())).Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders LIMIT 0 DESC", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders WHERE (((status = 'x')))", UnitExecutionOptions.DatabaseLimits(new() { MaxQueryDepth = 2 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)
             .IsEqualTo(ErrorCode.BudgetExceeded);
     }
 }

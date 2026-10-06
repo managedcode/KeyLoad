@@ -4,6 +4,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class OpenLoopOriginalFailureReadFixture : IAsyncDisposable
 {
+    private const string MissingRuntimeFailure = "The CLR did not reject the impossible array dimensions.";
     private readonly TaskCompletionSource<OpenLoopCancellationHealthRead> read = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource disposal = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly TaskCompletionSource disposalStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -26,6 +27,20 @@ internal sealed class OpenLoopOriginalFailureReadFixture : IAsyncDisposable
     internal void CancelRead(CancellationToken cancellationToken) => read.SetCanceled(cancellationToken);
     internal void FailDisposal(Exception failure) => disposal.SetException(failure);
     internal void CompleteDisposal() => disposal.SetResult();
+
+    internal static OutOfMemoryException RuntimeOversizeFailure()
+    {
+        try
+        {
+            // The CLR rejects impossible dimensions before allocating an array payload.
+            _ = Array.CreateInstance(typeof(byte), int.MaxValue, int.MaxValue);
+        }
+        catch (OutOfMemoryException failure)
+        {
+            return failure;
+        }
+        throw new InvalidOperationException(MissingRuntimeFailure);
+    }
 
     public async ValueTask DisposeAsync()
     {

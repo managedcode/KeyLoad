@@ -23,7 +23,7 @@ internal sealed class ReplicaMembershipAuthorityNativeContractTests
         await Assert.That(decodedCall.CallerSiloAddress).IsEqualTo(caller);
         await Assert.That(decodedCall.RequestId).IsEqualTo(call.RequestId);
         await Assert.That(decodedCall.Operation).IsEqualTo((int)ReplicaMembershipAuthorityOperation.ReadAll);
-        using var mac = new ReplicaMembershipAuthorityMac(new byte[ReplicaMembershipAuthorityProtocol.SecretBytes], UnitRoutingOptions.Membership());
+        using var mac = new ReplicaMembershipAuthorityMac(new byte[System.Security.Cryptography.SHA256.HashSizeInBytes], UnitRoutingOptions.Membership());
         var signature = mac.SignRequest(Cluster, call.AuthorityPhysicalShardId.ToString("N"),
             call.AuthorityIncarnation.ToString("N"), call.CallerPhysicalShardId.ToString("N"),
             call.CallerIncarnation.ToString("N"), Voter, caller, "638000000000000000", Nonce, encodedCall);

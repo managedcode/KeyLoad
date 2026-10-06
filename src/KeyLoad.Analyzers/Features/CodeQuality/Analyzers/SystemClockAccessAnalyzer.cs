@@ -30,7 +30,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         System.ArgumentNullException.ThrowIfNull(context);
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterOperationAction(AnalyzePropertyReference, OperationKind.PropertyReference);
+        context.RegisterOperationAction(AnalyzePropertyReference, Microsoft.CodeAnalysis.OperationKind.PropertyReference);
     }
 
     private static void AnalyzePropertyReference(OperationAnalysisContext context)

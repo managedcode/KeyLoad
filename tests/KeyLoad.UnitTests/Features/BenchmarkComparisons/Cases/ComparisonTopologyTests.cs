@@ -14,7 +14,7 @@ internal sealed class ComparisonTopologyTests
     public async Task AcBct003DefaultAndLegacyConfigurationSpellingsBindThroughRealConfiguration()
     {
         using var configuration = new ConfigurationManager();
-        await Assert.That(ComparisonOptions.Read(configuration).Topology).IsEqualTo(ComparisonTopology.Standalone);
+        await Assert.That(ComparisonOptions.Read(configuration).Value.Topology).IsEqualTo(ComparisonTopology.Standalone);
 
         foreach (var (configured, expected) in new[]
         {
@@ -29,7 +29,7 @@ internal sealed class ComparisonTopologyTests
         {
             configuration[TopologySetting] = configured;
             var options = ComparisonOptions.Read(configuration);
-            await Assert.That(options.Topology).IsEqualTo(expected);
+            await Assert.That(options.Value.Topology).IsEqualTo(expected);
         }
     }
 

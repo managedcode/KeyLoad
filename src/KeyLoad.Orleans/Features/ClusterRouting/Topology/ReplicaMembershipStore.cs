@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using KeyLoad.Core;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Orleans;
 

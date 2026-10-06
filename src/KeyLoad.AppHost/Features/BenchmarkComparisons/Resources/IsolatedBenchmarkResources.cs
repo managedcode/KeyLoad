@@ -1,6 +1,6 @@
 using System.Globalization;
-using KeyLoad.Comparisons;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

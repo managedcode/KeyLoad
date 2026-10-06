@@ -115,7 +115,7 @@ internal static class IsolatedDatabaseMatrixAssertions
         await Assert.That(row[IsolatedPlanFields.Label]!.GetValue<string>()).IsEqualTo(label);
         await Assert.That(row[IsolatedPlanFields.JobName]!.GetValue<string>()).IsEqualTo(target + " / " + label);
         var scaleProfile = row[IsolatedPlanFields.ScaleProfile]?.GetValue<string>();
-        var vectorProfile = row["vectorProfile"]?.GetValue<string>();
+        var vectorProfile = row[IsolatedPlanFields.VectorProfile]?.GetValue<string>();
         await Assert.That(scaleProfile).IsEqualTo(!preflight && profile.StartsWith("scaled-", StringComparison.Ordinal) ? profile : null);
         await Assert.That(vectorProfile).IsEqualTo(!preflight && profile.StartsWith("vector-", StringComparison.Ordinal) ? profile : null);
         await Assert.That(row[IsolatedPlanFields.ArtifactPrefix]!.GetValue<string>()).IsEqualTo(preflight ? "comparison-preflight-" : "comparison-worker-");

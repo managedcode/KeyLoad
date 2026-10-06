@@ -15,6 +15,8 @@ internal static class NativeSagaTimeoutJournalFence
         DurableJob job, CancellationToken cancellationToken)
     {
         var services = fixture.SiloServices;
+        // ADR-110 authorizes this native journal fence API while it is experimental.
+#pragma warning disable ORLEANSEXP005
         var journalId = JournalId.Create(JobRootSegment, JobShardsSegment, job.ShardId);
         var storage = services.GetRequiredService<IJournalStorageProvider>().CreateStorage(journalId);
         var metadata = await storage.GetMetadataAsync(cancellationToken);
@@ -30,6 +32,7 @@ internal static class NativeSagaTimeoutJournalFence
 
         return new NativeSagaJournalFence(header.JournalName, header.InstanceId, owner, localSilo,
             metadata.ETag ?? string.Empty, header.OwnerGeneration);
+#pragma warning restore ORLEANSEXP005
     }
 }
 

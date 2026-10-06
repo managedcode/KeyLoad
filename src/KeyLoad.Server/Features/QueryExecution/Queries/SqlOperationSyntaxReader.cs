@@ -1,6 +1,6 @@
+using KeyLoad.Features.QueryExecution;
 using KeyLoad.Query;
 using Microsoft.Extensions.Options;
-using KeyLoad.Features.QueryExecution;
 
 namespace KeyLoad.Server;
 

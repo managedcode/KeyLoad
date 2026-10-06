@@ -89,10 +89,10 @@ internal sealed class KurrentStreamOwnershipTests
     [Test]
     public async Task IntensiveAndMaximumValidProfilesStayLazyAndHaveCheckedFiniteCapacity()
     {
-        var intensive = new KurrentStreamOwnership(new ComparisonOptions
-        { Documents = 4_096, Repetitions = 5, Warmup = 256, Operations = 10_000 });
-        var maximum = new KurrentStreamOwnership(new ComparisonOptions
-        { Documents = 1_000_000, Repetitions = 20, Warmup = 100_000, Operations = 1_000_000 });
+        var intensive = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        { Documents = 4_096, Repetitions = 5, Warmup = 256, Operations = 10_000 }));
+        var maximum = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        { Documents = 1_000_000, Repetitions = 20, Warmup = 100_000, Operations = 1_000_000 }));
         await Assert.That(intensive.Capacity).IsEqualTo(55_378);
         await Assert.That(maximum.Capacity).IsEqualTo(23_000_002);
         await Assert.That(intensive.Count).IsEqualTo(0);
@@ -110,7 +110,7 @@ internal sealed class KurrentStreamOwnershipTests
         ];
         foreach (var options in invalid)
         {
-            await Assert.That(() => { _ = new KurrentStreamOwnership(options); }).Throws<ArgumentOutOfRangeException>();
+            await Assert.That(() => { _ = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(options)); }).Throws<ArgumentOutOfRangeException>();
         }
     }
 
@@ -127,8 +127,8 @@ internal sealed class KurrentStreamOwnershipTests
     public async Task ConcurrentDistinctOriginalReservationsRetainEveryAcknowledgedCandidate()
     {
         const int workers = 16;
-        var ledger = new KurrentStreamOwnership(new ComparisonOptions
-        { Documents = 1, TopK = 1, Operations = workers, Warmup = 0, Repetitions = 1 });
+        var ledger = new KurrentStreamOwnership(NativeExecutionPolicyFixture.Workload(new ComparisonOptions
+        { Documents = 1, TopK = 1, Operations = workers, Warmup = 0, Repetitions = 1 }));
         var originals = Enumerable.Range(0, workers).Select(index => Task.Run(() =>
         {
             var name = First + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -143,5 +143,5 @@ internal sealed class KurrentStreamOwnershipTests
     }
 
     private static KurrentStreamOwnership Create()
-        => new(new ComparisonOptions { Documents = 1, TopK = 1, Operations = 1, Warmup = 0, Repetitions = 1 });
+        => new(NativeExecutionPolicyFixture.Workload(new ComparisonOptions { Documents = 1, TopK = 1, Operations = 1, Warmup = 0, Repetitions = 1 }));
 }

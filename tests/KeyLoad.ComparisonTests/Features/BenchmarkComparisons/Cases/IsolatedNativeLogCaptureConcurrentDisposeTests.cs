@@ -1,6 +1,7 @@
 using Aspire.Hosting.ApplicationModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -17,46 +18,51 @@ internal sealed class IsolatedNativeLogCaptureConcurrentDisposeTests
     private const string CaptureDisposeFailureStage = "capture-dispose";
     private const string FixtureDisposeFailureStage = "fixture-dispose";
     private const int MarkerEventId = 2;
-    private static readonly TimeSpan Deadline = TimeSpan.FromSeconds(30);
     private static readonly Action<ILogger, string, Exception?> WriteMarker = LoggerMessage.Define<string>(
         LogLevel.Information, new EventId(MarkerEventId, EventName), MarkerTemplate);
 
     [Test]
     public async Task ConcurrentDisposeWaitsForOriginalCaptureJoin()
     {
-        IsolatedResourceLogCaptureStopFixture? fixture = null;
-        ComparisonTestLogCapture? capture = null;
         var callbackEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releaseCallback = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var failures = new IsolatedNativeTeardownFailures(null);
-        try
-        {
-            using var timeout = new CancellationTokenSource(Deadline);
-            fixture = await IsolatedResourceLogCaptureStopFixture.CreateAsync(
-                ResourceName, ComparisonResourceName, ContainerImage);
-            capture = CreateBlockedCapture(fixture, callbackEntered, releaseCallback);
-            await PublishBlockedLineAsync(fixture, callbackEntered, timeout.Token);
-            await VerifySharedDisposalAsync(capture, releaseCallback, timeout.Token);
-        }
-        catch (Exception failure)
-        {
-            failures.Record(BodyFailureStage, failure);
-        }
-        finally
-        {
-            releaseCallback.TrySetResult();
-            await DisposeCaptureAsync(capture, failures);
-            await DisposeFixtureAsync(fixture, failures);
-        }
-
+        var execution = NativeExecutionPolicyFixture.Harness();
+        var original = RunFixtureAsync(callbackEntered, releaseCallback, failures, execution);
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(() => original,
+            FixtureDisposeFailureStage, failures, execution);
         failures.ThrowIfAny();
     }
 
-    private static ComparisonTestLogCapture CreateBlockedCapture(IsolatedResourceLogCaptureStopFixture fixture,
-        TaskCompletionSource entered, TaskCompletionSource release)
+    private static async Task RunFixtureAsync(TaskCompletionSource entered, TaskCompletionSource release,
+        IsolatedNativeTeardownFailures failures, IOptions<NativeComparisonHarnessOptions> execution)
+    {
+        await using var fixture = await IsolatedResourceLogCaptureStopFixture.CreateAsync(
+            ResourceName, ComparisonResourceName, ContainerImage);
+        var original = RunCaptureAsync(fixture, entered, release, failures, execution);
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(() => original,
+            CaptureDisposeFailureStage, failures, execution);
+    }
+
+    private static async Task RunCaptureAsync(IsolatedResourceLogCaptureStopFixture fixture,
+        TaskCompletionSource entered, TaskCompletionSource release, IsolatedNativeTeardownFailures failures,
+        IOptions<NativeComparisonHarnessOptions> execution)
     {
         Action<string> observer = line => BlockMarker(line, entered, release);
-        return new ComparisonTestLogCapture(fixture.Application, [ResourceName], nativeLineObserver: observer);
+        await using var capture = new ComparisonTestLogCapture(fixture.Application, execution,
+            [ResourceName], nativeLineObserver: observer);
+        using var timeout = new CancellationTokenSource(execution.Value.ConcurrentCaptureDisposalTimeout);
+        async Task RunBodyAsync()
+        {
+            await PublishBlockedLineAsync(fixture, entered, execution, timeout.Token);
+            await VerifySharedDisposalAsync(capture, release, timeout.Token);
+        }
+        try
+        {
+            await IsolatedNativeOriginalTaskSettlement.RunAsync(RunBodyAsync, BodyFailureStage, failures, execution);
+        }
+        finally
+        { release.TrySetResult(); }
     }
 
     private static void BlockMarker(string line, TaskCompletionSource entered, TaskCompletionSource release)
@@ -69,26 +75,26 @@ internal sealed class IsolatedNativeLogCaptureConcurrentDisposeTests
     }
 
     private static async Task PublishBlockedLineAsync(IsolatedResourceLogCaptureStopFixture fixture,
-        TaskCompletionSource callbackEntered, CancellationToken token)
+        TaskCompletionSource callbackEntered, IOptions<NativeComparisonHarnessOptions> execution, CancellationToken token)
     {
-        var logger = fixture.Application.Services.GetRequiredService<ResourceLoggerService>();
-        var notifications = fixture.Application.Services.GetRequiredService<ResourceNotificationService>();
-        var subscriber = IsolatedResourceLogSubscriberScopeFactory.Create(logger.WatchAnySubscribersAsync(token), token);
-        Exception? primary = null;
-        try
+        var failures = new IsolatedNativeTeardownFailures(null);
+        async Task PublishScopeAsync()
         {
-            await ActivateAndObserveAsync(notifications, fixture.Resource, subscriber, token);
-            await ActivateAndObserveAsync(notifications, fixture.ComparisonResource, subscriber, token);
-            WriteMarker(logger.GetLogger(fixture.ComparisonResource), Marker, null);
-            await IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(callbackEntered.Task, token);
+            var logger = fixture.Application.Services.GetRequiredService<ResourceLoggerService>();
+            var notifications = fixture.Application.Services.GetRequiredService<ResourceNotificationService>();
+            await using var subscriber = IsolatedResourceLogSubscriberScopeFactory.Create(
+                logger.WatchAnySubscribersAsync(token), token);
+            async Task PublishOwnedAsync()
+            {
+                await ActivateAndObserveAsync(notifications, fixture.Resource, subscriber, token);
+                await ActivateAndObserveAsync(notifications, fixture.ComparisonResource, subscriber, token);
+                WriteMarker(logger.GetLogger(fixture.ComparisonResource), Marker, null);
+                await IsolatedResourceLogCaptureStopSupport.AwaitBoundedAndObserveAsync(callbackEntered.Task, token);
+            }
+            await IsolatedNativeOriginalTaskSettlement.RunAsync(PublishOwnedAsync, BodyFailureStage, failures, execution);
         }
-        catch (Exception failure)
-        {
-            primary = failure;
-        }
-        var failures = new IsolatedNativeTeardownFailures(primary);
-        try { await subscriber.DisposeAsync(); }
-        catch (Exception failure) { failures.Record(SubscriberDisposeFailureStage, failure); }
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(PublishScopeAsync,
+            SubscriberDisposeFailureStage, failures, execution);
         failures.ThrowIfAny();
     }
 
@@ -118,19 +124,4 @@ internal sealed class IsolatedNativeLogCaptureConcurrentDisposeTests
             Task.WhenAll(first, second), token);
     }
 
-    private static async Task DisposeCaptureAsync(ComparisonTestLogCapture? capture,
-        IsolatedNativeTeardownFailures failures)
-    {
-        if (capture is null) { return; }
-        try { await capture.DisposeAsync(); }
-        catch (Exception failure) { failures.Record(CaptureDisposeFailureStage, failure); }
-    }
-
-    private static async Task DisposeFixtureAsync(IsolatedResourceLogCaptureStopFixture? fixture,
-        IsolatedNativeTeardownFailures failures)
-    {
-        if (fixture is null) { return; }
-        try { await fixture.DisposeAsync(); }
-        catch (Exception failure) { failures.Record(FixtureDisposeFailureStage, failure); }
-    }
 }

@@ -7,6 +7,12 @@ namespace KeyLoad.UnitTests;
 /// <summary>Explicit validated native options for actual Orleans routing regression fixtures.</summary>
 internal static class UnitRoutingOptions
 {
+    internal static IOptions<ReplicaPeerOptions> Peers(ReplicaConfiguration configuration, ReplicaPeerOptions value)
+    {
+        value.Validate(configuration);
+        return Options.Create(value);
+    }
+
     internal static IOptions<GrainRoutingOptions> Routing(GrainRoutingOptions? configured = null)
     {
         var value = configured ?? new GrainRoutingOptions();

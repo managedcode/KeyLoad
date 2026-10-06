@@ -52,7 +52,7 @@ internal sealed class BlobGrainRoutingTests
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
-        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
+        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
         var keys = new[]
         {
             (BlobAgentCases.Partition with { TransactionDomainId = OtherDomain }).AtomicPartitionId,
@@ -71,7 +71,7 @@ internal sealed class BlobGrainRoutingTests
                     TestContext.Current!.Execution.CancellationToken)) ?? throw new InvalidOperationException();
                 await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             }
-            await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Partition, BlobAgentCases.Principal, BlobAgentCases.CommandId)).IsNull();
+            await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, BlobAgentCases.Principal, BlobAgentCases.CommandId)).IsNull();
         }
     }
 

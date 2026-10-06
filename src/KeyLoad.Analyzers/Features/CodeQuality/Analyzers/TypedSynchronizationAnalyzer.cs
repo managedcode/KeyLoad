@@ -39,10 +39,10 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
             var grainType = GetMetadataType(startContext.Compilation, OrleansMetadataNames.Grain);
             startContext.RegisterOperationAction(
                 operationContext => AnalyzeLock(operationContext, lockType, grainType),
-                OperationKind.Lock);
+                Microsoft.CodeAnalysis.OperationKind.Lock);
             startContext.RegisterOperationAction(
                 operationContext => AnalyzeInvocation(operationContext, monitorType, lockType, grainType),
-                OperationKind.Invocation);
+                Microsoft.CodeAnalysis.OperationKind.Invocation);
         });
     }
 

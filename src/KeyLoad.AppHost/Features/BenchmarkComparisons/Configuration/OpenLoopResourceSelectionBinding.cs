@@ -19,7 +19,8 @@ internal static class OpenLoopResourceSelectionBinding
         var proofText = configuration[TestSuiteProtocol.OpenLoopCancellationProofSetting];
         if (selection.OpenLoopRate is not { } rate)
         {
-            if (proofText is not null) { throw new InvalidOperationException(InvalidSelection); }
+            if (proofText is not null)
+            { throw new InvalidOperationException(InvalidSelection); }
             return null;
         }
         if (proofText is not null && proofText != SelectedProof

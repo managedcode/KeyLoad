@@ -20,7 +20,6 @@ internal static class IsolatedKeyLoadPublicRegressionProtocol
     internal const string BlobMetadata = "keyload_blobs_metadata";
     internal const string BlobRange = "keyload_blobs_read_range";
     internal const string Request = "request";
-    internal const int CleanupSeconds = 30;
     private const string Argument = "args";
     private const string NodePrefix = "node";
     private const string HttpEndpoint = "http";

@@ -1,9 +1,10 @@
-using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
-using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Replication;
+using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests;
@@ -106,5 +107,11 @@ internal static class RecoveryExecutionOptions
     {
         configured.Validate();
         return Options.Create(configured);
+    }
+    internal static IOptions<ServerNodeUpgradeExecutionOptions> NodeUpgrade()
+    {
+        var settings = new ServerNodeUpgradeExecutionOptions();
+        settings.Validate();
+        return Options.Create(settings);
     }
 }

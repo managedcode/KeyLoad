@@ -58,7 +58,7 @@ internal sealed class ReplicaTransferProcessRecoveryTests
             node.Snapshots.Recover();
             await ReplicaProcessAssertions.SnapshotAsync(node, trial, 4);
             await ReplicaProcessAssertions.ReceiptAsync(node, 4);
-            await Assert.That(OutcomeStoreOracle.Read(node.Store, ReplicaCrashModel.Operation(5))).IsNull();
+            await Assert.That(OutcomeStoreOracle.Read(node.Canonical, ReplicaCrashModel.Operation(5))).IsNull();
         }
         using var reopened = ReplicaCrashNode.OpenTarget(trial.DirectoryPath, trial.Incarnation);
         await using var recovered = new ReplicaMaterializer(reopened.Database, reopened.Log, reopened.Snapshots, RecoveryExecutionOptions.Replica());

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
+using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 

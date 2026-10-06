@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using Npgsql;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 

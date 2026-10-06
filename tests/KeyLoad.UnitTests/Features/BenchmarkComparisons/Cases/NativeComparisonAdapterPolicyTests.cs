@@ -14,6 +14,12 @@ internal sealed class NativeComparisonAdapterPolicyTests
     [Arguments(nameof(NativeComparisonExecutionOptions.ReportFileBufferBytes), 65_536)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleCancellationTimeoutMilliseconds), 2000)]
     [Arguments(nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize), 16)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.ReportWriterBufferCharacters), 16_384)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopEvidenceBufferBytes), 16_384)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopProofBufferBytes), 8192)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopControlFileBufferBytes), 11)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval), 4096)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize), 256)]
     public async Task NativeIntegerAdapterLimitsValidateInclusiveCeilingsAsync(string property, int maximum)
     {
         foreach (var accepted in new[] { maximum, 1 })
@@ -24,6 +30,26 @@ internal sealed class NativeComparisonAdapterPolicyTests
         }
 
         foreach (var rejected in new[] { 0, -1, maximum + 1 })
+        {
+            var options = UnitBenchmarkOptions.Native();
+            SetInteger(options.Value, property, rejected);
+            await AssertRejectedAsync(options);
+        }
+    }
+
+    [Test]
+    [Arguments(nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval), 4096)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize), 256)]
+    public async Task NativeVectorCadencesRequirePowerOfTwoBelowTheirCeilingsAsync(string property, int maximum)
+    {
+        foreach (var accepted in new[] { 2, maximum / 2 })
+        {
+            var options = UnitBenchmarkOptions.Native();
+            SetInteger(options.Value, property, accepted);
+            await Assert.That(NativeComparisonExecutionOptions.Require(options)).IsEqualTo(options);
+        }
+
+        foreach (var rejected in new[] { 3, maximum - 1 })
         {
             var options = UnitBenchmarkOptions.Native();
             SetInteger(options.Value, property, rejected);
@@ -105,6 +131,34 @@ internal sealed class NativeComparisonAdapterPolicyTests
                 break;
             case nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize):
                 options.TimescaleMaximumPoolSize = value;
+                break;
+            default:
+                SetReportOrVectorInteger(options, property, value);
+                break;
+        }
+    }
+
+    private static void SetReportOrVectorInteger(NativeComparisonExecutionOptions options, string property, int value)
+    {
+        switch (property)
+        {
+            case nameof(NativeComparisonExecutionOptions.ReportWriterBufferCharacters):
+                options.ReportWriterBufferCharacters = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.OpenLoopEvidenceBufferBytes):
+                options.OpenLoopEvidenceBufferBytes = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.OpenLoopProofBufferBytes):
+                options.OpenLoopProofBufferBytes = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.OpenLoopControlFileBufferBytes):
+                options.OpenLoopControlFileBufferBytes = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval):
+                options.VectorCancellationCheckInterval = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize):
+                options.VectorYieldBatchSize = value;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(property), property, null);

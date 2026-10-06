@@ -36,7 +36,10 @@ internal static class EpochPriorSourceProbe
 
     internal static async Task<bool> TryRunAsync(string[] args)
     {
-        if (args.Length != 1 || args[0] is not (Mode or Native6Mode))
+        const int EmptyArgsLength = 1;
+        const int ArgsFirstIndex = 0;
+
+        if (args.Length != EmptyArgsLength || args[ArgsFirstIndex] is not (Mode or Native6Mode))
         {
             return false;
         }
@@ -51,13 +54,13 @@ internal static class EpochPriorSourceProbe
             EpochPriorSourceReply reply;
             try
             {
-                reply = await ExecuteAsync(request, args[0] == Mode ? ExpectedDataEpoch : Native6DataEpoch);
+                reply = await ExecuteAsync(request, args[ArgsFirstIndex] == Mode ? ExpectedDataEpoch : Native6DataEpoch);
             }
             catch (KeyLoadException failure)
             {
                 Environment.ExitCode = RejectedExitCode;
                 reply = EpochPriorSourceReply.Rejected(failure.Code) with
-                { SourceRevision = SourceRevisionForEpoch(args[0] == Mode ? ExpectedDataEpoch : Native6DataEpoch) };
+                { SourceRevision = SourceRevisionForEpoch(args[ArgsFirstIndex] == Mode ? ExpectedDataEpoch : Native6DataEpoch) };
             }
             await output.WriteLineAsync(JsonSerializer.Serialize(reply, JsonOptions));
             await output.FlushAsync();
@@ -146,9 +149,11 @@ internal static class EpochPriorSourceProbe
 
     private static EpochPriorSourceReply CreateOutcomeFrame(ZoneTreeStore store, EpochPriorSourceRequest request)
     {
+        const int BytesLengthEmptyCount = 0;
+
         var commandId = request.OutcomeCommandId!.Value;
         var bytes = EpochUpgradeFixture.CreateOutcomeFrame(store, commandId);
-        if (bytes.Length is <= 0 or > MaximumOutcomeFrameBytes)
+        if (bytes.Length is <= BytesLengthEmptyCount or > MaximumOutcomeFrameBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidProbe);
         }
@@ -189,6 +194,11 @@ internal sealed record EpochPriorSourceReply(string SourceRevision, int DataEpoc
     long AppliedPosition, Guid NodeId, Guid Incarnation, long ReadGeneration, bool DispatchPaused,
     string SigningKeySha256, DurabilityProfile Durability, string? ErrorCode = null)
 {
+    private const int RejectedDataEpochEmptyCount = 0;
+    private const int RejectedPositionEmptyCount = 0;
+    private const int RejectedAppliedPositionEmptyCount = 0;
+    private const int RejectedReadGenerationEmptyCount = 0;
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? OutcomeFrameBase64 { get; init; }
 
@@ -204,33 +214,36 @@ internal sealed record EpochPriorSourceReply(string SourceRevision, int DataEpoc
             Convert.ToHexStringLower(SHA256.HashData(identity.SigningKey.Span)), identity.Durability);
 
     internal static EpochPriorSourceReply Rejected(ErrorCode code)
-        => new(EpochPriorSourceProbe.SourceRevision, 0, 0, 0, Guid.Empty, Guid.Empty, 0, false,
+        => new(EpochPriorSourceProbe.SourceRevision, RejectedDataEpochEmptyCount, RejectedPositionEmptyCount, RejectedAppliedPositionEmptyCount, Guid.Empty, Guid.Empty, RejectedReadGenerationEmptyCount, false,
             string.Empty, DurabilityProfile.ProcessDurable, code.ToString());
 }
 
 internal static class EpochPriorProbeInput
 {
-    private const int ChunkCharacters = 256;
     private const string InvalidInput = "The prior-executable probe request is invalid or exceeds its bound.";
 
     internal static async Task<EpochPriorSourceRequest> ReadAsync(int maximum, JsonSerializerOptions options)
     {
+        const int LengthInitialValue = 0;
+        const int EmptyCount = 0;
+        const int StartEmptyCount = 0;
+
         var retained = new char[maximum];
-        var chunk = new char[ChunkCharacters];
-        var length = 0;
+        var chunk = new char[CrashExecutionOptions.Child().Value.ProfileReadChunkCharacters];
+        var length = LengthInitialValue;
         while (true)
         {
             var count = await Console.In.ReadAsync(chunk.AsMemory());
-            if (count == 0)
+            if (count == EmptyCount)
             {
-                return JsonSerializer.Deserialize<EpochPriorSourceRequest>(retained.AsSpan(0, length), options)
+                return JsonSerializer.Deserialize<EpochPriorSourceRequest>(retained.AsSpan(StartEmptyCount, length), options)
                     ?? throw new InvalidDataException(InvalidInput);
             }
             if (count > maximum - length)
             {
                 throw new InvalidDataException(InvalidInput);
             }
-            chunk.AsSpan(0, count).CopyTo(retained.AsSpan(length));
+            chunk.AsSpan(StartEmptyCount, count).CopyTo(retained.AsSpan(length));
             length += count;
         }
     }

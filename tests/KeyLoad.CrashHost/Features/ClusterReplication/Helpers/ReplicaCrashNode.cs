@@ -4,6 +4,7 @@ using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost;
 
@@ -22,10 +23,11 @@ internal sealed class ReplicaCrashNode : IDisposable
     private const string Obsolete = "replica-crash-obsolete";
     private const int CredentialBytes = 32;
     private readonly ZoneTreeStore replicaStore;
+    private readonly IOptions<ReplicaConfiguration> configurationOptions;
 
     private ReplicaCrashNode(string directory, string voter, Guid incarnation, Action<ReplicaCrashBoundary>? observer)
     {
-        Configuration = new(voter, [VoterA, VoterB, VoterC], directory, incarnation);
+        configurationOptions = CrashExecutionOptions.Configuration(voter, [VoterA, VoterB, VoterC], directory, incarnation);
         Canonical = new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
         try
         {
@@ -33,9 +35,9 @@ internal sealed class ReplicaCrashNode : IDisposable
             try
             {
                 Database = new(Canonical, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.TimeSeriesExecution());
-                Log = new(replicaStore, CrashExecutionOptions.Configuration(Configuration), observer, canonicalDatabase: Database);
+                Log = new(replicaStore, configurationOptions, observer, canonicalDatabase: Database);
                 Bootstrap();
-                Snapshots = new(Canonical, Log, CrashExecutionOptions.Configuration(Configuration), CrashExecutionOptions.Replica(), observer);
+                Snapshots = new(Canonical, Log, configurationOptions, CrashExecutionOptions.Replica(), observer);
             }
             catch (Exception)
             {
@@ -51,7 +53,7 @@ internal sealed class ReplicaCrashNode : IDisposable
     }
 
     /// <summary>The configured fixed RF3 voter set and stable cluster incarnation.</summary>
-    public ReplicaConfiguration Configuration { get; }
+    public ReplicaConfiguration Configuration => configurationOptions.Value;
     /// <summary>The node-owned canonical storage engine.</summary>
     public ZoneTreeStore Canonical { get; }
     /// <summary>The real caller-visible database engine.</summary>
@@ -97,14 +99,18 @@ internal sealed class ReplicaCrashNode : IDisposable
     /// <param name="cut">The final deterministic operation to append, commit and apply.</param>
     public void Populate(int cut)
     {
-        Log.SaveTermAndVote(1, null);
-        for (var index = 1; index <= cut; index++)
+        const int SeedTerm = 1;
+        const int FirstSeedOperation = 1;
+        const int ConfigureResourceOperation = 1;
+
+        Log.SaveTermAndVote(SeedTerm, null);
+        for (var index = FirstSeedOperation; index <= cut; index++)
         {
             var operation = Database.NormalizeOperation(ReplicaCrashModel.Operation(index));
-            Log.Append([new(index, 1, operation)]);
+            Log.Append([new(index, SeedTerm, operation)]);
             Log.Commit(index);
             var result = Database.Apply(operation, index);
-            if (index == 1)
+            if (index == ConfigureResourceOperation)
             {
                 result.Get<ResourceDefinition>();
             }

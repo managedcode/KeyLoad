@@ -33,8 +33,8 @@ internal sealed class RealComparisonSuite
         var builder = await CreateBuilderAsync(root, output, options, timeout.Token);
         ConfigureLogging(builder);
         await using var app = await builder.BuildAsync(timeout.Token);
-        await using var logCapture = new ComparisonTestLogCapture(app);
-        await using var diagnostics = new ComparisonResourceDiagnostics(app.ResourceNotifications);
+        await using var logCapture = new ComparisonTestLogCapture(app, NativeExecutionPolicyFixture.Harness());
+        await using var diagnostics = new ComparisonResourceDiagnostics(app.ResourceNotifications, NativeExecutionPolicyFixture.Harness());
         diagnostics.Start();
         try
         {

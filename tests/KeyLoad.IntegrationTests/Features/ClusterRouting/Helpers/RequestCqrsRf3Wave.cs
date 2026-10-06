@@ -2,7 +2,6 @@ using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Orleans;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -131,37 +130,30 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
         RequestCqrsRf3Diagnostics? diagnostics, List<Exception> failures,
         RequestCqrsLifecycleEvidence? lifecycleEvidence = null)
     {
-        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
-        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures,
-            FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppStop).ConfigureAwait(false);
-        if (diagnostics is not null)
+        Action<RequestCqrsLifecycleStage>? failureObserver = lifecycleEvidence is null
+            ? null : lifecycleEvidence.RecordOwnerFailure;
+        async Task CompleteOwnedAsync()
         {
-            await RequestCqrsLifecycleFailureObserver.ObserveAsync(
-                () => diagnostics.CompleteAndDrainAsync(deadline.Token), failures,
-                FailureObserver,
-                RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain).ConfigureAwait(false);
+            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppStop).ConfigureAwait(false);
+            if (diagnostics is not null)
+            {
+                await RequestCqrsLifecycleFailureObserver.ObserveAsync(
+                    () => diagnostics.CompleteAndDrainAsync(deadline.Token), failures,
+                    failureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsDrain).ConfigureAwait(false);
+            }
+            await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppDispose).ConfigureAwait(false);
         }
-        await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures,
-            FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveAppDispose)
-            .ConfigureAwait(false);
-        try
-        { deadline.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, FailureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
-        }
+        await RequestCqrsLifecycleFailureObserver.ObserveAsync(CompleteOwnedAsync, failures, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose).ConfigureAwait(false);
         var ownedDiagnostics = diagnostics;
         if (ownedDiagnostics is not null && failures.Count > 0)
         {
             RequestCqrsLifecycleFailureObserver.Observe(
                 () => ownedDiagnostics.SaveFailureEvidence(failures[0]), failures,
-                FailureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
+                failureObserver, RequestCqrsLifecycleStage.AuthorityWaveDiagnosticsArtifact);
         }
     }
 

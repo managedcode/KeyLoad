@@ -41,13 +41,15 @@ internal static class C1OutcomeInspectionRequestValidation
 
     private static bool ValidPrincipal(string principalId)
     {
+        const int GetByteCountEmptyCount = 0;
+
         if (string.IsNullOrEmpty(principalId))
         {
             return false;
         }
         try
         {
-            return StrictUtf8.GetByteCount(principalId) is > 0 and <= C1OutcomeInspectionProtocol.MaximumPrincipalBytes;
+            return StrictUtf8.GetByteCount(principalId) is > GetByteCountEmptyCount and <= C1OutcomeInspectionProtocol.MaximumPrincipalBytes;
         }
         catch (EncoderFallbackException)
         {

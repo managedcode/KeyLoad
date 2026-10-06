@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 

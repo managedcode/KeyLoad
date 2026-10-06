@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.Search;
 

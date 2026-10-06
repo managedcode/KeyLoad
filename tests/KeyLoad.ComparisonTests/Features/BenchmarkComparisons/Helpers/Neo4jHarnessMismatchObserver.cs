@@ -11,7 +11,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
     BenchmarkDataset dataset,
     CancellationToken runToken) : IAsyncDisposable
 {
-    private const int MutationTimeoutSeconds = 15;
+    private static TimeSpan MutationTimeout => NativeExecutionPolicyFixture.Harness().Value.Neo4jMutationTimeout;
     private const string RestoreFailureMessage = "Neo4jHarnessSeedRestoreMismatch";
     private const string HttpStatusPrefix = ":HTTP";
     private readonly HttpClient client = Neo4jHarnessQueryClient.CreateClient(endpoint, password);
@@ -64,7 +64,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
 
     private void UpdateSeedJson(string value, CancellationToken cancellationToken, bool restoreAll = false)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(MutationTimeoutSeconds));
+        using var timeout = new CancellationTokenSource(MutationTimeout);
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var documents = seedDocuments.Select(document => new { document.Id, json = restoreAll ? document.Json : value }).ToArray();
         var statement = Neo4jHarnessStatements.UpdateDocuments(label);
@@ -73,7 +73,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
 
     private void VerifyStoredSeeds(CancellationToken cancellationToken)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(MutationTimeoutSeconds));
+        using var timeout = new CancellationTokenSource(MutationTimeout);
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var statement = Neo4jHarnessStatements.ReadDocuments(label);
         using var document = SendStatement(statement, new { ids = seedDocuments.Select(item => item.Id).ToArray() }, bounded.Token);
@@ -90,7 +90,7 @@ internal sealed class Neo4jHarnessMismatchObserver(
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, Neo4jHarnessConstants.QueryPath)
         {
-            Content = JsonContent.Create(new { statement, parameters, maxExecutionTime = MutationTimeoutSeconds })
+            Content = JsonContent.Create(new { statement, parameters, maxExecutionTime = (int)MutationTimeout.TotalSeconds })
         };
         using var response = client.Send(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         using var stream = response.Content.ReadAsStream(cancellationToken);

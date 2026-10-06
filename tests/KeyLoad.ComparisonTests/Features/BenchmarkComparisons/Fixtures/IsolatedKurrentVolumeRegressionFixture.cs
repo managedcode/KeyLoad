@@ -3,16 +3,18 @@ using System.Runtime.ExceptionServices;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 using KurrentEventData = KurrentDB.Client.EventData;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, ComparisonOptions options)
+internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, ComparisonOptions options,
+    IOptions<NativeComparisonHarnessOptions> harnessOptions)
 {
     private const int CanonicalCount = 55_378;
     private readonly Guid scope = Guid.NewGuid();
     private readonly List<KurrentDBClient> clients = [];
-    private readonly KurrentStreamOwnership ownership = new(options);
+    private readonly KurrentStreamOwnership ownership = new(NativeExecutionPolicyFixture.Workload(options));
     private readonly KurrentEventData[] expectedEvents = new KurrentEventData[CanonicalCount];
     private KurrentDBClient? writer;
     private string[] streams = [];
@@ -43,7 +45,7 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
         foreignBefore = await IsolatedKurrentOwnershipRegressionNative.ReadOriginalAsync(CreateClient(), foreign, token);
         streams = Enumerable.Range(0, ownership.Capacity)
             .Select(index => Prefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
-        await IsolatedKurrentVolumeRegressionWorkers.RunAsync(streams.Length, SeedOneAsync, token);
+        await IsolatedKurrentVolumeRegressionWorkers.RunAsync(streams.Length, SeedOneAsync, harnessOptions, token);
         await Assert.That(ownership.SnapshotAcknowledged().Length).IsEqualTo(ownership.Capacity);
     }
 
@@ -55,19 +57,19 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
         await Assert.That(acknowledged.ToHashSet(StringComparer.Ordinal).SetEquals(streams)).IsTrue();
         var preDeleteReader = CreateClient();
         await IsolatedKurrentVolumeRegressionWorkers.RunAsync(streams.Length,
-            (index, workerToken) => RequireOriginalAsync(preDeleteReader, index, workerToken), token);
+            (index, workerToken) => RequireOriginalAsync(preDeleteReader, index, workerToken), harnessOptions, token);
         var originalClients = clients.ToArray();
         clients.Clear();
         cleanupAttempted = true;
         var cleanupWriter = writer;
         writer = null;
-        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], CancellationToken.None);
+        var diagnostic = await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, acknowledged, originalClients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
         await IsolatedKurrentVolumeRegressionNative.RequireCompleteAsync(diagnostic, ownership.Capacity);
         writer = null;
         var reader = CreateClient();
         await IsolatedKurrentVolumeRegressionWorkers.RunAsync(acknowledged.Length,
             (index, workerToken) => IsolatedKurrentVolumeRegressionNative.RequireDeletedAsync(reader,
-                acknowledged[index], workerToken), token);
+                acknowledged[index], workerToken), harnessOptions, token);
         await RequireForeignUnchangedAsync(reader, token);
     }
 
@@ -115,7 +117,7 @@ internal sealed class IsolatedKurrentVolumeRegressionFixture(Uri endpoint, Compa
     {
         var ownedClients = clients.ToArray();
         clients.Clear();
-        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], CancellationToken.None);
+        return await KurrentOwnedStreamCleanup.RunAsync(cleanupWriter, streamsToDelete, ownedClients, [], NativeExecutionPolicyFixture.Lifecycle(), CancellationToken.None);
     }
 
     private async Task SeedOneAsync(int index, CancellationToken token)

@@ -1,5 +1,5 @@
-using KeyLoad.Comparisons;
 using KeyLoad.Client;
+using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 

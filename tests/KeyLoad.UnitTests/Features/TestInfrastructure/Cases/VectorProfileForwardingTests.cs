@@ -31,7 +31,7 @@ internal sealed class VectorProfileForwardingTests
 
     [Test]
     [Arguments("KeyLoadTests:Suite", "unit")]
-    [Arguments("KeyLoadTests:Filter", "/*/*/ComparisonTests/*")]
+    [Arguments(TestSuiteProtocol.FilterSetting, "/*/*/ComparisonTests/*")]
     [Arguments("KeyLoadTests:TimeoutMinutes", "60")]
     [Arguments("Benchmarks:NodeCount", "4")]
     [Arguments("Benchmarks:Scenario", "PointRead")]
@@ -62,7 +62,7 @@ internal sealed class VectorProfileForwardingTests
     {
         var configuration = new ConfigurationManager();
         configuration[TestSuiteSettings.SuiteSetting] = "comparison";
-        configuration["KeyLoadTests:Filter"] = "/*/*/IsolatedNativeComparisonTests/*";
+        configuration[TestSuiteProtocol.FilterSetting] = "/*/*/IsolatedNativeComparisonTests/*";
         configuration[TestSuiteSettings.VectorProfileSetting] = Profile;
         configuration[ComparisonWorkerSelection.TargetSetting] = "Qdrant";
         configuration[ComparisonWorkerSelection.NodeCountSetting] = "3";

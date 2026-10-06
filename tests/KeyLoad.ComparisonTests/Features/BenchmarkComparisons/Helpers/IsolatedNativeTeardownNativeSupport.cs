@@ -1,4 +1,5 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -16,7 +17,7 @@ internal static class IsolatedNativeTeardownNativeSupport
         ComparisonProgressNativeFixture fixture, CancellationTokenSource owner)
     {
         var original = AspireResourceCompletion.WaitForExitAsync(fixture.Application, IsolatedResourceTopologyFixture.RunnerName, owner.Token);
-        owner.Cancel();
+        await owner.CancelAsync();
         try
         { await original; }
         catch (OperationCanceledException failure) { return failure; }
@@ -26,7 +27,8 @@ internal static class IsolatedNativeTeardownNativeSupport
     internal static Task CompleteAsync(ComparisonProgressNativeFixture fixture, string output,
         string evidence, string absentDataRoot, Exception? primary)
         => IsolatedNativeTeardown.CompleteAsync(fixture.Application, fixture.Capture, output, evidence,
-            absentDataRoot, [fixture.Runner, fixture.Node], new IsolatedNativeOwnedWork(), primary);
+            absentDataRoot, [fixture.Runner, fixture.Node],
+            new IsolatedNativeOwnedWork(NativeExecutionPolicyFixture.Harness()), primary);
 
     internal static void CreateRawCopyConflict(string output, string evidence)
     {
@@ -34,5 +36,42 @@ internal static class IsolatedNativeTeardownNativeSupport
         Directory.CreateDirectory(evidence);
         File.WriteAllText(Path.Combine(output, WorkerFile), "source-marker");
         File.WriteAllText(Path.Combine(evidence, WorkerFile), "existing-marker");
+    }
+
+    internal static async Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
+    {
+        var initiation = StartAsync(operation);
+        var failure = await OpenLoopFailure.ObserveAsync(initiation);
+        if (failure is not null)
+        {
+            AddOriginalFailures(initiation, failure, failures);
+            return;
+        }
+        var original = await initiation;
+        failure = await OpenLoopFailure.ObserveAsync(original);
+        if (failure is not null)
+        { AddOriginalFailures(original, failure, failures); }
+    }
+
+    internal static void AddOriginalFailures(Task original, Exception observed, List<Exception> failures)
+    {
+        AddDistinct(observed, failures);
+        if (original.Exception is { } aggregate)
+        {
+            foreach (var failure in aggregate.InnerExceptions)
+            { AddDistinct(failure, failures); }
+        }
+    }
+
+    private static void AddDistinct(Exception failure, List<Exception> failures)
+    {
+        if (!failures.Any(existing => ReferenceEquals(existing, failure)))
+        { failures.Add(failure); }
+    }
+
+    private static async Task<Task> StartAsync(Func<Task> operation)
+    {
+        await Task.CompletedTask;
+        return operation();
     }
 }

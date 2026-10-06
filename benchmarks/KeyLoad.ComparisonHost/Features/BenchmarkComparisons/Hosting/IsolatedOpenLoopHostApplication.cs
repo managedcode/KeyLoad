@@ -23,7 +23,7 @@ internal static class IsolatedOpenLoopHostApplication
             openLoop.ExecutionOptions, owner.ExecutionOptions, Console.WriteLine);
         var report = await runner.RunAsync(target, settings.Worker, settings.Storage, cancellationToken)
             .ConfigureAwait(false);
-        _ = await OpenLoopEvidenceWriter.WriteAsync(settings.OutputDirectory, report, cancellationToken)
+        _ = await OpenLoopEvidenceWriter.WriteAsync(settings.OutputDirectory, report, owner.ExecutionOptions, cancellationToken)
             .ConfigureAwait(false);
         return HasFailedMeasurement(report)
             ? ComparisonHostConstants.FailedExitCode : ComparisonHostConstants.SuccessfulExitCode;

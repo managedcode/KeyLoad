@@ -1,8 +1,8 @@
-using KeyLoad.AppHost.Hosting;
 using System.Globalization;
 using System.Text;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
+using KeyLoad.AppHost.Hosting;
 
 internal static class ClusterResources
 {

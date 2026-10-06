@@ -30,7 +30,7 @@ internal static class Neo4jHarnessFailureCollector
 
     public static async Task AttemptBoundedAsync(Func<CancellationToken, Task> operation, List<Exception> failures)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        using var timeout = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.Neo4jFailureCleanupTimeout);
         await AttemptAsync(() => operation(timeout.Token), failures);
     }
 

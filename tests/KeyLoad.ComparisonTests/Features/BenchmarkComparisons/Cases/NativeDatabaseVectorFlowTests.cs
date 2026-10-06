@@ -19,7 +19,7 @@ internal sealed class NativeDatabaseVectorFlowTests
             ? new SurrealDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions)
             : new HelixDbVectorTarget(client, fixture.Image, Guid.NewGuid().ToString(), NativeDatabaseFlowFixture.ExecutionOptions);
         var profile = VectorComparisonProfile.Parse("vector-100k-" + method + "-plain-c16");
-        var corpus = new VectorComparisonCorpus(profile);
+        var corpus = new VectorComparisonCorpus(profile, NativeDatabaseFlowFixture.ExecutionOptions);
         await Assert.That(await target.IngestAsync(Seed(corpus, token), token)).IsEqualTo(256);
         var receipt = await target.BuildIndexAsync(profile, token);
         await Assert.That(receipt.IndexKind).IsEqualTo(profile.IndexKind);
@@ -31,10 +31,10 @@ internal sealed class NativeDatabaseVectorFlowTests
         }
 
         await Assert.That(readback.Count).IsEqualTo(256);
-        await Assert.That(readback.All(row => row.Dimensions == profile.Dimensions && row.VectorSha256 == VectorComparisonCorpus.HashVector(corpus.Document(row.Number).Embedding.Span))).IsTrue();
+        await Assert.That(readback.All(row => row.Dimensions == profile.Dimensions && row.VectorSha256 == VectorComparisonCorpus.HashVector(corpus.Create(row.Number).Embedding.Span))).IsTrue();
         foreach (var mode in new[] { VectorQueryMode.Plain, VectorQueryMode.Filtered, VectorQueryMode.Mixed })
         {
-            var actual = await target.SearchAsync(corpus.Document(0).Embedding, 2, mode, token);
+            var actual = await target.SearchAsync(corpus.Create(0).Embedding, 2, mode, token);
             await Assert.That(actual.Count).IsEqualTo(2);
             if (method == "exact")
             {
@@ -42,20 +42,20 @@ internal sealed class NativeDatabaseVectorFlowTests
             }
             await Assert.That(actual.All(row => Eligible(int.Parse(row.Id.AsSpan(1), System.Globalization.CultureInfo.InvariantCulture), mode))).IsTrue();
             await Assert.That(actual.Select(row => row.Id).Distinct().Count()).IsEqualTo(2);
-            await Assert.That(await target.ExplainAsync(corpus.Document(0).Embedding, mode, token)).IsNotEmpty();
+            await Assert.That(await target.ExplainAsync(corpus.Create(0).Embedding, mode, token)).IsNotEmpty();
         }
-        var original = corpus.Document(19);
-        var update = new VectorUpdate(19, original.Id, corpus.Document(31).Embedding);
+        var original = corpus.Create(19);
+        var update = new VectorUpdate(19, original.Id, corpus.Create(31).Embedding);
         await target.UpdateAsync(update, token);
         await Assert.That((await target.ReadAsync(original.Id, token))!.VectorSha256).IsEqualTo(VectorComparisonCorpus.HashVector(update.Embedding.Span));
-        var missing = corpus.Document(256);
+        var missing = corpus.Create(256);
         await Assert.That(await target.ReadAsync(missing.Id, token)).IsNull();
         await Assert.That(async () => await target.UpdateAsync(new VectorUpdate(missing.Number, missing.Id, original.Embedding), token)).Throws<ComparisonFailureException>();
         await Assert.That(await target.ReadAsync(missing.Id, token)).IsNull();
     }
     private static IEnumerable<string> ExactIds(VectorComparisonCorpus corpus, VectorQueryMode mode)
-        => Enumerable.Range(0, 256).Where(number => Eligible(number, mode)).Select(number => corpus.Document(number))
-            .OrderBy(document => CosineDistance(corpus.Document(0).Embedding.Span, document.Embedding.Span))
+        => Enumerable.Range(0, 256).Where(number => Eligible(number, mode)).Select(number => corpus.Create(number))
+            .OrderBy(document => CosineDistance(corpus.Create(0).Embedding.Span, document.Embedding.Span))
             .ThenBy(document => document.Id, StringComparer.Ordinal).Take(2).Select(document => document.Id);
 
     private static double CosineDistance(ReadOnlySpan<float> query, ReadOnlySpan<float> candidate)
@@ -78,7 +78,7 @@ internal sealed class NativeDatabaseVectorFlowTests
         for (var index = 0; index < 256; index++)
         {
             token.ThrowIfCancellationRequested();
-            yield return corpus.Document(index);
+            yield return corpus.Create(index);
         }
         await Task.CompletedTask;
     }

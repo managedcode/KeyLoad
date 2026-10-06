@@ -15,23 +15,34 @@ internal static class ReplicaCrashScenario
     /// <param name="args">The original replica mode, root, boundary and incarnation arguments.</param>
     public static Task<bool> TryRunAsync(string[] args)
     {
+        const int NoArguments = 0;
+        const int ScenarioArgument = 0;
+        const int RootArgument = 1;
+        const int BoundaryArgument = 2;
+        const int IncarnationArgument = 3;
+
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length == 0 || args[0] != Scenario)
+        if (args.Length == NoArguments || args[ScenarioArgument] != Scenario)
         {
             return Task.FromResult(false);
         }
-        if (args.Length != ArgumentCount || string.IsNullOrWhiteSpace(args[1])
-            || !Enum.TryParse<ReplicaCrashBoundary>(args[2], out var boundary) || !Enum.IsDefined(boundary)
-            || !Guid.TryParse(args[3], out var incarnation) || incarnation == Guid.Empty)
+        if (args.Length != ArgumentCount || string.IsNullOrWhiteSpace(args[RootArgument])
+            || !Enum.TryParse<ReplicaCrashBoundary>(args[BoundaryArgument], out var boundary) || !Enum.IsDefined(boundary)
+            || !Guid.TryParse(args[IncarnationArgument], out var incarnation) || incarnation == Guid.Empty)
         {
             throw new ArgumentException(InvalidArguments, nameof(args));
         }
-        Run(args[1], boundary, incarnation);
+        Run(args[RootArgument], boundary, incarnation);
         throw new InvalidOperationException(BoundaryNotReached);
     }
 
     private static void Run(string root, ReplicaCrashBoundary boundary, Guid incarnation)
     {
+        const int SeedCut = 2;
+        const int NextTerm = 2;
+        const int NextOperationIndex = 3;
+        const int SeedTerm = 1;
+
         var armed = false;
         ReplicaCrashNode? physicalNode = null;
         using var target = ReplicaCrashNode.OpenTarget(root, incarnation, observed =>
@@ -48,17 +59,17 @@ internal static class ReplicaCrashScenario
             ReplicaCrashTransfer.Run(root, incarnation, target, boundary);
             return;
         }
-        target.Populate(2);
+        target.Populate(SeedCut);
         if (boundary == ReplicaCrashBoundary.TermSaved)
         {
             armed = true;
-            target.Log.SaveTermAndVote(2, ReplicaCrashNode.CandidateId);
+            target.Log.SaveTermAndVote(NextTerm, ReplicaCrashNode.CandidateId);
             return;
         }
         armed = boundary == ReplicaCrashBoundary.EntryAcknowledged;
-        target.Log.Append([new(3, 1, target.Database.NormalizeOperation(ReplicaCrashModel.Operation(3)))]);
+        target.Log.Append([new(NextOperationIndex, SeedTerm, target.Database.NormalizeOperation(ReplicaCrashModel.Operation(NextOperationIndex)))]);
         armed = true;
-        target.Log.Commit(3);
+        target.Log.Commit(NextOperationIndex);
     }
 
     private static void Pause(ReplicaCrashReady ready)

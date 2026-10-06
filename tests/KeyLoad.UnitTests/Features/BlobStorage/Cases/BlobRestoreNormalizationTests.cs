@@ -36,7 +36,7 @@ internal sealed class BlobRestoreNormalizationTests
         try
         {
             var backup = PrepareBackup(root);
-            var restoredIdentity = ZoneTreeStore.Restore(backup.BackupDirectory,                 Path.Combine(root, RestoredDirectoryName), UnitExecutionOptions.StorageExecution(), backup.TargetIncarnation);
+            var restoredIdentity = ZoneTreeStore.Restore(backup.BackupDirectory, Path.Combine(root, RestoredDirectoryName), UnitExecutionOptions.StorageExecution(), backup.TargetIncarnation);
             using var restoredStore = new ZoneTreeStore(new(Path.Combine(root, RestoredDirectoryName)), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var restoredDatabase = new DatabaseEngine(restoredStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
             var operations = new BlobStorageOperations(restoredDatabase);

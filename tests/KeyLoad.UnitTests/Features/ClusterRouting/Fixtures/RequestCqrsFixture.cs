@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orleans.Metadata;
-using Orleans.Hosting;
 using Orleans.Serialization;
 using Orleans.TestingHost;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;

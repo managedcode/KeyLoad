@@ -2,15 +2,16 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Options;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static partial class IsolatedNativeReportAssertions
 {
+    private static readonly JsonSerializerOptions ResourceJson = new(JsonSerializerDefaults.Web);
     private const string CellEnvironment = "KEYLOAD_COMPARISON_CELL_ID";
     private const string JobEnvironment = "KEYLOAD_COMPARISON_JOB_ID";
     private const string WorkerFile = "worker.json";
@@ -151,7 +152,7 @@ internal static partial class IsolatedNativeReportAssertions
         await Assert.That(info.Exists && info.Length <= options.Value.MaxSidecarBytes).IsTrue();
         await using var stream = File.OpenRead(path);
         var evidence = await JsonSerializer.DeserializeAsync<ScaleServerResourceEvidence>(stream,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web), cancellationToken)
+            ResourceJson, cancellationToken)
             ?? throw new InvalidDataException("Server resource evidence is malformed.");
         await Assert.That(evidence.Schema).IsEqualTo(ServerResourceSchema);
         await Assert.That(evidence.ObservationPolicy).IsEqualTo(ScaleServerObservationPolicySnapshot.Capture(options));

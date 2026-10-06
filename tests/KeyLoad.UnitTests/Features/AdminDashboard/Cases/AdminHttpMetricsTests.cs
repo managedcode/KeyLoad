@@ -1,4 +1,5 @@
 using KeyLoad.Server;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.AdminDashboard;
 
@@ -14,7 +15,7 @@ internal sealed class AdminHttpMetricsTests
     [Test]
     public async Task AcAd003ConcurrentObservationsPreserveCountersAndProcessIdentity()
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         var initial = metrics.Snapshot();
         await Task.WhenAll(Enumerable.Range(0, Requests).Select(index => Task.Run(() =>
             metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), index % 2 == 0 ? Failure(index) : null))));
@@ -24,7 +25,7 @@ internal sealed class AdminHttpMetricsTests
         await Assert.That(final.ElapsedMilliseconds).IsEqualTo((double)Requests * DurationMilliseconds);
         await Assert.That(final.ProcessInstance).IsEqualTo(initial.ProcessInstance);
         await Assert.That(final.StartedAt).IsEqualTo(initial.StartedAt);
-        await Assert.That(new AdminHttpMetrics().Snapshot().ProcessInstance).IsNotEqualTo(final.ProcessInstance);
+        await Assert.That(new AdminHttpMetrics(UnitAdminObservationOptions.Execution()).Snapshot().ProcessInstance).IsNotEqualTo(final.ProcessInstance);
     }
 
     [Test]
@@ -36,7 +37,7 @@ internal sealed class AdminHttpMetricsTests
     [Arguments(AdminDashboardProtocol.RecentFailureLimit * 2)]
     public async Task AcVi004FailureLogIsBoundedNewestFirstWithExactFields(int count)
     {
-        var metrics = new AdminHttpMetrics(TimeProvider.System);
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution(), TimeProvider.System);
         var lower = TimeProvider.System.GetUtcNow();
         for (var index = 0; index < count; index++)
         {
@@ -67,7 +68,7 @@ internal sealed class AdminHttpMetricsTests
     [Test]
     public async Task AcVi004SuccessesAreCountedButNeverLogged()
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         const int failures = 4;
         for (var index = 0; index < failures; index++)
         {
@@ -84,13 +85,13 @@ internal sealed class AdminHttpMetricsTests
         await Assert.That(snapshot.FailedRequests).IsEqualTo(failures);
         await Assert.That(snapshot.RecentFailures.Select(entry => entry.StatusCode)
             .SequenceEqual(Enumerable.Range(0, failures).Reverse().Select(index => FailureBaseStatus + index))).IsTrue();
-        await Assert.That(new AdminHttpMetrics().Snapshot().RecentFailures.IsDefaultOrEmpty).IsTrue();
+        await Assert.That(new AdminHttpMetrics(UnitAdminObservationOptions.Execution()).Snapshot().RecentFailures.IsDefaultOrEmpty).IsTrue();
     }
 
     [Test]
     public async Task AcVi004ConcurrentFailuresKeepExactCountersAndBoundedDistinctLog()
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         await Task.WhenAll(Enumerable.Range(0, Requests).Select(index => Task.Run(() =>
             metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), Failure(index)))));
         var snapshot = metrics.Snapshot();
@@ -106,7 +107,7 @@ internal sealed class AdminHttpMetricsTests
     [Test]
     public async Task AcVi004EarlierSnapshotIsNotAliasedByLaterFailures()
     {
-        var metrics = new AdminHttpMetrics();
+        var metrics = new AdminHttpMetrics(UnitAdminObservationOptions.Execution());
         metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), Failure(0));
         var earlier = metrics.Snapshot();
         metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), Failure(1));
@@ -115,6 +116,37 @@ internal sealed class AdminHttpMetricsTests
         await Assert.That(earlier.RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus);
         await Assert.That(later.RecentFailures.Length).IsEqualTo(2);
         await Assert.That(later.RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus + 1);
+    }
+
+    [Test]
+    [Arguments(1)]
+    [Arguments(3)]
+    public async Task AcCq034ConfiguredRetentionKeepsOnlyNewestFailuresAndPreservesCounters(int retained)
+    {
+        var options = UnitAdminObservationOptions.Execution(new() { MaximumRecentFailures = retained });
+        var metrics = new AdminHttpMetrics(options);
+        for (var index = 0; index < Requests; index++)
+        { metrics.Record(TimeSpan.FromMilliseconds(index), Failure(index)); }
+
+        var snapshot = metrics.Snapshot();
+        await Assert.That(snapshot.CompletedRequests).IsEqualTo(Requests);
+        await Assert.That(snapshot.FailedRequests).IsEqualTo(Requests);
+        await Assert.That(snapshot.RecentFailures.Length).IsEqualTo(retained);
+        await Assert.That(snapshot.RecentFailures.Select(entry => entry.StatusCode)
+            .SequenceEqual(Enumerable.Range(Requests - retained, retained).Reverse()
+                .Select(index => FailureBaseStatus + index))).IsTrue();
+        metrics.Record(TimeSpan.FromMilliseconds(DurationMilliseconds), Failure(Requests));
+        await Assert.That(snapshot.RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus + Requests - 1);
+        await Assert.That(metrics.Snapshot().RecentFailures[0].StatusCode).IsEqualTo(FailureBaseStatus + Requests);
+    }
+
+    [Test]
+    [Arguments(0)]
+    [Arguments(AdminDashboardProtocol.RecentFailureLimit + 1)]
+    public void AcCq034InvalidRetentionIsRejectedBeforeMetricsOwnerConstruction(int retained)
+    {
+        var options = Options.Create(new AdminObservationOptions { MaximumRecentFailures = retained });
+        Assert.ThrowsExactly<OptionsValidationException>(() => new AdminHttpMetrics(options));
     }
 
     private static AdminHttpFailureDetail Failure(int index) =>

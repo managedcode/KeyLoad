@@ -6,7 +6,7 @@ internal readonly record struct ComparisonReplayDiagnosticLog(int Key, int Voter
     long Read, long Data, long NodeMaximum)
 {
     internal const int SlotCount = 13;
-    internal const int MaximumProtectedBytes = 8192;
+    internal static int MaximumProtectedBytes => NativeExecutionPolicyFixture.Harness().Value.MaximumProtectedReplayLogBytes;
     internal static bool TryRead(string original, out ComparisonReplayDiagnosticLog record)
         => ComparisonReplayDiagnosticLogReader.TryRead(original, out record);
 
@@ -28,7 +28,7 @@ internal readonly record struct ComparisonReplayDiagnosticLog(int Key, int Voter
 internal static class ComparisonReplayDiagnosticLogReader
 {
     private const int TimestampCharacters = 28;
-    private const int MaximumOriginalCharacters = 1024;
+    private static int MaximumOriginalCharacters => NativeExecutionPolicyFixture.Harness().Value.MaximumOriginalReplayLogCharacters;
     private const long MaximumNonces = 1_048_576;
     private const string TimestampFormat = "yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'";
     private const string TimestampShape = "0000-00-00T00:00:00.0000000Z";

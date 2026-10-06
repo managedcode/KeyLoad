@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using KeyLoad.AppHost.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
+using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 

@@ -42,7 +42,7 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
     {
         try
         { await ExecuteAsync(parentToken).ConfigureAwait(false); }
-        catch
+        catch (Exception)
         {
             lifecycle.RecordFirstFailure();
             throw;
@@ -139,13 +139,14 @@ internal sealed class RequestCqrsAuthorityFaultScenario(bool useMcp, RequestCqrs
         identity = activeIdentity with { Principal = saved };
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
         var marker = heldMarker ?? throw new InvalidOperationException(MissingOwner);
-        (controls ?? throw new InvalidOperationException(MissingOwner)).WriteRelease(armId, marker.RequestId);
+        var activeControls = controls ?? throw new InvalidOperationException(MissingOwner);
+        activeControls.WriteRelease(armId, marker.RequestId);
         await RequestCqrsAuthorityFaultLifecycleAssertions.VerifyReleasedAndDisposedAsync(
-            controls ?? throw new InvalidOperationException(MissingOwner),
+            activeControls,
             discovery ?? throw new InvalidOperationException(MissingOwner), armId, commandId, marker,
             cancellationToken).ConfigureAwait(false);
         await JoinOriginalAndAssertDeniedAsync().ConfigureAwait(false);
-        await (controls ?? throw new InvalidOperationException(MissingOwner)).RetireArmAsync(armId,
+        await activeControls.RetireArmAsync(armId,
             cancellationToken).ConfigureAwait(false);
         await VerifyNoEffectAsync(cancellationToken).ConfigureAwait(false);
     }

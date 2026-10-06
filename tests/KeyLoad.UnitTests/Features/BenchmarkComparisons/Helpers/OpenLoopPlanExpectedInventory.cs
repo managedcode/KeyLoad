@@ -82,7 +82,7 @@ internal static class OpenLoopPlanExpectedInventory
         foreach (var topology in contract.GetProperty(UnsupportedProperty).EnumerateArray())
         {
             var target = topology.GetProperty(TargetProperty).GetString()!;
-            foreach (var nodeCount in topology.GetProperty("nodeCounts").EnumerateArray())
+            foreach (var nodeCount in topology.GetProperty(IsolatedPlanFields.NodeCounts).EnumerateArray())
             {
                 result.Add(Identity(target, nodeCount.GetInt32(), "*", "*"));
             }
@@ -90,7 +90,7 @@ internal static class OpenLoopPlanExpectedInventory
         return result;
     }
 
-    private static IReadOnlyList<OpenLoopPlanExpectedCell> BuildMeasurements(JsonElement contract,
+    private static List<OpenLoopPlanExpectedCell> BuildMeasurements(JsonElement contract,
         IReadOnlyDictionary<string, JsonElement> scaled)
     {
         var targets = contract.GetProperty(TargetsProperty).EnumerateArray().Select(item => item.GetString()!).ToArray();
@@ -98,7 +98,7 @@ internal static class OpenLoopPlanExpectedInventory
         var scenarios = contract.GetProperty(ScenariosProperty).EnumerateArray().Select(item => item.GetString()!).ToArray();
         var profiles = ReadProfiles(scaled);
         if (targets.Length != ExpectedTargetCount || nodes.Length != ExpectedNodeCount
-            || scenarios.Length != ExpectedScenarioCount || profiles.Count != ExpectedProfileCount
+            || scenarios.Length != ExpectedScenarioCount || profiles.Length != ExpectedProfileCount
             || Rates.Length != ExpectedRateCount)
         {
             throw new InvalidOperationException("The canonical open-loop dimensions do not match the frozen inventory.");
@@ -117,21 +117,23 @@ internal static class OpenLoopPlanExpectedInventory
         return result;
     }
 
-    private static IReadOnlyList<string> ReadProfiles(IReadOnlyDictionary<string, JsonElement> scaled)
+    private static string[] ReadProfiles(IReadOnlyDictionary<string, JsonElement> scaled)
     {
         var profiles = scaled.Values.Select(cell => cell.GetProperty(ProfileProperty).GetString()!)
             .Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
         return profiles;
     }
 
-    private static IReadOnlyList<OpenLoopPlanExpectedCell> BuildProofs(IReadOnlyDictionary<string, JsonElement> scaled)
+    private static List<OpenLoopPlanExpectedCell> BuildProofs(IReadOnlyDictionary<string, JsonElement> scaled)
     {
         var result = new List<OpenLoopPlanExpectedCell>(ExpectedProofCount);
         foreach (var profile in ReadProfiles(scaled))
-        foreach (var rate in Rates)
         {
-            result.Add(Create(scaled, KeyLoadTarget, KeyLoadNodeCount, PointReadScenario, profile, rate,
-                ProofFamily, ProofSuffix, cancellationProof: true));
+            foreach (var rate in Rates)
+            {
+                result.Add(Create(scaled, KeyLoadTarget, KeyLoadNodeCount, PointReadScenario, profile, rate,
+                    ProofFamily, ProofSuffix, cancellationProof: true));
+            }
         }
         return result;
     }

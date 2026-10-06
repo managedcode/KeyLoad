@@ -67,7 +67,7 @@ internal sealed class SqlBetweenGrammarTests
     public async Task AcSqlc006APrefixNotAndImmediateOuterAndKeepPredicateGrouping()
     {
         var prefixNot = new SqlParser("SELECT * FROM orders WHERE NOT number BETWEEN 1 AND 9", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter;
-        var immediateAnd = (Logical)new SqlParser(            "SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = TRUE", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
+        var immediateAnd = (Logical)new SqlParser("SELECT * FROM orders WHERE number BETWEEN 1 AND 5 AND flag = TRUE", UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse().Filter!;
         var range = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(9m));
         var immediateRange = Range(new FieldOperand(SqlBetweenTestData.NumberPath), ValueOperand.Create(1m), ValueOperand.Create(5m));
 

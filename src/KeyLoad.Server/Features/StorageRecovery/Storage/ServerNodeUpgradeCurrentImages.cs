@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

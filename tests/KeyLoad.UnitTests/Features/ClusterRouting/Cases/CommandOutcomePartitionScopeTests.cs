@@ -79,8 +79,11 @@ internal sealed class CommandOutcomePartitionScopeTests
         await Assert.That(database.Database.Apply(global).Error).IsNull();
         await Assert.That(database.Database.Apply(partition).Error).IsNull();
         await Assert.That(database.Database.Apply(Operation(database, commandId, OperationKind.ConfigureResource,
-            globalRequest with { Definition = new ResourceDefinition("other", ResourceKind.Collection,
-                database.Partition.TransactionDomainId) })).Error).IsEqualTo(ErrorCode.Conflict);
+            globalRequest with
+            {
+                Definition = new ResourceDefinition("other", ResourceKind.Collection,
+                database.Partition.TransactionDomainId)
+            })).Error).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Database.Apply(Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition, [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.SecondJson)])))
             .Error).IsEqualTo(ErrorCode.Conflict);

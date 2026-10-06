@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using ModelContextProtocol.Protocol;
 using Microsoft.Extensions.Options;
+using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 

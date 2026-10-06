@@ -37,7 +37,7 @@ internal sealed class VectorProfileTests
     public async Task CorpusUsesCanonicalLengthDeterministicNormalizedFloatVectorsAndExcludedMixedUpdates()
     {
         var profile = VectorComparisonProfile.Parse("vector-100k-exact-mixed-c16");
-        var corpus = new VectorComparisonCorpus(profile);
+        var corpus = new VectorComparisonCorpus(profile, NativeDatabaseFlowFixture.ExecutionOptions);
         var first = corpus.Create(42);
         var same = corpus.Create(42);
         await Assert.That(first.Id).IsEqualTo("v000000042");
@@ -57,7 +57,7 @@ internal sealed class VectorProfileTests
     [Test]
     public async Task NativeExactOracleStreamsTheCorpusAndReturnsOrderedUniqueNeighbors()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), NativeDatabaseFlowFixture.ExecutionOptions);
         var query = corpus.CreateQueries()[0];
         var expected = corpus.ExactNeighbors(query);
         await Assert.That(expected.Count).IsEqualTo(10);

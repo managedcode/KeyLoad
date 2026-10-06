@@ -75,6 +75,33 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
 | REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
 
+### Functional CLI operation coverage
+
+TASK-CQ-CLI-BACKUP-FLOW-001 maps REQ-BACKUP-001/002/003 to AC-BACKUP-001/002/003
+and AC-CQ-031. It adds genuine Release CLI child-process flows in
+tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs,
+with feature-local Processes/ and Fixtures/ helpers. The actual Aspire-owned
+unit and unit-scalar runners own every child, original exit, bounded pipe drain,
+temporary file and cleanup. Native validated test execution options supply
+operational bounds; no alternate test entry point or fake CLI is permitted.
+
+The positive flow commits and closes real ZoneTree storage, then invokes backup,
+pack-backup, inspect-artifact, copy-artifact, unpack-backup and restore through the
+actual CLI dispatch. It verifies copied archive bytes, reopened canonical data,
+a new incarnation and paused dispatch. Negative flows pass corrupted original
+artifacts or nonempty destinations through the same real CLI boundary, observe
+the original nonzero exit, preserve existing destination bytes and storage state,
+and complete a healthy follow-up operation. CLI dispatch and disposal assertions
+remain part of the operation flow; property access alone is not acceptance.
+
+These cases are functional contributors only after native collection binds
+their original executions and assemblies. They do not establish a cluster-wide
+cut, old-token fencing, RF3 recovery, power-loss safety, or a measured coverage
+percentage. Existing artifact/recovery flows remain mandatory. Existing ADR-033,
+ADR-046 and ADR-048 contracts apply unchanged; no new format or public contract
+is introduced by this test stage. Root owns the native coverage and source-bound
+evidence joins; exact-source Linux qualification remains pending.
+
 ## Negative and boundary flows
 
 Reject checksum mismatch, missing canonical files, malformed catalog entries, path traversal/reparse points, nonempty destinations, and a restore whose manifest/version is unsupported. Preserve the last known materialized state when a restore fails. A process-kill or local round trip is not evidence of power-loss durability, a globally consistent multi-partition cut, or recovery of every optional capability.

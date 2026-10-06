@@ -1,11 +1,11 @@
 using Aspire.Hosting.ApplicationModel;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Retains bounded, privacy-safe Aspire lifecycle evidence for failed comparison startup.</summary>
-internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService notifications) : IAsyncDisposable
+internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService notifications, IOptions<NativeComparisonHarnessOptions> executionOptions) : IAsyncDisposable
 {
-    private const int MaximumRecords = 128;
     private const string Comparisons = "comparisons";
     private const string Postgres = "benchmark-postgres";
     private const string Rabbit = "benchmark-rabbit";
@@ -22,7 +22,7 @@ internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService 
     ];
 
     private readonly CancellationTokenSource lifetime = new();
-    private readonly ComparisonLifecycleRecord?[] records = new ComparisonLifecycleRecord?[MaximumRecords];
+    private readonly ComparisonLifecycleRecord?[] records = new ComparisonLifecycleRecord?[executionOptions.Value.MaximumResourceDiagnosticRecords];
     private readonly System.Threading.Lock recordsGate = new();
     private readonly System.Threading.Lock lifecycleGate = new();
     private Task? capture;
@@ -131,8 +131,8 @@ internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService 
         lock (recordsGate)
         {
             records[nextRecord] = record;
-            nextRecord = (nextRecord + 1) % MaximumRecords;
-            retainedRecords = Math.Min(retainedRecords + 1, MaximumRecords);
+            nextRecord = (nextRecord + 1) % records.Length;
+            retainedRecords = Math.Min(retainedRecords + 1, records.Length);
         }
     }
 
@@ -161,10 +161,10 @@ internal sealed class ComparisonResourceDiagnostics(ResourceNotificationService 
     private ComparisonLifecycleRecord[] SnapshotRecords()
     {
         var snapshot = new ComparisonLifecycleRecord[retainedRecords];
-        var first = (nextRecord - retainedRecords + MaximumRecords) % MaximumRecords;
+        var first = (nextRecord - retainedRecords + records.Length) % records.Length;
         for (var index = 0; index < retainedRecords; index++)
         {
-            snapshot[index] = records[(first + index) % MaximumRecords]
+            snapshot[index] = records[(first + index) % records.Length]
                 ?? throw new InvalidOperationException("Lifecycle ring contains an empty slot.");
         }
 

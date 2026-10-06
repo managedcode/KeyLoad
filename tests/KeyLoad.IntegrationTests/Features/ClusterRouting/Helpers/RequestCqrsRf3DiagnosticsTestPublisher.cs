@@ -41,7 +41,7 @@ internal static class RequestCqrsRf3DiagnosticsTestPublisher
         var error = Errors.Fail(ErrorCode.Validation, McpTransportProtocol.InvalidTransport);
         error.Data[McpTransportDiagnostics.StageMetadataKey] = stage;
         var headers = new HeaderDictionary { [McpTransportProtocol.MethodHeader] = MethodToolsCall };
-        McpTransportDiagnostics.Log(logger, error, headers);
+        McpTransportDiagnostics.Log(logger, error, headers, IntegrationMcpOptions.Execution());
     }
 
     private static string FixedMessage(McpTransportStage stage)

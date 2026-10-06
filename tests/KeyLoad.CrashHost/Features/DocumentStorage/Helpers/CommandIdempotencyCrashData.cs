@@ -19,9 +19,11 @@ internal static class CommandIdempotencyCrashData
 
     internal static ReplicatedOperation CreateOperation()
     {
+        const int ExpectedRevisionEmptyCount = 0;
+
         var command = new CommandRequest(CommandIdempotencyCrashContract.CommandId, CommandIdempotencyCrashContract.Partition,
         [
-            new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.DocumentJson, 0),
+            new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.DocumentJson, ExpectedRevisionEmptyCount),
             new AppendEvents(CommandIdempotencyCrashContract.StreamSet, CommandIdempotencyCrashContract.StreamId,
                 [new(CommandIdempotencyCrashContract.EventId, CommandIdempotencyCrashContract.EventType, CommandIdempotencyCrashContract.EventPayloadJson)], ExpectedStreamRevision.NoStream),
             new EnqueueMessage(CommandIdempotencyCrashContract.Queue, CommandIdempotencyCrashContract.MessageId, CommandIdempotencyCrashContract.QueuePayloadJson)
@@ -31,37 +33,48 @@ internal static class CommandIdempotencyCrashData
 
     internal static ReplicatedOperation CreateChangedOperation(ReplicatedOperation operation)
     {
+        const int IndexEmptyCount = 0;
+        const int ExpectedRevisionEmptyCount = 0;
+
         var command = JsonDefaults.Deserialize<CommandRequest>(Encoding.UTF8.GetBytes(operation.PayloadJson));
-        var changed = command.Mutations.SetItem(0,
-            new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, 0));
+        var changed = command.Mutations.SetItem(IndexEmptyCount,
+            new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, ExpectedRevisionEmptyCount));
         var payload = JsonSerializer.Serialize(command with { Mutations = changed }, JsonDefaults.Options);
         return operation with { PayloadJson = payload };
     }
 
     internal static CommitReceipt CreateFollowUp(DatabaseEngine database)
     {
+        const int ExpectedRevisionEmptyCount = 0;
+
         var id = CommandIdempotencyCrashContract.FollowUpCommandId;
         var request = new CommandRequest(id, CommandIdempotencyCrashContract.Partition,
-            [new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId, CommandIdempotencyCrashContract.FollowUpJson, 0)]);
+            [new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.FollowUpDocumentId, CommandIdempotencyCrashContract.FollowUpJson, ExpectedRevisionEmptyCount)]);
         return CrashDatabase.Submit(database, OperationKind.Batch, request, id).Get<CommitReceipt>();
     }
 
     internal static async Task SaveEvidenceAsync<T>(string directory, string fileName, T value)
     {
+        const int BytesLengthEmptyCount = 0;
+        const string SaveEvidenceAsyncMessageText = "Command restart evidence exceeded its fixed bound.";
+
         var bytes = NativeSerialization.Serialize(value);
-        if (bytes.Length is <= 0 or > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
+        if (bytes.Length is <= BytesLengthEmptyCount or > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
         {
-            throw new InvalidOperationException("Command restart evidence exceeded its fixed bound.");
+            throw new InvalidOperationException(SaveEvidenceAsyncMessageText);
         }
         await File.WriteAllBytesAsync(Path.Combine(directory, fileName), bytes);
     }
 
     internal static async Task<T> ReadEvidenceAsync<T>(string directory, string fileName, CancellationToken cancellationToken = default)
     {
+        const int NewFileInfoPathLengthEmptyCount = 0;
+        const string ReadEvidenceAsyncMessageText = "Command restart evidence was absent or exceeded its fixed bound.";
+
         var path = Path.Combine(directory, fileName);
-        if (!File.Exists(path) || new FileInfo(path).Length is <= 0 or > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
+        if (!File.Exists(path) || new FileInfo(path).Length is <= NewFileInfoPathLengthEmptyCount or > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
         {
-            throw new InvalidOperationException("Command restart evidence was absent or exceeded its fixed bound.");
+            throw new InvalidOperationException(ReadEvidenceAsyncMessageText);
         }
         return NativeSerialization.Deserialize<T>(await File.ReadAllBytesAsync(path, cancellationToken));
     }

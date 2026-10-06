@@ -29,8 +29,6 @@ internal static class TestSuiteResources
         const string AddPath2Text = "KeyLoad.slnx";
         const string MessageText = "The test AppHost must run from the KeyLoad source checkout.";
         const string Path1Text = "TestResults";
-        const string CommandText = "dotnet";
-        const string EmptyText = "";
         const string AddValueText = "0";
 
         var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, Path2Text));
@@ -40,11 +38,7 @@ internal static class TestSuiteResources
         }
         var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine(Path1Text, settings.Suite));
         var arguments = BuildArguments(root, settings, resultsDirectory);
-        var runner = builder.AddExecutable(settings.ResourceName, CommandText, root, arguments)
-            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, EmptyText)
-            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, EmptyText)
-            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, EmptyText)
-            .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, EmptyText);
+        var runner = CreateRunner(builder, settings.ResourceName, root, arguments);
         if (settings.LocalRf3ImageEnabled)
         {
             ConfigureLocalImage(builder, runner, root);
@@ -74,6 +68,17 @@ internal static class TestSuiteResources
         {
             runner.WithEnvironment(IntrinsicsEnvironment, AddValueText);
         }
+    }
+
+    private static IResourceBuilder<ExecutableResource> CreateRunner(IDistributedApplicationBuilder builder,
+        string name, string root, string[] arguments)
+    {
+        const string Command = "dotnet";
+        return builder.AddExecutable(name, Command, root, arguments)
+            .WithEnvironment(TestSuiteSettings.SuiteEnvironment, string.Empty)
+            .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, string.Empty)
+            .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, string.Empty)
+            .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, string.Empty);
     }
 
     private static void ConfigureRecoveryProbes(IDistributedApplicationBuilder builder,

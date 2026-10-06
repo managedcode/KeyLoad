@@ -1,5 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests;
@@ -7,6 +8,13 @@ namespace KeyLoad.IntegrationTests;
 /// <summary>Explicit validated native options for actual Orleans routing regression fixtures.</summary>
 internal static class IntegrationRoutingOptions
 {
+    internal static IOptions<RequestProbeExecutionOptions> ProbeExecution()
+    {
+        var value = new RequestProbeExecutionOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+
     internal static IOptions<GrainRoutingOptions> Routing(GrainRoutingOptions? configured = null)
     {
         var value = configured ?? new GrainRoutingOptions();

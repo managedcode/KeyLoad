@@ -14,6 +14,9 @@ internal sealed class ExistingStoreInspectorInputs(ExistingStoreInspectionReques
 
     internal ZoneTreeStoreOptions? CreateOptions()
     {
+        const int MaxFrameBytesEmptyCount = 0;
+        const int MaxSnapshotBytesEmptyCount = 0;
+
         var options = new ZoneTreeStoreOptions(request.Directory) { Incarnation = request.Incarnation };
         return request.Variant switch
         {
@@ -23,8 +26,8 @@ internal sealed class ExistingStoreInspectorInputs(ExistingStoreInspectionReques
             ExistingStoreInspectionVariant.RelativeDirectory => options with { Directory = RelativeDirectory },
             ExistingStoreInspectionVariant.EmptyDirectory => options with { Directory = string.Empty },
             ExistingStoreInspectionVariant.NonCanonicalDirectory => options with { Directory = Path.Combine(request.Directory, DotSegment) },
-            ExistingStoreInspectionVariant.ZeroFrameBudget => options with { MaxFrameBytes = 0 },
-            ExistingStoreInspectionVariant.ZeroSnapshotBudget => options with { MaxSnapshotBytes = 0 },
+            ExistingStoreInspectionVariant.ZeroFrameBudget => options with { MaxFrameBytes = MaxFrameBytesEmptyCount },
+            ExistingStoreInspectionVariant.ZeroSnapshotBudget => options with { MaxSnapshotBytes = MaxSnapshotBytesEmptyCount },
             ExistingStoreInspectionVariant.Cache => ConfigureCache(options),
             ExistingStoreInspectionVariant.Observer => options with { FaultObserver = (_, _, _) => ObservedStages++ },
             _ => options

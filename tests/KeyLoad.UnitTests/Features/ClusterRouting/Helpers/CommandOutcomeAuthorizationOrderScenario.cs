@@ -1,6 +1,7 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.Security;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -38,7 +39,8 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         => CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition,
                 [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, DocumentId, DocumentJson)]))
-            with { PrincipalId = Writer };
+            with
+        { PrincipalId = Writer };
 
     private static byte[] MoveOutcomeToInvalidLegacyScope(TestDatabase database, Guid commandId)
     {

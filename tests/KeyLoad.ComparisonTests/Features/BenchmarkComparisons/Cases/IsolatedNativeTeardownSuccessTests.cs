@@ -12,16 +12,13 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         var evidence = Path.Combine(directory.FullName, "evidence");
         var output = Path.Combine(directory.FullName, "output");
         var dataRoot = Path.Combine(directory.FullName, "absent-data");
-        ComparisonProgressNativeFixture? fixture = null;
-        var settled = false;
         try
         {
-            fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
+            await using var fixture = await IsolatedNativeTeardownNativeSupport.CreateFixtureAsync(
                 Path.Combine(evidence, "progress.json"));
             var stopping = fixture.Capture.StopAsync();
             var applicationStopping = fixture.Application.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
             await IsolatedNativeTeardownNativeSupport.CompleteAsync(fixture, output, evidence, dataRoot, null);
-            settled = true;
             await Assert.That(stopping.IsCompletedSuccessfully).IsTrue();
             await Assert.That(ReferenceEquals(stopping, fixture.Capture.StopAsync())).IsTrue();
             await Assert.That(applicationStopping.IsCancellationRequested).IsTrue();
@@ -31,11 +28,6 @@ internal sealed class IsolatedNativeTeardownSuccessTests
         }
         finally
         {
-            if (!settled && fixture is not null)
-            {
-                await fixture.DisposeAsync();
-            }
-
             directory.Delete(recursive: true);
         }
     }

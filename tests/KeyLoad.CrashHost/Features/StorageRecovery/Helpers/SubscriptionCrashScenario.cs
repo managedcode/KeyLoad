@@ -12,17 +12,21 @@ internal static class SubscriptionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int ExecutionGenerationSingleItemCount = 1;
+        const int ExpectedRevisionEmptyCount = 0;
+        const int PositionStep = 1;
+
         var database = CrashDatabase.Create(store);
         Configure(database);
         var receive = Guid.NewGuid();
         var delivery = CrashDatabase.Submit(database, OperationKind.ReceiveSubscription,
             new ReceiveSubscriptionRequest(receive, Subscription, LeaseSeconds: CrashFixtureValues.LeaseSeconds), receive)
             .Get<ReceiveSubscriptionResult>().Deliveries.Single();
-        var request = new SubscriptionProcessingRequest(CommandId, Subscription, delivery.Token, CrashFixtureValues.Handler, 1,
-            [new PutDocument(CrashFixtureValues.Orders, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, 0)]);
+        var request = new SubscriptionProcessingRequest(CommandId, Subscription, delivery.Token, CrashFixtureValues.Handler, ExecutionGenerationSingleItemCount,
+            [new PutDocument(CrashFixtureValues.Orders, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, ExpectedRevisionEmptyCount)]);
         var operation = CrashDatabase.Operation(OperationKind.SubscriptionProcessing, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), JsonDefaults.Serialize(operation));
-        boundary.Position = store.Position + 1;
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         database.Apply(operation).Get<SubscriptionProcessingResult>();
         await CrashHostPause.WaitForKillAsync();

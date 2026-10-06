@@ -45,7 +45,7 @@ internal static class OpenLoopPlanNodeProcess
         {
             throw new InvalidOperationException(InputLimitMessage);
         }
-        var process = new Process { StartInfo = startInfo };
+        using var process = new Process { StartInfo = startInfo };
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(processOptions.ProcessTimeout);
         var failures = new List<Exception>();

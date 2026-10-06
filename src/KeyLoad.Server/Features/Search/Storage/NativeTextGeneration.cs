@@ -1,7 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Query.Features.Search;
-using ZoneTree.FullTextSearch.Index;
 using Microsoft.Extensions.Options;
+using ZoneTree.FullTextSearch.Index;
 
 namespace KeyLoad.Server.Features.Search;
 

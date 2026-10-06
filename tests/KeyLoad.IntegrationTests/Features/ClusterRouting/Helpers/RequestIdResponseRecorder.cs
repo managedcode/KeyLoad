@@ -2,8 +2,13 @@ using System.Net;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-internal sealed class RequestIdResponseRecorder(HttpMessageHandler innerHandler) : DelegatingHandler(innerHandler)
+internal sealed class RequestIdResponseRecorder : DelegatingHandler
 {
+    internal RequestIdResponseRecorder()
+    {
+        InnerHandler = new SocketsHttpHandler();
+    }
+
     private const int MaximumReceipts = 64;
     private readonly System.Threading.Lock gate = new();
     private readonly List<RequestIdReceipt> receipts = [];

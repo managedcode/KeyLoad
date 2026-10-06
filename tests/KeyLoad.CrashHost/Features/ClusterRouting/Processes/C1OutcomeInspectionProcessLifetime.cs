@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.Server;
 using KeyLoad.Storage.IO;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting.Processes;
 
@@ -13,8 +14,10 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private readonly ReadOnlyMemory<byte> input;
     private readonly string ownerPath;
     private readonly List<Exception> failures;
-    private readonly C1OutcomeInspectionCapture stdout = new(C1OutcomeInspectionProcessBounds.OutputLimitBytes);
-    private readonly C1OutcomeInspectionCapture stderr = new(C1OutcomeInspectionProcessBounds.OutputLimitBytes);
+    private readonly C1OutcomeInspectionCapture stdout;
+    private readonly C1OutcomeInspectionCapture stderr;
+    private readonly IOptions<CrashHostExecutionOptions> executionOptions;
+    private readonly CrashHostExecutionOptions settings;
     private readonly Process process = new();
     private FileStream? owner;
     private Task? exitTask;
@@ -33,11 +36,15 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private bool ownerReleaseReported;
 
     internal C1OutcomeInspectionProcessLifetime(ReadOnlyMemory<byte> input, string ownerPath,
-        List<Exception> failures)
+        List<Exception> failures, IOptions<CrashHostExecutionOptions> executionOptions)
     {
         this.input = input;
         this.ownerPath = ownerPath;
         this.failures = failures;
+        this.executionOptions = executionOptions;
+        settings = executionOptions.Value;
+        stdout = new(executionOptions);
+        stderr = new(executionOptions);
     }
 
     internal bool DisposalAttemptCompleted { get; private set; }
@@ -56,7 +63,7 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private void Start()
     {
         owner = OfflineRegularFile.Open(ownerPath, FileAccess.ReadWrite, FileShare.None,
-            C1OutcomeInspectionProcessBounds.ReadBufferBytes);
+            settings.InspectionReadBufferBytes);
         process.StartInfo = C1OutcomeInspectionProcessStartInfo.Create();
         if (!process.Start())
         { throw new InvalidOperationException(StartFailureMessage); }
@@ -71,7 +78,7 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     private async Task SettleAsync(CancellationToken cancellationToken)
     {
         var all = Task.WhenAll(exitTask!, inputTask!, stdoutTask!, stderrTask!);
-        await C1OutcomeInspectionDeadline.WaitAsync(process, all, failures, cancellationToken).ConfigureAwait(false);
+        await C1OutcomeInspectionDeadline.WaitAsync(process, all, failures, executionOptions, cancellationToken).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => all, failures).ConfigureAwait(false);
         originalTasksJoined = all.IsCompleted;
         reaped = process.HasExited;
@@ -89,6 +96,45 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
     {
         if (DisposalAttemptCompleted)
         { return; }
+        await JoinOriginalTasksBeforeReleaseAsync().ConfigureAwait(false);
+        if ((!started || reaped && originalTasksJoined) && !processClosed)
+        {
+            var handle = started ? process.SafeHandle : null;
+            try
+            {
+                process.Dispose();
+                processClosed = handle?.IsClosed ?? true;
+            }
+            catch (Exception error) when (handle?.IsClosed ?? true)
+            {
+                processClosed = true;
+                failures.Add(error);
+            }
+        }
+        if (started && reaped && originalTasksJoined && !processClosed)
+        { ReportProcessHandleCloseFailure(); }
+        if (owner is not null && !ownerReleased && (!started || reaped && originalTasksJoined && processClosed))
+        {
+            var handle = owner.SafeFileHandle;
+            try
+            {
+                owner.Dispose();
+                ownerReleased = handle.IsClosed;
+            }
+            catch (Exception error) when (handle.IsClosed)
+            {
+                ownerReleased = true;
+                failures.Add(error);
+            }
+        }
+        if (owner is not null && !ownerReleased && started && reaped && originalTasksJoined && processClosed)
+        { ReportOwnerReleaseFailure(); }
+        DisposalAttemptCompleted = (!started || reaped && originalTasksJoined)
+            && processClosed && (owner is null || ownerReleased);
+    }
+
+    private async Task JoinOriginalTasksBeforeReleaseAsync()
+    {
         if (started && !originalTasksJoined)
         {
             ServerFailureObserver.Observe(() => C1OutcomeInspectionProcessIo.Kill(process), failures);
@@ -107,44 +153,6 @@ internal sealed class C1OutcomeInspectionProcessLifetime : IAsyncDisposable
         }
         if (started && reaped)
         { exitCode = process.ExitCode; }
-        if ((!started || reaped && originalTasksJoined) && !processClosed)
-        { CloseProcess(); }
-        if (started && reaped && originalTasksJoined && !processClosed)
-        { ReportProcessHandleCloseFailure(); }
-        if (owner is not null && !ownerReleased && (!started || reaped && originalTasksJoined && processClosed))
-        { ReleaseOwner(); }
-        if (owner is not null && !ownerReleased && started && reaped && originalTasksJoined && processClosed)
-        { ReportOwnerReleaseFailure(); }
-        DisposalAttemptCompleted = (!started || reaped && originalTasksJoined)
-            && processClosed && (owner is null || ownerReleased);
-    }
-
-    private void CloseProcess()
-    {
-        var handle = started ? process.SafeHandle : null;
-        try
-        {
-            process.Dispose();
-            processClosed = handle?.IsClosed ?? true;
-        }
-        catch (Exception error) when (!C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
-    }
-
-    private void ReleaseOwner()
-    {
-        var handle = owner!.SafeFileHandle;
-        try
-        {
-            owner.Dispose();
-            ownerReleased = handle.IsClosed;
-        }
-        catch (Exception error) when (!C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
-        catch (Exception error) when (C1OutcomeInspectionFailures.ContainsFatal(error))
-        { failures.Add(error); }
     }
 
     private void ReportUnreapedProcess()

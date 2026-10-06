@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Collections.Immutable;
 using ManagedCode.MCPGateway;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

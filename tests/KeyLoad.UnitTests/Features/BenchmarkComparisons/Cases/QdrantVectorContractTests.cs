@@ -41,7 +41,7 @@ internal sealed class QdrantVectorContractTests
     [Test]
     public async Task AcVq001NativeReadbackValidatesIdentityFilterMetadataAndObservedVectorBytes()
     {
-        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"));
+        var corpus = new VectorComparisonCorpus(VectorComparisonProfile.Parse("vector-100k-exact-filtered-c16"), UnitBenchmarkOptions.Native());
         var input = corpus.Create(100);
         using var native = JsonSerializer.SerializeToDocument(new
         {

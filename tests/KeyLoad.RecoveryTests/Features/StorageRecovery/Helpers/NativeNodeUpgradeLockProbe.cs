@@ -19,7 +19,7 @@ internal static class NativeNodeUpgradeLockProbe
     {
         try
         {
-            using var lease = ServerNodeUpgradeLocks.Acquire(source);
+            using var lease = ServerNodeUpgradeLocks.Acquire(source, RecoveryExecutionOptions.NodeUpgrade());
         }
         catch (Exception failure) when (failure is IOException or KeyLoadException)
         {

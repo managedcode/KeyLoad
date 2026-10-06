@@ -16,8 +16,8 @@ internal static class PostgresSchemaDuplicateTargets
     {
         var runId = Guid.NewGuid().ToString("D");
         var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2)));
-        var winner = new PostgresTarget(connectionString, runId, "comparison-test-image");
-        var loser = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var winner = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
+        var loser = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         var loserDisposeStarted = false;
         try
         {
@@ -49,8 +49,8 @@ internal static class PostgresSchemaDuplicateTargets
     {
         var runId = Guid.NewGuid().ToString("D");
         var dataset = new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2)));
-        var first = new PostgresTarget(connectionString, runId, "comparison-test-image");
-        var second = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var first = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
+        var second = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         var firstDisposeStarted = false;
         var secondDisposeStarted = false;
         try

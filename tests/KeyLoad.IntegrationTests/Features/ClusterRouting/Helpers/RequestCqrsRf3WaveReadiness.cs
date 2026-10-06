@@ -19,37 +19,43 @@ internal static class RequestCqrsRf3WaveReadiness
         {
             try
             {
-                if (requireHealthy)
-                {
-                    await app.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken)
-                        .ConfigureAwait(false);
-                    lifecycle?.RecordReadiness(node, RequestCqrsNodeReadinessOutcome.Ready);
-                    continue;
-                }
-                await app.ResourceNotifications.WaitForResourceAsync(node,
-                    resource => resource.Snapshot.State?.Text == KnownResourceStates.Running
-                        || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart
-                        || captureDiscovery && node == RequestCqrsRf3Protocol.Node1
-                            && IsTerminal(resource.Snapshot.State?.Text),
-                    cancellationToken).ConfigureAwait(false);
-                if (!app.ResourceNotifications.TryGetCurrentState(node, out var state)
-                    || state?.Snapshot.State?.Text != KnownResourceStates.Running
-                        && !(captureDiscovery && node == RequestCqrsRf3Protocol.Node1
-                            && IsTerminal(state?.Snapshot.State?.Text)))
-                {
-                    lifecycle?.RecordReadiness(node, ReadinessObserved(app, node)
-                        ? RequestCqrsNodeReadinessOutcome.NotReady : RequestCqrsNodeReadinessOutcome.NotObserved);
-                    throw new InvalidOperationException("An expected mixed-protocol Aspire node did not reach Running.");
-                }
-                lifecycle?.RecordReadiness(node, RequestCqrsNodeReadinessOutcome.Ready);
+                await WaitForNodeAsync(app, node, requireHealthy, captureDiscovery, lifecycle, cancellationToken)
+                    .ConfigureAwait(false);
             }
-            catch
+            catch (Exception)
             {
                 lifecycle?.RecordReadiness(node, ReadinessObserved(app, node)
                     ? RequestCqrsNodeReadinessOutcome.NotReady : RequestCqrsNodeReadinessOutcome.NotObserved);
                 throw;
             }
         }
+    }
+
+    private static async Task WaitForNodeAsync(DistributedApplication app, string node, bool requireHealthy,
+        bool captureDiscovery, RequestCqrsLifecycleEvidence? lifecycle, CancellationToken cancellationToken)
+    {
+        if (requireHealthy)
+        {
+            await app.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken).ConfigureAwait(false);
+            lifecycle?.RecordReadiness(node, RequestCqrsNodeReadinessOutcome.Ready);
+            return;
+        }
+        await app.ResourceNotifications.WaitForResourceAsync(node,
+                    resource => resource.Snapshot.State?.Text == KnownResourceStates.Running
+                        || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart
+                        || captureDiscovery && node == RequestCqrsRf3Protocol.Node1
+                            && IsTerminal(resource.Snapshot.State?.Text),
+                    cancellationToken).ConfigureAwait(false);
+        if (!app.ResourceNotifications.TryGetCurrentState(node, out var state)
+            || state?.Snapshot.State?.Text != KnownResourceStates.Running
+                && !(captureDiscovery && node == RequestCqrsRf3Protocol.Node1
+                    && IsTerminal(state?.Snapshot.State?.Text)))
+        {
+            lifecycle?.RecordReadiness(node, ReadinessObserved(app, node)
+                ? RequestCqrsNodeReadinessOutcome.NotReady : RequestCqrsNodeReadinessOutcome.NotObserved);
+            throw new InvalidOperationException("An expected mixed-protocol Aspire node did not reach Running.");
+        }
+        lifecycle?.RecordReadiness(node, RequestCqrsNodeReadinessOutcome.Ready);
     }
 
     private static bool ReadinessObserved(DistributedApplication app, string node)

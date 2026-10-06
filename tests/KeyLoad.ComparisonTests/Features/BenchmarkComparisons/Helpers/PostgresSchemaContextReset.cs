@@ -15,14 +15,15 @@ internal static class PostgresSchemaContextReset
     // this helper does not inspect target internals or claim that it observed the target's data source.
     internal static async Task VerifyAsync(string connectionString, CancellationToken cancellationToken)
     {
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(30));
+        timeout.CancelAfter(policy.PostgresContextResetTimeout);
         var poolConnectionString = new NpgsqlConnectionStringBuilder(connectionString)
         {
             Pooling = true,
             MaxPoolSize = 1,
             MinPoolSize = 1,
-            Timeout = 5
+            Timeout = policy.PostgresContextConnectTimeoutSeconds
         }.ConnectionString;
         await using var source = NpgsqlDataSource.Create(poolConnectionString);
         var runId = Guid.NewGuid();

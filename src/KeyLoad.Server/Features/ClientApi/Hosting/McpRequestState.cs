@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using ModelContextProtocol.Protocol;
 using Microsoft.Extensions.Options;
+using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;
 

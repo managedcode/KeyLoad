@@ -13,7 +13,7 @@ internal static class PhysicalShardCatalogInterface34ObservationReader
         RequestCqrsProbeFileStore.VerifyOwnerFile(owned.Directory, owned.OwnerBytes);
         var paths = RequestCqrsProbeFileValidation.ValidateContents(owned.Directory, allowDiscoveryRecords: true);
         var records = paths.Where(IsDiscoveryFile)
-            .Select(path => (Path: path, Record: RequestCqrsProbeJson.ReadDiscovery(
+            .Select(path => (Path: path, Record: fixture.Json.ReadDiscovery(
                 RequestCqrsProbeFileStore.ReadRecord(path))))
             .ToArray();
         if (records.Length != RequestCqrsProbeFixtureProtocol.MaximumDiscoveryRecords

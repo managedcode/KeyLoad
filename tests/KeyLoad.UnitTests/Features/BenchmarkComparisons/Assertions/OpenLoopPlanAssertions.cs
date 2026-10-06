@@ -21,17 +21,17 @@ internal static class OpenLoopPlanAssertions
         await Assert.That(actualMeasurements).IsEquivalentTo(expected.Measurements, CollectionOrdering.Matching);
         await Assert.That(actualProofs).IsEquivalentTo(expected.Proofs, CollectionOrdering.Matching);
         await VerifyIdentityPartitionAsync(actualMeasurements, actualProofs, expected.Unsupported,
-            contract.GetProperty("targets"));
+            contract.GetProperty(IsolatedPlanFields.Targets));
     }
 
-    private static async Task VerifyIdentityPartitionAsync(IReadOnlyList<OpenLoopPlanExpectedCell> measurements,
-        IReadOnlyList<OpenLoopPlanExpectedCell> proofs, HashSet<string> unsupported, JsonElement targets)
+    private static async Task VerifyIdentityPartitionAsync(OpenLoopPlanExpectedCell[] measurements,
+        OpenLoopPlanExpectedCell[] proofs, HashSet<string> unsupported, JsonElement targets)
     {
-        await Assert.That(measurements.Count).IsEqualTo(OpenLoopPlanExpectedInventory.ExpectedMeasurementCount);
-        await Assert.That(proofs.Count).IsEqualTo(OpenLoopPlanExpectedInventory.ExpectedProofCount);
+        await Assert.That(measurements.Length).IsEqualTo(OpenLoopPlanExpectedInventory.ExpectedMeasurementCount);
+        await Assert.That(proofs.Length).IsEqualTo(OpenLoopPlanExpectedInventory.ExpectedProofCount);
         var measurementIds = measurements.Select(cell => cell.Id).ToHashSet(StringComparer.Ordinal);
-        await Assert.That(measurementIds.Count).IsEqualTo(measurements.Count);
-        await Assert.That(proofs.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(proofs.Count);
+        await Assert.That(measurementIds.Count).IsEqualTo(measurements.Length);
+        await Assert.That(proofs.Select(cell => cell.Id).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(proofs.Length);
         await Assert.That(proofs.All(cell => !measurementIds.Contains(cell.Id))).IsTrue();
         var unsupportedCount = measurements.Count(cell => unsupported.Contains(
             OpenLoopPlanExpectedInventory.UnsupportedKey(cell.Target, cell.NodeCount)));
@@ -41,7 +41,7 @@ internal static class OpenLoopPlanAssertions
             && cell.Target == "KeyLoad" && cell.NodeCount == 3 && cell.Scenario == "PointRead")).IsTrue();
     }
 
-    private static async Task VerifyTargetCountsAsync(IReadOnlyList<OpenLoopPlanExpectedCell> measurements, JsonElement targets)
+    private static async Task VerifyTargetCountsAsync(OpenLoopPlanExpectedCell[] measurements, JsonElement targets)
     {
         foreach (var target in targets.EnumerateArray())
         {
@@ -60,9 +60,9 @@ internal static class OpenLoopPlanAssertions
         {
             throw new InvalidOperationException("An open-loop plan cell has unexpected fields or field order.");
         }
-        return new OpenLoopPlanExpectedCell(value.GetProperty("id").GetString()!, value.GetProperty("target").GetString()!,
-            value.GetProperty("nodeCount").GetInt32(), value.GetProperty("scenario").GetString()!,
-            value.GetProperty("profile").GetString()!, value.GetProperty(OpenLoopPlanExpectedInventory.FamilyProperty).GetString()!,
+        return new OpenLoopPlanExpectedCell(value.GetProperty(IsolatedPlanFields.Id).GetString()!, value.GetProperty(IsolatedPlanFields.Target).GetString()!,
+            value.GetProperty(IsolatedPlanFields.NodeCount).GetInt32(), value.GetProperty(IsolatedPlanFields.Scenario).GetString()!,
+            value.GetProperty(IsolatedPlanFields.Profile).GetString()!, value.GetProperty(OpenLoopPlanExpectedInventory.FamilyProperty).GetString()!,
             value.GetProperty(OpenLoopPlanExpectedInventory.OfferedRateProperty).GetInt32(),
             value.GetProperty(OpenLoopPlanExpectedInventory.CancellationProofProperty).GetBoolean());
     }

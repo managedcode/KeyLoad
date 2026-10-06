@@ -38,8 +38,8 @@ internal sealed class MongoNativeReadinessRegressionProcess : IDisposable
         token.ThrowIfCancellationRequested();
         started = process.Start();
         MongoNativeReadinessRegressionProtocol.Require(started);
-        output = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardOutput, MongoNativeReadinessRegressionProtocol.OutputCharacters);
-        error = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardError, MongoNativeReadinessRegressionProtocol.ErrorCharacters);
+        output = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardOutput, NativeExecutionPolicyFixture.Harness().Value.MongoReadinessOutputCharacters);
+        error = IsolatedKeyLoadFaultRegressionOutput.ReadAsync(process.StandardError, NativeExecutionPolicyFixture.Harness().Value.MongoReadinessErrorCharacters);
         token.ThrowIfCancellationRequested();
     }
 

@@ -11,6 +11,7 @@ internal sealed class ScaledRawStorageSettingsTests
     private const int OneMillion = 1_000_000;
     private const int FiveMillion = 5_000_000;
     private const int InvalidPayloadBytes = 64;
+    private const long ExpectedHeadroomBytes = 2_147_483_648;
 
     [Test]
     [Arguments(HundredThousand, SmallPayloadBytes)]
@@ -24,12 +25,12 @@ internal sealed class ScaledRawStorageSettingsTests
         var expectedValues = (long)recordCount * payloadBytes;
         var expectedScratch = (long)payloadBytes * 3L;
         var expectedCapacity = expectedKeysAndOrder + expectedValues + expectedScratch
-            + ScaledRawStorageMemoryGuard.RequiredHeadroomBytes;
+            + ExpectedHeadroomBytes;
 
         await Assert.That(ScaledRawStorageSettings.CapacityBound(recordCount, payloadBytes, UnitBenchmarkOptions.ScaledStorage().Value.RequiredHeadroomBytes))
             .IsEqualTo(expectedCapacity);
         await Assert.That(expectedCapacity - expectedKeysAndOrder - expectedValues - expectedScratch)
-            .IsEqualTo(ScaledRawStorageMemoryGuard.RequiredHeadroomBytes);
+            .IsEqualTo(ExpectedHeadroomBytes);
     }
 
     [Test]
@@ -45,5 +46,5 @@ internal sealed class ScaledRawStorageSettingsTests
     }
 
     private static void ValidateCapacity(int recordCount, int payloadBytes)
-        => ScaledRawStorageSettings.ValidateFixtureCapacity(recordCount, payloadBytes);
+        => ScaledRawStorageSettings.ValidateFixtureCapacity(recordCount, payloadBytes, UnitBenchmarkOptions.ScaledPreparation.Value);
 }

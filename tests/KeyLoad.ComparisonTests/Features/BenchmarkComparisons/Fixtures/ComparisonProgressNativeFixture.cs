@@ -9,7 +9,7 @@ internal sealed class ComparisonProgressNativeFixture : IAsyncDisposable
     internal const string RunnerName = "comparisons";
     internal const string NodeName = "progress-native-node";
     private const string Image = "mcr.microsoft.com/dotnet/runtime:10.0";
-    private static readonly TimeSpan Deadline = TimeSpan.FromSeconds(30);
+    private static TimeSpan Deadline => NativeExecutionPolicyFixture.Harness().Value.FixtureDisposalTimeout;
 
     private ComparisonProgressNativeFixture(DistributedApplication application,
         ContainerResource runner, ContainerResource node, string progressPath)
@@ -17,7 +17,7 @@ internal sealed class ComparisonProgressNativeFixture : IAsyncDisposable
         Application = application;
         Runner = runner;
         Node = node;
-        Capture = new ComparisonTestLogCapture(application, [NodeName], progressPath);
+        Capture = new ComparisonTestLogCapture(application, NativeExecutionPolicyFixture.Harness(), [NodeName], progressPath);
     }
 
     internal DistributedApplication Application { get; }

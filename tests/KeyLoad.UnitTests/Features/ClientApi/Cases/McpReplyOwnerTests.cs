@@ -94,8 +94,8 @@ internal sealed class McpReplyOwnerTests
     [Test]
     public async Task InvalidCanonicalReplyCannotBecomeStructuredContent()
     {
-        var invalid = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(            Encoding.UTF8.GetBytes(McpOutputTestData.InvalidJson), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
-        var deep = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(            McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.OverReplyDepth), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
+        var invalid = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(Encoding.UTF8.GetBytes(McpOutputTestData.InvalidJson), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
+        var deep = Assert.ThrowsExactly<KeyLoadException>(() => McpReplyOwner.Success(McpResponseBoundaryTestData.NestedArrays(McpOutputTestData.OverReplyDepth), McpOutputTestData.ExecutionId, McpOutputTestData.MaximumBytes, UnitMcpOptions.Execution()));
         await Assert.That(invalid.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(deep.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(invalid.Message).DoesNotContain(McpOutputTestData.Marker);

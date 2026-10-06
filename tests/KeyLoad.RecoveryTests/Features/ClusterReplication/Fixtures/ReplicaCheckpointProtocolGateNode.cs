@@ -22,8 +22,8 @@ internal sealed class ReplicaCheckpointProtocolGateNode : IAsyncDisposable
     {
         Configuration = new(VoterA, [VoterA, VoterB, VoterC], directory, incarnation);
         stores = ReplicaMaterializerLifecycleStores.Open(
-            () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, FaultObserver = observer }),
-            () => new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }));
+            () => new(new(Path.Combine(directory, CanonicalDirectory)) { Incarnation = incarnation, FaultObserver = observer }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()),
+            () => new(new(Path.Combine(directory, ReplicaDirectory)) { Incarnation = incarnation }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()));
         DurableReplicaLog? openedLog = null;
         try
         {

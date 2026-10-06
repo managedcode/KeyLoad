@@ -12,14 +12,17 @@ internal static class ProjectionCrashScenario
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int ExpectedRevisionEmptyCount = 0;
+        const int PositionStep = 1;
+
         var database = CrashDatabase.Create(store, boundOutbox: true);
         Configure(database);
         var batch = database.ReadProjectionBatch(CrashFixtureValues.Principal, new(Consumer));
         var request = new CommitProjectionBatchRequest(CommandId, Consumer, batch.Token,
-            [new PutDocument(CrashFixtureValues.Projection, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, 0)]);
+            [new PutDocument(CrashFixtureValues.Projection, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, ExpectedRevisionEmptyCount)]);
         var operation = CrashDatabase.Operation(OperationKind.CommitProjectionBatch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), JsonDefaults.Serialize(operation));
-        boundary.Position = store.Position + 1;
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         database.Apply(operation).Get<ProjectionBatchResult>();
         await CrashHostPause.WaitForKillAsync();
@@ -27,6 +30,9 @@ internal static class ProjectionCrashScenario
 
     private static void Configure(DatabaseEngine database)
     {
+        const int IndexGenerationSingleItemCount = 1;
+        const int ExpectedRevisionEmptyCount = 0;
+
         foreach (var resource in new[]
         {
             new ResourceDefinition(CrashFixtureValues.Orders, ResourceKind.Collection, CrashFixtureValues.Orders),
@@ -38,10 +44,10 @@ internal static class ProjectionCrashScenario
         }
         var configure = Guid.NewGuid();
         CrashDatabase.Submit(database, OperationKind.ConfigureProjectionConsumer,
-            new ConfigureProjectionConsumerRequest(configure, Consumer, new(1, [CrashFixtureValues.Orders], [])), configure).Get<ProjectionConsumerInfo>();
+            new ConfigureProjectionConsumerRequest(configure, Consumer, new(IndexGenerationSingleItemCount, [CrashFixtureValues.Orders], [])), configure).Get<ProjectionConsumerInfo>();
         var producer = Guid.NewGuid();
         CrashDatabase.Submit(database, OperationKind.Batch,
-            new CommandRequest(producer, Partition, [new PutDocument(CrashFixtureValues.Orders, CrashFixtureValues.Input, CrashFixtureValues.EmptyJson, 0)]),
+            new CommandRequest(producer, Partition, [new PutDocument(CrashFixtureValues.Orders, CrashFixtureValues.Input, CrashFixtureValues.EmptyJson, ExpectedRevisionEmptyCount)]),
             producer).Get<CommitReceipt>();
     }
 }

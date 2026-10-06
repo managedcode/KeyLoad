@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
-using Npgsql;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace KeyLoad.Comparisons.Targets;
 

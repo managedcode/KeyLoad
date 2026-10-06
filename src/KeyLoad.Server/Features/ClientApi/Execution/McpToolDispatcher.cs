@@ -1,9 +1,9 @@
 using System.Text.Json;
-using KeyLoad.Query;
 using KeyLoad.Orleans;
+using KeyLoad.Query;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

@@ -146,7 +146,7 @@ internal static class OpenLoopResourceArtifactDecoder
         }
     }
 
-    private static bool Matches(string value, long expected)
+    private static bool Matches(string? value, long expected)
         => long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed)
             && parsed == expected && value == expected.ToString(CultureInfo.InvariantCulture);
 

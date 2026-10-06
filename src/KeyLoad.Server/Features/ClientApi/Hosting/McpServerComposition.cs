@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;

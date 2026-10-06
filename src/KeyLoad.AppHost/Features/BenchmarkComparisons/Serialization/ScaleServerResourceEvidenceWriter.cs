@@ -13,6 +13,7 @@ internal static class ScaleServerResourceEvidenceWriter
     private const string ExceededSidecar = "Server resource evidence exceeded its bound.";
     private const string ExceededWorker = "The isolated worker report exceeded its bound.";
     private const int EmptyValue = 0;
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
     internal static async Task WriteAsync(ComparisonWorkerSelection selection, string output,
         ScaleServerObservationSnapshot observations, IOptions<ScaleServerResourceOptions> resourceOptions,
@@ -33,7 +34,7 @@ internal static class ScaleServerResourceEvidenceWriter
             selection.Scenario.ToString(), selection.Profile, workerHash, observations.Hardware,
             observations.AppHostEnvelope, observations.Containers, observations.MissingEvidence,
             observations.Qualified, observations.ObservationPolicy);
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(document, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(document, SerializerOptions);
         if (bytes.Length > settings.MaxSidecarBytes)
         {
             throw new InvalidDataException(ExceededSidecar);
@@ -57,8 +58,10 @@ internal static class ScaleServerResourceEvidenceWriter
         while (true)
         {
             var count = await stream.ReadAsync(buffer, token);
-            if (count == EmptyValue) { break; }
-            if (total > settings.MaxWorkerBytes - count) { throw new InvalidDataException(ExceededWorker); }
+            if (count == EmptyValue)
+            { break; }
+            if (total > settings.MaxWorkerBytes - count)
+            { throw new InvalidDataException(ExceededWorker); }
             total += count;
             hash.AppendData(buffer, EmptyValue, count);
         }

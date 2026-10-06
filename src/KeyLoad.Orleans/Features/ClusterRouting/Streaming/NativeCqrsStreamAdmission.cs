@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;

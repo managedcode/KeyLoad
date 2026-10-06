@@ -5,7 +5,7 @@ using Orleans.TestingHost;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
-internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture fixture)
+internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture fixture) : IAsyncDisposable
 {
     private const int NativeSiloCount = 1;
     private TestCluster? cluster;
@@ -73,7 +73,7 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
     {
         using var deadline = new CancellationTokenSource(fixture.TestProfile.ShutdownTimeout);
         await CloseSchedulingAsync(failures);
-        await StopSilosAsync(deadline.Token, failures);
+        await StopSilosAsync(failures, deadline.Token);
         await DrainRequestWorkAsync(failures);
         await DisposeClusterAsync(failures);
         await DisposeRequestWorkAsync(failures);
@@ -81,6 +81,13 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
         {
             DisposeDatabase(failures);
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        var failures = new List<Exception>();
+        await StopAsync(failures, disposeDatabase: true);
+        NativeSagaTimeoutCleanup.ThrowFailures(failures);
     }
 
     private static TestClusterBuilder CreateBuilder()
@@ -119,7 +126,7 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
         }, failures);
     }
 
-    private async Task StopSilosAsync(CancellationToken cancellationToken, ICollection<Exception> failures)
+    private async Task StopSilosAsync(ICollection<Exception> failures, CancellationToken cancellationToken)
     {
         if (cluster is null)
         {
@@ -142,8 +149,22 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
     {
         if (cluster is not null)
         {
-            await NativeSagaTimeoutCleanup.ObserveAsync(() => Cluster.DisposeAsync().AsTask(), failures);
-            cluster = null;
+            try
+            {
+                await cluster.DisposeAsync();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            finally
+            {
+                cluster = null;
+            }
         }
     }
 
@@ -151,8 +172,22 @@ internal sealed class NativeSagaTimeoutRuntimeLifecycle(NativeSagaTimeoutFixture
     {
         if (requestWork is not null)
         {
-            await NativeSagaTimeoutCleanup.ObserveAsync(() => requestWork.DisposeAsync().AsTask(), failures);
-            requestWork = null;
+            try
+            {
+                await requestWork.DisposeAsync();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            finally
+            {
+                requestWork = null;
+            }
         }
     }
 

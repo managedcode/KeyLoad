@@ -12,6 +12,11 @@ internal static class NativeCoverageSelection
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var selected = configuration[NativeCoverageProtocol.FormatSetting];
+        if (suite == TestSuiteProtocol.ComparisonSuite
+            && (settings is not null || output is not null || selected is not null))
+        {
+            throw new InvalidOperationException(NativeCoverageProtocol.InvalidSelection);
+        }
         if (selected is null)
         {
             return NativeCoverageProtocol.CoberturaFormat;

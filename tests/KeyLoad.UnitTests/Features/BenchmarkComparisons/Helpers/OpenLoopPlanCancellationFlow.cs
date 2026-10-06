@@ -44,7 +44,7 @@ internal static class OpenLoopPlanCancellationFlow
             {
                 return;
             }
-            await ServerFailureObserver.ObserveAsync(() => cancellation.CancelAsync(), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(cancellation.CancelAsync, failures).ConfigureAwait(false);
             await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
             originalObserved = original.IsCompleted;
         }

@@ -84,7 +84,7 @@ internal sealed class KurrentCleanupDiagnosticTests
     [Test]
     public async Task FirstNativeFailureStopsAdmissionAndSurvivesLaterDisposalFailure()
     {
-        var state = new KurrentCleanupState(3);
+        var state = new KurrentCleanupState(3, NativeExecutionPolicyFixture.Lifecycle());
         var first = new RpcException(new Status(StatusCode.DeadlineExceeded, Secret));
         await Assert.That(state.TrySubmit(CancellationToken.None, out var index)).IsTrue();
         await Assert.That(index).IsEqualTo(0);

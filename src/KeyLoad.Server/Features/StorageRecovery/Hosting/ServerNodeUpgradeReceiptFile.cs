@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 

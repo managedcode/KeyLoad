@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using Microsoft.Extensions.Options;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 

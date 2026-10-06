@@ -39,13 +39,13 @@ internal sealed class ScaleProfileForwardingTests
         configuration[TestSuiteSettings.SuiteSetting] = "unit";
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(configuration));
         configuration[TestSuiteSettings.SuiteSetting] = "comparison";
-        configuration["KeyLoadTests:Filter"] = "/*/*/Other/*";
+        configuration[TestSuiteProtocol.FilterSetting] = "/*/*/Other/*";
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(configuration));
-        configuration["KeyLoadTests:Filter"] = Filter;
+        configuration[TestSuiteProtocol.FilterSetting] = Filter;
         configuration[ComparisonWorkerSelection.ScaleProfileSetting] = Profile;
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(configuration));
         configuration[ComparisonWorkerSelection.ScaleProfileSetting] = null;
-        configuration["Benchmarks:Concurrency"] = "8";
+        configuration[TestOrchestrationConfigurationKeys.BenchmarksConcurrency] = "8";
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(configuration));
     }
 
@@ -82,7 +82,7 @@ internal sealed class ScaleProfileForwardingTests
     {
         var configuration = new ConfigurationManager();
         configuration[TestSuiteSettings.SuiteSetting] = "comparison";
-        configuration["KeyLoadTests:Filter"] = Filter;
+        configuration[TestSuiteProtocol.FilterSetting] = Filter;
         configuration[ComparisonWorkerSelection.TargetSetting] = "KeyLoad";
         configuration[ComparisonWorkerSelection.NodeCountSetting] = "3";
         configuration[ComparisonWorkerSelection.ScenarioSetting] = nameof(Scenario.DocumentWrite);

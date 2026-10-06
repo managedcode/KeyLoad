@@ -10,7 +10,8 @@ internal static class ClusterFixturePhysicalShardIdentity
     internal static LocalProfile ReadProfile(string root)
     {
         var path = Path.Combine(root, ClusterFixtureProtocol.ProfileFileName);
-        return global::ClusterProfileStore.DeserializeCurrent(global::ClusterProfileStore.ReadBoundedBytes(path));
+        var execution = IntegrationProfileOptions.Execution();
+        return global::ClusterProfileStore.DeserializeCurrent(global::ClusterProfileStore.ReadBoundedBytes(path, execution), execution);
     }
 
     internal static void OverrideNode(IDistributedApplicationTestingBuilder builder, string? nodeName, Guid identity)

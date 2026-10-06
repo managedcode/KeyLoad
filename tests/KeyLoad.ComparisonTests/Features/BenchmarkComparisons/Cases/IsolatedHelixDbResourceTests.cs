@@ -5,6 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedHelixDbResourceTests
 {
+    private const string HelixDataDirectorySetting = "HELIX_DATA_DIR";
     [Test]
     public async Task HelixDbUsesPinnedServerWithNativeDirectoryPersistence()
     {
@@ -25,7 +26,7 @@ internal sealed class IsolatedHelixDbResourceTests
         await Assert.That(mount.IsReadOnly).IsFalse();
         await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single(item => item.Name == "http").TargetPort).IsEqualTo(8080);
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
-        await Assert.That(environment["HELIX_DATA_DIR"]).IsEqualTo("/var/lib/helix");
+        await Assert.That(environment[HelixDataDirectorySetting]).IsEqualTo("/var/lib/helix");
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
         await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__0"])
             .IsEqualTo("{isolated-helixdb.bindings.http.url}");

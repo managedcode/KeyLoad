@@ -7,6 +7,9 @@ internal static class ExistingStoreInspectorFailures
 
     internal static (string[] Types, string? Code) Collect(List<Exception> originals)
     {
+        const int OriginalsCountStep = 1;
+        const int IndexValidationBoundary = 0;
+
         if (originals.Count > ExistingStoreInspectorProtocol.MaximumFailureTypes)
         {
             throw new InvalidDataException(FailureGraphTooLarge);
@@ -14,7 +17,7 @@ internal static class ExistingStoreInspectorFailures
         var types = new List<string>();
         var visited = new HashSet<Exception>(ReferenceEqualityComparer.Instance);
         var pending = new Stack<Exception>();
-        for (var index = originals.Count - 1; index >= 0; index--)
+        for (var index = originals.Count - OriginalsCountStep; index >= IndexValidationBoundary; index--)
         {
             pending.Push(originals[index]);
         }
@@ -43,13 +46,16 @@ internal static class ExistingStoreInspectorFailures
 
     private static void PushCauses(Exception original, Stack<Exception> pending)
     {
+        const int InnerExceptionsCountStep = 1;
+        const int IndexValidationBoundary = 0;
+
         if (original is AggregateException aggregate)
         {
             if (pending.Count + aggregate.InnerExceptions.Count > ExistingStoreInspectorProtocol.MaximumFailureTypes)
             {
                 throw new InvalidDataException(FailureGraphTooLarge);
             }
-            for (var index = aggregate.InnerExceptions.Count - 1; index >= 0; index--)
+            for (var index = aggregate.InnerExceptions.Count - InnerExceptionsCountStep; index >= IndexValidationBoundary; index--)
             {
                 pending.Push(aggregate.InnerExceptions[index]);
             }

@@ -67,7 +67,7 @@ internal sealed class SqlOperationCommentBudgetTests
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var reader = new SqlOperationSyntaxReader(SqlOperationCommentTestData.Block,
-            SqlOperationCommentTestData.CallTokens, SqlOperationCommentTestData.ShallowDepth, cancellation.Token);
+            SqlOperationCommentTestData.CallTokens, SqlOperationCommentTestData.ShallowDepth, UnitExecutionOptions.QueryExecution(), cancellation.Token);
         var failure = Assert.ThrowsExactly<OperationCanceledException>(reader.SkipTrivia);
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
     }

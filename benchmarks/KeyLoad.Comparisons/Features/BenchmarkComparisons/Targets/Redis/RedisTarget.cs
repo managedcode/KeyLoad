@@ -1,5 +1,5 @@
-using StackExchange.Redis;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 

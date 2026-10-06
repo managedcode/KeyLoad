@@ -18,7 +18,7 @@ internal static class PostgresSchemaOwnership
     {
         var runId = Guid.NewGuid().ToString("D");
         var schema = PostgresSchemaSupport.Schema(runId);
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         var disposeStarted = false;
         try
         {
@@ -50,7 +50,7 @@ internal static class PostgresSchemaOwnership
     {
         var runId = Guid.NewGuid().ToString("D");
         var schema = PostgresSchemaSupport.Schema(runId);
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         var disposeStarted = false;
         try
         {
@@ -80,7 +80,7 @@ internal static class PostgresSchemaOwnership
     {
         var runId = Guid.NewGuid().ToString("D");
         var schema = PostgresSchemaSupport.Schema(runId);
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         var disposeStarted = false;
         try
         {
@@ -129,7 +129,8 @@ internal static class PostgresSchemaOwnership
     private static async Task DropOwnedSchemaAsync(string connectionString, string schema,
         CancellationToken cancellationToken = default)
     {
-        using var cleanup = cancellationToken.CanBeCanceled ? null : new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
+        using var cleanup = cancellationToken.CanBeCanceled ? null : new CancellationTokenSource(policy.PostgresSchemaCleanupTimeout);
         var token = cancellationToken.CanBeCanceled ? cancellationToken : cleanup!.Token;
         await using var connection = await PostgresSchemaSupport.OpenAsync(connectionString, token);
         await using var transaction = await connection.BeginTransactionAsync(token);

@@ -15,7 +15,7 @@ internal sealed class ComparisonLiveProgressObserverTests
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         try
         {
-            await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(file.Path, line));
+            await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(file.Path, line), UnitBenchmarkOptions.Native());
             observer.Begin(ComparisonProgressPhase.Measure, 2, Attempts);
             await Parallel.ForAsync(0, Attempts, TestContext.Current!.Execution.CancellationToken, (attempt, token) =>
                 WriteAttemptAsync(file, observer, attempt, token));
@@ -34,7 +34,7 @@ internal sealed class ComparisonLiveProgressObserverTests
     public async Task AcBcLive002InvalidStateIsRejectedBeforeReplacingTheAcceptedFile()
     {
         using var file = new ComparisonLiveProgressFile();
-        await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(file.Path, line));
+        await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(file.Path, line), UnitBenchmarkOptions.Native());
         observer.Begin(ComparisonProgressPhase.Initialize, 0);
         var accepted = await File.ReadAllTextAsync(file.Path, TestContext.Current!.Execution.CancellationToken);
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => observer.Begin((ComparisonProgressPhase)int.MaxValue, 0));
@@ -50,7 +50,7 @@ internal sealed class ComparisonLiveProgressObserverTests
     {
         using var file = new ComparisonLiveProgressFile();
         var missing = file.MissingPath;
-        await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(missing, line));
+        await using var observer = new ComparisonProgressObserver(line => File.WriteAllText(missing, line), UnitBenchmarkOptions.Native());
         observer.Begin(ComparisonProgressPhase.Warmup, 1, 1);
         observer.Settle(success: true);
         observer.Complete();

@@ -1,6 +1,6 @@
 using System.Text;
-using Microsoft.Extensions.Options;
 using KurrentDB.Client;
+using Microsoft.Extensions.Options;
 using KurrentEventData = KurrentDB.Client.EventData;
 
 namespace KeyLoad.Comparisons.Targets;

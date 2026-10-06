@@ -5,7 +5,6 @@ internal static class OpenLoopEvidenceContract
 {
     internal const int SchemaVersion = 1;
     internal const int MaximumArtifactBytes = 4 * 1024 * 1024;
-    internal const int JsonWriterBufferBytes = 16_384;
     internal const int Sha256HexCharacters = 64;
     internal const int GitRevisionHexCharacters = 40;
     internal const int MaximumWorkerTargetCharacters = 256;

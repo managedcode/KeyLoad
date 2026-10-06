@@ -6,6 +6,22 @@ namespace KeyLoad.CrashHost;
 
 internal static class SagaTimeoutCrashScenario
 {
+    private const int SagaDueOffsetSeconds = 5;
+    private const string CompactGuidFormat = "N";
+    private const string ConfigureTimeoutQueueIdText = "f6831ec3-e664-43b1-94e4-9a93af3efbd0";
+    private const string TimeoutIdentitySeparator = "-";
+    private const string TimeoutRevisionHexFormat = "x16";
+
+    private const string FixtureTenant = "tenant";
+    private const string FixtureDatabase = "database";
+    private const string MessagingDomain = "messaging";
+    private const string ConfigureWorkQueueIdText = "be44ba62-d912-46f7-8e9f-53934859531b";
+    private const string ConfigureSagaCommandIdText = "f64ff08b-299d-42ae-a39e-b6536fdb7295";
+    private const string ExpireCommandIdText = "842223f3-9f76-4ba2-8a62-c3bb0f0fe8f2";
+
+    private const int TimeoutMessageLifetimeDays = 1;
+    [ImmutableTemporalData]
+    private static readonly TimeSpan TimeoutMessageLifetime = TimeSpan.FromDays(TimeoutMessageLifetimeDays);
     internal const string Mode = "saga-timeout-crash";
     internal const string OperationFile = "saga-timeout-operation.json";
     internal const string SeedTailFile = "saga-timeout-seed-tail.txt";
@@ -22,34 +38,36 @@ internal static class SagaTimeoutCrashScenario
     internal const long WaitingRevision = 1;
     internal const long TimedOutRevision = 2;
     internal const long ExpectedRevision = 1;
-    internal static readonly PartitionRef Partition = new("tenant", "database", "messaging", PartitionId);
-    internal static readonly Guid ConfigureWorkQueueId = Guid.Parse("be44ba62-d912-46f7-8e9f-53934859531b");
-    internal static readonly Guid ConfigureTimeoutQueueId = Guid.Parse("f6831ec3-e664-43b1-94e4-9a93af3efbd0");
-    internal static readonly Guid ConfigureSagaCommandId = Guid.Parse("f64ff08b-299d-42ae-a39e-b6536fdb7295");
-    internal static readonly Guid ExpireCommandId = Guid.Parse("842223f3-9f76-4ba2-8a62-c3bb0f0fe8f2");
+    internal static readonly PartitionRef Partition = new(FixtureTenant, FixtureDatabase, MessagingDomain, PartitionId);
+    internal static readonly Guid ConfigureWorkQueueId = Guid.Parse(ConfigureWorkQueueIdText);
+    internal static readonly Guid ConfigureTimeoutQueueId = Guid.Parse(ConfigureTimeoutQueueIdText);
+    internal static readonly Guid ConfigureSagaCommandId = Guid.Parse(ConfigureSagaCommandIdText);
+    internal static readonly Guid ExpireCommandId = Guid.Parse(ExpireCommandIdText);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int PositionStep = 1;
+
         var database = CrashDatabase.Create(store, tenantId: Partition.TenantId);
         var lane = new QueueLaneRef(Partition, Queue);
         var timeoutLane = new QueueLaneRef(Partition, TimeoutQueue);
         ConfigureQueue(database, Queue, ConfigureWorkQueueId);
         ConfigureQueue(database, TimeoutQueue, ConfigureTimeoutQueueId);
-        var deadline = TimeProvider.System.GetUtcNow().AddSeconds(5);
+        var deadline = TimeProvider.System.GetUtcNow().AddSeconds(SagaDueOffsetSeconds);
         ConfigureSaga(database, lane, timeoutLane, deadline);
         await WaitUntilDueAsync(deadline);
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
         var operation = CreateExpiryOperation(lane);
         await SaveOperationAsync(directory, tail, operation);
-        boundary.Position = store.Position + 1;
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         _ = database.Apply(operation).Get<CommitReceipt>();
         await CrashHostPause.WaitForKillAsync();
     }
 
     internal static string TimeoutMessageId()
-        => string.Concat(MessagePrefix, Guid.Parse(SagaIdText).ToString("N"), "-",
-            WaitingRevision.ToString("x16", CultureInfo.InvariantCulture));
+        => string.Concat(MessagePrefix, Guid.Parse(SagaIdText).ToString(CompactGuidFormat), TimeoutIdentitySeparator,
+            WaitingRevision.ToString(TimeoutRevisionHexFormat, CultureInfo.InvariantCulture));
 
     private static void ConfigureQueue(DatabaseEngine database, string queue, Guid commandId)
     {
@@ -62,9 +80,11 @@ internal static class SagaTimeoutCrashScenario
     private static void ConfigureSaga(DatabaseEngine database, QueueLaneRef lane, QueueLaneRef timeoutLane,
         DateTimeOffset deadline)
     {
+        const int NoSagaRevision = 0;
+
         var timeout = new SagaTimeoutDefinition(timeoutLane, TimeoutPayload, TimeoutHeaders,
-            TimeToLive: TimeSpan.FromDays(1));
-        var saga = new CompareExchangeSaga(lane, Guid.Parse(SagaIdText), 0, SagaPhase.Waiting,
+            TimeToLive: TimeoutMessageLifetime);
+        var saga = new CompareExchangeSaga(lane, Guid.Parse(SagaIdText), NoSagaRevision, SagaPhase.Waiting,
             StateJson, deadline, timeout);
         var command = new CommandRequest(ConfigureSagaCommandId, Partition, [saga]);
         _ = CrashDatabase.Submit(database, OperationKind.Batch, command, ConfigureSagaCommandId).Get<CommitReceipt>();

@@ -7,10 +7,10 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class RequestCqrsProbeFixtureOperations
 {
     internal static (string Directory, byte[] OwnerBytes) PrepareNode(string root, string sessionId,
-        string node, string voter)
+        string node, string voter, RequestCqrsProbeJson json)
     {
         var bytes = RequestCqrsProbeJsonWriter.Owner(sessionId, voter);
-        var owner = RequestCqrsProbeJson.ReadOwner(bytes);
+        var owner = json.ReadOwner(bytes);
         if (owner.Version != RequestCqrsProbeFixtureProtocol.Version
             || owner.Kind != RequestCqrsProbeFixtureProtocol.OwnerKind || owner.SessionId != sessionId
             || owner.Voter != voter)

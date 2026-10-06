@@ -8,8 +8,8 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 internal sealed class OpenSearchNativeVectorIndex(Uri endpoint, int nodeCount) : IAsyncDisposable
 {
     private const int Dimensions = 2;
-    private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(10);
+    private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchRequestTimeout;
+    private static TimeSpan CleanupTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchIndexCleanupTimeout;
     private readonly HttpClient client = new() { BaseAddress = endpoint, Timeout = RequestTimeout };
     private readonly string index = OpenSearchNames.IndexNamePrefix + Guid.NewGuid().ToString(OpenSearchNames.GuidFormat);
     private bool owned;

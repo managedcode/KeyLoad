@@ -1,10 +1,14 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Comparisons;
 
 internal static class VectorExactOracle
 {
     internal static IReadOnlyList<IReadOnlyList<VectorNeighbor>> Compute(VectorComparisonCorpus corpus,
-        IReadOnlyList<ReadOnlyMemory<float>> queries, CancellationToken cancellationToken)
+        IReadOnlyList<ReadOnlyMemory<float>> queries, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        CancellationToken cancellationToken)
     {
+        var cancellationMask = NativeComparisonExecutionOptions.Require(executionOptions).Value.VectorCancellationCheckMask;
         ArgumentNullException.ThrowIfNull(queries);
         if (queries.Count == VectorExactOracleValues.FirstIndex || queries.Count > corpus.Profile.QueryVectorCount)
         {
@@ -16,7 +20,7 @@ internal static class VectorExactOracle
         Span<float> vector = stackalloc float[corpus.Profile.Dimensions];
         for (var number = VectorExactOracleValues.FirstIndex; number < corpus.Profile.RecordCount; number++)
         {
-            if ((number & VectorExactOracleValues.CancellationChunkMask) == VectorExactOracleValues.FirstIndex)
+            if ((number & cancellationMask) == VectorExactOracleValues.FirstIndex)
             {
                 cancellationToken.ThrowIfCancellationRequested();
             }

@@ -84,7 +84,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task GenuineLegacyJsonEnvelopeSignatureIsExplicitlyInvalidated()
     {
         using var fixture = new TestDatabase();
-        await AssertLegacyRejectedAsync(fixture, new(fixture.Database, TimeProvider.System), OriginalJson);
+        await AssertLegacyRejectedAsync(fixture, new(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing()), OriginalJson);
     }
 
     [Test]

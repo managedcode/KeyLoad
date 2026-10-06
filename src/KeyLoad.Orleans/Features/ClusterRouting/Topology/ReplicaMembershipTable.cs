@@ -32,7 +32,8 @@ public sealed class ReplicaMembershipTable : IMembershipTable
         : this(database, coordinator, endpoint, clusterId, internalPrincipal, clock,
             ReplicaMembershipProtocol.UnboundedRows,
             membershipOptions ?? throw new ArgumentNullException(nameof(membershipOptions)),
-            executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), startupCancellation) { }
+            executionOptions ?? throw new ArgumentNullException(nameof(executionOptions)), startupCancellation)
+    { }
 
     /// <summary>Creates a profile-bounded authority provider without changing the default provider contract.</summary>
     internal ReplicaMembershipTable(DatabaseEngine database, ICommitCoordinator coordinator, ReplicaConsensus endpoint,

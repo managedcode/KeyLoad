@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests;
@@ -42,6 +43,8 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         Canonical.Configure(ReplicaAppliedPositionWaitTests.Resource, ResourceKind.Collection);
     }
 
+    private static readonly System.Text.CompositeFormat DocumentBodyFormat = System.Text.CompositeFormat.Parse(BodyFormat);
+
     internal void Commit(params string[] documentIds)
     {
         var entries = new List<ReplicaEntry>(documentIds.Length);
@@ -55,7 +58,7 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
             var commandId = Guid.NewGuid();
             var request = new CommandRequest(commandId, Canonical.Partition,
                 [new PutDocument(ReplicaAppliedPositionWaitTests.Resource, documentId,
-                    string.Format(System.Globalization.CultureInfo.InvariantCulture, BodyFormat, documentId))]);
+                    string.Format(System.Globalization.CultureInfo.InvariantCulture, DocumentBodyFormat, documentId))]);
             var operation = new ReplicatedOperation(commandId, OperationKind.Batch, RootPrincipal,
                 TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
             entries.Add(new(nextIndex++, 1, Canonical.Database.NormalizeOperation(operation)));

@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 
 namespace KeyLoad.Orleans;

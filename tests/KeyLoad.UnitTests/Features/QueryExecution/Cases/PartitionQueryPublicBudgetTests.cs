@@ -46,7 +46,7 @@ internal sealed class PartitionQueryPublicBudgetTests
         SeedOne(fixture);
         var query = PartitionQueryPublicTestSupport.Query(1);
         var request = QueryValidation.Normalize(new AstQueryRequest(fixture.First, query, AllowFullScan: true),
-            fixture.Database.Limits);
+            fixture.Database.Limits, UnitExecutionOptions.QueryExecution().Value);
         return new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery("root", request, [fixture.First]);
     }
 

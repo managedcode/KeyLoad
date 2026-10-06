@@ -9,7 +9,7 @@ internal static class OpenSearchNativeVectorRegression
 {
     private const string FirstNode = "isolated-opensearch-1", Http = "http", GuidFormat = "N";
     private const int QueryNumber = 170, HigherNeighbor = 2289, LowerNeighbor = 1272;
-    private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(30);
+    private static TimeSpan RequestTimeout => NativeExecutionPolicyFixture.Harness().Value.OpenSearchRequestTimeout;
 
     /// <summary>AC-BC-FAIL-010: real post-start native1/2/3 resources retain exact double rank, projection and caller cancellation.</summary>
     internal static async Task VerifyAsync(DistributedApplication app, int nodeCount, CancellationToken token)

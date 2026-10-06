@@ -38,9 +38,12 @@ internal sealed class McpFrameBody : IDisposable
     /// <summary>Gets borrowed checked bytes that must not survive this owner's disposal.</summary>
     internal ReadOnlyMemory<byte> Bytes
     {
-        get {
+        get
+        {
             const int StartEmptyCount = 0;
- ThrowIfDisposed(); return buffer.GetBuffer().AsMemory(StartEmptyCount, WireBytes); }
+            ThrowIfDisposed();
+            return buffer.GetBuffer().AsMemory(StartEmptyCount, WireBytes);
+        }
     }
 
     /// <summary>Reads and checks one complete bounded wire frame without retaining an overrun byte.</summary>

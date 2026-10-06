@@ -60,11 +60,11 @@ internal sealed class ScaledIsolatedPlanTests
         var control = (await IsolatedPlanNodeProcess.ProbeAsync("create"))[IsolatedPlanFields.Value]!.AsObject();
         var composite = (await IsolatedPlanNodeProcess.ProbeAsync("create-composite"))[IsolatedPlanFields.Value]!.AsObject();
         await Assert.That(composite[IsolatedPlanFields.SchemaVersion]!.GetValue<int>()).IsEqualTo(3);
-        await Assert.That(JsonNode.DeepEquals(composite["control"], control)).IsTrue();
+        await Assert.That(JsonNode.DeepEquals(composite[IsolatedPlanFields.Control], control)).IsTrue();
         await Assert.That(control[IsolatedPlanFields.Cells]!.AsArray().Count).IsEqualTo(330);
         var scales = composite[IsolatedPlanFields.ScaledProfiles]!.AsArray();
         await Assert.That(scales.Count).IsEqualTo(2);
-        var vectors = composite["vectorProfiles"]!.AsArray();
+        var vectors = composite[IsolatedPlanFields.VectorProfiles]!.AsArray();
         await Assert.That(vectors.Count).IsEqualTo(24);
         var ids = control[IsolatedPlanFields.Cells]!.AsArray()
             .Concat(scales.SelectMany(profile => profile![IsolatedPlanFields.Cells]!.AsArray()))

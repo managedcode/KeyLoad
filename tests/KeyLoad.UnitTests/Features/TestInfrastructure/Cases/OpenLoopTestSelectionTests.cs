@@ -2,7 +2,6 @@ using Aspire.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.UnitTests.Features.TestInfrastructure;
 
 namespace KeyLoad.UnitTests.Features.TestInfrastructure.Cases;
 
@@ -42,15 +41,15 @@ internal sealed class OpenLoopTestSelectionTests
     }
 
     [Test]
-    [Arguments("KeyLoadTests:OpenLoopRate", "")]
-    [Arguments("KeyLoadTests:OpenLoopRate", " 250")]
-    [Arguments("KeyLoadTests:OpenLoopRate", "0250")]
-    [Arguments("KeyLoadTests:OpenLoopRate", "2500")]
-    [Arguments("KeyLoadTests:ScaleProfile", "")]
-    [Arguments("KeyLoadTests:ScaleProfile", "scaled-1m-c16")]
+    [Arguments(TestSuiteProtocol.OpenLoopRateSetting, "")]
+    [Arguments(TestSuiteProtocol.OpenLoopRateSetting, " 250")]
+    [Arguments(TestSuiteProtocol.OpenLoopRateSetting, "0250")]
+    [Arguments(TestSuiteProtocol.OpenLoopRateSetting, "2500")]
+    [Arguments(TestSuiteProtocol.ScaleProfileSetting, "")]
+    [Arguments(TestSuiteProtocol.ScaleProfileSetting, "scaled-1m-c16")]
     [Arguments("Benchmarks:OpenLoopCancellationProof", "true")]
-    [Arguments("KeyLoadTests:Suite", "unit")]
-    [Arguments("KeyLoadTests:Filter", "/*/*/IsolatedNativeComparisonTests/*")]
+    [Arguments(TestSuiteProtocol.SuiteSetting, "unit")]
+    [Arguments(TestSuiteProtocol.FilterSetting, "/*/*/IsolatedNativeComparisonTests/*")]
     [Arguments("Benchmarks:OpenLoopRate", "1000")]
     [Arguments("Benchmarks:ScaleProfile", "scaled-100k-c16")]
     [Arguments("Benchmarks:Operations", "100000")]
@@ -61,19 +60,19 @@ internal sealed class OpenLoopTestSelectionTests
     [Arguments("Benchmarks:Enabled", "true")]
     [Arguments("KeyLoadTests:TimeoutMinutes", "60")]
     [Arguments("KeyLoadTests:LocalRf3Image:Enabled", "true")]
-    [Arguments("Benchmarks:EvidenceProfile", "scaled-1m-c16")]
+    [Arguments(TestOrchestrationConfigurationKeys.BenchmarksEvidenceProfile, "scaled-1m-c16")]
     public async Task AcOpenLoopRejectsMixedConfigurationBeforeAddingAnAspireResource(string key, string value)
     {
         await AssertRejectedWithoutResourceAsync(OpenLoopAspirePlanTestBuilder.CreateBuilder(false,
-            new(key, value)));
+            new KeyValuePair<string, string?>(key, value)));
     }
 
     [Test]
     public async Task AcOpenLoopRejectsInactiveFiveMillionProfileBeforeAddingAnAspireResource()
     {
         var builder = OpenLoopAspirePlanTestBuilder.CreateBuilder(false,
-            new("KeyLoadTests:ScaleProfile", "scaled-5m-c16"),
-            new("Benchmarks:EvidenceProfile", "scaled-5m-c16"));
+            new(TestSuiteProtocol.ScaleProfileSetting, "scaled-5m-c16"),
+            new(TestOrchestrationConfigurationKeys.BenchmarksEvidenceProfile, "scaled-5m-c16"));
         await AssertRejectedWithoutResourceAsync(builder);
     }
 
@@ -81,11 +80,11 @@ internal sealed class OpenLoopTestSelectionTests
     public async Task AcOpenLoopRejectsMissingSuiteOrScaleBeforeAddingAnAspireResource()
     {
         var missingSuite = OpenLoopAspirePlanTestBuilder.CreateBuilder();
-        missingSuite.Configuration["KeyLoadTests:Suite"] = null;
+        missingSuite.Configuration[TestSuiteProtocol.SuiteSetting] = null;
         await AssertRejectedWithoutResourceAsync(missingSuite);
 
         var missingScale = OpenLoopAspirePlanTestBuilder.CreateBuilder();
-        missingScale.Configuration["KeyLoadTests:ScaleProfile"] = null;
+        missingScale.Configuration[TestSuiteProtocol.ScaleProfileSetting] = null;
         await AssertRejectedWithoutResourceAsync(missingScale);
     }
 
@@ -96,7 +95,7 @@ internal sealed class OpenLoopTestSelectionTests
     public async Task AcOpenLoopCancellationProofRejectsAnyOtherNativeIdentityBeforeResources(string key, string value)
     {
         await AssertRejectedWithoutResourceAsync(OpenLoopAspirePlanTestBuilder.CreateBuilder(true,
-            new(key, value)));
+            new KeyValuePair<string, string?>(key, value)));
     }
 
     [Test]
@@ -115,7 +114,7 @@ internal sealed class OpenLoopTestSelectionTests
         var arguments = new[] { OpenLoopRateCliAssignment };
         Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Requested(arguments));
         var builder = OpenLoopAspirePlanTestBuilder.CreateBuilderWithCommandLineArguments(arguments,
-            new(TestSuiteSelectionValidator.OpenLoopRateSetting, null));
+            new KeyValuePair<string, string?>(TestSuiteSelectionValidator.OpenLoopRateSetting, null));
         await AssertRejectedWithoutResourceAsync(builder);
     }
 
@@ -131,8 +130,8 @@ internal sealed class OpenLoopTestSelectionTests
     {
         var filter = proof ? ProofFilter : MeasuredFilter;
         var builder = OpenLoopAspirePlanTestBuilder.CreateBuilder(proof,
-            new("KeyLoadTests:OpenLoopRate", rate), new("KeyLoadTests:Filter", filter),
-            new("KeyLoadTests:ScaleProfile", profile), new("Benchmarks:EvidenceProfile", profile));
+            new(TestSuiteProtocol.OpenLoopRateSetting, rate), new(TestSuiteProtocol.FilterSetting, filter),
+            new(TestSuiteProtocol.ScaleProfileSetting, profile), new(TestOrchestrationConfigurationKeys.BenchmarksEvidenceProfile, profile));
         return await OpenLoopAspirePlanTestBuilder.ComposeAndReadAsync(builder);
     }
 
@@ -142,20 +141,20 @@ internal sealed class OpenLoopTestSelectionTests
         var filterIndex = Array.IndexOf(plan.Arguments, "--treenode-filter");
         await Assert.That(filterIndex >= 0).IsTrue();
         await Assert.That(plan.Arguments[filterIndex + 1]).IsEqualTo(filter);
-        await Assert.That(plan.Environment["Benchmarks__OpenLoopRate"]).IsEqualTo(rate);
-        await Assert.That(plan.Environment["Benchmarks__ScaleProfile"]).IsEqualTo(profile);
-        await Assert.That(plan.Environment.ContainsKey("Benchmarks__VectorProfile")).IsFalse();
-        await Assert.That(plan.Environment["KeyLoadTests__VectorProfile"]).IsEqualTo(string.Empty);
-        await Assert.That(plan.Environment["KeyLoadTests__OpenLoopRate"]).IsEqualTo(string.Empty);
-        await Assert.That(plan.Environment["KeyLoadTests__ScaleProfile"]).IsEqualTo(string.Empty);
-        await Assert.That(plan.Environment["KeyLoadTests__Suite"]).IsEqualTo(string.Empty);
+        await Assert.That(plan.Environment[TestSuiteProtocol.OpenLoopNativeRateEnvironment]).IsEqualTo(rate);
+        await Assert.That(plan.Environment[TestOrchestrationConfigurationKeys.BenchmarksScaleProfileEnvironment]).IsEqualTo(profile);
+        await Assert.That(plan.Environment.ContainsKey(TestOrchestrationConfigurationKeys.BenchmarksVectorProfileEnvironment)).IsFalse();
+        await Assert.That(plan.Environment[TestSuiteProtocol.VectorProfileEnvironment]).IsEqualTo(string.Empty);
+        await Assert.That(plan.Environment[TestSuiteProtocol.OpenLoopRateEnvironment]).IsEqualTo(string.Empty);
+        await Assert.That(plan.Environment[TestSuiteProtocol.ScaleProfileEnvironment]).IsEqualTo(string.Empty);
+        await Assert.That(plan.Environment[TestSuiteProtocol.SuiteEnvironment]).IsEqualTo(string.Empty);
     }
 
     private static async Task AssertRejectedWithoutResourceAsync(IDistributedApplicationBuilder builder)
     {
-        var resourceCount = builder.Resources.Count();
+        var resourceCount = builder.Resources.Count;
         Assert.ThrowsExactly<InvalidOperationException>(() =>
             KeyLoadAppHostApplication.AddKeyLoad(builder));
-        await Assert.That(builder.Resources.Count()).IsEqualTo(resourceCount);
+        await Assert.That(builder.Resources.Count).IsEqualTo(resourceCount);
     }
 }

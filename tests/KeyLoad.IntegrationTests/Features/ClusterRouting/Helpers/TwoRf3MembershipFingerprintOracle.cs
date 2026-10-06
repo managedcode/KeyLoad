@@ -63,7 +63,8 @@ internal static class TwoRf3MembershipFingerprintOracle
         CancellationToken token)
     {
         var parameter = model.Resources.OfType<ParameterResource>().Single(resource => resource.Name == name);
-        return await parameter.GetValueAsync(token).ConfigureAwait(false);
+        return await parameter.GetValueAsync(token).ConfigureAwait(false)
+            ?? throw new InvalidOperationException(TwoRf3MembershipProtocol.MissingState);
     }
 
     private static async Task<ReplicaSiloDiscovery[]> ReadSixAsync(DistributedApplication app,
@@ -102,7 +103,7 @@ internal static class TwoRf3MembershipFingerprintOracle
     {
         var failure = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             TwoRf3MembershipSignedDiscovery.ReadAsync(app, TwoRf3MembershipProtocol.Node4,
-                clusterId, incarnation, secret, token)).ConfigureAwait(false);
+                clusterId, incarnation, secret, token));
         await Assert.That(failure).IsNotNull();
     }
 

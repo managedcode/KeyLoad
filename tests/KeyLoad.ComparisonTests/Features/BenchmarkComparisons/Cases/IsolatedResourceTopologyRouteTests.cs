@@ -5,6 +5,7 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class IsolatedResourceTopologyRouteTests
 {
+    private const string ScenarioEnvironment = "Benchmarks__Scenario";
     private const string KeyLoad = "KeyLoad";
     private const string Redis = "Redis";
     private const string Neo4j = "Neo4j";
@@ -35,7 +36,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await Assert.That(environment[SourceSetting]).IsEqualTo(IsolatedResourceTopologyApplication.Source);
         await Assert.That(environment[TargetSetting]).IsEqualTo(KeyLoad);
         await Assert.That(int.Parse(environment[CountSetting], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(1);
-        await Assert.That(environment["Benchmarks__Scenario"]).IsEqualTo(nameof(Scenario.PointRead));
+        await Assert.That(environment[ScenarioEnvironment]).IsEqualTo(nameof(Scenario.PointRead));
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, [resources.Single(resource => resource.Name == "node1")]);
     }

@@ -73,12 +73,12 @@ internal static class ScaleServerCgroupEnvelopeReader
         var memoryPath = Path.Combine(directory, MemoryMaximum);
         var cpuText = isRoot
             ? ScaleServerCgroupHierarchy.ReadRootLimit(cpuPath)
-            : await BoundedText.ReadAsync(cpuPath, budget.Settings.MaxFileBytes, token, budget);
+            : await BoundedText.ReadAsync(cpuPath, budget.Settings.MaxFileBytes, budget, token);
         var memoryText = isRoot
             ? ScaleServerCgroupHierarchy.ReadRootLimit(memoryPath)
-            : await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, token, budget);
+            : await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, budget, token);
         var setText = await BoundedText.ReadAsync(Path.Combine(directory, Path2Text),
-            budget.Settings.MaxFileBytes, token, budget);
+            budget.Settings.MaxFileBytes, budget, token);
         return cpuText is null || memoryText is null || string.IsNullOrWhiteSpace(setText)
             ? null : (cpuText, memoryText, setText);
     }

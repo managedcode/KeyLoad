@@ -1,8 +1,8 @@
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
@@ -41,7 +41,7 @@ public static class ReportWriter
         cancellationToken.ThrowIfCancellationRequested();
         await File.WriteAllTextAsync(Path.Combine(directory, MarkdownFileName), Markdown(report), cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
-        await ReportCsvWriter.WriteAsync(report, Path.Combine(directory, CsvFileName), Number, cancellationToken).ConfigureAwait(false);
+        await ReportCsvWriter.WriteAsync(report, Path.Combine(directory, CsvFileName), Number, executionOptions, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Formats the established case summary for the console and Markdown file.</summary>

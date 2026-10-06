@@ -16,11 +16,13 @@ internal sealed class RequestCqrsProbeFixture
     private bool cleaned;
 
     internal RequestCqrsProbeFixture(string root, string sessionId,
-        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, bool captureDiscovery = false)
+        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json,
+        bool captureDiscovery = false)
     {
         Root = root;
         SessionId = sessionId;
         CaptureDiscovery = captureDiscovery;
+        Json = json;
         nodeDirectories = directories;
         ownerRecords = owners;
         foreach (var node in Nodes)
@@ -30,6 +32,7 @@ internal sealed class RequestCqrsProbeFixture
     internal string Root { get; }
     internal string SessionId { get; }
     internal bool CaptureDiscovery { get; }
+    internal RequestCqrsProbeJson Json { get; }
 
     internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId, bool captureDiscovery = false)
         => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId, captureDiscovery);
@@ -48,7 +51,7 @@ internal sealed class RequestCqrsProbeFixture
             while (arms.ContainsKey(armId))
             { armId = Guid.NewGuid(); }
             var bytes = RequestCqrsProbeJsonWriter.Arm(SessionId, armId, principalId, commandId, readKind, phase, action);
-            var decoded = RequestCqrsProbeJson.ReadArm(bytes);
+            var decoded = Json.ReadArm(bytes);
             RequestCqrsProbeArmValidator.ValidateDecoded(decoded, armId, principalId, commandId, readKind, phase, action);
             RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
                 RequestCqrsProbeFileNames.Arm(armId), bytes);
@@ -68,7 +71,7 @@ internal sealed class RequestCqrsProbeFixture
                 || arm.RequestId != requestId || arm.ReleaseWritten)
             { throw new InvalidOperationException(InvalidRelease); }
             var bytes = RequestCqrsProbeJsonWriter.Release(SessionId, armId, requestId);
-            var decoded = RequestCqrsProbeJson.ReadRelease(bytes);
+            var decoded = Json.ReadRelease(bytes);
             if (decoded.SessionId != SessionId || decoded.ArmId != armId || decoded.RequestId != requestId)
             { throw new InvalidOperationException(InvalidRelease); }
             RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,

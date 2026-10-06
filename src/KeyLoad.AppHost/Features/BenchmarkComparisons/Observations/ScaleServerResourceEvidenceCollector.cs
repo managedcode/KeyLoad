@@ -1,13 +1,13 @@
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
-    ComparisonWorkerSelection selection, string output, CancellationToken applicationStopping,
+    ComparisonWorkerSelection selection, string output,
     IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions,
-    OpenLoopResourceSelection? openLoop = null)
+    CancellationToken applicationStopping, OpenLoopResourceSelection? openLoop = null) : IAsyncDisposable
 {
     private const string RunnerName = "comparisons";
     private const string BootstrapFragment = "bootstrap";
@@ -72,65 +72,13 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     private async Task ObserveAsync(Func<CancellationToken, Task> readiness, CancellationToken applicationToken)
     {
-        const int EmptyValue = 0;
-        const int SampleInitialValue = 0;
-
         using var deadline = new CancellationTokenSource(_settings.MaximumObservation);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(
             applicationToken, _applicationStopping, _stop.Token, deadline.Token);
         var token = linked.Token;
         try
         {
-            if (!OperatingSystem.IsLinux())
-            {
-                _missing.Add(ScaleServerResourceBounds.HardwareMissing);
-                _missing.Add(ScaleServerResourceBounds.EnvelopeMissing);
-                _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-                return;
-            }
-            await readiness(token);
-            foreach (var sampler in _samplers)
-            {
-                sampler.MarkReadyBoundary();
-            }
-
-            (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(executionOptions, provenanceOptions, token);
-            if (_hardware is null)
-            {
-                _missing.Add(ScaleServerResourceBounds.HardwareMissing);
-            }
-
-            if (_envelope is null)
-            {
-                _missing.Add(ScaleServerResourceBounds.EnvelopeMissing);
-            }
-
-            if (_samplers.Length == EmptyValue)
-            {
-                _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-            }
-
-            var timer = Stopwatch.StartNew();
-            for (var sample = SampleInitialValue; sample < _settings.MaxSamples; sample++)
-            {
-                token.ThrowIfCancellationRequested();
-                var budget = new ScaleServerResourceSampleBudget(executionOptions, provenanceOptions);
-                foreach (var sampler in _samplers)
-                {
-                    await sampler.SampleAsync(budget, token);
-                    if (sampler.StorageUnavailable)
-                    {
-                        _missing.Add(ScaleServerResourceBounds.StorageMissing);
-                    }
-                }
-                if (timer.Elapsed >= _settings.MaximumObservation)
-                {
-                    _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-                    return;
-                }
-                await Task.Delay(_settings.Cadence, token);
-            }
-            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
+            await ObserveOwnedAsync(readiness, token);
         }
         catch (OperationCanceledException failure)
         {
@@ -148,6 +96,79 @@ internal sealed class ScaleServerResourceEvidenceCollector(
         catch (Aspire.Hosting.DistributedApplicationException) { _missing.Add(ScaleServerResourceBounds.SamplingMissing); }
         catch (System.ComponentModel.Win32Exception) { _missing.Add(ScaleServerResourceBounds.SamplingMissing); }
         catch (OverflowException) { _missing.Add(ScaleServerResourceBounds.SamplingMissing); }
+    }
+
+    private async Task ObserveOwnedAsync(Func<CancellationToken, Task> readiness, CancellationToken token)
+    {
+        const int EmptyValue = 0;
+        if (!OperatingSystem.IsLinux())
+        {
+            _missing.Add(ScaleServerResourceBounds.HardwareMissing);
+            _missing.Add(ScaleServerResourceBounds.EnvelopeMissing);
+            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
+            return;
+        }
+        await readiness(token);
+        foreach (var sampler in _samplers)
+        {
+            sampler.MarkReadyBoundary();
+        }
+
+        (_hardware, _envelope) = await ScaleServerHostEvidence.ReadAsync(executionOptions, provenanceOptions, token);
+        if (_hardware is null)
+        {
+            _missing.Add(ScaleServerResourceBounds.HardwareMissing);
+        }
+
+        if (_envelope is null)
+        {
+            _missing.Add(ScaleServerResourceBounds.EnvelopeMissing);
+        }
+
+        if (_samplers.Length == EmptyValue)
+        {
+            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
+        }
+
+        await SampleAsync(token);
+    }
+
+    private async Task SampleAsync(CancellationToken token)
+    {
+        const int SampleInitialValue = 0;
+        var timer = Stopwatch.StartNew();
+        for (var sample = SampleInitialValue; sample < _settings.MaxSamples; sample++)
+        {
+            token.ThrowIfCancellationRequested();
+            var budget = new ScaleServerResourceSampleBudget(executionOptions, provenanceOptions);
+            foreach (var sampler in _samplers)
+            {
+                await sampler.SampleAsync(budget, token);
+                if (sampler.StorageUnavailable)
+                {
+                    _missing.Add(ScaleServerResourceBounds.StorageMissing);
+                }
+            }
+            if (timer.Elapsed >= _settings.MaximumObservation)
+            {
+                _missing.Add(ScaleServerResourceBounds.SamplingMissing);
+                return;
+            }
+            await Task.Delay(_settings.Cadence, token);
+        }
+        _missing.Add(ScaleServerResourceBounds.SamplingMissing);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_observation is { } observation)
+        {
+            await CompleteAsync(observation);
+        }
+        else
+        {
+            _stop.Dispose();
+        }
     }
 
     private bool IsNormalOwnerSettlement(OperationCanceledException failure, CancellationToken observationToken,

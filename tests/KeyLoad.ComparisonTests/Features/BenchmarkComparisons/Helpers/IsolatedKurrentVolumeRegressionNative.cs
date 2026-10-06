@@ -64,7 +64,7 @@ internal static class IsolatedKurrentVolumeRegressionNative
         await Assert.That(counts.PeakConcurrency <= Workers).IsTrue();
         await Assert.That(diagnostic.CancellationRequested).IsFalse();
         await Assert.That(diagnostic.DeadlineExpired).IsFalse();
-        await Assert.That(diagnostic.ElapsedMilliseconds <= KurrentConstants.CleanupHostTimeoutSeconds * 1_000L).IsTrue();
+        await Assert.That(diagnostic.ElapsedMilliseconds <= NativeExecutionPolicyFixture.Lifecycle().Value.KurrentCleanupHostTimeout.TotalMilliseconds).IsTrue();
         await Assert.That(diagnostic.LaterDisposalFailures).IsEqualTo(0);
     }
 

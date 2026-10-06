@@ -45,7 +45,7 @@ internal sealed class ReplicaProcessRecoveryTests
         }
         else
         {
-            await Assert.That(OutcomeStoreOracle.Read(node.Store, ReplicaCrashModel.Operation(3))).IsNull();
+            await Assert.That(OutcomeStoreOracle.Read(node.Canonical, ReplicaCrashModel.Operation(3))).IsNull();
         }
         if (boundary == ReplicaCrashBoundary.EntryAcknowledged)
         {
@@ -119,7 +119,7 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
             await Assert.That(empty.Log.State.LastIndex).IsEqualTo(4);
             await ReplicaProcessAssertions.ReceiptAsync(empty, 4);
             empty.Log.Append([new(5, 1, empty.Database.NormalizeOperation(ReplicaCrashModel.Operation(5)))]);
-            await Assert.That(OutcomeStoreOracle.Read(empty.Store, ReplicaCrashModel.Operation(5))).IsNull();
+            await Assert.That(OutcomeStoreOracle.Read(empty.Canonical, ReplicaCrashModel.Operation(5))).IsNull();
             await using var materializer = new ReplicaMaterializer(empty.Database, empty.Log, empty.Snapshots, RecoveryExecutionOptions.Replica());
             materializer.Commit(5);
             await ReplicaProcessAssertions.WaitAsync(materializer, 5, cancellationToken);
@@ -169,7 +169,7 @@ internal sealed class ReplicaSnapshotProcessRecoveryTests
             await Assert.That(node.Log.TermAt(4)).IsEqualTo(1);
             await Assert.That(node.Log.ReadEntry(4)).IsNull();
             await ReplicaProcessAssertions.OperationAsync(node.Database, node.Log.ReadEntry(5)!.Operation, ReplicaCrashModel.Operation(5));
-            await Assert.That(OutcomeStoreOracle.Read(node.Store, ReplicaCrashModel.Operation(5))).IsNull();
+            await Assert.That(OutcomeStoreOracle.Read(node.Canonical, ReplicaCrashModel.Operation(5))).IsNull();
             await ReplicaProcessAssertions.ReceiptAsync(node, 4);
             materializer.Commit(5);
             await ReplicaProcessAssertions.WaitAsync(materializer, 5, cancellationToken);

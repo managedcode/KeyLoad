@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "kind": "source_only_implementation_checkpoint",
+  "sourceOnly": true,
+  "parentSourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
+  "requirements": [
+    "REQ-CQ-009",
+    "AC-CQ-031",
+    "AC-CQ-039",
+    "AC-CQ-041",
+    "AC-CQ-042",
+    "AC-BACKUP-001",
+    "AC-BACKUP-002",
+    "AC-BACKUP-003",
+    "REQ-SCALE-017",
+    "REQ-SCALE-022"
+  ],
+  "sourceFiles": [
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate-cli.mjs",
+      "sha256": "26c837534eed5d503ee9ef3469b2027927f243c7e3fb382d01defbd67940aaf1"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate.mjs",
+      "sha256": "cc8d974d88404fcebe8bec32914d8172ee598ae93902408ecac466fec6d07480"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-fairness.mjs",
+      "sha256": "3543f7ef02d8a9900dd4003ba70f9e61059abfa3b702d49ac8fde7152ead2046"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-validation.mjs",
+      "sha256": "56baf5f746c1efd9ff6663b128be66c4d876e3f79614a1a780bbd60788106961"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-contracts.mjs",
+      "sha256": "6c7869938c3b950e41393e106a52daba1f21acf6af5b0dceb87f0e2f7830fe7f"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-files.mjs",
+      "sha256": "28ba36cd7697fe058968d832e8d33928131a45915b48e65cb91a530626249257"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-materializer.mjs",
+      "sha256": "4b58e2260236e8f302f2d4be84006bd9529b5fa494e4c5a90496cb4a120d369a"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-tool.mjs",
+      "sha256": "3bab582eff6d9d45455e4597bdf0d74ef8717923192d841edda24c3e28cdadf4"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image.dockerfile",
+      "sha256": "bd61b6534098afe11d8feeb7bc8bca8be0cd5a87a1062a4a933cc8c954d19783"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image.mjs",
+      "sha256": "65cec6f1b698cd67367a96e0c8aa3a01b847be9928281e81fbf0903cdeec0acc"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-lifecycle.sh",
+      "sha256": "29451602c622e7ea86e3a54668c2bd35ee5d891c20c2004eb1af221fff433a14"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-target.sh",
+      "sha256": "2027aa983ae05029d4b6ca100e684389869aeb0bddcd4f3b1d93859897227478"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-wrapper.sh",
+      "sha256": "3252abf1ae1da0df5e2baf147b802ed8bde96108daf421b2629b21f94360b28c"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server.settings.xml",
+      "sha256": "a3b8c3bdeca28079c69d5664ede35106756de33edc409008e6de79a316603b37"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageExecutionOptions.cs",
+      "sha256": "3173c87976caf1a2fb283c7580703941a00756a5e6a7e51f40f7bac7bb1c00f1"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageSelection.cs",
+      "sha256": "b94de46f3883563e42687b93cc885c32795ce7587d16364666eddf116730a1ef"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Identity/NativeCoverageToolPackage.cs",
+      "sha256": "f083837df3352879afea002019e363bbaa365eb2f82589e2d0518ce72f48b1fd"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/OpenLoopCancellationRequestPublisher.cs",
+      "sha256": "be6d0a3536959e121f28414b07fa8b89704381fca61329380d10d9df5243ca73"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcessLifetime.cs",
+      "sha256": "112a6bf27c853fe410fffb1839e4d5a9ea13bf7eb2f64797b8657de3eab5e6ea"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Assertions/CliBackupRestoreAssertions.cs",
+      "sha256": "41237fee3c014ac3a74a8f00a825fb4eea905f2d098ceacb4ff361742c60f474"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
+      "sha256": "50ab2582d16ff1bd1d88de57bb7a6c98d9a26f582d69e3c71f727c53b613716b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Fixtures/CliBackupRestoreFixture.cs",
+      "sha256": "313e78cb199f895b0871671090ae8f06ac8875846758e1ae6dfad3699150006c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Processes/CliBackupRestoreProcess.cs",
+      "sha256": "a3279b9bc31ed2d0983722f718a3f371f3d2a38f986e6da96b310350775d7574"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Processes/CliBackupRestoreProcessOutput.cs",
+      "sha256": "0b2dd097517a9d0f4e09ef0ea023a20fe5c4532f5c450a38a482f8c5babbd62a"
+    }
+  ],
+  "joinedPrivatePackets": {
+    "cliBackupRestoreManifest": "5fb536644bdc6a08fb9ceb8245d0e957843e4de14fec8f450ed83e6e2e01544a",
+    "nativeImageManifest": "298b76d8683e06bae1dd1b364fa01e99b518bc9fd8cdd057b0b526a9cc868e75",
+    "comparisonLifecyclePatch": "044d1d0d574012a9cfa37e0edcc8b13e687adb9effa36442d44fb52bf607cb4f"
+  },
+  "latestCompletedNativeBuild": {
+    "stage": "R16",
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+    "exitCode": 0,
+    "passed": true,
+    "elapsedSeconds": 116.651,
+    "inputCount": 4024,
+    "sourceDriftCount": 0,
+    "errorCount": 0,
+    "logSha256": "f37ee59455237b440c127bac0ce70340a84de3a8e5f1a14af3652dc183960976",
+    "inputSnapshotSha256": "dad200ec42640697885ae77f09e11f4ab7138ac2f55064740a2443d9607cdd5c",
+    "qualification": "actual full native local Release build only; tests and exact-source Linux gates pending"
+  },
+  "coverage": {
+    "loadAndPerformanceTestsExcluded": true,
+    "completeOperationTestsRequired": true,
+    "globalPercent": null,
+    "nativeCollectionPassed": false,
+    "sameImageBinaryUnionQualified": false
+  },
+  "remaining": [
+    "Fresh native full build and actual Aspire-owned normal/scalar operation execution",
+    "Native AppHost image preparation, three original RF3 server collector lifetimes, export and exact-source report admission",
+    "Actual same-image binary merge/export and independent repeat-input invariance",
+    "Complete production module, uncovered line/branch analysis and 80/70/90 qualification gates",
+    "Authenticated complete Linux open-loop workflow cohort and public benchmark delivery",
+    "Authentic native fatal runtime regression remains unqualified"
+  ],
+  "all104AcceptanceClosed": false,
+  "reviewedPostCorrectionSources": [
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate-cli.mjs",
+      "sha256": "26c837534eed5d503ee9ef3469b2027927f243c7e3fb382d01defbd67940aaf1"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-aggregate.mjs",
+      "sha256": "cc8d974d88404fcebe8bec32914d8172ee598ae93902408ecac466fec6d07480"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-fairness.mjs",
+      "sha256": "3543f7ef02d8a9900dd4003ba70f9e61059abfa3b702d49ac8fde7152ead2046"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-cohort-validation.mjs",
+      "sha256": "56baf5f746c1efd9ff6663b128be66c4d876e3f79614a1a780bbd60788106961"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-contracts.mjs",
+      "sha256": "6c7869938c3b950e41393e106a52daba1f21acf6af5b0dceb87f0e2f7830fe7f"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-files.mjs",
+      "sha256": "28ba36cd7697fe058968d832e8d33928131a45915b48e65cb91a530626249257"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-materializer.mjs",
+      "sha256": "4b58e2260236e8f302f2d4be84006bd9529b5fa494e4c5a90496cb4a120d369a"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image-tool.mjs",
+      "sha256": "3bab582eff6d9d45455e4597bdf0d74ef8717923192d841edda24c3e28cdadf4"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image.dockerfile",
+      "sha256": "bd61b6534098afe11d8feeb7bc8bca8be0cd5a87a1062a4a933cc8c954d19783"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-image.mjs",
+      "sha256": "65cec6f1b698cd67367a96e0c8aa3a01b847be9928281e81fbf0903cdeec0acc"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-lifecycle.sh",
+      "sha256": "29451602c622e7ea86e3a54668c2bd35ee5d891c20c2004eb1af221fff433a14"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-target.sh",
+      "sha256": "2027aa983ae05029d4b6ca100e684389869aeb0bddcd4f3b1d93859897227478"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server-wrapper.sh",
+      "sha256": "3252abf1ae1da0df5e2baf147b802ed8bde96108daf421b2629b21f94360b28c"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.server.settings.xml",
+      "sha256": "a3b8c3bdeca28079c69d5664ede35106756de33edc409008e6de79a316603b37"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageExecutionOptions.cs",
+      "sha256": "3173c87976caf1a2fb283c7580703941a00756a5e6a7e51f40f7bac7bb1c00f1"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageSelection.cs",
+      "sha256": "b94de46f3883563e42687b93cc885c32795ce7587d16364666eddf116730a1ef"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Identity/NativeCoverageToolPackage.cs",
+      "sha256": "f083837df3352879afea002019e363bbaa365eb2f82589e2d0518ce72f48b1fd"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/OpenLoopCancellationRequestPublisher.cs",
+      "sha256": "e68242064ca053ad7ebff7a8527095681e15dd9c41496ce9cebef5391ab2d5a4"
+    },
+    {
+      "path": "tests/KeyLoad.CrashHost/Features/ClusterRouting/Processes/C1OutcomeInspectionProcessLifetime.cs",
+      "sha256": "112a6bf27c853fe410fffb1839e4d5a9ea13bf7eb2f64797b8657de3eab5e6ea"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Assertions/CliBackupRestoreAssertions.cs",
+      "sha256": "41237fee3c014ac3a74a8f00a825fb4eea905f2d098ceacb4ff361742c60f474"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs",
+      "sha256": "50ab2582d16ff1bd1d88de57bb7a6c98d9a26f582d69e3c71f727c53b613716b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Fixtures/CliBackupRestoreFixture.cs",
+      "sha256": "b3af13b92364e28ddf1dc933259bb36c9b874dc17c6fb0715d5bd9ce4d7514fe"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Processes/CliBackupRestoreProcess.cs",
+      "sha256": "1c3a00db9190eb16ef291086656f807b76c406365ce5c9a434d76c4eb73cdaab"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BackupRestore/Processes/CliBackupRestoreProcessOutput.cs",
+      "sha256": "0b2dd097517a9d0f4e09ef0ea023a20fe5c4532f5c450a38a482f8c5babbd62a"
+    }
+  ]
+}

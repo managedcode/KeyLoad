@@ -77,7 +77,8 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         }
         finally
         {
-            if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+            if (Directory.Exists(path))
+            { Directory.Delete(path, recursive: true); }
         }
     }
 
@@ -101,13 +102,17 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     {
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { CheckpointBatchRecords = 0 });
-        Assert.ThrowsExactly<InvalidOperationException>(() => new ZoneTreeStore(new(path), invalid, UnitExecutionOptions.PointCacheExecution()));
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        {
+            using var store = new ZoneTreeStore(new(path), invalid, UnitExecutionOptions.PointCacheExecution());
+        });
         await Assert.That(Directory.Exists(path)).IsFalse();
     }
 
     private static void Seed(ZoneTreeStore store) => store.Commit((tx, _) =>
     {
-        foreach (var name in new[] { "a", "b", "c" }) tx.Put(Encoding.UTF8.GetBytes(name), Value);
+        foreach (var name in new[] { "a", "b", "c" })
+        { tx.Put(Encoding.UTF8.GetBytes(name), Value); }
         return true;
     });
 
@@ -119,7 +124,8 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         while (input.Position < input.Length)
         {
             input.ReadExactly(header);
-            if (BinaryPrimitives.ReadUInt64LittleEndian(header) == ZoneTreePersistenceFormat.CheckpointDataMagic) frames++;
+            if (BinaryPrimitives.ReadUInt64LittleEndian(header) == ZoneTreePersistenceFormat.CheckpointDataMagic)
+            { frames++; }
             input.Position += BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(ZoneTreePersistenceFormat.PayloadLengthOffset));
         }
         return frames;

@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 

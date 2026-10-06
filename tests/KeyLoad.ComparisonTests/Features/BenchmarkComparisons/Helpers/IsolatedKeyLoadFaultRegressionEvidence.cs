@@ -6,7 +6,6 @@ namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 /// <summary>Owned atomic no-overwrite evidence exports only safe provider, native and public membership facts.</summary>
 internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, IsolatedComparisonWorker worker)
 {
-    private const int MaximumBytes = 262_144;
     public int SchemaVersion { get; } = 1;
     public string Cell { get; } = cell;
     public IsolatedComparisonWorker Worker { get; } = worker;
@@ -29,9 +28,9 @@ internal sealed class IsolatedKeyLoadFaultRegressionEvidence(string cell, Isolat
         Directory.CreateDirectory(directory);
         var pending = Path.Combine(directory, ".fault-" + Guid.NewGuid().ToString("N") + ".pending");
         var bytes = JsonSerializer.SerializeToUtf8Bytes(this, JsonDefaults.Options);
-        IsolatedKeyLoadFaultRegressionProtocol.Require(bytes.Length <= MaximumBytes);
+        IsolatedKeyLoadFaultRegressionProtocol.Require(bytes.Length <= NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultMaximumEvidenceBytes);
         var owned = false;
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(IsolatedKeyLoadFaultRegressionProtocol.CliSeconds));
+        using var deadline = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultCliTimeout);
         try
         {
             await using (var stream = new FileStream(pending, FileMode.CreateNew, FileAccess.Write, FileShare.None,

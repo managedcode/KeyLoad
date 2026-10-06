@@ -13,10 +13,11 @@ internal static class PostgresSchemaFailure
 
     internal static async Task VerifyAtomicFailureAsync(string connectionString, CancellationToken cancellationToken)
     {
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
         var isolated = await PostgresSchemaDatabase.CreateAsync(connectionString, cancellationToken);
         var runId = Guid.NewGuid().ToString("D");
         var schema = PostgresSchemaSupport.Schema(runId);
-        var target = new PostgresTarget(isolated, runId, "comparison-test-image");
+        var target = new PostgresTarget(isolated, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         try
         {
             await PostgresSchemaDatabase.InstallVectorOutsideSearchPathAsync(isolated, cancellationToken);
@@ -31,7 +32,8 @@ internal static class PostgresSchemaFailure
         {
             try
             {
-                await target.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(15), CancellationToken.None);
+                await PostgresSchemaOriginalTaskSettlement.JoinAsync(target.DisposeAsync().AsTask(),
+                    policy.PostgresTargetDisposeTimeout, CancellationToken.None);
             }
             finally
             {
@@ -43,50 +45,29 @@ internal static class PostgresSchemaFailure
 
     internal static async Task VerifyLockCancellationAsync(string connectionString, CancellationToken cancellationToken)
     {
+        var harnessOptions = NativeExecutionPolicyFixture.Harness();
         var runId = Guid.NewGuid().ToString("D");
         var schema = PostgresSchemaSupport.Schema(runId);
         var lockKey = PostgresSchemaSupport.LockKey(Guid.Parse(runId));
         await using var blocker = await PostgresSchemaSupport.OpenAsync(connectionString, cancellationToken);
         await using var transaction = await blocker.BeginTransactionAsync(cancellationToken);
         await AcquireLockAsync(blocker, transaction, lockKey, cancellationToken);
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
-        using var attemptCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var initialization = CaptureCancellationAsync(target, attemptCancellation.Token);
-        try
-        {
-            await WaitForAdvisoryLockWaitAsync(blocker, lockKey, cancellationToken);
-            await attemptCancellation.CancelAsync();
-            var failure = await initialization.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
-            await Assert.That(failure is OperationCanceledException).IsTrue();
-        }
-        finally
-        {
-            await attemptCancellation.CancelAsync();
-            try
-            {
-                await initialization.WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
-            }
-            finally
-            {
-                try
-                {
-                    await transaction.RollbackAsync(CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
-                }
-                finally
-                {
-                    await PostgresSchemaSupport.DisposeTargetAsync(target);
-                }
-            }
-        }
+        var failures = new IsolatedNativeTeardownFailures(null);
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(() => PostgresSchemaLockOwner.RunAsync(
+            connectionString, runId, blocker, transaction, lockKey, harnessOptions, failures, cancellationToken),
+            "postgres-owned-target", failures, harnessOptions,
+            () => PostgresSchemaLockOwner.ReleaseBlockerAsync(blocker, transaction, failures, harnessOptions));
+        failures.ThrowIfAny();
         await Assert.That(await PostgresSchemaSupport.SchemaExistsAsync(connectionString, schema, cancellationToken)).IsFalse();
         await VerifySubsequentRunAsync(connectionString, runId, cancellationToken);
     }
 
-    private static async Task WaitForAdvisoryLockWaitAsync(NpgsqlConnection connection, long lockKey,
+    internal static async Task WaitForAdvisoryLockWaitAsync(NpgsqlConnection connection, long lockKey,
         CancellationToken cancellationToken)
     {
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
         var started = Stopwatch.GetTimestamp();
-        while (Stopwatch.GetElapsedTime(started) < TimeSpan.FromSeconds(20))
+        while (Stopwatch.GetElapsedTime(started) < policy.PostgresLockObservationTimeout)
         {
             await using var command = new NpgsqlCommand(WaitingLockSql, connection);
             command.Parameters.AddWithValue(lockKey);
@@ -94,7 +75,7 @@ internal static class PostgresSchemaFailure
             {
                 return;
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(50), cancellationToken);
+            await Task.Delay(policy.PostgresLockPollInterval, cancellationToken);
         }
         throw new TimeoutException("PostgreSQL did not report the target waiting for its namespace advisory lock.");
     }
@@ -121,7 +102,7 @@ internal static class PostgresSchemaFailure
         }
     }
 
-    private static async Task<OperationCanceledException?> CaptureCancellationAsync(PostgresTarget target,
+    internal static async Task<OperationCanceledException?> CaptureCancellationAsync(PostgresTarget target,
         CancellationToken cancellationToken)
     {
         try
@@ -138,7 +119,7 @@ internal static class PostgresSchemaFailure
     private static async Task VerifySubsequentRunAsync(string connectionString, string runId,
         CancellationToken cancellationToken)
     {
-        var target = new PostgresTarget(connectionString, runId, "comparison-test-image");
+        var target = new PostgresTarget(connectionString, runId, "comparison-test-image", NativeExecutionPolicyFixture.Read(), NativeExecutionPolicyFixture.Lifecycle());
         try
         {
             await target.InitializeAsync(new BenchmarkDataset(Microsoft.Extensions.Options.Options.Create(PostgresSchemaSupport.Options(2))), cancellationToken);
@@ -186,7 +167,8 @@ internal static class PostgresSchemaDatabase
 
     internal static async Task DropAsync(string connectionString)
     {
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
+        using var cleanup = new CancellationTokenSource(policy.PostgresDatabaseCleanupTimeout);
         var ownedPool = new NpgsqlConnection(new NpgsqlConnectionStringBuilder(connectionString) { Database = DatabaseName }.ConnectionString);
         NpgsqlConnection.ClearPool(ownedPool);
         await ownedPool.DisposeAsync();

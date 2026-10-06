@@ -1,4 +1,5 @@
 using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -11,14 +12,19 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
     private const string JoinFailureStage = "control-join";
     private const string DisposeFailureStage = "control-lifetime-dispose";
     private readonly IsolatedNativeCasePlan plan;
+    private readonly IOptions<NativeComparisonHarnessOptions> executionOptions;
     private readonly CancellationTokenSource lifetime;
     private readonly TaskCompletionSource<OpenLoopNativeCompletionV1> marker =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly System.Threading.Lock disposeGate = new();
     private Task? disposal;
 
-    internal OpenLoopNativeCancellationControl(IsolatedNativeCasePlan plan, string output, CancellationToken token)
+    internal OpenLoopNativeCancellationControl(IsolatedNativeCasePlan plan, string output,
+        IOptions<NativeComparisonHarnessOptions> executionOptions, CancellationToken token)
     {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.Value.Validate();
+        this.executionOptions = executionOptions;
         this.plan = plan;
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
         Completion = PublishAsync(output);
@@ -55,7 +61,7 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
     {
         await marker.Task.WaitAsync(lifetime.Token);
         lifetime.Token.ThrowIfCancellationRequested();
-        OpenLoopCancellationRequestPublisher.Publish(output);
+        await OpenLoopCancellationRequestPublisher.PublishAsync(output, executionOptions);
     }
 
     public ValueTask DisposeAsync()
@@ -76,14 +82,46 @@ internal sealed class OpenLoopNativeCancellationControl : IAsyncDisposable
     {
         await registered;
         var failures = new IsolatedNativeTeardownFailures(null);
-        try { await lifetime.CancelAsync(); }
-        catch (Exception failure) { failures.Record(CancelFailureStage, failure); }
-        try { await Completion; }
-        catch (OperationCanceledException failure) when (lifetime.IsCancellationRequested
-            && failure.CancellationToken == lifetime.Token) { }
-        catch (Exception failure) { failures.Record(JoinFailureStage, failure); }
-        try { lifetime.Dispose(); }
-        catch (Exception failure) { failures.Record(DisposeFailureStage, failure); }
+        var execution = executionOptions;
+        var original = DisposeOwnedLifetimeAsync(failures, execution);
+        await IsolatedNativeOriginalTaskSettlement.RunAsync(() => original, DisposeFailureStage, failures, execution);
         failures.ThrowIfAny();
     }
+
+    private async Task DisposeOwnedLifetimeAsync(IsolatedNativeTeardownFailures failures,
+        IOptions<NativeComparisonHarnessOptions> execution)
+    {
+        using (lifetime)
+        {
+            await IsolatedNativeOriginalTaskSettlement.RunAsync(lifetime.CancelAsync, CancelFailureStage, failures, execution);
+            await JoinPublicationAsync(failures);
+
+        }
+    }
+    private async Task JoinPublicationAsync(IsolatedNativeTeardownFailures failures)
+    {
+        try
+        { await Completion; }
+        catch (OperationCanceledException failure) when (lifetime.IsCancellationRequested
+            && failure.CancellationToken == lifetime.Token)
+        { }
+        catch (Exception failure) when (Completion.IsFaulted || Completion.IsCanceled)
+        { RecordPublicationFailures(failure, failures); }
+    }
+
+    private void RecordPublicationFailures(Exception failure, IsolatedNativeTeardownFailures failures)
+    {
+        failures.Record(JoinFailureStage, failure);
+        if (Completion.Exception is not { } aggregate)
+        { return; }
+        AddPublicationFailures(aggregate.InnerExceptions, failures);
+    }
+
+    private static void AddPublicationFailures(IEnumerable<Exception> originals,
+        IsolatedNativeTeardownFailures failures)
+    {
+        foreach (var original in originals)
+        { failures.Record(JoinFailureStage, original); }
+    }
+
 }

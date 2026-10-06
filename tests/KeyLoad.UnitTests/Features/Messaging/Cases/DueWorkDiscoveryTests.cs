@@ -21,10 +21,10 @@ internal sealed class DueWorkDiscoveryTests
         await Assert.That(pages[3].ScannedPrefix).IsEqualTo(DueWorkKind.Saga);
         foreach (var page in pages)
         {
-            await Assert.That(page.ExaminedRecords <= DueWorkProtocol.MaximumRecordsPerPage).IsTrue();
+            await Assert.That(page.ExaminedRecords <= fixture.Database.DueExecution.MaximumRecordsPerPage).IsTrue();
             await Assert.That(page.AdmittedValueBytes <= fixture.Database.Limits.MaxBatchBytes).IsTrue();
             await Assert.That(page.ExaminedBytes >= page.AdmittedValueBytes).IsTrue();
-            await Assert.That(page.ExaminedBytes <= DueWorkProtocol.NativeRangeByteCeiling).IsTrue();
+            await Assert.That(page.ExaminedBytes <= fixture.Database.DueExecution.MaximumRangeBytes).IsTrue();
             await Assert.That(page.Rejected.IsEmpty).IsTrue();
         }
         await Assert.That(pages.Any(page => page.ExaminedBytes > page.AdmittedValueBytes)).IsTrue();

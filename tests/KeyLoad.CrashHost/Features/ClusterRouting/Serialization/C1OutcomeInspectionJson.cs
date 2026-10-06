@@ -6,6 +6,8 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 
 internal static class C1OutcomeInspectionJson
 {
+    private const int ReceiptLineTerminatorBytes = 1;
+
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
     private static readonly string[] RequestFields =
     [
@@ -66,13 +68,16 @@ internal static class C1OutcomeInspectionJson
 
     internal static C1OutcomeInspectionReceipt ReadReceipt(ReadOnlySpan<byte> bytes)
     {
+        const int FormatVersionValidationBoundary = 0;
+        const int PositionValidationBoundary = 0;
+
         ValidateShape(bytes, ReceiptFields, C1OutcomeInspectionProtocol.MaximumReceiptBytes, InvalidReceipt);
         try
         {
             var receipt = JsonSerializer.Deserialize(bytes, Context.C1OutcomeInspectionReceipt);
             if (receipt is null || receipt.Version != C1OutcomeInspectionProtocol.Version
                 || receipt.NodeId == Guid.Empty || receipt.Incarnation == Guid.Empty
-                || receipt.FormatVersion <= 0 || receipt.Position < 0)
+                || receipt.FormatVersion <= FormatVersionValidationBoundary || receipt.Position < PositionValidationBoundary)
             {
                 throw InvalidReceipt();
             }
@@ -86,15 +91,18 @@ internal static class C1OutcomeInspectionJson
 
     internal static byte[] SerializeReceipt(C1OutcomeInspectionReceipt receipt)
     {
+        const int JsonLengthStep = 1;
+        const char LineFeedCharacter = '\n';
+
         var json = JsonSerializer.SerializeToUtf8Bytes(receipt, Context.C1OutcomeInspectionReceipt);
-        var lineLength = checked(json.Length + 1);
+        var lineLength = checked(json.Length + JsonLengthStep);
         if (lineLength > C1OutcomeInspectionProtocol.MaximumReceiptBytes)
         {
             throw InvalidReceipt();
         }
         var line = new byte[lineLength];
         json.CopyTo(line);
-        line[^1] = (byte)'\n';
+        line[ReceiptLineTerminatorBytes] = (byte)LineFeedCharacter;
         return line;
     }
 
@@ -114,6 +122,8 @@ internal static class C1OutcomeInspectionJson
     private static void ValidateShapeCore(ReadOnlySpan<byte> bytes, string[] fields, int maximumBytes,
         Func<InvalidDataException> invalid)
     {
+        const int IndexOfValidationBoundary = 0;
+
         if (bytes.IsEmpty || bytes.Length > maximumBytes)
         {
             throw invalid();
@@ -144,7 +154,7 @@ internal static class C1OutcomeInspectionJson
                 throw invalid();
             }
             var name = reader.GetString();
-            if (name is null || Array.IndexOf(fields, name) < 0 || !seen.Add(name)
+            if (name is null || Array.IndexOf(fields, name) < IndexOfValidationBoundary || !seen.Add(name)
                 || !reader.Read() || reader.TokenType is JsonTokenType.Null
                     or JsonTokenType.StartArray or JsonTokenType.StartObject or JsonTokenType.EndArray or JsonTokenType.EndObject)
             {

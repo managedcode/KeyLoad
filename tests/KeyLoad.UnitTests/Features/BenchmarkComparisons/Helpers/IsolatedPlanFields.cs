@@ -54,4 +54,26 @@ internal static class IsolatedPlanFields
     internal const string GraphFanOut = "graphFanOut";
     internal const string GraphDepth = "graphDepth";
     internal const string CrudFamily = "crud";
+    internal const string Counts = "counts";
+    internal const string Rejected = "rejected";
+    internal const string VectorProfile = "vectorProfile";
+    internal const string Number = "number";
+    internal const string Error = "error";
+    internal const string Status = "status";
+    internal const string AllScaleCellsMissingResources = "allScaleCellsMissingResources";
+    internal const string CellCount = "cellCount";
+    internal const string Control = "control";
+    internal const string Disposition = "disposition";
+    internal const string FailedIds = "failedIds";
+    internal const string MissingEvidence = "missingEvidence";
+    internal const string Qualified = "qualified";
+    internal const string RejectsDuplicateGlobalIdentity = "rejectsDuplicateGlobalIdentity";
+    internal const string RejectsTamper = "rejectsTamper";
+    internal const string ResourceEquivalence = "resourceEquivalence";
+    internal const string Result = "result";
+    internal const string ServerResourceQualified = "serverResourceQualified";
+    internal const string VectorProfiles = "vectorProfiles";
+    internal const string OpenLoopPlan = "openLoopPlan";
+    internal const string MeasurementCells = "measurementCells";
+    internal const string OfferedRatePerSecond = "offeredRatePerSecond";
 }

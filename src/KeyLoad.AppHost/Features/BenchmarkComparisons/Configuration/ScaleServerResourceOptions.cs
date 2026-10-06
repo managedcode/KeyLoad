@@ -60,7 +60,8 @@ internal sealed record ScaleServerResourceOptions
 
     internal void Validate()
     {
-        if (!IsValid()) { throw new ArgumentException(ValidationMessage); }
+        if (!IsValid())
+        { throw new ArgumentException(ValidationMessage); }
     }
 
     private static bool Positive(TimeSpan value, long maximumTicks) => value > TimeSpan.Zero && value.Ticks <= maximumTicks;

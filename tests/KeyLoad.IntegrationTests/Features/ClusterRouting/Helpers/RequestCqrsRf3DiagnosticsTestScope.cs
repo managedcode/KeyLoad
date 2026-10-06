@@ -113,10 +113,10 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
     internal async Task JoinOriginalSubscriptionsAsync()
     {
         lifecycle.SetStage(RequestCqrsLifecycleStage.CaptureJoin);
-        (streamOwner ?? throw new InvalidOperationException("The native stream owner is absent."))
-            .CompleteResourceStreams();
-        await (streamOwner ?? throw new InvalidOperationException("The native stream owner is absent."))
-            .JoinDiagnosticsTwiceAsync().ConfigureAwait(false);
+        var ownedStreams = streamOwner
+            ?? throw new InvalidOperationException("The native stream owner is absent.");
+        ownedStreams.CompleteResourceStreams();
+        await ownedStreams.JoinDiagnosticsTwiceAsync().ConfigureAwait(false);
         lifecycle.SetStage(RequestCqrsLifecycleStage.ObserverJoin);
         await subscriberObserver.DisposeAsync().ConfigureAwait(false);
     }
@@ -181,12 +181,12 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
 
     private async Task DisposeDiagnosticsAsync(List<Exception> failures)
     {
-        var ownedDiagnostics = diagnostics;
-        if (diagnosticsJoined || ownedDiagnostics is null)
+        if (diagnosticsJoined || diagnostics is null)
         { return; }
         var before = failures.Count;
+        var original = DisposeOwnedDiagnosticsAsync();
         await RequestCqrsLifecycleFailureObserver.ObserveAsync(
-            () => ownedDiagnostics.DisposeAsync().AsTask(), failures, lifecycle.RecordOwnerFailure,
+            () => original, failures, lifecycle.RecordOwnerFailure,
             RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
         if (failures.Count == before)
         {
@@ -194,6 +194,9 @@ internal sealed class RequestCqrsRf3DiagnosticsTestScope(Guid waveId, RequestCqr
             diagnostics = null;
         }
     }
+
+    private async Task DisposeOwnedDiagnosticsAsync()
+    { await diagnostics!.DisposeAsync().ConfigureAwait(false); }
 
     private async Task DisposeApplicationAsync(List<Exception> failures)
     {

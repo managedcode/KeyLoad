@@ -159,7 +159,7 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         await startup.BootstrapAsync(principal, Guid.NewGuid(), cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task ObserveAsync(Func<Task> operation, ICollection<Exception> failures)
+    private static async Task ObserveAsync(Func<Task> operation, List<Exception> failures)
     {
         try
         { await operation().ConfigureAwait(false); }
@@ -219,10 +219,11 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
             graph.AllowClientCallGrain<IRequestGrain>()
                 .AllowClientCallGrain<IRuntimeJournalReplayGrain>()
                 .AddGrainTransition<IRuntimeJournalReplayGrain, IRequestGrain>()
-                .MethodByName(nameof(IRuntimeJournalReplayGrain.SetAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-                .MethodByName(nameof(IRuntimeJournalReplayGrain.ReadAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-                .MethodByName(nameof(IRuntimeJournalReplayGrain.GetActivationTokenAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
-                .MethodByName(nameof(IRuntimeJournalReplayGrain.DeleteAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
+                .MethodsByName(
+                    (nameof(IRuntimeJournalReplayGrain.SetAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
+                    (nameof(IRuntimeJournalReplayGrain.ReadAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
+                    (nameof(IRuntimeJournalReplayGrain.GetActivationTokenAsync), nameof(IRequestGrain.ExecuteStreamAsync)),
+                    (nameof(IRuntimeJournalReplayGrain.DeleteAsync), nameof(IRequestGrain.ExecuteStreamAsync))).And()
                 .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
                 .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
                 .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()

@@ -14,7 +14,7 @@ internal static class FailedBenchmarkNodeProcess
         }
 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        deadline.CancelAfter(TimeSpan.FromMinutes(ImageBundleRealProtocol.TimeoutMinutes));
+        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.ImageBundleProcessTimeout);
         var output = ImageBundleRealOutput.ReadAsync(process.StandardOutput, deadline.Token);
         var error = ImageBundleRealOutput.ReadAsync(process.StandardError, deadline.Token);
         try
@@ -57,7 +57,7 @@ internal static class FailedBenchmarkNodeProcess
     private static async Task ReapAsync(Process process)
     {
         TryKill(process);
-        using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(ImageBundleRealProtocol.CleanupSeconds));
+        using var cleanup = new CancellationTokenSource(NativeExecutionPolicyFixture.Harness().Value.ImageBundleCleanupTimeout);
         try
         {
             await process.WaitForExitAsync(cleanup.Token);

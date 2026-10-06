@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <AssemblyMetadata Include="KeyLoadNativeCoverageToolVersion" Value="$(KeyLoadNativeCoverageToolVersion)" />
+    <AssemblyMetadata Include="KeyLoadNativeCoveragePackageRoot" Value="$(NuGetPackageRoot)dotnet-coverage/$(KeyLoadNativeCoverageToolVersion)/" />
     <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadNativeCoverageToolVersion)]" />
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../KeyLoad.Orleans/KeyLoad.Orleans.csproj" IsAspireProjectResource="false" />

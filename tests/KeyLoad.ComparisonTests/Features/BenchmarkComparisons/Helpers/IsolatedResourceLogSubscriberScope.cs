@@ -11,7 +11,7 @@ internal sealed class IsolatedResourceLogSubscriberScope<T> : IAsyncDisposable
 {
     private const string PendingOperations = "Native subscriber operations remain active; enumerator disposal is deferred.";
     private const string PendingDisposal = "Native subscriber disposal is still running; its lifetime remains retained.";
-    private static readonly TimeSpan CleanupDeadline = TimeSpan.FromSeconds(30);
+    private static TimeSpan CleanupDeadline => NativeExecutionPolicyFixture.Harness().Value.SubscriberCleanupTimeout;
     private readonly List<Task> _originalOperations = [];
     private readonly CancellationTokenSource _lifetime;
     private int _disposeStarted;

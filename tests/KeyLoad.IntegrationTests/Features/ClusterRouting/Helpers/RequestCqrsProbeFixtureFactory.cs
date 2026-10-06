@@ -1,4 +1,5 @@
 using KeyLoad.Server;
+using KeyLoad.Server.Features.ClusterRouting;
 using static KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsProbeFixtureProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -11,6 +12,7 @@ internal static class RequestCqrsProbeFixtureFactory
         if (sessionId == Guid.Empty)
         { throw new ArgumentException(InvalidArm, nameof(sessionId)); }
         var session = sessionId.ToString("N");
+        var json = new RequestCqrsProbeJson(IntegrationRoutingOptions.ProbeExecution());
         var root = CreateRoot(dataRoot, session);
         var directories = new Dictionary<string, string>(StringComparer.Ordinal);
         var owners = new Dictionary<string, byte[]>(StringComparer.Ordinal);
@@ -18,10 +20,10 @@ internal static class RequestCqrsProbeFixtureFactory
         RequestCqrsProbeFixture? fixture = null;
         ServerFailureObserver.Observe(() =>
         {
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node1, Node1Origin, directories, owners);
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node2, Node2Origin, directories, owners);
-            CreateNode(root, session, RequestCqrsRf3Protocol.Node3, Node3Origin, directories, owners);
-            fixture = new RequestCqrsProbeFixture(root, session, directories, owners, captureDiscovery);
+            CreateNode(root, session, RequestCqrsRf3Protocol.Node1, Node1Origin, directories, owners, json);
+            CreateNode(root, session, RequestCqrsRf3Protocol.Node2, Node2Origin, directories, owners, json);
+            CreateNode(root, session, RequestCqrsRf3Protocol.Node3, Node3Origin, directories, owners, json);
+            fixture = new RequestCqrsProbeFixture(root, session, directories, owners, json, captureDiscovery);
         }, failures);
         if (failures.Count > 0)
         {
@@ -33,9 +35,9 @@ internal static class RequestCqrsProbeFixtureFactory
     }
 
     private static void CreateNode(string root, string session, string node, string voter,
-        Dictionary<string, string> directories, Dictionary<string, byte[]> owners)
+        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json)
     {
-        var created = RequestCqrsProbeFixtureOperations.PrepareNode(root, session, node, voter);
+        var created = RequestCqrsProbeFixtureOperations.PrepareNode(root, session, node, voter, json);
         directories.Add(node, created.Directory);
         owners.Add(node, created.OwnerBytes);
         RequestCqrsProbeFileStore.WriteAtomic(created.Directory, OwnerFileName, created.OwnerBytes);

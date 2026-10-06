@@ -11,11 +11,12 @@ internal static class IsolatedKurrentCleanupRegressionGossip
 {
     private const string NodePrefix = "isolated-kurrent-", NativeSuffix = ".dev.internal", Http = "http";
     private const string InvalidGossip = "KurrentCleanupNativeGossipMismatch";
-    private const int NativePort = 2113, MaximumBytes = 65_536;
+    private const int NativePort = 2113;
 
     internal static async Task<Uri> ReadLeaderAsync(DistributedApplication app, int nodeCount, CancellationToken token)
     {
         var topology = ComparisonTopologies.FromNodeCount(nodeCount);
+        var policy = NativeExecutionPolicyFixture.Harness().Value;
         var names = Enumerable.Range(1, nodeCount).Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
         var views = new KurrentGossipView[nodeCount];
         var endpoints = new Uri[nodeCount];
@@ -28,7 +29,7 @@ internal static class IsolatedKurrentCleanupRegressionGossip
             using var response = await client.GetAsync(new Uri(KurrentConstants.GossipPath, UriKind.Relative),
                 HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
-            using var json = await ReadBoundedAsync(response.Content, token);
+            using var json = await ReadBoundedAsync(response.Content, policy.KurrentGossipMaximumResponseBytes, token);
             views[index] = ParseView(json.RootElement, names[index] + NativeSuffix);
         }
         if (!KurrentClusterMembers.IsReady(views, topology) || views.Any(view => view.Members.Any(member =>
@@ -85,10 +86,10 @@ internal static class IsolatedKurrentCleanupRegressionGossip
         return element.GetProperty(name);
     }
 
-    private static async Task<JsonDocument> ReadBoundedAsync(HttpContent content, CancellationToken token)
+    private static async Task<JsonDocument> ReadBoundedAsync(HttpContent content, int maximumBytes, CancellationToken token)
     {
         await using var stream = await content.ReadAsStreamAsync(token);
-        var bytes = new byte[MaximumBytes + 1];
+        var bytes = new byte[maximumBytes + 1];
         var length = 0;
         while (length < bytes.Length)
         {
@@ -98,7 +99,7 @@ internal static class IsolatedKurrentCleanupRegressionGossip
                 return JsonDocument.Parse(bytes.AsMemory(0, length));
             }
             length += read;
-            if (length > MaximumBytes)
+            if (length > maximumBytes)
             {
                 throw new ComparisonFailureException(InvalidGossip);
             }

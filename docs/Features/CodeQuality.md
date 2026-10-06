@@ -488,6 +488,10 @@ remain distinct; their configuration helpers follow the same native options path
   static readonly, reject direct runtime configuration reads and bare configuration
   object injection, permit centrally registered options/defaults and const/nameof
   identities, and cover all general-literal spans/assemblies/generated boundaries.
+  Native `FileStreamOptions.BufferSize` assignments and explicit `bufferSize`
+  arguments of native FileStream/StreamWriter/StreamReader constructors are also
+  operational policy sinks, including const-backed values. Verify actual framework
+  symbol ownership; same-named application members do not become native IO sinks.
   Genuine field-only immutable temporal corpus data permits its native TimeSpan
   declaration; mutable/counterfeit markers and reuse as a timeout still fail.
   Immutable JSON metadata record snapshots preserve their serialized shape; a
@@ -496,6 +500,21 @@ remain distinct; their configuration helpers follow the same native options path
   diagnostics in the canonical full Release build; native Aspire full analyzers,
   unit/scalar/recovery/RF3 suites, format and source-bound coverage retain all gates.
   Original narrow-stage findings and test artifacts remain historical evidence.
+
+Executable native regression helpers also use the centrally bound/validated
+`NativeComparisonHarnessOptions` section `KeyLoad:NativeComparisonHarness`.
+Their PostgreSQL cleanup, advisory-lock observation and pool context reset,
+Redis probe lifetime, Kurrent gossip response/worker/volume bounds and original
+teardown task settlement/readback limits are operational policy. Preserve each
+original default and inclusive ceiling, independent capacity oracles, native
+client operations and all primary/callback/cleanup failures. Actual task-state
+observation must join native work before disposing its cancellation owner; a
+threshold expiry never grants permission to leave that original work running.
+The auxiliary native harness group also owns Neo4j/Mongo/OpenSearch HTTP and
+cleanup budgets, child-process/readback/fault/readiness bounds and progress-file
+write buffers. `NativeComparisonHarnessPolicyTests` exercises a configured lower
+threshold using a genuine native delay/cancellation callback and validates
+invalid native configuration before execution; execution evidence is pending.
 
 Additional AC-CQ-034/035 regressions are `CentralAppHostOptionsTests` (native
 bootstrap snapshot, configured timeout/filter admission, actual resource charging
@@ -515,6 +534,14 @@ native adapter bounds and invalid-value matrices),
 (configured policy reaches the actual Npgsql connection settings). These checks
 are authored and await the rebuilt Aspire-owned suite; they do not qualify
 comparative performance.
+
+`NativeComparisonReportPolicyTests` compares original and configured lower native
+CSV buffers against independent golden bytes. `VectorExecutionCadenceTests`
+compares configured cancellation/yield policy with unchanged corpus payload,
+vector digests and exact oracle results. `OpenLoopOriginalFailureTests` and
+`OpenLoopOriginalFailureWorkerTests` exercise the production settlement path with
+original native tasks and cancellation callbacks, retaining original failures
+and joined disposal. These checks await the rebuilt Aspire-owned suite.
 
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
@@ -694,10 +721,14 @@ do not make it N/A. Unexercised executable code remains an uncovered gap.
 Generated compiler-only infrastructure may be classified separately with an
 exact source reason; never remove executable source to raise a percentage.
 
-The server wrapper launches one original native `collect` command with an exact
-session, settings and binary output, wrapping `dotnet KeyLoad.Server.dll`. On an
-Aspire stop signal it asks the same native session to shut down and waits for
-that original collector/server chain. It writes a create-only terminal receipt
+The server wrapper launches one original native `collect --server-mode` command
+with an exact session, settings and binary output and one native `connect` to
+that same session. Its feature-local target wrapper launches exactly one
+original `dotnet KeyLoad.Server.dll`, retaining its PID, Linux process-start
+fingerprint and actual wait exit status. On Aspire stop the owner verifies that
+original target identity, requests its graceful TERM, joins the original
+target/connect tasks, then shuts down and joins the same native collector.
+It writes a create-only terminal receipt
 only after native settlement; requested stop, a snapshot, a wrapper timeout or
 a later replacement process is not settlement proof. Native SIGTERM/exit/flush
 behavior must be proved with the actual Linux tool/server before qualification.
@@ -708,7 +739,7 @@ actual execution; consumers have no duplicate defaults or raw policy reads.
 
 Ownership is `scripts/Features/CodeQuality/` for closed manifests, native tool
 invocation, test-only image/wrapper, identity/report verification and retained
-artifacts; `src/KeyLoad.AppHost/Features/CodeQuality/{Configuration,Resources}/`
+artifacts; `src/KeyLoad.AppHost/Features/CodeQuality/{Configuration,Contracts,Identity,Resources}/`
 for validated test-only preparation and resource dependencies; and
 `tests/KeyLoad.IntegrationTests/Features/CodeQuality/{Configuration,Fixtures,Helpers}/`
 for scoped fixture selection/export. Root owns the existing TestSuiteResources,
@@ -733,6 +764,13 @@ server/base/tool identity and bounds shape released to the image worker; Node
 receives its descriptor byte limit explicitly and enforces the immutable1MiB
 descriptor-format ceiling, without an operational default.
 
+Validate at least two closure files, readBufferBytes no larger than an individual
+file, and the context manifest no larger than either the file or complete closure
+limit. The AppHost and materializer enforce the same captured relationships.
+The comparison suite rejects coverage settings, output and format selectors
+before creating its runner; load and performance execution cannot become a
+functional coverage contributor through that entry point.
+
 Native shutdown defaults to10 seconds, original chain settlement to20 seconds,
 container stop to45 seconds and complete three-node application cleanup to180
 seconds. Validate positive whole seconds, shutdown+settlement strictly below
@@ -745,3 +783,80 @@ Timeouts fail without a successful terminal receipt. Full fault suites do not
 inherit an assumed graceful-flush result. The tool version is read from native
 AppHost assembly metadata emitted from the central package property, never a
 second runtime version literal. Root owns registration and fixture/cleanup joins.
+
+The closed native descriptor bounds also include readBufferBytes, default64KiB
+and bounded by the one native options definition. Both hashing and copy readers
+consume that exact captured buffer; they do not embed a second operational
+buffer in Node format constants. Image tooling is split by descriptor contract,
+bounded filesystem, native tool closure and context/CLI responsibilities under
+the existing400-file/50-function/three-level limits. Linux-x64 collection covers
+all original KeyLoad runtime assemblies in the selected server closure, with
+AppHost/Analyzers still separately qualified infrastructure. Dynamic managed
+instrumentation preserves admitted DLL/PDB bytes. The wrapper cannot publish a
+successful terminal while an original Server child remains alive; actual native
+process identity/exit settlement remains mandatory before report admission.
+
+The native server-mode/connect split replaces the unproved assumption that a
+collector shutdown also stops its application. It is one collector/session and
+one server per existing RF3 node, not another deployment. No replacement target
+or snapshot qualifies. Target identity and exit receipts are create-only and
+bound to that node/session/image/context/source. The overall settlement watchdog
+starts once at the original stop request and covers target/connect/collector;
+IPC shutdown consumes its configured bound inside that lifetime. Timeout,
+identity reuse, missing exit witness or any nonzero original exit publishes no
+successful terminal. Root must still prove actual Linux behavior through Aspire.
+
+The preparation resource reads both the exact engine version and restored
+package root from native AppHost assembly metadata generated by the same build.
+KeyLoadNativeCoverageToolVersion uses the central version property;
+KeyLoadNativeCoveragePackageRoot uses its actual NuGet package root and that
+same property. Missing, duplicate, relative or inconsistent metadata fails before
+preparation. The materializer still validates and hashes the original package
+closure; metadata alone does not prove collection, image identity or coverage.
+
+TASK-CQ-PRODUCTION-IDENTITY-003 freezes the additive canonical manifest before
+native binary-merge implementation. The Query v2 manifest and its original reports
+remain scoped history. The new create-only
+`functional-coverage.production-source-manifest.json` has schemaVersion3 and the
+closed fields sourceRevision, repository, contractSha256, compiledProducts,
+compiledTestsManifest, compilationProducer, contributors, settingsSha256 and
+scripts. Every referenced file has its observed original SHA256; metadata alone
+does not qualify a build or contributor.
+
+- AC-CQ-043: compiledProducts has exactly the16 modules listed above, once each.
+  Each entry has the exact fields module, role, sources and compiledIdentity.
+  Only KeyLoad.AppHost and KeyLoad.Analyzers have role infrastructure; the other14
+  have role production. sources retains each actual owned source path/SHA256.
+  compiledIdentity is the native Read-FcCompiledIdentity result, including the
+  original DLL/PDB paths/hashes, moduleName, MVID, PDB GUID/stamp, source-checksum
+  documents, compilation/inspection roots, identity-tool hash and complete/missing
+  source bindings. Unknown, repeated, changed or incomplete module identity fails.
+  The merge descriptor references this authoritative collection and does not
+  manufacture another compiler identity table.
+- AC-CQ-044: compiledTestsManifest is an explicit array of suite, fileName and
+  sha256 references to original native test-image manifests. Unit and scalar may
+  reference the same original image; recovery and RF3 must bind their own actual
+  image. Each selected contributor retains exact suite/class/method/instance,
+  related feature REQ/AC, operation/outcome/state and executed-module admission.
+  Every original selected TRX and native test outcome must match that inventory.
+  Native source/central-input/producer compile receipts remain mandatory; a later
+  filesystem snapshot cannot establish an older test compilation.
+- AC-CQ-045: MTP reports and RF3 fixtures are separate explicit groups. Unit and
+  scalar runs do not acquire a fictitious server roster. Each actual contributing
+  RF3 fixture supplies exactly three original node context/terminal/report records.
+  Merge/export starts after the original contributor invocations and collectors
+  finish. Native tooling-operation proofs are excluded product contributors;
+  missing finalized fixtures remain an open gate, never an invented report.
+
+Root owns new production inventory/compiled-identity tooling, existing native
+test-compilation receipt joins, AppHost preparation and finalized artifact roster.
+The Luna merge worker owns only new native-merge consumers and complete native
+tooling-operation regression packets. The image worker owns actual materializer
+operation proofs. Root verifies fresh original PE/PDB/source equality, changed
+input rejection with unchanged originals and healthy follow-up, then actual
+Aspire normal/scalar/recovery/RF3 collection and post-settlement merge. Existing
+80/70/90/no-decrease and complete delivered-source Linux gates remain mandatory.
+Rollback removes the coherent new tooling/joins and preserves every original
+report and v2 scoped record; database data, public protocols and replica topology
+are unchanged by this tooling stage. ADR-033 remains Accepted until these gates
+have their required evidence.

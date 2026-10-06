@@ -29,8 +29,9 @@ internal static class PackedAnnPreparedValueTestSupport
     internal static PackedAnnVectors Copy(TestDatabase database, VectorRecord[] records, VectorSpace space)
     {
         var budget = PackedAnnIndexTestSupport.Budget(database);
-        var admission = PackedAnnAdmission.Create(space, records, new PackedAnnOptions(), budget);
-        return PackedAnnVectors.Copy(records, admission, budget);
+        var options = UnitExecutionOptions.PackedAnn(new()).Value;
+        var admission = PackedAnnAdmission.Create(space, records, options, budget);
+        return PackedAnnVectors.Copy(records, admission, budget, options.VectorBudgetCheckInterval);
     }
 
     internal static async Task VerifyScoresAsync(TestDatabase database, float[][] vectors,

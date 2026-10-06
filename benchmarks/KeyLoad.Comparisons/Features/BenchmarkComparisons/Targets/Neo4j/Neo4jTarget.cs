@@ -164,13 +164,13 @@ public sealed class Neo4jTarget(HttpClient http, string runId, string image,
     /// <summary>Executes one comparison session’s document and directed graph queries.</summary>
     private sealed class Session(Neo4jTarget target) : IComparisonSession
     {
-    private const string ReadCorpusAsyncMATCHNText = "MATCH (n:";
-    private const string ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
-    private const string ReadAsyncIdIdRETURNNJsonText = " {id:$id}) RETURN n.json";
-    private const string ExecuteAsyncMATCHAText = "MATCH (a:";
-    private const string ExecuteAsyncIdIdLINKSText = " {id:$id})-[:LINKS*1..";
-    private const string ExecuteAsyncBText = "]->(b:";
-    private const string ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText = ") WHERE b.id<>$id RETURN DISTINCT b.id ORDER BY b.id";
+        private const string ReadCorpusAsyncMATCHNText = "MATCH (n:";
+        private const string ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
+        private const string ReadAsyncIdIdRETURNNJsonText = " {id:$id}) RETURN n.json";
+        private const string ExecuteAsyncMATCHAText = "MATCH (a:";
+        private const string ExecuteAsyncIdIdLINKSText = " {id:$id})-[:LINKS*1..";
+        private const string ExecuteAsyncBText = "]->(b:";
+        private const string ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText = ") WHERE b.id<>$id RETURN DISTINCT b.id ORDER BY b.id";
 
         public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {

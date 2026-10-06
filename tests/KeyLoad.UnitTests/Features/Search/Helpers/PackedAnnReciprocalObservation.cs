@@ -13,7 +13,7 @@ internal static class PackedAnnReciprocalObservation
     {
         var allocatedStart = GC.GetAllocatedBytesForCurrentThread();
         var started = Stopwatch.GetTimestamp();
-        var state = PackedAnnBuilder.Build(space, records, options, budget);
+        var state = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options), budget);
         var elapsed = Stopwatch.GetTimestamp() - started;
         var allocated = GC.GetAllocatedBytesForCurrentThread() - allocatedStart;
         return (state, elapsed, allocated);

@@ -1,5 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 
@@ -78,52 +79,40 @@ internal sealed class RequestCqrsRf3DiagnosticsCleanup : IAsyncDisposable
             await RequestCqrsLifecycleFailureObserver.ObserveAsync(() => drain.WaitAsync(cancellationToken),
                 failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
         }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.CaptureDrain);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-            RequestCqrsLifecycleStage.CaptureDrain);
-        }
         finally
         {
-            if (!drain.IsCompleted)
-            {
-                fallbackRequested = true;
-                await ObserveCleanupAsync(lifetime.CancelAsync, failures,
-                    RequestCqrsLifecycleStage.CaptureFallbackCancellation).ConfigureAwait(false);
-                await ObserveCleanupAsync(() => drain, failures,
-                    RequestCqrsLifecycleStage.CaptureFallbackJoin).ConfigureAwait(false);
-            }
-            try
-            { lifetime.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureLifetimeDispose);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureLifetimeDispose);
-            }
-            try
-            { cleanupDeadline.Dispose(); }
-            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureDeadlineDispose);
-            }
-            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-            {
-                RequestCqrsLifecycleFailureObserver.Append(failures, error, failureObserver,
-                RequestCqrsLifecycleStage.CaptureDeadlineDispose);
-            }
+            await JoinFallbackAsync(drain, failures).ConfigureAwait(false);
+            var lifetimeDisposal = DisposeLifetimeAsync();
+            await ObserveCleanupAsync(() => lifetimeDisposal, failures,
+                RequestCqrsLifecycleStage.CaptureLifetimeDispose).ConfigureAwait(false);
+            var deadlineDisposal = DisposeDeadlineAsync();
+            await ObserveCleanupAsync(() => deadlineDisposal, failures,
+                RequestCqrsLifecycleStage.CaptureDeadlineDispose).ConfigureAwait(false);
         }
         ThrowWithNativeFatalPriority(failures);
+    }
+
+    private async Task DisposeLifetimeAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+        lifetime.Dispose();
+    }
+
+    private async Task DisposeDeadlineAsync()
+    {
+        await Task.CompletedTask.ConfigureAwait(false);
+        cleanupDeadline.Dispose();
+    }
+
+    private async Task JoinFallbackAsync(Task drain, List<Exception> failures)
+    {
+        if (drain.IsCompleted)
+        { return; }
+        fallbackRequested = true;
+        await ObserveCleanupAsync(lifetime.CancelAsync, failures,
+            RequestCqrsLifecycleStage.CaptureFallbackCancellation).ConfigureAwait(false);
+        await ObserveCleanupAsync(() => drain, failures,
+            RequestCqrsLifecycleStage.CaptureFallbackJoin).ConfigureAwait(false);
     }
 
     private void CompleteResourceStreams(List<Exception> failures)

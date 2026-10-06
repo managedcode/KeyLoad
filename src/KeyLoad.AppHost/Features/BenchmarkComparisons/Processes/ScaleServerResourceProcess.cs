@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -26,7 +24,7 @@ internal static partial class ScaleServerResourceProcess
         const char LineFeedCharacter = '\n';
         const int InspectFieldCount = 6;
 
-        var output = await RunAsync(Docker, [ArgumentsText, InspectAsyncArgumentsText, InspectFormat, container], token, budget);
+        var output = await RunAsync(Docker, [ArgumentsText, InspectAsyncArgumentsText, InspectFormat, container], budget, token);
         if (output is null)
         {
             return null;
@@ -36,13 +34,10 @@ internal static partial class ScaleServerResourceProcess
         return fields.Length == InspectFieldCount ? output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter) : null;
     }
 
-    internal static async Task<string?> RunAsync(string executable, string[] arguments, CancellationToken token,
-        ScaleServerResourceSampleBudget budget, int? maximumOutputBytes = null)
+    internal static async Task<string?> RunAsync(string executable, string[] arguments,
+        ScaleServerResourceSampleBudget budget, CancellationToken cancellationToken, int? maximumOutputBytes = null)
     {
         const string MessageText = "Server resource sample exceeded its bound.";
-        const int SuccessfulExitCode = 0;
-        const string RunAsyncMessageText = "Server resource process cancellation cleanup failed.";
-
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo(executable)
@@ -67,78 +62,48 @@ internal static partial class ScaleServerResourceProcess
         var errorLimit = Math.Min(budget.Settings.MaxFileBytes, Math.Max(RunAsyncFirstPositiveCount, limit / budget.Settings.StandardErrorOutputDivisor));
         var outputLimit = limit - errorLimit;
         process.Start();
-        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.NativeReadBufferBytes, token);
-        var error = DrainBoundedAsync(process.StandardError.BaseStream, errorLimit, token);
+        var output = ReadBoundedAsync(process.StandardOutput.BaseStream, outputLimit, budget.Settings.NativeReadBufferBytes, cancellationToken);
+        var error = DrainBoundedAsync(process.StandardError.BaseStream, errorLimit, cancellationToken);
+        var exit = process.WaitForExitAsync(cancellationToken);
+        var readers = Task.WhenAll(output, error);
+        return await ObserveAsync(process, output, error, exit, readers, budget);
+    }
+
+    private static async Task<string?> ObserveAsync(Process process, Task<byte[]> output, Task<int> error,
+        Task exit, Task readers, ScaleServerResourceSampleBudget budget)
+    {
+        const int SuccessfulExitCode = 0;
+        const string CancellationCleanupFailureMessage = "Server resource process cancellation cleanup failed.";
         try
         {
-            var exit = process.WaitForExitAsync(token);
-            var readers = Task.WhenAll(output, error);
             if (await Task.WhenAny(exit, readers) == readers)
             {
                 await readers;
             }
-
             await exit;
             await readers;
             var bytes = await output;
-            budget?.Charge(bytes.Length + error.Result);
+            var diagnosticBytes = await error;
+            budget.Charge(bytes.Length + diagnosticBytes);
             return process.ExitCode == SuccessfulExitCode ? Encoding.UTF8.GetString(bytes) : null;
-        }
-        catch (OperationCanceledException failure)
-        {
-            try
-            { await TerminateAndJoinAsync(process, output, error, budget.Settings.ProcessSettlement); }
-            catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
-            catch (Exception cleanupFailure)
-            {
-                throw new AggregateException(RunAsyncMessageText, failure, cleanupFailure);
-            }
-            ExceptionDispatchInfo.Capture(failure).Throw();
-            throw;
         }
         catch (Exception failure)
         {
             try
-            { await TerminateAndJoinAsync(process, output, error, budget.Settings.ProcessSettlement); }
-            catch (Exception cleanupFailure) when (SharesTerminalFailure(failure, cleanupFailure)) { }
+            {
+                await ScaleServerResourceProcessSettlement.SettleAsync(process, output, error, exit, readers,
+                    budget.Settings.ProcessSettlement, SendSignal, failure);
+            }
             catch (Exception cleanupFailure)
             {
-                throw new AggregateException(ProcessAndCleanupFailureMessage, failure, cleanupFailure);
+                var message = failure is OperationCanceledException ? CancellationCleanupFailureMessage : ProcessAndCleanupFailureMessage;
+                throw new AggregateException(message, failure, cleanupFailure);
             }
-            ExceptionDispatchInfo.Capture(failure).Throw();
             throw;
         }
     }
 
-    private static bool SharesTerminalFailure(Exception failure, Exception cleanupFailure)
-        => ReferenceEquals(failure, cleanupFailure)
-            || failure is OperationCanceledException original && cleanupFailure is OperationCanceledException cleanup
-                && original.CancellationToken == cleanup.CancellationToken;
-
-    private static async Task TerminateAndJoinAsync(Process process, Task<byte[]> output, Task error, TimeSpan settlement)
-    {
-        const int SignalValue = 15;
-
-        if (!process.HasExited)
-        {
-            if (OperatingSystem.IsLinux())
-            {
-                _ = SendSignal(process.Id, SignalValue);
-            }
-
-            var exited = process.WaitForExitAsync(CancellationToken.None);
-            if (await Task.WhenAny(exited, Task.Delay(settlement)) != exited)
-            {
-                try
-                { process.Kill(entireProcessTree: true); }
-                catch (InvalidOperationException) { }
-                catch (Win32Exception) { }
-            }
-            await process.WaitForExitAsync(CancellationToken.None);
-        }
-        await Task.WhenAll(output, error);
-    }
-
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [LibraryImport(ScaleServerResourceProcessMetadataName, EntryPoint = ScaleServerResourceProcessScaleServerResourceProcessMetadataName, SetLastError = true)]
     private static partial int SendSignal(int processId, int signal);
 
@@ -169,7 +134,7 @@ internal static partial class ScaleServerResourceProcess
                 throw new InvalidDataException(MessageText);
             }
 
-            buffer.Write(chunk, OffsetValue, count);
+            await buffer.WriteAsync(chunk.AsMemory(OffsetValue, count), token);
         }
     }
 

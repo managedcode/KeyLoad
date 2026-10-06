@@ -10,6 +10,10 @@ internal static class TwoRf3MembershipFingerprintAssertions
 {
     private const string Domain = "keyload.orleans.membership.active.v1";
     private const int MaximumHealthBytes = 512;
+    private const string VersionProperty = "version";
+    private const string ActiveSilosProperty = "activeSilos";
+    private const string MembershipRowsProperty = "membershipRows";
+    private const string ActiveFingerprintProperty = "activeFingerprint";
 
     internal static string Fingerprint(IEnumerable<string> addresses)
     {
@@ -52,13 +56,13 @@ internal static class TwoRf3MembershipFingerprintAssertions
         var root = json.RootElement;
         await Assert.That(root.ValueKind).IsEqualTo(JsonValueKind.Object);
         var names = root.EnumerateObject().Select(property => property.Name).OrderBy(name => name, StringComparer.Ordinal).ToArray();
-        await Assert.That(names.SequenceEqual(new[] { "activeFingerprint", "activeSilos", "membershipRows", "version" },
+        await Assert.That(names.SequenceEqual(new[] { ActiveFingerprintProperty, ActiveSilosProperty, MembershipRowsProperty, VersionProperty },
             StringComparer.Ordinal)).IsTrue();
-        await Assert.That(root.GetProperty("version").GetInt32()).IsEqualTo(1);
-        await Assert.That(root.GetProperty("activeSilos").GetInt32()).IsEqualTo(6);
-        var rows = root.GetProperty("membershipRows").GetInt32();
+        await Assert.That(root.GetProperty(VersionProperty).GetInt32()).IsEqualTo(1);
+        await Assert.That(root.GetProperty(ActiveSilosProperty).GetInt32()).IsEqualTo(6);
+        var rows = root.GetProperty(MembershipRowsProperty).GetInt32();
         await Assert.That(rows is >= 6 and <= 48).IsTrue();
-        var actual = root.GetProperty("activeFingerprint").GetString();
+        var actual = root.GetProperty(ActiveFingerprintProperty).GetString();
         await Assert.That(IsLowerHex(actual)).IsTrue();
         await Assert.That(actual).IsEqualTo(expected);
     }

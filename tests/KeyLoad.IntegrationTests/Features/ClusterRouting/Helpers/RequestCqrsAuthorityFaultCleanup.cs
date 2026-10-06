@@ -17,51 +17,44 @@ internal static class RequestCqrsAuthorityFaultCleanup
         Action<RequestCqrsLifecycleStage>? failureObserver = null)
     {
         var cleanup = new List<Exception>();
-        var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
-        if (operationDeadline is not null)
+        async Task CleanupOwnedAsync()
         {
-            await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityDeadlineCancellation).ConfigureAwait(false);
+            using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline);
+            if (operationDeadline is not null)
+            {
+                await ObserveAsync(operationDeadline.CancelAsync, cleanup, failureObserver,
+                RequestCqrsLifecycleStage.AuthorityDeadlineCancellation).ConfigureAwait(false);
+            }
+            await ReleaseAndJoinAsync(controls, discovery, sdkCall, mcpCall, armId, originalStarted,
+                cleanup, failureObserver, deadline.Token).ConfigureAwait(false);
+            await DisposeCallersAsync(caller, administrator, cleanup, failureObserver).ConfigureAwait(false);
+            var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup, failureObserver)
+                .ConfigureAwait(false);
+            await DisposeControlsAsync(controls, waveStopped, cleanup, failureObserver).ConfigureAwait(false);
+            var oracle = outcomeOracle;
+            if (waveStopped && cleanup.Count == 0 && oracle is not null)
+            {
+                await ObserveAsync(() => InspectIfReadyAsync(oracle, heldCommandId, deadline.Token),
+                    cleanup, failureObserver, RequestCqrsLifecycleStage.AuthorityOutcomeInspect).ConfigureAwait(false);
+            }
+            RequestCqrsLifecycleFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityDeadlineDispose);
+            if (rootCreated && waveStopped && cleanup.Count == 0)
+            {
+                RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,
+                failureObserver, RequestCqrsLifecycleStage.AuthorityRootDelete);
+            }
         }
-        await ReleaseAndJoinAsync(controls, discovery, sdkCall, mcpCall, armId, originalStarted,
-            cleanup, deadline.Token, failureObserver).ConfigureAwait(false);
-        await DisposeCallersAsync(caller, administrator, cleanup, failureObserver).ConfigureAwait(false);
-        var waveStopped = await StopWaveAsync(wave, waveStartupAttempted, cleanup, failureObserver)
-            .ConfigureAwait(false);
-        await DisposeControlsAsync(controls, waveStopped, cleanup, failureObserver).ConfigureAwait(false);
-        var oracle = outcomeOracle;
-        if (waveStopped && cleanup.Count == 0 && oracle is not null)
-        {
-            await ObserveAsync(() => InspectIfReadyAsync(oracle, heldCommandId, deadline.Token),
-                cleanup, failureObserver, RequestCqrsLifecycleStage.AuthorityOutcomeInspect).ConfigureAwait(false);
-        }
-        RequestCqrsLifecycleFailureObserver.Observe(() => operationDeadline?.Dispose(), cleanup,
-            failureObserver, RequestCqrsLifecycleStage.AuthorityDeadlineDispose);
-        if (rootCreated && waveStopped && cleanup.Count == 0)
-        {
-            RequestCqrsLifecycleFailureObserver.Observe(() => Directory.Delete(root, recursive: true), cleanup,
-            failureObserver, RequestCqrsLifecycleStage.AuthorityRootDelete);
-        }
-        try
-        { deadline.Dispose(); }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            RequestCqrsLifecycleFailureObserver.Append(cleanup, error, failureObserver,
-            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose);
-        }
+        await ObserveAsync(CleanupOwnedAsync, cleanup, failureObserver,
+            RequestCqrsLifecycleStage.AuthorityCleanupDeadlineDispose).ConfigureAwait(false);
         failures.AddRange(cleanup);
     }
 
     private static async Task ReleaseAndJoinAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Task<Result<CommitReceipt>>? sdkCall,
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, bool originalStarted,
-        List<Exception> failures, CancellationToken cancellationToken,
-        Action<RequestCqrsLifecycleStage>? failureObserver)
+        List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver,
+        CancellationToken cancellationToken)
     {
         if (controls is not null)
         {
@@ -84,7 +77,7 @@ internal static class RequestCqrsAuthorityFaultCleanup
             RequestCqrsLifecycleStage.AuthorityMcpJoin).ConfigureAwait(false);
         }
         await ObserveProducerDisposedAsync(controls, discovery, armId, originalStarted, failures,
-            cancellationToken, failureObserver).ConfigureAwait(false);
+            failureObserver, cancellationToken).ConfigureAwait(false);
         if (controls is not null && armId != Guid.Empty)
         {
             await ObserveAsync(() => RetireArmIfOpenAsync(controls, armId, cancellationToken), failures,
@@ -94,8 +87,8 @@ internal static class RequestCqrsAuthorityFaultCleanup
 
     private static async Task ObserveProducerDisposedAsync(RequestCqrsProbeFixture? controls,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, Guid armId, bool originalStarted,
-        List<Exception> failures, CancellationToken cancellationToken,
-        Action<RequestCqrsLifecycleStage>? failureObserver)
+        List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver,
+        CancellationToken cancellationToken)
     {
         await ObserveAsync(async () =>
         {

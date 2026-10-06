@@ -1,3 +1,4 @@
+using KeyLoad.Orleans;
 namespace KeyLoad.UnitTests;
 
 /// <summary>AC-ORL-011: due discovery waits on real canonical apply with a joined clock fallback.</summary>
@@ -66,9 +67,10 @@ internal sealed class RecurringDueWaitTests
     [Test]
     public async Task ApplyLogFailureWakesDueWaitAndPreservesRecoveryFence()
     {
-        var fixture = new ReplicaAppliedPositionWaitFixture();
+        ReplicaAppliedPositionWaitFixture? fixture = null;
         try
         {
+            fixture = new ReplicaAppliedPositionWaitFixture();
             using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
@@ -82,8 +84,20 @@ internal sealed class RecurringDueWaitTests
         }
         finally
         {
-            var disposalFailure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => fixture.DisposeAsync().AsTask());
-            await Assert.That(disposalFailure!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            KeyLoadException? disposalFailure = null;
+            try
+            {
+                await (fixture?.DisposeAsync() ?? ValueTask.CompletedTask);
+            }
+            catch (KeyLoadException error) when (error.GetType() == typeof(KeyLoadException))
+            {
+                disposalFailure = error;
+            }
+            if (fixture is not null)
+            {
+                await Assert.That(disposalFailure).IsNotNull();
+                await Assert.That(disposalFailure!.Code).IsEqualTo(ErrorCode.FormatUnsupported);
+            }
         }
     }
 }

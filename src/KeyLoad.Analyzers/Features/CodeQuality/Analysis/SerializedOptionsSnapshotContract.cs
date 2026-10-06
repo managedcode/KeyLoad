@@ -27,16 +27,16 @@ internal static class SerializedOptionsSnapshotContract
 
     private static bool IsDataMember(Compilation compilation, MemberDeclarationSyntax member,
         CancellationToken cancellationToken) => member switch
-    {
-        FieldDeclarationSyntax field => field.Modifiers.Any(SyntaxKind.ConstKeyword),
-        PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors } property =>
-            property.Initializer is null && accessors.Accessors.All(static accessor =>
-                accessor.Body is null && accessor.ExpressionBody is null &&
-                accessor.Kind() is SyntaxKind.GetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration) &&
-            compilation.GetSemanticModel(member.SyntaxTree).GetDeclaredSymbol(property, cancellationToken) is { } symbol &&
-            HasNativeAttribute(compilation, symbol, OrleansMetadataNames.IdAttribute),
-        _ => false
-    };
+        {
+            FieldDeclarationSyntax field => field.Modifiers.Any(SyntaxKind.ConstKeyword),
+            PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessors } property =>
+                property.Initializer is null && accessors.Accessors.All(static accessor =>
+                    accessor.Body is null && accessor.ExpressionBody is null &&
+                    accessor.Kind() is SyntaxKind.GetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration) &&
+                compilation.GetSemanticModel(member.SyntaxTree).GetDeclaredSymbol(property, cancellationToken) is { } symbol &&
+                HasNativeAttribute(compilation, symbol, OrleansMetadataNames.IdAttribute),
+            _ => false
+        };
 
     private static bool HasNativeAttribute(Compilation compilation, ISymbol symbol, string metadataName)
     {

@@ -12,7 +12,7 @@ internal sealed class NodeEpochReplicaEmptySnapshotTests
         var canonicalPosition = fixture.CanonicalStore.Position;
         var plan = fixture.Preflight();
 
-        ReplicaSnapshotFormatUpgrade.Upgrade(plan, fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(            fixture.Configuration), fixture.DestinationSnapshots,             (_, _) => throw new InvalidOperationException("An empty snapshot inventory must not invoke conversion."), recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution());
+        ReplicaSnapshotFormatUpgrade.Upgrade(plan, fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), fixture.DestinationSnapshots, (_, _) => throw new InvalidOperationException("An empty snapshot inventory must not invoke conversion."), recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution());
 
         await Assert.That(fixture.ReplicaStore.Position).IsEqualTo(replicaPosition);
         await Assert.That(fixture.CanonicalStore.Position).IsEqualTo(canonicalPosition);

@@ -1,6 +1,6 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
-using Microsoft.Extensions.Configuration;
 using KeyLoad.AppHost.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 

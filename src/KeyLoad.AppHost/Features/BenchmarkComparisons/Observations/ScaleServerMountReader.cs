@@ -25,10 +25,6 @@ internal static class ScaleServerMountReader
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int EmptyLength = 0;
-        const int MountFieldCount = 3;
-        const int FirstIndex = 0;
-        const int ElementIndex = 2;
-        const int SecondIndex = 1;
 
         token.ThrowIfCancellationRequested();
         var expected = new HashSet<string>(expectedTargets, StringComparer.Ordinal);
@@ -49,27 +45,7 @@ internal static class ScaleServerMountReader
                 return [];
             }
 
-            var observed = new HashSet<string>(StringComparer.Ordinal);
-            var mounts = new List<ScaleServerMount>();
-            foreach (var row in text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries))
-            {
-                var fields = row.Split(FieldSeparator, StringSplitOptions.None);
-                if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == EmptyLength
-                    || mounts.Count >= budget.Settings.MaxMounts || !expected.Contains(fields[SecondIndex])
-                    || !observed.Add(fields[SecondIndex]))
-                {
-                    return [];
-                }
-
-                var mount = await ReadActualMountAsync(fields[FirstIndex], fields[SecondIndex], fields[ElementIndex], budget, token);
-                if (mount is null)
-                {
-                    return [];
-                }
-
-                mounts.Add(mount);
-            }
-            return observed.SetEquals(expected) ? mounts.ToArray() : [];
+            return await ReadMountedFilesystemsAsync(text, expected, budget, token);
         }
         catch (OperationCanceledException) { throw; }
         catch (IOException) { return []; }
@@ -78,6 +54,38 @@ internal static class ScaleServerMountReader
         catch (FormatException) { return []; }
         catch (System.ComponentModel.Win32Exception) { return []; }
         catch (OverflowException) { return []; }
+    }
+
+    private static async Task<ScaleServerMount[]> ReadMountedFilesystemsAsync(string text, HashSet<string> expected,
+        ScaleServerResourceSampleBudget budget, CancellationToken token)
+    {
+        const int EmptyLength = 0;
+        const int MountFieldCount = 3;
+        const int FirstIndex = 0;
+        const int ElementIndex = 2;
+        const int SecondIndex = 1;
+
+        var observed = new HashSet<string>(StringComparer.Ordinal);
+        var mounts = new List<ScaleServerMount>();
+        foreach (var row in text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var fields = row.Split(FieldSeparator, StringSplitOptions.None);
+            if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == EmptyLength
+                || mounts.Count >= budget.Settings.MaxMounts || !expected.Contains(fields[SecondIndex])
+                || !observed.Add(fields[SecondIndex]))
+            {
+                return [];
+            }
+
+            var mount = await ReadActualMountAsync(fields[FirstIndex], fields[SecondIndex], fields[ElementIndex], budget, token);
+            if (mount is null)
+            {
+                return [];
+            }
+
+            mounts.Add(mount);
+        }
+        return observed.SetEquals(expected) ? mounts.ToArray() : [];
     }
 
     private static async Task<bool> IsLocalDockerAsync(ScaleServerResourceSampleBudget budget, CancellationToken token)
@@ -91,7 +99,7 @@ internal static class ScaleServerMountReader
         }
 
         var endpoint = await ScaleServerResourceProcess.RunAsync(Docker,
-            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], token, budget, budget.Settings.MaxNativeOutputBytes);
+            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], budget, token, budget.Settings.MaxNativeOutputBytes);
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
     }
 
@@ -100,11 +108,6 @@ internal static class ScaleServerMountReader
     {
         const string ArgumentsText = "--json";
         const string ReadActualMountAsyncArgumentsText = "--bytes";
-        const string PropertyNameText = "filesystems";
-        const int SingleFilesystemCount = 1;
-        const int IndexValue = 0;
-        const string ReadActualMountAsyncPropertyNameText = "fstype";
-        const int BoundaryValue = 0;
 
         string canonicalSource;
         try
@@ -116,12 +119,24 @@ internal static class ScaleServerMountReader
         }
 
         var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
-            [ArgumentsText, ReadActualMountAsyncArgumentsText, TargetArgument, canonicalSource, OutputArgument, FindmntOutput], token, budget,
+            [ArgumentsText, ReadActualMountAsyncArgumentsText, TargetArgument, canonicalSource, OutputArgument, FindmntOutput], budget, token,
             budget.Settings.MaxNativeOutputBytes);
         if (json is null)
         {
             return null;
         }
+
+        return ReadMountDescriptor(canonicalSource, containerPath, mountType, json);
+    }
+
+    private static ScaleServerMount? ReadMountDescriptor(string canonicalSource, string containerPath,
+        string mountType, string json)
+    {
+        const string PropertyNameText = "filesystems";
+        const int SingleFilesystemCount = 1;
+        const int IndexValue = 0;
+        const string ReadActualMountAsyncPropertyNameText = "fstype";
+        const int BoundaryValue = 0;
 
         try
         {

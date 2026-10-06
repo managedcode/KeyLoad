@@ -20,7 +20,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
         var originalCanonicalPosition = fixture.CanonicalStore.Position;
         ReplicaHardState originalHardState;
         (ImmutableArray<ReplicaEntry> Entries, byte[][] Bytes) originalSuffix;
-        using (var originalLog = new DurableReplicaLog(fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration),                    canonicalDatabase: fixture.Database))
+        using (var originalLog = new DurableReplicaLog(fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), canonicalDatabase: fixture.Database))
         {
             originalHardState = originalLog.State;
             originalSuffix = await CaptureRetainedSuffixAsync(fixture, originalLog);
@@ -32,7 +32,7 @@ internal sealed class NodeEpochReplicaSnapshotConversionTests
         await Assert.That(plan.Canonical.Position).IsEqualTo(fixture.CanonicalStore.Position);
         await Assert.That(plan.Replica.Position).IsEqualTo(originalReplicaPosition);
 
-        ReplicaSnapshotFormatUpgrade.Upgrade(plan, fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(            fixture.Configuration with { VoterIds = [.. fixture.Configuration.VoterIds] }),             fixture.DestinationSnapshots, fixture.Convert, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution());
+        ReplicaSnapshotFormatUpgrade.Upgrade(plan, fixture.Database, fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration with { VoterIds = [.. fixture.Configuration.VoterIds] }), fixture.DestinationSnapshots, fixture.Convert, recoveryOptions: UnitExecutionOptions.OfflineRecovery(), executionOptions: UnitExecutionOptions.ReplicaExecution());
 
         using var log = new DurableReplicaLog(fixture.ReplicaStore, UnitExecutionOptions.ReplicaConfiguration(fixture.Configuration), canonicalDatabase: fixture.Database);
         var converted = log.State.Snapshot!;

@@ -18,7 +18,6 @@ internal static class IsolatedPostgresSlotRegression
     private const string Standby = "benchmark_standby";
     private const long RetentionBytes = 512L * 1024 * 1024;
     private const int ProbeMilliseconds = 200;
-    private const int ObservationSeconds = 60;
 
     internal static async Task VerifyAsync(string connectionString, int nodeCount, CancellationToken token)
     {
@@ -77,7 +76,7 @@ internal static class IsolatedPostgresSlotRegression
     private static async Task WaitForCopiesAsync(NpgsqlConnection connection, int expected, string cut, CancellationToken token)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
-        deadline.CancelAfter(TimeSpan.FromSeconds(ObservationSeconds));
+        deadline.CancelAfter(NativeExecutionPolicyFixture.Harness().Value.PostgresSlotObservationTimeout);
         while (true)
         {
             await using var command = new NpgsqlCommand(Copies, connection);

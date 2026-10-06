@@ -34,10 +34,10 @@ internal sealed class ScaledCohortAggregateFailureTests
         await Assert.That(result.Error).DoesNotContain(directory.Root);
         using var diagnostic = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(scaleOutput, "failed-accounting.json"), token));
         await Assert.That(diagnostic.RootElement.EnumerateObject().Select(property => property.Name)
-            .SequenceEqual(["schemaVersion", "status", "error"], StringComparer.Ordinal)).IsTrue();
-        await Assert.That(diagnostic.RootElement.GetProperty("schemaVersion").GetInt32()).IsEqualTo(1);
-        await Assert.That(diagnostic.RootElement.GetProperty("status").GetString()).IsEqualTo("incomplete");
-        await Assert.That(diagnostic.RootElement.GetProperty("error").GetString()).IsEqualTo("E_AGGREGATE_INPUT");
+            .SequenceEqual([IsolatedPlanFields.SchemaVersion, IsolatedPlanFields.Status, IsolatedPlanFields.Error], StringComparer.Ordinal)).IsTrue();
+        await Assert.That(diagnostic.RootElement.GetProperty(IsolatedPlanFields.SchemaVersion).GetInt32()).IsEqualTo(1);
+        await Assert.That(diagnostic.RootElement.GetProperty(IsolatedPlanFields.Status).GetString()).IsEqualTo("incomplete");
+        await Assert.That(diagnostic.RootElement.GetProperty(IsolatedPlanFields.Error).GetString()).IsEqualTo("E_AGGREGATE_INPUT");
         await Assert.That(File.Exists(Path.Combine(scaleOutput, "cohort-receipt.json"))).IsFalse();
         await Assert.That(Directory.Exists(directory.PathFor("aggregate"))).IsFalse();
     }

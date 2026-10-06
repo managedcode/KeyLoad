@@ -58,7 +58,7 @@ internal static class NodeEpochRegularFileScenario
         try
         {
             _ = ZoneTreeSnapshotFormatUpgrade.Upgrade(source, destination, incarnation, CrashExecutionOptions.StorageExecution());
-            Console.Out.WriteLine("UnexpectedSuccess");
+            Console.Out.WriteLine(nameof(UnexpectedSuccess));
         }
         catch (KeyLoadException failure)
         {
@@ -76,8 +76,8 @@ internal static class NodeEpochRegularFileScenario
             try
             {
                 using var unexpected = OfflineRegularFile.OpenWithIdentity(source, identity,
-                    FileAccess.Read, FileShare.Read, 4096);
-                await Console.Out.WriteLineAsync("UnexpectedSuccess");
+                    FileAccess.Read, FileShare.Read, CrashExecutionOptions.Child().Value.AuthorityReadBufferBytes);
+                await Console.Out.WriteLineAsync(nameof(UnexpectedSuccess));
             }
             catch (KeyLoadException failure)
             {
@@ -94,28 +94,36 @@ internal static class NodeEpochRegularFileScenario
 
     private static async Task<EpochPriorNodeProfile> ReadProfileAsync()
     {
+        const string ReadProfileAsyncMessageText = "The node profile is invalid.";
+
         var input = await ReadBoundedProfileAsync();
         return JsonSerializer.Deserialize<EpochPriorNodeProfile>(input, EpochPriorSourceProbe.JsonOptions)
-            ?? throw new InvalidDataException("The node profile is invalid.");
+            ?? throw new InvalidDataException(ReadProfileAsyncMessageText);
     }
 
     private static async Task<string> ReadBoundedProfileAsync()
     {
+        const int EmptyCount = 0;
+        const int IndexInitialValue = 0;
+        const char CarriageReturnCharacter = '\r';
+        const char LineFeedCharacter = '\n';
+        const string ReadBoundedProfileAsyncMessageText = "The node profile is invalid.";
+
         var builder = new StringBuilder();
-        var chunk = new char[256];
+        var chunk = new char[CrashExecutionOptions.Child().Value.ProfileReadChunkCharacters];
         var ended = false;
         while (true)
         {
             var count = await Console.In.ReadAsync(chunk.AsMemory());
-            if (count == 0)
+            if (count == EmptyCount)
             { break; }
-            for (var index = 0; index < count; index++)
+            for (var index = IndexInitialValue; index < count; index++)
             {
                 var character = chunk[index];
-                if (character is '\r' or '\n')
+                if (character is CarriageReturnCharacter or LineFeedCharacter)
                 { ended = true; continue; }
                 if (ended || builder.Length >= MaximumProfileCharacters)
-                { throw new InvalidDataException("The node profile is invalid."); }
+                { throw new InvalidDataException(ReadBoundedProfileAsyncMessageText); }
                 builder.Append(character);
             }
         }

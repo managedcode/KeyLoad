@@ -28,13 +28,13 @@ internal sealed class PackedAnnNeighborCountTests
         var space = PackedAnnTestData.Space(metric, Dimension);
         var options = Options();
         var measuredBudget = PackedAnnIndexTestSupport.Budget(database);
-        var measured = PackedAnnBuilder.Build(space, records, options, measuredBudget);
+        var measured = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options), measuredBudget);
         var measuredGraph = PackedAnnAdjacencyAssertions.Snapshot(measured, PackedAnnIndexTestSupport.Budget(database));
         var slots = await AssertShapeAsync(measured, measuredGraph);
         await AssertReplaceClearRestoreAsync(measured, measuredGraph, slots, database);
         await AssertCountBudgetAndCancellationAsync(measured,
             (slots.PartialUpperSource, slots.PartialUpperLayer), database);
-        var replay = PackedAnnBuilder.Build(space, records, options,
+        var replay = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options),
             PackedAnnIndexTestSupport.Budget(database, measuredBudget.WorkUnits));
         await PackedAnnAdjacencyAssertions.AssertSameAsync(measuredGraph,
             PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget(database)));
@@ -148,7 +148,7 @@ internal sealed class PackedAnnNeighborCountTests
         PackedAnnOptions options, long work, TestDatabase database)
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnBuilder.Build(space, records,
-            options, PackedAnnIndexTestSupport.Budget(database, work - 1)));
+            UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database, work - 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

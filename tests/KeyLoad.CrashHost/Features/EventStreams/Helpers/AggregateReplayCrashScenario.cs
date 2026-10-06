@@ -5,6 +5,8 @@ namespace KeyLoad.CrashHost;
 
 internal static class AggregateReplayCrashScenario
 {
+    private const string SnapshotCommandIdText = "cd5b0e77-6dd2-4f1d-8ebf-fb28949d2a5e";
+
     internal const string Mode = "aggregate-replay";
     internal const string OperationFile = "aggregate-replay-operation.bin";
     internal const string HeadFile = "aggregate-replay-head.bin";
@@ -28,18 +30,24 @@ internal static class AggregateReplayCrashScenario
     internal const string StateJson = "{\"count\":0}";
     internal static PartitionRef Partition { get; } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
         CrashFixtureValues.Orders, CrashFixtureValues.Partition);
-    internal static Guid SnapshotCommandId { get; } = Guid.Parse("cd5b0e77-6dd2-4f1d-8ebf-fb28949d2a5e");
+    internal static Guid SnapshotCommandId { get; } = Guid.Parse(SnapshotCommandIdText);
 
     internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
+        const int EmptySourceRevision = 0;
+        const int InitialStateSchemaVersion = 1;
+        const int NoSnapshotVersion = 0;
+        const int InitialGeneration = 1;
+        const int PositionStep = 1;
+
         var database = CrashDatabase.Create(store);
         Seed(database);
         await PreserveSourceBytesAsync(directory, store);
-        var command = new StoreAggregateSnapshot(StreamSet, StreamId, 0, Reducer, 1, StateJson, 0, 1);
+        var command = new StoreAggregateSnapshot(StreamSet, StreamId, EmptySourceRevision, Reducer, InitialStateSchemaVersion, StateJson, NoSnapshotVersion, InitialGeneration);
         var request = new CommandRequest(SnapshotCommandId, Partition, [command]);
         var operation = CrashDatabase.Operation(OperationKind.Batch, request, SnapshotCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), NativeSerialization.Serialize(operation));
-        boundary.Position = store.Position + 1;
+        boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         database.Apply(operation).Get<CommitReceipt>();
         await CrashHostPause.WaitForKillAsync();
@@ -47,10 +55,12 @@ internal static class AggregateReplayCrashScenario
 
     private static void Seed(DatabaseEngine database)
     {
+        const string SeedCommandIdText = "a8ad08f7-0ad4-4e64-944a-b6f68be8592a";
+
         CrashDatabase.Submit(database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
                 new(StreamSet, ResourceKind.StreamSet, Partition.TransactionDomainId)), Guid.NewGuid()).Get<ResourceDefinition>();
-        var appendId = Guid.Parse("a8ad08f7-0ad4-4e64-944a-b6f68be8592a");
+        var appendId = Guid.Parse(SeedCommandIdText);
         var append = new CommandRequest(appendId, Partition,
             [new AppendEvents(StreamSet, StreamId, [new(EventId, EventType, EventPayloadJson)],
                 ExpectedStreamRevision.NoStream)]);

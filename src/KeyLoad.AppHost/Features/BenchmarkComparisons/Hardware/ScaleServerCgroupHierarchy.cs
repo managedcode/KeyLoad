@@ -20,9 +20,9 @@ internal static class ScaleServerCgroupHierarchy
     internal static async Task<bool> IsSupportedRootAsync(string root, ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
-        var mounts = await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxFileBytes, token, budget);
+        var mounts = await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxFileBytes, budget, token);
         var controllers = await BoundedText.ReadAsync(Path.Combine(root, ControllerFile),
-            budget.Settings.MaxFileBytes, token, budget);
+            budget.Settings.MaxFileBytes, budget, token);
         return mounts is not null && controllers is not null && IsRootMount(mounts, root)
             && HasRequiredControllers(controllers);
     }

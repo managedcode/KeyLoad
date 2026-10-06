@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Replication;
 

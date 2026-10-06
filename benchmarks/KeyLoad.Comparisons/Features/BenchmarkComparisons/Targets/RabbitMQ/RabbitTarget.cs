@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
-using RabbitMQ.Client;
 using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 
 namespace KeyLoad.Comparisons.Targets;
 

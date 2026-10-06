@@ -1,10 +1,24 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Orleans;
 
-internal sealed class GrainBoundedPayloadStream(int maximumBytes, CancellationToken cancellationToken) : Stream
+internal sealed class GrainBoundedPayloadStream : Stream
 {
-    private const int InitialCapacity = 4_096;
     private const int GrowthFactor = 2;
-    private readonly MemoryStream buffer = new(Math.Min(InitialCapacity, maximumBytes));
+    private readonly MemoryStream buffer;
+    private readonly int maximumBytes;
+    private readonly CancellationToken cancellationToken;
+
+    internal GrainBoundedPayloadStream(int maximumBytes, IOptions<GrainRoutingOptions> options,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        var routing = options.Value;
+        routing.Validate();
+        this.maximumBytes = maximumBytes;
+        this.cancellationToken = cancellationToken;
+        buffer = new(Math.Min(routing.InitialReplyBufferBytes, maximumBytes));
+    }
 
     /// <inheritdoc />
     public override bool CanRead => false;

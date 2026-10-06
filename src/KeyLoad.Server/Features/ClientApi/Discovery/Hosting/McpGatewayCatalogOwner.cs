@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Options;
 using ManagedCode.MCPGateway;
 using ManagedCode.MCPGateway.Abstractions;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.Server;

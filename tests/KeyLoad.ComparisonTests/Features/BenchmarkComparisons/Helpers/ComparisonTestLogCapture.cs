@@ -4,15 +4,12 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonTestLogCapture : IAsyncDisposable
 {
-    private const int MaximumRetainedLines = 150;
-    private const int MaximumNodeLines = 2_000;
-    private const int MaximumResourceBytes = 1_048_576;
-    private const int MaximumLineBytes = 16_384;
     private const string StopFailureMessage = "Comparison log capture stop failed.";
     private const string ResourceLogSuffix = ".log";
     private const string ComparisonResourceName = "comparisons";
@@ -28,20 +25,24 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     private Task? stopping;
     private Task? disposing;
 
-    public ComparisonTestLogCapture(DistributedApplication application, IEnumerable<string>? selectedResources = null,
+    public ComparisonTestLogCapture(DistributedApplication application, IOptions<NativeComparisonHarnessOptions> executionOptions,
+        IEnumerable<string>? selectedResources = null,
         string? progressPath = null, Action<string>? nativeLineObserver = null)
     {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var execution = executionOptions.Value;
+        execution.Validate();
         this.application = application;
         this.nativeLineObserver = nativeLineObserver;
         var names = (selectedResources ?? []).Append(ComparisonResourceName).Distinct(StringComparer.Ordinal).ToArray();
-        if (names.Any(name => name.Length is < 1 or > 100 || name.Any(character =>
+        if (names.Any(name => name.Length == 0 || name.Length > execution.MaximumResourceLogNameCharacters || name.Any(character =>
             !char.IsAsciiLetterOrDigit(character) && character != '-')))
         {
             throw new ArgumentException("Resource log names must be confined native identifiers.", nameof(selectedResources));
         }
         logs = names.ToDictionary(name => name, name => new ComparisonResourceLogBuffer(
-            name == ComparisonResourceName ? MaximumRetainedLines : MaximumNodeLines,
-            MaximumResourceBytes, MaximumLineBytes), StringComparer.Ordinal);
+            name == ComparisonResourceName ? execution.MaximumRetainedComparisonLogLines : execution.MaximumRetainedNodeLogLines,
+            execution.MaximumResourceLogBytes, execution.MaximumLogLineBytes), StringComparer.Ordinal);
         var logger = application.Services.GetRequiredService<ResourceLoggerService>();
         progress = progressPath is null ? null : new ComparisonProgressFile(progressPath);
         capture = Task.Run(() => CaptureResourcesAsync(logger), CancellationToken.None);
@@ -116,36 +117,45 @@ internal sealed class ComparisonTestLogCapture : IAsyncDisposable
     {
         await registered;
         var failures = new List<Exception>();
-        await CollectFailureAsync(() => StopAsync(), failures);
-        try { lifetime.Dispose(); }
-        catch (Exception failure) { AddDistinct(failures, failure); }
+        await CollectFailureAsync(StopAsync, failures);
+        var disposal = DisposeLifetimeAsync();
+        await CollectFailureAsync(() => disposal, failures);
         ThrowFailures(failures);
+    }
+
+    private async Task DisposeLifetimeAsync()
+    {
+        await Task.CompletedTask;
+        lifetime.Dispose();
     }
 
     private static void AddDistinct(List<Exception> failures, Exception failure)
     {
-        if (!failures.Any(existing => ReferenceEquals(existing, failure))) { failures.Add(failure); }
+        if (!failures.Any(existing => ReferenceEquals(existing, failure)))
+        { failures.Add(failure); }
     }
 
-    private static async Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
-    {
-        try { await operation(); }
-        catch (Exception failure) { AddDistinct(failures, failure); }
-    }
+    private static Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
+        => IsolatedNativeTeardownNativeSupport.CollectFailureAsync(operation, failures);
 
     private static void ThrowFailures(List<Exception> failures)
     {
         var fatal = failures.Select(CqrsRuntimeFailures.FindFatal).FirstOrDefault(error => error is not null);
-        if (fatal is not null) { ThrowFatalFirst(fatal, failures); }
-        if (failures.Count == 1) { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
-        if (failures.Count > 1) { throw new AggregateException(StopFailureMessage, failures); }
+        if (fatal is not null)
+        { ThrowFatalFirst(fatal, failures); }
+        if (failures.Count == 1)
+        { ExceptionDispatchInfo.Capture(failures[0]).Throw(); }
+        if (failures.Count > 1)
+        { throw new AggregateException(StopFailureMessage, failures); }
     }
 
     private static void ThrowFatalFirst(Exception fatal, List<Exception> failures)
     {
         var ordered = new List<Exception> { fatal };
-        foreach (var failure in failures) { AddDistinct(ordered, failure); }
-        if (ordered.Count == 1) { ExceptionDispatchInfo.Capture(fatal).Throw(); }
+        foreach (var failure in failures)
+        { AddDistinct(ordered, failure); }
+        if (ordered.Count == 1)
+        { ExceptionDispatchInfo.Capture(fatal).Throw(); }
         throw new AggregateException(StopFailureMessage, ordered);
     }
 
