@@ -6,8 +6,6 @@ internal sealed class BackupArtifactPublication
     private const string StagePrefix = ".keyload-unpack-";
     private const string EmptySuffix = ".empty";
     private const string ClaimSuffix = ".claim";
-    private const int EmptyFailureCount = 0;
-    private const int PrimaryFailureIndex = 0;
 
     private readonly BackupArtifactDestinationState destinationState;
     private readonly BackupArtifactStagePaths paths;
@@ -47,7 +45,9 @@ internal sealed class BackupArtifactPublication
         BackupArtifactStagePaths paths)
     {
         var stageCreated = false;
-        try
+        BackupArtifactPublication? publication = null;
+        Exception? failure = null;
+        var created = BackupArtifactFailurePolicy.TryCapture(() =>
         {
             if (BackupArtifactStageFileSystem.PathExists(paths.Stage))
             {
@@ -59,18 +59,18 @@ internal sealed class BackupArtifactPublication
             {
                 File.SetUnixFileMode(paths.Stage, BackupArtifactStageFileSystem.PrivateDirectoryMode);
             }
-            return new BackupArtifactPublication(state, paths);
-        }
-        catch (Exception failure)
+            publication = new BackupArtifactPublication(state, paths);
+        }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
+        if (!created)
         {
             var cleanupFailures = CleanupFailedClaim(paths, stageCreated);
-            if (cleanupFailures.Count > EmptyFailureCount)
+            foreach (var cleanupFailure in cleanupFailures)
             {
-                cleanupFailures.Insert(PrimaryFailureIndex, failure);
-                throw new AggregateException(cleanupFailures);
+                failure = BackupArtifactFailurePolicy.Combine(failure, cleanupFailure);
             }
-            throw;
+            BackupArtifactFailurePolicy.Throw(failure!);
         }
+        return publication!;
     }
 
     private static List<Exception> CleanupFailedClaim(BackupArtifactStagePaths paths, bool stageCreated)
@@ -78,65 +78,46 @@ internal sealed class BackupArtifactPublication
         var failures = new List<Exception>();
         if (stageCreated)
         {
-            try
+            BackupArtifactFailurePolicy.TryCapture(() =>
             {
                 BackupArtifactStageFileSystem.ValidateRegularDirectory(paths.Stage,
                     BackupArtifactStageFileSystem.InvalidStageDirectoryError);
                 Directory.Delete(paths.Stage, recursive: false);
-            }
-            catch (Exception failure)
-            {
-                failures.Add(failure);
-            }
+            }, failures.Add);
         }
-        try
-        {
-            BackupArtifactStageFileSystem.DeleteClaim(paths.StageClaim);
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
-        }
+        BackupArtifactFailurePolicy.TryCapture(() => BackupArtifactStageFileSystem.DeleteClaim(paths.StageClaim), failures.Add);
         return failures;
     }
 
     internal void Publish()
     {
-        BackupArtifactStageFileSystem.ValidateRegularDirectory(paths.Stage,
-            BackupArtifactStageFileSystem.InvalidStageDirectoryError);
-        EnsureDestinationUnchanged();
-        var empty = destinationState.IsEmpty
-            ? new BackupArtifactEmptyDestination(destinationState, paths.EmptyRollback)
-            : null;
-        try
+        BackupArtifactEmptyDestination? empty = null;
+        Exception? failure = null;
+        var published = BackupArtifactFailurePolicy.TryCapture(() =>
         {
+            BackupArtifactStageFileSystem.ValidateRegularDirectory(paths.Stage,
+                BackupArtifactStageFileSystem.InvalidStageDirectoryError);
+            EnsureDestinationUnchanged();
+            empty = destinationState.IsEmpty
+                ? new BackupArtifactEmptyDestination(destinationState, paths.EmptyRollback)
+                : null;
             empty?.Prepare();
             RemoveStageClaim();
             empty?.ReleaseClaim();
             Directory.Move(paths.Stage, destinationState.Path);
             ownsStage = false;
-        }
-        catch (Exception failure)
+        }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
+        if (published)
         {
-            var failures = new List<Exception> { failure };
-            try
-            {
-                empty?.Restore(failures);
-            }
-            catch (Exception rollbackFailure)
-            {
-                failures.Add(rollbackFailure);
-            }
-            try
-            {
-                empty?.Cleanup(failures);
-            }
-            catch (Exception cleanupFailure)
-            {
-                failures.Add(cleanupFailure);
-            }
-            throw new AggregateException(failures);
+            return;
         }
+        var failures = new List<Exception> { failure! };
+        if (empty is not null)
+        {
+            BackupArtifactFailurePolicy.TryCapture(() => empty.Restore(failures), failures.Add);
+            BackupArtifactFailurePolicy.TryCapture(() => empty.Cleanup(failures), failures.Add);
+        }
+        throw new AggregateException(failures);
     }
 
     internal void Cleanup(List<Exception> failures)
@@ -144,7 +125,7 @@ internal sealed class BackupArtifactPublication
         var stageSettled = true;
         if (ownsStage)
         {
-            try
+            stageSettled = BackupArtifactFailurePolicy.TryCapture(() =>
             {
                 if (BackupArtifactStageFileSystem.PathExists(paths.Stage))
                 {
@@ -153,24 +134,15 @@ internal sealed class BackupArtifactPublication
                     Directory.Delete(paths.Stage, recursive: false);
                 }
                 ownsStage = false;
-            }
-            catch (Exception failure)
-            {
-                failures.Add(failure);
-                stageSettled = false;
-            }
+            }, failures.Add);
         }
         if (ownsStageClaim && stageSettled)
         {
-            try
+            BackupArtifactFailurePolicy.TryCapture(() =>
             {
                 BackupArtifactStageFileSystem.DeleteClaim(paths.StageClaim);
                 ownsStageClaim = false;
-            }
-            catch (Exception failure)
-            {
-                failures.Add(failure);
-            }
+            }, failures.Add);
         }
     }
 

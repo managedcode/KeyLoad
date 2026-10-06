@@ -40,7 +40,6 @@ internal sealed class BackupArtifactEmptyDestination
         Directory.Delete(rollback, recursive: false);
         removed = true;
     }
-
     internal void ReleaseClaim()
     {
         if (ownsClaim)
@@ -49,121 +48,142 @@ internal sealed class BackupArtifactEmptyDestination
             ownsClaim = false;
         }
     }
-
     internal void Restore(List<Exception> failures)
     {
         if (!movedOut)
         {
             return;
         }
-        if (BackupArtifactStageFileSystem.PathExists(destinationState.Path))
+        var publicPathExists = false;
+        if (!BackupArtifactFailurePolicy.TryCapture(() =>
+            publicPathExists = BackupArtifactStageFileSystem.PathExists(destinationState.Path), failures.Add))
+        {
+            keepClaim = ownsClaim;
+            return;
+        }
+        if (publicPathExists)
         {
             PreserveRollback(failures, publicPathOccupied: true);
             failures.Add(new IOException(BackupArtifactStageFileSystem.RacingDestinationError));
             return;
         }
-        if (!removed && BackupArtifactStageFileSystem.PathExists(rollback))
+        if (!removed)
         {
-            try
+            var rollbackExists = false;
+            if (!BackupArtifactFailurePolicy.TryCapture(() =>
+                rollbackExists = BackupArtifactStageFileSystem.PathExists(rollback), failures.Add))
             {
-                Directory.Move(rollback, destinationState.Path);
-                movedOut = false;
-            }
-            catch (Exception restoreFailure)
-            {
-                failures.Add(restoreFailure);
-                if (BackupArtifactStageFileSystem.PathExists(destinationState.Path))
-                {
-                    failures.Add(new IOException(BackupArtifactStageFileSystem.RacingDestinationError));
-                }
                 keepClaim = ownsClaim;
                 return;
             }
-            try
+            if (rollbackExists)
             {
-                ReleaseClaim();
+                if (!BackupArtifactFailurePolicy.TryCapture(
+                    () => Directory.Move(rollback, destinationState.Path), failures.Add))
+                {
+                    AddRacingDestinationIfPresent(failures);
+                    keepClaim = ownsClaim;
+                    return;
+                }
+                movedOut = false;
+                BackupArtifactFailurePolicy.TryCapture(ReleaseClaim, failures.Add);
+                return;
             }
-            catch (Exception cleanupFailure)
-            {
-                failures.Add(cleanupFailure);
-            }
-            return;
         }
         PreserveRollback(failures);
     }
-
     internal void Cleanup(List<Exception> failures)
     {
         if (!ownsClaim || keepClaim)
         {
             return;
         }
-        try
+        BackupArtifactFailurePolicy.TryCapture(() =>
         {
             BackupArtifactStageFileSystem.DeleteClaim(claim);
             ownsClaim = false;
-        }
-        catch (Exception failure)
-        {
-            failures.Add(failure);
-        }
+        }, failures.Add);
     }
-
     private void PreserveRollback(List<Exception> failures, bool publicPathOccupied = false)
     {
-        if (!removed && BackupArtifactStageFileSystem.PathExists(rollback))
+        if (!removed)
         {
-            keepClaim = ownsClaim;
-            return;
+            var rollbackExists = false;
+            if (!BackupArtifactFailurePolicy.TryCapture(() =>
+                rollbackExists = BackupArtifactStageFileSystem.PathExists(rollback), failures.Add))
+            {
+                keepClaim = ownsClaim;
+                return;
+            }
+            if (rollbackExists)
+            {
+                keepClaim = ownsClaim;
+                return;
+            }
         }
         RestoreNewOwnedRollback(failures, publicPathOccupied);
     }
-
     private void RestoreNewOwnedRollback(List<Exception> failures, bool publicPathOccupied)
     {
         var parent = Path.GetDirectoryName(destinationState.Path)!;
         var retained = Path.Combine(parent,
             RetainedPrefix + Guid.NewGuid().ToString(BackupArtifactStageFileSystem.GuidHexFormat));
         var retainedClaim = retained + ClaimSuffix;
-        var ownsRetainedClaim = false;
-        var retainedCreated = false;
-        var moveAttempted = false;
-        try
+        if (!BackupArtifactFailurePolicy.TryCapture(() => BackupArtifactStageFileSystem.CreateClaim(retainedClaim), failures.Add))
         {
-            BackupArtifactStageFileSystem.CreateClaim(retainedClaim);
-            ownsRetainedClaim = true;
-            if (BackupArtifactStageFileSystem.PathExists(retained))
-            {
-                throw new IOException(BackupArtifactStageFileSystem.OccupiedRetainedRollbackError);
-            }
-            BackupArtifactStageFileSystem.CreateEmptyDirectory(retained, destinationState.Mode);
-            retainedCreated = true;
-            RestoreUnixMode(retained);
-            moveAttempted = true;
-            Directory.Move(retained, destinationState.Path);
-            retainedCreated = false;
-            BackupArtifactStageFileSystem.DeleteClaim(retainedClaim);
-            ownsRetainedClaim = false;
+            return;
         }
-        catch (Exception failure)
+        var retainedExists = false;
+        if (!BackupArtifactFailurePolicy.TryCapture(() =>
+            retainedExists = BackupArtifactStageFileSystem.PathExists(retained), failures.Add))
         {
-            failures.Add(failure);
-            if (!publicPathOccupied && moveAttempted && retainedCreated &&
-                BackupArtifactStageFileSystem.PathExists(destinationState.Path))
-            {
-                failures.Add(new IOException(BackupArtifactStageFileSystem.RacingDestinationError));
-            }
-            if (retainedCreated)
-            {
-                keepClaim = true;
-            }
-            else if (ownsRetainedClaim)
-            {
-                DeleteRetainedClaim(retainedClaim, failures);
-            }
+            DeleteRetainedClaim(retainedClaim, failures);
+            return;
+        }
+        if (retainedExists)
+        {
+            failures.Add(new IOException(BackupArtifactStageFileSystem.OccupiedRetainedRollbackError));
+            DeleteRetainedClaim(retainedClaim, failures);
+            return;
+        }
+        if (!BackupArtifactFailurePolicy.TryCapture(
+            () => BackupArtifactStageFileSystem.CreateEmptyDirectory(retained, destinationState.Mode), failures.Add))
+        {
+            DeleteRetainedClaim(retainedClaim, failures);
+            return;
+        }
+        if (!BackupArtifactFailurePolicy.TryCapture(() => RestoreUnixMode(retained), failures.Add))
+        {
+            keepClaim = ownsClaim;
+            return;
+        }
+        if (!BackupArtifactFailurePolicy.TryCapture(() => Directory.Move(retained, destinationState.Path), failures.Add))
+        {
+            AddRacingDestinationIfPresent(failures, publicPathOccupied);
+            keepClaim = ownsClaim;
+            return;
+        }
+        movedOut = false;
+        if (!BackupArtifactFailurePolicy.TryCapture(() => BackupArtifactStageFileSystem.DeleteClaim(retainedClaim), failures.Add))
+        {
+            DeleteRetainedClaim(retainedClaim, failures);
+            return;
         }
     }
-
+    private void AddRacingDestinationIfPresent(List<Exception> failures, bool publicPathOccupied = false,
+        bool retainedDirectoryStillOwned = true)
+    {
+        if (publicPathOccupied || !retainedDirectoryStillOwned)
+        {
+            return;
+        }
+        var publicPathExists = false;
+        if (BackupArtifactFailurePolicy.TryCapture(() =>
+            publicPathExists = BackupArtifactStageFileSystem.PathExists(destinationState.Path), failures.Add) && publicPathExists)
+        {
+            failures.Add(new IOException(BackupArtifactStageFileSystem.RacingDestinationError));
+        }
+    }
     private void RestoreUnixMode(string path)
     {
         if (!OperatingSystem.IsWindows() && destinationState.Mode is not null)
@@ -171,17 +191,6 @@ internal sealed class BackupArtifactEmptyDestination
             File.SetUnixFileMode(path, destinationState.Mode.Value);
         }
     }
-
     private static void DeleteRetainedClaim(string path, List<Exception> failures)
-    {
-        try
-        {
-            BackupArtifactStageFileSystem.DeleteClaim(path);
-        }
-        catch (Exception cleanupFailure)
-        {
-            failures.Add(cleanupFailure);
-        }
-    }
-
+        => BackupArtifactFailurePolicy.TryCapture(() => BackupArtifactStageFileSystem.DeleteClaim(path), failures.Add);
 }

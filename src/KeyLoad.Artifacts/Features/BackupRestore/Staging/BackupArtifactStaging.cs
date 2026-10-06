@@ -1,14 +1,17 @@
+using System.Runtime.ExceptionServices;
+
 namespace KeyLoad.Artifacts;
 
 /// <summary>Owns exact payload files written during one archive extraction.</summary>
 internal sealed class BackupArtifactStaging
 {
     private const int CanonicalPayloadCount = 3;
-    private const int PrimaryFailureCount = 1;
-    private const int EmptyCollectionCount = 0;
+    private const int NoOwnedFilesCount = 0;
+    private const int NoFailuresCount = 0;
 
     private readonly BackupArtifactPublication publication;
     private readonly List<string> ownedFiles = new(CanonicalPayloadCount);
+    private bool published;
 
     private BackupArtifactStaging(BackupArtifactPublication publication) => this.publication = publication;
 
@@ -21,64 +24,48 @@ internal sealed class BackupArtifactStaging
             BackupArtifactStageFileSystem.InvalidStageDirectoryError);
         var path = Path.Combine(publication.StagePath, name);
         var file = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        RegisterOwnedFile(path, file);
-        SetPrivateFileMode(path, file);
+        var ownershipRecorded = false;
+        var returned = false;
+        Exception? failure = null;
+        BackupArtifactFailurePolicy.TryCapture(() =>
+        {
+            try
+            {
+                BackupArtifactFailurePolicy.TryCapture(() =>
+                {
+                    RegisterOwnedFile(path);
+                    ownershipRecorded = true;
+                    SetPrivateFileMode(path);
+                    returned = true;
+                }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
+            }
+            finally
+            {
+                if (!returned)
+                {
+                    file.Dispose();
+                }
+            }
+        }, disposeFailure => failure = BackupArtifactFailurePolicy.Combine(failure, disposeFailure));
+        if (!ownershipRecorded)
+        {
+            BackupArtifactFailurePolicy.TryCapture(() => File.Delete(path),
+                deleteFailure => failure = BackupArtifactFailurePolicy.Combine(failure, deleteFailure));
+        }
+        if (failure is not null)
+        {
+            ExceptionDispatchInfo.Capture(failure).Throw();
+        }
         return file;
     }
 
-    private void RegisterOwnedFile(string path, FileStream file)
-    {
-        try
-        {
-            ownedFiles.Add(path);
-        }
-        catch (Exception ownershipFailure)
-        {
-            var cleanupFailures = new List<Exception> { ownershipFailure };
-            try
-            {
-                file.Dispose();
-            }
-            catch (Exception disposeFailure)
-            {
-                cleanupFailures.Add(disposeFailure);
-            }
-            try
-            {
-                File.Delete(path);
-            }
-            catch (Exception deleteFailure)
-            {
-                cleanupFailures.Add(deleteFailure);
-            }
-            if (cleanupFailures.Count > PrimaryFailureCount)
-            {
-                throw new AggregateException(cleanupFailures);
-            }
-            throw;
-        }
-    }
+    private void RegisterOwnedFile(string path) => ownedFiles.Add(path);
 
-    private static void SetPrivateFileMode(string path, FileStream file)
+    private static void SetPrivateFileMode(string path)
     {
-        try
+        if (!OperatingSystem.IsWindows())
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                File.SetUnixFileMode(path, BackupArtifactStageFileSystem.PrivateFileMode);
-            }
-        }
-        catch (Exception operationFailure)
-        {
-            try
-            {
-                file.Dispose();
-            }
-            catch (Exception disposeFailure)
-            {
-                throw new AggregateException(operationFailure, disposeFailure);
-            }
-            throw;
+            File.SetUnixFileMode(path, BackupArtifactStageFileSystem.PrivateFileMode);
         }
     }
 
@@ -86,14 +73,19 @@ internal sealed class BackupArtifactStaging
     {
         publication.Publish();
         ownedFiles.Clear();
+        published = true;
     }
 
     internal void Dispose()
     {
+        if (published)
+        {
+            return;
+        }
         var failures = new List<Exception>();
         RemoveOwnedFiles(failures);
-        publication.Cleanup(failures);
-        if (failures.Count > EmptyCollectionCount)
+        BackupArtifactFailurePolicy.TryCapture(() => publication.Cleanup(failures), failures.Add);
+        if (failures.Count > NoFailuresCount)
         {
             throw new AggregateException(failures);
         }
@@ -101,38 +93,37 @@ internal sealed class BackupArtifactStaging
 
     private void RemoveOwnedFiles(List<Exception> failures)
     {
-        if (ownedFiles.Count == EmptyCollectionCount)
+        if (ownedFiles.Count == NoOwnedFilesCount)
         {
             return;
         }
-        try
-        {
+        var stageValidated = BackupArtifactFailurePolicy.TryCapture(() =>
             BackupArtifactStageFileSystem.ValidateRegularDirectory(publication.StagePath,
-                BackupArtifactStageFileSystem.InvalidStageDirectoryError);
-        }
-        catch (Exception stageFailure)
+                BackupArtifactStageFileSystem.InvalidStageDirectoryError), failures.Add);
+        if (!stageValidated)
         {
-            failures.Add(stageFailure);
             return;
         }
         foreach (var path in ownedFiles)
         {
-            try
-            {
-                if (BackupArtifactStageFileSystem.TryGetAttributes(path, out var attributes))
-                {
-                    if ((attributes & FileAttributes.Directory) != BackupArtifactStageFileSystem.NoMatchingAttributes ||
-                        (attributes & FileAttributes.ReparsePoint) != BackupArtifactStageFileSystem.NoMatchingAttributes)
-                    {
-                        throw new IOException(BackupArtifactStageFileSystem.InvalidPayloadPathError);
-                    }
-                    File.Delete(path);
-                }
-            }
-            catch (Exception failure)
-            {
-                failures.Add(failure);
-            }
+            RemoveOwnedFile(path, failures);
         }
+    }
+
+    private static void RemoveOwnedFile(string path, List<Exception> failures)
+    {
+        BackupArtifactFailurePolicy.TryCapture(() =>
+        {
+            if (!BackupArtifactStageFileSystem.TryGetAttributes(path, out var attributes))
+            {
+                return;
+            }
+            if ((attributes & FileAttributes.Directory) != BackupArtifactStageFileSystem.NoMatchingAttributes ||
+                (attributes & FileAttributes.ReparsePoint) != BackupArtifactStageFileSystem.NoMatchingAttributes)
+            {
+                throw new IOException(BackupArtifactStageFileSystem.InvalidPayloadPathError);
+            }
+            File.Delete(path);
+        }, failures.Add);
     }
 }

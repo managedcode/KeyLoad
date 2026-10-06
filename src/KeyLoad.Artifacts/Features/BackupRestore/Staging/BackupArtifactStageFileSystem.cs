@@ -78,7 +78,23 @@ internal static class BackupArtifactStageFileSystem
 
     internal static void CreateClaim(string path)
     {
-        using (new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None)) { }
+        var created = false;
+        Exception? failure = null;
+        BackupArtifactFailurePolicy.TryCapture(() =>
+        {
+            using var claim = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            created = true;
+        }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
+        if (failure is null)
+        {
+            return;
+        }
+        if (created)
+        {
+            BackupArtifactFailurePolicy.TryCapture(() => DeleteClaim(path),
+                cleanupFailure => failure = BackupArtifactFailurePolicy.Combine(failure, cleanupFailure));
+        }
+        BackupArtifactFailurePolicy.Throw(failure);
     }
 
     internal static void DeleteClaim(string path)

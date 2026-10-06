@@ -78,6 +78,15 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 
 ### Functional CLI operation coverage
 
+TASK-GENERAL-OPTIONS-RESTORE-INPUT-001 maps REQ-BACKUP-002 / AC-BACKUP-002 to
+`MissingBackupManifestTests`: the real embedded restore normalizes only a missing
+manifest or its directory to the existing `FormatUnsupported` Problem and fixed
+manifest detail. The other required-file contracts remain intact. Both genuine
+missing/empty-directory cases verify unchanged source/valid-backup bytes, original
+store identity and data, no published/staged destination, and a healthy following
+restore. They passed in the original native Aspire focused118/118 run on2026-10-06;
+that focused development result does not qualify full recovery, RF3 or Linux.
+
 TASK-CQ-CLI-BACKUP-FLOW-001 maps REQ-BACKUP-001/002/003 to AC-BACKUP-001/002/003
 and AC-CQ-031. It adds genuine Release CLI child-process flows in
 tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/CliBackupRestoreFlowTests.cs,

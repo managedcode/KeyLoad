@@ -134,20 +134,19 @@ public static class BackupArtifact
         Exception? failure = null;
         try
         {
-            staging = BackupArtifactExtraction.StageArtifact(artifactPath, destinationState);
-            staging.Publish();
+            BackupArtifactFailurePolicy.TryCapture(() =>
+            {
+                staging = BackupArtifactExtraction.StageArtifact(artifactPath, destinationState);
+                staging.Publish();
+            }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
         }
-        catch (Exception operationFailure)
+        finally
         {
-            failure = operationFailure;
-        }
-        try
-        {
-            staging?.Dispose();
-        }
-        catch (Exception cleanupFailure) when (failure is not null)
-        {
-            throw new AggregateException(failure, cleanupFailure);
+            if (staging is not null)
+            {
+                BackupArtifactFailurePolicy.TryCapture(staging.Dispose,
+                    cleanupFailure => failure = BackupArtifactFailurePolicy.Combine(failure, cleanupFailure));
+            }
         }
         if (failure is not null)
         {

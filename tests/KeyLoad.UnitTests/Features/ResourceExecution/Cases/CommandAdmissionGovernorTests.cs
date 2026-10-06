@@ -63,16 +63,21 @@ internal sealed class CommandAdmissionGovernorTests
     {
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command(new() { MaxCommands = 8 }));
         using var held = new CountdownEvent(8);
+        var allHeld = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var admitted = Enumerable.Range(0, 8).Select(i => Task.Run(async () =>
         {
             using var lease = Reserve(governor, OperationKind.Batch, Principal("p-" + i, "t-" + i), 1, 1);
-            held.Signal();
+            if (held.Signal())
+            {
+                allHeld.TrySetResult();
+            }
             await release.Task;
         })).ToArray();
         try
         {
-            await Assert.That(held.Wait(TimeSpan.FromSeconds(10), TestContext.Current!.Execution.CancellationToken)).IsTrue();
+            await Assert.That(await WaitForReadyAsync(allHeld.Task, TimeSpan.FromSeconds(10),
+                TestContext.Current!.Execution.CancellationToken)).IsTrue();
             await Assert.That(governor.Snapshot().Commands).IsEqualTo(8);
             var rejected = await Task.WhenAll(Enumerable.Range(0, 64).Select(i => Task.Run(() =>
                 Assert.ThrowsExactly<KeyLoadException>(() => Reserve(governor, OperationKind.Batch, Principal("rejected-" + i), 0, 0)).Code)));
@@ -86,5 +91,18 @@ internal sealed class CommandAdmissionGovernorTests
         }
         finally { release.TrySetResult(); await Task.WhenAll(admitted); }
         await Assert.That(governor.Snapshot()).IsEqualTo(new(0, 0, 0, 0, 0, 0));
+    }
+
+    private static async Task<bool> WaitForReadyAsync(Task ready, TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ready.WaitAsync(timeout, TimeProvider.System, cancellationToken);
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
     }
 }

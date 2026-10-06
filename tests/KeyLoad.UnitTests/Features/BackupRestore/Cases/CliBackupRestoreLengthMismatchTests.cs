@@ -105,7 +105,7 @@ internal sealed class CliBackupRestoreLengthMismatchTests
         if (wasInitiallyEmpty && Directory.Exists(path))
         {
             await Assert.That(Directory.EnumerateFileSystemEntries(path).Any()).IsFalse();
-            if (expectedMode is not null)
+            if (!OperatingSystem.IsWindows() && expectedMode is not null)
             {
                 await Assert.That(File.GetUnixFileMode(path)).IsEqualTo(expectedMode.Value);
             }

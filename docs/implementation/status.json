@@ -4908,17 +4908,15 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "all_runtime_options_literals_and_phase_bank_semantic_analyzer_joins_checkpointed_current_source_native_verification_pending",
-    "canonicalBuildPassed": false,
+    "sourceStage": "runtime_options_literals_locks_phase_health_semantics_native_test_admission_and_manifest_input_fix_complete_runtime_gates_in_progress",
+    "canonicalBuildPassed": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Pass final current-source canonical Release build and formatter after phase-bank/options/analyzer joins",
-      "Verify final native analyzer and phase-bank options regressions through Aspire",
-      "Pass full Aspire unit/scalar/recovery and native RF3 suites with completed original reports; interrupted runs cannot count",
-      "Pass required source-bound coverage and exact delivered-source Linux qualification"
+      "Pass full Aspire unit/scalar/recovery and native RF3 suites with completed original reports",
+      "Pass required source-bound functional coverage and exact delivered-source Linux qualification"
     ],
-    "canonicalFormatterPassed": false,
+    "canonicalFormatterPassed": true,
     "developmentEvidence": {
       "directory": "artifacts/code-quality/general-runtime-options-development-20261006",
       "canonicalRelease": "keyload-general-options-full-release-v5.log",
@@ -5156,7 +5154,177 @@
         "sourceChangedDuringRun": true,
         "concurrentSourceChanges": 29,
         "qualification": "native full Release build failed new backup staging analyzer/disposal diagnostics and concurrent TimeProvider signature joins; literal/import hygiene repaired; owning chats are repairing behavioral joins; final current-source canonical build required"
+      },
+      "compiledInventoryAuditV34": {
+        "log": "keyload-general-options-compiled-inventory-audit-v34.log",
+        "projectCount": 19,
+        "compiledSourceCount": 3167,
+        "currentAnalyzerAndAppHost": true,
+        "staleProjects": [
+          "KeyLoad.Artifacts",
+          "KeyLoad.UnitTests",
+          "KeyLoad.IntegrationTests"
+        ],
+        "qualification": "readonly original PE metadata audit; analyzer/AppHost native source content current; pending shared full rebuild for backup and clock test inputs"
+      },
+      "analyzersV34": {
+        "suite": "analyzers",
+        "nativeExit": 134,
+        "status": "incoming_native_same_directory_Aspire_CLI_stopped_current_AppHost_no_completed_original_report_no_pass_claim",
+        "log": "keyload-general-options-aspire-analyzers-v34.log",
+        "replacementCliLog": "cli_20261006T082534_8247a03f.log",
+        "evidence": "native CLI08:25:34.241 explicitly Stopping previous instance AppHost PID52532; runner started native TUnit DLL08:25:30.248 before external cancellation"
+      },
+      "analyzersFinalSharedV34": {
+        "suite": "analyzers",
+        "nativeExit": 0,
+        "passed": 388,
+        "failed": 0,
+        "skipped": 0,
+        "report": "analyzers-final-shared-v34/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+        "reportSha256": "b5f02f448bc940fbfb50be86db8c1d26e7ef307c0f0ac70d7ae5114ba539189e",
+        "nativeCli": "analyzers-final-shared-v34/original-native-aspire-cli.log",
+        "qualification": "completed local native Aspire suite launched by TimeProvider chat after replacing root run; original unchanged native report; current Analyzer/AppHost source verified through PE inventory before run; not functional numerical coverage, full unit/recovery/RF3 or delivered-source Linux qualification"
+      },
+      "canonicalFormatV37": {
+        "log": "keyload-general-options-format-verify-v37.log",
+        "nativeExit": 2,
+        "passed": false,
+        "qualification": "canonical whole-solution verify found current backup staging SDK disposal/catch/nesting diagnostics and comparison cancellation fixture platform/catch/style diagnostics; no runtime-literal/options/synchronization diagnostics remain in this result; unrelated owning chat is repairing behavioral joins"
+      },
+      "canonicalReleaseV34": {
+        "log": "keyload-general-options-full-release-v34.log",
+        "nativeExit": 0,
+        "passed": true,
+        "warnings": 0,
+        "errors": 0,
+        "duration": "00:04:30.55",
+        "sourceChangedDuringRun": true,
+        "concurrentSourceChanges": 6,
+        "compiledInventoryAudit": "keyload-general-options-compiled-inventory-audit-v35.log",
+        "qualification": "actual full Release build; post-build original PE SHA/source inventory audit confirmed all19 projects and3189 authored C# inputs match current tree despite six earlier source changes"
+      },
+      "canonicalFormatV38": {
+        "log": "keyload-general-options-format-verify-v38.log",
+        "nativeExit": 0,
+        "passed": true
+      },
+      "phaseV34": {
+        "suite": "unit",
+        "filter": "/*/*/DatabasePhase*/*",
+        "nativeExit": 0,
+        "passed": 101,
+        "failed": 0,
+        "skipped": 0,
+        "report": "general-options-phase-v34/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "qualification": "actual native configured bank/options/arithmetic/allocation/concurrency/schema operations; local focused development evidence only"
+      },
+      "healthV34": {
+        "suite": "unit",
+        "filter": "/*/*/OpenSearchHealthPolicyTests/*",
+        "nativeExit": 0,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "report": "general-options-health-v34/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "qualification": "actual native configured URI/culture/evidence and invalid options before HTTP; not native OpenSearch cluster qualification"
+      },
+      "unitV34": {
+        "nativeExit": 2,
+        "total": 4133,
+        "passed": 4061,
+        "failed": 72,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "report": "unit-v34/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "a1b3bda5348c83fd3c0ba259242ff9c75e3ef31e23bca61c8e044486656e91cf",
+        "durationMs": 989322.266,
+        "status": "completed_original_native_Aspire_full_unit_failed_72_native_startup_readiness_input_normalization_empty_collection_and_post_build_source_drift_failures_retained_no_pass_claim"
+      },
+      "deliveredLinuxV35": {
+        "headSha": "7e218a1f8e161d1107457f5b035759b8af2cafdd",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37437683914",
+        "status": "completed_website_only_workflow_run_failure_isolated_Pages_GitHub_evidence_rejected_runtime_jobs_intentionally_not_selected_no_backend_qualification"
+      },
+      "deliveredLinuxPushV36": {
+        "headSha": "f3453f23e3553790171f79888255564cce534d82",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37441534044",
+        "status": "completed_failure_native_analyzers_and_governance_pass_build_and_RF3_prerequisite_failed_backup_staging_CA1031_CA2000_KLD0033_current_scoped_repairs_build_locally_but_not_yet_delivered_no_runtime_suite_pass_claim"
+      },
+      "canonicalReleaseV36": {
+        "passed": true,
+        "nativeExit": 0,
+        "warnings": 0,
+        "errors": 0,
+        "duration": "00:03:11.40",
+        "log": "keyload-general-options-full-release-v36.log",
+        "compiledSourceInventory": "keyload-general-options-compiled-inventory-audit-v37.log",
+        "projectCount": 19,
+        "compiledSourceCount": 3190,
+        "mismatches": 0,
+        "scope": "actual_full_solution_native_build_current_local_development_source_not_delivered_Linux_qualification"
+      },
+      "canonicalFormatV41": {
+        "passed": true,
+        "nativeExit": 0,
+        "log": "keyload-general-options-format-verify-v41.log",
+        "scope": "actual_canonical_full_solution_verify_no_changes_after_import_order_fix"
+      },
+      "canonicalReleaseV37": {
+        "passed": true,
+        "nativeExit": 0,
+        "warnings": 0,
+        "errors": 0,
+        "duration": "00:03:14.30",
+        "log": "keyload-general-options-full-release-v37.log",
+        "compiledSourceInventory": "keyload-general-options-compiled-inventory-audit-v38.log",
+        "projectCount": 19,
+        "compiledSourceCount": 3190,
+        "mismatches": 0,
+        "scope": "actual_current_local_development_full_solution_not_delivered_Linux_qualification"
+      },
+      "runtimeFocusV35": {
+        "nativeExit": 0,
+        "total": 118,
+        "passed": 118,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "report": "focus-v35/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "sha256": "c48ba780a79e41da5663762c7b01e863e8d3ca91c483d8a9f5790210bf2fe81f",
+        "scope": "original_native_Aspire_focused_development_regressions"
+      },
+      "nativeAdmissionV36": {
+        "nativeExit": 0,
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "report": "admission-v36/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json",
+        "sha256": "639ecf3b7ccf828ba0633d4813ef803b15f456e5fdc86a66842faaa003e1bac8",
+        "scope": "original_native_Aspire_focused_development_regressions"
+      },
+      "nativeAnalyzersV36": {
+        "nativeExit": 0,
+        "total": 388,
+        "passed": 388,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "timedOut": 0,
+        "flaky": 0,
+        "report": "analyzers-v36/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json",
+        "sha256": "20a2d1cf983b13a606341ef4d5f7e6a2226d7176deacb07c2c9fcafbbd1dfd3c",
+        "scope": "actual_completed_original_native_Aspire_full_analyzer_suite_current_local_source"
       }
-    }
+    },
+    "verificationStage": "canonical_full_release_v37_format_v41_compiled_19_projects_3190_inputs_native_118_focus_4_admission_models_and_full388_analyzers_pass_remaining_full_runtime_coverage_Linux_gates_open"
   }
 }

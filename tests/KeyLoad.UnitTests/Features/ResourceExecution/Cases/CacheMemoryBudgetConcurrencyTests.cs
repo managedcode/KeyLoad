@@ -16,11 +16,15 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
             MaxRetainedEntries = ConsumerCount
         }));
         using var ready = new CountdownEvent(ConsumerCount);
+        var allReady = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var consumers = Enumerable.Range(0, ConsumerCount).Select(_ => Task.Run(async () =>
         {
             using var reservation = Reserve(budget, 1, 1);
-            ready.Signal();
+            if (ready.Signal())
+            {
+                allReady.TrySetResult();
+            }
             await release.Task.ConfigureAwait(false);
             await Task.Yield();
             reservation.Dispose();
@@ -29,7 +33,7 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
 
         try
         {
-            await Assert.That(ready.Wait(CoordinationTimeout,
+            await Assert.That(await WaitForReadyAsync(allReady.Task, CoordinationTimeout,
                 TestContext.Current!.Execution.CancellationToken)).IsTrue();
             var full = budget.GetSnapshot();
             await Assert.That(full).IsEqualTo(new CacheMemorySnapshot(ConsumerCount, ConsumerCount,
@@ -57,17 +61,21 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
         using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(new() { MaxRetainedBytes = 64, MaxRetainedEntries = 64 }));
         using var reservation = Reserve(budget, 17, 3);
         using var ready = new CountdownEvent(Disposers);
+        var allReady = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var disposals = Enumerable.Range(0, Disposers).Select(_ => Task.Run(async () =>
         {
-            ready.Signal();
+            if (ready.Signal())
+            {
+                allReady.TrySetResult();
+            }
             await release.Task.ConfigureAwait(false);
             reservation.Dispose();
         })).ToArray();
 
         try
         {
-            await Assert.That(ready.Wait(CoordinationTimeout,
+            await Assert.That(await WaitForReadyAsync(allReady.Task, CoordinationTimeout,
                 TestContext.Current!.Execution.CancellationToken)).IsTrue();
         }
         finally
@@ -116,4 +124,17 @@ internal sealed class CacheMemoryBudgetConcurrencyTests
 
     private static async Task AssertSnapshotUnchanged(CacheMemoryBudget budget, CacheMemorySnapshot expected)
         => await Assert.That(budget.GetSnapshot()).IsEqualTo(expected);
+
+    private static async Task<bool> WaitForReadyAsync(Task ready, TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await ready.WaitAsync(timeout, TimeProvider.System, cancellationToken);
+            return true;
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
 }

@@ -3,6 +3,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
@@ -11,6 +12,8 @@ internal sealed class AspireTestEntryModelTests
 {
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string ScalarRuntimeEnvironment = "DOTNET_EnableHWIntrinsic";
+    private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
+    private const string DefaultMaximumParallelTests = "8";
     private const string FilterArgument = "--KeyLoadTests:Filter=Suite.Filter";
     private static readonly (string Suite, string Project)[] Suites =
     [
@@ -48,7 +51,8 @@ internal sealed class AspireTestEntryModelTests
                 new[]
                 {
                     "test", "--project", Path.Combine(repository, "tests", project), "--no-build", "--no-restore",
-                    "--configuration", "Release", "--results-directory", Path.Combine(repository, "TestResults", suite)
+                    "--configuration", "Release", "--results-directory", Path.Combine(repository, "TestResults", suite),
+                    MaximumParallelTestsArgument, DefaultMaximumParallelTests
                 }, CollectionOrdering.Matching);
                 var environment = configuration.EnvironmentVariables.ToDictionary();
                 await Assert.That(environment[SuiteEnvironment]).IsEqualTo("");
@@ -81,7 +85,8 @@ internal sealed class AspireTestEntryModelTests
             {
                 "test", "--project", Path.Combine(RepositoryRoot(), "tests", "KeyLoad.UnitTests"), "--no-build",
                 "--no-restore", "--configuration", "Release", "--results-directory",
-                Path.Combine(RepositoryRoot(), "TestResults", "unit"), "--treenode-filter", "Suite.Filter"
+                Path.Combine(RepositoryRoot(), "TestResults", "unit"), MaximumParallelTestsArgument,
+                DefaultMaximumParallelTests, "--treenode-filter", "Suite.Filter"
             }, CollectionOrdering.Matching);
         }
         finally
@@ -94,6 +99,46 @@ internal sealed class AspireTestEntryModelTests
             "--KeyLoadTests:Filter=" + new string('x', 4_097));
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit", "--Benchmarks:Enabled=true");
         await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit", "--Benchmarks:Target=ZoneTree");
+    }
+
+    [Test]
+    public async Task ConfiguredParallelismUsesTheNativeArgumentAndInclusiveBoundaries()
+    {
+        foreach (var parallelism in new[] { "1", "64" })
+        {
+            var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
+                "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
+            KeyLoadAppHostApplication.AddKeyLoad(builder);
+            var app = builder.Build();
+            try
+            {
+                var runner = app.Services.GetRequiredService<DistributedApplicationModel>()
+                    .Resources.OfType<ExecutableResource>().Single(resource => resource.Name == "tests-unit");
+                var configuration = await ReadConfigurationAsync(runner);
+                var arguments = configuration.Arguments.Select(argument => argument.Value).ToArray();
+                var argumentIndex = Array.IndexOf(arguments, MaximumParallelTestsArgument);
+                await Assert.That(argumentIndex >= 0).IsTrue();
+                await Assert.That(arguments[argumentIndex + 1]).IsEqualTo(parallelism);
+            }
+            finally
+            {
+                await app.DisposeAsync();
+            }
+        }
+    }
+
+    [Test]
+    public async Task InvalidParallelismIsRejectedBeforeResourcesAreAdded()
+    {
+        foreach (var parallelism in new[] { "0", "-1", "65" })
+        {
+            var builder = CreateBuilder("--KeyLoadTests:Suite=unit",
+                "--KeyLoadTests:Execution:MaximumParallelTests=" + parallelism);
+            await Assert.That(() => KeyLoadAppHostApplication.AddKeyLoad(builder)).Throws<OptionsValidationException>();
+            await Assert.That(builder.Resources.Select(resource => resource.Name)).IsEmpty();
+        }
+        await AssertRejectedBeforeResourcesAsync("--KeyLoadTests:Suite=unit",
+            "--KeyLoadTests:Execution:MaximumParallelTests=not-an-integer");
     }
 
     private static async Task AssertRejectedBeforeResourcesAsync(params string[] args)

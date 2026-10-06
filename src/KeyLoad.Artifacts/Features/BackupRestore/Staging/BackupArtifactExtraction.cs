@@ -9,42 +9,37 @@ internal static class BackupArtifactExtraction
     internal static BackupArtifactStaging StageArtifact(string artifactPath,
         BackupArtifactDestinationState destinationState)
     {
-        var artifact = CatalogedArtifact.Open(artifactPath);
         BackupArtifactStaging? staging = null;
         Exception? failure = null;
-        try
+        BackupArtifactFailurePolicy.TryCapture(() =>
         {
-            if (!artifact.Entries.Select(entry => entry.RelativePath).Order().SequenceEqual(BackupArtifact.CanonicalFileNames))
-            {
-                throw Errors.Fail(ErrorCode.Validation, BackupArtifact.InvalidCatalog);
-            }
-            staging = BackupArtifactStaging.Create(destinationState);
-            foreach (var entry in artifact.Entries)
-            {
-                CopyEntry(artifact, entry, staging);
-            }
-        }
-        catch (Exception operationFailure)
-        {
-            failure = operationFailure;
-        }
-        try
-        {
-            artifact.Dispose();
-        }
-        catch (Exception disposeFailure)
-        {
-            failure = failure is null ? disposeFailure : new AggregateException(failure, disposeFailure);
-        }
-        if (failure is not null)
-        {
+            var artifact = CatalogedArtifact.Open(artifactPath);
             try
             {
-                staging?.Dispose();
+                BackupArtifactFailurePolicy.TryCapture(() =>
+                {
+                    if (!artifact.Entries.Select(entry => entry.RelativePath).Order().SequenceEqual(BackupArtifact.CanonicalFileNames))
+                    {
+                        throw Errors.Fail(ErrorCode.Validation, BackupArtifact.InvalidCatalog);
+                    }
+                    staging = BackupArtifactStaging.Create(destinationState);
+                    foreach (var entry in artifact.Entries)
+                    {
+                        CopyEntry(artifact, entry, staging);
+                    }
+                }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
             }
-            catch (Exception cleanupFailure)
+            finally
             {
-                failure = new AggregateException(failure, cleanupFailure);
+                artifact.Dispose();
+            }
+        }, disposeFailure => failure = BackupArtifactFailurePolicy.Combine(failure, disposeFailure));
+        if (failure is not null)
+        {
+            if (staging is not null)
+            {
+                BackupArtifactFailurePolicy.TryCapture(staging.Dispose,
+                    cleanupFailure => failure = BackupArtifactFailurePolicy.Combine(failure, cleanupFailure));
             }
             ExceptionDispatchInfo.Capture(failure).Throw();
         }
@@ -53,33 +48,29 @@ internal static class BackupArtifactExtraction
 
     private static void CopyEntry(CatalogedArtifact artifact, CatalogEntry entry, BackupArtifactStaging staging)
     {
-        var file = staging.CreateFile(entry.RelativePath);
-        Exception? operationFailure = null;
-        try
+        Exception? failure = null;
+        BackupArtifactFailurePolicy.TryCapture(() =>
         {
-            if (artifact.CopyTo(entry, file) != entry.Length)
+            var file = staging.CreateFile(entry.RelativePath);
+            try
             {
-                throw Errors.Fail(ErrorCode.Corruption, BackupArtifact.InvalidLength);
+                BackupArtifactFailurePolicy.TryCapture(() =>
+                {
+                    if (artifact.CopyTo(entry, file) != entry.Length)
+                    {
+                        throw Errors.Fail(ErrorCode.Corruption, BackupArtifact.InvalidLength);
+                    }
+                    file.Flush(true);
+                }, operationFailure => failure = BackupArtifactFailurePolicy.Combine(failure, operationFailure));
             }
-            file.Flush(true);
-        }
-        catch (Exception failure)
+            finally
+            {
+                file.Dispose();
+            }
+        }, disposeFailure => failure = BackupArtifactFailurePolicy.Combine(failure, disposeFailure));
+        if (failure is not null)
         {
-            operationFailure = failure;
-        }
-        try
-        {
-            file.Dispose();
-        }
-        catch (Exception disposeFailure)
-        {
-            operationFailure = operationFailure is null
-                ? disposeFailure
-                : new AggregateException(operationFailure, disposeFailure);
-        }
-        if (operationFailure is not null)
-        {
-            ExceptionDispatchInfo.Capture(operationFailure).Throw();
+            ExceptionDispatchInfo.Capture(failure).Throw();
         }
     }
 }

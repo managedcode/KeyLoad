@@ -554,3 +554,44 @@ owning NativeComparisonSeedExecutionOptionsValidator, preserving exact exception
 metadata and failures; the general options owner calls that cohesive validator.
 OpenSearch URI/observation regressions live in their own OpenSearchHealthPolicyTests
 case class. Preserve the existing all-adapter boundary table and every assertion.
+
+### Current local semantic verification
+
+The original native Aspire analyzer report completed388/388 passed with0 failures
+and0 skipped on2026-10-06 at08:27:40 UTC, followed by native AppHost/CLI exit0.
+AC-CQ-037 includes all37 added synchronization, configuration, timer, provenance
+and conditional-flow regressions; the expanded inventory/parser cases also pass.
+The unchanged original report and CLI provenance are retained under the
+GENERAL-RUNTIME-OPTIONS-001 development evidence. Canonical current-source full
+build/format and the runtime options, full unit/scalar/recovery/RF3, functional
+coverage and delivered Linux gates remain open; this result does not mark the
+ADR or complete options acceptance implemented.
+
+### Native test-runner admission join
+
+REQ-TEST-016 / AC-TEST-016 and TASK-GENERAL-OPTIONS-TEST-ADMISSION-001 extend this
+existing options contract to TUnit admission. Bind `MaximumParallelTests` only in
+native `TestExecutionOptions`, default8 with supported range1–64, reject invalid
+configuration before constructing resources, and transfer its validated captured
+value through TestSuiteSettingsReader/TestSuiteSettings to the real native runner
+argument. Keep named command identity and invariant numeric formatting. No
+environment fallback, unlimited value, test assertion/deadline change, benchmark
+matrix cap or parallel options defaults are introduced. The ordered stage is
+central definition/validation, runner propagation, genuine Aspire model regressions,
+then current-source build/format and required native suites. Root integrates the
+shared feature/status evidence; the contributor owns only these AppHost joins and
+focused model tests. Failed original v34 evidence stays retained. A scoped revert
+is the rollback; binary/storage/public API migration and dependency changes are
+N/A. Actual full native and delivered-source Linux verification remain open.
+
+The qualification repair TASK-GENERAL-OPTIONS-RESTORE-INPUT-001 maps the existing
+REQ/AC-BACKUP-002 input-rejection contract to the owning ZoneTree manifest reader
+and two real missing/empty-directory cases. Only native FileNotFoundException or
+DirectoryNotFoundException from the manifest read becomes the existing bounded
+FormatUnsupported Problem. Canonical data, identity, backup bytes and a healthy
+following restore are asserted; no storage format, resource limit, broad catch or
+dependency replacement is introduced. The focused native118/118 runtime run,
+4/4 genuine admission models, full388/388 analyzer run, canonical formatter and
+full Release build are retained as local development evidence. Full native
+unit/scalar/recovery/RF3, source-bound functional coverage and delivered Linux
+acceptance remain mandatory and open.

@@ -24,6 +24,7 @@ internal static class TestSuiteResources
     private const string CoverageFormatArgument = "--coverage-output-format";
     private const string CoverageOutputArgument = "--coverage-output";
     private const string TestFilterArgument = "--treenode-filter";
+    private const string MaximumParallelTestsArgument = "--maximum-parallel-tests";
 
     internal static void Add(IDistributedApplicationBuilder builder, TestSuiteSettings settings)
     {
@@ -163,6 +164,8 @@ internal static class TestSuiteResources
             NoBuildArgument, NoRestoreArgument, ConfigurationArgument, ReleaseConfiguration,
             ResultsDirectoryArgument, resultsDirectory
         };
+        arguments.Add(MaximumParallelTestsArgument);
+        arguments.Add(settings.MaximumParallelTests.ToString(CultureInfo.InvariantCulture));
         if (settings.ReportTrx)
         {
             arguments.Add(TrxReportArgument);

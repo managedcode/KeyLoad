@@ -13,6 +13,7 @@ internal sealed record TestSuiteSettings(
     string Project,
     string? Filter,
     TimeSpan Timeout,
+    int MaximumParallelTests,
     string? ResultsDirectory,
     bool ReportTrx,
     string? CoverageSettings,

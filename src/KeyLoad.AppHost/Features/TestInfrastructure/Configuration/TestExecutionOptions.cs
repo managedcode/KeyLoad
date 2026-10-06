@@ -6,7 +6,7 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 internal sealed class TestExecutionOptions
 {
     internal const string SectionName = "KeyLoadTests:Execution";
-    internal const string ValidationMessage = "Aspire test execution durations and output limits exceed supported bounds.";
+    internal const string ValidationMessage = "Aspire test execution durations, output limits and parallelism exceed supported bounds.";
     private const int OrdinaryMinutes = 30;
     private const int ClusterMinutes = 60;
     private const int IntensiveMinutes = 140;
@@ -21,6 +21,9 @@ internal sealed class TestExecutionOptions
     private const int DefaultOutputCharacters = 4_096;
     private const int MinimumOutputCharacters = 1;
     private const int MaximumOutputCharacters = 65_536;
+    private const int DefaultMaximumParallelTests = 8;
+    private const int MinimumMaximumParallelTests = 1;
+    private const int MaximumMaximumParallelTests = 64;
 
     public TimeSpan OrdinaryTimeout { get; set; } = TimeSpan.FromMinutes(OrdinaryMinutes);
     public TimeSpan ClusterTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);
@@ -37,6 +40,7 @@ internal sealed class TestExecutionOptions
 
     public int MaximumFilterCharacters { get; set; } = MaximumArgumentCharacters;
     public int MaximumPathCharacters { get; set; } = MaximumArgumentCharacters;
+    public int MaximumParallelTests { get; set; } = DefaultMaximumParallelTests;
 
     internal bool IsValid() => Bounded(OrdinaryTimeout) && Bounded(ClusterTimeout) && Bounded(IntensiveTimeout)
         && Bounded(NativeControlTimeout) && Bounded(NativeScaledTimeout) && Bounded(NativeVectorTimeout)
@@ -44,6 +48,7 @@ internal sealed class TestExecutionOptions
         && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval)
         && MaximumFilterCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
         && MaximumPathCharacters is >= MinimumOutputCharacters and <= MaximumArgumentCharacters
+        && MaximumParallelTests is >= MinimumMaximumParallelTests and <= MaximumMaximumParallelTests
         && CleanupOutputCharacters is >= MinimumOutputCharacters and <= MaximumOutputCharacters;
 
     internal static bool Bounded(TimeSpan value) => value > TimeSpan.Zero && value.Ticks <= MaximumMinutes * TimeSpan.TicksPerMinute;

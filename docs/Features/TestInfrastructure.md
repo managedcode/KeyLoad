@@ -388,6 +388,32 @@ packet and its source docs; coverage and full goal remain unqualified.
 
 ## Platform, dependency та release qualification
 
+### Central native TUnit admission
+
+REQ-TEST-016 / AC-TEST-016 (TASK-GENERAL-OPTIONS-TEST-ADMISSION-001) requires
+every Aspire-owned TUnit runner to receive its native `--maximum-parallel-tests`
+argument from centrally bound and validated `IOptions<TestExecutionOptions>`.
+`KeyLoadTests:Execution:MaximumParallelTests` defaults to8 and accepts only1–64;
+zero/unlimited, negative and above-ceiling values fail before resources are added.
+The eight-test default is a bounded test-runner admission policy: the original
+full unit v34 run completed4061/4133 passing, with four readiness deadline failures
+and native cluster startup cancellation while other compiled workloads were
+active. Those observations do not establish a defect in production locks or prove
+that this admission policy resolves every failure. Preserve each test's own worker
+count, workload, deadline and assertions, all required suites and original exit
+reports. The setting must flow to the actual runner command, including configured
+non-default values; inherited TUnit environment variables cannot override that
+validated command argument. This does not cap GitHub benchmark matrices or change
+measurement workloads.
+
+Native Aspire model tests map default/configured forwarding, boundary and malformed
+configuration rejection to AC-TEST-016. Full native unit/scalar/recovery/RF3 and
+exact-source Linux reports remain required. [ADR-113](../ADR/ADR-113-centralized-runtime-options.md)
+owns the central options standard; root owns this contract, the AppHost contributor
+owns Configuration/Execution/Validation/Hosting propagation and its focused model
+regressions. Rollback reverts only that setting, propagation and test addition,
+without changing existing runner lifetime, cleanup, suite or outcome contracts.
+
 B3 keeps the exact task lifetime above while satisfying enabled CA1031: a private
 throwing AggregateException wrapper preserves each original exception object;
 the collector handles only that wrapper and adds direct inner errors. It never

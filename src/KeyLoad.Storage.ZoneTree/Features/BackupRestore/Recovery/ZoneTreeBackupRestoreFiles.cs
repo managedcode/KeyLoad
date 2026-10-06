@@ -41,8 +41,7 @@ internal static class ZoneTreeBackupRestoreFiles
     internal static StoreIdentity ReadAndVerify(string backup, string staging, ZoneTreeStorageExecutionOptions policy,
         out long position)
     {
-        var manifestBytes = ZoneTreeMetadataFile.Read(Path.Combine(backup, BackupManifestFileName),
-            policy.MaximumBackupManifestBytes, policy.StreamBufferBytes, BackupManifestUnsupported);
+        var manifestBytes = ReadManifest(backup, policy);
         var manifest = ZoneTreeMetadataBinary.Read<ZoneTreeBackupRestoreManifest>(manifestBytes.Span, ZoneTreeMetadataBinary.BackupMagic, BackupManifestUnsupported);
         if (manifest.Version != BackupManifestVersion || manifest.Position < InitialJournalPosition || manifest.Files.Length != SourceFiles.Length
             || !manifest.Files.Select(file => file.Name).Order().SequenceEqual(SourceFiles.Order()))
@@ -69,6 +68,23 @@ internal static class ZoneTreeBackupRestoreFiles
             FileShare.Read, policy.StreamBufferBytes);
         ZoneTreeBackupJournalValidation.Verify(journal, identity, manifest.Position, policy);
         return identity;
+    }
+
+    private static ReadOnlyMemory<byte> ReadManifest(string backup, ZoneTreeStorageExecutionOptions policy)
+    {
+        try
+        {
+            return ZoneTreeMetadataFile.Read(Path.Combine(backup, BackupManifestFileName),
+                policy.MaximumBackupManifestBytes, policy.StreamBufferBytes, BackupManifestUnsupported);
+        }
+        catch (FileNotFoundException)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
+        }
+        catch (DirectoryNotFoundException)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, BackupManifestUnsupported);
+        }
     }
 
     private static ZoneTreeBackupRestoreManifestFile CopyAndDescribe(string sourceDirectory, string backupDirectory,
