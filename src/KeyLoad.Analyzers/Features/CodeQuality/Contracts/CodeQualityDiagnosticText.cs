@@ -38,9 +38,9 @@ internal static class CodeQualityDiagnosticText
     public const string OrleansConstructorMessage = "Orleans DTO '{0}' must not declare an instance constructor; use property initialization or a static factory method";
     public const string OrleansConstructorDescription = "Orleans wire, request, response, event, option, and state DTOs remain serializer-friendly data shapes. Put controlled creation behind a static factory instead of an explicit instance constructor.";
 
-    public const string SystemClockTitle = "Use TimeProvider for current time";
+    public const string SystemClockTitle = "Use TimeProvider for clock access";
     public const string SystemClockMessage = "Use TimeProvider instead of direct system clock access '{0}'";
-    public const string SystemClockDescription = "Current time must come from TimeProvider so runtime behavior and tests use one explicit, controllable clock abstraction.";
+    public const string SystemClockDescription = "Current time and elapsed measurements must come from TimeProvider so runtime behavior and tests use one explicit, controllable clock abstraction.";
 
     public const string OrleansSerializerTitle = "Orleans DTOs require generated serialization";
     public const string OrleansSerializerMessage = "Orleans DTO '{0}' must declare GenerateSerializer";
