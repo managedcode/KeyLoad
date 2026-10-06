@@ -99,7 +99,7 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.NodeReadiness);
         await RequestCqrsRf3WaveReadiness.WaitForNodesAsync(application, requireHealthy,
-            controls?.CaptureDiscovery == true, cancellationToken, lifecycleEvidence).ConfigureAwait(false);
+            cancellationToken, lifecycleEvidence).ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
         wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics,

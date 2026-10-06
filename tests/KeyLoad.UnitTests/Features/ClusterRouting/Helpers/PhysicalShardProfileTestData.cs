@@ -13,20 +13,15 @@ internal static class PhysicalShardProfileTestData
             Encoding.UTF8.GetBytes(valid.Replace("\"Version\":2,", "\"Version\":2,\"Version\":2,", StringComparison.Ordinal)),
             Encoding.UTF8.GetBytes(valid.Replace("\"PhysicalShardId\":\"0123456789abcdef0123456789abcdef\",", "", StringComparison.Ordinal)),
             Encoding.UTF8.GetBytes(valid[..^1] + ",\"Unknown\":1}"),
-            Encoding.UTF8.GetBytes(valid.Replace("\"Version\":2", "\"Version\":1", StringComparison.Ordinal)),
+            Encoding.UTF8.GetBytes(valid.Replace("\"Version\":2", "\"Version\":8", StringComparison.Ordinal)),
             Encoding.UTF8.GetBytes(valid.Replace("0123456789abcdef0123456789abcdef", "00000000000000000000000000000000", StringComparison.Ordinal)),
             Encoding.UTF8.GetBytes(new string(' ', 8193))
         ];
     }
 
-    internal static void AssertOpenAndUpgradeRejected(string root)
-    {
-        _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.Open(root, UnitProfileOptions.Execution()));
-        AssertOfflineUpgradeRejected(root);
-    }
-
-    internal static void AssertOfflineUpgradeRejected(string root)
-        => _ = Assert.ThrowsExactly<InvalidOperationException>(() => ClusterProfileStore.UpgradeLegacyOffline(root, UnitProfileOptions.Execution()));
+    internal static void AssertOpenRejected(string root)
+        => _ = Assert.ThrowsExactly<InvalidOperationException>(() =>
+            ClusterProfileStore.Open(root, UnitProfileOptions.Execution()));
 
     internal static void SetPrivateFileMode(string path)
     {

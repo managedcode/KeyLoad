@@ -53,6 +53,30 @@ internal sealed class ReplicaAppliedPositionWaitTests
         await fixture.AssertDocument(SecondDocument);
     }
 
+    /// <summary>A recreated materializer starts at the persisted prefix and publishes the next completed apply.</summary>
+    [Test]
+    public async Task RecreatedMaterializerPublishesFromPersistedPrefix()
+    {
+        await using var fixture = new ReplicaAppliedPositionWaitFixture();
+        fixture.ConfigureResource();
+        using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
+            TestContext.Current!.Execution.CancellationToken);
+        fixture.Commit(FirstDocument);
+        await fixture.Materializer.WaitForApplyAsync(1, linked.Token);
+
+        await fixture.RecreateMaterializerAsync();
+        await fixture.Materializer.WaitForApplyAsync(1, linked.Token);
+        await Assert.That(fixture.Materializer.AppliedPosition).IsEqualTo(1L);
+        var changed = fixture.Materializer.WaitForAppliedPositionChangeAsync(1, linked.Token);
+        fixture.Commit(SecondDocument);
+
+        await Assert.That(await changed.WaitAsync(linked.Token)).IsEqualTo(2L);
+        await Assert.That(fixture.Materializer.AppliedPosition).IsEqualTo(2L);
+        await fixture.AssertDocument(FirstDocument);
+        await fixture.AssertDocument(SecondDocument);
+    }
+
     /// <summary>Canceling one wait leaves the shared applied-position signal available to another caller.</summary>
     [Test]
     public async Task CallerCancellationDoesNotCancelAnotherAppliedPositionWait()

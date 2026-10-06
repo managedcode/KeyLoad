@@ -15,12 +15,11 @@ generations remain unchanged until their online outbox lifecycle is frozen.
 
 Implementation contract: [EventProjectionLineage](../Features/Search/EventProjectionLineage.md),
 REQ/AC-LINEAGE-001–005, original KL-097 and later KL-039; ADR-015/019/022/025/029/
-030/078/081/082. Ordered stages, exact worker/root scope, tests, baseline,
-migration/rollback, native data and public/RF3 integration are frozen there.
+030/078/081/082. Ordered stages, exact worker/root scope, tests, baseline, current native data contract and public/RF3 integration are frozen there.
 This ADR becomes Implemented only after all required artifacts and evidence.
 The new private effect identity uses the stable integer `DistanceMetric` value
 as a key-codec-v1 scalar. Apply, eligibility and deletion use the identical key;
-the existing key codec and prior persisted records do not change.
+the existing key codec and existing persisted records do not change.
 
 ```mermaid
 flowchart LR

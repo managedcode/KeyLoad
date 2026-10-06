@@ -43,7 +43,7 @@ dependency or website evidence authority changes. Progress is diagnostic only.
 Shared integration is root-owned. Unrelated CQRS/identity engine work is preserved.
 
 Rollout: source, capture and entry land together. Rollback removes all three
-joins together; no database data migration applies. Existing terminal failures
+joins together; no stored-data contract changes apply. Existing terminal failures
 remain failures, cancellation remains cancellation, and failed cells remain null.
 
 ```mermaid

@@ -6,8 +6,6 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
 {
     private const int InitialAppliedPosition = 0;
     private const int ObserverNonMutationIndex = 0;
-    private const string ReaderContractRequired = "Runtime journal snapshots require the persisted reader contract.";
-    private static readonly byte[] RuntimeJournalPrefix = KeyCodec.Encode(StoreReaderContract.RuntimeJournalKeySpace);
 
     internal StorageSnapshot CreateSnapshot(string path, long? expectedAppliedPosition)
     {
@@ -98,7 +96,7 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
     {
         using var input = new FileStream(temporary, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
             runtime.Options.StreamBufferBytes);
-        var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options, validate: ValidateReaderContract);
+        var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options);
         if (snapshot.Incarnation != runtime.Identity.Incarnation || snapshot.AppliedPosition != expectedAppliedPosition
             || input.Position != input.Length)
         {
@@ -116,22 +114,13 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
             runtime.Options.StreamBufferBytes);
-        var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options, validate: ValidateReaderContract);
+        var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options);
         if (input.Position != input.Length)
         {
             throw Errors.Fail(ErrorCode.Corruption, SnapshotTrailingData);
         }
 
         return snapshot;
-    }
-
-    private void ValidateReaderContract(StorageMutation mutation)
-    {
-        if (runtime.Identity.MinimumReaderContract == StoreReaderContract.Legacy
-            && mutation.Key.Span.StartsWith(RuntimeJournalPrefix))
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, ReaderContractRequired);
-        }
     }
 
     private string TemporaryPath(string prefix) => Path.Combine(runtime.Options.Directory,

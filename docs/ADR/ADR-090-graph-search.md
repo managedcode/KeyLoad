@@ -52,8 +52,8 @@ Implementation contract:
    GraphRetrieval's G3 section. This adds qualification for existing contracts,
    not a second executor or global distributed rank claim.
 
-No persisted data converter, automatic store migration, dependency change or
-physical placement change is involved. Nodes lacking the application capability
+No persisted data conversion, dependency change or physical placement change
+is involved. Nodes lacking the application capability
 cannot accept this request. Rollback removes endpoint admission and fails
 unsupported operators explicitly while retaining committed stores. Integration
 requires all coding artifacts, root review and successful mapped tests; final

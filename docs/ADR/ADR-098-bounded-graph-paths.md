@@ -8,6 +8,14 @@ native node-local ZoneTree adjacency in one current authorized committed cut.
 Explicit depth frontiers batch local work without per-edge RPC. Orleans retains
 one request grain and native ManagedCode CQRS; storage handles remain node-local.
 
+```mermaid
+flowchart LR
+    Request[Authorized bounded path request] --> Cut[One committed graph read cut]
+    Cut --> Frontier[Batched breadth-first frontiers]
+    Frontier --> Limits[Depth work time and cancellation checks]
+    Limits --> Path[Deterministic shortest path or explicit empty result]
+```
+
 The implementation contract is [ShortestPath](../Features/GraphTraversal/ShortestPath.md),
 REQ-GRAPH-007..010, AC-GRAPH-006..009, TASK-KL023-PATH. It freezes new version1
 aliases/IDs, deterministic BFS ties, empty/zero-hop results, conservative metadata
@@ -28,7 +36,7 @@ Neither source presence nor focused passes complete KL-023; normal/scalar,
 recovery and full RF3/client gates, including failover/revocation, remain required.
 
 No canonical data, existing alias/ID, journal, placement or acknowledgement
-changes occur. There is no data migration. Rollout adds explicit v1 capabilities;
+changes occur. The request does not alter canonical stored data. Rollout adds explicit v1 capabilities;
 unknown versions fail closed. Rollback removes new read registration without
 rewriting acknowledged data. Weighted/cross-partition paths, full SQL/protocol
 and measured performance leadership remain separate mandatory workstreams.

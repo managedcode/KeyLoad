@@ -22,7 +22,7 @@ internal static class NativeSourceManifestChildSettlement
     private const string NoProfileArgument = "-NoProfile";
     private const string NonInteractiveArgument = "-NonInteractive";
     private const string CommandArgument = "-Command";
-    private const string StartFailure = "The native settlement child could not start.";
+    internal const string StartFailure = "The native settlement child could not start.";
     private const string ReadinessFailure = "The native settlement child did not publish its readiness marker.";
     internal const string OutputFailure = "The native settlement child exceeded its captured output bound.";
     private const string ChildCommand = """
@@ -34,12 +34,17 @@ internal static class NativeSourceManifestChildSettlement
         """;
 
     internal static Task<NativeSourceManifestChildJoined> RunAsync(CancellationToken cancellationToken)
-        => RunAsync(ProductionSourceManifestProcess.CaptureExecutionOptions(), cancellationToken);
+        => RunAsync(ProductionSourceManifestProcess.CaptureExecutionOptions(), TimeProvider.System, cancellationToken);
+
+    internal static Task<NativeSourceManifestChildJoined> RunAsync(
+        IOptions<TestExecutionOptions> executionOptions, CancellationToken cancellationToken)
+        => RunAsync(executionOptions, TimeProvider.System, cancellationToken);
 
     internal static async Task<NativeSourceManifestChildJoined> RunAsync(
-        IOptions<TestExecutionOptions> executionOptions, CancellationToken cancellationToken)
+        IOptions<TestExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         cancellationToken.ThrowIfCancellationRequested();
         var options = executionOptions.Value;
         if (!options.IsValid())
@@ -58,7 +63,7 @@ internal static class NativeSourceManifestChildSettlement
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 Directory.CreateDirectory(root);
-                joined = await RunChildAsync(process, options, failures, cancellationToken).ConfigureAwait(false);
+                joined = await RunChildAsync(process, options, timeProvider, failures, cancellationToken).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
@@ -83,11 +88,11 @@ internal static class NativeSourceManifestChildSettlement
     }
 
     private static async Task<NativeSourceManifestChildJoined?> RunChildAsync(Process process,
-        TestExecutionOptions options, List<Exception> failures, CancellationToken cancellationToken)
+        TestExecutionOptions options, TimeProvider timeProvider, List<Exception> failures,
+        CancellationToken cancellationToken)
     {
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var retained = new NativeSourceManifestChildOriginals();
-        Task? initialOriginal = null;
         var pending = false;
         try
         {
@@ -99,25 +104,24 @@ internal static class NativeSourceManifestChildSettlement
                     throw new InvalidOperationException(StartFailure);
                 }
                 retained.Capture(process, options, failures);
-                initialOriginal = retained.Original;
-                pending = await InterruptAfterReadinessAsync(retained, options, caller, failures,
+                pending = await InterruptAfterReadinessAsync(retained, options, timeProvider, caller, failures,
                     cancellationToken).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         finally
         {
-            await retained.SettleAsync(process, options, initialOriginal, failures).ConfigureAwait(false);
+            await retained.SettleAsync(process, options, timeProvider, failures).ConfigureAwait(false);
         }
         return await retained.JoinedAsync(process, pending, failures, caller.Token).ConfigureAwait(false);
     }
 
     private static async Task<bool> InterruptAfterReadinessAsync(NativeSourceManifestChildOriginals retained,
-        TestExecutionOptions options, CancellationTokenSource caller, List<Exception> failures,
+        TestExecutionOptions options, TimeProvider timeProvider, CancellationTokenSource caller, List<Exception> failures,
         CancellationToken cancellationToken)
     {
         var ready = retained.Ready ?? throw new InvalidDataException(ReadinessFailure);
         var original = retained.Original ?? throw new InvalidOperationException(StartFailure);
-        var marker = await ready.WaitAsync(options.OrdinaryTimeout, TimeProvider.System,
+        var marker = await ready.WaitAsync(options.OrdinaryTimeout, timeProvider,
             cancellationToken).ConfigureAwait(false);
         if (!string.Equals(marker, ReadyMarker, StringComparison.Ordinal))
         {
@@ -167,8 +171,6 @@ internal static class NativeSourceManifestChildSettlement
 
 internal sealed class NativeSourceManifestChildOriginals
 {
-    private const string ExitConfirmationFailure = "The native settlement child did not confirm exit within its cleanup bound.";
-
     internal bool Started { get; set; }
     internal Task? Exit { get; private set; }
     internal Task<string?>? Ready { get; private set; }
@@ -187,47 +189,20 @@ internal sealed class NativeSourceManifestChildOriginals
                 options.CleanupOutputCharacters), failures);
         ServerFailureObserver.Observe(() => Error ??= NativeCoverageImageNodeOutput.ReadBoundedAsync(
             process.StandardError, options.CleanupOutputCharacters), failures);
-        Original = Task.WhenAll(ActualStages());
+        Original ??= Task.WhenAll(ActualStages());
     }
 
-    internal async Task SettleAsync(Process process, TestExecutionOptions options, Task? initialOriginal,
+    internal async Task SettleAsync(Process process, TestExecutionOptions options, TimeProvider timeProvider,
         List<Exception> failures)
     {
         if (!Started)
         {
             return;
         }
-        Capture(process, options, failures);
-        await ProductionSourceManifestProcessSettlement.JoinAsync(process, Original!,
-            options.ProcessSettlementTimeout, failures).ConfigureAwait(false);
-        await Original!.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        if (initialOriginal is not null)
-        {
-            await initialOriginal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        }
-        await ConfirmNativeExitAsync(process, options, failures).ConfigureAwait(false);
-    }
-
-    internal static async Task ConfirmNativeExitAsync(Process process, TestExecutionOptions options,
-        List<Exception> failures)
-    {
-        var started = TimeProvider.System.GetTimestamp();
-        var missedDeadline = false;
-        ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-        while (true)
-        {
-            if (!missedDeadline && TimeProvider.System.GetElapsedTime(started) >= options.ProcessSettlementTimeout)
-            {
-                failures.Add(new TimeoutException(ExitConfirmationFailure));
-                missedDeadline = true;
-            }
-            if (process.HasExited)
-            {
-                return;
-            }
-            await Task.Delay(options.ProcessExitPollInterval, TimeProvider.System, CancellationToken.None)
-                .ConfigureAwait(false);
-        }
+        var original = Original ?? throw new InvalidOperationException(NativeSourceManifestChildSettlement.StartFailure);
+        await using var cleanup = await ProductionSourceManifestProcessSettlement.JoinAsync(process, Started, original,
+            options.ProcessSettlementTimeout, timeProvider, options.TerminationGrace, failures).ConfigureAwait(false);
+        await cleanup.ConfirmNativeExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
     }
 
     internal async Task<NativeSourceManifestChildJoined?> JoinedAsync(Process process, bool pending,
@@ -263,17 +238,4 @@ internal sealed class NativeSourceManifestChildOriginals
         }
     }
 
-    private static void KillIfRunning(Process process)
-    {
-        try
-        {
-            if (!process.HasExited)
-            {
-                process.Kill(entireProcessTree: true);
-            }
-        }
-        catch (InvalidOperationException) when (process.HasExited)
-        {
-        }
-    }
 }

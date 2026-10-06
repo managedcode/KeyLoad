@@ -39,12 +39,12 @@ internal sealed class NativeMissingIdentityTests
     [Arguments(7)]
     [Arguments(51)]
     [Arguments(WalFileFixture.HeaderBytes)]
-    public async Task AcIs004And008MissingIdentityNeverTruncatesShortLegacyJournal(int length)
+    public async Task AcIs004And008MissingIdentityNeverTruncatesShortUnsupportedJournal(int length)
     {
         using var files = new WalFileFixture();
         Directory.CreateDirectory(files.DirectoryPath);
         await File.WriteAllBytesAsync(Path.Combine(files.DirectoryPath, OwnerLockFileName), []);
-        var frame = WalFileFixture.CreateFrame([0x10, 0x30], magic: WalFileFixture.LegacyMagic);
+        var frame = WalFileFixture.CreateFrame([0x10, 0x30], magic: WalFileFixture.UnsupportedMagic);
         await File.WriteAllBytesAsync(files.JournalPath, frame[..length]);
 
         await AssertRejectedUnchangedAsync(files);

@@ -1,5 +1,4 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
-using KeyLoad.AppHost.Features.ClusterReplication.Commands;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,8 +15,6 @@ internal static class KeyLoadAppHostApplication
         const int EmptyResult = 0;
 
         _ = SerializationExecutionRegistration.Process.Value;
-        if (ClusterProfileUpgradeCommand.Dispatch(args) is { } upgradeExitCode)
-        { return upgradeExitCode; }
         var requested = TestSuiteSettings.Requested(args);
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {

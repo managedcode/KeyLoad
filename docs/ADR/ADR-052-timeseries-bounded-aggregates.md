@@ -165,7 +165,7 @@ recovery/analyzer and RF3 jobs pass, comparison-smoke has two genuine Aspire
 Waiting failures. Preserve them as failures and keep comparisons/measurements
 distinct. Native report counts and hashes are retained in the runtime ledger.
 
-## Verification, migration and rollback
+## Verification and rollback
 
 Each criterion maps to test-owned independent raw oracles and real provider/
 SDK/MCP/fault operations in the TimeSeries feature. Preserve all existing
@@ -174,9 +174,9 @@ global suppression, new retries or increased bounds. Native seek-error disposal
 requires source/lifetime review because no real provider failure-injection API
 is available; it is not claimed as an executed environmental fault branch.
 
-No persisted format or data migration. Public changes are additive read APIs;
-roll back the additive contracts/routes/read catalog/reader slice together while
-retaining old numeric read kinds and storage formats. The separate ADR-050
+Persisted format and data remain unchanged. Public changes add read APIs;
+roll back the contracts/routes/read catalog/reader slice together while
+retaining existing numeric read kinds and storage formats. The separate ADR-050
 comparison continues declaring its own measured operations; client-folded
 statistics must not be relabeled measured server aggregation.
 
@@ -221,6 +221,6 @@ Root owns shared contracts/config/docs and final quality gates. Independent admi
 assets/browser diagnosis is outside these disjoint worker scopes; no overwritten
 or partial packet unblocks final review. Workers stop on unsupported APIs, overlap
 or actual production defects and report complete/blocked/failed/cancelled evidence.
-No public/persistence/dependency migration occurs; rollback restores coherent
+No unrelated public/persistence/dependency change occurs; rollback restores coherent
 fixture/oracle sources while preserving all behavior/gates and native red evidence.
 This ADR remains Accepted; source-oracle repair is not numeric coverage/readiness.

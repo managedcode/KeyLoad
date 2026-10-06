@@ -58,7 +58,7 @@ internal sealed class NativeTextProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await JoinOutputReadersAsync(process, timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(source, timeout.Token);
-            EpochUpgradeFileInventory.AssertNativeHandlesReleased(source);
+            RecoveryFileInventory.AssertNativeHandlesReleased(source);
             var receipt = NativeSerialization.Deserialize<NativeTextCrashReceipt>(
                 await File.ReadAllBytesAsync(receiptPath, timeout.Token));
             await NativeTextProjectionRecoveryAssertions.RecoverAndVerifyAsync(source, receipt, timeout.Token);
@@ -71,7 +71,7 @@ internal sealed class NativeTextProjectionProcessRecoveryTests
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
-            await EpochUpgradeCleanup.SettleAsync(process, root, source, activeFailure, cleanup.Token);
+            await RecoveryProcessCleanup.SettleAsync(process, root, source, activeFailure, cleanup.Token);
         }
     }
 
@@ -249,7 +249,7 @@ internal static class NativeTextProjectionRecoveryAssertions
     {
         var expected = receipt.AuthorityFiles.ToDictionary(file => file.Name,
             file => Convert.ToHexString(file.Sha256), StringComparer.Ordinal);
-        await EpochUpgradeFileInventory.AssertAuthorityUnchangedAsync(source, expected, cancellationToken);
+        await RecoveryFileInventory.AssertAuthorityUnchangedAsync(source, expected, cancellationToken);
     }
 
     private static async Task AssertParityAsync(RankedDocument[] expected, RankedDocument[] actual,

@@ -15,7 +15,7 @@ qualification. This is a repair of the frozen contract, not a new data format.
 
 ## Decision and contracts
 
-Implement REQ-IS-001..009 / AC-IS-001..009 using Orleans10.3.1 generated codecs, stable aliases and explicit immutable field IDs across all owned internal concrete DTOs. Use pooled native sessions and raw ReadOnlyMemory<byte> codecs; reject incomplete/trailing/malformed input and validate required semantic fields before effects. Do not use Orleans' optional JSON codec or a runtime JSON fallback. JSON DOM adapters represent structural ordered fields and original numeric lexemes; native DOM materialization is a concrete boundary, not a persisted JSON subtree.
+Implement REQ-IS-001..009 / AC-IS-001..009 using centrally pinned Orleans generated codecs, stable aliases and explicit immutable field IDs across all owned internal concrete DTOs. Use pooled native sessions and raw ReadOnlyMemory<byte> codecs; reject incomplete/trailing/malformed input and validate required semantic fields before effects. Do not use Orleans' optional JSON codec or a runtime JSON fallback. JSON DOM adapters represent structural ordered fields and original numeric lexemes; native DOM materialization is a concrete boundary, not a persisted JSON subtree.
 
 ```mermaid
 flowchart TD
@@ -23,26 +23,24 @@ flowchart TD
     Integrity --> Native[Generated Orleans typed decode]
     Native --> Validate[Complete input and semantic validation]
     Validate --> Apply[Existing ordered atomic apply]
-    Old[Legacy or unknown version] --> Reject[Reject before mutation]
-    Old --> Offline[Explicit separately validated offline conversion]
-    Offline --> New[Publish complete verified destination]
+    Unknown[Unsupported or unknown version] --> Reject[Reject before mutation]
 ```
 
 Concrete contracts retained: public HTTP/MCP JSON; exact caller-owned JSON document strings; canonical operation/idempotency golden digests; sortable KeyCodec1; ZoneTree native ByteArraySerializer/WAL; fixed checksummed framing; raw blob chunks; HMAC/SHA; Cartograph archives. Native binary output must not be assumed canonical for unordered maps. Signed claims are versioned before changing signed bytes. Peer envelope field IDs/types remain stable; any changed meaning/authentication version is explicit.
 
 ## Ordered implementation and joins
 
-TASK-IS-004: shared Abstractions native codec, generated DTO closure and JsonElement structural surrogate. TASK-IS-005: Core private records and every borrowed record/scalar reader/writer plus accounting and claims. TASK-IS-006: Replication native message/state/snapshot DTOs and exact batch accounting. TASK-IS-007: lead StorageRecovery checkpoint/identity and BackupRestore formats. TASK-IS-008: lead Orleans grain/membership/security joins. TASK-IS-009: explicit offline legacy conversion if required. TASK-IS-010/011: integrated enabled compile/static gates and exact-source canonical GitHub qualification. Shared contracts have one assigned owner; the lead reviews every join and retains unrelated changes.
+TASK-IS-004: shared Abstractions native codec, generated DTO closure and JsonElement structural surrogate. TASK-IS-005: Core private records and every borrowed record/scalar reader/writer plus accounting and claims. TASK-IS-006: Replication native message/state/snapshot DTOs and exact batch accounting. TASK-IS-007: lead StorageRecovery checkpoint/identity and BackupRestore formats. TASK-IS-008: lead Orleans grain/membership/security joins. TASK-IS-010/011: integrated enabled compile/static gates and exact-source canonical GitHub qualification. Shared contracts have one assigned owner; the lead reviews every join and retains unrelated changes.
 
-## Format, migration and rollback
+## Current format identity and rollback
 
-The old Compact operation preserves opaque JSON values; it is not a migration. New stores/metadata must have externally distinguishable format versions and fail closed on old identities before opening/mutating trees or truncating journals. Do not promote an old identity into the new record format. Retain stopped-source backups and exact matching old binaries. Any converter must classify every key/value, validate all source cuts/records, recalculate queue/topic/outbox encoded-byte charges and move replica hard state/entries/membership authority coherently into an independently staged destination. Unknown keys or failed/interrupted conversion prevent destination publication and preserve source. No converter means an explicit upgrade blocker, never silent recreation. Rollback uses untouched old copies before new writes; after new writes reverse conversion needs separate qualification.
+Compaction preserves opaque JSON values. Current stores and metadata must use the required format identity and fail closed on unsupported identities before opening or mutating trees or truncating journals. Never promote or reinterpret an unsupported identity. Current backup and restore verify the complete source state before destination publication; unknown keys or failed verification prevent publication and preserve source. Rollback is a source checkpoint and never changes stored data or republishes a different format.
 
 ## Security, tests and evidence
 
 Authenticate exact peer scope and sender before replay-slot admission. Native header projection/skipping may not allocate decoded opaque payloads or grant a malformed message a nonce slot; control/data pools and all external capacity contracts stay exact. Existing state ownership, synchronous barriers, unknown outcomes, cancellation and caller-visible sanitized diagnostics remain.
 
-Native codec/type-family/DOM tests, exact record byte accounting, actual metadata corruption/legacy fixtures, claims/tamper/version tests, replica admission allocation/malformed/scope tests, existing canonical hashes, real-process recovery and genuine RF3 SDK/MCP form the acceptance chain. Required commands are enabled solution restore/build and formatter/static governance, then canonical GitHub normal/scalar/recovery/analyzer/RF3 jobs. No local runtime tests, no removed assertions or invented load tests. Performance, full memory amplification, power-loss, endurance and production proof are separately unqualified. Publication is not attempted again without explicit approval after the previous automatic-review rejection.
+Native codec/type-family/DOM tests, exact record byte accounting, actual current metadata corruption and unsupported-version fixtures, claims/tamper/version tests, replica admission allocation/malformed/scope tests, existing canonical hashes, real-process recovery and genuine RF3 SDK/MCP form the acceptance chain. Required commands are enabled solution restore/build and formatter/static governance, then canonical GitHub normal/scalar/recovery/analyzer/RF3 jobs. No local runtime tests, no removed assertions or invented load tests. Performance, full memory amplification, power-loss, endurance and production proof are separately unqualified. Publication is not attempted again without explicit approval after the previous automatic-review rejection.
 
 ## Resumption repair contract, 2026-10-03
 
@@ -56,8 +54,8 @@ The restore owner retains explicit new identity/incarnation/signing authority an
 paused dispatch; malformed or incompatible backups leave destination unchanged.
 Native scalar/count/type/reference/depth/work validation repairs stay in the shared
 InternalSerialization slice and preserve official generated wire encoding.
-No old-store conversion, running-cluster rollout or product release is inferred
-from development-source installation. Existing required qualification remains.
+Development-source installation does not establish product release or running-cluster
+qualification. Existing required qualification remains.
 
 TASK-IS-R4C shared preflight retains generated encoding and official scalar
 readers. It validates expected root compatibility before dynamic dispatch, walks
@@ -90,7 +88,7 @@ support for it requires a separately specified bounded replay contract. Ordinary
 known-schema references remain supported. AC-IS-002 includes the concrete hidden
 underfilled float-array reference regression before native allocation.
 
-TASK-IS-R4E aligns replica inspection and malformed fixtures with Orleans10.3.1:
+TASK-IS-R4E aligns replica inspection and malformed fixtures with centrally pinned Orleans:
 explicit property Ids are body members, preceded by the empty constructor scope.
 The Server authentication projection follows the same genuine generated record
 shape. Official generated writer-to-inspector positive tests cover these joins;
@@ -141,7 +139,7 @@ same owned journal handle and bounded current codecs to verify complete frames,
 checksums, sequence, checkpoint metadata/footer and record semantics without apply,
 truncation or tree writes. Leave a permitted incomplete current tail untouched
 during preflight; ordinary ordered recovery alone applies/truncates it afterward.
-Unsupported complete legacy frames and complete corruption must fail without
+Unsupported complete frames and complete corruption must fail without
 changing journal/identity/provider files. Reset the journal position before
 ordinary recovery; keep startup preflight distinct from acknowledged write gates.
 
@@ -154,9 +152,9 @@ StorageRecovery owns the initializer and new preflight helper; UnitTests owns
 NativeStoreOpenPreflight regressions using real files plus unchanged historical
 file-preservation assertions. Root owns integration/docs; wire worker owns reader
 normalization; no shared runtime/phase-file overlap. Verify valid checkpoint/tail,
-torn-tail recovery, late complete corruption and legacy rejection through actual
-GitHub normal/scalar/recovery/RF3 suites. No migration or old-store conversion is
-introduced; rollback restores prior binaries for matching stores. Extra startup
+torn-tail recovery, late complete corruption and unsupported-current-format rejection
+through actual GitHub normal/scalar/recovery/RF3 suites. Rollback restores the source
+checkpoint without changing persisted data. Extra startup
 validation cost requires actual recovery/performance evidence and cannot count
 as a speed improvement. All fault assertions and numeric budgets remain.
 
@@ -190,8 +188,8 @@ pair metadata mapping and new InternalSerialization TUnit fixtures. Root owns
 integration, scoped commit/push and exact-source normal/scalar/recovery/RF3 CI.
 Do not change wire preflight, graph charge/depth/reference rules, profiles, error
 classification, formats, policy or performance claims. Rollback restores the
-prior binary without rewriting data; malformed required-null pairs remain an
-unqualified input until corrected binaries are selected. Native measurement
+source checkpoint without rewriting data; malformed required-null pairs remain
+rejected until the corrected source passes its required gates. Native measurement
 artifacts remain bound to their actual source and do not qualify this repair.
 
 ## Accepted exposed-fixture and auth-reader repair contract
@@ -218,7 +216,7 @@ Quota boundaries must use actual native persisted/normalized byte costs and
 retain exact/one-byte-short rejection; public changefeed JSON remains JSON.
 Compare decoded record fields and contents, including immutable arrays, without
 assuming allocation identity. Native membership test hosts must register their
-real dependencies without altering production RF3, directory or migration.
+real dependencies without altering production RF3, directory or current data contracts.
 
 No runtime fallback, new role trust, wire version, storage ownership, size limit
 or recovery-policy change. Root reviews every diff, development build/format,
@@ -282,7 +280,7 @@ and terminal-failure rules apply.
 
 ## Accepted stored-body fixture repair contract
 
-R17-AC001 follows original ca22 run37124217640. Persisted native queue-body corruption is a storage fault and must retain Corruption, escaping the atomic-command domain-error catch as currently designed. Root owns only QueueBodyAccountingTests: replace its old malformed-body Validation expectation with exact Corruption and no-effects assertions, retain missing-body controls, and restore the original native bytes to demonstrate the same failed operation ID can subsequently receive once. Check exact stored bytes, ready marker, counters, committed/applied position and absent outcome before repair. Native format, public invalid-JSON policy, durability/admission/authorization, quotas and FIFO remain unchanged. Unit/scalar qualification is GitHub-only and all recovery/RF3 gates still apply. Rollback restores the fixture only; no data migration or performance claim follows. Unknown well-known header metadata requires a separately accepted narrow Reader design before runtime implementation.
+R17-AC001 follows original ca22 run37124217640. Persisted native queue-body corruption is a storage fault and must retain Corruption, escaping the atomic-command domain-error catch as currently designed. Root owns only QueueBodyAccountingTests: replace its previous malformed-body Validation expectation with exact Corruption and no-effects assertions, retain missing-body controls, and restore the original native bytes to demonstrate the same failed operation ID can subsequently receive once. Check exact stored bytes, ready marker, counters, committed/applied position and absent outcome before repair. Native format, public invalid-JSON policy, durability/admission/authorization, quotas and FIFO remain unchanged. Unit/scalar qualification is GitHub-only and all recovery/RF3 gates still apply. Rollback restores the fixture only; no data-format change or performance claim follows. Unknown well-known header metadata requires a separately accepted narrow Reader design before runtime implementation.
 
 
 ## Accepted unknown well-known header metadata repair contract
@@ -346,12 +344,12 @@ exception does not claim an executed genuine owned fault, change product error
 semantics or weaken no-fakes policy. Genuine nonspan/known/null/encoded and all
 new caller/storage tests remain required. Runtime/GitHub/coverage evidence stays
 open until actual source-matched results; local checks follow the owner's later
-development authorization and cannot produce website data. No migration/API or
+development authorization and cannot produce website data. No API or
 runtime change; rollback removes supplemental tests/docs only.
 
 ## Accepted pre-cancelled native membership read contract
 
-R17-AC003 follows authenticated ca7 run37126562970: the compare-exchange cancellation assertion passed, while the subsequent read-barrier cancellation surfaced TaskCanceledException before ReadAsync reached its own cancellation guard. Root owns ReplicaMembershipStore.ReadAsync and its existing genuine membership test. Check the caller token before invoking the quorum barrier and retain the existing post-barrier cancellation check, so an already cancelled read performs no quorum work and raises the caller's original OperationCanceledException. Keep both existing exact cancellation assertions and all absent-row/log-state/committed-applied checks; assert original token identity and cancelled task state for the read. This is an owning entry-boundary repair, with unchanged successful read cut, authorization, placement, native bytes and public API. Normal/scalar/full recovery/RF3 run at delivered source; no speed claim follows from the guard. Rollback removes the new pre-check only and requires matching cancellation-contract requalification, without data migration.
+R17-AC003 follows authenticated ca7 run37126562970: the compare-exchange cancellation assertion passed, while the subsequent read-barrier cancellation surfaced TaskCanceledException before ReadAsync reached its own cancellation guard. Root owns ReplicaMembershipStore.ReadAsync and its existing genuine membership test. Check the caller token before invoking the quorum barrier and retain the existing post-barrier cancellation check, so an already cancelled read performs no quorum work and raises the caller's original OperationCanceledException. Keep both existing exact cancellation assertions and all absent-row/log-state/committed-applied checks; assert original token identity and cancelled task state for the read. This is an owning entry-boundary repair, with unchanged successful read cut, authorization, placement, native bytes and public API. Normal/scalar/full recovery/RF3 run at delivered source; no speed claim follows from the guard. Rollback removes the new pre-check only and requires matching cancellation-contract requalification, without changing persisted data.
 
 
 ## Accepted native diagnostic credential isolation contract (R18)

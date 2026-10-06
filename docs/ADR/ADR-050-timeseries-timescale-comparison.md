@@ -14,7 +14,7 @@ digest-bearing image for cleanup, and keep the report's full source tag/digest.
 No AppHost pin, actual readiness/oracle/foreign-schema/cleanup assertion, timeout,
 report or package changes. Existing failing actual Aspire-model case is tests-first
 proof; lead reviews source, builds/formats and qualifies the complete GitHub suite.
-Rollback affects only test native-identity inspection; no migration is involved.
+Rollback affects only test native-identity inspection.
 Primary source: [Aspire ContainerImageAnnotation](https://source.dot.net/Aspire.Hosting/ApplicationModel/ContainerImageAnnotation.cs.html).
 
 ## Decision
@@ -26,7 +26,7 @@ uses published10.0.3; remove the stale10.0.0 literal and keep report schema1,
 memory/ACK guarantees, targets, timings and numerical oracles unchanged. The
 bounded worker owns only recorder and existing workload/Aspire version tests;
 root owns shared docs/config and final GitHub qualification. No format/API or
-topology migration is introduced; rollback restores code and central package
+topology change is introduced; rollback restores code and central package
 together, never relabels an already measured immutable report.
 
 ### Accepted digest-backed execution continuation (AC-IMAGE-002/004/005)
@@ -39,7 +39,7 @@ The bounded host identity worker owns only ComparisonExecutionIdentity helpers,
 TimeSeriesComparisonApplication and new matching CLI-negative tests. First add
 real report/CLI assertions, then source; join with ADR-034 image preparation and
 native ContainerResource lifecycle at one pushed SHA. No product/public schema
-migration occurs. Rollback stops this qualification stage while preserving raw
+change occurs. Rollback stops this qualification stage while preserving raw
 evidence and cannot substitute unqualified host-process completion. Status remains
 Accepted until actual image, report, exit and full relevant GitHub gates pass.
 
@@ -69,9 +69,9 @@ flowchart LR
 6. Update TimeSeries and BenchmarkComparisons feature requirements, architecture map, ADR index, `docs/implementation/status.json`, task/coverage catalog, README and implementation comparison docs. Keep the existing nine-engine counts and status claims intact.
 7. Root joins all source changes, runs the enabled solution build, format, governance and analyzer/complexity gates, then dispatches full GitHub CI. Preserve exact SHA, job URLs and artifacts; status remains pending until successful delivered-SHA evidence exists.
 
-## Migration, rollout, rollback, verification and agent roles
+## Delivery, rollback, verification and agent roles
 
-No product data or public API migration occurs. The separate report is additive and is published only after successful matched CI evidence. Root is the sole owner of shared configuration, AppHost registration, public contracts, central package versions, workflow, docs and final integration. Worker ownership is limited to the new target files and its matching new test files; no shared-file overlap is allowed. Join point is the root comparison profile contract and one final full solution/CI run.
+No product data or public API change occurs. The separate report is additive and is published only after successful matched CI evidence. Root is the sole owner of shared configuration, AppHost registration, public contracts, central package versions, workflow, docs and final integration. Worker ownership is limited to the new target files and its matching new test files; no shared-file overlap is allowed. Join point is the root comparison profile contract and one final full solution/CI run.
 
 Rollback disables the optional comparison profile and removes only its resource, package reference, target, report and tests. Existing engine profiles and immutable reports remain untouched. Verification: full Release solution build, `dotnet format`, governance, and GitHub TUnit/comparison plus required recovery/RF3 SDK/MCP suites; no local runtime tests or measurements.
 

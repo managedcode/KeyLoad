@@ -28,7 +28,7 @@ Related: `REQ-DSTORE-001/AC-DSTORE-001`, `REQ-DSTORE-004/AC-DSTORE-004`, `REQ-EV
 1. Freeze catalog binding, atomic key identity, physical placement epoch, and cross-resource failure semantics.
 2. Test same/different-domain resources, duplicate literal keys, failed mixed batches, movement, recovery, and snapshot catch-up using real stores and RF3.
 3. Implement binding and compiler checks in DocumentStorage/Core, with routing and physical placement owned by ClusterReplication/ClusterRouting.
-4. Migration verifies catalog bindings before accepting writes; rollback stops movement and preserves the prior owner, never merging domains.
+4. Before a physical move, verify catalog bindings; rollback stops movement and preserves the current owner, never merging domains.
 5. Qualify exact source through GitHub unit, process-recovery, and three-node SDK/MCP tests before claiming atomic cluster movement.
 
 Current identity types and checks are in `src/KeyLoad.Abstractions/Contracts.cs`, `src/KeyLoad.Core/DatabaseEngine.cs`, and `PartitionRef`; `TransactionTests.SameLiteralPartitionKeyCannotCrossTransactionDomains` is existing source evidence. Current delivered-source qualification remains pending.

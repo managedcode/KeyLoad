@@ -75,7 +75,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     public string DirectoryPath { get; }
     /// <summary>Fixed voter and incarnation scope of this replica group.</summary>
     public ReplicaConfiguration Configuration { get; }
-    internal bool RuntimeJournalStoresMarked
+    internal bool CurrentCapabilityValidated
         => stores.Canonical.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal
             && stores.Replica.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;
 
@@ -93,7 +93,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private DatabaseEngine OpenCanonicalDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization, TimeProvider clock)
     {
         var core = runtimeOptions.Core;
-        RuntimeJournalStorePreparation.Prepare(stores, core.RuntimeJournal, runtimeOptions.StorageExecution);
+        RuntimeJournalStorePreparation.Prepare(stores);
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
             core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, clock);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);

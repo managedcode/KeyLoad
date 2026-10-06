@@ -1,19 +1,35 @@
+using System.Diagnostics;
 using KeyLoad.ServiceDefaults.Features.ClusterRouting.Configuration;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class OrleansRuntimeTelemetryAssertions
 {
+    internal static async Task AssertIsolatedParentAsync(Activity parent)
+    {
+        await Assert.That(parent.Parent).IsNull();
+        await Assert.That(parent.TraceId).IsNotEqualTo(default(ActivityTraceId));
+        await Assert.That(parent.ParentSpanId).IsNotEqualTo(default(ActivitySpanId));
+        await Assert.That((parent.ActivityTraceFlags & ActivityTraceFlags.Recorded) != ActivityTraceFlags.None).IsTrue();
+        await Assert.That(parent.Baggage.Any()).IsFalse();
+        await Assert.That(ReferenceEquals(Activity.Current, parent)).IsTrue();
+    }
+
+    internal static async Task AssertActivityRestoredAsync(Activity? expected)
+        => await Assert.That(ReferenceEquals(Activity.Current, expected)).IsTrue();
+
     internal static async Task AssertTracePrivacyAsync(OrleansActivityCapture[] captures, PrincipalRecord first,
         PrincipalRecord second, PrincipalRecord third, IReadOnlyList<OrleansTelemetryOperationParent> parents,
-        OrleansTelemetryOptions options)
+        OrleansTelemetryOptions options, IReadOnlyList<OrleansRuntimeTelemetrySentinelObservation> sentinelObservations)
     {
         var spans = captures.Where(static span => span.SourceName is OrleansRuntimeTelemetryTokens.ApplicationSource
             or OrleansRuntimeTelemetryTokens.LifecycleSource).ToArray();
         await Assert.That(spans.Length).IsGreaterThan(0);
         await Assert.That(spans.Any(span => span.Tags.Any(tag => tag.Key == OrleansRuntimeTelemetryTokens.RpcMethodTag
             && tag.Value == OrleansRuntimeTelemetryTokens.RequestMethodValue))).IsTrue();
-        await Assert.That(spans.Any(static span => span.Status == System.Diagnostics.ActivityStatusCode.Error)).IsTrue();
+        await Assert.That(spans.Any(static span => span.Status == System.Diagnostics.ActivityStatusCode.Error)).IsTrue()
+            .Because(string.Join(Environment.NewLine,
+                sentinelObservations.Select(static observation => observation.ToSafeSummary())));
         foreach (var parent in parents)
         {
             await Assert.That(spans.Any(span => span.TraceId == parent.TraceId.ToHexString()

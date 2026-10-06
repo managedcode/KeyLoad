@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
@@ -39,23 +40,24 @@ public sealed partial class DatabaseEngine
     private OperationResult ApplyCommittedCommand(IAtomicTransaction transaction, ReplicatedOperation operation,
         long position, long replicationIndex)
     {
+        var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, OperationLimitsOptions, position, replicationIndex);
         var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
-        if (ReadAlreadyAppliedOutcome(transaction, operation, replicationIndex, partitionScope) is { } applied)
+        if (ReadAlreadyAppliedOutcome(rosterTransaction, operation, replicationIndex, partitionScope) is { } applied)
         {
             return applied;
         }
         var fingerprint = CommandFingerprint(operation);
-        var outcome = ExecuteAndBuildOutcome(transaction, operation, position, replicationIndex, fingerprint,
+        var outcome = ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, fingerprint,
             partitionScope, out var replayed, out var selection, out var persistOutcome);
         if (replayed)
         {
             return outcome.Result;
         }
-        PersistCommandOutcome(transaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
-        return ValidateCompiledCommand(transaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
+        PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
+        return ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
     }
 
-    private static OperationResult? ReadAlreadyAppliedOutcome(IAtomicTransaction transaction, ReplicatedOperation operation,
+    private static OperationResult? ReadAlreadyAppliedOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
         long replicationIndex, CommandOutcomePartitionScope scope)
     {
         if (replicationIndex <= AtomicCommandCommitInitialSequence || transaction.ReadOwnedValue(KeySpace.AppliedBytes) is not { } appliedBytes
@@ -72,12 +74,11 @@ public sealed partial class DatabaseEngine
         return applied.Result;
     }
 
-    private StoredOutcome ExecuteAndBuildOutcome(IAtomicTransaction transaction, ReplicatedOperation operation,
+    private StoredOutcome ExecuteAndBuildOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
         long position, long replicationIndex, string fingerprint, CommandOutcomePartitionScope partitionScope,
         out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome)
     {
         replayed = false;
-        var authorized = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.PrincipalId, operation.Id, partitionScope);
         persistOutcome = true;
         long policyEpoch = AtomicCommandCommitInitialSequence;
@@ -90,7 +91,6 @@ public sealed partial class DatabaseEngine
             policyEpoch = principal.PolicyEpoch;
             var placement = AuthorizeOperation(transaction, principal, operation);
             selection = CommandOutcomeKeyResolver.Select(transaction, operation.PrincipalId, operation.Id, partitionScope);
-            authorized = true;
             if (selection.Outcome is { } previous)
             {
                 result = ReplayCommand(transaction, principal, operation, previous, fingerprint, replicationIndex, selection);
@@ -116,8 +116,7 @@ public sealed partial class DatabaseEngine
             replayed = false;
             result = new(null, ErrorCode.Validation, InvalidCommandJsonMessage);
         }
-        persistOutcome = selection.Outcome is null
-            && (authorized || !CommandOutcomeKeyResolver.HasLegacyOutcome(transaction, operation.PrincipalId, operation.Id));
+        persistOutcome = selection.Outcome is null;
         return BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority, partitionScope);
     }
 
@@ -159,7 +158,7 @@ public sealed partial class DatabaseEngine
         return previous.Result;
     }
 
-    private static void ValidateCommandClock(IKeyValueView view, DateTimeOffset evaluatedAt)
+    private static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)
     {
         if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } clock && evaluatedAt < NativeSerialization.Deserialize<DateTimeOffset>(clock))
         {
@@ -167,7 +166,7 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static void PersistCommandOutcome(IAtomicTransaction transaction, ReplicatedOperation operation, byte[] resultKey,
+    private static void PersistCommandOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation, byte[] resultKey,
         StoredOutcome outcome, long replicationIndex, bool persistOutcome)
     {
         // Domain effects, outcome and apply watermark share one redo transaction.
@@ -199,11 +198,12 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private static OperationResult ValidateCompiledCommand(IAtomicTransaction transaction, ReplicatedOperation operation,
+    private static OperationResult ValidateCompiledCommand(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
         byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome)
     {
         try
         {
+            transaction.PersistCandidates();
             transaction.ValidateCommit();
             return outcome.Result;
         }
@@ -215,6 +215,7 @@ public sealed partial class DatabaseEngine
             var failure = new OperationResult(null, exception.Code, exception.Message);
             PersistCommandOutcome(transaction, operation, resultKey, outcome with
             { Result = failure, BlobAuthority = null, CompositionAuthority = null }, replicationIndex, persistOutcome);
+            transaction.PersistCandidates();
             transaction.ValidateCommit();
             return failure;
         }

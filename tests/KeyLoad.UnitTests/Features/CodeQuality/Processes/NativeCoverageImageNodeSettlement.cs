@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.CodeQuality.Processes;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 
@@ -12,25 +13,30 @@ internal sealed record NativeCoverageImageNodeJoined(int ExitCode, string Standa
 
 internal static class NativeCoverageImageNodeSettlement
 {
-    private const string SettlementFailure = "The native coverage image materializer did not settle within its cleanup bound.";
-
-    internal static async Task<NativeCoverageImageNodeJoined> SettleAsync(Process process, Task? exit,
-        Task<string>? output, Task<string>? error, TimeSpan settlementTimeout, List<Exception> failures)
+    internal static async Task<NativeCoverageImageNodeJoined> SettleAsync(Process process, bool processStarted,
+        Task original, Task? exit, Task<string>? output, Task<string>? error, TimeSpan settlementTimeout,
+        TimeProvider timeProvider, TimeSpan terminationGrace, TimeSpan processExitPollInterval,
+        List<Exception> failures)
     {
-        ServerFailureObserver.Observe(() => TryStop(process), failures);
-        if (exit is null)
+        await using var deadline = new NativeProcessCleanupDeadline(settlementTimeout, timeProvider);
+        if (NeedsCleanup(original, failures) && processStarted)
         {
-            ServerFailureObserver.Observe(() => exit = process.WaitForExitAsync(CancellationToken.None), failures);
-        }
-        var original = Task.WhenAll(exit ?? Task.CompletedTask, output ?? Task.CompletedTask,
-            error ?? Task.CompletedTask);
-        await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(settlementTimeout, TimeProvider.System), failures).ConfigureAwait(false);
-        if (!original.IsCompleted)
-        {
-            failures.Add(new TimeoutException(SettlementFailure));
             ServerFailureObserver.Observe(() => TryStop(process), failures);
-            ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
-            ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
+        }
+        if (!await deadline.TryJoinAsync(original, terminationGrace).ConfigureAwait(false))
+        {
+            if (processStarted)
+            {
+                CloseOriginalReaders(process, failures);
+            }
+            if (!await deadline.TryJoinAsync(original).ConfigureAwait(false))
+            {
+                NativeProcessCleanupDeadline.FailStop();
+            }
+        }
+        if (processStarted)
+        {
+            await deadline.ConfirmNativeExitAsync(process, processExitPollInterval).ConfigureAwait(false);
         }
         var stdout = await ObserveTextAsync(output, failures).ConfigureAwait(false);
         var stderr = await ObserveTextAsync(error, failures).ConfigureAwait(false);
@@ -45,6 +51,9 @@ internal static class NativeCoverageImageNodeSettlement
 
     internal static void ThrowFailures(List<Exception> failures)
         => ServerFailureObserver.ThrowIfAny(failures);
+
+    private static bool NeedsCleanup(Task original, List<Exception> failures)
+        => failures.Count != 0 || !original.IsCompleted || !original.IsCompletedSuccessfully;
 
     private static async Task<(string Text, bool Joined)> ObserveTextAsync(Task<string>? original,
         List<Exception> failures)
@@ -69,5 +78,11 @@ internal static class NativeCoverageImageNodeSettlement
         catch (InvalidOperationException) when (process.HasExited)
         {
         }
+    }
+
+    private static void CloseOriginalReaders(Process process, List<Exception> failures)
+    {
+        ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
+        ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
     }
 }

@@ -11,7 +11,6 @@ public sealed record AggregateReplayWorkerLimits
     private const int MaximumStateByteCeiling = 16_777_216;
     private const int MaximumInputByteCeiling = 67_108_864;
     private const int MaximumJsonDepthCeiling = 64;
-    private const int MaximumRegisteredUpcasterCeiling = 64;
     /// <summary>Canonical caller configuration section.</summary>
     public const string SectionName = "KeyLoad:AggregateReplayWorker";
     /// <summary>Validation failure retained by replay workers and native binding.</summary>
@@ -28,16 +27,12 @@ public sealed record AggregateReplayWorkerLimits
     /// <summary>Maximum JSON nesting depth accepted for state, payloads and headers.</summary>
     public int MaximumJsonDepth { get; init; } = 64;
 
-    /// <summary>Maximum registered one-version event transforms.</summary>
-    public int MaximumRegisteredUpcasters { get; init; } = 64;
-
     /// <summary>Checks the configured budgets against the existing replay ceilings.</summary>
     /// <returns>Whether the worker can safely execute within these budgets.</returns>
     public bool IsValid() => MaximumEvents is > MinimumPositiveBudget and <= MaximumEventCeiling &&
         MaximumStateBytes is > MinimumPositiveBudget and <= MaximumStateByteCeiling &&
         MaximumInputBytes is > MinimumPositiveBudget and <= MaximumInputByteCeiling &&
-        MaximumJsonDepth is > MinimumPositiveBudget and <= MaximumJsonDepthCeiling &&
-        MaximumRegisteredUpcasters is > MinimumPositiveBudget and <= MaximumRegisteredUpcasterCeiling;
+        MaximumJsonDepth is > MinimumPositiveBudget and <= MaximumJsonDepthCeiling;
 
     /// <summary>Rejects invalid standalone settings before caller execution.</summary>
     public void Validate()

@@ -8,8 +8,8 @@ internal static class AtomicPartitionPlacementSerialization
 {
     private const string DirectoryKeySpace = "atomic-partition-placement-directory";
     private const string DirectoryVersion = "v1";
-    private const string RowKeySpace = "atomic-partition-placement";
-    private const string RowVersion = "v1";
+    internal const string RowKeySpace = "atomic-partition-placement";
+    internal const string RowVersion = "v1";
     private const string Malformed = "The committed atomic partition placement is malformed.";
 
     internal static byte[] DirectoryKey() => KeyCodec.Encode(DirectoryKeySpace, DirectoryVersion);

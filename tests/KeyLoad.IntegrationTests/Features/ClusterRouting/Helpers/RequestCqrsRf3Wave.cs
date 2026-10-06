@@ -51,23 +51,11 @@ internal sealed class RequestCqrsRf3Wave : IAsyncDisposable
             null, diagnosticsWaveId, cancellationToken, controls, physicalShardOverrideNode: physicalShardOverrideNode,
             physicalShardOverrideId: physicalShardOverrideId);
 
-    internal static Task<RequestCqrsRf3Wave> StartPriorNative6Async(string dataRoot,
-        IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
-        CancellationToken cancellationToken)
-        => StartPriorNative6Async(dataRoot, images, configureCohort, requireHealthy,
-            Guid.NewGuid(), cancellationToken);
-
     internal static Task<RequestCqrsRf3Wave> StartProbedAsync(string dataRoot,
         IReadOnlyDictionary<string, string> images, RequestCqrsProbeFixture controls,
         CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null)
         => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort: false, requireHealthy: true,
             null, Guid.NewGuid(), cancellationToken, controls, lifecycleEvidence: lifecycle);
-
-    internal static Task<RequestCqrsRf3Wave> StartPriorNative6Async(string dataRoot,
-        IReadOnlyDictionary<string, string> images, bool configureCohort, bool requireHealthy,
-        Guid diagnosticsWaveId, CancellationToken cancellationToken)
-        => RequestCqrsRf3WaveStartup.StartAsync(dataRoot, images, configureCohort, requireHealthy,
-            NodeEpochRf3Protocol.SnapshotThresholdArgument, diagnosticsWaveId, cancellationToken);
 
     internal static RequestCqrsRf3Wave TransferOwned(string dataRoot, ContainerRuntimeControl runtime,
         ref DistributedApplication? application, ref RequestCqrsRf3Diagnostics? diagnostics,

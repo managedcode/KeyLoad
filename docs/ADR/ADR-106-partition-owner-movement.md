@@ -4,7 +4,7 @@ Status: Accepted for Stage 1A shared membership implementation only; later physi
 
 ## Context
 
-The current product has one physical shard and one three-voter RF3 group. Source anchors include architecture-v0.3.uk.md §§4/6/28 and the exact original KL-036, KL-071 and KL-072 task blocks, ADR-016/017, current SCAT/PMAP contracts and the accepted PMOVE family-page contract. `AtomicPartitionPlacementV1` and startup are intentionally pinned to that single default owner at epoch 1. The bounded partition-family reader captures raw records from an already-owned committed view but explicitly excludes global catalog, global outcomes, shared accounting and installation. Current partition-scoped outcomes gain locators, while Global/Unknown outcomes remain non-movable. Current command epochs cover only the native Batch claim; most operation requests do not carry a trusted placement witness. Current queue-transfer receipts validate local current epoch 1, not a destination group lineage. These are real prerequisites, not a movement implementation.
+The current product has one physical shard and one three-voter RF3 group. Source anchors include architecture-v0.3.uk.md §§4/6/28 and the exact original KL-036, KL-071 and KL-072 task blocks, ADR-016, current SCAT/PMAP contracts and the accepted PMOVE family-page contract. `AtomicPartitionPlacementV1` and startup are intentionally pinned to that single default owner at epoch 1. The bounded partition-family reader captures raw records from an already-owned committed view but explicitly excludes global catalog, global outcomes, shared accounting and installation. Current partition-scoped outcomes gain locators, while Global/Unknown outcomes remain non-movable. Current command epochs cover only the native Batch claim; most operation requests do not carry a trusted placement witness. Current queue-transfer receipts validate local current epoch 1, not a destination group lineage. These are real prerequisites, not a movement implementation.
 
 The first topology stage has a separate verified blocker: src/KeyLoad.Server/Features/ClusterRouting/Hosting/OrleansSiloConfiguration.cs:66-68,91-95 registers ReplicaMembershipTable over each node local partition.Database, coordinator, and consensus, then uses options.ClusterId as the Orleans ClusterId. src/KeyLoad.Orleans/Features/ClusterRouting/Topology/ReplicaMembershipStore.cs:27-42 reads that local database and submits membership mutations through that local group. src/KeyLoad.AppHost/Features/ClusterReplication/Resources/ClusterResources.cs:24-43,46-90,96-108 currently creates one three-node group, one physical ID/incarnation, and per-group KeyLoad__Peers__0..2; it has no six-node profile. src/KeyLoad.Server/Features/ClusterReplication/Transport/ReplicaDiscoveryEndpoints.cs:36-51 exposes /health/ready only after local catalog readiness and local cohort check. Therefore same ClusterId across two disjoint stores does not yield one six-silo Orleans membership view, and local /health/ready is not a six-silo proof. A six-node profile is not ready until an authenticated shared membership authority and actual six-member membership oracle are specified and implemented. Separate group health, signed peer discovery, or matching cluster strings do not establish shared Orleans membership.
 
@@ -20,7 +20,7 @@ Cross-group user writes cannot be one local ZoneTree transaction. The control au
 
 The selected initial KL-072 token policy is explicit invalidation, not position translation: every token or cursor whose meaning depends on a physical-group log position must either carry/check the source incarnation and placement epoch or be version-rejected at admission after switch with stable `TokenInvalidated`. New destination tokens use its own current epoch and log identity. At no point are independent Raft positions compared. Durable position translation is not an alternative in this ADR; it requires a separate owner decision before the contract changes.
 
-The owner directory must be additive/versioned from current SCAT V1/PMAP V1. Do not mutate V1 or depend on old readers ignoring fields. A version/profile readiness gate rejects incompatible old binaries before the first movement record can become authoritative. The exact new generated aliases, IDs, command envelope, persistence keys, movement journal, bounds, status/error codes and upgrade rule are frozen in source before code.
+The owner directory must be additive and versioned from current SCAT V1/PMAP V1. Do not mutate V1 or rely on readers ignoring new fields. A version/profile readiness gate requires every participating node to support the complete owner-fencing contract before the first movement record can become authoritative. The exact new generated aliases, IDs, command envelope, persistence keys, movement journal, bounds, status/error codes and current homogeneous-cohort admission rule are frozen before code.
 
 ## Requirements and acceptance
 
@@ -50,11 +50,11 @@ This ADR adopts draft `REQ-MOVE-001..007` and `AC-MOVE-001..007` in `PartitionTr
 6. TASK-MOVE-TOKEN implements the selected explicit invalidation policy: every persisted/response cursor whose meaning includes a group log position must carry/check owner incarnation+placement epoch or be version-rejected at admission after switch with TokenInvalidated. Destination-issued tokens use its own lineage. No position-translation branch is part of this contract.
 7. TASK-MOVE-RF3 supplies genuine AppHost-managed six-node SDK and official MCP tests at every failure phase and runs exact-source Linux gates. Root owns shared fixture, operational waves, CI and status updates.
 
-## Bounds, migration and rollback
+## Movement bounds and rollback
 
 Before TASK-MOVE-IMAGE, freeze maximum image bytes/records/families, per-operation/tail bytes, retained staging disk, transfer concurrency, deadline/cancellation and tail backlog behavior from current read/write budgets and physical resource limits. Every manifest/page/frame has checked accounting and checksum; oversized/incomplete transfers reject before install. The source may reject/throttle writes before tail capacity is exhausted. Every attempt is MoveId-idempotent and bounded; no unbounded retries.
 
-Use a new native format/profile and writer-stopped compatibility transition if required. Before publication, cleanup may discard only a destination generation proven unpublished and unreferenced, after original streams/handles/locks are joined. After publication, never rollback catalog epoch or un-fence old source; recover forward or stop for operator repair. Keep the last verified source/destination recovery evidence until the complete destination is authoritative and all required retention horizons expire. Backups/restore must contain control authority, owner map, pending command reservations/outcomes, migration phase and all owner images; restoring data without the authority map is not a valid database restore.
+Use a separately reviewed native format/profile contract if required. Before publication, cleanup may discard only a destination generation proven unpublished and unreferenced, after original streams/handles/locks are joined. After publication, never rollback catalog epoch or un-fence old source; recover forward or stop for operator repair. Keep the last verified source/destination recovery evidence until the complete destination is authoritative and all required retention horizons expire. Backups/restore must contain control authority, owner map, pending command reservations/outcomes, movement phase and all owner images; restoring data without the authority map is not a valid database restore.
 
 ## Verification and unresolved gate
 
@@ -63,7 +63,7 @@ Required evidence includes strict Release build/analyzers/formatter, real ZoneTr
 
 ## R4 — Authenticated shared membership authority for topology Stage 1A
 
-This amendment proposes only the Stage 1A membership prerequisite. It does not approve Stage 1B, owner routing, public multi-owner writes, partition copy, migration or rollback.
+This amendment proposes only the Stage 1A membership prerequisite. It does not approve Stage 1B, owner routing, public multi-owner writes, partition copy, or rollback.
 
 ### Decision
 
@@ -102,9 +102,9 @@ Membership mutations preserve the native trust and concurrency model. The caller
 
 ### Errors, compatibility and readiness
 
-Malformed auth, stale/replayed nonce, identity or signature mismatch is `Unauthenticated`; unknown shape/operation is `Validation`; old protocol version or remote delete is `UnsupportedCapability`; missing authority/quorum/deadline is `OwnershipLost`; bound exhaustion is `ResourceExhausted`; persisted snapshot corruption remains `Corruption`. Unavailability never returns partial rows or authorizes startup. Server error bodies/details are safe fixed enum mappings; raw exception text and payload never cross the wire.
+Malformed auth, stale/replayed nonce, identity or signature mismatch is `Unauthenticated`; unknown shape/operation is `Validation`; unsupported protocol version or remote delete is `UnsupportedCapability`; missing authority/quorum/deadline is `OwnershipLost`; bound exhaustion is `ResourceExhausted`; persisted snapshot corruption remains `Corruption`. Unavailability never returns partial rows or authorizes startup. Server error bodies/details are safe fixed enum mappings; raw exception text and payload never cross the wire.
 
-The new membership wire version is independent and exactly 1. Standard three-node RF3 keeps local provider behavior. The two-RF3 test profile requires all six exact same immutable current image before starting containers; old/mixed binaries do not participate in this topology and no rolling-upgrade compatibility is claimed. New membership clients reject wrong version/authority identity before invoking the local provider. Incompatible/missing membership evidence leaves membership-ready false. AppHost image proof and endpoint protocol checks do not replace each other.
+The new membership wire version is independent and exactly 1. Standard three-node RF3 keeps local provider behavior. The two-RF3 test profile requires all six exact same immutable current image before starting containers; every node in this topology uses the same verified current image and supports the frozen membership contract. New membership clients reject wrong version/authority identity before invoking the local provider. Incompatible/missing membership evidence leaves membership-ready false. AppHost image proof and endpoint protocol checks do not replace each other.
 
 The readiness state machine is explicit: SiloJoined follows native startup; AuthorityReady follows Group A’s local catalog initialization and provider publication; the shared membership provider can retain historical generations. MembershipReady requires the six expected current unique SiloAddress generations to be Active in a complete view, with no unexpected active current member; non-current history remains visible and the total need not equal six. Neither status opens database readiness.
 
@@ -172,7 +172,7 @@ rejection/cancellation and six-container startup/failover/cleanup tests must
 qualify it. Native membership CAS, persisted authority, schema/byte limits and
 public data-admission closure remain unchanged. Root owns the join and gates;
 Luna lifecycle_wave owns only the guarded implementation/test packet. There is
-no data/wire migration; rollback disables the new profile.
+no stored-data or wire-contract change; rollback disables the new profile.
 
 ## Accepted six-generation oracle and native parameter handoff, 2026-10-05
 
@@ -218,6 +218,7 @@ close/join then Kestrel stop/join then root-provider disposal; add native
 composition/lifecycle regressions and execute the existing actual six-container
 Aspire startup/authentication/teardown flow. lifecycle_wave owns the private
 guarded ServerConfiguration/transport/test correction; root owns source review,
-integration, strict checks, original Linux RF3 evidence and commit. No wire/data
-migration or public database opening occurs. Rollback disables the new profile;
+integration, strict checks, original Linux RF3 evidence and commit. No stored-data or wire-contract change or public database opening occurs. Rollback disables the new profile;
 an unmapped route or undisposed owner cannot be reported as delivered membership.
+
+Ownership movement and current same-view session tokens retain the contract in [ADR-017](ADR-017-ownership-session-tokens.md). Unknown or unverifiable lineage invalidates explicitly.

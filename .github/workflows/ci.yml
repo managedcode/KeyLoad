@@ -215,41 +215,14 @@ jobs:
       - name: Build KeyLoad server and benchmark Docker images
         id: images
         run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
-      - name: Build the genuine previous KeyLoad server image
-        id: prior-images
-        run: node scripts/Features/StorageRecovery/prepare-native5-server-image.mjs
-      - name: Build the genuine epoch-six RPC1 KeyLoad server image
-        id: rpc1-images
-        run: node scripts/Features/ClusterRouting/prepare-rpc1-server-image.mjs
-      - name: Build the genuine epoch-seven interface-three KeyLoad server image
-        id: interface3-images
-        run: node scripts/Features/ClusterRouting/prepare-interface3-server-image.mjs
       - name: Configure Docker image references
         shell: bash
         env:
           KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
           KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
-          KEYLOAD_PRIOR_SERVER_IMAGE: ${{ steps.prior-images.outputs.prior-server-image }}
-          KEYLOAD_PRIOR_IMAGE_RECEIPT: ${{ steps.prior-images.outputs.prior-image-receipt }}
-          KEYLOAD_PRIOR_SERVER_MANIFEST: ${{ steps.prior-images.outputs.prior-server-manifest }}
-          KEYLOAD_RPC1_SERVER_IMAGE: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_IMAGE }}
-          KEYLOAD_RPC1_IMAGE_RECEIPT: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_IMAGE_RECEIPT }}
-          KEYLOAD_RPC1_SERVER_MANIFEST: ${{ steps.rpc1-images.outputs.KEYLOAD_RPC1_SERVER_MANIFEST }}
-          KEYLOAD_INTERFACE3_SERVER_IMAGE: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_IMAGE }}
-          KEYLOAD_INTERFACE3_IMAGE_RECEIPT: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_IMAGE_RECEIPT }}
-          KEYLOAD_INTERFACE3_SERVER_MANIFEST: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_MANIFEST }}
-          KEYLOAD_INTERFACE3_SERVER_INVENTORY: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_INVENTORY }}
-          KEYLOAD_INTERFACE3_SERVER_ARCHIVE: ${{ steps.interface3-images.outputs.KEYLOAD_INTERFACE3_SERVER_ARCHIVE }}
         run: |
           test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
-          test -n "$KEYLOAD_PRIOR_SERVER_IMAGE" && test -n "$KEYLOAD_PRIOR_IMAGE_RECEIPT" && test -n "$KEYLOAD_PRIOR_SERVER_MANIFEST"
-          test -n "$KEYLOAD_RPC1_SERVER_IMAGE" && test -n "$KEYLOAD_RPC1_IMAGE_RECEIPT" && test -n "$KEYLOAD_RPC1_SERVER_MANIFEST"
-          test -n "$KEYLOAD_INTERFACE3_SERVER_IMAGE" && test -n "$KEYLOAD_INTERFACE3_IMAGE_RECEIPT" && test -n "$KEYLOAD_INTERFACE3_SERVER_MANIFEST"
-          test -n "$KEYLOAD_INTERFACE3_SERVER_INVENTORY" && test -n "$KEYLOAD_INTERFACE3_SERVER_ARCHIVE"
           printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
-          printf 'KEYLOAD_PRIOR_SERVER_IMAGE=%s\nKEYLOAD_PRIOR_IMAGE_RECEIPT=%s\nKEYLOAD_PRIOR_SERVER_MANIFEST=%s\n' "$KEYLOAD_PRIOR_SERVER_IMAGE" "$KEYLOAD_PRIOR_IMAGE_RECEIPT" "$KEYLOAD_PRIOR_SERVER_MANIFEST" >> "$GITHUB_ENV"
-          printf 'KEYLOAD_RPC1_SERVER_IMAGE=%s\nKEYLOAD_RPC1_IMAGE_RECEIPT=%s\nKEYLOAD_RPC1_SERVER_MANIFEST=%s\n' "$KEYLOAD_RPC1_SERVER_IMAGE" "$KEYLOAD_RPC1_IMAGE_RECEIPT" "$KEYLOAD_RPC1_SERVER_MANIFEST" >> "$GITHUB_ENV"
-          printf 'KEYLOAD_INTERFACE3_SERVER_IMAGE=%s\nKEYLOAD_INTERFACE3_IMAGE_RECEIPT=%s\nKEYLOAD_INTERFACE3_SERVER_MANIFEST=%s\nKEYLOAD_INTERFACE3_SERVER_INVENTORY=%s\nKEYLOAD_INTERFACE3_SERVER_ARCHIVE=%s\n' "$KEYLOAD_INTERFACE3_SERVER_IMAGE" "$KEYLOAD_INTERFACE3_IMAGE_RECEIPT" "$KEYLOAD_INTERFACE3_SERVER_MANIFEST" "$KEYLOAD_INTERFACE3_SERVER_INVENTORY" "$KEYLOAD_INTERFACE3_SERVER_ARCHIVE" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |

@@ -8,11 +8,9 @@ public static class KeySpace
     private const string CatalogSpace = "catalog";
     private const string PrincipalSpace = "principal";
     private const string ApiKeySpace = "api-key";
-    private const string LegacyOutcomeSpace = "outcome";
     private const string ScopedOutcomeSpace = "outcome-v2";
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
-    private const string LegacyOutcomeLocatorSpace = "outcome-locator-v1";
     private const string ScopedOutcomeLocatorSpace = "outcome-locator-v2";
     private const string SystemSpace = "system";
     private const string AppliedName = "last-applied";
@@ -57,9 +55,6 @@ public static class KeySpace
     /// <returns>The canonical independent credential key.</returns>
     public static byte[] ApiKey(string id) => KeyCodec.Encode(ApiKeySpace, id);
 
-    internal static byte[] LegacyOutcomeKey(string principal, Guid id)
-        => KeyCodec.Encode(LegacyOutcomeSpace, principal, id);
-
     internal static byte[] PartitionOutcome(PartitionRef partition, string principal, Guid id)
         => Partition(ScopedOutcomeSpace, partition, principal, id);
 
@@ -68,9 +63,6 @@ public static class KeySpace
 
     internal static byte[] UnknownOutcome(string principal, Guid id)
         => KeyCodec.Encode(ScopedOutcomeSpace, UnknownOutcomeScope, principal, id);
-
-    internal static byte[] OutcomeLocatorV1(PartitionRef partition, string principal, Guid id)
-        => Partition(LegacyOutcomeLocatorSpace, partition, principal, id);
 
     internal static byte[] OutcomeLocatorV2(PartitionRef partition, string principal, Guid id)
         => Partition(ScopedOutcomeLocatorSpace, partition, principal, id);

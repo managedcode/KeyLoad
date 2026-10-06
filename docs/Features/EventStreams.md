@@ -39,11 +39,44 @@ related recovery/RF3 checks after strict build; source is not qualified delivery
 | REQ-EVENT-007: compatible snapshot and complete same-cut tail reproduce an aggregate | AC-EVENT-007: reference equals snapshot+tail reduction; exact reducer/state schema enforced; explicit full replay requires complete history; wrong generation, erased/missing history and invalid identity fail explicitly | ADR-075; AggregateReplay real ZoneTree, pure worker, process recovery and actual RF3 SDK/MCP tests; runtime pending |
 | REQ-EVENT-008: one bounded snapshot slot has atomic CAS and stable retry | AC-EVENT-008: absent-slot version zero, exact prior version, nondecreasing source revision and tail/floor bounds hold; retry never advances twice; unknown format/checksum corruption fail closed; reopen preserves exact state | ADR-075; AggregateSnapshot CAS/native/reopen/recovery tests; runtime pending |
 | REQ-EVENT-009: aggregate state requires fully authorized workers | AC-EVENT-009: persisted EventsRead plus EventsReplay or EventsSnapshotsManage and every payload/header raw-read/raw-use grant are checked before bodies; tenant/resource denial and revocation disclose no protected state/events | ADR-075; persisted-policy real-store and official-client RF3 tests; runtime pending |
-| REQ-EVENT-010: replay is bounded and produces no external effects | AC-EVENT-010: complete tail fits MaximumEvents and shared raw/result/deadline/cancel bounds or fails whole; one cut and exact schema feed deterministic versioned worker upcasting; missing paths fail; no append/enqueue/ack/subscription redrive occurs | ADR-075; AggregateReplay bounds/source invariance and pure SDK worker tests; runtime pending |
+| REQ-EVENT-010: replay is bounded and produces no external effects | AC-EVENT-010: complete tail fits MaximumEvents and shared raw/result/deadline/cancel bounds or fails whole; one cut and one exact current event schema feed a deterministic pure worker; schema mismatch fails before callbacks; no append/enqueue/ack/subscription redrive occurs | ADR-075; AggregateReplay bounds/source invariance and pure SDK worker tests; runtime pending |
 
 Повна resource identity включає tenant/database/atomic partition/stream set/stream/generation. Domain events є public history; CDC/outbox, consensus WAL та queue state мають власні authority/retention за [ADR-023](../ADR/ADR-023-journal-authority.md). Feed positions і revision — [ADR-025](../ADR/ADR-025-event-revision-feed-positions.md), atomic binding — [ADR-024](../ADR/ADR-024-transaction-domain-binding.md), privacy — [ADR-029](../ADR/ADR-029-event-message-classification.md), restore/retention — [ADR-030](../ADR/ADR-030-retention-paused-restore.md).
 
 Topics/group delivery належать [Messaging](Messaging.md), CDC/system projections — [ChangeFeeds](ChangeFeeds.md), uploaded user bytes — [BlobStorage](BlobStorage.md). External effects і cross-partition atomic commits не обіцяються. Target map: Abstractions/Core/Client/Server/tests `Features/EventStreams/`; shared transport/host composition мають свої owners. UI N/A, це programmable Event Store. Нові runtime tasks починаються зі своїх ADR contracts; tests тільки real GitHub TUnit/recovery/RF3 SDK/MCP. Наявні test methods — source evidence, а не passing run.
+
+## Current replay and event identity contract
+
+Under ADR-075, `AggregateReplayReduction.Reduce` accepts the complete current
+page, exact reducer, validated `IOptions<AggregateReplayWorkerLimits>` and
+cancellation. Every event must match the reducer's current event schema exactly.
+Validate the complete stream/generation/head/floor/tail/order/identity, original
+payload/header JSON and combined input limits before invoking any reducer. Pass
+the original immutable event to the reducer; validate each resulting state and
+check cancellation at every existing boundary. There is no schema conversion
+callback, registry, path resolver or associated configuration/message surface.
+Snapshot and full-history replay must yield the same independently expected
+state; wrong schema, invalid JSON, incomplete tail or exhausted budget must fail
+without reducer effects. A subsequent healthy replay must still succeed.
+
+AC-EVENT-005 uses only the current stream-and-generation EventId key. Real
+append/retry/different-content/reopen cases retain exact head, revision, sequence,
+receipt and content checks. Remove the alternate resource-wide key lookup.
+Current whole-operation dedup tests remain required.
+
+TASK-EVENT-CURRENT-028 freezes Client EventStreams reduction/validation/options/
+messages, the two exclusive conversion files, Core Events append lookup and the
+three existing worker case files plus test support as one guarded private scope.
+It also ports only the EventId dedup case in Messaging's
+`SubscriptionRecoveryAndPolicyTests.cs` to real current-key append/retry,
+different-content rejection, reopen and independent stream/topic operations;
+all other subscription, policy and inbox flows remain unchanged.
+The worker removes conversion-only cases and ports current schema, bounds,
+cancellation and positive reduction flows; root reviews every change, joins
+shared docs and runs enabled build/format plus actual Aspire normal/scalar and
+current event recovery/RF3 gates. Current native IDs/aliases, exact canonical
+event content, persisted authorization and atomic/RF3 authority do not change.
+Rollback restores a coherent source checkpoint with the current format.
 
 TASK-MCP-EVENT-PARITY adds actual Docker RF3 .NET/official MCP evidence for
 REQ-EVENT-004/005/006 and AC-EVENT-004/005/006 under ADR-039: identical bounded

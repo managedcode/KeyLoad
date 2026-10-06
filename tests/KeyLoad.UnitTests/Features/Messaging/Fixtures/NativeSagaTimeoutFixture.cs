@@ -63,7 +63,6 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
         using var deadline = new CancellationTokenSource(TestProfile.StartupTimeout, TimeProvider.System);
         try
         {
-            Database.Store.RequireReaderContract(KeyLoad.Storage.StoreReaderContract.RuntimeJournal);
             Database.Database.ConfigureRuntimeJournal(JournalOptions);
             Database.Configure("jobs", ResourceKind.WorkQueue);
             Database.Configure("timeouts", ResourceKind.WorkQueue);

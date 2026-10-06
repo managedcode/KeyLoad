@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 internal static class ClusterProfileStore
 {
     internal const string ProfileName = "local-profile.json";
-    internal const string LegacyBackupName = "local-profile.v1.json.bak";
     private const string StagingSuffix = ".tmp-";
     private const string GuidFormat = "N";
     private const string AdminPrefix = "root.";
@@ -56,10 +55,6 @@ internal static class ClusterProfileStore
         }
         finally { DeleteStage(staged); }
     }
-
-    /// <summary>Explicit offline conversion of one strict four-field legacy profile with a verified backup.</summary>
-    internal static LocalProfile UpgradeLegacyOffline(string dataRoot, IOptions<ClusterProfileExecutionOptions> executionOptions)
-        => ClusterProfileOfflineUpgrade.Run(dataRoot, executionOptions);
 
     private static LocalProfile Read(string path, IOptions<ClusterProfileExecutionOptions> executionOptions)
         => DeserializeCurrent(ReadBoundedBytes(path, executionOptions), executionOptions);
@@ -155,14 +150,6 @@ internal static class ClusterProfileStore
             || input.ReadByte() != MissingValue || input.Length != total)
         { throw new InvalidOperationException(InvalidProfile); }
         return buffer.AsSpan(StartValue, total).ToArray();
-    }
-
-    internal static void VerifyCopy(byte[] original, byte[] copy)
-    {
-        var originalHash = SHA256.HashData(original);
-        var copyHash = SHA256.HashData(copy);
-        if (original.Length != copy.Length || !CryptographicOperations.FixedTimeEquals(originalHash, copyHash))
-        { throw new InvalidOperationException(InvalidProfile); }
     }
 
     internal static void WriteStage(string path, byte[] bytes, UnixFileMode? fileMode, IOptions<ClusterProfileExecutionOptions> executionOptions)

@@ -5,38 +5,50 @@ namespace KeyLoad.UnitTests.Features.CodeQuality.Processes;
 
 internal static class ProductionSourceManifestProcessSettlement
 {
-    private const string SettlementFailure = "The native source-manifest producer did not settle within its cleanup bound.";
-
-    internal static async Task JoinAsync(Process process, Task original, TimeSpan settlementTimeout,
+    internal static async Task<NativeProcessCleanupDeadline> JoinAsync(Process process, bool processStarted,
+        Task original, TimeSpan settlementTimeout, TimeProvider timeProvider, TimeSpan terminationGrace,
         List<Exception> failures)
     {
-        if (!original.IsCompleted)
+        var deadline = new NativeProcessCleanupDeadline(settlementTimeout, timeProvider);
+        try
+        {
+            await JoinOriginalAsync(process, processStarted, original, deadline, terminationGrace, failures)
+                .ConfigureAwait(false);
+            await ObserveOriginalAsync(original, failures).ConfigureAwait(false);
+            return deadline;
+        }
+        catch (Exception primary)
+        {
+            var cleanupFailures = new List<Exception> { primary };
+            await ServerFailureObserver.ObserveAsync(() => deadline.DisposeAsync().AsTask(), cleanupFailures)
+                .ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(cleanupFailures);
+            throw;
+        }
+    }
+
+    private static async Task JoinOriginalAsync(Process process, bool processStarted, Task original,
+        NativeProcessCleanupDeadline deadline, TimeSpan terminationGrace, List<Exception> failures)
+    {
+        if (NeedsCleanup(original, failures) && processStarted)
         {
             ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-            if (!await WaitWithinDeadlineAsync(original, settlementTimeout, failures).ConfigureAwait(false))
+        }
+        if (!await deadline.TryJoinAsync(original, terminationGrace).ConfigureAwait(false))
+        {
+            if (processStarted)
             {
-                ServerFailureObserver.Observe(() => KillIfRunning(process), failures);
-                ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
-                ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
-                await WaitWithinDeadlineAsync(original, settlementTimeout, failures).ConfigureAwait(false);
+                CloseOriginalReaders(process, failures);
+            }
+            if (!await deadline.TryJoinAsync(original).ConfigureAwait(false))
+            {
+                NativeProcessCleanupDeadline.FailStop();
             }
         }
-        await ObserveOriginalAsync(original, failures).ConfigureAwait(false);
     }
 
-    private static async Task<bool> WaitWithinDeadlineAsync(Task original, TimeSpan settlementTimeout,
-        List<Exception> failures)
-    {
-        var waiter = original.WaitAsync(settlementTimeout, TimeProvider.System);
-        await waiter.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-        if (waiter.Exception?.InnerExceptions is [TimeoutException timeout] &&
-            original.Exception?.InnerExceptions.Any(failure => ReferenceEquals(failure, timeout)) != true)
-        {
-            failures.Add(new TimeoutException(SettlementFailure, timeout));
-            return false;
-        }
-        return true;
-    }
+    private static bool NeedsCleanup(Task original, List<Exception> failures)
+        => failures.Count != 0 || !original.IsCompleted || !original.IsCompletedSuccessfully;
 
     private static async Task ObserveOriginalAsync(Task original, List<Exception> failures)
     {
@@ -73,6 +85,18 @@ internal static class ProductionSourceManifestProcessSettlement
         }
         catch (InvalidOperationException) when (process.HasExited)
         {
+        }
+    }
+
+    private static void CloseOriginalReaders(Process process, List<Exception> failures)
+    {
+        if (process.StartInfo.RedirectStandardOutput)
+        {
+            ServerFailureObserver.Observe(process.StandardOutput.Dispose, failures);
+        }
+        if (process.StartInfo.RedirectStandardError)
+        {
+            ServerFailureObserver.Observe(process.StandardError.Dispose, failures);
         }
     }
 }

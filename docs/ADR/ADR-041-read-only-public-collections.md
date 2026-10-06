@@ -47,8 +47,8 @@ an explicit nullable null. Keep legitimate empty Put, reader/replay/format/versi
 cache/copy and flush/apply order, and null frame overhead=2 identical. Lead owns
 docs/source review/build/formatter and exact-SHA full GitHub unit/process recovery/
 RF3 SDK/MCP joins. WAL byte equality, borrowed/owned absence, range, empty value,
-reopen and snapshot counts are mandatory. No historical empty-row rewrite is
-safe without provenance; rollback reverts the projection and keeps regressions.
+reopen and snapshot counts are mandatory. Rollback reverts the projection and
+keeps regressions.
 
 The lead owns strict converter registration in JsonDefaults and new Abstractions
 Features/ResourceExecution converter files. ImmutableArray conversion delegates
@@ -60,7 +60,7 @@ parser or default-to-empty fallback. Reject JSON null and IsDefault on the requi
 immutable type. Nullable wrappers continue to accept null; an explicitly present
 default immutable value remains invalid. Missing required constructor parameters
 remain rejected by RespectRequiredConstructorParameters. The tests-first fixtures
-cover these negative paths before schema migration.
+cover these negative paths before converter integration.
 
 Rename the one owned point-read contract to ReadOwnedValue(byte[] key). Remove
 Get from that interface/implementations and update semantic storage callers once.
@@ -72,15 +72,14 @@ This intentionally changes CLR property/constructor/interface signatures. Rebuil
 all solution consumers together; external compiled consumers must recompile for
 the development API. Type/namespace names, JSON names/order, enum values, array/
 base64 forms, nullable defaults, signatures and persisted format versions stay
-identical. No compatibility or data-migration claim follows from compilation.
+identical. Compilation does not establish persisted-format guarantees beyond the current format.
 
 The Client query factory also moves from KeyLoadQuery<T>.From to the non-generic
 KeyLoadQuery.From<T> to resolve the actual strict CA1000 prerequisite. Keep the
 same initial AST and instance builder behavior, with an internal constructor and
-one factory under Client/Features/QueryExecution. Remove the old static member;
-adapt real QueryAdapter/LiveQuery/RF3 SDK callers and README examples together.
-This is an explicit development CLR migration; the generated query JSON stays
-identical. No alias, second builder algorithm or analyzer suppression.
+one factory under Client/Features/QueryExecution. All QueryAdapter/LiveQuery/RF3
+SDK callers and README examples use the current factory. The generated query JSON
+remains identical. No alias, second builder algorithm or analyzer suppression.
 
 The public KeySpace.Applied/Clock properties expose read-only byte memory with
 unchanged canonical encoded bytes. Core keeps assembly-private cached input
@@ -108,11 +107,11 @@ flowchart LR
 | REQ-ROC-002: exact wire/signed/persisted identity | AC-ROC-002: handcrafted base64/tombstone/empty/nullable/vector/polymorphic sequence fixtures round-trip to identical bytes and hashes; invalid required null/missing/default values reject | TUnit serializer/fingerprint goldens and existing retry/frame/recovery suites |
 | REQ-ROC-003: owned input/results and efficient dense vectors | AC-ROC-003: freeze once, independent scan buffers, no per-score array conversion, unchanged exact ranks/scores | Real ZoneTree ownership and Search golden/allocation cases; source allocation review |
 | REQ-ROC-004: one accurate owned-read API | AC-ROC-004: ReadOwnedValue retains hit/miss/independent buffers; no interface Get or alias | Interface/reflection and real provider read/counter cases, combined compile |
-| REQ-ROC-005: all callers and persisted policies migrate together | AC-ROC-005: SDK/query/core/storage/security/replication/tests/comparisons compile with unchanged success/negative/error behavior | Exact GitHub full TUnit/recovery/RF3 SDK/MCP; no skipped/fake qualification |
-| REQ-ROC-006: honest source migration and delivery | AC-ROC-006: strict build/format/governance and delivered-SHA CI succeed; docs disclose CLR break/evidence | Lead combined review, exact SHA/run/jobs/artifacts |
+| REQ-ROC-005: all callers and persisted policies use the current contracts | AC-ROC-005: SDK/query/core/storage/security/replication/tests/comparisons compile with unchanged success/negative/error behavior | Exact GitHub full TUnit/recovery/RF3 SDK/MCP; no skipped/fake qualification |
+| REQ-ROC-006: honest source verification and delivery | AC-ROC-006: strict build/format/governance and delivered-SHA CI succeed; docs disclose CLR break/evidence | Lead combined review, exact SHA/run/jobs/artifacts |
 
-UI N/A: programmatic contracts. Wire/format conversion N/A: exact compatibility is
-mandatory. Compilation is not throughput or resource proof; AC-MP-011 remains.
+UI N/A: programmatic contracts. Wire/format conversion N/A: the exact current
+wire shape and bytes are mandatory. Compilation is not throughput or resource proof; AC-MP-011 remains.
 
 ## Ordered implementation and ownership
 
@@ -140,7 +139,7 @@ mandatory. Compilation is not throughput or resource proof; AC-MP-011 remains.
    its existing real-store projection/continuation assertions.
    The lead alone integrates DatabaseEngine, KeySpace, ReadExecutionBudget and
    BudgetedReadView, native/recovery/comparison joins and shared docs/config.
-4. Lead's strict converter stage must join before property migration. Required-
+4. Lead's strict converter stage must join before collection-property integration. Required-
    default validation retains typed rejection and persisted policy.
    IAuthorizationPolicy.Project takes IReadOnlyList<SensitiveFieldPolicy>, allowing
    array and immutable resource-policy callers through one existing algorithm.
@@ -195,7 +194,7 @@ partial catalog effects, and retry/watermark/fingerprint behavior must survive t
 extraction. This is regression coverage of the existing serializer boundary; it
 does not establish a newly reproduced null-protocol defect.
 
-The existing DatabaseEngine partial type exceeds type_max_loc across its legacy
+The existing DatabaseEngine partial type exceeds type_max_loc across its
 business files. Cohesive source extraction does not make that aggregate compliant.
 Record this bounded existing deviation under exception_policy: owner integration
 lead, affected existing DatabaseEngine partial declarations only, removal target
@@ -204,15 +203,15 @@ handlers under their canonical slices with the same node-local atomic transactio
 and persisted authorization boundary. Do not expand this deviation with new
 behavior or claim the aggregate type limit passes. In this prerequisite stage,
 split shared responsibilities, enforce <=400 files and <=64 functions, and retain
-the aggregate-type migration as open complexity evidence. Verification requires
+the aggregate-type refactoring as open complexity evidence. Verification requires
 the real numeric gate plus full real-store/recovery/RF3 behavior after extraction.
 
-TASK-MP-010H-W/010F-W/010G-W may split their already assigned compact legacy test
+TASK-MP-010H-W/010F-W/010G-W may split their already assigned compact test
 files into cohesive internal TUnit classes under the owning Features paths when
 the mandatory formatter exposes existing size/style/documentation errors. Preserve
 every test and assertion, names or stable AC links, and real fixture setup. Delete
 the replaced root test declaration in the same change; no copied parallel suite.
-This is an explicit migration to ADR-032's target, not an exception to its layout.
+This is an explicit source refactor to ADR-032's target, not an exception to its layout.
 Workers do not edit any unassigned test, shared fixture, docs, config or policy.
 
 The lead's narrow BenchmarkComparisons join owns only the three changed DTO inputs
@@ -235,7 +234,7 @@ and use ReadOwnedValue for retained comparison/assertion reads. Preserve all twe
 base64 boundary trials, exact WAL header/payload offsets and bytes, rejection and
 unchanged-position/state assertions, and every existing read/result/cancellation
 allocation bound. Move/split the frame suite into its canonical slice, remove the
-old declaration, keep internal TUnit types and exact scenario discovery. No
+original declaration, keep internal TUnit types and exact scenario discovery. No
 assertion weakening, doubles, production/config/native/comparison edits or local
 test execution. These are known compile mismatches, not observed failing tests.
 The lead alone owns shared TestDatabase visibility/constants/real-system-clock
@@ -249,7 +248,7 @@ and all consumers as one verified source unit, with no shim or mixed binaries.
 Invalid required null/default input rejects explicitly; nullable fields retain
 their old null meaning. Real retry/fingerprint/frame/checksum/process-recovery,
 hidden/redacted policy and RF3 SDK/MCP regressions are required. Coverage/complexity
-remain mandatory and unverified until compatible collection/gates run.
+remain mandatory and unverified until the required collection/gates run.
 
 Primary guidance: [CA1819](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1819),
 [CA1716](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1716),

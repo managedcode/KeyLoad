@@ -9,7 +9,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 internal sealed class WalFileFixture : IDisposable
 {
     internal const ulong CurrentMagic = 0x344C4157444C4BUL;
-    internal const ulong LegacyMagic = 0x314C4157444C4BUL;
+    internal const ulong UnsupportedMagic = ulong.MaxValue;
     internal const int HeaderBytes = 52;
     internal const int CurrentIdentityVersion = 7;
     private const int PayloadLengthOffset = 8;
@@ -58,14 +58,6 @@ internal sealed class WalFileFixture : IDisposable
     {
         var settings = UnitExecutionOptions.StorageExecution().Value;
         return Task.FromResult(ZoneTreeIdentityFile.Read(IdentityPath, settings.MaximumIdentityFileBytes, settings.StreamBufferBytes));
-    }
-
-    // This independent JSON envelope is exclusively the historical format refusal fixture.
-    internal async Task WriteLegacyJsonIdentityAsync(StoreIdentity identity)
-    {
-        var payload = JsonDefaults.Serialize(identity);
-        await File.WriteAllBytesAsync(IdentityPath,
-            JsonDefaults.Serialize(new IdentityEnvelope(payload, SHA256.HashData(payload))));
     }
 
     internal async Task<Dictionary<string, byte[]>> CaptureFilesAsync()
@@ -130,5 +122,4 @@ internal sealed class WalFileFixture : IDisposable
         }
     }
 
-    private sealed record IdentityEnvelope(byte[] Payload, byte[] Checksum);
 }

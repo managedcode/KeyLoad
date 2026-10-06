@@ -9,7 +9,7 @@ The owner separates database comparisons/JSON from Chrome/site qualification.
 The latest clarification permits a separate static build action after JSON,
 including at the end of Benchmarks. The selected implementation triggers the
 independent website action through CI on own-main push/manual and completed
-Benchmarks events. Exactly three workflows remain; measurements and failed/null
+Benchmarks events. Exactly four workflows remain; measurements and failed/null
 semantics stay intact. Website failures cannot block benchmark JSON.
 
 REQ/AC-BC-FAIL-017..020 own this boundary. Root removes the old aggregate HTML
@@ -31,7 +31,7 @@ Reselect latest before deployment; a changed tuple fails freshness.
 
 Producer worker owns existing site-isolated-github context/contract/capture/runs/
 receipt/proof and native producer SiteTests. Bound actual workflow_run payloads
-and preserve frozen original seven-step legacy receipts; new producers require
+and preserve frozen original seven-step receipts; new producers require
 five database aggregate steps. Root owns workflows, composites/policies,
 closure/coverage inventories and docs; workflow worker owns relevant UnitTests.
 Join at exact original suite/provider archives,270/277 proof, all website gates
@@ -104,7 +104,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    PONG/write/direct-copy/cancellation and AOF/ack contracts. Never remove health
    checks, alter shared TLS/trust settings, disable certificate validation or
    change another engine's resources. Rollback is the scoped call/check removal
-   and honestly restores the known readiness mismatch; no storage migration.
+   and honestly restores the known readiness mismatch; no stored-data change.
    Under FAIL-PREP-KURRENT, `KurrentTarget.InitializeAsync` constructs the actual
    SDK writer only after `KurrentClusterVerifier.VerifyAsync` proves membership.
    Three SDK/resource-model tests belong to ComparisonTests and run in common
@@ -138,7 +138,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    publish honest unavailable cells; new source must retain its own entire
    authenticated270 cohort and full site/Pages gates. Rollback reverts only these
    benchmark adapter/tests/contracts, restoring the known precision rejection;
-   no database migration or engine repair is involved.
+   no stored-data or engine contract changes are involved.
    Under FAIL-SITE-STARTUP (REQ/AC-BC-FAIL-011), original270 aggregation passed
    but QualifySite shell redirection failed before any test because its evidence
    parent was absent. Root owns QualifySite/action.yml initialization, the new
@@ -227,7 +227,7 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    never forged CI/GitHub environment or rebound original website/control fields.
    A focused development filter cannot qualify the full suite/coverage.
    Rollback reverts only these test-harness/admission changes and truthfully
-   restores the observed qualification failure. No engine/data migration.
+   restores the observed qualification failure. No engine or stored-data change.
    Under FAIL-SITE-CATALOG/ICO (REQ/AC-BC-FAIL-015/016), the complete original-input
    local development suite reached159/168 passing after the heavy-child repair.
    Five real Chrome cases exposed emitted `./data/isolated-catalog.json`, which
@@ -252,13 +252,13 @@ upload; cancellation/timeouts that prevent artifacts remain explicit blockers.
    closure is unchanged by this markup/test-only repair, allowing genuine older
    measured/control source to qualify a freshly captured main website source.
    Rollback reverts these four owned files and restores the known failure;
-   no data, dependency, transport, engine or storage migration is involved.
+   no stored-data, dependency, transport or engine contract change is involved.
 5. Root reviews all diffs, builds solution, runs formatter/governance and focused
    Aspire-owned suites, then checkpoints scoped changes on current main and pushes.
 6. Genuine Linux Benchmarks run qualifies all cells, aggregate, site coverage/browser
    and Pages publication. Local tests are development proof only.
 
-Migration is additive to version4 dispositions; deploy producer/validators/site
+Failure handling extends the current versioned publication dispositions; deploy producer/validators/site
 atomically. Rollback reverts this coherent change and restores the conservative
 publication gate, retaining immutable original artifacts. AC-BC-FAIL-001..019 map
 to automated and actual-provider evidence in the feature specification. Root alone
@@ -288,7 +288,7 @@ metadata digest is f8816dacf8a60b68a41b8911185b8c97f2e27cbd816980f1331972b929d19
 ## Independent website execution queue
 
 The delivered ee7 CI push37193589875 queued behind an older ordinary CI scalar/
-recovery run under the legacy main-wide workflow group. REQ/AC-BC-FAIL-021 makes
+recovery run under the main-wide workflow group. REQ/AC-BC-FAIL-021 makes
 push/manual CI groups run-specific, retains PR ref cancellation and workflow_run
 serialization, and adds separate qualification/deployment job groups. Website
 work starts independently while all ordinary suites remain mandatory. Root owns
@@ -303,7 +303,7 @@ has 3 checks and 30 workloads; all 297 isolated Linux jobs retain sequential
 prepare/build/run/finalize/upload/cleanup steps. All database groups fan out from
 plan/images concurrently, and aggregate joins every database group even on workload
 failure. YAML anchors share step definitions while leaving native top-level GitHub
-step conclusions visible. Exactly three workflows remain.
+step conclusions visible. Exactly four workflows remain.
 
 Ordered delivery: root updates requirements/policy; root edits planner, workflow
 and exact name validators; a worker updates disjoint source-contract TUnit
@@ -312,7 +312,7 @@ commits the scoped stage on current main. The owner explicitly excludes executin
 tests, benchmarks or workflow dispatch for this Actions-only task. This evidence
 exception does not assert runtime qualification. Original authenticated historical
 job names remain accepted as exact cell contracts, preserving already produced JSON.
-No data/dependency/topology migration; rollback restores workflow/planner/name
+No stored-data/dependency/topology change; rollback restores workflow/planner/name
 contracts together without modifying immutable evidence. Agent coordination is
 limited to static contract review and disjoint test-source updates.
 

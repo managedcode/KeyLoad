@@ -17,12 +17,35 @@ ClusterReplication `REQ-REP-004`/`AC-REP-004`, StorageRecovery `REQ-STORAGE-004`
 ## Implementation contract
 
 1. Freeze authoritative manifest, per-partition cut, retention pins, event-history guarantees, paused restore, and external-effect reconciliation.
-2. Add real-store tests for backup consistency, interruption, corruption, retention pins, restore-old-cut token invalidation, and absence of automatic dispatch; qualify replica erase/reinstall separately.
+2. Add real-store tests for current-format backup consistency, interruption, corruption, retention pins, restore-old-cut token invalidation, and absence of automatic dispatch; qualify replica erase/reinstall separately.
 3. Implement in `src/KeyLoad.Core/Features/BackupRestore/`, `src/KeyLoad.Storage.ZoneTree/Features/BackupRestore/`, and replication snapshot ownership under `src/KeyLoad.Replication/Features/ClusterReplication/`.
-4. Version manifests and validate every resource before restore. Rollout keeps backups read-compatible; rollback must preserve original archive bytes and stop dispatch if any resource/cut is unknown.
+4. Validate the current manifest version and every resource before restore. Reject unsupported versions and preserve original archive bytes; stop dispatch if any resource/cut is unknown.
 5. GitHub CI runs TUnit, recovery, and RF3 restore drills. Root owns the manifest/cut contract; Messaging/EventStreams join with checkpoint/inbox/retention proof and exact artifacts.
 
-Dependencies: [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), [ADR-011](ADR-011-format-upgrades.md), [ADR-016](ADR-016-atomic-physical-placement.md), and [ADR-030](ADR-030-retention-paused-restore.md). Stop if any authoritative message/history state is omitted or restore would automatically invoke an external side effect.
+Dependencies: [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), [ADR-016](ADR-016-atomic-physical-placement.md), and [ADR-030](ADR-030-retention-paused-restore.md). Stop if any authoritative message/history state is omitted or restore would automatically invoke an external side effect.
+
+## TASK-KL042-CATALOG-001A implementation contract
+
+The ordered roster foundation under REQ/AC-BACKUP-004 is frozen in
+[BackupRestore](../Features/BackupRestore.md). Add stable generated native entry
+contracts and canonical full-scope keys, then integrate actual staged-write
+registration with command effects/outcomes and commit validation, including
+Reset/rejection, empty placement and cross-partition destination writes. Author
+the real ZoneTree command/reopen/retry/rejection/deletion flows in the same stage.
+Root owns shared joins and native gates; Luna produces a bounded private source
+packet in the exact feature-local paths specified there. No public backup API,
+startup behavior, physical topology, or dependency changes are included here.
+
+The current one-physical-shard RF3 cut is shared by logical partitions. A complete
+catalog requires a later fenced, resumable RF3 census before capture admission;
+the current roster comprises live partition-family keys and explicit placement
+rows. A complete current-format census is required before capture admission.
+Canonical data and ownership records remain authoritative. Preserve original rows
+on rollback and withhold cluster capture; never reinterpret a partial roster as
+ready. New records use their frozen aliases/IDs and a homogeneous current
+release. Full build/format, Aspire unit/scalar/recovery/RF3, native functional
+coverage and exact-source Linux proof remain required. This stage and ADR remain
+unqualified until their mapped capture/restore operations meet acceptance.
 
 ```mermaid
 flowchart LR

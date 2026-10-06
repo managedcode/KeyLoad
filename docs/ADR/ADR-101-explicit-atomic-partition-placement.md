@@ -1,6 +1,6 @@
 # ADR-101: Explicit atomic-partition placement directory
 
-Status: accepted implementation contract; implementation and qualification pending; no movement authority is enabled. Related requirements: REQ-PMAP-001–004 and AC-PMAP-001–004 in [AtomicPartitionPlacement](../Features/ClusterRouting/AtomicPartitionPlacement.md). Depends on accepted SCAT V1 in [ADR-099](ADR-099-physical-shard-catalog.md), and preserves [ADR-016](ADR-016-atomic-physical-placement.md) and unresolved [ADR-017](ADR-017-migration-tokens.md).
+Status: accepted implementation contract; implementation and qualification pending; no movement authority is enabled. Related requirements: REQ-PMAP-001–004 and AC-PMAP-001–004 in [AtomicPartitionPlacement](../Features/ClusterRouting/AtomicPartitionPlacement.md). Depends on accepted SCAT V1 in [ADR-099](ADR-099-physical-shard-catalog.md), and preserves [ADR-016](ADR-016-atomic-physical-placement.md) .
 
 ## Decision
 
@@ -41,9 +41,9 @@ The row, directory header, ordinary command outcome, and applied watermark remai
 
 Persisted header/row decode is bounded before accepting materialized state. Invalid version, impossible count/revision, malformed full identity, key/row mismatch, physical-owner tuple mismatch, orphan row state observed during lookup, or over-limit bytes is `Corruption`. Request version/identity shape is `Validation`; stale expected revision and command replay mismatch are `Conflict`; capacity or encoded-size excess is `BudgetExceeded`; unsupported non-default target is a typed closed failure. No fallback is permitted for malformed or unreadable persisted data.
 
-## Migration and rollback
+## Rollout and rollback
 
-This is additive native state and retains all SCAT V1 bytes. Since this stage can bind only the already-current default shard, a newly written row does not relocate data. Do not claim arbitrary old-binary compatibility: the new operation kind and generated native aliases require a homogeneous negotiated cohort before the operation is enabled. Restore-before-stage backup remains the rollback method; if a row was committed, do not delete it or downgrade binaries without a separately verified converter/rollback procedure. Later ownership moves require an explicit new ADR covering source/target cuts, no-resurrection, quorum/catch-up, atomic publication, failure recovery and commit-token lineage.
+This is additive native state and retains all SCAT V1 bytes. Since this stage can bind only the already-current default shard, a newly written row does not relocate data. The new operation kind and generated native aliases must be admitted through the current validated capability contract before use. Rollback restores a verified pre-stage backup only when needed; committed rows are retained. Later ownership movement requires a separate owner-fenced contract covering source/target cuts, no-resurrection, quorum/catch-up, publication, failure recovery and commit-token lineage.
 
 ## Ordered implementation, ownership, and evidence
 
@@ -67,3 +67,5 @@ flowchart TD
   RowCheck -->|yes| Explicit[Return row plus same-view default tuple]
   RowCheck -->|no| Fallback[Return fallback witness, revision zero, no write]
 ```
+
+Ownership movement and current same-view session tokens retain the contract in [ADR-017](ADR-017-ownership-session-tokens.md). Unknown or unverifiable lineage invalidates explicitly.

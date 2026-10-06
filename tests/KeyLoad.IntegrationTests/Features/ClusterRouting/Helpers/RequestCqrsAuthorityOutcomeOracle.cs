@@ -12,6 +12,7 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
     string principalId, Guid positiveCommandId)
 {
     private const string PositiveDocumentId = "c1-outcome-positive-control";
+    private const int ExpectedCurrentDataEpoch = 7;
     private const string PositiveJson = "{\"control\":\"stored-outcome\"}";
     private const string MissingCut = "The C1 outcome inspection has no complete captured RF3 cut.";
     private NodeEpochRf3NodeObservation[]? nodes;
@@ -74,7 +75,7 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
         await Assert.That(receipt.NodeId).IsEqualTo(expectedNodeId);
         await Assert.That(receipt.Incarnation).IsEqualTo(node.Status.Incarnation);
         await Assert.That(receipt.Incarnation).IsEqualTo(profile.Incarnation);
-        await Assert.That(receipt.FormatVersion).IsEqualTo(ServerNodeUpgradeProtocol.TargetEpoch);
+        await Assert.That(receipt.FormatVersion).IsEqualTo(ExpectedCurrentDataEpoch);
         await Assert.That(receipt.Position).IsGreaterThanOrEqualTo(0L);
         return receipt;
     }

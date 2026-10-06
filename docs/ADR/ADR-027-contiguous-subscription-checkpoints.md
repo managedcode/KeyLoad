@@ -1,6 +1,6 @@
 # ADR-027: Durable consumer groups with contiguous checkpoints
 
-Status: Accepted; bounded-gap, migration, and RF3 qualification pending.
+Status: Accepted; bounded-gap and RF3 qualification pending.
 
 ## Context and decision
 
@@ -26,9 +26,9 @@ Max-ACK checkpointing is rejected because it skips pending input. Strict sequent
 Related: `REQ-MSG-003/AC-MSG-003`, `REQ-FEED-004/AC-FEED-004`, ADR-023/025/026/030; KL-089, KL-093, KL-098/099, KL-102. Current group types/behavior are in `src/KeyLoad.Core/Features/Messaging/Execution/SubscriptionGroups.cs`, `EventSources.cs`, and `src/KeyLoad.Abstractions/Features/EventStreams/Contracts/Subscriptions.cs`.
 
 1. Freeze gap bounds, filter generation, checkpoint ownership, and retention-pin transition rules.
-2. Test ACK beyond a pending gap, gap ceiling, restart, seek/filter changes, retained-history discovery, migration, and concurrent workers.
+2. Test ACK beyond a pending gap, gap ceiling, restart, seek/filter changes, retained-history discovery, partition movement, and concurrent workers.
 3. Implement persisted group/checkpoint state in Messaging within the same atomic command and use explicit generation fencing.
 4. Restore older checkpoints paused; reconcile group ownership and history before enabling workers. Rollback must not move a visible checkpoint backward.
 5. Qualify real workers/store/process and three-node failover through GitHub TUnit/recovery/RF3 workflows.
 
-Existing tests include `SubscriptionTests.IndependentGroupsRetainOnePayloadAndAckOnlyAContiguousPrefix`, `GapWindowStopsNewClaimsUntilTheMissingPrefixIsAcknowledged`, and `SeekFencesOldTokensAndRequiresExplicitResume`; they do not qualify current delivery. Owner: Messaging with root owning Orleans worker and migration joins.
+Existing tests include `SubscriptionTests.IndependentGroupsRetainOnePayloadAndAckOnlyAContiguousPrefix`, `GapWindowStopsNewClaimsUntilTheMissingPrefixIsAcknowledged`, and `SeekFencesOldTokensAndRequiresExplicitResume`; they do not qualify current delivery. Owner: Messaging with root owning Orleans worker and partition-movement joins.

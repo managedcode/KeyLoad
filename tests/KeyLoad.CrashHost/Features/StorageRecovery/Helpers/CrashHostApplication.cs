@@ -17,12 +17,7 @@ internal static class CrashHostApplication
         const int RunAsyncArgsComponentIndex = 3;
 
         _ = SerializationExecutionRegistration.Process.Value;
-        if (await EpochPriorSourceProbe.TryRunAsync(args) || await EpochUpgradeCrashScenario.TryRunAsync(args))
-        {
-            return;
-        }
-        if (await NodeEpochCrashScenario.TryRunAsync(args) || await NodeEpochRegularFileScenario.TryRunAsync(args)
-            || await NativeTextCrashScenario.TryRunAsync(args))
+        if (await NativeTextCrashScenario.TryRunAsync(args))
         {
             return;
         }

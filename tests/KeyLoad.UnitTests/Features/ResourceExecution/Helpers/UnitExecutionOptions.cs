@@ -100,13 +100,6 @@ internal static class UnitExecutionOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<KeyLoad.Replication.OfflineRecoveryExecutionOptions> OfflineRecovery(KeyLoad.Replication.OfflineRecoveryExecutionOptions? configured = null)
-    {
-        var value = configured ?? new KeyLoad.Replication.OfflineRecoveryExecutionOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
-
     internal static IOptions<QueryExecutionOptions> QueryExecution(QueryExecutionOptions? configured = null)
     {
         var value = configured ?? new QueryExecutionOptions();

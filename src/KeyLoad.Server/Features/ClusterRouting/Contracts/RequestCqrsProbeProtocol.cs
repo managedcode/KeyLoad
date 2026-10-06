@@ -6,14 +6,6 @@ internal static class RequestCqrsProbeProtocol
     internal const string EnabledSetting = "Enabled";
     internal const string RootSetting = "Root";
     internal const string SessionSetting = "SessionId";
-    internal const string DiscoveryCaptureSetting = "DiscoveryCaptureMode";
-    internal const string DiscoveryCaptureDisabled = "disabled";
-    internal const string MixedInterface3Capture = "mixed-interface3-v1";
-    internal const string DiscoveryKind = "DiscoveryObservation";
-    internal const string DiscoveryFilePrefix = "discovery-";
-    internal const string DiscoveryFileZero = "discovery-00.json";
-    internal const string DiscoveryFileOne = "discovery-01.json";
-    internal const int MaximumDiscoveryRecords = 2;
     internal const string FixedRoot = "/request-probes";
     internal const string OwnerFile = "owner.json";
     internal const string OwnerKind = "Owner";

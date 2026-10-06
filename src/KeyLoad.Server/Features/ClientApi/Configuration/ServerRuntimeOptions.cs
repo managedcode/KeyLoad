@@ -15,7 +15,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<DueCoordinationOptions> DueCoordination,
     IOptions<NativeDurableJobOptions> DurableJobs,
     IOptions<ReplicaExecutionOptions> ReplicaExecution,
-    IOptions<OfflineRecoveryExecutionOptions> OfflineRecovery,
     IOptions<PeerDiscoveryOptions> PeerDiscovery,
     IOptions<ReplicaTransportOptions> ReplicaTransport,
     IOptions<ReplicaPeerOptions> Peer,
@@ -30,7 +29,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<AdminObservationOptions> AdminObservation,
-    IOptions<ServerNodeUpgradeExecutionOptions> NodeUpgrade,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<ServerExecutionOptions> ServerExecution,
     IOptions<DatabasePhaseExecutionOptions> DatabasePhaseExecution,
@@ -43,7 +41,6 @@ internal sealed record ServerRuntimeOptions(
         _ = DueCoordination.Value;
         _ = DurableJobs.Value;
         _ = ReplicaExecution.Value;
-        _ = OfflineRecovery.Value;
         _ = PeerDiscovery.Value;
         _ = ReplicaTransport.Value;
         _ = Replay.Value;
@@ -58,7 +55,6 @@ internal sealed record ServerRuntimeOptions(
         _ = Membership.Value;
         _ = GrainRouting.Value;
         _ = AdminObservation.Value;
-        _ = NodeUpgrade.Value;
         _ = NativeText.Value;
         _ = ServerExecution.Value;
         _ = DatabasePhaseExecution.Value;
@@ -72,7 +68,6 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(DueCoordination);
         services.AddSingleton(DurableJobs);
         services.AddSingleton(ReplicaExecution);
-        services.AddSingleton(OfflineRecovery);
         services.AddSingleton(PeerDiscovery);
         services.AddSingleton(ReplicaTransport);
         services.AddSingleton(Peer);
@@ -87,7 +82,6 @@ internal sealed record ServerRuntimeOptions(
         services.AddSingleton(Membership);
         services.AddSingleton(GrainRouting);
         services.AddSingleton(AdminObservation);
-        services.AddSingleton(NodeUpgrade);
         services.AddSingleton(NativeText);
         services.AddSingleton(ServerExecution);
         services.AddSingleton(DatabasePhaseExecution);

@@ -78,7 +78,7 @@ The original qualification ZIP11273123955 SHA256
 matches provider/upload proof. Accepting queued as running is forbidden.
 
 Keep bounded attempt-page discovery and all existing source/job/attempt/main/
-workflow and existing canonical-or-legacy URL checks. Corroborate only the discovered ID through the
+workflow and existing documented GitHub job URL checks. Corroborate only the discovered ID through the
 authenticated exact jobs/{id} endpoint. A still-queued same-identity/null-result
 record originally permitted at most3 captures separated by1000ms; the accepted
 G2 cache-window contract below replaces that insufficient refresh bound. Any mismatch, terminal/
@@ -128,7 +128,7 @@ The existing actual intensive1/2/3 SDK workload and authentic runner/worker
 originals qualify this stage; pure tests do not authenticate counters or prove
 the old cause. Numeric coverage/fault/complete-cohort/site gates remain open.
 Roll back interface/helper/adapter/single runner join/tests together; no product
-data migration. This ADR remains Accepted.
+data contract change. This ADR remains Accepted.
 
 ## Implementation contract
 
@@ -148,7 +148,7 @@ data migration. This ADR remains Accepted.
    pages and every exact request/response under current-job-refresh-NN files;
    final job.json and environment ID appear only after strict fresh validation.
    Existing validateJobIdentity remains authoritative, including optional attempt
-   validation and its canonical-or-legacy URL forms; require same discovered ID,
+   validation and its documented GitHub job URL forms; require same discovered ID,
    workflow/main and running/null-result state independently. No detached race,
    unbounded polling, stale successful fallback or new public evidence schema.
 4. TASK-NGR-K1 metadata/leader work beyond accepted stageA below remains pending
@@ -166,7 +166,7 @@ data migration. This ADR remains Accepted.
    without timing; the observed startup failure is not an unsupported measurement.
    TimeSeries6/30 remains separately pending. Missing coverage/fault gates stay open.
 
-## Migration, rollout and rollback
+## Rollout, rollback and qualification
 
 Only private startup capture files are additive. No public request/result/data,
 image/package/credential/measurement change. Roll back helper and two source joins
@@ -229,7 +229,7 @@ isolated-github-api.mjs, isolated-github-transport.mjs and only the necessary
 optional-signal join in isolated-github-stream.mjs, plus focused UnitTests
 Features/BenchmarkComparisons IsolatedCurrentJob-prefixed cases/helpers. Keep
 default callers byte/behavior compatible, fixed closed headers, original
-authenticated transport and canonical-or-legacy URL/source/attempt/name checks.
+authenticated transport and documented GitHub job URL/source/attempt/name checks.
 Any required additional boundary is returned for freeze before implementation.
 
 Tests retain captured identical-ETag queued/header sequences and the separate
@@ -246,7 +246,7 @@ records do not authenticate GitHub or qualify workload success. Local tests run
 through the Aspire-owned entry under the root's later local-development
 authorization; actual Linux GitHub startup must retain fresh source/job/provider
 originals before G2 is qualified. Roll back the helper/optional transport joins and
-tests together; no public schema, data, engine, image or website policy migration.
+tests together; no public schema, data, engine, image or website policy change.
 
 ## Accepted Kurrent metadata stage A
 

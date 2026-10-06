@@ -72,8 +72,8 @@ no packages or infrastructure install. One existing full RF3 AppHost supplies th
 connection after the comparison process finishes. Test-owned databases and pools
 are cleaned before AppHost teardown; no additional full cluster or measured timer.
 
-Migration and rollback: these are transient benchmark schemas. New code leaves old
-unmarked namespaces untouched and never claims them. No product data migration.
+Schema lifecycle and rollback: these are transient benchmark schemas. Current code
+leaves unmarked namespaces untouched and never claims them. Product data is unchanged.
 Rollback must not quietly revive unsafe deletion or weaken mandatory rules.
 Arbitrary loss of an exact commit response remains an explicit real-fault evidence
 gap; source design covers uncertain responses but that fault is not claimed tested.
@@ -86,8 +86,8 @@ document/vector/queue/graph/stream owners; a private topology helper returns the
 same observed profile. The public facade remains the sole data-source owner.
 Retain native SQL/parameters, read/lease/cardinality/replica checks, timing boundaries,
 immutable buffers, setup/cancellation/disposal order and all public signatures.
-Remove replaced private declarations; this source-only decomposition requires no
-wire/data migration. Lead reviews every diff and all enabled source/runtime gates;
+Keep the source decomposition within the current private ownership boundaries;
+it changes no wire or data contract. Lead reviews every diff and all enabled source/runtime gates;
 no partial-type loophole, new exception or suppression is authorized.
 
 Primary contracts: [PostgreSQL18 transaction-local settings and advisory locks](https://www.postgresql.org/docs/18/functions-admin.html),

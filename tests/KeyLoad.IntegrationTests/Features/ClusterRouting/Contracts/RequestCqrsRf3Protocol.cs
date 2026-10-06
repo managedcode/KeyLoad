@@ -9,9 +9,6 @@ internal static class RequestCqrsRf3Protocol
     internal const string VoterPrefix = "--KeyLoadTests:ProtocolCohort:Voters:";
     internal const string DataRootPrefix = "--KeyLoad:DataRoot=";
     internal const string Ephemeral = "--KeyLoad:Ephemeral=true";
-    internal const string Rpc1ImageEnvironment = "KEYLOAD_RPC1_SERVER_IMAGE";
-    internal const string Rpc1ReceiptEnvironment = "KEYLOAD_RPC1_IMAGE_RECEIPT";
-    internal const string Rpc1ManifestEnvironment = "KEYLOAD_RPC1_SERVER_MANIFEST";
     internal const string AdminCollection = "cluster-routing-c1";
     internal const string Database = "database";
     internal const string Domain = "cluster-routing-c1";

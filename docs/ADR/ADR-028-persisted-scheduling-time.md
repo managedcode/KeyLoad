@@ -31,7 +31,7 @@ Related: `REQ-MSG-004/AC-MSG-004`, `REQ-REP-002/AC-REP-002`; ADR-003, ADR-026, A
 1. Freeze accepted clock skew, readiness/error behavior, evaluation-time encoding, and transition semantics.
 2. Test due/not-due boundaries, retry jitter determinism, restart, lease-expiry races, replica skew, leader change, and clock-uncertain denial.
 3. Implement a persisted bounded scheduler/seek index under `src/KeyLoad.Core/Features/Messaging/` and append transitions with canonical evaluated time; keep cluster coordination in `src/KeyLoad.Orleans/Features/ClusterRouting/` and preserve `TimeProvider.System` for host scheduling and timeout infrastructure.
-4. Roll out with versioned schedule records and replay tests; rollback pauses scheduling while retaining canonical pending entries.
+4. Use the current schedule-record contract and replay tests; rollback pauses scheduling while retaining canonical pending entries.
 5. Qualify process recovery, real RF3 leaders/followers, and operator readiness signals through GitHub Actions only.
 
 Current `MessagingTests` cover queue time behavior, but a full scheduler gate is planned. Owner: Messaging plus ClusterReplication/Orleans; dependencies: persisted command time, resource governor, and ADR-036 foundation.

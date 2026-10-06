@@ -43,7 +43,7 @@ consumer join; it never rewrites historical evidence or changes native formats.
 
 ## Fixed-membership benchmark topology contract
 
-The owner explicitly requested actual1/2/3-node benchmark sets. Existing production validation continues to require odd groups≥3; default AppHost remainsRF3. Only explicit trusted server startup `BenchmarkTopology` enables benchmark groups1/2/3. ReplicaConfiguration receives the same explicit opt-in; no HTTP/SQL/client request can set it. The same consensus, Orleans distributed directory/migration/request actors, persisted membership/auth and node-local ZoneTree+journals apply. Majority stays floor(n/2)+1. RF1 has no replica fault tolerance; RF2 requires both voters for read/commit and offers no single-node-loss availability. RF3 retains its current majority/fault contracts. Never callRF1 orRF2 production-qualified from timing tests.
+The owner explicitly requested actual1/2/3-node benchmark sets. Existing production validation continues to require odd groups≥3; default AppHost remainsRF3. Only explicit trusted server startup `BenchmarkTopology` enables benchmark groups1/2/3. ReplicaConfiguration receives the same explicit opt-in; no HTTP/SQL/client request can set it. The same consensus, Orleans distributed directory/activation movement/request actors, persisted membership/auth and node-local ZoneTree+journals apply. Majority stays floor(n/2)+1. RF1 has no replica fault tolerance; RF2 requires both voters for read/commit and offers no single-node-loss availability. RF3 retains its current majority/fault contracts. Never callRF1 orRF2 production-qualified from timing tests.
 
 Every group has a fresh fixed incarnation and its own storage directories. Changed voter membership must not silently reopen an existing authority; existing persistent identity checks remain. Restart retains exactly the same set and ordered atomic apply. Real SDK/MCP topology, acknowledged-data restart,RF2 quorum-loss and unchangedRF3 gates are required. Compiler opt-ins remain scoped to the existing two Orleans calls; no analyzer suppression or alternate engine.
 
@@ -76,23 +76,20 @@ Worker model/permissions/escalations are in the plan. Root approves each disjoin
 
 ## Rollout and rollback
 
-No database format/API migration. Benchmark opt-in is additive and defaults off. New complete evidence producer/aggregate/site protocol deploys atomically as a versioned route, with latest publication blocked until the first full qualified cohort. Source rollback removes the new route together and retains prior immutable historical evidence, sourceSHA and contract labels; no mixed format/latest pointer or hidden fallback. Temporary source stages remain Accepted and visibly unqualified until every criterion and delivery gate passes.
+No database format/API change. Benchmark opt-in is additive and defaults off. New complete evidence producer/aggregate/site protocol deploys atomically as a versioned route, with latest publication blocked until the first full qualified cohort. Source rollback removes the new route together and retains prior immutable historical evidence, sourceSHA and contract labels; no mixed format/latest pointer or hidden fallback. Temporary source stages remain Accepted and visibly unqualified until every criterion and delivery gate passes.
 
 ### TASK005 persisted membership refinement before opt-in implementation
 
-Source audit found legacy hardstate carries incarnation but no exact voter list.
-AC-ISO-004 cannot be met by validation alone. TASK005 additionally owns only
-`ReplicaLogValidation.cs` and new `ReplicaBenchmarkMembership*` feature files/tests.
-Use the existing node-owned replica ZoneTree IAtomicStore commit/WAL for a versioned
-private guard containing incarnation and exact ordered voters. Fresh benchmark
-stores commit it atomically with initial hardstate; no extra flat-file authority.
-Existing hardstate without guard rejects benchmark opt-in; no guessed legacy
-migration. Any existing guard is validated on every open, including opt-out, and
-voter/incarnation drift or malformed metadata fails closed. Existing production
-stores without guard keep their existing production contract. Canonical snapshot
-installation does not replace the independent local replica metadata; reopen and
-restore revalidate it. Source rollback cannot safely reopen benchmark1/2 with an old
-runtime and is explicitly unsupported. No data/ACK/quorum/protocol substitution.
+Source audit found that replica hardstate needs a private exact voter guard to meet
+AC-ISO-004. TASK005 additionally owns only `ReplicaLogValidation.cs` and new
+`ReplicaBenchmarkMembership*` feature files/tests. Use the existing node-owned
+replica ZoneTree IAtomicStore commit/WAL for a guard containing incarnation and
+exact ordered voters. Fresh stores commit it atomically with initial hardstate;
+no flat-file authority is added. Every node open validates the guard, including
+production and benchmark startup; missing, malformed or mismatched incarnation/
+voters fail closed. Canonical snapshot installation does not replace independent
+local replica metadata; reopen and restore validate it. No data/ACK/quorum/protocol
+behavior is substituted.
 Real-ZoneTree persistence/corruption/reopen/atomic-commit tests plus native1/2/3
 restart/quorum qualification are required before statusImplemented. This extends
 the ordered005→010→012 join; root owns restore review and final evidence.
@@ -364,7 +361,7 @@ if returned it must equal current. Artifact workflow_run has no attempt field:
 exact own source/run/repository IDs, unique name/ID, immutable digest and created
 within the exact current successful job interval bind it; another attempt's
 artifact cannot qualify. Provider job html_url may be native actions/runs/run/job/id
-or documented legacy runs/run/jobs/id; verify actual own IDs/repository and retain
+or the documented runs/run/jobs/id form; verify actual own IDs/repository and retain
 raw URL, project the same actual IDs to frozen canonical actions URL. No alternate
 run/attempt lookup or fallback. A changed pagination snapshot fails closed; setup
 may make explicitly recorded bounded same-route fresh captures before allocation,
@@ -433,7 +430,7 @@ ONLY NEW site Features/BenchmarkComparisons/isolated-*.mjs and NEW SiteIsolated*
 TUnit test files; may split private helpers under the same prefixes. Root owns
 HTML/bootstrap/build assets/shared inventories/Pages/source catalog joins. Start
 condition: this contract, existing ADR056, acceptance and plan are approved under
-the owner's requested work. Tests precede implementation. Preserve legacy schema2
+the owner's requested work. Tests precede implementation. Preserve historical schema2
 contracts and all real-browser/TUnit gates; add no third-party packages, fake
 fetch/server/measurement, framework, local tests or qualification. New sources
 enter exact coverage inventory,80/70 aggregate and90 critical validation/UI gates.
@@ -523,7 +520,7 @@ credentials/tokens/raw exception strings. Root reviews every prefix diff and
 qualifies all1/2/3 actual native jobs at final SHA before completion.
 
 TASK-ISO-011W clarified joins: projection loader entry is the whole validated
-catalog. Rows preserve legacy row fields plus nodeCount and verbatim worker
+catalog. Rows preserve existing row fields plus nodeCount and verbatim worker
 metadata/report. isolated-contracts.mjs browser constants must match canonical
 isolated-contract.json structurally in every producer invocation. Defaults are
 PointRead/node3/target all/repetition all/throughput. DOM IDs: isolated-lab,
@@ -542,7 +539,7 @@ evidence tools without claiming unmeasured tooling coverage.
 ## TASK-ISO-012P approved isolated Pages evidence join
 
 REQ-BC-056/057/058, AC-ISO-007/008/009. Root approves this additive contract
-before implementation. Retain the independent genuine legacy comparison job,
+before implementation. Retain the independent genuine comparison job,
 12-file archive, three historical profiles and their complete tests. Their
 actual earlier SHA is independent of the new isolated cohort; unavailable or
 expired historical evidence fails rather than fabricating profiles.
@@ -725,7 +722,7 @@ Admission source join is internal to the benchmark slice: one immutable
 IsolatedKeyLoadAdmissionProfile in Comparisons owns the exact finite limits and
 validates actual HTTP status. Add only the AppHost friend assembly, and mark only
 the isolated host-created KeyLoadTarget with an internal init flag. Existing public
-constructor/default/legacy RF3 calls and wire schemas remain unchanged. AppHost
+constructor/default/existing RF3 calls and wire schemas remain unchanged. AppHost
 maps the profile's seven changed fields to explicit native node environment;
 target initialization validates every actual SDK member before seeding and retains
 its bounded admission observations with the actual topology after seeding.
@@ -824,8 +821,8 @@ IsolatedResourceLogCaptureStopSupport.cs in ComparisonTests/BenchmarkComparisons
 No production logger/teardown, package, config, docs, Git, CI or local runtime/test/
 build changes are delegated. Root reviews every line and repeats the integrated
 source gates, then genuine exact-SHA GitHub composition/native qualification.
-Unrelated pending ADR-060 source migration cannot be disguised as a passing
-solution build or resolved by adding a compatibility fallback.
+Unrelated pending ADR-060 source refactor cannot be disguised as a passing
+solution build or resolved by adding an alternate fallback.
 ## Native b474 public document oracle correction
 
 TASK-ISO-019J implements AC-ISO-004/005 under the existing canonical JSON contract
@@ -843,7 +840,7 @@ other available workers have disjoint active native/security and TimeSeries scop
 so serial root integration avoids overlapping ownership. The already failing real
 public regression is the acceptance regression; no mock or local test is added.
 Verify scoped source format/build, then the complete native1/2/3 PointRead public
-regressions and required exact-SHA CI. There is no product/schema/wire migration;
+regressions and required exact-SHA CI. There is no product schema or wire change;
 rollback removes only the wrong oracle's correction. Native2/3 failures remain
 separately tracked and cannot be closed by this test correction.
 
@@ -934,7 +931,7 @@ build/neighboring version rejection, preserving all topology and unhealthy-membe
 negative cases. Pure member DTO values are algorithm inputs, not native HTTP
 proof. Root full diff/build/format/governance joins exact-SHA native1/2/3 genuine
 HTTP/member/copy flows and full270 before any site metrics. All tests GitHub only.
-Additive constant and strict comparison have no schema/state/wire migration;
+Additive constant and strict comparison have no schema/state/wire change;
 rollback restores the old source as a coherent unit and retains failed evidence.
 ADR remains Accepted until every required gate is genuinely satisfied.
 
@@ -998,7 +995,7 @@ algorithm data, not mocked native services. Original independent resource/tail
 regressions remain. Source full diff/build/format/governance precede exact-SHA
 GitHub normal/scalar/comparison and real native1/2/3 original log proof. No local
 tests or fabricated recorded success. Rollback removes this coherent source/test
-unit; no persisted/wire migration. ADR stays Accepted until required evidence.
+unit; persisted/wire state is unchanged. ADR stays Accepted until required evidence.
 
 
 TASK-ISO-023L config-transition edge: a newly retained valid config demotes any
@@ -1062,7 +1059,7 @@ flows on all1/2/3 topologies are the acceptance-derived rerun proof. No fake/pur
 mirror oracle test or local runtime qualification. Ordered stages: preserve
 original failure/sample bytes, root source correction/static/build/format,
 scoped stable commit/push, exact-SHA full required gates and native1/2/3 public
-regressions. No persistence/API migration; rollback reverts only this coherent
+regressions. No persistence/API change; rollback reverts only this coherent
 test-oracle correction. Root reviews every diff; ADR remains Accepted until
 all native/evidence tasks complete.
 
@@ -1082,7 +1079,7 @@ reading during RDB loading. Do not infer readiness from TCP or wait a fixed
 sleep. Native failures, caller cancellation, wrong role/host/port/version/runID,
 AOF or missing copies remain failures; no measured retry, new timeout budget,
 configuration change or weakened predicate. Final identity unchanged checks
-and WAITAOF measurement remain intact. No persistence/public contract migration.
+and WAITAOF measurement remain intact. No persistence/public contract change.
 
 Disjoint gates_audit worker owns only RedisReplicaProof.cs and
 RedisCopyObservation.cs under Comparisons/Features/BenchmarkComparisons, plus
@@ -1154,7 +1151,7 @@ within the existing60second/200millisecond observation envelope. No sleeps that
 stand in for readiness, fake database, standby identity translation, retries,
 expanded budgets or ignored failure. Native setup's original parallel3-node
 bootstrap is the failing regression and mandatory rerun proof. No API/product
-persistence migration; rollback only this coherent isolated bootstrap/test unit.
+persistence change; rollback only this coherent isolated bootstrap/test unit.
 
 Ordered stages: frozen acceptance before writes; model/native regression source,
 root bootstrap repair, complete reviewed Release/format/governance; scoped main
@@ -1203,7 +1200,7 @@ small shell-auth correction, worker source/static evidence, root serialized
 native selector join/review/full Release/format/governance, scoped main delivery,
 exact-SHA normal/scalar/RF3/comparison/native1/2/3 before270 publication. Root
 owns shared docs/selection/workflow/Git; worker escalates undefined contracts/
-upstream defect/overlap. No product persistence/API migration; rollback this
+upstream defect/overlap. No product persistence/API change; rollback this
 coherent auth/regression unit only. ADR remains Accepted until qualification.
 
 
@@ -1270,7 +1267,7 @@ full diff/lifetime review, complete Release/format/governance, scoped main
 delivery then same-SHA required gates and realKurrent1/2/3 cleanup proof. Genuine
 quorum-loss fault phase remains an explicit subsequent root-frozen task; source
 changes alone cannot qualify failure drain behavior. No product persistence/API
-migration; rollback only coherent cleanup unit, retain original failures. ADR
+change; rollback only coherent cleanup unit, retain original failures. ADR
 stays Accepted until required implementation and verification evidence exist.
 
 
@@ -1388,7 +1385,7 @@ characterization must retain actual idempotency and uncertainty, not force a
 false WrongExpectedVersion or delete the foreign candidate to make a test pass.
 
 Rollback restores only this coherent ownership unit after original calls drain;
-no persistence migration. Full source review/build/format/governance and exact-SHA
+persisted state is unchanged. Full source review/build/format/governance and exact-SHA
 Linux pure/native1/2/3/270 remain required. No unchanged-cost or maximum-performance
 claim; measured results capture actual ledger overhead. ADR remains Accepted.
 
@@ -1448,7 +1445,7 @@ ordinary full coherent main delivery, then same-SHA GitHub normal/scalar units,
 real image roundtrip, recovery/RF3, native preflights and complete270 qualification.
 Root retains original failed job/ZIP/raw measurements and all independent cleanup
 failures. Missing/skipped/failed cells cannot publish site values. No persistence
-migration; rollback is the coherent tooling/test unit after original operations
+change; rollback is the coherent tooling/test unit after original operations
 drain. Native/coverage/endurance/performance gates remain separate and pending.
 
 ```mermaid
@@ -1602,7 +1599,7 @@ Write ownership is only benchmarks/KeyLoad.Comparisons/Features/BenchmarkCompari
 
 Accepted ISO005/007 and AC-PQ-036-001/002: comparison-images invokes17 TUnit suites sequentially, and the default report path overwrites earlier original JSON. Root owns only their ci.yml results-directory arguments, using17 distinct named directories beneath TestResults/comparison-images. Keep every invocation/filter/order/build/timeout/action/permission/native and aggregate boundary unchanged. The existing always-upload glob retains every original report and accompanying logs; no rewritten report or log-count substitute is admitted as JSON evidence.
 
-Ordered stages are unique-directory static inspection, scoped workflow mutation, full development source/format/governance, scoped delivery and actual GitHub execution. Join all17 original JSON source/case/summary facts with exact job/upload/provider ZIP metadata and digest before claiming this evidence gate passed. Existing native1/2/3 and270 remain separate. Rollback reverts only results-directory arguments; no product data/API migration. Root is sole workflow/evidence owner; read-only audit performs provider reconciliation. This ADR remains Accepted until the required genuine gates finish.
+Ordered stages are unique-directory static inspection, scoped workflow mutation, full development source/format/governance, scoped delivery and actual GitHub execution. Join all17 original JSON source/case/summary facts with exact job/upload/provider ZIP metadata and digest before claiming this evidence gate passed. Existing native1/2/3 and270 remain separate. Rollback reverts only results-directory arguments; no product data/API change. Root is sole workflow/evidence owner; read-only audit performs provider reconciliation. This ADR remains Accepted until the required genuine gates finish.
 
 ## TASK-IMAGE-LIFE-PROCESS-IDENTITY-RACE
 
@@ -1618,6 +1615,6 @@ cohesive UnitTests BenchmarkComparisons/Helpers identity-observation helper and
 updates only the support/reaper probe calls; root reviews and integrates, runs
 the five existing real Node cases through Aspire and required full gates, retains
 original failed/passing reports and commits. Benchmark producer/site/measurement
-paths receive no writes. No data/API/topology migration occurs; rollback restores
+paths receive no writes. No data/API/topology change occurs; rollback restores
 the two probes and removes the helper. This correction does not qualify native
 database/process fault cohorts or the full comparison matrix.

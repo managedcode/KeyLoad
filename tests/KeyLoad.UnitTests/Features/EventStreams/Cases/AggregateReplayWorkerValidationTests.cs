@@ -6,41 +6,39 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 internal sealed class AggregateReplayWorkerValidationTests
 {
     [Test]
-    public async Task AcEvent010MissingOrDuplicatePathsFailBeforeAnyCallback()
+    public async Task AcEvent010RejectsAnyWrongCurrentSchemaBeforeCallbacksThenHealthyReplaySucceeds()
     {
         var stream = Stream();
-        var page = Page(stream, null,
-            [Event(stream, 1, "v1", "{}", 1), Event(stream, 2, "v2", "{}", 2)]);
-        var transformCalls = 0;
-        var reducerCalls = 0;
-        EventUpcaster Next(int from) => new(from, from + 1,
-            data => { transformCalls++; return data with { SchemaVersion = from + 1 }; });
-        var backward = new EventUpcaster(2, 1, data => { transformCalls++; return data; });
-        var reducer = CounterReducer(3, (_, _) => { reducerCalls++; return "{}"; });
+        var first = Event(stream, 1, "first", "{\"increment\":2}");
+        var mismatched = Event(stream, 2, "second", "{\"increment\":3}", schema: 2);
+        var invalidPage = Page(stream, null, [first, mismatched]);
+        var calls = 0;
+        var reducer = CounterReducer(apply: (state, record) => { calls++; return AddIncrement(state, record); });
 
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer, limitsOptions: UnitClientOptions.Replay(), [Next(1)]));
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer, limitsOptions: UnitClientOptions.Replay(), [Next(1), Next(1), Next(2)]));
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer, limitsOptions: UnitClientOptions.Replay(), [backward]));
+        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(invalidPage, reducer,
+            limitsOptions: UnitClientOptions.Replay()));
+        await Assert.That(calls).IsEqualTo(0);
+        await Assert.That(invalidPage.Events[0].Data.PayloadJson).IsEqualTo("{\"increment\":2}");
+        await Assert.That(invalidPage.Events[1].Data.SchemaVersion).IsEqualTo(2);
+        var invalidPayload = Page(stream, null, [Event(stream, 1, "bad-payload", "{")]);
+        var headerRecord = Event(stream, 1, "bad-headers", "{}");
+        var invalidHeaders = Page(stream, null, [headerRecord with
+        {
+            Data = headerRecord.Data with { HeadersJson = "{" }
+        }]);
+        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(invalidPayload, reducer,
+            limitsOptions: UnitClientOptions.Replay()));
+        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(invalidHeaders, reducer,
+            limitsOptions: UnitClientOptions.Replay()));
+        await Assert.That(calls).IsEqualTo(0);
+        await Assert.That(invalidPayload.Events[0].Data.PayloadJson).IsEqualTo("{");
+        await Assert.That(invalidHeaders.Events[0].Data.HeadersJson).IsEqualTo("{");
 
-        await Assert.That(transformCalls).IsEqualTo(0);
-        await Assert.That(reducerCalls).IsEqualTo(0);
-    }
-
-    [Test]
-    public async Task AcEvent010RejectsChangedIdentityAndInvalidUpcastOutputBeforeReducer()
-    {
-        var stream = Stream();
-        var page = Page(stream, null, [Event(stream, 1, "identity", "{}", 1)]);
-        var reducerCalls = 0;
-        var reducer = CounterReducer(2, (_, _) => { reducerCalls++; return "{}"; });
-        var identityChange = new EventUpcaster(1, 2,
-            data => data with { HeadersJson = "{\"changed\":true}", SchemaVersion = 2 });
-        var invalidJson = new EventUpcaster(1, 2, data => data with { PayloadJson = "{", SchemaVersion = 2 });
-
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer, limitsOptions: UnitClientOptions.Replay(), [identityChange]));
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(page, reducer, limitsOptions: UnitClientOptions.Replay(), [invalidJson]));
-
-        await Assert.That(reducerCalls).IsEqualTo(0);
+        var healthyPage = Page(stream, null, [first, Event(stream, 2, "second", "{\"increment\":3}")]);
+        var state = AggregateReplayReduction.Reduce(healthyPage, reducer, limitsOptions: UnitClientOptions.Replay());
+        await Assert.That(ReadInteger(state, "total")).IsEqualTo(5);
+        await Assert.That(calls).IsEqualTo(2);
+        await Assert.That(healthyPage.Events[0].Data.PayloadJson).IsEqualTo("{\"increment\":2}");
     }
 
     [Test]
@@ -48,8 +46,8 @@ internal sealed class AggregateReplayWorkerValidationTests
     {
         var stream = Stream();
         var record = Event(stream, 1, "one", "{}");
-        var reducerCalls = 0;
-        var reducer = CounterReducer(1, (_, _) => { reducerCalls++; return "{}"; });
+        var calls = 0;
+        var reducer = CounterReducer(apply: (_, _) => { calls++; return "{}"; });
         var incompatibleSnapshots = new[]
         {
             Snapshot(stream, 1, "{}") with { ReducerVersion = "different.reducer" },
@@ -58,9 +56,11 @@ internal sealed class AggregateReplayWorkerValidationTests
         };
         foreach (var snapshot in incompatibleSnapshots)
         {
-            Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(Page(stream, snapshot, []), reducer, limitsOptions: UnitClientOptions.Replay()));
+            Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(
+                Page(stream, snapshot, []), reducer, limitsOptions: UnitClientOptions.Replay()));
         }
-        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(Page(stream, null, []), reducer with { InitialStateJson = "invalid" }, limitsOptions: UnitClientOptions.Replay()));
+        Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(
+            Page(stream, null, []), reducer with { InitialStateJson = "invalid" }, limitsOptions: UnitClientOptions.Replay()));
         var invalidPages = new[]
         {
             Page(stream with { Generation = 2 }, null, [record]),
@@ -71,9 +71,10 @@ internal sealed class AggregateReplayWorkerValidationTests
 
         foreach (var invalidPage in invalidPages)
         {
-            Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(invalidPage, reducer, limitsOptions: UnitClientOptions.Replay()));
+            Assert.ThrowsExactly<InvalidDataException>(() => AggregateReplayReduction.Reduce(
+                invalidPage, reducer, limitsOptions: UnitClientOptions.Replay()));
         }
 
-        await Assert.That(reducerCalls).IsEqualTo(0);
+        await Assert.That(calls).IsEqualTo(0);
     }
 }

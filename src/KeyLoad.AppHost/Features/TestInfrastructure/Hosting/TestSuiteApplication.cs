@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.AppHost.Features.CodeQuality;
-using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -97,9 +96,7 @@ internal static class TestSuiteApplication
 
     private static Task ForwardOutputAsync(DistributedApplication app, TestSuiteSettings settings, CancellationToken token)
     {
-        string[] resources = settings.Suite == PriorProbeResources.RecoverySuite
-            ? [settings.ResourceName, PriorProbeResources.Native5Resource, PriorProbeResources.Native6Resource]
-            : [settings.ResourceName];
+        string[] resources = [settings.ResourceName];
         if (settings.LocalRf3ImageEnabled)
         {
             resources = [.. resources, LocalRf3ImagePrerequisite.ResourceName];

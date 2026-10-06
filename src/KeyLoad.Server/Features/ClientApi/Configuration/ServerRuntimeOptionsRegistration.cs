@@ -32,7 +32,6 @@ internal static class ServerRuntimeOptionsRegistration
             .Bind(configuration.GetSection(ReplicaExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaProtocol.InvalidLimits).ValidateOnStart();
         services.AddOptions<PeerDiscoveryOptions>().Bind(configuration.GetSection(PeerDiscoveryOptions.SectionName))
-            .PostConfigure<IOptions<NodeOptions>>((options, node) => ConfigureDiscovery(options, node.Value, configuration))
             .Validate(options => options.IsValid(), PeerDiscoveryOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaTransportOptions>().Bind(configuration.GetSection(ReplicaTransportOptions.SectionName))
             .Validate(options => options.IsValid(), ReplicaTransportOptions.ValidationMessage).ValidateOnStart();
@@ -52,11 +51,6 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<OfflineRecoveryExecutionOptions>()
-            .Bind(configuration.GetSection(OfflineRecoveryExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), OfflineRecoveryExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<ServerNodeUpgradeExecutionOptions>().Bind(configuration.GetSection(ServerNodeUpgradeExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), ServerNodeUpgradeExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<NativeTextExecutionOptions>().Bind(configuration.GetSection(NativeTextExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), NativeTextExecutionOptions.ValidationMessage).ValidateOnStart();
     }
@@ -128,17 +122,4 @@ internal static class ServerRuntimeOptionsRegistration
             node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp);
     }
 
-    private static void ConfigureDiscovery(PeerDiscoveryOptions options, NodeOptions node, IConfiguration configuration)
-    {
-        var legacyKey = string.Join(ConfigurationPath.KeyDelimiter, ServerProtocol.ConfigurationSection,
-            nameof(NodeOptions.PeerConnectTimeoutMilliseconds));
-        if (configuration[legacyKey] is null)
-        { return; }
-        var configuredKey = string.Join(ConfigurationPath.KeyDelimiter, PeerDiscoveryOptions.SectionName,
-            nameof(PeerDiscoveryOptions.ConnectTimeout));
-        var legacyTimeout = TimeSpan.FromMilliseconds(node.PeerConnectTimeoutMilliseconds);
-        if (configuration[configuredKey] is not null && options.ConnectTimeout != legacyTimeout)
-        { throw new OptionsValidationException(Options.DefaultName, typeof(PeerDiscoveryOptions), [PeerDiscoveryOptions.ValidationMessage]); }
-        options.ConnectTimeout = legacyTimeout;
-    }
 }

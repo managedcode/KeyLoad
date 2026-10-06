@@ -27,8 +27,8 @@ Ordered stages: freeze contract; implement/review finite physical guard and fail
 
 Related joins: C0 Graph/native runtime tests can run against10.2.6 while this owning repair proceeds. C2 public HTTP adoption waits for the verified release and its separate product contract. C1 signed cohort/RPC and C3 long-work durability are unchanged. Workers do not modify shared KeyLoad files, version, Git, source cohorts or run commands during root runtime qualification.
 
-## Migration, rollback and evidence
+## Rollout, rollback and evidence
 
-This is an additive configuration contract plus intentional safe plain-text failure behavior; valid bounded RFC7807 remains compatible. Document both in the owning README. No persisted data, node-local ownership, public SQL protocol or RF3 membership change. Preserve a homogeneous binary rollback; never restore an unsafe raw-body fallback as a workaround.
+This is an additive configuration contract plus intentional safe plain-text failure behavior; valid bounded RFC7807 remains compatible. Document both in the owning README. No stored-data, node-local ownership, public SQL protocol or RF3 membership change. Keep rollback within the verified package release path; never restore an unsafe raw-body fallback as a workaround.
 
 Tests and original source/run/attempt/feed evidence must establish every CHB AC. Source presence alone is not implemented status. Frontend N/A: transport library work. No acceleration, public readiness or durable-operation claim follows from this repair.

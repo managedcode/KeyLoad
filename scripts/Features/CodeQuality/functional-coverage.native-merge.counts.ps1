@@ -221,8 +221,9 @@ function Get-FcNativeCoverageSummary([object[]] $RawRows, [Collections.IDictiona
         nativeCoberturaLinesValid = $Totals.linesValid; nativeCoberturaLinesCovered = $Totals.linesCovered
         nativeCoberturaBranchPairs = $Totals.nativeCoberturaBranchPairs
         branchUnion = 'unmeasured; Cobertura branch pairs do not identify individual native branch outcomes'
-        packages = $byPackage; files = @($byFile.Values | Sort-Object module,source)
-        uncoveredLocations = @($uncovered.ToArray()); rows = $rows; rawRows = @($RawRows | Sort-Object package,file,class,line) }
+        packages = $byPackage; files = @($byFile.Values | Sort-Object { $_['module'] },{ $_['source'] })
+        uncoveredLocations = @($uncovered.ToArray()); rows = $rows
+        rawRows = @($RawRows | Sort-Object { $_['package'] },{ $_['file'] },{ $_['class'] },{ $_['line'] }) }
 }
 function Merge-FcNativeCoverageLineRows([object[]] $RawRows) {
     $lines = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
@@ -233,7 +234,7 @@ function Merge-FcNativeCoverageLineRows([object[]] $RawRows) {
         }
         elseif ($row.hits -gt 0) { $lines[$identity].hits = $row.hits }
     }
-    @($lines.Values | Sort-Object package,file,line)
+    @($lines.Values | Sort-Object { $_['package'] },{ $_['file'] },{ $_['line'] })
 }
 
 function Add-FcNativeCoveragePackageLineSummary([Collections.Generic.Dictionary[string, object]] $Packages,

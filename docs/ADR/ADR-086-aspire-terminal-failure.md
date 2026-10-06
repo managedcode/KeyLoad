@@ -45,7 +45,7 @@ database jobs continue their own workloads after another database fails.
 3. Root joins TestSuiteApplication, IsolatedNativeCase and shared ClusterFixture
    startup, with any necessary test friend visibility. vector_runtime reviews
    required resources and planned fault boundaries read-only. Concurrent engine
-   CQRS/upgrade code and its dedicated wave fixtures remain with their owner.
+   CQRS/current recovery code and its dedicated wave fixtures remain with their owner.
 4. Build/format/governance and focused TUnit tests through the canonical Aspire
    entry, then retain exact-source Linux CI reports. Full unit/scalar/recovery/RF3
    and native benchmark qualification remain required; unrelated failures are
@@ -54,7 +54,7 @@ database jobs continue their own workloads after another database fails.
 
 Graph: CONTRACT -> NATIVE HELPERS/TESTS -> JOINS -> REVIEW -> EVIDENCE.
 Acceptance mapping is in TestInfrastructure. No production contract, package,
-data-format or topology migration. Rollback reverts only these lifecycle joins
+stored-data format or topology changes. Rollback reverts only these lifecycle joins
 and helpers; the canonical Aspire entry and existing outcomes remain required.
 Frontend N/A: developer and CI lifecycle only.
 

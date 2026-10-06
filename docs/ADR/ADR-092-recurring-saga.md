@@ -15,7 +15,7 @@ transition graph in [RecurringSaga](../Features/Messaging/RecurringSaga.md),
 REQ-JOBS-001..005/AC-JOBS-001..005. A timer is a repeated request to evaluate
 canonical due state, never durability authority. Bound catch-up32 and preserve
 backlog. Compare-exchange resolves timeout/completion/cancel before an atomic
-timeout enqueue; no general workflow engine compatibility is inferred.
+timeout enqueue; no general workflow-engine behavior is inferred.
 
 Implementation contract and join points:
 
@@ -32,11 +32,10 @@ Implementation contract and join points:
    fairness/recovery contract, builds real process and genuine RF3 SDK/MCP fault
    fixtures, and completes original acceptance before task closure.
 
-Dependencies: existing queue readiness/inbox, KL-090/092/094, epoch7 reader
-admission and explicit stopped-copy migration. No live store is automatically
-converted. Rollout requires homogeneous reader/capability support; rollback
-pauses scheduling and retains watermarks/saga/queue data under a capable reader,
-never decrements/reuses generation or replays external actions. Unsupported
+Dependencies: existing queue readiness/inbox and KL-090/092/094. The feature
+uses the current persisted record contract and explicit capability admission.
+Rollback pauses scheduling and retains watermarks/saga/queue data; it never
+decrements/reuses a generation or replays external actions. Unsupported
 timezone/calendar profiles fail explicitly. A scoped development pass or commit
 does not establish Linux/RF3/endurance/performance qualification.
 

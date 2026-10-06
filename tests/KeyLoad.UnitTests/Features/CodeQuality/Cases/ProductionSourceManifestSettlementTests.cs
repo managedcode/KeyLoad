@@ -28,8 +28,9 @@ internal sealed class ProductionSourceManifestSettlementTests
         using var process = new Process();
         var options = ProductionSourceManifestProcess.CaptureExecutionOptions();
 
-        await ProductionSourceManifestProcessSettlement.JoinAsync(process, original,
-            options.Value.ProcessSettlementTimeout, failures);
+        await using var deadline = await ProductionSourceManifestProcessSettlement.JoinAsync(process, false,
+            original, options.Value.ProcessSettlementTimeout, TimeProvider.System,
+            options.Value.TerminationGrace, failures);
 
         await Assert.That(original.IsFaulted).IsTrue();
         await Assert.That(failures.Count).IsEqualTo(2);
@@ -46,8 +47,9 @@ internal sealed class ProductionSourceManifestSettlementTests
         using var process = new Process();
         var options = ProductionSourceManifestProcess.CaptureExecutionOptions();
 
-        await ProductionSourceManifestProcessSettlement.JoinAsync(process, original,
-            options.Value.ProcessSettlementTimeout, failures);
+        await using var deadline = await ProductionSourceManifestProcessSettlement.JoinAsync(process, false,
+            original, options.Value.ProcessSettlementTimeout, TimeProvider.System,
+            options.Value.TerminationGrace, failures);
 
         await Assert.That(failures.Count).IsEqualTo(1);
         var projected = Assert.ThrowsExactly<TimeoutException>(

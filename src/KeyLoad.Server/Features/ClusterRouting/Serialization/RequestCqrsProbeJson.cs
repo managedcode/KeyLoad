@@ -64,32 +64,6 @@ internal sealed class RequestCqrsProbeJson
         return value;
     }
 
-    internal RequestCqrsProbeDiscoveryRecord ReadDiscovery(ReadOnlySpan<byte> bytes)
-    {
-        const int ApplicationRpcVersionValidationBoundary = 0;
-        const int PeerEnvelopeVersionValidationBoundary = 0;
-
-        var value = Read(bytes, RequestCqrsProbeRecordFields.Discovery, Context.RequestCqrsProbeDiscoveryRecord);
-        if (value.Version != RequestCqrsProbeProtocol.Version
-            || value.Kind != RequestCqrsProbeProtocol.DiscoveryKind
-            || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId)
-            || string.IsNullOrWhiteSpace(value.ObserverVoterId)
-            || string.IsNullOrWhiteSpace(value.PeerVoterId)
-            || value.ObserverVoterId == value.PeerVoterId
-            || value.ApplicationRpcVersion < ApplicationRpcVersionValidationBoundary || value.PeerEnvelopeVersion < PeerEnvelopeVersionValidationBoundary
-            || value.ProtocolCompatible)
-        { throw Invalid(); }
-        return value;
-    }
-
-    internal byte[] WriteDiscovery(RequestCqrsProbeDiscoveryRecord value)
-    {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeDiscoveryRecord);
-        if (bytes.Length > executionOptions.Value.MaximumRecordBytes)
-        { throw Invalid(); }
-        return bytes;
-    }
-
     internal byte[] WriteMarker(RequestCqrsProbeMarkerRecord value)
     {
         var bytes = JsonSerializer.SerializeToUtf8Bytes(value, Context.RequestCqrsProbeMarkerRecord);

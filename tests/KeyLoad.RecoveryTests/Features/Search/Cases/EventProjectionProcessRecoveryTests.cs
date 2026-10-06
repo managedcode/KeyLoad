@@ -37,7 +37,7 @@ internal sealed class EventProjectionProcessRecoveryTests
             await process.WaitForExitAsync(timeout.Token);
             await JoinPipesAsync(process, timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            EpochUpgradeFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertNativeHandlesReleased(root);
             await EventProjectionProcessRecoveryAssertions.RecoverAndVerifyAsync(root, stage, timeout.Token);
         }
         catch (Exception failure)
@@ -48,7 +48,7 @@ internal sealed class EventProjectionProcessRecoveryTests
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupSeconds), TimeProvider.System);
-            await EpochUpgradeCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
+            await RecoveryProcessCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
         }
     }
 

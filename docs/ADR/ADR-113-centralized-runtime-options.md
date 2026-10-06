@@ -3,11 +3,10 @@
 Status: Accepted (implementation and verification pending)
 Date: 2026-10-06
 
-The owner explicitly requires complete runtime literal migration, including
-endpoint/method tokens, and rejects per-class timeout constants. CodeQuality
-REQ-CQ-012/013 and AC-CQ-033..038 supersede the selected-context scope in ADR-111.
-Immutable identities use feature-owned constants/nameof. Operational policy uses
-centrally bound and validated native IOptions<T>, consumed by its execution owner.
+The current runtime contract centralizes operational policy in validated native
+IOptions<T>, consumed by its execution owner. Immutable protocol identities use
+feature-owned constants or nameof. CodeQuality REQ-CQ-012/013 and AC-CQ-033..038
+are the governing requirements for this contract.
 
 Keep scenario options in their owning Features/<Slice>/Configuration role; register
 them through the server/AppHost composition boundary. Defaults retain current
@@ -25,7 +24,9 @@ native options factory/DI lifecycle is owned and disposed, and no raw provider
 escapes to feature execution. CLI/env names and malformed/unknown-setting failure
 contracts remain exact. Persisted authorization and RF3 membership cannot be
 configured away. Preserve serializer Id/Alias, native bytes and canonical digests.
-
+This options contract does not alter SQL/client protocol behavior, Orleans
+activation movement, node-local storage authority, recovery ordering or RF3
+acknowledgement requirements.
 
 Persisted user policies (queue/subscription/retention) and explicit caller request
 parameters are domain data, not server execution configuration. Their stable
@@ -43,8 +44,13 @@ that exact immutable declaration, with constant arguments; it does not exempt a
 class, method, mutable field, counterfeit marker or execution owner. Policy sinks
 such as Task.Delay, CancellationTokenSource, HTTP timeouts and semaphore waits
 still inspect the initializer recursively and reject the same field as hardcoded
-execution policy. Corpus bucket widths and timestamp offsets keep their original
-digest bytes and remain distinct from the native execution deadline options.
+execution policy. Every runtime clock read, deadline, delay and timer uses its
+owning validated TimeProvider. Select TimeProvider.System only at a composition or
+default boundary, then pass that provider through the operation and cleanup helpers;
+helpers do not silently select a different clock. Controlled providers are used
+only where an authorized test contract requires them. Corpus bucket widths and
+timestamp offsets keep their original digest bytes and remain distinct from the
+native execution deadline options.
 
 Public JSON report and manifest records retain their existing option metadata as
 data. The property-only `SerializedOptionsSnapshotAttribute` identifies an actual
@@ -89,22 +95,15 @@ flowchart LR
     Constants --> Gates
 ```
 
-TASK-CQ-GENERAL-001..005 and exact disjoint ownership are frozen in the feature
-contract. Lead owns markers/shared package references, central registration,
-AppHost configuration, all shared docs/configuration and final joins. Worker002
-owns analyzer/tests/tooling;003 owns core/storage/replication;004 owns server and
-Orleans execution plus clients/benchmarks, excluding lead's central binding files.
-No delegated boundary implementation starts before this contract is available.
-
-The integrated ownership extends002 to shared UnitTests API joins,003 to the
-Comparison library's immutable identities and adapter policies, and lead to the
-ComparisonHost startup/native-option factories and IntegrationTests joins.004
-retains Server/Orleans/Client/CLI/BenchmarkScenarios. These are disjoint portions
-of the same general migration; they do not add database features.
+The canonical CodeQuality feature specification owns the exact file map, execution
+order and acceptance tests for runtime options. Each execution owner consumes the
+validated wrapper supplied by its composition boundary; shared option registration
+and native call-site changes are joined in the same source checkpoint. These
+contracts define runtime policy ownership and do not add database features.
 
 The native registries group actual owners: Core database/due-work/messaging/query/
 graph/change-feed/time-series/search/cache execution; Server node-derived authority,
-replica/discovery/transport/membership/routing/admission/MCP/probe/text/upgrade/admin
+replica/discovery/transport/membership/routing/admission/MCP/probe/text/restore/admin
 execution; AppHost startup/selectors/test/process/image/profile/RF3 composition/
 benchmark deployment and observation. CLI and comparison hosts use native
 OptionsFactory/OptionsManager before client or file construction. Strict immutable
@@ -117,9 +116,10 @@ Private-profile byte/path/buffer/depth options reach reads, parsing and writes;
 oversized writes fail before creating a staged file. Source/run/attempt/job identity
 remains original environment provenance. Resource observation emits version2 with
 the actual primitive policy; aggregation validates it, enforces its sample/mount
-ceilings and rejects different policies within a comparable cohort. Existing
-version1 evidence remains historical input. This metadata schema change does not
-change persisted database formats or qualify new performance measurements.
+ceilings and rejects different policies within a comparable cohort. Earlier evidence
+is immutable history and cannot enter a current cohort.
+This metadata schema change does not change persisted database formats or qualify
+new performance measurements.
 
 RF3 published host ports consume `ClusterDeploymentOptions.FirstPublicPort`,
 centrally bound from `KeyLoad:FirstPublicPort` with the preserved default5101.
@@ -147,11 +147,11 @@ report bytes, corpus hashes and qualification criteria. Semantic enforcement
 includes actual framework file-buffer properties and constructor parameters;
 same-named source types must not impersonate those framework symbols.
 
-The final sink audit also moves grain reply initial reservation, administrator
-failure-log retention and Mongo/KeyLoad/Redis/OpenSearch seed batches into their
-existing native options groups. Preserve defaults 4096/50/256/100/256/64 and their
+The native options groups also own grain reply initial reservation, administrator
+failure-log retention and Mongo/KeyLoad/Redis/OpenSearch seed batches. Preserve
+defaults 4096/50/256/100/256/64 and their
 inclusive ceilings. Actual allocation and chunking owners consume the snapshot;
-unused former cleanup constants are removed. Command inbox scheduling uses its
+command inbox scheduling uses its
 own nonserialized `KeyLoad:CommandInboxExecution` group, with configurable
 MaximumControlBurst 1..8 and the original default 8. Keep the immutable fairness
 ceiling 8 and every existing admission Id/JSON contract; central server binding,
@@ -279,8 +279,9 @@ allocation, memory or performance claims.
 
 Storage stream buffering is distinct from transfer/chunk buffering. The native
 storage options group owns StreamBufferBytes 1..4096, default 4096, for metadata,
-backup and checkpoint FileStream owners, including former implicit OpenRead
-buffers. Preserve existing 65536-byte transfer/chunk defaults, original frame and
+backup and checkpoint FileStream owners, including native FileStream entry points
+that otherwise select an implicit
+buffer. Preserve existing 65536-byte transfer/chunk defaults, original frame and
 manifest bytes, recovery validation and synchronous Flush(true) barriers.
 
 Native text file providers apply the bound FileBufferBytes ceiling to actual
@@ -323,9 +324,9 @@ composition repair under TASK-CQ-CLI-BACKUP-FLOW-001.
 Rollout is one coherent source rebuild. Preserve defaults/sections and fail invalid
 configuration before readiness/admission. Constructor/configuration ownership
 changes update every actual call site and real regression in the same stage. No
-compatibility constructor silently restores hardcoded policy. Rollback reverts the
-coherent ownership/rule migration while preserving persisted data and all earlier
-gates. Do not mark this decision Implemented until complete build, formatter,
+constructor may restore hardcoded policy. A source rollback restores the
+complete pre-checkpoint source state while preserving persisted data and previously
+qualified gates. Do not mark this decision Implemented until complete build, formatter,
 Aspire full analyzer/unit/scalar/recovery/RF3, coverage and exact-source evidence
 exist. Local compiler previews and passing focused tests remain development proof.
 
@@ -339,8 +340,8 @@ default. Actual CLI process tests use 1024-byte pieces, independently verify all
 piece counts and exact extracted backup bytes, and prove invalid settings reject
 before archive creation while a following configured invocation remains healthy.
 
-The required full-suite regression join preserves the replica worker's original
-terminal failure during owned shutdown. `ReplicaMaterializer.ApplyWorkerAsync`
+The replica worker's terminal failure remains observable during owned shutdown.
+`ReplicaMaterializer.ApplyWorkerAsync`
 stores a known apply failure for the existing recovery fence and rethrows the same
 exception, so `ReplicaMaterializerShutdown` joins and reports it while disposing
 its owned lifetime/apply gate and retaining the borrowed protocol gate. No quorum,
@@ -362,8 +363,8 @@ clone contains native configuration and does not replace storage, recalculate an
 expected capacity or change the public benchmark receipt/schema. Invalid native
 options must reject before owner file IO; no performance claim follows from it.
 
-The required scoped-outcome join preserves an already selected canonical outcome
-on rejected replay. REQ/AC-DSTORE-009 and ADR002/011 require conflicting or
+The scoped-outcome contract preserves an already selected canonical outcome on
+rejected replay. REQ/AC-DSTORE-009 and ADR002/011 require conflicting or
 reauthorization-failed retries to retain exact prior outcome/locator/domain bytes
 and the local committed cut. `AtomicCommandCommit` therefore disables publication
 after failure against a selected existing outcome; the no-publication branch still
@@ -372,9 +373,9 @@ clock or publish a replacement outcome. New authorized domain failures retain
 their existing durable-result behavior. Corruption/format/recovery exceptions
 remain exact thrown failures that abort commit. Genuine existing scoped-outcome
 cases retain exact cuts/bytes and denied authorization controls. AC-DSTORE-005
-counts the extra bounded retained-legacy authority lookup required by AC-DSTORE-009
-separately from the six original metadata points and three placement points;
+measures the actual bounded current locator/outcome and placement reads;
 transaction-scoped document images and paired-size payload work remain unchanged.
+Removed alternate-key lookups are not part of the active read-count contract.
 
 The full-suite OpenLoop fixture retains bounded actual stage evidence after its
 original child exit and both stream readers settle. Seed, rejection intake/extra,
@@ -386,8 +387,8 @@ does not change the20-second native child deadline, assertions, plan workload,
 source-freeze validation, process-tree cleanup or production scheduling. The
 observed timeout's cause remains unqualified until actual stage evidence exists.
 
-The final completeness audit under TASK-CQ-GENERAL-OPTIONS-001 also migrates
-remaining serialization reservations. `SerializationExecutionOptions` owns the
+TASK-CQ-GENERAL-OPTIONS-001 defines the remaining serialization reservations.
+`SerializationExecutionOptions` owns the
 canonical JSON pending-byte flush cadence (default65536, positive and no larger
 than the existing default) and bounded digest UTF-8 stack scratch (default256,
 positive and no larger than256). Existing static entry points borrow the same
@@ -411,10 +412,10 @@ larger than its existing reservation. Native comparison composition binds and
 validates this required group before target ownership, and the SurrealDB target
 captures the same native wrapper. Actual native protocol builders consume the
 settings; syntax, finite-vector validation, canonical workload/index parameters,
-HTTP limits and evidence provenance stay unchanged. Independently constructed
-SQL and digest goldens, configured lower reservations and invalid-policy
-pre-ownership rejection regressions verify these joins. Root owns the required
-source-controlled configuration, composition joins, final build and Aspire gates.
+HTTP limits and evidence provenance stay unchanged. Independently constructed SQL
+and digest goldens, configured lower reservations
+and invalid-policy pre-ownership rejection regressions verify these joins through
+the native Aspire entry point.
 
 The same comparison serialization group owns PostgreSQL vector text reservation
 (default14 characters per component, inclusive1 through14); both vector target
@@ -440,11 +441,11 @@ restore8192. All actual constructors join the same required dependency. Persiste
 signing authority, KLT2 prefix, native claim bytes, MAC, aliases/field IDs and
 reauthorization stay unchanged. Real signed-claim and leased-message regressions
 prove lower-policy rejection retains exact state and a following valid configured
-operation succeeds; invalid options reject before store IO. Root owns the engine
-signature, composition/helper joins and final verification; the decoder worker
-owns the cohesive options, Verify dispatch and focused regressions.
+operation succeeds; invalid options reject before store IO. The engine signature,
+composition/helper joins, cohesive options, Verify dispatch and focused regressions
+are verified together.
 
-The final CodeQuality RF3 IO audit requires the already central native
+The CodeQuality RF3 IO contract requires the centrally bound native
 NativeCoverageExecutionOptions.ReadBufferBytes to reach source-manifest reads,
 invocation/base-image receipts and run-manifest writes. A path-format ceiling is
 not an IO buffer default. Bind that native wrapper before startup control
@@ -457,27 +458,26 @@ original source/image trust, cleanup and all schemas. The frozen source64MiB and
 run4MiB evidence admission fences remain distinct from the context-manifest
 MaximumManifestBytes setting. This joins AC-CQ-034 to the actual native coverage
 consumer without implementing a new coverage architecture or claiming coverage
-qualification. The lead owns shared registration/settings/prerequisite joins;
-the comparison worker owns the six RF3 reader/writer/protocol/selection files.
+qualification. Shared registration/settings/prerequisite joins and the six RF3
+reader/writer/protocol/selection files consume the same wrapper.
 
-### Final phase-bank operational policy join
+### Phase-bank operational policy
 
 TASK-CQ-GENERAL-OPTIONS-001 applies AC-CQ-034/035/038 to ADR-063's bank as
 well as active host consumers. `DatabasePhaseExecutionOptions`, in Abstractions'
 ResourceExecution/Configuration responsibility, owns the disabled-by-default
 mode, stripe reservation (default4; only1/2/4) and maximum CAS attempts (default4;
-inclusive1..4). Server's existing central registration binds and validates the
-native wrapper before physical ownership; startup projects its captured values
-to the BCL-only process facade. There is no new Diagnostics dependency.
-Unknown properties, malformed native values and a scalar whole section are
-rejected before bank construction rather than silently selecting defaults.
+inclusive1..4). Server's central registration binds and validates the native
+wrapper before physical ownership; startup projects its captured values to the
+BCL-only process facade. There is no Diagnostics dependency. Unknown properties,
+malformed native values and a scalar whole section are rejected before bank
+construction rather than silently selecting defaults.
 
-The required primitive signatures become `DatabasePhaseBank(bool enabled,
-int stripeCount, int maximumCasAttempts)`, `DatabasePhaseTelemetry.Initialize`
-with the same three required operands, and `TryIncrement(ref long, int)`.
-Remove the old bool-only/default overloads and operational const fields; do not
-silently restore four inside any primitive. Constructor validation occurs before
-allocation. The bank captures immutable scalars and its actual allocation,
+The required primitive signatures are `DatabasePhaseBank(bool enabled, int
+stripeCount, int maximumCasAttempts)`, `DatabasePhaseTelemetry.Initialize` with
+the same three required operands, and `TryIncrement(ref long, int)`. No primitive
+supplies hidden policy defaults. Constructor validation occurs before allocation.
+The bank captures immutable scalars and its actual allocation,
 stripe selection, snapshot merge and CAS loop use those exact operands. Setup
 idempotence compares all three values; any different later value is rejected.
 The initially unpublished facade remains disabled without constructing policy.
@@ -486,24 +486,24 @@ This owner-requested join refines ADR-063's fixed-four source defaults and API,
 preserving four as the qualified ceiling/default, its fixed32/6/16 public schema,
 128KiB startup ceiling, saturation/sticky degradation, no hot allocation/callback
 or gate, and no live reconfiguration/reset. It adds no request, wire or stored
-field. Root owns options, Server registration/preflight/startup, policy/docs and
-integrated checks; the runtime worker owns Diagnostics' bank/arithmetic/facade
-and the DatabasePhase* TUnit cases. Regression criteria include every allowed
+field. The options owner, Server registration/preflight/startup, Diagnostics bank,
+arithmetic/facade and DatabasePhase* TUnit cases are qualified together through
+the integrated current-source checks. Regression criteria include every allowed
 reservation, invalid pre-allocation rejection, actual lower-stripe memory,
 unchanged detached snapshots, native contention/saturation and zero hot-path
-allocation. Restore the former source only with a coordinated rollback before
-work; no data migration exists. Full build/format, Aspire unit/scalar/recovery
-and RF3 remain required; neither this source join nor a narrow case closes the
-separate profiling/overhead/export qualification in ADR-063.
+allocation. A source rollback restores the complete preceding source checkpoint before new
+work is admitted; stored data is unchanged. Full build/format, Aspire
+unit/scalar/recovery and RF3 remain required. This source join or a narrow case
+does not close the separate profiling/overhead/export qualification in ADR-063.
 
 ### Semantic policy coverage integration
 
 TASK-CQ-GENERAL-OPTIONS-001 joins AC-CQ-009/034/037 to the six new executable
 analysis helpers: HardcodedPolicyReturns, HardcodedPolicySearch, NativeTimerPolicy,
 OptionsSnapshotOverrides, OwnedDiagnosticsPolicy and PolicyArgumentSources.
-Root extends the frozen native coverage contract and KLD0037 critical pipeline
-before verification. The exact inventory becomes54 sources:45 executable and
-9 declaration-only. Every new helper contributes to module coverage and the
+The native coverage contract and KLD0037 critical pipeline include the exact
+inventory of54 sources:45 executable and9 declaration-only. Every new helper
+contributes to module coverage and the
 critical pipeline; none is a declaration exclusion. Module80/70 and critical90
 thresholds, native integer semantics, source hashing and closed inventory checks
 remain unchanged. Controlled XML boundary fixtures retain their independent
@@ -511,23 +511,23 @@ integer expectations for the expanded450-line synthetic corpus; these are parser
 regressions, never measured coverage. The existing native coverage process,
 threshold and source-inventory tests must pass through the Aspire entry point,
 followed by actual source-bound functional coverage before numerical qualification.
-Root owns this contract/script-token/test-token/docs join. A rollback must remove
-the six source files and their inventory entries together; no stored-data or
-collector-format migration exists.
+The source checkpoint includes all six analysis helpers and their inventory
+entries. A rollback removes those together; stored data and collector format are
+unchanged.
 
 The same AC-CQ-037 semantic traversal includes conditional values, coalescing
 fallbacks and switch-expression arm values. Inspect result operands rather than
 predicate/pattern constants, and retain the existing depth32, symbol-cycle and
 cancellation guards. Native compiler regressions reject a constant deadline in
 any reachable result arm, preserve configured/dynamic result arms and native
-zero/infinite sentinels, and assert exact native sink spans. The bounded analyzer
-worker owns HardcodedPolicySearch plus its feature-local conditional-flow cases;
-root owns inventory/docs integration and final native analyzer verification.
+zero/infinite sentinels, and assert exact native sink spans. HardcodedPolicySearch
+and its feature-local conditional-flow cases are verified
+with the source inventory and native analyzer gates.
 
 ### Native OpenSearch health-wait policy
 
-The final all-class audit under TASK-CQ-GENERAL-OPTIONS-001 identified the
-embedded timeout=60s in OpenSearchNames.HealthParameters as an execution deadline.
+TASK-CQ-GENERAL-OPTIONS-001 assigns the OpenSearchNames.HealthParameters
+timeout=60s to centrally validated execution policy.
 NativeComparisonExecutionOptions' existing adapter responsibility owns
 OpenSearchHealthWaitTimeoutSeconds (default60, inclusive1..60). The existing
 central native binding/validation creates the wrapper before target ownership.
@@ -538,15 +538,16 @@ operand using invariant culture. Green status, all active copies and shard-level
 evidence remain native protocol invariants; only the timeout operand changes.
 Record the effective setting with the existing native adapter evidence.
 
-Root owns source-controlled configuration, contracts/docs and final integration.
-The bounded adapter worker owns the existing options/validator/evidence members,
-OpenSearchNames/ClusterEvidence/Target and the native vector call-site join,
-plus TUnit regressions for configured native URI parameters, the unchanged default
-and invalid-option rejection before observation. Existing real OpenSearch cluster
+Source-controlled configuration, contracts, options/validator/evidence members,
+OpenSearchNames/ClusterEvidence/Target, native vector call sites and TUnit
+regressions are one integration scope. Tests cover configured native URI
+parameters, the unchanged default and invalid-option rejection before observation.
+Existing real OpenSearch cluster
 tests retain their actual operations and acknowledgement assertions. Run focused
 native unit cases through Aspire, then full build/format and all mandatory gates;
-URI regressions alone do not qualify the cluster. Rollback restores these source
-joins together; no schema, stored state or workload comparison contract changes.
+URI regressions alone do not qualify the cluster. A source rollback restores these
+joins together. No schema, stored state or
+workload comparison contract changes.
 
 The native numeric self-review requires keeping aggregate partial types below200
 code lines. Move the existing seed validation/exception join into its already
@@ -555,17 +556,14 @@ metadata and failures; the general options owner calls that cohesive validator.
 OpenSearch URI/observation regressions live in their own OpenSearchHealthPolicyTests
 case class. Preserve the existing all-adapter boundary table and every assertion.
 
-### Current local semantic verification
+### Qualification status
 
-The original native Aspire analyzer report completed388/388 passed with0 failures
-and0 skipped on2026-10-06 at08:27:40 UTC, followed by native AppHost/CLI exit0.
-AC-CQ-037 includes all37 added synchronization, configuration, timer, provenance
-and conditional-flow regressions; the expanded inventory/parser cases also pass.
-The unchanged original report and CLI provenance are retained under the
-GENERAL-RUNTIME-OPTIONS-001 development evidence. Canonical current-source full
-build/format and the runtime options, full unit/scalar/recovery/RF3, functional
-coverage and delivered Linux gates remain open; this result does not mark the
-ADR or complete options acceptance implemented.
+AC-CQ-037 covers synchronization, configuration, timer, provenance and
+conditional-flow analysis, with the expanded inventory and parser regressions.
+Qualification requires a fresh canonical current-source build and formatter, the
+runtime-options suite, full unit/scalar/recovery/RF3 gates, source-bound functional
+coverage and delivered Linux results. No earlier run substitutes for those gates;
+this ADR remains Accepted with implementation and verification pending.
 
 ### Native test-runner admission join
 
@@ -578,21 +576,22 @@ argument. Keep named command identity and invariant numeric formatting. No
 environment fallback, unlimited value, test assertion/deadline change, benchmark
 matrix cap or parallel options defaults are introduced. The ordered stage is
 central definition/validation, runner propagation, genuine Aspire model regressions,
-then current-source build/format and required native suites. Root integrates the
-shared feature/status evidence; the contributor owns only these AppHost joins and
-focused model tests. Failed original v34 evidence stays retained. A scoped revert
-is the rollback; binary/storage/public API migration and dependency changes are
-N/A. Actual full native and delivered-source Linux verification remain open.
+then current-source build/format and required native suites. The AppHost admission
+join and focused model tests are qualified together with
+shared feature evidence. Every run retains its original failure evidence. A source
+rollback restores the preceding checkpoint; binary/storage/public API formats and
+dependencies remain unchanged. Full native and delivered-source Linux verification
+remain open.
 
-The qualification repair TASK-GENERAL-OPTIONS-RESTORE-INPUT-001 maps the existing
-REQ/AC-BACKUP-002 input-rejection contract to the owning ZoneTree manifest reader
-and two real missing/empty-directory cases. Only native FileNotFoundException or
+The REQ/AC-BACKUP-002 input-rejection contract applies to the owning ZoneTree
+manifest reader and its two real missing/empty-directory cases. Only native FileNotFoundException or
 DirectoryNotFoundException from the manifest read becomes the existing bounded
 FormatUnsupported Problem. Canonical data, identity, backup bytes and a healthy
 following restore are asserted; no storage format, resource limit, broad catch or
-dependency replacement is introduced. The focused native118/118 runtime run,
-4/4 genuine admission models, full388/388 analyzer run, canonical formatter and
-full Release build are retained as local development evidence. Full native
+dependency replacement is introduced. Focused runtime and admission regressions
+execute through the test-owned Aspire
+entry point and retain their original reports. Source review or a previous local
+run does not qualify the current source checkpoint. Full native
 unit/scalar/recovery/RF3, source-bound functional coverage and delivered Linux
 acceptance remain mandatory and open.
 
@@ -608,8 +607,9 @@ line, 70 percent module branch and 90 percent critical pipeline thresholds.
 
 The ordered implementation is this contract, the workflow preparation/collection/
 verification join, static governance review, exact-source Linux execution and
-original artifact review. Root owns workflow/docs/status integration; a read-only
-reviewer checks native caller arguments, source identity and failure paths.
+original artifact review. Native caller arguments, source identity and failure paths
+are reviewed with the
+workflow and documentation join.
 Collection failure remains a failed test step; verification also runs after that
 failure and writes its original failure evidence. Always retain reports, settings,
 manifest, raw coverage and derived gate evidence in the existing analyzer artifact.
@@ -617,62 +617,59 @@ Require exactly one original analyzer TRX with a positive total, all tests
 executed and all tests passed; retain its counters, source SHA and original file
 hash in a derived receipt. Skipped tests cannot qualify this full-suite gate.
 
-This executes the same gate independently of benchmark producer selection while
-retaining the existing website coverage gate. No dependency, product contract,
-storage migration, threshold, source inventory or required runtime suite changes.
-Rollback restores this workflow join together with its documentation. Only a
+This runs the analyzer gate independently of benchmark selection and retains the
+website coverage gate. No dependency, product contract,
+storage format, threshold, source inventory or required runtime suite changes.
+A source rollback restores this workflow join and its documentation. Only a
 completed successful original collector report and source-bound verification
 qualify coverage; unit/scalar/recovery/RF3 acceptance remains separately required.
 
-### Native deterministic PDB qualification repair
+### Native deterministic PDB source binding
 
-TASK-CQ-PDB-PATHMAP-008 joins REQ-CQ-009 and AC-CQ-043/044 under ADR-033 after
-the delivered Linux RF3 prerequisite rejected all120 Abstractions sources.
-Native .NET CI builds map source roots through PathMap; the owning compiled
-identity resolver currently treats the mapped `/_/` root as an external physical
-directory. Recognize only that exact deterministic prefix and validate its suffix
-through the existing confined source-path resolver. Preserve physical/original
+TASK-CQ-PDB-PATHMAP-008 joins REQ-CQ-009 and AC-CQ-043/044 under ADR-033. The
+source binder handles deterministic portable-PDB paths using the strict contract
+below.
+Native .NET CI builds map source roots through PathMap. The compiled identity
+resolver recognizes only the exact deterministic `/_/` prefix and validates its
+suffix through the confined source-path resolver. Preserve physical/original
 compilation roots, digest-redacted unknown external paths, complete inventory,
 SHA256 checksums, PE/PDB GUID/stamp checks, artifact/document/path bounds and drift
 checks. No unbound source becomes measured and no fallback mapping is introduced.
 
-Root owns the specification, script integration, evidence and final Linux gates.
-The script contributor owns only functional-coverage.compiled-identity.ps1; the
-test contributor owns feature-local deterministic compiler fixtures, native TUnit
-cases and reuse of the existing bounded ProductionSourceManifestProcess lifecycle.
-Before implementation, freeze the stage order: this contract; narrow mapping;
-real native compiler fixtures with matched DLL/PDB/source bytes; focused Aspire
-regressions; exact-source Linux preparation and complete recovery/RF3 qualification.
+The source map, compiled-identity verifier and its feature-local compiler fixtures
+form one source checkpoint. Native TUnit cases exercise matched DLL/PDB/source
+bytes through the bounded ProductionSourceManifestProcess lifecycle. Qualification
+then uses exact-source Linux preparation and the complete recovery/RF3 gates.
 
-Compile fixture sources with the actual installed SDK compiler in an owned
-temporary directory, using its native PathMap and portable PDB emission. Verify
+Compiler fixtures use the installed SDK compiler in an owned temporary directory,
+with native PathMap and portable PDB emission. Verify
 canonical mapped sources bind and retain their real checksum; altered source
 bytes fail against the original PDB, restored bytes succeed, and unknown or
 escaping mapped roots fail binding without exposing their original path. Preserve
 the existing native full production manifest/tamper/healthy-follow-up regression,
 every original child/reader/disposal join and centrally admitted test deadlines.
-Rollback restores the resolver and its fixture joins; storage/public format and
-dependency migration are N/A. Builds, source review and fixture results alone do
-not qualify runtime suites or numeric coverage.
+A source rollback restores the resolver and its fixture joins. Storage/public
+formats and dependency versions remain unchanged. Builds, source review and fixture
+results alone do not qualify runtime suites or numeric coverage.
 
-The fixture join also repairs the inherited native process settlement path:
+The fixture join exercises native process settlement:
 always observe the original task, including a fault completed between deadline
 and cleanup; retain the complete primary/cleanup aggregate, including fatal
 members; and join every original child and reader before process disposal or
-owned-root deletion. The process contributor owns
-ProductionSourceManifestProcessSettlement and the existing failure projection in
-NativeCoverageImageNodeSettlement, with feature-local native child/cancellation
+owned-root deletion. ProductionSourceManifestProcessSettlement and the existing
+failure projection in
+NativeCoverageImageNodeSettlement retain feature-local native child/cancellation
 and aggregate-retention regressions. Existing centrally admitted operation and
 settlement deadlines remain unchanged; an exceeded cleanup deadline stays a
 failure and does not authorize detached cleanup or success. Shared coverage-copy
-implementation remains with its current owner. Root reviews this independent
-join before a fresh canonical build and focused Aspire execution.
+implementation remains with its current owner. The complete join is verified with
+a fresh canonical build and focused Aspire
+execution.
 
-Root also owns the matching Linux CI integration: execute the ten native source
-ownership cases through the existing Aspire unit entry before the full unit suite,
-require their original TRX to contain exactly ten executed/passed cases, and
-retain it through the existing always-uploaded TestResults artifact. This gives
-the repaired prerequisite an independent completed receipt while full
-unit/scalar/recovery/RF3 and product coverage remain mandatory and keep their
-actual failure status. No suite, timeout, coverage threshold or source inventory
-is weakened; rollback removes only this additional focused CI join.
+The Linux CI integration executes the ten native source-ownership cases through
+the existing Aspire unit entry before the full unit suite. Their original TRX must
+contain exactly ten executed and passed cases and remains in the always-uploaded
+TestResults artifact. This focused receipt supplements the required
+unit/scalar/recovery/RF3 and product-coverage gates without changing their status.
+Suite, timeout, coverage threshold and source inventory remain unchanged; a source
+rollback removes this focused CI join.

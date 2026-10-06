@@ -11,8 +11,8 @@ assemblies consume its public types, so those types are an actual library API.
 Retain KeyLoad.Comparisons project/path/assembly/namespace and all public CLR
 signatures as a library. Introduce KeyLoad.ComparisonHost as the only CLI, with
 feature-owned composition and lifecycle plus a thin Program. No visibility fixes
-or analysis suppression. Public arrays/Single naming require their own accepted
-migration; this decision does not authorize changing them or their wire values.
+or analysis suppression. Public names, signatures and serialized values remain
+unchanged under this decision.
 
 ```mermaid
 flowchart LR
@@ -36,7 +36,7 @@ every required stage and evidence exists.
 
 HOST-CLI owns only the new host project after lead-authored local AGENTS; HOST-TEST
 owns only new UnitTests BenchmarkComparisons process tests/helpers; HOST-JOIN alone
-owns library csproj/old Program removal, solution, AppHost exact project reference
+owns library csproj, host entry point, solution, AppHost exact project reference
 and Projects.KeyLoad_ComparisonHost substitution, inventory/maps/docs. Existing
 contracts, adapters, runner, registration, profiles, report serialization, tests,
 native topology and website remain protected. No concurrent same-file writes.
@@ -45,11 +45,11 @@ Keep all existing CLI settings and environment/argument precedence, current targ
 registration, resource name comparisons, waits/images/environment, report files and
 exit meaning. Validate required settings before allocating network clients; track
 partial construction owners explicitly, clean each once, detach console handlers
-before cancellation-source disposal. Private ownership restructuring has no data,
-authorization, schema, dependency or persistence migration. No fake verification.
+before cancellation-source disposal. Private ownership restructuring changes no data,
+authorization, schema, dependency or persistence contract. No fake verification.
 
-The only removed executable is the replaced library Program. Rollback moves the
-sole entry and matching project/Aspire wiring together; no shim or duplicate path.
+The host is the sole CLI. Rollback restores its project and matching
+AppHost wiring together; no shim or duplicate path.
 Stop on an upstream defect or broader public/native/report contract need. Local
 build/static proof is allowed; tests/load/recovery qualification are GitHub-only.
 The historical six-engine baseline does not satisfy nine-engine ADR-034 acceptance.
@@ -62,7 +62,7 @@ report/exit contracts. Ordered try/finally cleanup attempts all later targets an
 unowned clients. A failure asynchronously prints the existing safe target/type
 line and throws ComparisonTargetCleanupFailed with no original message/inner
 exception; errors cannot silently leave a successful host exit. This is a host
-error boundary repair, with no public library/data/topology/dependency migration.
+error boundary repair, with no public library/data/topology/dependency change.
 The exact disjoint task graph, first-authored real process negative regression,
 manual private-lifetime review exception, development builds and mandatory GitHub
 qualification are in the host acceptance/plan. Keep this ADR Accepted; source

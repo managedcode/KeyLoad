@@ -11,7 +11,7 @@ This decision remains Accepted until delivered-source qualification is complete.
 
 REQ-STORAGE-020 / AC-DBHP-009 extends AC-SQ-004 and AC-DBHP-005/006.
 Exact40f87 run37109874881 discovers a real post-InstallPrepared cleanup failure:
-the old maintainer/tree were successfully disposed during generation preparation
+the retired maintainer/tree were successfully disposed during generation preparation
 but remain referenced as live owners; final disposal repeats the maintainer call.
 This is KeyLoad handle ownership, not a replacement or workaround for ZoneTree.
 
@@ -31,7 +31,7 @@ Keep failed-open maintainer/journal/tree/ownership and normal
 maintainer/tree/journal/ownership orders, independently required cleanup,
 generation/identity publication, journal swap, poison and recovery semantics.
 No swallowed ObjectDisposedException, diagnostics waiver, new callback, data or
-deployment migration. Root owns shared docs/Git/gates. Rollback both product
+deployment change. Root owns shared docs/Git/gates. Rollback both product
 helpers together after drain; retain the regression and native failure evidence.
 The decision remains Accepted until actual qualification; process kills do not
 qualify power-loss durability.
@@ -43,7 +43,7 @@ one private runtime/handle owner with cohesive initialization/identity, journal,
 read/transaction/range, checkpoint-format/generation and BackupRestore components.
 All feature code remains in the same repository and canonical slices. No second
 gate/tree/WAL, partial-type loophole, quality exception or grain-owned storage.
-PartitionHost retains physical ownership when Orleans activations migrate.
+PartitionHost retains physical ownership as Orleans activations move.
 
 ```mermaid
 flowchart TD
@@ -82,7 +82,7 @@ flowchart TD
 5. TASK-MP-010AF-B owns only NEW ZoneTreeBackupRestore-prefixed files in BackupRestore
    after runtime/identity interfaces freeze. Retain exact verified local backup,
    clean restore/private new identity/paused authority-state recipe and one ordinary
-   restored facade. Remove old provider backup behavior in the lead's same join.
+   restored facade. Route backup operations through the shared BackupRestore owner in the lead's same join.
 6. Lead waits for all required full packets, reviews every diff against criteria,
    builds actual provider/full graph with all SDK/style/XML/numeric rules, and
    resolves genuine findings. Canonical GitHub runs real TUnit/MTP unit, process
@@ -101,10 +101,10 @@ and replay in original order. Checkpoint manager and backup borrow the single ru
 Lead joins unchanged public facade callers, unit/recovery/replica checkpoints and
 both StorageRecovery/BackupRestore feature specs. All worker write scopes are disjoint.
 
-Source-only migration: move real private responsibilities to canonical slices and
-remove replaced facade partial behavior together. No data, public or wire migration;
+Source-only refactoring: keep private responsibilities in canonical slices and
+compose them through the facade. No data, public or wire contract change;
 identity/checkpoint/WAL/backup bytes and error codes remain exact. Rollback this
 entire private decomposition as one source unit; do not roll back enabled analysis,
-add compatibility shims or reassign node-local storage to grains. Existing unrelated
+add alternate API paths or reassign node-local storage to grains. Existing unrelated
 native/website/adapter work is protected. Process kills qualify only their declared
 failure model, never power-loss durability or production readiness.

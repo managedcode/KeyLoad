@@ -47,7 +47,7 @@ flowchart LR
 | TASK-CQ-SYNC-001 | Runtime worker: Core, Storage.ZoneTree, Replication, Orleans, Diagnostics | This accepted owner correction | Audited typed gates; no grain-state lock; preserving lifecycle diff |
 | TASK-CQ-SYNC-002 | Server worker: Server and AppHost only | This contract | Typed gates, disposal completion repair and shared-service ownership review |
 | TASK-CQ-SYNC-003 | Analyzer worker: Analyzers and Analyzers.Tests only | Frozen KLD0034 / AC-CQ-025 | Native compiler rule and complete semantic regression flows |
-| TASK-CQ-SYNC-004 | Lead: benchmark/test gate migration, shared docs, review and verification | 001..003 | Integrated diff; formatter/build; Aspire suite evidence; scoped checkpoint |
+| TASK-CQ-SYNC-004 | Lead: benchmark/test gate updates, shared docs, review and verification | 001..003 | Integrated diff; formatter/build; Aspire suite evidence; scoped checkpoint |
 
 Workers read nearest local policy and preserve unrelated changes; same-file
 OrleansNode edits must preserve its pre-existing diff. No worker owns shared
@@ -66,7 +66,7 @@ gates. A failing unrelated source gate is reported, never hidden or taken over.
 Initial inventory found object gates in shared services and test collectors,
 including OrleansNode, PartitionHost, ReplicaConsensus, ClusterCoordinator and
 ZoneTreePointCacheLifecycle, plus Monitor wait/pulse disposal coordination in
-NativeTextProjection. Source migration covers 64 fields and two helper parameters;
+NativeTextProjection. Typed-gate refactoring covers 64 fields and two helper parameters;
 the new real native-reader disposal/reopen regression is authored. Local compiler,
 Aspire analyzer and blocker evidence is retained in the
 [development receipt](../implementation/typed-synchronization-2026-10-05.json).

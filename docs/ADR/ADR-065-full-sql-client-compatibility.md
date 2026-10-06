@@ -1,18 +1,5 @@
 # ADR-065: Full SQL syntax and client protocol
 
-TASK-SQLC-COMP-ORACLE / REQ-SQLC-003 / AC-SQLC-003C preserves AC-COMP-007 after
-actualca22 RF3 report0a29cc8c3c5d29db4f1135277856af42c23a584a83a232b0358c8636b74f1ad1
-retains66pass/1error. Messaging.Enqueue already canonicalizes queue JSON in
-ordinal key order. Root first uses that original failing RF3 regression, then
-owns only IntegrationTests DatabaseCompositionRf3Tests.cs and NEW
-DatabaseCompositionRf3Payload.cs: preserve incoming noncanonical DTO JSON, compare
-persisted exact bytes to an independent named-field ordinal JSON golden and
-reparse full link equality. No product canonicalizer may generate the golden.
-All forward/reverse/replay/rollback/error flows and genuine SDK/MCP RF3 remain.
-Root source review/build/format/static precede stable delivery and real RF3;
-reverse-flow and fullgate remain pending. No production/schema/migration change;
-rollback both fixture files together. Independent ADR067/outbox work is preserved.
-
 Owner clarification 2026-10-03 requires full SQL for one composable database,
 not merely independent per-model calls. [DatabaseComposition](../Features/DatabaseComposition.md)
 and [ADR-067](ADR-067-composable-agent-database.md) define the first bounded atomic
@@ -24,18 +11,16 @@ Status: Accepted staged implementation contract; full execution/native protocol
 and exact-source qualification pending. Date2026-10-03. Integration owner: KeyLoad
 root planning agent. Related QueryExecution/ClientApi/RelationalStorage/Search;
 REQ-SQLC-001–011 and AC-SQLC-001–011 in the root sql-client-compatibility acceptance.
-This extends ADR-012/054; their initial Q1/CALL stage is historical, not the full
-product. Existing SQL envelope1 and generated DTO IDs remain unchanged.
+This extends ADR-012/054; the existing Q1/CALL implementation is a bounded initial
+stage, not the full product. Existing SQL envelope1 and generated DTO IDs remain unchanged.
 
 ## Accepted public/native test-oracle stage
 
-TASK-SQLC-P1 / REQ-SQLC-003 / AC-SQLC-003P follows the root-reviewed R17 original
-report (source366, CI37123589277/job111204377864/artifact11273574119; report SHA256
-3471e334e4348ff727cf928ffdc845ec7b73a9e0de63b920262450217dc69635).
-SQL-compiled versus canonical descriptor bytes pass before the invalid trailing
-pre-JSON DTO comparison fails. Array/stream divergence or graph normalization
-is not yet established; no product serialization change is authorized here.
-
+TASK-SQLC-P1 / REQ-SQLC-003 / AC-SQLC-003P defines the independent public-value
+oracle for canonical native serialization. Native array and stream writers must
+agree for the same decoded instance, and the complete typed DTO must roundtrip
+without changing its public JSON value. Serializer defects belong to the owning
+serializer; the SQL caller must not normalize payloads to hide them.
 Ordered contract: first-author actual same-instance native array/MemoryStream
 writer parity plus received-command/recursive DTO semantic regressions; then
 bounded gpt-6-luna/high worker updates only UnitTests ClientApi canonical corpus,
@@ -56,8 +41,8 @@ not JSON/null text. All existing recursive/raw JSON value assertions remain.
 A same decoded instance must produce exact equal native array/stream bytes and
 valid typed round trips. Any genuine failure remains failing and escalates to
 its serializer owner; no fixture avoidance, dropped assertion or consumer
-workaround. No public/format/storage/auth/transport migration; rollback corpus
-and oracle changes together. FullSQL/native/coverage gates stay open.
+workaround. No public format, storage, authorization, or transport change is in scope; rollback
+the corpus and oracle changes together. FullSQL/native/coverage gates stay open.
 
 ```mermaid
 flowchart LR
@@ -195,9 +180,7 @@ atomic set-DML/DDL, transport-neutral verified dispatch/original settlement, the
 canonical session transaction read-cut/write-set/commit authority before wire
 implementation. Simple-query implicit batches, explicit BEGIN and modifying CTEs
 require their actual semantics and fault tests. Proposed API shapes remain
-planning only. The70-input audit binds inspected working bytes at HEAD8071148c,
-including undelivered composition work; it is not committed equality or runtime
-proof. Packet SHA256 `10b154a3a3786152c8e821026c4919b4efea70a1e609fac8b0f33dff2ef9fb7a`.
+planning only.
 
 ## Native transport and search freezes
 
@@ -208,9 +191,10 @@ implicit/explicit transaction state, SQLSTATE, startup/catalog client probes,
 pipeline/connection/reply numeric limits and original execution drain. Every
 command revalidates persisted principal/policy and uses a fresh request grain.
 Current SHA256 API-key verifiers are not SCRAM verifiers. Do not invent SCRAM,
-trusted roles or DefaultHttpContext to impersonate the HTTP gateway. Auth/TLS/
-credential migration and transport-neutral gateway admission require explicit
-review and their own real invalid/revoked/failover/cancel/recovery evidence.
+trusted roles or DefaultHttpContext to impersonate the HTTP gateway. Any native
+authentication/TLS or transport-neutral gateway admission contract must preserve
+persisted authorization and prove invalid, revoked, failover, cancellation and
+recovery behavior through real clients.
 
 [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) is
 the owner's search candidate under AC010/ADR-009; no package/replacement decision
@@ -219,13 +203,13 @@ ownership, atomic index publication, rebuild/checkpoint/restart/collision/scorin
 partial cancellation, quotas and physical-replica proof before integration. Real
 matched read/create/update/delete and fault/performance tests determine the choice.
 
-## Migration, rollback and qualification
+## Implementation boundaries and qualification
 
-Stage1 is additive grammar/internal SDK classification only: no data, serializer,
-SQL envelope version, API route, package or storage-format migration. Roll back
-the shared reader and all consumers together. Preserve canonical execution and
-native WAL/atomic/RF3 journals. Native transport or broader AST/data migrations
-need separate stage contracts before implementation and explicit recovery proof.
+This stage adds grammar/internal SDK classification only; it does not change data,
+serializer, SQL envelope version, API route, package, or persisted storage format.
+Roll back the shared reader and all consumers together. Preserve canonical execution
+and native WAL/atomic/RF3 journals. Native transport or broader AST work needs its
+own implementation contract and recovery proof before implementation.
 
 First-author TUnit/MTP tests from AC; no mocks/doubles. Unit real-store/Kestrel,
 process recovery and Docker/Aspire RF3 actual SDK plus official MCP qualify only
@@ -247,10 +231,10 @@ Status remains Accepted. [Original7d1196 CI](../implementation/sql-client-qualif
 qualifies the bounded stage's44 execution rows and complete ordinary CI;
 coverage, full SQL/native transport and complete performance gates remain open.
 
-1. Review the current parser/normalizer/evaluator/candidate/permission/cursor
-   sources and retained ca7 baseline. R22 corrects partial-bound truth: UNKNOWN
-   AND FALSE is FALSE, NOT that is TRUE; UNKNOWN AND TRUE stays UNKNOWN. Eager
-   non-null scalar mismatch errors and null-before-type checks remain current Q1.
+1. The current parser/normalizer/evaluator/candidate/permission/cursor must
+   preserve three-valued partial-bound semantics: UNKNOWN AND FALSE is FALSE,
+   NOT that is TRUE, and UNKNOWN AND TRUE stays UNKNOWN. Eager non-null scalar
+   mismatch errors and null-before-type checks remain current Q1.
 2. First-author real grammar and ZoneTree TUnit tests, then lower unquoted
    `value [NOT] BETWEEN lower AND upper` to existing >=/<= AND and optional
    outer Negation. Existing Operand reads all three operands; consume only the
@@ -272,13 +256,13 @@ coverage, full SQL/native transport and complete performance gates remain open.
    MCP, independent positive/negative/null truth results, manifest and error/next
    request. No skipped suite or development build satisfies execution.
 
-No persisted data, native wire, serializer or public DTO migration. Rollback
-parser/manifest/new fixtures together; existing old AST/operators remain valid.
+This stage changes no persisted data, native wire, serializer, or public DTO.
+Rollback parser/manifest/new fixtures together; current AST/operators remain unchanged.
 Dependencies are existing Q1 and ADR012/054, typed AST/scalar comparison, resource
 limits, field authorization and SDK/MCP RF3 infrastructure. New performance
 claims require actual matched scale cohorts; this stage does not add an index
-range access path or complete SQL/native transport. Root keeps all independent
-benchmark/serialization/profiling/Garnet edits untouched.
+range access path or complete SQL/native transport. Independent benchmark,
+serialization and profiling work remains outside this scope.
 
 ```mermaid
 flowchart LR

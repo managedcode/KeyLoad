@@ -10,11 +10,8 @@ internal sealed class ReplicaPeerOptionsFactory(IOptions<NodeOptions> node, IOpt
 {
     public ReplicaPeerOptions Create(string name)
     {
-        var options = node.Value.CreatePeerOptions() with
-        {
-            ConnectTimeout = discovery.Value.ConnectTimeout,
-            ReplayLimits = replay.Value
-        };
+        var options = node.Value.CreatePeerOptions(discovery.Value.ConnectTimeout) with
+        { ReplayLimits = replay.Value };
         options.Validate(replica.Value);
         return options;
     }

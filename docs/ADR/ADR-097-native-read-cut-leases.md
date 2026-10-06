@@ -21,8 +21,8 @@ normal/scalar/recovery/RF3 and exact-SHA Linux results before qualification.
 Pinned ZoneTree1.9.8 snapshot creation and iterator advance are synchronous and
 non-cancellable. Check and charge before/after; do not claim an interruptible
 deadline or abandon original work. No canonical format, native WAL, public wire,
-RF3 topology or acknowledged-write authority changes. Leases are disposable on
-restart/migration and retain no signing material. Rollback drains the actual
+RF3 topology or acknowledged-write authority changes. Leases are disposable on restart or activation movement and retain no signing
+material. Rollback drains the actual
 leases after stopping admission and removes only runtime helpers.
 
 Whole-tree replacement must reject ResourceExhausted while a native cut is leased.

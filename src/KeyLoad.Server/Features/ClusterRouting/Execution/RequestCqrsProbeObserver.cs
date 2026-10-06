@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IReplicaDiscoveryObservationSink, IAsyncDisposable
+internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAsyncDisposable
 {
     private readonly Lock disposeSync = new();
     private readonly RequestCqrsProbeFiles files;
@@ -28,10 +28,6 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IRe
         this.clock = clock ?? TimeProvider.System;
         lifecycle = new(executionOptions);
     }
-
-    public ValueTask ObserveIncompatibleAsync(string voterId, ReplicaDiscoveryObservation observation,
-        CancellationToken cancellationToken)
-        => RequestCqrsProbeDiscoveryObservation.Record(files, replica, voterId, observation, cancellationToken);
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken cancellationToken)

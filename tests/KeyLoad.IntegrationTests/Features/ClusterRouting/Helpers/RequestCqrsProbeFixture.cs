@@ -16,12 +16,10 @@ internal sealed class RequestCqrsProbeFixture
     private bool cleaned;
 
     internal RequestCqrsProbeFixture(string root, string sessionId,
-        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json,
-        bool captureDiscovery = false)
+        Dictionary<string, string> directories, Dictionary<string, byte[]> owners, RequestCqrsProbeJson json)
     {
         Root = root;
         SessionId = sessionId;
-        CaptureDiscovery = captureDiscovery;
         Json = json;
         nodeDirectories = directories;
         ownerRecords = owners;
@@ -31,11 +29,10 @@ internal sealed class RequestCqrsProbeFixture
 
     internal string Root { get; }
     internal string SessionId { get; }
-    internal bool CaptureDiscovery { get; }
     internal RequestCqrsProbeJson Json { get; }
 
-    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId, bool captureDiscovery = false)
-        => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId, captureDiscovery);
+    internal static RequestCqrsProbeFixture Create(string dataRoot, Guid sessionId)
+        => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId);
 
     internal Guid WriteArm(string principalId, Guid commandId, GrainReadKind? readKind,
         RequestCqrsProbePhase phase, RequestCqrsProbeAction action)
@@ -161,8 +158,7 @@ internal sealed class RequestCqrsProbeFixture
             if (cleaned)
             { return Task.CompletedTask; }
         }
-        RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true,
-            allowDiscoveryRecords: CaptureDiscovery);
+        RequestCqrsProbeFileStore.DeleteOwnedTree(Root, nodeDirectories, ownerRecords, requireAllOwners: true);
         lock (sync)
         { cleaned = true; }
         return Task.CompletedTask;

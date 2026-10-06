@@ -4,7 +4,6 @@ internal sealed record RequestCqrsProbeSnapshot(
     IReadOnlyList<RequestCqrsProbeLoadedArm> Arms,
     IReadOnlyList<RequestCqrsProbeReleaseRecord> Releases,
     IReadOnlyList<RequestCqrsProbeMarkerRecord> Markers,
-    IReadOnlyList<RequestCqrsProbeDiscoveryRecord> Discoveries,
     int FileCount,
     long AggregateBytes);
 

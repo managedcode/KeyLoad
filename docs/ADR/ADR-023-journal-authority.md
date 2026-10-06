@@ -28,10 +28,10 @@ Treating every ordered record as one interchangeable log is rejected because its
 
 Related: `REQ-FEED-001/AC-FEED-001`, `REQ-EVENT-003/AC-MP-005`, `REQ-MSG-003/AC-MSG-003`, `REQ-BACKUP-004/AC-BACKUP-004`; ADR-003/008, ADR-024/025/027/030; KL-003/005/016, KL-081/082/084/098/099.
 
-1. Freeze record authority, lifecycle, and retention owner for each state class before storage/schema changes.
+1. Freeze record authority, lifecycle, and retention owner for each state class under the current storage schema.
 2. Test independent trim, corruption, backup/restore, reopen/compaction, and consumer pin boundaries against a real store.
 3. Implement catalog/keyspace, recovery, and manifest owners in their canonical slices; atomic writes include every affected state and receipt.
-4. Roll out versioned manifests only with verified upgrade/rollback; never repurpose one journal's sequence as another public cursor.
+4. Validate the current manifest version and reject unsupported versions; never repurpose one journal's sequence as another public cursor.
 5. Qualify local recovery and RF3 snapshot/restore through GitHub process and cluster suites; separately qualify retention and endurance.
 
 Current source: `src/KeyLoad.Storage.ZoneTree/`, `src/KeyLoad.Core/Features/ChangeFeeds/Execution/ProjectionOutbox.cs`, `Events.cs`, `Messaging.cs`, `EventSources.cs`; tests include ChangeFeed, EventStreams, Messaging, Recovery, and Artifact suites. These paths are not proof of full capability qualification.

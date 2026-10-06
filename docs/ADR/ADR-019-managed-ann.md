@@ -10,7 +10,7 @@ product execution budgets and global runner concurrency remain unchanged. Verify
 the private base/post packet, full strict build/format/governance, Aspire normal
 and scalar suites and exact-source Linux originals before any qualification
 claim. Rollback removes only the resource key and attributes; there is no data,
-dependency, public API or production admission migration.
+dependency, public API or production admission change.
 
 ## Context and decision
 
@@ -51,12 +51,12 @@ No external ANN package or persisted index format is approved here. The root own
 
 The complete computational API, bounds, requirements, acceptance criteria, slice ownership and rollout are frozen in [ManagedAnn](../Features/Search/ManagedAnn.md). Related tasks are KL-030/031/032/059/060; no task is closed by this decision.
 
-Root accepts the bounded local R2A canonical input seam in [ManagedAnnSeed](../Features/Search/ManagedAnnSeed.md), REQ/AC-ASD-001–006. The ordered contract assigns new Core/Search AnnSeed files to query_wave, independent new AnnSeed TUnit cases to cluster_wave, read-only review to lifecycle_wave and all shared/gate/Git joins to root. One current persisted-policy read cut captures owned visible full-space vectors, actual scalar source/applied/outbox metadata; budgeted metadata and the original vector view avoid double charging. Sorting and exact-bit hashing run only after the gate is released, with finite pre-allocation owned/peak reservations and work/cancellation checks. This is a historical computational seed, not pinned replay, durable generation, public approximation, current authorization or complete AC-ANN-007/008. Existing synchronous queued-gate cancellation and later policy/source/generation validation remain explicit later contracts; no storage or client migration is authorized by R2A.
+Root accepts the bounded local R2A canonical input seam in [ManagedAnnSeed](../Features/Search/ManagedAnnSeed.md), REQ/AC-ASD-001–006. The ordered contract assigns new Core/Search AnnSeed files to query_wave, independent new AnnSeed TUnit cases to cluster_wave, read-only review to lifecycle_wave and all shared/gate/Git joins to root. One current persisted-policy read cut captures owned visible full-space vectors, actual scalar source/applied/outbox metadata; budgeted metadata and the original vector view avoid double charging. Sorting and exact-bit hashing run only after the gate is released, with finite pre-allocation owned/peak reservations and work/cancellation checks. This is a historical computational seed, not pinned replay, durable generation, public approximation, current authorization or complete AC-ANN-007/008. Existing synchronous queued-gate cancellation and later policy/source/generation validation remain explicit later contracts; R2A changes no storage or client contract.
 
 R2A source is joined and locally verified: full solution build23/formatter23/governance23 passed, and actual Aspire normal/scalar 34-case regressions passed unchanged source/runtime inventories. The linked seed spec retains all original passing reports, the earlier 31/33 failure and its concrete reservation/corruption fixes. This development checkpoint does not mark this ADR Implemented; persisted projection, replay, public admission and exact-source Linux/recovery/RF3 gates remain open.
 
 1. R1: implement the immutable packed computational candidate in new Query/Search files and independently authored real-ZoneTree metric, budget, filter, recall and rebuild tests. Root owns integration, all shared files, strict solution checks, Aspire execution and a stage commit. Public exact search and canonical stored data remain unchanged.
-2. R2: root must first accept an exact native-generated ZoneTree manifest/chunk and source-cut/outbox replay contract, including atomic publication, locks, leases, cancellation, corruption and crash recovery. Only then implement the node-local disposable projection. The current decision does not authorize workers to invent that format or lifecycle.
+2. R2: root must first accept an exact native-generated ZoneTree manifest/chunk and source-cut/outbox replay contract, including atomic publication, locks, leases, cancellation, corruption and crash recovery. Only then implement the node-local disposable projection. The current decision does not authorize workers to invent that current-format lifecycle.
 3. R3: root must first accept versioned SQL/SDK/MCP approximation, completeness, fallback, eligibility and freshness metadata. Only then integrate an explicit ANN capability with persisted authorization in one scoped read cut and genuine RF3 tests. No silent approximation or branch truncation is permitted.
 4. R4: retain actual loaded corpora, quality/resource counters, normal/scalar reports and exact-source Linux qualification. Global performance still requires the mandated 100,000/1,000,000-record matched GitHub workloads; R1's 10,000-record recall control is not that evidence.
 
@@ -64,7 +64,7 @@ The algorithm reference is the primary [HNSW paper](https://arxiv.org/abs/1603.0
 
 Vector-only PutVector updates can preserve DocumentRevision. R2 freshness therefore must bind committed source cuts and actual outbox positions, not only document revision. Logical index identity includes partition, collection, field and the complete VectorSpace; node identity/incarnation/data epoch and read-generation binding belong to the later physical projection contract. Orleans coordinates logical ownership and admission; open ZoneTree handles remain node-local.
 
-Rollback of R1 removes the unused candidate. R2/R3 rollback disables its derived capability and rebuilds from canonical ZoneTree data without changing acknowledged writes, native WAL, replication or atomic recovery journals. No public wire/data migration occurs in R1; later stages require their explicit upgrade contracts before implementation.
+Rollback of R1 removes the unused candidate. R2/R3 rollback disables its derived capability and rebuilds from canonical ZoneTree data without changing acknowledged writes, native WAL, replication or atomic recovery journals. R1 changes no public wire or persisted data; later stages require their separately accepted current-product contracts before implementation.
 
 Root accepted the R1 packing/reservation refinement in [ManagedAnn](../Features/Search/ManagedAnn.md#accepted-packing-and-reservation-refinement-2026-10-04) before the first runtime gate: actual-level upper offsets/edges, per-query visit bitmap, explicit conservative array/string/object accounting, reported build/search reservations and inclusive exact/excess/sparse admission. This corrects source-review findings without changing public search, canonical data or the unapproved R2/R3 contracts. Both workers retain their disjoint new-file scopes; root must review the revised source and execute every gate before any qualification claim.
 
@@ -95,7 +95,7 @@ exact-score/allocation regressions in that order. Query worker owns its private
 Search implementation packet, cluster worker owns its independent real-store test
 packet, and root owns complete review, joins, full checks,
 Aspire native/scalar corpus gates and original exact-source evidence. No data,
-wire, capability or format migration is introduced; rollback reverts the value
+wire, capability or persisted-format change is introduced; rollback reverts the value
 joins. This ADR remains unqualified until its original full acceptance is proven.
 
 Root accepts the R2B pin prerequisite in
@@ -107,8 +107,8 @@ with signed empty-effect receipts, and retain later history for replay. The
 bounded single-record bridge in independent real-store tests is a correctness
 control, not a production performance choice. Cluster worker owns only new
 private Search test files; root owns review, Aspire normal/scalar/full gates,
-original evidence and all-code checkpoints. No physical generation, alias,
-format, public capability or canonical migration is accepted by this prerequisite;
+original evidence and all-code checkpoints. This prerequisite accepts no physical generation, alias,
+format, public capability, or canonical-data change;
 the complete native ZoneTree projection/recovery contract remains required.
 
 Root accepts TASK-ANN-R1-CONSTRUCTION-VALUE and REQ/AC-ANN-011 in the
@@ -120,7 +120,7 @@ charge. Root freezes and reviews the private implementation, joins independent
 class/value traversal and allocation tests, then retains full Release/static and
 Aspire native/scalar corpus evidence. Exact-source Linux and ANN lifecycle/RF3
 acceptance remain required. No persistence or public transport changes occur;
-rollback reverts these computational joins, with no store migration.
+rollback reverts these computational joins, with no store change.
 
 ## Accepted unchanged-build observations, 2026-10-05
 
@@ -141,7 +141,7 @@ Root accepts REQ/AC-ANN-015 and TASK-ANN-R1-NEIGHBOR-COUNT in
 Query's owned RAM adjacency packs the count into its existing first slot within
 the unchanged five-million-record/degree128 admission. Preserve neighbor order,
 metric arithmetic, actual edge charges and every original resource/deadline cap;
-there is no data or public format migration. One Luna worker owns the narrow
+there is no data or public-format change. One Luna worker owns the narrow
 PackedAnnGraph source packet and independent native graph/candidate regressions;
 root owns contract review, exact-base join, unchanged-work before/after
 development observations, strict checks and Aspire normal/scalar/full Linux
@@ -156,7 +156,7 @@ Accepted bounded stage: REQ/AC-ANN-016 and TASK-ANN-DUPLICATE-BUDGET-CHECKS in `
 
 `AnnWorkBudget.Charge` begins by calling `Check`, then validates the charge and updates the existing work counter. In eight frozen Search source files, twelve sites call `Check` immediately before `Charge` with no intervening operation. Remove only those twelve calls. Retain every `Charge` and its original amount, so each charged action still observes cancellation/deadline immediately before its counter update. Preserve other explicit checks, particularly any path that can exit without reaching a charge.
 
-The Luna worker owns only the eight listed ANN source files in the private packet. Root owns exact-base review, integration, strict checks, and same-source genuine Aspire normal/scalar observations with no changes to the corpus, caps, deadline, test admission, or assertions. This is an equivalent-check-count optimization candidate, not a measured speedup, timeout diagnosis, or qualification. Rollback restores the eight source files. Persistence, public transport, storage, and migration are N/A.
+The Luna worker owns only the eight listed ANN source files in the private packet. Root owns exact-base review, integration, strict checks, and same-source genuine Aspire normal/scalar observations with no changes to the corpus, caps, deadline, test admission, or assertions. This is an equivalent-check-count optimization candidate, not a measured speedup, timeout diagnosis, or qualification. Rollback restores the eight source files. Persistence, public transport, and storage are outside this stage.
 
 
 ## Accepted ADR-019 amendment — charged ANN inner-loop check de-duplication
@@ -199,8 +199,8 @@ The Luna owner supplies the guarded source packet and independent native
 adjacency regressions. Root compares complete successful controls, retains
 original incomplete Linux normal/scalar observations, and owns the join and
 all strict/Aspire gates. A partial failed build cannot prove graph equivalence
-or speed. Migration is N/A: R1 remains an internal immutable candidate with no
-serialized/public contract; R2/R3 require separate accepted contracts. Rollback
+or speed. R1 remains an internal immutable candidate with no serialized/public
+contract; R2/R3 require separate accepted contracts. Rollback
 restores only the removed scan and helper.
 
 Root's successful-control observation joins AC-ANN-018 before code: fixed v1

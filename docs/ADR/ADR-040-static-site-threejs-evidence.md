@@ -4,7 +4,7 @@ Status: Implemented for the website scope; exact-H GitHub qualification, automat
 
 ## Context and decision
 
-The owner requests a website design appropriate for KeyLoad and real Three.js. Keep plain static HTML/CSS/ES modules, introduce a product-first editorial composition and a conceptual RF3 architecture figure, retain the complete numerical benchmark explorer and move feature-owned assets into the canonical BenchmarkComparisons slice. A framework/backend migration would add unrelated boundaries and risk evidence parsing; a CSS-only repaint would not explain the product or satisfy Three.js.
+The owner requests a website design appropriate for KeyLoad and real Three.js. Keep plain static HTML/CSS/ES modules, introduce a product-first editorial composition and a conceptual RF3 architecture figure, retain the complete numerical benchmark explorer and move feature-owned assets into the canonical BenchmarkComparisons slice. A framework or backend would add unrelated boundaries and risk evidence parsing; a CSS-only repaint would not explain the product or satisfy Three.js.
 
 Three.js is a lazy independent architectural decoration. Three physical hosts own storage; logical atomic partitions remain distinct. It never depicts live readiness, replication timing, traffic or benchmark values. DOM content, poster, captions and links carry the facts. The numeric explorer uses only successful raw GitHub schema2 evidence until the separately accepted schema3 publisher qualifies all required profiles. No invented winner, stale mixed state, partial invalid report or current-source qualification claim.
 
@@ -22,11 +22,11 @@ flowchart LR
 
 ## Dependency, renderer and preservation contract
 
-Pin Three.js0.186.1 MIT from [official npm distribution](https://registry.npmjs.org/three/-/three-0.186.1.tgz), source commit9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8. Expected SHA512 integrity: `sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==`. Vendor only original build/three.webgpu.js, build/three.core.js and LICENSE under site/Features/BenchmarkComparisons/vendor/three/0.186.1, with file hashes, bytes and gzip sizes in a manifest. No package/framework/global installation or browser CDN. Preserve unmodified distribution bytes and license; this narrowly documented exception to authored LOC/type/function/literal limits applies only to those third-party files. The shared workspace additionally records upstream `space-before-tab` handling for the pinned vendor files in `.gitattributes`. Earlier isolated A–E validation candidates retained their parent attributes; exact H includes the separately reviewed attributes integration, preserving all original vendor bytes. Preserve the hash-verified distribution bytes; authored files receive ordinary checks. Repository-authored wrappers obey all limits. Upgrade replaces the versioned directory coherently after full hash/browser/CI review; no second legacy renderer is retained.
+Pin Three.js0.186.1 MIT from [official npm distribution](https://registry.npmjs.org/three/-/three-0.186.1.tgz), source commit9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8. Expected SHA512 integrity: `sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==`. Vendor only original build/three.webgpu.js, build/three.core.js and LICENSE under site/Features/BenchmarkComparisons/vendor/three/0.186.1, with file hashes, bytes and gzip sizes in a manifest. No package/framework/global installation or browser CDN. Preserve unmodified distribution bytes and license; this narrowly documented exception to authored LOC/type/function/literal limits applies only to those third-party files. The shared workspace additionally records upstream `space-before-tab` handling for the pinned vendor files in `.gitattributes`. Earlier isolated A–E validation candidates retained their parent attributes; exact H includes the separately reviewed attributes integration, preserving all original vendor bytes. Preserve the hash-verified distribution bytes; authored files receive ordinary checks. Repository-authored wrappers obey all limits. A renderer release update replaces the versioned directory coherently after full hash/browser/CI review; the site uses one renderer implementation.
 
 Use WebGPURenderer, await init and node materials. The [native renderer](https://threejs.org/manual/pages/webgpurenderer) selects WebGPU or its own WebGL2 backend; no custom compatibility fallback. Use public onDeviceLost/onError from the [pinned renderer source](https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/renderers/common/Renderer.js), not private backend/device access. Intentional device.destroy is ignored by the [pinned backend loss handler](https://raw.githubusercontent.com/mrdoob/three.js/9b4a2ac29c63ccb43fd51c5661f2f873ac2c39b8/src/renderers/webgpu/WebGPUBackend.js); it cannot be presented as actual public loss qualification.
 
-Procedural geometry, no external model/texture/font/control package, shadow maps, postprocessing or compute. One renderer/canvas; DPR≤1.5, drawing buffer≤1M pixels, draw calls≤30, triangles≤5K. Render on init/resize/bounded pointer input, settle≤500ms, no perpetual idle loop. Reduced/coarse motion remains static; hidden/offscreen/pagehide stops work. Cancelled asynchronous init must dispose unpublished resources. Resize-to-zero, repeat disposal and pageshow restoration are explicit. Unrecoverable graphics errors stop only decoration and expose the always-present poster/text, with no reload/retry loop. This progressive static/graphics composition is the new complete UI, not retention of an obsolete implementation.
+Procedural geometry, no external model/texture/font/control package, shadow maps, postprocessing or compute. One renderer/canvas; DPR≤1.5, drawing buffer≤1M pixels, draw calls≤30, triangles≤5K. Render on init/resize/bounded pointer input, settle≤500ms, no perpetual idle loop. Reduced/coarse motion remains static; hidden/offscreen/pagehide stops work. Cancelled asynchronous init must dispose unpublished resources. Resize-to-zero, repeat disposal and pageshow restoration are explicit. Unrecoverable graphics errors stop only decoration and expose the always-present poster/text, with no reload/retry loop. This progressive static/graphics composition is the complete UI.
 
 ## Evidence and test boundaries
 
@@ -39,11 +39,11 @@ Raw-hash acceptance additionally invokes the production `loadReport` through an 
 ## Implementation contract and join
 
 1. Root records brainstorm→acceptance→plan, Feature BC011–018, this ADR and strongest COMPLETE TASK-SITE-PLAN-001 before delegated writes. User scope authorizes design/Three dependency, not backend/schema/runtime/publication changes.
-2. Root alone owns contracts.mjs, bootstrap.mjs, build-site.mjs, scripts/build.mjs, vendor, workflows, shared docs, new SiteTests policy/project, solution/governance inventory and superseded-file removal. Create new local AGENTS before project code.
+2. Root alone owns contracts.mjs, bootstrap.mjs, build-site.mjs, scripts/build.mjs, vendor, workflows, shared docs, new SiteTests policy/project, solution/governance inventory and canonical site file inventory. Create new local AGENTS before project code.
 3. TASK-SITE-VISUAL-002 owns feature index.html/styles.css/tokens.css/assets/cluster-poster.svg only. TASK-SITE-SCENE-003 owns cluster-scene.mjs/scene-geometry.mjs/scene-lifecycle.mjs/scene-observers.mjs/scene.css only after vendor proof. The additional observer helper is a reviewed scope extension to preserve the mandatory 400-line authored-file limit while isolating listener/observer ownership; it does not change the public mount or dependency contracts. Both gpt-6-luna high; exact root DOM/mount contracts, no same-file writes.
 4. TASK-SITE-TEST-004 owns only SiteTests/Features/BenchmarkComparisons test files after policy/project/probe protocol. Tests derive from acceptance before evidence code. TASK-SITE-EVIDENCE-005 owns measurements.mjs/measurement-loader.mjs/benchmark-lab.mjs/benchmark-chart.mjs/benchmark-profiles.mjs only, after frozen test assertions. No new parser schema or dependency invention.
 5. Each worker returns complete/blocked/failed/cancelled, all paths/hashes, source/static evidence and unresolved issues. Missing APIs, policy conflict, overlap, changed contract or scope expansion stops dependent work. Partial/unverified output cannot join.
-6. Root joins every COMPLETE packet, reads every diff, integrates a coherent canonical asset/build migration and removes replaced flat site files only after proof. Validate vendor/raw bytes, syntax, limits, links, clean output and policy inventory; build a disposable authentic-evidence preview.
+6. Root joins every COMPLETE packet, reads every diff, refactors assets and build entry points into the canonical feature slice and removes duplicate root files only after proof. Validate vendor/raw bytes, syntax, limits, links, clean output and policy inventory; build a disposable authentic-evidence preview.
 7. Root records real first-render desktop/tablet/mobile, keyboard/controls/error/provenance and scene lifecycle/browser observations. GitHub executes the full relevant TUnit site suite at exact source SHA; preserve run/job/artifacts and measured-source SHA. Strongest TASK-SITE-REVIEW-007 reviews all combined files/evidence, fixes are rejoined and affected checks repeated.
 8. Record source/static/manual/GitHub/coverage/publication states separately. Existing Pages checks out measured source; a future two-revision public design/data contract requires separate review. No public deploy or DNS action is included here. This ADR stays Accepted until every required gate actually has evidence.
 
@@ -59,7 +59,7 @@ Enforce aggregate authored JavaScript≥80% lines and≥70% available V8 block b
 
 TASK-SITE-COVERAGE-008 owns new SiteCoverage-prefixed C# helpers/tests only. TASK-SITE-BROWSER-009 owns new SiteBrowser-prefixed C# helpers/tests and the existing real static-file host MIME/teardown boundary only. Their contracts are frozen before writes; no overlap with completed original test/probe files. Root owns workflow/feature/ADR/plan and final integration. BCL Chrome tests assert actual generated UI and numeric/provenance correspondence, atomic error/retry and lifecycle using real files and browser actions. Retain native ranges/browser version/source metadata. Manual composition/device review is additional evidence and cannot qualify numerical coverage. Required COMPLETE packets and exact-source GitHub gates precede strongest final review.
 
-## Migration, consequences and rollback
+## Consequences and rollback
 
 Strongest TASK008 converter review requires TASK-SITE-COVERAGE-REPAIR-013 before
 join. Preserve native receipt identity/hash and scriptId (optional context) in
@@ -111,9 +111,9 @@ exact source/pipeline contract. TASK011 owns disjoint new tooling/tests; root ow
 workflow/pins/docs and waits for its COMPLETE packet plus real numeric evidence.
 This does not broaden website delivery into product/RF3 coverage qualification.
 
-Migrate site/index.html/app.js/styles.css/measurements.mjs and scripts/measurements.test.mjs to the accepted feature/template/TUnit surfaces as one reviewed change; keep scripts/build.mjs as a thin executable composition entry and favicon as a shared asset. Add SiteTests to the solution, architecture and current governance inventory without changing existing policy text. ADR-032 old layout debt is closed only for the migrated site, not for unrelated backend/tests.
+Refactor site/index.html/app.js/styles.css/measurements.mjs and scripts/measurements.test.mjs into the accepted feature/template/TUnit surfaces as one reviewed change; keep scripts/build.mjs as a thin executable composition entry and favicon as a shared asset. Add SiteTests to the solution, architecture and current governance inventory without changing existing policy text. ADR-032 layout debt is closed only for the site refactor, not for unrelated backend/tests.
 
-Benefits: a clear product identity, same-origin bounded graphics, accessible evidence and an independently runnable site qualification gate. Costs: a lazy vendor payload recorded separately and another centrally governed TUnit project; browser/device review is still necessary. Rollback restores the prior coherent asset/build set and evidence access, retains immutable measured artifacts, and never weakens policy/tests or mixes incompatible module versions. At this historical design stage, Core, quality/coverage, schema3/cluster comparisons, DNS and publication remained distinct pending gates; the scoped website closure below records the fulfilled website qualification and publication.
+Benefits: a clear product identity, same-origin bounded graphics, accessible evidence and an independently runnable site qualification gate. Costs: a lazy vendor payload recorded separately and another centrally governed TUnit project; browser/device review is still necessary. Rollback restores the prior coherent asset/build set and evidence access, retains immutable measured artifacts, and never weakens policy/tests or mixes modules from different releases. Core, quality/coverage, schema3/cluster comparisons, DNS and publication remained distinct gates at that stage; the scoped website closure below records the fulfilled website qualification and publication.
 
 ### Native equal-span function contract
 
@@ -139,9 +139,9 @@ copies must not be labeled or retained as actual executed native evidence. Root
 reviews the retained packet and actual GitHub converter assertions before join.
 
 Read-only hosted-runtime preflight confirms that validation discovers Chrome and
-configures browser/native coverage roots. The separate legacy publish job lacks
-these required site-suite inputs and checks out the measured revision, which may
-predate this suite. It is not a qualified delivery path for the redesigned site.
+configures browser/native coverage roots. The Pages publication path must receive
+these required site-suite inputs and qualify the current website source. A missing
+input cannot qualify publication.
 Publication remains explicitly deferred: a future approved two-revision release
 must use qualified website source, independently authenticated measured evidence
 and the complete browser/native coverage inputs. Do not run publish or count its
@@ -177,7 +177,7 @@ separate CLI `compression` receipt frozen in ADR-040-static-site-threejs-evidenc
    complete real GitHub qualification. Site/native80/70/90 and every real browser
    assertion remain mandatory. Missing/partial/failed evidence blocks final007.
 
-No runtime/database migration. Rollback restores the coherent builder/test source
+No runtime or database change. Rollback restores the coherent builder/test source
 set while retaining original vendor/raw reports and failed-run artifacts. A
 reversion cannot qualify the still-failing builder. Publication remains separate
 until the owner's subsequent fresh-evidence extension is frozen and qualified.
@@ -249,19 +249,17 @@ flowchart TD
    qualification provenance. No source review or controlled fixture is a deploy
    receipt. ADR stays Accepted until every required evidence gate is satisfied.
 
-No database/persisted-format migration. Rollback restores coherent workflow/site,
+No database or persisted-format change. Rollback restores coherent workflow/site,
 retains last verified live evidence and every immutable failed/successful receipt,
 and never restores a bypass. Historical success15 cannot qualify current
 database source/schema3/readiness.
 
 ### Owner-directed website-only contract revision, 2026-10-02
 
-The owner explicitly directed finishing only the website, with its separate action
-triggered by site folder changes or completion of benchmark work. This supersedes
-the earlier conservative-B and equal-site/measured-SHA publication task restrictions
-recorded above and in local AGENTS.md. Those records remain intact; no website
-qualification threshold, report validation, trust check or prior unrelated rule is
-weakened. Successful-run wording now means the actual successful comparison job;
+The owner directed website qualification to run independently when site files
+change or benchmark work completes. Current website qualification keeps every
+report threshold, provenance check and trust boundary. A successful-run claim means
+the actual successful comparison job;
 never falsely label a failed enclosing workflow successful.
 
 ```mermaid
@@ -304,7 +302,7 @@ Implementation contract for REQ/AC-BC-028 under TASK021/022/024:
    job/automatic consumer/provider/live proof closes this website task without
    waiting for independently owned database/performance implementation gates.
 6. Rollback retains prior coherent source and verified public evidence. No data,
-   database deployment or DNS migration. All worker diffs/evidence join at024 and
+   database deployment or DNS change. All worker diffs/evidence join at024 and
    strongest final review; this ADR remains Accepted pending required live proof.
 
 Actual authenticated artifact11193564650 inspection corrects the earlier inferred
@@ -313,11 +311,11 @@ exact-nine ZIP shape: verified SHA25682aa46027dd143e3da6678e81ac881511068ac23290
 samples.csv, results.md, runner.log), 3469609 uncompressed bytes. Strongest023
 independently confirmed these bytes. TASK022 MUST preflight exactly these12 files,
 retain/hash every input, and publish/compare only the existing9 report files.
-Runner logs are qualification evidence, never measurement inputs. This explicit
-source-shape correction supersedes the earlier nine-entry assumption without
-allowing unknown files, weakening confinement/bounds or changing the producer.
+Runner logs are qualification evidence, never measurement inputs. This
+source-shape contract allows no unknown files and does not weaken confinement,
+bounds or producer behavior.
 
-Native source compatibility under AC-BC-028/8 is strongest-approved TASK025: one
+Native source revision resolution under AC-BC-028/8 is strongest-approved TASK025: one
 internal Get-CoverageSourceRevision resolver in existing PowerShell shared tooling.
 Present dedicated KEYLOAD_SITE_SOURCE_REVISION is exclusive; empty/malformed
 values fail without fallback. Truly absent dedicated input preserves strict
@@ -395,7 +393,7 @@ serial development build/format; strongest reviews the two-file diff; complete
 GitHub native/Site/Chrome/coverage qualification joins before delivery. Keep all
 repository source prefixes, fifteen authored assets, four vendor files, raw
 report/hash checks and seventeen-source/nine-critical coverage inventory. No
-builder, API, dependency, data, renderer or deployment migration; rollback is the
+builder, API, dependency, data, renderer or deployment change; rollback is the
 coherent two-file caller restoration with failure evidence retained. Existing
 complete-preview test is the positive regression; no helper-mirroring test or
 qualification waiver is added. Other implementation owners remain disjoint.
@@ -408,7 +406,7 @@ Reuse MaxPairs and canonical path helpers; E_ARCHIVE rejection proves the
 receipt's structural bound without fake transport or performance data. Root
 reviews the single-file diff, serialized development build/format, strongest
 source join and complete real GitHub gates in that order. No data/contract/API/
-deployment migration or threshold change; production ownership stays with030.
+deployment or threshold change; production ownership stays with030.
 
 ### Native browser zero-delta implementation contract
 
@@ -433,8 +431,8 @@ mutation or fake execution. Positive retains every byte/hash with zero empty
 credit; controlled second sessions prove empty-only/anonymous-only/missing/
 non-array/foreign-origin and empty Node rejection even beside valid evidence.
 Ownership, dependencies, commands, terminal states and required evidence are
-tracked in ADR-040-static-site-threejs-evidence.md. No public API/data/runtime/dependency
-migration. Rollback restores the coherent parser/reader/tests and previous verified
+tracked in ADR-040-static-site-threejs-evidence.md. No public API, data, runtime or dependency
+change. Rollback restores the coherent parser/reader/tests and previous verified
 public output, retaining failed evidence; this ADR remains Accepted until actual
 publication and complete acceptance evidence exist.
 
@@ -533,7 +531,7 @@ evidence.
 
 Rollback restores the owned helper/callers/test and their contract together;
 there is no product, persisted-data, dependency, website rendering, workflow or
-publication migration.
+publication change.
 
 # Proposed ADR-040 r2 amendment — original waiter withdrawal oracle
 

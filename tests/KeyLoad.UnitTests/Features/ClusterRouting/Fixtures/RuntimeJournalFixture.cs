@@ -19,7 +19,6 @@ internal sealed class RuntimeJournalFixture : IDisposable
             throw new ArgumentException(RuntimeJournalOptions.ValidationMessage, nameof(configured));
         }
 
-        database.Store.RequireReaderContract(KeyLoad.Storage.StoreReaderContract.RuntimeJournal);
         database.Database.ConfigureRuntimeJournal(Options.Create(options));
         Bootstrap();
     }

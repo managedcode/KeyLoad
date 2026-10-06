@@ -20,8 +20,7 @@ The standard license-key and notice-preservation limitations also remain intact.
 The [official FAQ](https://www.elastic.co/licensing/elastic-license/faq) illustrates
 application use and the hosted-service boundary.
 
-This final scope supersedes the earlier BSL decision and its proposed transition
-date. ELv2 contains no automatic Apache conversion, Change Date or GPL covenant.
+ELv2 contains no automatic Apache conversion, Change Date or GPL covenant.
 The root LICENSE contains the complete operative text. Current distributions
 are source available. Third-party and independently owned dependency licenses
 stay with their owners. Previously distributed copies retain their granted
@@ -46,8 +45,8 @@ product qualification gates.
    Missing evidence or unrelated build failures are recorded, never relabeled green.
 4. Delivery uses a scoped commit on the current branch and a normal main push,
    followed by a fresh read of GitHub's main LICENSE. Preserve unrelated changes.
-   No release workflow dispatch, new dependency, storage migration or alteration
-   of immutable historical measurements is part of this task.
+   No release workflow dispatch, new dependency, stored-data change or alteration
+   of existing benchmark provenance is part of this task.
 
 Rollback changes future distribution source coherently; it cannot revoke rights
 already granted. A later license decision requires explicit owner direction.

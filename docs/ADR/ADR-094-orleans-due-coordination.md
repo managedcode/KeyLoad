@@ -40,9 +40,8 @@ Implementation contract:
    before full KL-100 closure. Scoped tests and code presence do not close S2.
 
 Dependencies:ADR-092, existing queue admission, native request/identity boundaries,
-epoch7 reader admission, original quorum/leader/read-cut contracts. Rollout uses
-homogeneous capable readers; rollback stops due coordination while retaining all
-watermarks, outcomes, queues and saga state. No automatic data migration occurs.
+and the original quorum/leader/read-cut contracts. Rollback stops due
+coordination while retaining all watermarks, outcomes, queues and saga state.
 Failed pages/jobs remain observable with safe structured errors; no raw retained
 templates, credentials or subject/entity identities are logged.
 
@@ -59,14 +58,11 @@ sequenceDiagram
   Coordinator-->>Service: Joined settlement or explicit failure
 ```
 
-Accepted TASK-DUE-FRESH-ATTEMPT repair,2026-10-05: a coordinator dispatch chooses
-one fresh command GUID after canonical barrier/creator reload, retaining it
-across its one unknown-result retry. Later sweeps get fresh IDs; the old internal
-v1 hint-to-command hash and obsolete hash-only test are removed. This fixes the
-original durable-denial replay trap without changing command outcome caching,
-canonical occurrence IDs, monotonic schedule state, saga revision CAS, serializer
-aliases/Ids, reader epochs or stored data. Exact scope, regression oracles, agent
-roles, ordered integration, rollout and remaining RF3 gates are in the accepted
-DueCoordination implementation contract. A caller retry of an actual existing
-command ID still replays that original terminal receipt. No automatic migration
-or reconstruction of historical command IDs is performed.
+## Command identity and retry
+
+Each dispatch chooses one fresh command GUID after the canonical barrier and
+creator-authority reload, and retains it across its single unknown-result retry.
+Later sweeps use fresh IDs. A caller retry of an existing command ID replays its
+original terminal receipt. Canonical occurrence IDs, monotonic schedule state,
+saga revision CAS and serializer aliases/IDs remain stable. Actual Aspire RF3 and
+exact-source Linux gates remain required for S2 qualification.

@@ -37,8 +37,6 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(unknownKey))?.ScopeKind)
             .IsEqualTo(CommandOutcomeScopeKind.Unknown);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.LegacyOutcomeKey("root", commandId)))).IsNull();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId)))).IsNotNull();
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.OutcomeLocatorV2(secondPartition, "root", commandId)))).IsNotNull();
@@ -88,7 +86,7 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
     }
 
     [Test]
-    public async Task OrphanV1OrV2LocatorBlocksNewWriteWithoutRepair()
+    public async Task OrphanV2LocatorBlocksNewWriteWithoutRepair()
     {
         using var database = new TestDatabase();
         database.Configure(CommandOutcomePartitionScopeTestData.Resource, ResourceKind.Collection);
@@ -96,12 +94,12 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         var operation = CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, database.Partition,
                 [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, "orphan", "{}")]));
-        var legacyLocator = KeySpace.OutcomeLocatorV1(database.Partition, "root", commandId);
-        var scopedLocator = KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId);
+        var locator = KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId);
+        var outcomeKey = KeySpace.PartitionOutcome(database.Partition, "root", commandId);
+        var locatorBytes = outcomeKey.ToArray();
         database.Store.Commit((transaction, _) =>
         {
-            transaction.Put(legacyLocator, KeySpace.LegacyOutcomeKey("root", commandId));
-            transaction.Put(scopedLocator, KeySpace.PartitionOutcome(database.Partition, "root", commandId));
+            transaction.Put(locator, locatorBytes);
             return true;
         });
         var before = database.Store.Position;
@@ -109,56 +107,8 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.PartitionOutcome(database.Partition, "root", commandId)))).IsNull();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(legacyLocator))).IsNotNull();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(scopedLocator))).IsNotNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(outcomeKey))).IsNull();
+        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(locator))!.AsSpan()
+            .SequenceEqual(locatorBytes)).IsTrue();
     }
-
-    [Test]
-    public async Task RetainedLegacyUnknownOutcomeIsAnAmbiguityBarrierAndIsNotRewritten()
-    {
-        using var database = new TestDatabase();
-        database.Configure(CommandOutcomePartitionScopeTestData.Resource, ResourceKind.Collection);
-        var commandId = Guid.NewGuid();
-        var malformed = new ReplicatedOperation(commandId, OperationKind.ConfigureResource, "root",
-            database.Database.EvaluationClock.GetUtcNow(), "{");
-        var malformedResult = database.Database.Apply(malformed);
-        var legacyKey = KeySpace.LegacyOutcomeKey("root", commandId);
-        var unknownKey = KeySpace.UnknownOutcome("root", commandId);
-        var previous = database.Store.Read(view => view.GetRecord<StoredOutcome>(unknownKey))!;
-        database.Store.Commit((transaction, _) =>
-        {
-            transaction.PutRecord(legacyKey, previous with { ScopeKind = CommandOutcomeScopeKind.Unknown, Partition = null });
-            transaction.Delete(unknownKey);
-            return true;
-        });
-
-        var valid = CommandOutcomePartitionScopeTestData.Operation(database, commandId, OperationKind.Batch,
-            new CommandRequest(commandId, database.Partition,
-                [new PutDocument(CommandOutcomePartitionScopeTestData.Resource,
-                    CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.FirstJson)]));
-        var originalLegacy = database.Store.Read(view => view.ReadOwnedValue(legacyKey))!;
-        var beforeReplay = database.Store.Position;
-        var replay = database.Database.Apply(malformed);
-        var changed = database.Database.Apply(malformed with { PayloadJson = "[" });
-        var blockedScopedWrite = database.Database.Apply(valid);
-
-        await Assert.That(malformedResult.Error).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(replay.Error).IsEqualTo(malformedResult.Error);
-        await Assert.That(replay.SafeDetail).IsEqualTo(malformedResult.SafeDetail);
-        await Assert.That(changed.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(blockedScopedWrite.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(database.Store.Position).IsEqualTo(beforeReplay);
-        await Assert.That(originalLegacy.AsSpan().SequenceEqual(
-            database.Store.Read(view => view.ReadOwnedValue(legacyKey)))).IsTrue();
-        await Assert.That(database.Store.Read(view => view.GetRecord<StoredOutcome>(legacyKey)?.ScopeKind))
-            .IsEqualTo(CommandOutcomeScopeKind.Unknown);
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(unknownKey))).IsNull();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.PartitionOutcome(database.Partition, "root", commandId)))).IsNull();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(
-            KeySpace.OutcomeLocatorV2(database.Partition, "root", commandId)))).IsNull();
-    }
-
 }

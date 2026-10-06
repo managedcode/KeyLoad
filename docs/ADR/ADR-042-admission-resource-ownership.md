@@ -15,7 +15,7 @@ Repair ownership and consumers together without disabling diagnostics.
 Rename AdmittedCommandQueue to AdmittedCommandInbox. Move its public Pending to
 the top-level AdmittedCommand type and both public nested leases to top-level
 CommandAdmissionLease and HttpAdmissionLease. Remove the replaced declarations;
-no compatibility aliases. New source belongs to Features/ResourceExecution.
+no alternate aliases. New source belongs to Features/ResourceExecution.
 Preserve persisted JSON, operation identity, quotas and FIFO within each lane.
 The named maximum control burst stays eight before a waiting data command.
 
@@ -49,8 +49,8 @@ Name existing constants and error details once, with no budget or route changes.
 | Requirement | Pass/fail acceptance | Automated evidence |
 |---|---|---|
 | REQ-ADM-001: explicit bounded reservation transfer | AC-ADM-001: completion/failure/disposal releases once; rejected/canceled admission changes no quota; data saturation leaves control capacity | Existing CommandAdmissionTests/HttpAdmissionTests and new ResourceExecution argument/ownership cases |
-| REQ-ADM-002: correct inbox lifecycle | AC-ADM-002: FIFO and burst eight are exact; Stop fails queued work; waiting reader exits before DisposeAsync completes; repeated disposal is safe; disposed/concurrent-reader calls reject | Existing CommandQueueTests migrated and new direct real inbox lifetime cases with bounded task coordination |
-| REQ-ADM-003: integrated strict migration | AC-ADM-003: old declarations/callers absent; actual dependency-enabled build and format pass; GitHub TUnit/full gates pass at delivered SHA | Lead source inventory, compiler/SARIF, exact CI run/jobs/artifacts |
+| REQ-ADM-002: correct inbox lifecycle | AC-ADM-002: FIFO and burst eight are exact; Stop fails queued work; waiting reader exits before DisposeAsync completes; repeated disposal is safe; disposed/concurrent-reader calls reject | Existing CommandQueueTests and new direct real inbox lifetime cases with bounded task coordination |
+| REQ-ADM-003: integrated current API | AC-ADM-003: all callers use the current declarations; actual dependency-enabled build and format pass; GitHub TUnit/full gates pass at delivered SHA | Lead source inventory, compiler/SARIF, exact CI run/jobs/artifacts |
 
 ```mermaid
 flowchart LR
@@ -82,7 +82,7 @@ flowchart LR
    ownership inventory. The active native ClusterCoordinator still uses this
    admission helper: rename its field/pending type and await inbox disposal only
    after StopAsync and worker drain. Serialize these narrow joins against the
-   native owner; do not restore obsolete routing to exercise the helper.
+   native owner; do not add alternate routing to exercise the helper.
 5. Normal strict Core/solution build, scoped and full format, governance and policy
    review precede stable delivery and exact-SHA GitHub TUnit/recovery/RF3 SDK/MCP
    qualification. Keep this ADR Accepted until all evidence exists.
@@ -94,8 +94,8 @@ Lead owns all shared contracts/config/docs, integration and final review.
 
 ## Rollout and rollback
 
-This is a development CLR API break requiring all solution callers to recompile.
-It changes no persisted/wire format. Revert the owned types and callers together
+These are the current internal CLR declarations and callers.
+They do not change the current persisted/wire format. Revert the owned types and callers together
 only as a verified source unit; never preserve an undisposed semaphore or duplicate
 the old declarations as a rollback shortcut. Runtime tests use actual governors,
 inbox and real database fixtures, without mocks, fakes, sleeps or frozen host time.

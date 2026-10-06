@@ -6,13 +6,12 @@ Related: REQ-BC-020; AC-BCT-001..006; ADR-033/034/035/041/043.
 
 ## Decision and caller boundary
 
-Replace the nine diagnosed public mutable array properties and the cached oracle
-returns with typed ImmutableArray, following the established solution contract.
-This is an intentional solution-contained CLR migration, with no legacy aliases.
+The public collection properties and cached oracle returns use typed ImmutableArray,
+following the established solution contract. The current caller API has no
+alternate aliases.
 Preserve every valid report JSON array/field/enum spelling and workload/wire value.
 Required DTO missing/null/default arrays reject; optional null and present empty arrays
-remain distinct. This malformed-input hardening is explicit, not a compatibility
-claim. SchemaVersion remains3; valid older array-bearing reports still read.
+remain distinct. This malformed-input hardening defines the current report-input contract. SchemaVersion remains3; valid older array-bearing reports still read.
 
 Rename the CLR zero topology member to Standalone, preserving Single JSON and
 configuration spelling with JsonStringEnumMemberName and a TypeConverter. Numeric
@@ -42,8 +41,8 @@ single lead shared runner/report join; exact diff/build/formatter review; actual
 delivered-SHA GitHub full suites and honest retained evidence. No local tests/load.
 
 T owns only new immutable/config/exception fixture files plus existing pure report/
-stream fixtures. C owns old Contracts.cs and BenchmarkDataset.cs and their source
-moves to Features/BenchmarkComparisons/, with new topology/contract-json/exception
+stream fixtures. C owns Contracts.cs and BenchmarkDataset.cs and their source
+files under Features/BenchmarkComparisons/, with new topology/contract-json/exception
 helpers in that same slice. Namespace/assembly stays KeyLoad.Comparisons. P owns
 only engine Targets and engine-prefixed feature helpers. L owns report writer,
 runner/measurement/validation/protocol, host and remaining test/config callers,
@@ -84,10 +83,11 @@ and [TypeConverter attribute/reflection contract](https://learn.microsoft.com/en
 
 PostgreSQL DDL/static SQL redesign, registration/topology/receipt changes, generated
 site data and numeric gates are separate contracts. Every existing real engine/
-RF3/.NET/MCP/recovery gate stays mandatory. Existing fake fixtures and old six-engine
-assertions cannot qualify this stage and remain tracked independent repair work.
+RF3/.NET/MCP/recovery gate stays mandatory. Fake fixtures and the existing six-engine assertion set cannot qualify this stage.
+Historical six-engine evidence remains separate from the current required gates.
 
-Migration is source-only harness caller migration; product persistence/API/security
-N/A. Move mapped entry paths together and remove replaced files. Rollback this exact
-contract/caller/fixture unit together, without fallback APIs. Keep this ADR Accepted
+This is a source-only harness contract; product persistence/API/security are
+unchanged. Keep all current callers and fixture ownership aligned with these
+signatures. Rollback this exact contract/caller/fixture unit together, without
+alternate APIs. Keep this ADR Accepted
 until implementation, all mapped tests and delivered-SHA evidence actually exist.

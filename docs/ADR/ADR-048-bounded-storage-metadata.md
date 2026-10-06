@@ -54,9 +54,9 @@ Implementation contract:
    unfinished until configured and verified. Record source versus executed proof
    before this ADR can become Implemented.
 
-Compatibility changes only accepted input size: excessive whitespace or metadata
-above budgets now fails explicitly. Supported stored schema/version and writer
-output remain exact; no persisted migration or public signature/dependency change.
+Current input limits are explicit: excessive whitespace or metadata above budgets
+fails. The current stored schema/version and writer output remain exact; persisted
+data, public signatures and dependencies are unchanged.
 Rollout is the coherent private reader/restore/test unit. Rollback reverts it and
 its constants, never changes durable files or introduces a fallback. Whole-backup
 concurrent modification, cluster-cut restore, power loss, endurance and measured

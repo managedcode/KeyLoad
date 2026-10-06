@@ -16,7 +16,7 @@ Implementation contract: [FilteredRetrieval](../Features/Search/FilteredRetrieva
 REQ/AC-FILTER-001–005, KL-032/060; ADR-010/018/019/022/082.
 Ordered stages, disjoint worker/root ownership, tests, baseline failures,
 dependencies, rollout/rollback and client/RF3 joins are frozen there. Root owns
-shared contracts and negotiated epochs; Luna owns Query/Search and its new tests.
+shared request contracts; Luna owns Query/Search and its new tests.
 No data format or trusted role is introduced. Source is not qualification.
 
 ```mermaid

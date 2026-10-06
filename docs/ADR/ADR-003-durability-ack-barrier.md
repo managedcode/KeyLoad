@@ -19,10 +19,10 @@ One generic “durable” label would conceal materially different failure model
 1. Freeze per-profile acknowledged record, local persistence, quorum, and response semantics; keep unsupported profiles unavailable in the capability manifest.
 2. Add TUnit state-machine and real-process interruption cases at every barrier, including write/ACK response loss and restart. Power-loss/endurance tests remain separate required evidence for local/quorum durable claims.
 3. Implement local persistence and read-lifetime barriers under `src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/`, quorum commit under `src/KeyLoad.Replication/Features/ClusterReplication/`, and shared receipt contracts in the existing Abstractions durability contract. Preserve node-local `PartitionHost` ownership; do not add standalone Durability or Commit slices.
-4. Upgrade profile metadata explicitly. Rollout may advertise only profiles proven by the active deployment; rollback disables stronger profiles before changing barriers and never relabels old receipts.
+4. Validate profile metadata explicitly. Advertise only profiles proven by the active deployment; rollback disables stronger profiles before changing barriers and never relabels receipts.
 5. GitHub CI runs build, TUnit, process recovery, and real RF3 .NET/MCP operations; power-loss and endurance require their own CI/environment evidence before qualification. Root owns the profile matrix and review join.
 
-Dependencies: [ADR-004](ADR-004-committed-read-views.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), [ADR-008](ADR-008-backup-log-retention.md), [ADR-011](ADR-011-format-upgrades.md), and [ADR-016](ADR-016-atomic-physical-placement.md). No test run is implied by source presence. Escalate if the actual flush/replication barrier cannot be identified; never infer power-loss durability from an enum or process kill.
+Dependencies: [ADR-004](ADR-004-committed-read-views.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), [ADR-008](ADR-008-backup-log-retention.md), and [ADR-016](ADR-016-atomic-physical-placement.md). No test run is implied by source presence. Escalate if the actual flush/replication barrier cannot be identified; never infer power-loss durability from an enum or process kill.
 
 ```mermaid
 flowchart LR

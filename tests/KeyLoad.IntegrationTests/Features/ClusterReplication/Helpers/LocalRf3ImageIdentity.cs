@@ -37,7 +37,7 @@ internal static class LocalRf3ImageIdentity
         var provenance = Environment.GetEnvironmentVariable(ProvenanceEnvironment);
         var reference = Environment.GetEnvironmentVariable(ReferenceEnvironment);
         var receipt = Environment.GetEnvironmentVariable(ReceiptEnvironment);
-        if (provenance is null && reference is null && receipt is null)
+        if (provenance is null && receipt is null)
         {
             return null;
         }

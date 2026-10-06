@@ -25,11 +25,9 @@ CLR reference sharing cannot determine a delivery or corruption decision. Verify
 equal digests after separate actual native edge-frame decoding, independently
 allocated equal references, and changed full identity/content. Keep all aliases,
 field IDs, exact content and global native serialization behavior unchanged.
-Unqualified prior digests stay fail closed with immutable original evidence; no
-fallback or automatic rewrite is accepted. Writer-stopped bounded data rebuild
-and real restart/RF3 qualification remain required for any populated upgrade.
-Rollback retains original canonical data, intents and high-water records rather
-than treating either source generation as proven compatible.
+Invalid digests fail closed; no fallback or automatic rewrite is accepted.
+Real restart/RF3 qualification remains required for populated data. Rollback
+retains canonical data, intents and high-water records.
 
 ```mermaid
 sequenceDiagram
@@ -43,7 +41,7 @@ sequenceDiagram
     Note over S,T: One validated physical owner; no cross-partition atomic transaction
 ```
 
-Use `MaxScanRecords` and `MaxBatchBytes` for pending intent and receiver-state capacity, plus `MaxResults`/`MaxScanRecords`/`MaxBatchBytes` per bounded repair page and the original request deadline. Failed reservation prevents source commit. Do not discard unresolved intents or receiver tombstones automatically. Current placement must be validated against the complete same-shard tuple; different owners fail closed. Rollout is additive native schema; no old record rewrite or source-edge migration. Rollback stops new cross-partition writes/repair but retains canonical source records, unresolved intents and target high-water state for a future compatible reader. No restart is allowed to reinterpret an unknown native envelope as success. Physical movement requires a separate owner-fenced migration and signed receipt contract.
+Use `MaxScanRecords` and `MaxBatchBytes` for pending intent and receiver-state capacity, plus `MaxResults`/`MaxScanRecords`/`MaxBatchBytes` per bounded repair page and the original request deadline. Failed reservation prevents source commit. Do not discard unresolved intents or receiver tombstones automatically. Current placement must be validated against the complete same-shard tuple; different owners fail closed. Rollout uses the current native schema without rewriting existing records. Rollback stops new cross-partition writes/repair but retains canonical source records, unresolved intents and target high-water state. No restart is allowed to reinterpret an unknown native envelope as success. Physical movement remains subject to a separate owner-fenced contract and signed receipt.
 
 ## Verification and agent roles
 

@@ -90,8 +90,8 @@ Root owns shared projection/lifecycle/HTML/CSS, requirements and integration;
 disjoint workers own only the poster and new acceptance-driven source/CDP helpers.
 Join tests first, then source, root diff/development/static/manual review, then the
 complete exact-SHA GitHub website/analyzer/coverage gate and normal Pages receipt.
-No local test execution, new dependencies or evidence-policy exemption. Same
-favicon/poster paths provide asset compatibility; rollback reverts only the
+No local test execution, new dependencies or evidence-policy exemption. The
+canonical favicon/poster paths remain stable; rollback reverts only the
 coherent presentation change. Missing independent comparison evidence remains
 an explicit publication blocker. This continuation remains Accepted until all
 required verification exists.
@@ -113,7 +113,7 @@ in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.md#implementatio
 Join the exported bytes, emitted/static-host behavior and acceptance-driven real
 builder/RF3 tests before lead review/development/static/manual checks and normal
 exact-SHA GitHub qualification/publication. No new dependency or persisted-data
-migration. Rollback coherently reverts the added head/assets/copy/whitelist changes.
+change. Rollback coherently reverts the added head/assets/copy/whitelist changes.
 Provider indexing/share-cache refresh is a manual external outcome; source push
 or local rendering cannot establish it. Missing isolated evidence is reported,
 never bypassed. This additive contract remains Accepted until required gates pass.
@@ -136,9 +136,9 @@ Dependencies:
 - Contract additions are additive init properties with defaults. The SDK and the official MCP output pick them up from the DTO type.
 - No schema, storage, routing or package change.
 
-Migration, rollback and verification:
+Rollout, rollback and verification:
 - **Rollout:** a single release. The console and the site deploy independently.
-- **Rollback:** revert the assets and remove the three init properties. Stored data is untouched.
+- **Rollback:** revert the assets and restore the three init properties with the original source. Stored data is untouched.
 - **Verification:**
   - ci.yml unit tests: metrics ring and middleware.
   - RF3: failure-log route template and voter membership through the real SDK and official MCP.

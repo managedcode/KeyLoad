@@ -8,10 +8,6 @@ internal static class ServerApplication
     internal static async Task RunAsync(string[] args)
     {
         _ = SerializationExecutionRegistration.Process.Value;
-        if (await ServerOfflineFormatUpgrade.TryRunAsync(args).ConfigureAwait(false))
-        {
-            return;
-        }
         var app = ServerConfiguration.Build(args);
         var failures = new List<Exception>();
         PartitionHost? partition = null;

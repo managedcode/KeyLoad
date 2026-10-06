@@ -23,8 +23,7 @@ and retains exact-SHA Linux original results before qualification.
 
 L2 still must atomically pin/capture a canonical base cut, build while canonical
 writes proceed, replay ordered deltas, validate/cut over and recover catalog/pins.
-Do not call L1 a completed online index. No public wire/canonical data epoch or
-index manifest transition occurs. Rollback stops the node and reconstructs only
+Do not call L1 a completed online index. No public wire, canonical storage or index manifest transition occurs. Rollback stops the node and reconstructs only
 its disposable owned index; original canonical data remains authoritative.
 
 ```mermaid

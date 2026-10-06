@@ -101,6 +101,14 @@ three modeled tags, and actual container image config IDs after startup. Existin
 GitHub exact-source/manifest verification and ADR-034 publication remain unchanged;
 this receipt is never accepted by qualification or website provenance validators.
 
+TASK-TI-RF3-IMAGE-MODE-011 corrects only the IntegrationTests local-helper selector
+under REQ/AC-TEST-011/015. The shared server reference is not a local-proof
+selector; absent local provenance and local receipt leave the existing default
+GitHub proof path intact. Root joins the single predicate, preserves strict local
+and GitHub image checks and renews actual SDK/MCP RF3 through Aspire on Linux.
+No serving, image format, dependency or topology contract changes. Source review
+is provisional until both required real modes and complete gates execute.
+
 Stages: root freezes this contract and TestInfrastructure acceptance first;
 dependency_closeout supplies disjoint local settings, producer, image selection,
 verification and real model/negative regressions; root joins the shared AppHost and
@@ -110,7 +118,7 @@ Features/ClusterReplication; scripts/Features/TestInfrastructure owns the produc
 No new database API, stored format, package or production topology applies.
 
 Request admission is owned by TestInfrastructure/Validation and invocation
-construction by Execution; retain no executable legacy copies in Models.
+construction by Execution; Models must contain data only.
 The two owned native termination helpers use generated LibraryImport, with
 AllowUnsafeBlocks enabled narrowly in KeyLoad.AppHost.csproj and
 KeyLoad.IntegrationTests.csproj. No global unsafe setting or diagnostic suppression
@@ -132,10 +140,10 @@ Keep original receipts/reports as development evidence. Rollback removes only th
 explicit local selector and its owned helpers; the default GitHub path remains
 fail closed. Model/parser checks do not prove real image creation or cleanup:
 actual Docker/Aspire SDK/MCP execution and failure receipts are required. Local
-comparison mode is deferred to its own accepted contract. Immutable prior-image
-and mixed-image protocol cases keep their qualified historical image requirements;
-if selected without those proofs they fail closed, with no skipping or local
-receipt substitution. This development filter cannot qualify the complete RF3 suite.
+comparison mode is deferred to its own accepted contract. Current RF3 negative
+cases retain their actual signed-purpose/capability fencing, unchanged membership,
+no-effect assertions and owned-resource shutdown. This development filter cannot
+qualify the complete RF3 suite.
 
 1. TASK-TEST-CONTRACT, root: this contract and requirements precede implementation.
 2. TASK-TEST-ENTRY, root: AppHost Features/TestInfrastructure owns closed suite
@@ -166,7 +174,7 @@ Aspire is already centrally pinned; no new package, product DTO or stored format
 Deploy source and invoking CI commands together. Unknown suites/mixed modes fail
 before resources are added. Existing unit/recovery/RF3 semantics stay mandatory.
 Failure handling releases acquired resources before deleting owned test data;
-never touch user data or unrelated running containers. No production migration.
+never touch user data or unrelated running containers. Production data is unchanged.
 Frontend N/A because the entry is developer/CI infrastructure.
 
 ```mermaid

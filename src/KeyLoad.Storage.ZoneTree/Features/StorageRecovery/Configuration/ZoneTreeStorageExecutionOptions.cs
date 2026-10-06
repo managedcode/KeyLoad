@@ -24,7 +24,6 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const int DefaultStreamBufferBytes = 4_096;
     private const int DefaultMaximumBackupManifestBytes = 16_384;
     private const int DefaultMaximumIdentityFileBytes = 4_096;
-    private const int DefaultMaximumUpgradeReceiptBytes = 65_536;
     private const int MinimumPositiveBudget = 1;
     private const long MaximumTimerMilliseconds = 4_294_967_294;
     private static readonly TimeSpan MaximumNativeTimerDuration = TimeSpan.FromMilliseconds(MaximumTimerMilliseconds);
@@ -58,8 +57,6 @@ public sealed record ZoneTreeStorageExecutionOptions
     public int MaximumBackupManifestBytes { get; init; } = DefaultMaximumBackupManifestBytes;
     /// <summary>Maximum bytes used for MaximumIdentityFileBytes during storage and offline operations.</summary>
     public int MaximumIdentityFileBytes { get; init; } = DefaultMaximumIdentityFileBytes;
-    /// <summary>Maximum bytes used for MaximumUpgradeReceiptBytes during storage and offline operations.</summary>
-    public int MaximumUpgradeReceiptBytes { get; init; } = DefaultMaximumUpgradeReceiptBytes;
 
     /// <summary>Checks positive budgets without inventing relationships between independently valid limits.</summary>
     /// <returns>Whether every budget can be consumed by the native storage owners.</returns>
@@ -72,8 +69,7 @@ public sealed record ZoneTreeStorageExecutionOptions
         && IdentityBufferBytes is >= MinimumPositiveBudget and <= DefaultIdentityBufferBytes
         && StreamBufferBytes is >= MinimumPositiveBudget and <= DefaultStreamBufferBytes
         && MaximumBackupManifestBytes is >= MinimumPositiveBudget and <= DefaultMaximumBackupManifestBytes
-        && MaximumIdentityFileBytes is >= MinimumPositiveBudget and <= DefaultMaximumIdentityFileBytes
-        && MaximumUpgradeReceiptBytes is >= MinimumPositiveBudget and <= DefaultMaximumUpgradeReceiptBytes;
+        && MaximumIdentityFileBytes is >= MinimumPositiveBudget and <= DefaultMaximumIdentityFileBytes;
 
     /// <summary>Rejects invalid policy before opening files or admitting native work.</summary>
     public void Validate()

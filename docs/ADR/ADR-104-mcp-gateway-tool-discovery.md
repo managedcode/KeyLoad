@@ -9,9 +9,9 @@ REQ-MCPGW-001..007 / AC-MCPGW-001..007, original KL-002/014/061/076/080,
 ## Decision and reason
 
 The owner requires our MCPGateway and Markdown-LD knowledge graph to make the
-large tool inventory usable. Replace the public default all-operation MCP catalog
-with the package's search/route/invoke meta-tool pattern. Use the actual published
-ManagedCode.MCPGateway0.4.16 and ManagedCode.MarkdownLd.Kb0.2.10 native graph
+large tool inventory usable. Expose the package's search/route/invoke meta-tool pattern as the public MCP
+entry point. Use the actual published
+ManagedCode.MCPGateway0.4.17 and ManagedCode.MarkdownLd.Kb0.2.10 native graph
 APIs. Keep the canonical operation inventory inside KeyLoad and return selected
 complete schemas/effect hints on demand.
 
@@ -85,9 +85,8 @@ before this extension is qualified.
    protocol, admission and owner tests. Preserve whole-frame charging and
    actual typed `CallToolResult` lifetime. No catalog/graph-engine implementation.
 4. Root reviews every packet against AC, joins singleton/host startup and
-   central packages, migrates all official MCP callers/examples to the new meta
-   pattern, retains independent complete internal-inventory/schema assertions,
-   removes old public pagination/direct-tool dispatch, and integrates real SDK/MCP
+   central packages, uses the meta-tool pattern in all official MCP callers/examples, retains independent complete internal-inventory/schema assertions,
+   keeps the public catalog limited to the three meta tools, and integrates real SDK/MCP
    RF3 authority/cancellation/restart cases. Agent packets are source only until
    combined build and actual caller gates succeed.
 5. Restore/Release build and analyzers; focused and related Aspire units, scalar,
@@ -102,14 +101,14 @@ packets, disjoint source ownership, no competing builds or sibling edits. Every
 test maps to ToolDiscovery acceptance; no mock gateway or storage replaces real
 native libraries/RF3 callers.
 
-## Migration, rollback and unresolved qualification
+## Rollout, rollback and unresolved qualification
 
-This is an owner-authorized public discovery revision of ADR-039. The meta names
+This is the accepted public discovery contract for ADR-039. The meta names
 are the package's canonical pattern; existing database DTOs, SQL, HTTP SDK,
-signed envelopes and persisted formats do not change. Migrate callers and docs
+signed envelopes and persisted formats do not change. Update callers and docs
 atomically and remove obsolete direct operation-tool routes. No second full
 catalog endpoint or compatibility fallback remains. Source-only rollback reverts
-the composition/caller migration together without touching data or receipts.
+the composition/caller changes together without touching data or receipts.
 
 Native graph cancellation cannot promise immediate SPARQL interruption; owners
 remain held until actual work settles. Fixed metadata/count/source/reply bounds

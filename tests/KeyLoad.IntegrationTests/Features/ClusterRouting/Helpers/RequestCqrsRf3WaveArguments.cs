@@ -23,8 +23,6 @@ internal static class RequestCqrsRf3WaveArguments
             args.Add("--KeyLoadTests:RequestCqrsProbe:Enabled=true");
             args.Add("--KeyLoadTests:RequestCqrsProbe:Root=" + controls.Root);
             args.Add("--KeyLoadTests:RequestCqrsProbe:SessionId=" + controls.SessionId);
-            if (controls.CaptureDiscovery)
-            { args.Add("--KeyLoadTests:RequestCqrsProbe:DiscoveryCaptureMode=mixed-interface3-v1"); }
         }
         return [.. args];
     }

@@ -44,7 +44,7 @@ flowchart LR
     Verify --> Result[Projected exact result]
 ```
 
-The generation scope binds source physical NodeId, Incarnation, data epoch,
+The generation scope binds source physical NodeId, Incarnation, current storage identity,
 ReadGeneration, committed Position, logical PartitionRef, collection, exact JSON
 field, principal ID, policy epoch, schema version, tokenizer and hash versions.
 Capture it within `WithQueryView`, after persisted capability/row/field-use checks.
@@ -205,11 +205,10 @@ authority oracle, and no claim of immutable native file layout follows.
    regression. TASK-FTS-CANONICAL-ORACLE extends only the real-process receipt and
    assertions with the complete bounded canonical-state digest defined above.
 
-Join conditions: source files obey400/type200/method50/depth3; no worker runs
+Join conditions: source files obey400/type200/method64/depth3; no worker runs
 runtime checks or edits another scope. Root owns checks and milestone commits.
 Retain exact-SHA Linux/original test artifacts before accepting this stage.
-Rollback drops only recognized derived generations and deploys a compatible
-epoch6 binary using the exact oracle; canonical native records do not migrate.
+Rollback drops only recognized derived generations and uses the current binary and the exact oracle; canonical native records do not migrate.
 No production readiness, power-loss guarantee or performance winner is claimed.
 
 ## Development evidence

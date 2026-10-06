@@ -55,10 +55,10 @@ flowchart LR
    nonce/expiry/generation and physical-ID handshake, fixed-voter bounded fanout,
    coalescing/backpressure, lifecycle/drain and authenticated policy acceptance.
    No implementation may fill these decisions with a caller-supplied trusted ID.
-5. Join actual RF3 SDK/MCP authorization/restart/migration tests, closed metrics and
+5. Join actual RF3 SDK/MCP authorization/restart/recovery and activation-movement tests, closed metrics and
    repeated cache-on/off cold/warm/mixed profiles. Quantify native resources before
    advertising speed, scalability or RAM bounds. Complete required source/native
-   gates and actual compatible coverage before marking this ADR Implemented.
+   gates and actual coverage collection before marking this ADR Implemented.
 
 Dependencies and joins: no new package; Abstractions interfaces avoid a Storage to
 Core dependency cycle. Core pool is node-owned and shared by actual stores/cache
@@ -76,19 +76,24 @@ key/overlay/snapshot/pin and forged/expired/stale/partial-control tests. The ful
 normal/scalar/recovery/RF3 and matched resources retain source/run/job/native ZIP
 provenance; missing coverage or measurements stay open.
 
-## Rollout, migration and rollback
+## Rollout and rollback
 
-No persisted-format or ACK migration. Model budget defaults64MiB/4096 entries,
+No persisted-format or ACK change. Model budget defaults64MiB/4096 entries,
 bounded configurable ceilings up to1GiB/65536 entries, are source admission
 settings rather than measured performance/RSS acceptance values. Pool disposal
 closes new admission and retains existing reservation charges until their owner
 returns them. Cluster cache is initially cold and gated by validated control
 leases. Expiry/failure/deactivation causes bypass, never stale access or data loss.
+Activation movement invalidates runtime-generation-bound leases and cached read
+cuts. The destination must reauthenticate its actual physical host and policy
+before acceleration resumes; moving an activation never moves open storage handles.
+RF3 receiver/control flows must prove denial, revocation, movement, restart and
+healthy follow-up without stale authorization or stale cached data.
 Rollback disables admission, drains readers/fills, releases ephemeral entries and
 removes acceleration joins together; native records/journals remain unchanged.
 
 Unresolved qualification: actual provider duplication benefit, cross-cache memory
-mix, decoded/runtime/native memory, auth/migration/fault cases, whole-process RSS,
+mix, decoded/runtime/native memory, auth/fault cases, whole-process RSS,
 numeric coverage, repeated throughput/latency and endurance. No current source
 build or architecture choice resolves those gates.
 
@@ -326,7 +331,7 @@ AC-CACHE-011: actual cold ZoneTree factory allocates no index; embedded/duplicat
   finite synchronization. No fake clocks/providers, reflection, test-only production hooks or local execution.
 - Manual independent-source exceptions: tiny between-pin/recheck and create/close interleavings cannot be
   deterministically forced without forbidden production hooks; inspect the mandatory state/lock order and join
-  actual callback/pressure/revoke/close native tests. This does not close signed RF3/migration qualification.
+  actual callback/pressure/revoke/close native tests. This does not close signed RF3 qualification.
 
 Task graph
 Root shared integration: exact public contracts/permit validation/facade/runtime/lifecycle/read admission and docs.
@@ -347,7 +352,7 @@ Strong read-only join: inspect all production/test diffs and exact-SHA native ar
 Start condition: root joins R61 critique and accepts durable ADR058/feature/acceptance/plan before writes.
 Join condition: all worker results complete; root reviews every diff and combined enabled source gates.
 Qualification: GitHub only full normal/scalar/recovery/RF3; actual coverage and matched resource profiles stay open.
-Rollback: remove optional local control joins after reader drain; no persisted format, native WAL or authority migration.
+Rollback: remove optional local control joins after reader drain; no persisted format, native WAL or authority change.
 
 ## Accepted R75 disposal-entry repair
 
@@ -376,7 +381,7 @@ recovers the committed value. No doubles or local test execution.
 
 TASK-CACHE-DISPOSE-ENTRY-TESTS-R75 owns only the new matching test and fixture;
 TASK-CACHE-DISPOSE-ENTRY-INTEGRATION-R75 is root-only. Rollback removes this
-entry-validation unit together with its tests; no persisted/wire migration.
+entry-validation unit together with its tests; no persisted/wire change.
 ADR remains Accepted while native and coverage/resource evidence is open.
 
 R75 test-lifetime join also enforces the existing original-failure contract at
@@ -497,7 +502,7 @@ This test-only repair preserves existing provider identity/copy/error contracts.
    the new identity cases; required recovery/RF3 remain independent mandatory
    gates. Authenticated controls, coverage, endurance and profiles stay open.
 
-No data/API/topology/version migration. Rollback reverts these test-side changes
+No data/API/topology/version change. Rollback reverts these test-side changes
 only; product identity validation cannot be relaxed. Existing ADR035/041 cover
 the unchanged exception and lifetime boundaries. This ADR remains Accepted.
 
@@ -523,7 +528,7 @@ Ordered implementation and join contract:
    Orleans/Features/ResourceExecution generated13 metadata types, enums,
    marker interfaces, cohesive validation/size/transcript/authenticator/
    correlation helpers, shared docs and source joining. Preserve all existing
-   replica/storage/token/auth bytes and the held native-format migration.
+   replica/storage/token/auth bytes and the current native-format contract.
 4. TASK-CACHE-WIRE-REVIEW-R85 independently reviews every included/omitted
    field, raw digest/RFC Guid byte rule, nested MAC, exact correlation, private
    key closure, complete size preflight and caller-owned output. Root closes
@@ -531,7 +536,7 @@ Ordered implementation and join contract:
    complete eligible main delivery and exact remote confirmation.
 5. Authentic new exact-SHA GitHub normal/scalar/recovery/RF3 and real native
    generated-codec/golden/lifetime cases qualify these primitives only. Coverage
-   and later control/replay/clock/discovery/migration/IPC gates remain open.
+   and later control/replay/clock/discovery/IPC gates remain open.
 
 Testing methodology: actual Serializer/DI, sealed immutable DTOs and real .NET
 crypto; fixed nonsecret independent byte vectors; valid/negative/edge and
@@ -541,7 +546,7 @@ reviewed independently: conservative maximum C5547/S5550/correlation-input5588
 bytes, below65536; impossible exact-cap edge is source arithmetic, not an
 invented runtime test. Native predecode queues/allocations/RSS remain unmeasured.
 
-Rollout adds unused internal source only; no public/persisted/protocol migration.
+Rollout adds unused internal source only; no public/persisted/protocol change.
 Rollback removes these unused helpers/tests together. Shared contracts and all
 cross-cutting docs have one integration owner. No artifact/build/source claim
 marks this ADR Implemented without all required verification evidence.
@@ -589,9 +594,9 @@ Ordered implementation contract:
    ordinary ALL eligible main delivery and exact-SHA GitHub TUnit/MTP normal,
    scalar, native-codec/crypto/lifetime, recovery and RF3 qualification.
 
-No public/data/version/topology migration. Rollback reverts only this test repair;
+No public/data/version/topology change. Rollback reverts only this test repair;
 previous failed tests remain evidence and cannot be weakened. No local tests or
-crypto are executed. Coverage, receiver/control/migration/probe, performance and
+crypto are executed. Coverage, receiver/control/probe, performance and
 production-readiness gates remain separate and open.
 
 ## Real prepare-age timer repair (2026-10-04)

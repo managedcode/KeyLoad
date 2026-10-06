@@ -44,10 +44,4 @@ internal static class AggregateReplayWorkerTestSupport
         return new(stream, new(tail, 1, stream.Generation), snapshot, [.. events], tail + 10);
     }
 
-    internal static IEnumerable<EventUpcaster> CancelAfterOne(CancellationTokenSource cancellation)
-    {
-        yield return new(1, 2, data => data with { SchemaVersion = 2 });
-        cancellation.Cancel();
-        yield return new(2, 3, data => data with { SchemaVersion = 3 });
-    }
 }

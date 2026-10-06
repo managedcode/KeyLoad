@@ -123,7 +123,7 @@ subject to their exact storage and trust joins.
    Linux GitHub measurements precede capability or acceleration claims.
 
 The feature specification is the canonical task graph, dependency/start/join,
-flow/test/bound and migration source. No candidate task is complete merely because
+flow/test/bound and rollout source. No candidate task is complete merely because
 an attribute compiles. Failed or incomplete proof does not unblock its dependants.
 New public control APIs, provider formats or dependency defects need the owning
 contract and, for ManagedCode defects, its mandatory published repair/release.
@@ -131,8 +131,8 @@ contract and, for ManagedCode defects, its mandatory published repair/release.
 Rollout/rollback retain original request aliases, persisted authorization,
 ZoneTree state, ordered apply and RF3 recovery journals. Stop admission and join
 live work before disabling a candidate. Reconcile persistent job delivery against
-canonical generations before provider removal; no format/data migration is
-performed by this documentation stage.
+canonical generations before provider removal; this documentation stage changes
+no persisted format or data.
 
 ## Native sources checked against Orleans 10.4.0
 
@@ -150,8 +150,9 @@ Orleans and Server joins, ordered worker tasks, rollout/rollback, private identi
 and real recovery/RF3 acceptance. Scoped ORLEANSEXP005 is owner authorized. The
 native manager starts background work without awaiting its catalog at silo start;
 provider async calls wait on a separately canceled readiness gate until signed
-RF3 bootstrap and verification complete. The legacy epoch7 reader compatibility
-gate must be implemented and qualified before first journal admission.
+RF3 bootstrap and verification complete. Both physical stores must already satisfy
+the current required reader contract before first journal admission; fresh stores
+are created with that contract and unsupported capabilities fail closed.
 
 Native streamed-request telemetry join, 2026-10-06: TASK-ORL-TELEMETRY-STREAM-002
 in [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md) freezes the

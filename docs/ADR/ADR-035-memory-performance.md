@@ -29,7 +29,7 @@ options, CSV column order, escaping, every attempt, error/timeout and queue-stag
 value. JSON is serialized directly to a real output FileStream; CSV is written
 one row at a time with bounded writer buffering. Existing Markdown returns a
 summary of cases, not raw attempts, and its owned-string caller contract remains
-until a separate consumer migration. Cancellation is checked before creating
+until separate consumers use the public operation. Cancellation is checked before creating
 files and throughout output; a cancelled write is not a qualified report. No
 sample-retention, runner, workload, adapter, schema or measurement-scope change is
 authorized to the report worker. Tests use actual files with UTF-8/quote/newline,
@@ -63,7 +63,7 @@ sequenceDiagram
    Core feature files/tests. Shared budget/provider/API files remain lead-owned.
 5. Before TASK-MP-009 retention/peer writes, specify snapshot publication authority,
    safe deletion/in-flight leases, crash interruption, protocol/admission budgets,
-   active-path migration and rollback. No new storage/protocol design by a worker.
+   active-path implementation and rollback. No new storage/protocol design by a worker.
 6. TASK-MP-010 joins all reviewed diffs and repairs required build/format/coverage/
    complexity prerequisites. No analyzer suppression or test weakening.
 7. TASK-MP-011 runs GitHub real TUnit/recovery/RF3 SDK/MCP and resource profiles,
@@ -73,9 +73,9 @@ sequenceDiagram
 Workers receive exact ownership/AC/test duties and stop on contract ambiguity,
 overlap, data/security semantics or actual dependency defect. No local tests or
 benchmarks, global installation or forced/protection-bypassing delivery. Shared
-contracts, migrations and central docs/config have a single owner.
+contracts and central docs/config have a single owner.
 
-## Migration, rollback and verification
+## Implementation, rollback and verification
 
 ### Accepted TASK-MP-007I document image reuse
 
@@ -188,7 +188,7 @@ an object cache or widen this repair.
    formatter/governance, then exact-SHA GitHub suites before closing MP-035.
 
 Rollback text helper/overload and both callers together as one reviewed unit;
-data migration is N/A. Stop on changed fingerprint/error/Unicode behavior or
+persisted state remains unchanged. Stop on changed fingerprint/error/Unicode behavior or
 uncertain ownership. Related primary contracts: [configured ArrayPool](https://learn.microsoft.com/en-us/dotnet/api/system.buffers.arraypool-1.create?view=net-10.0),
 [.NET10 configured pool source](https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Buffers/ConfigurableArrayPool.cs),
 [UTF8 replacement behavior](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.utf8?view=net-10.0).
@@ -212,7 +212,7 @@ internal token accessor and documented CreateView capability, docs, API/grain/
 contract joins and final combined proof.
 Incorrect persisted identity/position becomes explicit Corruption; valid records,
 signatures, cursor purpose/authority, generations, projection and format remain.
-Revert this source stage together if needed; no conversion or fallback implementation.
+Revert this source stage together if needed; persisted state remains unchanged.
 
 ### Accepted TASK-MP-006C analytical-read admission contract
 
@@ -230,7 +230,7 @@ entry points; inspect dependency/source/formatter diagnostics; run exact-SHA Git
 TUnit and RF3 regressions before any passing claim. TASK-MP-006C worker owns only
 the new Core helper/partial/test files and QueryEngine/LiveQueries/SearchEngine
 admission joins. Lead owns shared docs and all other integration. Revert this
-source stage as one unit if needed; no data conversion or compatibility shim.
+source stage as one unit if needed; persisted state remains unchanged.
 Existing constructor/entry signatures and results remain intact. Invalid zero/
 negative limits fail construction explicitly; saturation and cancellation precede
 expensive validation, store gate waits and ranking. Independent engines attached
@@ -249,7 +249,7 @@ Ordered join: worker authors real ZoneTree point/range/error/cancel regressions 
 new StorageRecovery snapshot/counter helpers; lead alone adds existing provider
 leaf instrumentation and public local snapshot method, reviews every diff and
 joins strict development/static and exact GitHub proof. Session counters reset on
-reopen; persisted data/wire needs no conversion and source revert is compatible.
+reopen; persisted data and wire state remain unchanged by this source-only stage.
 No server route/report schema, physical-I/O instrumentation, keys/payload/path
 labels or shared abstraction changes are delegated. Saturation is verified by
 arithmetic source review if reaching Int64.MaxValue with real storage is infeasible;
@@ -353,7 +353,7 @@ sample; CheckResult validates the exact complete array and metadata at the end.
 ReadSamples accepts optional caller cancellation; Clock.GetUtcNow governs the
 existing principal-expiry check without altering Orleans/runtime time. No append,
 dedup, tag policy, schema, wire or timestamp semantics change. Lead owns this
-legacy region and new TimeSeries helper/tests; Query/Search workers must not edit
+region and new TimeSeries helper/tests; Query/Search workers must not edit
 GraphAndSeries.cs while this stage is active. Real-store tests precede code and
 exercise narrow ranges with large excluded values, min/max/offset/equal timestamps,
 byte/cancel failures, exact result boundary and a healthy following operation.
@@ -426,7 +426,7 @@ candidate/read/text/result budgets and following-call health have real-store tes
 Ordered stages: lead writes contracts and Core visitors; worker writes failing
 real-store tests, Query Search helpers/entry point, then static review/build;
 lead reviews/joins Core+Query+server and exact GitHub proof. Source/wire/data are
-compatible; rollback reverts implementation without a storage migration. No public
+unchanged; rollback reverts implementation without changing persisted state. No public
 SDK schema, admission policy, consensus or clock-runtime change is in worker scope.
 Search admission remains separately open in the full resource inventory.
 
@@ -483,7 +483,7 @@ public API or persisted-format change is accepted by this continuation.
 
 Join is the reviewed exact-source baseline/candidate/error and actual store
 outcome; CI evidence includes fallback invocation and zero skipped cases. This
-compatible internal change requires no CLR/wire/storage migration. Rollback
+internal change leaves CLR, wire and storage contracts unchanged. Rollback
 reverts only the finite-validation loop and retains the acceptance regressions.
 No measured gain is declared without TASK-MP-011B matched RF3 server/resource
 artifacts and evidence-derived budgets; hardware availability affects performance,
@@ -498,7 +498,7 @@ The existing event payload is serialized once and reused. Worker writes real-sto
 boundary/error/rollback regressions before changing only assigned EventSources
 private regions and new matching Messaging helpers; stream SourceHead and public
 read/cursor contracts remain exact. Lead reviews/joins build/static/GitHub proof;
-provider counters are separate. No format/API/migration change; source revert is
+provider counters are separate. No format/API change; source revert is
 compatible. Queue and public SourceRecord/read work have separate ownership stages.
 
 TASK-MP-007F implements REQ-MSG-007 / AC-MP-006/012 exactly as Messaging:
@@ -508,7 +508,7 @@ lease into the common delivery transition. No body presence/corruption validatio
 may be removed. Keep direct and processing error precedence, scope checks before
 inbox replay, quota-releasing ACK staged before effects, FIFO/time/generation/
 projection/signature and atomic rollback semantics. Persisted bodies/wire are
-identical; source revert requires no data conversion. Framework quota tests do
+identical; source revert leaves persisted entries unchanged. Framework quota tests do
 not establish measured point-read reduction without MP-011 provider counters.
 
 Ordered join: write real-store boundary/state/error/replay regressions first,
@@ -573,7 +573,7 @@ The lead owns `ProjectionOutbox.cs`, `StoredOutboxReader.cs` and the new
 diagnostic files. First add the real ZoneTree compatibility/read-count test, then
 make the two private read-work changes. A dependency-enabled development build is
 allowed; TUnit/recovery/RF3 execution remains GitHub Actions only. Rollback is a
-source revert with identical stored entries and public byte-budget behavior.
+source revert leaves stored entries and public byte-budget behavior unchanged.
 
 The historical purge reader receives `min(head.Tail, ThroughSequence)` as its inclusive end,
 
@@ -588,15 +588,14 @@ producer, wire or persisted-format change accompanies this read-work repair.
 
 Both stages write real-store regression cases before code, then development
 build/static review; lead inspects every diff and joins actual GitHub unit/recovery/
-RF3 SDK/MCP proof. Persisted/wire formats stay compatible; revert changes without
+RF3 SDK/MCP proof. Persisted/wire formats stay unchanged; revert source changes without
 data conversion on owner-directed rollback. Shared contracts, docs and CI have
 one integration owner. They do not close the unrelated mutation/queue/cluster work.
 
 Streaming/sort/copy changes keep persisted/wire formats. Durable retention or
 protocol changes require a further exact contract here before implementation;
 published cut/committed prefix/in-flight transfer protection cannot be omitted.
-Rollback is owner-directed revert only where data compatibility is proven. Existing
-dirty work stays intact; pending Orleans migration cannot be counted as live proof.
+Rollback is an owner-directed source revert. Existing dirty work stays intact; pending Orleans activation movement cannot be counted as live proof.
 
 Testing methodology and per-criterion assertions are in the acceptance matrix.
 Verification: strict Release build, formatter/governance, CI TUnit real stores and
@@ -718,7 +717,7 @@ write, partial JSON below one quarter of complete raw error bytes, and absent
 Markdown/CSV. No fake stream, file hook, synthetic dependency or full-output oracle.
 These resource/correctness assertions do not claim measured peak allocation or
 latency. Rollback reverts only the internal write projection/join; no persisted
-format, public CLR or schema migration. Required evidence includes tests-first
+format, public CLR or schema change. Required evidence includes tests-first
 source snapshot, reviewed diff and exact CI report/job/SHA; remain Accepted until
 all actual gates pass.
 
@@ -738,7 +737,7 @@ assertion is removed. Existing failed run37005805424 is the tests-first baseline
 Both workers own disjoint named test files; lead owns shared docs and integration.
 Ordered verification is source lifetime/oracle review, enabled solution build,
 formatter/governance and full exact-SHA GitHub UnitTests and regressions. No new
-API, data format, package, timeout or authority migration. Rollback reverts only
+API, data format, package, timeout or authority change. Rollback reverts only
 the corresponding fixture/oracle changes, retaining the original production paths.
 
 TASK-RUNTIME-Kestrel-W additionally owns only
@@ -749,7 +748,7 @@ handler faults. Keep the response incomplete and all five-second waits, actual
 cancellation/request-abort/reuse assertions and original transport mapping. The
 macOS failed run37005805424 is its tests-first baseline; source lifecycle review,
 enabled build/format and full multi-OS GitHub suites qualify this fixture repair.
-No production, data or API migration; rollback changes only test coordination.
+No production, data or API change; rollback changes only test coordination.
 
 ### Accepted TASK-RUNTIME-QUEUE-W2 join
 
@@ -766,8 +765,8 @@ same-slice input helper, ReadyQueueRangeTests.cs and QueueBodyAccountingTests.cs
 Lead alone owns docs, shared contracts and final join. No changes to256 ceiling,
 FIFO, message/byte/in-flight limits, time, counters, lease/signature/security/error
 order, persisted shapes or public APIs. Missing-body Corruption remains fail-closed;
-malformed-body Validation and healthy restoration remain tested. No migration is
-needed; source rollback reverts only this traversal/fixture repair. Runtime/perf
+malformed-body Validation and healthy restoration remain tested. Source rollback
+reverts only this traversal/fixture repair. Runtime/perf
 qualification remains pending until the exact new SHA passes.
 
 ### Accepted TASK-RUNTIME-CANCEL-W2 real fixture refinement
@@ -792,7 +791,7 @@ necessary new same-slice file observer helper, KeyLoadClientTransportTests.cs an
 MidBodyCancellationResponse.cs. Lead owns docs/integration. Ordered verification:
 failed exact-SHA baseline, scoped fixtures, source lifetime/numeric/privacy review,
 enabled solution build/formatter/governance, complete multi-OS GitHub suites and
-retained reports. No persisted/public migration; rollback is fixture-only.
+retained reports. No persisted/public contract change; rollback is fixture-only.
 
 The enabled join found KLD0031: the transport test type includes its two nested
 fixture implementations and totals 290 code lines. Lead numeric integration owns
@@ -817,8 +816,7 @@ Ordered stages are failing CI baseline; accepted source repair; enabled solution
 build, formatter and static governance; complete exact-SHA GitHub verification.
 The existing ErrorBodiesArePreservedWhenValidAndBoundedWhenNullMalformedOrOversized
 test proves valid, malformed, null and oversized responses over real Kestrel and
-the original write ID. Source rollback needs no data, package or public-contract
-migration. Read-only workers own independent failure families; this small shared
+the original write ID. Source rollback changes no data, package or public contract. Read-only workers own independent failure families; this small shared
 transport/error join stays with the lead to serialize contract and evidence edits.
 
 ## Accepted preserving storage crash-trial admission stage
@@ -837,8 +835,8 @@ The worker owns RecoveryTests.cs, ProjectionRecoveryTests.cs,
 SubscriptionRecoveryTests.cs and new Features/StorageRecovery private helpers.
 Root owns docs/shared evidence/config/Git and final review. Replica-process
 fixtures, production APIs/data/ownership, dependencies, fault points and all
-existing bounds are preserved. No migration is needed; rollback removes only
-admission/receipt extensions together. Rare environmental admission/launch/
+existing bounds are preserved. Rollback removes only admission/receipt
+extensions together. Rare environmental admission/launch/
 cleanup failure paths require explicit lifetime review, with no synthetic process
 verification. Current artifacts establish cancellation under overlap; precise
 resource causality and candidate qualification remain pending.

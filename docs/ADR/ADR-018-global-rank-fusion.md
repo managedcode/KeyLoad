@@ -29,7 +29,7 @@ Related: `REQ-SEARCH-001/AC-SEARCH-001`, `REQ-SEARCH-002/AC-SEARCH-002`, `REQ-SE
 1. Freeze schema, statistics scope/epoch, candidate-window semantics, ties, and RRF version before implementation.
 2. Add real-store relevance/quality fixtures for lexical-only, vector-only, hybrid, missing branches, ties, filters, ACLs, cancellation, and budget exhaustion.
 3. Implement bounded branch windows and fusion under the same authorized cut; preserve exact-vector oracle and current accepted request semantics.
-4. Any persisted statistics/epoch migration must support rebuild, checkpointing, rollback, and stale-generation rejection.
+4. Persisted statistics and generation updates must support bounded rebuild, checkpointing, rollback, and stale-generation rejection.
 5. Run TUnit and RF3 Search through .NET and official MCP SDK in GitHub Actions; publish quality evidence with source SHA before claiming qualification.
 
 Current source: `src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs`, `src/KeyLoad.Core/GraphAndSeries.cs`; current tests: `tests/KeyLoad.UnitTests/GraphAndSearchTests.cs`. Planned external/provider files are owned by Search, not this ADR. Dependencies: ADR-009, ADR-019, ADR-020, ADR-022. Owner: Search lead; global quality/review join: root.

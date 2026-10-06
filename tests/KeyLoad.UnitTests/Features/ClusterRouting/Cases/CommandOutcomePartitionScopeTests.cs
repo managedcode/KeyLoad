@@ -30,7 +30,6 @@ internal sealed class CommandOutcomePartitionScopeTests
         await Assert.That(outcome.Partition).IsEqualTo(database.Partition);
         await Assert.That(locator).IsNotNull();
         await Assert.That(locator!.SequenceEqual(KeySpace.PartitionOutcome(database.Partition, "root", commandId))).IsTrue();
-        await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.LegacyOutcomeKey("root", commandId)))).IsNull();
         var expected = JsonSerializer.Serialize(first.Get<CommitReceipt>(), JsonDefaults.Options);
         await Assert.That(JsonSerializer.Serialize(replay.Get<CommitReceipt>(), JsonDefaults.Options)).IsEqualTo(expected);
         await Assert.That(JsonSerializer.Serialize(database.Database.ResolveOutcome(operation).Get<CommitReceipt>(),

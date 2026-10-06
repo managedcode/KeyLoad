@@ -1,10 +1,10 @@
 # ADR-103: Bounded scaled database comparison stage
 
 
-Owner correction 2026-10-05 supersedes the earlier three-scale inventory: only
-100k and 1m remain active for every database and workload. SurrealDB/HelixDB
-increase the active inventory to 11 engines; the closed-loop CRUD family has
-264 identities. Historical original artifacts retain their initial settings.
+The active inventory contains exactly 100k and 1m profiles for every database
+and workload. SurrealDB/HelixDB increase the active inventory to 11 engines; the
+closed-loop CRUD family has 264 identities. Original artifacts retain their
+recorded settings as provenance.
 [ADR-109](ADR-109-native-vector-comparisons.md) governs the vector/site
 extension.
 Status: Accepted implementation contract; source, current full cohort and CI originals remain open. Related REQ/AC-SCALE-009..015 and KL-075. See [ScalingQualification](../Features/BenchmarkComparisons/ScalingQualification.md). Preserve [ScaledWorkloads](../Features/BenchmarkComparisons/ScaledWorkloads.md) and its independent ZoneTree raw-storage profile; this ADR concerns the full database comparison matrix.
@@ -37,7 +37,7 @@ flowchart LR
 6. The existing `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json` control workload parameters stay unchanged; ADR-109 extends the catalog to 330 cell identities. A version-2 composite CI plan wraps the exact existing version-1 control plan and two independently validated 132-cell scale subplans. The eleven database groups receive their unchanged 3 preflight + 30 control rows plus 24 profile-qualified scale rows each. `scripts/Features/BenchmarkComparisons/{isolated-plan*,isolated-preflight.mjs}` own this plan/matrix; `benchmarks.yml` only routes its eleven returned matrices and passes exact per-row `Benchmarks__ScaleProfile` and `Benchmarks__EvidenceProfile`. There is no second workflow/harness.
 7. GitHub proof is partitioned into four exact profile cohorts (control plus the three scale IDs). Every cohort retains the same authenticated source SHA/run/attempt/repository/ref/workflow; each worker, job, artifact, report, target, topology and profile is validated against exactly one matching profile-specific subplan. The collector/worker/aggregate modules under `scripts/Features/BenchmarkComparisons/` reject duplicate/missing rows and mixed identities. `aggregate-cli.mjs` performs one all-profile admission only after the composite plan and all four proofs validate; it leaves the existing `aggregate.json` control bytes/shape unchanged and emits `scaled/<profileId>/aggregate.json` for each profile plus `scaled/cohort-receipt.json`.
 8. `scaled/cohort-receipt.json` uses closed `schemaVersion: 1` and contains: common `{sourceRevision,runId,attempt,repository,ref,workflow}`; `control` `{profile,cellCount,aggregateSha256,cells}` where the exact 330 rows contain `{id,artifactId,artifactName,artifactDigest,workerSha256}`; `scaledProfiles` contains the two exact canonical IDs/count settings and 132 rows each, with `{id,target,nodeCount,scenario,disposition,artifactId,artifactName,artifactDigest,workerSha256}`; top-level `{qualified,failedIds,missingEvidence}` explicitly records scale qualification, sorted safe IDs of accounted failed/null cells, and sorted closed evidence-category keys. Missing actual hardware/server envelope evidence uses only `hardwareClass`, `effectiveServerResources`, `storageEnvelope`, or `serverCpuRss`; client-process counters and unlike host snapshots cannot substitute. `qualified` additionally requires empty `missingEvidence`. The validator compares all ID sets to the independent canonical plan and requires each `sha256:` archive digest and worker JSON digest to match authenticated proof. The control aggregate hash binds the unchanged validated 330 control rows. Each scaled profile contains exactly 132 scale rows. `qualified` is true only if all required measurable cells succeeded and every unsupported row is the exact frozen disposition; otherwise a complete, authenticated receipt records `qualified=false` and sorted `failedIds`, preserving null reports and fixed safe reasons. Missing, duplicate, corrupt, or mismatched rows reject active scale accounting. Stable hardware-class fingerprint and actual effective CPU/memory/storage limits must match within each comparable `(profile,nodeCount,scenario)` cohort; storage/durability/write-ACK, record count, payload, seed, same-profile corpus/workload identity, actual node count and profile are exact. Dataset digests are compared only within identical record-count/profile cohorts, never across different profile sizes. Target image/version must match that target's own canonical target manifest and are retained as exact per-target evidence, not compared for equality across unlike providers. Runner instance IDs and observed CPU/RSS peaks are provenance/measurements, not equality keys; peaks must be finite and within effective limits. Missing/unknown hardware or limits never match.
-9. `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/` owns independent scale-plan exact-set, legacy-control-unchanged, matrix job/artifact uniqueness, four-profile proof partition and receipt rejection oracles in role-local helpers. Existing cases to extend are `IsolatedPlanTests`, `IsolatedPlanRejectionTests`, `IsolatedAggregateProofTests`, `IsolatedAggregateEnvelopeTests`, and workflow-layout tests. Root owns any later site projection contract. This stage does not add a site gate or consume the scale receipt in the website: complete authenticated scale failures preserve current ADR-080 control publication semantics, while no scale projection or full-scale success claim is emitted.
+9. `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/` owns independent scale-plan exact-set, control-contract-unchanged, matrix job/artifact uniqueness, four-profile proof partition and receipt rejection oracles in role-local helpers. Existing cases to extend are `IsolatedPlanTests`, `IsolatedPlanRejectionTests`, `IsolatedAggregateProofTests`, `IsolatedAggregateEnvelopeTests`, and workflow-layout tests. Root owns any later site projection contract. This stage does not add a site gate or consume the scale receipt in the website: complete authenticated scale failures preserve current ADR-080 control publication semantics, while no scale projection or full-scale success claim is emitted.
 
 Rollback removes the scale selector/matrices/subplans/receipt together, preserving the original control plan/output and ADR-080 authenticated failed/null publication. Specialized scale query/model/recovery/movement/endurance work remains open.
 
@@ -124,7 +124,7 @@ an escalation/failure threshold, never detached completion. Add genuine native
 Cases/Helpers regressions for pending settlement and simultaneous primary plus
 cleanup failures, and run them through the canonical Aspire comparison entry.
 ComparisonTests owns this code, partition_pages owns its private guarded packet,
-and root owns integration/gates/evidence/commit. There is no data or wire migration;
+and root owns integration/gates/evidence/commit. There is no stored-data or wire-contract change;
 rollback cannot convert an unfinished original task into a passing qualification.
 The stage also replaces the collector's premature completed boolean with one
 memoized original completion task, preserves cancellation-callback failures
@@ -159,7 +159,7 @@ shared AppHost/workflow joins and evidence/commits; the dedicated partition_page
 Luna owns private guarded implementation. Scripts use new feature-local
 open-loop executable artifacts. Dependencies are the S1 native corpus and
 resource evidence, genuine provider topology and SCALE-017 original settlement.
-Public/product schema migration is N/A: this is a separate internal artifact;
+Public/product schema changes are N/A: this is a separate internal artifact;
 control schema3,264 closed-loop cells and website projection remain unchanged.
 Rollback removes the new selection/cohort without rewriting original receipts.
 The actual1/3/6-node objective, two physical owners, skew/fanout and recovery/
@@ -193,7 +193,7 @@ provenance registration at case composition and typed options passed into the
 artifact assertions. Preserve each original identity and independent oracle;
 do not substitute a raw environment read or duplicate execution policy.
 ScalingQualification owns the exact file/agent join and six-case verification
-contract. This source migration leaves every native and Linux gate open.
+contract. This source integration leaves every native and Linux gate open.
 
 TASK-SCALE-OPENLOOP-INVENTORY-001 freezes the separate792-measurement/six-proof
 canonical plan in ScalingQualification before workflow or evidence changes.
@@ -267,7 +267,7 @@ canonical792/six plan, native measured/proof writers, artifact-bound sidecars
 and original bounded GitHub archive/metadata primitives. Tooling fixtures never
 count as authentic measurements or product functional-coverage contributors.
 
-Migration is additive/internal; original control/scaled/vector/publication and
+This is an additive internal change; original control/scaled/vector/publication and
 native topologies remain mandatory. CI selects the new plan only after the
 coherent dispatch-to-intake route exists. Rollback removes only this new route
 and preserves original immutable evidence. No new website open-loop projection
@@ -291,7 +291,7 @@ solution gates and the delivered-source Linux planning job. Root owns shared
 scripts/workflow joins and evidence; the Luna worker owns the guarded private
 implementation and test helpers in the existing BenchmarkComparisons slice.
 
-Migration changes internal matrix serialization only. Original plan, worker,
+This changes internal matrix serialization only. Original plan, worker,
 terminal, archive and public metric schemas remain mandatory. Rollback must keep
 the output bound and complete canonical inventory; reverting to oversized output
-cannot count as successful delivery. There is no data migration or new test entry.
+cannot count as successful delivery. No stored-data contract or test-entry change is involved.

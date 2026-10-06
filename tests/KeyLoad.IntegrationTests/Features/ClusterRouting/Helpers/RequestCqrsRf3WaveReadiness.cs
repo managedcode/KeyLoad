@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class RequestCqrsRf3WaveReadiness
 {
-    internal static async Task WaitForNodesAsync(DistributedApplication app, bool requireHealthy, bool captureDiscovery,
+    internal static async Task WaitForNodesAsync(DistributedApplication app, bool requireHealthy,
         CancellationToken cancellationToken, RequestCqrsLifecycleEvidence? lifecycle = null)
     {
         lifecycle?.SetStage(RequestCqrsLifecycleStage.NodeReadiness);
@@ -19,7 +19,7 @@ internal static class RequestCqrsRf3WaveReadiness
         {
             try
             {
-                await WaitForNodeAsync(app, node, requireHealthy, captureDiscovery, lifecycle, cancellationToken)
+                await WaitForNodeAsync(app, node, requireHealthy, lifecycle, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception)
@@ -32,7 +32,7 @@ internal static class RequestCqrsRf3WaveReadiness
     }
 
     private static async Task WaitForNodeAsync(DistributedApplication app, string node, bool requireHealthy,
-        bool captureDiscovery, RequestCqrsLifecycleEvidence? lifecycle, CancellationToken cancellationToken)
+        RequestCqrsLifecycleEvidence? lifecycle, CancellationToken cancellationToken)
     {
         if (requireHealthy)
         {
@@ -42,18 +42,14 @@ internal static class RequestCqrsRf3WaveReadiness
         }
         await app.ResourceNotifications.WaitForResourceAsync(node,
                     resource => resource.Snapshot.State?.Text == KnownResourceStates.Running
-                        || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart
-                        || captureDiscovery && node == RequestCqrsRf3Protocol.Node1
-                            && IsTerminal(resource.Snapshot.State?.Text),
+                        || resource.Snapshot.State?.Text == KnownResourceStates.FailedToStart,
                     cancellationToken).ConfigureAwait(false);
         if (!app.ResourceNotifications.TryGetCurrentState(node, out var state)
-            || state?.Snapshot.State?.Text != KnownResourceStates.Running
-                && !(captureDiscovery && node == RequestCqrsRf3Protocol.Node1
-                    && IsTerminal(state?.Snapshot.State?.Text)))
+            || state?.Snapshot.State?.Text != KnownResourceStates.Running)
         {
             lifecycle?.RecordReadiness(node, ReadinessObserved(app, node)
                 ? RequestCqrsNodeReadinessOutcome.NotReady : RequestCqrsNodeReadinessOutcome.NotObserved);
-            throw new InvalidOperationException("An expected mixed-protocol Aspire node did not reach Running.");
+            throw new InvalidOperationException("An expected Aspire node did not reach Running.");
         }
         lifecycle?.RecordReadiness(node, RequestCqrsNodeReadinessOutcome.Ready);
     }
@@ -61,6 +57,4 @@ internal static class RequestCqrsRf3WaveReadiness
     private static bool ReadinessObserved(DistributedApplication app, string node)
         => app.ResourceNotifications.TryGetCurrentState(node, out _);
 
-    private static bool IsTerminal(string? state) => state == KnownResourceStates.Exited
-        || state == KnownResourceStates.FailedToStart || state == KnownResourceStates.Finished;
 }

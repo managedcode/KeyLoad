@@ -59,17 +59,17 @@ Variants are test inputs and may not become benchmark/publication evidence.
 
 1. Resolve actual pinned response writer/secret API and strongest contract review.
    Inspect full relevant historical-main CI baseline, preserve exact artifacts.
-2. Archive original six methods, target and shared caller. Author the real native
+2. Review the six existing methods, target and shared caller. Author the real native
    duplicate constraint/marker and response regressions before production repair.
-3. In parallel migrate three pure methods once and implement genuine positive,
+3. In parallel refactor the three pure methods once and implement genuine positive,
    mismatch/setup/warmup/CSV checks with real private clients/data/paths. Every
    original assertion maps to an exact new obligation; no fake remains at join.
 4. Apply confirmed ownership and one-pass acknowledgement validation in existing
    Neo4jTarget plus new canonical Neo4jQueryResponse helper. Dispose unreturned
    documents and response streams; preserve actual target/client/session behavior.
 5. Lead alone joins named test visibility and the existing ComparisonTests hook;
-   retrieve real Aspire endpoint/password/image. Delete old fake file only after
-   replacement source is complete and reviewed. Native/AppHost/shared writes are
+   retrieve real Aspire endpoint/password/image. Remove fake-response assertions only after
+   real replacement source is complete and reviewed. Native/AppHost/shared writes are
    serialized; no overwritten independent work.
 6. Strongest and lead inspect every source/error/lifetime/token/method/registration
    packet. Build/analyze/format/governance/numeric/coverage, then complete accepted
@@ -78,9 +78,10 @@ Variants are test inputs and may not become benchmark/publication evidence.
    RF3 .NET/official MCP/comparison evidence. No skipped suite or source-only claim.
 
 Exact owners/model tiers/scopes/dependencies/artifacts/start/join/terminal states
-are the plan graph. Product runtime/persistence/frontend/schema migration: N/A,
+are the plan graph. Product runtime/persistence/frontend/schema: unchanged;
 this changes private benchmark lifecycle and test proof only. Existing schema3 and
-nine-engine requirements are mandatory; stale six-engine assertions remain debt.
+nine-engine requirements are mandatory. Historical six-engine evidence does not
+qualify current requirements.
 No new package, paid feature, global configuration or public API permission.
 
 ## Verification, rollout and rollback
@@ -93,7 +94,7 @@ synchronous observer. AC007 requires complete exact-source GitHub/static/coverag
 gates. Secret/native-detail assertions use Boolean checks so failure output cannot
 echo credentials or native messages. Source-generation is not test execution.
 
-No product persisted rollout. Transient private resources disappear after genuine
+No product data changes. Transient private resources disappear after genuine
 successful ownership cleanup; uncertain acknowledgement may need operator cleanup.
 Rollback is a coherent reviewed source/test unit preserving no-fakes policy and
 cleanup authority. Environmental lost-response/cleanup faults remain explicit

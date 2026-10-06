@@ -142,6 +142,13 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
         foreach (var point in metric.GetMetricPoints())
         {
             pointsInExport = AddSaturated(pointsInExport, CounterStep);
+            var capture = new OrleansMetricPointCapture(metric.MeterName, metric.Name,
+                CaptureTags(point.Tags), CaptureExemplarTags(point));
+            if (records.Any(record => IsSameObservation(record, capture)))
+            {
+                continue;
+            }
+
             if (records.Count >= CaptureLimit)
             {
                 WasTruncated = true;
@@ -149,9 +156,34 @@ internal sealed class OrleansMetricCaptureExporter : BaseExporter<Metric>
                 continue;
             }
 
-            records.Add(new OrleansMetricPointCapture(metric.MeterName, metric.Name,
-                CaptureTags(point.Tags), CaptureExemplarTags(point)));
+            records.Add(capture);
         }
+    }
+
+    private static bool IsSameObservation(OrleansMetricPointCapture left, OrleansMetricPointCapture right)
+        => string.Equals(left.MeterName, right.MeterName, StringComparison.Ordinal)
+            && string.Equals(left.MetricName, right.MetricName, StringComparison.Ordinal)
+            && AreTagsEqual(left.Tags, right.Tags)
+            && AreTagsEqual(left.ExemplarTags, right.ExemplarTags);
+
+    private static bool AreTagsEqual(KeyValuePair<string, string?>[] left,
+        KeyValuePair<string, string?>[] right)
+    {
+        if (left.Length != right.Length)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < left.Length; index++)
+        {
+            if (!string.Equals(left[index].Key, right[index].Key, StringComparison.Ordinal)
+                || !string.Equals(left[index].Value, right[index].Value, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static long AddSaturated(long current, long increment)

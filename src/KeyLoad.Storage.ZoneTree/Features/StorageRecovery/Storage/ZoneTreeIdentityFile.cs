@@ -21,7 +21,7 @@ internal static class ZoneTreeIdentityFile
         var identity = new StoreIdentity(CurrentDataEpoch, KeyCodec.Version,
             Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
-            DurabilityProfile.ProcessDurable);
+            DurabilityProfile.ProcessDurable, MinimumReaderContract: StoreReaderContract.RuntimeJournal);
         Validate(identity, options);
         Write(path, identity, options.IdentityBufferBytes);
 
@@ -67,7 +67,8 @@ internal static class ZoneTreeIdentityFile
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
         if (identity.FormatVersion != CurrentDataEpoch
-            || identity.KeyCodecVersion != KeyCodec.Version)
+            || identity.KeyCodecVersion != KeyCodec.Version
+            || identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
@@ -88,16 +89,16 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity Read(ReadOnlySpan<byte> bytes)
     {
-        var magic = ZoneTreeIdentityReaderContract.ReadMagic(bytes);
-        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes, magic, IdentityFormatUnsupported);
+        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes,
+            ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
         {
             throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
         }
 
         var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
-        ZoneTreeIdentityReaderContract.Validate(identity, magic);
-        if (identity.FormatVersion != CurrentDataEpoch || identity.KeyCodecVersion != KeyCodec.Version)
+        if (identity.FormatVersion != CurrentDataEpoch || identity.KeyCodecVersion != KeyCodec.Version
+            || identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
         }
@@ -113,8 +114,13 @@ internal static class ZoneTreeIdentityFile
     internal static void Write(string path, StoreIdentity identity, int identityBufferBytes)
     {
         var payload = NativeSerialization.Serialize(identity);
+        if (identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
+        {
+            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
+        }
+
         var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
-            ZoneTreeIdentityReaderContract.WriteMagic(identity));
+            ZoneTreeMetadataBinary.IdentityMagic);
         var temporary = path + TemporaryFileSuffix;
         using (var file = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None,
             identityBufferBytes, FileOptions.WriteThrough))
@@ -125,35 +131,6 @@ internal static class ZoneTreeIdentityFile
 
         File.Move(temporary, path, true);
     }
-
-    internal static StoreIdentity ReadStoppedSourceForUpgrade(ReadOnlySpan<byte> bytes)
-    {
-        var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes,
-            ZoneTreeMetadataBinary.IdentityMagic, IdentityFormatUnsupported);
-        if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
-        }
-
-        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload);
-        if (identity.FormatVersion is not (Native5DataEpoch or Native6DataEpoch)
-            || identity.KeyCodecVersion != KeyCodec.Version)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
-        }
-
-        ValidateIdentityFields(identity);
-        return identity;
-    }
-
-    private static void ValidateIdentityFields(StoreIdentity identity)
-    {
-        if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, IdentityChecksumInvalid);
-        }
-    }
-
 }
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.IdentityEnvelope)]

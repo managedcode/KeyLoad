@@ -13,7 +13,7 @@ Status: Accepted under owner direction2026-10-02; implementation/qualification p
 
 One server/database serves AI agents across documents, typed rows, graphs,
 vectors/text search, blobs, queues and events. SQL becomes the central versioned
-language. Keep Q1 SELECT and AST1 backward compatible. Add SQL operation-envelope
+language. Keep the current Q1 SELECT and AST1 contracts unchanged. Add SQL operation-envelope
 version1: Q1 SELECT compiles to the existing QueryRequest; bounded
 `CALL exact_public_operation(@arguments)` compiles using the sole public operation
 catalog's strict typed decoder and enters the same signed Orleans gateway. The
@@ -74,7 +74,7 @@ No acceleration, full SQL compatibility or production claim before qualification
 Accepted TASK-AISQL-012 source integration repair, triggered by candidate
 b3f93431a/run37068458582: KeyLoadClient's aggregate partial type exceeded200 code
 lines after the additive blob surface; six write adapters also lacked null guards.
-Keep typed blob methods source-compatible as feature-owned public extension
+Keep typed blob methods as feature-owned public extension
 methods in BlobClientExtensions, invoking the same assembly-internal Send
 transport with unchanged route/type/command ID/write classification. Validate
 client and request before transport. No second HttpClient or retry path. Root owns
@@ -85,7 +85,7 @@ use existing genuine RF3 blob lifecycle/range parity as operational regression.
 Another disjoint worker removes unnecessary equality-planner nesting, retaining
 all authored native point/index/security/budget tests and iterator semantics.
 Root joins/reviews then repeats exact-SHA build/format/full runtime gates. This is
-pre-delivery source refinement; no published binary/schema migration is claimed.
+pre-delivery source refinement; no published binary/schema change is claimed.
 
 TASK-DBHP-012 preserves REQ-AISQL-003 and AC-AISQL-007 under AC-DBHP-012.
 Tests run37113337508 at9e0532fdeed7c55a17f9c857f8d5a264215341e7 reports
@@ -100,6 +100,6 @@ Keep budget, rejection, unchanged command-ID reuse, actual direct-control succes
 routing and three-voter assertions. SDK errors/cancellation remain failures.
 One bounded worker owns only SqlRf3AdmissionTests.cs; root owns requirements,
 review, build/format, main delivery and new exact-source CI RF3 evidence.
-No production resource lifetime, public contract or storage migration changes;
+No production resource lifetime, public contract or storage changes;
 rollback reverts the test-only observation. Source analysis cannot establish
 that the native failure is repaired or that no resource leaks exist.

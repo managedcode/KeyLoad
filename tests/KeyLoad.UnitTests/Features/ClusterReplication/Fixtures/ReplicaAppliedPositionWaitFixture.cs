@@ -3,6 +3,7 @@ using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Replication;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
 
@@ -27,16 +28,22 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         var configuration = ReplicaExecutionTestOptions.Configuration(Configuration);
         var execution = ReplicaExecutionTestOptions.Execution();
         Log = new(replica, configuration, canonicalDatabase: Canonical.Database);
-        Materializer = new(Canonical.Database, Log,
-            new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution()), execution);
+        Materializer = CreateMaterializer(configuration, execution);
         Consensus = new(Materializer, configuration, execution, TimeProvider.System);
     }
 
     internal TestDatabase Canonical { get; }
     internal ReplicaConfiguration Configuration { get; }
     internal DurableReplicaLog Log { get; }
-    internal ReplicaMaterializer Materializer { get; }
+    internal ReplicaMaterializer Materializer { get; private set; }
     internal ReplicaConsensus Consensus { get; }
+
+    internal async Task RecreateMaterializerAsync()
+    {
+        await Materializer.DisposeAsync();
+        Materializer = CreateMaterializer(ReplicaExecutionTestOptions.Configuration(Configuration),
+            ReplicaExecutionTestOptions.Execution());
+    }
 
     internal void ConfigureResource()
     {
@@ -82,6 +89,11 @@ internal sealed class ReplicaAppliedPositionWaitFixture : IAsyncDisposable
         });
         Materializer.Commit(index);
     }
+
+    private ReplicaMaterializer CreateMaterializer(IOptions<ReplicaConfiguration> configuration,
+        IOptions<ReplicaExecutionOptions> execution)
+        => new(Canonical.Database, Log,
+            new ReplicaSnapshotStore(Canonical.Store, Log, configuration, UnitExecutionOptions.ReplicaExecution()), execution);
 
     internal async Task AssertDocument(string documentId)
     {

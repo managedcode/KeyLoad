@@ -1,7 +1,7 @@
 # ADR-076: Publish only the complete current comparison cohort
 
-Status: Accepted implementation contract under the owner's immediate legacy
-removal direction; source and runtime qualification pending. Date: 2026-10-03.
+Status: Accepted implementation contract; source and runtime qualification pending.
+Date: 2026-10-03.
 Related: REQ/AC-BC-CURRENT-001..004, KL-040/095/096, ADR-040/047/056/064/074.
 
 ## Decision and authority
@@ -13,13 +13,6 @@ files validated by the existing isolated GitHub and archive contracts. Preserve
 engine/topology/scenario/repetition, correctness, acknowledgement, durability,
 machine fairness and exact source/run/attempt/job/artifact identities. No workload
 or isolated measurement job is removed by this publication change.
-
-Retire the obsolete comparison-smoke/comparison-suite collector, twelve-file
-historical archive dependency, three-profile current-site renderer and their
-unused implementations, tests, hooks, environment settings and source inventories
-in the same change. The old producer no longer exists in CI. Relabelling those
-archives or bypassing their failed checks would not produce current evidence.
-Immutable authentic historical evidence remains history, outside the live path.
 
 The current publisher consumes the existing complete isolated cohort. Mandatory
 authenticated capture, confined BCL ZIP preflight/extraction, original receipt
@@ -36,7 +29,7 @@ The final builder verifies an immutable regular receipt of at most 4 MiB and all
 original inputs before and after its bounded run. The emitted aggregate matches
 the qualified bytes. Publication metadata schema version 2 contains these source
 revisions, the complete isolated archive receipt and original qualification
-test/coverage/job receipts; obsolete historical-profile fields are removed.
+test/coverage/job receipts; the metadata records the current qualified profile.
 Immediately before deployment recheck current main and the authenticated exact
 producer tuple. Keep needs-gated least-privilege Pages deployment and its actual
 provider receipt. No credentials, DNS, database topology or persistence change.
@@ -81,8 +74,7 @@ provider receipt. No credentials, DNS, database topology or persistence change.
    workflow source regressions and canonical site docs/README/status.
    The trusted-control closure retains all producer dependencies and includes
    every remaining authored builder/browser module plus the thin build entry
-   (65 exact sorted paths for this source). The former 49-path producer-only
-   inventory does not cover newly standalone builder consumers. Vendor bytes
+   (65 exact sorted paths for this source). The source closure includes every standalone builder consumer. Vendor bytes
    retain their separate original hash/license/manifest gate. Every one of the
    32 remaining native-covered sources and 25 critical sources retains its
    original 80/70/90 thresholds; removing seven retired sources is not a bypass.
@@ -99,8 +91,7 @@ GitHub executor, old-producer fallback or test skipping is permitted.
 
 Deliver capture, tests, builder and deployment joins as one coherent source.
 Missing genuine current cohort fails closed and leaves published evidence intact.
-Rollback restores the prior qualified site artifact; it cannot authenticate the
-removed producer or refresh historical measurements. Source/build validation is
+Rollback restores the last qualified site artifact. Source/build validation is
 not publication evidence. No current database qualification or performance win is
 claimed from a website change.
 

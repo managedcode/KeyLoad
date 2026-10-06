@@ -7,12 +7,9 @@ ADR-034, ADR-078, AC-MCP-001 and AC-SQLVIEW-003.
 
 ## Problem and evidence boundary
 
-The original Linux RF3 report for source7136d6e/run37154664686 records a text
-search failure followed by loss of the node1 Orleans heartbeat. The artifacts
-do not identify the exact blocked native phase; they remain failure evidence.
-Independent source inspection establishes an integration hazard: pinned
-ZoneTree1.9.8 `ZoneTreeMaintainer.WaitForBackgroundThreads()` synchronously waits
-on its async method, whose merge-thread join await captures the current context.
+Source inspection establishes an integration hazard: pinned ZoneTree1.9.8
+`ZoneTreeMaintainer.WaitForBackgroundThreads()` synchronously waits on its async
+method, whose merge-thread join await captures the current context.
 ZoneTree.FullTextSearch1.0.9 calls that path during eviction/disposal. KeyLoad
 currently invokes synchronous search and projection settlement inside the
 Orleans read turn. A continuation can require the turn blocked by that wait.
@@ -21,17 +18,18 @@ captured continuation is the concrete hazard.
 
 Provider source: [ZoneTreeMaintainer at pinned13ee11e](https://github.com/ZoneTree/ZoneTree/blob/13ee11e19007301fdea72b9210de62f6257f4929/src/ZoneTree/Core/ZoneTreeMaintainer.cs).
 Actual causality and repaired liveness require the real public RF3 regression.
-Local default-scheduler tests alone do not establish the Orleans join.
-
-The [local integration receipt](../implementation/native-async-search-development-2026-10-03.json)
-binds the reviewed precommit source and runtime inventories to complete Aspire
-normal/scalar2866 tests each with identical identities and recovery228, without
-skips or flaky results. The three new real-native admission/projection oracles,
-all10 native-text process cuts,14 epoch cases and1000 unique seeded atomic
-process-crash receipts pass. This is macOS development evidence; the new public
-RF3 oracle and exact delivered-source Linux artifacts remain required.
+Default-scheduler tests alone do not establish the Orleans join.
 
 ## Execution and ownership contract
+
+```mermaid
+flowchart LR
+    Request[Authorized request grain] --> Admit[Bounded node-local query admission]
+    Admit --> Worker[Await default-scheduler worker]
+    Worker --> Cut[Canonical read cut and native projection]
+    Cut --> Result[Exact authorized results]
+    Result --> Join[Settle leases before releasing admission]
+```
 
 Add `SearchEngine.SearchAsync` and factor existing exact search into one shared
 core. Validate the request argument, create/check the existing operation budget
@@ -62,8 +60,8 @@ Preserve one grain per request, fresh quorum barrier and persisted authorization
 reload, node-local PartitionHost files/journals/apply gate, exact source cuts,
 generation bounds, primary-plus-cleanup failure reporting and RF3 authority.
 Neither scheduling nor activation movement transfers physical storage ownership.
-SearchRequest/output/native aliases, epoch6 and HTTP/SDK/MCP protocol remain
-unchanged. This is execution integration, not canonical storage migration. No
+SearchRequest/output/native aliases and the HTTP/SDK/MCP protocol remain
+unchanged. This is execution integration; canonical storage is unchanged. No
 speed, hard cancellation latency, power-loss or production qualification follows.
 
 ## Independent RF3 oracle repairs
@@ -71,8 +69,12 @@ speed, hard cancellation latency, power-loss or production qualification follows
 The same original run exposes stale expectations unrelated to scheduling.
 Repair fixtures under existing accepted contracts, without product changes:
 
-* MCP discovery enumerates all56 actual accepted tools, including stream replay
-  and series retention, with independent required-field/effect/schema oracles.
+* MCP initially exposes the three gateway tools. Authorized on-demand discovery
+  resolves canonical operations, including stream replay and series retention,
+  with independent required-field/effect/schema oracles under
+  [ADR-104](ADR-104-mcp-gateway-tool-discovery.md). The independent current
+  canonical inventory contains 68 operation names; its complete validation and
+  invocation coverage remain distinct from the initial gateway tool list.
 * Aggregate replay protected payload/header writes use explicit persisted write
   grants matching field policies. Restricted-read/use cases retain write grants
   and continue proving denial of missing read/use authority.
@@ -116,7 +118,7 @@ Repair fixtures under existing accepted contracts, without product changes:
 5. TASK-FTS-ASYNC-JOIN, root: review every diff, strict full Release build,
    formatter/governance, TUnit unit/scalar and genuine Docker/Aspire RF3 through
    real clients, unchanged source inventory/original reports, honest docs/status,
-   stage commit and push. Prior-executable recovery, fault/endurance/performance,
+   stage commit and push. Current-format process recovery, fault/endurance/performance,
    coverage and exact-source Linux gates retain separate required evidence.
 
 Root alone owns shared contracts, docs, evidence and Git. Workers have disjoint
@@ -126,12 +128,11 @@ source-freeze release; never mutate source during generated-consumer tests.
 
 ## Rollout and rollback
 
-Deploy a homogeneous exact-source RF3 build after qualification; no data rewrite
-or wire negotiation is required. Rollback removes only this execution adapter
-and restores the earlier source, whose text-search scheduler hazard remains
-explicitly unqualified. It cannot be described as a safe qualified search
-release. No acknowledged committed state or derived-index authority changes.
-Migration N/A: unchanged canonical epoch6 data. Frontend N/A: no UI requested.
+Deploy a homogeneous exact-source RF3 build after qualification. Any rollback
+must retain the current stored contract and a qualified awaited execution path;
+never reintroduce a synchronous native join on an Orleans turn. A deployment
+change must preserve acknowledged committed state and derived-index authority.
+Frontend N/A: no UI requested.
 Public DTO changes N/A: same accepted operations. Owning dependency patch N/A:
 ZoneTree is third-party; KeyLoad corrects its own native execution boundary
 without changing or imitating the dependency.

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using KeyLoad.Orleans;
 using ManagedCode.Communication.CQRS;
 
@@ -7,49 +8,73 @@ internal static class OrleansRuntimeTelemetryWorkflows
 {
     internal static async Task RunAsync(RequestCqrsClusterFixture fixture)
     {
+        var callerActivity = Activity.Current;
         await using var telemetry = await OrleansRuntimeTelemetryFixture.StartAsync();
         fixture.Database.Configure(OrleansRuntimeTelemetryTokens.Collection, ResourceKind.Collection);
         var first = PersistPrincipal(fixture, "first");
         var second = PersistPrincipal(fixture, "second");
         var third = PersistPrincipal(fixture, "third");
-        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Event);
-        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Baggage);
-        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Link);
-        await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.ErrorStatus);
+        List<OrleansRuntimeTelemetrySentinelObservation> sentinelObservations =
+        [
+            await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Event),
+            await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Baggage),
+            await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.Link),
+            await WriteWithSentinelAsync(fixture, telemetry, first, OrleansRuntimeTelemetryMutation.ErrorStatus)
+        ];
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
         var parentage = new List<OrleansTelemetryOperationParent>(await ReadRealDocumentAsync(fixture, telemetry, first));
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
         var concurrent = await Task.WhenAll(WriteWithParentAsync(fixture, telemetry, second),
             WriteWithParentAsync(fixture, telemetry, third));
         await Assert.That(concurrent[0].Reply.Error).IsNull();
         await Assert.That(concurrent[1].Reply.Error).IsNull();
         await Assert.That(concurrent[0].Parent.TraceId).IsNotEqualTo(concurrent[1].Parent.TraceId);
         parentage.AddRange(concurrent.Select(static operation => operation.Parent));
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
         await FailRevokedWriteAsync(fixture, first);
-        telemetry.Flush();
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
+        for (var flushIndex = 0; flushIndex <= telemetry.CaptureOptions.MaximumRecords; flushIndex++)
+        {
+            telemetry.Flush();
+        }
+
         var traces = telemetry.Activities.Snapshot();
         var metrics = telemetry.Metrics.Snapshot();
         await Assert.That(telemetry.Activities.WasTruncated).IsFalse();
         await Assert.That(telemetry.Metrics.WasTruncated).IsFalse().Because(telemetry.Metrics.DiagnosticSummary);
         await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parentage,
-            telemetry.Options);
+            telemetry.Options, sentinelObservations);
         await OrleansRuntimeTelemetryAssertions.AssertMetricPrivacyAsync(metrics);
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
     }
 
-    private static async Task WriteWithSentinelAsync(RequestCqrsClusterFixture fixture,
-        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal, OrleansRuntimeTelemetryMutation mutation)
+    private static async Task<OrleansRuntimeTelemetrySentinelObservation> WriteWithSentinelAsync(
+        RequestCqrsClusterFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
+        OrleansRuntimeTelemetryMutation mutation)
     {
-        using var sentinel = new OrleansRuntimeTelemetrySentinel(mutation,
-            telemetry.Options.MaximumBaggageItems);
-        using var parent = telemetry.StartParentActivity()
+        var ambientActivity = Activity.Current;
+        var parent = telemetry.StartParentActivity()
             ?? throw new InvalidOperationException("The telemetry provider did not sample the operation parent.");
-        var documentId = NewDocumentId();
-        var requestId = Guid.NewGuid();
-        var commandId = Guid.NewGuid();
-        var signed = SignWrite(fixture, principal, requestId, commandId, documentId);
-        var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
-            commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
-        await Assert.That(reply.Error).IsNull();
-        await Assert.That(sentinel.WasInjected).IsTrue();
-        await AssertDocumentRevisionAsync(fixture, documentId, 1);
+        OrleansRuntimeTelemetrySentinelObservation observation;
+        using (parent)
+        {
+            await OrleansRuntimeTelemetryAssertions.AssertIsolatedParentAsync(parent);
+            using var sentinel = new OrleansRuntimeTelemetrySentinel(mutation,
+                telemetry.Options.MaximumBaggageItems, parent, telemetry.Activities);
+            var documentId = NewDocumentId();
+            var requestId = Guid.NewGuid();
+            var commandId = Guid.NewGuid();
+            var signed = SignWrite(fixture, principal, requestId, commandId, documentId);
+            var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
+                commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
+            await Assert.That(reply.Error).IsNull();
+            await Assert.That(sentinel.WasInjected).IsTrue();
+            await AssertDocumentRevisionAsync(fixture, documentId, 1);
+            observation = sentinel.Snapshot();
+        }
+
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(ambientActivity);
+        return observation;
     }
 
     private static async Task<OrleansTelemetryOperationParent[]> ReadRealDocumentAsync(RequestCqrsClusterFixture fixture,
@@ -59,35 +84,54 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var createReply = await WriteWithParentAsync(fixture, telemetry, principal, documentId);
         await Assert.That(createReply.Reply.Error).IsNull();
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
-        using var parent = telemetry.StartParentActivity()
+        var ambientActivity = Activity.Current;
+        var parent = telemetry.StartParentActivity()
             ?? throw new InvalidOperationException("The telemetry provider did not sample the read parent.");
-        var requestId = Guid.NewGuid();
-        var signed = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
-            NativeSerialization.Serialize(new GetDocumentRequest(new(fixture.Database.Partition,
-                OrleansRuntimeTelemetryTokens.Collection, documentId))));
-        var reply = await ReadAsync(fixture, principal, requestId, signed);
-        await Assert.That(reply.Payload.IsEmpty).IsFalse();
-        var record = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
-        await Assert.That(record).IsNotNull();
-        await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
-        await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);
-        return [createReply.Parent, new OrleansTelemetryOperationParent(parent.TraceId, parent.SpanId)];
+        OrleansTelemetryOperationParent readParent;
+        using (parent)
+        {
+            await OrleansRuntimeTelemetryAssertions.AssertIsolatedParentAsync(parent);
+            var requestId = Guid.NewGuid();
+            var signed = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
+                NativeSerialization.Serialize(new GetDocumentRequest(new(fixture.Database.Partition,
+                    OrleansRuntimeTelemetryTokens.Collection, documentId))));
+            var reply = await ReadAsync(fixture, principal, requestId, signed);
+            await Assert.That(reply.Payload.IsEmpty).IsFalse();
+            var record = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
+            await Assert.That(record).IsNotNull();
+            await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
+            await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);
+            readParent = new(parent.TraceId, parent.SpanId);
+        }
+
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(ambientActivity);
+        return [createReply.Parent, readParent];
     }
 
     private static async Task<(GrainOperationReply Reply, OrleansTelemetryOperationParent Parent)> WriteWithParentAsync(
         RequestCqrsClusterFixture fixture, OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal,
         string? documentId = null)
     {
-        using var parent = telemetry.StartParentActivity()
+        var ambientActivity = Activity.Current;
+        var parent = telemetry.StartParentActivity()
             ?? throw new InvalidOperationException("The telemetry provider did not sample the concurrent parent.");
-        var requestId = Guid.NewGuid();
-        var commandId = Guid.NewGuid();
-        var id = documentId ?? NewDocumentId();
-        var signed = SignWrite(fixture, principal, requestId, commandId, id);
-        var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
-            commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
-        await AssertDocumentRevisionAsync(fixture, id, 1);
-        return (reply, new OrleansTelemetryOperationParent(parent.TraceId, parent.SpanId));
+        GrainOperationReply reply;
+        OrleansTelemetryOperationParent operationParent;
+        using (parent)
+        {
+            await OrleansRuntimeTelemetryAssertions.AssertIsolatedParentAsync(parent);
+            var requestId = Guid.NewGuid();
+            var commandId = Guid.NewGuid();
+            var id = documentId ?? NewDocumentId();
+            var signed = SignWrite(fixture, principal, requestId, commandId, id);
+            reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, signed, principal, requestId,
+                commandId, OrleansRuntimeTelemetryTokens.CompletedTerminalSequence);
+            await AssertDocumentRevisionAsync(fixture, id, 1);
+            operationParent = new(parent.TraceId, parent.SpanId);
+        }
+
+        await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(ambientActivity);
+        return (reply, operationParent);
     }
 
     private static async Task FailRevokedWriteAsync(RequestCqrsClusterFixture fixture, PrincipalRecord principal)

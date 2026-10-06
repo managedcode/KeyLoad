@@ -38,24 +38,36 @@ internal static class ProductionSourceManifestProcess
     internal static Task<ProductionSourceManifestProcessResult> RunAsync(
         IOptions<TestExecutionOptions> executionOptions, string mode, string evidenceRoot,
         CancellationToken cancellationToken)
+        => RunAsync(executionOptions, mode, evidenceRoot, TimeProvider.System, cancellationToken);
+
+    internal static Task<ProductionSourceManifestProcessResult> RunAsync(
+        IOptions<TestExecutionOptions> executionOptions, string mode, string evidenceRoot,
+        TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(mode);
         ArgumentNullException.ThrowIfNull(evidenceRoot);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         cancellationToken.ThrowIfCancellationRequested();
-        return RunAsync(executionOptions, CreateStartInfo(mode, evidenceRoot), cancellationToken);
+        return RunAsync(executionOptions, CreateStartInfo(mode, evidenceRoot), timeProvider, cancellationToken);
     }
 
-    internal static async Task<ProductionSourceManifestProcessResult> RunAsync(
+    internal static Task<ProductionSourceManifestProcessResult> RunAsync(
         IOptions<TestExecutionOptions> executionOptions, ProcessStartInfo startInfo,
+        CancellationToken cancellationToken)
+        => RunAsync(executionOptions, startInfo, TimeProvider.System, cancellationToken);
+
+    internal static async Task<ProductionSourceManifestProcessResult> RunAsync(
+        IOptions<TestExecutionOptions> executionOptions, ProcessStartInfo startInfo, TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(startInfo);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         cancellationToken.ThrowIfCancellationRequested();
         var options = executionOptions.Value;
         using var process = new Process { StartInfo = startInfo };
-        using var deadlineTimeout = new CancellationTokenSource(options.OrdinaryTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(options.OrdinaryTimeout, timeProvider);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         var failures = new List<Exception>();
         var started = false;
@@ -70,7 +82,7 @@ internal static class ProductionSourceManifestProcess
         }, failures);
         if (started)
         {
-            result = await RunStartedAsync(process, options, failures, deadline.Token, cancellationToken)
+            result = await RunStartedAsync(process, options, timeProvider, failures, deadline.Token, cancellationToken)
                 .ConfigureAwait(false);
         }
         var disposed = false;
@@ -87,20 +99,37 @@ internal static class ProductionSourceManifestProcess
     }
 
     private static async Task<ProductionSourceManifestProcessResult?> RunStartedAsync(
-        Process process, TestExecutionOptions options, List<Exception> failures, CancellationToken deadline,
-        CancellationToken caller)
+        Process process, TestExecutionOptions options, TimeProvider timeProvider, List<Exception> failures,
+        CancellationToken deadline, CancellationToken caller)
     {
         Task? exit = null;
         Task<string>? output = null;
         Task<string>? error = null;
-        ServerFailureObserver.Observe(() => exit = process.WaitForExitAsync(CancellationToken.None), failures);
-        ServerFailureObserver.Observe(() => output = ReadBoundedAsync(process.StandardOutput, options.CleanupOutputCharacters), failures);
-        ServerFailureObserver.Observe(() => error = ReadBoundedAsync(process.StandardError, options.CleanupOutputCharacters), failures);
-        var original = Task.WhenAll(exit ?? Task.CompletedTask, output ?? Task.CompletedTask,
-            error ?? Task.CompletedTask);
-        await ObserveUntilDeadlineAsync(original, failures, deadline, caller).ConfigureAwait(false);
-        await ProductionSourceManifestProcessSettlement.JoinAsync(process, original, options.ProcessSettlementTimeout,
-            failures).ConfigureAwait(false);
+        var originals = new List<Task>();
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = process.WaitForExitAsync(CancellationToken.None);
+            exit = task;
+            originals.Add(task);
+        }, failures);
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = ReadBoundedAsync(process.StandardOutput, options.CleanupOutputCharacters);
+            output = task;
+            originals.Add(task);
+        }, failures);
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = ReadBoundedAsync(process.StandardError, options.CleanupOutputCharacters);
+            error = task;
+            originals.Add(task);
+        }, failures);
+        var original = Task.WhenAll(originals);
+        await ObserveUntilDeadlineAsync(original, failures, timeProvider, deadline, caller).ConfigureAwait(false);
+        await using var cleanup = await ProductionSourceManifestProcessSettlement.JoinAsync(process, true,
+            original, options.ProcessSettlementTimeout, timeProvider, options.TerminationGrace, failures)
+            .ConfigureAwait(false);
+        await cleanup.ConfirmNativeExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
         if (!original.IsCompletedSuccessfully || exit is null || output is null || error is null || failures.Count != 0)
         {
             return null;
@@ -111,17 +140,26 @@ internal static class ProductionSourceManifestProcess
     }
 
     private static async Task ObserveUntilDeadlineAsync(Task original, List<Exception> failures,
-        CancellationToken deadline, CancellationToken caller)
+        TimeProvider timeProvider, CancellationToken deadline, CancellationToken caller)
     {
-        var signal = Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, deadline);
-        if (await Task.WhenAny(original, signal).ConfigureAwait(false) == original)
+        using var signalCancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline);
+        var signal = Task.Delay(Timeout.InfiniteTimeSpan, timeProvider, signalCancellation.Token);
+        try
         {
-            await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
-            return;
+            if (await Task.WhenAny(original, signal).ConfigureAwait(false) == original)
+            {
+                await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
+                return;
+            }
+            failures.Add(caller.IsCancellationRequested
+                ? new OperationCanceledException(caller)
+                : new TimeoutException(DeadlineFailure));
         }
-        failures.Add(caller.IsCancellationRequested
-            ? new OperationCanceledException(caller)
-            : new TimeoutException(DeadlineFailure));
+        finally
+        {
+            await ServerFailureObserver.ObserveAsync(signalCancellation.CancelAsync, failures).ConfigureAwait(false);
+            await signal.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
     }
 
     private static ProcessStartInfo CreateStartInfo(string mode, string evidenceRoot)

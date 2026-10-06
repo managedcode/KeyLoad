@@ -1,6 +1,5 @@
 using System.Globalization;
 using KeyLoad.AppHost.Features.CodeQuality;
-using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure.Execution;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.AppHost.Hosting;
@@ -50,10 +49,6 @@ internal static class TestSuiteResources
         {
             ConfigureLocalImage(builder, runner, root);
         }
-        if (settings.Suite == PriorProbeResources.RecoverySuite)
-        {
-            ConfigureRecoveryProbes(builder, runner, root, resultsDirectory);
-        }
         if (settings.Suite == TestSuiteProtocol.ComparisonSuite && settings.ComparisonTarget is not null)
         {
             runner.WithEnvironment(BenchmarkTargetEnvironment, settings.ComparisonTarget);
@@ -86,17 +81,6 @@ internal static class TestSuiteResources
             .WithEnvironment(TestSuiteSettings.ScaleProfileEnvironment, string.Empty)
             .WithEnvironment(TestSuiteSettings.VectorProfileEnvironment, string.Empty)
             .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, string.Empty);
-    }
-
-    private static void ConfigureRecoveryProbes(IDistributedApplicationBuilder builder,
-        IResourceBuilder<ExecutableResource> runner, string root, string resultsDirectory)
-    {
-        var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
-        foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
-        {
-            runner.WaitForCompletion(preparation);
-        }
-        runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
     }
 
     private static void ConfigureLocalImage(IDistributedApplicationBuilder builder,

@@ -8,7 +8,6 @@ public static class AggregateReplayReduction
     /// <summary>Reduces a validated bounded replay slice into state JSON.</summary>
     /// <param name="page">The complete server-authorized snapshot and tail.</param>
     /// <param name="reducer">The exact state and event schema reducer.</param>
-    /// <param name="upcasters">Optional one-version event payload transforms.</param>
     /// <param name="limitsOptions">The bound and validated worker budgets.</param>
     /// <param name="cancellationToken">Token checked before validation and each callback.</param>
     /// <returns>The final valid state JSON.</returns>
@@ -16,7 +15,6 @@ public static class AggregateReplayReduction
         AggregateReplayPage page,
         AggregateReplayReducer reducer,
         IOptions<AggregateReplayWorkerLimits> limitsOptions,
-        IEnumerable<EventUpcaster>? upcasters = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(limitsOptions);
@@ -24,15 +22,12 @@ public static class AggregateReplayReduction
         cancellationToken.ThrowIfCancellationRequested();
         AggregateReplayValidation.ValidateLimits(limits);
         AggregateReplayValidation.ValidateReducer(reducer);
-        var resolved = AggregateReplayValidation.ValidatePage(page, reducer, upcasters, limits, cancellationToken);
-        var state = resolved.InitialState;
+        var initialState = AggregateReplayValidation.ValidatePage(page, reducer, limits, cancellationToken);
+        var state = initialState;
         foreach (var record in page.Events)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var path = resolved.Paths[record.Data.SchemaVersion];
-            var transformed = AggregateReplayUpcast.Apply(record, path, limits, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            state = reducer.Apply(state, transformed);
+            state = reducer.Apply(state, record);
             AggregateReplayJson.ValidateState(state, limits, AggregateReplayMessages.ReducerState);
         }
         return state;

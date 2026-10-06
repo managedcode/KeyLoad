@@ -2,7 +2,7 @@
 
 Status: Accepted; implementation/qualification pending. Date:2026-10-02.
 Owner: KeyLoad integration owner. Related: [BlobStorage](../Features/BlobStorage.md),
-REQ/AC-BLOB-001–007, [format matrix](ADR-011-format-upgrades.md), [acceptance](../Features/BlobStorage.md),
+REQ/AC-BLOB-001–007, [acceptance](../Features/BlobStorage.md),
 [execution graph](../Features/BlobStorage.md), ADR-035/036/039/041/042.
 Acceptance is the integrator's decision within the authorized full rewrite;
 it is not passing storage, RF3, coverage or endurance evidence.
@@ -41,7 +41,7 @@ CompleteBlobUpload/AbortBlobUpload/DeleteBlob/ReclaimBlob. Append capability bit
 BlobRead30/BlobWrite31/BlobDelete32/BlobManage33; All contains bits0..33.
 ResourceDefinition gains nullable BlobPolicy omitted when null to preserve exact
 nonblob JSON/fingerprints. Null BlobStore policy means immutable v1 defaults.
-Existing configured-definition changes still require explicit resource migration.
+Configured-definition changes that alter the resource identity are rejected by the existing strict checks.
 
 | DTO | Exact positional fields / contract |
 |---|---|
@@ -83,7 +83,10 @@ keyload_blobs_reclaim, keyload_blobs_metadata, keyload_blobs_upload_info,
 keyload_blobs_read_range, keyload_blobs_list. Canonical arguments remain {request:DTO}.
 Four reads: read-only/idempotent/nondestructive. Six commands: stable-ID idempotent;
 complete/delete/reclaim destructive. Begin/part/abort leave published bytes intact.
-Native catalog becomes47; update actual discovery inventories, no hidden tools.
+Register all ten operations in the canonical catalog with their exact schemas
+and effect hints. The initial public tool list contains only the three gateway
+tools; authorized on-demand discovery and invocation follow
+[ADR-104](ADR-104-mcp-gateway-tool-discovery.md).
 
 ## Limits, quotas and lifecycle
 
@@ -111,8 +114,7 @@ unmatched raw records fail closed. First global initialization must prove blob
 prefixes/catalog evidence empty and consistent, never reset existing feature state to zero.
 The initial catalog proof visits at most10000 delivered records under the native
 examined-record/byte limits. Existing BlobStore evidence is Corruption; an
-unfinished proof is BudgetExceeded and cannot initialize counters. This finite
-bootstrap bound also applies when offline normalization finds no global counter.
+unfinished proof is BudgetExceeded and cannot initialize counters.
 Begin checks ExpectedRevision immediately and uses Access ?? existingHead.Access
 ?? new RowAccess(). Complete checks the then-current head RowAccess as well.
 Nonempty indexes/field/header policies and event-authoritative BlobStore
@@ -127,8 +129,8 @@ unexpired upload. Stored-command replay rechecks current capability/creator/row/
 PolicyEpoch, without old effects/expiry reapplication. Reclaimed upload authority
 is unavailable: upload-target commands return TokenInvalidated rather than bypass
 missing row/creator state. Reusing a reclaimed UploadId creates a new lifetime
-identified by immutable BeginCommandId; the existing outcome's private v1 stamp
-must match on replay under ADR-011, or TokenInvalidated. No unbounded retired-ID table.
+identified by immutable BeginCommandId; replay requires the current outcome's
+private v1 stamp to match or returns TokenInvalidated. No unbounded retired-ID table.
 
 Complete checks accepted length/count and caller's expected chain, performs O(1)
 head CAS, publishes revision+1, marks this version current and previous retired.
@@ -145,7 +147,7 @@ pairs from the persisted reclaim cursor. Release exactly deleted logical bytes;
 final deletion removes version state and version slot. Missing/corrupt parts fail
 closed. Reclaim already-removed state is empty Complete after BlobManage scope
 check. Reclaim always checks actual current head VersionId; an absent referenced
-state is Corruption. Its final/absent replay lifetime rules are fixed in ADR-011.
+state is Corruption. Its final/absent replay lifetime follows the current command-outcome contract.
 Never mutate inside VisitRange. Logical deletion is not physical compaction.
 
 Global reservation covers blob payload, not other features/outcome metadata,
@@ -213,7 +215,7 @@ hidden/deleted/unreadable and returns exclusive last-visited AfterId. A final em
 page may have an advancing cursor when rows are hidden. Cursor is a bounded
 validated ID, not historical snapshot/authority; ordering is KeyCodec UTF8 order.
 
-## Implementation, migration and qualification
+## Implementation and qualification
 
 [Plan](../Features/BlobStorage.md) freezes task/owner/dependencies.
 Root owns contracts/shared adapters; workers own disjoint new feature files.
@@ -223,18 +225,25 @@ Abort/reclaim use explicit finite cleanup control classification, no new unlimit
 lane. Existing quality/Client owner returns before shared-scope edits.
 
 First use atomically creates v1 state; nonblob JSON/data are unchanged. Unknown
-marker/state version FormatUnsupported; missing initialized state Corruption.
+marker/state version is FormatUnsupported; missing initialized state is Corruption.
 Canonical snapshots contain raw/meta/head/state/counters together. Same-incarnation
-reopen/InstallSnapshot preserves chains. Whole-store restore/new incarnation uses
-the exact offline bounded resumable normalization in ADR-011: abort active uploads,
-release only unused reservation/upload slots once, rebind authority and preserve
-published bytes/revisions/original IntegrityIncarnation. The actual marker fences
-all blob operations until complete. No downgrade to preblob executable after
-blob data. Rollback uses blob-compatible release or a complete prefeature backup
-with explicit data-loss boundary; never delete live blobs to start an old binary.
+reopen and InstallSnapshot preserve chains. Restore validates the complete current
+snapshot and fails closed on missing, corrupt or inconsistent blob state.
+Restore to a new authority incarnation runs the bounded, resumable current-format
+normalization in [ADR-011](ADR-011-current-native-format.md) before readiness.
+Rebind authority-bearing metadata; abort active uploads and release unused
+reservation and active-upload slots exactly once. Preserve published bytes,
+head revisions, part and chain hashes, BeginCommandId and IntegrityIncarnation.
+Persisted phase/cursor/accounting fences survive restart and prevent service until
+every current state, head, quota and resource account is verified.
+Rollback requires a source
+release that supports the current stored format or a verified current-format
+backup, with its actual data-loss boundary recorded; live blob data is never
+deleted to enable startup.
 
 Required exact-SHA GitHub evidence: complete format/build/analyzers/governance,
 TUnit contract/provider, actual flush/ACK kill/reopen/corruption/quota, Docker/Aspire
-RF3 .NET and official MCP(all47 operations), leader-loss retry, empty replica/rejoin,
+RF3 .NET and official MCP flows for all ten blob operations through the gateway,
+leader-loss retry, empty replica/rejoin,
 bounded memory/control progress, changed-code coverage, faults/endurance artifacts.
 Compilation and process-kill are not power-loss or production proof. All AC pending.

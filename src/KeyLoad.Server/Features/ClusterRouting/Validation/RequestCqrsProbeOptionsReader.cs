@@ -9,7 +9,7 @@ internal static class RequestCqrsProbeOptionsReader
 
     private const string RootPath = "/";
 
-    private const int MaximumConfigurationKeys = 4;
+    private const int MaximumConfigurationKeys = 3;
 
     internal static RequestCqrsProbeOptions Read(IConfiguration configuration, ReplicaConfiguration replica,
         bool allowPrivateNetworkHttp)
@@ -26,15 +26,14 @@ internal static class RequestCqrsProbeOptionsReader
         var children = section.GetChildren().Take(MaximumConfigurationKeys + MaximumConfigurationKeysStep).ToArray();
         if (children.Length == EmptyChildrenLength)
         {
-            var disabled = new RequestCqrsProbeOptions(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
+            var disabled = new RequestCqrsProbeOptions(false, null, string.Empty);
             Validate(disabled, replica, allowPrivateNetworkHttp);
             return disabled;
         }
         var keys = new HashSet<string>(StringComparer.Ordinal);
         if (children.Length > MaximumConfigurationKeys || children.Any(child =>
             !keys.Add(child.Key) || child.Key is not (RequestCqrsProbeProtocol.EnabledSetting
-                or RequestCqrsProbeProtocol.RootSetting or RequestCqrsProbeProtocol.SessionSetting
-                or RequestCqrsProbeProtocol.DiscoveryCaptureSetting)
+                or RequestCqrsProbeProtocol.RootSetting or RequestCqrsProbeProtocol.SessionSetting)
                 || child.Value is null || child.GetChildren().Take(CountSingleItemCount).Any()))
         { throw Invalid(); }
         var enabledValue = section[RequestCqrsProbeProtocol.EnabledSetting];
@@ -42,8 +41,7 @@ internal static class RequestCqrsProbeOptionsReader
         { throw Invalid(); }
         var rootConfigured = children.Any(child => child.Key == RequestCqrsProbeProtocol.RootSetting);
         var options = new RequestCqrsProbeOptions(enabled, section[RequestCqrsProbeProtocol.RootSetting],
-            section[RequestCqrsProbeProtocol.SessionSetting] ?? string.Empty,
-            section[RequestCqrsProbeProtocol.DiscoveryCaptureSetting] ?? RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
+            section[RequestCqrsProbeProtocol.SessionSetting] ?? string.Empty);
         Validate(options, replica, allowPrivateNetworkHttp, rootConfigured);
         return options;
     }
@@ -53,25 +51,19 @@ internal static class RequestCqrsProbeOptionsReader
     {
         const int EmptySessionIdLength = 0;
         const int EmptyVoterIdsLength = 3;
-        const int IndexEmptyCount = 0;
 
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(replica);
         if (!options.Enabled)
         {
-            if (rootConfigured || options.Root is not null || options.SessionId.Length != EmptySessionIdLength
-                || options.DiscoveryCaptureMode != RequestCqrsProbeProtocol.DiscoveryCaptureDisabled)
+            if (rootConfigured || options.Root is not null || options.SessionId.Length != EmptySessionIdLength)
             { throw Invalid(); }
             return;
         }
         replica.Validate();
         if (options.Root != RequestCqrsProbeProtocol.FixedRoot || string.IsNullOrWhiteSpace(options.SessionId)
             || !IsSessionId(options.SessionId)
-            || options.DiscoveryCaptureMode is not (RequestCqrsProbeProtocol.DiscoveryCaptureDisabled
-                or RequestCqrsProbeProtocol.MixedInterface3Capture)
             || replica.BenchmarkTopology || replica.VoterIds.Length != EmptyVoterIdsLength
-            || options.DiscoveryCaptureMode == RequestCqrsProbeProtocol.MixedInterface3Capture
-                && replica.LocalId != replica.VoterIds[IndexEmptyCount]
             || !allowPrivateNetworkHttp || replica.VoterIds.Any(voter => !IsPrivateNetworkOrigin(voter)))
         { throw Invalid(); }
     }

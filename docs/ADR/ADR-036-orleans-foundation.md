@@ -1,6 +1,6 @@
 # ADR-036: Orleans foundation and client-driven qualification
 
-Status: Accepted, implementation in progress. Date: 2026-10-01. Owner: KeyLoad lead. Authority: direct owner instructions for Orleans-only clustering, request grains, distributed directory/migration, TUnit, Docker/Aspire and SDK/MCP clients.
+Status: Accepted, implementation in progress. Date: 2026-10-01. Owner: KeyLoad lead. Authority: direct owner instructions for Orleans-only clustering, request grains, distributed directory and activation movement, TUnit, Docker/Aspire and SDK/MCP clients.
 
 Identity correction: this uncommitted document originally collided with the comparisons decision ADR-034. On 2026-10-02 it became ADR-036; the full decision and implementation obligations are preserved. Existing policy links to ADR-034 comparisons remain unchanged. See the [decision index](README.md).
 
@@ -24,8 +24,8 @@ UnitTests/Features/ClusterRouting/OrleansRpcFailureTests.cs. Ordered stages:
 first author actual-native-exception classification/negative/privacy cases;
 implement narrow helper and RPC catch; root joins both callers and reviews;
 GitHub full build/format/units/scalar/recovery and stopped-replica RF3/replay prove
-the exact SHA. No persisted format or wire enum migration; rollback removes this
-classification and the internal intent parameter together. Qualification pending.
+the exact SHA. No persisted format or wire enum change; rollback removes this classification and
+the internal intent parameter together. Qualification pending.
 
 Failure-only diagnostics use LoggerMessage with request GUID, a closed native-RPC
 category (Orleans or timeout), and mapped ErrorCode. Never retain/log the exception
@@ -65,9 +65,8 @@ DatabaseReadGrain, GrainCommandExecutor, GrainRequestAuthority, GrainPayloadJson
 joins. A bounded worker owns only new ClusterRouting diagnostic helper/enum and
 UnitTests files. Ordered stages: author actual-provider privacy/reply regressions;
 add helpers; lead joins closed stage updates and error mapping; enabled build and
-format; full GitHub UnitTests/RF3 with exact SHA and fault log artifacts. No database,
-public API or persisted-format migration; rollback removes only this metadata/log
-path while retaining the original safe replies. The stage log helps locate a
+format; full GitHub UnitTests/RF3 with exact SHA and fault log artifacts. No database, public API or persisted-format change; rollback removes only this
+metadata/log path while retaining the original safe replies. The stage log helps locate a
 rejection and does not by itself qualify a repaired runtime failure.
 
 TASK-RUNTIME-ARTIFACTS-W is an accepted retention-path refinement for
@@ -84,8 +83,8 @@ TASK-RUNTIME-RESOURCE-W preserves REQ/AC-ROUTE-001 by giving the existing
 RequestIdReceiptTests scenario a unique tenant. Resource catalog identity omits
 partition key; run37005805424 proved a legitimate incompatible orders definition
 collision with an earlier RF3 leader-loss fixture. Worker owns only that fixture
-scope construction. Keep every SDK retry/parallel actor-ID assertion and product
-migration rejection. Source review/build/format precede full exact-SHA RF3;
+scope construction. Keep every SDK retry/parallel actor-ID assertion and strict rejection of an incompatible current resource definition. Source
+review/build/format precede full exact-SHA RF3;
 no production or persisted-format change, rollback is test-scope only.
 
 Accepted TASK-RUNTIME-RECEIPTS-W maps REQ/AC-TEST-007 and AC-MP-012 to the actual
@@ -98,7 +97,7 @@ native exit replaced, capture cap widened or extra local qualification executed.
 The exact next GitHub run/job/SHA and downloaded first-failure/report/recovery
 receipts are the join and explicit environmental verification exception. Source
 rollback removes only receipt retention/step scheduling; production data and
-contracts need no migration. Source helpers stay in their canonical test slices;
+contracts remain unchanged. Source helpers stay in their canonical test slices;
 root alone owns shared ci.yml, docs and integration.
 
 Host integration contract: `Server/Features/StorageRecovery/PartitionHost` owns
@@ -123,19 +122,19 @@ Membership; it may not apply data or public security operations. TASK-ROUTE-AUTH
 supplies real-store regressions under AC-AUTH-002/003; the lead integrates engine
 guards and fresh-node bootstrap. Membership cannot depend on a public root key.
 
-1. Establish historical full-suite baseline from main CI; preserve prior durable-store and client semantics. Read-only architecture review checks Orleans Grain Service bootstrap before delegated implementation.
-2. Replace external DotNext cluster packages/log/state machine with a node-owned, fixed-voter replication host. Votes, appends, barriers, forwarding and bounded snapshot chunks use Orleans per-silo Grain Services. Signed silo-address discovery only discovers the current runtime address; it cannot vote, append or commit.
-3. Store term/vote/log/commit metadata using the existing checksummed atomic storage adapter, in an independently owned replica directory. The host, not migrating grain activations, owns file locks, durable acknowledgement and ordered apply. Majority acknowledgement and current-term read barriers remain mandatory.
+1. Establish the current full-suite baseline from main CI and preserve the existing durable-store and client semantics. Read-only architecture review checks Orleans Grain Service bootstrap before delegated implementation.
+2. Use a node-owned, fixed-voter replication host. Votes, appends, barriers, forwarding and bounded snapshot chunks use Orleans per-silo Grain Services. Signed silo-address discovery only discovers the current runtime address; it cannot vote, append or commit.
+3. Store term/vote/log/commit metadata using the existing checksummed atomic storage adapter, in an independently owned replica directory. The host, independent of moving grain activations, owns file locks, durable acknowledgement and ordered apply. Majority acknowledgement and current-term read barriers remain mandatory.
 4. Use the replica service during membership bootstrap, enable Orleans distributed directory and activation repartitioning, and route each public database request through its own grain. Protect internal envelopes and preserve database authorization before exposing outcomes.
 
 The owner's explicit distributed-directory and activation-repartitioning instruction
-opts into Orleans 10.3.1's two experimental APIs. Native compiler consent is confined
+opts into the centrally pinned Orleans runtime's two experimental APIs. Native compiler consent is confined
 to the two composition calls for ORLEANSEXP003 and ORLEANSEXP001 respectively; no
 global NoWarn or analyzer-severity change is permitted. This is the feature-specific
 consent required by [the .NET experimental API contract](https://learn.microsoft.com/en-us/dotnet/fundamentals/syslib-diagnostics/experimental-overview)
 and [the Orleans directory API](https://learn.microsoft.com/en-us/dotnet/api/orleans.hosting.corehostingextensions.adddistributedgraindirectory?view=orleans-10.0).
-5. Migrate all .NET tests to TUnit without weakening assertions. Rebuild the RF3 fixture around Docker/Aspire and real .NET and official MCP SDK callers. Replace obsolete DotNext-specific tests with equivalent current-host acknowledgement, snapshot and real-process fault scenarios.
-6. Remove obsolete packages, code, configuration and current-architecture claims in the same coherent change. Old implementation remains recoverable from Git; no runtime compatibility fallback is retained. Historical evidence remains labelled historical.
+5. Keep all .NET tests on TUnit without weakening assertions. Run the RF3 fixture through Docker/Aspire and real .NET and official MCP SDK callers. Cover current-host acknowledgement, snapshots and real-process fault scenarios.
+6. Keep the delivered package, code, configuration and current-architecture claims aligned in one coherent change. No alternate runtime path is part of the current implementation.
 7. Join all disjoint worker diffs, build/analyze/format and static-check the combined source. Push a reviewable validation ref and run all required GitHub Actions suites. Publish stable main only after the required gates pass. Record exact SHA/run/jobs/artifacts; power-loss/endurance remain unqualified.
 
 ```mermaid
@@ -153,7 +152,7 @@ sequenceDiagram
     Request-->>API: Public result
 ```
 
-Ownership: lead alone owns central config, shared contracts, docs and final integration. TASK-TEST-MIGRATE owns only existing test sources; TASK-REP-LOG owns only the new ClusterReplication durable-log/snapshot slice after contracts are fixed; transport research is read-only. Task graph, permissions, start/join conditions and test mapping are in the [execution plan](ADR-036-orleans-foundation.md).
+Ownership: lead alone owns central config, shared contracts, docs and final integration. TASK-TEST-ORLEANS owns only existing test sources; TASK-REP-LOG owns only the new ClusterReplication durable-log/snapshot slice after contracts are fixed; transport research is read-only. Task graph, permissions, start/join conditions and test mapping are in the [execution plan](ADR-036-orleans-foundation.md).
 
 TASK-ROUTE-REQUEST freezes generated request/reply contracts before delegated writes.
 Every public operation uses a unique, non-reentrant GUID request actor; it invokes a
@@ -182,13 +181,13 @@ does not redefine a public API or permit analyzer suppression.
 
 After the read-only lifecycle review, TASK-REP-ORLEANS owns the disjoint new Orleans ClusterReplication service/transport slice against the frozen `IReplicaEndpoint` and `IReplicaTransport` boundaries. Lead owns consensus, node materialization and host integration. The wire envelope contains generated-serializer `byte[]` payloads, authenticated with incarnation, voter, method, recipient runtime address, timestamp and nonce; command payload bytes remain exact across the dedicated replica codec. The service attaches its lazily resolved client in `GrainService.Init` at RuntimeGrainServices, without quorum waiting or an IMembershipTable dependency cycle. Consensus remains available through membership shutdown and drains at RuntimeStorageServices.
 
-Snapshot ingress has a separate node-owned serialized transfer gate. An authenticated current leader may abandon an incomplete conflicting upload with `ResetIncoming`; a complete verified installation is recovered before any abandonment. Ordinary `Begin` remains fenced against a different pending transfer. This prevents an orphaned old-leader upload from permanently blocking catch-up after leadership changes without discarding a materialized or verified cut.
+Snapshot ingress has a separate node-owned serialized transfer gate. An authenticated current leader may abandon an incomplete conflicting upload with `ResetIncoming`; a complete verified installation is recovered before any abandonment. Ordinary `Begin` remains fenced against a different pending transfer. This prevents an orphaned former-leader upload from permanently blocking catch-up after leadership changes without discarding a materialized or verified cut.
 
 REQ/AC-REP-006 adds bounded configurable anti-replay pools. Critical consensus/control calls have reserved capacity separate from application Forward, read barriers and data Appends. Payload classification occurs only after MAC/scope verification and uses the existing database control-kind policy. Nonces stay unique across methods until their full validity expires. Data throttling returns ResourceExhausted and triggers a bounded empty leader heartbeat; it cannot consume vote/noop/membership reserve. Pure cryptographic regressions complement, and do not replace, real RF3 saturation/failover tests.
 
-Rollout: development-version cluster migration uses new independent data directories for qualification. Existing snapshot/backup canonical format is preserved; old DotNext protocol directories are rejected with an explicit migration error rather than interpreted. Destructive production migration/restore is not part of this implementation. Rollback is to the prior Git commit and its matching isolated development data, never mixed consensus metadata.
+Rollout: deploy a homogeneous cluster using the current independently owned node data directories. Preserve the current snapshot and backup formats. Roll back to the prior source commit with its matching isolated development data; never mix consensus metadata.
 
-Testing methodology: TUnit validates exact durable metadata and failure boundaries against real storage; CrashHost is killed at acknowledgement/install boundaries; Docker/Aspire RF3 client tests cover happy path, minority denial, leader loss, stable-ID retry, authorization, snapshot catch-up and request routing migration. Changed critical-flow coverage must be measured in CI before claiming policy thresholds. All required source, docs, tests, quality gates and CI evidence must exist before this ADR becomes Implemented.
+Testing methodology: TUnit validates exact durable metadata and failure boundaries against real storage; CrashHost is killed at acknowledgement/install boundaries; Docker/Aspire RF3 client tests cover happy path, minority denial, leader loss, stable-ID retry, authorization, snapshot catch-up and Orleans activation movement. Changed critical-flow coverage must be measured in CI before claiming policy thresholds. All required source, docs, tests, quality gates and CI evidence must exist before this ADR becomes Implemented.
 
 AppHost builds the repository Dockerfile and runs node1/node2/node3 as actual
 container resources with separate `/data` mounts, internal HTTP8080/silo11111, and
@@ -198,7 +197,7 @@ existing scenarios using actual managed-container kill/restart, bounded logs and
 JSON topology/fault receipts. Required Docker RF3 qualification is a dedicated
 Linux CI job; unit and process recovery remain mandatory on Linux/macOS/Windows.
 
-Native failed-start boundary: exact Orleans10.3.1 Silo source has no automatic
+Native failed-start boundary: exact centrally pinned Orleans Silo source has no automatic
 lifecycle rollback when membership startup fails or is cancelled. Provider disposal
 does not prove the partially opened listener was unbound. KeyLoad withdraws runtime
 discovery and drains its borrowed replica endpoint before disposing dependencies,
@@ -220,8 +219,8 @@ application calls, pretend a system target is IGrain, or duplicate its filters i
 KeyLoad. Scoped upstream regression/checks/canonical patch/release/feed receipt
 must join before the consumer package pin and real enforced-graph RF3 proof.
 
-Discovery replacement contract (REQ/AC-REP-001/005/006): remove legacy HTTP Raft
-headers, generic body streaming/spooling and IHttpMessageHandlerFactory ownership.
+Discovery contract (REQ/AC-REP-001/005/006): the node discovery request has no
+Raft headers, body streaming/spooling or IHttpMessageHandlerFactory ownership.
 The only HTTP peer request is a bodyless GET of /internal/silo, without query or
 content. PeerSecurity takes ReadOnlyMemory<byte> secret, TimeProvider clock,
 optional connect timeout and a bounded replay capacity; it copies its secret once.
@@ -232,9 +231,9 @@ timestamp/nonce are authenticated. Fixed capacity and inclusive expiry prevent
 unbounded replay state or premature removal of future-dated valid nonces.
 TASK-REP-DISCOVERY owns new replication helpers and security regression sources;
 the lead alone updates the two native-discovery composition callers. Existing
-native envelope bounds and real transfer recovery replace legacy body tests.
-Obsolete provider tests may be removed only with an assertion/scenario migration
-matrix and equivalent current durable-log/snapshot tests, filling any found gap.
+Native envelope bounds and real transfer recovery are covered by the current
+durable-log and snapshot tests, including every required assertion and failure
+boundary.
 
 TASK-GRAPH-OWNING accepted handoff: the clean sibling Orleans.Graph checkout is
 at fcc4cb7cd8a1f5a30bfd067b9a4d1d819424a0df, current canonical version10.0.5.
@@ -263,15 +262,14 @@ later. SystemStatus is internal, so do not read it through reflection or claim a
 public SystemStatus assertion. The public-stage witness proves real execution
 before Active without adding a framework stub or unsupported inspection API.
 
-Legacy recovery test join preserves source and installed canonical Position before
-tail apply, stable generation/node identity, old-versus-new applied cuts, image/
-intent cleanup, and second reopen. Add a genuine foreign-incarnation Begin case:
+Current recovery tests preserve source and installed canonical Position before
+tail apply, stable generation/node identity, pre- and post-install applied cuts,
+image/intent cleanup, and second reopen. Add a genuine foreign-incarnation Begin case:
 the incoming descriptor fails Validation before transfer/files/canonical effects;
 a mismatched physical canonical/log authority fails TokenInvalidated. Invalid
-private unacknowledged incoming metadata is reclaimed under the new format while
-the existing verified canonical cut remains unchanged. Published image corruption
-or absence still fails closed. This replaces old DotNext-only incoming/append
-interfaces, not their durable-data guarantees. Test replay expiry at numeric
+private unacknowledged incoming metadata is reclaimed under the current format
+while the existing verified canonical cut remains unchanged. Published image corruption
+or absence still fails closed. These cases preserve the current durable-data guarantees. Test replay expiry at numeric
 boundaries through the actual internal replay algorithm, plus genuine signed
 request cases; a test friend assembly does not expose a public test API or clock.
 
@@ -282,18 +280,17 @@ before nonce admission; a valid payload using the same nonce must still admit in
 the configured single-entry application pool, and a signed failure reply verifies
 against its originating request. Outbound SignRequest rejects the same bound.
 These complement decoded-control limits, append JSON/log bounds and RF3 sockets;
-they replace the legacy oversized generic-body assertion without a fake handler.
+the tests exercise the actual bounded request body without a fake handler.
 
-TASK-REP-SCHEMA joins the accepted ADR-041 contract migration in the undeployed
-native protocol. ReplicaConfiguration.VoterIds and AppendRequest.Entries become
+TASK-REP-SCHEMA refines the accepted ADR-041 contract in the current native
+protocol. ReplicaConfiguration.VoterIds and AppendRequest.Entries become
 ImmutableArray; snapshot chunks and generated peer payload/signature/secret
 properties become ReadOnlyMemory<byte>. Durable log Read returns its final immutable
 batch, Append takes IReadOnlyList<ReplicaEntry>, and its point read is ReadEntry.
 The mutable encoded state key is internal storage infrastructure. Generated aliases,
 field IDs, enum values, signature bytes, public/durable JSON array/base64/tombstone
-forms and persisted versions stay unchanged. This changes CLR and native field
-types before first qualification; rebuild all binaries/voters together, never run
-mixed schema binaries or claim compatibility with an already deployed native wire.
+forms and persisted versions stay unchanged. This changes CLR and native field types before first qualification; rebuild all
+binaries and voters together.
 Root alone owns contracts and typed caller integration; workers may add meaningful
 XML/style corrections without changing signatures or algorithms. Ordered log,
 ownership, checksums, memory admission, real MAC and recovery tests remain required.
@@ -471,7 +468,7 @@ from the accumulated failures. These explicit ownership barriers also give the
 strict disposal analyzer a direct resource-close call chain; no rule is suppressed
 or weakened. See the [native CA2213 ownership rule](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2213).
 
-TASK-TEST-DOCKER-DISCOVERY joins the fixture's obsolete diagnostic caller to the
+TASK-TEST-DOCKER-DISCOVERY joins the fixture diagnostic caller to the
 only permitted signed GET /internal/silo using TimeProvider.System. Read response
 headers first, reject an oversized declared body, and consume at most the fixed
 diagnostic byte ceiling plus one byte before any text materialization. A truncation
@@ -569,7 +566,7 @@ root owns docs and delivery. No other worker changes these files.
 
 Dependencies: existing native request isolation, transport and read-barrier
 contracts. No persistent schema, wire-envelope, credential, topology, retry or
-journal migration. Rollout deploys the source together; rollback reintroduces
+journal change. Rollout deploys the source together; rollback reintroduces
 ambiguous cancellation classification and requires requalification. Keep the existing private closed-category logging contract; the diagnostic classifier
 must receive the same computed code as the returned reply. Internal execution
 phase of run37070004864 failure was not retained reliably, so this refinement is
@@ -599,7 +596,7 @@ complete exact-SHA GitHub unit/scalar/process recovery and real RF3 SDK/MCP gate
 The TimeSeries follower test separately retains safe Problem code/detail on its
 unchanged success assertions; no unobserved response code authorizes a retry.
 Rollback removes only this classification case/tests while preserving native
-Orleans/timeout handling; there is no persisted migration. Qualification pending.
+Orleans/timeout handling; persisted state is unchanged. Qualification pending.
 
 
 ## TASK-ISO-021 accepted application/control read separation
@@ -609,7 +606,7 @@ Source b474 proves application quorum rounds spend Critical capacity via empty
 Append. Actual native RF2 OwnershipLost/RF3 ResourceExhausted do not yet prove
 which replay pool first overflowed; preserve that uncertainty and failed samples.
 
-Append signed method ordinals ReadProbe=7 and ControlReadBarrier=8; old0..6,
+Append signed method ordinals ReadProbe=7 and ControlReadBarrier=8; existing0..6,
 envelope version, exact HMAC method binding, generation, nonce, freshness,
 full-lifetime cross-method replay and durable formats stay unchanged. ReadProbe
 uses the existing strict AppendRequest parser with initialized empty Entries
@@ -629,8 +626,7 @@ application purpose. No ICommitCoordinator/HTTP/SQL/SDK/MCP/authorization change
 
 ReplicaMembershipTable constructor now requires the actual ReplicaConsensus
 instead of IReplicaEndpoint; the sole production construction already supplies
-partition.Consensus. Change the source signature coherently, with no legacy
-overload/cast/compatibility fallback. ReplicaMembershipStore receives that same
+partition.Consensus. Change the source signature coherently, with no additional overload, cast or fallback. ReplicaMembershipStore receives that same
 node-owned consensus and calls trusted control read; membership writes retain
 coordinator/atomic CAS. Preserve true caller cancellation; independent native
 deadline/lifetime cancellation maps OwnershipLost as the original coordinator.
@@ -645,7 +641,7 @@ fixture edit; no synthetic successful transport, gate/quorum/term/retry relaxati
 or public/shared abstraction edits. Tests first use actual stored nodes and
 real protocol. Root new security TUnit tests cover valid signed methods, empty
 guards, wrong sender/MAC, malformed/nonempty/null fields, cross-method replay,
-separate capacity denial and unchanged old method/data/snapshot classification.
+separate capacity denial and unchanged existing method/data/snapshot classification.
 
 Quota diagnostic snapshot is captured atomically at capacity denial and emitted
 after the lock: configured numeric sender index, closed method/pool, counts and
@@ -667,9 +663,8 @@ RF3 and native KeyLoad1/2/3; then genuine control-pressure/failover proof and
 all270 before aggregation/site. Native control execution/membership-under-load
 observer remains a separately frozen required join, not inferred from admission
 or absence of warnings. Public auth/lease reserve liveness remains unqualified.
-All test/runtime execution is GitHub only. Homogeneous all-voter rollout and
-rollback preserves local stores/journals; old nodes fail closed on new methods,
-no mixed-version availability promise. ADR remains Accepted pending all evidence.
+All test/runtime execution is GitHub only. Homogeneous all-voter rollout and rollback preserves local stores and journals.
+ADR remains Accepted pending all evidence.
 
 
 TASK-ISO-021P test instrumentation refinement: NEW RecoveryTests ClusterReplication
@@ -690,8 +685,7 @@ genuine signed admission tests and Docker/Aspire RF3 remain mandatory joins.
 
 TASK-ISO-021T source integration details: ReplicaEnvelopeAuthenticator adds an
 optional fifth ILogger<ReplicaEnvelopeAuthenticator> constructor argument; all
-source callers remain coherent and native DI supplies the actual logger. This
-is a homogeneous source/ABI rollout, not a retained legacy constructor shim.
+source callers remain coherent and native DI supplies the actual logger. This is a homogeneous source and ABI rollout.
 The exact authenticated quota snapshot and fixed rate state are source-owned
 ReplicaReplayAdmissionFailure/Diagnostics; one numeric configuration record
 retains actual node pool capacities, and at most one rejection record per

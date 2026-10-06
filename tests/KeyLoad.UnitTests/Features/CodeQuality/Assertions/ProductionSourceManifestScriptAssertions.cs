@@ -72,7 +72,7 @@ internal static class ProductionSourceManifestScriptAssertions
     private static async Task AssertFieldsAsync(JsonElement row)
     {
         var actual = row.EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal);
-        await Assert.That(actual).IsEquivalentTo(new[] { HashProperty, NameProperty },
+        await Assert.That(actual).IsEquivalentTo(new[] { NameProperty, HashProperty },
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 }

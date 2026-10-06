@@ -94,7 +94,7 @@ The historical partial matrix does not close independent partition isolation.
 ## Accepted scoped outcome repair, 2026-10-05
 
 REQ/AC-DSTORE-009 repairs that gap under the exact accepted matrix in
-[ADR-011](../ADR/ADR-011-format-upgrades.md). Durable identity is verified
+[ADR-011](../ADR/ADR-011-current-native-format.md). Durable identity is verified
 principal, explicit Global/Partition scope, the complete resolved `PartitionRef`
 for Partition, and CommandId. The canonical fingerprint, native StoredOutcome
 alias and IDs 0..7, persisted authorization, incarnation checks and ordered
@@ -158,7 +158,7 @@ AC-DSTORE-009 requires complete actual-operation scenarios:
 5. Existing Aspire-owned real process cuts and two-process retry scenarios prove new-key recovery and old-byte preservation. Aspire RF3 tests use both actual SDK and official MCP clients for same-ID/two-partition commits, opposite-endpoint retries and an owned restart/leader path. Local proof remains distinct from delivered-source Linux qualification.
 
 Ordered ownership: TASK-DSTORE-SCOPED-OUTCOMES-001 freezes this feature and the
-ADR-002/011/017 and TokenMigrationLineage joins (root); 002 owns scoped keys,
+ADR-002/011/017 and TokenOwnershipLineage joins (root); 002 owns scoped keys,
 locator codecs/inventory and existing Core commit/resolution paths (Luna private
 packet); 003 updates all actual accessor callers and adds UnitTests,
 RecoveryTests/CrashHost and IntegrationTests operation flows in their canonical

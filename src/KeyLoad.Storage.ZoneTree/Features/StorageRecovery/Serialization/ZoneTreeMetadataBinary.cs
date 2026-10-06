@@ -4,7 +4,7 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeMetadataBinary
 {
-    internal const ulong IdentityMagic = 0x354449444C4BUL;
+    internal const ulong IdentityMagic = 0x364449444C4BUL;
     internal const ulong BackupMagic = 0x32504B424C4BUL;
     private const int PrefixBytes = sizeof(ulong);
 

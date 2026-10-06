@@ -19,10 +19,10 @@ Persisting command identity with effects resolves lost responses across process 
 1. Freeze command fingerprint inputs, principal/scope binding, error replay, and retention horizon before changing envelopes.
 2. Add TUnit tests for same-ID/same-content replay, same-ID/changed-content conflict, lost response after commit, precondition failure replay, and unrelated principal/partition scope.
 3. Keep shared command/request/outcome contracts in the existing `src/KeyLoad.Abstractions/Contracts.cs` building block and dispatch/persisted outcome handling in `src/KeyLoad.Core/DatabaseEngine.cs`; feature-specific mutation logic remains in its canonical owning `Features/<SliceName>/` directory. Do not create a separate CommandExecution slice or project.
-4. This ADR authorizes no outcome-format migration, compatibility reader, dual-format read/write path, or legacy fallback. If an existing persisted outcome requires an upgrade, stop until [ADR-011](ADR-011-format-upgrades.md) is Accepted with the concrete format version, migration mode, and rollback boundary. Any temporary compatibility transition additionally requires a documented reason, owner, exact scope, verification, and removal date. Until then, unknown formats fail closed.
+4. The current outcome format has one canonical reader and writer. Unknown, malformed, or unsupported outcomes fail closed without rewrite or alternate-key lookup.
 5. GitHub qualification is TUnit, real process recovery, and RF3 SDK outcomes after leader change. Root owns shared command contracts; feature owners join with fingerprint vectors and named test evidence.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-011](ADR-011-format-upgrades.md), and [ADR-016](ADR-016-atomic-physical-placement.md). Stop if canonical fingerprint or dedup expiry behavior is not specified. Do not infer exactly-once handler execution or include an external API call in the database transaction.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), and [ADR-016](ADR-016-atomic-physical-placement.md). Stop if canonical fingerprint or dedup expiry behavior is not specified. Do not infer exactly-once handler execution or include an external API call in the database transaction.
 
 ## TASK-DSTORE-COMMAND-100-RESTART implementation contract
 
@@ -32,18 +32,16 @@ UnitTests/Features/DocumentStorage. Root freezes the literal error, document,
 revision and outbox oracles; query_wave owns only the new cases/helpers. This
 stage changes no outcome format, canonical key or public API. Current source
 uses principal/command keys and partition-bearing fingerprints; independent
-resolved-partition identity remains an explicit implementation gap. The Accepted
-decision above is unchanged. Root must define the exact upgrade and public
-resolution contract under ADR-011 before repairing that separate gap. Tests of
-principal isolation must not stand in for partition isolation.
+resolved-partition identity remains an explicit implementation gap. The accepted identity decision remains unchanged. Tests of principal isolation
+must not stand in for partition isolation.
 
 Current command outcomes have no automatic TTL or purge implementation. A
 matching authorized retry resolves its retained canonical outcome in the same
 store incarnation. This does not promise a finite minimum retention period,
 eternal replay after explicit store/record removal, or replay across a changed
 incarnation; an existing outcome from another incarnation is TokenInvalidated.
-Adding expiry, purge, a minimum temporal horizon or an outcome-format change
-requires its own accepted policy and migration contract before implementation.
+Expiry, purge, a minimum temporal horizon, and outcome-format changes require
+a separately accepted current-product contract before implementation.
 
 REQ-DSTORE-006 / AC-DSTORE-006 and original KL-012 require two actual CrashHost
 processes over one owned native ZoneTree store. The first commits one authorized
@@ -87,28 +85,23 @@ flowchart LR
     Effects --> Commit[Ordered commit]
 ```
 
-## Accepted scoped-key completion, 2026-10-05
+## Accepted scoped command-outcome contract, 2026-10-05
 
 REQ/AC-DSTORE-009 and TASK-DSTORE-SCOPED-OUTCOMES-001..004 in
-[DocumentStorage](../Features/DocumentStorage.md) now freeze the independent
-full-partition identity missing from the earlier test-only matrix. The exact
-[ADR-011 outcome-v2 matrix](ADR-011-format-upgrades.md) accepts cold homogeneous
-writes to scoped v2 keys while retaining and validating original native outcome
-bytes. Existing fingerprint/authorization/incarnation/error/atomicity semantics
-remain required. Remove public principal/ID-only result/key access; every active
-lookup carries its original normalized operation. No SDK/HTTP/MCP endpoint
-replacement is needed because none exposes that removed Core API.
+[DocumentStorage](../Features/DocumentStorage.md) freeze the complete atomic
+partition identity in persisted command-outcome lookup. Current command writes
+use the accepted outcome representation; every lookup is bound to its normalized
+operation, authenticated principal, and complete partition scope. Public
+principal/ID-only result or key access is not an accepted path.
 
-Ordered stages and exact file/test ownership are in the feature contract. Root
-joins its contract before Luna implements Core keys/locator inventory and the
-existing commit/resolution path, then updates all actual callers and adds real
-unit/scalar/prior-process/restart/RF3 scenarios. Root reviews, qualifies and
-delivers the full joined stage. Wrong/missing locator, contradictory scope,
-same-scope old/new duplicates and malformed frames fail closed without rewrite.
-Unknown prior scope blocks ambiguous reuse, never hash-derived backfill. New
-Unknown failures have a distinct explicit nonmovable v2 identity and cannot
-install an old-key barrier over a prior Global/Partition success; every new
-write is v2, with bounded point resolution and no shared reservation protocol.
-After the first v2 write recover forward; a legacy-only downgrade requires the
-verified full pre-upgrade backup and explicit accepted data-loss scope. The
-accepted contract does not close any original KL-012 acceptance gate by itself.
+The current contract rejects a missing or contradictory locator, malformed
+record, duplicate scoped identity, or unsupported outcome without rewriting
+persisted bytes, searching an alternate key, or deriving identity from a hash.
+The current `Unknown` scope represents a normalized operation that failed before
+partition resolution. Its matching, freshly authorized retry replays only that
+same failed operation; it never invents partition authority or permits effects.
+Unknown scope values and contradictory identities fail closed. New commands use the
+canonical current identity and outcome representation. Ordered source ownership
+and the real unit, scalar, process-recovery, restart, and RF3 cases remain mapped
+in the feature contract; root owns shared joins and actual qualification. This
+section records the current behavior contract and does not claim gate completion.

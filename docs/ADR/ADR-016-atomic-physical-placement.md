@@ -4,7 +4,7 @@ Status: Accepted; placement movement and GitHub RF3 qualification pending. Relat
 
 ## Context and decision
 
-Logical transaction scope and physical placement are separate identities. Each `AtomicPartitionId` owns its command ordering and resource binding; a physical shard/host may pack many atomic partitions. A `PartitionHost` on a physical node owns canonical storage, journals, locks, and ordered apply gate. Orleans grains route operations and may migrate activation placement without moving those node-owned resources. A partition move is explicit and transfers a complete verified cut plus lineage; it is not an incidental grain migration.
+Logical transaction scope and physical placement are separate identities. Each `AtomicPartitionId` owns its command ordering and resource binding; a physical shard/host may pack many atomic partitions. A `PartitionHost` on a physical node owns canonical storage, journals, locks, and ordered apply gate. Orleans grains route operations and may move activation placement without moving those node-owned resources. A partition move is explicit and transfers a complete verified cut plus lineage; it is not incidental Orleans activation movement.
 
 ## Rationale, alternatives, consequences
 
@@ -17,12 +17,12 @@ ClusterRouting `REQ-ROUTE-001..003`/`AC-ROUTE-001..003`; ClusterReplication `REQ
 ## Implementation contract
 
 1. Freeze logical ID, physical shard identity, placement catalog/epoch, ownership fencing, and token translation before movement implementation.
-2. Add tests for many atomic partitions per host, isolated writes, stale-owner rejection, complete snapshot plus tail, interruption, and activation migration that leaves node-local locks/storage unmoved.
+2. Add tests for many atomic partitions per host, isolated writes, stale-owner rejection, complete snapshot plus tail, interruption, and activation movement that leaves node-local locks/storage unmoved.
 3. Target modules: `src/KeyLoad.Core/Features/ClusterRouting/`, `src/KeyLoad.Orleans/Features/ClusterRouting/`, and `src/KeyLoad.Replication/Features/ClusterReplication/`; node-local `PartitionHost` lifecycle and physical I/O belong to `src/KeyLoad.Server/Features/StorageRecovery/Hosting/PartitionHost.cs`, with the provider in `src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/`. Core owns logical identity and business helpers, never physical node I/O.
-4. Migration fences old owner, captures verified cut/lineage, installs destination, catches up ordered tail, then publishes placement epoch. Rollback reactivates old owner only if it remains complete and fenced against concurrent writes; otherwise stop and recover forward.
+4. A physical move fences the current owner, captures verified cut/lineage, installs the destination, catches up the ordered tail, then publishes the placement epoch. Rollback reactivates the source only if it remains complete and fenced against concurrent writes; otherwise stop and recover forward.
 5. GitHub CI runs process recovery and Aspire RF3 move/failover tests through .NET and MCP clients. Root owns placement/catalog protocol and joins source-storage owners with cut evidence.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), [ADR-008](ADR-008-backup-log-retention.md), and [ADR-017](ADR-017-migration-tokens.md). Stop if a plan transfers journal/lock ownership with an activation or changes logical AtomicPartitionId during a physical move.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), [ADR-007](ADR-007-replica-consensus-bootstrap.md), and [ADR-008](ADR-008-backup-log-retention.md). Stop if a plan transfers journal/lock ownership with an activation or changes logical AtomicPartitionId during a physical move.
 
 ## First accepted native page stage, 2026-10-05
 

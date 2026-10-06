@@ -1298,14 +1298,41 @@ prepare, tamper/rejection, preserved-input, restore and healthy verification
 workflow; a property-format assertion alone is not native identity proof.
 
 The AC-CQ-045/047 original-child settlement uses one captured absolute cleanup
-watchdog. On timeout or overflow, kill the owned child tree and close its two
-original redirected readers, then join the original exit/readers within the
-remaining admitted bound. Do not reset the timer, create a replacement waiter
-or await without a bound. If the original tasks still cannot settle, fail-stop
-the native merger owner with a fixed safe fatal message, preserve every original
+watchdog. On timeout or overflow, kill the owned child tree, allow its original
+exit/readers to join within the existing validated TerminationGrace and the
+remaining absolute bound, and close the original redirected readers only if
+they are still pending. Join those same tasks within the remaining bound. Do
+not reset the timer, create a replacement waiter or await without a bound. If
+the original tasks or actual native exit still cannot settle, fail-stop the
+native merger owner with a fixed safe fatal message, preserve every original
 input, and publish no successful merge output or receipt. Its original parent
 observes that native failure and retains Aspire/TUnit ownership of tree cleanup;
 an unsettled process is never labelled joined or converted into coverage proof.
+
+TASK-CQ-ORIGINAL-SETTLEMENT-008 retains REQ-CQ-009 and AC-CQ-045/047. The
+native R72 cancellation/output workflows passed3/3, but source review found
+reset cleanup timers, a second original-task capture and an unlimited exit poll.
+Freeze the repair in CodeQuality/Processes and the real child-operation helper:
+one async-disposable deadline captures the owner's TimeProvider and validated
+ProcessSettlementTimeout once. Both task joining and actual HasExited polling
+consume that same monotonic budget. Cancel and join every owned deadline/grace/
+poll timer before disposal; TimeProvider.System is selected only by default
+entry points. Capture the actual original exit/readers once and retain their
+original exceptions without duplication. Never substitute completed tasks for
+missing original stages or recapture a replacement exit observer.
+
+Root owns the helper, live joins and serial native build/format/Aspire gates;
+Luna owns a private guarded process/deadline packet and mapped complete-operation
+regression. Remove the obsolete settlement overload and migrate every caller
+together. Verify real readiness followed by cancellation, bounded-output failure,
+original task completion, actual exit before disposal, owned-root removal and a
+successful prepare/tamper/rejection/restore/healthy manifest follow-up. Keep all
+existing failure-identity assertions. Native fatal-deadline expiry requires its
+own real-process proof; source review or ordinary cancellation does not prove it.
+No new public API, persisted format, dependency, raised bound or relaxed gate is
+introduced. Rollback restores one coherent previous test-owner implementation
+after all admitted work joins, retaining original reports. Linux full functional
+coverage, recovery and RF3 gates remain required.
 
 Native R26/R27 baseline exposed KLD0031 on the216-code-line combined
 NativeComparisonExecutionOptions type. The unchanged adapter conditions now

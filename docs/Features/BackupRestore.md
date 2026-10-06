@@ -191,6 +191,75 @@ functional coverage and required recovery/RF3/Linux gates remain mandatory.
 
 ## Negative and boundary flows
 
+### TASK-KL042-CATALOG-001A: atomic first-write roster
+
+REQ-BACKUP-004 / AC-BACKUP-004 first require a durable roster of complete
+PartitionRef identities. The supported RF3 topology has one physical shard and
+one ordered node-local store/apply cut; a future multiple-physical-shard barrier
+is not implemented. Freeze this first implementation stage as write-time
+registration, followed by fenced legacy backfill and the cluster capture/restore
+stages. Registration alone does not establish a complete legacy inventory or a
+qualified cluster backup.
+
+Add a generated native v1 entry with stable alias/IDs for Version, Partition,
+FirstSeenStorePosition and FirstSeenAppliedIndex. The key is
+KeyCodec.Encode("atomic-partition-catalog", "v1", "partition", the four scope
+strings). A positive replicated index is retained separately from local store
+position; replicated rows use store position0 so node-local commit offsets cannot
+make RF3 canonical rows diverge. Local operations use positive store position and
+applied index0. Repeated registration validates
+and preserves the original row. Placement remains authoritative in its current
+row; the roster must not duplicate physical ownership or invent a second epoch.
+The frozen alias is keyload.backup.atomic-partition-catalog-entry.v1; field IDs
+are0 Version,1 Partition,2 FirstSeenStorePosition and3 FirstSeenAppliedIndex.
+
+Inside the existing DatabaseEngine atomic command callback, a feature-local
+IAtomicTransaction decorator forwards the actual native view/write contract and
+records distinct partition identities from staged Put/Delete keys. Reuse
+PartitionRecordFamilies.All and the canonical KeyCodec; include destination
+partitions of cross-partition graph effects and explicit empty-placement rows.
+Recognized malformed/noncanonical scoped keys fail as Corruption. Unknown global
+families do not create rows. Outcome-v2 has separate canonical global/unknown
+four-component grammars as well as scoped outcomes; match those exact global
+keys through the existing KeySpace constructors before interpreting a partition
+scope. A tenant literally named global or unknown remains a valid scoped identity.
+Reset clears staged candidates. Register candidate
+rows with effects and durable outcomes before ValidateCommit, including the
+post-reset bounded rejection outcome path. The combined native commit validation
+must reject the whole staged image on exhaustion; no acknowledged effect may
+omit its roster row. Replays must preserve their original outcome/row identities.
+Use the validated DatabaseLimits.MaxBatchMutations and MaxBatchBytes to bound
+distinct retained candidate identities/encoded keys, and preserve provider commit
+bounds. Do not add arbitrary operational constants or an unbounded collection.
+Carry the engine's existing validated OperationLimitsOptions as native
+IOptions<DatabaseLimits> into the roster transaction. Do not create a parallel
+configuration owner or pass a raw limits policy across this boundary. Tests use
+the same explicitly validated options contract. Private helpers whose only actual
+caller uses the roster transaction retain that concrete type; all domain indices
+and empty-count values have named constants under the unchanged analyzer policy.
+
+Root owns contracts, shared commit integration, policy/source maps and native
+gates. Luna may prepare a guarded private packet for Abstractions BackupRestore
+Contracts/Serialization, Core BackupRestore Execution/Serialization/Validation,
+the exact AtomicCommandCommit join and placement-key identity reuse, plus real
+UnitTests BackupRestore cases. No replication/startup/public API/dependency/Git
+changes in this stage. Do not add unused Ready flags, capture placeholders or
+claim migration completeness. Legacy backfill will use a resumable RF3-committed
+census of live scoped keys plus explicit placements with admission fenced; a
+fully purged unassigned legacy identity has no surviving authority.
+
+Mapped real workflows must commit and reopen several partition/model writes,
+verify same-transaction roster/outcome/data, retry without changing first-seen
+identity, reject a batch with preserved state, register a durable rejected
+outcome, bind an empty placement, exercise a cross-partition destination effect,
+and delete data while retaining its monotonic row. Use actual ZoneTree and
+authenticated DatabaseEngine operations, not fake transactions or source checks.
+Full build/format, Aspire normal/scalar, recovery/RF3 and source-bound Linux
+functional coverage remain mandatory. Rollout requires one compatible RF3 cohort;
+old writers cannot qualify a complete roster. Rollback may retain original typed
+rows but must keep cluster capture unavailable until backfill and restore gates
+are qualified. ADR-008 and ADR-011 govern the additive native record format.
+
 Reject checksum mismatch, missing canonical files, malformed catalog entries, path traversal/reparse points, nonempty destinations, and a restore whose manifest/version is unsupported. Preserve the last known materialized state when a restore fails. A process-kill or local round trip is not evidence of power-loss durability, a globally consistent multi-partition cut, or recovery of every optional capability.
 
 ## ADRs and verification boundary

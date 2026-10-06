@@ -28,7 +28,7 @@ Related: `REQ-AUTH-006..009/AC-AUTH-006..009`, `REQ-MSG-002/AC-MSG-002`, `REQ-FE
 1. Freeze classification vocabulary, grant separation, schema evolution, and safe diagnostic policy.
 2. Add real persisted-policy canary tests across read, search, event, queue, DLQ, replay, projection, and required worker input.
 3. Implement one projector and lineage propagation; each feature owner applies its own source authorization before projection or processing.
-4. Reclassification migration preserves restrictive defaults and invalidates affected cached/cursor authority; rollback cannot expose prior raw output.
+4. Reclassification preserves restrictive defaults and invalidates affected cached/cursor authority; rollback cannot expose raw output that current policy denies.
 5. Qualify unauthorized output absence and no-effect denial in GitHub unit, recovery, and RF3 .NET/MCP suites; inspect logs/artifacts for canaries.
 
 Current security tests cover document/query and feed paths; event/message-wide coverage and current integrated qualification remain pending. Root joins cross-slice policy changes. Public callers never provide trusted roles.

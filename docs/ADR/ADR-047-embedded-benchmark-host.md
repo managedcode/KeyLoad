@@ -24,10 +24,9 @@ policy and ordinary generated-process toolchain intact.
 Choose a nonpackable public KeyLoad.BenchmarkScenarios library under canonical
 BenchmarkComparisons ownership. Existing KeyLoad.Benchmarks remains the sole
 microbenchmark executable, with only a typed application runner selecting the
-fixture assembly. Public fixture CLR identity moves from the global executable
-type to its library namespace, preserving three method names/filter fragments and
-operation behavior. This is a benchmark tooling boundary, not a database product,
-RF3 topology, managed dependency replacement or comparative-report migration.
+fixture assembly. The public fixture CLR identity belongs to the library namespace; preserve the
+three method names/filter fragments and operation behavior. This is a benchmark tooling boundary, not a database product,
+RF3 topology, managed dependency replacement or comparative-report change.
 
 ```mermaid
 flowchart LR
@@ -77,9 +76,9 @@ owns that shared configuration; actual paired restore, enabled builds and stage4
 real Dry generated consumer are required compatibility evidence. Rollback of the
 complete benchmark join also removes the new peer pin; removing it alone leaves
 the invalid graph and is not an accepted rollback. No ManagedCode release or
-persisted migration follows from this compiler-package alignment.
-Rollout is coherent source/library/host/test/reference change; no stored conversion.
-Rollback removes that complete source unit while preserving strict policy, without
-retaining the old fixture as a compatibility shim or diagnostic bypass. Shared
+persisted-data change follows from this compiler-package alignment.
+Deliver the source/library/host/test/reference changes coherently; persisted data is
+unchanged. Rollback removes that complete source unit while preserving strict policy,
+without a duplicate fixture API or diagnostic bypass. Shared
 contracts/configuration/docs have one lead owner; independent query/storage/native
 work cannot be overwritten. Accepted remains until every mapped gate succeeds.

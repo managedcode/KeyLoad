@@ -67,25 +67,6 @@ internal sealed class BenchmarkTopologyMembershipTests
     }
 
     [Test]
-    public async Task AcIso004LegacyProductionStateCannotAcquireBenchmarkAuthority()
-    {
-        using var fixture = new BenchmarkTopologyMembershipFixture();
-        var production = fixture.Configuration(3, benchmark: false);
-        using (var store = fixture.Open())
-        {
-            using var log = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(production));
-            await Assert.That(BenchmarkTopologyMembershipFixture.Membership(store)).IsNull();
-        }
-        using var reopened = fixture.Open();
-        using var ordinary = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(production));
-        var position = reopened.Position;
-        var failure = BenchmarkTopologyMembershipFixture.Reject(reopened, production with { BenchmarkTopology = true });
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(reopened.Position).IsEqualTo(position);
-        await Assert.That(BenchmarkTopologyMembershipFixture.Membership(reopened)).IsNull();
-    }
-
-    [Test]
     public async Task AcIso004PersistedGuardAlsoFencesMembershipAfterOptOut()
     {
         using var fixture = new BenchmarkTopologyMembershipFixture();

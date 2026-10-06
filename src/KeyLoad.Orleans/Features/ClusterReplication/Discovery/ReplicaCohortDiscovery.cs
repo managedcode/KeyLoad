@@ -12,11 +12,10 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
     private readonly ReplicaCohortAdmission admission;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly TimeProvider clock;
-    private readonly IReplicaDiscoveryObservationSink? observationSink;
 
     internal ReplicaCohortDiscovery(IOptions<ReplicaConfiguration> configurationOptions, IOptions<ReplicaPeerOptions> peerSettings,
         ReplicaSiloDiscoveryState local, ReplicaEnvelopeAuthenticator authentication, TimeProvider clock,
-        IOptions<PeerDiscoveryOptions> peerOptions, IReplicaDiscoveryObservationSink? observationSink = null)
+        IOptions<PeerDiscoveryOptions> peerOptions)
     {
         var configuration = configurationOptions.Value;
         var options = peerSettings.Value;
@@ -27,7 +26,6 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(clock);
         this.configuration = configurationOptions.Value;
         this.clock = clock;
-        this.observationSink = observationSink;
         observations = new(configurationOptions, local, clock);
         var ownedResources = new ReplicaDiscoveryResources(configurationOptions, peerSettings, authentication, clock, peerOptions);
         resources = new(ownedResources);
@@ -174,11 +172,6 @@ internal sealed class ReplicaCohortDiscovery : IDisposable, IAsyncDisposable
             && (attemptToken.IsCancellationRequested || error is TaskCanceledException))
         {
             return null;
-        }
-        if (discovered is { ProtocolCompatible: false } && observationSink is not null)
-        {
-            await observationSink.ObserveIncompatibleAsync(voterId, discovered, attemptToken)
-                .ConfigureAwait(false);
         }
         return discovered;
     }

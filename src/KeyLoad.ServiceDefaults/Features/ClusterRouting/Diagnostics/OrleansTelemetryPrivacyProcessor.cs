@@ -95,12 +95,7 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
         {
             if (keys.Count == Options.MaximumBaggageItems)
             {
-                foreach (var existingKey in keys)
-                {
-                    activity.SetBaggage(existingKey, null);
-                }
-
-                return true;
+                break;
             }
 
             keys.Add(key);
@@ -111,7 +106,8 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
             activity.SetBaggage(key, null);
         }
 
-        return false;
+        using var remainingBaggage = activity.Baggage.GetEnumerator();
+        return remainingBaggage.MoveNext();
     }
 
     private static bool HasNoEventTags(ActivityEvent activityEvent)

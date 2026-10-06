@@ -175,11 +175,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
         }
     }
 
-    /// <summary>Persists a monotonic minimum reader requirement under the exclusive physical owner.</summary>
-    /// <param name="minimumReaderContract">The supported native runtime journal reader contract.</param>
-    public void RequireReaderContract(int minimumReaderContract)
-        => ZoneTreeReaderContractPublication.Require(runtime, minimumReaderContract);
-
     /// <summary>Copies the canonical journal and identity into a private verified backup directory.</summary>
     /// <param name="directory">Destination directory that must be empty.</param>
     /// <returns>The captured local journal position.</returns>

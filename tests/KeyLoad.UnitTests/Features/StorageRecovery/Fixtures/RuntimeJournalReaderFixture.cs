@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -5,8 +6,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class RuntimeJournalReaderFixture : IDisposable
 {
-    internal const ulong LegacyIdentityMagic = 0x354449444C4BUL;
-    internal const ulong RuntimeJournalIdentityMagic = 0x364449444C4BUL;
+    internal const ulong UnsupportedIdentityMagicBit = 1;
     internal const string GuidFormat = "N";
     internal const string RuntimeJournalNamespace = StoreReaderContract.RuntimeJournalKeySpace;
     internal const string PayloadName = "reader-contract-test";
@@ -26,6 +26,37 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal string BackupPath => Path.Combine(root, "backup");
     internal string RestorePath => Path.Combine(root, "restored");
     internal static string IdentityPath(string directory) => Path.Combine(directory, "identity.json");
+
+    internal static async Task RewriteCapabilityAsync(string directory, int capability)
+    {
+        var path = IdentityPath(directory);
+        var bytes = await File.ReadAllBytesAsync(path);
+        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
+        var identity = NativeSerialization.Deserialize<StoreIdentity>(envelope.Payload) with
+        { MinimumReaderContract = capability };
+        var payload = NativeSerialization.Serialize(identity);
+        var changed = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
+            ZoneTreeMetadataBinary.IdentityMagic);
+        await File.WriteAllBytesAsync(path, changed);
+    }
+
+    internal static async Task CorruptIdentityMagicAsync(string directory)
+    {
+        var path = IdentityPath(directory);
+        var bytes = await File.ReadAllBytesAsync(path);
+        bytes[0] ^= (byte)UnsupportedIdentityMagicBit;
+        await File.WriteAllBytesAsync(path, bytes);
+    }
+
+    internal static async Task<Dictionary<string, byte[]>> ReadFilesAsync(string directory)
+    {
+        var files = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        foreach (var path in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+        {
+            files.Add(Path.GetRelativePath(directory, path), await File.ReadAllBytesAsync(path));
+        }
+        return files;
+    }
     internal static byte[] RuntimeJournalKey => KeyCodec.Encode(RuntimeJournalNamespace, PayloadName);
     internal static byte[] FollowupKey => KeyCodec.Encode(RuntimeJournalNamespace, FollowupName);
     internal const string FollowupName = "reader-contract-followup";

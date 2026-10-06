@@ -10,7 +10,7 @@ the unchanged synchronous real ZoneTree query. Exact case/helper ownership,
 follow-up requirements are frozen in DistributedQueryExecution before code.
 Root owns review, joins and Aspire normal/scalar/full-gate evidence;
 dependency_closeout owns the private test packet. Preserve the earlier failed
-original report. No product boundary, data/wire format or migration changes;
+original report. No product boundary or stored-data/wire-format change;
 rollback may revert this test synchronization but cannot weaken its assertions.
 
 ## Context
@@ -95,7 +95,7 @@ Remove only the new internal plan/leaf/merge code and its tests after stopping
 any future internal caller. This stage writes no data and changes no persisted
 format, public DTO, query grammar, server route, SDK/MCP tool, Orleans grain
 dispatcher, catalog, physical placement, token/cursor, index, or authorization
-policy. No migration is required. Do not add test-only delays, fake leaf
+policy. The implementation does not rewrite persisted data. Do not add test-only delays, fake leaf
 providers, synthetic shard identities, or a private RF3 topology. The future
 KL-037 contract must separately define independent physical placement, catalog
 epoch fencing, per-owner authenticated execution, fan-out/backpressure,
@@ -174,7 +174,7 @@ The linked DistributedQueryExecution feature freezes REQ/AC-PQUERY-001 through 0
 4. Root owns the immutable server PhysicalShardRecord registration from configured PartitionHost/NodeOptions, DatabaseReadGrain/GrainQueryReadCapabilities join, append-only read kind, public route and SDK/MCP inventories, generated-native corpus and actual RF3 client regressions. The first public request can execute only after the existing successful catalog fence, and every leaf compares fresh SCAT/PMAP evidence with the immutable host tuple.
 5. Root runs required Release build, formatter/analyzers and Aspire-owned focused/full unit, scalar, recovery and RF3 suites. Remote fan-out, independent physical owners, SQL grammar, cursors, global cuts, movement and split/merge remain separate unqualified requirements.
 
-The wire addition is append-only and versioned; no committed storage-format change occurs. Rollout requires clients and servers with the typed new capability, and older servers reject it through the existing unsupported-capability path. Rollback removes exposure of the new route/kind from the deployment without changing retained committed SCAT/PMAP records or their corruption checks. Root serializes source integration and owns the complete-stage commit/push; agents prepare scoped immutable packets. The feature names exact automated acceptance cases and final evidence. This amendment does not mark the ADR implemented or KL-037 complete.
+The wire addition is append-only and versioned; no committed storage-format change occurs. The route is admitted only when the typed capability is present and otherwise fails through the existing unsupported-capability path. Rollback removes exposure of the new route/kind without changing committed SCAT/PMAP records or their corruption checks. Root serializes source integration and owns the complete-stage commit/push; agents prepare scoped immutable packets. The feature names exact automated acceptance cases and final evidence. This amendment does not mark the ADR implemented or KL-037 complete.
 
 Per-leaf PMAP directory/row revisions and fallback state are validated against that leaf's own same-view records. Bound and fallback partitions with the same physical owner remain valid together; their row revisions/fallback states can differ, and directory revisions can differ across the retained per-leaf cuts. Cross-leaf equality covers the full owner tuple plus existing node/incarnation/read-generation/policy witnesses, without a global snapshot.
 

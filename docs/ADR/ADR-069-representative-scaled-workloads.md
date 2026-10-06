@@ -8,7 +8,8 @@ The actual runtime repair contract REQ/AC-SCALE-RT-001..003 is frozen in
 
 ## Decision and implementation contract
 
-Owner requires100K/1M/5M actual records and100K+ measured calls per cell.
+Owner requires exactly100K and1M actual records and at least100K measured calls per
+applicable workload cell. Remove5M from active profiles.
 Current4096 hot-key/80Actual samples do not establish that scale; preserve them
 as original controls. Current270-cell cohort has its own smaller frozen contract.
 Add an independent BenchmarkComparisons raw resident read profile before the
@@ -33,13 +34,13 @@ verification and owned-close errors.
 Each public generated ScaledStorageReadBenchmarks method performs exactly5M
 reads per invocation, OpsPerInvoke5M/invocation1/unroll1/.NET10/launch1/
 warmup8/Actual10. Sequential and frozen SplitMix64/Fisher-Yates permutation
-cover everyN key50/5/1 times for100K/1M/5M. Same seed/order/one output copy,
+cover everyN key50/5 times for100K/1M. Same seed/order/one output copy,
 two payload sizes/one selected engine per process. These counters/oracle costs
 are included, not subtracted or called lookup-only. Native actual rows>=100ms,
 retainedResults8..10 and exact complete12cell cohort are required.
 
 ZoneTree mutable boundmax(1000,N+2)/WALNone/compressionNone/no
-maintainer;1000 is its native mini-fixture minimum;100K/1M/5M retainN+2.
+maintainer;1000 is its native mini-fixture minimum;100K/1M retainN+2.
 Actual mutable/inmemoryN and no frozen/disk records. Source settings
 do not prove5M residency or record stride. Record every actual native counter.
 
@@ -95,8 +96,9 @@ SCALE-D compact corpus/order/arena and independent SCALE-E native settings/
 engines/fixture/BDN private candidates with disjoint NEW files; strongest SCALE-R
 reads every stopped source/test/diff; root SCALE-I joins exact bytes and owns
 build/normal+scalar/full/format/governance/all-current main delivery; SCALE-N
-actual separate local100K->1M->5M ZoneTree and12cell source/machine reconciliation.
-Only three canonical workflows; retain the ZoneTree-only report/profile and
+actual separate local100K->1M ZoneTree and12cell source/machine reconciliation.
+Use the four canonical Build and Tests, Benchmarks, Website and Release workflows;
+retain the ZoneTree-only report/profile and
 complete native database comparison/site contract. The owner prohibits internal/raw
 microbenchmark jobs, dispatch modes and dependencies in benchmarks.yml. PhaseA
 optimization measurements run locally and ordinary correctness tests belong in
@@ -127,8 +129,8 @@ SHA/run/attempt/job/ZIP/file bindings with matched verified actual hardware,
 resources, topology, durability and workloads. Coverage,
 recovery/RF3/endurance/powerloss gates remain separately required and open.
 
-No migration/security/production dependency/data-format change. Rollback removes
-the new diagnostic profile/helpers/tests/docs together and preserves original
-control receipts. PhaseB has its own future migration/rollback contract before
-code. Keep Accepted until all required sources/tests/evidence and architectural
-assessment exist; there is no universal-winner or product storage change here.
+No security, production dependency, or data-format change is in scope. Rollback
+removes the diagnostic profile/helpers/tests/docs together and preserves original
+control receipts. PhaseB requires its own workload contract before code. Keep
+Accepted until required sources/tests/evidence and architectural assessment exist;
+there is no universal-winner or product storage change here.

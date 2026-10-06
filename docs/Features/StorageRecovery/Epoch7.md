@@ -161,3 +161,130 @@ flowchart LR
   Publish --> Serve[Homogeneous epoch7 capability3 RF3]
   Old[Unaware old reader or signed peer] --> Reject[Reject before admission]
 ```
+
+## TASK-EPOCH7-PRIOR-COMPOSITION-002: original-binary recovery prerequisite
+
+REQ/AC-EPOCH7-006 retains actual native5/native6 processes and every source,
+conversion, refusal, state and cleanup oracle. CI preparation currently rebuilds
+historical Core and fails four CA1822 errors before dependent recovery cases.
+The current helper overlays also call later APIs absent in both pinned epochs.
+Repair only the fresh CrashHost composition; preserve every historical production
+provider, serializer, identity validator, snapshot reader and original binary.
+
+Use the authenticated original Actions artifact11320554042 from own-main
+run37249197752, repository477801965, head
+f8b3ba68da2f28660da1a36db396882ba2f72b7d. Verify original metadata, artifact
+name/size and ZIP SHA256
+cb5f3986adfe05b1430b963e9aefea7a6189b03f81ebad279090f2a657187d3f,
+then every exact native5/native6 closure row and original embedded receipt.
+The receipts retain githubQualified:false; authenticated binary inputs do not
+qualify the historical driver source or this new composition. Missing/expired/
+changed inputs fail before dependent test admission; no local-package fallback.
+
+The immutable profiles remain native5 revision7784b6b46b98ce994dd98070dc1f58fe4e506b91,
+treeb03bf1301a03b3fe00f419c3c7bf5285a34b63f9, archive SHA256
+e0072dfab6e265ccc4ca4b5717aa5a978903330a36287c58c8e91a604b0bf2c5;
+native6 revision2801b03091efc5cf45b1268c6570457539f12f27,
+tree678ac682c90294306a0ae4092c4c80b382c4a18b, archive SHA256
+86e62558c443d39d068568a0e3d2792ec10130db587d4f3835c56eabe4747d96.
+Verify safe archive paths/modes and the complete old CrashHost source inventory.
+
+Build separate external SDK compositions with no historical ProjectReference.
+Reference only each exact original non-CrashHost DLL closure and the pinned
+.NET10 reference pack. Preserve SDK10.0.401/latestPatch, net10.0/C#14, normal
+SDK/style analysis and warnings-as-errors. Bind the current reviewed64-line
+KeyLoad.Analyzers binary/source identity and pinned Orleans10.3.1 generator;
+remove only the automatically injected historical analyzer ProjectReference.
+No NoWarn, disabled analyzer, lower severity, old production edit or old
+CrashHost fallback is permitted. Fresh assembly identity remains KeyLoad.CrashHost,
+assembly/file0.1.0.0, informational0.1.0-dev and the exact friend/ApplicationPart
+metadata. Actually generate native6's five NativeText serializer aliases;
+native5 retains its empty native manifest. Do not copy old generated code.
+
+Fresh epoch-specific probe/fixture inputs must use the original constructors:
+ZoneTreeStore(ZoneTreeStoreOptions), DatabaseEngine(store, policy, limits, clock),
+validated direct ReplicaConfiguration, original snapshot/materializer signatures,
+ZoneTreeIdentityFile.Read(path), and ZoneTreeCheckpointReader.Read(FileStream,
+original options). Verify stream length against original MaxSnapshotBytes and
+retain the reader's own bounds; no widened snapshot allocation. The existing
+native6 thirty-second child bound is captured at the external default boundary
+and passed with TimeProvider to fresh helper operations. Keep the current helper
+files used by the current CrashHost unchanged; prior-only source overlays are
+explicit feature-local executable build inputs with distinct source hashes.
+
+Produce fresh driver DLL/PDB/XML/deps/runtimeconfig/apphost; verify the original
+runtime graph against copied immutable dependencies and actual new assembly
+metadata. The new receipt binds source/archive/tree, original receipt/artifact,
+all source/overlay/project/import/compiler/analyzer/generator inputs and every
+output hash. Never relabel receipt driverSources mismatches as original source.
+AppHost owns both existing preparation resources, deadlines, readers, cancellation,
+exit, create-only destination and cleanup. Only both successful verified receipts
+admit the recovery runner. A preparation failure runs zero dependent cases.
+
+Root owns contract/source-map/admission joins and serial native gates. Luna may
+prepare a guarded private build-prior-probe.sh and feature-local acquisition/
+composition source/receipt packet under scripts/Features/StorageRecovery, with
+only mapped real prerequisite/recovery test changes. No serving-image, workflow,
+package pin, public API, historical production or Git edits. Verify real old
+create/open/inspect/snapshot operations, original input preservation, conversion
+and new-state outcomes through Aspire recovery, normal/scalar and exact-source
+Linux gates; metadata/build success alone does not close AC-EPOCH7-006.
+Rollback restores one coherent prerequisite seam, retaining original artifacts
+and keeping failed prerequisites closed. ADR-077/091 remain Accepted until their
+complete required runtime and RF3 gates qualify.
+
+### R2 review corrections and receipt admission contract
+
+The exact accepted field/path/type contract is
+[PriorProbeReceipt](PriorProbeReceipt.md), frozen by root before producer and
+consumer implementation. Its fixed profile and actual original assembly metadata
+must be validated, not replaced by desired project text.
+
+The rejected R1 packet did not qualify the prerequisite. Its project included
+fresh source paths that were never populated, represented unchanged current
+helper hashes as compiled driver sources, assumed the 10.0.0 reference pack,
+captured unbounded tool output and suppressed cleanup failures. Preserve the
+original authenticated inputs while repairing these concrete defects.
+
+Use an explicit fresh receipt schema2. Historical schema1 receipts remain exact
+immutable acquisition evidence and are never rewritten or admitted as the fresh
+composition. The schema2 producer identifies an authenticated prior closure plus
+a source-bound test driver. Separate the actual compiled driver/source inventory
+from current repository driver inputs; every compiler input must have its actual
+path, role, size and digest. The admission reader must validate the complete
+schema, reject duplicate or unknown fields, verify confined regular files and
+reject a missing, stale, ambiguous or tampered original receipt, runtime closure,
+driver source, compiler input or required output before any dependent case runs.
+The fresh receipt keeps githubQualified:false and binds the pinned artifact/run/
+repository/head identity, original archive and exact original profile receipt.
+
+Resolve compiler and framework references from the actual evaluated SDK build,
+not an assumed pack directory. The installed development SDK10.0.401 currently
+uses Microsoft.NETCore.App.Ref10.0.12; each Linux run must record its own exact
+evaluated pack. Keep the pinned SDK/roll-forward contract, strict analyzer and
+generator policies unchanged. Populate every explicitly compiled path, preserve
+every historical source and exact original non-CrashHost runtime reference, and
+verify actual output assembly/friend/ApplicationPart metadata and native serializer
+manifest alongside DLL/PDB/XML/deps/runtimeconfig/apphost completeness.
+
+Tool execution must drain bounded stdout/stderr and settle its owned process tree,
+original exit and reader tasks under one captured deadline. Owned temporary roots
+belong to the preparation resource's unique result directory. Cleanup failures
+remain observable together with the primary failure and prevent success; publish
+the create-only verified result and success protocol only after owned staging
+cleanup settles. Do not suppress failures, leave children running or reset the
+budget to make cleanup pass.
+
+Ownership is scripts/Features/StorageRecovery/priorprobe for acquisition, source
+composition, execution and schema2 production; scripts/Features/StorageRecovery/
+templates/native5 and native6 own the fresh driver inputs. The recovery feature
+owns Helpers/EpochPriorExecutableArtifact.cs, typed records in Contracts and
+actual admission checks in Validation. Do not modify the current CrashHost helper
+and fixture, unrelated test semantics, serving images, packages or workflows.
+Root freezes the exact field/path schema before consumer implementation, reviews
+the joined producer/reader contract and runs real prerequisite, rejection and
+unchanged recovery operations through Aspire. Positive and tamper controls must
+exercise the actual whole admission/preparation operation and verify zero
+dependent cases on rejection; fabricated getters or source-word checks are not
+acceptance evidence. Keep file400/type200/executable-unit64/nesting3 limits in
+every language, without analyzer exceptions or suppression.

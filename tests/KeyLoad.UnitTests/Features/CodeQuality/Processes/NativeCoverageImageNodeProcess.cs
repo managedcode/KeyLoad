@@ -18,18 +18,26 @@ internal static class NativeCoverageImageNodeProcess
     private const string DescriptorLimitOption = "--maximum-descriptor-bytes=";
     private const string StartFailure = "The native coverage image materializer did not start.";
 
-    internal static async Task<NativeCoverageImageNodeResult> RunAsync(string repositoryRoot,
+    internal static Task<NativeCoverageImageNodeResult> RunAsync(string repositoryRoot,
         NativeCoverageImageInvocation invocation, IOptions<TestExecutionOptions> executionOptions,
         IOptions<NativeCoverageExecutionOptions> coverageOptions,
+        CancellationToken cancellationToken)
+        => RunAsync(repositoryRoot, invocation, executionOptions, coverageOptions, TimeProvider.System,
+            cancellationToken);
+
+    internal static async Task<NativeCoverageImageNodeResult> RunAsync(string repositoryRoot,
+        NativeCoverageImageInvocation invocation, IOptions<TestExecutionOptions> executionOptions,
+        IOptions<NativeCoverageExecutionOptions> coverageOptions, TimeProvider timeProvider,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(invocation);
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(coverageOptions);
+        ArgumentNullException.ThrowIfNull(timeProvider);
         var execution = executionOptions.Value;
         var coverage = coverageOptions.Value;
         cancellationToken.ThrowIfCancellationRequested();
-        using var deadlineTimeout = new CancellationTokenSource(execution.OrdinaryTimeout, TimeProvider.System);
+        using var deadlineTimeout = new CancellationTokenSource(execution.OrdinaryTimeout, timeProvider);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
         using var process = new Process { StartInfo = CreateStartInfo(repositoryRoot, invocation, coverage) };
         var failures = new List<Exception>();
@@ -43,7 +51,7 @@ internal static class NativeCoverageImageNodeProcess
             }
         }, failures);
         var joined = started
-            ? await RunStartedAsync(process, execution, failures, deadline.Token).ConfigureAwait(false)
+            ? await RunStartedAsync(process, execution, timeProvider, failures, deadline.Token).ConfigureAwait(false)
             : NativeCoverageImageNodeJoined.Empty;
         var disposed = false;
         ServerFailureObserver.Observe(() =>
@@ -58,21 +66,38 @@ internal static class NativeCoverageImageNodeProcess
     }
 
     private static async Task<NativeCoverageImageNodeJoined> RunStartedAsync(Process process,
-        TestExecutionOptions execution, List<Exception> failures, CancellationToken deadline)
+        TestExecutionOptions execution, TimeProvider timeProvider, List<Exception> failures,
+        CancellationToken deadline)
     {
         Task? exit = null;
         Task<string>? output = null;
         Task<string>? error = null;
-        ServerFailureObserver.Observe(() => exit = process.WaitForExitAsync(CancellationToken.None), failures);
-        ServerFailureObserver.Observe(() => output = NativeCoverageImageNodeOutput.ReadBoundedAsync(process.StandardOutput,
-            execution.CleanupOutputCharacters), failures);
-        ServerFailureObserver.Observe(() => error = NativeCoverageImageNodeOutput.ReadBoundedAsync(process.StandardError,
-            execution.CleanupOutputCharacters), failures);
-        var original = Task.WhenAll(exit ?? Task.CompletedTask, output ?? Task.CompletedTask,
-            error ?? Task.CompletedTask);
+        var originals = new List<Task>();
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = process.WaitForExitAsync(CancellationToken.None);
+            exit = task;
+            originals.Add(task);
+        }, failures);
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = NativeCoverageImageNodeOutput.ReadBoundedAsync(process.StandardOutput,
+                execution.CleanupOutputCharacters);
+            output = task;
+            originals.Add(task);
+        }, failures);
+        ServerFailureObserver.Observe(() =>
+        {
+            var task = NativeCoverageImageNodeOutput.ReadBoundedAsync(process.StandardError,
+                execution.CleanupOutputCharacters);
+            error = task;
+            originals.Add(task);
+        }, failures);
+        var original = Task.WhenAll(originals);
         await ServerFailureObserver.ObserveAsync(() => original.WaitAsync(deadline), failures).ConfigureAwait(false);
-        return await NativeCoverageImageNodeSettlement.SettleAsync(process, exit, output, error,
-            execution.ProcessSettlementTimeout, failures).ConfigureAwait(false);
+        return await NativeCoverageImageNodeSettlement.SettleAsync(process, true, original,
+            exit, output, error, execution.ProcessSettlementTimeout, timeProvider,
+            execution.TerminationGrace, execution.ProcessExitPollInterval, failures).ConfigureAwait(false);
     }
 
     private static ProcessStartInfo CreateStartInfo(string repositoryRoot, NativeCoverageImageInvocation invocation,

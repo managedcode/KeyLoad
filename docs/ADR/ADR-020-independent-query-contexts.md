@@ -32,7 +32,7 @@ Related: `REQ-ROUTE-001/AC-ROUTE-001`, `REQ-MP-002/AC-MP-002..006`, `REQ-SEARCH-
 1. Freeze context lifetime, shared-versus-operation budget rules, and cancellation propagation before changing APIs.
 2. Test concurrent independent requests, cancellation at each stage, policy revocation between pages, and healthy subsequent operations using real storage and Kestrel/RF3.
 3. Implement context-local immutable preparation and scoped resources; preserve one distinct Orleans request grain for every request.
-4. Roll out without persisted format change; rollback removes only the optimization and retains request isolation.
+4. Keep query-context changes within the current persisted format; rollback removes only the optimization and retains request isolation.
 5. Qualify real SDK and official MCP calls through GitHub TUnit/recovery/RF3 suites; source-only build is not qualification.
 
 Current files: `src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs`, `src/KeyLoad.Core/ReadExecutionBudget.cs`, `src/KeyLoad.Orleans/CommandRouterGrain.cs`. Target paths are matching QueryExecution/Search feature folders. Root owns the router and integration join; dependencies are ADR-036, Admission, Search and Authorization.

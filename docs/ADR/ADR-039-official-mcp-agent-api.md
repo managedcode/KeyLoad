@@ -2,11 +2,10 @@
 
 Status: Accepted for implementation; runtime and delivery qualification pending. Date: 2026-10-02. Owner: ClientApi lead / KeyLoad integration owner. Related: [ClientApi](../Features/ClientApi.md), REQ-CLIENT-004–007 / AC-CLIENT-004–007; [Authorization](../Features/Authorization.md), [BlobStorage](../Features/BlobStorage.md), [TestInfrastructure](../Features/TestInfrastructure.md).
 
-Owner revision 2026-10-05: [ADR-104](ADR-104-mcp-gateway-tool-discovery.md)
-supersedes the public all-operation tool list with three native gateway meta tools
-and static agent resource/prompt guidance. Canonical typed operations, persisted
-authorization, official SDK transport and signed Orleans execution remain governed
-by this ADR; replaced public pagination/direct-tool paths are removed together.
+Current tool discovery uses the three native gateway meta tools and static agent
+resource/prompt guidance specified in [ADR-104](ADR-104-mcp-gateway-tool-discovery.md).
+Canonical typed operations, persisted authorization, official SDK transport and
+signed Orleans execution remain governed by this ADR.
 
 ## Accepted runtime root-name framing refinement
 
@@ -19,8 +18,7 @@ id spelling, scalar/native ids, valid surrogate pairs and fixed safe errors.
 Existing malformed name/value and escaped-id exact-boundary tests are the
 tests-first baseline. One bounded worker owns that file; lead owns shared docs,
 source review, enabled build/format/governance and exact GitHub UnitTests/RF3
-qualification. No broad catch, dependency change, wire/data migration or public
-schema change. Rollback removes only the internal classification repair.
+qualification. No broad catch, dependency change, wire/data or public schema change. Rollback removes only the internal classification repair.
 
 ## Контекст і запропонований напрям
 
@@ -59,18 +57,23 @@ diagnostic enums/formatter and new same-slice tests/capture helper. No business
 dispatch, composition, frames, accepted revision, SDK package or public reply
 change. Exact-SHA GitHub unit tests and retained initial discovery plus fallback
 receipts are the join; this ADR remains Accepted while official RF3 calls fail.
-No persisted/wire migration, source rollback removes only diagnostic metadata
+No persisted/wire change; source rollback removes only diagnostic metadata
 and logging. Unknown metadata is sanitized, logging never receives exceptions,
 headers, body, arbitrary method/target text or private identities.
 
-Root policy вимагає простий agent API та інтегрований official MCP C# SDK server для всіх database/search/storage operations, з real .NET SDK і official MCP SDK клієнтами в Docker/Aspire RF3 тестах. Поточні HTTP operations у [ApiEndpoints](../../src/KeyLoad.Server/Features/ClientApi/Transport/ApiEndpoints.cs) і [KeyLoadClient](../../src/KeyLoad.Client/KeyLoadClient.cs) існують; завершеної official MCP/agent surface не знайдено.
+Root policy requires a simple agent API and the official MCP C# SDK server for
+all database, search and storage operations. Current source includes the official
+stateless MCP host, canonical typed operation adapters, three gateway tools and
+static resource/prompt guidance. Actual SDK and official MCP caller parity,
+authorization, resource bounds, recovery and RF3 delivery remain required
+qualification gates.
 
 Напрям: протокольні adapters належать ClientApi, а business behavior/requirements залишаються в owning DocumentStorage/EventStreams/Messaging/GraphTraversal/TimeSeries/Search/ChangeFeeds/BlobStorage slices. Ідентичність береться з persisted server credentials; model/tool arguments не можуть підмінити trusted roles. Кожна операція викликає окремий Orleans request grain за ADR-036 і використовує ту саму canonical authorization, bounds, outcomes та unknown-write retry semantics.
 
-Прийнято official SDK 2.2.0, native stateless Streamable HTTP `/mcp`, explicit
-typed version-one catalog нижче та shared canonical Orleans gateway. Простий
-agent API — той самий discoverable tool catalog; окремого engine/session authority
-немає. Acceptance і execution graph: [acceptance](../Features/ClientApi.md),
+Use the centrally pinned official SDK 2.2.0, native stateless Streamable HTTP
+`/mcp`, the canonical typed operation inventory and shared Orleans execution.
+The agent-facing API is the three-tool discovery/schema/invocation flow under
+ADR-104, with fresh persisted authorization for each invocation. Acceptance і execution graph: [acceptance](../Features/ClientApi.md),
 [brainstorm](../Features/ClientApi.md),
 [plan](../Features/ClientApi.md).
 
@@ -88,7 +91,7 @@ captured initialization/session state. Do not add RequireAuthorization without a
 real authentication scheme. Every tool effect uses a fresh GUID request grain,
 then the existing capability/partition grain with a reloaded persisted principal.
 
-## Frozen catalog and wire contract
+## Canonical operations and wire contract
 
 ADR-098 adds its direct and SQL graph-path tools as additive version-one reads;
 AC-MCP-001 independently verifies the current complete 68-name catalog, typed schemas
@@ -204,11 +207,14 @@ must be opaque and authorization checked on each read, with bounded range/page
 limits. Native BlobResourceContents.FromBytes receives raw bytes; official clients
 use DecodedData, avoiding double base64. Native resources/read has no IsError;
 unresolved URIs use safe protocol InvalidParams for the current revision. No
-unfinished blob tool or resource may be advertised. The current source catalog
-contains 50 operations: the base 37 below, ten implemented-source BlobStorage
-tools whose names/routes/contracts are frozen by ADR-038, and three additive
-read-only [AdminDashboard](ADR-051-admin-dashboard.md) tools. All runtime and
-delivery gates remain pending; a catalog count does not qualify blob semantics.
+unfinished blob tool or resource may be advertised. The current canonical
+inventory contains 68 operation names, including the ten BlobStorage operations
+frozen by ADR-038 and the read-only [AdminDashboard](ADR-051-admin-dashboard.md)
+operations. The complete independent schema/effect oracle is
+[McpCatalogExpectations](../../tests/KeyLoad.IntegrationTests/Features/ClientApi/Helpers/McpCatalogExpectations.cs).
+All operations are reached through authorized on-demand gateway discovery and
+invocation; the initial public list contains three gateway tools. A catalog count
+cannot qualify operation semantics or replace runtime and delivery gates.
 
 ```mermaid
 flowchart LR
@@ -234,15 +240,15 @@ declare MCP coverage, runtime qualification or future blobs complete.
 
 ## Implementation contract
 
-1. The table freezes the base typed operations; ADR-038 freezes the ten additional current BlobStorage tools. Root resolves admission/schema review findings before dependent runtime implementation. Any further unfinished blob operation remains gated by its owning accepted contract and implementation.
-2. Shared protocol composition належить Server/ClientApi; `.NET` DTO shape не змінюється неявно. Нові helpers/tests mirror `Features/ClientApi/`, business tests — owning feature. Existing `src/KeyLoad.Server/ApiEndpoints.cs` та Client transport лишаються tracked ADR-032 layout debt, а не compliant layer-first target.
+1. The table maps current core operations; the independent full catalog oracle and each owning feature freeze the complete names, schemas and effects. ADR-038 owns the ten BlobStorage operations. Root resolves admission/schema review findings before dependent runtime implementation. Any further unfinished blob operation remains gated by its owning accepted contract and implementation.
+2. Shared protocol composition належить Server/ClientApi; `.NET` DTO shape не змінюється неявно. Нові helpers/tests mirror `Features/ClientApi/`, business tests — owning feature. Current host composition and typed transport stay in their owning ClientApi slices; existing structural debt remains governed by ADR-032.
 3. AC-CLIENT-004/005 and AC-MCP-001–007 map to real operation/error/retry regressions; AC-MCP-008 retains genuine large/range storage after BlobStorage acceptance. The .NET SDK adds its missing BackupAsync and SetDispatchAsync surfaces for complete parity.
 4. Workers мають окремі adapter/schema, SDK caller/tests та owning-feature operation scopes після contracts; один lead owns shared packages/host/API docs. Новий tool contract, trust weakening, missing upstream SDK contract або overlap → stop/escalate. Join усіх complete reviewed source і evidence перед qualification.
 5. Canonical GitHub Actions build/analyze/format, TUnit, process recovery та RF3 suites використовують actual .NET/MCP clients без doubles; фіксують exact source SHA/run/jobs/artifacts і parity кожного exposed operation. Capability manifest не advertises unfinished operations.
 
 Prerequisites: ADR-036 Orleans request/host lifetime, Authorization current principal/policy epoch, ResourceExecution budgets, owning operation contracts; BlobStorage додатково ADR-038 accepted implementation.
 
-## Migration, rollout, rollback та verification
+## Rollout, rollback та verification
 
 Accepted qualification repair TASK-RUNTIME-MCP-W maps REQ-CLIENT-006,
 AC-MCP-001/003/005/007 and AC-ROC-006 to actual run37005805424 at6949fa0.
@@ -250,7 +256,7 @@ The official client must retain default protocol negotiation for discovery-first
 stateless HTTP; pinning the client revision disables its server/discover path and
 forces an initialize handshake which the current stateless protocol does not use.
 Keep the server's current protocol, official transport and per-request persisted
-bearer authentication unchanged. Do not pin an older revision or emulate protocol.
+bearer authentication unchanged. Use the pinned official SDK's native negotiation without protocol emulation.
 
 The official caller retains native default negotiation and per-request persisted
 authentication. ADR-104 now owns discovery tests: exactly three meta tools, the
@@ -259,13 +265,13 @@ isolation, and complete canonical operation/schema parity through native graph
 search and invocation. Every existing negative/authority scenario remains. A
 present empty header is one empty StringValues element; a no-values header is
 absent in this abstraction. No reflection discovery, duplicate catalog source or
-protocol workaround is permitted. Replaced operation-list paginator tests and
-their fixture are deleted rather than retained as an active legacy path.
+protocol workaround is permitted. The current discovery contract is exercised
+through its real native tools and cursor boundaries.
 
 Ordered stages: accepted contracts and actual failure baseline; preserving test
 vectors/caller repair; lead source review/build/formatter/static checks; complete
 exact-SHA GitHub UnitTests and real official SDK RF3 caller gates. Rollback reverts
-these test/caller changes; no product/data/wire migration. If native negotiation
+these test/caller changes; no product/data/wire change. If native negotiation
 still fails, retain bounded sanitized discovery status/error evidence without keys.
 No passing or all-operation parity claim is made before actual qualification.
 
@@ -289,6 +295,6 @@ identity/order/head/continuation. Every actual read cut covers the append receip
 sequential quorum cuts cannot regress. Required persisted membership heartbeats
 can advance the physical cut between independent requests, and the current public
 request cannot pin that cut. No fake transport, direct-store proof, fixture changes,
-new provider or runtime contract. This adds no persisted/public format migration;
+new provider or runtime contract. This adds no persisted/public format change;
 rollback removes only these tests/helper overload together. A failure or blocked
 cluster does not qualify the EventStreams capability.

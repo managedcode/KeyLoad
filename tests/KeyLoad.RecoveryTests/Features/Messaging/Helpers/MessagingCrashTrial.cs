@@ -40,7 +40,7 @@ internal static class MessagingCrashTrial
         finally
         {
             using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(CleanupTimeoutSeconds), TimeProvider.System);
-            await EpochUpgradeCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
+            await RecoveryProcessCleanup.SettleAsync(process, root, root, activeFailure, cleanup.Token);
         }
     }
 

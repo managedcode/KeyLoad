@@ -25,8 +25,6 @@ public sealed record RuntimeJournalOptions
     private const int MaximumNameLength = 512;
     private const int MaximumMetadataEntryCount = 64;
 
-    /// <summary>Gets the explicit parent directory for verified backups of existing unmarked node stores.</summary>
-    public string? ReaderUpgradeBackupDirectory { get; init; }
     /// <summary>Gets or sets the maximum retained journals, including empty journals.</summary>
     public int MaximumJournals { get; init; } = MaximumJournalCount;
     /// <summary>Gets or sets the maximum opaque bytes in one journal.</summary>
@@ -49,8 +47,7 @@ public sealed record RuntimeJournalOptions
     /// <summary>Checks that every policy remains inside the native recovery bounds.</summary>
     /// <returns>Whether the configuration is admissible.</returns>
     public bool IsValid()
-        => (ReaderUpgradeBackupDirectory is null || Path.IsPathFullyQualified(ReaderUpgradeBackupDirectory))
-            && MaximumJournals is >= MinimumJournalCount and <= MaximumJournalCount
+        => MaximumJournals is >= MinimumJournalCount and <= MaximumJournalCount
             && MaximumJournalBytes is >= MinimumJournalLength and <= MaximumJournalLength
             && MaximumTotalBytes is >= MinimumCatalogLength and <= MaximumTotalLength
             && ChunkBytes is >= MinimumChunkLength and <= MaximumChunkLength

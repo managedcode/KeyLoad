@@ -43,8 +43,6 @@ internal sealed record NodeOptions
     public int LowerElectionTimeoutMilliseconds { get; init; } = NodeDefaults.LowerElectionMilliseconds;
     /// <summary>Upper randomized election bound.</summary>
     public int UpperElectionTimeoutMilliseconds { get; init; } = NodeDefaults.UpperElectionMilliseconds;
-    /// <summary>HTTP discovery connection establishment bound.</summary>
-    public int PeerConnectTimeoutMilliseconds { get; init; } = NodeDefaults.ConnectMilliseconds;
     /// <summary>Overall Orleans peer RPC deadline, including bounded generation rediscovery.</summary>
     public int PeerRpcTimeoutMilliseconds { get; init; } = NodeDefaults.RpcMilliseconds;
     /// <summary>Data and reserved control admission limits.</summary>
@@ -55,7 +53,7 @@ internal sealed record NodeOptions
     public McpMemoryLimits McpMemory { get; init; } = new();
     /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
     public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
-    internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty, RequestCqrsProbeProtocol.DiscoveryCaptureDisabled);
+    internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty);
     /// <summary>Explicit native membership provider mode; local preserves the ordinary RF3 topology.</summary>
     public MembershipAuthoritySettings MembershipAuthority { get; init; } = new();
 
@@ -82,7 +80,6 @@ internal sealed record NodeOptions
         }
         var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
         configuration.Validate();
-        CreatePeerOptions().Validate(configuration);
         MembershipAuthoritySettingsValidator.Validate(MembershipAuthority, this);
         RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
     }
@@ -145,11 +142,12 @@ internal sealed record NodeOptions
     };
 
     /// <summary>Creates fixed discovery endpoints and bounded HMAC replay limits.</summary>
+    /// <param name="connectTimeout">The centrally validated peer-discovery connection bound.</param>
     [ConfigurationBinding]
-    public ReplicaPeerOptions CreatePeerOptions() => new(Peers.ToDictionary(peer => peer, peer => new Uri(peer), StringComparer.Ordinal),
+    public ReplicaPeerOptions CreatePeerOptions(TimeSpan connectTimeout) => new(Peers.ToDictionary(peer => peer, peer => new Uri(peer), StringComparer.Ordinal),
         Convert.FromBase64String(PeerSecret), ClusterId)
     {
-        ConnectTimeout = TimeSpan.FromMilliseconds(PeerConnectTimeoutMilliseconds),
+        ConnectTimeout = connectTimeout,
         ReplayLimits = ReplayAdmission,
         MaxControlPayloadBytes = CommandAdmission.MaxControlPayloadBytes
     };
@@ -172,7 +170,6 @@ internal sealed record NodeOptions
         internal const int SnapshotThreshold = 1_024;
         internal const int LowerElectionMilliseconds = 4_000;
         internal const int UpperElectionMilliseconds = 8_000;
-        internal const int ConnectMilliseconds = 500;
         internal const int RpcMilliseconds = 2_000;
         internal const int MinimumAdminCharacters = 32;
     }

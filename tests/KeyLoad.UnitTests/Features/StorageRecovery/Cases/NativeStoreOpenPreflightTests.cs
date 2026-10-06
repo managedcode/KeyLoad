@@ -11,6 +11,8 @@ internal sealed class NativeStoreOpenPreflightTests
     private const int IncompleteHeaderBytes = 7;
     private const int ChangedByte = 1;
     private const int CurrentIdentityVersion = 7;
+    private const ulong UnsupportedCheckpointMagic = ulong.MaxValue;
+    private const ulong UnsupportedJournalMagic = ulong.MaxValue;
     private const string MissingReceipt = "The native preflight inspector did not return a receipt.";
 
     [Test]
@@ -79,8 +81,8 @@ internal sealed class NativeStoreOpenPreflightTests
     [Arguments(true, NativeStoreOpenPreflightDefect.Sequence)]
     [Arguments(false, NativeStoreOpenPreflightDefect.Semantics)]
     [Arguments(true, NativeStoreOpenPreflightDefect.Semantics)]
-    [Arguments(false, NativeStoreOpenPreflightDefect.LegacyTornPayload)]
-    [Arguments(true, NativeStoreOpenPreflightDefect.LegacyTornPayload)]
+    [Arguments(false, NativeStoreOpenPreflightDefect.UnsupportedTornPayload)]
+    [Arguments(true, NativeStoreOpenPreflightDefect.UnsupportedTornPayload)]
     [Arguments(false, NativeStoreOpenPreflightDefect.Checkpoint)]
     [Arguments(true, NativeStoreOpenPreflightDefect.Checkpoint)]
     public async Task R12Ac002CompleteCorruptionRejectsBeforeAnyProviderFileChanges(bool guarded, NativeStoreOpenPreflightDefect defect)
@@ -97,20 +99,18 @@ internal sealed class NativeStoreOpenPreflightTests
             await files.AppendAsync(InvalidFrame(files, defect));
         }
         var before = await files.CaptureHashesAsync();
-        var expected = defect == NativeStoreOpenPreflightDefect.LegacyTornPayload ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
+        var expected = defect == NativeStoreOpenPreflightDefect.UnsupportedTornPayload ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
         await AssertRejectedAsync(files, guarded, expected);
         await files.AssertHashesUnchangedAsync(before);
         await files.Source.AssertOwnerAvailableAsync();
     }
 
     [Test]
-    [Arguments(ZoneTreePersistenceFormat.SourceCheckpointMagic)]
-    [Arguments(ZoneTreePersistenceFormat.Native6CheckpointMagic)]
-    public async Task AcEpoch7OrdinaryOpenRejectsHistoricalCheckpointProfilesWithoutMutation(ulong magic)
+    public async Task CurrentOpenRejectsUnsupportedCheckpointMagicWithoutMutation()
     {
         using var files = new NativeStoreOpenPreflightFiles();
         files.Compact();
-        await files.SetCheckpointMagicAsync(magic);
+        await files.SetCheckpointMagicAsync(UnsupportedCheckpointMagic);
         var before = await files.CaptureHashesAsync();
 
         var error = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -131,9 +131,9 @@ internal sealed class NativeStoreOpenPreflightTests
         {
             frame[ChecksumOffset] ^= ChangedByte;
         }
-        if (defect == NativeStoreOpenPreflightDefect.LegacyTornPayload)
+        if (defect == NativeStoreOpenPreflightDefect.UnsupportedTornPayload)
         {
-            BinaryPrimitives.WriteUInt64LittleEndian(frame, WalFileFixture.LegacyMagic);
+            BinaryPrimitives.WriteUInt64LittleEndian(frame, UnsupportedJournalMagic);
             return frame[..WalFileFixture.HeaderBytes];
         }
         if (defect == NativeStoreOpenPreflightDefect.Semantics)
@@ -185,4 +185,4 @@ internal sealed class NativeStoreOpenPreflightTests
     }
 }
 
-internal enum NativeStoreOpenPreflightDefect { Checksum, Sequence, Semantics, LegacyTornPayload, Checkpoint }
+internal enum NativeStoreOpenPreflightDefect { Checksum, Sequence, Semantics, UnsupportedTornPayload, Checkpoint }

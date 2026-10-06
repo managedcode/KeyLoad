@@ -5,8 +5,8 @@ Status: Accepted under owner direction2026-10-02; implementation/qualification p
 Pre-delivery naming refinement: CA1720 rejected the new public enum members
 Int64/Decimal in candidate6cfdadf38. Use WholeNumber (signed 64-bit integer) and
 FixedPoint (exact .NET decimal range/scale). Preserve their ordinal values and
-all scalar correctness contracts; no published/live typed schema migration is
-claimed. This fixes the public identifiers rather than suppressing the analyzer.
+all scalar correctness contracts. This fixes the public identifiers rather than
+suppressing the analyzer.
 
 ## Decision
 
@@ -36,8 +36,8 @@ preflights raw typed SET scalars, then validates the final image once; this reje
 decimal rounding/underflow before the original precision is lost. Both honor
 configured document-byte/depth limits before parsing.
 
-Foreign keys/checks/defaults/cascades, join planning and migrations need subsequent
-explicit contracts and are not advertised by this typed-row stage. They remain
+Foreign keys/checks/defaults/cascades and join planning need subsequent explicit
+contracts and are not advertised by this typed-row stage. They remain
 required relational product work, with partition/domain/policy/resource bounds.
 
 ```mermaid
@@ -65,11 +65,11 @@ all docs/SDK/routing joins. Worker owns only Core/Features/RelationalStorage/
 validators and UnitTests/Features/RelationalStorage/ tests. Read views, physical
 storage, grain ownership and existing mutation/public JSON values remain unchanged.
 
-New resource opt-in only; changed resource schemas still require an explicit
-migration job. Null metadata omission preserves existing resource serialization.
-Rollout: new validating writers before table configuration; mixed-version old
-writers must not serve typed resources. Rollback fences/removes table capability
-before returning to old writers; never silently discard a persisted schema.
+New resources opt in with the typed schema; changed resource schemas fail strict
+configuration validation. Null metadata omission preserves the current resource
+serialization. Rollout enables typed resources only where the active writer enforces
+this schema. Rollback keeps persisted schema intact and fails closed whenever the
+active source cannot validate or serve it; never silently discard a schema.
 
 Tests map each column type/null/unknown/duplicate/primary condition, revision and
 protected-write denial, unique conflict, full mixed-batch rollback, persistence

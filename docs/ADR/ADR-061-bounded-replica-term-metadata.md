@@ -117,13 +117,13 @@ only repairs the real-clock regression wait without changing the permit.
 Both repairs require the same complete new-source native join; a partial pass
 or a skipped scalar/comparison gate cannot close this decision.
 
-## Migration, rollout, rollback and joins
+## Rollout, rollback and joins
 
-No persisted-format, public protocol, package, security or topology migration.
+This optimization changes no persisted format, public protocol, package, security or topology.
 The scalar cell begins empty on every node; physical storage remains node-owned
 when Orleans activations migrate. A drained source rollback removes the helper
 and caller together and retains every valid log/snapshot and both read barriers.
-No mixed-version RPC change, weakened durable ACK, retry or fault oracle.
+No RPC version change, weakened durable ACK, retry or fault oracle.
 
 Related tests and evidence map one canonical ClusterReplication slice in the
 feature contract. Root alone updates status and reports. This ADR remains

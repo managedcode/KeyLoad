@@ -96,7 +96,7 @@ flowchart LR
    and all required recovery/RF3/Linux delivered-source gates. Retain original
    reports and method/source coverage; unmeasured branches and CRAP stay unmeasured.
 
-## Migration, rollback and evidence
+## Rollout, rollback and evidence
 
 TASK-BACKUP-CLI-MISSING-INPUT-002 adds the offline restore error join needed by
 REQ-BACKUP-002/006 and AC-BACKUP-002/006. The retained original run confirms
@@ -127,10 +127,10 @@ exceptions; the CLI owns their user-facing serialization.
    demonstrates the intended behavior; no authored mapping is acceptance proof.
 
 Rollback removes this coherent CLI/test join before delivery and preserves
-original evidence. There is no database or archive migration. This extension
+original evidence. No database or archive data-format change is introduced. This extension
 remains Accepted until its implementation and mandatory runtime gates pass.
 
-No archive format or persisted-data migration exists. The same public method
+No archive or persisted-data format change exists. The same public method
 uses the verified publication path for new calls. Owned staging is disposable
 only after the invocation settles; it is not an authority or recovery journal.
 Rollback is the scoped source/test change before delivery, not reactivation of

@@ -38,9 +38,7 @@ internal sealed class AspireTestEntryModelTests
             {
                 var model = app.Services.GetRequiredService<DistributedApplicationModel>();
                 var executables = model.Resources.OfType<ExecutableResource>().ToArray();
-                var expectedResources = suite == "recovery"
-                    ? new[] { $"tests-{suite}", "prepare-native5-probe", "prepare-native6-probe" }
-                    : new[] { $"tests-{suite}" };
+                var expectedResources = new[] { $"tests-{suite}" };
                 await Assert.That(executables.Select(resource => resource.Name)).IsEquivalentTo(expectedResources);
                 await Assert.That(model.Resources.OfType<ContainerResource>().Where(IsRf3Node)).IsEmpty();
                 await Assert.That(model.Resources.Count).IsEqualTo(expectedResources.Length);

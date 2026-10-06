@@ -120,6 +120,29 @@ if explicitly selected without that proof; local mode never skips or substitutes
 those cases. Original 104-task acceptance remains
 open until its complete required qualification exists.
 
+### TASK-TI-RF3-IMAGE-MODE-011: preserve the default CI image path
+
+REQ/AC-TEST-011/015 retains the two existing image-proof modes. Exact Linux
+CI37462761672 on e6295 recorded121 pre-start failures because the local-only
+IntegrationTests helper treated the shared server image reference as an explicit
+local selector. A server reference also belongs to the default authenticated
+GitHub mode and cannot select local provenance by itself.
+
+LocalRf3ImageIdentity enters its local verification only when a local provenance
+or local receipt selector is present. With both absent it leaves the default
+path to the existing strict RuntimeContainerImage parsing, exact-source GitHub
+receipt and modeled image checks. Preserve every local provenance/receipt/tag/
+input/config-ID/membership check and reject incomplete or conflicting local
+selectors. Do not add fallback proof, synthesize a receipt, accept mutable images
+or change the actual Docker/Aspire RF3 topology.
+
+Root owns this single helper predicate and its integration with the existing
+ClusterFixture. Existing genuine default-CI and explicit-local RF3 operation
+flows provide the positive/negative evidence; source review alone does not qualify
+either mode. Renew canonical build/format and exact-source Linux SDK/official MCP
+RF3 with original reports. ADR-074's existing ownership and proof contracts remain
+unchanged; rollback restores only this test-harness predicate, retaining failures.
+
 ## Prompt termination on owned Aspire failure
 
 [ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle

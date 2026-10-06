@@ -9,23 +9,18 @@ internal sealed class RequestCqrsProbeProfile
 {
     private const int ThirdVoterIndex = 2;
 
-    private const string DiscoveryCaptureVoter = "node1";
-
     internal const string Section = "KeyLoadTests:RequestCqrsProbe";
     private const string MountRoot = "/request-probes";
     private const string EnabledEnvironment = "KeyLoad__RequestCqrsProbe__Enabled";
     private const string RootEnvironment = "KeyLoad__RequestCqrsProbe__Root";
     private const string SessionEnvironment = "KeyLoad__RequestCqrsProbe__SessionId";
-    private const string DiscoveryModeEnvironment = "KeyLoad__RequestCqrsProbe__DiscoveryCaptureMode";
-    private const string MixedMode = "mixed-interface3-v1";
     private const string EnabledValue = "true";
     private const string InvalidConfiguration = "RequestCqrsProbeConfigurationInvalid";
 
     private readonly IReadOnlyDictionary<string, string> nodeRoots;
-    private readonly string discoveryCaptureMode;
 
-    private RequestCqrsProbeProfile(string sessionId, string discoveryCaptureMode, IReadOnlyDictionary<string, string> nodeRoots)
-    { SessionId = sessionId; this.discoveryCaptureMode = discoveryCaptureMode; this.nodeRoots = nodeRoots; }
+    private RequestCqrsProbeProfile(string sessionId, IReadOnlyDictionary<string, string> nodeRoots)
+    { SessionId = sessionId; this.nodeRoots = nodeRoots; }
 
     internal string SessionId { get; }
 
@@ -43,9 +38,9 @@ internal sealed class RequestCqrsProbeProfile
         { throw new InvalidOperationException(InvalidConfiguration); }
         ArgumentException.ThrowIfNullOrWhiteSpace(dataRoot);
         ArgumentNullException.ThrowIfNull(images);
-        ValidateImages(images, settings.DiscoveryCaptureMode);
+        ValidateImages(images);
         var nodeRoots = RequestCqrsProbeProfilePaths.Validate(settings.Root, settings.SessionId, dataRoot, AppHostOptionsRegistration.Get(builder).RequestProbeFiles);
-        return new(settings.SessionId, settings.DiscoveryCaptureMode, nodeRoots);
+        return new(settings.SessionId, nodeRoots);
     }
 
     internal void Apply(IResourceBuilder<ContainerResource> resource, string node)
@@ -57,11 +52,9 @@ internal sealed class RequestCqrsProbeProfile
             .WithEnvironment(EnabledEnvironment, EnabledValue)
             .WithEnvironment(RootEnvironment, MountRoot)
             .WithEnvironment(SessionEnvironment, SessionId);
-        if (node == DiscoveryCaptureVoter && discoveryCaptureMode == MixedMode)
-        { resource.WithEnvironment(DiscoveryModeEnvironment, MixedMode); }
     }
 
-    private static void ValidateImages(IReadOnlyDictionary<string, RuntimeContainerImage> images, string discoveryCaptureMode)
+    private static void ValidateImages(IReadOnlyDictionary<string, RuntimeContainerImage> images)
     {
         const int IndexValue = 0;
         const int ValidateImagesIndexValue = 1;
@@ -75,12 +68,8 @@ internal sealed class RequestCqrsProbeProfile
         { throw new InvalidOperationException(InvalidConfiguration); }
         var second = images[voters[ValidateImagesIndexValue]].Reference;
         var third = images[voters[ThirdVoterIndex]].Reference;
-        var sameImage = string.Equals(second, reference, StringComparison.Ordinal)
-            && string.Equals(third, reference, StringComparison.Ordinal);
-        var exactMixed = discoveryCaptureMode == MixedMode
-            && !string.Equals(reference, second, StringComparison.Ordinal)
-            && string.Equals(second, third, StringComparison.Ordinal);
-        if (discoveryCaptureMode == MixedMode ? !exactMixed : !sameImage)
+        if (!string.Equals(second, reference, StringComparison.Ordinal)
+            || !string.Equals(third, reference, StringComparison.Ordinal))
         { throw new InvalidOperationException(InvalidConfiguration); }
     }
 }

@@ -10,14 +10,13 @@ internal static class ReplicaBenchmarkMembership
     private const string InvalidMembership = "The persisted benchmark replica authority does not match this startup.";
     private const string CorruptMembership = "The persisted benchmark replica authority is inconsistent or corrupt.";
     private const int MinimumVoters = 1;
-    private const int MaximumVoters = 3;
     internal static readonly byte[] StorageKey = KeyCodec.Encode(MembershipKeyName);
 
     internal static void Validate(byte[]? bytes, bool hasHardState, ReplicaConfiguration configuration)
     {
         if (bytes is null)
         {
-            if (hasHardState && configuration.BenchmarkTopology)
+            if (hasHardState)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidMembership);
             }
@@ -27,13 +26,14 @@ internal static class ReplicaBenchmarkMembership
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptMembership);
         }
-        var membership = Decode(bytes);
+        var maximumVoters = Math.Max(configuration.MaxAppendEntries, configuration.VoterIds.Length);
+        var membership = Decode(bytes, maximumVoters);
         if (membership.Version != ReplicaProtocol.FormatVersion)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, ReplicaProtocol.UnsupportedFormat);
         }
         if (membership.Incarnation == Guid.Empty
-            || membership.VoterIds.IsDefault || membership.VoterIds.Length is < MinimumVoters or > MaximumVoters
+            || membership.VoterIds.IsDefault || membership.VoterIds.Length < MinimumVoters || membership.VoterIds.Length > maximumVoters
             || membership.VoterIds.Any(string.IsNullOrWhiteSpace)
             || membership.VoterIds.Distinct(StringComparer.Ordinal).Count() != membership.VoterIds.Length)
         {
@@ -48,18 +48,15 @@ internal static class ReplicaBenchmarkMembership
 
     internal static void Initialize(IAtomicTransaction transaction, ReplicaConfiguration configuration)
     {
-        if (configuration.BenchmarkTopology)
-        {
-            transaction.Put(StorageKey, ReplicaProtocolCodec.Serialize(new ReplicaBenchmarkMembershipRecord(ReplicaProtocol.FormatVersion,
-                configuration.Incarnation, configuration.VoterIds)));
-        }
+        transaction.Put(StorageKey, ReplicaProtocolCodec.Serialize(new ReplicaBenchmarkMembershipRecord(ReplicaProtocol.FormatVersion,
+            configuration.Incarnation, configuration.VoterIds)));
     }
 
-    private static ReplicaBenchmarkMembershipRecord Decode(byte[] bytes)
+    private static ReplicaBenchmarkMembershipRecord Decode(byte[] bytes, int maximumVoters)
     {
         try
         {
-            return ReplicaProtocolCodec.DeserializeStored<ReplicaBenchmarkMembershipRecord>(bytes, MaximumVoters);
+            return ReplicaProtocolCodec.DeserializeStored<ReplicaBenchmarkMembershipRecord>(bytes, maximumVoters);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {

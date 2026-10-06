@@ -89,29 +89,21 @@ Current authority is rechecked before receipt-only replay; no source rescan or
 effect duplication on stable command retries. Payload mismatch still conflicts.
 Receipts contain actual primitive effects, not raw copied source documents.
 
-Reviewed TASK-COMP-004 refinement: persist a native generated
-CompositionOutcomeAuthority containing distinct authorized EntityRef endpoints
-selected by successful composition (and the explicit reverse start) alongside
-the existing StoredOutcome. Append optional field ID5; preserve IDs0–4 and old
-outcomes without composition. Append internal native MutationReceipt field ID4,
-ignored by public JSON, with an empty default for ordinary effects. Ordered apply
-marks expanded effects explicitly and captures endpoints from their already
-authorized primitive operands after success, then folds those saved refs into the
-outcome. Do not infer origin from prefixes or reread final target records: a later
-valid delete or unrelated message must not break the command. No source rescan or
-extra post-apply storage read budget. New composing operations require authority on
-replay, fail closed if missing, and recheck current DocumentsRead/catalog/row
-visibility for its saved endpoints. Source changes or ACK/deletion do not select
-new effects on retries. This prevents unchanged-principal row-policy changes from
-revealing a stale derived receipt. Bound saved refs by expanded mutation limits;
-same homogeneous pre-producer rollout applies to the additive generated field.
-Freeze actual native MutationReceipt/StoredOutcome bytes from the committed
-pre-composition writer at8071148cd; current reader must decode absent appended
-fields without losing ordinary receipt/outcome data. The internal receipt
-reference getter normalizes an omitted legacy field to an empty collection:
-generated Orleans decode does not run its property initializer. Validate all
-present references normally; do not relax global default-collection validation. This tests that explicit
-upgrade seam, not universal old-store or downgrade compatibility.
+Current generated native DTOs persist a `CompositionOutcomeAuthority` containing
+distinct authorized `EntityRef` endpoints selected by successful composition
+(and the explicit reverse start) alongside `StoredOutcome` at stable field ID5.
+The internal `MutationReceipt` uses stable field ID4, ignored by public JSON, with
+an empty value for ordinary effects. Ordered apply marks expanded effects and
+captures endpoints from already-authorized primitive operands after success,
+then folds those references into the stored outcome. Do not infer origin from
+prefixes or reread final target records: a later valid delete or unrelated
+message must not break the command. Do not rescan sources or spend an extra
+post-apply storage read budget. Current composition operations require authority
+on replay, fail closed when it is absent or invalid, and recheck current
+DocumentsRead/catalog/row visibility for saved endpoints. Source changes or
+ACK/deletion do not select new effects on retries. Bound saved references by the
+existing expanded-mutation limits. All RF3 voters run the same current serializer
+contract before composition producers are enabled.
 
 This stage accepts composition only in standalone CommandRequest batches. Handler,
 subscription and projection inbox Effects explicitly reject these new mutation
@@ -120,30 +112,22 @@ effects remain available. A later lease/ACK composition stage must retain saved
 authority through every inbox receipt and recheck it on new-command handler
 replays before enabling those joins. Ready projection does not consume messages.
 
-Dependencies: ADR-004/010/014/022/024/026/054/055/060/065. Rollout is additive public
-JSON, but new native DTOs require homogeneous upgraded nodes before producers
-issue them. Primitive stored data and existing digest format remain unchanged.
-Rollback stops new producers/advertisement; committed graph/queue data remain
-canonical. No old-store conversion or journal removal. Agent ownership/start,
+Dependencies: ADR-004/010/014/022/024/026/054/055/060/065. Current generated DTO
+identities and public JSON contracts remain stable; primitive stored data and
+existing digest format remain unchanged. Every active node must run the same
+current contract before composition producers are enabled. Recovery continues to
+use canonical graph/queue data and the existing journals. Agent ownership/start,
 tests, error flows and join conditions are frozen in this implementation contract
-and the durable feature acceptance below.
-Remain Accepted until all required source/migration/tests/GitHub evidence exist.
+and the durable feature acceptance below. Remain Accepted until required
+implementation, tests and exact-source qualification evidence exist.
 
-TASK-COMP-007 / AC-COMP-004/007/008 preserves the existing AC-DSTORE-005
-outbox-image regression after the native format change. Its independently
-constructed expected object graph shares Resource/Collection strings and creates
-separate RowAccess values, while actual canonical decode and document `with`
-clones have different reference sharing. Orleans encodes those relationships;
-value-equal graphs need not have identical bytes. The pre-composition writer
-reproduces this failure. Test-only repair compares every decoded entry/receipt,
-polymorphic mutation and before/after image value, then requires byte-exact native
-reserialization of the actual decoded graph. Preserve the real store, sequential
-same-ID mutations, tombstone/revision/outbox counts and failure/CAS assertions.
-Worker owns only DocumentMutationImageTests.cs; root owns this contract and source
-join. No serializer, production image path or durability behavior changes. Build
-and focused native outbox/composition tests precede scoped delivery; complete
-Linux CI remains required. This corrects a fixture reference-identity assumption,
-not the exact user-content or frozen canonical digest contracts.
+TASK-COMP-007 / AC-COMP-004/007/008 requires independent value oracles for
+current document mutation images. Expected values are constructed independently
+from the production canonicalizer; compare every decoded entry, receipt,
+polymorphic mutation and before/after image, then require byte-exact native
+reserialization of the actual decoded graph. Preserve actual store operations,
+sequential same-ID mutations, tombstone/revision/outbox counts and failure/CAS
+assertions. These checks do not authorize serializer or durability changes.
 
 RF3 AC-COMP-007 fixture refinement: existing Enqueue canonicalizes the outer
 payload JSON before projection. Compare the complete decoded QueueGraphLink

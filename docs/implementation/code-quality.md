@@ -39,8 +39,42 @@ The original c8 push CI37450680516 failed full unit/scalar/recovery and RF3 sour
 preparation; no RF3 case executed after that preparation failure. Global
 functional coverage, CRAP and delivered-source Linux acceptance remain
 unqualified. No original104 task or overall CodeQuality acceptance is closed by
-this checkpoint. Pending bounded cleanup and prior-format composition packets
-have not been integrated and are not evidence of passing operations.
+this checkpoint. At that checkpoint, pending bounded cleanup and prior-format
+composition packets had not been integrated and were not evidence of passing
+operations.
+
+## Native cleanup development checkpoint R75, 2026-10-06
+
+The R75 full canonical Release build passed with0 warnings/errors,4224 compile
+inputs and no source drift; original log SHA256:
+`29429ce51f04b68aa928ef237928865dd33542228f7436643608383442820b4d`.
+The actual Aspire-owned cleanup/source-manifest flow executed13/13 cases, all
+passing in1248.339 seconds. Original TRX SHA256:
+`e75ac3954550629ae3cefca18bb5678c6dad5d707e108fcdb3282152e86e64ef`;
+original caller log SHA256:
+`9c66eecf271defebb2b709b81a88cc126ef9a538de6c7e050ad5fed0db0022c1`.
+The4275 source and84 DLL/PDB before/after guards found no drift. Actual child
+cancellation and inclusive/overflow pipe boundaries, joined original tasks,
+healthy source preparation, tamper rejection, preserved evidence and healthy
+following operations ran. Forced fatal-deadline expiry, complete suites, functional
+coverage and exact-source Linux gates remain pending.
+
+The unchanged complete R75 native telemetry case failed1/1; original TRX SHA256:
+`d5c6d5193a8300bc85e6117836208de75176490acb4a1e2c833e82593f79ce1a`.
+The bounded diagnostic proves actual Error status remained Error; every selected
+native span inherited one ambient baggage item and the privacy processor suppressed
+its recording. The new independent caller-context correction is source joined
+with all whole-operation privacy, state, identity, parentage and metric assertions
+retained; its native verification is pending.
+
+The subsequent R76 source cohort added the first-write partition roster and
+caller-context correction. Its full build failed6 errors with0 warnings and
+no source drift: three CA1859 concrete-type corrections, two KLD0037 native
+options-boundary findings and one KLD0035 unnamed empty-count value. Original
+log SHA256:`a0311da1e914452a4b0495426d6ab18cae0d1fa73974d7a09f5cf569ba7deec2`.
+This failure is retained; focused tests cannot be admitted using stale binaries.
+The scoped preserving correction and fresh native gates follow. No whole-task,
+cluster backup, global coverage or Linux acceptance closure is claimed.
 
 ## Historical initial analyzer baseline, 2026-10-02
 

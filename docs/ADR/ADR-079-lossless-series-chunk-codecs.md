@@ -3,26 +3,25 @@
 Status: Accepted; codec source and local development verification delivered.
 Exact-source Linux and subsequent canonical layout qualification remain pending.
 Related: KL-078, REQ-SERIES-006/017–020 and AC-CHUNK-001–006 in
-[TimeSeries](../Features/TimeSeries.md), architecture §27.6, ADR-035, ADR-073 and
-ADR-077. The owner authorized completing the implementation plan; root owns this
-bounded contract and the integration review.
+[TimeSeries](../Features/TimeSeries.md), architecture §27.6, ADR-035 and ADR-073.
+The owner authorized completing the implementation plan; root owns this bounded
+contract and the integration review.
 
 ## Decision and boundaries
 
 Qualify a private generated Orleans chunk payload against the current native
 SampleRecord oracle before choosing a canonical chunk layout. This stage does
 not write chunk records, replace sample keys, change append acceptance, persist
-a second authority, or alter identity6/WAL4/checkpoint4. Samples, sample-id
+a second authority, or alter the current native storage contract. Samples, sample-id
 receipts, sequence counters and retention floors remain canonical ZoneTree data.
 PartitionHost keeps all physical ownership; this codec owns only transient
 buffers. Ordinary request grains and RF3 operation contracts remain unchanged.
 
-An eventual canonical replacement requires a separate storage-layout ADR,
-measured codec choice, an explicit6→7 offline conversion, real previous-v6
-refusal, correction-generation recovery and all reader/retention/RF3 joins.
-The accepted5→6 conversion must not be relabelled as that migration. Removing
-the transient candidate is the rollback for this stage; no data conversion is
-performed and old SampleRecord aliases/Ids/native bytes remain unchanged.
+Any future canonical chunk layout requires its own storage-layout decision,
+measured codec choice, correction-generation recovery and all reader, retention
+and RF3 joins. Removing the transient candidate is the rollback for this stage;
+no canonical data conversion is performed and current SampleRecord aliases, IDs
+and native bytes remain unchanged.
 
 ```mermaid
 flowchart LR
@@ -180,7 +179,7 @@ exhaustion remains BudgetExceeded. Failure cannot mutate canonical source data.
    numeric complexity, strict full build/formatter/governance, run actual TUnit
    through Aspire, retain original reports and commit/push the completed stage.
    Exact-source normal/scalar Linux CI remains required. Canonical storage,
-   correction recovery, retention rewrite, migration and RF3 stay pending until
+   correction recovery, retention rewrite and RF3 stay pending until
    the separate layout contract and genuine tests exist.
 
 Coding workers stop and escalate on contract ambiguity, bound/compatibility

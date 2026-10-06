@@ -54,6 +54,120 @@ outcomes, creator revocation/restoration, no-quorum, leader loss/restart and
 single-effect identities through SDK and official MCP. Hot writes must preserve
 finite fixed-tail traversal; the service must still join during cancellation.
 
+### TASK-ORL-APPLIED-PUBLISHED-CUT-014: completed apply publication
+
+REQ-ORL-011 / AC-ORL-011 retain the changed-cut and coalesced-batch contract.
+The original e6295 unit operation committed two real replica entries and observed
+index1 before the completed batch published index2. That schedule is inferred
+from the actual assertion and source; the captured failure does not prove an early
+SDK receipt. Freeze a disposable last-published canonical cut under the existing
+signal Lock, initialized from recovered committed state before the worker starts.
+Update it only from a successfully completed apply/checkpoint cut captured under
+the owning apply gate, then publish after releasing that gate. Audit all publication,
+recovery, checkpoint, fault and shutdown paths; a wake alone must not promote an
+in-progress cut or regress a same-incarnation publication. Preserve the authoritative
+AppliedPosition getter, target-index WaitForApplyAsync and leader quorum/outcome
+receipt barriers. The published scalar owns no storage or durable authority.
+The changed-cut waiter returns only a published position strictly greater than
+its observed canonical position; a caller may have observed an in-progress higher
+cut, and a lower published position must never become an immediate result.
+
+Root owns contract, join and final gates. Luna may prepare a private guarded
+ReplicaMaterializer and real waiter-test/fixture packet; escalate an ambiguous
+checkpoint/recovery ordering contract before coding around it. Preserve the complete
+registration-race, two-entry bounded-batch, cancellation and shutdown operations;
+cover re-created materializer admission over the real persisted prefix. A bounded
+batch publication does not promise that a larger committed backlog fits one batch.
+No new public signature, format, dependency, budget or weaker assertion is allowed.
+Run actual Aspire normal/scalar waiter and target-index controls, then required
+recovery/RF3/Linux qualification. ADR-110 remains Accepted.
+
+### TASK-ORL-TELEMETRY-CAPTURE-006: repeated native metric observations
+
+REQ-ORL-012 / AC-ORL-012 retain every original signed-operation, privacy, status,
+parentage, cancellation and bounded-capture assertion. R82's unchanged complete
+normal flow passed; its scalar operation reached ten real exports and307 matching
+points, filling the validated256-record sink. The sink currently appends each
+periodic export even when its complete observable privacy record is identical.
+
+Freeze exact deduplication of retained observations in the existing test exporter:
+meter/name and both complete ordered tag/exemplar arrays must compare ordinally
+and structurally. Preserve every distinct observation, including an earlier unsafe
+tag or exemplar; do not replace it with a later clean row, normalize away a field,
+evict records or use array-reference equality. Check an exact existing observation
+before the unchanged capacity check; a new distinct observation beyond the bound
+still sets WasTruncated and fails the operation. Keep actual cumulative export/point
+diagnostics, periodic native reader, validated options and256 default unchanged.
+
+Luna owns a private guarded exporter plus whole-workflow repetition packet; Root
+reviews and joins after the active native cohort settles. Execute real signed writes,
+read, revoked rejection and concurrent principals before enough real ForceFlush calls
+to exceed the configured raw observation bound. Keep every original resulting-state,
+parentage and privacy assertion. Source inspection and getter-only checks are not
+proof. Run the unchanged full operation through Aspire normal/scalar, full build/
+format and required Linux/RF3 functional qualification. No production provider or
+public/persisted contract changes; ADR-110 remains Accepted.
+
+## TASK-ORL-TELEMETRY-BAGGAGE-003: inherited baggage export fence
+
+REQ-ORL-012 / AC-ORL-012 retain the accepted no-exported-baggage, bounded-work,
+status and parentage contract. The unchanged R72 real signed-operation workflow
+passed stream classification/parentage and then failed privacy: native descendant
+captures contained a late canary after bounded parent cleanup. The original
+failed TRX is retained with SHA256
+`7c93d4056304cb30d910ff4df7052d23792df794ed952dfbb75a5c7e2368a534`.
+
+Freeze the fix in the existing ServiceDefaults ClusterRouting diagnostics owner:
+after at most the configured number of removal attempts, check for remaining
+baggage with a one-item presence probe. Any residual inherited or unremovable
+baggage must suppress that native span through the existing fixed
+`baggage_limit` reason before export. Never mutate a caller-owned parent, increase
+the bound, export raw values, manufacture a replacement activity or weaken the
+real operation/privacy/status/parentage assertions. Verify actual pinned runtime
+and OTel export behavior; flags/configuration alone are not proof.
+
+Root owns contract/integration and serial native gates. Luna may prepare a
+private guarded ServiceDefaults processor/registration packet after reviewing
+the exact native API behavior; retain the complete existing operation test.
+The unchanged Aspire normal/scalar workflow must pass and continue to verify
+real committed documents, reads, revoked-write rejection, private trace/metrics,
+concurrent identities and exact parentage. Full build/format, original Linux
+functional coverage and RF3 qualification remain mandatory. This bug repair uses
+ADR-110's accepted telemetry trust boundary and introduces no public or persisted
+format change; ADR-110 remains Accepted until its full gates qualify.
+
+TASK-ORL-TELEMETRY-ERROR-004 retains the same full operation and assertions.
+The R74 unchanged operation passes native-span/request-method assertions but
+fails the exported Error-status assertion before later privacy checks. Source
+review confirms possible inherited-baggage suppression and native escaping-
+exception status handling; neither identifies the exact failed sentinel span.
+Before another production change, add bounded test-only observations of the
+exact sentinel-selected Activity across start, stop and the existing actual
+export capture. Keep identities solely in memory for equality joins. Report
+only fixed source/method/parent-match/status/Recorded booleans and a baggage
+presence/count capped at the existing removal bound plus one presence probe.
+Never retain or print baggage keys/values, principal/payload or trace/span IDs.
+Keep original real write/read/state, revocation, privacy, metrics and exact
+parentage assertions; diagnostic context must not relax them. Root owns the
+assertion/contract/native join; Luna may prepare private guarded sentinel and
+workflow diagnostic helpers. Then run that same Aspire operation, identify the
+actual path and freeze any necessary correction before changing production.
+These observations are failure diagnostics, not collected privacy/coverage proof.
+
+The source-bound R75 operation establishes that all four selected native spans
+have inherited baggage at start and are already unrecorded. The exact Error
+sentinel remains Error at stop, so native status overwrite is not the cause.
+TASK-ORL-TELEMETRY-CALLER-005 corrects only the test caller boundary: create the
+existing provider-backed parent Activity with an independent valid remote W3C
+ActivityContext. This has no backing ambient Activity from which to inherit
+baggage, while native Start/Dispose preserve the previous Activity.Current.
+Keep the real signed writes/reads, revoked request, concurrent identities,
+original status/privacy/metrics/parentage assertions and production processor
+unchanged. The same complete operation must additionally prove caller isolation
+and restoration; no synthetic exported span, altered exporter or ambient-parent
+mutation is allowed. Root owns the source join and actual normal/scalar Aspire
+proof; Luna may prepare only the guarded fixture/workflow correction.
+
 ## Accepted native telemetry contract: REQ/AC-ORL-012
 
 Enable native AddActivityPropagation on the production silo. Subscribe the

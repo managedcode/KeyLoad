@@ -21,10 +21,4 @@ internal static class IntegrationServerRuntimeOptions
         return runtime;
     }
 
-    internal static IOptions<ServerNodeUpgradeExecutionOptions> Upgrade()
-    {
-        var value = new ServerNodeUpgradeExecutionOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
 }

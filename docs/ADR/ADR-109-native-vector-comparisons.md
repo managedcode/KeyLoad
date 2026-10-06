@@ -61,7 +61,7 @@ control; no new native or vector qualification has run. The shared checkout has
 unrelated active changes. Previous canonical build failed on an unrelated XML
 parameter warning in OrleansNode; recheck the current snapshot before tests.
 
-## Boundaries, migration and risks
+## Boundaries, rollout and risks
 
 This changes benchmark adapters, report/configuration contracts and publication,
 not KeyLoad product storage or RF3 authority. Reuse central package pins and
@@ -71,8 +71,8 @@ receipt. SurrealDB experimental TiKV clustering must not be advertised as a
 qualified durable peer without native membership/fault/resource evidence.
 
 New profile identifiers are additive and exact. Live validation admits only the
-new producer's complete inventory and source-bound receipts. Old receipts retain
-their original schemas and cohort identities as history. Rollback reverts the
+new producer's complete inventory and source-bound receipts. Each immutable source/run receipt remains bound to its original cohort and is
+not treated as current scale output. Rollback reverts the
 new producer/consumer changes together; it cannot relabel old measurements as
 new qualification. Failures, insufficient recall, unexpected plans, resource
 mismatch, missing/corrupt artifacts or incomplete cleanup fail the affected cell.
@@ -86,7 +86,7 @@ The 2026-10-06 general configuration correction requires the bounded execution
 policy join specified in VectorQualification TASK-VQ-POLICY-001. The comparison
 host centrally binds and validates IOptions; adapters consume typed policy and
 retain effective limits. Immutable profile/corpus/index identities stay frozen.
-No unrelated product configuration or protocol migration is authorized here.
+No unrelated product configuration or protocol change is authorized here.
 
 TASK-VQ-JOB-001 repairs the image preparation/current-job authority join under
 AC-VQ-007 and AC-ISO-006/007. Image preparation selects the original control

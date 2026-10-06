@@ -19,8 +19,8 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     private readonly Lock signals = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly Task worker;
+    private readonly ReplicaMaterializerAppliedPositionSignals appliedPosition;
     private Task? shutdown;
-    private TaskCompletionSource changed = NewSignal();
     private Exception? failure;
 
     /// <summary>Constructs and recovers the committed prefix before exposing a node-owned worker.</summary>
@@ -41,6 +41,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         Database = database;
         Log = log;
         Snapshots = snapshots;
+        appliedPosition = new(signals, database, Check);
         Recover();
         worker = Task.Run(ApplyWorkerAsync);
         work.Writer.TryWrite(true);
@@ -70,11 +71,19 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     /// <summary>Rejects unsupported canonical cuts and completes verified interrupted snapshot installs.</summary>
     public void Recover()
     {
-        Snapshots.Recover();
-        if (Database.LastApplied > Log.State.CommittedIndex)
+        applyGate.Wait();
+        long recoveredCut;
+        try
         {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+            Snapshots.Recover();
+            if (Database.LastApplied > Log.State.CommittedIndex)
+            {
+                throw Errors.Fail(ErrorCode.RecoveryRequired, ReplicaProtocol.CorruptLog);
+            }
+            recoveredCut = Database.LastApplied;
         }
+        finally { applyGate.Release(); }
+        appliedPosition.PublishCompletedCut(recoveredCut);
     }
 
     /// <summary>Flushes the commit cut before waking ordered canonical materialization.</summary>
@@ -90,47 +99,15 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     /// <param name="index">Committed index that must be applied before completion.</param>
     /// <param name="cancellationToken">Cancellation of the wait for the apply cut.</param>
     /// <returns>Completion once the canonical engine reaches the requested cut.</returns>
-    public async Task WaitForApplyAsync(long index, CancellationToken cancellationToken)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(index);
-        while (true)
-        {
-            Task signal;
-            lock (signals)
-            {
-                Check();
-                if (Database.LastApplied >= index)
-                {
-                    return;
-                }
-                signal = changed.Task;
-            }
-            await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
-        }
-    }
+    public Task WaitForApplyAsync(long index, CancellationToken cancellationToken)
+        => appliedPosition.WaitForApplyAsync(index, cancellationToken);
 
-    /// <summary>Waits until canonical apply changes from the caller's observed cut.</summary>
+    /// <summary>Waits until a completed canonical cut advances beyond the caller's observed position.</summary>
     /// <param name="observedPosition">The cut observed before registering the wait.</param>
     /// <param name="cancellationToken">Cancellation of this caller's wait only.</param>
     /// <returns>The changed canonical cut.</returns>
-    public async Task<long> WaitForAppliedPositionChangeAsync(long observedPosition, CancellationToken cancellationToken)
-    {
-        while (true)
-        {
-            Task signal;
-            lock (signals)
-            {
-                Check();
-                var current = Database.LastApplied;
-                if (current != observedPosition)
-                {
-                    return current;
-                }
-                signal = changed.Task;
-            }
-            await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
-        }
-    }
+    public Task<long> WaitForAppliedPositionChangeAsync(long observedPosition, CancellationToken cancellationToken)
+        => appliedPosition.WaitForChangeAsync(observedPosition, cancellationToken);
 
     private async Task ApplyWorkerAsync()
     {
@@ -139,10 +116,14 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
             await foreach (var _ in work.Reader.ReadAllAsync(lifetime.Token).ConfigureAwait(false))
             {
                 await applyGate.WaitAsync(lifetime.Token).ConfigureAwait(false);
+                long completedCut = BeforeFirstLogPosition;
                 try
-                { ReplicaCanonicalApply.ApplyBatch(Database, Log, applyBatchSize); }
+                {
+                    ReplicaCanonicalApply.ApplyBatch(Database, Log, applyBatchSize);
+                    completedCut = Database.LastApplied;
+                }
                 finally { applyGate.Release(); }
-                PublishChange();
+                appliedPosition.PublishCompletedCut(completedCut);
                 if (Database.LastApplied < Log.State.CommittedIndex)
                 {
                     work.Writer.TryWrite(true);
@@ -162,7 +143,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
             { failure = error; }
             throw;
         }
-        finally { PublishChange(); }
+        finally { appliedPosition.WakeWaiters(); }
     }
 
     /// <summary>Fences any verified recovery during replacement of an old leader's incomplete upload.</summary>
@@ -173,12 +154,25 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         await applyGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        long completedCut = BeforeFirstLogPosition;
+        var completed = false;
         try
         {
             Check();
-            return await Task.Run(() => ReplicaCanonicalApply.Begin(Snapshots, snapshot), cancellationToken).ConfigureAwait(false);
+            var offset = await Task.Run(() => ReplicaCanonicalApply.Begin(Snapshots, snapshot), cancellationToken)
+                .ConfigureAwait(false);
+            completedCut = Database.LastApplied;
+            completed = true;
+            return offset;
         }
-        finally { applyGate.Release(); PublishChange(); }
+        finally
+        {
+            applyGate.Release();
+            if (completed)
+            { appliedPosition.PublishCompletedCut(completedCut); }
+            else
+            { appliedPosition.WakeWaiters(); }
+        }
     }
 
     /// <summary>Captures the exact applied cut without holding the protocol term gate during file IO.</summary>
@@ -208,14 +202,16 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     {
         await applyGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         ReplicaSnapshot snapshot;
+        long installedCut = BeforeFirstLogPosition;
         try
         {
             Check();
             snapshot = await Task.Run(() => Snapshots.Complete(transferId), cancellationToken).ConfigureAwait(false);
+            installedCut = Database.LastApplied;
             work.Writer.TryWrite(true);
         }
         finally { applyGate.Release(); }
-        PublishChange();
+        appliedPosition.PublishCompletedCut(installedCut);
         return snapshot;
     }
 
@@ -227,25 +223,93 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         }
     }
 
-    private static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private void PublishChange()
-    {
-        lock (signals)
-        {
-            var previous = changed;
-            changed = NewSignal();
-            previous.TrySetResult();
-        }
-    }
-
     /// <summary>Stops the node-owned apply loop before its independently owned stores are disposed.</summary>
     /// <returns>Completion after the apply worker and its owned gate drain; the borrowed protocol gate remains with the log owner.</returns>
     public ValueTask DisposeAsync()
     {
         lock (signals)
         {
-            shutdown ??= ReplicaMaterializerShutdown.DisposeAsync(lifetime, work.Writer, worker, applyGate, PublishChange);
+            shutdown ??= ReplicaMaterializerShutdown.DisposeAsync(lifetime, work.Writer, worker, applyGate,
+                appliedPosition.WakeWaiters);
             return new(shutdown);
         }
     }
+}
+
+/// <summary>Coalesces published canonical cuts under the materializer's existing waiter-registration lock.</summary>
+internal sealed class ReplicaMaterializerAppliedPositionSignals
+{
+    private readonly Lock signals;
+    private readonly DatabaseEngine database;
+    private readonly Action check;
+    private TaskCompletionSource changed = NewSignal();
+    private long publishedAppliedPosition;
+
+    internal ReplicaMaterializerAppliedPositionSignals(Lock signals, DatabaseEngine database, Action check)
+    {
+        this.signals = signals ?? throw new ArgumentNullException(nameof(signals));
+        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(check);
+        this.database = database;
+        this.check = check;
+    }
+
+    internal async Task WaitForApplyAsync(long index, CancellationToken cancellationToken)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+        while (true)
+        {
+            Task signal;
+            lock (signals)
+            {
+                check();
+                if (database.LastApplied >= index)
+                { return; }
+                signal = changed.Task;
+            }
+            await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    internal async Task<long> WaitForChangeAsync(long observedPosition, CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            Task signal;
+            lock (signals)
+            {
+                check();
+                if (publishedAppliedPosition > observedPosition)
+                { return publishedAppliedPosition; }
+                signal = changed.Task;
+            }
+            await signal.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    internal void PublishCompletedCut(long completedCut)
+    {
+        lock (signals)
+        {
+            if (completedCut <= publishedAppliedPosition)
+            { return; }
+            publishedAppliedPosition = completedCut;
+            RotateSignal();
+        }
+    }
+
+    internal void WakeWaiters()
+    {
+        lock (signals)
+        { RotateSignal(); }
+    }
+
+    private void RotateSignal()
+    {
+        var previous = changed;
+        changed = NewSignal();
+        previous.TrySetResult();
+    }
+
+    private static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
 }

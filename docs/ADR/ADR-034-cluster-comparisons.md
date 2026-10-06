@@ -5,7 +5,7 @@ AC-KLEVENT-001..003. Exact b21 JSON shows missing KeyLoad public session readbac
 no timing/storage weakness is inferred. Tests first use existing actual RF3/SDK;
 two source files delegate bounded reads and return null for absence. Root owns
 ComparisonTests hook/docs/build/CI; one bounded worker owns only those source/new
-regression files. No API/durable/ACK/package migration, source-only rollback,
+regression files. No API, durable-state, acknowledgement, or package change; source-only rollback,
 immutable evidence preserved. Native nine-engine/six-profile35+31 scope remains.
 
 Identity note: ADR-034 owns comparisons. The formerly colliding Orleans foundation document is now [ADR-036](ADR-036-orleans-foundation.md); its identity-correction record explains the preserved root policy's historical “ADR-034 evidence” reference for the two Orleans experimental API calls. That rule remains mandatory and is not modified by this comparison decision.
@@ -64,7 +64,7 @@ Primary Kurrent sources: [26.1.2 release](https://github.com/kurrent-io/KurrentD
 ## Implementation contract
 
 1. Lead writes brainstorm, stable requirements/acceptance, ordered plan and this ADR, then joins highest-capability TASK-BC-ARCH-001 decisions. Publish no unimplemented scenario before adapters/runner correctness are integrated.
-2. Root owns Contracts.cs, dataset/runner, registration, packages, shared workflows and docs. Adapter workers own only their exact new feature files; no same-file writes. External resource helpers remain separate from the active shared AppHost/Orleans migration.
+2. Root owns Contracts.cs, dataset/runner, registration, packages, shared workflows and docs. Adapter workers own only their exact new feature files; no same-file writes. External resource helpers remain separate from the active shared AppHost/Orleans refactoring.
 3. Implement native MongoDB/KurrentDB/OpenSearch clients and cluster evidence checks with fixed constructor/operation contracts supplied by the lead. Unsupported cases return explicit reasons; no mock database/service target qualifies an engine.
 4. Integrate event scenarios and real runtime membership/acknowledgement checks, then compose Single/Replicated Docker profiles through Aspire. Container startup/seed/readiness happens before timing. Check all required image/connection/configuration facts at runtime.
 5. Add meaningful TUnit contract/real-engine assertions; run only GitHub Actions tests. Record baseline failures and fix owning paths; never skip a required suite or weaken policy to make CI green.
@@ -74,7 +74,7 @@ Primary Kurrent sources: [26.1.2 release](https://github.com/kurrent-io/KurrentD
 
 Workers receive exact paths, REQ/AC IDs, constructor/result contracts, primary sources, verification commands, forbidden changes, dependencies, completion states and escalation rules. Strongest suitable planner owns architecture/integration/final review; bounded workers use the least expensive capable model. All required results must be complete and reviewed before dependent tasks start. Every gate links to exact GitHub SHA/run/job/artifacts.
 
-## Migration, rollout and rollback
+## Rollout and rollback
 
 ### Accepted digest-backed container execution stage (2026-10-02)
 
@@ -217,9 +217,9 @@ alone joins the exact AppHost generated type/project reference; native and websi
 owners retain all other source. Host startup regressions precede implementation,
 and real GitHub qualification remains mandatory before the decision is Implemented.
 
-New code uses named feature paths; move existing flat benchmark assets only as a verified whole-slice migration. Isolated benchmark engine datasets are disposable; no product schema or persisted format changes are introduced. Keep immutable published results after rollback; stop new publication while repairing a failing profile and preserve the complete required CI matrix. Do not overwrite old evidence or invent replacement numbers. A rollback cannot weaken a mandatory product/test/security rule.
+New code uses named feature paths; move existing flat benchmark assets only as a verified whole-slice refactoring. Isolated benchmark engine datasets are disposable; no product schema or persisted format changes are introduced. Keep immutable published results after rollback; stop new publication while repairing a failing profile and preserve the complete required CI matrix. Do not overwrite old evidence or invent replacement numbers. A rollback cannot weaken a mandatory product/test/security rule.
 
-The current baseline is six-engine GitHub CI36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45. Nine-engine/multi-node/full-Docker evidence is pending. The TUnit source migration is present locally and awaits delivered-source GitHub proof. Existing Node-runner/DotNext/host-process and coverage/complexity gaps remain explicit until their owning implementations and GitHub proofs complete.
+The current baseline is six-engine GitHub CI36926803549 at9c570f8c33a7a9667507a8e1c0ca68860de3be45. Nine-engine/multi-node/full-Docker evidence is pending. The current TUnit source awaits delivered-source GitHub proof. Coverage and complexity evidence remain pending until their owning implementations and GitHub proofs complete.
 
 ## Owner-directed isolated producer refinement, 2026-10-03
 

@@ -210,8 +210,8 @@ scope before verification, and no encoding duration. Those tests depend on the
 separately frozen private capture/native stages and remain open. Independent
 strong review joins source before all-eligible main checkpoint; authentic CI,
 coverage, on/off overhead and profile observations remain qualification gates.
-Rollback removes these optional scopes together after draining; no data/wire
-migration is required and the process bank remains disabled by default.
+Rollback removes these optional scopes together after draining; no persisted or wire
+contract changes are required, and the process bank remains disabled by default.
 
 ### Frozen provider producer packet: TASK-DBPROF-PROVIDER
 
@@ -301,7 +301,7 @@ observations. Worker supplies full proposed files and exact original/candidate
 hashes; root reviews and runs enabled integrated development/CI gates. No package,
 stored/public/wire contract, Orleans-request isolation or authorized-cut changes.
 
-Diagnostics default off; source adds no stored/public/wire/package migration.
+Diagnostics default off; source changes no stored, public, wire or package contract.
 Host drain precedes removing exporter/facade/scopes/references together. Physical
 storage and retained scalar metadata remain node-owned on activation migration.
 Profile files are disposable siblings of storage, excluded from DB authority.

@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Orleans;
-using KeyLoad.Storage;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Communication.Orleans.Extensions;
@@ -44,8 +43,6 @@ internal sealed class RuntimeJournalNativeFixture : IAsyncInitializer, IAsyncDis
         {
             throw new InvalidOperationException("The native runtime test timing profile is invalid.");
         }
-
-        Database.Store.RequireReaderContract(StoreReaderContract.RuntimeJournal);
         Database.Database.ConfigureRuntimeJournal(JournalOptions);
         Current = this;
         try

@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace KeyLoad.Client;
 
 internal static class AggregateReplayValidation
@@ -22,10 +20,9 @@ internal static class AggregateReplayValidation
         }
     }
 
-    internal static ValidatedReplay ValidatePage(
+    internal static string ValidatePage(
         AggregateReplayPage page,
         AggregateReplayReducer reducer,
-        IEnumerable<EventUpcaster>? upcasters,
         AggregateReplayWorkerLimits limits,
         CancellationToken cancellationToken)
     {
@@ -35,9 +32,8 @@ internal static class AggregateReplayValidation
         var initialState = page.Snapshot is { } snapshot
             ? ValidateSnapshot(page, snapshot, reducer, limits, input)
             : ValidateInitialState(page, reducer, limits, input);
-        var upcasterMap = AggregateReplayUpcast.BuildMap(upcasters, limits.MaximumRegisteredUpcasters, cancellationToken);
-        var paths = ValidateEvents(page, reducer, upcasterMap, limits, input, cancellationToken);
-        return new(initialState, paths);
+        ValidateEvents(page, reducer, limits, input, cancellationToken);
+        return initialState;
     }
 
     private static string ValidateInitialState(
@@ -94,10 +90,9 @@ internal static class AggregateReplayValidation
         }
     }
 
-    private static Dictionary<int, ImmutableArray<EventUpcaster>> ValidateEvents(
+    private static void ValidateEvents(
         AggregateReplayPage page,
         AggregateReplayReducer reducer,
-        IReadOnlyDictionary<int, EventUpcaster> upcasters,
         AggregateReplayWorkerLimits limits,
         AggregateReplayInput input,
         CancellationToken cancellationToken)
@@ -111,45 +106,40 @@ internal static class AggregateReplayValidation
         {
             throw new InvalidDataException(AggregateReplayMessages.IncompleteTail);
         }
-        Dictionary<int, ImmutableArray<EventUpcaster>> paths = [];
         HashSet<string> eventIds = new(StringComparer.Ordinal);
         long priorSequence = AggregateReplayProtocol.NoSequence;
         for (var index = AggregateReplayProtocol.FirstEventIndex; index < page.Events.Length; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var record = page.Events[index] ?? throw new InvalidDataException(AggregateReplayMessages.NullEvent);
-            ValidateEventIdentity(record, page, sourceRevision, index, priorSequence, eventIds);
+            ValidateEventIdentity(record, page, reducer, sourceRevision, index, priorSequence, eventIds);
             input.AddJson(record.Data.PayloadJson, AggregateReplayMessages.EventPayload);
             input.AddJson(record.Data.HeadersJson, AggregateReplayMessages.EventHeaders);
-            if (!paths.ContainsKey(record.Data.SchemaVersion))
-            {
-                paths.Add(record.Data.SchemaVersion,
-                    AggregateReplayUpcast.ResolvePath(record.Data.SchemaVersion, reducer.EventSchemaVersion, upcasters));
-            }
             priorSequence = record.EventSequence;
         }
-        return paths;
     }
 
     private static void ValidateEventIdentity(
         EventRecord record,
         AggregateReplayPage page,
+        AggregateReplayReducer reducer,
         long sourceRevision,
         int index,
         long priorSequence,
         HashSet<string> eventIds)
     {
         var data = record.Data;
-        if (record.Stream != page.Stream || record.Revision != sourceRevision + index + AggregateReplayProtocol.RevisionStep ||
+        if (data is null || record.Stream != page.Stream ||
+            record.Revision != sourceRevision + index + AggregateReplayProtocol.RevisionStep ||
             record.EventSequence <= priorSequence || record.EventSequence <= AggregateReplayProtocol.NoSequence ||
-            data is null || string.IsNullOrWhiteSpace(data.EventId) || string.IsNullOrWhiteSpace(data.EventType) ||
-            data.SchemaVersion <= AggregateReplayProtocol.InvalidSchemaVersion || !eventIds.Add(data.EventId))
+            string.IsNullOrWhiteSpace(data.EventId) || string.IsNullOrWhiteSpace(data.EventType) ||
+            !eventIds.Add(data.EventId))
         {
             throw new InvalidDataException(AggregateReplayMessages.InvalidEvent);
         }
+        if (data.SchemaVersion != reducer.EventSchemaVersion)
+        {
+            throw new InvalidDataException(AggregateReplayMessages.IncompatibleEventSchema);
+        }
     }
-
-    internal sealed record ValidatedReplay(
-        string InitialState,
-        Dictionary<int, ImmutableArray<EventUpcaster>> Paths);
 }

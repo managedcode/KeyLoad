@@ -8,7 +8,7 @@ internal sealed class ReplicaDiscoveryObservation(
     bool protocolCompatible,
     bool transportReady,
     long observedTimestamp,
-    int runtimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Legacy)
+    int runtimeJournalReaderContract = KeyLoad.Storage.StoreReaderContract.Unspecified)
 {
     internal SiloAddress Address { get; } = address;
     internal int ApplicationRpcVersion { get; } = applicationRpcVersion;

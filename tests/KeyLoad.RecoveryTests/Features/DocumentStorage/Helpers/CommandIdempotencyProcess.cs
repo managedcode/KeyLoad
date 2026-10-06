@@ -26,7 +26,7 @@ internal static class CommandIdempotencyProcess
             await active.WaitForAcknowledgementAsync(timeout.Token);
             await active.StopAndJoinAsync(timeout.Token);
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            EpochUpgradeFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertNativeHandlesReleased(root);
             active.CloseNativeProcessAfterJoin();
             active = null;
 
@@ -39,7 +39,7 @@ internal static class CommandIdempotencyProcess
                 throw new InvalidOperationException("The post-restart command verification process failed.");
             }
             await KilledProcessFileReadiness.WaitAsync(root, timeout.Token);
-            EpochUpgradeFileInventory.AssertNativeHandlesReleased(root);
+            RecoveryFileInventory.AssertNativeHandlesReleased(root);
             await CommandIdempotencyRecoveryAssertions.AssertRecoveredStoreAsync(root, timeout.Token);
             active.CloseNativeProcessAfterJoin();
             active = null;
@@ -118,7 +118,7 @@ internal static class CommandIdempotencyProcess
     {
         try
         {
-            await EpochUpgradeCleanup.SettleAsync(null, root, root, null, cancellationToken);
+            await RecoveryProcessCleanup.SettleAsync(null, root, root, null, cancellationToken);
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))
         {

@@ -14,8 +14,9 @@ Ordered implementation contract:
 1. Author real native-file TUnit cases under tests/KeyLoad.UnitTests/Features/
    StorageRecovery/ before production. Cover successful original current-format
    identity/data/position, missing canonical directory/owner/identity/journal/tree/
-   provider metadata without recreation, wrong expected identity/incarnation/legacy
-   format, occupied ownership, invalid options and normal reopen after guard close.
+   provider metadata without recreation, wrong expected node ID, unsupported identity
+   epoch or mismatched incarnation, occupied ownership, invalid options and normal
+   reopen after guard close.
 2. NEW ZoneTreeExistingStore and ZoneTreeExistingStoreCleanup under StorageRecovery
    validate and own guarded runtime/handoff; original fault first, independent
    cleanup causes retained, no discarded cleanup or false provider settlement.
@@ -29,7 +30,8 @@ Ordered implementation contract:
    unchanged. Reuse actual serializer/comparer/tombstone/
    Sync-WAL factory configuration once, with ordinary OpenOrCreate unchanged and
    guarded existing tree/metadata then provider Open. Identity OpenExisting reuses
-   bounded Read/private Validate and requires original format4/GUID/incarnation.
+   bounded Read/private Validate and requires identity epoch7, a GUID node ID and
+   incarnation.
    Existing journal helper has an internal FileMode parameter defaulting to
    OpenOrCreate; guard passes Open. No provider metadata filename/codec duplication.
 4. Root alone adds internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId);
@@ -45,8 +47,8 @@ Ordered implementation contract:
    must settle before outer lock release/restart. Native1/2/3 seed/final business
    oracle and actual LastApplied versus validated ACK remain separately required.
 
-No filesystem/data migration or signing material output; rollback removes additive
-private mode/classes/constructor and retains ordinary opens. Provider recovery is
+No signing material output; rollback removes additive private mode/classes/
+constructor and retains ordinary opens. Provider recovery is
 explicitly permitted to replay/modify derived WAL, not claimed forensic immutability
 or power-loss durability. Guard source/lifetime review covers exceptional partial
 provider open and cleanup/handoff/fatal failure until genuine process fault tests;
@@ -87,7 +89,7 @@ Benchmarks:TimeSeries:CellId/ContractSha256. Benchmarks:Storage equals exactly "
 (a description, not a path). Reuse BenchmarkRunnerContainer.Create and existing
 selected TimeSeries resources/context. No dispatch/host/native qualification yet.
 Root later installs routing which rejects any partial intensive selection before
-legacy/default allocation; that is a separate reviewed join.
+current/default allocation; that is a separate reviewed join.
 
 H-S: NEW TimeSeriesIntensiveHostSettings(Selection, Cell, ContractSha256, Identity,
 JobId, Image, OutputDirectory, Storage, RunId, Native), internal immutable record.
@@ -98,7 +100,8 @@ ComparisonExecutionIdentity.ReadTimeSeriesIntensive(configuration, sourceRevisio
 (valid immutable; KeyLoad equals Identity.KeyLoadImage). Private RunId is fresh
 Guid N, separate from actual GitHub RunId and workload hash. Root adds identity
 entry to existing validator using the selection EvidenceProfile key and Current
-family profile; missing runner identity rejects. Legacy methods unchanged.
+family profile; missing runner identity rejects. Existing benchmark methods remain
+unchanged.
 
 NEW TimeSeriesIntensiveHostNativeSettings(Image, ImmutableArray<Uri> Endpoints,
 ImmutableArray<string> VoterIds, Guid? Incarnation, string? AdminKey,
@@ -133,7 +136,7 @@ comparison-images with separate results directories, preserving every existing
 invocation/assertion and upload glob. Normal/scalar includes the host input tests.
 These are source/model gates; each real native6/30 cell still requires its own
 independent runner. Every source stage remains
-pending native qualification. No feature/interface/data/production migration;
+pending native qualification. No feature/interface/data/production behavior change;
 rollback additive source and metadata only. ADR remains Accepted.
 
 ```mermaid
@@ -166,7 +169,7 @@ equality; retain every assertion. Source limits/constants apply. No repository,
 other file, package, local test/native/Git or provider action. Root reviews every
 diff, integrates and builds/formats/static-checks; exact-SHA GitHub models and
 later genuine host/preflight/copy/ACK joins qualify behaviour. Rollback removes
-only new bindings and restores private visibility; no data or public migration.
+only new bindings and restores private visibility; no data or public contract change.
 Stop on an unspecified signature or source ownership overlap.
 
 ```mermaid
@@ -220,8 +223,8 @@ TUnit. Root owns all existing files, APIs, embedding and native/workflow/site/
 coverage joins. Worker performs no repository/Git/build/tests/native/runtime/
 package action and stops on unspecified contracts. Every file/type/function must
 meet policy limits, with named implementation keys/diagnostics/shared values.
-No product/API/persistence migration; rollback removes only the additive writer
-and eventual caller. Keep ADR Accepted until native/coverage/site qualification.
+No product API or persistence behavior changes; rollback removes only the additive
+writer and eventual caller. Keep ADR Accepted until native/coverage/site qualification.
 
 ```mermaid
 flowchart LR
@@ -240,7 +243,7 @@ NEW Features/BenchmarkComparisons/TimeSeries/Intensive/timeseries-contract.json
 in KeyLoad.Comparisons and later embeds it with LogicalName
 KeyLoad.Comparisons.TimeSeriesIntensiveContract. A small strict internal reader
 retains the actual UTF8-byte SHA256 and immutable typed values. Do not modify
-the old isolated-contract.json, old270 types/routes or existing profile values.
+the established isolated-contract.json, 270 types/routes or existing profile values.
 
 The exact JSON fields are schemaVersion1; family timeseries-intensive;
 evidenceProfile intensive-timeseries-4096-c16; targets ordered KeyLoad,
@@ -281,8 +284,8 @@ under UnitTests. No repository/package/shared-contract/host/workflow/Git/build/
 test/native change by worker. Root owns JSON, embedding, all integration and
 every shared boundary. Stop on a missing exact contract rather than inventing it.
 
-No product persistence/API migration. Rollback removes only additive plan files
-and embedding; old profiles/routes/test/qualification contracts stay intact.
+No product persistence/API behavior changes. Rollback removes only additive plan
+files and embedding; existing profiles/routes/test/qualification contracts stay intact.
 Tests are actual embedded JSON and independent acceptance data/negative parsing,
 not provider simulations. The temporary candidate and source review are not
 delivery or qualification. This ADR stays Accepted until genuine full gates,
@@ -334,7 +337,7 @@ construction, seeding, readiness and warmup remain outside the measured interval
 
 KeyLoad preserves benchmark RF1/RF2/RF3 opt-in/guard, node-local store/journal/apply
 ownership, separate request grain and persisted authority. New public negatives
-execute actual SDK/MCP operations. Legacy client-synthesized error/hash behaviour
+execute actual SDK/MCP operations. Client-synthesized error/hash behaviour
 cannot qualify the new route and is retained only as historical regression.
 
 Timescale uses the existing digest-pinned2.30.2-pg18 image. Native image
@@ -357,7 +360,7 @@ errors. Owned counter/identity SQL details are frozen before their worker starts
 2. TS006 root approves exact internal operation/result/target constructor packet;
    disjoint domain worker owns only NEW TimeSeriesIntensive* under Comparisons
    TimeSeries/Intensive and matching NEW UnitTests. Tests precede seed/oracle/bounded
-   timing implementation; no public product API or old wire change.
+   timing implementation; no public product API or existing comparison-family wire change.
 3. TS007 genuine pinned-image facts precede native bootstrap writes. Disjoint NEW
    IsolatedTimeSeries* resources/tests; root serialized ownership of existing
    primary script/context/selector/image/host composition. Model tests accompany
@@ -372,7 +375,7 @@ errors. Owned counter/identity SQL details are frozen before their worker starts
    and30 measured jobs receive independent Linux VMs. Nothing relaxes270 checks.
 6. TS010 only starts from complete authenticated native30 evidence; bounded NEW
    family site modules/tests, root existing source/coverage/Pages joins. Retain
-   all legacy/270 tests/thresholds, original hashes and independent source facts.
+   all existing270 tests/thresholds, original hashes and independent source facts.
 7. TS011 root reviews every complete diff and combined repository state, runs
    exact-SHA required native checks, separate genuine matched coverage, complete
   30/270/site/Chrome/no-skip/freshness/provider/live proof and honest status docs.
@@ -384,11 +387,12 @@ workflow/docs and integration. Completed source is not a completed task; blocked
 or partial workers never unblock dependants. No local qualification, fake target,
 test skip, unpublished dependency reference, suppressed rule or credential leak.
 
-## Migration, rollout, rollback and evidence
+## Rollout, rollback and evidence
 
-No product persistence/API migration. Add explicit timeseries-intensive profile,
-typed target/node/scenario/phase; reject before allocation. Keep productionRF3,
-legacy timeseries,270/old native schemas and immutable evidence. Family namespace
+Add an explicit timeseries-intensive benchmark profile with typed target/node/
+scenario/phase; product persistence/API behavior remains unchanged. Reject invalid
+selections before allocation. Keep productionRF3, established TimeSeries, 270-cell
+protocols and immutable evidence. Family namespace
 and owned data are unique per cell; rollback stops/removes only new additive
 routes/resources after owned cleanup. Missing/invalid family data blocks its
 publication; no latest-pointer or guarantee rewrite. Publish only actual qualified
@@ -400,14 +404,14 @@ Required solution/analyzer/format/governance/normal+scalar/recovery/RF3/coverage
 six preflights/all30/full site/provider/live evidence maps to AC-TSI-001..008.
 Instrumentation is separate from measured images/cohorts. Retain exact SHA,
 run/job/attempt URLs, images, raw JSON and receipts. Do not mark Implemented until
-all tests/docs/migration/evidence exist; no speed/SIMD/durability/readiness claim
+all tests/docs/implementation/evidence exist; no speed/SIMD/durability/readiness claim
 from the design or source compilation.
 
 ## TS007F native image feasibility packet
 
 Root approves only NEW TimeSeriesIntensivePinnedImage* TUnit/helper files under
 tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/Intensive.
-No product/resource/bootstrap/legacy changes. A separate Linux job uses only the
+No shared product/resource/bootstrap changes. A separate Linux job uses only the
 accepted Timescale image and real Docker CLI, with actual own-main GitHub SHA/run/
 attempt/repository context. Pull the exact tag+digest; inspect its actual config
 ID, RepoDigests, OS/architecture, entrypoint/cmd/default-user/env. Retain these
@@ -434,12 +438,12 @@ required before root selects the bootstrap command or writes TS007 resources.
 
 All new domain types remain internal in the existing Comparisons assembly.
 Root alone adds a narrowly scoped KeyLoad.AppHost friend and routes
-Benchmarks:Profile=timeseries-intensive before the old270 target selector;
+Benchmarks:Profile=timeseries-intensive before the established270 target selector;
 EvidenceProfile=intensive-timeseries-4096-c16 is a distinct frozen load profile.
 Separate target/node/scenario/phase enums reject drift before allocation; never
-expand old Scenario or ComparisonWorkerSelection. The accepted selection carries
+expand the existing Scenario or ComparisonWorkerSelection. The accepted selection carries
 KeyLoad/TimescaleDB, node1..3, Append/RawRangeRead/Latest/Aggregate/Windows and
-preflight/intensive. All existing old routes remain byte/semantic compatible.
+preflight/intensive. All existing routes retain their current bytes and semantics.
 
 ITimeSeriesIntensiveTarget binds one private partition/schema, one set and actual
 topology at construction. InitializeAsync/SeedAsync are untimed; SeedAsync accepts
@@ -484,7 +488,7 @@ Root approves an internal InitializeOwnedAsync(connectionString,schemaName,
 ownerId,Func<NpgsqlConnection,NpgsqlTransaction,CancellationToken,Task> installer,
 cancellationToken) in the current TimescaleSchemaLifecycle. The original
 InitializeAsync delegates to the same marker/extension/transaction/confirmation
-flow with its unchanged legacy sample installer. Only source-owned installers
+flow with its unchanged standard sample installer. Only source-owned installers
 are accepted; no caller/network SQL or guessed cleanup authority. Install tables
 and function in that transaction; return ownership only after marker confirmation.
 Keep existing search-path validation and locked marker check before DROP intact.
@@ -494,8 +498,8 @@ nonnegative last_sequence), event_identity (scoped EventId primary key plus uniq
 scoped sequence and native timestamp/value/jsonb identity fields), and samples
 hypertable (primary key set_name,series_id,sample_time,event_id; finite float8
 value, sequence and tags). The query index starts with set_name,series_id,
-sample_time,sample_sequence. No unsupported hypertable FK assumption or legacy
-time/event-only key. Prepare all eleven logical series counter rows untimed.
+sample_time,sample_sequence. No unsupported hypertable FK assumption or time/event-
+only key. Prepare all eleven logical series counter rows untimed.
 
 Source-controlled SECURITY INVOKER append function uses typed set/series/command
 UUID/sample JSONB/tags parameters and a confined validated private search path.
@@ -552,7 +556,7 @@ may proceed while the separately tracked twelve270 native preflight failures
 block adapters, measured-family and publication qualification. It cannot unblock
 those native dependants. Internal pure types reuse existing SampleData,
 SampleRecord, SampleAggregate and SampleAggregateWindow; no product/wire/selector
-or old-family changes. Separate gRange=k%224 from gLatest=k%256. Inclusive seed
+or established-family changes. Separate gRange=k%224 from gLatest=k%256. Inclusive seed
 readback chunks cover16 groups/256 rows, and append chunks1000q..1000q+999ms.
 Whole-series aggregate/count checks remain required because raw LIMIT can truncate.
 
@@ -614,7 +618,7 @@ s-000000/seq4096/7 and k0 aggregate512/84/-17/16.75/0.1640625, windows54/count51
 Source build/format/static review are permitted; all TUnit execution remains
 GitHub full normal/scalar. No fake target, local test/load/runtime, Git/config/
 package changes or exclusions. Native all30 later proves caller response flows.
-Additive pure types have no persistence migration; rollback removes only this
+Additive pure types make no product persistence change; rollback removes only this
 coherent source/test unit. ADR remains Accepted until every required gate passes.
 
 
@@ -643,7 +647,7 @@ Disjoint same worker owns these NEW/previously authored TimeSeriesIntensive*
 production and test files only. Introduce cohesive named frame/domain/version/
 label/error/recipe constants within this owned new unit, preserving every
 existing byte/formula; root literal/magic policy applies even without diagnostics.
-No runner/interface/target/native host/shared or old-family writes.
+No runner/interface/target/native host/shared or established-family writes.
 
 Tests first: repeated516 JSONB spellings, alternating equivalent spellings,
 corruption after memo hit, malformed/extra/changed tags, full identity/cardinality/
@@ -657,8 +661,8 @@ must not call production profile/corpus/plans/oracle/framer for expected values.
 Ordered source join: tests, bounded correction, root full review/scoped build/
 format, exact-SHA full normal/scalar GitHub suites, later actual all30 native
 responses. No local tests/runtime/benchmarks/Git or invented allocation/speed
-result. Additive source rollback removes this coherent owned unit; no persistence
-migration. ADR remains Accepted; source and native gates stay distinct.
+result. Additive source rollback removes this coherent owned unit; product persistence
+remains unchanged. ADR remains Accepted; source and native gates stay distinct.
 
 
 ## TASK-ISO-TS007B accepted compact runner implementation contract
@@ -669,7 +673,7 @@ adapters, native resources, family wire/host/workflow/site remain separate tasks
 The genuine source baseline is2f374fc34/run37093197474: full Release/format/
 governance, normal/scalar units and63/63 RF3 currently pass; original recovery
 counts and native preflights are still pending. Source success cannot unblock
-missing native qualifications. Existing270/legacy interfaces and bytes stay fixed.
+missing native qualifications. Existing270 interfaces and bytes stay fixed.
 
 The exact internal ITimeSeriesIntensiveTarget signatures are the DTO-returning
 TS006 interface above, with InitializeAsync(CancellationToken),
@@ -689,7 +693,7 @@ IAsyncDisposable. The runner borrows it; the host calls disposal and owns resour
 Runner.RunAsync(target, closed Scenario, string runId, CancellationToken
 cellCancellation) returns Task<TimeSeriesIntensiveRunResult>. Scenario values are
 Append, RawRangeRead, Latest, Aggregate, Windows. Reject unknown selection before
-allocation. No fallback, delegate transport, Supports or legacy runner changes.
+allocation. No fallback, delegate transport, Supports or runner changes.
 
 Prepare one cell-local Expectations before timing:224 raw arrays/aggregates/window
 arrays and256 latest values/cuts. Reuse exact pure oracles and separate range/latest
@@ -721,7 +725,7 @@ message, credentials, SQL text or fabricated native code enters these records.
 Directly await each original target Task under linked30-second cancellation.
 Cancellation completion must include transport drain/decode/response release in
 the real adapter. No WaitAsync-only timeout, detached client task or replacement
-while an old response remains live. If deadline/cell cancellation was signalled
+while a prior response remains live. If deadline/cell cancellation was signalled
 before observed completion, a late success cannot be recorded as Succeeded. Stop
 starting calls after cell cancellation and observe all original loops. The host's
 90-minute lifetime includes readiness and is never restarted by the runner; real
@@ -764,7 +768,7 @@ proof is explicitly deferred to real native SDK/Npgsql tests, not claimed by
 these pure cases. Escalate undefined framing/public DTO/upstream defects/overlap
 or scope changes. Root reviews all diffs and joins full solution source checks,
 exact-SHA normal/scalar/recovery/RF3, later6 preflights/all30/native coverage.
-Rollback removes only this additive coherent source unit; no persistence migration.
+Rollback removes only this additive coherent source unit; no product persistence change.
 ADR remains Accepted until the complete implementation/evidence chain passes.
 
 
@@ -804,7 +808,7 @@ completion is DeadlineExceeded, caller cancellation is Cancelled, underlying
 KeyLoad/Npgsql/HTTP facts remain actual, and fatal runtime errors propagate.
 Pure exception/outcome inputs test this mapping first; genuine native blocked
 operation/cancellation cases remain later6/30 gates. Worker does not edit
-measured reader, old33 oracle files, other shared files, Git or runtime; root
+measured reader, existing33 oracle files, other shared files, Git or runtime; root
 reviews/full source gates and exact-SHA GitHub before qualification.
 
 
@@ -871,7 +875,7 @@ Root accepts REQ-BC-060/061/062/063, AC-TSI-002/003/004/005/006/008
 before any writes. This stage owns the real SDK adapter and pure actual-input
 regressions only; native public/MCP/fault helpers, host/resources/evidence and
 shared Failure/Attempt joins remain root-owned later stages. Existing SDK,
-public contracts, legacy RF3 target, production defaults and dependencies remain.
+public contracts, existing RF3 target, production defaults and dependencies remain.
 
 1. NEW internal KeyLoadTimeSeriesIntensiveContext/Peer records contain run ID,
    PartitionRef, private SeriesSet, nonempty actual incarnation and1..3 borrowed
@@ -954,7 +958,7 @@ public contracts, legacy RF3 target, production defaults and dependencies remain
 Root reviews complete diffs and joins before source build/format/governance and
 exact-SHA GitHub normal/scalar/recovery/RF3; native6/30/coverage/site evidence
 remains mandatory. Additive source rollback removes only the new adapter unit
-after original calls settle; no API/persistence migration. ADR stays Accepted.
+after original calls settle; no public API or persistence behavior change. ADR stays Accepted.
 
 
 TS008K root compact-fact join, before writes: root alone owns existing
@@ -1010,7 +1014,7 @@ fields in the reviewed packet, reproduced here as the implementation contract:
    until>=from, finite positive fixed interval with no year/month components;
    UTC makes interval days fixed here. Null/infinite window bounds raise22023.
    Native interval/timestamp arithmetic overflows retain22015/22008 or the actual
-   native code; no client clipping, compatibility switch or substituted maximum.
+   native code; no client clipping or substituted maximum.
 3. Private series_counter uses exact set/series PK and nonnegative int8 counter;
    seed/warm-r0..4/measured-r0..4 are the eleven zero rows installed untimed.
    event_identity has scoped EventId PK and scoped unique positive sequence.
@@ -1048,17 +1052,18 @@ fields in the reviewed packet, reproduced here as the implementation contract:
    in CLR. Return actual tags_json::text; later TagScope validates native spelling.
 8. Root owns TimescaleSchemaLifecycle's repair and borrowed NpgsqlDataSource
    overloads. CREATE SCHEMA, marker, extension and closed installer run in ONE
-   transaction; legacy installer/entry point stays compatible. Positive ownsSchema
-   follows successful commit plus exact-one owner confirmation only. Existing
+   transaction; the existing installer entry point retains its current behavior.
+   Positive ownsSchema follows successful commit plus exact-one owner confirmation
+   only. Existing
    marker lock and equality check precede DROP. Unknown commit/confirmation never
    permits guessed DROP or retry; root removes only actual owned container/files.
    Installer is InstallAsync(connection,transaction,schemaName,setName,token).
    Root exposes existing ValidateSchemaName internally; installer repeats that
    validation before quoted identifier interpolation. DDL search path may put
    the validated private schema first; every installed routine fixes pg_catalog
-   first as above. Legacy lifecycle remains separately owned, with no global pool
-   clear or dropping the public extension. Intensive lifecycle borrows the ONE
-   target-owned datasource, rather than global connection-string PoolManager.
+   first as above. The existing lifecycle path remains separately owned, with no
+   global pool clear or dropping the public extension. Intensive lifecycle borrows
+   the ONE target-owned datasource, rather than global connection-string PoolManager.
 9. Future adapter owns datasource MaxPoolSize16/MinPoolSize0, Enlist=false,
    Multiplexing=false, NoResetOnClose=false, IncludeErrorDetail=false,
    LogParameters=false, CommandTimeout30s/CancellationTimeout2000ms and validated
@@ -1100,7 +1105,7 @@ staged with separately owned actual native fixtures before qualification, never
 synthetic service tests or local execution. Static SQL authoring/build is source
 evidence only. Root inspects every SQL statement and full diff before integration.
 Rollback removes additive routines/new native target after original tasks settle;
-legacy48/schema1/general270 and public APIs stay intact. Exact-SHA source,
+historical48/schema1/general270 and public APIs stay intact. Exact-SHA source,
 normal/scalar/recovery/RF3, real native6/30, coverage/collector/site evidence are
 still pending; ADR remains Accepted.
 
@@ -1114,8 +1119,8 @@ fresh database uses TEMPLATE template0 and a generated LOGIN role with database
 ownership/CREATE but no superuser/extension privilege. Typed settings and native
 format quote role/password; no credentials/error strings enter evidence. Require
 actual42501 from extension install, then independently observe namespace absent.
-The pre-repair code leaves it present. A privileged subsequent real legacy
-initialize/owner-checked drop must succeed. Fixture cleanup removes only its
+The pre-repair code leaves it present. A privileged subsequent call to the
+existing initializer and owner-checked drop must succeed. Fixture cleanup removes only its
 positively CREATE-ACKed database/role, observes original disposal, and preserves
 the first failure through subsequent cleanup. Private nonpooled fixture connections
 avoid shared/global pool clearing. Existing foreign-owner test stays mandatory.
@@ -1224,7 +1229,8 @@ Stages: root criteria/ADR/tests/shared completion source; disjoint adapter tests
 and source; full root diff and independent review; serial full solution build /
 format / governance; scoped main delivery; exact-SHA normal/scalar/recovery/RF3 and
 native six preflights/30 cells/coverage/collector/site. No dependency or product
-storage migration; rollback restores source before any qualified TS30 publication.
+storage behavior change; rollback restores source before any qualified TS30
+publication.
 Root alone owns host/resources/native fixtures/workflows/collector/site/evidence.
 Workers stop and escalate any unspecified contract or required shared-file edit.
 ADR remains Accepted until all native and publication joins actually qualify.
@@ -1284,15 +1290,15 @@ TS008N final allocation-owner refinement: owned projection r6 proves six CA2000 
 
 This accepted packet maps REQ-BC-059/060/062/063 and AC-TSI-001/002/003/006/008. The delivered5bbf30f checkpoint resolves the previous source-composition coordination dependency; original d45 failures and new push37104211481 remain separate qualification records.
 
-Root owns NEW internal TimeSeriesIntensiveSelection, TimeSeriesIntensiveTargetKind and TimeSeriesIntensiveCellPhase under Comparisons TimeSeries/Intensive, plus corresponding selection UnitTests. Entry route is exactly Benchmarks:Profile=timeseries-intensive. Keys are Benchmarks:TimeSeries:Target, NodeCount, Phase, Scenario, EvidenceProfile. Target is exactly KeyLoad|TimescaleDB, Phase exactly Preflight|Intensive, NodeCount string exactly1|2|3, EvidenceProfile exactly intensive-timeseries-4096-c16. Scenario is absent only for Preflight, and exactly one declared existing TimeSeriesIntensiveScenario name for Intensive. Empty/whitespace/numeric/case drift, scenario supplied for preflight, missing intensive scenario, incompatible old Benchmarks:Target/Scenario/NodeCount selection or invalid route reject before any allocation. No old public enum, selection, report or wire change.
+Root owns NEW internal TimeSeriesIntensiveSelection, TimeSeriesIntensiveTargetKind and TimeSeriesIntensiveCellPhase under Comparisons TimeSeries/Intensive, plus corresponding selection UnitTests. Entry route is exactly Benchmarks:Profile=timeseries-intensive. Keys are Benchmarks:TimeSeries:Target, NodeCount, Phase, Scenario, EvidenceProfile. Target is exactly KeyLoad|TimescaleDB, Phase exactly Preflight|Intensive, NodeCount string exactly1|2|3, EvidenceProfile exactly intensive-timeseries-4096-c16. Scenario is absent only for Preflight, and exactly one declared existing TimeSeriesIntensiveScenario name for Intensive. Empty/whitespace/numeric/case drift, scenario supplied for preflight, missing intensive scenario, incompatible existing Benchmarks:Target/Scenario/NodeCount selection or invalid route reject before any allocation. No existing public enum, selection, report or wire behavior change.
 
-Root NEW IsolatedTimeSeriesResourceContext under AppHost BenchmarkComparisons owns Builder, validated NodeCount, Runner and fresh Root. It exposes DataDirectory(name), BindEndpoint(index,node,endpointName), BindSetting(name,string|ParameterResource builder|ReferenceExpression), BindImage(reference), using the existing Benchmarks__Native__ environment prefix solely inside this new selected route. No old general selector is fabricated to represent a time-series workload. Root separately owns KeyLoad resource composition and all shared host/workflow/JSON/collector/site/coverage integration.
+Root NEW IsolatedTimeSeriesResourceContext under AppHost BenchmarkComparisons owns Builder, validated NodeCount, Runner and fresh Root. It exposes DataDirectory(name), BindEndpoint(index,node,endpointName), BindSetting(name,string|ParameterResource builder|ReferenceExpression), BindImage(reference), using the existing Benchmarks__Native__ environment prefix solely inside this new selected route. No general selector is fabricated to represent a time-series workload. Root separately owns KeyLoad resource composition and all shared host/workflow/JSON/collector/site/coverage integration.
 
 Disjoint TS007R-S worker owns ONLY NEW IsolatedTimeSeriesTimescaleResources.cs and NEW IsolatedTimeSeriesTimescaleResourceTests.cs. Signature Add(IsolatedTimeSeriesResourceContext context) validates before resource creation. Primary resource isolated-timescale-1 is AddPostgres; n-1 genuine physical standbys are isolated-timescale-2/3. All use timescale/timescaledb:2.30.2-pg18 and exact sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e. Each node has a GUID-private explicit container name, canonical DNS alias and distinct fresh0700 node directory. Exactly one secret parameter isolated-timescale-password, native TCP endpoints0..n-1, primary ConnectionString and exact docker.io image reference bind to runner; no credentials or connection strings become reports or logs. Primary plus standbys use fsync=on/synchronous_commit=on, original mounted scripts, physical slots and application names benchmark_standby1/2. Node data mounts, image and shared secret are genuine model assertions; models do not prove native startup/copies/ACK.
 
-Root serially adds FindScripts(IDistributedApplicationBuilder builder) and an optional final primaryName argument to existing IsolatedPostgresBootstrap.Configure; existing signatures delegate/default to isolated-postgres-1 so old general270 topology is preserved. Configure called by new resources uses isolated-timescale-1 explicitly; no shell rewrite, image fallback or replica relabelling. Quorum configuration occurs only after actual native roles/standbys are ready and before schema install/operations: closed native ANY1 config for2/3, empty for1, then readback. Initial bootstrap avoids synchronous-write deadlock before standbys exist; this phase is untimed and does not claim qualified ACKs. Root native verifier must separately inspect PostgreSQL18, actual Timescale extension, member/slot/app/sync state, actual flush/replay cuts and ordered data copies1/2/3 versus ACK1/2/2. Measured operations stay primary.
+Root serially adds FindScripts(IDistributedApplicationBuilder builder) and an optional final primaryName argument to existing IsolatedPostgresBootstrap.Configure; existing signatures delegate/default to isolated-postgres-1 so existing general270 topology is preserved. Configure called by new resources uses isolated-timescale-1 explicitly; no shell rewrite, image fallback or replica relabelling. Quorum configuration occurs only after actual native roles/standbys are ready and before schema install/operations: closed native ANY1 config for2/3, empty for1, then readback. Initial bootstrap avoids synchronous-write deadlock before standbys exist; this phase is untimed and does not claim qualified ACKs. Root native verifier must separately inspect PostgreSQL18, actual Timescale extension, member/slot/app/sync state, actual flush/replay cuts and ordered data copies1/2/3 versus ACK1/2/2. Measured operations stay primary.
 
-Ordered verification: selection acceptance input tests first, then closed selection/context and physical resource model assertions; root reviews every diff and source limits, builds/formats/governs source, delivers exact SHA, then runs real six Linux native preflights with actual SDK/official MCP/Npgsql. Native30/protocol/provider/coverage/site joins remain blocked until six genuine outputs pass. Rollback removes only additive new route/resources/context and restores optional common overload; default RF3, old selectors and all immutable evidence remain. No local tests/build/container/native execution by worker, no source/Git/shared docs edits beyond its two files. Stop and escalate unspecified APIs, overlap or native contract drift.
+Ordered verification: selection acceptance input tests first, then closed selection/context and physical resource model assertions; root reviews every diff and source limits, builds/formats/governs source, delivers exact SHA, then runs real six Linux native preflights with actual SDK/official MCP/Npgsql. Native30/protocol/provider/coverage/site joins remain blocked until six genuine outputs pass. Rollback removes only additive new route/resources/context and restores optional common overload; default RF3, existing selectors and all immutable evidence remain. No local tests/build/container/native execution by worker, no source/Git/shared docs edits beyond its two files. Stop and escalate unspecified APIs, overlap or native contract drift.
 
 ## SG009P process-only test join (Accepted source contract)
 
@@ -1377,7 +1383,7 @@ names. Parent NEW ExistingStoreInspectorProcess.RunAsync(request, outerOwnerPath
 CancellationToken=default, bool cancelWhenReady=false) returns own typed exit facts
 with PID, exit code, canceled flag, assembly SHA256 and original drained strings/
 optional receipt. Root integration alone wires this additive mode before existing
-ReplicaCrashScenario.TryRunAsync; old CLI/modes stay byte-equivalent.
+ReplicaCrashScenario.TryRunAsync; existing CLI/modes stay byte-equivalent.
 
 ```mermaid
 flowchart LR
@@ -1573,7 +1579,7 @@ warmup slots. Unexecuted/failed/canceled warmup slots stay explicit actual outco
 A completed RunState.Finish returns the same live-owned ReadOnlyMemory view as a
 NEW internal init-only RunResult.WarmupAttempts property. All original workers
 have settled before publication. Existing constructor/RunAsync/result schema1
-writer behavior remains compatible; no raw wire/host/native/site claim changes.
+writer behavior remains unchanged; no raw wire/host/native/site claim changes.
 
 Exact library edits: TimeSeriesIntensiveAttemptLedger adds CreateWarmupStorage()
 and factors its existing canonical initializer into a private bounded helper,

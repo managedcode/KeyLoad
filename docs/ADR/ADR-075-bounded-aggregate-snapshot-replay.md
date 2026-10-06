@@ -9,9 +9,17 @@ Related: REQ/AC-EVENT-007..010, KL-084/085, ADR-002/011/015/024/025/029/030/060.
 
 Keep one latest snapshot slot per complete stream generation, keyed by
 `aggregate-snapshot-v1 / partition / streamSet / streamId / generation` in the
-canonical ZoneTree store. This bounded initial implementation replaces the
-unbounded historical sketch of one slot per source revision/reducer version.
-It does not create a separate database or treat snapshots as event authority.
+canonical ZoneTree store. Each replacement atomically updates that one slot;
+retained events remain the authority for rebuilding derived snapshot state.
+
+```mermaid
+flowchart LR
+    Caller[Authenticated replay request] --> Cut[One authorized committed read cut]
+    Cut --> Snapshot[Validate current snapshot identity and checksum]
+    Snapshot --> Tail[Validate complete bounded event tail]
+    Tail --> Worker[SDK pure reducer over original events]
+    Worker --> State[Bounded derived state]
+```
 
 The public snapshot contains StreamRef, monotonically increasing SnapshotVersion,
 SourceRevision, exact ReducerVersion identifier, positive StateSchemaVersion,
@@ -61,45 +69,31 @@ across an await/grain movement. Replay reads never append, publish, enqueue, ACK
 invoke subscription handlers or send external output. Original event payload,
 header and schema version remain exact replay inputs.
 
-The .NET client provides an explicit worker-side reducer/upcaster contract:
-reducer/state versions match the slice; transforms advance one schema version
-at a time, reject missing/duplicate/cyclic paths and preserve event identity and
-position. Callbacks are caller-owned pure functions. The server loads no code
-and the SDK does not register or redrive a subscription. External effects retain
-their explicit operations and authorization. Worker business logic owns state
-correctness; storage proves the exact compatible source slice.
+The .NET client provides an explicit worker-side reducer contract. The reducer
+contains Version, StateSchemaVersion, EventSchemaVersion, InitialStateJson and
+`Func<string, EventRecord, string> Apply`. The request selects one exact current
+event schema; records with a different schema fail before caller code runs. The
+worker validates the complete slice identity/order/floor/head before invoking
+the pure reducer, then checks cancellation and bounded JSON for each payload and
+resulting state. No reducer callback runs for an invalid slice. The server loads
+no code and the SDK does not register or redrive a subscription. The typed read
+calls `/v1/streams/replay`; official MCP name is `keyload_streams_replay`.
+`AggregateReplayClient` owns the typed SDK read as an extension on `KeyLoadClient`,
+using its existing internal `Send` transport. Caller syntax and HTTP contracts
+stay the same; feature adapters remain separate bounded types rather than
+extending the aggregate partial client beyond the mandatory 200-line type limit.
 
-The frozen SDK helper is AggregateReplayReduction.Reduce(page, reducer,
-upcasters = null, limits = null, cancellationToken = default), returning state
-JSON. AggregateReplayReducer contains Version, StateSchemaVersion,
-EventSchemaVersion, InitialStateJson and Func<string, EventRecord, string> Apply.
-EventUpcaster contains FromVersion, ToVersion and Func<EventData, EventData>
-Transform. Only payload JSON and its schema version may change in an upcast;
-stream/revision/sequence, event ID/type, original headers and occurrence/correlation/
-causation metadata remain exact. Every transform advances exactly one positive
-version; duplicate, missing, backwards or cyclic paths fail explicitly. Validate
-the entire slice identity/order/floor/head and needed schema paths before invoking
-callbacks, then check cancellation and valid bounded JSON for every transformed
-payload and resulting state. No reducer callback runs for an invalid slice.
-
-AggregateReplayWorkerLimits defaults to MaximumEvents=4096,
+`AggregateReplayWorkerLimits` defaults to MaximumEvents=4096,
 MaximumStateBytes=1048576, MaximumInputBytes=16777216 and MaximumJsonDepth=64.
 Each is positive; hard ceilings are respectively 65536, 16777216, 67108864 and
-64. Original payload/header/state UTF8 bytes share the complete input cap;
-every intermediate state respects the state cap. These explicit worker bounds
-complement server limits and do not authorize relaxing a server budget. Callbacks
-and their registry are bounded: at most 64 upcasters, with cancellation checked
-while enumerating. Cache paths by input schema version after complete validation;
-reduce the original immutable events without duplicating each record into a second
+64. Original payload/header/state UTF8 bytes share the complete input cap; every
+intermediate state respects the state cap. These explicit worker bounds
+complement server limits and do not authorize relaxing a server budget. Reduce
+the original immutable events without duplicating each record into a second
 object graph. Original valid DateTimeOffset metadata has no added SDK-only range.
-Callbacks
-are synchronous caller-owned pure functions; the SDK cannot make impure callbacks
-safe or guarantee business correctness. No server assembly/plugin installation.
-The typed read calls /v1/streams/replay; official MCP name keyload_streams_replay.
-AggregateReplayClient owns the typed SDK read as an extension on KeyLoadClient,
-using its existing internal Send transport. Caller syntax and HTTP contracts stay
-the same; feature adapters remain separate bounded types rather than extending
-the aggregate partial client beyond the mandatory 200-line type limit.
+Reducer callbacks are synchronous caller-owned pure functions; the SDK cannot
+make impure callbacks safe or guarantee business correctness. No server
+assembly/plugin installation.
 
 ## Ordered implementation and task graph
 
@@ -143,12 +137,12 @@ Graph: CONTRACT -> STORE -> CLIENT / RECOVERY -> root integrated EVIDENCE.
 Workers own disjoint files; shared contracts/config/security/transport/docs/Git
 remain root-owned. Escalate contract/dependency defects; no invented fallback.
 
-## Upgrade, rollback and qualification
+## Rollback and qualification
 
-Deploy compatible homogeneous RF3 before the first snapshot write. Do not reopen
-with older binaries: unsupported downgrade detection is a required KL-043 gate.
-Rebuild a missing snapshot explicitly only while its complete source history is
-retained. Deleting derived state never permits erasing events, ID receipts or
-journals. Roll back code only before writes or via qualified format migration.
-UI N/A: programmable EventStreams/worker infrastructure. Process-kill evidence
-does not qualify power-loss durability; original fault/endurance gates remain.
+Run the accepted RF3 topology and recovery gates before treating snapshot
+behavior as qualified. Rebuild a missing snapshot explicitly only while its
+complete source history is retained. Deleting derived state never permits erasing
+events, ID receipts or journals. Roll back code only through a reviewed deployment
+change that preserves the current stored contract. UI N/A: programmable
+EventStreams/worker infrastructure. Process-kill evidence does not qualify
+power-loss durability; required fault/endurance gates remain.

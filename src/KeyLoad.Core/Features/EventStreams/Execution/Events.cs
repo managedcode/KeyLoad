@@ -79,12 +79,6 @@ public sealed partial class DatabaseEngine
 
         var idKey = KeySpace.Partition(EventIdentitySpace, partition, append.StreamSet, append.StreamId, append.Generation, item.EventId);
         var retained = tx.GetRecord<EventIdentity>(idKey);
-        // The first kernel stored a resource-wide ID pointer. Existing stores keep its dedup guarantee during this format upgrade.
-        if (retained is null && tx.GetRecord<EventIdentity>(KeySpace.Partition(EventIdentitySpace, partition, append.StreamSet, item.EventId)) is { } legacy
-            && legacy.StreamId == append.StreamId && legacy.Generation == append.Generation)
-        {
-            retained = legacy;
-        }
 
         foreach (var policy in resource.FieldPolicies)
         {

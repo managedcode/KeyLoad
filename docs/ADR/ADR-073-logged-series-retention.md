@@ -86,16 +86,13 @@ new mapped tests, integrated build and genuine required evidence. Forbidden:
 storage ownership changes, outcome pruning, provider substitutions, cross-partition
 atomicity, concurrent-file overwrites or claims of power-loss qualification.
 
-## Migration, rollout and rollback
+## Current record and rollout contract
 
-This is an additive private feature prefix in the current native store format.
-Use homogeneous compatible RF3 binaries and verify a prefeature backup. Older
-binaries do not understand the retention floor and must not reopen a series
-after its first retention write. Rollback then requires the compatible binary or
-an explicitly approved complete backup rollback; silently removing the floor is
-forbidden. Unknown native feature versions are refused, never JSON-fallback read.
-The root must retain this feature in the full format/upgrade inventory and
-qualify unsupported downgrade before advertising broad KL-043 compatibility.
+The current native record is scoped to the canonical partition, set and series.
+Its format discriminator is validated before use, and unknown or corrupt state
+fails closed. The feature does not alter existing sample, sequence or identity
+bytes. Rollback removes the feature only as a complete reviewed deployment change;
+it must not silently remove a persisted retention floor.
 
 ```mermaid
 flowchart LR

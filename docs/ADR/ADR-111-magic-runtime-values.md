@@ -18,8 +18,8 @@ uses the native exclusion API. Existing diagnostics keep their IDs and severity.
 A blanket syntax ban introduces thousands of findings, including data and
 structural arithmetic. An arbitrary global allowance for zero/one would hide real
 timeout policies. The selected semantic contexts give actionable diagnostics and
-require a preserving migration in the same stage. The root policy still applies
-to uncovered contexts. A broader complete migration needs an explicit contract
+require a behavior-preserving source refactor in the same stage. The root policy still applies
+to uncovered contexts. A broader source refactor needs an explicit contract
 extension; do not silently add a suppression baseline or change analyzer severity.
 
 ```mermaid
@@ -36,7 +36,7 @@ flowchart LR
 
 Ordered implementation: TASK-CQ-LITERALS-001 read-only inventory; 002 lead-owned
 semantic rules/shared docs/configuration; 003 disjoint new compiler regressions;
-004 diagnostic-driven migrations and lead-owned final integration. Lead planning
+004 diagnostic-driven constant refactoring and lead-owned final integration. Lead planning
 freezes scope before write workers begin, reviews every diff and runs all gates.
 No runtime public signature, dependency, format, trust or topology change occurs.
 Rollout is a coherent rebuild. Rollback reverts these new rules and preserving

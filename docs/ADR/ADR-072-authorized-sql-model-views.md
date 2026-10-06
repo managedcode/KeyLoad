@@ -91,13 +91,12 @@ This worker is independent of TimeSeries retention and EventStreams snapshots;
 root exclusively owns shared contracts/config/docs/Git and transport joins.
 Escalate public/schema/authorization drift or foreign file overlap immediately.
 
-## Migration and rollback
+## Rollout and rollback
 
-No persisted key/record or serializer format migration; native generated query
-DTOs have additive stable fields. Deploy compatible homogeneous binaries before
-using the extension. Rollback parser, AST source metadata and executor together;
-old document-only queries retain their exact semantics. Do not reinterpret
-model sources as document collections on unsupported binaries. Full SQL/native
+The native generated query DTOs use stable field identities. Roll back parser,
+AST source metadata and executor together if this feature is withdrawn. Document
+queries retain their defined semantics, and unsupported model sources fail
+explicitly rather than being treated as document collections. Full SQL/native
 session and cross-partition contracts remain required later ADR-065 stages.
 UI: N/A, existing programmable SQL/SDK/MCP surfaces suffice. No new package.
 

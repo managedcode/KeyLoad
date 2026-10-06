@@ -66,12 +66,11 @@ flowchart LR
    final edits and formatting, record exact outcomes; commit only this refresh
    stage when verified. Unrelated unfinished work remains owned by its author.
 
-## Migration, rollback and failure contracts
+## Rollout, rollback and failure contracts
 
 No KeyLoad schema, serializer aliases/field IDs, protocol, persisted authority,
 RF3 membership or node-local ownership changes are selected. The existing
-recovery/serialization tests must detect dependency incompatibility. No rolling
-upgrade or performance claim follows from version alignment or compilation.
+recovery/serialization tests must detect dependency incompatibility. No compatibility or performance claim follows from version alignment or compilation.
 Restore failure, downgrade, analyzer failure, runtime regression or missing
 infrastructure leaves qualification open. A reproducible dependency defect must
 be repaired at its actual owner; never suppress diagnostics to complete refresh.

@@ -28,25 +28,25 @@ flowchart TD
 4. TASK-MCAF-LOCAL-002 owns only new local AGENTS.md in the 20 csproj roots, site, .github/workflows and docs. It must name entry points, boundaries, commands, protected risks and no-install skill policy.
 5. TASK-MCAF-CHECK-003 owns only scripts/Features/RepositoryGovernance/verify.mjs and new scripts/AGENTS.md. It uses Node built-ins, consumes docs/implementation/mcaf-installation.json and scans the real repository for project/module coverage, prefix preservation, policy IDs, required documents and unexpected skills.
 6. Lead waits for every required result, inspects every diff, fixes integration issues, runs the validator, reviews links and Mermaid sources, and records acceptance evidence. TASK-MCAF-REVIEW-005 supplies the highest-capability independent final review. Workers cannot commit, push or install anything.
-7. Qualification and published performance data remain GitHub Actions evidence. A governance bootstrap cannot mark unrelated product migrations complete.
+7. Qualification and published performance data remain GitHub Actions evidence. A governance bootstrap cannot mark unrelated product work complete.
 
 Start condition: the owning feature specification contains acceptance and ordered execution contracts, and required ADR contracts exist. Shared contracts and central docs have one integration owner. Terminal states: complete, blocked, failed or cancelled. Only a reviewed complete evidence packet can satisfy a join condition. Ambiguity, unsafe file overlap or missing credentials must be escalated immediately.
 
-## Existing architecture migration debt
+## Existing architecture refactoring debt
 
 The current source layout predates MCAF. It is not declared compliant by this ADR. The target is mirrored Features/<SliceName>/ paths with shared composition roots and building blocks outside feature folders. Lead owner; removal date: 2026-10-15.
 
-| Existing paths | Target / scope | Verification and migration owner |
+| Existing paths | Target / scope | Verification and refactoring owner |
 |---|---|---|
 | benchmarks/KeyLoad.Comparisons/*.cs and Targets/; AppHost/BenchmarkResources.cs; ComparisonTests/ComparisonTests.cs; site benchmark code | Features/BenchmarkComparisons/ in each applicable technical root; shared executable entry points remain composition roots. | BenchmarkComparisons feature owner; identical corpus, real Docker/Aspire topology, qualified GitHub JSON and site proof. |
 | Core/Documents.cs, Events.cs, Messaging.cs, GraphAndSeries.cs; query and security feature files | DocumentStorage, EventStreams, Messaging, GraphTraversal, Search and Authorization slices, preserving node-local storage ownership. | Owning feature leads; mapped contracts and existing recovery/security regressions must pass before each move. |
 | Existing unit/recovery/integration feature tests in flat project roots | Matching Features/<SliceName>/ test paths; fixtures and real-process hosts remain shared test infrastructure. | Owning feature leads; no skipped or weakened tests. |
 
-New feature-owned artifacts must use the target layout. Existing runtime divergences (unqualified TUnit migration, DotNext consensus, host-process RF3, incomplete official MCP and blob surfaces) are separately tracked implementation gaps, not exceptions to mandatory policy and not work completed by MCAF installation. TUnit references and test source have been migrated locally after the initial inventory; only a successful delivered-source GitHub run can qualify them.
+New feature-owned artifacts must use the target layout. Existing runtime gaps (host-process RF3 and incomplete official MCP and blob surfaces) remain separately tracked implementation work, not exceptions to mandatory policy or results of MCAF installation. TUnit remains the required test framework; only a successful delivered-source GitHub run qualifies its current source.
 
-### Static site migration join (2026-10-02)
+### Static site refactoring join (2026-10-02)
 
-[ADR-040](ADR-040-static-site-threejs-evidence.md) and [BenchmarkComparisons](../Features/BenchmarkComparisons.md) now own the website portion of this debt: feature HTML/modules/styles, pinned same-origin Three.js, independent TUnit `KeyLoad.SiteTests`, atomic historical-evidence loading and a validation-only Pages job. The new project's local policy was created before code. Replacement packets, static/raw-byte proof, manual browser evidence and the exact-source GitHub suite must all join before that portion is marked complete. This extension does not close the benchmark/runtime migrations in the table or qualify new database topologies.
+[ADR-040](ADR-040-static-site-threejs-evidence.md) and [BenchmarkComparisons](../Features/BenchmarkComparisons.md) now own the website portion of this debt: feature HTML/modules/styles, pinned same-origin Three.js, independent TUnit `KeyLoad.SiteTests`, atomic historical-evidence loading and a validation-only Pages job. The new project's local policy was created before code. Replacement packets, static/raw-byte proof, manual browser evidence and the exact-source GitHub suite must all join before that portion is marked complete. This extension does not close the benchmark/runtime refactoring in the table or qualify new database topologies.
 
 ## Conflict register
 
@@ -54,7 +54,7 @@ New feature-owned artifacts must use the target layout. Existing runtime diverge
 - The incoming template asks to install skills. Owner's latest explicit instruction says not to install skills: no skills are added or changed.
 - Historical supplied AGENTS required lock files; an explicit owner correction requested removal of packages.lock.json before this bootstrap. The current on-disk mandatory root prohibits generating or committing them. This installation preserves that current file exactly and does not change package policy or central build settings.
 - The design document discusses DotNext as an earlier candidate and optional per-request facades; current root forbids DotNext and requires a separate Orleans grain per request. Current stricter policy controls future implementation. The product specification is not silently rewritten.
-- Existing site validation uses Node's test runner while current root policy says all tests use TUnit. Existing Node test invocations are recorded migration debt, not authorization to add an alternate framework. Static installation validation does not replace runtime tests.
+- All tests use TUnit. Node-based static installation validation does not replace runtime tests.
 
 ## Rollout, rollback and verification
 
@@ -70,7 +70,7 @@ Implementation contract: REQ-MCAF-008/009 and AC-MCAF-008/009 in [RepositoryGove
 
 Ordered stages: update owner policy and these contracts; capture current paths and unrelated changes; remove all three suffix families without relocating plans; ignore root/nested matches without exceptions; replace live references with canonical Feature/ADR contracts; stop requiring planning artifacts and reject their reintroduction; run the original Node validator and focused real-process TUnit cases; review combined diffs and scoped stage/commit/push.
 
-Migration affects documentation and repository validation only, with no runtime/API/data/dependency/topology change. Historical receipts retain original source descriptions. Deleted tracked files remain recoverable in Git history; rollback of the new owner rule requires owner direction. Required regressions include positive absence, each suffix at root/nested paths, original prefix/inventory/policy/skill protections, actual ignore behavior and live link checks. Local tests are development evidence; GitHub qualification is separate. The working-file cleanup and local verification are complete; the owning Feature records the nine passing TUnit cases, formatter, inventory, ignore and link evidence and the unrelated shared-build limitation. This does not close the ADR's other migration or product-qualification stages.
+This update affects documentation and repository validation only, with no runtime/API/data/dependency/topology change. Historical receipts retain original source descriptions. Deleted tracked files remain recoverable in Git history; rollback of the new owner rule requires owner direction. Required regressions include positive absence, each suffix at root/nested paths, original prefix/inventory/policy/skill protections, actual ignore behavior and live link checks. Local tests are development evidence; GitHub qualification is separate. The working-file cleanup and local verification are complete; the owning Feature records the nine passing TUnit cases, formatter, inventory, ignore and link evidence and the unrelated shared-build limitation. This does not close the ADR's other refactoring or product-qualification stages.
 
 ```mermaid
 flowchart LR
@@ -81,7 +81,7 @@ flowchart LR
     Verify --> Deliver[Reviewed scoped Git delivery]
 ```
 
-## Owner-directed feature-local role migration, 2026-10-04
+## Owner-directed feature-local role refactoring, 2026-10-04
 
 Decision: MCAF-ARCH-001 requires populated responsibility folders inside each owning
 feature. A flat collection of unrelated grains, commands, queries, models and helpers
@@ -98,7 +98,7 @@ Contracts and Models. ResourceExecution owns Models, Contracts, Serialization,
 Authentication and Validation. Small read-capability slices own Queries. The read-only
 reviewer verifies responsibility assignment and path consumers; root owns all writes,
 reference updates, combined checks and delivery. New API/data/dependencies/topology,
-behavior fixes and other projects' layout migrations are outside this stage.
+behavior fixes and other projects' layout refactoring are outside this stage.
 
 Rollout is an exact-content physical move with current documentation path repair;
 MSBuild's existing recursive source glob includes the files. Rollback reverses physical
@@ -107,11 +107,11 @@ Verification compares every pre/post file byte and complete inventory, checks no
 feature C# file remains, reviews live links, and runs governance, formatter, Release
 build and AppHost unit/recovery/RF3 suites. Existing process-recovery and real SDK/MCP
 RF3 contracts remain mandatory. Missing infrastructure or unrelated concurrent compiler
-failures are reported and never relabelled as passing. This migration does not mark the
+failures are reported and never relabelled as passing. This refactoring does not mark the
 ADR's other architecture debt or product qualification complete.
 
 The owner's subsequent whole-solution clarification extends the feature-local role
-migration to every production, contract, SDK, infrastructure, benchmark and test project.
+refactoring to every production, contract, SDK, infrastructure, benchmark and test project.
 TASK-MCAF-LAYOUT-003/004/005 own disjoint exact-content project moves and local policy;
 TASK-MCAF-LAYOUT-006 owns central integration, current reference repair and verification.
 The owning RepositoryGovernance specification contains exact project scopes and join
@@ -121,14 +121,14 @@ fully colocated artifact convention. No behavior or authority boundary changes a
 introduced. Capture all worker hashes before source moves and verify the complete join;
 never rewrite historical SHA-bound receipts or stage another task's code modifications.
 
-The root also owns the narrow structural split of `Core/GraphAndSeries.cs` into
+The root also owns the narrow structural refactoring of `Core/GraphAndSeries.cs` into
 GraphTraversal, TimeSeries and Search partial declarations. Preserve complete original
 member text and signatures, document the role map and compare every declaration against
 the original snapshot. Only the using/namespace/partial-class shell is repeated; runtime
 behavior and existing private cross-model calls remain unchanged. This resolves the
 file's mixed-feature ownership rather than assigning it to an arbitrary one-model slice.
 
-The same exact-declaration split applies to `Abstractions/Queries.cs`: place each public
+The same exact-declaration refactoring applies to `Abstractions/Queries.cs`: place each public
 request/result record in its owning DocumentStorage, EventStreams, Messaging,
 GraphTraversal, TimeSeries, QueryExecution, Search, BackupRestore or ClusterRouting
 slice under Contracts. Preserve XML documentation, signatures, attributes, aliases

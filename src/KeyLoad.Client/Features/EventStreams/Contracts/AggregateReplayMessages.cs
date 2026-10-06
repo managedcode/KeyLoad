@@ -17,13 +17,7 @@ internal static class AggregateReplayMessages
     internal const string EventPayload = "Event payload";
     internal const string EventHeaders = "Event headers";
     internal const string InvalidEvent = "Replay event identity, position or ordering is invalid.";
-    internal const string FutureEventSchema = "An event schema is newer than the reducer schema.";
-    internal const string MissingUpcastPath = "No complete one-version upcast path reaches the reducer schema.";
-    internal const string NullUpcastResult = "An event upcaster returned null.";
-    internal const string UpcasterLimitExceeded = "The registered upcaster count exceeds 64.";
-    internal const string InvalidUpcastTransition = "Upcasters must form unique positive one-version transitions.";
-    internal const string InvalidUpcastMutation = "An event upcaster may change payload JSON and schema version only.";
-    internal const string UpcastPayload = "Upcast payload";
+    internal const string IncompatibleEventSchema = "The event schema does not match the reducer.";
     internal const string MissingInput = "Replay input JSON is absent.";
     internal const string InputLimitExceeded = "Combined replay state, payload and header bytes exceed the worker input limit.";
     internal const string ByteLimitSuffix = " is absent or exceeds its byte limit.";

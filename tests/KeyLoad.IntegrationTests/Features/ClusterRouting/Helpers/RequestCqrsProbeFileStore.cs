@@ -110,7 +110,7 @@ internal static class RequestCqrsProbeFileStore
     }
 
     internal static void DeleteOwnedTree(string root, IReadOnlyDictionary<string, string> nodePaths,
-        IReadOnlyDictionary<string, byte[]> ownerRecords, bool requireAllOwners, bool allowDiscoveryRecords = false)
+        IReadOnlyDictionary<string, byte[]> ownerRecords, bool requireAllOwners)
     {
         RequestCqrsProbeFileValidation.ValidateDirectory(root);
         if (nodePaths.Count > RequestCqrsRf3Protocol.NodeCount
@@ -129,8 +129,7 @@ internal static class RequestCqrsProbeFileStore
             { throw new IOException(RequestCqrsProbeFixtureProtocol.InvalidControlEntry); }
             RequestCqrsProbeFileValidation.ValidateDirectory(node);
             VerifyNodeOwner(node, pair.Key, ownerRecords, requireAllOwners);
-            var files = RequestCqrsProbeFileValidation.ValidateContents(node,
-                allowDiscoveryRecords && pair.Key == RequestCqrsRf3Protocol.Node1);
+            var files = RequestCqrsProbeFileValidation.ValidateContents(node);
             foreach (var file in files)
             { File.Delete(file); }
             Directory.Delete(node, recursive: false);

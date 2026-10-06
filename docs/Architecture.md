@@ -78,10 +78,10 @@ with explicit typed execution/native-client gates and
 [versioned conformance inventory](implementation/sql-client-conformance.json).
 The first lexical repair shares an internal bounded trivia reader between Query,
 Server and SDK; quoted content, authority, envelope1 and storage remain exact.
-Full PostgreSQL-compatible execution and native transport are pending. The
-[ZoneTree.FullTextSearch candidate review](implementation/zonetree-fulltextsearch-review.md)
-adds search integration/correctness/recovery/resource/performance gates without
-selecting a provider or promising acceleration.
+Full PostgreSQL-compatible execution and native transport are pending. The selected text index is ZoneTree.FullTextSearch, using its centrally pinned
+native APIs under node-local ownership. [NativeFullTextProjection](Features/Search/NativeFullTextProjection.md)
+defines the integration, correctness, recovery, resource and performance gates.
+Provider selection is fixed; acceleration requires comparable measurements.
 
 [ADR-068](ADR/ADR-068-native-benchmark-gate-repair.md) preserves isolated benchmark
 startup authority: original bounded job discovery joins authenticated metadata for
@@ -230,8 +230,8 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
-| src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/StorageContracts.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal. |
-| src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/ | Node-local engine and atomic transactions; document/event/queue/graph/time-series behavior. |
+| src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/StorageContracts.cs; Features/BackupRestore/Contracts/AtomicPartitionCatalogEntry.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal and the generated BackupRestore roster entry. |
+| src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. The provisional roster does not qualify complete legacy census or cluster backup. |
 | src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
 | src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs | StorageRecovery; shared internal public-OS-ABI regular-file opening for stopped migration. No engine, database state or replication dependency; ADR-077, AC-EPOCH-012. |
@@ -282,7 +282,7 @@ classDiagram
 | src/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Features/CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage/routing. |
 | tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Features/CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions, TUnit and CI-only execution. |
 
-## Feature convention and migration
+## Feature ownership convention
 
 Each vertical slice groups actual responsibilities in populated local role folders;
 `Features/<SliceName>/` is an ownership boundary, not a flat file collection.
@@ -291,7 +291,7 @@ streaming, identity, serialization, diagnostics and topology. Its replication sl
 separates grain services, discovery, transport, authentication, replay and wire models;
 ResourceExecution separates cache-control models, contracts, serialization,
 authentication and validation. AdminDashboard and BlobStorage own query capabilities
-in `Queries/`. The migration preserves namespaces, aliases/Ids and runtime behavior.
+in `Queries/`. The structure preserves namespaces, aliases/Ids and runtime behavior.
 The owner contract and checks are in [RepositoryGovernance](Features/RepositoryGovernance.md)
 and [ADR-032](ADR/ADR-032-mcaf-governance.md).
 
@@ -307,9 +307,11 @@ discarded evaluation plans are removed; native WAL, node-local ownership, RF3
 and all correctness/resource/qualification contracts remain mandatory.
 The independent [ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md)
 under [ADR-069](ADR/ADR-069-representative-scaled-workloads.md) adds actual
-100K/1M/5M full-keyspace read datasets,5M calls per measurement and explicit
-resource/value/provider gates. Mandatory public index/complex/RF3 stages remain
-open; existing4096/270 control and site schemas remain separate.
+exactly 100,000 and 1,000,000 actual full-keyspace records, with at least
+100,000 measured operations per applicable workload cell and explicit resource,
+value, durability and provider gates. Mandatory public index, complex-query and
+native topology/RF3 stages remain open. Tiny hot-key controls remain labelled
+microbenchmarks and cannot qualify the required scales.
 Local ZoneTree microbenchmarks use the actual generated consumer for development.
 Full native database comparisons retain isolated Linux runners and the required
 resource, correctness, recovery and multi-node qualification gates.
@@ -816,16 +818,18 @@ do not establish expanded runtime, fault or performance results.
 Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint identities,
 sortable keys, raw ZoneTree values, fixed checksum/HMAC framing and blob bytes
 retain their concrete protocols. Native generated bytes are not canonical hashes
-for unordered values. Current data epoch6/journal4/checkpoint4/backup2,
-homogeneous-v2 native payloads and KLT2/replica2 keep explicit format fences.
-Ordinary readers do not accept earlier epochs; Compact preserves opaque records
-and cannot convert them. [ADR-077](ADR/ADR-077-offline-native-data-epoch.md)
-defines the explicit stopped native5/journal4/checkpoint3 per-store copy adapter
-and the complete-node extension. The per-store source has local process-recovery
-evidence; complete-node source and real-prior component/crash oracles are being
-integrated. Genuine prior-to-current Linux Docker/Aspire RF3 rollout qualification
-remains pending. Every voter stays stopped through preparation and publication;
-this is not a rolling-write compatibility contract.
+for unordered values. The current data epoch is 7, journal version 4,
+checkpoint version 5 and backup version 2. Current homogeneous native payloads,
+KLT2 and replica2 retain their explicit format fences. Readers reject unsupported
+formats before effects; Compact preserves opaque current records.
+[CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and
+[ADR-011](ADR/ADR-011-current-native-format.md) define strict admission,
+read-only identity and capability validation, ordered current journal recovery,
+backup validation and bounded restore. New-incarnation blob restore normalizes
+only current authority metadata, with persisted accounting and phase fences.
+Current process recovery and genuine Docker/Aspire RF3 qualification remain
+required at the delivered source. The owner contract is
+[ADR-116](ADR/ADR-116-first-release-current-format.md).
 
 ```mermaid
 flowchart LR
@@ -848,39 +852,6 @@ classDiagram
     ReplicaProtocolCodec --> ReplicaEntryBatch : exact encoded byte accounting
     GrainRequestEnvelope --> GrainValue : attributed native boundary
 ```
-
-The complete-node operator owns all three original file locks and immutable
-source inventory, prepares both canonical and replica stores, converts every
-historical replica image, and changes only the published descriptor length/SHA.
-Private-copy verification precedes publication; checksummed native receipts bind
-retry ownership without exposing keys. Published retry preserves later current
-writes. The all-three preparation/publication/start barriers belong to the
-separate RF3 acceptance fixture, not an individual per-node CLI invocation.
-
-```mermaid
-flowchart LR
-    Original[Stopped native5 node] --> Locks[Original node and store ownership]
-    Locks --> Inputs[Private identity and WAL copies]
-    Inputs --> Stores[ZoneTreeFormatUpgrade]
-    Original --> Images[ZoneTreeSnapshotFormatUpgrade]
-    Stores --> Plan[ReplicaSnapshotFormatUpgrade]
-    Images --> Plan
-    Plan --> Prepared[Bound closed node stage]
-    Prepared --> Verify[Private current verification]
-    Verify --> Publish[Locked node publication]
-    Publish --> RF3[All three published before homogeneous Aspire start]
-```
-
-```mermaid
-classDiagram
-    ServerNodeFormatUpgrade --> ServerNodeUpgradeBuilder : prepares one stopped node
-    ServerNodeUpgradeBuilder --> ZoneTreeFormatUpgrade : authoritative store copies
-    ServerNodeUpgradeBuilder --> ZoneTreeSnapshotFormatUpgrade : bounded image conversion
-    ServerNodeUpgradeBuilder --> ReplicaSnapshotFormatUpgrade : same logical pointer cut
-    ServerNodeFormatUpgrade --> ServerNodeUpgradeVerifier : private copies and read only images
-    ServerNodeFormatUpgrade --> ServerNodeUpgradeReceipt : immutable source and target binding
-```
-
 
 ## Isolated read/control admission integration
 
@@ -1037,14 +1008,16 @@ classDiagram
 
 ## Delivery workflows
 
-[ADR-064](ADR/ADR-064-three-pipeline-release-delivery.md) replaces the historical
-[ADR-062](ADR/ADR-062-workflow-separation.md) placement with exactly three workflows.
-`ci.yml` (`CI`) combines PR/main/manual build, format, rules, analyzers, normal/scalar
-units, recovery and genuine Docker/Aspire RF3 SDK/MCP qualification. `benchmarks.yml`
-(`Benchmarks`) preserves every isolated Linux native comparison and TimeSeries image
-check, then runs the complete site qualification/deployment stages after successful
-aggregate/image gates. Website metrics authenticate this exact run/attempt/source;
-historical legacy archives keep their genuine original identity.
+[ADR-064](ADR/ADR-064-workflow-release-delivery.md) and
+[ADR-062](ADR/ADR-062-workflow-separation.md) define exactly four workflows.
+`ci.yml` (`Build and Tests`) owns PR/main/manual build, format, rules, analyzers,
+normal/scalar units, current process recovery and genuine Docker/Aspire RF3
+SDK/MCP qualification. `benchmarks.yml` (`Benchmarks`) owns the complete isolated
+Linux database groups and authenticated aggregation. Its settled final dispatch
+triggers `website.yml` (`Website`), which owns its own main/manual triggers,
+content/browser/source/coverage gates and Pages publication. Website metrics
+require a complete comparable authenticated cohort; unavailable measurements
+remain explicit. `release.yml` (`Release`) owns the separate release contract.
 
 [ReleaseDelivery](Features/ReleaseDelivery.md) owns `release.yml` (`Release`): an
 immutable UTC version reservation `vM.m.yyMMdd.N`, full build/packages, self-contained
@@ -1055,10 +1028,12 @@ qualification. Provider and exact-SHA proof remain separate from source integrat
 
 ```mermaid
 flowchart LR
-    Source[PR or main source] --> CI[CI build and ordinary tests]
+    Source[PR or main source] --> CI[Build and Tests]
     Main[Main source] --> Benchmarks[All isolated native benchmarks]
     Benchmarks --> Aggregate[Complete authenticated JSON]
-    Aggregate --> Site[Full website tests and publication]
+    Aggregate --> Dispatch[Settled final Website dispatch]
+    Dispatch --> Site[Website gates and Pages publication]
+    Main --> Site
     Manual[Manual main release] --> Reserve[UTC date and daily number]
     Reserve --> Build[Packages database distribution images]
     CI --> Gate[Successful exact source proof]
