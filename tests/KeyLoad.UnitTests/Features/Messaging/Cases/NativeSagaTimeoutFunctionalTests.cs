@@ -42,7 +42,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
         NativeSagaTimeoutTestData.CompleteSaga(fixture, stale);
 
         var control = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        var controlDueAt = staleJobDueAt.Add(fixture.TestProfile.HeldJobDelay);
+        var controlDueAt = ControlJobDueAt(staleJobDueAt, control);
         await fixture.JobHarness.ScheduleAsync(control.Hint, controlDueAt, CancellationToken.None);
         var controlShards = await fixture.JobHarness.CaptureOwnedShardsAsync(controlDueAt, CancellationToken.None);
         await Assert.That(await NativeSagaTimeoutJobHarness.CountScheduledJobsAsync(controlShards)).IsGreaterThan(NoScheduledJobs);
@@ -68,7 +68,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
         NativeSagaTimeoutTestData.CancelSaga(fixture, stale);
 
         var control = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        var controlDueAt = staleJobDueAt.Add(fixture.TestProfile.HeldJobDelay);
+        var controlDueAt = ControlJobDueAt(staleJobDueAt, control);
         await fixture.JobHarness.ScheduleAsync(control.Hint, controlDueAt, CancellationToken.None);
         var controlShards = await fixture.JobHarness.CaptureOwnedShardsAsync(controlDueAt, CancellationToken.None);
         await Assert.That(await NativeSagaTimeoutJobHarness.CountScheduledJobsAsync(controlShards)).IsGreaterThan(NoScheduledJobs);
@@ -95,7 +95,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
         NativeSagaTimeoutTestData.RevokeCreator(fixture);
 
         var control = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        var controlDueAt = staleJobDueAt.Add(fixture.TestProfile.HeldJobDelay);
+        var controlDueAt = ControlJobDueAt(staleJobDueAt, control);
         await fixture.JobHarness.ScheduleAsync(control.Hint, controlDueAt, CancellationToken.None);
         var controlShards = await fixture.JobHarness.CaptureOwnedShardsAsync(controlDueAt, CancellationToken.None);
         await Assert.That(await NativeSagaTimeoutJobHarness.CountScheduledJobsAsync(controlShards)).IsGreaterThan(NoScheduledJobs);
@@ -120,7 +120,7 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
         await Assert.That(await NativeSagaTimeoutJobHarness.CountScheduledJobsAsync(staleShards)).IsGreaterThan(NoScheduledJobs);
 
         var control = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        var controlDueAt = staleJobDueAt.Add(fixture.TestProfile.HeldJobDelay);
+        var controlDueAt = ControlJobDueAt(staleJobDueAt, control);
         await fixture.JobHarness.ScheduleAsync(control.Hint, controlDueAt, CancellationToken.None);
         var controlShards = await fixture.JobHarness.CaptureOwnedShardsAsync(controlDueAt, CancellationToken.None);
         await Assert.That(await NativeSagaTimeoutJobHarness.CountScheduledJobsAsync(controlShards)).IsGreaterThan(NoScheduledJobs);
@@ -133,6 +133,13 @@ internal sealed class NativeSagaTimeoutFunctionalTests(NativeSagaTimeoutFixture 
         await Assert.That(current.Revision).IsEqualTo(RevisionOne);
         await Assert.That(fixture.Database.Database.InspectMessage(SagaPrincipalId, future.TimeoutLane,
             NativeSagaTimeoutTestData.TimeoutMessageId(future.Id, RevisionOne))).IsNull();
+    }
+
+    private DateTimeOffset ControlJobDueAt(DateTimeOffset previousJobDueAt, NativeSagaTimeoutCase control)
+    {
+        var plannedDueAt = previousJobDueAt.Add(fixture.TestProfile.HeldJobDelay);
+        var canonicalDueAt = control.Deadline.Add(fixture.TestProfile.HeldJobDelay);
+        return plannedDueAt >= canonicalDueAt ? plannedDueAt : canonicalDueAt;
     }
 
     private async Task<SagaInspection> WaitForTimedOutSagaAsync(QueueLaneRef lane, Guid sagaId)

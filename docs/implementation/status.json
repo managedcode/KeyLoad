@@ -4873,8 +4873,8 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "runtime_policy_migration_runtime_failures_under_repair_final_canonical_refresh_pending",
-    "canonicalBuildPassed": false,
+    "sourceStage": "runtime_repairs_complete_canonical_release_and_format_v5_passed_full_Aspire_unit_v3_running",
+    "canonicalBuildPassed": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
@@ -4882,11 +4882,11 @@
       "Pass required source-bound coverage and delivered-source Linux qualification",
       "Review any actual runtime failures without weakening diagnostics, contracts or assertions"
     ],
-    "canonicalFormatterPassed": false,
+    "canonicalFormatterPassed": true,
     "developmentEvidence": {
       "directory": "artifacts/code-quality/general-runtime-options-development-20261006",
-      "canonicalRelease": "keyload-general-options-full-release-v4.log",
-      "canonicalFormat": "keyload-general-options-canonical-format-v3.log",
+      "canonicalRelease": "keyload-general-options-full-release-v5.log",
+      "canonicalFormat": "keyload-general-options-canonical-format-v5.log",
       "analyzers": {
         "suite": "analyzers",
         "passed": 340,
