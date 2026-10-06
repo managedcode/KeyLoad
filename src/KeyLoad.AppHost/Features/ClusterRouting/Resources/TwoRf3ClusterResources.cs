@@ -1,7 +1,6 @@
 using KeyLoad.AppHost.Hosting;
 using System.Globalization;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using System.Security.Cryptography;
 using KeyLoad.AppHost.Features.ClusterReplication;
 
@@ -50,7 +49,6 @@ internal static class TwoRf3ClusterResources
     private const string SiloAddressEnvironment = "KeyLoad__SiloAddress";
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
     private const string PrivateHttpEnvironment = "KeyLoad__AllowPrivateNetworkHttp";
-    private const string PeerPrefix = "KeyLoad__Peers__";
     private const string AuthorityPrefix = "KeyLoad__MembershipAuthority__";
     private const string AuthorityHealth = "/health/membership-authority";
     private const string MembershipHealth = "/health/membership-ready";
@@ -96,8 +94,6 @@ internal static class TwoRf3ClusterResources
         const string NameText = "keyload-";
         const string AddNodesNameText = "-";
         const string SchemeText = "tcp";
-        const int PeerIndexInitialValue = 0;
-        const int AuthorityIndexInitialValue = 0;
 
         var resources = new IResourceBuilder<ContainerResource>[TwoRf3ProfileProtocol.TotalNodes];
         for (var index = IndexInitialValue; index < Nodes.Length; index++)
@@ -119,32 +115,34 @@ internal static class TwoRf3ClusterResources
                     isExternal: false, isProxied: false)
                 .WithEnvironment(DataRootEnvironment, Data)
                 .WithEnvironment(ClusterEnvironment, clusterId);
-            if (groupA)
-            {
-                resource.WithEnvironment(PhysicalEnvironment, physical.ToString(ParameterIdentityFormat))
-                .WithEnvironment(IncarnationEnvironment, incarnation.ToString(ParameterIdentityFormat));
-            }
-            else
-            { resource.WithEnvironment(PhysicalEnvironment, physicalB).WithEnvironment(IncarnationEnvironment, incarnationB); }
+            ApplyPhysicalIdentity(resource, groupA, physical, incarnation, physicalB, incarnationB);
             resource
                 .WithEnvironment(SigningEnvironment, signing).WithEnvironment(PeerEnvironment, peerSecret)
                 .WithEnvironment(AdminEnvironment, admin).WithEnvironment(PrivateHttpEnvironment, True)
                 .WithEnvironment(PublicEnvironment, Origin(name)).WithEnvironment(SiloAddressEnvironment, name)
                 .WithEnvironment(SiloPortEnvironment, TwoRf3ProfileProtocol.SiloPort.ToString(CultureInfo.InvariantCulture))
                 .WithHttpHealthCheck(groupA ? AuthorityHealth : MembershipHealth, endpointName: Http);
-            for (var peerIndex = PeerIndexInitialValue; peerIndex < group.Length; peerIndex++)
-            { resource.WithEnvironment(PeerPrefix + peerIndex.ToString(CultureInfo.InvariantCulture), Origin(group[peerIndex])); }
+            TwoRf3TopologyResources.ApplyPeerEndpoints(resource, group);
             ApplyAuthoritySettings(resource, groupA, profile, physicalB, incarnationB,
                 firstPeer, secondPeer, firstGroup, secondGroup);
             ClusterResourceSettings.Apply(builder, resource, containerUser);
-            if (!groupA)
-            {
-                for (var authorityIndex = AuthorityIndexInitialValue; authorityIndex < firstGroup.Length; authorityIndex++)
-                { resource.WaitFor(resources[authorityIndex]); }
-            }
+            TwoRf3TopologyResources.WaitForAuthority(resource, resources, firstGroup.Length, groupA);
             resources[index] = resource;
         }
         return resources;
+    }
+
+    private static void ApplyPhysicalIdentity(IResourceBuilder<ContainerResource> resource, bool groupA,
+        Guid physical, Guid incarnation, IResourceBuilder<ParameterResource> physicalB,
+        IResourceBuilder<ParameterResource> incarnationB)
+    {
+        if (groupA)
+        {
+            resource.WithEnvironment(PhysicalEnvironment, physical.ToString(ParameterIdentityFormat))
+                .WithEnvironment(IncarnationEnvironment, incarnation.ToString(ParameterIdentityFormat));
+            return;
+        }
+        resource.WithEnvironment(PhysicalEnvironment, physicalB).WithEnvironment(IncarnationEnvironment, incarnationB);
     }
 
     private static void ApplyAuthoritySettings(IResourceBuilder<ContainerResource> resource, bool groupA,
@@ -198,7 +196,7 @@ internal static class TwoRf3ClusterResources
         { throw new InvalidOperationException(TwoRf3ProfileProtocol.Invalid); }
     }
 
-    private static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginFormat, node);
+    internal static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginFormat, node);
 
     private static string RandomSecret()
     {

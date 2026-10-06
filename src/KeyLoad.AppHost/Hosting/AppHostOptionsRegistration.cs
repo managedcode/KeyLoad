@@ -1,9 +1,9 @@
 using KeyLoad.AppHost.Features.ClusterRouting;
 using System.Runtime.CompilerServices;
-using KeyLoad;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.CodeQuality;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -47,8 +47,10 @@ internal static class AppHostOptionsRegistration
         var isolatedAdmission = Bind<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
             builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
             value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
+        var coverage = Bind<NativeCoverageExecutionOptions>(builder.Configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
+            value => value.IsValid(), NativeCoverageExecutionOptions.ValidationMessage);
         var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
-            cluster, command, http, replay, profile, deployment, relay, workload, probeFiles, isolatedReplay, isolatedAdmission);
+            cluster, command, http, replay, profile, deployment, relay, workload, probeFiles, isolatedReplay, isolatedAdmission, coverage);
         Register(builder.Services, runtime);
         return runtime;
     }
@@ -73,6 +75,7 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.TestExecution);
         services.AddSingleton(runtime.Startup);
         services.AddSingleton(runtime.IsolatedAdmission);
+        services.AddSingleton(runtime.NativeCoverage);
     }
 
     internal static IOptions<ClusterProfileExecutionOptions> BindProfileExecution(IConfiguration configuration) =>
@@ -93,11 +96,11 @@ internal static class AppHostOptionsRegistration
         catch (InvalidOperationException) { return false; }
     }
 
-    private static IOptions<T> Bind<T>(IConfiguration configuration, Func<T, bool> predicate, string message) where T : class, new()
+    private static OptionsManager<T> Bind<T>(IConfiguration configuration, Func<T, bool> predicate, string message) where T : class, new()
     {
         var factory = new OptionsFactory<T>([new ConfigureFromConfigurationOptions<T>(configuration)], [],
             [new ValidateOptions<T>(Options.DefaultName, predicate, message)]);
-        IOptions<T> options = new OptionsManager<T>(factory);
+        var options = new OptionsManager<T>(factory);
         _ = options.Value;
         return options;
     }
@@ -111,4 +114,5 @@ internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> Test
     IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Orleans.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
     IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<KeyLoad.Comparisons.ComparisonOptions>? BenchmarkWorkload, IOptions<RequestProbeFileOptions> RequestProbeFiles,
     IOptions<KeyLoad.Orleans.ReplicaReplayLimits> IsolatedReplayAdmission,
-    IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission);
+    IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
+    IOptions<NativeCoverageExecutionOptions> NativeCoverage);

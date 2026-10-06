@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.Orleans;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +18,7 @@ internal static class IsolatedKeyLoadReplayOptionsRegistration
     internal static IOptions<ReplicaReplayLimits> Bind(IConfiguration configuration)
     {
         var factory = new IsolatedReplayFactory(configuration.GetSection(SectionName));
-        IOptions<ReplicaReplayLimits> options = new OptionsManager<ReplicaReplayLimits>(factory);
+        var options = new OptionsManager<ReplicaReplayLimits>(factory);
         _ = options.Value;
         return options;
     }

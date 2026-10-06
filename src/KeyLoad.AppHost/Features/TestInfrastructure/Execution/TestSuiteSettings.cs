@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using Microsoft.Extensions.Options;
@@ -181,6 +180,11 @@ internal sealed record TestSuiteSettings(
             : scaleProfile is not null || vectorProfile is not null ? execution.IntensiveTimeout
             : suite is TestSuiteProtocol.Rf3Suite or TestSuiteProtocol.ComparisonSuite
                 ? execution.ClusterTimeout : execution.OrdinaryTimeout;
+        return ValidateTimeout(timeout);
+    }
+
+    private static TimeSpan ValidateTimeout(TimeSpan timeout)
+    {
         if (!TestExecutionOptions.Bounded(timeout))
         {
             throw new ArgumentOutOfRangeException(nameof(timeout));

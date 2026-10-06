@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 
@@ -35,14 +34,10 @@ internal static class RequestCqrsProbeProfileSettingsReader
 
     internal static RequestCqrsProbeProfileSettings? Read(IConfiguration configuration)
     {
-        const int Step = 1;
         const int CountValue = 1;
 
         ArgumentNullException.ThrowIfNull(configuration);
-        var section = configuration.GetSection(RequestCqrsProbeProfile.Section);
-        var fields = section.GetChildren().Take(MaximumSettings + Step).ToArray();
-        if (section.Value is not null || fields.Length > MaximumSettings)
-        { throw new InvalidOperationException(InvalidConfiguration); }
+        var fields = ReadFields(configuration);
         var enabledFound = false;
         var rootFound = false;
         var sessionFound = false;
@@ -85,6 +80,18 @@ internal static class RequestCqrsProbeProfileSettingsReader
         }
         ValidateEnabledSettings(configuration, rootFound, root, sessionFound, session, modeFound, mode);
         return new RequestCqrsProbeProfileSettings(root!, session!, mode ?? DisabledMode);
+    }
+
+    private static IConfigurationSection[] ReadFields(IConfiguration configuration)
+    {
+        const int OverflowDetectionCount = 1;
+        var section = configuration.GetSection(RequestCqrsProbeProfile.Section);
+        var fields = section.GetChildren().Take(MaximumSettings + OverflowDetectionCount).ToArray();
+        if (section.Value is not null || fields.Length > MaximumSettings)
+        {
+            throw new InvalidOperationException(InvalidConfiguration);
+        }
+        return fields;
     }
 
     private static void ValidateDisabledSettings(bool rootFound, bool sessionFound, string? session,

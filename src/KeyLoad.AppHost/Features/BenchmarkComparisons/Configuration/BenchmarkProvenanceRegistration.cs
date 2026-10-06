@@ -1,4 +1,3 @@
-using KeyLoad;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
@@ -36,7 +35,7 @@ internal static class BenchmarkProvenanceRegistration
             options.DockerHost = values.DockerHost;
             options.DockerContext = values.DockerContext;
         })], [], []);
-        IOptions<BenchmarkProvenanceOptions> options = new OptionsManager<BenchmarkProvenanceOptions>(factory);
+        var options = new OptionsManager<BenchmarkProvenanceOptions>(factory);
         _ = options.Value;
         return options;
     }

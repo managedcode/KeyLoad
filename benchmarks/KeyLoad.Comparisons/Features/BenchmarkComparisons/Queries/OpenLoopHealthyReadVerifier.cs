@@ -11,9 +11,17 @@ internal static class OpenLoopHealthyReadVerifier
     {
         var expected = corpus.CreateDocument(FirstCorpusDocumentIndex);
         var session = await target.OpenSessionAsync(hostToken).ConfigureAwait(false);
+        var result = await SettleReadAsync(ReadSessionAsync(session, expected, hostToken), session.DisposeAsync)
+            .ConfigureAwait(false);
+        var actual = result.Actual;
+        return new(actual.Revision, OpenLoopCancellationProofValidation.HashJson(actual.Json), SessionClosed: true);
+    }
+
+    internal static async Task<OpenLoopCancellationHealthRead> SettleReadAsync(
+        Task<OpenLoopCancellationHealthRead> original, Func<ValueTask> dispose)
+    {
         Exception? primary = null;
         OpenLoopCancellationHealthRead? result = null;
-        var original = ReadSessionAsync(session, expected, hostToken);
         try
         {
             result = await original.ConfigureAwait(false);
@@ -23,7 +31,7 @@ internal static class OpenLoopHealthyReadVerifier
             primary = failure;
         }
         var cleanup = ImmutableArray.CreateBuilder<Exception>();
-        var disposalFailure = await OpenLoopFailure.ObserveAsync(DisposeSessionAsync(session)).ConfigureAwait(false);
+        var disposalFailure = await OpenLoopFailure.ObserveAsync(DisposeSessionAsync(dispose)).ConfigureAwait(false);
         if (disposalFailure is not null)
         {
             cleanup.Add(disposalFailure);
@@ -33,8 +41,7 @@ internal static class OpenLoopHealthyReadVerifier
         {
             ExceptionDispatchInfo.Capture(combined).Throw();
         }
-        var actual = result?.Actual ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMissing);
-        return new(actual.Revision, OpenLoopCancellationProofValidation.HashJson(actual.Json), SessionClosed: true);
+        return result ?? throw new ComparisonFailureException(OpenLoopFailureCodes.OpenLoopCancellationHealthyReadMissing);
     }
 
     private static async Task<OpenLoopCancellationHealthRead> ReadSessionAsync(IComparisonSession session,
@@ -49,9 +56,9 @@ internal static class OpenLoopHealthyReadVerifier
         return result;
     }
 
-    private static async Task DisposeSessionAsync(IComparisonSession session)
+    private static async Task DisposeSessionAsync(Func<ValueTask> dispose)
     {
-        await session.DisposeAsync().ConfigureAwait(false);
+        await dispose().ConfigureAwait(false);
     }
 
     private static void Verify(OpenLoopCancellationHealthRead result, BenchmarkDocument expected)

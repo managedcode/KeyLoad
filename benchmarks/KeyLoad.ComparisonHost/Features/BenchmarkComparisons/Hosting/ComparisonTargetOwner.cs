@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
-using System.Text;
 using Microsoft.Extensions.Options;
 using KeyLoad.Comparisons;
 using KeyLoad.Client;
@@ -233,9 +232,5 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
     }
 
     private static AuthenticationHeaderValue CreateNeo4jAuthorization(string password)
-    {
-        var credential = ComparisonHostConstants.Neo4jUser + ComparisonHostConstants.UserPasswordSeparator + password;
-        var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(credential));
-        return new AuthenticationHeaderValue(ComparisonHostConstants.BasicAuthenticationScheme, token);
-    }
+        => ComparisonEndpointBindings.CreateBasicAuthorization(ComparisonHostConstants.Neo4jUser, password);
 }

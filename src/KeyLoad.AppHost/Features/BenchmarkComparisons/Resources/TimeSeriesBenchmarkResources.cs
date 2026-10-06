@@ -16,7 +16,6 @@ internal static class TimeSeriesBenchmarkResources
     private const string TimescaleDigest = "sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e";
     private const int DigestPrefixLength = 7;
     private const string TimescaleImageSetting = "Benchmarks__Images__Timescale";
-    private const string OutputSetting = "Benchmarks:Output";
     private const string DefaultOutputDirectory = "reports/timeseries";
 
     internal static void Add(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource>[] nodes,

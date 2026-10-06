@@ -45,9 +45,9 @@ internal static class IsolatedBenchmarkResources
         {
             builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection,
                 AppHostOptionsRegistration.Get(builder).Startup.Value.BenchmarkOutput ?? Path.Combine(root, ReportsDirectory),
-                serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
-                AppHostOptionsRegistration.Get(builder).ServerResources, AppHostOptionsRegistration.Get(builder).Provenance,
-                openLoop));
+                applicationStopping: serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
+                executionOptions: AppHostOptionsRegistration.Get(builder).ServerResources, provenanceOptions: AppHostOptionsRegistration.Get(builder).Provenance,
+                openLoop: openLoop));
         }
         if (IsolatedComparisonContract.Current.UnsupportedTopologies.Any(item =>
                 item.Target == selection.Target && item.NodeCounts.Contains(selection.NodeCount)))

@@ -31,9 +31,6 @@ internal static class TestSuiteResources
         const string Path1Text = "TestResults";
         const string CommandText = "dotnet";
         const string EmptyText = "";
-        const string NameText = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
-        const string ValueText = "true";
-        const string AddNameText = "KEYLOAD_IMAGE_RECEIPT";
         const string AddValueText = "0";
 
         var root = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, Path2Text));
@@ -50,26 +47,11 @@ internal static class TestSuiteResources
             .WithEnvironment(TestSuiteSelectionValidator.OpenLoopRateEnvironment, EmptyText);
         if (settings.LocalRf3ImageEnabled)
         {
-            var execution = LocalRf3ImageExecution.Create(root);
-            var preparation = LocalRf3ImagePrerequisite.Add(builder, root, execution);
-            runner.WaitForCompletion(preparation);
-            runner.WithEnvironment(LocalRf3ImageExecution.ProvenanceEnvironment, LocalRf3ImageExecution.Provenance)
-                .WithEnvironment(LocalRf3ImageExecution.ImageReferenceEnvironment, execution.ImageReference)
-                .WithEnvironment(LocalRf3ImageExecution.ReceiptEnvironment, execution.ReceiptPath)
-                .WithEnvironment(NameText, ValueText)
-                .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
-                .WithEnvironment(AddNameText, string.Empty)
-                .WithEnvironment(GithubRevisionEnvironment, string.Empty)
-                .WithEnvironment(GithubActionsEnvironment, string.Empty);
+            ConfigureLocalImage(builder, runner, root);
         }
         if (settings.Suite == PriorProbeResources.RecoverySuite)
         {
-            var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
-            foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
-            {
-                runner.WaitForCompletion(preparation);
-            }
-            runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
+            ConfigureRecoveryProbes(builder, runner, root, resultsDirectory);
         }
         if (settings.Suite == TestSuiteProtocol.ComparisonSuite && settings.ComparisonTarget is not null)
         {
@@ -92,6 +74,36 @@ internal static class TestSuiteResources
         {
             runner.WithEnvironment(IntrinsicsEnvironment, AddValueText);
         }
+    }
+
+    private static void ConfigureRecoveryProbes(IDistributedApplicationBuilder builder,
+        IResourceBuilder<ExecutableResource> runner, string root, string resultsDirectory)
+    {
+        var probesDirectory = PriorProbeResources.CreateDirectoryPath(resultsDirectory);
+        foreach (var preparation in PriorProbeResources.Add(builder, root, probesDirectory))
+        {
+            runner.WaitForCompletion(preparation);
+        }
+        runner.WithEnvironment(PriorProbeResources.DirectoryEnvironment, probesDirectory);
+    }
+
+    private static void ConfigureLocalImage(IDistributedApplicationBuilder builder,
+        IResourceBuilder<ExecutableResource> runner, string root)
+    {
+        const string LocalImageChildEnvironment = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
+        const string EnabledValue = "true";
+        const string ImageReceiptEnvironment = "KEYLOAD_IMAGE_RECEIPT";
+        var execution = LocalRf3ImageExecution.Create(root);
+        var preparation = LocalRf3ImagePrerequisite.Add(builder, root, execution);
+        runner.WaitForCompletion(preparation);
+        runner.WithEnvironment(LocalRf3ImageExecution.ProvenanceEnvironment, LocalRf3ImageExecution.Provenance)
+            .WithEnvironment(LocalRf3ImageExecution.ImageReferenceEnvironment, execution.ImageReference)
+            .WithEnvironment(LocalRf3ImageExecution.ReceiptEnvironment, execution.ReceiptPath)
+            .WithEnvironment(LocalImageChildEnvironment, EnabledValue)
+            .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
+            .WithEnvironment(ImageReceiptEnvironment, string.Empty)
+            .WithEnvironment(GithubRevisionEnvironment, string.Empty)
+            .WithEnvironment(GithubActionsEnvironment, string.Empty);
     }
 
     private static string[] BuildArguments(string root, TestSuiteSettings settings, string resultsDirectory)

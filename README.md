@@ -342,10 +342,12 @@ passes the official MCP SDK guidance case but fails the complete RF3 and release
 gates. [Checkpoint evidence](docs/implementation/partition-runtime-development-2026-10-05.json)
 keeps those failures and the remaining scalar, recovery, RF3 and scale gates explicit.
 
-Functional coverage excludes load/comparison runs. The first 25-test Query profile
-passed in normal and scalar modes and measured **773 of 3,540 lines** and
-**451 of 2,372 branches** in the native reports. This is a scoped local measurement;
-whole-solution and actual RF3-server coverage remain unmeasured. See the
+Functional coverage excludes load/comparison runs and admits complete operation
+flows only. The current Query profile binds exactly 25 named cases and 103 source
+files; fresh current-source coverage is pending. The earlier local prototype
+passed normal/scalar modes and measured 773 of 3,540 lines and 451 of 2,372 branches;
+those historical reports do not qualify the later source or the complete
+sixteen-module/RF3-server cohort, whose coverage remains unmeasured. See the
 [coverage contract](docs/Features/CodeQuality.md) for source/contributor binding,
 native report preservation and complete-operation test requirements.
 

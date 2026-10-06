@@ -38,9 +38,9 @@ internal static class ScaleServerCancellationProbe
         File.Copy(Path.Combine(root, "reports", WorkerFile), Path.Combine(output, WorkerFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-        var collector = new ScaleServerResourceEvidenceCollector(selection, output, lifetime.ApplicationStopping,
-            app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
-            app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
+        var collector = new ScaleServerResourceEvidenceCollector(selection, output, applicationStopping: lifetime.ApplicationStopping,
+            executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
+            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
         var observation = collector.StartAsync(containers,
             readinessToken => ScaleServerResourceReadiness.WaitAsync(app, containers, readinessToken), caller.Token);
         try
@@ -123,9 +123,9 @@ internal static class ScaleServerCancellationProbe
         Directory.CreateDirectory(Path.Combine(output, EvidenceFile));
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         var collector = new ScaleServerResourceEvidenceCollector(selection, output,
-            app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
-            app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
-            app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
+            applicationStopping: app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
+            executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
+            provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>());
         var observation = collector.StartAsync(containers,
             readinessToken => ScaleServerResourceReadiness.WaitAsync(app, containers, readinessToken), caller.Token);
         var primary = await CancelNativeResourceWaitAsync(app, containers[0].Name, caller);

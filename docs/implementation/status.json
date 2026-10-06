@@ -856,7 +856,7 @@
       "partitionScopedOutcomeContract": "source_joined_native_unit_scalar_recovery_RF3_and_coverage_pending",
       "qualified": false
     },
-    "sourceStage": "full_partition_scoped_v2_outcomes_authorization_order_and_actual_operation_flows_joined_current_native_gates_pending",
+    "sourceStage": "partition_scoped_v2_outcomes_and_private_CrashHost_observation_seam_joined_current_build_process_recovery_and_RF3_gates_pending",
     "scopedOutcomeSourceReceipt": "docs/implementation/scoped-outcome-functional-flow-source-2026-10-06.json",
     "fullPartitionIdentityFlows": "four_actual_scope_replay_conflict_close_reopen_cases_joined_current_native_gates_pending"
   },
@@ -2213,7 +2213,7 @@
       "docs/implementation/functional-coverage-open-loop-source-2026-10-06.json",
       "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
     ],
-    "sourceStage": "native_R10_library_R5_Aspire_selection_cases_resource_sidecar_lifecycle_and_provenance_options_joined_native_build_tests_and_Linux_cohort_pending",
+    "sourceStage": "canonical792_measurements_six_proofs_optional201_207_matrix_original_awaited_lifetimes_joined_REQ_SCALE_022_delivery_contract_frozen_actual_native_workflow_artifacts_and_Linux_cohort_pending",
     "qualification": {
       "allAcceptanceClosed": false,
       "nativeCohortQualified": false,
@@ -2237,8 +2237,11 @@
       "originalCancellationProof": "native_original1024_marker_compared_against_exact_parent_observation_and_independent_accounting_source_joined_native_run_pending",
       "sourceQualified": false,
       "runtimeQualified": false,
-      "sourceReceipt": "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json",
-      "resourceSidecar": "original_measured_or_proof_bytes_SHA256_bound_native_collector_joined_real_observations_pending"
+      "sourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
+      "resourceSidecar": "original_measured_or_proof_bytes_SHA256_bound_native_collector_joined_real_observations_pending",
+      "canonicalMeasurementCells": 792,
+      "canonicalProofCells": 6,
+      "workflowDelivery": "contract_frozen_new_modules_in_private_Luna_implementation_existing_root_joins_pending"
     }
   },
   "KL-076": {
@@ -3669,12 +3672,14 @@
     "functionalCoverageDevelopment": {
       "loadTestsExcluded": true,
       "completeWorkflowTestsRequired": true,
-      "sameCompilationIdentity": "source_joined_static_private_producer_and_rejection_checks_only",
+      "sameCompilationIdentity": "source_bound_native_manifest_and_central_tool_metadata_joined_actual_current_collection_pending",
       "currentCoveragePercent": null,
-      "scope": "Query_first_profile_complete16_module_and_RF3_server_collection_pending",
+      "scope": "Query_exact25_cases_103_sources_reviewed_complete16_module_RF3_native_collection_and_binary_merge_pending",
       "fullBuildPassed": false,
       "currentNativeCollectionPassed": false,
-      "sourceReceipt": "docs/implementation/functional-coverage-native-open-loop-source-2026-10-06.json"
+      "sourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
+      "exactCaseCount": 25,
+      "inventoriedQuerySourceFiles": 103
     }
   },
   "AdminDashboard": {

@@ -8,7 +8,7 @@ internal static class ComparisonHostOptionsRegistration
 {
     internal static IOptions<T> Bind<T>(Func<T> readValidated) where T : class
     {
-        IOptions<T> options = new OptionsManager<T>(new StrictHostOptionsFactory<T>(readValidated));
+        var options = new OptionsManager<T>(new StrictHostOptionsFactory<T>(readValidated));
         _ = options.Value;
         return options;
     }

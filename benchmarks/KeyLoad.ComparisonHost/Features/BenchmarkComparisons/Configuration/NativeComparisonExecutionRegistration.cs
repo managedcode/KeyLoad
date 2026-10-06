@@ -13,7 +13,7 @@ internal static class NativeComparisonExecutionRegistration
 
     internal static IOptions<NativeComparisonExecutionOptions> Read(IConfiguration configuration)
     {
-        IOptions<NativeComparisonExecutionOptions> options = new OptionsManager<NativeComparisonExecutionOptions>(
+        var options = new OptionsManager<NativeComparisonExecutionOptions>(
             new OptionsFactory<NativeComparisonExecutionOptions>([new ConfigureFromConfigurationOptions<NativeComparisonExecutionOptions>(
                 configuration.GetRequiredSection(NativeComparisonExecutionOptions.SectionName))], [],
                 [new ValidateOptions<NativeComparisonExecutionOptions>(Options.DefaultName,
@@ -35,7 +35,7 @@ internal static class NativeComparisonExecutionRegistration
 
     internal static IOptions<ComparisonHostExecutionOptions> ReadHost(IConfiguration configuration)
     {
-        IOptions<ComparisonHostExecutionOptions> options = new OptionsManager<ComparisonHostExecutionOptions>(
+        var options = new OptionsManager<ComparisonHostExecutionOptions>(
             new OptionsFactory<ComparisonHostExecutionOptions>([new ConfigureFromConfigurationOptions<ComparisonHostExecutionOptions>(
                 configuration.GetSection(ComparisonHostExecutionOptions.SectionName))], [],
                 [new ValidateOptions<ComparisonHostExecutionOptions>(Options.DefaultName,

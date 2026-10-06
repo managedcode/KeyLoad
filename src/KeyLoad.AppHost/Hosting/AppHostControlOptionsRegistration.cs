@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
@@ -21,7 +20,7 @@ internal static class AppHostControlOptionsRegistration
 
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution)
     {
-        IOptions<AppHostControlOptions> options = new OptionsManager<AppHostControlOptions>(
+        var options = new OptionsManager<AppHostControlOptions>(
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
                 value.Tests = TestSuiteSettings.Read(configuration, execution);

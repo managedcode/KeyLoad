@@ -1,4 +1,3 @@
-using KeyLoad;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -17,7 +16,7 @@ internal static class ComparisonStartupRegistration
 {
     internal static IOptions<ComparisonStartupOptions> Read(IConfiguration configuration)
     {
-        IOptions<ComparisonStartupOptions> options = new OptionsManager<ComparisonStartupOptions>(
+        var options = new OptionsManager<ComparisonStartupOptions>(
             new OptionsFactory<ComparisonStartupOptions>([new ConfigureFromConfigurationOptions<ComparisonStartupOptions>(configuration)], [], []));
         _ = options.Value;
         return options;

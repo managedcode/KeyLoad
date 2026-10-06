@@ -89,6 +89,9 @@ internal static class ComparisonEndpointBindings
     }
 
     internal static AuthenticationHeaderValue CreateRabbitAuthorization(string user, string password)
+        => CreateBasicAuthorization(user, password);
+
+    internal static AuthenticationHeaderValue CreateBasicAuthorization(string user, string password)
     {
         var credential = user + ComparisonHostConstants.UserPasswordSeparator + password;
         var token = Convert.ToBase64String(Encoding.UTF8.GetBytes(credential));

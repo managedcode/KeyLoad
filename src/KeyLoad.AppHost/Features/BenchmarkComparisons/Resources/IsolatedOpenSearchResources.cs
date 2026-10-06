@@ -1,5 +1,6 @@
 using KeyLoad.AppHost.Hosting;
 using System.Globalization;
+using System.Text;
 
 namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
@@ -26,6 +27,7 @@ internal static class IsolatedOpenSearchResources
     private const string BindAll = "0.0.0.0";
     private const string HeapSetting = "OPENSEARCH_JAVA_OPTS";
     private const string HeapFormat = "-Xms{0}m -Xmx{0}m";
+    private static readonly CompositeFormat HeapCompositeFormat = CompositeFormat.Parse(HeapFormat);
     private const string DisableDemo = "DISABLE_INSTALL_DEMO_CONFIG";
     private const string DisableSecurity = "DISABLE_SECURITY_PLUGIN";
     private const string Enabled = "true";
@@ -47,7 +49,7 @@ internal static class IsolatedOpenSearchResources
             throw new InvalidOperationException(InvalidSelection);
         }
         var deployment = AppHostOptionsRegistration.Get(context.Builder).Deployment.Value;
-        var heap = string.Format(CultureInfo.InvariantCulture, HeapFormat, deployment.OpenSearchHeapMegabytes);
+        var heap = string.Format(CultureInfo.InvariantCulture, HeapCompositeFormat, deployment.OpenSearchHeapMegabytes);
         var cell = Guid.NewGuid().ToString(GuidFormat);
         var names = Enumerable.Range(StartValue, context.Selection.NodeCount)
             .Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();

@@ -6,9 +6,6 @@ namespace KeyLoad.AppHost.Features.BenchmarkComparisons;
 
 internal static class IsolatedTimeSeriesBenchmarkResources
 {
-    private const string EnabledSetting = "Benchmarks:Enabled";
-    private const string RootSetting = "Benchmarks:DataRoot";
-    private const string OutputSetting = "Benchmarks:Output";
     private const string TemporaryPrefix = "keyload-timeseries-intensive-";
     private const string ReportsDirectory = "reports";
     private const string NativeDirectory = "native";

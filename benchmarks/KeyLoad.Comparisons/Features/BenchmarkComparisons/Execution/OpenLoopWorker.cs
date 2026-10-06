@@ -90,7 +90,7 @@ internal static class OpenLoopWorker
         return new(OpenLoopOutcome.Succeeded, finished, null);
     }
 
-    private static async Task PublishProgressAsync(OpenLoopProgressV1? progress,
+    internal static async Task PublishProgressAsync(OpenLoopProgressV1? progress,
         Action<OpenLoopProgressV1>? nativeProgress, Exception? fatal, CancellationTokenSource lifetime)
     {
         try

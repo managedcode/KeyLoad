@@ -67,8 +67,6 @@ internal static class BenchmarkResources
     private const string Neo4jImageEnvironment = "Benchmarks__Images__Neo4j";
     private const string Neo4jImageReferencePrefix = "docker.io/library/neo4j:2026.09.0@";
 
-    private const string OutputConfiguration = "Benchmarks:Output";
-    private const string ConfigurationPrefix = "Benchmarks:";
     private const string EnvironmentPrefix = "Benchmarks__";
     // Multi-architecture manifest digests pin the actual content, including the PostgreSQL patch under pg18.
     internal const string PostgresDigest = "sha256:2ba9ca5f2e7daa0f0e7723cba1ee9167bab54efd3640516a44ac1a928dd67e7a";

@@ -1,4 +1,3 @@
-using KeyLoad;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.TestInfrastructure.Validation;

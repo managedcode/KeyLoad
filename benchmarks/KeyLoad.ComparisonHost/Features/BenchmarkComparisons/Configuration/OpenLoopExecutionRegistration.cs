@@ -11,7 +11,7 @@ internal static class OpenLoopExecutionRegistration
     internal static IOptions<OpenLoopExecutionOptions> Read(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        IOptions<OpenLoopExecutionOptions> options = new OptionsManager<OpenLoopExecutionOptions>(
+        var options = new OptionsManager<OpenLoopExecutionOptions>(
             new OptionsFactory<OpenLoopExecutionOptions>([new ConfigureFromConfigurationOptions<OpenLoopExecutionOptions>(
                 configuration.GetSection(OpenLoopExecutionOptions.SectionName))], [], [new OpenLoopExecutionOptionsValidator()]));
         _ = options.Value;

@@ -507,6 +507,15 @@ they are not marked passing until the Aspire-owned suite runs against the rebuil
 source. Existing byte preservation, atomic publication, authentication and RF3
 assertions remain mandatory when required constructor arguments are joined.
 
+Additional AC-CQ-034 checks are `NativeComparisonAdapterPolicyTests` (inclusive
+native adapter bounds and invalid-value matrices),
+`TimeSeriesIntensiveDigestTests.AcCq034ConfiguredOperationTimeoutChangesOnlyItsIndependentWorkloadFrameAsync`
+(independent configured-timeout digest oracle and unchanged frozen default), and
+`TimescaleTimeSeriesIntensiveSessionTests.AcCq034ConfiguredAdapterPolicyReachesNativeNpgsqlSettingsAsync`
+(configured policy reaches the actual Npgsql connection settings). These checks
+are authored and await the rebuilt Aspire-owned suite; they do not qualify
+comparative performance.
+
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
 | TASK-CQ-GENERAL-001 | Lead: contracts, central configuration markers/options registry integration, AppHost configuration, shared config/docs | Freeze034/035 and disjoint joins before worker writes |
@@ -714,3 +723,25 @@ unexpected contributors and failed cleanup with a healthy follow-up where
 applicable. Preserve full unit/scalar/recovery/RF3/analyzer/site gates separately
 and always-upload originals after failures. CI source-only settings, private
 fixtures and partial reports do not close this contract or any original task.
+
+TASK-CQ-NATIVE-COVERAGE-OPTIONS-001 freezes the one native AppHost options
+snapshot before image preparation. Section KeyLoadTests:NativeCoverage owns
+descriptor/files/path/manifest/report and lifecycle policy. Defaults are64KiB
+descriptor,4096 files,2GiB total closure,256MiB individual file,4096 path characters,
+16MiB context manifest and256MiB native report. The JSON descriptor uses the exact
+server/base/tool identity and bounds shape released to the image worker; Node
+receives its descriptor byte limit explicitly and enforces the immutable1MiB
+descriptor-format ceiling, without an operational default.
+
+Native shutdown defaults to10 seconds, original chain settlement to20 seconds,
+container stop to45 seconds and complete three-node application cleanup to180
+seconds. Validate positive whole seconds, shutdown+settlement strictly below
+container stop and application cleanup above the three-node stop budget. Compose
+the Docker stop policy through Aspire's native WithContainerRuntimeArgs at the
+test-only coverage resource; retain actual inspected runtime stop behavior and
+original collector exits before claiming qualification. Native testing must
+prove that DCP honors this policy; an API/descriptor alone is not flush evidence.
+Timeouts fail without a successful terminal receipt. Full fault suites do not
+inherit an assumed graceful-flush result. The tool version is read from native
+AppHost assembly metadata emitted from the central package property, never a
+second runtime version literal. Root owns registration and fixture/cleanup joins.

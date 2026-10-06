@@ -33,7 +33,7 @@ internal static class OpenLoopResourceSelectionBinding
             [new ConfigureFromConfigurationOptions<OpenLoopExecutionOptions>(
                 configuration.GetSection(OpenLoopExecutionOptions.SectionName))], [],
             [new OpenLoopExecutionOptionsValidator()]);
-        IOptions<OpenLoopExecutionOptions> options = new OptionsManager<OpenLoopExecutionOptions>(factory);
+        var options = new OptionsManager<OpenLoopExecutionOptions>(factory);
         _ = options.Value;
         return new(rate, proofText is not null);
     }

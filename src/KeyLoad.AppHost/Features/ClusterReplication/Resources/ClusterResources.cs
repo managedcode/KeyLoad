@@ -61,10 +61,7 @@ internal static class ClusterResources
         var root = Path.GetFullPath(dataRoot);
         var (localImage, images, probes) = ReadImagesAndProbes(builder, root, ephemeral, benchmarkNodeCount);
         ClusterProfileStore.PrepareDirectory(root);
-        var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
-        var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
-        var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
-        var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
+        var (signing, peer, admin, incarnation) = AddIdentityParameters(builder, profile);
         var physicalShardId = profile.PhysicalShardId.ToString(GuidFormat);
         var containerUser = ClusterContainerUser.Resolve(builder);
         var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
@@ -100,6 +97,17 @@ internal static class ClusterResources
             nodes[index] = resource;
         }
         return nodes;
+    }
+
+    private static (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
+        IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation)
+        AddIdentityParameters(IDistributedApplicationBuilder builder, LocalProfile profile)
+    {
+        var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
+        var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
+        var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
+        var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
+        return (signing, peer, admin, incarnation);
     }
 
     private static (LocalDevelopmentContainerImage? LocalImage,

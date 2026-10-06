@@ -1,0 +1,2928 @@
+{
+  "schema": "keyload.functional-coverage-exact-cases-native-options-source.v1",
+  "stage": "91G-R3-exact-functional-cases-native-options-and-open-loop-delivery-contract",
+  "capturedUtc": "2026-10-06T01:13:07.162485+00:00",
+  "parentRevision": "31bb2202499d5deb81eee2417c07bef010a28657",
+  "sourceOnly": true,
+  "coveragePercent": null,
+  "originalAcceptanceClosed": 0,
+  "functionalCoverage": {
+    "loadTestsExcluded": true,
+    "completeOperationFlowsRequired": true,
+    "queryContractVersion": 2,
+    "exactCases": 25,
+    "sourceFiles": 103,
+    "freshNativeCollectionPassed": false,
+    "wholeSixteenModuleAndRf3CoverageMeasured": false,
+    "queryJoin": "reviewed guarded R2 manifest/shared/TRX parser/inventory join; exact identities and all added sources admitted",
+    "nativeOptions": "one validated native AppHost IOptions snapshot; canonical central tool version in generated assembly metadata; image/fixture/merge execution joins and actual Linux collector settlement pending"
+  },
+  "openLoop": {
+    "canonicalMeasurementIdentities": 792,
+    "canonicalProofIdentities": 6,
+    "unsupportedMeasurementIdentities": 144,
+    "matrixRowsPerComparator": 201,
+    "matrixRowsKeyLoad": 207,
+    "joinedSource": "canonical plan, optional CLI/fourth matrix argument, full-process tooling cases, original awaited worker/watcher settlement",
+    "deliveryContract": "REQ-SCALE-022 AC-SCALE-022 ADR-103 stage13 accepted before private new terminal/receipt tooling",
+    "nativeCohortQualified": false,
+    "workflowSelectionEnabled": false
+  },
+  "partitionOutcome": {
+    "nativeCrashHostFriendAssembly": "same private committed-record observation seam as UnitTests/RecoveryTests; Core public API unchanged",
+    "currentFullNativeGatesPassed": false
+  },
+  "reviewedPrivatePackets": [
+    {
+      "originalIntake": "/private/tmp/keyload-stage91f-orleans-cli-20261006-root-intake.json",
+      "sha256": "8bb4a4db32c1beb2a7315d126356be282634357d9eaaeffabc4fee72329572b8",
+      "qualification": "guarded source join; subsequent shared changes are bound by current sourceCapture, not historical packet postimage"
+    },
+    {
+      "originalIntake": "/private/tmp/keyload-openloop-inventory-20261006-r2-root-intake.json",
+      "sha256": "8d4964101a5181e5672d8292eab040aac524972df068ff048541beb53b764c9c",
+      "qualification": "guarded source join; subsequent shared changes are bound by current sourceCapture, not historical packet postimage"
+    },
+    {
+      "originalIntake": "/private/tmp/keyload-openloop-general-repair-20261006-r5-narrow-root-intake.json",
+      "sha256": "e24c79d08ff89818e64db1e54037d328818940d1a74b74975551245edd49befb",
+      "qualification": "guarded source join; subsequent shared changes are bound by current sourceCapture, not historical packet postimage"
+    },
+    {
+      "originalIntake": "/private/tmp/keyload-openloop-plan-joins-20261006-r2-root-intake.json",
+      "sha256": "48746cddcfbef6a35d00751a63a1fd729f0e7b76764bafa33be30d101fbc78d5",
+      "qualification": "guarded source join; subsequent shared changes are bound by current sourceCapture, not historical packet postimage"
+    },
+    {
+      "originalIntake": "/private/tmp/keyload-functional-coverage-query-exact-cases-20261006-r2-root-intake.json",
+      "sha256": "1bb0a78445f7ce3383a763342819046582fc3960ff3d2959386e1b853a8098e6",
+      "qualification": "guarded source join; subsequent shared changes are bound by current sourceCapture, not historical packet postimage"
+    }
+  ],
+  "sourceCapture": [
+    {
+      "path": "Directory.Packages.props",
+      "bytes": 4461,
+      "sha256": "7b40bc477cca6eb1de2f1d733c636bc3d0f0253997ccc27d5f19757ce10d2b4e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 31598,
+      "sha256": "6f90d7a65566898f789663811d0af616f1f846667ddd9af63e5afdb897a1c0c6"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/IsolatedOpenLoopSettings.cs",
+      "bytes": 2198,
+      "sha256": "5f61fc497b810784d4f8de9bcbe3eada9c0eda0dbf7c36946adaa62ad9b79612"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Configuration/OpenLoopExecutionRegistration.cs",
+      "bytes": 877,
+      "sha256": "2cc1876ef1fecb088dd093fdb78249e92bf2632be7d66f48cdd108cfa85ee747"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Hosting/IsolatedHostApplication.cs",
+      "bytes": 6604,
+      "sha256": "143d284043a9554cdcc19f969270c20b2ed9731dce760daaa0116e0b83fddb67"
+    },
+    {
+      "path": "benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/Hosting/IsolatedOpenLoopHostApplication.cs",
+      "bytes": 2152,
+      "sha256": "d14ed41c9862b509311c0d9b85828ca07df7ee35f06c1cf0523dc5623eea6f17"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Configuration/OpenLoopExecutionOptions.cs",
+      "bytes": 2647,
+      "sha256": "261bcada1ab452beac1eb949164e1772da5a8375da7e9780c77baada193f0005"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Configuration/OpenLoopExecutionOptionsValidator.cs",
+      "bytes": 1454,
+      "sha256": "493e3b2b22002839dbc4f607535b21b1710c0ab530788364c4cb7acf15aff9b3"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/OpenLoopCancellationProofV1.cs",
+      "bytes": 5217,
+      "sha256": "b373b595aeed86482a63da14e77c1c00cc6094356b4968ba23ecae04d54123cb"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/OpenLoopComparisonContracts.cs",
+      "bytes": 5921,
+      "sha256": "1e00a54282cf9dc6f3bf46a94f573ca77aa3e25dee76727706226aba1abc4c73"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/OpenLoopEvidenceContract.cs",
+      "bytes": 1498,
+      "sha256": "8f0ff116669995096ffd903564e5712173842f49b965edc45dc967b1858effdb"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/OpenLoopExecutionPolicy.cs",
+      "bytes": 2012,
+      "sha256": "7b5091079a7228e87958ca0e590e36120a5b6237f0ec7f1f4931235cd55cc23f"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/OpenLoopProtocolIdentities.cs",
+      "bytes": 439,
+      "sha256": "ffee5c0220f9ecaee6ca04f4697d68b27fe0ac0ffef25d003d07a8f5957db506"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Diagnostics/OpenLoopFailureCodes.cs",
+      "bytes": 2217,
+      "sha256": "102fb3ed8745a87cdde90b1560671097aef0057ffcbd17ec77fa40255b3cd8a4"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Diagnostics/OpenLoopFailureMessages.cs",
+      "bytes": 296,
+      "sha256": "ce577560cbfba05f101f500d157dbed589f6246ac294ef9089d68fce971610f4"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Diagnostics/ScaledCorpusReadbackFailureCodes.cs",
+      "bytes": 398,
+      "sha256": "e44a99d86e9aa48cff18f321952409ce432efd004c1f0489af6de64075cf7908"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ComparisonSessionCleanup.cs",
+      "bytes": 3863,
+      "sha256": "ae14f2b90649b614bb95edc8ac23a8915dbc1ef3fc0364446245eb66856ca016"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopCancellationProofRunner.cs",
+      "bytes": 9242,
+      "sha256": "83421515033b88dffcd6dce6c3814bb5a8c934b16d1d2d17fc724554fb221808"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopCancellationRequestWatcher.cs",
+      "bytes": 4600,
+      "sha256": "91f1d8440b7c926d3758b25fcb10e29ed9528ff859ab1709f56beb8285375035"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopChannel.cs",
+      "bytes": 453,
+      "sha256": "becb9918f1b8e3b3bd86791188455ba2480ed4ba2a85ee382323321a86e2343a"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopComparisonRunner.cs",
+      "bytes": 7000,
+      "sha256": "f2c14acdc7cf058f6a8a1e21da4f74e1f328d7b442f0189ea9822bac08a9aa86"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopExecutionCompletion.cs",
+      "bytes": 3307,
+      "sha256": "f83d29ea0ddf2004af221b426e3d06c04a394727be5cd06febd990b4c0469692"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopExecutionContext.cs",
+      "bytes": 1496,
+      "sha256": "f4f30804832caf6c0346e16051d30f368c0ca2289bcc36235d1546359625e7e5"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopFailure.cs",
+      "bytes": 2110,
+      "sha256": "301e827532cf8633c41bf230dc8843a146646bf0be2e5026b45880852f4268e7"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopOwnerCancellation.cs",
+      "bytes": 385,
+      "sha256": "3abd0f91aab6a0156915a17da344e71f74a7fad2896a1ecee44b2366dcf9a5ba"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopProducer.cs",
+      "bytes": 2704,
+      "sha256": "33b7285bc7dd069a33617e1d4996aba07a8661886e3e35012fdc758bb34a8aa0"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopRunState.cs",
+      "bytes": 8042,
+      "sha256": "dbdc1c807769dc969a1d574ccb2a09b253712cba38f3844390875e2328e01c00"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopSessionAcquisition.cs",
+      "bytes": 1740,
+      "sha256": "9441fa27d3e76da1cdd04bde753fb6fbba26bae6ba085c4a2a35b901d9283f1f"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopTimeline.cs",
+      "bytes": 2385,
+      "sha256": "5cc7ebcc5b692a8c9063ecc4c66e0655158d896df2f49af1d3b6b18956fd01fd"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopWorkLifetime.cs",
+      "bytes": 8394,
+      "sha256": "4079ff73da0e11503ebec1253b66dafec4120b79bde1e3dd48bcb814925c40e1"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/OpenLoopWorker.cs",
+      "bytes": 7304,
+      "sha256": "4f976431e45cb1a9418ebd9f44bae0602f4fc209bbf334ca612a925273ffc563"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledMeasurementState.cs",
+      "bytes": 3385,
+      "sha256": "9a926fdc075f2f353150685af20343ec822bd0d7cf73cfe479d6e2fc91f40579"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Models/OpenLoopWorkItem.cs",
+      "bytes": 966,
+      "sha256": "aea8bf0c3dbc39b6136566ac4546ceea593287e2039bcb09cdacf0ec3bc69497"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Queries/OpenLoopHealthyReadVerifier.cs",
+      "bytes": 3453,
+      "sha256": "1663102bdb30c72330cc8df51087b7950ab9b4d62d9058c43873036b925701ff"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Reporting/OpenLoopCancellationProofWriter.cs",
+      "bytes": 1310,
+      "sha256": "9c7dc98813cd56d8a8f236fa80896de839c9e23b32ff7286383bb60f421c0ef0"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Reporting/OpenLoopEvidenceArtifactWriter.cs",
+      "bytes": 2769,
+      "sha256": "03386f10b5316a944bb80259456822d3bcd5ea6f921e2dc4307a9ec7eed17f1b"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Reporting/OpenLoopEvidenceWriter.cs",
+      "bytes": 1120,
+      "sha256": "222f738e4f4ef95d1e6cf732c07d22ea3dc94a58a59321e7eb0cc640f160dcf3"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Reporting/OpenLoopTimingSummarizer.cs",
+      "bytes": 3094,
+      "sha256": "81ec4ee816d973e5618443ed1810afd9f10c2f1f7ff5ccc51415085409a216b5"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Serialization/BoundedEvidenceStream.cs",
+      "bytes": 1584,
+      "sha256": "cc517ba29b1e0c0e10e76d3bf151fd573533d5a0c6185e16234b2b639b1272ed"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Serialization/OpenLoopNativeCompletionMarker.cs",
+      "bytes": 4454,
+      "sha256": "d248f14b92cf5d787287efadb5c15af160e5f34c2803b8e248c25778fa7d33f4"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/Contracts/KeyLoadWorkloadIdentities.cs",
+      "bytes": 508,
+      "sha256": "f7b8d7a5a86a8ce7768e763ff238df39524e456d174ec648b5192484183a1739"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/IOpenLoopCancellationHealthSession.cs",
+      "bytes": 350,
+      "sha256": "ca997c0b0c8acd086e984298acb6982ac119a9ed70ca04b67f8eb63f98699001"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadComparisonSession.cs",
+      "bytes": 9212,
+      "sha256": "0602af7b1984cd22b7831fd46447604c13a645fb17017c37da31c8646df30698"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadDocumentOperations.cs",
+      "bytes": 4021,
+      "sha256": "037984048b4bee361514afa75777d8a73b75b6c5b144a40eb3a47bbeaf5e4a34"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Targets/KeyLoad/KeyLoadOpenLoopResults.cs",
+      "bytes": 432,
+      "sha256": "6010bd0fc3b78ffd1a073fa60dc94a538592ba7aeda124b49fbedb94e889f737"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Validation/OpenLoopAccountingValidator.cs",
+      "bytes": 1988,
+      "sha256": "3b9fe56b19009c010d6798b3cc41fca92572d0975879e8a2b58d5e167ee7a1c8"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Validation/OpenLoopCancellationProofValidation.cs",
+      "bytes": 4579,
+      "sha256": "0fa717c043a2dfc6fee1b5d1d03ed2b94e0ce4e38de33ba20e80aeca441c2610"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Validation/OpenLoopComparisonValidation.cs",
+      "bytes": 2573,
+      "sha256": "5887ddef4a62b3e0bd62d925471dd6c88cb144cd1eb9f59bebc0e0d6e030b162"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Validation/OpenLoopEvidenceValidation.cs",
+      "bytes": 6889,
+      "sha256": "4694af8fa4fa0f780e2a09998bf9eab62e579149466f10eda50afe50bf87e6d5"
+    },
+    {
+      "path": "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Validation/OpenLoopRateContract.cs",
+      "bytes": 1461,
+      "sha256": "2ed41a737cd8384eb2f7ad27e6372753a4ed3f58993d6055fbc89c25a452a323"
+    },
+    {
+      "path": "docs/ADR/ADR-002-command-idempotency.md",
+      "bytes": 9443,
+      "sha256": "db828eb0a8ac7d9eb72e6865615a0088ff63485122d2dba92eff29c4532f2e8c"
+    },
+    {
+      "path": "docs/ADR/ADR-033-code-quality.md",
+      "bytes": 63651,
+      "sha256": "0deef5db5697fca4eb07239343cbdf105e8bd356d5ba9fb7390bab3809352158"
+    },
+    {
+      "path": "docs/ADR/ADR-103-scaled-fair-comparisons.md",
+      "bytes": 34333,
+      "sha256": "4cb2272358dcb64fa0feba2b10a78ceeca66b40f81815a96ff56bf43f17cc93d"
+    },
+    {
+      "path": "docs/ADR/ADR-113-centralized-runtime-options.md",
+      "bytes": 9705,
+      "sha256": "b18f318f06b64eef4ca8f3204108b6e082a00ed6a885f5f6ef0b84b246365ffc"
+    },
+    {
+      "path": "docs/Features/BenchmarkComparisons/ScalingQualification.md",
+      "bytes": 63086,
+      "sha256": "ba166964a77f080a0890ebdb1cb4c7673ddf482d7232ea3df023be66ad3867eb"
+    },
+    {
+      "path": "docs/Features/CodeQuality.md",
+      "bytes": 53498,
+      "sha256": "7cf46a604f69ccd50bdaaab331e4a3fe7af8ec4931392eb6e2dc25624b0702a0"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/isolated-plan-cli.mjs",
+      "bytes": 4167,
+      "sha256": "e1d1fc4cca071777abafdd7cba2d1011753c6cd1fbed91dd29e91ab8e009e451"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/isolated-preflight.mjs",
+      "bytes": 4496,
+      "sha256": "4a82b0258f9048248b322a6d74140d88db2a57b4fbd7446e02ade27cae11a0e4"
+    },
+    {
+      "path": "scripts/Features/BenchmarkComparisons/open-loop-isolated-plan.mjs",
+      "bytes": 7364,
+      "sha256": "91ed81de16fb9ba605f1a1ecc52f4a5b3d12d60f05fc9cd62a8a4cabc31c184c"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.compile-identity.ps1",
+      "bytes": 8546,
+      "sha256": "02273661f5824b694ceae9ed6396d2db76a316f6f1382b711a5670d7f1d54f0a"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.compiled-identity.ps1",
+      "bytes": 10605,
+      "sha256": "cf222e88c3345f58eb82face8bcc8407c09642ecea12bf547921b8319b7fc2e9"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.contract.json",
+      "bytes": 27869,
+      "sha256": "309ff727b678cb5e3b74d1e8f67add4d77d5087867e5185cbdfbf83529ce4db7"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.image-manifests.ps1",
+      "bytes": 4726,
+      "sha256": "e304e319f7d1de5823e6c9bd2bf7ecb080ed5769f14892d450cc75940719d555"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.inventory.ps1",
+      "bytes": 9770,
+      "sha256": "f38503004504f215903686573156c98c59caec73917c2ab8d836419844e3f80b"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.parse.ps1",
+      "bytes": 22449,
+      "sha256": "9414495b388b95e3a4bf9190d5266c33316a19fca8ec1286be2114fbe4f4357e"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.ps1",
+      "bytes": 2803,
+      "sha256": "4fdf80359423ce6eecdf1dc56e2dd258ba45dfc1a80e7022d9e42dd408c13c56"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.settings.xml",
+      "bytes": 801,
+      "sha256": "2b030ad5feeddc5e61baaf6336f8ec1fc6a27853c4287c60a9811957c4c123a3"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.shared.ps1",
+      "bytes": 11994,
+      "sha256": "dee2068e86e7ab05da127fb6b5cfdb1bc922e4dba25e7523a4847b60e6201a7e"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/functional-coverage.test-identity.ps1",
+      "bytes": 24575,
+      "sha256": "e2944da704f48d26d6f2217ca7ca111885a8174fc743c4bf6c7a54b4c7165a3f"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.contract.json",
+      "bytes": 15236,
+      "sha256": "5961647f84e3989b666f8570407b68254e4521352b2ee354dc8005b4b468ab69"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.inventory.ps1",
+      "bytes": 13575,
+      "sha256": "e47af2bc71df1bb750fbb0d7144ceb0d137c2eeb34904d9d2ac59bfb1d28623e"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.parse.ps1",
+      "bytes": 17728,
+      "sha256": "143996f4921ff97a957045e10bdb0d76fc9a38a42d7334866a4cd30ab550da78"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.ps1",
+      "bytes": 4693,
+      "sha256": "1921422b65a1f298f9add4dca25e8755f391d63fbc814a02f07b3a5d68d60fa9"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml",
+      "bytes": 809,
+      "sha256": "f38a438a8832f1a99b53e882683237dcdabaf9566c3146cb31036938925eb90b"
+    },
+    {
+      "path": "scripts/Features/CodeQuality/site-analyzer-coverage.shared.ps1",
+      "bytes": 10259,
+      "sha256": "550c8e621096c9e1aeb76ecbf5dcacfb87dc75f8790b2c1385b693a2e657236f"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Contracts/OpenLoopResourceEvidenceV1.cs",
+      "bytes": 1783,
+      "sha256": "891c67451b727fc3a24b62c7a496ccc4b6be676100e09e3800d2999640079384"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Observations/ScaleServerObservationSnapshot.cs",
+      "bytes": 315,
+      "sha256": "bf2624a68c588442ed50f309b399799cf8de1b2e5d64744df4c8f8b8c1237e60"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Serialization/OpenLoopResourceArtifact.cs",
+      "bytes": 239,
+      "sha256": "e3afffe6c74193e8ff6033a5b389ea99ae19463308a6f0b4f89e94a30de75bbc"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Serialization/OpenLoopResourceArtifactBytes.cs",
+      "bytes": 1920,
+      "sha256": "1a6b29f0ba9d255e1893ca8d2208850be9c7d9fedbe108ca6d3262e56f6d539f"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Serialization/OpenLoopResourceArtifactDecoder.cs",
+      "bytes": 5712,
+      "sha256": "c5da36fbcc69ee048fb97f6aa4f8596f9d5748ec27539bb5e77a405e595bb4b3"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Serialization/OpenLoopResourceArtifactReader.cs",
+      "bytes": 1843,
+      "sha256": "c5a2c68069be57beb3cedaadfec3e3700b5482afaf65c78de7d998e57997088c"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/BenchmarkComparisons/Serialization/OpenLoopResourceEvidenceWriter.cs",
+      "bytes": 5658,
+      "sha256": "77e506ad407e93be62985ec99c0e33aa514bb6d59069a86dc52ccef11eca1dae"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageExecutionOptions.cs",
+      "bytes": 3693,
+      "sha256": "9dfae8a8e5d41f9e1a0b5c2e40915648bc602976b876805633dbe83508b067e1"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageSelection.cs",
+      "bytes": 1609,
+      "sha256": "d70bce2ddeabe1ebd941fc2ed3d9f67227a58e5c174a7f0470cfbcc497f077de"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Contracts/NativeCoverageProtocol.cs",
+      "bytes": 675,
+      "sha256": "779cbe2b93817589540d2a4c83c29a5415eb5b8c1bf710335d7301745685d4bd"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Contracts/TestSuiteProtocol.cs",
+      "bytes": 3401,
+      "sha256": "d62d7ab3914666cdc5bcb9a432b8f94a36d510741762fd2e64e4b3f7009de963"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Execution/TestSuiteSettings.cs",
+      "bytes": 11776,
+      "sha256": "54117cd94a9df05f3aa4f3caad6e99b0bfe4d8f6a19c7c302d8390b845db4ba0"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Execution/VectorTestSuiteSelection.cs",
+      "bytes": 2392,
+      "sha256": "84e6b1a6f716b906d62b0fd883a56fe4a717c21e4b47e2fa38a59ddfb3a4afc2"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs",
+      "bytes": 7247,
+      "sha256": "707f7a5cfaed004334bd4866cfcf25061a0570b024943933221a8be114b307a3"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Validation/TestSuiteSelectionValidator.cs",
+      "bytes": 9195,
+      "sha256": "7ecf6537490abaa5e9b9ac5268a85d1403cb405590bd91a065d1c79628a0cdd7"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Hosting/AppHostOptionsRegistration.cs",
+      "bytes": 8696,
+      "sha256": "f94cb8c6e0d7700327cf6a8c79f8cfb9fabf1f20ecefacc849877ab632ad1395"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/KeyLoad.AppHost.csproj",
+      "bytes": 1604,
+      "sha256": "f84ddf24ce75b6ca20c5658b0a6c8dd81111b9492659f8aa9545c62289afec9a"
+    },
+    {
+      "path": "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/ArtifactTransfer.cs",
+      "bytes": 1994,
+      "sha256": "6d0bff584fa6af2054e75b1de1d3b51eeeb2d7a5b36c127373558312f3a6d97e"
+    },
+    {
+      "path": "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
+      "bytes": 7484,
+      "sha256": "729a394e886e004a00eadbec95dd81906a8bcceaff23b50e08208132f97f7538"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/ClientApi/Configuration/KeyLoadClientOptionsRegistration.cs",
+      "bytes": 1200,
+      "sha256": "71646a3ed56e9b550c4d2268ac4830a234d77d55f106d05b9f08bdff2b630a6e"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/ClientApi/Transport/BoundedProblemReader.cs",
+      "bytes": 1740,
+      "sha256": "7702dfc6c4ca8ac2e8052d0f116ff6f7ab239f291980cd01b3b71d0bc132ed91"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/ClientApi/Transport/KeyLoadClientTransport.cs",
+      "bytes": 3096,
+      "sha256": "164e712c0d7d1a88441961586ce8480119e75c2f630831c9689114892590d93a"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/EventStreams/Configuration/AggregateReplayWorkerOptionsRegistration.cs",
+      "bytes": 1163,
+      "sha256": "d5c642aaf75e2da4c46efa3df03def239c4589bae1eff70c995d8c7d80fb581e"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/EventStreams/Execution/AggregateReplayReduction.cs",
+      "bytes": 2058,
+      "sha256": "988a1a6cf9ac54a562b0bcf4e12a32dced536da97ff920cc979f1a5ea3456b9d"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/EventStreams/Execution/AggregateReplayUpcast.cs",
+      "bytes": 4091,
+      "sha256": "412d1728444c2168b33f1ceec31a41030bb9133f23d21310e626918633068f70"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/EventStreams/Validation/AggregateReplayValidation.cs",
+      "bytes": 7493,
+      "sha256": "758efd236c3c6652bb7a6d6e61e96fec47ac017055871656e7ac6e7480739412"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/QueryExecution/Configuration/QueryTranslationOptionsRegistration.cs",
+      "bytes": 1156,
+      "sha256": "4cb63e394528720cf73b3db25a5e0f3be497c4409d87a6acd44ecfcf0038a1ce"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/QueryExecution/Parsing/SqlWriteClassifier.cs",
+      "bytes": 2935,
+      "sha256": "a74e5bbcfc620e3fb36d314f01e341a5abed7b71901844217323f06481715a2f"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/QueryExecution/Queries/KeyLoadQueryFactory.cs",
+      "bytes": 1358,
+      "sha256": "ffc88c00e416a3cc8e77689223fb0b6f7cffefb7bc22e7f9eaee9315d5cc47be"
+    },
+    {
+      "path": "src/KeyLoad.Client/Features/QueryExecution/Transport/SqlClient.cs",
+      "bytes": 937,
+      "sha256": "bc78fd88b09b0524d5a4adeb9510ffe5c62d5228d2c971e1aa2b4a04a6e26ee6"
+    },
+    {
+      "path": "src/KeyLoad.Client/KeyLoadClient.cs",
+      "bytes": 22743,
+      "sha256": "d5395a600acc819bdf616741377a6b65706cb4c57b4afd4ee7f6dadc4e5a3a46"
+    },
+    {
+      "path": "src/KeyLoad.Core/AtomicCommandCommit.cs",
+      "bytes": 11362,
+      "sha256": "22b11cb922f317b1817db0f33107e31dabd6f97ad6d605374b6729ffbb9a5200"
+    },
+    {
+      "path": "src/KeyLoad.Core/Features/InternalSerialization/Execution/CoreTestVisibility.cs",
+      "bytes": 1255,
+      "sha256": "8b14acb0fcb89e4f519ffa6c3fc5692a239db9f4b85f47911e53b7bc85a9fff3"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/ChangeFeeds/Contracts/LiveCursorClaims.cs",
+      "bytes": 747,
+      "sha256": "1f1bd13e622ded06f9a17f1f313c8b5244b608d21b2a2e68060cac44535aeb84"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/ChangeFeeds/Execution/LiveQueries.cs",
+      "bytes": 1576,
+      "sha256": "44c415580f531c845ca94195f98ba50730ad37ee99b05753a9ea97789b677e89"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/ChangeFeeds/Queries/LiveQueryExecutor.cs",
+      "bytes": 6395,
+      "sha256": "5bccd2b9ac715bb8a40f4b5417b39f085563f716ecf44fc532fe797a574621f9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Configuration/QueryExecutionOptions.cs",
+      "bytes": 5003,
+      "sha256": "8632a8a94ca9e3e5542c16998a8240230ad076adca0dcd48d8b37b6cfb4b0449"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryCandidateV1.cs",
+      "bytes": 397,
+      "sha256": "7e39b4b958b18d0b45c4c54e7ff22d3a89423bc226ea266e4d8e6dd74fdcb71a"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafPlanV1.cs",
+      "bytes": 475,
+      "sha256": "e8fe666038b7e79a9dbec4e6878f7d084a27408860d54ebacc0568f4347d666d"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryLeafResultV1.cs",
+      "bytes": 779,
+      "sha256": "2618dea5e889188ff3385b3e9e89072304a2c4e8f9a1231c41e1a5742ca00a8d"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryPlanV1.cs",
+      "bytes": 592,
+      "sha256": "1361234218b35e1c1012f56ae1497a2cc54827335efa3ff31678154ae2594dbb"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQueryResultV1.cs",
+      "bytes": 545,
+      "sha256": "c079768baa64a945852e0b62d816e7cf6c74f2b736aba323bc12371a3f5a3cd9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/PartitionQuerySerializationAliases.cs",
+      "bytes": 517,
+      "sha256": "783dce44532341caa96747a6f4690d32801495a7a6f5cb94513ce2b2a4f59299"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/QueryCapabilityCatalog.cs",
+      "bytes": 2090,
+      "sha256": "805895c201b727097adfdfba705d8e8c6b9b1d04c3459fa05f99f07c0450880b"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Contracts/QueryCursorClaims.cs",
+      "bytes": 1905,
+      "sha256": "f1520de4ec3f36bb00a6d48b94c360caba308626af93f4777d57713acd4cd76d"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/ModelQueryExecutor.cs",
+      "bytes": 4342,
+      "sha256": "4f6a44873b499e44fcd5c031cec6e554610dd6dbfaf3c19382f78d57c8302939"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryExecution.cs",
+      "bytes": 4192,
+      "sha256": "bcdd7bb052c53ecda766e440b20f8a30e57eb8740cc75cc9a5a39da872ea9546"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafExecutor.cs",
+      "bytes": 3467,
+      "sha256": "052326c26857e0076a30b25d41a67ab4cf47c4b4e73fb317e2ad5f184b1afb25"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafReadGrant.cs",
+      "bytes": 898,
+      "sha256": "3bfebf25296ad3f1279794e1aeeaa1afe0d7da7ff7600d46f585e15f866c6d4f"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryLeafRetention.cs",
+      "bytes": 1581,
+      "sha256": "83b0830ff759849dec6c70db3bd423af644ef1224e03a3b1dc0e8e487988c26f"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryMerge.cs",
+      "bytes": 10393,
+      "sha256": "c27231494d9cbac18cdd08a5960b3f95404fda71ab2cceb72bee89c876b2c5c8"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryOrder.cs",
+      "bytes": 2747,
+      "sha256": "85db24ff191c63866673e4f05f10281acf86c185c7ef65764aa83cdec4f5eea4"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicExecution.cs",
+      "bytes": 1522,
+      "sha256": "af1574c82ed6a0eaad1043ac61aafe1e1d588f7d5dfe0755a3e0c7a8fd2c15b9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryPublicMapper.cs",
+      "bytes": 2801,
+      "sha256": "b08fb2672c4e633cb6b128a9809e436bb62b86cfa9dbe9ec64db955a54529b33"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/PartitionQueryRetention.cs",
+      "bytes": 4295,
+      "sha256": "772cbd9a654702f431605b1616201c23c871c8ba8cf883b7c2a8f18767021174"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/QueryRowProjection.cs",
+      "bytes": 1513,
+      "sha256": "e0cd6f751c6c0cc41981ba720fd59f03cbeed58b2e8fc133702d563cde6a4e94"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlCommentSyntax.cs",
+      "bytes": 358,
+      "sha256": "e32f7bcf60584bac4291f0f361a458bdc7ac542e6c17c2c2f89d4855227fa3a8"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlExpressionParser.cs",
+      "bytes": 5218,
+      "sha256": "c33bc570c9ff2ba082a69237d0d787ed0a358d6db11ab7a7e8ca873ce1168966"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathParser.cs",
+      "bytes": 3778,
+      "sha256": "b1e25f49eb71fe511dffbc6189ce9291871213b5cbeb7b1681a2b014acefdd24"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphPathValueReader.cs",
+      "bytes": 2494,
+      "sha256": "35860d3aedd428c449e9b0db76dd50e4d713aedc837a278a414cefda12992dfd"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchParser.cs",
+      "bytes": 6481,
+      "sha256": "fcd718f4d33b13559d8ceb294e820af1411dc56620a97432681824f8f80525e9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlGraphSearchValueReader.cs",
+      "bytes": 6286,
+      "sha256": "fa09db2df48e2f03340cd00d4bd1a737d7df076adbc1592aad3f349e981c4903"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
+      "bytes": 8024,
+      "sha256": "fa871245490901aad23697d26e6e96a5a69ed3c5853ff4be72a0909c116adfbf"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlSyntax.cs",
+      "bytes": 2571,
+      "sha256": "772b7dec8acfb415556d7c171161b24ee285f116eda41280e584b79285e576b1"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlTokenizer.cs",
+      "bytes": 7099,
+      "sha256": "d646bd7da99093e12d3b1bb6967e67624c9fb2a42137a602751755743c2a18d8"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Identity/ModelQueryPolicies.cs",
+      "bytes": 1055,
+      "sha256": "4c92899f074e1c5c775002ba9994e366065115bef2c1eb9a61b4d17b90cbf2fe"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/PreparedQuery.cs",
+      "bytes": 8619,
+      "sha256": "4f6afed6518b462c55413183c241e9505cb212a53f209210e65cac16102b5aa1"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
+      "bytes": 8493,
+      "sha256": "38c477130795452074fdab0bb535fce058e894cb9ce5e1e56c07ec86f6f3415a"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryCandidateReader.cs",
+      "bytes": 5604,
+      "sha256": "918173189787856a94e8839c63193c48c3ff36ac613a40ae29620dcfb8970a57"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.GraphPath.cs",
+      "bytes": 1635,
+      "sha256": "b8c5946167e5ca5e15b2e6d5411f85258f337146a421d7da7e4efbab84533db7"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.PartitionQuery.cs",
+      "bytes": 1121,
+      "sha256": "c6e3b276b8733730a6d1a4a7d3f4777ecd37ec4075b20971b144f7e50e1539f0"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
+      "bytes": 11705,
+      "sha256": "8427b185372b3d82fd91df4f03796a7dfac769503015112d6a19e95f369f6884"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlGraphSearchExecutor.cs",
+      "bytes": 845,
+      "sha256": "e63efaf8616fae60b01c65f27969d38016384e1fe981d4914ef47bb5910a704f"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Queries/SqlTokenCursor.cs",
+      "bytes": 1246,
+      "sha256": "01dcd3cce19a690cbf9b96462bd722cffba41fe30bec8e4f7550485b4dcfae42"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Serialization/QueryRequestIdentity.cs",
+      "bytes": 386,
+      "sha256": "90e64c8ef6e332be6239a75e76f5f1235d72a8c3e5f7e15f095fc5d088a25001"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlacementValidation.cs",
+      "bytes": 1579,
+      "sha256": "1d0eb59b9f6dd9ad1be694295775de2cd8bd182322e0bae94f269cfc1906e2ce"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanFactory.cs",
+      "bytes": 4368,
+      "sha256": "be1b1e2ea0fa0265ce66c3c774990e83cebc65dfb91d40e7c8df19f22430e84a"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPlanValidation.cs",
+      "bytes": 5596,
+      "sha256": "6af6e9f8f069ee4a3ade005a35a58e62c7182c2136baa746b2c2f071648aeea8"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/PartitionQueryPublicValidation.cs",
+      "bytes": 3839,
+      "sha256": "88c6ad6cee07cefec1b640175d3639f426242ad528d7da591c4ed4050c160208"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryFieldAuthorization.cs",
+      "bytes": 591,
+      "sha256": "92c99691eaf60a04806c4055d9f20521bb2e9938affaf5816869bf67e742de66"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryPredicateNormalizer.cs",
+      "bytes": 4381,
+      "sha256": "a72acbd1de1e88a91047c220e088809dd12a3948923ab30d88648432fac34f31"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/QueryValidation.cs",
+      "bytes": 7078,
+      "sha256": "34c357b9204e78774c281fd5325ae8939f21718d29b97c8206fd75c5f43d8e63"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathRequestSizer.cs",
+      "bytes": 1159,
+      "sha256": "8d0cafa7ec048ed33cc3fb3ec804f3b5afb3a230c97bbe04cc44175c9a01657f"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphPathSyntax.cs",
+      "bytes": 949,
+      "sha256": "b961b4d0adfbf4a0f118b0b9e11d21f007e71a92f3d8908f82d1a4eb0e714bf8"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchRequestSizer.cs",
+      "bytes": 2830,
+      "sha256": "c8388548e1c4d7d4b9d48b804a5302203f29912661f52c35eabce72717fceb62"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/QueryExecution/Validation/SqlGraphSearchSyntax.cs",
+      "bytes": 1960,
+      "sha256": "84ca325ad021f6c2535fb9534dbb6e6115024e5964d77225e34ace991c06df94"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Admission/AnnWorkBudget.cs",
+      "bytes": 2845,
+      "sha256": "42fe0939f9c82d8f2bd3b0856e7374fee3a00e743ee6e0123dcb9b20e068e7b0"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Admission/FilteredSearchRequestSizer.cs",
+      "bytes": 691,
+      "sha256": "e9bdfe5e7044242aac82d93c87ceec76ea6edc5d716c58c755c3ceba65d80c9d"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnAdmission.cs",
+      "bytes": 7654,
+      "sha256": "a1dd2000494f7ef55a420c96fddb3260096ae745a91638f4ac0a9adab27f105c"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Admission/PackedAnnReservations.cs",
+      "bytes": 3213,
+      "sha256": "2e4fbc453714bb09f6e56a69f39467133f2eb14d5ee851d390bf8dcbc2ad8cdf"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Configuration/PackedAnnOptions.cs",
+      "bytes": 4902,
+      "sha256": "4af5616229901664180a58beaa1e68913d0d21ae77a68e117ead4cad8b4abeb9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Contracts/GlobalBranchContracts.cs",
+      "bytes": 3269,
+      "sha256": "bd11abfe9f183880ca4aaebced529d78333af7f4fd90938daae25dd26487c106"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Contracts/IPackedAnnSimilarity.cs",
+      "bytes": 149,
+      "sha256": "3ad1e97be4c5f521768e100ce599fd5df36537f6a156d17f9de8499697cb9917"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionContracts.cs",
+      "bytes": 3221,
+      "sha256": "52aafc41ac5b7860479fde14fd8a61539477d2c817053cbfae2170459ba234e1"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Contracts/TextProjectionProtocol.cs",
+      "bytes": 620,
+      "sha256": "9e1936281436c474921e355b56004be3a5ef45a5e14aff5792db8a3ba4a2b4cc"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuildScratch.cs",
+      "bytes": 1267,
+      "sha256": "9f1adfdb587f396ca3ceccd9ee60f00b09140c05a62f71cc5403b9778d41b70c"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnBuilder.cs",
+      "bytes": 8087,
+      "sha256": "1fbdb057f4a3bd127d72113fc4500f62384962d5a2c8fd8bf1a0837cc0eb9669"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnConstruction.cs",
+      "bytes": 1691,
+      "sha256": "45f243854cab118dafc0cd70c7b5109cbdb8731e62fcdb782abd81970857aa06"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnGraph.cs",
+      "bytes": 4602,
+      "sha256": "f63a45c17da638189b35b5c6e794d3a4123c039299b63aeeb1e6a3d112e561fb"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnIndex.cs",
+      "bytes": 2242,
+      "sha256": "feba50c646493b691f64587638331af5bf93d5cf13fd9c8d990f190694cf823e"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLayerBuffers.cs",
+      "bytes": 3394,
+      "sha256": "583a2ed3dbc108c52a62827e6a66554bf98c675ac7164d40f8ed212f4edbc390"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnLevels.cs",
+      "bytes": 1408,
+      "sha256": "a3a83dfa193661ec14d53bcc611f36f49bf4cd206dd7a6c4713254a7004ce8be"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborOrdering.cs",
+      "bytes": 1652,
+      "sha256": "074fba721ac3eee735fa638e3942f0af1ef2bacc93e5ec1403c0e5bdddb6935c"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PackedAnnNeighborSelection.cs",
+      "bytes": 8120,
+      "sha256": "8004095f65f53bda1b540b118765e958fe0b2bbd272002374f4ca18bc168d66a"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/PreparedSimilarity.cs",
+      "bytes": 3057,
+      "sha256": "240f2a8346d0187db4c59fd04579c7c690bbedadbb934361e4067cb76c509d8e"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Execution/SimilarityMetricMath.cs",
+      "bytes": 5873,
+      "sha256": "8ee505a817201c927b314d6219bc758e42fb7f3cf813024d5dca69c5ab4c5616"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Lifecycle/TextProjectionLifecycle.cs",
+      "bytes": 1013,
+      "sha256": "bbc8db7ef17df47469b924bceebfeb80bcc5a427a1576105c8b7fdf4d422da22"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Models/FilteredVectorPlan.cs",
+      "bytes": 200,
+      "sha256": "9b0a349ccfc6a305f1e6c9ffe574035bfb64ef926814af9718024d680c9c15b1"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Models/PackedAnnApproximateResult.cs",
+      "bytes": 208,
+      "sha256": "cd06afa1d338b5c71589234f960f39a01327b53d2f84d1238d4eae041e8a62e6"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchBranch.cs",
+      "bytes": 848,
+      "sha256": "11852f3a6b9e965974f8d647efbc932279b6c6afee8ecda833962d6c592a92b5"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchCountingStream.cs",
+      "bytes": 1134,
+      "sha256": "b4414c6f67f7896dd19802943786d1411d64d812b55fa927acc4721d5e6ce039"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredSearchErrors.cs",
+      "bytes": 389,
+      "sha256": "1d9e7f5e66d1ab6b417f11e39183dfc49b7a7088867a334c0b95459042ac8142"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/FilteredVectorPlanner.cs",
+      "bytes": 2168,
+      "sha256": "782831faaae15571c2afeece8349d10816e6afca7e661bbcea81fcbd02b41fd3"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchByteAdmission.cs",
+      "bytes": 676,
+      "sha256": "d9967f92554c63a6dda1cc88e40389b6ecff745adbc25aeb979eb59f586ab388"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchOrder.cs",
+      "bytes": 3966,
+      "sha256": "b77fe517ac11d666aead2d47338a4320789e4a4462ea6500882854c08a1793d9"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchSinglePartitionAdapter.cs",
+      "bytes": 922,
+      "sha256": "2c3786d8030185ef7a88bb01f125dce56931d9b28c9f8b0be40dfbf473a2f5ed"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GlobalBranchWindowMerger.cs",
+      "bytes": 6737,
+      "sha256": "38f71521f777d5c98e94798dce80a7757bd414325375e815db6d64db15a6e3d0"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExecutor.cs",
+      "bytes": 8328,
+      "sha256": "b19d6d6582e159857b14368c802c78ce260f0e845b85dc5d334659b3dc0f4d32"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/GraphSearchExpansion.cs",
+      "bytes": 4701,
+      "sha256": "61555d6dfc74259d2fb6c759c00b003997d8cebf7c6e55a731e27c4dd187b177"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnApproximateSearch.cs",
+      "bytes": 4286,
+      "sha256": "91255f942cfe925f329293620eb341ea5931b6c7fc47e256653b84ff37933194"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnCandidateHeaps.cs",
+      "bytes": 7830,
+      "sha256": "794c2d377fb4e2be82940e3956e21a13a3d6d025d1fce942a5750e1afb013949"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnExactSearch.cs",
+      "bytes": 4442,
+      "sha256": "968f947333e16f0c9ffcf7e2917b583e846ef051ae72e90497a0efb86dfdce22"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnLayerSearch.cs",
+      "bytes": 6250,
+      "sha256": "6e3bfc60cc55fb9eeea1996bfafd1a8326cd955d20f8ec8bbd939f893277205d"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnSearch.cs",
+      "bytes": 7459,
+      "sha256": "faa8ce1f53279e0e46bdec7b4930415af446d78b0686eceec3efe62fad0b9f76"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/PackedAnnVectors.cs",
+      "bytes": 4211,
+      "sha256": "0b6f9cd3c99ed5f8700de0b8307d58f2933688480b98207c0ed9ec0fe5ac8c63"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchBranchExecution.cs",
+      "bytes": 3381,
+      "sha256": "097e5d27c85c209c28e9b2cd73be130e7bfad09d88fd25e2f31c0010f758b992"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchEngine.cs",
+      "bytes": 7356,
+      "sha256": "7e20cd58e3dd69fd3afa4dbc81beef838cd6bda5a192591c47a12aaf35365195"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRankFusion.cs",
+      "bytes": 1691,
+      "sha256": "59cac8d89a79dc5f4e665550d8459ce7e097149cf274001af9e39ad311a0bb93"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchRequestValidation.cs",
+      "bytes": 2181,
+      "sha256": "e58b9eb1d9d7854f31d56881a1c2bd322e2ca1bdab2193a0383eab23515496e0"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchScore.cs",
+      "bytes": 122,
+      "sha256": "3d6f26e9663abe2fa5427627aad070342c1ec2dc36d4f563b7d2d2f6dc66d762"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/SearchTerms.cs",
+      "bytes": 1906,
+      "sha256": "fe6691808a1452f707e640e74dfdcf3128742977142a3a629b643299c8572ed3"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/TextRanker.cs",
+      "bytes": 4572,
+      "sha256": "b8626ea3620c068293d784df019a3dbce214ed354dbb449bcbe6b31e9888a42c"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Queries/VectorRanker.cs",
+      "bytes": 1043,
+      "sha256": "0e621b02aa5260832fc4715efd603f7ef369e3e52e482408494bafb7746bfa87"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Validation/FilteredSearchEligibility.cs",
+      "bytes": 1954,
+      "sha256": "29c0c9adc4089aacafb9dccd9abeaf818ccd9a1d50d991f5238d47ea8628dc14"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Validation/GlobalBranchValidation.cs",
+      "bytes": 7052,
+      "sha256": "85e283f0366a12b67e479a8016195c03dc36c3d83d8a62e6a8609dcab96ebcce"
+    },
+    {
+      "path": "src/KeyLoad.Query/Features/Search/Validation/GraphSearchValidation.cs",
+      "bytes": 4732,
+      "sha256": "8f3afe4655cac1ba9aa78b579030e59ba6fc58e8fffdbbf70e4e9a7330772434"
+    },
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/Execution/ReplicaConsensus.cs",
+      "bytes": 11598,
+      "sha256": "f73472f6327739875bb6e1196fdd8f81990a9cdedf6421c2b767a718462e30e2"
+    },
+    {
+      "path": "src/KeyLoad.Replication/Features/ClusterReplication/Queries/ReplicaReadRoundExecutor.cs",
+      "bytes": 2471,
+      "sha256": "0b992bac077ad22db5bfcc35567aff6f172e8c3022b8641c657457c52de37269"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Assertions/IsolatedNativeOpenLoopAssertions.cs",
+      "bytes": 11334,
+      "sha256": "12c335b8a7214cbe7faf130e53b5c38be40ee2265fb95c163c5981c49f13fbc9"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Assertions/IsolatedNativeOpenLoopCancellationAssertions.cs",
+      "bytes": 1707,
+      "sha256": "bfa1b4ce4bc5531153817237bb2d3bcd54e233f3aa284c9df3e0de2ca67de486"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Assertions/IsolatedNativeOpenLoopResourceAssertions.cs",
+      "bytes": 11212,
+      "sha256": "ca478cc09225670b799247ac70279e2a082968099d34343561e591b7bb3e7182"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Assertions/OpenLoopCancellationProofValidationForTests.cs",
+      "bytes": 6904,
+      "sha256": "a8cf04ec2fed942d92b84955084dde2e47b0f4eba116755153385f39937d883b"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/IsolatedNativeLogCaptureConcurrentDisposeTests.cs",
+      "bytes": 6603,
+      "sha256": "d1a3ace49d43bd188ed2928a7aa4509739c63409cf1d6eb073cfcd2305c9caf4"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/IsolatedNativeOpenLoopCancellationTests.cs",
+      "bytes": 511,
+      "sha256": "f2356fd6a2a39fa9df151966186e915a4e301b2127b2fefacf26da4dcc829fda"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/IsolatedNativeOpenLoopComparisonTests.cs",
+      "bytes": 476,
+      "sha256": "71b17576c86989efffe59be078d75fab1b958052f8fd48dccf11684b2896ccef"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Contracts/OpenLoopNativeTestOracle.cs",
+      "bytes": 3722,
+      "sha256": "67061dc75b730a392a826587d4a77222cd4c3e659c1a87276bc74ab0ecd1ff5f"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/ComparisonTestLogCapture.cs",
+      "bytes": 7973,
+      "sha256": "7e9d047cd50ea12d6fe13970a947f2523c9e5277612144b4a997fe6218ebf1c6"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeCase.cs",
+      "bytes": 7753,
+      "sha256": "a180e6594d9c941b767f360ad6cd13da20e1d2db5dd0c5a62c225d2cecb82f02"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeOwnedWork.cs",
+      "bytes": 3326,
+      "sha256": "e4072392a482ee83001191e35ae304aca8f591ef83e77f8d9332aa961b7f5f45"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/OpenLoopCancellationRequestPublisher.cs",
+      "bytes": 1860,
+      "sha256": "864e3a2e4806531d454abc6fc1efd06fc15df5a204769cfbf6000793d6e2355a"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/OpenLoopNativeCancellationControl.cs",
+      "bytes": 3542,
+      "sha256": "5117c8537406c254fb4dfaa943bc3a3caeb5ec59fe5380d850e557d0382bf274"
+    },
+    {
+      "path": "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/OpenLoopNativeProvenanceValues.cs",
+      "bytes": 757,
+      "sha256": "ff8e5e645f159adfdd2206837e5ac5f8a0a744a43a77b3806e2a737d1ac6d083"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Assertions/ComparisonLiveProgressAssertions.cs",
+      "bytes": 1685,
+      "sha256": "6e2ef1de31513eeff5883f998bcd6c5b6aff2f9dfeae5386997ab98b263d30da"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Assertions/IsolatedDatabaseMatrixAssertions.cs",
+      "bytes": 8481,
+      "sha256": "dfd1b7c833c04697c5eb9d37468dbbbbcce1beb32055bb9a237f058c6e3f8371"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Assertions/IsolatedOpenLoopHostAssertions.cs",
+      "bytes": 2474,
+      "sha256": "aea51bb435653dd8d8277f23c91a9b19617d6590b655e6baf70a218e390306a1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Assertions/OpenLoopPlanAssertions.cs",
+      "bytes": 4650,
+      "sha256": "ddcc517fddbd4590ab5c5e4ff84377d63cce6f6cfd17ebc3f91fbc2182919be5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Assertions/OpenLoopPlanJoinAssertions.cs",
+      "bytes": 11236,
+      "sha256": "3e1c4fd841c7493b1ba63214319abfd046d9c028619b9629a6d803b72cda9477"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkMembershipUnknownMetadataNoEffectsTests.cs",
+      "bytes": 5144,
+      "sha256": "2915e43218e8622e6336702469d9148cc17e46f6c4b39d03c3e23768eb5898d5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkTopologyConfigurationTests.cs",
+      "bytes": 7025,
+      "sha256": "4ccf61ced0eb1ea3beaeb82cc928e9058e6eede5bdf1eaee00975cf6dc059049"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkTopologyMembershipCorruptionTests.cs",
+      "bytes": 5824,
+      "sha256": "4e449a9fd2ad63be8087f840217981f1766c616330b5b8d461bfc9b83589448e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkTopologyMembershipTests.cs",
+      "bytes": 5847,
+      "sha256": "63e985cc088d7c8effd27f2f774e79dc2a17b3b037828bee66a9ccdb6ba768bd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkTopologyMembershipVersionTests.cs",
+      "bytes": 3597,
+      "sha256": "ff1821a1419b2aedfa28dd9c23660e21363efd0eae114f25a01727a599de73c7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/BenchmarkTopologyTargetTests.cs",
+      "bytes": 3207,
+      "sha256": "f3f58d3c05fd3921ba90c06ddef8b901cb5f8ed4e898fe0ac921d509a07a582d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonArgumentTests.cs",
+      "bytes": 5964,
+      "sha256": "908b9de3033ec9b129e95afd0f03a8b660878bfb471cd9ea4bee694770973dbf"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonCorpusTests.cs",
+      "bytes": 1879,
+      "sha256": "3700f8a65667b0fcc325a99c1e4a0a35c0f6f99a6ddb042b46f3be0020bf41ab"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonExceptionTests.cs",
+      "bytes": 1380,
+      "sha256": "9785382de6d73afce19a4058e0f3dbe0a254e707163b90f258acb4eb70fa8da0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonExecutionIdentityReferenceTests.cs",
+      "bytes": 2338,
+      "sha256": "18a13ed9fc0fe8dbe8dd58e75ba2c1627f037b7a70da5f9b849dba4427072587"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonExecutionIdentityTests.cs",
+      "bytes": 6799,
+      "sha256": "559d0fbe07f56f5bfd99719deac60b131936fbb38a6ca26a1d66aa5814e1701b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonExecutionIdentityTimeSeriesTests.cs",
+      "bytes": 3475,
+      "sha256": "7dd12b47db593e44effb7403fd92bb38b1a1d0c24bc877b19828509ec5706ec2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonGraphOracleTests.cs",
+      "bytes": 1350,
+      "sha256": "151ca3c0fcc6709ecc12cb0d78610d69a331f0fba95d42b84fcb09c6ed9466e5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHarnessTests.cs",
+      "bytes": 6381,
+      "sha256": "fc0be74b3b56344017e9582399c3f06a06a21d983faff0677a37dffa1ea31005"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHostBindingsTests.cs",
+      "bytes": 6717,
+      "sha256": "7f064705d4b7302317523a2d1aae14e64a7ffbff712a54c8fe42cf1c1be60f76"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHostCleanupTests.cs",
+      "bytes": 8007,
+      "sha256": "87f5a5061f05428dcddd351bb9fa4f6f4ef7042a71f7fd5b544705fa36ccb726"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHostStartupDiagnosticsTests.cs",
+      "bytes": 9197,
+      "sha256": "7cf27216e0adeb8f08212e1d35194b2b73e90ad6a18cec4c7a9a01831a2c0cf6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonHostStartupTests.cs",
+      "bytes": 3539,
+      "sha256": "19d515f3ea696be1c274afbc6841a36e951b4c0b0b4e7012674270c8f0d563d7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonLiveProgressHeartbeatTests.cs",
+      "bytes": 2108,
+      "sha256": "d07981cc208d11bbeb32a6e4d82071f0afa82affee3f228759da2285bfb1c036"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonLiveProgressObserverTests.cs",
+      "bytes": 4002,
+      "sha256": "45fac99f173c2085bf91b96cd874d69aba3e3394eea7a4181c9ec27b47a935da"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonLiveProgressRunnerTests.cs",
+      "bytes": 4490,
+      "sha256": "4f5b1bb29eac3d6c9925d262b7ce3397e017ed23b81ae6e4754e3e40fcb1056f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonStatisticsTests.cs",
+      "bytes": 1225,
+      "sha256": "657d91013a3b59399919f46f7212d80e9f6365f279efff255b1af519fd483cf8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ComparisonTopologyTests.cs",
+      "bytes": 3541,
+      "sha256": "4442a1cf8ca2de0c9ca02ca2612e5cdd9c6b3c62b548e50277058ba0dc990e8a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/CompositeSiteContractTests.cs",
+      "bytes": 3697,
+      "sha256": "9a36aabc62ad4b40a1fdb03e2a453f81242ad3e7dc7c569c29a552de2898836f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/EmbeddedBenchmarkContractTests.cs",
+      "bytes": 4753,
+      "sha256": "f1339d4ab90eb544e572ee56f237d0dcbf21116aa2559ca5bd91bbcf5431ced4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/EmbeddedBenchmarkGeneratedConsumerTests.cs",
+      "bytes": 6502,
+      "sha256": "5a4bc9085c7bcc64fe66464692de5cf1b16574d2d91548adb2526d90af150761"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/HistoricalBenchmarkContractTests.cs",
+      "bytes": 3959,
+      "sha256": "27a8bd25d16975b5d307b7ffc2bee37f9a933373b6e9355ca684a0e9f813bdbe"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/HttpTargetArgumentTests.cs",
+      "bytes": 5141,
+      "sha256": "a23bfe38448c94b6267b8ddc618a4b632d3f7dc87dade859210d315b2ed6be5b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImageBundleCliTests.cs",
+      "bytes": 1772,
+      "sha256": "d26cf7164dcc87477c3354ac6800c1d0fecd8d99565b240484e0c33eba8ead79"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImageBundleFileTests.cs",
+      "bytes": 2415,
+      "sha256": "77312e91cd17dd0c1100c0f6ce08d35ff0d3680cd267ac9e18d4f09256fe3f3c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImageHttpDeadlineTests.cs",
+      "bytes": 2350,
+      "sha256": "d821bf900118ee7e21f71437d88945525699cacbda0cda4b4ddb4e80ebcaa797"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImageRegistryReadinessTests.cs",
+      "bytes": 1683,
+      "sha256": "a7b3e459aa68bfe05b3a86c438d6d7cb10044cd112863ed64a5bd30bbb5fadc5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImageToolingContractTests.cs",
+      "bytes": 14883,
+      "sha256": "d374727d8f0eef40fd246e2144238d6138ccc6ffacd94c3c346a0476d4cf5452"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ImmutableComparisonContractTests.cs",
+      "bytes": 14026,
+      "sha256": "e7e89492c426abdab30a750b304506879d9585c096875804782bd84543ec65eb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateCliTests.cs",
+      "bytes": 4939,
+      "sha256": "dcf55930cc07018d2f9e2297df68789476eaa889ee96361c82c24ad0bd45bde5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateEnvelopeTests.cs",
+      "bytes": 3333,
+      "sha256": "00d625da8db6afe925f4acd3710148fb4342e9c7a52e191cb161681bbe205300"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateFileTests.cs",
+      "bytes": 2844,
+      "sha256": "cc63569aafc78a86e1fc0f64f88b3881a8bdbe79c4cf61ada1f3a4a76c8f49a8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateInventoryTests.cs",
+      "bytes": 2439,
+      "sha256": "cf5105f90917e09dccf3c08fc192beea63ba20f805004133555c2ed85fcbb35b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateJsonTests.cs",
+      "bytes": 1932,
+      "sha256": "7983acfcfd07b3b31af21befa11b5d698175b5d206c64a72993a22eb75f095a0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateNodeLifetimeTests.cs",
+      "bytes": 3386,
+      "sha256": "3f33752858ac365295bc444bd66b45e4a5a784a44b2f65c376673529761799a8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateProofTests.cs",
+      "bytes": 2742,
+      "sha256": "62d1e951c3391842a0fd537b1e85275ff9ca5ef9d37d1949a26f4d04919ea068"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedAggregateUnsupportedTests.cs",
+      "bytes": 2739,
+      "sha256": "df9173bd9627e0e556bae0b6cad4d31e3f3b6c6387922f8cd6be1c37b32bd42a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedCurrentJobCacheTests.cs",
+      "bytes": 6695,
+      "sha256": "24a6c9badd2dc8eea100c7d44cfe9da03cb12015a2412ae344a12b871baa8827"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedCurrentJobTests.cs",
+      "bytes": 2114,
+      "sha256": "8ee29953c4f40e123c8d7393647e616bf3167be8d116dc752bbce6d6eeb8847b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubCompleteTests.cs",
+      "bytes": 1419,
+      "sha256": "1fcd348f98bc6dd4935a4a9a847093ae518641ddcf170b1b33c486bc37ab2ad1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubFileTests.cs",
+      "bytes": 1147,
+      "sha256": "08d573bb86524a83ab582c259e7d00ec3a0ddf66e813e4b77b17f1e18295b045"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubHeaderTests.cs",
+      "bytes": 2138,
+      "sha256": "26872a7e86d4a3959eb9642a42422e0605f7187ba4c0a4c1669397264b43713b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubMetadataTests.cs",
+      "bytes": 1790,
+      "sha256": "0e04a3590c3936182938b4d1270f4a2abe5d53d2c0608eae6d6c34182554b74c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubRateTests.cs",
+      "bytes": 1141,
+      "sha256": "b7658bc7f7be390c3801fbfb3d66c438db4db82da79611e9bc3555bb08746989"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedGitHubTransientTests.cs",
+      "bytes": 1946,
+      "sha256": "549b5c4c25d173adf3a451aedad4a5624843f22627262d7642b617412a00a126"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedHostConfigurationTests.cs",
+      "bytes": 4590,
+      "sha256": "f30913e0b5bc25f8e1eef531dca90be5a7ed5524ba2e714514440b245bb18e73"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedHostNativeParserTests.cs",
+      "bytes": 831,
+      "sha256": "8d156dc360cd9a7060e2faca271671748ba2eb2f3a9b6bb857a0906f518f9167"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedHostOutputTests.cs",
+      "bytes": 6725,
+      "sha256": "a8a349df3b13e768ece4e17d63a6f3c688a6ab688a683f035b2eb890bc7baf0a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedKeyLoadMutationTests.cs",
+      "bytes": 1274,
+      "sha256": "4b7e471bd01f1f49f4eae74a6f25e53470003a29daf390c8b7a4784f20db2fc5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedMutationCorpusTests.cs",
+      "bytes": 3056,
+      "sha256": "978bbe4f44eb4b3bb291dfc1a082a876d27afaba5fbd7bccf9ac316bbac5930b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedMutationOracleTests.cs",
+      "bytes": 1816,
+      "sha256": "7e3a90ca1c5b62773225e99ec701acf0992d78b05c4392ad2653a914991f1929"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedNeo4jMutationTests.cs",
+      "bytes": 1407,
+      "sha256": "d331dc7e3946f4d030031d5cc1f91ec4e80d70fd79e2ea3409e5f7767cfb15b6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedOpenLoopHostTests.cs",
+      "bytes": 2833,
+      "sha256": "74e286b621ad5699ef673cd512647059d7941b947d87801e14294c7c7e4dbcfd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedPlanCliTests.cs",
+      "bytes": 5771,
+      "sha256": "80d721a76238a316bfbcbb223734820527e8e1753bd1e7bb5385ecdec0c6279a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedPlanRejectionTests.cs",
+      "bytes": 5808,
+      "sha256": "ca1935c7d861b003c1e4b9653ad57a4177b6ff9660982ee49423ad372c8681b4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedPlanTests.cs",
+      "bytes": 5970,
+      "sha256": "6e0350ba21f1bd024e6b27cc50856f7ac2a88f019985190f0ee9dd3f8ab3eb09"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedPreflightTests.cs",
+      "bytes": 2532,
+      "sha256": "9d097bd5d81f7bf7400b05a443312ff97a195aaf64acfb29dc56502e40da5c19"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedRedisMutationTests.cs",
+      "bytes": 2326,
+      "sha256": "8b6180d7b9d0d5e66dfc670424bb1c09de95e3c0028513fefcf5185c0f3eb69d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedRunnerArgumentTests.cs",
+      "bytes": 1205,
+      "sha256": "cdb3ec25d0baf9b58fb7d07bba2079f50812e0eb9d5f210c47ed666aa905dafc"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedSelectionTests.cs",
+      "bytes": 3496,
+      "sha256": "c4bb06b9e14e1866a045ff933e39d9e2fed3817cd7b5f3de17b7c79b54f55924"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/IsolatedSetupFailureTests.cs",
+      "bytes": 1281,
+      "sha256": "4f3d47b5b1c25f4629bff0d20130043aae41f07ffcd77147d8efdf4a052d2827"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/KurrentCleanupStateTests.cs",
+      "bytes": 6120,
+      "sha256": "443e7331df9aef0acf914e285ca45655ff23c25c74b0b768776166496ac655b8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/KurrentGossipVersionTests.cs",
+      "bytes": 5775,
+      "sha256": "a13667d49c866a074d7800656f7d5261afd49d21b99e000ebecee812f5a41d07"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/KurrentSetupDiagnosticFormatterTests.cs",
+      "bytes": 4239,
+      "sha256": "6ea4e3850e134789575f2b8640c4e5272b5b68962fdbe512d6bd008c0b6424eb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeBenchmarkProgressEntryTests.cs",
+      "bytes": 1811,
+      "sha256": "864473082afe9124c5ae7337eee4f9ad134e6a05ef8825e4fa0f56a288c7bb97"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeComparisonAdapterPolicyTests.cs",
+      "bytes": 5967,
+      "sha256": "a189ef37af8a99bba9be41a8b96f7c79f36439375ee2449ca2e1a5bca4825db8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyKurrentTests.cs",
+      "bytes": 2393,
+      "sha256": "3a9386c947bbf8dcc781ac3c404f04d842b57b190443a4bf6832a11caed05d99"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyMongoTests.cs",
+      "bytes": 6688,
+      "sha256": "0688af0ce093ffa1d9a37ed724a6e912b4d7a4a299624a9739a00ce511649ca0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyOpenSearchMembershipTests.cs",
+      "bytes": 3345,
+      "sha256": "d74dc822881f714b2b9cb9ecdea47932da2e28b4904ef78489f226a69ddcb39e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyOpenSearchTests.cs",
+      "bytes": 5526,
+      "sha256": "8053108998b12d51914173b99273423692f9c3b5f33b31636d044bdd281dbc55"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeDocumentTopologyPostgresTests.cs",
+      "bytes": 4516,
+      "sha256": "15e547e7410afecb3a460fb3847e8cfbce1aa7892c8a534642c1b8960f44529a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeQuorumTopologyConfigurationTests.cs",
+      "bytes": 4636,
+      "sha256": "af86ecc7b411232b7276373f4d324601e43fa7d9bcbeb35b836b6712056eebd1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeQuorumTopologyQdrantTests.cs",
+      "bytes": 7261,
+      "sha256": "c44b0bc24a00391fedeeb8f3d290e0fb62648463789908d04803e56c9d639524"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeQuorumTopologyRabbitTests.cs",
+      "bytes": 4102,
+      "sha256": "009d64e27a22461a09d8dd282f12d042e175fedc9118cb40c93bc8c338c9db39"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkCancellationTests.cs",
+      "bytes": 5374,
+      "sha256": "c343bdcccd2b510388420721b5968a092a1beeb5a1facd88ea8fe3488bb8776b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkCorpusTests.cs",
+      "bytes": 4709,
+      "sha256": "4e5877c3af6897f4d0a54f66c4a9673a51519e3c9997b70495a81a9f3c2d33f6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkGeneratedConsumerTests.cs",
+      "bytes": 3804,
+      "sha256": "8f9641103df35702cee1cfd6f11c3f58f2342fb25afe9b4fe4af36974827baf5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkManifestTests.cs",
+      "bytes": 2839,
+      "sha256": "381cc8f0c239942c8c37cba45e46acc5fc88235815fc473b00edde5d43090f9a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkMetadataTests.cs",
+      "bytes": 2080,
+      "sha256": "db320a346c51e28f329af0461f61bb81b0dec4599a82afd88fb67c9f777222eb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationBenchmarkOwnershipTests.cs",
+      "bytes": 2310,
+      "sha256": "dec9c1f7f124b4a91a2c12321f8a00c43ceb0909cd0dbc2b23f3ad9ffd2491a7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationGitHubDeadlineTests.cs",
+      "bytes": 2210,
+      "sha256": "351199b79712925d5e3c553f66611effae8bed908fb024dcdc3f52a40263b2a0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationGitHubStepTests.cs",
+      "bytes": 5052,
+      "sha256": "d4dfb6682f3deb7e0f122ae5b3921c31651dc1f53de6ff3ad1bfa0215cacc585"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationReportValidatorTests.cs",
+      "bytes": 3378,
+      "sha256": "c829c82f1f19df5a74ab203ca970340ff363fb61b869a985eb7cbb014b8e86f8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeSerializationWorkflowTests.cs",
+      "bytes": 2655,
+      "sha256": "d96a9dba32459eb691d4a30ab5c5cc1db92737a1570560e20271d6617cca39b1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/NativeTargetArgumentTests.cs",
+      "bytes": 2023,
+      "sha256": "7983da012e0d3ef821b8e817f99e930a3b1c5dc23bf6a1860c3a3ac9f04bd245"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/OpenLoopIsolatedPlanTests.cs",
+      "bytes": 7786,
+      "sha256": "f509ee8f2d3bae676a55c23f09ad97c6a3f873fcdddfc89538d531aac251feca"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/OpenLoopPlanCliJoinTests.cs",
+      "bytes": 10612,
+      "sha256": "f64580f3441a2930a28fdac8f05c8c4ae41203fc2f59d8ecabd3f58ac1a3bbd8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/OutboxFailureDiagnosticClassifierTests.cs",
+      "bytes": 3979,
+      "sha256": "e8ec49259cea871e0f486306df260b236ac38d4ca3e49ead158214966c71d5e4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/OutboxFailureDiagnosticFormatterTests.cs",
+      "bytes": 7625,
+      "sha256": "94b7ce20f244db6ac64be82fedb1abe43ffd1eada1d7b8ac45b7cf5ce57a8504"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/PostgresVectorPayloadContractTests.cs",
+      "bytes": 1903,
+      "sha256": "852e2dc59cdae41d153cb14108da128e08a4a6392cea5070b094a20e23da89f4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/PostgresVectorQueryContractTests.cs",
+      "bytes": 2423,
+      "sha256": "2e41e9327f5df6869f1198b0b24e8b156e4365ff4e31d23c8bcc49a722f70d28"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/QdrantVectorContractTests.cs",
+      "bytes": 5371,
+      "sha256": "fdd42d8cab3da59ebd8d9418f3b29c4bbe71f98545661f90d3bc92130ba16663"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/RawStorageBenchmarkTests.cs",
+      "bytes": 8561,
+      "sha256": "e86ad7ab69a38d27776e2cb157d8eaa3fbe65dd69a6e11f851df900761aa4df3"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/RawStorageCrudTests.cs",
+      "bytes": 6401,
+      "sha256": "7ae002a462cbc44c3e524e9e6972e24731e6c2c8dc863011de7491c5a29377f4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/RawStorageLifetimeTests.cs",
+      "bytes": 4801,
+      "sha256": "01fb9343924b6a54c2a991b7b3911f43ba1368717d245baf1a0aaa7e66d5161e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/RawStorageReportValidatorTests.cs",
+      "bytes": 7381,
+      "sha256": "84d52d5199118489bf3cf53973baba2ee5338e1ef61701c650e98a15bb8b6669"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ReportFileTests.cs",
+      "bytes": 10968,
+      "sha256": "1a9f11de20ac87f2c6c2a4fbcc78d7e78824c1582157b77ed024ba2542dcac0d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/SampleChunkBenchmarkConsumerTests.cs",
+      "bytes": 5212,
+      "sha256": "6c4fbe39d524726d5613f331788d6ab9d7be3fb869b4765e26c4fad51e8ea893"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaleServerHostEvidenceTests.cs",
+      "bytes": 1352,
+      "sha256": "3366621ca475fe73caced5ad7f233be95f42de66711b50ba0510233a078a5b78"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaleServerResourceBoundsTests.cs",
+      "bytes": 719,
+      "sha256": "1d6c4e96ac6ecf66f02656f83a7bab93302a2de434624b4a9ccdfe3e7239b71a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaleServerResourceCancellationTests.cs",
+      "bytes": 810,
+      "sha256": "97720f491ed448099436925cbf5951832b3bc33c1c66e126435242b4aeb9bab7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaleServerResourceEvidenceParserTests.cs",
+      "bytes": 1807,
+      "sha256": "cce8d04a6732df59ccaf6189e837851938a18946bdd0c6fbd9233a9bb5437f2b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaleWorkloadForwardingTests.cs",
+      "bytes": 810,
+      "sha256": "f5ca314ff81205dc14821382f21d7d5c777470852c3e72f9bd2deb584e705b95"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledCohortAggregateFailureTests.cs",
+      "bytes": 2830,
+      "sha256": "cf1c4e663fae5425a8db212d7dd988d738ba69f22939e20510f4141c286aac57"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledCohortReceiptTests.cs",
+      "bytes": 8822,
+      "sha256": "2dfe835e8a2d273003f0b606c0145eb78c63f6ccdbb17ee379f6447373ce4953"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledComparisonDatasetTests.cs",
+      "bytes": 4034,
+      "sha256": "4b09817d823a484ed07c164797f9f2e352686674555a0111b9941910aab341b2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledComparisonProfileTests.cs",
+      "bytes": 3256,
+      "sha256": "7f6312e23e4aa2922fe88e661fc0f77965272b7e9919668000c825a24abf7486"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledCorpusReadbackTests.cs",
+      "bytes": 4907,
+      "sha256": "2806590f89e9ca0ae53c1226632372a1c3b5c7d0e593eaf31f3d438eca864531"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledIsolatedPlanTests.cs",
+      "bytes": 5478,
+      "sha256": "7f931ccb6c6b254d159f411637f9ce5688838744bbf229aa9565ba7c2ad3f9bd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledLatencySampleTests.cs",
+      "bytes": 1140,
+      "sha256": "2fa4718e935dc4902f7a01277a4955d5584e16d18ad0754ae0001a56468b17f5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageBenchmarkTests.cs",
+      "bytes": 8536,
+      "sha256": "9ab96d7c19c3f6c2a4cddcfc9f9309980b7e0c755aa0b0c0d9b79a9622bae2db"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageBoundsTests.cs",
+      "bytes": 7336,
+      "sha256": "55db9e561ee7935eb7bc23b9f4c440a4b01550d02c4a3abd19dbc9b6c776b315"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageCorpusTests.cs",
+      "bytes": 12128,
+      "sha256": "04fe284b3d42cef58f5e2318b2b81a73ce7ac0507e6d9f5f82a01bf11caa1983"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageFixtureLifetimeTests.cs",
+      "bytes": 2258,
+      "sha256": "fed718368b7e15d82bb2d33ed6e1793282ee80c1afafa567f76d3b0063b40dc5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageFixtureTests.cs",
+      "bytes": 7663,
+      "sha256": "494402bb5352d690478c0909937e0080fc3e34c8b774c5d2202415ef69c69558"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageOwnerTests.cs",
+      "bytes": 6293,
+      "sha256": "0d0080b4c5b287742c0976fc33bb140b721bc77514e46484865fe72d356eb7e9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageProcessMemoryTests.cs",
+      "bytes": 2082,
+      "sha256": "d54e31099e41d8d79a339a7f7eec89a682812ea121b4f8675c86dc51a7f1e6e9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageReadOrderTests.cs",
+      "bytes": 4509,
+      "sha256": "e6a447ad12e9950b1397f9d8655e8290d535a26091b2ed452bec44f9a2dc8c44"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/ScaledRawStorageSettingsTests.cs",
+      "bytes": 2476,
+      "sha256": "081a062d5ddfad40c683d06f50153867fc4654b9c2684eaf91e1aefdf431ee74"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/SiteOptionalBenchmarkSelectionTests.cs",
+      "bytes": 1591,
+      "sha256": "0d48db096830fba890ad6c999df24edd455af46f73b0ad07f41d4f28364c8c96"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/SiteQualificationStartupTests.cs",
+      "bytes": 2895,
+      "sha256": "ec444e5d24ef589faa331d43034b09b79d823bbaae324203442eb093072c628a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/StreamCorpusTests.cs",
+      "bytes": 3143,
+      "sha256": "e19c26d7cdbe01be628ea7ac2a846f2647a5e80ab4fd89467d72b4e5c100875e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorAggregateAdmissionTests.cs",
+      "bytes": 4944,
+      "sha256": "7ef2e26857a6ab2efaa6423b5f169a6786d6bf90c06bc50c7489f55d0f781bff"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorCorpusContractTests.cs",
+      "bytes": 4571,
+      "sha256": "35ba566fe27488a6c567f540e56027f727eae9e76586e41da51660ac5c5ce64e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorExecutionPolicyContractTests.cs",
+      "bytes": 2593,
+      "sha256": "25c36ae3dc081ef9d6d6d93d2975ff84fe1384c43d182f35ff634aa91026b615"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorIndexContractTests.cs",
+      "bytes": 1814,
+      "sha256": "93bbce2ff6be7dd0a09174f5c4cd5a1827a7f49af04c08b09d93efd5cc45e8ad"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorProfileContractTests.cs",
+      "bytes": 1743,
+      "sha256": "d98c25b09c28bb56e4029ae100991fdd0674d5b10e875790ca48a0a769f890f1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorResponseContractTests.cs",
+      "bytes": 2786,
+      "sha256": "0fdfe6812df300c6ef99c940c687d0699ac261a00dc5acc39aa27f0bc82bf47f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/VectorSelectionContractTests.cs",
+      "bytes": 2867,
+      "sha256": "2f3002cce4777325c948196889172c2f3334f56730abbb7bdb9684f75e5c51f0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Configuration/OpenLoopPlanProcessOptions.cs",
+      "bytes": 1829,
+      "sha256": "bd8c65c78f0419950edba287b7d2155b2601ed62606170e776570ab82b44ea53"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Contracts/NativeQuorumTopologyTokens.cs",
+      "bytes": 2670,
+      "sha256": "d7af5d3316607102cbb61991e82773c77540397d7bd4fd9509cb9a017f957186"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Contracts/SiteOptionalBenchmarkSelectionTokens.cs",
+      "bytes": 317,
+      "sha256": "45fd20fa3405394458babaa83cb0a46438ee776be1fd3655827be6057d2953dc"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/BenchmarkTopologyMembershipFixture.cs",
+      "bytes": 2785,
+      "sha256": "20e1b7077ecc32f46ffdc0489e7c43f54b9e64ee53744f9b27ada0b49fbfbc93"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedAggregateCliFixture.cs",
+      "bytes": 4737,
+      "sha256": "c5e496162de23bfb2158c9e8883a6caafdabd5d18d7203f15da545585d805156"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedAggregateData.cs",
+      "bytes": 4899,
+      "sha256": "c079c0f164e1a461d6abdf32c84b8fe656209a3526341e3421534df2f0788962"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedAggregateNodePipeFailureFixture.cs",
+      "bytes": 555,
+      "sha256": "f332b612db1903e8cc2d720a409d9bb9ad5e8994a5a8d1875b9dec4dabde8ad2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchCohort.json",
+      "bytes": 235,
+      "sha256": "e6da7eda869dfabfee15a4ee29acd94c0161c8283062f5f9f00e6180ac353e16"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-01.headers",
+      "bytes": 1294,
+      "sha256": "c0672a5db4fa53e0868476a7461db97a26ed2ad134cd9ec191013a15fc2f572d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-01.json",
+      "bytes": 843,
+      "sha256": "a7fca4a55d2e371c1918631cd3993d81cbf22e613e763c892202a514a74ec0f7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-02.headers",
+      "bytes": 1295,
+      "sha256": "c1f1e7670a06d1b9faca0873e8d898ba76800720eaed1a293a0b1584d156063b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-02.json",
+      "bytes": 843,
+      "sha256": "a7fca4a55d2e371c1918631cd3993d81cbf22e613e763c892202a514a74ec0f7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-03.headers",
+      "bytes": 1295,
+      "sha256": "a88779cc76bf93ed6893fd95e671af50b4c67abbc4a6bc85a537d9f516c254cc"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-03.json",
+      "bytes": 843,
+      "sha256": "a7fca4a55d2e371c1918631cd3993d81cbf22e613e763c892202a514a74ec0f7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchRunning.json",
+      "bytes": 2335,
+      "sha256": "290852de037a87373fb93ad786dfb65fb6ce1271a49e29031ab1ef4bc3a9405c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedHostFixture.cs",
+      "bytes": 3712,
+      "sha256": "ebcc7093765f43f8421d3601de7e7489f105b4583eba7a60d565bc4b7db4d23f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/NativeSerializationReportData.cs",
+      "bytes": 6166,
+      "sha256": "557bb5e1a63c4aa94a638f84041c32bddd3c70c7ab2a997d0472789982a6291a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/RawStorageReportData.cs",
+      "bytes": 5646,
+      "sha256": "c567bcd33b7c7bf738de97c56d70ff8ab4127fe9f97de3fee55724fc1fe06c79"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteOptionalRetainedReadyAggregate.json",
+      "bytes": 3461,
+      "sha256": "f68ebade76636939a2538f78aba75083bdf49fa283d84ebfc8aad726b0da2808"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteOptionalRetainedReadyRun.json",
+      "bytes": 13535,
+      "sha256": "c9327123bef04a6480aef188ffa87f322bfd7d5d17b55eb369171ddeddbd5d96"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteOptionalRetainedUnreadyAggregate.json",
+      "bytes": 2579,
+      "sha256": "4fce281d0997dbe2b2eac91a9f273f1e55edb15f8efe9098bd4f8b1fdbefdfaa"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteOptionalRetainedUnreadyRun.json",
+      "bytes": 14122,
+      "sha256": "3277fd8667b5953e5dc4cdfb927e2a99bad14642fd10f98527456037934126db"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteOptionalRetainedWorkflow.json",
+      "bytes": 470,
+      "sha256": "d3362e7ec1afe1f990c31600af6d4f5904b2d96564d5ea2da5d275b6270c448a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/SiteQualificationStartupFixture.cs",
+      "bytes": 6121,
+      "sha256": "77f39517eddeef539ef729ff28b43ed08ba44dbc418d46f840f7bd67f0a17f26"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonExecutionIdentitySupport.cs",
+      "bytes": 3175,
+      "sha256": "907689790278eee959f5f4e89f05b224e98bcdc192832c35cd5e8b69545b0278"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonExecutionIdentityTimeSeriesSupport.cs",
+      "bytes": 3205,
+      "sha256": "e9dbe9a3e4a13031d46028d9d1b40bfd29064e3730e27aa6966c8b83188a6f2f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonHarnessInputs.cs",
+      "bytes": 392,
+      "sha256": "c89b26d06416c45abefcca7ec22a87a09bc4248fc3d521457f107842a80aa701"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonHostBindingsSupport.cs",
+      "bytes": 6445,
+      "sha256": "e20752f5e914aee20a88ff191e9bacbe86ab7e9aa594db4b3a75774a61039a3a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonHostOutputCapture.cs",
+      "bytes": 3881,
+      "sha256": "20e378cb417b7ddb95537562d1e2ab36e50db5c110791f302354f6416cfc21cf"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonHostStartupDiagnostics.cs",
+      "bytes": 5420,
+      "sha256": "8a4d6834c194cd6a12fae5c028816a8f40c913759fa3be7f8334dd1caeaf22b1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ComparisonLiveProgressFile.cs",
+      "bytes": 722,
+      "sha256": "0576c12e8f7560408c009e506777a9a422b1311303061ee0faab00b77f44154a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ImageBundleTestDirectory.cs",
+      "bytes": 705,
+      "sha256": "7cab39c0b83b055e55ed883f688172befeff0cee8ff70122e25a6299ad758943"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateFields.cs",
+      "bytes": 3135,
+      "sha256": "39d08cb4f8e5dd0a59eef3148657d5de87a3c6c3d32135dcba733f4a886ee684"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeDeadlineOwner.cs",
+      "bytes": 1680,
+      "sha256": "92def83b7a25dc32914c8735b24f152c2a3aa7f32c72858443fdf097c5f53f75"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeDeferredPromptRelease.cs",
+      "bytes": 1489,
+      "sha256": "e304c56c1c890c78b3a381a6a3dd690be1b0cd2b78a3cce8bfb4d906cca9b2ab"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeDeferredRelease.cs",
+      "bytes": 3537,
+      "sha256": "e641f307d8a1a0b32730813ef8762b59c1679a34c2af1598d7fb743d9c1c260a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeFailureSet.cs",
+      "bytes": 1274,
+      "sha256": "6996938c6c99c90abe76a5803f1e58d0e5b748280971def50c587344273c9dd5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeGuardedInvocation.cs",
+      "bytes": 2162,
+      "sha256": "10024f0f5b9d063f67db7a6044a1c3c91807475d6d85a9fe2291131a7974c9b8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeIdentityObservation.cs",
+      "bytes": 2050,
+      "sha256": "11094f569bdbdc1adae8f128970f85f9ca1aaf2210fa0a0846efb525b8ecf628"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeLifetime.cs",
+      "bytes": 2837,
+      "sha256": "9cb7310d3a5cb9414ca634c4d75b875cfea52ec772a3e6bd343ee67466bc245e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeLifetimeCleanup.cs",
+      "bytes": 5962,
+      "sha256": "69eb7fa409554da4635b95543508b1ff6c7accc39da4734c7e63e0d3ada442f5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeLifetimeTestSupport.cs",
+      "bytes": 7690,
+      "sha256": "0f1c0ada9a68cb0dc53d5b88d3edc819055bfd2496ab8a0c89898f613db8ced5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeOutput.cs",
+      "bytes": 1064,
+      "sha256": "b4ec5801f7d5296c12d32de6baf1ec031847bae988834cbb8771a035329378b9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodePipeFailureOwner.cs",
+      "bytes": 6093,
+      "sha256": "277a79900d21aa8b341a8bc1172e51f390a49ff8723ab4caaa5f895bc22f0154"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodePipeFailureOwnerEvidence.cs",
+      "bytes": 1728,
+      "sha256": "f6798858177db5b1fe6149ed3fb85e2f6f66aea0eafa39c049c61ef3ab4eea3e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodePromptOwner.cs",
+      "bytes": 3028,
+      "sha256": "8e274b96f9af715baffda2d226cc3340d2eb3f718213db61f03120d3b8bd31e6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeStartOwner.cs",
+      "bytes": 2679,
+      "sha256": "da26e5f94058db04398d6f4430bce47a54bbe249c794069a37dfd1ae8f4771b7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateNodeTestCleanup.cs",
+      "bytes": 6553,
+      "sha256": "54638b49f634fd655d4fbb0333bd2c992c8251f9a29de586317df96242125492"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedAggregateProbe.cs",
+      "bytes": 2258,
+      "sha256": "fc62816dd0ff156785520cdb890ad61573b7cff9f08cc223adf36fae627b1582"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedCurrentJobCacheNodeProbe.cs",
+      "bytes": 1695,
+      "sha256": "a20fa0b1b519f275cc8ac225b5ab87c36af4062f57edc9a839e6c192fd91de12"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedCurrentJobCacheNodeProgram.cs",
+      "bytes": 7658,
+      "sha256": "a3628b18bdaac74fa766c34e9f1d3f5083e76493f3f0bbd19a2243a190940e4c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedOpenLoopHostTestSettings.cs",
+      "bytes": 1324,
+      "sha256": "f8ad6e3323e0560f916676827b634d68aa3b1b45640b9fe89be6e0a9560af2d2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedPlanDirectory.cs",
+      "bytes": 453,
+      "sha256": "8c7adf1e2f1c0fa3a7d05c87e08fd41f46de608801b33e85224733ea4fd10286"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/IsolatedPlanFields.cs",
+      "bytes": 2874,
+      "sha256": "f2e56c2af34294f269183712b18a9132fb95ae5c20865c8f9f723c3ad337cf36"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/NativeQuorumTopologyResponses.cs",
+      "bytes": 4075,
+      "sha256": "8a8883d6698ad64ccecb5c3fef4f1a002f93e5f5b5e6df28eae4de6fa12d9910"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/NativeSerializationGitHubStepData.cs",
+      "bytes": 4424,
+      "sha256": "0dcf49b8b546ad998b214c669f20aa430a6e83743e785c49a7142fa3e9809f9a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanCancellationFlow.cs",
+      "bytes": 2682,
+      "sha256": "066984589ecb8b3f08573ea294f30c4f3f1736ef04546369224c9519d06c14b9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanCliCapture.cs",
+      "bytes": 3720,
+      "sha256": "f292716643c8d16b16c54d59a6a7ffefb600528d5562106b6ce6d3d48a22e865"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanExpectedInventory.cs",
+      "bytes": 8295,
+      "sha256": "c8f05e5bcd7599311afa791329a3c509049a36094949c1aac05f2ecf55e9c4b2"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanJoinNodeProcess.cs",
+      "bytes": 2742,
+      "sha256": "7bffca8d6f7fb0f7864302793eecdcb356e94f078200d120e515a167e70b2dd8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanMatrixNodeProgram.cs",
+      "bytes": 1591,
+      "sha256": "a7566def37ef00635e025a683ae7c05e0f73b4f24d41435aa2f99231a32ede47"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanNodeProcess.cs",
+      "bytes": 7735,
+      "sha256": "974c17c8a3bb47db59a4efa5f3ce87ed7b26796b35f580ad9bb75c16558dc2d9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanNodeProgram.cs",
+      "bytes": 3924,
+      "sha256": "d999a123b2cbb9e3178a5c8c1c40b24a65a9bbb4bc3e962b9bade26e4b0957c0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanProcessOptionsBinding.cs",
+      "bytes": 392,
+      "sha256": "3663b012eb14f359b676826362f801983490c4cf0ced343d87ae9ffc3d24ce33"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanProcessSettlement.cs",
+      "bytes": 1289,
+      "sha256": "4443dd892ae479f4ee0e9f71a4fa531be6e7cb0b37b085e241d159bd57840520"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/OpenLoopPlanTestLifetime.cs",
+      "bytes": 1529,
+      "sha256": "f07c7f213627330417408ec091002e769a5b5a075ad4791f12445580fa696c25"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/RealFileGrowthObserver.cs",
+      "bytes": 2896,
+      "sha256": "de580cd65e9b091d9a379b494c79d4132d62cd93d73bdbdf4f2d04244cef28e1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/SampleChunkBenchmarkRejectionMutations.cs",
+      "bytes": 8640,
+      "sha256": "520cd32cbbbb6bd00e1523a5cbc796adf6469228dc6218492d7d70e448f0a2ef"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/SampleChunkBenchmarkRejectionOracle.cs",
+      "bytes": 2810,
+      "sha256": "eef293b8c62e5d030140fd81d1ddfd26788f9af5b7b5dddf8efec1c464faf5b4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaleServerCgroupOracle.cs",
+      "bytes": 7168,
+      "sha256": "0cd42e9ea4f9a9d7f62ea60b2f622fd29b58e4920785ddfd3c75d27b5f2ca49b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaledRawStorageFixtureOracleTests.cs",
+      "bytes": 3851,
+      "sha256": "201e3964b08917c8b37c2ae464d16c5400b8ac9b0edc9a4081f6be71042f1409"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/ScaledRawStorageTestLifetime.cs",
+      "bytes": 1343,
+      "sha256": "a9a7631c7dc49a1f7cb7069af54175aa67899abe6d5317400492893face847d1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/UnitAppHostResourceOptions.cs",
+      "bytes": 697,
+      "sha256": "6ea55159d582cd2d78c81932c6005d02e1a4dafe21e86e43b861ceb2bdf837fd"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Helpers/UnitBenchmarkOptions.cs",
+      "bytes": 2580,
+      "sha256": "7fa37c73708494f68061301b1a156ca3dda844ec84dc5654766fdadc5e3bb003"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedCurrentJobOriginal.json",
+      "bytes": 943,
+      "sha256": "35600c24a4159b1b0877124151df9f35ab1e52156a5eab0fc395319bcf27763c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedGitHubTransientOriginal.headers",
+      "bytes": 871,
+      "sha256": "1b5a4d6018c51b3145602b56d37f95f9dda3e0de7c3ce04e1996f5718932b52d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Models/OpenLoopPlanCliSnapshot.cs",
+      "bytes": 600,
+      "sha256": "425ddb1e0b71b809fb2a3922d693ff24b2c7240bfe18d68a3f3c840014e21f01"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Models/OpenLoopPlanExpectedCell.cs",
+      "bytes": 252,
+      "sha256": "2d9786cba0160a632074a6704f4d0e901c3c8dd8302dd0157348b49c7996274c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Models/OpenLoopPlanNodeResult.cs",
+      "bytes": 150,
+      "sha256": "95f770d111a19fc2eeb0fd51d9604345306ab85b4791ef14040e671ac0f18298"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ComparisonHostProcess.cs",
+      "bytes": 9228,
+      "sha256": "b1201b3f3778bae6648bee13b91a808cab026d5aa220c0285e25870dcbf73379"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/EmbeddedBenchmarkProcess.cs",
+      "bytes": 7413,
+      "sha256": "c7b69a536d5262c006923c1465a83db9543e6b4d7fcad9beadbfe4833f80022d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ImageBundleNodeProgram.cs",
+      "bytes": 6484,
+      "sha256": "0cbc28cb0df257374e3e99d0dbae6e2cd6ff978ac57b583e207de17affca5a24"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ImageHttpDeadlineNodeProgram.cs",
+      "bytes": 3015,
+      "sha256": "4b3ebb08ef84066515d0640583ba904371140d5b2a3e11b3a7d71033c1ee1794"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ImageRegistryReadinessFixture.mjs",
+      "bytes": 10331,
+      "sha256": "dac1b3b67da8dc48dc1b3c82baaf133f278e126a19e2f5e147022287e6fec076"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ImageToolingContractNodeProcess.cs",
+      "bytes": 10325,
+      "sha256": "67c876996d9b8658d79ae36a117c363bdbf7325e9f5742b48afaa3307d811dad"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedAggregateNodeDeferredProcessRelease.cs",
+      "bytes": 1795,
+      "sha256": "5d1e76bbe4cd75a39a32214eca2c6c6b2f87395aaba7e4d529a2af7bd9b67f0f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedAggregateNodeLifetimeProgram.cs",
+      "bytes": 2694,
+      "sha256": "378187778e6cc78b7600a5720da0bb6992ccb7df8273fc6f7904e707beb94a8f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedAggregateNodeProcess.cs",
+      "bytes": 2440,
+      "sha256": "807bc927db6e1279a911cf2fd0cc6edd082d8d37053c0e1e8508f8499931b5e3"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedAggregateNodeProcessTeardown.cs",
+      "bytes": 5346,
+      "sha256": "879453d8607863e8d845b4cab75b672b95b4d03a06b2ccd6afeb48c24c016834"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedAggregateNodeTestProcessReaper.cs",
+      "bytes": 7399,
+      "sha256": "7048eddecdd0ed13b4eac259bbb28f4a606f00d4d88fce92a980e39598af456a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedCurrentJobNodeProgram.cs",
+      "bytes": 2636,
+      "sha256": "66a362b1e0abe1c16c72cebaf3eacc5b53410cea851885c3ebf4eca7a739631f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedGitHubCompleteProgram.cs",
+      "bytes": 5291,
+      "sha256": "5c548531e0e7e7b03d3f33b695b8c7a636b39249ab43ae201d9ab707eef8e492"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedGitHubFileProgram.cs",
+      "bytes": 2352,
+      "sha256": "9932c6a677fb397b4805f11eb9f765203eae9733e848c0a8ed42e57a7e7ce4ed"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedGitHubNodeProgram.cs",
+      "bytes": 5557,
+      "sha256": "598a38ceb6cc920a4382d7a0354d950e2d3893c8c5bcf525407ae02433148841"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedGitHubRateProgram.cs",
+      "bytes": 1762,
+      "sha256": "c081df47516fed94d615d8be7f47386a7594c71566ef7a622a071bfd800e11cb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedGitHubTransientProgram.cs",
+      "bytes": 3323,
+      "sha256": "fb8419fcccb34da46521e7996541fd788691c5b41855b7be2b822d33352f6187"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/IsolatedPlanNodeProcess.cs",
+      "bytes": 7186,
+      "sha256": "fad10faf306eda90d3f5339bfab148818bdca5ab3c536b77e8b5342770d7600e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/NativeBenchmarkProgressNodeProgram.cs",
+      "bytes": 4329,
+      "sha256": "a3d548ba2dd13951e68635a48cf1cfa8942cfa77f245a9c3cc1e6640a54e6d25"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/NativeSerializationBenchmarkProcess.cs",
+      "bytes": 1516,
+      "sha256": "c468d38d8d20237524182b9b4ebca18bb5a04edbdc4343783ab64f809960512f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/NativeSerializationBenchmarkProcessExit.cs",
+      "bytes": 1466,
+      "sha256": "5c07bda212f9bd7074f1ef05d614129b9e08154c9afc01e18f48915b51a2701b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/NativeSerializationGitHubStepNodeProcess.cs",
+      "bytes": 3707,
+      "sha256": "e7c57974b90e3e53d5a149d5a5f6d01dcc3024df38a04e8097fea9ac0fb6d7ab"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/NativeSerializationReportNodeProcess.cs",
+      "bytes": 4090,
+      "sha256": "2e7f8d8cf23e7d7f41fdd583e663c305b27f8a4df5b7e10d5509118c7c90c8e0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/RawStorageReportNodeProcess.cs",
+      "bytes": 8753,
+      "sha256": "55e2444b8d2f826a715a2adc3c44c868ec513f6321a4e044e34e0cdea6de1348"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/SampleChunkBenchmarkRejectionProgram.cs",
+      "bytes": 9260,
+      "sha256": "6dd9366dfce59f5e06775cd4ae514f75f6dd903f5233b475c30c73879bb519f7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ScaleServerResourceNodeProgram.cs",
+      "bytes": 11820,
+      "sha256": "7428f14fada66bb56d287956a706c2bd8264fed82845779d8cb4512728b93124"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/ScaleWorkloadForwardingNodeProgram.cs",
+      "bytes": 2601,
+      "sha256": "056b9565378a15e107cfad0b6ebcd283465fabcec5b53399d0149cff535e3fdb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/SiteOptionalBenchmarkSelectionNodeProcess.cs",
+      "bytes": 575,
+      "sha256": "5c27c05408ad5c865c331a001f55069415b388f68ee3382fe88b59b2f116feb5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Processes/SiteOptionalBenchmarkSelectionNodeProgram.cs",
+      "bytes": 10981,
+      "sha256": "0dd866d786c58d53698c3c77042b8801acf7a4e0388fa28a5412adde6b784cf6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/BenchmarkTopologyMembershipNativeCodec.cs",
+      "bytes": 2424,
+      "sha256": "9db0b27f7d0392abdd7b201ac34772858ff9224bbc54c5c667aadee6c68b07f6"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationBenchmarkCaptureFiles.cs",
+      "bytes": 2157,
+      "sha256": "acb859a2fb9839684398bb35598b381dc4fc71c25499578af3c508e649fa68a7"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationBenchmarkCaptures.cs",
+      "bytes": 7555,
+      "sha256": "8c36a2dd291849de91838b36a356cb2dae89b056d3f83f0312ce016bee855786"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationBenchmarkFailures.cs",
+      "bytes": 1281,
+      "sha256": "5b4493203f54346d43fbda55dfad01413ff19448519fb489ae389009a9a74e37"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationBenchmarkStartInfo.cs",
+      "bytes": 1740,
+      "sha256": "62679dc7fe41ccdd144369e5c6b8831fadbd0eea1b98a4defd64dbe5bdd29149"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationGitHubStepFields.cs",
+      "bytes": 1888,
+      "sha256": "4dda1b01ff679b8290d70b1a118c49ae0248cf3ce94bdddd7bdbff13f774f7a5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationReportFields.cs",
+      "bytes": 3197,
+      "sha256": "ce97a4614cb72993810d68e5eb72f53d494d838327dc4a0105a7ebefbca0727e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Serialization/NativeSerializationReportMutations.cs",
+      "bytes": 8011,
+      "sha256": "e53753b4b1361044fef6e19bc5a0fe397d527e51aa9c9684982ec8a1d3d012e4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Assertions/TimeSeriesIntensiveReferenceResults.cs",
+      "bytes": 3252,
+      "sha256": "81c145cee6101c93ea252bc419dd62a8d6725cb187ab9ca1c427a1567430ed6e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/KeyLoadTimeSeriesIntensiveReceiptTests.cs",
+      "bytes": 5322,
+      "sha256": "029c61c9b47e9ddb6e673c3b7d4aed723980c7f975e8595fc171fbd7ec9f3a7b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/KeyLoadTimeSeriesIntensiveResultTests.cs",
+      "bytes": 4805,
+      "sha256": "4242710dd0937601b5c5db155468ac08d5365b0d21d9d91811a063c0ac60852a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/KeyLoadTimeSeriesIntensiveSeedTests.cs",
+      "bytes": 2810,
+      "sha256": "633c2f61989d09368d99fa741430557e70dbd776d64074f41b3a86b0362ab453"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/KeyLoadTimeSeriesIntensiveTopologyTests.cs",
+      "bytes": 5990,
+      "sha256": "8a34a5b5a503a95be68a9e56c16e642355380ac283fbbaf9720286fd8b7b2faf"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveAppendOracleTests.cs",
+      "bytes": 3702,
+      "sha256": "06294efedf70d979cc782b579676d771b87e3d9d80bde207bf9dcc8e5e1a325c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveAppendValidationTests.cs",
+      "bytes": 2374,
+      "sha256": "d4dc44b42cff469bc3d98d0942f755cc3b897504a91a82bc63583dd04200f15b"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveAttemptLedgerTests.cs",
+      "bytes": 2342,
+      "sha256": "84bc238aab3dee4727227872ddcc842cd0ce65f88c941f8e9fc3343fac04416d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveCallScopeTests.cs",
+      "bytes": 4892,
+      "sha256": "d03fdabb1c546e18af4ddf2b47a11b2cfba435adf0c87e6328b7f54ce642dc42"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveCompactEncodingTests.cs",
+      "bytes": 1692,
+      "sha256": "a46fa717e85ef3164c99a39c2ea66200dc13215e3a477b4663082b620efeab24"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveCompletionTests.cs",
+      "bytes": 5726,
+      "sha256": "379a3ab9f385ae73c8d6a51aa20bf61e68717eef3629c042190b964517108831"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveCorpusTests.cs",
+      "bytes": 4912,
+      "sha256": "841f7abad5b6f20aa6758c4e8ebb2c40070880737845a80e4c7371b3dd622b9d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveDigestTests.cs",
+      "bytes": 4496,
+      "sha256": "15023201b971626d154ed5b17eaaf004e63e5d7702c617e08bb220c713496a2e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveExceptionBoundaryTests.cs",
+      "bytes": 1804,
+      "sha256": "60fe875eabaf707878c2ec1bdedcec2decbccf4a964daf659109760a8287da46"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveFailureMappingTests.cs",
+      "bytes": 2316,
+      "sha256": "e483cd87f7d5e7cd7fb1808d6f0d39fe95cd46be8f7cc0bd0fa2804dd9f53a01"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveFamilyContractTests.cs",
+      "bytes": 24717,
+      "sha256": "98b683de3e421754d3d165748dca8f87756aed3634390075c1385ab886138be0"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveHostSettingsNegativeTests.cs",
+      "bytes": 13679,
+      "sha256": "3c2ffe1bd8d680982594df5aa77e67d0e1577bfe6fde51fac5ae6a7c0bc454fc"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveHostSettingsTests.cs",
+      "bytes": 9288,
+      "sha256": "81e14d986cfc722f10728ca51a1bc31b565d8e0f81832c524b89ae11709af2cb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveNativeFailureFactTests.cs",
+      "bytes": 4963,
+      "sha256": "290f3f49fb10406cf050864444f71a3692fa91615f9119dad4d98ad99d5c5090"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveObservedFailureTests.cs",
+      "bytes": 6925,
+      "sha256": "63972040cb3ba0861beebac8908a17acb48df99aef37ef2b8311f4005d3a35fe"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveOracleReferenceTests.cs",
+      "bytes": 2742,
+      "sha256": "038a2d76dceec5df4cfafc3963d2ac4cdd4fab37bd95db0f45b4f9210ed59b5d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveOracleTests.cs",
+      "bytes": 6318,
+      "sha256": "e3ded957f03e527dfef52033b0f2750ac5e7461c52e84047460dac0fcc99d609"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensivePhaseEvidenceTests.cs",
+      "bytes": 4389,
+      "sha256": "3e1db2654862d857159ae97d60053cbd990986dac82629311f8c5172238ed14d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensivePreparedExpectationTests.cs",
+      "bytes": 2503,
+      "sha256": "729d554ad2e1b1246bfdd4459800ad1fad9b58c35f135cd0eb81739b59393592"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensivePreparedPhaseTests.cs",
+      "bytes": 1325,
+      "sha256": "2c197317e820224f101d41416e928dde2bc85c73d261f1976e1ea8f271beb134"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveRunJsonTests.cs",
+      "bytes": 19332,
+      "sha256": "f76a7a7a8eaeb73a382aa88881f3e9a7cb0b8d2c05a779d5544867b428980f7a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveRunJsonValidationTests.cs",
+      "bytes": 7767,
+      "sha256": "0d25726681a647b65349c5ea0e782f384db60e27a487128d141746d7b079f885"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveSelectionTests.cs",
+      "bytes": 4336,
+      "sha256": "e82b59cd0c1160112bc3371e496d55095b2c9bc7860438769d03103005ecba8c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveSummaryTests.cs",
+      "bytes": 2850,
+      "sha256": "333aebbbdfc4908820b7c578f6456c79d614c781d1e043cbadbd0779134dd97c"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveTagScopeTests.cs",
+      "bytes": 1732,
+      "sha256": "2c8b644652f5bdde0c906db899265b2d8eada594515a100ea089a88c393a52e8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveValidatedDigestTests.cs",
+      "bytes": 5541,
+      "sha256": "27db6c06bef111cb8b12ed5d4b0cefe5ac9fdd5a6622eb81900688b5cc1cc156"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveValidationTests.cs",
+      "bytes": 5278,
+      "sha256": "1831a75e6539e0b0c591af5c066c42fe895b06eef1e3cdc18277dda9f553dc98"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveWarmupStorageTests.cs",
+      "bytes": 7264,
+      "sha256": "7d0431307e9b4ddf769872243e07a3e3ad42a87b780d7a1a9b72fe25ceb00b74"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveWorkerPartitionTests.cs",
+      "bytes": 1413,
+      "sha256": "b3b75cda8fd027227433b4428830d2958372b64ba3488291b501e0b19c521cbb"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimeSeriesIntensiveWriterTests.cs",
+      "bytes": 2485,
+      "sha256": "b6f164594db6e48d9ca3127d5076d8774f67ed9599c8cac50a2195ad34ab2afe"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimescaleTimeSeriesIntensiveContextTests.cs",
+      "bytes": 1110,
+      "sha256": "8ecbb861c89d6a51eb65fedc919fce0e7fdced6c06e3792eb85bc736159dd165"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimescaleTimeSeriesIntensiveReceiptTests.cs",
+      "bytes": 4608,
+      "sha256": "c34d0a679db93fffe1489e9599d3e20f6b6eab077dfa90d25379169ceb347d62"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Cases/TimescaleTimeSeriesIntensiveSessionTests.cs",
+      "bytes": 3160,
+      "sha256": "e66bddd2ee838a873f34876533cf80f2a2693bc1c027562c7be0bfc46a6d21f1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Fixtures/TimeSeriesIntensiveAttemptValues.cs",
+      "bytes": 525,
+      "sha256": "5dc8b332cdd3a2dd9dbc071015d2b8d41854c0ccd4b222bacadec8b4023b751e"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Fixtures/TimeSeriesIntensiveHostSettingsFixture.cs",
+      "bytes": 8979,
+      "sha256": "6e8f82b4cb6c3c96deb7dcce5843889dc55af69e74cd0a3e004f07fd36147853"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Helpers/TimeSeriesIntensiveReferenceFramer.cs",
+      "bytes": 1719,
+      "sha256": "4121a3f56f48e36cbd5b5aa40e6b4ce508bc306eb268b637a6003aac96c69711"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Helpers/TimeSeriesIntensiveReferenceOracle.cs",
+      "bytes": 2991,
+      "sha256": "3004fd68e51fe15050b9529fd51c26457140d1d2c25fdbbdbe9c76b5b7e15e5d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Helpers/TimeSeriesIntensiveReferencePhases.cs",
+      "bytes": 2486,
+      "sha256": "05b3e5a8ab7736d038b719abe4ee4e34874d126bba8deb22c789ae4d00754f27"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/TimeSeries/Intensive/Helpers/TimeSeriesIntensiveReferenceWorkload.cs",
+      "bytes": 3657,
+      "sha256": "1c860f572903db58cc168c450d7c48e12266a0329b0380a1890737debafb0bd5"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Assertions/FullPartitionOutcomeIdentityAssertions.cs",
+      "bytes": 3596,
+      "sha256": "598f8c0e4e53d608a7b254a8e6134fc31bbd0a19c32e3fa59d49d6844a4f754f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/FullPartitionOutcomeIdentityTests.cs",
+      "bytes": 765,
+      "sha256": "c21b07bfeb8e86336f32f1a5542f06a8ae8ba5db8d83a71a25e91cd28d27aff8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/ClusterRouting/Helpers/FullPartitionOutcomeIdentityScenario.cs",
+      "bytes": 9987,
+      "sha256": "799ff2d1aa8f91115677a84a3d0e5c1f845a7ab9c7863e2d26a5f0c2922a2cdf"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets",
+      "bytes": 12642,
+      "sha256": "a369a44d74a669c207dcb6b94f0e52d8028657275b15e6340b6b1009808a0494"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Assertions/PartitionQueryReferenceSizing.cs",
+      "bytes": 3190,
+      "sha256": "efafaa0cca114261c041e3d4a9b78f48703bc4bba362bb2b3a3ff971be118f04"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryAuthorizationTests.cs",
+      "bytes": 1704,
+      "sha256": "561464d296f1f86d5c14c939333a7e4d920e39d04ff5f647fe85327d811bb912"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryCancellationTests.cs",
+      "bytes": 1978,
+      "sha256": "ffbd73c54113b893ec504c2d3d51db943484c09f5bdf7fd5f6a06037558db720"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryContractTests.cs",
+      "bytes": 4421,
+      "sha256": "0644afe62604b1ade963cda4ca36805ce44681cb7ba005f314b108e1a95aff82"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryGrantTests.cs",
+      "bytes": 6458,
+      "sha256": "612c411423f7eeb8a6ccfa288b95971d3204dbdf6e6a632cc8a18fa758d302e8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryMergeTests.cs",
+      "bytes": 7141,
+      "sha256": "514e4195eff27f6adcfbc46279ba24b40e2c433adf955ee7b4ee83b668d962c9"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicAuthorizationTests.cs",
+      "bytes": 3321,
+      "sha256": "d2d47b72ed204d53c12d2eccd756c405f3958338f0605c701b7be9e8a4f5b540"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicBudgetTests.cs",
+      "bytes": 3648,
+      "sha256": "849b3de2251e16947ceb74378dec03ca926e632f54bdee00f74e1a4ebfba351d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicContractTests.cs",
+      "bytes": 4068,
+      "sha256": "446e518334df491922e69696e4370d246fd60ecf6fbdb98d2831cd243f16a091"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/PartitionQueryPublicMergeTests.cs",
+      "bytes": 1480,
+      "sha256": "8beaa04a6fdeab9bdad7142b53c6480e3232f52cefc6266d6b849db8fca11148"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/ClientApi/Assertions/PartitionQueryMcpCatalogAssertions.cs",
+      "bytes": 9776,
+      "sha256": "1ac230574d6a86b748db9814569bb14ce38f005090d6f701901ca52a49857365"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/ClientApi/Assertions/PartitionQueryMcpNativeAssertions.cs",
+      "bytes": 2873,
+      "sha256": "b59d70a5fc2083fd04bd91e33d3fbf75d15f22437e131115b3aae3992ed8b8f8"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/ClientApi/Cases/PartitionQueryMcpContractTests.cs",
+      "bytes": 7228,
+      "sha256": "aeba2931a19fddb1e10cb25573141da210c70ec46e29d3e8eb59fde7d3e1b8f4"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/ClientApi/Contracts/PartitionQueryMcpProtocol.cs",
+      "bytes": 2512,
+      "sha256": "e9e8313c6f7be0b2f832e27350075fe60413ced4e1a64c295e4df97d856b1fa1"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/ClientApi/Helpers/PartitionQueryMcpTestData.cs",
+      "bytes": 4784,
+      "sha256": "0a9b7668b653452767e23346a360cc48acc57403ea4a6bac26067d35bc6ef043"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationFailures.cs",
+      "bytes": 1384,
+      "sha256": "36c057734c08ae373d7b58c86339cda16edcf5b21433ffb9b2076481cdf9649a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationObserver.cs",
+      "bytes": 6341,
+      "sha256": "b72d5c3e54f26503c25277817d9666cf568f9d9c2b8f7ed39b1b7344b6663112"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryCancellationRun.cs",
+      "bytes": 3277,
+      "sha256": "8577045df2ba053e105f5a2894ae48cd10ba640e9c0301273fa734d9a5de527f"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryPublicTestSupport.cs",
+      "bytes": 3588,
+      "sha256": "b2d560dbffc51a2e1b45aadcff66f02562c3174e2642d9c2bb2dc93a81ac951d"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Helpers/PartitionQueryTestSupport.cs",
+      "bytes": 4554,
+      "sha256": "104e3479135555e17f76c23a636d7f32209b3a5bdada1a61d42fc552fd09b75a"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/QueryExecution/Models/PartitionQueryPublicSeed.cs",
+      "bytes": 192,
+      "sha256": "e4d823407859a32a0bdc607036c6665578e110dc495754306cafe183ae934476"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/OpenLoopTestSelectionTests.cs",
+      "bytes": 7673,
+      "sha256": "e92ac1a5ae0e341ea34c319ec86f06636569ca5b81759e9492f5513de2168743"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/TestInfrastructure/Helpers/OpenLoopAspirePlanTestBuilder.cs",
+      "bytes": 5150,
+      "sha256": "ac4bb03ffd81ba7e1e7ba7e00b1537a1a98466f961b7d24d630d79ef57326884"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+      "bytes": 1969,
+      "sha256": "8a7ff6074ff6b2d970b0ddf9710d28cc9645313b5e173916c1d3df2223bedc58"
+    }
+  ],
+  "sourceCaptureMissingHistoricalPaths": [],
+  "nativeDevelopmentBuilds": [
+    {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal",
+      "nativeExitCode": 1,
+      "buildCompletedSuccessfully": false,
+      "elapsedSeconds": 3.476,
+      "log": "/private/tmp/keyload-stage91f-r8-native-build-unrestricted-20261006.log",
+      "logSha256": "721ce4a1e3fde67363ce5e40bc3f34382da8af5b995a15907583d41ce6f59dbd",
+      "inputCount": 3988,
+      "inputDrift": [],
+      "distinctDiagnostics": 428,
+      "sourceQualified": false
+    },
+    {
+      "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal",
+      "nativeExitCode": 1,
+      "buildCompletedSuccessfully": false,
+      "elapsedSeconds": 3.801,
+      "log": "/private/tmp/keyload-stage91g-r9-native-build-unrestricted-20261006.log",
+      "logSha256": "3346c22fb6fb77fe0aa37efd6a12bee1544666b5e75a974efdf3566e9183eaec",
+      "inputCount": 3990,
+      "inputDrift": [],
+      "distinctDiagnostics": 11,
+      "sourceQualified": false
+    }
+  ],
+  "qualification": {
+    "fullReleaseBuildPassed": false,
+    "currentNativeFunctionalCoveragePassed": false,
+    "formatterQualified": false,
+    "fullUnitScalarRecoveryRf3ComparisonPassed": false,
+    "deliveredSourceLinuxQualified": false,
+    "lastSourceDiagnostics": "R8 retained 422 CrashHost and six comparison diagnostics; shared comparison corrections followed; R9 stopped with11 MSB4166 child-node failures before useful source diagnosis",
+    "sourceDriftNote": "zero drift during each recorded build does not qualify this later source capture"
+  },
+  "note": "Local development source checkpoint only. Original intakes/build logs retained privately; source/configuration and Git commits do not satisfy acceptance or measured coverage.",
+  "sourceCaptureMode": "immutable native Git index blobs at this checkpoint; later working-tree edits remain visible for the next checkpoint",
+  "priorWorkingTreeSnapshot": {
+    "path": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06.json",
+    "sha256": "f1c429c1d0b22ee1a3d84bffd0e06d0f2a92ad6e3f5bbd2bebf4b985439306a5"
+  },
+  "gitNormalizedFixtureFiles": [
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-01.headers",
+      "workingTreeSha256": "48a80f9867bc17ad2ab0ee0618432d85371d7cb342eb828582af6394b80400b9",
+      "gitIndexSha256": "c0672a5db4fa53e0868476a7461db97a26ed2ad134cd9ec191013a15fc2f572d",
+      "reason": "native Git text clean normalizes CRLF in non-compiler original-header test fixtures"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-02.headers",
+      "workingTreeSha256": "60889d0daf2b557752db724701365b2a90fb86810876c700ffac17ab763498d3",
+      "gitIndexSha256": "c1f1e7670a06d1b9faca0873e8d898ba76800720eaed1a293a0b1584d156063b",
+      "reason": "native Git text clean normalizes CRLF in non-compiler original-header test fixtures"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Fixtures/IsolatedCurrentJobOriginalOpenSearchQueued-03.headers",
+      "workingTreeSha256": "c6cd7b031d12209b446a766037072a02bfd2eb24b24d594fd3de52ca88bd5faf",
+      "gitIndexSha256": "a88779cc76bf93ed6893fd95e671af50b4c67abbc4a6bc85a537d9f516c254cc",
+      "reason": "native Git text clean normalizes CRLF in non-compiler original-header test fixtures"
+    },
+    {
+      "path": "tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/IsolatedGitHubTransientOriginal.headers",
+      "workingTreeSha256": "fdae329312907773c6e5e0905790593a85a0c7b1c14200f151c4ae341e013567",
+      "gitIndexSha256": "1b5a4d6018c51b3145602b56d37f95f9dda3e0de7c3ce04e1996f5718932b52d",
+      "reason": "native Git text clean normalizes CRLF in non-compiler original-header test fixtures"
+    }
+  ],
+  "priorStagedSnapshot": {
+    "path": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r2.json",
+    "sha256": "d853ea26e024fffb5ae6b59e1714ba06430e1d775cc306cba4d20ccc12430a49"
+  },
+  "sharedStageChanges": [
+    {
+      "path": "docs/Features/CodeQuality.md",
+      "priorSha256": "540797e4ea91efd34132997d83838427e58aadb2bd374842fa2d42af9bc6e1e6",
+      "stagedSha256": "7cf46a604f69ccd50bdaaab331e4a3fe7af8ec4931392eb6e2dc25624b0702a0"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/CodeQuality/Configuration/NativeCoverageExecutionOptions.cs",
+      "priorSha256": "192f32a7a83d1172f1bcc87561ae0657863182cbc6bfcd6439a6731b94bb410c",
+      "stagedSha256": "9dfae8a8e5d41f9e1a0b5c2e40915648bc602976b876805633dbe83508b067e1"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs",
+      "priorSha256": "391c345eb0d7274e7c9fe4aee6035c641bf40fc70fffd87c7c44af4b522cb4b5",
+      "stagedSha256": "707f7a5cfaed004334bd4866cfcf25061a0570b024943933221a8be114b307a3"
+    },
+    {
+      "path": "src/KeyLoad.AppHost/Hosting/AppHostOptionsRegistration.cs",
+      "priorSha256": "5556cf1940f86ba334cf5ab45f1303521c2dd3e45de39c8c5b59617e9013836e",
+      "stagedSha256": "f94cb8c6e0d7700327cf6a8c79f8cfb9fabf1f20ecefacc849877ab632ad1395"
+    }
+  ]
+}
