@@ -595,3 +595,31 @@ dependency replacement is introduced. The focused native118/118 runtime run,
 full Release build are retained as local development evidence. Full native
 unit/scalar/recovery/RF3, source-bound functional coverage and delivered Linux
 acceptance remain mandatory and open.
+
+### Independent delivered-source analyzer coverage join
+
+TASK-CQ-GENERAL-CI-001 maps REQ-CQ-006/012/013 and AC-CQ-009/033..038 to the
+existing Linux `analyzer-rules` job in `.github/workflows/ci.yml`. Prepare the
+unchanged 54-source analyzer inventory and exact settings copy after the native
+Release build, run the complete analyzer suite through the existing Aspire
+entry with the native Cobertura collector, then verify the original report
+against its prepared source hashes. Preserve the existing 80 percent module
+line, 70 percent module branch and 90 percent critical pipeline thresholds.
+
+The ordered implementation is this contract, the workflow preparation/collection/
+verification join, static governance review, exact-source Linux execution and
+original artifact review. Root owns workflow/docs/status integration; a read-only
+reviewer checks native caller arguments, source identity and failure paths.
+Collection failure remains a failed test step; verification also runs after that
+failure and writes its original failure evidence. Always retain reports, settings,
+manifest, raw coverage and derived gate evidence in the existing analyzer artifact.
+Require exactly one original analyzer TRX with a positive total, all tests
+executed and all tests passed; retain its counters, source SHA and original file
+hash in a derived receipt. Skipped tests cannot qualify this full-suite gate.
+
+This executes the same gate independently of benchmark producer selection while
+retaining the existing website coverage gate. No dependency, product contract,
+storage migration, threshold, source inventory or required runtime suite changes.
+Rollback restores this workflow join together with its documentation. Only a
+completed successful original collector report and source-bound verification
+qualify coverage; unit/scalar/recovery/RF3 acceptance remains separately required.

@@ -1353,3 +1353,21 @@ RF3, recovery and every existing no-decrease/80/70/90 gate remain mandatory.
 ## Controlled time ownership, 2026-10-06
 
 [ResourceExecution TimeProvider](ResourceExecution/TimeProvider.md) and [ADR-115](../ADR/ADR-115-time-provider.md) extend KLD0022 to native Stopwatch timing and Environment.TickCount/TickCount64, with exact-span real-compiler positive/negative/generated fixtures. Explicit provider/default composition boundaries remain allowed. Native provider timers and real clock-controlled engine/replica workflows are required; source migration alone is not qualification.
+
+### Independent Linux analyzer coverage
+
+TASK-CQ-GENERAL-CI-001 under [ADR-113](../ADR/ADR-113-centralized-runtime-options.md)
+maps REQ-CQ-006/012/013 and AC-CQ-009/033..038 to the existing Linux analyzer job.
+After its Release build, prepare the frozen source/settings manifest, collect the
+complete native Aspire analyzer suite and verify the original Cobertura integers
+against the captured source SHA. Retain all 54 sources, 45 executable files,
+9 declarations and unchanged 80/70/90 module/critical thresholds. Missing, stale,
+empty, malformed or insufficient native evidence fails; diagnostic suite failures
+remain failures even if coverage thresholds pass. Verification runs after a failed
+collection to preserve failure evidence, and the existing artifact upload retains
+original reports, settings, manifest, raw coverage and gate report. This additional
+CI join executes independently of benchmark producer selection and preserves the
+website gate and every unit/scalar/recovery/RF3 qualification requirement.
+Require exactly one original analyzer TRX, a positive total, executed equal to
+total and passed equal to total. Preserve those counters, source SHA and original
+TRX hash in the retained receipt; missing, skipped or failed tests fail the job.

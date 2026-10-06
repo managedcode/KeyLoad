@@ -4909,7 +4909,7 @@
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
     "sourceStage": "runtime_options_literals_locks_phase_health_semantics_native_test_admission_and_manifest_input_fix_complete_runtime_gates_in_progress",
-    "canonicalBuildPassed": false,
+    "canonicalBuildPassed": true,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
@@ -5359,8 +5359,45 @@
         "compiledReceipt": "keyload-general-options-compiled-inventory-audit-v38.log:19projects_3190inputs_mismatches_empty",
         "nativeRegression": "unit_v34_AcScale016CancellationStopsAndJoinsTheOwnedNativeProbe_passed_5296.189ms_in_original_4133test_report",
         "qualification": "prior successful local full-build snapshot and genuine child cancellation case; complete suite originally failed72other_tests; unrelated subsequent CLI_telemetry_coverage_source_changes_require_fresh_build_and_reports"
+      },
+      "deliveredLinuxA130": {
+        "headSha": "a1309f6b6115790d012977aff3eb7db26ab22146",
+        "run": "https://github.com/managedcode/KeyLoad/actions/runs/37449460526",
+        "canonicalBuild": "passed_in_main_verify_and_RF3_jobs",
+        "repositoryRules": "passed",
+        "analyzerJob": "passed_original_report_review_pending",
+        "rf3Prerequisite": "failed_native_Release_DLL_PDB_source_binding_KeyLoad_Abstractions_missingSourceCount120_before_topology_and_tests",
+        "rf3Job": "https://github.com/managedcode/KeyLoad/actions/runs/37449460526/job/112222193881",
+        "mainVerify": "format_step_in_progress_at_observation",
+        "qualification": "immutable Linux source; successful builds are not complete runtime or source-bound coverage qualification"
+      },
+      "independentAnalyzerCoverageCiJoin": {
+        "task": "TASK-CQ-GENERAL-CI-001",
+        "scope": ".github/workflows/ci.yml:analyzer-rules",
+        "nativeCaller": "existing_full_Aspire_analyzers_with_original_TRX_and_Cobertura",
+        "inventory": {
+          "sources": 54,
+          "executable": 45,
+          "declarationOnly": 9,
+          "configuration": 8
+        },
+        "thresholds": {
+          "moduleLinePercent": 80,
+          "moduleBranchPercent": 70,
+          "criticalPipelineLinePercent": 90
+        },
+        "staticChecks": {
+          "governance": "passed",
+          "yamlParse": "passed",
+          "actionlintWorkflowValidation": "passed",
+          "fullActionlint": "one_preexisting_SC2129_shellcheck_style_finding_in_unchanged_RF3_environment_export_block_confirmed_same_on_HEAD"
+        },
+        "nativePrepare": "passed_original_54source_8configuration_manifest_with_frozen_settings_hash",
+        "originalTrxReceiptCheck": "passed_against_retained_original_Linux702_receipt_total388_executed388_passed388_SHA256b464ebaedff25a6e59c2bb3db74864afa01ecee858a450422339811b67261800",
+        "review": "read_only_reviewer_verified_native_settings_source_SHA_binding_failure_paths_original_upload_and_no_skip_receipt_join",
+        "qualification": "new_workflow_requires_actual_exact_source_Linux_collection_and_80_70_90_verification_no_coverage_pass_claim"
       }
     },
-    "verificationStage": "Linux702_repository_rules_and388analyzers_pass_build_blocked_by_seven_native_cancellation_helper_diagnostics_reviewed_exact_byte_repairs_joined_remaining_full_runtime_coverage_gates_open"
+    "verificationStage": "Linuxa130_full_Release_builds_pass_RF3_stopped_at_native_PDB_source_binding_independent_complete_analyzer_CI_coverage_join_reviewed_and_static_checked_remaining_exact_source_full_runtime_and_numeric_coverage_gates_open"
   }
 }

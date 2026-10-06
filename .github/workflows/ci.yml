@@ -41,8 +41,53 @@ jobs:
         run: |
           dotnet build src/KeyLoad.AppHost --no-restore --configuration Release
           dotnet build tests/KeyLoad.Analyzers.Tests --no-restore --configuration Release
+      - name: Prepare source-bound analyzer coverage
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'artifacts/code-quality/analyzer-coverage'
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          Copy-Item scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml (Join-Path $evidence 'coverage.config.xml')
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 `
+            -Mode Prepare -Repository $root `
+            -Contract (Join-Path $root 'scripts/Features/CodeQuality/site-analyzer-coverage.contract.json') `
+            -EvidenceRoot $evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run analyzer tests
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
+        id: analyzers
+        run: |
+          dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ResultsDirectory=TestResults/analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:CoverageSettings=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$GITHUB_WORKSPACE/artifacts/code-quality/analyzer-coverage/coverage.cobertura.xml"
+      - name: Verify every analyzer test passed
+        if: ${{ !cancelled() && steps.analyzers.outcome != 'skipped' }}
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $files = @(Get-ChildItem -LiteralPath (Join-Path $root 'TestResults/analyzers') -Filter '*.trx' -File)
+          if ($files.Count -ne 1) { throw 'Expected exactly one analyzer TRX receipt' }
+          [xml]$document = Get-Content -LiteralPath $files[0].FullName -Raw
+          $counts = $document.TestRun.ResultSummary.Counters
+          if ([int]$counts.total -le 0 -or [int]$counts.executed -ne [int]$counts.total -or
+              [int]$counts.passed -ne [int]$counts.total) {
+            throw 'Incomplete or failing analyzer qualification; skipped tests cannot pass'
+          }
+          [ordered]@{
+            sourceRevision = $env:GITHUB_SHA
+            total = [int]$counts.total
+            executed = [int]$counts.executed
+            passed = [int]$counts.passed
+            sha256 = (Get-FileHash -LiteralPath $files[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $root 'artifacts/code-quality/analyzer-coverage/test-receipt.json') -Encoding utf8NoBOM
+      - name: Verify source-bound analyzer coverage
+        if: ${{ !cancelled() && steps.analyzers.outcome != 'skipped' }}
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'artifacts/code-quality/analyzer-coverage'
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 `
+            -Mode Verify -Repository $root `
+            -Contract (Join-Path $root 'scripts/Features/CodeQuality/site-analyzer-coverage.contract.json') `
+            -EvidenceRoot $evidence -CoverageReport (Join-Path $evidence 'coverage.cobertura.xml')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Save analyzer test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
