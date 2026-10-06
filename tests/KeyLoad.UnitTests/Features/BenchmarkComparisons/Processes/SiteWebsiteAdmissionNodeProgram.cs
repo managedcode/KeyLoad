@@ -16,15 +16,19 @@ internal static class SiteWebsiteAdmissionNodeProgram
             GITHUB_WORKSPACE: '/tmp/keyload-site-tests', GITHUB_REF: 'refs/heads/main',
           }, args: { mode: SITE_GH.publish, 'workflow-revision': revision, 'site-revision': revision } });
           const candidate = makeFixture();
+          if (scenario === 'website-executor-manual') candidate.environment.GITHUB_EVENT_NAME = 'workflow_dispatch';
+          if (scenario === 'website-executor-retired-event') candidate.environment.GITHUB_EVENT_NAME = 'workflow_run';
           if (scenario === 'website-executor-legacy-ci') candidate.environment.GITHUB_WORKFLOW = 'CI';
           if (scenario === 'website-executor-wrong-path') {
             candidate.environment.GITHUB_WORKFLOW_REF = `${SITE_GH.repository}/.github/workflows/ci.yml@refs/heads/main`;
           }
           const before = JSON.stringify(candidate);
           let accepted = true;
-          try { await context.createSiteIsolatedContext(candidate.environment, candidate.args, 'linux'); }
+          let admitted;
+          try { admitted = await context.createSiteIsolatedContext(candidate.environment, candidate.args, 'linux'); }
           catch { accepted = false; }
-          assert(accepted === (scenario === 'website-executor-accepted'));
+          assert(accepted === (scenario === 'website-executor-accepted' || scenario === 'website-executor-manual'));
+          if (accepted) assert(admitted.executor.event === candidate.environment.GITHUB_EVENT_NAME && admitted.trigger === null);
           assert(JSON.stringify(candidate) === before);
           const followup = makeFixture();
           const healthy = await context.createSiteIsolatedContext(followup.environment, followup.args, 'linux');

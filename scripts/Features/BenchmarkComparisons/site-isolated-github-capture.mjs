@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { isDeepStrictEqual } from 'node:util';
 import { absolutePath, existingPath } from './aggregate-files.mjs';
 import { createDirectory } from './image-bundle-files.mjs';
 import { GH } from './isolated-github-contract.mjs';
@@ -17,11 +16,6 @@ import { siteMetadataFiles } from './site-isolated-github-files.mjs';
 import { captureHistoricalContract } from './historical-site-evidence.mjs';
 
 async function captureSelectionRuns(directory, context, workflow) {
-  if (context.trigger !== null) {
-    const trigger = await captureApi(`${GH.api}/runs/${context.trigger.runId}/attempts/${context.trigger.attempt}`,
-      path.join(directory, 'trigger-run.json'), false, context);
-    requireSite(isDeepStrictEqual(selectLatestSiteProducer([trigger], workflow), context.trigger));
-  }
   if (context.requestedRun !== null) {
     const pinned = await captureApi(`${GH.api}/runs/${context.requestedRun}`,
       path.join(directory, SITE_GH.pinnedRunCapture), false, context);

@@ -439,3 +439,21 @@ jobs:
           path: ${{ runner.temp }}/open-loop-aggregate/**
           if-no-files-found: warn
           retention-days: 90
+  website-trigger:
+    name: Trigger Website
+    needs: [comparison-aggregate]
+    if: >-
+      always() && !cancelled() &&
+      github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {actions: write}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BENCHMARK_RUN_ID: ${{ github.run_id }}
+    steps:
+      - name: Start the separate Website workflow
+        run: timeout 120s gh api --method POST "repos/$GH_REPO/actions/workflows/website.yml/dispatches" -f ref=main -f "inputs[benchmark_run_id]=$BENCHMARK_RUN_ID"

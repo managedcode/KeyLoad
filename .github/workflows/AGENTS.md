@@ -76,3 +76,7 @@
 ## Separate Website workflow, owner correction 2026-10-06
 
 - The owner's explicit correction supersedes the earlier three-workflow limit and every CI/Benchmarks website placement: `Build and Tests` (`ci.yml`) owns full solution build, repository checks and ordinary tests; `Website` (`website.yml`) independently owns site qualification/build/Pages on trusted main pushes, manual dispatch and completed Benchmarks events. `Benchmarks` and manual `Release` retain their existing scopes. Website uses ready authenticated metrics when available and publishes the fully qualified content-only site when none exist; all applicable source, browser, coverage, freshness and permission gates remain mandatory.
+
+## Final Benchmarks Website trigger, owner clarification 2026-10-06
+
+- Benchmarks ends with only a bounded dispatch of `website.yml` on main, after its aggregation dependencies settle even when benchmark work fails. Keep site building, tests and Pages entirely in Website; remove its `workflow_run` subscription. Only the final trigger job receives `actions: write`. Website authenticates an optional triggering run against GitHub and waits boundedly for completion before its existing newest-ready selection; no input supplies trusted measurements. Push/manual Website publication and all original qualification/freshness gates remain independent.

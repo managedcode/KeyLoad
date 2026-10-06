@@ -45,3 +45,4 @@
 
 ## Standalone Website qualification
 - BenchmarkComparisons' Aspire-owned `SiteOptionalBenchmarkSelectionTests` preparation gate MUST verify native Website executor admission, rejection of CI and a wrong workflow path, unchanged controlled inputs and a healthy follow-up on every Website run, including the no-metrics mode. Use the actual production context API; controlled context properties are test data and never provider/publication evidence. Keep the closed content artifact/browser source inventory and complete measured provenance coverage distinct and mandatory.
+- The final Benchmarks dispatch contract also requires native manual Website admission and rejection of retired `workflow_run` executor events in that same always-run Aspire gate. Preserve unchanged inputs and a healthy follow-up; the optional producer run input is never metric authority.

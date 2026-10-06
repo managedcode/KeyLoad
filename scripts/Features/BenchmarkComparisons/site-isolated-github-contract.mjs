@@ -6,7 +6,7 @@ import { exactKeys } from './aggregate-contracts.mjs';
 export const SITE_GH = Object.freeze({
   repository: 'managedcode/KeyLoad', repositoryId: 477801965,
   executor: 'Website', executorPath: '.github/workflows/website.yml',
-  executorEvents: Object.freeze(['push', 'workflow_dispatch', 'workflow_run']),
+  executorEvents: Object.freeze(['push', 'workflow_dispatch']),
   executorJobs: Object.freeze(['qualify', 'deploy']), producerEvents: Object.freeze(['push', 'workflow_dispatch']),
   producerKeys: Object.freeze(['runId', 'attempt', 'sourceRevision', 'event', 'conclusion']),
   producerConclusions: Object.freeze(['success', 'failure']), eventBytes: 1_048_576, pinnedRunCapture: 'requested-run.json',

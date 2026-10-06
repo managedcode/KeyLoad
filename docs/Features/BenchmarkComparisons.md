@@ -1253,8 +1253,8 @@ REQ-BC-WEB-006 / AC-BC-WEB-006: expose Build and Tests, Benchmarks, Website and
 Release. Build and Tests runs the complete solution build and every existing
 ordinary/analyzer/scalar/recovery/Aspire RF3 test gate with no website jobs or
 Benchmarks completion trigger. Website alone runs the existing qualified site
-build/deployment on trusted main push/manual and completed own-main Benchmarks
-producers, with no dependency on Build and Tests or successful benchmarks.
+build/deployment on trusted main push/manual, including the final Benchmarks
+dispatch, with no dependency on Build and Tests or successful benchmarks.
 Optional metrics, rejection of invalid selected evidence and the no-data path
 remain AC-BC-WEB-001..005. Native executor authentication must accept only Website
 at `.github/workflows/website.yml` and reject the former CI executor.
@@ -1379,3 +1379,25 @@ Align that exact frozen count with the existing complete manifest, retaining byt
 comparison, sorted uniqueness, regular-path and per-file hash checks. This is a
 static workflow contract repair under AC-BC-WEB-004/005; no file or coverage source
 is removed and no provider pass is claimed until the next genuine run succeeds.
+
+### Final Benchmarks trigger, owner clarification 2026-10-06
+
+REQ-BC-WEB-007 / AC-BC-WEB-007: the final Benchmarks job only dispatches the
+separate Website workflow on main after aggregation dependencies settle. It runs
+on trusted own-main push/manual even when benchmark checks or aggregation fail,
+and never builds/tests/deploys the website. Scope `actions: write` to that job;
+retain read-only database jobs and unchanged workloads. Website uses only push
+and workflow_dispatch events, with its independent source publication intact.
+
+Dispatch supplies only an optional `benchmark_run_id` for completion waiting.
+Website authenticates the actual original run's repository, branch, workflow
+name/path, event and source through GitHub; bounded waiting resolves the race
+between dispatch and producer completion before newest-ready selection. Reject
+invalid/foreign metadata and timeout, preserve failure/absence handling and
+source/tuple freshness. The input never selects metric authority or replaces
+archive provenance. Empty manual input needs no producer wait. Existing native
+TUnit executor operations cover manual admission and retired executor-event
+rejection, unchanged inputs and a healthy follow-up. Static actionlint and YAML
+graph review verify infrastructure; a genuine final dispatch and separate
+workflow_dispatch Website/Pages run supply provider evidence. Ordered tasks and
+ownership are in ADR-112 TASK-WEB-TRIGGER-001..003.

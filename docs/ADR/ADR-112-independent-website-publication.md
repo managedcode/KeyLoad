@@ -105,3 +105,37 @@ workflow name to Build and Tests and its four actual readable job labels. It
 retains ci.yml, the complete exact-source/current-attempt/success requirement,
 unique jobs and immutable release protections. Static contract/AST review is the
 allowed preparation evidence; no product Release is dispatched to verify it.
+
+## Final Benchmarks dispatch, owner clarification 2026-10-06
+
+REQ/AC-BC-WEB-007 supersedes the `workflow_run` subscription. Benchmarks' final
+`website-trigger` job depends on the settled `comparison-aggregate` join and uses
+`always() && !cancelled()` plus trusted own-main repository/event admission.
+Its only effect is dispatching the separate Website workflow on main; all site
+source, tests, builds and Pages remain Website-owned. Confine `actions: write` to
+that trigger job, keep every database job read-only, and dispatch after successful
+or failed benchmark work. Trigger failure remains visible and is never fabricated
+as publication success. Build and Tests gains no Website dependency.
+
+The dispatch passes optional `benchmark_run_id` only to resolve the brief race
+before its producer workflow becomes completed. Website authenticates that run
+against original GitHub metadata (own repository/id, main, Benchmarks name/path,
+push/manual event and valid source) and waits at most five minutes before existing
+newest-ready selection. Failure/cancellation does not supply metrics; invalid
+metadata, API errors and timeout fail closed. Empty manual input skips waiting.
+The run input neither selects authoritative metrics nor bypasses archive or
+source/tuple freshness. Current executor events are push and workflow_dispatch;
+retired workflow_run admission is rejected while immutable event validation
+fixtures remain history.
+
+TASK-WEB-TRIGGER-001 lead updates root/local policy and this REQ/AC contract first.
+TASK-WEB-TRIGGER-002 lead owns benchmarks.yml final dispatch, website.yml input,
+bounded admission/wait and native executor-event contract; tests cover manual
+admission/retired event rejection using unchanged controlled objects and a healthy
+follow-up through the actual context API. TASK-WEB-TRIGGER-003 read-only reviewer
+audits the trust/permission/race contract; lead joins static actionlint/YAML graph,
+Aspire regressions, canonical build/format and genuine final dispatch plus separate
+Website/Pages evidence. Preserve unrelated checkout work. No package/data change;
+rollback reverts this coherent dispatch contract to the earlier completion hook
+without rewriting evidence or metric archives. Remain Accepted until original
+required qualification/provider gates have passed.

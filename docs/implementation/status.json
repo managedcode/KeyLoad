@@ -4884,7 +4884,7 @@
         "siteTestsFormat": "passed",
         "canonicalBuild": "passed_zero_warnings_zero_errors_final_source",
         "canonicalFormat": "failed_unrelated_BackupRestore_AtomicPartitionRosterFixture_whitespace",
-        "staticWorkflowGovernance": "passed",
+        "staticWorkflowGovernance": "workflow_graph_actionlint_passed; working_tree_governance_failed_unrelated_owner_migration_rule_changed_preserved_root_prefix; scoped_index_prefix_unchanged",
         "contentOnlyAspire": {
           "status": "passed_development_only",
           "tests": 5,
@@ -4901,11 +4901,11 @@
         "alwaysRunExecutorRegressions": {
           "status": "passed_development_only",
           "suite": "Aspire_unit_SiteOptionalBenchmarkSelectionTests",
-          "tests": 22,
-          "passed": 22,
+          "tests": 24,
+          "passed": 24,
           "skipped": 0,
-          "executorCases": 3,
-          "trxSha256": "df3991c8bd94b90a3a95a9ba952e68478111e3f09764f6787b4a4cdb46ddb94d"
+          "executorCases": 5,
+          "trxSha256": "2ed45090c82db5fd2748973794b574932d54ee062f9bc5a013b60054b9516206"
         },
         "firstNativeRun": {
           "source": "6c20cf4fba946afc123fd2fd29960d7995c248f4",
@@ -4929,6 +4929,26 @@
           "selectedBenchmarkRun": 37184989107,
           "selectedMeasuredSource": "73aebfd3f72695357834599e813aba77b9e274ad",
           "qualification": "capture_only_not_site_or_current_database_qualification"
+        },
+        "finalBenchmarkTrigger": {
+          "requirement": "REQ-BC-WEB-007",
+          "producerJob": "website-trigger",
+          "dependsOn": "comparison-aggregate",
+          "onlyEffect": "dispatch_Website_main",
+          "dispatchAfterFailureOrSkip": true,
+          "dispatchAfterWholeWorkflowCancellation": false,
+          "actionsWrite": "only_final_trigger_job",
+          "websiteEvents": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "workflowRunSubscription": false,
+          "producerInput": "benchmark_run_id_wait_only_not_metric_authority",
+          "authenticatedWaitDeadlineSeconds": 270,
+          "stepTimeoutMinutes": 5,
+          "staticContract": "passed",
+          "nativeManualAdmissionAndRetiredEventRejection": "passed_Aspire_unit",
+          "provider": "pending_genuine_final_dispatch_and_separate_Pages_run"
         }
       }
     }

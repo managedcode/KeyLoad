@@ -3,9 +3,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  workflow_run:
-    workflows: [Benchmarks]
-    types: [completed]
+    inputs:
+      benchmark_run_id:
+        description: Benchmark run to await (optional)
+        required: false
+        type: string
+        default: ''
 permissions:
   contents: read
 jobs:
@@ -16,16 +19,8 @@ jobs:
       cancel-in-progress: false
     if: >-
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
-      ((github.ref == 'refs/heads/main' &&
-        (github.event_name == 'push' || github.event_name == 'workflow_dispatch')) ||
-       (github.event_name == 'workflow_run' &&
-        github.event.workflow_run.head_repository.id == 477801965 &&
-        github.event.workflow_run.head_branch == 'main' &&
-        github.event.workflow_run.name == 'Benchmarks' &&
-        github.event.workflow_run.path == '.github/workflows/benchmarks.yml' &&
-        github.event.workflow_run.status == 'completed' &&
-        (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
-        (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')))
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 180
     permissions: {contents: read, actions: read}
@@ -37,6 +32,42 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
     steps:
+      - name: Await the triggering benchmark run
+        if: github.event_name == 'workflow_dispatch' && inputs.benchmark_run_id != ''
+        timeout-minutes: 5
+        env:
+          BENCHMARK_RUN_ID: ${{ inputs.benchmark_run_id }}
+        run: |
+          [[ "$BENCHMARK_RUN_ID" =~ ^[1-9][0-9]*$ && ${#BENCHMARK_RUN_ID} -le 20 ]]
+          benchmark_deadline=$((SECONDS + 270))
+          benchmark_poll=0
+          while ((SECONDS < benchmark_deadline)); do
+            benchmark_remaining=$((benchmark_deadline - SECONDS))
+            ((benchmark_remaining > 0)) || break
+            benchmark_request_timeout=$((benchmark_remaining < 10 ? benchmark_remaining : 10))
+            if ! benchmark_metadata=$(timeout "${benchmark_request_timeout}s" gh api "repos/$GH_REPO/actions/runs/$BENCHMARK_RUN_ID"); then
+              printf '%s\n' 'Unable to read the triggering benchmark run within the bounded request.' >&2
+              exit 1
+            fi
+            jq -e --arg run "$BENCHMARK_RUN_ID" '
+              (.id | tostring) == $run and
+              .repository.id == 477801965 and .repository.full_name == "managedcode/KeyLoad" and
+              .head_repository.id == 477801965 and .head_repository.full_name == "managedcode/KeyLoad" and
+              .head_branch == "main" and .name == "Benchmarks" and
+              .path == ".github/workflows/benchmarks.yml" and
+              (.event == "push" or .event == "workflow_dispatch") and
+              (.head_sha | test("^[a-f0-9]{40}$"))' <<< "$benchmark_metadata" > /dev/null
+            if [[ "$(jq -r .status <<< "$benchmark_metadata")" == completed ]]; then
+              exit 0
+            fi
+            benchmark_poll=$((benchmark_poll + 1))
+            printf 'Waiting for benchmark completion (poll %s).\n' "$benchmark_poll"
+            benchmark_remaining=$((benchmark_deadline - SECONDS))
+            ((benchmark_remaining > 0)) || break
+            sleep "$((benchmark_remaining < 5 ? benchmark_remaining : 5))"
+          done
+          printf '%s\n' 'The triggering benchmark run did not complete within the bounded wait.' >&2
+          exit 1
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

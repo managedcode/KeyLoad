@@ -57,7 +57,8 @@ flowchart LR
     Main[Own main push or manual] --> Benchmarks[All native load comparisons]
     Benchmarks --> Aggregate[Complete authenticated JSON aggregate]
     WebSource[Trusted main source or manual] --> Website[Separate Website workflow]
-    Aggregate --> Website
+    Aggregate --> Trigger[Dispatch Website only]
+    Trigger --> Website
     Website --> Qualify[Applicable site tests browser coverage]
     Qualify --> Deploy[Publish with ready metrics or without figures]
     Manual[Manual own-main Release] --> Version[UTC dated reservation]

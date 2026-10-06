@@ -24,6 +24,8 @@ internal sealed class SiteOptionalBenchmarkSelectionTests
     [Arguments("legacy-plan-reject-changed", true)]
     [Arguments("legacy-plan-reject-source", true)]
     [Arguments("website-executor-accepted", true)]
+    [Arguments("website-executor-manual", true)]
+    [Arguments("website-executor-retired-event", true)]
     [Arguments("website-executor-legacy-ci", true)]
     [Arguments("website-executor-wrong-path", true)]
     public async Task AcBcWeb002OptionalSelectionKeepsAuthenticAggregateAndCurrentStepContracts(string scenario, bool accepted)

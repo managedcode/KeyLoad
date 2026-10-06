@@ -79,11 +79,9 @@ export async function createSiteIsolatedContext(environment, args, platform = pr
     && typeof environment.GITHUB_WORKSPACE === 'string' && isAbsolute(environment.GITHUB_WORKSPACE));
   requireSite(environment.GITHUB_REF === 'refs/heads/main');
   if (args.mode === SITE_GH.publish) requireSite(args['requested-run'] === undefined);
-  const trigger = environment.GITHUB_EVENT_NAME === 'workflow_run'
-    ? await readSiteProducerEvent(environment.GITHUB_EVENT_PATH) : null;
   return { native: { workspace: repositoryRoot }, executor: { sourceRevision: environment.GITHUB_SHA,
     runId: environment.GITHUB_RUN_ID, attempt: environment.GITHUB_RUN_ATTEMPT, workflow: environment.GITHUB_WORKFLOW,
     event: environment.GITHUB_EVENT_NAME },
     source: { website: args['site-revision'], control: args['workflow-revision'] }, mode: args.mode, requestedRun: args['requested-run'] ?? null,
-    optional: args.optional === 'true', trigger, producer: null };
+    optional: args.optional === 'true', trigger: null, producer: null };
 }

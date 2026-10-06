@@ -1135,12 +1135,13 @@ flowchart LR
 ## Independent optional benchmark website publication
 
 [ADR-112](ADR/ADR-112-independent-website-publication.md) and
-[REQ/AC-BC-WEB-001..006](Features/BenchmarkComparisons.md) let Website publish website
+[REQ/AC-BC-WEB-001..007](Features/BenchmarkComparisons.md) let Website publish website
 source independently. The latest ready authenticated benchmark aggregate enriches
 the website when available; absence emits no metric catalog or figures. Content
 and measured artifacts have distinct complete applicable qualification, and
 predeploy rechecks actual website/control source plus ready-data identity or null.
-Completed own-main benchmarks trigger another independent Website consumer.
+The final own-main Benchmarks job only dispatches the independent Website workflow;
+Website authenticates and awaits that run's completion before selecting ready data.
 
 ```mermaid
 flowchart LR
