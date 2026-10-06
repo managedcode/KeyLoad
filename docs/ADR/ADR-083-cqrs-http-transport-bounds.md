@@ -1,8 +1,8 @@
 # ADR-083 — Bounded native CQRS HTTP consumption
 
-Status: Accepted; owning repair10.2.7 is delivered at6dae0a68960055f01216c186448787000fd0b6e6 with successful canonical Linux release and all four feed packages verified. KeyLoad central pins are updated; Aspire consumer qualification remains pending. Not Implemented until those required consumer gates pass.
+Status: Accepted; current centrally pinned Communication APIs own the bounded HTTP contract. Fresh Aspire consumer and exact-source Linux qualification remain required. Not Implemented until the complete required gates pass.
 
-Related: REQ/AC-CHB-001–005 in [CqrsTransportBounds](../Features/ClientApi/CqrsTransportBounds.md), AC-NCQRS-004 and [ADR-082](ADR-082-native-cqrs-streams.md), persisted privacy/resource contracts in ADR-010/015/022. Owning source: ManagedCode.Communication10.2.6 in the sibling Communication repository.
+Related: REQ/AC-CHB-001–005 in [CqrsTransportBounds](../Features/ClientApi/CqrsTransportBounds.md), AC-NCQRS-004 and [ADR-082](ADR-082-native-cqrs-streams.md), persisted privacy/resource contracts in ADR-010/015/022. Owning source: the ManagedCode.Communication family selected in Directory.Packages.props, maintained in the sibling Communication repository.
 
 ## Decision
 
@@ -23,9 +23,9 @@ No KeyLoad parser or unpublished local package is authorized. Generic long-opera
 
 TASK-NCQRS-HTTP-OWNER-BOUNDS: root owns planning, integration and release; lifecycle_wave Luna/high stages the narrowly scoped patch under /private/tmp after explicit write release. Exact owning paths are ManagedCode.Communication/Cqrs/CqrsStreamClientOptions.cs, CqrsHttpClientExtensions.cs and directly required bounded client helpers/constants; ManagedCode.Communication.Tests/CQRS native transport/API regressions; README.md examples. Existing server writers, normalizer, Graph, reliability and unrelated packages are outside scope. Root alone applies outside-checkout writes, runs commands, changes Directory.Build.props canonical patch values and performs Git/publication.
 
-Ordered stages: freeze contract; implement/review finite physical guard and failure decode; actual positive/negative/edge/cancel/dispose tests; full owning build/TUnit/coverage and bounded hot-path measurement; canonical10.2.7 commit/push/release/feed proof; centrally update all three consuming pins; restore/build/focused native CQRS via Aspire and required complete consumer gates. Never skip a failing stage or treat a green release workflow as all-package availability.
+Ordered stages: freeze contract; implement/review finite physical guard and failure decode; actual positive/negative/edge/cancel/dispose tests; full owning build/TUnit/coverage and bounded hot-path measurement; canonical patch commit/push/release/feed proof; centrally update all three consuming pins; restore/build/focused native CQRS via Aspire and required complete consumer gates. Never skip a failing stage or treat a green release workflow as all-package availability.
 
-Related joins: C0 Graph/native runtime tests can run against10.2.6 while this owning repair proceeds. C2 public HTTP adoption waits for the verified release and its separate product contract. C1 signed cohort/RPC and C3 long-work durability are unchanged. Workers do not modify shared KeyLoad files, version, Git, source cohorts or run commands during root runtime qualification.
+Related joins: C0 Graph/native runtime tests use the current centrally pinned packages. C2 public HTTP adoption requires the verified package release and its separate product contract. C1 signed cohort/RPC and C3 long-work durability are unchanged. Workers do not modify shared KeyLoad files, version, Git, source cohorts or run commands during root runtime qualification.
 
 ## Rollout, rollback and evidence
 

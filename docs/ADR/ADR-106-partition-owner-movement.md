@@ -138,7 +138,7 @@ sequenceDiagram
     B->>D: Join using same ClusterId and ServiceId
     H->>A: Poll one shared membership readiness view
     H->>B: Poll one shared membership readiness view
-    Note over A,B: DatabaseReady stays false; no IRequestGrain data dispatch in Stage 1A
+    Note over A,B: DatabaseReady stays false, no IRequestGrain data dispatch in Stage 1A
 ```
 
 ```mermaid

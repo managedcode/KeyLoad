@@ -211,9 +211,9 @@ internal sealed class ReplicaReplayCapacityTests
         await Assert.That(results.Count(result => result == ErrorCode.Unauthenticated)).IsEqualTo(ReplicaSecurityFixture.ReservedCapacity - 1);
     }
 
-    /// <summary>AC-REP-006: independently owned native bytes retain control classification and exact frozen operation content.</summary>
+    /// <summary>AC-REP-006: independently owned native bytes retain control classification and current operation content.</summary>
     [Test]
-    public async Task ValidOwnedNativeBytesRetainControlClassificationAndOriginalOperationBytes()
+    public async Task ValidOwnedNativeBytesRetainControlClassificationAndCurrentOperationContent()
     {
         using var fixture = new ReplicaSecurityFixture();
         var request = fixture.Forward(OperationKind.Membership);
@@ -221,8 +221,6 @@ internal sealed class ReplicaReplayCapacityTests
         request = fixture.Resign(request with { Payload = ReplicaProtocolCodec.Serialize(operation) });
         fixture.Receiver.VerifyRequest(request);
         await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(request.Payload.Span).PayloadJson).IsEqualTo(ReplicaSecurityFixture.OperationPayload);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<ReplicatedOperation>(
-            ReplicaSecurityWireFixture.LegacyEscapedOperation)).Code).IsEqualTo(ErrorCode.FormatUnsupported);
     }
 
     /// <summary>AC-REP-006: warmed borrowed classification avoids decoded content; accepted requests own independent buffers.</summary>

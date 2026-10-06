@@ -12,9 +12,11 @@ the prepared manual workflow. Provider qualification remains deferred.
 Build and Tests combines build/ordinary tests for PR/main/manual; Benchmarks owns
 all load/native comparison measurement and its final dispatch to the independent
 Website workflow; Website owns its qualification and Pages deployment;
-Release manually builds and publishes source-bound database distributions/images/
-packages with `vM.m.yyMMdd.N`. Keep the existing RF3 topology, node-local storage,
-workloads, isolated Linux cells and all product/site qualification requirements.
+Release is a prepared manual workflow; execute packaging or publication only
+after product readiness or an explicit owner release request. When authorized, it
+builds and publishes source-bound database distributions/images/packages with
+`vM.m.yyMMdd.N`. Keep the existing RF3 topology, node-local storage, workloads,
+isolated Linux cells and all product/site qualification requirements.
 
 ```mermaid
 flowchart TD
@@ -23,7 +25,7 @@ flowchart TD
     A --> Trigger[Final Benchmarks Website dispatch]
     Trigger --> Q[Independent Website qualification]
     Q --> D[Pages deployment]
-    R[Manual Release main] --> V[Source-bound UTC version reservation]
+    R[Owner-authorized manual Release] --> V[Source-bound UTC version reservation]
     V --> P[Build pack distribution image export]
     P --> F[Immutable GHCR tag and GitHub Release]
     Gate --> F
@@ -61,7 +63,8 @@ flowchart TD
    benchmark images with version/source labels, verifies package versions and all
    asset hashes. RF3 distribution uses three persistent node-local Docker owners
    and the existing exact membership/routing configuration, with no local user data.
-7. Write-limited publication verifies exact-source successful CI and actual assets,
+7. After the Release workflow is authorized, write-limited publication verifies
+   exact-source successful CI and actual assets,
    creates an annotated source/run/manifest-bound git tag without force, pushes
    only versioned GHCR image references, and creates GitHub Release with actual
    database/package/image assets and checksums. Reuse only matching owned existing

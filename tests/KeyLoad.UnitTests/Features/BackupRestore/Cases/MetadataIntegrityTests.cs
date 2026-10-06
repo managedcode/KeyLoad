@@ -47,11 +47,11 @@ internal sealed class MetadataIntegrityTests
     }
 
     [Test]
-    public async Task CorruptWalVerificationPrecedesMalformedIdentityParsing()
+    public async Task CorruptWalVerificationPrecedesUnsupportedIdentityParsing()
     {
         using var fixture = new MetadataBackupFixture();
         await File.WriteAllTextAsync(Path.Combine(fixture.BackupDirectory,
-            MetadataTestContract.IdentityFileName), MetadataTestContract.MalformedJson);
+            MetadataTestContract.IdentityFileName), MetadataTestContract.UnsupportedIdentityContents);
         await MetadataTestFiles.UpdateManifestFileAsync(fixture.BackupDirectory,
             MetadataTestContract.IdentityFileName);
         var journalPath = Path.Combine(fixture.BackupDirectory, MetadataTestContract.JournalFileName);

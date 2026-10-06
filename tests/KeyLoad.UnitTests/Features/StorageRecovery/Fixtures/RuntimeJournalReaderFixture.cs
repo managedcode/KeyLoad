@@ -1,6 +1,8 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.StorageRecovery.Serialization;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
@@ -11,6 +13,7 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal const string RuntimeJournalNamespace = StoreReaderContract.RuntimeJournalKeySpace;
     internal const string PayloadName = "reader-contract-test";
     internal const string RootPrefix = "keyload-runtime-journal-reader-";
+    private const string InvalidCurrentIdentity = "The current native identity envelope is invalid.";
 
     private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
 
@@ -40,6 +43,39 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
         await File.WriteAllBytesAsync(path, changed);
     }
 
+    internal static async Task OmitReaderCapabilityAsync(string directory)
+    {
+        var path = IdentityPath(directory);
+        var maximumBytes = UnitExecutionOptions.StorageExecution().Value.MaximumIdentityFileBytes;
+        var original = RequireCurrentEnvelope(await File.ReadAllBytesAsync(path), maximumBytes);
+        var identity = NativeSerialization.Deserialize<StoreIdentity>(original.Payload);
+        if (identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
+        {
+            throw new InvalidDataException(InvalidCurrentIdentity);
+        }
+        var payload = NativeIdentityCapabilityOmission.SerializeWithoutCapability(identity, maximumBytes);
+        var changed = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
+            ZoneTreeMetadataBinary.IdentityMagic);
+        await File.WriteAllBytesAsync(path, changed);
+        var rewritten = RequireCurrentEnvelope(await File.ReadAllBytesAsync(path), maximumBytes);
+        NativeIdentityCapabilityOmission.VerifyCapabilityOmitted(rewritten.Payload);
+    }
+
+    private static ZoneTreeIdentityEnvelope RequireCurrentEnvelope(byte[] bytes, int maximumBytes)
+    {
+        if (bytes.Length > maximumBytes || bytes.Length <= sizeof(ulong)
+            || BinaryPrimitives.ReadUInt64LittleEndian(bytes) != ZoneTreeMetadataBinary.IdentityMagic)
+        {
+            throw new InvalidDataException(InvalidCurrentIdentity);
+        }
+        var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(bytes.AsSpan(sizeof(ulong)));
+        if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))
+        {
+            throw new InvalidDataException(InvalidCurrentIdentity);
+        }
+        return envelope;
+    }
+
     internal static async Task CorruptIdentityMagicAsync(string directory)
     {
         var path = IdentityPath(directory);
@@ -57,6 +93,21 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
         }
         return files;
     }
+
+    internal static async Task<Dictionary<string, byte[]?>> ReadInventoryAsync(string directory)
+    {
+        var inventory = new Dictionary<string, byte[]?>(StringComparer.Ordinal);
+        foreach (var path in Directory.EnumerateDirectories(directory, "*", SearchOption.AllDirectories))
+        {
+            inventory.Add(Path.GetRelativePath(directory, path), null);
+        }
+        foreach (var path in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
+        {
+            inventory.Add(Path.GetRelativePath(directory, path), await File.ReadAllBytesAsync(path));
+        }
+        return inventory;
+    }
+
     internal static byte[] RuntimeJournalKey => KeyCodec.Encode(RuntimeJournalNamespace, PayloadName);
     internal static byte[] FollowupKey => KeyCodec.Encode(RuntimeJournalNamespace, FollowupName);
     internal const string FollowupName = "reader-contract-followup";

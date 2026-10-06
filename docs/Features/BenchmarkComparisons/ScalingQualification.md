@@ -13,7 +13,7 @@ Status: accepted new scaling implementation contract; current intensive comparis
 
 The existing `intensive-1k-c16` matrix is preserved byte-for-byte as a control. This feature adds a distinct actual-scale steady-state cohort through the existing `ComparisonRunner`, target adapters, isolated per-database GitHub job groups and native topology resources. It does not add a parallel harness or allow local measurements into website publication.
 
-Three exact profiles are introduced:
+Two exact profiles are admitted:
 
 | Profile | Actual corpus records | Measured operations per cell | Payload | Warmup / repetitions / concurrency |
 |---|---:|---:|---:|---|
@@ -22,7 +22,7 @@ Three exact profiles are introduced:
 
 Seed is fixed at 1729. Applicable common scenarios are exactly `PointRead`, `DocumentWrite`, `DocumentUpdate`, and `DocumentDelete`. `PointRead` is reported as the existing public point lookup operation; this stage does not claim SQL range-query or complex-query scale where an equivalent adapter is absent. All new cells are steady-state closed-loop. Existing actual topology counts `[1,2,3]` and target native adapters are reused. KeyLoad uses a genuinely configured native RF1/RF2/RF3 member count for each cell, with independent native endpoint/status and ACK validation. An external target is eligible only when that exact native member count and write ACK mode are supported; unsupported cells remain explicit. A single PostgreSQL process is never described as distributed.
 
-The complete planned cohort identity is target × actual node count × profile × applicable scenario (9 × 3 × 3 × 4 = 264 cells, preserving explicit unsupported topology dispositions). Every eligible cell is one isolated Linux GitHub runner/job, uses exact source/run/attempt/job and target image receipts, seeds and verifies all N records, then performs exactly100,000 caller operations. A missing, failed, unsupported-but-required, duplicated, timed-out or mismatched cell invalidates cohort completeness; no partial result is publishable.
+The complete planned cohort identity is target × actual node count × profile × applicable scenario (11 × 3 × 2 × 4 = 264 cells, preserving explicit unsupported topology dispositions). Every eligible cell is one isolated Linux GitHub runner/job, uses exact source/run/attempt/job and target image receipts, seeds and verifies all N records, then performs exactly100,000 caller operations. A missing, failed, unsupported-but-required, duplicated, timed-out or mismatched cell invalidates cohort completeness; no partial result is publishable.
 
 ## Bounded dataset and runner behavior
 
@@ -185,10 +185,10 @@ settlement or qualification for a detached original task.
 
 REQ-SCALE-018 requires an independent fixed-arrival measurement over the same
 real native targets and lazy 100K/1M corpora. TASK-SCALE-OPEN-LOOP owns
-AC-SCALE-018..021 below. It does not close the original KL-075 six-node,
-shard-skew, cross-owner fanout, recovery or movement requirements. Existing270
-control and264 closed-loop identities, report schema3 and website projections
-remain unchanged. Open-loop results are a separate internal cohort.
+AC-SCALE-018..021 below. It does not close the separately specified two-RF3
+six-silo physical-owner movement stages in ADR-106, shard-skew, cross-owner fanout
+or recovery requirements. The current330 control and264 closed-loop scale
+identities and their native report and website projection contracts remain unchanged. Open-loop results are a separate internal cohort.
 
 - AC-SCALE-018: each cell binds target, actual1/2/3-node topology, exact dataset,
   scenario and offered rate250/1000/4000 per second. Offer exactly100000 planned

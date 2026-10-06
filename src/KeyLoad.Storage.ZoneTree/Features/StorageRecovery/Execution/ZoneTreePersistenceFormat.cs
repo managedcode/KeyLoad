@@ -2,19 +2,10 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreePersistenceFormat
 {
-    internal const ulong LegacyJournalMagic = 0x314C4157444C4BUL;
-    internal const ulong LegacyBinaryJournalMagic = 0x324C4157444C4BUL;
-    internal const ulong LegacyNativeMutationJournalMagic = 0x334C4157444C4BUL;
     internal const ulong JournalMagic = 0x344C4157444C4BUL;
     internal const ulong CheckpointMagic = 0x35545043444C4BUL;
     internal const ulong CheckpointDataMagic = 0x35415444444C4BUL;
     internal const ulong CheckpointEndMagic = 0x35444E45444C4BUL;
-    internal const ulong Native6CheckpointMagic = 0x34545043444C4BUL;
-    internal const ulong Native6CheckpointDataMagic = 0x34415444444C4BUL;
-    internal const ulong Native6CheckpointEndMagic = 0x34444E45444C4BUL;
-    internal const ulong SourceCheckpointMagic = 0x33545043444C4BUL;
-    internal const ulong SourceCheckpointDataMagic = 0x33415444444C4BUL;
-    internal const ulong SourceCheckpointEndMagic = 0x33444E45444C4BUL;
     internal const int HeaderLength = 52;
     internal const int PayloadLengthOffset = 8;
     internal const int SequenceOffset = 12;
@@ -22,8 +13,6 @@ internal static class ZoneTreePersistenceFormat
     internal const int ChecksumLength = 32;
     internal const int CheckpointVersion = 5;
     internal const int CurrentDataEpoch = 7;
-    internal const int InitialIdentityVersion = 1;
-    internal const int LegacyBinaryJournalIdentityVersion = 3;
     internal const int BackupManifestVersion = 2;
     internal const int SigningKeyBytes = 32;
     internal const int StorageValueHeaderBytes = 1;
@@ -49,8 +38,7 @@ internal static class ZoneTreePersistenceFormat
     internal const string IdentityChecksumInvalid = "The database identity checksum is invalid.";
     internal const string IdentityFormatUnsupported = "The database identity format is unsupported.";
     internal const string IdentityScopeInvalid = "The configured cluster identity does not match this database.";
-    internal const string JournalHeaderInvalid = "The redo journal contains an invalid frame header.";
-    internal const string JournalFormatUpgradeRequired = "The journal format is unsupported.";
+    internal const string JournalFormatUnsupported = "The journal format is unsupported.";
     internal const string JournalSequenceInvalid = "The redo journal has an invalid length or sequence.";
     internal const string JournalChecksumInvalid = "The redo journal checksum is invalid.";
     internal const string RecoveryRequired = "The database must recover before accepting another operation.";

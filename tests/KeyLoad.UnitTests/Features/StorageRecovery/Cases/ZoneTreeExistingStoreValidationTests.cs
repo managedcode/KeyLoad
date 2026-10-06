@@ -26,10 +26,10 @@ internal sealed class ZoneTreeExistingStoreValidationTests
     }
 
     [Test]
-    public async Task AcSg009001LegacyIdentityIsRejectedWithoutPromotion()
+    public async Task AcSg009001UnsupportedFutureIdentityIsRejectedWithoutMutation()
     {
         using var files = new ZoneTreeExistingStoreFixture();
-        ZoneTreeIdentityFile.Write(files.IdentityPath, files.Identity with { FormatVersion = ZoneTreeExistingStoreFixture.LegacyFormat }, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
+        ZoneTreeIdentityFile.Write(files.IdentityPath, files.Identity with { FormatVersion = ZoneTreeExistingStoreFixture.UnsupportedFutureFormat }, UnitExecutionOptions.StorageExecution().Value.IdentityBufferBytes);
         var original = await File.ReadAllBytesAsync(files.IdentityPath);
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.FormatUnsupported, ExistingStoreInspectionExpectedFailures.KeyLoad);
@@ -44,7 +44,7 @@ internal sealed class ZoneTreeExistingStoreValidationTests
         var original = await File.ReadAllBytesAsync(files.IdentityPath);
         var envelope = NativeSerialization.Deserialize<ZoneTreeIdentityEnvelope>(original.AsSpan(sizeof(ulong)));
         envelope.Checksum[0] ^= ChecksumCorruptionMask;
-        var corrupted = ZoneTreeMetadataBinary.Write(envelope, 0x354449444C4BUL);
+        var corrupted = ZoneTreeMetadataBinary.Write(envelope, ZoneTreeMetadataBinary.IdentityMagic);
         await File.WriteAllBytesAsync(files.IdentityPath, corrupted);
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.Corruption, ExistingStoreInspectionExpectedFailures.KeyLoad);

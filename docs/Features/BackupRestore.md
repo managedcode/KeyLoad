@@ -61,7 +61,7 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 
 - The current store backup records a verified backup manifest and canonical storage files. Restore verifies the manifest/checksums, requires a clean target, creates a new database incarnation, and pauses dispatch.
 - `BackupArtifact.Pack` divides backup files into bounded Cartograph pieces; `Inspect` lists entries; `Unpack` verifies catalog layout and writes to a destination. `ArtifactTransfer` copies an archive through the ManagedCode file-storage abstraction. This is backup artifact transport, not chunked public BlobStorage or partial blob reads.
-- The `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch` test source checks restored data, new identity, paused dispatch, private file mode, and rejection after tampering with the backup `commands.wal`. This corruption case does not tamper with a Cartograph archive. `ArtifactTests.ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt` checks a multi-piece archive round trip and byte-identical file-storage copy; it does not measure peak or retained memory.
+- `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch` checks restored data, new identity, paused dispatch, private file mode, and rejection after tampering with `commands.wal`; that is native-store corruption coverage, not Cartograph corruption. `ArtifactTests.ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt` covers multi-piece archive round trip and byte-identical file-storage copy. Real CLI cases now exercise a noncanonical catalog, first/last entry-length mismatch, and missing manifest/identity/journal inputs, with rejected restore attempts and healthy restore/reopen controls. Authored cases remain pending exact-source Linux qualification; they do not measure peak or retained memory.
 - A cluster-wide consistent cut needs per-partition cut positions and catalog epoch, coordinated retention pins, and reconciliation of event, outbox, inbox, queue, and group state. That contract is planned; local backup must not be described as satisfying it.
 - Restore of an older cut changes incarnation and must not silently resume external dispatch or claim old cursors remain valid. Operator reconciliation and explicit resume remain a planned cluster-level workflow.
 
@@ -70,11 +70,11 @@ cluster-cut, power-loss, bounded-manifest-memory or performance claim.
 | Requirement | Measurable acceptance | Existing or planned evidence |
 |---|---|---|
 | REQ-BACKUP-001: produce and package a verifiable offline backup | AC-BACKUP-001 passes when a backup includes its manifest/checksums, archives in bounded pieces, and round-trips canonical files. Separate planned resource verification must measure bounded streaming/peak-memory behavior before making a memory-bound claim. | Existing test source: `ArtifactTests.ChunkedCartographBackupRoundTripsAndManagedCodeStorageTransfersIt` checks multi-piece round trip and copy. Planned real-file resource-bound verification; current GitHub TUnit qualification pending. |
-| REQ-BACKUP-002: restore only verified data to a clean target | AC-BACKUP-002 passes when a valid backup restores canonical data to a clean location; missing/tampered files and nonempty or unsafe destinations fail without publishing a usable partial database. | Existing test source: `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch` checks data restore and rejects a backup whose `commands.wal` is corrupted. Cartograph catalog/archive corruption, clean-target/path-safety, and partial-failure cases remain planned. |
+| REQ-BACKUP-002: restore only verified data to a clean target | AC-BACKUP-002 passes when a valid backup restores canonical data to a clean location; missing/tampered files and nonempty or unsafe destinations fail without publishing a usable partial database. | Authored real-operation source includes `CliBackupRestoreInvalidCatalogTests`, `CliBackupRestoreLengthMismatchTests`, `CliBackupRestoreMissingInputTests`, `CliBackupRestoreFlowTests`, `ArtifactTests`, and `RecoveryTests.VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`. These cover noncanonical catalog rejection, actual rejected output restore, missing required inputs, nonempty destination, original-byte/state preservation, and healthy restore/reopen controls. Exact-source Linux execution remains pending; path-traversal/reparse-specific and resource-bound evidence remains distinct and open. |
 | REQ-BACKUP-003: fence old identity and pause delivery after restore | AC-BACKUP-003 passes when restore produces a different incarnation, sets dispatch paused, and invalidates old cursor/lease identities until explicit operator reconciliation. | Existing `VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch`; planned auth/feed/lease token invalidation and explicit resume integration cases. |
 | REQ-BACKUP-004: restore a declared cluster cut with capability invariants | AC-BACKUP-004 passes when a captured per-partition cut restores document/event/outbox/inbox/queue/group state consistently, reports unavailable history explicitly, and performs no automatic external redelivery before resume. | Planned Docker/Aspire RF3 backup/restore and process-recovery scenarios under KL-042/KL-098; no current test or GitHub artifact establishes this acceptance. |
 | REQ-BACKUP-005: bound local metadata and parse the verified identity region once | AC-BSM-001..005: inclusive16KiB manifest/4KiB identity limits, same-owned-region outer/inner checksum, preserved error/destination/lock ordering and real allocation/restore proof | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), [acceptance](../ADR/ADR-048-bounded-storage-metadata.md) and [task graph](../ADR/ADR-048-bounded-storage-metadata.md); Metadata* real-file test source and exact-SHA GitHub qualification pending |
-| REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | TASK-BACKUP-UNPACK-PUBLICATION-001, TASK-BACKUP-CLI-MISSING-INPUT-002, `CliBackupRestoreLengthMismatchTests`, [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source identifies the validation/publication ordering hazard; actual execution and all required qualification remain pending. |
+| REQ-BACKUP-006: publish an unpacked archive only after complete native validation | AC-BACKUP-006 passes when first/last entry length failures leave an initially absent destination absent or an initially empty destination empty, the real CLI cannot restore either failed output, and the unchanged original archive still restores canonical data with a new incarnation and paused dispatch. All handles and owned cleanup settle; primary and cleanup failures are preserved. | Authored complete real CLI flow: `CliBackupRestoreLengthMismatchTests.AcBackup006CliLengthMismatchCannotPublishRestorablePartialBackup`, plus `CliBackupRestoreMissingInputTests.AcBackup002CliMissingRequiredBackupFilesRejectWithoutPublicationAndRestoreAfterRepair`; see TASK-BACKUP-UNPACK-PUBLICATION-001, TASK-BACKUP-CLI-MISSING-INPUT-002 and [ADR-114](../ADR/ADR-114-verified-artifact-publication.md). Source and tests exist; actual execution and all required Linux qualification remain pending. |
 
 ### Functional CLI operation coverage
 
@@ -196,10 +196,12 @@ functional coverage and required recovery/RF3/Linux gates remain mandatory.
 REQ-BACKUP-004 / AC-BACKUP-004 first require a durable roster of complete
 PartitionRef identities. The supported RF3 topology has one physical shard and
 one ordered node-local store/apply cut; a future multiple-physical-shard barrier
-is not implemented. Freeze this first implementation stage as write-time
-registration, followed by fenced legacy backfill and the cluster capture/restore
-stages. Registration alone does not establish a complete legacy inventory or a
-qualified cluster backup.
+is not implemented. Current-format operations register each partition identity
+atomically with its first committed effect or explicit placement. No legacy roster backfill or
+conversion of an earlier development format is supported. Cluster capture and
+restore must observe the complete current roster and continue to reject missing
+or corrupt roster state; fresh registration alone is not a cluster-backup
+qualification result.
 
 Add a generated native v1 entry with stable alias/IDs for Version, Partition,
 FirstSeenStorePosition and FirstSeenAppliedIndex. The key is
@@ -243,10 +245,11 @@ gates. Luna may prepare a guarded private packet for Abstractions BackupRestore
 Contracts/Serialization, Core BackupRestore Execution/Serialization/Validation,
 the exact AtomicCommandCommit join and placement-key identity reuse, plus real
 UnitTests BackupRestore cases. No replication/startup/public API/dependency/Git
-changes in this stage. Do not add unused Ready flags, capture placeholders or
-claim migration completeness. Legacy backfill will use a resumable RF3-committed
-census of live scoped keys plus explicit placements with admission fenced; a
-fully purged unassigned legacy identity has no surviving authority.
+changes in this stage. Do not add unused Ready flags or capture placeholders.
+Current writes atomically register roster rows with effects and durable outcomes;
+strictly reject missing or corrupt current roster state. There is no old-format
+roster backfill or storage conversion. A cluster backup is available only when
+the current roster and all existing capture/restore gates qualify.
 
 Mapped real workflows must commit and reopen several partition/model writes,
 verify same-transaction roster/outcome/data, retry without changing first-seen
@@ -255,16 +258,17 @@ outcome, bind an empty placement, exercise a cross-partition destination effect,
 and delete data while retaining its monotonic row. Use actual ZoneTree and
 authenticated DatabaseEngine operations, not fake transactions or source checks.
 Full build/format, Aspire normal/scalar, recovery/RF3 and source-bound Linux
-functional coverage remain mandatory. Rollout requires one compatible RF3 cohort;
-old writers cannot qualify a complete roster. Rollback may retain original typed
-rows but must keep cluster capture unavailable until backfill and restore gates
-are qualified. ADR-008 and ADR-011 govern the additive native record format.
+functional coverage remain mandatory. Cluster capture requires a complete,
+validated current roster and the existing restore gates. Unsupported format
+versions, missing roster state and corrupt roster rows fail closed; no backfill
+or conversion of an earlier development format is supported. ADR-008 and the
+current-format decisions govern native records and restore behavior.
 
 Reject checksum mismatch, missing canonical files, malformed catalog entries, path traversal/reparse points, nonempty destinations, and a restore whose manifest/version is unsupported. Preserve the last known materialized state when a restore fails. A process-kill or local round trip is not evidence of power-loss durability, a globally consistent multi-partition cut, or recovery of every optional capability.
 
 ## ADRs and verification boundary
 
-Related decisions: [ADR-003](../ADR/ADR-003-durability-ack-barrier.md), [ADR-008](../ADR/ADR-008-backup-log-retention.md), [ADR-011](../ADR/ADR-011-format-upgrades.md), and [ADR-030](../ADR/ADR-030-retention-paused-restore.md). Cluster identity and node ownership follow the pending [ADR-036](../ADR/ADR-036-orleans-foundation.md). The product-level restore sequence is described in [design sections 6, 14, and 44](../design/architecture-v0.3.uk.md).
+Related decisions: [ADR-003](../ADR/ADR-003-durability-ack-barrier.md), [ADR-008](../ADR/ADR-008-backup-log-retention.md), [ADR-011](../ADR/ADR-011-current-native-format.md), [ADR-116](../ADR/ADR-116-first-release-current-format.md), and [ADR-030](../ADR/ADR-030-retention-paused-restore.md). Cluster identity and node ownership follow the accepted [ADR-036](../ADR/ADR-036-orleans-foundation.md). The product-level restore sequence is described in [design sections 6, 14, and 44](../design/architecture-v0.3.uk.md).
 
 Unit, process-recovery, and RF3 tests run only in GitHub Actions under the repository CI workflow. Existing test names establish planned traceability only; current delivered-source, cluster restore, endurance, and power-loss gates are distinct and pending. Do not infer user BlobStorage from Cartograph piece sizes or replica snapshot chunk transport.
 

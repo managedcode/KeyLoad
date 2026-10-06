@@ -16,7 +16,8 @@ internal static class C1OutcomeInspectionJson
         nameof(C1OutcomeInspectionRequest.ExpectedNodeId),
         nameof(C1OutcomeInspectionRequest.Incarnation),
         nameof(C1OutcomeInspectionRequest.PrincipalId),
-        nameof(C1OutcomeInspectionRequest.CommandId)
+        nameof(C1OutcomeInspectionRequest.CommandId),
+        nameof(C1OutcomeInspectionRequest.Partition)
     ];
     private static readonly string[] ReceiptFields =
     [
@@ -155,8 +156,16 @@ internal static class C1OutcomeInspectionJson
             }
             var name = reader.GetString();
             if (name is null || Array.IndexOf(fields, name) < IndexOfValidationBoundary || !seen.Add(name)
-                || !reader.Read() || reader.TokenType is JsonTokenType.Null
-                    or JsonTokenType.StartArray or JsonTokenType.StartObject or JsonTokenType.EndArray or JsonTokenType.EndObject)
+                || !reader.Read())
+            {
+                throw invalid();
+            }
+            if (name == nameof(C1OutcomeInspectionRequest.Partition))
+            {
+                C1OutcomeInspectionRequestValidation.ValidatePartitionJsonShape(ref reader, invalid);
+            }
+            else if (reader.TokenType is JsonTokenType.Null or JsonTokenType.StartArray or JsonTokenType.StartObject
+                or JsonTokenType.EndArray or JsonTokenType.EndObject)
             {
                 throw invalid();
             }
@@ -173,6 +182,7 @@ internal static class C1OutcomeInspectionJson
         {
             MaxDepth = C1OutcomeInspectionProtocol.MaximumJsonDepth,
             PropertyNameCaseInsensitive = false,
+            IgnoreReadOnlyProperties = true,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
             RespectNullableAnnotations = true,
             RespectRequiredConstructorParameters = true,

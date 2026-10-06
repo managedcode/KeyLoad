@@ -4,16 +4,18 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class EpochGrainRequestPurposeTests
 {
-    private const string LegacyPurpose = "keyload-grain-request-v2";
+    private const string UnsupportedPurposeOne = "unsupported-grain-purpose-one";
+    private const string UnsupportedPurposeTwo = "unsupported-grain-purpose-two";
+    private const string UnsupportedPurposeThree = "unsupported-grain-purpose-three";
     private const string CurrentPurpose = "keyload-grain-request-data-epoch7-rpc3";
     private const string PrincipalId = "root";
     private const int NoDtoMarker = 0;
 
     [Test]
-    [Arguments(LegacyPurpose)]
-    [Arguments("keyload-grain-request-data-epoch6")]
-    [Arguments("keyload-grain-request-data-epoch6-rpc2")]
-    public async Task AcEpoch005OldSignedRequestPurposeFailsBeforeActorRouting(string rejectedPurpose)
+    [Arguments(UnsupportedPurposeOne)]
+    [Arguments(UnsupportedPurposeTwo)]
+    [Arguments(UnsupportedPurposeThree)]
+    public async Task AcEpoch005UnsupportedSignedRequestPurposeFailsBeforeActorRouting(string rejectedPurpose)
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());

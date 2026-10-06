@@ -1,5 +1,4 @@
 using System.Buffers.Text;
-using System.Security.Cryptography;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.ChangeFeeds;
 using KeyLoad.Query.Features.QueryExecution;
@@ -23,7 +22,6 @@ internal sealed class NativeQueryCursorTests
     private const string IndexPath = "index:status";
     private const string NativePrefix = "KLT2.";
     private const string WrongHash = "different-query";
-    private const string Separator = ".";
     private const char SignatureSeparator = '.';
     private const int SignatureBytes = 32;
     private const int One = 1;
@@ -60,14 +58,14 @@ internal sealed class NativeQueryCursorTests
     }
 
     [Test]
-    public async Task TamperedLegacyAndWrongQueryNativePageTokensAllRetainCursorExpiredContract()
+    public async Task TamperedAndWrongQueryNativePageTokensRetainCursorExpiredContract()
     {
         using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         var request = new QueryRequest(fixture.Partition, PageSql);
         var cursor = engine.Execute(Root, request).Cursor!;
         var claims = fixture.Database.Verify<QueryCursorClaims>(cursor);
-        var cases = new[] { Tamper(cursor), Legacy(fixture, claims), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
+        var cases = new[] { Tamper(cursor), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
         foreach (var invalid in cases)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -77,7 +75,7 @@ internal sealed class NativeQueryCursorTests
     }
 
     [Test]
-    public async Task NativeLiveCursorRetainsNestedChangeTokenAndTamperOrLegacyStillFailClosed()
+    public async Task NativeLiveCursorRetainsNestedChangeTokenAndTamperFailsClosed()
     {
         using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
@@ -88,7 +86,7 @@ internal sealed class NativeQueryCursorTests
         await Assert.That(snapshot.Cursor.StartsWith(NativePrefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(claims.ChangeCursor.StartsWith(NativePrefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(claims.QueryHash).IsEqualTo(QueryEngine.QueryHash(QueryValidation.Normalize(query, fixture.Database.Limits, UnitExecutionOptions.QueryExecution().Value)));
-        var cases = new[] { Tamper(snapshot.Cursor), Legacy(fixture, claims), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
+        var cases = new[] { Tamper(snapshot.Cursor), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
         foreach (var invalid in cases)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -118,12 +116,4 @@ internal sealed class NativeQueryCursorTests
 
     private static string Tamper(string token)
         => token[..(token.LastIndexOf(SignatureSeparator) + One)] + Base64Url.EncodeToString(new byte[SignatureBytes]);
-
-    // This independent legacy fixture proves genuine old signatures are invalidated, without runtime JSON fallback.
-    private static string Legacy<T>(TestDatabase fixture, T claims)
-    {
-        var bytes = JsonDefaults.Serialize(claims);
-        return Base64Url.EncodeToString(bytes) + Separator
-            + Base64Url.EncodeToString(HMACSHA256.HashData(fixture.Store.Identity.SigningKey.Span, bytes));
-    }
 }

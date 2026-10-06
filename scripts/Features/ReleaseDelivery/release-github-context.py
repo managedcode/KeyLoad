@@ -14,7 +14,7 @@ from pathlib import Path
 
 REPOSITORY = "managedcode/KeyLoad"
 RELEASE_PATH = ".github/workflows/release.yml"
-CI_PATH = ".github/workflows/ci.yml"
+CI_PATH = ".github/workflows/build-and-tests.yml"
 BUILD_TESTS_NAME = "Build and Tests"
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_ITEMS = 10_000

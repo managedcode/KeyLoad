@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text.Json;
 using KeyLoad.CrashHost;
 using KeyLoad.Storage.ZoneTree;
@@ -21,6 +22,8 @@ internal sealed class ZoneTreeExistingStoreTests
     private const char OversizedJsonCharacter = ' ';
     private const int MaximumProtocolCharacters = 4096;
     private const int ProtocolFailureExitCode = 2;
+    private const int JournalPayloadLengthOffset = sizeof(ulong);
+    private const int CorruptPayloadLength = int.MaxValue;
 
     [Test]
     public async Task AcSg009P001NonCanonicalDotAndDotDotDirectoryAreRejectedBeforeGuard()
@@ -154,12 +157,15 @@ internal sealed class ZoneTreeExistingStoreTests
     }
 
     [Test]
-    public async Task AcSg009003CompleteCanonicalCorruptionReleasesRegisteredOwnerWithoutReplacingIdentity()
+    public async Task AcSg009003CurrentJournalLengthCorruptionReleasesOwnerAndAllowsRepairedReopen()
     {
         using var files = new ZoneTreeExistingStoreFixture();
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
         var journalBytes = await File.ReadAllBytesAsync(files.JournalPath);
-        await File.WriteAllBytesAsync(files.JournalPath, new byte[ZoneTreeExistingStoreFixture.CompleteHeaderBytes]);
+        var corruptedJournal = journalBytes.ToArray();
+        BinaryPrimitives.WriteInt32LittleEndian(
+            corruptedJournal.AsSpan(JournalPayloadLengthOffset), CorruptPayloadLength);
+        await File.WriteAllBytesAsync(files.JournalPath, corruptedJournal);
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.Corruption, ExistingStoreInspectionExpectedFailures.KeyLoad);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);

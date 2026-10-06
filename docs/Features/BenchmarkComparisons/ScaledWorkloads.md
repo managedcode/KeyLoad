@@ -16,10 +16,10 @@ Actual first-run failures and preserving native/minimum/peak repairs are tracked
 |Requirement|Acceptance|Caller-visible behavior and proof|
 |---|---|---|
 |REQ-SCALE-001|AC-SCALE-001|Compact deterministic full-index binary inputs, sorted BE keys and full shuffled permutation; independent literal TUnit goldens|
-|REQ-SCALE-002|AC-SCALE-002|ExactlyN terminal seed writes and full distinct payload verification, real native copy/borrow and scratch lifetime; normal/scalar genuine engines|
+|REQ-SCALE-002|AC-SCALE-002|ExactlyN terminal seed writes and full distinct payload verification, real native copy/borrow and scratch lifetime; normal/scalar ZoneTree provider|
 |REQ-SCALE-003|AC-SCALE-003|Bounded native residency/page/index/process/preparation/cancel/close owners; actual100K/1M generated qualification|
 |REQ-SCALE-004|AC-SCALE-004|Every read invocation really performs1M operations over allN keys and consumes exact record identities/checksum; real BDNmetadata and nativeprocess|
-|REQ-SCALE-005|AC-SCALE-005|Separate records/calls/iterations, load/oracle/resources/digest, complete12cell/profile/duration gates and original failures|
+|REQ-SCALE-005|AC-SCALE-005|Separate records/calls/iterations, load/oracle/resources/digest, complete8cell/profile/duration gates and original failures|
 |REQ-SCALE-006|AC-SCALE-006|Local internal scale originals bound to source/machine; full-database GitHub comparisons use isolated runners and authenticated comparable originals; local evidence never publishes|
 |REQ-SCALE-007|AC-SCALE-007|Mandatory subsequent genuine SDK/officialMCP/RF3 ordered/index/complex-query supported-peer cohort, exact results/ACK/resources; currently OPEN|
 |REQ-SCALE-008|AC-SCALE-008|All current source preserved/periodic main delivery, full real quality/fault/coverage/endurance gates, no fake/skipped/invented success|
@@ -65,8 +65,9 @@ Keep authorization, public bounds, RF3 ACK, cancellation and original fault rule
 
 Native all-record validation and actual residency/peak-memory decide each size's
 eligibility. Source capacities are planning arithmetic, not measured fit/RSS.
-The previous full-materialized corpus would retain>10.32GB before the5M/1KiB
-engine; this profile eliminates its duplicate value corpus. Process-kill/cache/
+Historical estimate for the rejected 5M/1KiB full-materialized design exceeded
+10.32GB retained; this is not an active dataset scale. The current profile
+eliminates duplicate value-corpus retention. Process-kill/cache/
 localBDN evidence never proves powerloss durability, full database leadership or
 production readiness. Numeric coverage collection is still unavailable and open.
 
@@ -178,10 +179,10 @@ production readiness. Numeric coverage collection is still unavailable and open.
   (1M/N)*N*(N-1)/2. OperationsPerInvoke1M, invocation1/unroll1, .NET10,
   launch1/warmup8/Actual10, retainedResults8..10. Params payload32/1024 and
   selected exact100K/1M (env KEYLOAD_SCALED_STORAGE_RECORD_COUNT, default100K).
-  Engine ParamsSource uses KEYLOAD_RAW_STORAGE_ENGINE, exact lowercase zonetree
-  or tsavorite, with unset default zonetree and other labels rejected. Both
-  selectors are validated before native acquisition and the configured parameter
-  identity is retained exactly; never silently select another engine or count.
+  Engine ParamsSource uses KEYLOAD_RAW_STORAGE_ENGINE and accepts only the exact
+  lowercase value zonetree (unset also selects zonetree); every other label is
+  rejected before native acquisition. RecordCount selects only100K or1M, with the
+  documented100K default; never silently substitute an engine or count.
   Real metadata and native batch/checksum tests, real generated full JSON.
   INTERNAL benchmark Capture() forwards the active genuine fixture snapshot for
   cold correctness tests. Each method must increase actual NativeReadCalls by
@@ -193,7 +194,7 @@ production readiness. Numeric coverage collection is still unavailable and open.
 - AC-SCALE-005 / REQ-SCALE-005: report requested, charged seed, distinct verified,
   actual measured operations, warmup/sample/retained counts separately; retain
   untimed load/validation duration/digest/resources/residence. Every actual row
-  must have1M operations and>=100ms. Exactly24 two-engine×three-size×two-payload×
+  must have1M operations and>=100ms. Exactly8 one-engine×two-required-record-scale×two-payload×
   two-method cells across the completed scaled cohort; no write rows, mixed/tiny
   profiles, missing/failed/short/default/duplicate cells. Real strict Node parser
   schema vectors are test data, never producer measurements; actual originals are
@@ -201,8 +202,8 @@ production readiness. Numeric coverage collection is still unavailable and open.
 - AC-SCALE-006 / REQ-SCALE-006: local PhaseA originals bind the actual source,
   engine/count/payload, machine/runtime/settings, full JSON/CSV/stdout/cold
   manifests and original-file hashes. Sequential owned local processes stage
-  100K->1M per engine only after preceding resource/value stage passes.
-  Reconcile the full24-cell local profile without publishing it. PhaseB full
+  100K->1M on the single ZoneTree provider only after the preceding resource/value stage passes.
+  Reconcile the full8-cell local profile without publishing it. PhaseB full
   database comparisons require same-source/run/attempt authenticated GitHub
   executor/job/artifact/ZIP/file hashes and matched actual hardware/resources,
   native topology, durability and workloads on isolated runners. Existing270/site
@@ -211,7 +212,7 @@ production readiness. Numeric coverage collection is still unavailable and open.
 - AC-SCALE-007 / REQ-SCALE-007: actual product/full-service ordered/range, index
   preparation/index lookup verified by Explain and bounded complex Q1 queries
   through authorized SDK/officialMCP; exact ordered result/count/digest;100K+
-  measured calls per supported cell at all3scales. Real RF3 process/container and
+  measured calls per supported cell at both required record scales (100K and1M). Real RF3 process/container and
   native peer tests, authorization/negative/cancel/error/recovery cases, equivalent
   index/schema/ACK/topology/resource settings. Unsupported APIs are explicit,
   source limitations are never relabelled successes. This PhaseB criterion is OPEN.
@@ -226,10 +227,10 @@ production readiness. Numeric coverage collection is still unavailable and open.
 |AC|Automated evidence and verification|Explicit exception/remaining gate|
 |---|---|---|
 |001|NEW ScaledRawStorageCorpusTests/ReadOrderTests literal vectors, full uniqueness and actual buffer/span errors, normal/scalar TUnit|Managed/native/RSS model is only planning arithmetic|
-|002/003|NEW ScaledRawStorageFixtureTests/SettingsTests real mini+100K engines/copy/pins/resources/owner/cancel; actual generated all3sizes|Unobserved vendor constructor/pending/finite close faults remain manual limitation, not invented injected failures|
+|002/003|NEW ScaledRawStorageFixtureTests/SettingsTests real mini+100K ZoneTree fixtures/copy/pins/resources/owner/cancel; generated mini,100K and1M fixtures; mini remains a control and only100K/1M qualify|Unobserved vendor constructor/pending/finite close faults remain manual limitation, not invented injected failures|
 |004|NEW ScaledRawStorageBenchmarkTests real metadata and1M checksum methods plus genuine BDN subprocess originals|Per-operation bounds/oracle overhead remains included and labelled|
 |005|NEW ScaledRawStorageReportTests real bounded Node pure parser success/error vectors; genuine generated reports|Parser fixture values never publish or authenticate a provider|
-|006|Root local original24cell scale receipt; PhaseB authenticated full-database provider originals in Benchmarks|Manual source/machine/config/statistical and hardware reconciliation; no local website substitution or internal Benchmarks jobs|
+|006|Root local original8cell scale receipt; PhaseB authenticated full-database provider originals in Benchmarks|Manual source/machine/config/statistical and hardware reconciliation; no local website substitution or internal Benchmarks jobs|
 |007|Future frozen PhaseB real SDK/MCP/public query/container tests and supported native-peer cohorts|Not yet implemented/qualified; no raw point scan surrogate|
 |008|Full solution Release; real TUnit normal/scalar/recovery/RF3; dotnet format verify; node governance; exact-source Actions originals|Coverage collector/baseline still unavailable, no numeric pass claim|
 
@@ -286,7 +287,7 @@ Root owns this lifecycle contract and integration. The bounded test writer adds
 ScaledRawStorageOwnerTests before the native worker's preserving revision:
 genuine live owner remains readable after rejected second acquisition, original
 seed/read counts remain truthful, actual close admits one new native owner, and
-repeat close remains safe for both engines. Existing invalid/pre-cancel/metadata/
+repeat close remains safe for the ZoneTree fixture. Existing invalid/pre-cancel/metadata/
 full-value tests remain. Real vendor close-failure proof is still unavailable;
 no injected failure or fabricated native fault closes that exception. Strong
 independent source review checks every new ownership path before integration.
@@ -301,7 +302,7 @@ evidence gaps; a throwing test double is not acceptable proof.
 
 The independent pure parser contract is
 [ScaledReportQualification](ScaledReportQualification.md): REQ/AC-SCALE-RPT-001..004
-map the strict four-cell report and six-report cohort to actual bounded Node
+map the strict four-cell report and two-report cohort to the intended bounded Node
 tests. Parser vectors are controlled data. This stage does not authenticate cold
 native manifests, process ownership, machine identity or measured observations.
 
@@ -325,7 +326,7 @@ and source-only limitations. Review and integrate only completed worker results.
 |SCALE-E3|002..004|Luna native writer; five preserving private native revisions|Actual final residence capture, token ordering, digest and XML corrections; root and completed strongest R3 review|
 |SCALE-R|001..004|Strongest read-only reviewer|StoppedD/E; full exact source/test/lifetime/resource review before integration|
 |SCALE-I|001..008|Root sole repository join/Git owner|Complete reviewedD/E/R; fresh Release/focused normal+scalar/full/format/governance; preserve eligible current main scope|
-|SCALE-N|003..006|Root actual local runtime owner|Genuine100K then1M then5M perengine after previous value/resource gate; full24cell machine/source-bound originals, never site figures|
+|SCALE-N|003..006|Root actual local runtime owner|Genuine100K then1M on the ZoneTree provider after the previous value/resource gate; full8cell machine/source-bound originals, never site figures|
 |SCALE-H|002..004/006|Luna read-only native hot-path research; private source report only|Independent of runningN; rank source-backed profile targets without executing load or changing contracts; root joins with actual original measurements before any optimization contract|
 |SCALE-PV|002..004/006|Luna read-only pinned upstream native source research; private report only|StoppedH package pins; verify native defaults/read internals through primary source without code/runtime mutation; root joins with originalN before changing any setting|
 |SCALE-B|007/008|Root contracts/integration then disjoint workers|Freeze real public SDK/MCP/index/range/complex-query and native-peer contracts; exact-source GitHub hardware/cohort/fault gates|
@@ -350,14 +351,15 @@ endurance/fault qualification remain required. No skill/tool installation. The
 installed Orleans skill applies if PhaseB changes routing/authority and produces
 a concrete boundary/failure-contract review.
 
-Current state: the reviewed source is joined. Fresh full Release r7 passed with
+Historical local verification snapshot (2026-10-03): the source then under review was joined. The recorded full Release r7 passed with
 zero warnings/errors; genuine local normal54/54 and scalar54/54 passed without
-skips, source drift or unsettled owned process groups. Original evidence (report removed from repository)
-records the exact source/assembly hashes and original TRX. Actual100K BDN is
-running; broader tests, formatter, delivered-source Linux CI and all24 scale
-cells remain open. Strict report tests remain stopped private candidates; the
-parser and genuine cold manifest producer are unfinished. PhaseB, numeric
-coverage, powerloss and whole-product comparative qualification remain OPEN.
+skips, source drift or unsettled owned process groups. historical report (removed from repository)
+records the exact source/assembly hashes and original TRX. At that snapshot, the
+100K BDN run was still in progress; it did not establish completion of the current
+8-cell profile. Current qualification status is tracked separately. The strict
+scaled-report parser and genuine cold manifest producer remain OPEN in source.
+PhaseB, numeric coverage, powerloss and whole-product comparative qualification
+remain OPEN.
 
 Historical r2 failed8 analyzer checks: IDE0031, CA2213 tree/session/store/settings,
 CA1816, IDE0059 and IDE0005. Preserving direct close/clear-after-success, public

@@ -1,7 +1,6 @@
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using KeyLoad.Features.InternalSerialization;
 using KeyLoad.Replication;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,9 +14,6 @@ namespace KeyLoad.UnitTests;
 // Official native writers intentionally author rejected field shapes inside the shared envelope.
 internal static class ReplicaSecurityWireFixture
 {
-    private const string LegacyEscapedJson = "{\"id\":\"00000000-0000-0000-0000-000000000001\",\"kind\":\"Membership\",\"principalId\":\"http://voter-a:8080\",\"evaluatedAt\":\"1970-01-01T00:00:00Z\",\"payloadJson\":\"\\u0065\\u0033\\u0030\\u003D\"}";
-    internal static byte[] LegacyEscapedOperation => Encoding.UTF8.GetBytes(LegacyEscapedJson);
-
     internal static byte[] Operation(ReplicatedOperation value, string shape)
         => Encode(value, new ReplicaSecurityOperationCodec(shape));
 

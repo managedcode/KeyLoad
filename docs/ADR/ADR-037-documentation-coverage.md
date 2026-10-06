@@ -1,49 +1,90 @@
 # ADR-037: Повний каталог функцій і архітектурних рішень
 
-Status: Accepted, documentation complete locally and independently reviewed; GitHub delivery pending. Date: 2026-10-02. Owner: KeyLoad documentation lead. Related: [RepositoryGovernance](../Features/RepositoryGovernance.md), REQ-DOCS-001–008 / AC-DOCS-001–008, [acceptance](../Features/RepositoryGovernance.md), [plan](../Features/RepositoryGovernance.md).
+Status: Accepted documentation contract; product implementation and delivered-source qualification remain independently tracked.
+Owner: KeyLoad documentation lead. Related: [RepositoryGovernance](../Features/RepositoryGovernance.md), REQ-DOCS-001–008 / AC-DOCS-001–008, [acceptance](../Features/RepositoryGovernance.md), [current implementation status](../implementation/status.json).
 
 ## Контекст і рішення
 
-Власник прямо вимагає весь продукт описати Feature-специфікаціями та ADR. Загальний дизайн не замінює owning specs: вісім функцій і ADR-001–031 потребували повного acceptance-каталогу; вузькі resource-repair документи не описували усю baseline поведінку. Порівняльне рішення має ідентифікатор ADR-034, а Orleans foundation — ADR-036.
+Кожна non-trivial capability має owning feature specification, stable `REQ-*` and
+measurable `AC-*`, canonical slice map, applicable ADRs, and traceability to
+actual automated evidence or an explicit evidence exception. The canonical
+governance contract indexes 25 owning Feature specifications, the
+current ADR index contains 111 decision files, and traceability covers all 104 KL
+items. These counts are checked against their owning sources rather than copied
+from a historical snapshot. Documentation approval does not authorize a Proposed
+API or mark product code implemented.
 
-Додаємо рівно 20 канонічних Feature-файлів, зберігаємо початкові ADR-001–031 з продуктової специфікації, доповнюємо існуючі docs та створюємо повні індекси з трасованістю всіх 104 KL-задач. Запропоновані рішення не отримують неявного implementation approval: unresolved algorithm/provider/wire/format — Proposed; source-present і GitHub-qualified — різні стани. Documentation completion не змінює жоден ADR на Implemented.
-
-ADR-034 лишається порівняльними бенчмарками, на які вже посилаються mandatory policies. Orleans foundation отримує ADR-036, усі doc references оновлюються, факт виправлення записується в ADR index. ADR-038 описує required, але ще не визначений customer-facing BlobStorage; ADR-039 — required official MCP/agent integration без вигаданих tool names/routes.
+Keep all existing requirements, IDs, feature ownership and architecture boundaries.
+The documentation catalog records all current KL items and maps each requirement
+to its acceptance criteria, ADR, task and evidence source without presenting source
+presence as runtime proof. Product delivery and qualification status remain owned
+by `implementation/status.json` and exact-source Linux evidence.
 
 ```mermaid
 flowchart LR
-    Spec[Product spec and owner policy] --> Features[20 owning Feature specs]
-    Features --> Decisions[39 uniquely identified ADRs]
-    Decisions --> Trace[104 KL items plus REQ AC tests]
-    Trace --> Review[Joined strongest model review]
-    Review --> Docs[Static links hashes and rendered diagrams]
-    Docs --> CI[Separate product GitHub qualification]
+    Policy[Current owner policy] --> Features[Owning feature requirements]
+    Features --> Decisions[Current ADR contracts]
+    Decisions --> Trace[KL REQ AC and evidence mapping]
+    Trace --> Structural[Documentation structure and link checks]
+    Trace --> Functional[Real operation tests and delivery gates]
+    Structural --> Status[Honest documentation status]
+    Functional --> Status
 ```
 
 ## Альтернативи й наслідки
 
-- Лише загальний дизайн: менше файлів, але немає feature ownership і stable acceptance trace; відхилено.
-- Копіювання великого дизайну: дублює джерело та плутає майбутнє із source; відхилено.
-- Реалізувати missing capabilities одночасно: змішує документальний scope з невирішеними public contracts; відхилено для цього task.
+- Тільки загальний дизайн: немає feature ownership та acceptance trace; відхилено.
+- Копіювання великого дизайну: дублює джерело та плутає майбутнє з поточним; відхилено.
+- Реалізувати unresolved capabilities як наслідок документального review: це
+  перетворює опис на неавторизоване API-рішення; відхилено.
 
-Наслідок: читач має конкретні behavior/decisions/source/test links; автори підтримують один owning spec на функцію. Усі чинні правила та IDs зберігаються. Статуси продукту продовжує визначати `implementation/status.json`, а qualification — exact GitHub evidence.
+Canonical feature specs own behavior. This ADR defines their catalogue and
+traceability contract; the product does not become qualified because its docs or
+static checks pass.
 
-## Implementation contract
+## Implementation and maintenance contract
 
-1. Strongest planner gpt-6-astra ultra читає root/local policies, поточні docs/spec/source й фіксує REQ-DOCS/AC-DOCS, scope, точні ADR slugs та unresolved boundaries. Root записує brainstorm → acceptance → plan → Feature/ADR contract до delegated writes. Це документальне approval від власника не є дозволом реалізувати Proposed API.
-2. Перед початком зберегти snapshot наявних документів і full SHA256 усіх 27 AGENTS.md. Root один володіє існуючими файлами, shared links, README/Architecture, index/catalog, BlobStorage і ADR-036–039. Source, test, packages, workflows та policies не змінюються цим task.
-
-   Shared-checkout preservation contract: immutable original hashes лишаються в evidence catalog. Якщо інший owning task додає policy text, root не відновлює старий файл поверх його роботи й не приховує drift. До final verification спершу уточнює AC-DOCS-007/plan, записує original/current full hashes та перевіряє повне збереження старого тексту/правил; strongest review joins це evidence. Only independently verified additive changes допустимі для цього audit; unexplained drift, scope loss або rule weakening блокують завершення. Цей task не має policy write ownership.
-3. TASK-DOC-AUTHOR-004: gpt-6-luna high A, тільки нові DocumentStorage/Messaging/GraphTraversal і ADR-001–016. TASK-DOC-AUTHOR-005: gpt-6-luna high B, тільки нові ChangeFeeds/BackupRestore і ADR-017–031. Search та Authorization з'явилися від concurrent owner до authoring; worker зупинився без змін, root оглянув їх і взяв у scope існуючих файлів, зберігши старі IDs. Start — всі попередні contracts існують; workers читають `docs/AGENTS.md` і точний frozen packet. Ownership розділений.
-4. Кожен Feature має observable positive/negative/edge/error AC, canonical slice/N/A, current/planned boundary, реальні test method/file links або explicit planned test. Кожен ADR має REQ/AC, ordered implementation stages, exact current/target paths, integration owner, prerequisites, data impact, rollout/rollback, GitHub verification і diagram. Proposed зупиняє dependent implementation до вирішення його відкритих контрактів.
-5. Workers повертають всі paths/hashes, evidence/source/test mappings та terminal complete/blocked/failed/cancelled. Ambiguous semantics, overlap, невідомий endpoint/provider, missing source або policy conflict → stop/escalate. Partial/blocked/failed packet не unblock join. Root оглядає кожен документ, виправляє інтеграційні references і joins обидва complete results.
-6. TASK-DOC-REVIEW-007 gpt-6-astra ultra проводить незалежний full-file review; root виконує combined Feature/ADR/KL/REQ/AC/link/hash/whitespace/governance checks та render кожної Mermaid діаграми існуючим cached CLI. Жодних skills/tool installation, локальних продуктових tests/builds/containers/benchmarks або worker commit/push.
-7. Записати результат документальних AC й pending delivery в `implementation/documentation-coverage.json`. Product/source status і реальні GitHub runtime gates не змінюються на passing. Будь-яка подальша реалізація запускається тільки за своїм owning Feature/ADR contract та root qualification policy.
+1. `REQ-DOCS/AC-DOCS-001–008` are preserved and mapped below. The documentation
+owner maintains `docs/Features/`, `docs/ADR/README.md`,
+   `docs/Architecture.md`, and the traceability links while preserving stable IDs,
+   current source boundaries, explicit Proposed/pending states and applicable
+   owner policy. Do not retain completed worker assignments, temporary review
+   chronology or per-run reports as active implementation instructions.
+2. Every feature `REQ-*` maps to one or more `AC-*`; each AC maps to real test
+   methods/files or a narrowly stated evidence exception. Each ADR retains its
+   related REQ/AC, ordered current implementation/verification responsibilities,
+   exact ownership and rollout/rollback constraints. A missing acceptance mapping
+   is reported as a gap, not filled by an inferred test.
+3. Static documentation governance checks only structural facts such as required
+   files/sections, stable IDs, mapped test/evidence links, catalogue entries and
+   local Markdown destinations. It does not assert product behavior from source
+   text. Privacy, authorization, state, fault and user-visible behavior are proved
+   by the owning feature's real complete-operation tests; documentation evidence
+   must not expose credentials, user payloads or private inventories.
+4. `node scripts/Features/RepositoryGovernance/verify.mjs`, review of local links,
+   index/ID consistency, hashes and renderable Mermaid diagrams are documentation
+   checks owned by the integration lead. Static success is not a product test or
+   runtime qualification. Local development tests use the canonical Aspire-owned
+   entry and remain development evidence; delivered-source qualification uses the
+   required exact-source Linux GitHub jobs.
+5. Status remains `Accepted` until the documentation mappings and required review
+   evidence are complete. Product/source state and runtime qualification never
+   change to passing as a side effect of this documentation decision.
 
 ## Документальні зміни, rollout і rollback
 
-Оновлення документації додає missing files, доповнює existing sections без втрати REQ/AC та підтримує canonical ADR identity і dependent links. Ця робота не змінює runtime чи persisted format. ADR-032 layout debt не стає compliant через опис target paths. Rollback нового тексту потребує review і не видаляє чинні правила, вимоги або immutable CI artifacts; номер виправленого рішення не використовується повторно.
+Documentation changes update the canonical source and dependent links together,
+without dropping requirements, criteria, ownership, privacy constraints or
+immutable evidence. They do not change runtime or persisted format. Existing
+architecture layout debt remains debt until the owned source moves and its required
+verification passes. Rollback must preserve current rules, requirements, IDs and
+immutable CI originals.
 
 ## Verification і межі
 
-REQ/AC-DOCS-001–008 → task rows у плані → file/ID/104-KL/static source-test checks + manual complete-content review exception. `node scripts/Features/RepositoryGovernance/verify.mjs`, `git diff --check`, full 27-policy hashes, local links і всі Mermaid renders обов'язкові. Existing historical CI `36926803549` / `9c570f8c33a7a9667507a8e1c0ca68860de3be45` не кваліфікує dirty checkout. Повні TUnit, recovery, RF3 SDK/MCP, code-quality/coverage/complexity, power-loss та endurance gates залишаються окремими pending доказами продукту.
+REQ/AC-DOCS-001–008 map to structural document checks and complete-content review;
+AC-DOCS-007 specifically retains the policy-hash and drift-preservation oracle.
+product behavior retains its own real TUnit, process-recovery, RF3 SDK/MCP,
+code-quality, coverage/complexity, endurance and power-loss gates. The integration
+lead records the actual check and evidence source. No historical CI receipt,
+source-text assertion or documentation-only result qualifies the current product.

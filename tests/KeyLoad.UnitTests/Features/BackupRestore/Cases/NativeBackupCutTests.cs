@@ -7,6 +7,8 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class NativeBackupCutTests
 {
+    private const ulong UnsupportedJournalSignature = ulong.MaxValue;
+
     [Test, Arguments(false), Arguments(true)]
     public async Task AcIs004HashConsistentTruncatedHeaderPreservesBackupAndDestination(bool existingEmpty)
     {
@@ -75,11 +77,11 @@ internal sealed class NativeBackupCutTests
     }
 
     [Test]
-    public async Task AcIs004HashConsistentLegacyJournalIsRefusedWithoutPublication()
+    public async Task AcIs004HashConsistentUnsupportedJournalSignatureIsRefusedWithoutPublication()
     {
         using var fixture = new NativeBackupCutFixture();
         var bytes = await File.ReadAllBytesAsync(fixture.Journal);
-        BinaryPrimitives.WriteUInt64LittleEndian(bytes, ZoneTreePersistenceFormat.LegacyJournalMagic);
+        BinaryPrimitives.WriteUInt64LittleEndian(bytes, UnsupportedJournalSignature);
         await fixture.RewriteJournalAsync(bytes);
         await fixture.AssertRejectedUnchangedAsync(ErrorCode.FormatUnsupported);
     }

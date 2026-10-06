@@ -1,22 +1,15 @@
-using System.Buffers.Text;
-using System.Security.Cryptography;
-using System.Text;
 using KeyLoad.Orleans;
 
 namespace KeyLoad.UnitTests;
 
-/// <summary>AC-ROUTE-001/AC-IS-001: native envelope fields remain stable and legacy signed JSON is explicitly invalidated.</summary>
+/// <summary>AC-ROUTE-001/AC-IS-001: native envelope fields and signed-purpose fencing remain stable.</summary>
 internal sealed class GrainRequestEnvelopeWireTests
 {
     private const string Principal = "root";
     private const string RequestIdentifier = "11111111-1111-1111-1111-111111111111";
     private const string IncarnationIdentifier = "22222222-2222-2222-2222-222222222222";
     private const string PayloadJson = "{}";
-    private const string OriginalJson = """{"purpose":"keyload-grain-request-v1","requestId":"11111111-1111-1111-1111-111111111111","incarnation":"22222222-2222-2222-2222-222222222222","principalId":"root","readKind":"Document","commandKind":null,"commandId":"00000000-0000-0000-0000-000000000000","payloadBase64Url":"e30","expiresAt":"2099-01-01T00:00:00+02:00"}""";
-    private const string WireMember = "\"payloadBase64Url\":\"e30\",";
-    private const string NullWireMember = "\"payloadBase64Url\":null,";
-    private const string LegacySeparator = ".";
-    private const string LegacyPurpose = "keyload-grain-request-v1";
+    private const string UnsupportedPurpose = "unsupported-grain-request-purpose";
     private const int ExpiryYear = 2099;
     private const int FirstDay = 1;
     private const int OffsetHours = 2;
@@ -72,24 +65,6 @@ internal sealed class GrainRequestEnvelopeWireTests
     [Test]
     [Arguments(true)]
     [Arguments(false)]
-    public async Task SignedLegacyNullOrMissingPayloadIsInvalidatedWithoutJsonFallback(bool missing)
-    {
-        using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
-        var json = OriginalJson.Replace(WireMember, missing ? string.Empty : NullWireMember, StringComparison.Ordinal);
-        await AssertLegacyRejectedAsync(fixture, codec, json);
-    }
-
-    [Test]
-    public async Task GenuineLegacyJsonEnvelopeSignatureIsExplicitlyInvalidated()
-    {
-        using var fixture = new TestDatabase();
-        await AssertLegacyRejectedAsync(fixture, new(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing()), OriginalJson);
-    }
-
-    [Test]
-    [Arguments(true)]
-    [Arguments(false)]
     public async Task DefaultOrEmptyNativePayloadIsRejectedAtTheRealScopeBoundary(bool missing)
     {
         using var fixture = new TestDatabase();
@@ -105,25 +80,14 @@ internal sealed class GrainRequestEnvelopeWireTests
     }
 
     [Test]
-    public async Task NativeSignatureWithLegacyPurposeIsAlsoInvalidated()
+    public async Task NativeSignatureWithUnsupportedPurposeIsInvalidated()
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NativeSerialization.Serialize(NoDtoMarker));
-        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with { Purpose = LegacyPurpose };
+        var envelope = fixture.Database.Verify<GrainRequestEnvelope>(token) with { Purpose = UnsupportedPurpose };
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(fixture.Database.Sign(envelope), requestId)).Code)
-            .IsEqualTo(ErrorCode.TokenInvalidated);
-    }
-
-    private static async Task AssertLegacyRejectedAsync(TestDatabase fixture, GrainRequestCodec codec, string json)
-    {
-        var bytes = Encoding.UTF8.GetBytes(json);
-        var token = Base64Url.EncodeToString(bytes) + LegacySeparator
-            + Base64Url.EncodeToString(HMACSHA256.HashData(fixture.Store.Identity.SigningKey.Span, bytes));
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Verify<GrainRequestEnvelope>(token)).Code)
-            .IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.VerifyRead(token, Guid.Parse(RequestIdentifier))).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }
 }

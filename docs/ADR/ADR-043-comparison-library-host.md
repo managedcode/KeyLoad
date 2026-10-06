@@ -1,80 +1,28 @@
-# ADR-043: comparative harness library and executable host
+# ADR-043: Comparison library and executable host
 
-Status: Accepted implementation contract; implementation and qualification pending.
-Owner: KeyLoad integration lead under the explicit strict-analysis/resource repair
-goal. Related: ADR-033, ADR-034, ADR-035. Feature: BenchmarkComparisons.
+Status: Accepted; host source exists, delivered-source and native qualification remain distinct.
+Related: REQ-BC-019 / AC-HOST-001..007, AC-CQ-001/005/006, AC-MP-010/012; ADR-033, ADR-034, ADR-062, ADR-076, ADR-080.
 
-## Decision and boundary
+## Decision
 
-The actual strict benchmark source cut reports 32 CA1515 findings. Real test
-assemblies consume its public types, so those types are an actual library API.
-Retain KeyLoad.Comparisons project/path/assembly/namespace and all public CLR
-signatures as a library. Introduce KeyLoad.ComparisonHost as the only CLI, with
-feature-owned composition and lifecycle plus a thin Program. No visibility fixes
-or analysis suppression. Public names, signatures and serialized values remain
-unchanged under this decision.
+Keep KeyLoad.Comparisons as the library consumed by real tests and comparison composition. KeyLoad.ComparisonHost owns the sole comparison command-line entry point and its process lifecycle. Preserve the library's public CLR signatures, report serialization, target registrations, settings precedence, and existing AppHost resource ownership.
 
 ```mermaid
 flowchart LR
-    Aspire[AppHost comparisons resource] --> Host[KeyLoad.ComparisonHost CLI]
-    Host --> Library[KeyLoad.Comparisons public library]
-    Tests[Real TUnit and container tests] --> Library
-    Library --> Engines[Official engine clients and KeyLoad RF3]
+    Aspire[Aspire-owned comparison resource] --> Host[ComparisonHost process]
+    Host --> Library[Comparisons library]
+    Tests[Real TUnit and native tests] --> Library
+    Library --> Targets[Isolated native targets]
 ```
 
-## Implementation contract
+The host validates required settings before creating network clients. Every partially created target/client has one explicit cleanup owner, and cleanup attempts continue after earlier failures. Console handlers are detached before cancellation sources are disposed. The host preserves the original target order, reports, exit semantics and actual child completion; it does not fabricate verification or convert failed setup into an unsupported capability.
 
-REQ-BC-019 maps to AC-HOST-001..006, existing AC-CQ-001/005/006 and AC-MP-010/012.
-The detailed [acceptance](ADR-043-comparison-library-host.md) and
-[ordered task graph](ADR-043-comparison-library-host.md) define pass/fail and evidence.
+## Acceptance and ownership
 
-Ordered stages: lead policy/contract and frozen entry-point review; new real process
-regressions before CLI implementation; worker source review; single lead project/
-Aspire join; actual strict dependency build, format/governance and exact-SHA GitHub
-unit/recovery/RF3/comparison/analyzer qualification. Keep this ADR Accepted until
-every required stage and evidence exists.
+REQ-BC-019 maps to AC-HOST-001..007. The criteria require real process success and failure flows, validation before resource allocation, cleanup ownership on partial construction, preserved primary and cleanup failures, terminal child settlement, and safe failure output. Tests use actual child processes and the existing Aspire-owned target topology; they do not substitute fake targets. **AC-HOST-007** specifically transfers each HTTP client from pending ownership before publishing the target, so every partially built target/client has exactly one cleanup owner. Ordered cleanup attempts every later target and unowned client despite an earlier disposal error. Preserve target order and successful report/exit behavior; cleanup failure emits only the existing safe target/type diagnostic and fails the host with `ComparisonTargetCleanupFailed`, without the original message or inner exception. The real child regression requires exact case cardinality, failed setup details, null measurements and zero samples for every unusable endpoint, retained safe cleanup diagnostics, nonzero exit and no credential disclosure.
 
-HOST-CLI owns only the new host project after lead-authored local AGENTS; HOST-TEST
-owns only new UnitTests BenchmarkComparisons process tests/helpers; HOST-JOIN alone
-owns library csproj, host entry point, solution, AppHost exact project reference
-and Projects.KeyLoad_ComparisonHost substitution, inventory/maps/docs. Existing
-contracts, adapters, runner, registration, profiles, report serialization, tests,
-native topology and website remain protected. No concurrent same-file writes.
+**AC-ISO-003** remains the actual native-topology contract owned canonically by [BenchmarkComparisons](../Features/BenchmarkComparisons.md): observe genuine one/two/three-node membership, copies and acknowledgements for supported targets, and record unsupported native topology explicitly. Keep topology preflight separate from workload evidence; model/configuration selection cannot stand in for native membership or an acknowledged workload. This host ADR does not redefine or narrow those gates.
 
-Keep all existing CLI settings and environment/argument precedence, current target
-registration, resource name comparisons, waits/images/environment, report files and
-exit meaning. Validate required settings before allocating network clients; track
-partial construction owners explicitly, clean each once, detach console handlers
-before cancellation-source disposal. Private ownership restructuring changes no data,
-authorization, schema, dependency or persistence contract. No fake verification.
+The feature-owned paths are [KeyLoad.Comparisons](../../benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/), [KeyLoad.ComparisonHost](../../benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/), and matching TUnit cases under [ComparisonTests](../../tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/). Shared project, solution and AppHost wiring remain integration-owner changes. Rollback removes the host project and its matching AppHost wiring together; no shim or duplicate CLI is retained.
 
-The host is the sole CLI. Rollback restores its project and matching
-AppHost wiring together; no shim or duplicate path.
-Stop on an upstream defect or broader public/native/report contract need. Local
-build/static proof is allowed; tests/load/recovery qualification are GitHub-only.
-The historical six-engine baseline does not satisfy nine-engine ADR-034 acceptance.
-
-Accepted cleanup substage TASK-MP-010AH-H: REQ-BC-019 now also maps AC-HOST-007.
-Use an explicit pending-target ownership field before list publication; transfer
-HTTP clients out of the unowned list before publishing, so any intervening failure
-retains exactly one cleanup owner. Preserve original target order and successful
-report/exit contracts. Ordered try/finally cleanup attempts all later targets and
-unowned clients. A failure asynchronously prints the existing safe target/type
-line and throws ComparisonTargetCleanupFailed with no original message/inner
-exception; errors cannot silently leave a successful host exit. This is a host
-error boundary repair, with no public library/data/topology/dependency change.
-The exact disjoint task graph, first-authored real process negative regression,
-manual private-lifetime review exception, development builds and mandatory GitHub
-qualification are in the host acceptance/plan. Keep this ADR Accepted; source
-packets and clean builds alone do not satisfy the real process/engine gates.
-
-TASK-ISO-015U joins ADR056 AC-ISO-003/006 with REQ-BC-019/AC-HOST-007 after
-authentic1978 unit failure. Failed native initialization precedes capability
-classification, as required by the independent IsolatedSetupFailureTests flow.
-The cleanup regression must require exact case cardinality, failed setup details,
-null measurements and zero samples for every unusable endpoint; retain all safe
-cleanup diagnostics, nonzero exit and credential absence assertions. A bounded
-worker owns only ComparisonHostCleanupTests.cs; root joins acceptance/plan/docs
-and reviews the diff. No runner/adapter/settings/report contract change. The
-actual full Unit and required GitHub suites are the proof; rollback cannot restore
-an assertion that hides setup failure behind unsupported capability.
+Required verification is the enabled full source build, formatting and governance checks, then the eligible exact-source Linux unit, recovery, RF3 SDK/MCP and native comparison gates. Keep the ADR Accepted until the mapped implementation and evidence are complete. Historical measurements and delivery receipts remain immutable evidence for their original source only.

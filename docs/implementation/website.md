@@ -9,7 +9,7 @@ The domain uses GitHub's four apex A records (`185.199.108.153`, `.109.153`, `.1
 The separate [Website workflow](../../.github/workflows/website.yml) owns static
 site qualification, generation and Pages deployment. It runs on trusted main
 pushes, manual dispatch and completed own-main Benchmarks events. Build and Tests
-(`ci.yml`) builds the complete solution and runs ordinary project tests; its
+(`build-and-tests.yml`) builds the complete solution and runs ordinary project tests; its
 result is not a dependency of Website. Benchmarks produces authenticated JSON.
 Release remains the prepared manual product-release workflow.
 

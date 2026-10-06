@@ -1,82 +1,42 @@
-# ADR-050: Isolated TimeSeries and Timescale comparison profile
+# ADR-050: TimeSeries and Timescale comparison
 
-Status: Accepted; source implementation and full Release build complete, exact-SHA qualification pending. Date: 2026-10-02. Owner: BenchmarkComparisons lead. Related: REQ-TSC-001..006, AC-TSC-001..006, REQ-SERIES-007, AC-SERIES-007, REQ-BC-026, AC-BC-026; [TimeSeries](../Features/TimeSeries.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md), [acceptance](ADR-050-timeseries-timescale-comparison.md), [plan](ADR-050-timeseries-timescale-comparison.md).
+Status: Accepted; current workload-source update and delivered-source native qualification remain pending.
+Related: REQ-TSC-001..006 / AC-TSC-001..006, REQ-SERIES-007 / AC-SERIES-007, REQ-BC-026 / AC-BC-026; [TimeSeries](../Features/TimeSeries.md), [BenchmarkComparisons](../Features/BenchmarkComparisons.md), ADR-034, ADR-059, ADR-071, ADR-076, ADR-080.
 
-## Accepted native digest assertion refinement
+## Decision and boundaries
 
-TASK-RUNTIME-TIMESCALE-W preserves REQ/AC-TSC-001/006 and the accepted image hash.
-Official Aspire ContainerImageAnnotation makes Tag and SHA256 mutually exclusive;
-WithImageSHA256 clears Tag. Run37005805424 failed before resource startup because
-the test required tag plus digest in the native image name. The worker owns only
-TimeSeriesAspireProfileTests.VerifyTimescaleImage and its named constants: assert
-the native annotation's exact image repository and SHA256, require a resolved
-digest-bearing image for cleanup, and keep the report's full source tag/digest.
-No AppHost pin, actual readiness/oracle/foreign-schema/cleanup assertion, timeout,
-report or package changes. Existing failing actual Aspire-model case is tests-first
-proof; lead reviews source, builds/formats and qualifies the complete GitHub suite.
-Rollback affects only test native-identity inspection.
-Primary source: [Aspire ContainerImageAnnotation](https://source.dot.net/Aspire.Hosting/ApplicationModel/ContainerImageAnnotation.cs.html).
+Keep the time-series comparison as a separately reported workload family. Compare KeyLoad's persisted sample operations through the real RF3 .NET SDK, TimescaleDB through its native PostgreSQL interface, and ManagedCode.TimeSeries as an explicitly in-memory aggregation primitive. The library is not a KeyLoad persistence provider. Reports must keep persistence, recovery, replication and acknowledgement guarantees distinct; no combined winner or equivalent guarantee may be inferred.
 
-## Decision
-
-R18 preserving metadata repair (REQ/AC-TSC-003/004): the existing PackageVersion
-field must use the real loaded library's AssemblyInformationalVersion package
-component before `+`, rejecting missing metadata. The canonical consumer now
-uses published10.0.3; remove the stale10.0.0 literal and keep report schema1,
-memory/ACK guarantees, targets, timings and numerical oracles unchanged. The
-bounded worker owns only recorder and existing workload/Aspire version tests;
-root owns shared docs/config and final GitHub qualification. No format/API or
-topology change is introduced; rollback restores code and central package
-together, never relabels an already measured immutable report.
-
-### Accepted digest-backed execution continuation (AC-IMAGE-002/004/005)
-
-The isolated schema1 TimeSeries report adds optional GitHubProvenance and
-LoadGeneratorImage init metadata; it keeps its workload, oracle, storage and ACK
-semantics. The actual server image comes from the verified job-registry receipt.
-Root owns internal library report/runner, AppHost, real report assertions and CI.
-The bounded host identity worker owns only ComparisonExecutionIdentity helpers,
-TimeSeriesComparisonApplication and new matching CLI-negative tests. First add
-real report/CLI assertions, then source; join with ADR-034 image preparation and
-native ContainerResource lifecycle at one pushed SHA. No product/public schema
-change occurs. Rollback stops this qualification stage while preserving raw
-evidence and cannot substitute unqualified host-process completion. Status remains
-Accepted until actual image, report, exit and full relevant GitHub gates pass.
-
-Add an isolated Aspire benchmark-mode TimescaleDB resource and a separate time-series comparison result. Run the same deterministic UTC sample workload against KeyLoad through the real RF3 .NET SDK, TimescaleDB through Npgsql and ManagedCode.TimeSeries as an explicitly in-memory aggregation primitive. Pin the Timescale image to its multi-platform digest and centrally pin the published ManagedCode package. Preserve the current nine-engine/schema3 comparison and KeyLoad's public/persisted sample contract.
-
-The ManagedCode library does not become KeyLoad's persistence layer. Each arm reports its own durability, replication, and acknowledgement semantics. No combined winner score or equivalent guarantee is inferred.
+The current package pin is ManagedCode.TimeSeries 10.1.1. The Timescale resource is ephemeral `docker.io/timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e`. Container model/source assertions do not establish native extension availability, replication, acknowledgement or performance. The existing 48-sample deterministic run is a correctness/control profile only; it cannot qualify scale performance or replace the two required record scales and operation counts.
 
 ```mermaid
 flowchart LR
-    Dataset[Deterministic UTC samples and oracle] --> SDK[KeyLoad SDK]
-    SDK --> RF3[KeyLoad real RF3 Aspire cluster]
-    Dataset --> Npgsql[Npgsql time-series profile]
-    Npgsql --> TSDB[Timescale hypertable and time_bucket]
-    Dataset --> Library[ManagedCode.TimeSeries summer]
-    RF3 --> Result[Separate profile report with guarantee labels]
-    TSDB --> Result
-    Library --> Result
+    Corpus[Deterministic current UTC sample corpus] --> KeyLoad[KeyLoad RF3 sample operations]
+    Corpus --> Timescale[Native Timescale hypertable and SQL]
+    Corpus --> Library[ManagedCode.TimeSeries in-memory aggregation]
+    KeyLoad --> Oracle[Independent exact result oracle]
+    Timescale --> Oracle
+    Library --> Oracle
+    Oracle --> Report[Separate results and guarantee labels]
 ```
 
-## Implementation contract
+## Preserved identity and artifact acceptance
 
-1. Root adds `ManagedCode.TimeSeries` to `Directory.Packages.props`, adds its reference only to `benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj`, and owns shared comparison profile/report registration. The original pin was published `10.0.0`; the temporal repair is published `10.0.2` and the current shared pin advances to `10.0.3` after the owning summer allocation repair and independently verified release/feed receipt (report removed from repository). Historical reports keep their original package identity; new exact-source comparison and consumer regression execution is mandatory.
-2. Root owns `src/KeyLoad.AppHost/Features/BenchmarkComparisons/Resources/BenchmarkResources.cs` and `src/KeyLoad.AppHost/Features/BenchmarkComparisons/Resources/TimeSeriesBenchmarkResources.cs`. Register the Timescale resource only for the `timeseries` benchmark profile; use `timescale/timescaledb:2.30.2-pg18@sha256:e72689191e1c977892c53d6f2c344dbc4a9657a867dc8cc1899229f9d3672b2e`, parameterized Aspire connections, and readiness ordering. The container is ephemeral and has no cross-run data volume; the report claims persistence only for committed rows during that container's lifetime. Do not start it in ordinary RF3 product fixtures.
-3. Root owns deterministic profile contracts/data/report and `benchmarks/KeyLoad.ComparisonHost/Features/BenchmarkComparisons/` composition. The shared oracle checks UTC buckets, exact values, order, range edges and duplicate identity. Timings separate persistent append/read/aggregate work from in-memory aggregation; retain every failure.
-4. A bounded implementation task owns new Timescale Npgsql and ManagedCode.TimeSeries target files under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/TimeSeries/`. Use parameterized SQL, isolated per-run namespace/owner marker, hypertable-aware identity and cleanup only after positive ownership acknowledgement.
-5. A disjoint task owns real TUnit tests under `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/TimeSeries/`: deterministic/oracle contracts, report guarantee metadata, actual Aspire resource startup, RF3 public SDK roundtrip and Timescale SQL results. No fake database/target or local test run.
-6. Update TimeSeries and BenchmarkComparisons feature requirements, architecture map, ADR index, `docs/implementation/status.json`, task/coverage catalog, README and implementation comparison docs. Keep the existing nine-engine counts and status claims intact.
-7. Root joins all source changes, runs the enabled solution build, format, governance and analyzer/complexity gates, then dispatches full GitHub CI. Preserve exact SHA, job URLs and artifacts; status remains pending until successful delivered-SHA evidence exists.
+- **AC-TSC-003:** `PackageVersion` comes from the actually loaded `ManagedCode.TimeSeries` assembly's `AssemblyInformationalVersion` package component before `+`; missing or blank assembly version metadata is rejected. The current consumer assertion is bound to the centrally pinned 10.1.1 package. Do not use an unrelated project version or relabel an immutable report.
+- **AC-IMAGE-002:** for RF3 server image admission, consume the authenticated current source receipt (at most 65,536 bytes) and its named server manifest (at most 1,048,576 bytes); verify receipt schema/source revision, SHA-256 over the actual manifest bytes, registry digest, revision label and digest-qualified reference before any of the three native RF3 resources starts. All three rendered resources must use the same verified image repository and digest. These source/image limits are distinct from the TimeSeries workload-family plan; local source or model checks do not constitute authenticated native image qualification. See [ClusterFixtureImageIdentity](../../tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Assertions/ClusterFixtureImageIdentity.cs) and the canonical cluster-replication acceptance.
 
-## Delivery, rollback, verification and agent roles
+## Current target and source gap
 
-No product data or public API change occurs. The separate report is additive and is published only after successful matched CI evidence. Root is the sole owner of shared configuration, AppHost registration, public contracts, central package versions, workflow, docs and final integration. Worker ownership is limited to the new target files and its matching new test files; no shared-file overlap is allowed. Join point is the root comparison profile contract and one final full solution/CI run.
+The intensive family retains 30 logical target/node/scenario identities: KeyLoad and TimescaleDB, native 1/2/3-node topologies, and Append, RawRangeRead, Latest, Aggregate and Windows. It also retains six separate topology preflight identities. Each logical cell produces two scale-specific workloads: 100,000 and 1,000,000 actual records, with at least 100,000 measured operations at each scale. Each of the resulting 60 scale-specific workload identities runs on a separate isolated Linux runner and measurement session; the two scales for one logical cell never share a runner, process, resource session or measurement identity. The six preflights are separately isolated jobs. The scales do not add targets/scenarios to the family and are outside the canonical 1,386-worker main cohort. The current source plan does not yet dispatch this 60-job plus six-preflight structure, so it remains a source gap, not an implemented or qualified feature.
 
-Rollback disables the optional comparison profile and removes only its resource, package reference, target, report and tests. Existing engine profiles and immutable reports remain untouched. Verification: full Release solution build, `dotnet format`, governance, and GitHub TUnit/comparison plus required recovery/RF3 SDK/MCP suites; no local runtime tests or measurements.
+The current source still encodes a 4,096-sample, 10,000-operation profile. Those values do not meet the current scale target and must not be presented as current qualification. The implementation change, per-scale corpus/readback budgets, scale-specific isolated job identity and evidence projection remain pending. No actual 100,000/1,000,000 TimeSeries result is claimed here.
 
-## Sources
+Preserve real native sample operations and exact ordering/oracles: acknowledged append; inclusive raw range read; latest sample at an optional inclusive cut; complete half-open aggregates; and From-anchored, bounded dense windows. Use the currently validated execution options for concurrency, deadlines, output, resource and cleanup bounds; any bound that cannot admit the target corpus must be explicitly reviewed before changing it.
 
-- ManagedCode.TimeSeries package: https://www.nuget.org/packages/ManagedCode.TimeSeries/10.0.0
-- Timescale official image metadata: https://hub.docker.com/layers/timescale/timescaledb/2.30.2-pg18/images/sha256-ce57e0dc6d92ef03073c23b940e5e0b3fd7e776aef20b60c2e941ac43f760d75
-- Timescale Docker source: https://github.com/timescale/timescaledb-docker
+## Acceptance and implementation
+
+REQ-TSC-001..006 / AC-TSC-001..006 and REQ-SERIES-007 / AC-SERIES-007 require the same independently derived corpus/oracle, native KeyLoad and Timescale operations, bounded output and process lifecycle, exact package/image/source provenance, honest guarantee labels, and actual delivered-source Linux qualification. Dataset counts describe records; measured operation counts describe operations and may not be substituted with BDN iterations or repeated reads over a smaller corpus.
+
+Root owns the shared profile, target dispatch, AppHost resource composition, plan/evidence schema and documentation. Target code and matching TUnit tests remain in their BenchmarkComparisons TimeSeries feature paths. Tests use real Aspire resources, SDK, Npgsql and ZoneTree-backed KeyLoad state; no fake database or locally executed result substitutes for native evidence.
+
+Ordered verification: update and validate the strict source plan and its independent tests; build/format/govern the delivered source; run isolated Linux native preflights and all planned intensive cells; preserve authenticated original results; then run the current aggregate/site/coverage/browser/freshness/provider gates. Rollback disables only this optional comparison family and removes its report/resources coherently. Existing KeyLoad TimeSeries APIs, storage, public formats and other benchmark targets remain unchanged. Keep this ADR Accepted until exact-source evidence covers both scales and every required gate.

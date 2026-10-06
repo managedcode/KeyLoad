@@ -42,7 +42,8 @@ internal static class CommandOutcomeAuthorizationOrderScenario
     private static PrincipalRecord CreateWriter(TestDatabase database)
     {
         var writer = new PrincipalRecord(Writer, database.Partition.TenantId,
-            [new(database.Partition.DatabaseId, CommandOutcomePartitionScopeTestData.Resource, Capability.DocumentsWrite)], []);
+            [new(database.Partition.DatabaseId, CommandOutcomePartitionScopeTestData.Resource,
+                Capability.DocumentsWrite | Capability.DocumentsRead)], []);
         return database.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(writer)).Get<PrincipalRecord>();
     }
 

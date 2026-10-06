@@ -137,7 +137,7 @@ flowchart LR
 
 Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
 
-The [documentation index](README.md) is the complete entry point for 22 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps all 104 KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
+The [documentation index](README.md) is the complete entry point for 25 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps the canonical KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
 
 Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, separate request grains, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
 
@@ -231,10 +231,10 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | Project/module | Purpose and entry points | Canonical slices / protected boundary |
 |---|---|---|
 | src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/StorageContracts.cs; Features/BackupRestore/Contracts/AtomicPartitionCatalogEntry.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal and the generated BackupRestore roster entry. |
-| src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. The provisional roster does not qualify complete legacy census or cluster backup. |
+| src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. Complete current roster capture and cluster backup qualification remain required. |
 | src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
-| src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs | StorageRecovery; shared internal public-OS-ABI regular-file opening for stopped migration. No engine, database state or replication dependency; ADR-077, AC-EPOCH-012. |
+| src/KeyLoad.Storage.IO | Features/StorageRecovery/Storage/OfflineRegularFile.cs | StorageRecovery; shared internal public-OS-ABI regular-file opening for current native storage and scoped owner inspection. No engine, database state or replication dependency; ADR-011/116 and CurrentFormat. |
 | src/KeyLoad.Security | Features/Authorization/Execution/AuthorizationPolicy.cs | Authorization; trusted principal and row/field policy enforcement. |
 | src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Features/Search/Queries/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Artifacts | Features/BackupRestore/Execution/ArtifactTransfer.cs, Features/BackupRestore/Execution/BackupArtifact.cs | BackupRestore; verified artifact transport and format ownership. |
@@ -246,7 +246,7 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | src/KeyLoad.ServiceDefaults | Extensions.cs | Shared telemetry, service discovery and resilience composition. |
 | src/KeyLoad.AppHost | Program.cs, Features/BenchmarkComparisons/Resources/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
 | tests/KeyLoad.UnitTests | TestDatabase.cs and focused test files | Matching product slices; pure contract/engine regression evidence. |
-| tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and immutable prior native outcome compatibility; current source qualification pending. |
+| tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and current outcome-v2 scoped-locator integrity; current source qualification pending. |
 | tests/KeyLoad.CrashHost | Program.cs, Features/ClusterReplication/Helpers/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
 | tests/KeyLoad.IntegrationTests | ClusterFixture.cs, Features/ClusterReplication/Cases/ClusterTests.cs, Features/ResourceExecution/Cases/AdmissionClusterTests.cs | ClusterReplication and ClientApi shared fixtures; CodeQuality scopes actual server collector export; business cases mirror their owning canonical slices with real RF3/.NET and required MCP flows. |
 | tests/KeyLoad.ComparisonTests | Features/BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements, including the separate TimeSeries profile under ADR-050. |
@@ -254,9 +254,9 @@ All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure a
 | benchmarks/KeyLoad.BenchmarkScenarios | Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; ADR-047 public fixture library for external generated consumer, source joined with a clean enabled host build; real GitHub Dry execution pending. |
 | benchmarks/KeyLoad.Comparisons | Features/BenchmarkComparisons/Contracts/Contracts.cs, Features/BenchmarkComparisons/Corpus/BenchmarkDataset.cs, Features/BenchmarkComparisons/Execution/ComparisonRunner.cs; Features/BenchmarkComparisons/Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
 | benchmarks/KeyLoad.ComparisonHost | Program.cs and Features/BenchmarkComparisons/ | BenchmarkComparisons; sole CLI composition/lifetime under ADR-043, source-joined with actual build and GitHub qualification pending. |
-| site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; ADR-040 migration in progress. |
+| site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; website workflow is separate from benchmark execution. |
 | tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
-| .github/workflows | ci.yml, benchmarks.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; build/tests, same-run metrics/site and immutable database release. |
+| .github/workflows | build-and-tests.yml, benchmarks.yml, release.yml, website.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, release, and website workflows. |
 | scripts/Features/BenchmarkComparisons | github-evidence-contracts/runs/proof.mjs, github-evidence.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
 | docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
 
@@ -688,7 +688,7 @@ classDiagram
     ReplicaMaterializer --> ReplicaSnapshotStore : canonical IO under apply ownership
 ```
 
-[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) records the earlier WAL-only source qualified by mandatory native gates at cf630751/run37084177131. That exact source used journal3/identity4/checkpoint2 and its restricted legacy promotion contract. It does not qualify the expanded internal migration below; the whole isolated comparison cohort also retains failed preflight gates. Native raw-byte ZoneTree WAL and node-local physical ownership stay under their existing owners.
+[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) records an earlier WAL-only source qualified by mandatory native gates at cf630751/run37084177131. Its journal3/identity4/checkpoint2 values and promotion behavior describe that historical source only; they are not supported current formats or a conversion path. Current storage accepts the formats in [CurrentFormat](Features/StorageRecovery/CurrentFormat.md), preserves native raw-byte ZoneTree WAL and node-local physical ownership, and rejects unsupported versions before effects. The whole isolated comparison cohort also retains failed preflight gates; the historical result does not qualify current source.
 
 The staged [ADR-058](ADR/ADR-058-orleans-coordinated-cache-memory.md) keeps RAM
 acceleration under the canonical ResourceExecution slice across shared contracts,
@@ -1010,7 +1010,7 @@ classDiagram
 
 [ADR-064](ADR/ADR-064-workflow-release-delivery.md) and
 [ADR-062](ADR/ADR-062-workflow-separation.md) define exactly four workflows.
-`ci.yml` (`Build and Tests`) owns PR/main/manual build, format, rules, analyzers,
+`build-and-tests.yml` (`Build and Tests`) owns PR/main/manual build, format, rules, analyzers,
 normal/scalar units, current process recovery and genuine Docker/Aspire RF3
 SDK/MCP qualification. `benchmarks.yml` (`Benchmarks`) owns the complete isolated
 Linux database groups and authenticated aggregation. Its settled final dispatch
@@ -1133,7 +1133,7 @@ Source implementation and actual qualification/publication evidence are tracked
 in the feature specification. This architecture contract alone is not deployment
 proof. Existing benchmark/db/RF3 gates remain separate and mandatory.
 
-Build and Tests (`ci.yml`) retains solution build and ordinary tests. Website
+Build and Tests (`build-and-tests.yml`) retains solution build and ordinary tests. Website
 (`website.yml`) has no build/test workflow dependency; Benchmarks produces JSON
 and Release remains manual. This four-workflow correction supersedes the earlier
 three-workflow map without changing database qualification.

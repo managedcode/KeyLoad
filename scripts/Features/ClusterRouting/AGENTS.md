@@ -1,22 +1,24 @@
 # ClusterRouting scripts
 
-## Purpose and entry points
-- Produce and independently verify the genuine same-data-epoch RPC1/peer2 server image used by C1's actual Aspire RF3 protocol tests.
-- Entrypoints: prepare-rpc1-server-image.mjs and verify-rpc1-server-image.mjs. The accepted contract is docs/Features/ClusterRouting/NativeCqrsRequestV2.md and ADR-082.
+## Purpose and boundaries
 
-## Boundaries and ownership
-- Read root AGENTS.md and scripts/AGENTS.md first. Keep all work in the canonical ClusterRouting slice.
-- Root freezes source identity, receipt schema/environment names, CI and AppHost joins; workers return private patches before root review and application.
-- Reuse existing bounded native Git archive/inventory and BenchmarkComparisons image engine, manifest and owned-registry helpers. Preserve the separate native5 storage-upgrade implementation and originals.
-- The fixed image-source revision is377886f35928866f083806062b446056d64539e3. Require its exact tree/source/archive inventory and zero overlays, separately from the current producer's real Linux GitHub job identity.
-- Never invent GitHub environment, runtime image/manifest, native source, package, test or qualification evidence. Preserve secrets and report only controlled failure categories.
+This folder contains ClusterRouting-owned executable tooling when a current
+feature contract assigns such tooling here. It does not own server behavior,
+protocol compatibility or database data. Tooling is limited to the current-source
+feature contract and existing homogeneous Aspire test topology.
 
-## Physical-shard interface3→4 image evidence
-- ADR-099 and PhysicalShardCatalog.md additionally own prepare-interface3-server-image.mjs and verify-interface3-server-image.mjs, with interface3-server-source.mjs and interface3-server-proof.mjs. Freeze the actual prior source at1e8833c027cf232e35fe012cd3eed41c61a17f89: request alias keyload.request.v2, interface3, data epoch7 and peer envelope3. Keep RPC1/native5 pins and their original receipts unchanged.
-- Independently export and build the prior source with zero overlays in the real current Linux docker-rf3 job-owned registry. Verify the pinned Git tree in the real repository, the source inventory in the extracted build context and the retained archive after build; an extracted Git archive has no Git metadata.
-- Preserve separate prior-source and current-producer identities, actual config/manifest digests and all original artifacts. Authenticate every actual Aspire image before a cohort starts. Source/image evidence cannot qualify runtime; cold upgrade, signed mixed-cohort fencing and backup/restore use the native TUnit cases and complete owned cleanup.
+Read the root policy, `scripts/AGENTS.md`, the owning ClusterRouting feature
+specification and required ADR before adding a tool. Keep any executable artifact
+within the canonical ClusterRouting feature folder and use the actual current
+source, native APIs, AppHost-owned test entry and existing bounded artifact
+helpers. Do not create alternate image registries, source overlays, package substitutes,
+local data converters or standalone test runners.
 
-## Commands, skills and risks
-- node --check validates script syntax only. Runtime script regression callers use TUnit through the root's actual Aspire unit entry; image production qualification runs in the real Linux docker-rf3 CI job.
-- No installed script-specific skill or tool installation is required. Follow the already applicable Aspire/Orleans guidance for root integration.
-- Every owned export, process, registry use and file handle has bounded admission and joined cleanup. Retain original manifest/receipt/archive/inventory artifacts and actual producer/run identity; no timeout-abandoned operation or mixed-source proof may count as passing.
+Tools must validate bounded inputs and exact ownership, preserve original
+failures with cleanup failures, settle all owned processes/readers before cleanup,
+and fail closed on missing or ambiguous evidence. Never publish credentials,
+user payloads or synthetic source/run/image/test identities. Node syntax checks
+are not runtime proof; all required tests run through the actual Aspire entry,
+and only exact-source Linux GitHub artifacts qualify delivery.
+
+No executable tool currently has an independent entry point in this folder.

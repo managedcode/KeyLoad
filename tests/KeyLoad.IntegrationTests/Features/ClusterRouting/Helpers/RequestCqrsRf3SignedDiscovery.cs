@@ -6,6 +6,7 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -128,6 +129,7 @@ internal static class RequestCqrsRf3SignedDiscovery
         var voter = VoterOrigin(nodeName);
         if (value.VoterId != voter || value.ClusterId != ClusterPrefix + incarnation.ToString("N", CultureInfo.InvariantCulture)
             || value.Incarnation != incarnation || !value.TransportReady
+            || value.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal
             || string.IsNullOrEmpty(value.SiloAddress)
             || value.SiloAddress.Length > ReplicaTransportProtocol.MaximumAddressCharacters)
         { throw new InvalidOperationException(InvalidSignedObservation); }

@@ -42,7 +42,7 @@ internal sealed class IsolatedSurrealDbResourceTests
     internal static async Task VerifyNodeAsync(ContainerResource node, string root)
     {
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
-        await Assert.That(image.Registry).IsEqualTo("docker.io");
+        await Assert.That(image.Registry).IsEqualTo(string.Empty);
         await Assert.That(image.Image).IsEqualTo("surrealdb/surrealdb");
         await Assert.That(image.Tag).IsNull();
         await Assert.That(image.SHA256).IsEqualTo(BenchmarkResources.SurrealDbDigest[7..]);

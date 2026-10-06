@@ -1,3 +1,5 @@
+using KeyLoad.Storage;
+
 namespace KeyLoad.Orleans;
 
 /// <summary>One authenticated runtime-generation observation for a fixed configured voter.</summary>
@@ -17,5 +19,6 @@ internal sealed class ReplicaDiscoveryObservation(
     internal bool TransportReady { get; } = transportReady;
     internal long ObservedTimestamp { get; } = observedTimestamp;
     internal int RuntimeJournalReaderContract { get; } = runtimeJournalReaderContract;
-    internal bool Compatible => ProtocolCompatible && TransportReady;
+    internal bool CurrentContractCompatible => ProtocolCompatible
+        && RuntimeJournalReaderContract == StoreReaderContract.RuntimeJournal;
 }

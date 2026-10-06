@@ -1,6 +1,6 @@
 # Atomic partition placement prerequisite
 
-Status: proposed prerequisite contract; implementation and qualification pending. Canonical slice: ClusterRouting. Related: [PhysicalShardCatalog](PhysicalShardCatalog.md), [ADR-016](../../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../../ADR/ADR-017-migration-tokens.md), and [ADR-101](../../ADR/ADR-101-explicit-atomic-partition-placement.md).
+Status: proposed prerequisite contract; implementation and qualification pending. Canonical slice: ClusterRouting. Related: [PhysicalShardCatalog](PhysicalShardCatalog.md), [ADR-016](../../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../../ADR/ADR-017-ownership-session-tokens.md), and [ADR-101](../../ADR/ADR-101-explicit-atomic-partition-placement.md).
 
 This prerequisite persists explicit atomic-partition assignments while every assignment still resolves to the existing committed `DefaultShard`. It does not move data, change ordinary request routing, or complete KL-036, KL-037, KL-038, KL-071, or KL-072.
 

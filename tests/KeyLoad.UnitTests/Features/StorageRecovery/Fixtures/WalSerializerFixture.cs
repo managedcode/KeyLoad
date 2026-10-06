@@ -11,15 +11,11 @@ internal sealed class WalSerializerFixture : IDisposable
     private readonly ServiceProvider services;
     private readonly Serializer<ZoneTreeJournalMutation[]> serializer;
 
-    internal WalSerializerFixture(bool useNativeByteCodec = true)
+    internal WalSerializerFixture()
     {
         var collection = new ServiceCollection();
         collection.AddSerializer(builder => builder.AddAssembly(typeof(ZoneTreeJournalMutation).Assembly));
-        // False reproduces the frame2 provider for legacy refusal fixtures only.
-        if (useNativeByteCodec)
-        {
-            collection.AddSingleton<IFieldCodec<ReadOnlyMemory<byte>>, ReadOnlyMemoryOfByteCodec>();
-        }
+        collection.AddSingleton<IFieldCodec<ReadOnlyMemory<byte>>, ReadOnlyMemoryOfByteCodec>();
         services = collection.BuildServiceProvider();
         serializer = services.GetRequiredService<Serializer<ZoneTreeJournalMutation[]>>();
     }

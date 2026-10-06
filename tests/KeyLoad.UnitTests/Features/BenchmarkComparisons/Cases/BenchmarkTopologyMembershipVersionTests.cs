@@ -7,24 +7,17 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class BenchmarkTopologyMembershipVersionTests
 {
     private const int CurrentMembershipVersion = 2;
-    private const int LegacyMembershipVersion = 1;
+    private const int UnsupportedFutureMembershipVersion = int.MaxValue;
     private const int VoterCount = 3;
     private const long RetainedTerm = 1;
     private const long PersistedPosition = 3;
 
     [Test]
-    [Arguments(1, true)]
-    [Arguments(1, false)]
-    [Arguments(3, true)]
-    [Arguments(3, false)]
-    public Task AcIs004NativeMembershipVersionsRejectWithoutChangingPersistedAuthority(int version, bool benchmark)
-        => RejectWithoutMutationAsync(record => ReplicaProtocolCodec.Serialize(record with { Version = version }), benchmark);
-
-    [Test]
     [Arguments(true)]
     [Arguments(false)]
-    public Task AcIs004LegacyJsonMembershipRejectsWithoutFallbackOrInitialization(bool benchmark)
-        => RejectWithoutMutationAsync(record => JsonDefaults.Serialize(record with { Version = LegacyMembershipVersion }), benchmark);
+    public Task AcIs004UnknownNativeMembershipVersionRejectsWithoutChangingPersistedAuthority(bool benchmark)
+        => RejectWithoutMutationAsync(record => ReplicaProtocolCodec.Serialize(record with
+        { Version = UnsupportedFutureMembershipVersion }), benchmark);
 
     private static async Task RejectWithoutMutationAsync(Func<ReplicaBenchmarkMembershipRecord, byte[]> encode, bool benchmark)
     {

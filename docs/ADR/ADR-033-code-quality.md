@@ -61,3 +61,16 @@ A local build, focused run, static inventory, source review, or one passing coho
 This ADR changes quality tooling and evidence contracts; it does not change database bytes, SQL or external client protocols, Orleans activation movement, storage authority or RF3 topology. Roll out one reviewed source checkpoint containing its analyzer, tests, settings, inventory and documentation joins. A rollback restores the coherent source/configuration pair and retains every original report; it does not disable a rule, reduce a limit, or relabel prior reports as evidence for changed source.
 
 The decision remains Accepted until the complete implementation and all mapped exact-source gates pass. The current status and original qualification receipts remain in the canonical [implementation status](../implementation/status.json) and [CodeQuality evidence record](../implementation/code-quality.md); these records must bind qualification to its exact source, run, job and original reports.
+
+## Current native analyzer and report admission
+
+TASK-CQ-CURRENT-NATIVE-042 implements REQ-CQ-001/006/009 and AC-CQ-001/008/044/046
+under the owning feature contract. Ordered join: freeze the current artifact/report
+contract; build the source analyzer in the formatter's actual Debug configuration;
+run the unchanged canonical formatter; use native Cobertura `name` identities in
+the complete CLI collector/merge oracle; run full Release plus relevant Aspire
+flows and exact-source Linux checks. Root owns workflow, assertions and evidence.
+Keep80/70/90 coverage thresholds, original counts/union and400/200/64/depth3 rules.
+Rollback must retain a coherent source analyzer and strict native-report reader,
+never stale artifacts, skipped assertions or synthetic coverage. No database
+format, dependency, public API or topology changes belong to this quality stage.

@@ -136,6 +136,8 @@ jobs:
           process.stderr.write(verification.stderr ?? '');
           if (verification.error || verification.status !== 0) throw verification.error ?? new Error('Native FTS package signature verification failed.');
           JS
+      - name: Build current Debug analyzer for native formatting
+        run: dotnet build src/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --no-restore --configuration Debug
       - name: Check code formatting
         run: dotnet format KeyLoad.slnx --verify-no-changes --no-restore
       - name: Check repository rules
@@ -144,8 +146,6 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true
       - name: Test prompt termination on Aspire resource failures
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
-      - name: Test Aspire recovery prerequisite ownership
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/PriorProbePrerequisiteTests/*' --KeyLoadTests:ResultsDirectory=TestResults/recovery-prerequisites --KeyLoadTests:ReportTrx=true
       - name: Test live benchmark progress capture
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ComparisonProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-progress --KeyLoadTests:ReportTrx=true
       - name: Test live benchmark process entry

@@ -234,3 +234,22 @@ composition, then parsed against the frozen profile inventory before allocating
 resources. An absent selector admits the existing control/scaled families; an
 invalid or simultaneous selector rejects the worker selection. The vector worker
 owns this small configuration join and its profile-selection regressions.
+
+
+## Current Aspire image-model regression
+
+TASK-BC-CURRENT-IMAGE-MODEL-051 maps REQ/AC-VQ-005 and
+REQ/AC-BC-FAIL-005 under ADR-109. Original Linux job112392087984 at
+301181f failed two resource-model operations because their assertions assumed
+Aspire split registry from the image string. Preserve the actual current pinned
+image strings, SHA-256, tag semantics, persistent mounts, endpoints, health and
+runner dependencies. Match the pinned Aspire annotation representation and retain
+the exact fully qualified runner image reference. No server image, topology,
+version, schema or resource bound changes in this regression repair.
+
+The worker owns only IsolatedHelixDbResourceTests and
+IsolatedSurrealDbResourceTests in ComparisonTests/BenchmarkComparisons/Cases.
+Root reviews base/proposed hashes and complete operation assertions, then runs
+these model operations through the AppHost-owned comparison runner, with full
+solution/format and exact-source Linux isolated qualification still mandatory.
+A model pass does not prove a native image pull, loaded dataset or measurements.

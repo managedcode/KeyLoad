@@ -1,117 +1,30 @@
 # ADR-049: Genuine Neo4j harness and acknowledged cleanup ownership
 
-Status: Accepted; implementation and exact-source qualification pending.
-Owner: KeyLoad benchmark lead. Date: 2026-10-02.
-Related: REQ-BC-023 / AC-GH-001–007, REQ-BC-001/002/009,
-ADR032/033/034/035/043/044. Detailed contract:
-[acceptance](ADR-049-genuine-neo4j-harness.md) and
-[ordered graph](ADR-049-genuine-neo4j-harness.md).
+Status: Accepted; native comparison qualification remains pending.
+Related: REQ-BC-023 / AC-GH-001..007, REQ-BC-001/002/009; ADR-032, ADR-033, ADR-034, ADR-035, ADR-043, ADR-044, ADR-071, ADR-076, ADR-080.
 
-## Context and decision
+## Decision
 
-Three existing harness unit cases use fake HTTP/target responses; three pure
-oracle cases are useful. Existing ComparisonTests already owns real pinned Neo4j
-and KeyLoad RF3 through Aspire, so use that same live lifecycle for real replacement
-regressions. The main measured process disposes its targets before exiting; an
-additional known-private-ID runner/target is required to inspect persisted writes
-before target disposal. No second host, proxy, fake target or product injector.
+Use the existing Aspire-owned ComparisonTests lifecycle for Neo4j regressions. Tests and the benchmark target must use a real pinned Neo4j Community server and the real KeyLoad RF3 target where applicable. Neo4j Community is a single-node native topology; 2-node and 3-node Neo4j slots remain explicit unsupported-topology dispositions. Do not represent a standalone server as a cluster or fabricate missing capabilities.
 
-Neo4jTarget currently grants cleanup authority before CREATE CONSTRAINT succeeds.
-A native duplicate name on a different label can make failed-target disposal drop
-another owner's constraint. Grant authority only after parsed successful CREATE
-acknowledgement. Dispose/delete only confirmed-owned label/constraint; dispose the
-owned client on every path. Lost acknowledgement may leave an orphan and requires
-separate fault evidence; it never proves cleanup ownership or recovery safety.
+Grant cleanup authority only after a valid native CREATE acknowledgement confirms ownership of the label/constraint. On failure or uncertain acknowledgement, do not delete an unowned resource. Dispose each owned client and attempt every confirmed-owned cleanup while retaining primary and cleanup failures. An uncertain acknowledgement may leave an orphan; it is not proof of ownership or recovery safety.
 
-[Query API documentation](https://neo4j.com/docs/query-api/current/query/)
-shows HTTP202 for both success and query failure; successful examples omit errors.
-[Plain JSON](https://neo4j.com/docs/query-api/current/plain-json/) defines data.fields
-and data.values arrays. Accept documented omitted or empty errors with a valid
-CREATE-only success shape: empty field/value arrays, queryType s and an opaque
-string bookmarks array, including an empty list. Other query paths retain their
-normal result expectations with generic safe error validation. Reject
-malformed/missing claimed success and nonempty native errors
-without logging server messages. Exact pinned writer verification is a blocking
-preimplementation join; do not require an errors property that valid replies omit.
-
-Pinned writer research is complete in the working plan. Exact internal methods
-ValidateErrors and ValidateConstraintCreation take the already parsed JsonElement;
-the latter checks errors first. Valid native codes use AC006's four-component
-ASCII machine-code shape and existing Neo4j:code detail; malformed input uses
-fixed Neo4j:InvalidQueryResponse detail without raw code/message/body. Root grants
-only named ComparisonTests friend visibility. Genuine duplicate setup uses the
-original Warmup0/Repetitions1 cut and a fresh target/client after direct disposal.
-Every acknowledged-owned cleanup is attempted with bounded independent cleanup
-tokens, including both target node deletion and constraint drop; client disposal
-and original plus cleanup failures remain observable. No label-token removal claim.
-
-Reject duplicate critical root errors/data/queryType/bookmarks, data fields/values,
-and first native error code properties in either order. Later JSON properties
-cannot erase an earlier error or grant ownership; unrelated metadata is preserved.
-
-Use one source-owned internal response validator with real returned JSON and
-controlled in-memory malformed-input cases. A named friend assembly limited to
-ComparisonTests is allowed for that protocol boundary; public target CLR API,
-wire/request/body/response ownership and measured operations stay unchanged.
-Variants are test inputs and may not become benchmark/publication evidence.
-
-## Implementation contract
-
-1. Resolve actual pinned response writer/secret API and strongest contract review.
-   Inspect full relevant historical-main CI baseline, preserve exact artifacts.
-2. Review the six existing methods, target and shared caller. Author the real native
-   duplicate constraint/marker and response regressions before production repair.
-3. In parallel refactor the three pure methods once and implement genuine positive,
-   mismatch/setup/warmup/CSV checks with real private clients/data/paths. Every
-   original assertion maps to an exact new obligation; no fake remains at join.
-4. Apply confirmed ownership and one-pass acknowledgement validation in existing
-   Neo4jTarget plus new canonical Neo4jQueryResponse helper. Dispose unreturned
-   documents and response streams; preserve actual target/client/session behavior.
-5. Lead alone joins named test visibility and the existing ComparisonTests hook;
-   retrieve real Aspire endpoint/password/image. Remove fake-response assertions only after
-   real replacement source is complete and reviewed. Native/AppHost/shared writes are
-   serialized; no overwritten independent work.
-6. Strongest and lead inspect every source/error/lifetime/token/method/registration
-   packet. Build/analyze/format/governance/numeric/coverage, then complete accepted
-   nine-engine schema3/35+31 integration and every required product prerequisite.
-7. Stable normal delivery and exact-SHA GitHub full TUnit/analyzer/unit/recovery/
-   RF3 .NET/official MCP/comparison evidence. No skipped suite or source-only claim.
-
-Exact owners/model tiers/scopes/dependencies/artifacts/start/join/terminal states
-are the plan graph. Product runtime/persistence/frontend/schema: unchanged;
-this changes private benchmark lifecycle and test proof only. Existing schema3 and
-nine-engine requirements are mandatory. Historical six-engine evidence does not
-qualify current requirements.
-No new package, paid feature, global configuration or public API permission.
-
-## Verification, rollout and rollback
-
-AC001 preserves pure tests; AC002 captures actual HTTP202/native error and proves
-fixture ownership after failed cleanup; AC003/006 validate authentic and malformed
-protocol inputs; AC004 reads all28 writes/44nodes and96 measured CSV attempts before
-cleanup; AC005 exercises genuine mismatch/restoration via the existing bounded
-synchronous observer. AC007 requires complete exact-source GitHub/static/coverage
-gates. Secret/native-detail assertions use Boolean checks so failure output cannot
-echo credentials or native messages. Source-generation is not test execution.
-
-No product data changes. Transient private resources disappear after genuine
-successful ownership cleanup; uncertain acknowledgement may need operator cleanup.
-Rollback is a coherent reviewed source/test unit preserving no-fakes policy and
-cleanup authority. Environmental lost-response/cleanup faults remain explicit
-qualification gaps until real fault tests; no production/durability or performance
-claim follows from these mini-runs. Keep this ADR Accepted until every required
-implementation/test/docs/verification join has authentic evidence.
+Neo4j's HTTP Query API can return HTTP 202 for a query failure. Parse the documented JSON response shape: a successful CREATE may omit or contain an empty errors collection and must have the expected empty result shape, query type and opaque bookmark list. Reject malformed or missing claimed success and nonempty native errors. Diagnostics must not include server messages or credentials.
 
 ```mermaid
 flowchart LR
-    CI[GitHub TUnit] --> Aspire[Existing real pinned Neo4j]
-    Fixture[Independent owned marker and constraint] --> Aspire
-    Target[Real runner and target] --> Create[CREATE response]
-    Create --> Validate[One parsed acknowledgement]
-    Validate --> Owned[Confirmed cleanup authority]
-    Validate --> Failed[Failure or uncertainty]
-    Owned --> Cleanup[Delete owned label and constraint]
-    Failed --> Preserve[Preserve unowned fixture]
-    Aspire --> Oracle[Independent data and constraint readback]
-    Oracle --> Evidence[Exact source qualification]
+    Aspire[Existing Aspire Neo4j resource] --> Target[Real target and regression]
+    Target --> Query[Native CREATE acknowledgement]
+    Query -->|valid ownership| Cleanup[Delete only owned label and constraint]
+    Query -->|failure or uncertainty| Preserve[Preserve unowned fixture]
+    Cleanup --> Oracle[Independent native readback]
+    Preserve --> Oracle
 ```
+
+## Acceptance and implementation contract
+
+AC-GH-001..007 require replacement of fake HTTP/target cases with genuine lifecycle tests; successful ownership acknowledgement; preservation of foreign constraints on duplicate/setup failures; validation of real native response shapes; complete measured writes/data readback; bounded mismatch/restoration flows; and exact-source qualification. Existing pure oracle cases remain useful when they do not stand in for native behavior.
+
+The private protocol helper validates the already parsed JsonElement; it does not change the public target API, request body, native operation order or report schema. Root owns the existing ComparisonTests hook, friend visibility, AppHost lifecycle and shared joins. Tests remain under tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/; target code remains in the Neo4j BenchmarkComparisons slice. No fake server, second host, proxy or product injector is introduced.
+
+Run the full enabled source checks before exact-source Linux TUnit and native comparison qualification. A successful model test is not native startup, query, cleanup or performance evidence. Keep the ADR Accepted until every mapped gate has authentic evidence. Historical source/run receipts remain immutable and do not qualify the current source.

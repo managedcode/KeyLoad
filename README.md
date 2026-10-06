@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/ci.yml/badge.svg" alt="Build and Tests"></a>
+  <a href="https://github.com/managedcode/KeyLoad/actions/workflows/build-and-tests.yml"><img src="https://github.com/managedcode/KeyLoad/actions/workflows/build-and-tests.yml/badge.svg" alt="Build and Tests"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Elastic%202.0-black" alt="Elastic License 2.0"></a>
   <img src="https://img.shields.io/badge/.NET-10-512BD4" alt=".NET 10">
   <img src="https://img.shields.io/badge/built%20on-Orleans-0b5cad" alt="Built on Orleans">
@@ -357,7 +357,7 @@ native report preservation and complete-operation test requirements.
 | SQL `SELECT`, model views and `CALL`, plus the .NET SDK, MCP server and HTTP API | Combining data across partitions in one request |
 | Queue ↔ graph composition within one partition | [Approximate vector search (ANN)](docs/Features/Search/ManagedAnn.md); vector search is exact for now |
 | Three-node Orleans cluster, crash recovery, local backup and restore | Production, endurance and power-loss qualification |
-| Admin console and CLI | [Storage upgrades](docs/Features/StorageRecovery.md) from older versions, which still have an [open cold-cluster failure](docs/implementation/node-epoch-linux-0d78-2026-10-04.json) |
+| Admin console and CLI | |
 | | The full performance comparison with other databases (current runs are on the [website](https://www.keyload.cloud/#benchmarks)) |
 
 Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch). KeyLoad then ranks the results it finds and checks permissions on each one.
@@ -365,18 +365,17 @@ Full-text search comes from [ZoneTree.FullTextSearch](https://github.com/ZoneTre
 Native Orleans [runtime adoption](docs/Features/ClusterRouting/RuntimeAdoption.md)
 and [journal-backed Durable Jobs](docs/Features/ClusterRouting/RuntimeJournal.md)
 are being integrated. The source includes due-work wakeups, bounded telemetry,
-local lifecycle ownership and saga timeout jobs; its final build and runtime
-tests remain blocked by the current shared compiler/analyzer migration. Native
+local lifecycle ownership and saga timeout jobs; current-source build and runtime
+qualification remain in progress. Native
 job restart/adoption and real SDK/MCP RF3 fault qualification remain open.
 
-Runtime timeouts, retries and resource limits are being moved to centrally
-validated typed options. The [configuration contract](docs/ADR/ADR-113-centralized-runtime-options.md)
+Runtime timeouts, retries and resource limits use centrally validated typed options. The [configuration contract](docs/ADR/ADR-113-centralized-runtime-options.md)
 also covers the SDK, CLI and Aspire host; complete build and runtime verification
-of this migration remain pending.
+of the current source remain pending.
 
 For detailed status, see the [implementation tracker](docs/implementation/status.json) and the [qualification records](docs/implementation/). We publish performance numbers only from real GitHub Actions runs, on the [website](https://www.keyload.cloud/).
 
-The [TimeProvider migration](docs/Features/ResourceExecution/TimeProvider.md)
+The [TimeProvider contract](docs/Features/ResourceExecution/TimeProvider.md)
 supplies explicit clocks for timestamps, elapsed budgets and managed timers.
 Controlled-time regressions and the remaining runtime qualification gates
 are tracked in the feature specification.

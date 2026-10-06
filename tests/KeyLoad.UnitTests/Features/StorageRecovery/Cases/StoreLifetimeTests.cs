@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Text;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -7,7 +8,9 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class StoreLifetimeTests
 {
-    private const int CanonicalJournalHeaderBytes = 52;
+    private const int JournalPayloadLengthOffset = sizeof(ulong);
+    private const int CorruptPayloadLength = int.MaxValue;
+    private const byte CurrentJournalPayload = 0x10;
     private const string GuidFormat = "N";
     private const string JournalFileName = "commands.wal";
     private const string OwnerLockFileName = "owner.lock";
@@ -62,7 +65,7 @@ internal sealed class StoreLifetimeTests
     }
 
     [Test]
-    public async Task AcSq002CorruptCompleteJournalHeaderReleasesOwnershipForRepairedReopen()
+    public async Task AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen()
     {
         using var directory = new StoreDirectoryFixture();
         StoreIdentity originalIdentity;
@@ -72,7 +75,10 @@ internal sealed class StoreLifetimeTests
         }
 
         var journalPath = Path.Combine(directory.Path, JournalFileName);
-        await File.WriteAllBytesAsync(journalPath, new byte[CanonicalJournalHeaderBytes]);
+        var corruptJournal = WalFileFixture.CreateFrame([CurrentJournalPayload]);
+        BinaryPrimitives.WriteInt32LittleEndian(
+            corruptJournal.AsSpan(JournalPayloadLengthOffset), CorruptPayloadLength);
+        await File.WriteAllBytesAsync(journalPath, corruptJournal);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
             using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());

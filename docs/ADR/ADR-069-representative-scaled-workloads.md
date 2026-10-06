@@ -1,136 +1,114 @@
-# ADR-069: Representative scaled workload qualification
+# ADR-069: representative scaled workload qualification
 
-Status: Accepted,2026-10-03. Source, tests and native qualification OPEN.
-Related REQ-SCALE-001..008 / AC-SCALE-001..008:
-[ScaledWorkloads](../Features/BenchmarkComparisons/ScaledWorkloads.md).
-The actual runtime repair contract REQ/AC-SCALE-RT-001..003 is frozen in
+Status: Accepted contract; implementation and qualification remain open until the
+current [ScaledWorkloads](../Features/BenchmarkComparisons/ScaledWorkloads.md)
+acceptance and required exact-source evidence pass. Related REQ-SCALE-001..008 /
+AC-SCALE-001..008 and
 [ScaledRuntimeRepairs](../Features/BenchmarkComparisons/ScaledRuntimeRepairs.md).
 
-## Decision and implementation contract
+## Decision and active data scales
 
-Owner requires exactly100K and1M actual records and at least100K measured calls per
-applicable workload cell. Remove5M from active profiles.
-Current4096 hot-key/80Actual samples do not establish that scale; preserve them
-as original controls. Current270-cell cohort has its own smaller frozen contract.
-Add an independent BenchmarkComparisons raw resident read profile before the
-mandatory actual public index/complex/RF3 workload stage. Do not change production
-ZoneTree authority/WAL, Orleans request/partition ownership or RF3 topology.
+Every active database/workload family uses exactly 100,000 and 1,000,000 actual
+records, with at least 100,000 measured operations per applicable cell. Record
+count, measured operation count and benchmark iterations are separate facts.
+Qualify sequential/random and applicable ordered/range/index/complex-query
+workloads using actual returned records and independent caller-visible oracles.
+Preserve equal corpus, query/filter, schedule, accuracy, acknowledgement,
+topology, durability and effective-resource contracts across comparable engines.
+The canonical eleven-target inventory remains in the feature specification. Each
+comparison database runs its real native server and loader in isolated Linux
+GitHub runner/job cells; record native membership and mark unsupported native
+capabilities/topologies explicitly unavailable. Local experiments, tiny controls,
+source settings and parser fixtures never become database measurements or website
+figures.
 
-Freeze compact scale-v1 BE16B keys and full64-bit identity32/1024B values from
-[canonical feature contract](../Features/BenchmarkComparisons/ScaledWorkloads.md); one pinned key slab plus constant scratch, no per-record object
-tables or second full payload corpus. ZoneTree retains its immutable4096-record
-value chunks through original engine close. CountN successful
-seed calls, full distinct payload checks plus reserved miss before/after timing;
-Real immutable borrow/output-copy tests are mandatory. Every timed returned identity is checked and consumed.
-The fixture constructor completes actual native full verification before it
-returns (N verified records, one pass, N+1 reads). FullValueDigest is lowercase
-SHA256 over actual complete read values in ascending index order. A generated
-expected digest is only an independent oracle. ZoneTree's actual
-immutable arena retains N*payload bytes. ScaledRawStorageSettings is the frozen
-settings helper. Public Setup rejects an invalid qualification count before
-acquisition; cleanup performs full postverification and retains independent
-verification and owned-close errors.
+## ZoneTree raw resident-read lane
 
-Each public generated ScaledStorageReadBenchmarks method performs exactly5M
-reads per invocation, OpsPerInvoke5M/invocation1/unroll1/.NET10/launch1/
-warmup8/Actual10. Sequential and frozen SplitMix64/Fisher-Yates permutation
-cover everyN key50/5 times for100K/1M. Same seed/order/one output copy,
-two payload sizes/one selected engine per process. These counters/oracle costs
-are included, not subtracted or called lookup-only. Native actual rows>=100ms,
-retainedResults8..10 and exact complete12cell cohort are required.
+The internal raw-read development lane has exactly eight cells: one ZoneTree
+engine, two record counts (100,000 and 1,000,000), two payload sizes (32 and
+1,024 bytes) and two methods (sequential and deterministic shuffled). Each public
+read-method invocation performs exactly 1,000,000 actual point reads,
+`OperationsPerInvoke = 1,000,000`, one invocation and one unroll. Thus at 100,000
+records it visits every key ten times (1,000,000 / 100,000 = 10); at 1,000,000
+records it visits every key once (1,000,000 / 1,000,000 = 1). Both methods
+validate and consume every returned full record identity and require the exact
+sum oracle `((1,000,000 / N) * N * (N - 1) / 2)`; checksum-only or attribute-only
+proof is insufficient.
 
-ZoneTree mutable boundmax(1000,N+2)/WALNone/compressionNone/no
-maintainer;1000 is its native mini-fixture minimum;100K/1M retainN+2.
-Actual mutable/inmemoryN and no frozen/disk records. Source settings
-do not prove5M residency or record stride. Record every actual native counter.
+Use .NET 10, one launch, eight warmups and ten actual iterations; retain 8..10
+actual result samples as the native benchmark permits, and reject a measured row
+below 100 ms. The read-order,
+seed, payload bytes, key identity, full-value checks and settings are owned in
+detail by ScaledWorkloads.md. Charge the oracle and validation work inside the
+measurement; do not relabel this as lookup-only. The raw-read lane is an internal
+ZoneTree diagnostic and never substitutes for a database-comparison cell or a
+public metric.
 
+The real native fixture verifies exactly N successful terminal seed writes,
+reads all N distinct complete values before timing and afterward, and preserves
+native record/residency observations. The reserved miss is not a seed. Each
+successful read verifies actual identity. Preparation has the existing bounded
+20-minute deadline with cancellation checks at least every 256 operations; the
+whole native child has the current 12 GiB peak ceiling and 2 GiB total/cgroup
+headroom requirement. Owners remain charged until original operations, readers,
+and close settle. Preserve primary and independent cleanup failures. Unobserved
+vendor constructor/close faults are explicit evidence gaps, not test-double proof.
 
-Whole-child peak ceiling12GiB with minimum total/cgroup capacity ceiling+2GiB
-headroom and truthful total/available/RSS distinctions. Mini fixtures use a
-computed bound. Original public synchronous calls cannot be safely detached or
-preempted. Preparation20minute monotonic/incoming cancel checks in<=256-op
-chunks; outer nativejob120minute bound. Retain owners through actual original
-settlement/close and primary+independent cleanup errors. Unobserved vendor finite
-close/constructor/pending failures remain explicit gaps, never injected proof.
+## Full comparison and delivery gates
 
-AC-SCALE-003 source review correction freezes staged, one-shot acquisition and
-one charged scaled-fixture ownership slot per diagnostic process in the linked
-feature contract. Rooted managed owners precede native acquisition; successfully
-returned handles remain charged through original settlement and successful close,
-including a throwing constructor. Primary and close failures stay visible. A
-second owner is rejected before acquisition, and explicit failed-owner repeat
-close never disposes a healthy fixture or retries writes. Genuine live-owner,
-rejection, readback, actual close/replacement and repeat-close tests precede the
-private worker revision; source review then confirms the join. This corrects our
-wrapper's lifetime and does not claim unobserved vendor-constructor fault proof
-or change product/RF3/storage contracts. Root alone owns contract and integration.
+REQ-SCALE-007 requires the subsequent genuine authorized .NET SDK and official
+MCP operations through Aspire RF3 for supported ordered/range, index and bounded
+complex-query workloads, exact result/count/digest checks, error/cancel/recovery
+flows, and at least 100,000 measured operations at both required scales. The raw
+ZoneTree lane does not close this product gate. Native image, actual dataset,
+membership, server resource, correctness and acknowledgement evidence must all
+come from the original run and remain source/run/attempt/job/artifact bound. Retain
+original raw JSON, CSV and stdout plus the exact settings, machine and hardware
+observations; missing, mixed or unverifiable cell evidence cannot qualify.
 
-Every successful full-value pass captures actual native bounds before publishing
-oracle metadata, including the final pass before close. Cleanup preserves actual
-nonfatal primary/independent close failures. Excluded fatal unwind does not invoke
-test-owned cleanup; native/fatal fault occurrence remains unobserved manual proof.
-The separately frozen pure report contract is
-[ScaledReportQualification](../Features/BenchmarkComparisons/ScaledReportQualification.md),
-REQ/AC-SCALE-RPT-001..004. Root owns that contract/integration; stopped test-first
-candidates precede the bounded parser writer and strongest source review. Pure
-parser success does not prove genuine cold manifests or native process settlement.
+Use the four canonical workflows only: Build and Tests, Benchmarks, Website and
+Release. Benchmarks owns comparison jobs and authenticated aggregation; Website
+receives only the bounded final dispatch and independently uses authenticated
+ready metrics or a content-only path. Do not add internal/raw microbenchmark jobs,
+dispatch modes or dependencies to the Benchmarks workflow. Website metrics
+require the complete current cohort and all source/archive/freshness checks.
+
+Automated acceptance remains mapped to the owning specification:
+
+| Requirement | Required evidence |
+|---|---|
+| REQ-SCALE-001 / AC-SCALE-001 | Compact deterministic corpus, exact key/value format, independent goldens, order and uniqueness |
+| REQ-SCALE-002 / AC-SCALE-002 | Real native seed/readback, complete distinct-value validation, owned scratch and successful cleanup |
+| REQ-SCALE-003 / AC-SCALE-003 | Actual residency, process and preparation bounds; cancellation, cleanup and source-bound native observations |
+| REQ-SCALE-004 / AC-SCALE-004 | Every measured call performs and validates one million native reads at exact 100K/1M scales |
+| REQ-SCALE-005 / AC-SCALE-005 | Complete eight-cell ZoneTree profile, separate counts/operations/iterations, minimum duration and original reports |
+| REQ-SCALE-006 / AC-SCALE-006 | Local raw originals stay development-only; full comparison evidence comes from authenticated isolated Linux GitHub cells |
+| REQ-SCALE-007 / AC-SCALE-007 | Real RF3 SDK/MCP product workload cohort with equal native correctness and resource contracts; currently open until proven |
+| REQ-SCALE-008 / AC-SCALE-008 | Full current-source build, normal/scalar/recovery/RF3, coverage, fault and required quality gates; no skipped or synthetic success |
+
+Source review, a valid report parser, local BDN, or a completed child exit does not
+qualify native data, process settlement, performance, coverage or durability.
+The status and each open qualification boundary remain in the feature spec and
+`docs/implementation/status.json`; no universal winner or production-readiness
+claim follows from this diagnostic lane.
 
 ```mermaid
-sequenceDiagram
-    participant G as Compact generator
-    participant E as One real engine
-    participant B as Genuine generated BDN
-    participant P as Provider evidence
-    G->>E: Exactly N terminal seed writes
-    E-->>G: Full N-value and native residence oracle
-    B->>E: 5M real sequential or shuffled reads
-    E-->>B: Checked identity checksum and original statistics
-    G->>E: Full postoracle then owned close
-    B->>P: Original reports and bounded cold manifests
-    P->>P: Same-source job artifact hashes and complete cohort
+flowchart LR
+    Corpus[Bounded deterministic corpus] --> Native[Actual ZoneTree or isolated native database]
+    Native --> Verify[Full data and native resource validation]
+    Verify --> Read[1M actual reads per raw-lane invocation]
+    Read --> Oracle[Identity and arithmetic oracle]
+    Oracle --> Local[Development-only raw evidence]
+    Native --> Compare[Separate authenticated Linux comparison cell]
+    Compare --> Website[Current complete aggregate, if ready]
 ```
 
-Ordered stages/task graph: SCALE-P contracts/source baseline; SCALE-T private
-acceptance-derived literal/native tests, root-reviewed before implementation;
-SCALE-D compact corpus/order/arena and independent SCALE-E native settings/
-engines/fixture/BDN private candidates with disjoint NEW files; strongest SCALE-R
-reads every stopped source/test/diff; root SCALE-I joins exact bytes and owns
-build/normal+scalar/full/format/governance/all-current main delivery; SCALE-N
-actual separate local100K->1M ZoneTree and12cell source/machine reconciliation.
-Use the four canonical Build and Tests, Benchmarks, Website and Release workflows;
-retain the ZoneTree-only report/profile and
-complete native database comparison/site contract. The owner prohibits internal/raw
-microbenchmark jobs, dispatch modes and dependencies in benchmarks.yml. PhaseA
-optimization measurements run locally and ordinary correctness tests belong in
-CI. This ADR does not authorize a separate internal GitHub performance context.
-Root alone owns shared helpers/jobs.
-Agents stop on API/ownership/lifetime/contract ambiguity rather than inventing it.
+## Consequences and rollback
 
-Source join2026-10-03: completed strongest R3 approved the exact thirteen E3
-native files, three data files and ten current tests/support files. Root checked
-all39 input hashes and joined the native files. Integrated build/tests/formatter,
-actual native scale measurements and cold manifests remain pending; Accepted
-does not mean implemented or qualified.
-
-Frontend/public product API N/A in PhaseA because this is an independent
-diagnostic; no public site projection until separate proven metrics/schema contract.
-Mandatory PhaseB freezes actual authorized SDK/officialMCP index-build/indexquery/
-bounded complex-Q1/ordered/range and supported-peer cohort with equal ACK/topology/
-resource/correctness/error/cancel/fault contracts. No sorting emulator or fake SQL. Explain and exact independent
-result digests are required. Existing max-scan/query/result/auth/RF3 limits remain.
-
-Verification uses real native engines, bounded actual generated consumers and
-TUnit/MTP .NET10 normal/scalar; literal parser vectors are not measurements or
-provider authentication. Root retains machine/source/raw failures, original
-JSON/CSV/stdout/cold counters and actual package/settings/source/machine bindings.
-Local sequential experiments are development only. PhaseB website global metrics
-exclusively use genuine complete GitHub database originals and authenticated
-SHA/run/attempt/job/ZIP/file bindings with matched verified actual hardware,
-resources, topology, durability and workloads. Coverage,
-recovery/RF3/endurance/powerloss gates remain separately required and open.
-
-No security, production dependency, or data-format change is in scope. Rollback
-removes the diagnostic profile/helpers/tests/docs together and preserves original
-control receipts. PhaseB requires its own workload contract before code. Keep
-Accepted until required sources/tests/evidence and architectural assessment exist;
-there is no universal-winner or product storage change here.
+The raw lane can guide storage optimization while remaining separate from product
+performance claims. Full product comparison continues to require comparable
+native execution and public caller evidence. Rollback removes only the diagnostic
+profile and its implementation after preserving source and original evidence; it
+does not alter ZoneTree authority, WAL, Orleans request/partition ownership,
+production RF3 topology, public APIs or stored data. It cannot remove correctness,
+recovery, coverage or delivery gates.

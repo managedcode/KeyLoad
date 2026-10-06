@@ -36,6 +36,29 @@ internal static class OfflineRegularFile
         return OpenWithIdentity(path, expected, access, share, bufferSize);
     }
 
+    /// <summary>Opens a validated regular file for observation without taking or releasing its owner's flock.</summary>
+    /// <remarks>The caller must control writers; this read-only handle does not provide a coherent snapshot against concurrent writes.</remarks>
+    internal static FileStream OpenReadOnlyObservation(string path, int bufferSize)
+    {
+        ValidatePath(path);
+        if (bufferSize is <= NoBufferBytes or > MaximumBufferBytes)
+        { throw new ArgumentOutOfRangeException(nameof(bufferSize)); }
+
+        var expected = Inspect(path);
+        using var lease = OpenNative(path, FileAccess.Read);
+        try
+        {
+            VerifyDescriptor(lease.Handle, expected);
+            VerifyPath(path, expected);
+            return lease.TransferToReadOnlyStream(bufferSize);
+        }
+        catch (Exception error)
+        {
+            lease.RecordPrimary(error);
+            throw;
+        }
+    }
+
     internal static FileStream OpenWithIdentity(string path, OfflineFileIdentity expected,
         FileAccess access, FileShare share, int bufferSize)
     {

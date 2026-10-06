@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal sealed class OrleansWalCorruptionTests
 {
-    private const ulong UnknownMagic = 0x554E4B4E4F574EUL;
+    private const ulong UnsupportedMagic = 0x554E4B4E4F574EUL;
     private const byte ChangedByteMask = 0x40;
     private const byte MissingMutationKind = 0;
     private const byte UnknownMutationKind = byte.MaxValue;
@@ -43,8 +43,8 @@ internal sealed class OrleansWalCorruptionTests
     [Test]
     [Arguments(InvalidFrame.Checksum)]
     [Arguments(InvalidFrame.Sequence)]
-    [Arguments(InvalidFrame.UnknownMagic)]
-    public async Task AcWal003FrameEnvelopeCorruptionLeavesJournalAndIdentityUnchanged(InvalidFrame scenario)
+    [Arguments(InvalidFrame.UnsupportedSignature)]
+    public async Task AcWal003InvalidCurrentFrameOrUnsupportedSignatureLeavesFilesUnchanged(InvalidFrame scenario)
     {
         using var files = new WalFileFixture();
         files.Initialize();
@@ -53,7 +53,7 @@ internal sealed class OrleansWalCorruptionTests
         var journal = scenario switch
         {
             InvalidFrame.Sequence => WalFileFixture.CreateFrame(payload, sequence: 2),
-            InvalidFrame.UnknownMagic => WalFileFixture.CreateFrame(payload, magic: UnknownMagic),
+            InvalidFrame.UnsupportedSignature => WalFileFixture.CreateFrame(payload, magic: UnsupportedMagic),
             _ => WalFileFixture.CreateFrame(payload)
         };
         if (scenario == InvalidFrame.Checksum)
@@ -62,7 +62,8 @@ internal sealed class OrleansWalCorruptionTests
         }
 
         await File.WriteAllBytesAsync(files.JournalPath, journal);
-        await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), ErrorCode.Corruption);
+        var expected = scenario == InvalidFrame.UnsupportedSignature ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
+        await files.AssertRejectedUnchanged(journal, await File.ReadAllBytesAsync(files.IdentityPath), expected);
     }
 
     [Test]
@@ -152,6 +153,6 @@ internal sealed class OrleansWalCorruptionTests
     {
         Checksum,
         Sequence,
-        UnknownMagic
+        UnsupportedSignature
     }
 }

@@ -58,9 +58,9 @@ internal sealed class CurrentStoragePreservationTests
         var invalidBytes = snapshotBytes.ToArray();
         invalidBytes[^ChecksumOffsetFromEnd] ^= ChangedByte;
         await File.WriteAllBytesAsync(fixture.InvalidSnapshot, invalidBytes);
-        var sourceInventory = await CurrentStorageSnapshot.CaptureAsync(fixture.Source);
         using (var store = new ZoneTreeStore(fixture.SourceOptions, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
         {
+            var sourceInventory = await CurrentStorageSnapshot.CaptureAsync(fixture.Source);
             var position = store.Position;
             var identity = store.Identity;
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
@@ -76,8 +76,8 @@ internal sealed class CurrentStoragePreservationTests
             await Assert.That(store.Identity.Durability).IsEqualTo(identity.Durability);
             await Assert.That(store.Identity.DispatchPaused).IsEqualTo(identity.DispatchPaused);
             await Assert.That(store.Identity.ReadGeneration).IsEqualTo(identity.ReadGeneration);
+            await CurrentStorageSnapshot.AssertUnchangedAsync(fixture.Source, sourceInventory);
         }
-        await CurrentStorageSnapshot.AssertUnchangedAsync(fixture.Source, sourceInventory);
         await Assert.That((await File.ReadAllBytesAsync(fixture.Snapshot)).AsSpan().SequenceEqual(snapshotBytes)).IsTrue();
     }
 

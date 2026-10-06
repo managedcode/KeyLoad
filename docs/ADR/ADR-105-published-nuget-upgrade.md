@@ -30,7 +30,9 @@ The first upgraded restore exposed NU1608: the existing transitive
 Microsoft.CodeAnalysis.Workspaces.Common 5.0.0 requires Common exactly 5.0.0.
 Add its published 5.9.0 central peer pin alongside Common/CSharp 5.9.0. This
 aligns the existing dependency closure; it adds no new provider or compiler host
-and preserves all diagnostics. AC-NUGET-001 covers 45 final central entries.
+and preserves all diagnostics. The 2026-10-05 feed-audit snapshot covered 45
+central entries before later pins were added. It is not a current inventory
+count or a refreshed feed-availability claim.
 
 Updating only patches would leave requested published minor/major upgrades undone.
 Floating versions would undermine reproducibility. Local replacement packages,

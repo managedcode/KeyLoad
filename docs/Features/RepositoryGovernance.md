@@ -11,7 +11,7 @@ product API, frontend, schema and physical topology changes are N/A.
 
 | Requirement | Measurable acceptance and verification |
 |---|---|
-| REQ-NUGET-001: inspect every central dependency and Aspire SDK against the configured feed. | AC-NUGET-001: all 45 final central entries and the SDK have a recorded published latest stable version, or an explicit existing prerelease-only release; actual restore succeeds without downgrade or lock-file generation. Feed inventory/manual review is the explicit metadata-test exception. |
+| REQ-NUGET-001: inspect every central dependency and Aspire SDK against the configured feed. | AC-NUGET-001: every current central package entry in `Directory.Packages.props` and the Aspire SDK has a recorded published latest stable version, or an explicit existing prerelease-only release; actual restore succeeds without downgrade or lock-file generation. Feed inventory/manual review is the explicit metadata-test exception. |
 | REQ-NUGET-002: preserve native APIs and aligned dependency families while updating active version checks. | AC-NUGET-002: all 17 selected pins and active TimeSeries/Orleans capture checks agree; full Release build, formatter, governance and existing TimeSeries package/report regressions pass. No new behavior is selected, so existing meaningful regressions supply compatibility coverage. |
 | REQ-NUGET-003: keep qualification and unrelated work truthful and intact. | AC-NUGET-003: Aspire-owned analyzers, unit, scalar, recovery and RF3 SDK/MCP suites have their actual recorded outcome; failures or unavailable infrastructure keep qualification open; immutable historical receipts and concurrent changes remain intact. |
 
@@ -28,7 +28,7 @@ All requirements are mandatory. IDs remain stable when implementation changes.
 |---|---|---|---|
 | REQ-MCAF-001 | Governance / P0 | Merge root and local policy without deleting or weakening any existing rule. | AC-MCAF-001: original root prefix hash and complete diff are preserved. |
 | REQ-MCAF-002 | Workflow / P0 | Configure the four mandatory MCAF policies and real .NET commands. | AC-MCAF-002: all policy IDs and customized commands exist; no TODO placeholders. |
-| REQ-MCAF-003 | Ownership / P0 | Every project and delivery module has local policy with real entry points and boundaries. | AC-MCAF-003: all 22 current csproj roots plus site, workflows, docs and scripts pass inventory validation. |
+| REQ-MCAF-003 | Ownership / P0 | Every project and delivery module has local policy with real entry points and boundaries. | AC-MCAF-003: all 27 current csproj roots plus site, workflows, docs and scripts pass inventory validation. |
 | REQ-MCAF-004 | Architecture / P0 | Map the complete repository using canonical slices and explicit interfaces; record existing layout migration debt. | AC-MCAF-004: diagrams, slice map and dated ADR cover all surfaces. |
 | REQ-MCAF-005 | Orchestration / P0 | Plan before delegated writes, use capability/cost tiers, disjoint ownership and joined integrated proof. | AC-MCAF-005: task graph precedes writes and all required task results are reviewed. |
 | REQ-MCAF-006 | Constraint / P0 | Install no skills, including .NET skills, for this owner-requested bootstrap. | AC-MCAF-006: skill inventory is unchanged. |
@@ -94,7 +94,7 @@ Every REQ maps to its same-numbered AC above, ADR-032, tasks in the execution ta
 
 | Вимога | Критерій | Перевірка |
 |---|---|---|
-| REQ-DOCS-001: кожна канонічна функція має свій Feature | AC-DOCS-001: рівно 20 owning Feature-specs індексовані, включно з required BlobStorage | File/index inventory |
+| REQ-DOCS-001: кожна канонічна функція має свій Feature | AC-DOCS-001: рівно 25 canonical owning Feature-specs індексовані, включно з required BlobStorage | File/index inventory |
 | REQ-DOCS-002: повний контракт функції | AC-DOCS-002: actors, entry points, stable REQ/AC, flows, slice/N/A, source/target/planned, tests і Mermaid | Full-file review та REQ/AC mapping |
 | REQ-DOCS-003: змістовні ADR для всіх рішень | AC-DOCS-003: ADR-001–039 мають context/rationale/alternatives/consequences, implementation contracts та verification | ADR inventory і contract review |
 | REQ-DOCS-004: унікальна ідентичність ADR | AC-DOCS-004: comparisons034, foundation036; filename/header і всі залежні links узгоджені | Number/reference inventory |
@@ -128,7 +128,7 @@ no database, workload, native topology or unrelated website design changes apply
 ## Three-pipeline integration, 2026-10-03
 
 The owner's latest explicit correction supersedes the five-workflow placement above.
-[ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md) and
+[ADR-064](../ADR/ADR-064-workflow-release-delivery.md) and
 [ReleaseDelivery](ReleaseDelivery.md) define REQ/AC-PIPE-001..004 and REL-001..003:
 CI combines ordinary build/test/rule gates; Benchmarks runs every load/comparison
 suite and qualifies/publishes the same run's metrics; Release builds real database

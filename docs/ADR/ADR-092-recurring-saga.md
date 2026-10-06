@@ -48,5 +48,5 @@ sequenceDiagram
   Request->>Host: Logged time and current persisted authority
   Host->>Host: CAS canonical schedule or Waiting saga
   Host->>Host: Enqueue and watermark/state in one commit
-  Host-->>Timer: Durable outcome; retry same ID on uncertainty
+  Host-->>Timer: Durable outcome, retry same ID on uncertainty
 ```

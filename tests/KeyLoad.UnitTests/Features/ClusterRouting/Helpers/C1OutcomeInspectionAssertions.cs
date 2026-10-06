@@ -12,12 +12,13 @@ internal static class C1OutcomeInspectionAssertions
 
     internal static async Task<C1OutcomeInspectionProcessResult> RunAsync(
         C1OutcomeInspectionFixture fixture, Guid? nodeId = null, Guid? incarnation = null,
-        string? principalId = null, Guid? commandId = null, CancellationToken cancellationToken = default)
+        string? principalId = null, Guid? commandId = null, PartitionRef? partition = null,
+        CancellationToken cancellationToken = default)
     {
         fixture.CloseStore();
         var request = new C1OutcomeInspectionRequest(C1OutcomeInspectionProtocol.Version,
             fixture.DirectoryPath, nodeId ?? fixture.Identity.NodeId, incarnation ?? fixture.Identity.Incarnation,
-            principalId ?? AdminId, commandId ?? fixture.CommandId);
+            principalId ?? AdminId, commandId ?? fixture.CommandId, partition ?? fixture.Partition);
         var input = C1OutcomeInspectionProtocol.SerializeRequest(request);
         var result = await C1OutcomeInspectionProcess.RunAsync(input, fixture.OuterOwnerLockPath, cancellationToken);
         C1OutcomeInspectionOwnerPhase.ObserveChild(fixture, result);
@@ -48,9 +49,9 @@ internal static class C1OutcomeInspectionAssertions
     }
 
     internal static async Task AssertOutcomeAsync(C1OutcomeInspectionFixture fixture, bool expected,
-        string? principalId = null, Guid? commandId = null)
+        string? principalId = null, Guid? commandId = null, PartitionRef? partition = null)
     {
-        var result = await AssertJoinedAsync(await RunAsync(fixture, principalId: principalId, commandId: commandId));
+        var result = await AssertJoinedAsync(await RunAsync(fixture, principalId: principalId, commandId: commandId, partition: partition));
         await AssertReceiptAsync(fixture, expected, result);
     }
 
@@ -78,7 +79,8 @@ internal static class C1OutcomeInspectionAssertions
 
     internal static byte[] ValidInput(C1OutcomeInspectionFixture fixture)
         => C1OutcomeInspectionProtocol.SerializeRequest(new(C1OutcomeInspectionProtocol.Version,
-            fixture.DirectoryPath, fixture.Identity.NodeId, fixture.Identity.Incarnation, AdminId, fixture.CommandId));
+            fixture.DirectoryPath, fixture.Identity.NodeId, fixture.Identity.Incarnation, AdminId, fixture.CommandId,
+            fixture.Partition));
 
     internal static async Task AssertOuterOwnerReleasedAsync(C1OutcomeInspectionFixture fixture)
     {

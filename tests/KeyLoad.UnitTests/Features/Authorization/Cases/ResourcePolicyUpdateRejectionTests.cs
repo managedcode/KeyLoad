@@ -105,7 +105,7 @@ internal sealed class ResourcePolicyUpdateRejectionTests
     }
 
     [Test]
-    public async Task AcRpol002RejectsMalformedPolicyPointerAndLegacyPolicyOverwriteWithoutPartialState()
+    public async Task AcRpol002RejectsMalformedPolicyPointerAndChangedDefinitionWithoutCasWithoutPartialState()
     {
         using var fixture = new ResourcePolicyUpdateFixture();
         var previous = fixture.Resource();
@@ -114,13 +114,14 @@ internal sealed class ResourcePolicyUpdateRejectionTests
             FieldPolicies = [new("/secret~2name", NewClassification)],
             SchemaVersion = previous.SchemaVersion + 1
         }, previous.SchemaVersion));
-        var legacy = fixture.Apply(fixture.ConfigureResource(previous with
+        var changedWithoutCas = fixture.Apply(fixture.ConfigureResource(previous with
         { FieldPolicies = [new(ResourcePolicyUpdateFixture.SecretField, NewClassification)] }));
         var resourceBytes = fixture.ResourceBytes()!;
         var documentBytes = fixture.DocumentBytes()!;
 
         await Assert.That(ResourcePolicyUpdateFixture.Failure(malformed).Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(ResourcePolicyUpdateFixture.Failure(legacy).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(ResourcePolicyUpdateFixture.Failure(changedWithoutCas).Code)
+            .IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(fixture.ResourceBytes()!.SequenceEqual(resourceBytes)).IsTrue();
         await Assert.That(fixture.DocumentBytes()!.SequenceEqual(documentBytes)).IsTrue();
     }

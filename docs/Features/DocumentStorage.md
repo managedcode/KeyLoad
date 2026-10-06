@@ -63,10 +63,10 @@ The current root-level files are documented migration debt under ADR-032, not th
 | REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; actual `DocumentScalarIndexMutationTests` covers persisted old/new index transitions and rollback. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; actual field/row/tenant matrix plus isolated replacement-write and Delete-index-use controls. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
-| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Native placement admission adds exactly three bounded metadata point reads to the prior six, reused by the Batch receipt and every outbox effect under REQ/AC-MTOKEN-007. AC-DSTORE-009 adds one bounded retained-legacy outcome authority point read alongside the scoped outcome lookup, for exactly ten borrowed points; paired-size payload work remains unchanged. | TASK-MP-007I in ADR-035 and ADR-017; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
+| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Native placement admission adds exactly three bounded metadata point reads to the six current mutation/outcome reads, reused by the Batch receipt and every outbox effect under REQ/AC-MTOKEN-007. The current atomic roster performs one additional existing-entry validation per distinct candidate partition before publishing or validating its first-write row; the single-partition mutation oracle is therefore six mutation/outcome plus three placement plus one roster lookup (ten), with unchanged paired-size payload work. Actual native counters must verify the current per-operation total and paired-size payload work; an obsolete outcome lookup must not be retained to satisfy an old counter. | TASK-MP-007I in ADR-035 and ADR-017; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
 | REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. This remains planned until original Aspire/native reports exist. |
 | REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | TASK-DSTORE-OUTCOME-MATRIX under ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
-| REQ-DSTORE-009: persist command identity in its full resolved scope | AC-DSTORE-009 passes when the scoped-key, retained-error, corruption, prior-frame, restart and public RF3 flows below all pass without outcome rewrites, guessed partition identity or ambiguous principal/ID lookup. | TASK-DSTORE-SCOPED-OUTCOMES-001..004; ADR-002, ADR-011 and ADR-017; real ZoneTree unit/scalar, existing CrashHost recovery and SDK/official MCP Aspire RF3 cases. Contract accepted before implementation; no complete gate is claimed. |
+| REQ-DSTORE-009: persist command identity in its full resolved scope | AC-DSTORE-009 passes when the current scoped-key, retained-error, corruption, restart and public RF3 flows below all pass without outcome rewrites, guessed partition identity or ambiguous principal/ID lookup. | TASK-DSTORE-SCOPED-OUTCOMES-001..004; ADR-002, ADR-011 and ADR-017; real ZoneTree unit/scalar, existing CrashHost recovery and SDK/official MCP Aspire RF3 cases. Contract accepted before implementation; no complete gate is claimed. |
 
 The current command-outcome retention contract has no automatic TTL/purge path.
 Retries are supported while the original outcome remains in the canonical store
@@ -84,16 +84,9 @@ on error/replay and must not be mistaken for a new domain effect. No production
 key, fingerprint, serializer, public outcome API, expiry or permission changes
 are authorized by this test stage.
 
-The2026-10-05 source audit separately found that current outcome keys bind only
-PrincipalId and CommandId, while the canonical fingerprint binds the batch's
-partition. The original unscoped-key baseline conflicted when an ID was reused
-for another partition. The accepted scoped-key source repair below replaces that
-path; current-source build, recovery and SDK/MCP RF3 qualification remain pending.
-The historical partial matrix does not close independent partition isolation.
+## Current scoped outcome contract
 
-## Accepted scoped outcome repair, 2026-10-05
-
-REQ/AC-DSTORE-009 repairs that gap under the exact accepted matrix in
+REQ/AC-DSTORE-009 requires the exact accepted matrix in
 [ADR-011](../ADR/ADR-011-current-native-format.md). Durable identity is verified
 principal, explicit Global/Partition scope, the complete resolved `PartitionRef`
 for Partition, and CommandId. The canonical fingerprint, native StoredOutcome
@@ -113,20 +106,19 @@ reopen the store and resolve/read both original commands. Expected keys use the
 existing independent test oracle, not the production scope/key resolver. A
 dedicated worker owns only new ClusterRouting test cases/helpers; root owns live
 integration and the ordinary/scalar/recovery/RF3 gates. Acceptance maps to
-AC-DSTORE-009 and ADR-002/011; these authored cases do not replace genuine
-prior-format migration evidence or caller-visible RF3 proof.
+AC-DSTORE-009 and ADR-002/011; these authored cases do not replace caller-visible
+RF3 proof.
 
-New partition keys are `KeySpace.Partition("outcome-v2", partition, principal, id)`;
+Current partition keys are `KeySpace.Partition("outcome-v2", partition, principal, id)`;
 global keys are `KeyCodec.Encode("outcome-v2", "global", principal, id)`.
-New Unknown-scope persisted errors use the distinct nonmovable key
+Current Unknown-scope persisted errors use the distinct nonmovable key
 `KeyCodec.Encode("outcome-v2", "unknown", principal, id)`; Unknown is explicit
 missing scope, never an inferred partition or trusted global role.
 `outcome-locator-v2` contains the complete partition/principal/id and the exact
 matching v2 outcome key. Success and persisted domain failure write outcome,
 locator where applicable, domain effects, apply watermark and clock in the same
-existing transaction. New Unknown writes have no locator. Retained prior Unknown
-rows remain untouched at the internal exact legacy key and act as ambiguity
-barriers. No new write uses the legacy key and no guessed partition is created.
+existing transaction. Unknown writes have no locator. No partition is guessed
+and no alternate persisted representation is admitted.
 
 Operation-aware `ResolveOutcome(originalOperation)` is the sole retained-result
 lookup. Remove ambiguous public `DatabaseEngine.Outcome(principal,id)` and
@@ -134,28 +126,19 @@ lookup. Remove ambiguous public `DatabaseEngine.Outcome(principal,id)` and
 internal raw-format oracle. SDK/HTTP/MCP lookup-schema changes are N/A because
 none exposes the removed Core accessor. UI is N/A for this database contract.
 
-Within one existing view, validate the selected v2 row and the retained legacy
-row, including each row's native metadata and applicable locator, before deciding
-replay or new write. Known legacy scope matching the requested scope retains its
-original replay/conflict behavior; a valid different known scope does not collide.
-Unknown legacy scope is an ambiguity barrier: matching content retains its old
-behavior; different content conflicts and no v2 shadow is written. Duplicate
-same-scope legacy/v2 rows, contradictory scope, malformed frames or missing,
-wrong or extra locators fail Corruption without repair or winner selection.
-New Unknown identities are distinct from new Global/Partition identities; a
-malformed request cannot install a later legacy barrier over a committed scoped
-result. Point lookup remains bounded, without a cross-partition reservation,
-presence scan or new global first-writer gate.
-Retained v1 bytes are a supported persisted format, not an alternate dispatcher,
-unscoped public alias or temporary dual writer. No existing outcome is rekeyed.
+Within one committed view, select only the current key for the operation's full
+scope. Validate its native metadata and exact scoped locator before replay or a
+new write. An orphan locator, contradictory scope, malformed record or missing
+or wrong locator fails Corruption without repair or winner selection. Unknown,
+Global and Partition identities remain independent. Lookup is bounded; no
+cross-partition presence scan, reservation or inferred global identity is allowed.
 
 AC-DSTORE-009 requires complete actual-operation scenarios:
 
 1. The same principal and literal ID commits independently in two configured full partitions, with exact documents, receipts and outbox effects. Both exact retries retain their own results after fresh engine/store reopen; changed content in either scope conflicts and preserves both scopes. Include tenant/database/domain/key distinctions and explicit Global versus Partition reuse.
-2. A real precondition failure in A remains the same retained error after a fresh command makes that precondition satisfiable; reuse in B remains independent. Retry produces no new effects. Actual authorized resolution and revoked/denied controls preserve existing reauthorization. A real newly persisted Unknown failure before and after valid A/B commands with the same ID cannot shadow either scoped result; its own exact retry/error and changed-content conflict remain independent. Existing prior Unknown remains an ambiguity barrier.
-3. Real native transactions prove outcome/locator/effects/watermark/clock atomicity. Missing/wrong/extra locators, contradictory metadata, malformed frames and duplicate same-scope legacy/v2 records reject without fallback, rewriting or partial domain effects; a healthy unrelated command remains usable where its authority is intact.
-4. The existing immutable native6 producer supplies the genuine prior ConfigureResource outcome. Preserve its exact old key/value bytes, Unknown defaults and source/driver/binary receipts; current operation-aware resolution preserves matching behavior and mismatching content cannot create a v2 shadow. No fabricated prior partition frame or backfill is accepted.
-5. Existing Aspire-owned real process cuts and two-process retry scenarios prove new-key recovery and old-byte preservation. Aspire RF3 tests use both actual SDK and official MCP clients for same-ID/two-partition commits, opposite-endpoint retries and an owned restart/leader path. Local proof remains distinct from delivered-source Linux qualification.
+2. A real precondition failure in A remains the same retained error after a fresh command makes that precondition satisfiable; reuse in B remains independent. Retry produces no new effects. Actual authorized resolution and revoked/denied controls preserve reauthorization. A current persisted Unknown failure before and after valid A/B commands with the same ID cannot shadow either scoped result; its exact retry/error and changed-content conflict remain independent.
+3. Real native transactions prove outcome/locator/effects/watermark/clock atomicity. Missing or wrong locators, orphan locators, contradictory metadata and malformed records reject without rewriting or partial domain effects; a healthy unrelated command remains usable where its authority is intact. Current Global operations have no partition locator and cannot substitute for a missing Partition result.
+4. Aspire-owned real process cuts and two-process retry scenarios prove current-key recovery and exact current native state preservation. Aspire RF3 tests use both actual SDK and official MCP clients for same-ID/two-partition commits, opposite-endpoint retries and an owned restart/leader path. Local proof remains distinct from delivered-source Linux qualification.
 
 Ordered ownership: TASK-DSTORE-SCOPED-OUTCOMES-001 freezes this feature and the
 ADR-002/011/017 and TokenOwnershipLineage joins (root); 002 owns scoped keys,
@@ -164,12 +147,10 @@ packet); 003 updates all actual accessor callers and adds UnitTests,
 RecoveryTests/CrashHost and IntegrationTests operation flows in their canonical
 slices (same worker); 004 joins/reviews, runs build/format/governance and complete
 Aspire normal/scalar/recovery/RF3 plus exact-SHA Linux gates (root).
-Cold rollout stops every writer, verifies a complete immutable backup and installs
-homogeneous compatible RF3 binaries before admission. After the first v2 write,
-old-reader rollback requires the verified pre-upgrade backup and explicit accepted
-data-loss scope; otherwise recover forward. Outcome expiry and physical movement
-remain separate unimplemented contracts. No old binary is claimed to honor a
-new marker it does not read.
+Current deployment uses homogeneous RF3 binaries with the exact current native
+contract before admission. Recovery and restore validate the current format and
+preserve its state. Outcome expiry and cross-group token translation remain
+separate unimplemented contracts.
 
 ### Authorization and retained-error ordering
 
@@ -181,16 +162,14 @@ when the retained bytes are corrupt; after valid authorization the same corrupt
 row fails Corruption. The already-applied replica path retains its existing
 authority and replay order rather than introducing a new caller authorization step.
 
-If normal admission fails before outcome selection, retain that original error,
-reset staged domain effects, and use only a bounded legacy-key presence check.
-An occupied legacy key suppresses a new v2 outcome write; it is not decoded,
-repaired, shadowed or used to replace the original error. Preserve the existing
-apply-watermark and monotonic-clock transaction behavior. An existing v2 row also
-cannot be overwritten by this failure. Actual rejected-operation tests verify
-both original bytes and the absence of a second outcome/locator or domain effect.
-When neither legacy nor selected v2 identity exists, preserve the original
-retention of a newly persisted denied/domain-error outcome. Suppression for an
-occupied identity must not become a blanket prohibition on retained errors.
+If normal admission fails before outcome selection, retain that original error
+and reset staged domain effects. Current bounded presence checks prevent a
+previous outcome at the selected key from being overwritten; they do not decode
+it before authorization or disclose its fingerprint. Preserve the existing
+apply-watermark and monotonic-clock transaction behavior. Actual rejected-operation
+tests verify original bytes and the absence of a second outcome/locator or domain
+effect. An unoccupied selected identity may retain the current denied/domain-error
+outcome; occupied-identity protection must not prohibit all retained errors.
 
 Unknown-scope retry/conflict tests must use an actual operation whose persisted
 authorization succeeds before its malformed payload fails execution. An error
@@ -200,17 +179,16 @@ identity; no caller-supplied role or metadata-before-authorization shortcut is
 permitted. These flows extend AC-DSTORE-009 and its existing native unit/scalar,
 recovery and RF3 evidence, without qualifying an unexecuted gate.
 
-The scoped implementation, caller migration and authored operation flows were
-joined in the 2026-10-06 source checkpoint (report removed from repository).
-It captures the current source and root corrections during the shared options
-migration. Current build, formatter, unit/scalar, process recovery, RF3 and
+The scoped implementation, current callers and authored operation flows were
+joined in the historical report (removed from repository).
+It captures that historical source and root corrections to shared options. Current build, formatter, unit/scalar, process recovery, RF3 and
 functional coverage are pending; AC-DSTORE-006/009 remain open.
 
 The accepted [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md)
 assigns CRUD handlers and new matching tests to one worker, and shared
 AtomicMutationApplication caller integration to the lead. Internal context/result
 carriers stay under Features/DocumentStorage and within one atomic transaction.
-UI/SDK/MCP schema migration is N/A: public contracts and persisted bytes stay exact.
+UI/SDK/MCP schema changes are N/A: public contracts and current persisted bytes stay exact.
 
 The2026-10-04 regression-completion stage maps AC-DSTORE-001 to
 DocumentCrudRevisionTests and DocumentPutValidationAtomicityTests, AC-DSTORE-002

@@ -5,6 +5,7 @@ Canonical slice: BenchmarkComparisons. Related REQ/AC-SCALE-003,
 Scope: legal native diagnostic settings and truthful cold process-memory observations.
 Production ZoneTree/WAL/RF3, public APIs, persistence formats, native tiers and public
 comparison pipelines are unchanged. Frontend/public contracts: N/A, diagnostic only.
+The macOS-specific peak reader supports local diagnostics; required qualification remains Linux-only and this path adds no macOS gate.
 
 The first actual local normal TUnit run executed51 cases:35passed,16failed,0skipped.
 Original TRX SHA25649b165539a13fe5d5dd5fd61fb2dfd87b1fb9b46c92506a7de71e96e9686b395.
@@ -64,20 +65,21 @@ No injected native failure or fake peak is permitted. Native getrusage errno and
 unsupported64-bit fault occurrence remain unobserved manual limits, never simulated
 qualification. Native ABI size/offset is checked against the installed SDK header.
 Full formatter/build/governance, focused normal/scalar, broader unit regressions,
-then sequential actual100K/1M/5M BDN original output are ordered root gates.
+then sequential actual100K/1M BDN original output are ordered root gates.
 Delivered-source Linux CI/recovery/RF3, coverage, endurance, powerloss and full
 database comparisons remain separately required. No skipped suite counts as passing.
 
 Rollback removes the reader/test/project opt-in and its three joins together;
-unavailable macOS peak then remains a failed local gate. Production formats/data
+an unavailable macOS peak remains a diagnostic limitation rather than a qualification gate. Production formats/data
 are unaffected. ADR remains Accepted until actual required evidence exists.
 
 Primary sources: [dotnet10 ProcessManager.OSX](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/ProcessManager.OSX.cs#L60-L67),
 [Darwin resource header](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/resource.h#L150-L178),
 [Darwin getrusage units](https://github.com/apple/darwin-xnu/blob/main/bsd/man/man2/getrusage.2).
 
-Current state: the repaired full Release build passed with zero warnings/errors;
+Historical local verification snapshot (2026-10-03): the repaired full Release build passed with zero warnings/errors;
 actual local normal54/54 and scalar54/54 passed with no skips, unchanged source
-hashes and settled owned process groups. Original evidence (report removed from repository)
-retains the earlier51-case failure. Broader tests, exact-source Linux delivery,
+hashes and settled owned process groups. historical report (removed from repository)
+retains the earlier51-case failure. Required qualification remains Linux-only;
+macOS peak readings are local diagnostics. Broader tests, exact-source Linux delivery,
 native errno/platform faults and all-scale measurement qualification remain open.

@@ -5,11 +5,12 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal static class C1OutcomeInspectionProtocol
 {
     internal const string Mode = "c1-outcome-inspect";
-    internal const int Version = 1;
+    internal const int Version = 2;
     internal const int MaximumRequestBytes = 8_192;
     internal const int MaximumReceiptBytes = 4_096;
     internal const int MaximumJsonDepth = 4;
     internal const int MaximumPrincipalBytes = 256;
+    internal const int MaximumPartitionComponentBytes = 256;
     internal const int FailureExitCode = 2;
     internal const string InvalidRequest = "The C1 outcome inspection request is invalid.";
     internal const string InvalidReceipt = "The C1 outcome inspection receipt is invalid.";
@@ -27,7 +28,8 @@ internal sealed record C1OutcomeInspectionRequest(
     [property: JsonRequired] Guid ExpectedNodeId,
     [property: JsonRequired] Guid Incarnation,
     [property: JsonRequired] string PrincipalId,
-    [property: JsonRequired] Guid CommandId)
+    [property: JsonRequired] Guid CommandId,
+    [property: JsonRequired] PartitionRef Partition)
 {
     public override string ToString() => nameof(C1OutcomeInspectionRequest);
 }

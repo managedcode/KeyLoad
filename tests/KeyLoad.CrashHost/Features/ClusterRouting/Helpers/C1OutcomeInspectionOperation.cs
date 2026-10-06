@@ -1,6 +1,4 @@
-using KeyLoad.Core;
 using KeyLoad.Server;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.CrashHost.Features.ClusterRouting;
@@ -27,8 +25,8 @@ internal static class C1OutcomeInspectionOperation
             incarnation = store.Identity.Incarnation;
             formatVersion = store.Identity.FormatVersion;
             position = store.Position;
-            outcomePresent = store.Read(view => view.GetRecord<StoredOutcome>(
-                KeySpace.GlobalOutcome(request.PrincipalId, request.CommandId))) is not null;
+            outcomePresent = store.Read(view => C1OutcomeInspectionScopedOutcome.Exists(view, request.Partition,
+                request.PrincipalId, request.CommandId));
         }, failures);
         ServerFailureObserver.Observe(() => store?.Dispose(), failures);
         ServerFailureObserver.ThrowIfAny(failures);

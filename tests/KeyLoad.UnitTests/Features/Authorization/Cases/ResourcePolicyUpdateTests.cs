@@ -45,7 +45,7 @@ internal sealed class ResourcePolicyUpdateTests
     }
 
     [Test]
-    public async Task AcRpol002LegacyIdenticalDefinitionIsAllowedButChangedDefinitionRequiresCas()
+    public async Task AcRpol002IdenticalDefinitionIsAllowedButChangedDefinitionRequiresCas()
     {
         using var fixture = new ResourcePolicyUpdateFixture();
         var previous = fixture.Resource();

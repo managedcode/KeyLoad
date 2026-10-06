@@ -5,6 +5,7 @@ using KeyLoad.Replication;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using KeyLoad.UnitTests.Features.StorageRecovery;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests;
@@ -12,7 +13,8 @@ namespace KeyLoad.UnitTests;
 /// <summary>AC-IS-004/005: genuine native replica metadata obeys budgets, replay and version fences.</summary>
 internal sealed class ReplicaNativePersistenceTests
 {
-    private const int LegacyVersion = 1;
+    private const int UnsupportedFutureVersion = int.MaxValue;
+    private const int HealthyElectionTerm = 1;
     private const string Principal = "principal";
     private const string Payload = " { \"text\" : \"Україна 🙂\", \"n\" : 1.00 } ";
     private const string CanonicalDirectory = "canonical";
@@ -25,18 +27,8 @@ internal sealed class ReplicaNativePersistenceTests
     public async Task NativeHardStateSchemaRejectionPreservesExactStoreAndJournal(ReplicaMalformedVoteShape shape)
     {
         using var files = new ReplicaNativeFiles();
-        using var store = files.Open();
         var state = new ReplicaHardState(ReplicaProtocol.FormatVersion, files.Configuration.Incarnation, 0, null, 0, 0, null);
-        var bytes = ReplicaNativeFixtureWriter.State(shape, state);
-        var key = KeyCodec.Encode(ReplicaProtocol.StateKey);
-        store.Commit((tx, _) => { tx.Put(key, bytes); return true; });
-        var journal = await File.ReadAllBytesAsync(files.JournalPath);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-        {
-            using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
-        }).Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journal, CollectionOrdering.Matching);
+        await AssertCurrentHardStateRejectionRecovers(files, ReplicaNativeFixtureWriter.State(shape, state), ErrorCode.Corruption);
     }
 
     [Test]
@@ -106,23 +98,46 @@ internal sealed class ReplicaNativePersistenceTests
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task LegacyEncodingOrNativeOldStateVersionPreservesOriginalStore(bool nativeEncoding)
+    public async Task UnknownNativeHardStateVersionPreservesOriginalStore()
     {
         using var files = new ReplicaNativeFiles();
-        using var store = files.Open();
-        var legacy = new ReplicaHardState(LegacyVersion, files.Configuration.Incarnation, 0, null, 0, 0, null);
-        var bytes = nativeEncoding ? ReplicaProtocolCodec.Serialize(legacy) : JsonDefaults.Serialize(legacy);
-        var key = KeyCodec.Encode(ReplicaProtocol.StateKey);
-        store.Commit((tx, _) => { tx.Put(key, bytes); return true; });
-        var journal = await File.ReadAllBytesAsync(files.JournalPath);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+        var unsupported = new ReplicaHardState(UnsupportedFutureVersion, files.Configuration.Incarnation, 0, null, 0, 0, null);
+        await AssertCurrentHardStateRejectionRecovers(files, ReplicaProtocolCodec.Serialize(unsupported), ErrorCode.FormatUnsupported);
+    }
+
+    private static async Task AssertCurrentHardStateRejectionRecovers(ReplicaNativeFiles files, byte[] invalidState,
+        ErrorCode expectedError)
+    {
+        var stateKey = ReplicaProtocol.StateStorageKey;
+        var membershipKey = ReplicaBenchmarkMembership.StorageKey;
+        byte[] originalState;
+        byte[] originalMembership;
+        Dictionary<string, byte[]?> rejectionImage;
+        using (var store = files.Open())
         {
-            using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
-        }).Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(store.Read(view => view.ReadOwnedValue(key))).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journal, CollectionOrdering.Matching);
+            using (var initialized = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration))) { }
+            var identity = store.Identity;
+            originalState = store.Read(view => view.ReadOwnedValue(stateKey))!;
+            originalMembership = store.Read(view => view.ReadOwnedValue(membershipKey))!;
+            store.Commit((transaction, _) => { transaction.Put(stateKey, invalidState); return true; });
+            rejectionImage = await CurrentStorageSnapshot.CaptureAsync(files.Configuration.Directory);
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+            {
+                using var rejected = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
+            }).Code).IsEqualTo(expectedError);
+            await Assert.That(store.Identity).IsEqualTo(identity);
+            await Assert.That(store.Read(view => view.ReadOwnedValue(stateKey))).IsEquivalentTo(invalidState, CollectionOrdering.Matching);
+            await Assert.That(store.Read(view => view.ReadOwnedValue(membershipKey))).IsEquivalentTo(originalMembership, CollectionOrdering.Matching);
+            await CurrentStorageSnapshot.AssertUnchangedAsync(files.Configuration.Directory, rejectionImage);
+            store.Commit((transaction, _) => { transaction.Put(stateKey, originalState); return true; });
+            using var healthy = new DurableReplicaLog(store, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
+            healthy.SaveTermAndVote(HealthyElectionTerm, files.Configuration.LocalId);
+        }
+        using var reopened = files.Open();
+        using var recovered = new DurableReplicaLog(reopened, UnitExecutionOptions.ReplicaConfiguration(files.Configuration));
+        await Assert.That(recovered.State).IsEqualTo(new ReplicaHardState(ReplicaProtocol.FormatVersion,
+            files.Configuration.Incarnation, HealthyElectionTerm, files.Configuration.LocalId, 0, 0, null));
+        await Assert.That(reopened.Read(view => view.ReadOwnedValue(membershipKey))).IsEquivalentTo(originalMembership, CollectionOrdering.Matching);
     }
 
     [Test]

@@ -19,8 +19,8 @@ public static class ReplicaProtocol
     public const ulong PayloadMagic = 0x0032504C52444C4B;
     /// <summary>Number of fixed bytes before every native replica value.</summary>
     public const int PayloadPrefixBytes = sizeof(ulong);
-    /// <summary>Safe upgrade detail for legacy or unknown replica encodings.</summary>
-    public const string UnsupportedFormat = "The replica format is unsupported. Stop the cluster, preserve the original files and use the documented offline upgrade before starting matching-version voters.";
+    /// <summary>Safe rejection detail for unsupported replica encodings.</summary>
+    public const string UnsupportedFormat = "The replica format is unsupported and the current cluster cannot open it.";
     /// <summary>Absolute maximum acknowledged snapshot chunk size.</summary>
     public const int MaximumChunkBytes = 1_048_576;
     /// <summary>Safe rejection detail for invalid fixed voter topology.</summary>

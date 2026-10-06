@@ -102,14 +102,14 @@ flowchart LR
 | [ADR-059: separate native intensive TimeSeries family](ADR-059-isolated-intensive-timeseries.md) | Accepted |
 | [ADR-060: generated native internal serialization](ADR-060-native-internal-serialization.md) | Accepted |
 | [ADR-061: bounded node-owned replica term metadata](ADR-061-bounded-replica-term-metadata.md) | Accepted |
-| [ADR-062: CI, Tests, Benchmarks, Release and Website](ADR-062-workflow-separation.md) | Superseded |
+| [ADR-062: Workflow responsibility and qualification boundaries](ADR-062-workflow-separation.md) | Accepted |
 | [ADR-063: bounded callback-free database phase profiling](ADR-063-bounded-database-phase-profiling.md) | Accepted |
 | [ADR-064: Four workflows and source-bound release delivery](ADR-064-workflow-release-delivery.md) | Accepted |
 | [ADR-065: Full SQL syntax and client protocol](ADR-065-full-sql-client-compatibility.md) | Accepted |
 | [ADR-067: One composable database for AI agents](ADR-067-composable-agent-database.md) | Accepted |
 | [ADR-068: Native benchmark gate repair](ADR-068-native-benchmark-gate-repair.md) | Accepted |
 | [ADR-069: Representative scaled workload qualification](ADR-069-representative-scaled-workloads.md) | Accepted |
-| [ADR-071: Canonical ZoneTree providers and immediate candidate cleanup](ADR-071-canonical-zonetree-providers.md) | Accepted |
+| [ADR-071: Canonical ZoneTree storage and full-text providers](ADR-071-canonical-zonetree-providers.md) | Accepted |
 | [ADR-072: Authorized SQL event and queue read views](ADR-072-authorized-sql-model-views.md) | Accepted |
 | [ADR-073: Logged bounded time-series retention](ADR-073-logged-series-retention.md) | Accepted |
 | [ADR-074: One Aspire-owned test entry point](ADR-074-aspire-owned-test-entry.md) | Accepted |
@@ -147,7 +147,7 @@ flowchart LR
 | [ADR-109: Native vector qualification and additional comparison databases](ADR-109-native-vector-comparisons.md) | Accepted |
 | [ADR-110: native Orleans execution and scheduling primitives](ADR-110-native-orleans-execution-primitives.md) | Accepted |
 | [ADR-111: Semantic rules for magic runtime values](ADR-111-magic-runtime-values.md) | Accepted |
-| [ADR-112: Independent website publication with optional benchmarks](ADR-112-independent-website-publication.md) | Accepted |
+| [ADR-112: Independent Website publication with optional benchmarks](ADR-112-independent-website-publication.md) | Accepted |
 | [ADR-113: General runtime literals and centralized typed options](ADR-113-centralized-runtime-options.md) | Accepted |
 | [ADR-114: verified backup artifact publication](ADR-114-verified-artifact-publication.md) | Accepted |
 | [ADR-115: TimeProvider ownership](ADR-115-time-provider.md) | Accepted |

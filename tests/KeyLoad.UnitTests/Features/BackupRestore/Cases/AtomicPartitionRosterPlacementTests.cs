@@ -26,10 +26,12 @@ internal sealed class AtomicPartitionRosterPlacementTests
         var destinationVertex = new EntityRef(AtomicPartitionRosterFixture.Destination, AtomicPartitionRosterFixture.Collection, VertexId);
         var sourceSeed = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new PutDocument(AtomicPartitionRosterFixture.Collection, VertexId, DocumentJson));
-        fixture.SeedLegacyDocument(AtomicPartitionRosterFixture.Destination,
-            AtomicPartitionRosterFixture.Collection, VertexId);
+        var destinationSeed = fixture.Batch(AtomicPartitionRosterFixture.Destination,
+            new PutDocument(AtomicPartitionRosterFixture.Collection, VertexId, DocumentJson));
         await Assert.That(sourceSeed.Error).IsNull();
-        await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsNull();
+        await Assert.That(destinationSeed.Error).IsNull();
+        var targetEntry = fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)!;
+        await Assert.That(targetEntry).IsNotNull();
         var edge = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new UpsertEdge(AtomicPartitionRosterFixture.Graph, EdgeId, sourceVertex, destinationVertex, EdgeLabel));
         await Assert.That(edge.Error).IsNull();
@@ -37,7 +39,7 @@ internal sealed class AtomicPartitionRosterPlacementTests
             new ApplyCrossPartitionReverseEdge(AtomicPartitionRosterFixture.Source,
                 AtomicPartitionRosterFixture.Graph, EdgeId, destinationVertex, FirstRevision));
         await Assert.That(delivered.Error).IsNull();
-        var targetEntry = fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)!;
+        await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
         var receiver = fixture.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverStateV1>(
             GraphCrossPartitionKeys.Reverse(AtomicPartitionRosterFixture.Destination,
                 AtomicPartitionRosterFixture.Graph, destinationVertex, AtomicPartitionRosterFixture.Source, EdgeId)));
@@ -46,6 +48,7 @@ internal sealed class AtomicPartitionRosterPlacementTests
             new CompleteCrossPartitionReverseEdge(AtomicPartitionRosterFixture.Source,
                 AtomicPartitionRosterFixture.Graph, EdgeId, destinationVertex, FirstRevision));
         await Assert.That(completed.Error).IsNull();
+        await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
 
         var placementPartition = new PartitionRef(AtomicPartitionRosterFixture.Source.TenantId,
             AtomicPartitionRosterFixture.Source.DatabaseId, AtomicPartitionRosterFixture.Source.TransactionDomainId,
@@ -64,6 +67,10 @@ internal sealed class AtomicPartitionRosterPlacementTests
         await Assert.That(delete.Error).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsEqualTo(sourceEntry);
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
+        await Assert.That(fixture.ReadEntry(placementPartition)).IsEqualTo(placementEntry);
+        fixture.Reopen();
+        await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
+        await Assert.That(fixture.ReadEntry(placementPartition)).IsEqualTo(placementEntry);
     }
 
 }

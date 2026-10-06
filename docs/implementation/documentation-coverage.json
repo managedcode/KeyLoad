@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "documentation_only",
-  "status": "documentation_complete_locally_runtime_unqualified",
+  "status": "current_traceability_joined_runtime_unqualified",
   "implementationStatusSource": "docs/implementation/status.json",
   "qualificationRule": "Source and test mappings are not passing product results; only exact delivered GitHub Actions evidence qualifies runtime behavior.",
   "specification": "docs/design/architecture-v0.3.uk.md",
@@ -11,9 +11,9 @@
   "planSource": "docs/ADR/ADR-037-documentation-coverage.md",
   "counts": {
     "features": 20,
-    "decisions": 40,
+    "decisions": 41,
     "backlogItems": 104,
-    "requirements": 145
+    "requirements": 158
   },
   "features": [
     {
@@ -244,7 +244,7 @@
       "adrs": [
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-032-mcaf-governance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
@@ -269,7 +269,7 @@
           "adrs": [
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-032-mcaf-governance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
@@ -293,7 +293,7 @@
           "adrs": [
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-032-mcaf-governance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
@@ -317,7 +317,7 @@
           "adrs": [
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-032-mcaf-governance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
@@ -341,7 +341,7 @@
           "adrs": [
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-032-mcaf-governance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
@@ -811,7 +811,7 @@
       "name": "ChangeFeeds",
       "path": "docs/Features/ChangeFeeds.md",
       "adrs": [
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-022-policy-epoch-revocation.md",
         "docs/ADR/ADR-023-journal-authority.md",
         "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -841,7 +841,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -870,7 +870,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -899,7 +899,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -928,7 +928,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -957,7 +957,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -990,7 +990,7 @@
           "documentationTask": "TASK-DOC-AUTHOR-005",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-022-policy-epoch-revocation.md",
             "docs/ADR/ADR-023-journal-authority.md",
             "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -1175,7 +1175,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ],
       "documentationTask": "TASK-DOC-INTEGRATE-006",
@@ -1199,7 +1199,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1222,7 +1222,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1245,7 +1245,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1268,7 +1268,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1291,7 +1291,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1314,7 +1314,7 @@
             "docs/ADR/ADR-003-durability-ack-barrier.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         }
@@ -1328,7 +1328,7 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ],
       "documentationTask": "TASK-DOC-INTEGRATE-006",
@@ -1352,7 +1352,7 @@
             "docs/ADR/ADR-001-partition-identity-affinity.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1375,7 +1375,7 @@
             "docs/ADR/ADR-001-partition-identity-affinity.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1398,7 +1398,7 @@
             "docs/ADR/ADR-001-partition-identity-affinity.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1421,7 +1421,7 @@
             "docs/ADR/ADR-001-partition-identity-affinity.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
@@ -1434,7 +1434,7 @@
           ],
           "requirementText": "REQ-ROUTE-005: physical partition movement/split має fenced restartable protocol",
           "acceptanceText": "AC-ROUTE-005: PLANNED prepare/copy/catch-up/validate/ownership-switch/release tests з process interruption і real RF3 доводять complete cut, stable outcomes/token lineage або explicit invalidation, без old-owner write після switch",
-          "testOrReviewMapping": "PLANNED KL-036/069–072 suites; [ADR-016](../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../ADR/ADR-017-migration-tokens.md) unresolved token translation",
+          "testOrReviewMapping": "PLANNED KL-036/069–072 suites; [ADR-016](../ADR/ADR-016-atomic-physical-placement.md), [ADR-017](../ADR/ADR-017-ownership-session-tokens.md) unresolved token translation",
           "acceptanceSources": [
             "docs/Features/ClusterRouting.md"
           ],
@@ -1444,8 +1444,148 @@
             "docs/ADR/ADR-001-partition-identity-affinity.md",
             "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
+          ]
+        },
+        {
+          "id": "REQ-MTOKEN-001",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 28,
+          "acceptanceIds": [
+            "AC-MTOKEN-001"
+          ],
+          "requirementText": "Resolve the current placement witness through the exact existing transaction/read view without nested reads, stale authority or caller-supplied roles/epochs.",
+          "acceptanceText": "AC-MTOKEN-001",
+          "testOrReviewMapping": "AtomicPartitionPlacementResolutionTests, AtomicPartitionPlacementQueryViewTests, and corruption cases; real operation mapping only.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-MTOKEN-002",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 34,
+          "acceptanceIds": [
+            "AC-MTOKEN-002"
+          ],
+          "requirementText": "Validate a Batch ownership claim against the same current transaction view and preserve existing stale/future ownership outcomes without domain effects.",
+          "acceptanceText": "AC-MTOKEN-002",
+          "testOrReviewMapping": "AtomicPartitionPlacementCommandTests and AtomicPartitionPlacementCorruptionTests; exact current transaction and effect assertions remain required.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-MTOKEN-003",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 40,
+          "acceptanceIds": [
+            "AC-MTOKEN-003"
+          ],
+          "requirementText": "Bind commit tokens to issuer incarnation, full atomic partition, committed position and validated placement epoch; reject invalid identity safely.",
+          "acceptanceText": "AC-MTOKEN-003",
+          "testOrReviewMapping": "PartitionOwnershipEpochTests and FullPartitionOutcomeIdentityTests; source/test mapping does not qualify token runtime behavior.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-MTOKEN-004",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 46,
+          "acceptanceIds": [
+            "AC-MTOKEN-004"
+          ],
+          "requirementText": "Validate ownership tokens against current authoritative placement and do not translate positions across independent replica groups.",
+          "acceptanceText": "AC-MTOKEN-004",
+          "testOrReviewMapping": "FullPartitionOutcomeIdentityTests, CommandOutcomePartitionScopeFailureTests and current replay cases; cross-group translation remains Proposed.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-PMOVE-005",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 53,
+          "acceptanceIds": [
+            "AC-PMOVE-005"
+          ],
+          "requirementText": "Classify each committed command outcome from its normalized typed operation while preserving canonical identity and replay.",
+          "acceptanceText": "AC-PMOVE-005",
+          "testOrReviewMapping": "CommandOutcomePartitionScopeTests, CommandOutcomePartitionScopeFailureTests and authorization-order cases; full native outcome/state oracles remain required.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-PMOVE-006",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 63,
+          "acceptanceIds": [
+            "AC-PMOVE-006"
+          ],
+          "requirementText": "Persist bounded partition-scoped outcome locators atomically with matching outcomes; global and unknown outcomes remain non-movable.",
+          "acceptanceText": "AC-PMOVE-006",
+          "testOrReviewMapping": "CommandOutcomeScopeNativeSerializationTests, FullPartitionOutcomeIdentityTests and real store outcome/replay cases; no runtime pass inferred.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
+          ]
+        },
+        {
+          "id": "REQ-MTOKEN-007",
+          "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+          "sourceLine": 73,
+          "acceptanceIds": [
+            "AC-MTOKEN-007"
+          ],
+          "requirementText": "Reuse one validated Batch placement witness throughout the original atomic apply transaction and bounded group mutations.",
+          "acceptanceText": "AC-MTOKEN-007",
+          "testOrReviewMapping": "AtomicPartitionPlacementResolutionTests, AtomicPartitionPlacementCommandTests and paired-size read-counter cases; exact-source results remain pending.",
+          "acceptanceSources": [
+            "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-016-atomic-physical-placement.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md"
           ]
         }
       ],
@@ -1865,7 +2005,7 @@
         "docs/ADR/ADR-010-query-budgets-security.md",
         "docs/ADR/ADR-014-principals-rbac-row-policy.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-035-memory-performance.md"
       ],
       "documentationTask": "TASK-DOC-AUTHOR-004",
@@ -1892,7 +2032,7 @@
             "docs/ADR/ADR-010-query-budgets-security.md",
             "docs/ADR/ADR-014-principals-rbac-row-policy.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-035-memory-performance.md"
           ]
         },
@@ -1918,7 +2058,7 @@
             "docs/ADR/ADR-010-query-budgets-security.md",
             "docs/ADR/ADR-014-principals-rbac-row-policy.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-035-memory-performance.md"
           ]
         },
@@ -1944,7 +2084,7 @@
             "docs/ADR/ADR-010-query-budgets-security.md",
             "docs/ADR/ADR-014-principals-rbac-row-policy.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-035-memory-performance.md"
           ]
         },
@@ -1970,7 +2110,7 @@
             "docs/ADR/ADR-010-query-budgets-security.md",
             "docs/ADR/ADR-014-principals-rbac-row-policy.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-035-memory-performance.md"
           ]
         },
@@ -2002,7 +2142,7 @@
             "docs/ADR/ADR-010-query-budgets-security.md",
             "docs/ADR/ADR-014-principals-rbac-row-policy.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
-            "docs/ADR/ADR-017-migration-tokens.md",
+            "docs/ADR/ADR-017-ownership-session-tokens.md",
             "docs/ADR/ADR-035-memory-performance.md"
           ]
         }
@@ -3279,9 +3419,10 @@
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
-        "docs/ADR/ADR-036-orleans-foundation.md"
+        "docs/ADR/ADR-036-orleans-foundation.md",
+        "docs/ADR/ADR-116-first-release-current-format.md"
       ],
       "documentationTask": "TASK-DOC-INTEGRATE-006",
       "requirementMappings": [
@@ -3305,7 +3446,7 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
@@ -3330,7 +3471,7 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
@@ -3356,7 +3497,7 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
@@ -3384,7 +3525,7 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
@@ -3409,7 +3550,7 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
@@ -3436,34 +3577,151 @@
             "docs/ADR/ADR-004-committed-read-views.md",
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-035-memory-performance.md",
             "docs/ADR/ADR-036-orleans-foundation.md"
           ]
         },
         {
           "id": "REQ-STORAGE-007",
-          "feature": "docs/Features/StorageRecovery.md",
-          "sourceLine": 45,
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 60,
           "acceptanceIds": [
-            "AC-STORAGE-007"
+            "AC-STORAGE-007",
+            "AC-NATIVE-001"
           ],
-          "requirementText": "REQ-STORAGE-007: format/schema upgrades мають explicit compatibility та recovery path",
-          "acceptanceText": "AC-STORAGE-007: PLANNED version fixtures доводять upgrade/reopen/rollback на matching data generations; unsupported version не читається як current, interrupted migration лишає recoverable authority",
-          "testOrReviewMapping": "PLANNED real-store/CrashHost upgrade suite, KL-043 pending; [ADR-011](../ADR/ADR-011-format-upgrades.md) Proposed unresolved upgrade mechanism",
+          "requirementText": "REQ-STORAGE-007: one strict first-release native format; current writes and recovery preserve exact records and authority, while unsupported or corrupt records fail closed.",
+          "acceptanceText": "AC-STORAGE-007 / AC-NATIVE-001",
+          "testOrReviewMapping": "Current real-store write, close/reopen, WAL replay, compaction and checkpoint flows: RecoveryTests, CurrentStoragePreservationTests, FrameBudgetTests and PreparedTransactionTests; coverage and exact-source qualification remain unmeasured/pending.",
           "acceptanceSources": [
-            "docs/Features/StorageRecovery.md"
+            "docs/Features/StorageRecovery.md",
+            "docs/Features/StorageRecovery/CurrentFormat.md"
           ],
           "documentationTask": "TASK-DOC-INTEGRATE-006",
           "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
           "adrs": [
-            "docs/ADR/ADR-003-durability-ack-barrier.md",
-            "docs/ADR/ADR-004-committed-read-views.md",
-            "docs/ADR/ADR-005-canonical-keyspace-codec.md",
-            "docs/ADR/ADR-008-backup-log-retention.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
-            "docs/ADR/ADR-035-memory-performance.md",
-            "docs/ADR/ADR-036-orleans-foundation.md"
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-STORAGE-021",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 61,
+          "acceptanceIds": [
+            "AC-NATIVE-002"
+          ],
+          "requirementText": "Strict current-format admission rejects unsupported versions, invalid checksums and complete corrupt frames without changing original files or state.",
+          "acceptanceText": "AC-NATIVE-002",
+          "testOrReviewMapping": "Current native identity/WAL/checkpoint rejection cases in CurrentWalRejectionTests, NativeMissingIdentityTests, UnsupportedWalHeaderTests, MetadataFormatFailureTests and current backup/restore rejection cases; preserve safe typed errors and unchanged-state assertions.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-STORAGE-024",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 62,
+          "acceptanceIds": [
+            "AC-NATIVE-003"
+          ],
+          "requirementText": "Current signed SDK/MCP operations work through Aspire RF3; incompatible signed purposes/capabilities are fenced before dispatch or effects.",
+          "acceptanceText": "AC-NATIVE-003",
+          "testOrReviewMapping": "Current request-purpose and RF3 SDK/MCP controls in ClusterTests and current storage/request rejection cases; existing signed-purpose, authorization and unchanged-state oracles remain mandatory.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-NATIVE-004",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 63,
+          "acceptanceIds": [
+            "AC-NATIVE-004"
+          ],
+          "requirementText": "Current runner/profile/outcome paths use only current formats and no prior-image preparation, old-format converter or compatibility fallback.",
+          "acceptanceText": "AC-NATIVE-004",
+          "testOrReviewMapping": "Current whole-flow runner and outcome/profile tests plus governance inventories for deleted exclusive paths; static inventory is separate from functional operations.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-NATIVE-005",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 64,
+          "acceptanceIds": [
+            "AC-NATIVE-005"
+          ],
+          "requirementText": "Real process kills/restarts preserve one acknowledged cut; all owned processes, readers and resources settle and failures remain visible.",
+          "acceptanceText": "AC-NATIVE-005",
+          "testOrReviewMapping": "RecoveryTests, RecoveryProcessCleanup callers, ProductionSourceManifestSettlementTests and native RF3 shutdown flows; all process and settlement proof remains required.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-NATIVE-006",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 65,
+          "acceptanceIds": [
+            "AC-NATIVE-006"
+          ],
+          "requirementText": "Complete enabled build, formatter, analyzers, normal/scalar/recovery/RF3 gates and native functional coverage include current production contributors only.",
+          "acceptanceText": "AC-NATIVE-006",
+          "testOrReviewMapping": "Current functional coverage/native-merge evidence and full required Linux gates; current coverage and CRAP remain unmeasured until exact-source reports are retained.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-DOC-CURRENT-TRACE-038",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
+          ]
+        },
+        {
+          "id": "REQ-NATIVE-007",
+          "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+          "sourceLine": 66,
+          "acceptanceIds": [
+            "AC-NATIVE-007"
+          ],
+          "requirementText": "Strict current node-root admission rejects unknown entries, wrong kinds and links before initial root or provider mutation while retaining current partial recovery and exclusive ownership.",
+          "acceptanceText": "AC-NATIVE-007",
+          "testOrReviewMapping": "TASK-SR-CURRENT-LAYOUT-044: planned actual PartitionHost rejection, complete preservation and healthy current write/reopen; current snapshot/index/backup/lock controls and process/RF3 qualification remain required.",
+          "acceptanceSources": [
+            "docs/Features/StorageRecovery/CurrentFormat.md"
+          ],
+          "documentationTask": "TASK-SR-CURRENT-LAYOUT-044",
+          "evidenceState": "source_or_planned_mapping_only_not_product_qualification",
+          "adrs": [
+            "docs/ADR/ADR-011-current-native-format.md",
+            "docs/ADR/ADR-116-first-release-current-format.md"
           ]
         }
       ],
@@ -3587,7 +3845,7 @@
       "adrs": [
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-010-query-budgets-security.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-035-memory-performance.md"
@@ -3612,7 +3870,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3636,7 +3894,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3661,7 +3919,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3685,7 +3943,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3712,7 +3970,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3736,7 +3994,7 @@
           "adrs": [
             "docs/ADR/ADR-005-canonical-keyspace-codec.md",
             "docs/ADR/ADR-010-query-budgets-security.md",
-            "docs/ADR/ADR-011-format-upgrades.md",
+            "docs/ADR/ADR-011-current-native-format.md",
             "docs/ADR/ADR-016-atomic-physical-placement.md",
             "docs/ADR/ADR-030-retention-paused-restore.md",
             "docs/ADR/ADR-035-memory-performance.md"
@@ -3861,13 +4119,14 @@
     },
     {
       "id": "ADR-011",
-      "path": "docs/ADR/ADR-011-format-upgrades.md",
-      "decisionStatus": "Proposed",
-      "implementationContractSource": "docs/ADR/ADR-011-format-upgrades.md",
+      "path": "docs/ADR/ADR-011-current-native-format.md",
+      "decisionStatus": "Accepted",
+      "implementationContractSource": "docs/ADR/ADR-011-current-native-format.md",
       "relatedFeatures": [
         "docs/Features/BackupRestore.md",
         "docs/Features/StorageRecovery.md",
-        "docs/Features/TimeSeries.md"
+        "docs/Features/TimeSeries.md",
+        "docs/Features/StorageRecovery/CurrentFormat.md"
       ]
     },
     {
@@ -3927,14 +4186,15 @@
     },
     {
       "id": "ADR-017",
-      "path": "docs/ADR/ADR-017-migration-tokens.md",
-      "decisionStatus": "Proposed",
-      "implementationContractSource": "docs/ADR/ADR-017-migration-tokens.md",
+      "path": "docs/ADR/ADR-017-ownership-session-tokens.md",
+      "decisionStatus": "Accepted for native same-view scope; cross-group token translation remains Proposed.",
+      "implementationContractSource": "docs/ADR/ADR-017-ownership-session-tokens.md",
       "relatedFeatures": [
         "docs/Features/ChangeFeeds.md",
         "docs/Features/ClusterReplication.md",
         "docs/Features/ClusterRouting.md",
-        "docs/Features/GraphTraversal.md"
+        "docs/Features/GraphTraversal.md",
+        "docs/Features/ClusterRouting/TokenOwnershipLineage.md"
       ]
     },
     {
@@ -4179,6 +4439,17 @@
       "relatedFeatures": [
         "docs/Features/BenchmarkComparisons.md"
       ]
+    },
+    {
+      "id": "ADR-116",
+      "path": "docs/ADR/ADR-116-first-release-current-format.md",
+      "decisionStatus": "Accepted",
+      "implementationContractSource": "docs/ADR/ADR-116-first-release-current-format.md",
+      "relatedFeatures": [
+        "docs/Features/StorageRecovery/CurrentFormat.md",
+        "docs/Features/BackupRestore.md",
+        "docs/Features/StorageRecovery.md"
+      ]
     }
   ],
   "backlog": [
@@ -4207,7 +4478,7 @@
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
@@ -4220,7 +4491,7 @@
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
@@ -4231,7 +4502,7 @@
       "adrs": [
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-032-mcaf-governance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
@@ -4254,7 +4525,7 @@
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
@@ -4267,7 +4538,7 @@
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
@@ -4369,7 +4640,7 @@
       "id": "KL-016",
       "feature": "docs/Features/ChangeFeeds.md",
       "adrs": [
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-022-policy-epoch-revocation.md",
         "docs/ADR/ADR-023-journal-authority.md",
         "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -4389,7 +4660,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4400,7 +4671,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4411,7 +4682,7 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4422,7 +4693,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4433,7 +4704,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4447,7 +4718,7 @@
         "docs/ADR/ADR-010-query-budgets-security.md",
         "docs/ADR/ADR-014-principals-rbac-row-policy.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-035-memory-performance.md"
       ]
     },
@@ -4461,7 +4732,7 @@
         "docs/ADR/ADR-010-query-budgets-security.md",
         "docs/ADR/ADR-014-principals-rbac-row-policy.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-035-memory-performance.md"
       ]
     },
@@ -4471,7 +4742,7 @@
       "adrs": [
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-010-query-budgets-security.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-035-memory-performance.md",
@@ -4484,7 +4755,7 @@
       "adrs": [
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-010-query-budgets-security.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-035-memory-performance.md"
@@ -4496,7 +4767,7 @@
       "adrs": [
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-010-query-budgets-security.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-035-memory-performance.md"
@@ -4605,7 +4876,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4616,7 +4887,7 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -4643,7 +4914,7 @@
         "docs/ADR/ADR-010-query-budgets-security.md",
         "docs/ADR/ADR-014-principals-rbac-row-policy.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-035-memory-performance.md"
       ]
     },
@@ -4683,7 +4954,7 @@
       "adrs": [
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-032-mcaf-governance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
@@ -4691,13 +4962,14 @@
     },
     {
       "id": "KL-043",
-      "feature": "docs/Features/StorageRecovery.md",
+      "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
       "adrs": [
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-004-committed-read-views.md",
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
+        "docs/ADR/ADR-116-first-release-current-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
@@ -4843,7 +5115,7 @@
         "docs/ADR/ADR-010-query-budgets-security.md",
         "docs/ADR/ADR-014-principals-rbac-row-policy.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-035-memory-performance.md"
       ]
     },
@@ -5002,7 +5274,7 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -5013,7 +5285,7 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -5024,18 +5296,18 @@
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
     {
       "id": "KL-072",
-      "feature": "docs/Features/ClusterRouting.md",
+      "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
       "adrs": [
         "docs/ADR/ADR-001-partition-identity-affinity.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -5089,7 +5361,7 @@
       "adrs": [
         "docs/ADR/ADR-005-canonical-keyspace-codec.md",
         "docs/ADR/ADR-010-query-budgets-security.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-035-memory-performance.md"
@@ -5099,7 +5371,7 @@
       "id": "KL-079",
       "feature": "docs/Features/ChangeFeeds.md",
       "adrs": [
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-022-policy-epoch-revocation.md",
         "docs/ADR/ADR-023-journal-authority.md",
         "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -5379,7 +5651,7 @@
       "id": "KL-097",
       "feature": "docs/Features/ChangeFeeds.md",
       "adrs": [
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-022-policy-epoch-revocation.md",
         "docs/ADR/ADR-023-journal-authority.md",
         "docs/ADR/ADR-024-transaction-domain-binding.md",
@@ -5398,7 +5670,7 @@
       "adrs": [
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-008-backup-log-retention.md",
-        "docs/ADR/ADR-011-format-upgrades.md",
+        "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-030-retention-paused-restore.md",
         "docs/ADR/ADR-032-mcaf-governance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
@@ -5411,7 +5683,7 @@
         "docs/ADR/ADR-003-durability-ack-barrier.md",
         "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
         "docs/ADR/ADR-016-atomic-physical-placement.md",
-        "docs/ADR/ADR-017-migration-tokens.md",
+        "docs/ADR/ADR-017-ownership-session-tokens.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
       ]
     },
@@ -6140,1370 +6412,17 @@
     }
   },
   "verification": {
-    "state": "passed_documentation_static_and_complete_independent_review",
-    "verifiedAt": "2026-10-01T23:51:04.170Z",
-    "scope": "documentation_only",
+    "state": "pending",
+    "scope": "Root reviewed/joined the guarded current traceability changes and preserved historical subtrees. Current repository governance passed; native gates are recorded separately and no product acceptance is qualified by this document.",
     "localRuntimeTestsRun": false,
     "skillsOrToolsInstalled": false,
     "productGatesQualifiedByDocumentation": false,
-    "acceptanceOutcomes": [
-      {
-        "id": "AC-DOCS-001",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-002",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-003",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-004",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-005",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-006",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-007",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      },
-      {
-        "id": "AC-DOCS-008",
-        "state": "passed_documentation_scope_only",
-        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
-      }
-    ],
-    "static": {
-      "state": "passed",
-      "scope": "documentation_static_only",
-      "filesChecked": 68,
-      "features": 20,
-      "decisions": 39,
-      "backlogItems": 104,
-      "requirements": 137,
-      "localLinksChecked": 576,
-      "anchorsChecked": 14,
-      "diagramsFound": 67,
-      "preservedExistingFeatureFiles": [
-        {
-          "path": "docs/Features/RepositoryGovernance.md",
-          "identifiers": 14,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/BenchmarkComparisons.md",
-          "identifiers": 20,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/ClientApi.md",
-          "identifiers": 5,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/ClusterReplication.md",
-          "identifiers": 12,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/ClusterRouting.md",
-          "identifiers": 6,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/CodeQuality.md",
-          "identifiers": 8,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/EventStreams.md",
-          "identifiers": 4,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/QueryExecution.md",
-          "identifiers": 4,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/ResourceExecution.md",
-          "identifiers": 10,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/StorageRecovery.md",
-          "identifiers": 7,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/TestInfrastructure.md",
-          "identifiers": 6,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/TimeSeries.md",
-          "identifiers": 5,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        },
-        {
-          "path": "docs/Features/Search.md",
-          "identifiers": 7,
-          "originalObligationsPreserved": true,
-          "adaptation": "Concurrent owner added canonical DocumentStorageKeys ownership; prior paths and full requirements retained."
-        },
-        {
-          "path": "docs/Features/Authorization.md",
-          "identifiers": 6,
-          "originalObligationsPreserved": true,
-          "adaptation": "Additions and documented foundation-number correction only."
-        }
-      ],
-      "policies": 27,
-      "byteIdenticalPolicies": 24,
-      "externallyAddedPolicies": [
-        {
-          "path": "AGENTS.md",
-          "preservation": "external_insertion_original_full_text_verified"
-        },
-        {
-          "path": "src/KeyLoad.Core/AGENTS.md",
-          "preservation": "external_additive_original_full_prefix_verified"
-        },
-        {
-          "path": "tests/KeyLoad.UnitTests/AGENTS.md",
-          "preservation": "external_additive_original_full_prefix_verified"
-        }
-      ],
-      "documentManifest": [
-        {
-          "path": "docs/Features/Authorization.md",
-          "sha256": "94abdbd1a07b0a5cc743ad20fca47b8642a481d99f0f78f9a00f942c7605164b"
-        },
-        {
-          "path": "docs/Features/BackupRestore.md",
-          "sha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3"
-        },
-        {
-          "path": "docs/Features/BenchmarkComparisons.md",
-          "sha256": "c04a979ec4a09b6e4dab9658c8be954d84e6bc18d59ef7d61204014f4a757d21"
-        },
-        {
-          "path": "docs/Features/BlobStorage.md",
-          "sha256": "944a88bc31ef4bd0c3e0a4a847dbd9c5a60ef1201d4c791d54e24968327ea030"
-        },
-        {
-          "path": "docs/Features/ChangeFeeds.md",
-          "sha256": "26566f9c9017c62b235fd2a7bf9561a358370345e93bff72ef3dfe802d1d6158"
-        },
-        {
-          "path": "docs/Features/ClientApi.md",
-          "sha256": "e2dbe5dd3a2841d3ce3cf76b0b1a13ce69df64a4cf1ab09de035ce65f756503e"
-        },
-        {
-          "path": "docs/Features/ClusterReplication.md",
-          "sha256": "61fb2e0505c3026eb99b203dd56ed434c8946edbb6005367fc5fb63ac33ac459"
-        },
-        {
-          "path": "docs/Features/ClusterRouting.md",
-          "sha256": "f6a0ff266a0c2e779a5ba12c161dfb5bd2da2bb8dbec4478a8c3c774f8d857e3"
-        },
-        {
-          "path": "docs/Features/CodeQuality.md",
-          "sha256": "07d6ab68e5c5cb3bdc3a1ee905767ae0c5afdab5e53513e8d1858f003ea8f9c5"
-        },
-        {
-          "path": "docs/Features/DocumentStorage.md",
-          "sha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8"
-        },
-        {
-          "path": "docs/Features/EventStreams.md",
-          "sha256": "80d24346d37ccbf3b273ebe188c3be36610286cb80a58bcecf1b864ea89a4f2d"
-        },
-        {
-          "path": "docs/Features/GraphTraversal.md",
-          "sha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8"
-        },
-        {
-          "path": "docs/Features/Messaging.md",
-          "sha256": "963bdf05e0a65819f674eb0555ddd6c3598d8a6a90de92a6c7a08ca178032530"
-        },
-        {
-          "path": "docs/Features/QueryExecution.md",
-          "sha256": "39017131197a3acb461bf3e24955dd3056f4f7641ad39a1b54495bd4a2b69e9d"
-        },
-        {
-          "path": "docs/Features/RepositoryGovernance.md",
-          "sha256": "4773510806126f7fee6785526cf4ef4f72ee16da153bfafa56641b44f0c0bf98"
-        },
-        {
-          "path": "docs/Features/ResourceExecution.md",
-          "sha256": "6104dbebe5ba8ab2dea60df251310c6149377cd7018ab9b02cad2840b4f05ade"
-        },
-        {
-          "path": "docs/Features/Search.md",
-          "sha256": "63bc5298304b94752ccdec6a2fc1a5cb9f7130f316c2da2e94890b00d47fc229"
-        },
-        {
-          "path": "docs/Features/StorageRecovery.md",
-          "sha256": "a6cc5f6e213c8640d9cb62b63c40253bf239f84f49dc9c89f691d155871bc6c9"
-        },
-        {
-          "path": "docs/Features/TestInfrastructure.md",
-          "sha256": "50fbafb9cb930fe038b48f3b656a843543ed39dc19ca2a204aaddd8a85d920f8"
-        },
-        {
-          "path": "docs/Features/TimeSeries.md",
-          "sha256": "84c12ea9cb4f52e24af2a4b6cbbbcfdf0da24b71e872b779044bcd18b05ad449"
-        },
-        {
-          "path": "docs/ADR/ADR-001-partition-identity-affinity.md",
-          "sha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881"
-        },
-        {
-          "path": "docs/ADR/ADR-002-command-idempotency.md",
-          "sha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710"
-        },
-        {
-          "path": "docs/ADR/ADR-003-durability-ack-barrier.md",
-          "sha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07"
-        },
-        {
-          "path": "docs/ADR/ADR-004-committed-read-views.md",
-          "sha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431"
-        },
-        {
-          "path": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
-          "sha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083"
-        },
-        {
-          "path": "docs/ADR/ADR-006-strict-derived-indexes.md",
-          "sha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d"
-        },
-        {
-          "path": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
-          "sha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933"
-        },
-        {
-          "path": "docs/ADR/ADR-008-backup-log-retention.md",
-          "sha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b"
-        },
-        {
-          "path": "docs/ADR/ADR-009-search-provider-boundaries.md",
-          "sha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9"
-        },
-        {
-          "path": "docs/ADR/ADR-010-query-budgets-security.md",
-          "sha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a"
-        },
-        {
-          "path": "docs/ADR/ADR-011-format-upgrades.md",
-          "sha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff"
-        },
-        {
-          "path": "docs/ADR/ADR-012-sql-dialect.md",
-          "sha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629"
-        },
-        {
-          "path": "docs/ADR/ADR-013-authorized-query-ast.md",
-          "sha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a"
-        },
-        {
-          "path": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
-          "sha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6"
-        },
-        {
-          "path": "docs/ADR/ADR-015-sensitive-data-lineage.md",
-          "sha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836"
-        },
-        {
-          "path": "docs/ADR/ADR-016-atomic-physical-placement.md",
-          "sha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f"
-        },
-        {
-          "path": "docs/ADR/ADR-017-migration-tokens.md",
-          "sha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b"
-        },
-        {
-          "path": "docs/ADR/ADR-018-global-rank-fusion.md",
-          "sha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40"
-        },
-        {
-          "path": "docs/ADR/ADR-019-managed-ann.md",
-          "sha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1"
-        },
-        {
-          "path": "docs/ADR/ADR-020-independent-query-contexts.md",
-          "sha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407"
-        },
-        {
-          "path": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
-          "sha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f"
-        },
-        {
-          "path": "docs/ADR/ADR-022-policy-epoch-revocation.md",
-          "sha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8"
-        },
-        {
-          "path": "docs/ADR/ADR-023-journal-authority.md",
-          "sha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526"
-        },
-        {
-          "path": "docs/ADR/ADR-024-transaction-domain-binding.md",
-          "sha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c"
-        },
-        {
-          "path": "docs/ADR/ADR-025-event-revision-feed-positions.md",
-          "sha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866"
-        },
-        {
-          "path": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
-          "sha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5"
-        },
-        {
-          "path": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
-          "sha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914"
-        },
-        {
-          "path": "docs/ADR/ADR-028-persisted-scheduling-time.md",
-          "sha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a"
-        },
-        {
-          "path": "docs/ADR/ADR-029-event-message-classification.md",
-          "sha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305"
-        },
-        {
-          "path": "docs/ADR/ADR-030-retention-paused-restore.md",
-          "sha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca"
-        },
-        {
-          "path": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
-          "sha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7"
-        },
-        {
-          "path": "docs/ADR/ADR-032-mcaf-governance.md",
-          "sha256": "df0c219c4f25eec44f06def64b6ac5b8838c0471d6572b48880650b308319339"
-        },
-        {
-          "path": "docs/ADR/ADR-033-code-quality.md",
-          "sha256": "59b7f8c733d2ff7569a62961572285c6906066117bf9b7cf8e25cf732731ff10"
-        },
-        {
-          "path": "docs/ADR/ADR-034-cluster-comparisons.md",
-          "sha256": "2ddf9fee5bdb4dd59760cb2dab0487ec21d832cc274a0ea40425a0c63b504af2"
-        },
-        {
-          "path": "docs/ADR/ADR-035-memory-performance.md",
-          "sha256": "c27400a154930927cf77e7e442050be79d017805890c3a3f6364a35627598b59"
-        },
-        {
-          "path": "docs/ADR/ADR-036-orleans-foundation.md",
-          "sha256": "d87809acd80a749410581d3d53ec3c451157396ef034b3785e20314bf7d07d3f"
-        },
-        {
-          "path": "docs/ADR/ADR-037-documentation-coverage.md",
-          "sha256": "7882b42b4de476112fdadfbcc0650be567f77d4f255c63126a6d0c22833ce559"
-        },
-        {
-          "path": "docs/ADR/ADR-038-chunked-blob-storage.md",
-          "sha256": "a688ddf664820c4c1fd230013aebd5e0f2e1410678ccfd0109c560977fe93161"
-        },
-        {
-          "path": "docs/ADR/ADR-039-official-mcp-agent-api.md",
-          "sha256": "5306610e15ac55cbcfc8768c399e6dcb6d572736571243717ff05bf166c8f30b"
-        },
-        {
-          "path": "README.md",
-          "sha256": "f2668e3aae89ad4327b2582016914511f416eb8ff5b5aac0d998c6924411691d"
-        },
-        {
-          "path": "docs/README.md",
-          "sha256": "6b17eeb9182a4982fa2c464cc4a48886145ea28abeade4f4f9e37c31d48866e9"
-        },
-        {
-          "path": "docs/ADR/README.md",
-          "sha256": "d9542930c2d117e38e8aa2c440459d602b3ac61f73c53e75757e64c33a5d0153"
-        },
-        {
-          "path": "docs/Architecture.md",
-          "sha256": "8da2336ad76408078d2702571442c655451bf7122852137146ac6418f8f00cbd"
-        },
-        {
-          "path": "documentation-coverage.brainstorm.md",
-          "sha256": "8adac48d7127f6b74bf822cb275bcb9c885b36891db916481992ecad1d086c1d"
-        },
-        {
-          "path": "documentation-coverage.acceptance.md",
-          "sha256": "b825698cccb6a2181f89e4a60e55d88842b183be681e3f657a6e2f54015b6223"
-        },
-        {
-          "path": "documentation-coverage.plan.md",
-          "sha256": "5cd0df5c0c9be358d0d14a0fc61c4b7f8feec77bf350add0afb8b7d787dffcef"
-        },
-        {
-          "path": "docs/implementation/orleans-foundation.acceptance.md",
-          "sha256": "66ff5e80a5832fae04e01e3fd40679663f6176deb1cd4b799f1684eb04c46823"
-        },
-        {
-          "path": "docs/implementation/orleans-foundation.plan.md",
-          "sha256": "699433db8d4ac4e635e6059962b9096252d95ecfc5d915607783d750f8848689"
-        }
-      ],
-      "errors": [],
-      "reportSha256": "decbd1a66c3bd5d0d6b892a52516b2e2863173798faea44f458dfb07e511462f",
-      "verificationMethod": "One-off Node built-in inventory/link/anchor/hash/traceability checks plus manual full source/diff review; no alternate product test framework."
-    },
-    "workerJoin": {
-      "state": "passed",
-      "scope": "documentation_author_join_only",
-      "tasks": [
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "terminalState": "complete",
-          "artifacts": 19
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "terminalState": "complete",
-          "artifacts": 17
-        }
-      ],
-      "artifacts": 36,
-      "byteIdenticalSubmittedArtifacts": 34,
-      "reviewedExternalAdditiveArtifacts": 2,
-      "earlierHashOnlyJoin": "/private/tmp/keyload-documentation-worker-join.json",
-      "earlierHashOnlyJoinExplanation": "Historical strict comparison detected two later external additions; it was not accepted as a completed join. This final packet proves preservation by reconstructing the entire submitted body and records both hashes.",
-      "records": [
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/Features/DocumentStorage.md",
-          "submittedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
-          "integratedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
-          "reconstructedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/Features/Messaging.md",
-          "submittedSha256": "f6b5c5f9e417267e46cfc8bae75854888f83b85f3efe4be5b440e8945ce95758",
-          "integratedSha256": "963bdf05e0a65819f674eb0555ddd6c3598d8a6a90de92a6c7a08ca178032530",
-          "reconstructedSha256": "f6b5c5f9e417267e46cfc8bae75854888f83b85f3efe4be5b440e8945ce95758",
-          "originalBodyPreserved": true,
-          "integrationDelta": "external_post_completion_addition_MP007F_MP007G_full_original_body_preserved",
-          "addedText": "### Accepted TASK-MP-007F queue read-work repair\n\nREQ-MSG-007 maps AC-MSG-001/002/004/005 and AC-MP-006/012 to reuse of real stored\nbody lengths, counters and validated leases. Enqueue serializes its MessageBody\nonce, checks quotas against those exact bytes and stages that same payload through\nthe existing owned provider write. Sweep, Receive and delivery completion decode\nborrowed body bytes once and carry their observed stored length; they retain\nexisting absent/corrupt-body checks and do not reserialize for byte subtraction.\nValid persisted bodies retain the same counters, quotas and format.\n\nCarry a lane's counters through each bounded Sweep/Receive loop and stage the\nfinal value before return; no counters read is required for an empty sweep.\nProcessing verifies token scope before inbox replay, then validates the lease\nonce and passes it to the same private delivery transition. Direct delivery keeps\nresource validation before lease validation; processing keeps its existing lease\nerror before subsequent resource validation. The ACK counters/body transition is\nstaged before effects so released input quota can fund an atomic output. Preserve\nFIFO/ready sequence, recorded command time, expiry/backoff/attempts, generation,\ntoken fencing, field projection, receipts and rollback. No scheduler, public API,\nsigning, schema or cross-partition protocol change is authorized.\n\nWorker owns only Messaging.cs private queue/body/lease/processing regions and new\nmatching Core/UnitTests Features/Messaging helpers/tests; Sign/Verify/Inspect,\nEventSources, shared contracts/DatabaseEngine/docs/CI remain lead-owned. Real-store\ntests precede code: exact stored body bytes and one-byte-short quotas, multiple\nready/scheduled/expired/leased entries, NACK/ACK/renew, stale/foreign/expired token,\nproducer/effects failure rollback, inbox replay and healthy next claims. Existing\ntests are preserved. CI owns TUnit/recovery/RF3 execution; provider lookup counters\nand server allocation/RSS evidence remain separate MP-011 work before measured\nread or memory improvement claims.\n\n### Accepted TASK-MP-007G topic publication read-work repair\n\nREQ-MSG-008 maps AC-MSG-003/005 and AC-MP-006/012 to a single SourceResource and\nTopicHead read during Publish. Carry the same retained raw head's tail, first\navailable position, generation and stored bytes through publication. A shared\ntopic-head helper supplies the existing absent-head defaults and generation error;\nother SourceHead callers keep their validation and stream behavior. Event bytes\nare already serialized once and reused for staging; preserve that property.\n\nWorker owns EventSources.cs private TopicHead/SourceHead/Publish regions and new\nmatching Messaging helpers/tests only. Public reads/cursors, SourceRecord,\nSubscriptions, queue work, shared contracts/docs/CI remain out of scope. Real-store\ntests first cover exact/one-byte-short retained byte quota, absent/stale head,\nmultiple events, duplicate IDs, paused/invalid input and producer rollback with\nunchanged source tail/partition event sequence. Serialized shapes, generation/error\norder and persisted/wire formats remain; source rollback needs no conversion.\nBuild/static review and GitHub TUnit/recovery/RF3 proof are required; measured\npoint-read reduction awaits provider counters under MP-011.\n\n",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/Features/GraphTraversal.md",
-          "submittedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
-          "integratedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
-          "reconstructedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-001-partition-identity-affinity.md",
-          "submittedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
-          "integratedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
-          "reconstructedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-002-command-idempotency.md",
-          "submittedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
-          "integratedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
-          "reconstructedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-003-durability-ack-barrier.md",
-          "submittedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
-          "integratedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
-          "reconstructedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-004-committed-read-views.md",
-          "submittedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
-          "integratedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
-          "reconstructedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
-          "submittedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
-          "integratedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
-          "reconstructedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-006-strict-derived-indexes.md",
-          "submittedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
-          "integratedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
-          "reconstructedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
-          "submittedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
-          "integratedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
-          "reconstructedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-008-backup-log-retention.md",
-          "submittedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
-          "integratedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
-          "reconstructedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-009-search-provider-boundaries.md",
-          "submittedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
-          "integratedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
-          "reconstructedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-010-query-budgets-security.md",
-          "submittedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
-          "integratedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
-          "reconstructedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-011-format-upgrades.md",
-          "submittedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
-          "integratedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
-          "reconstructedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-012-sql-dialect.md",
-          "submittedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
-          "integratedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
-          "reconstructedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-013-authorized-query-ast.md",
-          "submittedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
-          "integratedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
-          "reconstructedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
-          "submittedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
-          "integratedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
-          "reconstructedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-015-sensitive-data-lineage.md",
-          "submittedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
-          "integratedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
-          "reconstructedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-004",
-          "path": "docs/ADR/ADR-016-atomic-physical-placement.md",
-          "submittedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
-          "integratedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
-          "reconstructedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/Features/ChangeFeeds.md",
-          "submittedSha256": "a8b59d7a81e81f0d0e043daa1c4c832196b5b74942f0c5e4947c7597eca2ada5",
-          "integratedSha256": "26566f9c9017c62b235fd2a7bf9561a358370345e93bff72ef3dfe802d1d6158",
-          "reconstructedSha256": "a8b59d7a81e81f0d0e043daa1c4c832196b5b74942f0c5e4947c7597eca2ada5",
-          "originalBodyPreserved": true,
-          "integrationDelta": "external_post_completion_bounded_purge_and_regression_addition_full_original_body_preserved",
-          "addedText": "Purge passes `min(head.Tail, ThroughSequence)` as the reader's inclusive upper\nposition. It neither decodes nor validates a retained entry beyond that requested\ncut; a no-op or already-reclaimed prefix reads no entries. Gaps and invalid\nsequence/partition metadata inside the requested prefix still fail atomically.\nPrepare the partition identity once per iterator, rather than hashing it for each\nentry. This changes read work only, not committed purge outcomes or retention pins.\n\n A corrupt next retained entry proves that no-op\nand prefix purge do not inspect it; restoring that real-store entry allows the\nnext projection batch to consume it.",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/Features/BackupRestore.md",
-          "submittedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
-          "integratedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
-          "reconstructedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-017-migration-tokens.md",
-          "submittedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
-          "integratedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
-          "reconstructedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-018-global-rank-fusion.md",
-          "submittedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
-          "integratedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
-          "reconstructedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-019-managed-ann.md",
-          "submittedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
-          "integratedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
-          "reconstructedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-020-independent-query-contexts.md",
-          "submittedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
-          "integratedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
-          "reconstructedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
-          "submittedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
-          "integratedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
-          "reconstructedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-022-policy-epoch-revocation.md",
-          "submittedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
-          "integratedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
-          "reconstructedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-023-journal-authority.md",
-          "submittedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
-          "integratedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
-          "reconstructedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-024-transaction-domain-binding.md",
-          "submittedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
-          "integratedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
-          "reconstructedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-025-event-revision-feed-positions.md",
-          "submittedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
-          "integratedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
-          "reconstructedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
-          "submittedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
-          "integratedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
-          "reconstructedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
-          "submittedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
-          "integratedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
-          "reconstructedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-028-persisted-scheduling-time.md",
-          "submittedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
-          "integratedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
-          "reconstructedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-029-event-message-classification.md",
-          "submittedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
-          "integratedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
-          "reconstructedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-030-retention-paused-restore.md",
-          "submittedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
-          "integratedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
-          "reconstructedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        },
-        {
-          "task": "TASK-DOC-AUTHOR-005",
-          "path": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
-          "submittedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
-          "integratedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
-          "reconstructedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
-          "originalBodyPreserved": true,
-          "integrationDelta": "none",
-          "rootFullContentReview": true,
-          "independentReview": "TASK-DOC-REVIEW-007"
-        }
-      ],
-      "errors": []
-    },
-    "diagramRendering": {
-      "state": "passed",
-      "scope": "static_documentation_mermaid_only",
-      "total": 67,
-      "passed": 67,
-      "installedTools": false,
-      "method": "Existing cached Mermaid CLI and existing Chrome; SVG files are temporary local proof, diagrams remain canonical Markdown source.",
-      "renderedAt": "2026-10-01T23:49:05.180Z",
-      "manifestSha256": "4424d4aa027cdc1f1f95d4566300a6bc9ce374e501b84301a0ef5136fcb9efe0",
-      "diagrams": [
-        {
-          "document": "docs/ADR/ADR-001-partition-identity-affinity.md",
-          "index": 1,
-          "sourceSha256": "bd9da8bb7a8180e719a6580aff89a005b4770cf47906fae033b3b272af70863a",
-          "outputSha256": "18e7d1cf0c1259ccec1594f57ff63f38faa8e36326039b59690e42cd5f959f93",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-002-command-idempotency.md",
-          "index": 1,
-          "sourceSha256": "c262a58f4928317b9b5c87a6f05b6e5b58aa769da1bb07edd9aa934119b638e6",
-          "outputSha256": "4fd504dc000529fcf71282f6c48bd8552a993494a37232f03167051c5e8e31de",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-003-durability-ack-barrier.md",
-          "index": 1,
-          "sourceSha256": "e4070626a061e155b00ba7d6f7ebb538793729cab68c290f8dcdf29a2cdf1d99",
-          "outputSha256": "c942e9afa7c0047acfe55ae3fb5370afcf4cba82f012b8ce04ccb71ce08ad040",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-004-committed-read-views.md",
-          "index": 1,
-          "sourceSha256": "9645a7c7242ef1d1c00374851a1539df844f0ebef8ac7938c9440992d763791c",
-          "outputSha256": "80805994fd43ffa8caf49cca9878cc9ebfc998b35d5232668164548f3773edae",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
-          "index": 1,
-          "sourceSha256": "a2310b81b8252a3192d7ad9c3dfd3dbfe10bf5f44d535331561a6b2b17aadcfc",
-          "outputSha256": "00091256cc56817ee789b512b17c209dce52a18b6ff7343195c28ef9aee82e51",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-006-strict-derived-indexes.md",
-          "index": 1,
-          "sourceSha256": "2d976c4fbe2a34e6d337552b082dbc0440d498c2886a9e24b162fc38944b9180",
-          "outputSha256": "e76973b5b085a5f622c8c06d36fed681302ee95a5bcf21730ee107623c5b005e",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
-          "index": 1,
-          "sourceSha256": "e8b40720b845c7bc3fbc3e587cbbf27598ae67aa1b09c2248a5b5358a5bdb711",
-          "outputSha256": "89b502a661028ae4942c6ca39334bb8493a84af3e53fc4696d4475b93fc2db1f",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-008-backup-log-retention.md",
-          "index": 1,
-          "sourceSha256": "830e0c56433745264c9a8aabe0862f0dc5b97cd46714ccb7de4a21a50ba466c6",
-          "outputSha256": "f64d4f680bc976a3a445dd2961cd189f9e3c54a8e4fc48c7a905a2455902f69c",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-009-search-provider-boundaries.md",
-          "index": 1,
-          "sourceSha256": "b17e2d9c993f8bd4618020555cbf7170465f7f6a0d236613f4450c6617108273",
-          "outputSha256": "c2244ecd20f487bc33107e8261dfed1110ca0ee82f82ee0c54c52c95db88b45b",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-010-query-budgets-security.md",
-          "index": 1,
-          "sourceSha256": "e8fbc7e9f8d5fe23a779e1e542b3b3861f1132a95bb1f95c3d9846ac7a29d829",
-          "outputSha256": "912b80ff0fb5d29beb2f1ed127576d80e6ce969a21799c7e94c2d75c66acfc4c",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-011-format-upgrades.md",
-          "index": 1,
-          "sourceSha256": "31c6b7c487e6a2f88376b80df61185fe272a8314de48c80391812077c826e7f1",
-          "outputSha256": "86b05536cf6a32e1c3d0437934d0ba7920c1ff1e813a2f4c6e191a5d7a61fc10",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-012-sql-dialect.md",
-          "index": 1,
-          "sourceSha256": "a118c0c8c0115df61038c4bfd36777a58488f9d4ad7cce78071d1678ab682988",
-          "outputSha256": "a89485278a8b7dc9bb8fad7a03044dac85f668fd89e0bf90f4dc6ae6619c3bd1",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-013-authorized-query-ast.md",
-          "index": 1,
-          "sourceSha256": "ae0b730af3beb022459d51fb321ec1329c78511d7d0f0235b1bae0e9d20a71ce",
-          "outputSha256": "c7ae3ecf79a627009e4d7c4702827a420d99c6e04473e745f2f59828f7e2ae2f",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
-          "index": 1,
-          "sourceSha256": "f3d57005cd439808a9f5db63d2b21de65c60cee8a1b13b11db60dc27f030a866",
-          "outputSha256": "26c4efead77c0a05fe0ad975f5ec521aca7c4aba6ccf1de3c6576ce7b1596ebc",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-015-sensitive-data-lineage.md",
-          "index": 1,
-          "sourceSha256": "f086bd28b504db908675234d657b29bac21f27c132c114fc05fcbdb7e694e53d",
-          "outputSha256": "f85826465715d9e1bf6cc4ad4d16b8ee9bede162e7238f198785c52957381479",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-016-atomic-physical-placement.md",
-          "index": 1,
-          "sourceSha256": "0c37a342668a4816d0432527efcf459136cbb018b022b46e198530a79554dc4e",
-          "outputSha256": "316875011f44305b9eb084eb42344d2007b2d074386a82ab409a58cad57e9674",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-017-migration-tokens.md",
-          "index": 1,
-          "sourceSha256": "07dd8685432fd0919a3da3a39ea9548e1c907ee67a12cf081a11e302008096ad",
-          "outputSha256": "f2174776bd4468fe715d09ba8a6d536b858839f6deca15ed10c824aaaba3a6ac",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-018-global-rank-fusion.md",
-          "index": 1,
-          "sourceSha256": "606df53285a2772daa0b301f6758ab1d3be32cf71b795156a60bb89e2d42fb21",
-          "outputSha256": "b0243be1b3457f1378e41391620650a9447419d8327483a434be6fbce6e6246d",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-019-managed-ann.md",
-          "index": 1,
-          "sourceSha256": "b9293920d88b110a06942b3abfc3eedcfcbdd36da6e1195c446a61b7be3485de",
-          "outputSha256": "af7310e0d0020c65dc4edf4021775fb549b798ea746a8a2b3c693165b26f4204",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-020-independent-query-contexts.md",
-          "index": 1,
-          "sourceSha256": "56664f4453d277e67812fa71defb56c32eff31968de3c423842217f110cc465f",
-          "outputSha256": "99576a78bc75dafc3420bd83b0fe40581f90cb3729d66af0594f8b6cf9b9bdba",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
-          "index": 1,
-          "sourceSha256": "978a76e442a21bb80a481faf15f2165e2684617454a9e8c16855b57c0c75f45b",
-          "outputSha256": "b42446d47b79603a6aabf40ebf1794d18b2f4488d458efe116d7b5f5f460d5d1",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-022-policy-epoch-revocation.md",
-          "index": 1,
-          "sourceSha256": "07bb5a856f73da79cb2c96284ec2ba4ab105875932c5048e2f22c3bfc82b5a65",
-          "outputSha256": "bb0dd71dc130593521bd9e8c34b35011f3b9c00066e52487460905284ff86ded",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-023-journal-authority.md",
-          "index": 1,
-          "sourceSha256": "663f4575771f129619ac096e8dadcac65bdda982641b0409c376b41fa48ed31c",
-          "outputSha256": "b1056c9340d0d57cca30d4b58a315dc45cd5aae30abac8b46ea937a01c13e038",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-024-transaction-domain-binding.md",
-          "index": 1,
-          "sourceSha256": "d24f1317cab6adf290a95ddc0f32c0cbb83fe381fb312acccbe71ec95752329e",
-          "outputSha256": "6684d46a5f73844bf97f79d999e145aac60fc107861c1d6ffe15563c6c679a47",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-025-event-revision-feed-positions.md",
-          "index": 1,
-          "sourceSha256": "e61d1be4b0152c45d0e26260ed721bd74f01341df5571dc3f18f556f886d33ef",
-          "outputSha256": "97b3c90948f65f86e5db95d12da8a3e73eb15641ebd9934ceb91bf50614ea241",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
-          "index": 1,
-          "sourceSha256": "4d12c39abfbfd89a0aa148f6858764d2f2ea567386311f5424dcf20af82ead08",
-          "outputSha256": "f329a3779b142232f5b6a9c3bc780c7405f458d88ff3a22f27726ece1ed3f0a2",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
-          "index": 1,
-          "sourceSha256": "2e3444764bc490aceb0e91da19f8b06118443015f39e92133909c75ad49d3ee1",
-          "outputSha256": "44e00959da41cdeb9ab80a968ab20909027e1b705b0b9c5992e285961d3cc8d2",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-028-persisted-scheduling-time.md",
-          "index": 1,
-          "sourceSha256": "6d211bcad926ac5b8574376b0413c9d8610b0598b7bcd4d2a7671e4ae3357cee",
-          "outputSha256": "b4328cfa9a41243a0d1fe7996209b2c31dd14b3ab86619f1cbc5f776c3aa6a2c",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-029-event-message-classification.md",
-          "index": 1,
-          "sourceSha256": "7ad6c20344da64b6ffc19f05ce9d43ea6d74b2aece992b098fd9b475c530ae7c",
-          "outputSha256": "0e085c52734e0642dd196d20ba16a6c1a77b3fb07e95b54f78e8e6d852258530",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-030-retention-paused-restore.md",
-          "index": 1,
-          "sourceSha256": "1ef14a3708bd264d436f7f02d919ca49ac3cb4ce28b4335bd18521488981f0c1",
-          "outputSha256": "3245d4714f112a073c90acd38b27530b0f9bae56f31697c59fc48a96e4ad6967",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
-          "index": 1,
-          "sourceSha256": "c9194b7afd2944b6c6b4902f2e2465478447c34d95eb2d9023cb19082123aa95",
-          "outputSha256": "8fd58fda62ea0c2c258148f26eab1b5f9db6353c699679e4b6142c72456a5ba1",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-032-mcaf-governance.md",
-          "index": 1,
-          "sourceSha256": "abf13bd1a9ca9125486aecf11de3b3d00cde5469b50123f5c06d97949de720c8",
-          "outputSha256": "c29372ff71a68c6d47d9969a7f8f57a834f614870d519849c7789de245d742c0",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-033-code-quality.md",
-          "index": 1,
-          "sourceSha256": "c32eb608babd516ae43af1ce474b1e6603aa5fb8dedc8b681c38b91279a889cf",
-          "outputSha256": "f0413d2a9c03b660c8315aa4dda2926183dd75665ce958155a8e1c01daf005ca",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-034-cluster-comparisons.md",
-          "index": 1,
-          "sourceSha256": "00c306a594563f63997a0756bd4844f6192ad99a50fa5d5081724caedff37243",
-          "outputSha256": "dd943c0052877210d43956255c44a28ec08ac7782b0de44112a8c474604ea8de",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-035-memory-performance.md",
-          "index": 1,
-          "sourceSha256": "96f1a48f92b1122a29ec0f7707dc1b5116955de9d9a532572984e3f7029db94b",
-          "outputSha256": "dd9a70213084b59bf9ccfd2cad94c7faf08274405ba018f287e43bd1a22f98c0",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-036-orleans-foundation.md",
-          "index": 1,
-          "sourceSha256": "e3fabeac3735f5d723d6968b60563865a66c69f376a55d1ffafc49a2962351f9",
-          "outputSha256": "067a8aef20653cffdf32a8552150edf9507bae6296a74efe96c8e54d1e5272c1",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-037-documentation-coverage.md",
-          "index": 1,
-          "sourceSha256": "166b3dc7dac81e2e1e3e49526ca1c38597018f50e22ff69042f8bb1630a33b2d",
-          "outputSha256": "8a772c3934499046fbd89a5f3d2adefca1646566e1819e51219bbcb52b3bcfe2",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-038-chunked-blob-storage.md",
-          "index": 1,
-          "sourceSha256": "f8949e027d4e7ed3eb3c7ada45ced834d78af32973d6bc7dc20434ddd34abb8c",
-          "outputSha256": "1286ea2ae00a2ac61b2eb2f6ef64b88f4369858d48bc99be48d543f5cd0aeb81",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/ADR-039-official-mcp-agent-api.md",
-          "index": 1,
-          "sourceSha256": "6df88717486855ed7e55fabb02e67693028c6729c5c904ebc4b757537638247e",
-          "outputSha256": "fcb73bf750ba38116f038a955541c3bb9f73514e375c8f66843a101b9887dba0",
-          "state": "passed"
-        },
-        {
-          "document": "docs/ADR/README.md",
-          "index": 1,
-          "sourceSha256": "e6668fce116019d30f1e62031f4eeca1c41def60a1555592cc87e34a602be202",
-          "outputSha256": "02f3ca0acb4a07a308417cbd371f07c0dd67b797664edfe9d296973b157c73b3",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 1,
-          "sourceSha256": "88252bb056c0470f901e09717942c6392e6f498f6789d5c52bbc7599b840195c",
-          "outputSha256": "feb6c70ad7bf7656a66569f3361b613b378b56a6d1d8fba76f8ee92ec6228207",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 2,
-          "sourceSha256": "b90bb06a43d959e120f0f8d43247af01501e24f5bbeda70955d259b017b44ff7",
-          "outputSha256": "df3d92cc955c4904c91d1afffc620b56b99eface0269a387e25ec317826b0a2e",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 3,
-          "sourceSha256": "a41a79499ced555d91899b0afbeede7ea602d52f8f12f7ba7561bc5dffff71b7",
-          "outputSha256": "2ed0328822ebc84e9601849336bf5273a9c4efd1321fa9b843896fa67e6149d6",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 4,
-          "sourceSha256": "f5fdab4cac2dbaa4097aff6fcfcc4c465a256cd72472061a923c1917d7b90121",
-          "outputSha256": "455a3fdf8836b6f6673c7cad10ae23e1908d884bb88f408b45b2aeb040393195",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 5,
-          "sourceSha256": "582643f4b60cc55c51e73a841dd3ae351e4a539cd5d8707ce22a84986178fd28",
-          "outputSha256": "27a964d4b660075ede9d1e2380c9e7ce084f24bddb2f3a8174ce5dca9ca8949d",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Architecture.md",
-          "index": 6,
-          "sourceSha256": "3ea1348b70edab498157cd61ea45181502b2188371cdf7fed1fbb7094e5c2e7e",
-          "outputSha256": "31a5a3f366e57feb236ce9a2d82b205e51c0eb4a545ce07480060158942dfb86",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/Authorization.md",
-          "index": 1,
-          "sourceSha256": "0c8e8ac58f68c02c74cc8daeb7346c6d32f9e7da13282ab1741a7e47be7ec138",
-          "outputSha256": "faeffe2b6220087218482f9a231d98b235642dbcde6ca16f4ca11c137e03d3b8",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/BackupRestore.md",
-          "index": 1,
-          "sourceSha256": "dca2062aea35ce45e32edd11e493a356414b645112f343da93d61a94af482a34",
-          "outputSha256": "6ed0b895999fba343f3e47c3b407b46922c61d1ed0cfbe86fb5a883f7c5ec386",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/BenchmarkComparisons.md",
-          "index": 1,
-          "sourceSha256": "832b0f71c55df399b5401f6051a591a6580312a6d35123c55e38f03cf31b772d",
-          "outputSha256": "9a85d70ebc0717f9fbaec2865b4d4a0e3a28df64f5c4600185ae66e521f1784c",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/BlobStorage.md",
-          "index": 1,
-          "sourceSha256": "814c8d1faa599452401b39bb39d4cd9c741551b15d605c7588cbc1018ef9dbaa",
-          "outputSha256": "6788162194bed41f71443f768dc54f23fcfa8613cb330dbc7def3efa4e255fee",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/ChangeFeeds.md",
-          "index": 1,
-          "sourceSha256": "48aba23071eca2ef476785b7a1bacd43a255ae89d996bb6e3adbf2fccd98c737",
-          "outputSha256": "c2716a64cab16499c943249adfc99a315b2351b0a86d4cf530ad23e69aab01f8",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/ClientApi.md",
-          "index": 1,
-          "sourceSha256": "5caf3711b7f902e41664156e18a3a17fdde51b6e1190575126c9d6efb6849f3a",
-          "outputSha256": "fb2bf91dd8c96c19c2f7d0e196596f3b52d079ac97b6610c1fb5391ae1bfe1a1",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/ClusterReplication.md",
-          "index": 1,
-          "sourceSha256": "9d2b41f3d1b113bfd469d36f92d4a385a535483263050f3fd63eff58b8ee100c",
-          "outputSha256": "3931dcc04cc7eecac1f2a5848924d422a48f07dd9b314b5b265b661442876fc6",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/ClusterRouting.md",
-          "index": 1,
-          "sourceSha256": "46c83859f6bb0a68bc1e9b2f2c6774dd3509d81081323d181994574d7697d06e",
-          "outputSha256": "f743ccbd1c3f438762507e17ca01a2edf205a3c7e0451aade5b40657e4f408a0",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/CodeQuality.md",
-          "index": 1,
-          "sourceSha256": "6d9e71f3ee657ea2bb95ea1d1cce43a2e73415382a384f7159230ff704730c92",
-          "outputSha256": "2bcbd23ed12d4eed5c75ba9f15ddde12ca2d9b5c9419b81b3946909a52d1064c",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/DocumentStorage.md",
-          "index": 1,
-          "sourceSha256": "70f9d45725251d6f85c17ba7b41f8b428de3661fbb8ef5834e135a76f12f033a",
-          "outputSha256": "de317b4283985923d5249ce6852a83102514a0edd80526ca3a43de6d470b47e7",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/EventStreams.md",
-          "index": 1,
-          "sourceSha256": "f3b98e2291340bd625a14e6c2dc780c052285126c752ea83b18875150bb38a6d",
-          "outputSha256": "268a16cb01bd1d290a5e910f00a66c40da57cac5a9ea22e1bbc817161021a9e0",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/GraphTraversal.md",
-          "index": 1,
-          "sourceSha256": "0c17de57b0300bf92a47ad0349fc5dfe4bff877cd228bb0f6f3b71f9ebf78e1e",
-          "outputSha256": "08a65fb43daee5c0863de32b721ce91779d4c649f1c19feb6c640e406cb385d3",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/Messaging.md",
-          "index": 1,
-          "sourceSha256": "56292eee302e39a3268c9d5425ec818d904f46939a929f415c828867991dcb42",
-          "outputSha256": "2c58e1aaa63f492d7d92b9c12e612a36c9e5dc0bde9efcc9313151056df5f2e6",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/QueryExecution.md",
-          "index": 1,
-          "sourceSha256": "a6ab05557d56c89bcffc892ef16d2b6d84055d946cadcfdeadf512311e4a095a",
-          "outputSha256": "efcec975b575a4b3432d26f1be15708dd55ec3357acbe85a0b0a5d14eb06e19a",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/RepositoryGovernance.md",
-          "index": 1,
-          "sourceSha256": "c630c18e95e20611455e674daa8eb2401ecfcf1da7921f8d31de7821080be845",
-          "outputSha256": "37d109b1112fa929810c92ca2e02766823924efa64e610335d8af82d8f27d3fa",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/ResourceExecution.md",
-          "index": 1,
-          "sourceSha256": "352e603691f6861233e5293931b6924faa5ae9833e1eb33fdd5317694cf2945a",
-          "outputSha256": "a07a9dfd6813f1de0703da027b84ed1def8c4804891b1fde9a616cdbcf8618f7",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/Search.md",
-          "index": 1,
-          "sourceSha256": "7ae536b0cab684b2017cb9d0c947a3373b2a6433047bbf39d8757f3968b8af67",
-          "outputSha256": "cc30caa91e879b52e0a26264b200bd8484cbe15bd36dd2cab54c61174bc1a613",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/StorageRecovery.md",
-          "index": 1,
-          "sourceSha256": "4f1c1a312f0cf9d6e86b8c1ef7e7334f7bdf8c659bf70862b58dec515b2ab002",
-          "outputSha256": "6e4ab080f7243f8f0602f6961bc70093d18d3e53c9517b515aab6eca90429799",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/TestInfrastructure.md",
-          "index": 1,
-          "sourceSha256": "9da0490b0fa6f206abe4635514f00dccea060fb7af7591bd0d02712e0527c9c6",
-          "outputSha256": "9020e96608c87dfff4a8aba801310a23bcebad38756f4018051a6712bcdd1aa5",
-          "state": "passed"
-        },
-        {
-          "document": "docs/Features/TimeSeries.md",
-          "index": 1,
-          "sourceSha256": "a2dc03be774dab0a12f82601671d5753a42586590aa9b0163689743d1346f431",
-          "outputSha256": "350f3f0bb9ffc813114fc2c26ac314d8cd21809783e41c5c98ae0421a6127cbe",
-          "state": "passed"
-        },
-        {
-          "document": "docs/README.md",
-          "index": 1,
-          "sourceSha256": "cc0b022e1c73d1eeb7dde9ff61f169ba1e36178ce5282edde15f3c7065e00e70",
-          "outputSha256": "14bc06e10a56e95217cac8651d100c503dd87543a335310d8a989259f9e17c4e",
-          "state": "passed"
-        }
-      ]
-    },
+    "acceptanceOutcomes": "No current product acceptance is closed by this traceability or governance update.",
+    "productGateException": "A documentation-only change uses static checks and explicit manual full-content/source review. Runtime TUnit/recovery/RF3, coverage/complexity and performance gates remain required in owning product plans and are not satisfied or waived here.",
     "governance": {
       "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
-      "state": "passed",
-      "projects": 22,
-      "modules": 4,
-      "preservedRootPrefix": true,
-      "repositorySkillInventoryUnchangedAndEmpty": true
-    },
-    "whitespace": {
-      "command": "git diff --check",
-      "state": "passed",
-      "untrackedDocumentationAlsoCheckedByStaticInventory": true
-    },
-    "productGateException": "A documentation-only change uses static checks and explicit manual full-content/source review. Runtime TUnit/recovery/RF3, coverage/complexity and performance gates remain required in owning product plans and are not satisfied or waived here.",
-    "catalogSnapshot": {
-      "counts": {
-        "features": 20,
-        "decisions": 39,
-        "backlogItems": 104,
-        "requirements": 137
-      },
-      "note": "Historical TASK-DOC-REVIEW-007 snapshot. New site extension requires its own source/static/manual/CI joins."
+      "exitCode": 0,
+      "scope": "local development current governance; not product or Linux qualification"
     }
   },
   "historicalProductBaseline": {
@@ -7598,7 +6517,7 @@
     "existingRequirementsRefined": [
       "REQ-STORAGE-014"
     ],
-    "qualifiedPartialReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+    "qualifiedPartialReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37070004864"
   },
   "ownerCompletionWave20261003": {
     "date": "2026-10-03",
@@ -10869,7 +9788,7 @@
         "dependencies": [
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "contracts": [
@@ -10916,7 +9835,7 @@
           "TASK-NODE-EPOCH-IMAGE",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "contracts": [
@@ -10971,7 +9890,7 @@
           "TASK-NODE-EPOCH-COORDINATOR",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "contracts": [
@@ -11030,7 +9949,7 @@
           "TASK-NODE-EPOCH-REPLICA",
           "TASK-NODE-EPOCH-REGULAR-FILE"
         ],
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "contracts": [
@@ -11118,7 +10037,7 @@
         ],
         "state": "source_reviewed_build_formatter_passed_current_RF3_execution_pending",
         "joinCondition": "no_bound_increase_no_swallowed_error_no_new_command_id_original_passed_reports",
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "id": "TASK-NODE-EPOCH-REGULAR-FILE",
@@ -11161,7 +10080,7 @@
         ],
         "state": "root_reviewed_full_Aspire_local_normal2908_scalar2908_recovery257_passed_exact_Linux_cold_RF3_pending_20261004",
         "joinCondition": "all_migration_inputs_guarded_actual_FIFO_no_hang_lock_interop_and_exact_original_preservation",
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       {
         "id": "TASK-DSTORE-RF3-PARITY",
@@ -11389,7 +10308,7 @@
         ],
         "repairContract": "Reuse tested ServerFailureObserver for actual cleanup observation; preserve synchronous Flush(true) through root OfflineFiles.FlushToDisk; preserve caps/ownership/oracles; root takes ColdScenario and CurrentWaveRunner disposal/order joins.",
         "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "deliveredEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
       },
       {
         "contracts": [
@@ -11445,7 +10364,7 @@
         ],
         "cleanupContract": "Await-using owns each wave; observe body and disposal faults into the same scenario failure list, do not advance waves after any fault; retained-wave final settlement preserves every failure and keeps private roots on errors.",
         "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "deliveredEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
       },
       {
         "id": "TASK-NODE-EPOCH-OFFLINE-CLI-REGRESSION",
@@ -11557,7 +10476,7 @@
         "state": "original_thresholds_pass_complete_normal_scalar_delivered_0d78_Linux_reports_no_global_CI_completion_claim",
         "joinCondition": "retain every original expiry/renewal assertion and real TimeProvider.System timestamp; no fake clock, threshold relaxation, skipped test or CI pass claim",
         "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "deliveredEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
       },
       {
         "requirements": [
@@ -12479,7 +11398,7 @@
         ],
         "state": "canonical_sample_Conflict_oracle_source_corrected_runtime_pending",
         "joinCondition": "every_original_no_mutation_retention_revocation_current_write_follower_recovery_snapshot_and_prior_source_integrity_assertion_executes_no_partial_acceptance",
-        "deliveredEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "deliveredEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
       },
       {
         "id": "TASK-NEXT-JOBS-ACCEPTANCE-ASSESSMENT",
@@ -14045,8 +12964,8 @@
         "dockerAspireRf3Qualified": false
       }
     ],
-    "nodeEpochDevelopmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-    "nodeEpochDelivered0d78Evidence": "Historical intermediate report removed from repository; no current qualification inferred",
+    "nodeEpochDevelopmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+    "nodeEpochDelivered0d78Evidence": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629",
     "annR1Checkpoint": {
       "commit": "eca51325477d22aeb5fc12677860d0d22eb3968a",
       "branch": "main",
@@ -14157,5 +13076,1418 @@
       "productRuntimeQualified": false,
       "allAcceptanceClosed": false
     }
+  },
+  "historicalStatus": "documentation_complete_locally_runtime_unqualified",
+  "historicalVerification": {
+    "state": "passed_documentation_static_and_complete_independent_review",
+    "verifiedAt": "2026-10-01T23:51:04.170Z",
+    "scope": "documentation_only",
+    "localRuntimeTestsRun": false,
+    "skillsOrToolsInstalled": false,
+    "productGatesQualifiedByDocumentation": false,
+    "acceptanceOutcomes": [
+      {
+        "id": "AC-DOCS-001",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-002",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-003",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-004",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-005",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-006",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-007",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      },
+      {
+        "id": "AC-DOCS-008",
+        "state": "passed_documentation_scope_only",
+        "evidence": "integrated inventory, preservation, link/render/static checks and complete TASK-DOC-REVIEW-007"
+      }
+    ],
+    "static": {
+      "state": "passed",
+      "scope": "documentation_static_only",
+      "filesChecked": 68,
+      "features": 20,
+      "decisions": 39,
+      "backlogItems": 104,
+      "requirements": 137,
+      "localLinksChecked": 576,
+      "anchorsChecked": 14,
+      "diagramsFound": 67,
+      "preservedExistingFeatureFiles": [
+        {
+          "path": "docs/Features/RepositoryGovernance.md",
+          "identifiers": 14,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/BenchmarkComparisons.md",
+          "identifiers": 20,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/ClientApi.md",
+          "identifiers": 5,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/ClusterReplication.md",
+          "identifiers": 12,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/ClusterRouting.md",
+          "identifiers": 6,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/CodeQuality.md",
+          "identifiers": 8,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/EventStreams.md",
+          "identifiers": 4,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/QueryExecution.md",
+          "identifiers": 4,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/ResourceExecution.md",
+          "identifiers": 10,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/StorageRecovery.md",
+          "identifiers": 7,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/TestInfrastructure.md",
+          "identifiers": 6,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/TimeSeries.md",
+          "identifiers": 5,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        },
+        {
+          "path": "docs/Features/Search.md",
+          "identifiers": 7,
+          "originalObligationsPreserved": true,
+          "adaptation": "Concurrent owner added canonical DocumentStorageKeys ownership; prior paths and full requirements retained."
+        },
+        {
+          "path": "docs/Features/Authorization.md",
+          "identifiers": 6,
+          "originalObligationsPreserved": true,
+          "adaptation": "Additions and documented foundation-number correction only."
+        }
+      ],
+      "policies": 27,
+      "byteIdenticalPolicies": 24,
+      "externallyAddedPolicies": [
+        {
+          "path": "AGENTS.md",
+          "preservation": "external_insertion_original_full_text_verified"
+        },
+        {
+          "path": "src/KeyLoad.Core/AGENTS.md",
+          "preservation": "external_additive_original_full_prefix_verified"
+        },
+        {
+          "path": "tests/KeyLoad.UnitTests/AGENTS.md",
+          "preservation": "external_additive_original_full_prefix_verified"
+        }
+      ],
+      "documentManifest": [
+        {
+          "path": "docs/Features/Authorization.md",
+          "sha256": "94abdbd1a07b0a5cc743ad20fca47b8642a481d99f0f78f9a00f942c7605164b"
+        },
+        {
+          "path": "docs/Features/BackupRestore.md",
+          "sha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3"
+        },
+        {
+          "path": "docs/Features/BenchmarkComparisons.md",
+          "sha256": "c04a979ec4a09b6e4dab9658c8be954d84e6bc18d59ef7d61204014f4a757d21"
+        },
+        {
+          "path": "docs/Features/BlobStorage.md",
+          "sha256": "944a88bc31ef4bd0c3e0a4a847dbd9c5a60ef1201d4c791d54e24968327ea030"
+        },
+        {
+          "path": "docs/Features/ChangeFeeds.md",
+          "sha256": "26566f9c9017c62b235fd2a7bf9561a358370345e93bff72ef3dfe802d1d6158"
+        },
+        {
+          "path": "docs/Features/ClientApi.md",
+          "sha256": "e2dbe5dd3a2841d3ce3cf76b0b1a13ce69df64a4cf1ab09de035ce65f756503e"
+        },
+        {
+          "path": "docs/Features/ClusterReplication.md",
+          "sha256": "61fb2e0505c3026eb99b203dd56ed434c8946edbb6005367fc5fb63ac33ac459"
+        },
+        {
+          "path": "docs/Features/ClusterRouting.md",
+          "sha256": "f6a0ff266a0c2e779a5ba12c161dfb5bd2da2bb8dbec4478a8c3c774f8d857e3"
+        },
+        {
+          "path": "docs/Features/CodeQuality.md",
+          "sha256": "07d6ab68e5c5cb3bdc3a1ee905767ae0c5afdab5e53513e8d1858f003ea8f9c5"
+        },
+        {
+          "path": "docs/Features/DocumentStorage.md",
+          "sha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8"
+        },
+        {
+          "path": "docs/Features/EventStreams.md",
+          "sha256": "80d24346d37ccbf3b273ebe188c3be36610286cb80a58bcecf1b864ea89a4f2d"
+        },
+        {
+          "path": "docs/Features/GraphTraversal.md",
+          "sha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8"
+        },
+        {
+          "path": "docs/Features/Messaging.md",
+          "sha256": "963bdf05e0a65819f674eb0555ddd6c3598d8a6a90de92a6c7a08ca178032530"
+        },
+        {
+          "path": "docs/Features/QueryExecution.md",
+          "sha256": "39017131197a3acb461bf3e24955dd3056f4f7641ad39a1b54495bd4a2b69e9d"
+        },
+        {
+          "path": "docs/Features/RepositoryGovernance.md",
+          "sha256": "4773510806126f7fee6785526cf4ef4f72ee16da153bfafa56641b44f0c0bf98"
+        },
+        {
+          "path": "docs/Features/ResourceExecution.md",
+          "sha256": "6104dbebe5ba8ab2dea60df251310c6149377cd7018ab9b02cad2840b4f05ade"
+        },
+        {
+          "path": "docs/Features/Search.md",
+          "sha256": "63bc5298304b94752ccdec6a2fc1a5cb9f7130f316c2da2e94890b00d47fc229"
+        },
+        {
+          "path": "docs/Features/StorageRecovery.md",
+          "sha256": "a6cc5f6e213c8640d9cb62b63c40253bf239f84f49dc9c89f691d155871bc6c9"
+        },
+        {
+          "path": "docs/Features/TestInfrastructure.md",
+          "sha256": "50fbafb9cb930fe038b48f3b656a843543ed39dc19ca2a204aaddd8a85d920f8"
+        },
+        {
+          "path": "docs/Features/TimeSeries.md",
+          "sha256": "84c12ea9cb4f52e24af2a4b6cbbbcfdf0da24b71e872b779044bcd18b05ad449"
+        },
+        {
+          "path": "docs/ADR/ADR-001-partition-identity-affinity.md",
+          "sha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881"
+        },
+        {
+          "path": "docs/ADR/ADR-002-command-idempotency.md",
+          "sha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710"
+        },
+        {
+          "path": "docs/ADR/ADR-003-durability-ack-barrier.md",
+          "sha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07"
+        },
+        {
+          "path": "docs/ADR/ADR-004-committed-read-views.md",
+          "sha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431"
+        },
+        {
+          "path": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+          "sha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083"
+        },
+        {
+          "path": "docs/ADR/ADR-006-strict-derived-indexes.md",
+          "sha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d"
+        },
+        {
+          "path": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
+          "sha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933"
+        },
+        {
+          "path": "docs/ADR/ADR-008-backup-log-retention.md",
+          "sha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b"
+        },
+        {
+          "path": "docs/ADR/ADR-009-search-provider-boundaries.md",
+          "sha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9"
+        },
+        {
+          "path": "docs/ADR/ADR-010-query-budgets-security.md",
+          "sha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a"
+        },
+        {
+          "path": "docs/ADR/ADR-011-format-upgrades.md",
+          "sha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff"
+        },
+        {
+          "path": "docs/ADR/ADR-012-sql-dialect.md",
+          "sha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629"
+        },
+        {
+          "path": "docs/ADR/ADR-013-authorized-query-ast.md",
+          "sha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a"
+        },
+        {
+          "path": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
+          "sha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6"
+        },
+        {
+          "path": "docs/ADR/ADR-015-sensitive-data-lineage.md",
+          "sha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836"
+        },
+        {
+          "path": "docs/ADR/ADR-016-atomic-physical-placement.md",
+          "sha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f"
+        },
+        {
+          "path": "docs/ADR/ADR-017-migration-tokens.md",
+          "sha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b"
+        },
+        {
+          "path": "docs/ADR/ADR-018-global-rank-fusion.md",
+          "sha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40"
+        },
+        {
+          "path": "docs/ADR/ADR-019-managed-ann.md",
+          "sha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1"
+        },
+        {
+          "path": "docs/ADR/ADR-020-independent-query-contexts.md",
+          "sha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407"
+        },
+        {
+          "path": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
+          "sha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f"
+        },
+        {
+          "path": "docs/ADR/ADR-022-policy-epoch-revocation.md",
+          "sha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8"
+        },
+        {
+          "path": "docs/ADR/ADR-023-journal-authority.md",
+          "sha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526"
+        },
+        {
+          "path": "docs/ADR/ADR-024-transaction-domain-binding.md",
+          "sha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c"
+        },
+        {
+          "path": "docs/ADR/ADR-025-event-revision-feed-positions.md",
+          "sha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866"
+        },
+        {
+          "path": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
+          "sha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5"
+        },
+        {
+          "path": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
+          "sha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914"
+        },
+        {
+          "path": "docs/ADR/ADR-028-persisted-scheduling-time.md",
+          "sha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a"
+        },
+        {
+          "path": "docs/ADR/ADR-029-event-message-classification.md",
+          "sha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305"
+        },
+        {
+          "path": "docs/ADR/ADR-030-retention-paused-restore.md",
+          "sha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca"
+        },
+        {
+          "path": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
+          "sha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7"
+        },
+        {
+          "path": "docs/ADR/ADR-032-mcaf-governance.md",
+          "sha256": "df0c219c4f25eec44f06def64b6ac5b8838c0471d6572b48880650b308319339"
+        },
+        {
+          "path": "docs/ADR/ADR-033-code-quality.md",
+          "sha256": "59b7f8c733d2ff7569a62961572285c6906066117bf9b7cf8e25cf732731ff10"
+        },
+        {
+          "path": "docs/ADR/ADR-034-cluster-comparisons.md",
+          "sha256": "2ddf9fee5bdb4dd59760cb2dab0487ec21d832cc274a0ea40425a0c63b504af2"
+        },
+        {
+          "path": "docs/ADR/ADR-035-memory-performance.md",
+          "sha256": "c27400a154930927cf77e7e442050be79d017805890c3a3f6364a35627598b59"
+        },
+        {
+          "path": "docs/ADR/ADR-036-orleans-foundation.md",
+          "sha256": "d87809acd80a749410581d3d53ec3c451157396ef034b3785e20314bf7d07d3f"
+        },
+        {
+          "path": "docs/ADR/ADR-037-documentation-coverage.md",
+          "sha256": "7882b42b4de476112fdadfbcc0650be567f77d4f255c63126a6d0c22833ce559"
+        },
+        {
+          "path": "docs/ADR/ADR-038-chunked-blob-storage.md",
+          "sha256": "a688ddf664820c4c1fd230013aebd5e0f2e1410678ccfd0109c560977fe93161"
+        },
+        {
+          "path": "docs/ADR/ADR-039-official-mcp-agent-api.md",
+          "sha256": "5306610e15ac55cbcfc8768c399e6dcb6d572736571243717ff05bf166c8f30b"
+        },
+        {
+          "path": "README.md",
+          "sha256": "f2668e3aae89ad4327b2582016914511f416eb8ff5b5aac0d998c6924411691d"
+        },
+        {
+          "path": "docs/README.md",
+          "sha256": "6b17eeb9182a4982fa2c464cc4a48886145ea28abeade4f4f9e37c31d48866e9"
+        },
+        {
+          "path": "docs/ADR/README.md",
+          "sha256": "d9542930c2d117e38e8aa2c440459d602b3ac61f73c53e75757e64c33a5d0153"
+        },
+        {
+          "path": "docs/Architecture.md",
+          "sha256": "8da2336ad76408078d2702571442c655451bf7122852137146ac6418f8f00cbd"
+        },
+        {
+          "path": "documentation-coverage.brainstorm.md",
+          "sha256": "8adac48d7127f6b74bf822cb275bcb9c885b36891db916481992ecad1d086c1d"
+        },
+        {
+          "path": "documentation-coverage.acceptance.md",
+          "sha256": "b825698cccb6a2181f89e4a60e55d88842b183be681e3f657a6e2f54015b6223"
+        },
+        {
+          "path": "documentation-coverage.plan.md",
+          "sha256": "5cd0df5c0c9be358d0d14a0fc61c4b7f8feec77bf350add0afb8b7d787dffcef"
+        },
+        {
+          "path": "docs/implementation/orleans-foundation.acceptance.md",
+          "sha256": "66ff5e80a5832fae04e01e3fd40679663f6176deb1cd4b799f1684eb04c46823"
+        },
+        {
+          "path": "docs/implementation/orleans-foundation.plan.md",
+          "sha256": "699433db8d4ac4e635e6059962b9096252d95ecfc5d915607783d750f8848689"
+        }
+      ],
+      "errors": [],
+      "reportSha256": "decbd1a66c3bd5d0d6b892a52516b2e2863173798faea44f458dfb07e511462f",
+      "verificationMethod": "One-off Node built-in inventory/link/anchor/hash/traceability checks plus manual full source/diff review; no alternate product test framework."
+    },
+    "workerJoin": {
+      "state": "passed",
+      "scope": "documentation_author_join_only",
+      "tasks": [
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "terminalState": "complete",
+          "artifacts": 19
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "terminalState": "complete",
+          "artifacts": 17
+        }
+      ],
+      "artifacts": 36,
+      "byteIdenticalSubmittedArtifacts": 34,
+      "reviewedExternalAdditiveArtifacts": 2,
+      "earlierHashOnlyJoin": "/private/tmp/keyload-documentation-worker-join.json",
+      "earlierHashOnlyJoinExplanation": "Historical strict comparison detected two later external additions; it was not accepted as a completed join. This final packet proves preservation by reconstructing the entire submitted body and records both hashes.",
+      "records": [
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/Features/DocumentStorage.md",
+          "submittedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
+          "integratedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
+          "reconstructedSha256": "087c30b9eec88dad3a0254a100aa20feb8da96f70b2cf2bb6bcbb95d75bec4b8",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/Features/Messaging.md",
+          "submittedSha256": "f6b5c5f9e417267e46cfc8bae75854888f83b85f3efe4be5b440e8945ce95758",
+          "integratedSha256": "963bdf05e0a65819f674eb0555ddd6c3598d8a6a90de92a6c7a08ca178032530",
+          "reconstructedSha256": "f6b5c5f9e417267e46cfc8bae75854888f83b85f3efe4be5b440e8945ce95758",
+          "originalBodyPreserved": true,
+          "integrationDelta": "external_post_completion_addition_MP007F_MP007G_full_original_body_preserved",
+          "addedText": "### Accepted TASK-MP-007F queue read-work repair\n\nREQ-MSG-007 maps AC-MSG-001/002/004/005 and AC-MP-006/012 to reuse of real stored\nbody lengths, counters and validated leases. Enqueue serializes its MessageBody\nonce, checks quotas against those exact bytes and stages that same payload through\nthe existing owned provider write. Sweep, Receive and delivery completion decode\nborrowed body bytes once and carry their observed stored length; they retain\nexisting absent/corrupt-body checks and do not reserialize for byte subtraction.\nValid persisted bodies retain the same counters, quotas and format.\n\nCarry a lane's counters through each bounded Sweep/Receive loop and stage the\nfinal value before return; no counters read is required for an empty sweep.\nProcessing verifies token scope before inbox replay, then validates the lease\nonce and passes it to the same private delivery transition. Direct delivery keeps\nresource validation before lease validation; processing keeps its existing lease\nerror before subsequent resource validation. The ACK counters/body transition is\nstaged before effects so released input quota can fund an atomic output. Preserve\nFIFO/ready sequence, recorded command time, expiry/backoff/attempts, generation,\ntoken fencing, field projection, receipts and rollback. No scheduler, public API,\nsigning, schema or cross-partition protocol change is authorized.\n\nWorker owns only Messaging.cs private queue/body/lease/processing regions and new\nmatching Core/UnitTests Features/Messaging helpers/tests; Sign/Verify/Inspect,\nEventSources, shared contracts/DatabaseEngine/docs/CI remain lead-owned. Real-store\ntests precede code: exact stored body bytes and one-byte-short quotas, multiple\nready/scheduled/expired/leased entries, NACK/ACK/renew, stale/foreign/expired token,\nproducer/effects failure rollback, inbox replay and healthy next claims. Existing\ntests are preserved. CI owns TUnit/recovery/RF3 execution; provider lookup counters\nand server allocation/RSS evidence remain separate MP-011 work before measured\nread or memory improvement claims.\n\n### Accepted TASK-MP-007G topic publication read-work repair\n\nREQ-MSG-008 maps AC-MSG-003/005 and AC-MP-006/012 to a single SourceResource and\nTopicHead read during Publish. Carry the same retained raw head's tail, first\navailable position, generation and stored bytes through publication. A shared\ntopic-head helper supplies the existing absent-head defaults and generation error;\nother SourceHead callers keep their validation and stream behavior. Event bytes\nare already serialized once and reused for staging; preserve that property.\n\nWorker owns EventSources.cs private TopicHead/SourceHead/Publish regions and new\nmatching Messaging helpers/tests only. Public reads/cursors, SourceRecord,\nSubscriptions, queue work, shared contracts/docs/CI remain out of scope. Real-store\ntests first cover exact/one-byte-short retained byte quota, absent/stale head,\nmultiple events, duplicate IDs, paused/invalid input and producer rollback with\nunchanged source tail/partition event sequence. Serialized shapes, generation/error\norder and persisted/wire formats remain; source rollback needs no conversion.\nBuild/static review and GitHub TUnit/recovery/RF3 proof are required; measured\npoint-read reduction awaits provider counters under MP-011.\n\n",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/Features/GraphTraversal.md",
+          "submittedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
+          "integratedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
+          "reconstructedSha256": "eb958dff33194e26d1600f7c1a3c3ac4fd15f94b7957d2ff77074e6ff3df8bd8",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-001-partition-identity-affinity.md",
+          "submittedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
+          "integratedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
+          "reconstructedSha256": "0b8219d86b6229d3bc7a7dd92600b78fc4fb32f21041559fa26554843b644881",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-002-command-idempotency.md",
+          "submittedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
+          "integratedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
+          "reconstructedSha256": "9bfc66d88fed21f7f715d56d01a44faa1b486050e634023bc754ee4e4d0f4710",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-003-durability-ack-barrier.md",
+          "submittedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
+          "integratedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
+          "reconstructedSha256": "712f89f15f1c4fd0b645fe0f31bd71b179956d6cbf8cdeffb8cad9cc5732cd07",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-004-committed-read-views.md",
+          "submittedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
+          "integratedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
+          "reconstructedSha256": "05d5d8f5eab4310d2c07f0dab525606c4e7ed5fcc30af32995632690131eb431",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+          "submittedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
+          "integratedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
+          "reconstructedSha256": "39af32fbc18556ef5862426ff774421a87cf70e66a67359a208b15282d9ab083",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-006-strict-derived-indexes.md",
+          "submittedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
+          "integratedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
+          "reconstructedSha256": "e6e99724ff91065a909a391b4c3319dfd080e6bc225014b7658763ac81942c5d",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
+          "submittedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
+          "integratedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
+          "reconstructedSha256": "7d9981ad5377ac3ce7aaa45c9c50856ba9761e930ada9ab2df6c5c6cef4b2933",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-008-backup-log-retention.md",
+          "submittedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
+          "integratedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
+          "reconstructedSha256": "eb553ad44a9baa9b21faea747267cbe5ce3d72169e31edef265f7f9a99fe715b",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-009-search-provider-boundaries.md",
+          "submittedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
+          "integratedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
+          "reconstructedSha256": "93579e4605fc499c06b5e3749c22545a295f85a0377485beae48570317bcbcb9",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-010-query-budgets-security.md",
+          "submittedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
+          "integratedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
+          "reconstructedSha256": "38e153137cebd264d8b87aabf527bcb647e8253b6a8e4aa281b4083d5c4ec74a",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-011-format-upgrades.md",
+          "submittedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
+          "integratedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
+          "reconstructedSha256": "cadc5e64b4c4a553de1409ba76a4b2fd23dbf6e0629e9bb111b728473c1879ff",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-012-sql-dialect.md",
+          "submittedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
+          "integratedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
+          "reconstructedSha256": "5d810f219a4252b084123b7323fb1e2f471215a2c09302774d364509c35c8629",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-013-authorized-query-ast.md",
+          "submittedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
+          "integratedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
+          "reconstructedSha256": "1a5f7c2db71cf936c6a9575609a485f4247affc309e135742fe4d86b7a51f72a",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
+          "submittedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
+          "integratedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
+          "reconstructedSha256": "4fba1ae2a03d16cc585ea01bd37f9559654ff6f76da43b39b44f99c78073f0e6",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-015-sensitive-data-lineage.md",
+          "submittedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
+          "integratedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
+          "reconstructedSha256": "4f3fa2924d555553e7448e4a9703fc8b3740f0b3008331f3e3586978db540836",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-004",
+          "path": "docs/ADR/ADR-016-atomic-physical-placement.md",
+          "submittedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
+          "integratedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
+          "reconstructedSha256": "3578ab324f4d5a8ebab8c188f6af2682d690d3ea7179787416cd0c10b580cd2f",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/Features/ChangeFeeds.md",
+          "submittedSha256": "a8b59d7a81e81f0d0e043daa1c4c832196b5b74942f0c5e4947c7597eca2ada5",
+          "integratedSha256": "26566f9c9017c62b235fd2a7bf9561a358370345e93bff72ef3dfe802d1d6158",
+          "reconstructedSha256": "a8b59d7a81e81f0d0e043daa1c4c832196b5b74942f0c5e4947c7597eca2ada5",
+          "originalBodyPreserved": true,
+          "integrationDelta": "external_post_completion_bounded_purge_and_regression_addition_full_original_body_preserved",
+          "addedText": "Purge passes `min(head.Tail, ThroughSequence)` as the reader's inclusive upper\nposition. It neither decodes nor validates a retained entry beyond that requested\ncut; a no-op or already-reclaimed prefix reads no entries. Gaps and invalid\nsequence/partition metadata inside the requested prefix still fail atomically.\nPrepare the partition identity once per iterator, rather than hashing it for each\nentry. This changes read work only, not committed purge outcomes or retention pins.\n\n A corrupt next retained entry proves that no-op\nand prefix purge do not inspect it; restoring that real-store entry allows the\nnext projection batch to consume it.",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/Features/BackupRestore.md",
+          "submittedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
+          "integratedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
+          "reconstructedSha256": "dc4417142c5743674b072f1da9b6850f3eabc7afd7cd5009c276c5e9720919c3",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-017-migration-tokens.md",
+          "submittedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
+          "integratedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
+          "reconstructedSha256": "afc90164690f01efecfd14c22cd61c39c921673f2f6a0f84bd389f950c9fa12b",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-018-global-rank-fusion.md",
+          "submittedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
+          "integratedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
+          "reconstructedSha256": "3821f8a5ad1a74719e46ed5a732226144054a008ebeafece91bed247298c8f40",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-019-managed-ann.md",
+          "submittedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
+          "integratedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
+          "reconstructedSha256": "f33d471f014d7ca24d3545b0d99a2fb27d675c469a5900973897d6454c8346a1",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-020-independent-query-contexts.md",
+          "submittedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
+          "integratedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
+          "reconstructedSha256": "d5052d2664c0592bcad20474c914350ab5009f4120373661b4eb70908a9b6407",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
+          "submittedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
+          "integratedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
+          "reconstructedSha256": "96b0180f9a9711f9dca4880251d28ef66405c746a1113354437ecf8fa8f6285f",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-022-policy-epoch-revocation.md",
+          "submittedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
+          "integratedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
+          "reconstructedSha256": "c981a2248a95138ab5dc6ef6e72c6f946622ea0f91f0d9fc2f796381360282f8",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-023-journal-authority.md",
+          "submittedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
+          "integratedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
+          "reconstructedSha256": "8743661dcf8908d594e8809ae40beedead8f918f01cd3c61f899159d080e9526",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-024-transaction-domain-binding.md",
+          "submittedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
+          "integratedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
+          "reconstructedSha256": "3eb6420fe8b7fe2944a23bd41805a8bea49b479a576c50c93d4598e018618a1c",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-025-event-revision-feed-positions.md",
+          "submittedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
+          "integratedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
+          "reconstructedSha256": "106b4b8b3bec718dbcd3fedaea45c71ad793608f7970f8c3f086a49e89d92866",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
+          "submittedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
+          "integratedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
+          "reconstructedSha256": "245469fe45559b1bfc99ce74d041ed1fc366d624c75627cf1613c76fa3f483a5",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
+          "submittedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
+          "integratedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
+          "reconstructedSha256": "ed5590e2c213772dd78b2fadf67c2a0d3c6581cc49a66acc4bb5c1e19a7b8914",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-028-persisted-scheduling-time.md",
+          "submittedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
+          "integratedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
+          "reconstructedSha256": "84fd3aa43fe9607f1290e9ae9ca4deeedc8729c18a5f7ead9d4dfdf380a58f0a",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-029-event-message-classification.md",
+          "submittedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
+          "integratedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
+          "reconstructedSha256": "4c8785761f5eef313d56051f80488a9c224b920bffe1f810ed38fd0ec590b305",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-030-retention-paused-restore.md",
+          "submittedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
+          "integratedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
+          "reconstructedSha256": "da20fd9f9f1d3d5fb24aacf1ab0e685ad533d4d4b97f493c7ed34ae95dfc4bca",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        },
+        {
+          "task": "TASK-DOC-AUTHOR-005",
+          "path": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
+          "submittedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
+          "integratedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
+          "reconstructedSha256": "75dd6189892ac6c4d8119d97d35f8a15089f8742190c5a917e935d6eb1a970c7",
+          "originalBodyPreserved": true,
+          "integrationDelta": "none",
+          "rootFullContentReview": true,
+          "independentReview": "TASK-DOC-REVIEW-007"
+        }
+      ],
+      "errors": []
+    },
+    "diagramRendering": {
+      "state": "passed",
+      "scope": "static_documentation_mermaid_only",
+      "total": 67,
+      "passed": 67,
+      "installedTools": false,
+      "method": "Existing cached Mermaid CLI and existing Chrome; SVG files are temporary local proof, diagrams remain canonical Markdown source.",
+      "renderedAt": "2026-10-01T23:49:05.180Z",
+      "manifestSha256": "4424d4aa027cdc1f1f95d4566300a6bc9ce374e501b84301a0ef5136fcb9efe0",
+      "diagrams": [
+        {
+          "document": "docs/ADR/ADR-001-partition-identity-affinity.md",
+          "index": 1,
+          "sourceSha256": "bd9da8bb7a8180e719a6580aff89a005b4770cf47906fae033b3b272af70863a",
+          "outputSha256": "18e7d1cf0c1259ccec1594f57ff63f38faa8e36326039b59690e42cd5f959f93",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-002-command-idempotency.md",
+          "index": 1,
+          "sourceSha256": "c262a58f4928317b9b5c87a6f05b6e5b58aa769da1bb07edd9aa934119b638e6",
+          "outputSha256": "4fd504dc000529fcf71282f6c48bd8552a993494a37232f03167051c5e8e31de",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-003-durability-ack-barrier.md",
+          "index": 1,
+          "sourceSha256": "e4070626a061e155b00ba7d6f7ebb538793729cab68c290f8dcdf29a2cdf1d99",
+          "outputSha256": "c942e9afa7c0047acfe55ae3fb5370afcf4cba82f012b8ce04ccb71ce08ad040",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-004-committed-read-views.md",
+          "index": 1,
+          "sourceSha256": "9645a7c7242ef1d1c00374851a1539df844f0ebef8ac7938c9440992d763791c",
+          "outputSha256": "80805994fd43ffa8caf49cca9878cc9ebfc998b35d5232668164548f3773edae",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+          "index": 1,
+          "sourceSha256": "a2310b81b8252a3192d7ad9c3dfd3dbfe10bf5f44d535331561a6b2b17aadcfc",
+          "outputSha256": "00091256cc56817ee789b512b17c209dce52a18b6ff7343195c28ef9aee82e51",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-006-strict-derived-indexes.md",
+          "index": 1,
+          "sourceSha256": "2d976c4fbe2a34e6d337552b082dbc0440d498c2886a9e24b162fc38944b9180",
+          "outputSha256": "e76973b5b085a5f622c8c06d36fed681302ee95a5bcf21730ee107623c5b005e",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-007-replica-consensus-bootstrap.md",
+          "index": 1,
+          "sourceSha256": "e8b40720b845c7bc3fbc3e587cbbf27598ae67aa1b09c2248a5b5358a5bdb711",
+          "outputSha256": "89b502a661028ae4942c6ca39334bb8493a84af3e53fc4696d4475b93fc2db1f",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-008-backup-log-retention.md",
+          "index": 1,
+          "sourceSha256": "830e0c56433745264c9a8aabe0862f0dc5b97cd46714ccb7de4a21a50ba466c6",
+          "outputSha256": "f64d4f680bc976a3a445dd2961cd189f9e3c54a8e4fc48c7a905a2455902f69c",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-009-search-provider-boundaries.md",
+          "index": 1,
+          "sourceSha256": "b17e2d9c993f8bd4618020555cbf7170465f7f6a0d236613f4450c6617108273",
+          "outputSha256": "c2244ecd20f487bc33107e8261dfed1110ca0ee82f82ee0c54c52c95db88b45b",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-010-query-budgets-security.md",
+          "index": 1,
+          "sourceSha256": "e8fbc7e9f8d5fe23a779e1e542b3b3861f1132a95bb1f95c3d9846ac7a29d829",
+          "outputSha256": "912b80ff0fb5d29beb2f1ed127576d80e6ce969a21799c7e94c2d75c66acfc4c",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-011-format-upgrades.md",
+          "index": 1,
+          "sourceSha256": "31c6b7c487e6a2f88376b80df61185fe272a8314de48c80391812077c826e7f1",
+          "outputSha256": "86b05536cf6a32e1c3d0437934d0ba7920c1ff1e813a2f4c6e191a5d7a61fc10",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-012-sql-dialect.md",
+          "index": 1,
+          "sourceSha256": "a118c0c8c0115df61038c4bfd36777a58488f9d4ad7cce78071d1678ab682988",
+          "outputSha256": "a89485278a8b7dc9bb8fad7a03044dac85f668fd89e0bf90f4dc6ae6619c3bd1",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-013-authorized-query-ast.md",
+          "index": 1,
+          "sourceSha256": "ae0b730af3beb022459d51fb321ec1329c78511d7d0f0235b1bae0e9d20a71ce",
+          "outputSha256": "c7ae3ecf79a627009e4d7c4702827a420d99c6e04473e745f2f59828f7e2ae2f",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-014-principals-rbac-row-policy.md",
+          "index": 1,
+          "sourceSha256": "f3d57005cd439808a9f5db63d2b21de65c60cee8a1b13b11db60dc27f030a866",
+          "outputSha256": "26c4efead77c0a05fe0ad975f5ec521aca7c4aba6ccf1de3c6576ce7b1596ebc",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-015-sensitive-data-lineage.md",
+          "index": 1,
+          "sourceSha256": "f086bd28b504db908675234d657b29bac21f27c132c114fc05fcbdb7e694e53d",
+          "outputSha256": "f85826465715d9e1bf6cc4ad4d16b8ee9bede162e7238f198785c52957381479",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-016-atomic-physical-placement.md",
+          "index": 1,
+          "sourceSha256": "0c37a342668a4816d0432527efcf459136cbb018b022b46e198530a79554dc4e",
+          "outputSha256": "316875011f44305b9eb084eb42344d2007b2d074386a82ab409a58cad57e9674",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-017-migration-tokens.md",
+          "index": 1,
+          "sourceSha256": "07dd8685432fd0919a3da3a39ea9548e1c907ee67a12cf081a11e302008096ad",
+          "outputSha256": "f2174776bd4468fe715d09ba8a6d536b858839f6deca15ed10c824aaaba3a6ac",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-018-global-rank-fusion.md",
+          "index": 1,
+          "sourceSha256": "606df53285a2772daa0b301f6758ab1d3be32cf71b795156a60bb89e2d42fb21",
+          "outputSha256": "b0243be1b3457f1378e41391620650a9447419d8327483a434be6fbce6e6246d",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-019-managed-ann.md",
+          "index": 1,
+          "sourceSha256": "b9293920d88b110a06942b3abfc3eedcfcbdd36da6e1195c446a61b7be3485de",
+          "outputSha256": "af7310e0d0020c65dc4edf4021775fb549b798ea746a8a2b3c693165b26f4204",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-020-independent-query-contexts.md",
+          "index": 1,
+          "sourceSha256": "56664f4453d277e67812fa71defb56c32eff31968de3c423842217f110cc465f",
+          "outputSha256": "99576a78bc75dafc3420bd83b0fe40581f90cb3729d66af0594f8b6cf9b9bdba",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-021-comparable-postgres-baseline.md",
+          "index": 1,
+          "sourceSha256": "978a76e442a21bb80a481faf15f2165e2684617454a9e8c16855b57c0c75f45b",
+          "outputSha256": "b42446d47b79603a6aabf40ebf1794d18b2f4488d458efe116d7b5f5f460d5d1",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-022-policy-epoch-revocation.md",
+          "index": 1,
+          "sourceSha256": "07bb5a856f73da79cb2c96284ec2ba4ab105875932c5048e2f22c3bfc82b5a65",
+          "outputSha256": "bb0dd71dc130593521bd9e8c34b35011f3b9c00066e52487460905284ff86ded",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-023-journal-authority.md",
+          "index": 1,
+          "sourceSha256": "663f4575771f129619ac096e8dadcac65bdda982641b0409c376b41fa48ed31c",
+          "outputSha256": "b1056c9340d0d57cca30d4b58a315dc45cd5aae30abac8b46ea937a01c13e038",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-024-transaction-domain-binding.md",
+          "index": 1,
+          "sourceSha256": "d24f1317cab6adf290a95ddc0f32c0cbb83fe381fb312acccbe71ec95752329e",
+          "outputSha256": "6684d46a5f73844bf97f79d999e145aac60fc107861c1d6ffe15563c6c679a47",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-025-event-revision-feed-positions.md",
+          "index": 1,
+          "sourceSha256": "e61d1be4b0152c45d0e26260ed721bd74f01341df5571dc3f18f556f886d33ef",
+          "outputSha256": "97b3c90948f65f86e5db95d12da8a3e73eb15641ebd9934ceb91bf50614ea241",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-026-fenced-delivery-inbox.md",
+          "index": 1,
+          "sourceSha256": "4d12c39abfbfd89a0aa148f6858764d2f2ea567386311f5424dcf20af82ead08",
+          "outputSha256": "f329a3779b142232f5b6a9c3bc780c7405f458d88ff3a22f27726ece1ed3f0a2",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-027-contiguous-subscription-checkpoints.md",
+          "index": 1,
+          "sourceSha256": "2e3444764bc490aceb0e91da19f8b06118443015f39e92133909c75ad49d3ee1",
+          "outputSha256": "44e00959da41cdeb9ab80a968ab20909027e1b705b0b9c5992e285961d3cc8d2",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-028-persisted-scheduling-time.md",
+          "index": 1,
+          "sourceSha256": "6d211bcad926ac5b8574376b0413c9d8610b0598b7bcd4d2a7671e4ae3357cee",
+          "outputSha256": "b4328cfa9a41243a0d1fe7996209b2c31dd14b3ab86619f1cbc5f776c3aa6a2c",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-029-event-message-classification.md",
+          "index": 1,
+          "sourceSha256": "7ad6c20344da64b6ffc19f05ce9d43ea6d74b2aece992b098fd9b475c530ae7c",
+          "outputSha256": "0e085c52734e0642dd196d20ba16a6c1a77b3fb07e95b54f78e8e6d852258530",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-030-retention-paused-restore.md",
+          "index": 1,
+          "sourceSha256": "1ef14a3708bd264d436f7f02d919ca49ac3cb4ce28b4335bd18521488981f0c1",
+          "outputSha256": "3245d4714f112a073c90acd38b27530b0f9bae56f31697c59fc48a96e4ad6967",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-031-modular-all-in-one-resource-isolation.md",
+          "index": 1,
+          "sourceSha256": "c9194b7afd2944b6c6b4902f2e2465478447c34d95eb2d9023cb19082123aa95",
+          "outputSha256": "8fd58fda62ea0c2c258148f26eab1b5f9db6353c699679e4b6142c72456a5ba1",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-032-mcaf-governance.md",
+          "index": 1,
+          "sourceSha256": "abf13bd1a9ca9125486aecf11de3b3d00cde5469b50123f5c06d97949de720c8",
+          "outputSha256": "c29372ff71a68c6d47d9969a7f8f57a834f614870d519849c7789de245d742c0",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-033-code-quality.md",
+          "index": 1,
+          "sourceSha256": "c32eb608babd516ae43af1ce474b1e6603aa5fb8dedc8b681c38b91279a889cf",
+          "outputSha256": "f0413d2a9c03b660c8315aa4dda2926183dd75665ce958155a8e1c01daf005ca",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-034-cluster-comparisons.md",
+          "index": 1,
+          "sourceSha256": "00c306a594563f63997a0756bd4844f6192ad99a50fa5d5081724caedff37243",
+          "outputSha256": "dd943c0052877210d43956255c44a28ec08ac7782b0de44112a8c474604ea8de",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-035-memory-performance.md",
+          "index": 1,
+          "sourceSha256": "96f1a48f92b1122a29ec0f7707dc1b5116955de9d9a532572984e3f7029db94b",
+          "outputSha256": "dd9a70213084b59bf9ccfd2cad94c7faf08274405ba018f287e43bd1a22f98c0",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-036-orleans-foundation.md",
+          "index": 1,
+          "sourceSha256": "e3fabeac3735f5d723d6968b60563865a66c69f376a55d1ffafc49a2962351f9",
+          "outputSha256": "067a8aef20653cffdf32a8552150edf9507bae6296a74efe96c8e54d1e5272c1",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-037-documentation-coverage.md",
+          "index": 1,
+          "sourceSha256": "166b3dc7dac81e2e1e3e49526ca1c38597018f50e22ff69042f8bb1630a33b2d",
+          "outputSha256": "8a772c3934499046fbd89a5f3d2adefca1646566e1819e51219bbcb52b3bcfe2",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-038-chunked-blob-storage.md",
+          "index": 1,
+          "sourceSha256": "f8949e027d4e7ed3eb3c7ada45ced834d78af32973d6bc7dc20434ddd34abb8c",
+          "outputSha256": "1286ea2ae00a2ac61b2eb2f6ef64b88f4369858d48bc99be48d543f5cd0aeb81",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/ADR-039-official-mcp-agent-api.md",
+          "index": 1,
+          "sourceSha256": "6df88717486855ed7e55fabb02e67693028c6729c5c904ebc4b757537638247e",
+          "outputSha256": "fcb73bf750ba38116f038a955541c3bb9f73514e375c8f66843a101b9887dba0",
+          "state": "passed"
+        },
+        {
+          "document": "docs/ADR/README.md",
+          "index": 1,
+          "sourceSha256": "e6668fce116019d30f1e62031f4eeca1c41def60a1555592cc87e34a602be202",
+          "outputSha256": "02f3ca0acb4a07a308417cbd371f07c0dd67b797664edfe9d296973b157c73b3",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 1,
+          "sourceSha256": "88252bb056c0470f901e09717942c6392e6f498f6789d5c52bbc7599b840195c",
+          "outputSha256": "feb6c70ad7bf7656a66569f3361b613b378b56a6d1d8fba76f8ee92ec6228207",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 2,
+          "sourceSha256": "b90bb06a43d959e120f0f8d43247af01501e24f5bbeda70955d259b017b44ff7",
+          "outputSha256": "df3d92cc955c4904c91d1afffc620b56b99eface0269a387e25ec317826b0a2e",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 3,
+          "sourceSha256": "a41a79499ced555d91899b0afbeede7ea602d52f8f12f7ba7561bc5dffff71b7",
+          "outputSha256": "2ed0328822ebc84e9601849336bf5273a9c4efd1321fa9b843896fa67e6149d6",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 4,
+          "sourceSha256": "f5fdab4cac2dbaa4097aff6fcfcc4c465a256cd72472061a923c1917d7b90121",
+          "outputSha256": "455a3fdf8836b6f6673c7cad10ae23e1908d884bb88f408b45b2aeb040393195",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 5,
+          "sourceSha256": "582643f4b60cc55c51e73a841dd3ae351e4a539cd5d8707ce22a84986178fd28",
+          "outputSha256": "27a964d4b660075ede9d1e2380c9e7ce084f24bddb2f3a8174ce5dca9ca8949d",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Architecture.md",
+          "index": 6,
+          "sourceSha256": "3ea1348b70edab498157cd61ea45181502b2188371cdf7fed1fbb7094e5c2e7e",
+          "outputSha256": "31a5a3f366e57feb236ce9a2d82b205e51c0eb4a545ce07480060158942dfb86",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/Authorization.md",
+          "index": 1,
+          "sourceSha256": "0c8e8ac58f68c02c74cc8daeb7346c6d32f9e7da13282ab1741a7e47be7ec138",
+          "outputSha256": "faeffe2b6220087218482f9a231d98b235642dbcde6ca16f4ca11c137e03d3b8",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/BackupRestore.md",
+          "index": 1,
+          "sourceSha256": "dca2062aea35ce45e32edd11e493a356414b645112f343da93d61a94af482a34",
+          "outputSha256": "6ed0b895999fba343f3e47c3b407b46922c61d1ed0cfbe86fb5a883f7c5ec386",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/BenchmarkComparisons.md",
+          "index": 1,
+          "sourceSha256": "832b0f71c55df399b5401f6051a591a6580312a6d35123c55e38f03cf31b772d",
+          "outputSha256": "9a85d70ebc0717f9fbaec2865b4d4a0e3a28df64f5c4600185ae66e521f1784c",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/BlobStorage.md",
+          "index": 1,
+          "sourceSha256": "814c8d1faa599452401b39bb39d4cd9c741551b15d605c7588cbc1018ef9dbaa",
+          "outputSha256": "6788162194bed41f71443f768dc54f23fcfa8613cb330dbc7def3efa4e255fee",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/ChangeFeeds.md",
+          "index": 1,
+          "sourceSha256": "48aba23071eca2ef476785b7a1bacd43a255ae89d996bb6e3adbf2fccd98c737",
+          "outputSha256": "c2716a64cab16499c943249adfc99a315b2351b0a86d4cf530ad23e69aab01f8",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/ClientApi.md",
+          "index": 1,
+          "sourceSha256": "5caf3711b7f902e41664156e18a3a17fdde51b6e1190575126c9d6efb6849f3a",
+          "outputSha256": "fb2bf91dd8c96c19c2f7d0e196596f3b52d079ac97b6610c1fb5391ae1bfe1a1",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/ClusterReplication.md",
+          "index": 1,
+          "sourceSha256": "9d2b41f3d1b113bfd469d36f92d4a385a535483263050f3fd63eff58b8ee100c",
+          "outputSha256": "3931dcc04cc7eecac1f2a5848924d422a48f07dd9b314b5b265b661442876fc6",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/ClusterRouting.md",
+          "index": 1,
+          "sourceSha256": "46c83859f6bb0a68bc1e9b2f2c6774dd3509d81081323d181994574d7697d06e",
+          "outputSha256": "f743ccbd1c3f438762507e17ca01a2edf205a3c7e0451aade5b40657e4f408a0",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/CodeQuality.md",
+          "index": 1,
+          "sourceSha256": "6d9e71f3ee657ea2bb95ea1d1cce43a2e73415382a384f7159230ff704730c92",
+          "outputSha256": "2bcbd23ed12d4eed5c75ba9f15ddde12ca2d9b5c9419b81b3946909a52d1064c",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/DocumentStorage.md",
+          "index": 1,
+          "sourceSha256": "70f9d45725251d6f85c17ba7b41f8b428de3661fbb8ef5834e135a76f12f033a",
+          "outputSha256": "de317b4283985923d5249ce6852a83102514a0edd80526ca3a43de6d470b47e7",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/EventStreams.md",
+          "index": 1,
+          "sourceSha256": "f3b98e2291340bd625a14e6c2dc780c052285126c752ea83b18875150bb38a6d",
+          "outputSha256": "268a16cb01bd1d290a5e910f00a66c40da57cac5a9ea22e1bbc817161021a9e0",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/GraphTraversal.md",
+          "index": 1,
+          "sourceSha256": "0c17de57b0300bf92a47ad0349fc5dfe4bff877cd228bb0f6f3b71f9ebf78e1e",
+          "outputSha256": "08a65fb43daee5c0863de32b721ce91779d4c649f1c19feb6c640e406cb385d3",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/Messaging.md",
+          "index": 1,
+          "sourceSha256": "56292eee302e39a3268c9d5425ec818d904f46939a929f415c828867991dcb42",
+          "outputSha256": "2c58e1aaa63f492d7d92b9c12e612a36c9e5dc0bde9efcc9313151056df5f2e6",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/QueryExecution.md",
+          "index": 1,
+          "sourceSha256": "a6ab05557d56c89bcffc892ef16d2b6d84055d946cadcfdeadf512311e4a095a",
+          "outputSha256": "efcec975b575a4b3432d26f1be15708dd55ec3357acbe85a0b0a5d14eb06e19a",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/RepositoryGovernance.md",
+          "index": 1,
+          "sourceSha256": "c630c18e95e20611455e674daa8eb2401ecfcf1da7921f8d31de7821080be845",
+          "outputSha256": "37d109b1112fa929810c92ca2e02766823924efa64e610335d8af82d8f27d3fa",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/ResourceExecution.md",
+          "index": 1,
+          "sourceSha256": "352e603691f6861233e5293931b6924faa5ae9833e1eb33fdd5317694cf2945a",
+          "outputSha256": "a07a9dfd6813f1de0703da027b84ed1def8c4804891b1fde9a616cdbcf8618f7",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/Search.md",
+          "index": 1,
+          "sourceSha256": "7ae536b0cab684b2017cb9d0c947a3373b2a6433047bbf39d8757f3968b8af67",
+          "outputSha256": "cc30caa91e879b52e0a26264b200bd8484cbe15bd36dd2cab54c61174bc1a613",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/StorageRecovery.md",
+          "index": 1,
+          "sourceSha256": "4f1c1a312f0cf9d6e86b8c1ef7e7334f7bdf8c659bf70862b58dec515b2ab002",
+          "outputSha256": "6e4ab080f7243f8f0602f6961bc70093d18d3e53c9517b515aab6eca90429799",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/TestInfrastructure.md",
+          "index": 1,
+          "sourceSha256": "9da0490b0fa6f206abe4635514f00dccea060fb7af7591bd0d02712e0527c9c6",
+          "outputSha256": "9020e96608c87dfff4a8aba801310a23bcebad38756f4018051a6712bcdd1aa5",
+          "state": "passed"
+        },
+        {
+          "document": "docs/Features/TimeSeries.md",
+          "index": 1,
+          "sourceSha256": "a2dc03be774dab0a12f82601671d5753a42586590aa9b0163689743d1346f431",
+          "outputSha256": "350f3f0bb9ffc813114fc2c26ac314d8cd21809783e41c5c98ae0421a6127cbe",
+          "state": "passed"
+        },
+        {
+          "document": "docs/README.md",
+          "index": 1,
+          "sourceSha256": "cc0b022e1c73d1eeb7dde9ff61f169ba1e36178ce5282edde15f3c7065e00e70",
+          "outputSha256": "14bc06e10a56e95217cac8651d100c503dd87543a335310d8a989259f9e17c4e",
+          "state": "passed"
+        }
+      ]
+    },
+    "governance": {
+      "command": "node scripts/Features/RepositoryGovernance/verify.mjs",
+      "state": "passed",
+      "projects": 22,
+      "modules": 4,
+      "preservedRootPrefix": true,
+      "repositorySkillInventoryUnchangedAndEmpty": true
+    },
+    "whitespace": {
+      "command": "git diff --check",
+      "state": "passed",
+      "untrackedDocumentationAlsoCheckedByStaticInventory": true
+    },
+    "productGateException": "A documentation-only change uses static checks and explicit manual full-content/source review. Runtime TUnit/recovery/RF3, coverage/complexity and performance gates remain required in owning product plans and are not satisfied or waived here.",
+    "catalogSnapshot": {
+      "counts": {
+        "features": 20,
+        "decisions": 39,
+        "backlogItems": 104,
+        "requirements": 137
+      },
+      "note": "Historical TASK-DOC-REVIEW-007 snapshot. New site extension requires its own source/static/manual/CI joins."
+    }
+  },
+  "currentTraceabilityProposal": {
+    "task": "TASK-DOC-CURRENT-TRACE-038",
+    "state": "root_reviewed_guarded_packet_joined",
+    "runtimeQualified": false,
+    "coverageAndCrap": "unmeasured",
+    "qualificationNote": "Root joined the fully reviewed guarded packet; no acceptance closes without complete current-source native and Linux delivery gates.",
+    "nativeCqrsSourceAssessment": {
+      "state": "current_source_inspected_runtime_unqualified",
+      "sourcePaths": [
+        "Directory.Packages.props",
+        "src/KeyLoad.Orleans/Features/ClusterRouting/Contracts/GrainRoutingProtocol.cs",
+        "src/KeyLoad.Orleans/Features/ClusterRouting/Streaming/NativeCqrsStreamAdmission.cs",
+        "src/KeyLoad.Orleans/Features/ClusterReplication/Discovery/ReplicaSiloDiscovery.cs"
+      ],
+      "communicationVersion": "10.3.1",
+      "orleansVersion": "10.4.0",
+      "graphVersion": "10.4.2",
+      "currentRequestRpc": "keyload.request.v2_interface4_ExecuteStreamAsync",
+      "nativeEnvelopePurpose": "current_identity_epoch7_distinct_from_request_interface_version",
+      "signedDiscoveryFields": [
+        "voterId",
+        "clusterId",
+        "incarnation",
+        "siloAddress",
+        "transportReady",
+        "applicationRpcVersion",
+        "peerEnvelopeVersion",
+        "runtimeJournalReaderContract"
+      ],
+      "currentInternalStreamImplemented": true,
+      "publicResultAndLongOperationAcceptanceQualified": false,
+      "peerReaderAdmissionFinding": "Current source now requires protocol plus capability1 in ordinary, cached/direct and current-catalog majority admission; fresh bootstrap retains all-voter admission. Actual signed unit/RF3 and physically omitted-field negative qualification remain open."
+    }
+  },
+  "countsScope": {
+    "features": "tracked parent feature catalog",
+    "decisions": "tracked decisions in this coverage catalog; the complete ADR index is separate",
+    "backlogItems": "all original KL tasks",
+    "requirements": "unique tracked requirement identifiers"
+  },
+  "historicalSections": {
+    "ownerCompletionWave20261003": "Immutable dated source assessments and execution receipts; superseded tasks, source versions and future plans in this section are not active product contracts or current acceptance evidence.",
+    "historicalProductBaseline": "Original published-source run only; never current dirty-checkout qualification.",
+    "historicalVerification": "Original documentation verification only; current gates remain open."
   }
 }

@@ -113,12 +113,11 @@ review, build, Aspire runtime evidence and delivery. Tests use the actual Aspire
 builder to prove dependency ordering and absence of outer nodes; parser/input
 tests cover negative cells without pretending to prove Docker creation. Real
 Docker/Aspire RF3 SDK and official MCP evidence must prove image identity, three
-nodes and cleanup. Frontend, production data/API migration and local comparison
-mode are N/A for this infrastructure stage. Immutable prior-image and mixed-image
-protocol tests retain their genuine qualified-image requirements and fail closed
-if explicitly selected without that proof; local mode never skips or substitutes
-those cases. Original 104-task acceptance remains
-open until its complete required qualification exists.
+nodes and cleanup. Frontend, production data/API changes and local comparison
+mode are N/A for this infrastructure stage. Current-image proof remains
+mandatory; local image preparation never skips or substitutes current-format
+recovery, SDK/MCP or RF3 cases. Original acceptance remains open until its
+complete required qualification exists.
 
 ### TASK-TI-RF3-IMAGE-MODE-011: preserve the default CI image path
 
@@ -147,7 +146,7 @@ unchanged; rollback restores only this test-harness predicate, retaining failure
 
 [ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle
 repair prompted by CI [37202347856](https://github.com/managedcode/KeyLoad/actions/runs/37202347856).
-Its original reports show RF3 87/88 passed (cold-upgrade authorization assertion)
+Its original reports show RF3 87/88 passed (one authorization assertion)
 and unit 2947/2953 passed (six native CQRS cases); they do not establish an AppHost
 crash. Website tests were 201/202 passed, with a real Chrome node-selection
 assertion failure. Dashboard-disabled CLI warnings appeared before successful

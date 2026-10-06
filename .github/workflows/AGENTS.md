@@ -80,3 +80,7 @@
 ## Final Benchmarks Website trigger, owner clarification 2026-10-06
 
 - Benchmarks ends with only a bounded dispatch of `website.yml` on main, after its aggregation dependencies settle even when benchmark work fails. Keep site building, tests and Pages entirely in Website; remove its `workflow_run` subscription. Only the final trigger job receives `actions: write`. Website authenticates an optional triggering run against GitHub and waits boundedly for completion before its existing newest-ready selection; no input supplies trusted measurements. Push/manual Website publication and all original qualification/freshness gates remain independent.
+
+## Build and Tests workflow filename, owner direction 2026-10-06
+
+- The canonical Build and Tests workflow is `.github/workflows/build-and-tests.yml`, renamed from `ci.yml`. Dispatch with `gh workflow run build-and-tests.yml --repo managedcode/KeyLoad --ref main`. This supersedes earlier active filename/dispatch references only; preserve all build/test gates, stable job IDs, permissions and historical evidence.

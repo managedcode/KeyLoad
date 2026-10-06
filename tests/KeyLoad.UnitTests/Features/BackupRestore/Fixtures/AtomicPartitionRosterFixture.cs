@@ -1,7 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Security;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -17,8 +16,6 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
     private const string RootTenantId = "system";
     private const string Wildcard = "*";
     private const string RootCredential = "root.unit-test-credential-32-characters";
-    private const long FirstRevision = 1;
-    private const string SeedJson = "{}";
     private const string ConfigurationFailure = "The real roster fixture resource configuration failed.";
     private const string TenantId = "tenant";
     private const string DatabaseId = "database";
@@ -80,17 +77,6 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         {
             throw new InvalidOperationException(result.SafeDetail ?? ConfigurationFailure);
         }
-    }
-
-    internal void SeedLegacyDocument(PartitionRef partition, string collection, string id)
-    {
-        var record = new DocumentRecord(new(partition, collection, id), FirstRevision,
-            SeedJson, new RowAccess(), Database.EvaluationClock.GetUtcNow());
-        Store.Commit((transaction, _) =>
-        {
-            transaction.PutRecord(KeySpace.Partition(PartitionRecordFamilies.Document, partition, collection, id), record);
-            return true;
-        });
     }
 
     internal void Reopen()

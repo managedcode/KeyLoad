@@ -2,13 +2,13 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class NativeOperationResultTests
 {
-    private const string LegacyJson = "true";
+    private const string JsonResult = "true";
     private const string RejectedDetail = "The native result was rejected.";
 
     [Test]
     public async Task AcIs001And003JsonOnlyInternalResultsNeverBecomeTypedSuccess()
     {
-        var result = new OperationResult(LegacyJson);
+        var result = new OperationResult(JsonResult);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => result.Get<bool>());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
     }
@@ -25,7 +25,7 @@ internal sealed class NativeOperationResultTests
     [Test]
     public async Task AcIs003StoredRejectionCannotBeMaskedByNativeOrJsonValue()
     {
-        var original = new OperationResult(LegacyJson, ErrorCode.PermissionDenied, RejectedDetail) { NativeValue = true };
+        var original = new OperationResult(JsonResult, ErrorCode.PermissionDenied, RejectedDetail) { NativeValue = true };
         var restored = NativeSerialization.Deserialize<OperationResult>(NativeSerialization.Serialize(original));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => restored.Get<bool>());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
@@ -33,9 +33,9 @@ internal sealed class NativeOperationResultTests
     }
 
     [Test]
-    public async Task AcIs003WrongNativeTypeNeverFallsBackToLegacyJson()
+    public async Task AcIs003WrongNativeTypeNeverFallsBackToJsonResult()
     {
-        var result = new OperationResult(LegacyJson) { NativeValue = 1 };
+        var result = new OperationResult(JsonResult) { NativeValue = 1 };
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => result.Get<bool>());
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
     }

@@ -1484,3 +1484,21 @@ regressions alongside the existing complete production-manifest operation case.
 Linux CI additionally runs those ten cases before the full unit suite, requires
 exactly ten executed/passed original TRX cases and retains the original reports.
 The additional receipt does not replace full unit/scalar/recovery/RF3 or coverage.
+
+### Current native formatter and coverage identities
+
+TASK-CQ-CURRENT-NATIVE-042 preserves REQ-CQ-001/006/009 and AC-CQ-001/008/044/046.
+The canonical `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` uses
+its default Debug analyzer project output. Build that actual source analyzer in
+Debug immediately before the command so an absent/stale artifact cannot omit
+rules or enforce an earlier limit. Keep the separate full Release build and
+all real64/65 boundary cases; no disabled analyzer or reduced rule is permitted.
+
+The actual native Cobertura format identifies both package and class through
+`name` attributes. Read those native attributes while keeping filename/module/line
+identity, exact original-input line union, native branch pairs, integer counts,
+bounded XML admission and repeated-input invariance unchanged. Validate through
+the complete real CLI pack/backup/restore collector and merge operation, retaining
+its three original inputs, proof, binary/XML reports, native failures, preserved
+backup/restored state and healthy follow-up. A repaired parser or this single
+functional contributor is not complete module coverage or a CRAP measurement.

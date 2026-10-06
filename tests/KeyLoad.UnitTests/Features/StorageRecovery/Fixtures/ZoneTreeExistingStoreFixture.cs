@@ -13,9 +13,8 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
     internal const string JournalFile = "commands.wal";
     internal const string TreeDirectory = "tree";
     internal const string OuterOwnerFile = "node.owner.lock";
-    internal const int LegacyFormat = 4;
+    internal const int UnsupportedFutureFormat = int.MaxValue;
     internal const int CurrentFormat = 7;
-    internal const int CompleteHeaderBytes = 52;
     private const string AllEntriesPattern = "*";
     private const string TemporaryPrefix = "keyload-existing-store-";
     private const string CanonicalDirectory = "database";

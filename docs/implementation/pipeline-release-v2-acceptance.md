@@ -19,7 +19,7 @@ dispatch, package/image builds, tag creation and provider publication are deferr
 until a later explicit release/readiness instruction. Retain the future release
 requirements and report their provider qualification as deferred, never passing.
 
-- AC-PIPE-001 / REQ-PIPE-001: exactly ci.yml, benchmarks.yml, website.yml and release.yml remain;
+- AC-PIPE-001 / REQ-PIPE-001: exactly build-and-tests.yml, benchmarks.yml, website.yml and release.yml remain;
   names are Build and Tests, Benchmarks, Website and Release. Build and Tests runs push(main), pull_request and manual;
   preserve full build/format/rules/analyzer/unit/scalar/recovery/real SDK/MCP RF3.
   Failure is failure; no omitted suite or separate governance/Tests workflow.
@@ -77,4 +77,4 @@ of release metadata use controlled data, never fabricated benchmark measurements
 Rollback reverts scoped workflow/adapters/tooling; published immutable tags/assets
 are never removed or moved. No newly installed tools/skills or consumer workarounds.
 
-Owner correction 2026-10-06: ADR-112 / AC-BC-WEB-006 moves complete website qualification/publication to standalone Website and removes its benchmark trigger/jobs from Build and Tests. The prepared Release source-success validator uses the current Build and Tests name while retaining the ci.yml path, mandatory job identities and exact-source success/permission gates. Historical CI measurement identities remain unchanged. Product Release stays manual and is not dispatched by this correction.
+Owner correction 2026-10-06: ADR-112 / AC-BC-WEB-006 moves complete website qualification/publication to standalone Website and removes its benchmark trigger/jobs from Build and Tests. The prepared Release source-success validator uses the current Build and Tests name while retaining the build-and-tests.yml path, mandatory job identities and exact-source success/permission gates. Historical CI measurement identities remain unchanged. Product Release stays manual and is not dispatched by this correction.

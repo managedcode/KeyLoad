@@ -29,6 +29,13 @@ internal sealed class OfflineNativeHandleLease(SafeFileHandle handle) : IDisposa
         return stream;
     }
 
+    internal FileStream TransferToReadOnlyStream(int bufferSize)
+    {
+        var stream = new FileStream(Handle, FileAccess.Read, bufferSize, isAsync: false);
+        ownershipTransferred = true;
+        return stream;
+    }
+
     internal void RecordPrimary(Exception error) => primaryFailure ??= error;
 
     internal static void DisposeUntransferred(ref SafeFileHandle? handle, Exception? primaryFailure)

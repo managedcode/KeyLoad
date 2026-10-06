@@ -9,13 +9,14 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 /// <summary>Checks real stored outcomes only after the RF3 wave has relinquished its native owners.</summary>
 internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpochRf3Profile profile,
-    string principalId, Guid positiveCommandId)
+    string principalId, Guid positiveCommandId, PartitionRef partition)
 {
     private const string PositiveDocumentId = "c1-outcome-positive-control";
     private const int ExpectedCurrentDataEpoch = 7;
     private const string PositiveJson = "{\"control\":\"stored-outcome\"}";
     private const string MissingCut = "The C1 outcome inspection has no complete captured RF3 cut.";
     private NodeEpochRf3NodeObservation[]? nodes;
+    private readonly PartitionRef inspectedPartition = partition;
 
     internal bool ReadyToInspect => nodes is { Length: RequestCqrsRf3Protocol.NodeCount };
 
@@ -32,7 +33,7 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0].Id).IsEqualTo(PositiveDocumentId);
         await Assert.That(receipt.Mutations[0].Revision).IsEqualTo(1L);
-        return new(dataRoot, profile, identity.Principal.Id, commandId);
+        return new(dataRoot, profile, identity.Principal.Id, commandId, identity.Partition);
     }
 
     internal async Task CaptureAsync(DistributedApplication app, CancellationToken cancellationToken)
@@ -66,7 +67,7 @@ internal sealed class RequestCqrsAuthorityOutcomeOracle(string dataRoot, NodeEpo
         var nodeRoot = Path.Combine(dataRoot, node.Name);
         var request = new C1OutcomeInspectionRequest(C1OutcomeInspectionProtocol.Version,
             Path.Combine(nodeRoot, PartitionStoreProtocol.CanonicalDirectory), expectedNodeId,
-            node.Status.Incarnation, principalId, commandId);
+            node.Status.Incarnation, principalId, commandId, inspectedPartition);
         var result = await C1OutcomeInspectionProcess.RunAsync(C1OutcomeInspectionProtocol.SerializeRequest(request),
             Path.Combine(nodeRoot, PartitionStoreProtocol.OwnershipFile), cancellationToken).ConfigureAwait(false);
         await AssertJoinedAsync(result).ConfigureAwait(false);

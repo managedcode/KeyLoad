@@ -1,8 +1,9 @@
 # ResourcePolicyUpdates within Authorization
 
 Accepted source contract: [ADR-093](../../ADR/ADR-093-resource-policy-updates.md).
-This closes the public metadata update gap exposed by AC-LINEAGE-004 without
-performing a physical resource, index, authority, quota or schema migration.
+This closes the public metadata update gap exposed by AC-LINEAGE-004 through
+current policy-only metadata replacement. Physical resource, index, authority,
+quota and schema shape changes are unsupported.
 Canonical feature ownership is Authorization. Existing ConfigureResource
 admission, persisted administrative authority, metadata RF3 and native outcomes
 remain the sole write path.
@@ -14,8 +15,8 @@ A non-null value is a compare-and-set on an existing resource. The replacement
 must increment SchemaVersion exactly once and may change only FieldPolicies and
 HeaderPolicies. All other definition properties must be canonically identical.
 No policy change may bypass the existing complete resource/path/budget validation.
-No-op version increments are invalid. Existing native aliases and IDs0–2 stay
-unchanged; older executors reject changed definitions rather than ignore policy.
+No-op version increments are invalid. Current native aliases and IDs0–3 stay
+unchanged; every current executor enforces the same policy-only CAS contract.
 
 | Requirement | Acceptance and automated evidence |
 |---|---|
@@ -35,8 +36,8 @@ Ordered execution and task graph:
    owns no storage handles, routing, alternate authorizer or external side effect.
    The root invokes it after reading previous metadata and before any write.
 3. The helper distinguishes Validation (invalid/no-op increment), RevisionConflict
-   (missing or stale CAS), UnsupportedCapability (physical/schema migration or
-   legacy changed-definition request) and ResourceExhausted (version overflow).
+   (missing or stale CAS), UnsupportedCapability (changed non-policy shape or
+   changed definition without CAS) and ResourceExhausted (version overflow).
    It cannot weaken the existing admin/tenant check or resource validation.
 4. Root reviews the complete diff and joins the helper, then builds the solution
    and runs the actual Aspire unit/scalar/recovery and SDK/MCP RF3 entries. Worker
@@ -47,7 +48,18 @@ Ordered execution and task graph:
    old cursor rejection and healthy following requests against Aspire RF3. No
    shared fixture, transport, routing or production edits are delegated to it.
 5. Delivered-source Linux artifacts and every AC are required for closure. A
-   local focused pass is development evidence only.
+local focused pass is development evidence only.
+
+TASK-AUTH-CURRENT-POLICY-046 removes obsolete terminology and the unsupported
+migration-job promise from ResourcePolicyUpdates and its actual operation cases.
+Null expected version means current create or identical-definition admission;
+policy replacement requires current CAS. Preserve branch behavior, native IDs,
+canonical fingerprints, typed failure codes, persisted admin checks, exact
+resource/document bytes and original outcome replay. The static unsupported
+detail states that the requested definition change is unsupported. Root owns
+this contract, exact three-path guards, full review/join and native Aspire
+normal/scalar/RF3 qualification; the private worker introduces no new dispatcher,
+job, storage format or client schema. Acceptance remains AC-RPOL-001/002/004.
 
 Baseline: full local Aspire Unit36 on unchanged build36 source has3019/3165
 passing and146 failures; policy reclassification is a diagnosed real product

@@ -1,6 +1,7 @@
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Orleans;
+using KeyLoad.Storage;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -25,6 +26,8 @@ internal static class RequestCqrsRf3DiscoveryOracle
             .IsEqualTo(RequestCqrsRf3Protocol.ApplicationProtocolVersion);
         await Assert.That(observation.PeerEnvelopeVersion)
             .IsEqualTo(RequestCqrsRf3Protocol.PeerEnvelopeVersion);
+        await Assert.That(observation.RuntimeJournalReaderContract)
+            .IsEqualTo(StoreReaderContract.RuntimeJournal);
     }
 
     internal static async Task AssertReplacementAsync(ReplicaSiloDiscovery[] prior,

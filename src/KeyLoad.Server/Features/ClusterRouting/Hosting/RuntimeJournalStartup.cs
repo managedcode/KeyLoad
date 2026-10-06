@@ -31,6 +31,11 @@ internal static class RuntimeJournalStartup
             await requests.BootstrapAsync(administrator, BootstrapCommandId(options.PhysicalShardId,
                 partition.Configuration.Incarnation), token).ConfigureAwait(false);
         }
+        else
+        {
+            var discovery = services.GetRequiredService<ReplicaSiloDiscoveryClient>();
+            await discovery.EnsureCompatibleCohortAsync(token).ConfigureAwait(false);
+        }
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);
     }
 

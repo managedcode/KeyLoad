@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.ClusterRouting;
-using KeyLoad.Security;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -24,8 +23,11 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     private const string TenantId = "inspection-tenant";
     private const string DatabaseId = "inspection-database";
     private const string DomainId = "inspection-domain";
-    private const string ResourceName = "inspection-resource";
-    private const string SuccessMessage = "The native outcome seed did not succeed.";
+    private const string PartitionKey = "inspection-partition";
+    internal const string ResourceName = "inspection-resource";
+    private const string SeedDocumentId = "inspection-outcome-seed";
+    private const string OtherPartitionKey = "inspection-other-partition";
+    internal const string SuccessMessage = "The native outcome seed did not succeed.";
     private const string UninitializedMessage = "The native outcome fixture has not completed initialization.";
     private ZoneTreeStore? store;
     private DatabaseEngine? InitializedDatabase { get; set; }
@@ -42,6 +44,8 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         OuterOwnerLockPath = Path.Combine(Root, OuterOwnerName);
         Incarnation = Guid.NewGuid();
         CommandId = Guid.NewGuid();
+        Partition = new(TenantId, DatabaseId, DomainId, PartitionKey);
+        OtherPartition = Partition with { PartitionKey = OtherPartitionKey };
     }
 
     internal static async Task RunOwnedAsync(Func<C1OutcomeInspectionFixture, Task> body)
@@ -71,6 +75,8 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
     internal DatabaseEngine Database => InitializedDatabase ?? throw new InvalidOperationException(UninitializedMessage);
     internal StoreIdentity Identity => Store.Identity;
     internal Guid CommandId { get; }
+    internal PartitionRef Partition { get; }
+    internal PartitionRef OtherPartition { get; }
     internal long Position { get; private set; }
 
     private void Initialize()
@@ -101,19 +107,26 @@ internal sealed class C1OutcomeInspectionFixture : IDisposable
         { }
         var nativeStore = new ZoneTreeStore(new ZoneTreeStoreOptions(DirectoryPath) { Incarnation = Incarnation }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         store = nativeStore;
-        var engine = new DatabaseEngine(nativeStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
+        var engine = C1OutcomeInspectionHealthyFollowUp.CreateDatabaseEngine(nativeStore);
         InitializedDatabase = engine;
         engine.Bootstrap(new(AdminId, TenantId, [new("*", "*", Capability.All)], ["*"])
         { ClusterAdministrator = true }, DatabaseEngine.Credential(AdminId, AdminId, AdminSecret));
-        var request = new ConfigureResourceRequest(TenantId, DatabaseId,
+        PhysicalShardTestBootstrap.Bootstrap(engine, AdminId);
+        var configure = new ConfigureResourceRequest(TenantId, DatabaseId,
             new(ResourceName, ResourceKind.Collection, DomainId));
-        var operation = new ReplicatedOperation(CommandId, OperationKind.ConfigureResource, AdminId,
-            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
-        var result = engine.Apply(operation);
-        if (result.Error is not null || engine.ResolveOutcome(operation).Error is not null)
+        var configureOperation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, AdminId,
+            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(configure, JsonDefaults.Options));
+        var configureResult = engine.Apply(configureOperation);
+        if (configureResult.Error is not null || engine.ResolveOutcome(configureOperation).Error is not null)
         { throw new InvalidOperationException(SuccessMessage); }
+        CommitBatch(Partition, CommandId, SeedDocumentId);
         Position = nativeStore.Position;
     }
+
+    internal void CommitBatch(PartitionRef partition, Guid commandId, string documentId)
+        => C1OutcomeInspectionHealthyFollowUp.CommitBatch(this, partition, commandId, documentId);
+
+    internal void RecordPosition(long position) => Position = position;
 
     internal void RecordOwnerPhase(string line)
     {

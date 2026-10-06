@@ -63,6 +63,7 @@ remove them.
 | REQ-NATIVE-004: no migration or legacy execution | AC-NATIVE-004: the actual AppHost recovery model starts its current runner without historical probe resources, old-source archives, old-server image preparation or prior-format environment/settings; profile loading accepts only its current contract and has no conversion command; native current outcomes use only outcome-v2 and current locators with no v1 fallback. Normal/scalar runners execute retained whole current flows. Static CI governance inventories verify removed paths, separately from functional proof. |
 | REQ-NATIVE-005: current recovery resources settle | AC-NATIVE-005: real process kills and restart preserve one complete acknowledged cut; all owned processes/readers/resources settle and failures remain visible. Existing process-recovery, source-manifest settlement and RF3 shutdown cases remain mandatory. |
 | REQ-NATIVE-006: cleanup does not remove active safety | AC-NATIVE-006: complete enabled build, formatter, analyzers and relevant normal/scalar/recovery/RF3 suites pass; native functional coverage retains current production contributors and excludes removed code and obsolete migration tests. No manufactured coverage or acceptance closure. |
+| REQ-NATIVE-007: admit only the current physical node layout | AC-NATIVE-007: actual owner startup rejects unknown root entries or links before initial root/lock/store mutation; complete original state and permissions remain unchanged. Known current partial recovery layouts remain admissible, owner exclusion is retained, and removal of only the test-owned invalid input permits a healthy current write/reopen. Current process and RF3 qualification remains required. |
 
 ## Ordered implementation and integration
 
@@ -151,3 +152,127 @@ NativeBackupCutTests.cs unsupported-header flow. Root joins only after full
 semantic review and all base/post guards, then runs enabled canonical build,
 formatting and actual Aspire current storage/backup/recovery tests. Any additional
 consumer is reported before ownership expands. Source inspection closes no AC.
+
+### Current native test inputs and operation boundaries
+
+TASK-SR-CURRENT-FIXTURES-041 maps REQ-STORAGE-021 / AC-NATIVE-002 and the
+current BackupRestore roster requirements. Remove exclusive prior-record bytes,
+prior codec branches and JSON metadata representations. Keep current native
+unknown-signature/version, length/order/checksum, exact-cut and whole restore
+rejection flows with no publication, unchanged input and healthy follow-up.
+Unknown complete signatures are FormatUnsupported. Corruption controls must
+retain the accepted current signature and damage its actual fields or checksum;
+identity checksum controls retain the independently frozen current identity magic.
+Guarded unknown-identity fixtures use an arbitrary unsupported future version,
+not an earlier product representation, and retain real child/lock/pipe settlement.
+
+Cross-partition reverse-edge/empty-placement roster tests must seed documents
+through actual authorized current Batch operations. The destination already has
+its atomically registered first-write row; delivering and completing the reverse
+edge, deleting the source edge and reopening must preserve the destination row
+and first-seen identity. Do not insert an unregistered document as a prior-roster
+positive input or promise a census/backfill. Preserve actual receiver state and
+all cross-destination-effect and empty-placement assertions.
+
+The current corrupt-snapshot no-mutation oracle begins after the ordinary current
+store open/recovery has joined and ends before its normal provider disposal.
+Compare the complete retained native file inventory around the rejected install
+within that owner window, together with unchanged identity/cut/data and a healthy
+following install/backup/restore. Native open/close housekeeping must not be
+misattributed to the rejected operation or hidden by excluding authoritative files.
+
+TASK-CURRENT-SNAPSHOT-NATIVE-FILE-067 implements this AC-NATIVE-002/006 oracle
+with an internal read-only observation handle in `KeyLoad.Storage.IO`. The test
+controls the live owner and performs no concurrent writes during each inventory.
+Native no-follow/nonblocking open and retained descriptor/path identity checks
+must reject non-regular or replaced inputs. Use the validated storage execution
+buffer setting; read every file's actual complete bytes without acquiring or
+releasing the owner's advisory lock. Preserve the competing-owner lock assertion
+and the original full inventory equality; do not skip locked WALs or substitute
+empty bytes. This is deterministic test observation, not a coherent snapshot
+against concurrent writers or a production ownership bypass. Production opens
+retain their existing lock contract. Root owns the API/platform join and verifies
+the complete current maintenance/rejection/install/backup/restore/reopen operation
+through the Aspire-owned runner after full build and formatting.
+
+## Current node-root admission
+
+TASK-SR-CURRENT-LAYOUT-044 implements REQ/AC-NATIVE-007 under ADR-116. Replace
+specific obsolete filenames with one strict current root inventory: optional
+regular `node.owner.lock` and optional non-link directories `database`, `replica`,
+`snapshots`, `search-indexes` and `backups`. Their internal contents remain owned
+by their existing native owners; admit valid partial prefixes after interruption.
+Do not add unused names, infer authority from directory presence or recursively
+replace native snapshot/index/store validation with a server filename list.
+
+Inspect an existing root and entries without create, chmod, delete or provider
+open. Unknown entries, wrong entry kinds and links reject FormatUnsupported with
+a static safe detail. An absent root may be created only for fresh ownership.
+After exclusive node ownership, inspect the root again before opening either
+store; retain the existing first-failure/cleanup aggregation. Cooperating writers
+use the same exclusive lock. Arbitrary concurrent external filesystem replacement
+is not qualified by enumeration; do not advertise such protection. A race found
+on the second check must reject and settle the acquired owner without deleting
+foreign state or claiming that a newly acquired lock never existed.
+
+The private worker owns only PartitionStores, a cohesive StorageRecovery root
+validation helper and new real PartitionHost admission cases/fixtures. Root owns
+this contract, the ADR, exact path guards, review/join and serialized native gates.
+Whole flows retain sentinel bytes/modes and absence of first-check side effects,
+then remove only their owned invalid input and prove current write/reopen effects.
+Existing snapshot recovery, index restart, backup/restore and owner-lock cases
+remain mandatory controls. SDK/MCP and frontend schemas are N/A; this is current
+physical owner admission, not a new public operation or format conversion.
+
+## Actual omitted current native capability inputs
+
+TASK-SR-CURRENT-MISSING-043 extends REQ-STORAGE-021/024 and AC-NATIVE-002/003.
+An explicit zero property or JSON omission does not prove omitted native fields.
+Use the actual current generated Orleans payload, verify the required field was
+physically omitted by a bounded current-wire test input, and retain the current
+envelope magic, identity fields and recalculated valid outer checksum. No prior
+type, binary, historical store or alternate runtime serializer is allowed.
+Actual store open must reject before journal/tree effects, release owned handles,
+preserve the complete original inventory and permit a valid current restore and
+healthy write/reopen afterward. The generated codec's actual error remains an
+unmeasured gate until this operation executes through AppHost.
+
+For authenticated peer discovery, every cohort admission path must require the
+current reader capability, including existing-catalog startup and ordinary
+requests. Root review of actual native sources precedes a guarded implementation.
+Real signed discovery/request/no-effects and recovered healthy SDK/MCP flows are
+required; direct record construction, a fake peer or a coordinator assertion does
+not qualify omitted-wire RF3 behavior. The paired-store preflight/no-mutation
+contract also remains open until current native operations prove it.
+
+
+## Current-reader cohort admission repair
+
+TASK-NATIVE-CURRENT-PEER-049 maps REQ-STORAGE-024 / AC-NATIVE-003 under
+ADR-116. One observation predicate requires current protocol plus reader
+capability1; protocol compatibility remains a separate recorded fact. Ordinary
+cohort admission, direct voter resolution and cached readiness count only voters
+with that current contract and ready transport. Any observed signed non-current
+capability is OwnershipLost/IncompatibleCohort, including a not-ready voter;
+a current-contract but unavailable/not-ready voter retains its existing unavailable
+classification. Keep configured-voter iteration, majority threshold, cache expiry,
+original signing, cancellation and joined shutdown. Missing capability remains0.
+
+Fresh native catalog bootstrap still requires every configured current voter.
+An existing catalog must pass current-contract majority admission before
+RuntimeJournalAdmission.Open; it does not acquire a new all-voters availability
+requirement. Preserve the existing authorized catalog read, unique request grain,
+startup deadline, clock and fresh-bootstrap wait. Unsupported local contract fails
+strictly; only current-contract transport unavailability may remain pending.
+Physical capability evidence continues to come from both validated node-local
+stores, with no permissive constructor default or advertised authority override.
+
+The worker owns only the root-guarded discovery/admission/startup paths, the
+static unsupported-replica detail, supplementary signed-socket whole-operation
+cases and actual RF3 positive discovery assertions. Unit endpoint controls remain
+policy operations, never physical RF3 evidence; healthy current test inputs state
+capability explicitly. Real SDK/MCP requests retain before-dispatch rejection,
+no effects and healthy follow-up acceptance. A physically omitted-field RF3
+negative requires a separate bounded server-owned native fault contract and is
+still open; no fake peer, re-signing bypass or compatibility hook is admitted.
+Root owns review, serial source joins, native gates and exact-source Linux proof.

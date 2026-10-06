@@ -7,9 +7,9 @@ namespace KeyLoad.UnitTests.Features.CodeQuality;
 internal static class NativeCoverageLineUnionAssertions
 {
     private const string RootName = "coverage";
-    private const string PackageName = "package";
+    private const string PackageName = "name";
     private const string FileName = "filename";
-    private const string ClassName = "class";
+    private const string ClassName = "name";
     private const string XmlLineElementName = "line";
     private const string NumberName = "number";
     private const string HitsName = "hits";

@@ -1,6 +1,6 @@
 # InternalSerialization
 
-The owner requires generated Orleans10.3.1 binary serialization for all owned internal typed payloads. Public HTTP/MCP JSON, exact user content and frozen canonical identities remain explicit concrete boundaries. This cross-cutting codec is genuinely shared; each model's behavior remains in its existing canonical slice. Frontend is N/A because no UI behavior is introduced; public API JSON stays unchanged.
+The owner requires generated Orleans10.4.0 binary serialization for all owned internal typed payloads. Public HTTP/MCP JSON, exact user content and frozen canonical identities remain explicit concrete boundaries. This cross-cutting codec is genuinely shared; each model's behavior remains in its existing canonical slice. Frontend is N/A because no UI behavior is introduced; public API JSON stays unchanged.
 
 ```mermaid
 flowchart LR
@@ -15,7 +15,7 @@ flowchart LR
 
 ## Requirements and acceptance
 
-REQ-IS-001 through REQ-IS-009 respectively require the complete attributed DTO closure, pooled strict native codec, typed persistence/accounting, versioned storage metadata, secure bounded replication, native grain/membership contracts, versioned native signed claims, explicit non-destructive migration and exact-source qualification. They map one-to-one to AC-IS-001..009 and the [test/flow matrix](InternalSerialization/Acceptance.md). Each missing or malformed case must fail before effects; deserialize defaults are not authorization or semantic validation.
+REQ-IS-001 through REQ-IS-009 respectively require the complete attributed DTO closure, pooled strict native codec, typed persistence/accounting, versioned storage metadata, secure bounded replication, native grain/membership contracts, versioned native signed claims, strict rejection of unsupported persisted formats and exact-source qualification. They map one-to-one to AC-IS-001..009 and the [test/flow matrix](InternalSerialization/Acceptance.md). Each missing or malformed case must fail before effects; deserialize defaults are not authorization or semantic validation.
 
 ## Ownership and verification
 
@@ -25,9 +25,9 @@ Tests mirror InternalSerialization and the affected existing slices. Generated c
 
 Historical static preview: attributes were partly applied and dependent runtime changes remained under the executed source hold. The fully joined temporary snapshot passed 25-project Release compilation with real analyzers, zero warnings/errors, and the required full formatter. Its 106 affected/new native test files contain 296 test declarations and 301 Arguments attributes; these are unexecuted source counts. Static receipt (report removed from repository) records exact source/patch/log hashes and excluded moving owner work. That snapshot requires fresh rebase and checks before installation; it does not qualify latest owner source or runtime behavior.
 
-The final candidate includes attributed ChangeFeedClaims and native grain-to-HTTP/MCP principal binding, retaining existing admission/accounting and narrow strict grammar checks. Known ungenerated enum headers follow the official backing integer codec. An internal public-input profile permits only null reference collection elements so existing command/query validators and valid traversal-label behavior remain intact; required roots/members/initialized arrays, dictionaries, persisted records, claims and outputs stay strict. Public HTTP/MCP/CLI JSON, user JSON content, frozen identity material and the explicitly user-selected local-profile.json configuration file retain their concrete external boundaries.
+The current implementation includes attributed ChangeFeedClaims and native grain-to-HTTP/MCP principal binding, retaining existing admission/accounting and narrow strict grammar checks. Known ungenerated enum headers follow the official backing integer codec. An internal public-input profile permits only null reference collection elements so existing command/query validators and valid traversal-label behavior remain intact; required roots/members/initialized arrays, dictionaries, persisted records, claims and outputs stay strict. Public HTTP/MCP/CLI JSON, user JSON content, frozen identity material and the explicitly user-selected local-profile.json configuration file retain their concrete external boundaries.
 
-Current owner-directed resumption installs the native candidate after a fresh rebase, preserving unrelated phase telemetry, scoped term observations and SQL work. The previous automatic-review rejection and source hold are historical. Missing-identity, backup-cut and shared collection/reference/depth/graph/DOM guards are being repaired with real regression fixtures before exact-source GitHub qualification. Legacy stores remain fail-closed; a qualified offline converter and reverse conversion are not delivered. Prior ADR-057 WAL proof qualifies only its historical source, not this wider migration. No measured acceleration, power-loss or production result is claimed.
+Current scope accepts the current attributed Orleans serialization and storage contracts only. Unsupported persisted format or identity versions fail closed before state mutation; no previous-format reader, converter, reverse conversion or migration workflow is part of the product. The current source and its missing-identity, backup-cut, collection/reference/depth/graph/DOM regression flows still require exact-source Linux qualification. ADR-057 evidence applies only to its historical source. No measured acceleration, power-loss or production result is claimed.
 
 Native v2 preserves bounded unknown fields and known-schema references. Typed
 references to opaque omitted-type unknown fields fail closed before allocation;

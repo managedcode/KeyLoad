@@ -1,7 +1,7 @@
 # KeyLoad.Storage.IO
 
 ## Purpose and entry points
-- Owns the shared regular-file opening primitive for stopped StorageRecovery conversion under ADR-077, REQ-STORAGE-025/026 and AC-EPOCH-012.
+- Owns the shared regular-file opening primitive used by current StorageRecovery, native index metadata and scoped process/RF3 inspection under ADR-011/116 and the CurrentFormat contract. Do not introduce storage conversion or prior-format admission.
 - Internal entry point: `Features/StorageRecovery/Storage/OfflineRegularFile.cs`; project: `KeyLoad.Storage.IO.csproj`.
 
 ## Ownership and boundaries
@@ -10,6 +10,7 @@
 - The frozen ABI scope is little-endian Linux/macOS x64/arm64. Other platforms and unavailable metadata capabilities fail closed; only genuine Linux evidence qualifies delivery.
 - Open existing inputs without create/truncate flags, using no-follow and nonblocking flags, and validate regular-file type and identity on the retained handle. Preserve nonblocking flock interoperability with the existing .NET owner locks.
 - Root owns signatures, project references, platform/error contract and integration. Workers must stop and escalate architecture changes, unsupported ABI assumptions or ownership conflicts.
+- ADR-116 permits an internal read-only observation handle for the CurrentFormat test's complete-file no-mutation oracle while that test controls all writers. Retain no-follow/nonblocking regular-file and identity validation, validated buffer options and full actual bytes; never acquire or release the live owner's advisory lock. This is not a concurrent-writer snapshot API or production ownership bypass. Production opens preserve their existing lock contract; root owns the API/platform integration and actual Aspire regression.
 
 ## Commands and verification
 - Required development checks: full Release solution build, formatter and repository governance. Root owns the serialized verification sequence.

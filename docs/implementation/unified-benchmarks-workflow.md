@@ -1,6 +1,12 @@
-# Shared parallel Benchmarks delivery
+# Historical shared parallel Benchmarks delivery
 
-Source changes implement the owner corrections recorded by ADR-064. This record
+This is an immutable historical development record, not the active workflow
+contract. The current four workflows and final bounded Website dispatch are
+defined by [ADR-064](../ADR/ADR-064-workflow-release-delivery.md),
+[ADR-112](../ADR/ADR-112-independent-website-publication.md) and
+[BenchmarkComparisons](../Features/BenchmarkComparisons.md).
+
+The recorded source changes implemented the then-current owner correction. This record
 distinguishes configuration/source checks from actual GitHub qualification.
 The root brainstorm/acceptance/working plan are task-local ignored files; the
 durable delivery contract and evidence are retained here.
@@ -54,7 +60,7 @@ orchestration changes, with per-operation concurrency/backpressure bounds retain
 # Execution
 
 Inputs: the acceptance above, [BenchmarkComparisons](../Features/BenchmarkComparisons.md)
-and [ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md).
+and [ADR-064](../ADR/ADR-064-workflow-release-delivery.md).
 Scope and test strategy are approved by the owner's direct workflow correction;
 this applies the existing three-pipeline design without topology/API changes.
 

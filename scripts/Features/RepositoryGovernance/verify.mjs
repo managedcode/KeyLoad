@@ -25,7 +25,7 @@ const REQUIRED_COMMAND_MARKERS = [
   'dotnet restore KeyLoad.slnx',
   'dotnet build KeyLoad.slnx',
   'dotnet format KeyLoad.slnx',
-  'gh workflow run ci.yml',
+  'gh workflow run build-and-tests.yml',
   'node scripts/Features/RepositoryGovernance/verify.mjs',
 ];
 const SKIPPED_DIRECTORY_NAMES = new Set([

@@ -59,10 +59,6 @@ internal static class ZoneTreeBackupJournalValidation
         // The observer validates every record without materializing a tree or imposing
         // the standalone-snapshot whole-file size limit on the combined journal.
         var magic = BinaryPrimitives.ReadUInt64LittleEndian(header);
-        if (magic == SourceCheckpointMagic)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, JournalFormatUpgradeRequired);
-        }
         return magic == CheckpointMagic
             ? ZoneTreeCheckpointReader.Read(journal, options, ObserveValidatedMutation).Position
             : InitialJournalPosition;

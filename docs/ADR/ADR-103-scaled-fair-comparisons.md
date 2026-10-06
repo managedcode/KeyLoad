@@ -27,17 +27,17 @@ flowchart LR
 ```
 
 1. Tests-first: `tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Cases/ScaledComparisonProfileTests.cs`, `ScaledComparisonDatasetTests.cs`, `ScaledComparisonRunnerTests.cs`, and `ScaledFairnessManifestTests.cs` plus role-local assertions/helpers. Literal profile/generator/manifest vectors are independent, strict and never generated from runtime catalog output.
-2. Library: add the scale profile and random-access dataset contracts under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/{Contracts,Corpus,Topology}`. Extend the existing ComparisonRunner/target/session path with a bounded scaled branch. It produces on-demand inputs, performs actual full native seed/readback verification, validates each measured result and discards it, and retains exact counters plus a fixed deterministic latency sample. Preserve old `BenchmarkDataset` and report behavior for the historical 270 control cells. Keep every in-flight operation within fixed concurrency and await settlement on cancellation/timeout.
+2. Library: add the scale profile and random-access dataset contracts under `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/{Contracts,Corpus,Topology}`. Extend the existing ComparisonRunner/target/session path with a bounded scaled branch. It produces on-demand inputs, performs actual full native seed/readback verification, validates each measured result and discards it, and retains exact counters plus a fixed deterministic latency sample. Preserve the current `BenchmarkDataset` control workload and report behavior for the 330 control cells. Keep every in-flight operation within fixed concurrency and await settlement on cancellation/timeout.
 3. Worker-owned target adaptation touches existing database target adapters only when necessary to consume the bounded dataset and preserve the exact semantic read/write oracle. Do not create new provider or in-memory adapters. Unsupported genuine topology remains unsupported.
 4. Root owns the canonical profile/workflow matrix, GitHub runner identity/hardware and per-resource effective limits, AppHost/RF topology observation, image/native membership/ACK proof, source/run/artifact authentication, aggregate completeness gate and website publication. New data must flow through these existing pipeline owners; no second workflow or harness.
 5. Root integrates, performs source review, then runs exact canonical solution build, formatter/analyzers and required TUnit/normal/scalar/recovery/RF3 suites through Aspire. Actual database scale jobs execute only in the isolated Linux GitHub pipeline. Publish eligibility additionally requires full original native artifacts and same-hardware/resource/durability/correctness envelope.
 
 ### Accepted exact-source composite CI accounting
 
-6. The existing `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json` control workload parameters stay unchanged; ADR-109 extends the catalog to 330 cell identities. A version-2 composite CI plan wraps the exact existing version-1 control plan and two independently validated 132-cell scale subplans. The eleven database groups receive their unchanged 3 preflight + 30 control rows plus 24 profile-qualified scale rows each. `scripts/Features/BenchmarkComparisons/{isolated-plan*,isolated-preflight.mjs}` own this plan/matrix; `benchmarks.yml` only routes its eleven returned matrices and passes exact per-row `Benchmarks__ScaleProfile` and `Benchmarks__EvidenceProfile`. There is no second workflow/harness.
-7. GitHub proof is partitioned into four exact profile cohorts (control plus the three scale IDs). Every cohort retains the same authenticated source SHA/run/attempt/repository/ref/workflow; each worker, job, artifact, report, target, topology and profile is validated against exactly one matching profile-specific subplan. The collector/worker/aggregate modules under `scripts/Features/BenchmarkComparisons/` reject duplicate/missing rows and mixed identities. `aggregate-cli.mjs` performs one all-profile admission only after the composite plan and all four proofs validate; it leaves the existing `aggregate.json` control bytes/shape unchanged and emits `scaled/<profileId>/aggregate.json` for each profile plus `scaled/cohort-receipt.json`.
+6. The existing `benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/isolated-contract.json` control workload parameters stay unchanged; ADR-109 extends the catalog to 330 cell identities. The current version-3 composite CI plan contains the exact version-1 control plan, two independently validated 132-cell scale subplans, and the 24 vector-profile subplans governed by ADR-109. Each of the eleven database groups receives 3 preflight + 30 control + 24 scale + 72 vector rows before the separately specified open-loop extension. `scripts/Features/BenchmarkComparisons/{scaled-isolated-plan.mjs,isolated-preflight.mjs}` own this plan/matrix; `benchmarks.yml` routes the eleven returned matrices and preserves each row's exact profile selectors. There is no second workflow/harness.
+7. CRUD proof is partitioned into three exact profile cohorts: control, `scaled-100k-c16`, and `scaled-1m-c16`. The composite additionally requires the 24 separate vector-profile proofs under ADR-109. Every cohort retains the same authenticated source SHA/run/attempt/repository/ref/workflow; each worker, job, artifact, report, target, topology and profile is validated against exactly one matching profile-specific subplan. The collector/worker/aggregate modules under `scripts/Features/BenchmarkComparisons/` reject duplicate/missing rows and mixed identities. `scaled-cohort-aggregate-cli.mjs` performs one composite admission only after every control, scale and vector proof validates; it leaves the current `aggregate.json` control bytes/shape unchanged and emits each scale/vector profile aggregate and the bound cohort receipt.
 8. `scaled/cohort-receipt.json` uses closed `schemaVersion: 1` and contains: common `{sourceRevision,runId,attempt,repository,ref,workflow}`; `control` `{profile,cellCount,aggregateSha256,cells}` where the exact 330 rows contain `{id,artifactId,artifactName,artifactDigest,workerSha256}`; `scaledProfiles` contains the two exact canonical IDs/count settings and 132 rows each, with `{id,target,nodeCount,scenario,disposition,artifactId,artifactName,artifactDigest,workerSha256}`; top-level `{qualified,failedIds,missingEvidence}` explicitly records scale qualification, sorted safe IDs of accounted failed/null cells, and sorted closed evidence-category keys. Missing actual hardware/server envelope evidence uses only `hardwareClass`, `effectiveServerResources`, `storageEnvelope`, or `serverCpuRss`; client-process counters and unlike host snapshots cannot substitute. `qualified` additionally requires empty `missingEvidence`. The validator compares all ID sets to the independent canonical plan and requires each `sha256:` archive digest and worker JSON digest to match authenticated proof. The control aggregate hash binds the unchanged validated 330 control rows. Each scaled profile contains exactly 132 scale rows. `qualified` is true only if all required measurable cells succeeded and every unsupported row is the exact frozen disposition; otherwise a complete, authenticated receipt records `qualified=false` and sorted `failedIds`, preserving null reports and fixed safe reasons. Missing, duplicate, corrupt, or mismatched rows reject active scale accounting. Stable hardware-class fingerprint and actual effective CPU/memory/storage limits must match within each comparable `(profile,nodeCount,scenario)` cohort; storage/durability/write-ACK, record count, payload, seed, same-profile corpus/workload identity, actual node count and profile are exact. Dataset digests are compared only within identical record-count/profile cohorts, never across different profile sizes. Target image/version must match that target's own canonical target manifest and are retained as exact per-target evidence, not compared for equality across unlike providers. Runner instance IDs and observed CPU/RSS peaks are provenance/measurements, not equality keys; peaks must be finite and within effective limits. Missing/unknown hardware or limits never match.
-9. `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/` owns independent scale-plan exact-set, control-contract-unchanged, matrix job/artifact uniqueness, four-profile proof partition and receipt rejection oracles in role-local helpers. Existing cases to extend are `IsolatedPlanTests`, `IsolatedPlanRejectionTests`, `IsolatedAggregateProofTests`, `IsolatedAggregateEnvelopeTests`, and workflow-layout tests. Root owns any later site projection contract. This stage does not add a site gate or consume the scale receipt in the website: complete authenticated scale failures preserve current ADR-080 control publication semantics, while no scale projection or full-scale success claim is emitted.
+9. `tests/KeyLoad.UnitTests/Features/BenchmarkComparisons/Cases/` owns independent scale-plan exact-set, control-contract-unchanged, matrix job/artifact uniqueness, complete current-profile proof partition and receipt rejection oracles in role-local helpers. Existing cases to extend are `IsolatedPlanTests`, `IsolatedPlanRejectionTests`, `IsolatedAggregateProofTests`, `IsolatedAggregateEnvelopeTests`, and workflow-layout tests. Root owns the site projection contract governed by ADR-109 and the separate Website executor under ADR-112/ADR-114. Complete authenticated failures retain their explicit failed/null disposition; missing, corrupt or mixed evidence never becomes an eligible measurement or a full-scale success claim.
 
 Rollback removes the scale selector/matrices/subplans/receipt together, preserving the original control plan/output and ADR-080 authenticated failed/null publication. Specialized scale query/model/recovery/movement/endurance work remains open.
 
@@ -63,235 +63,97 @@ The scaled cell manifest binds workflow schema, target, native count, profile, s
 
 The `intensive-1k-c16` workload parameters and historical artifacts retain their original identity; ADR-109 extends the live catalog and site projection together. If a profile, native target, topology or manifest fails, retain the failure and do not publish that scale cohort. Rollback removes the scale profile and producer cells as one source/workflow change while preserving original control receipts. No database contents are shared across runners or between engine targets. Source code, fixture manifests and local measurements never qualify an actual database comparison or site claim.
 
-Root owns workflow/AppHost/runner hardware/resource observations/aggregation/site joins. Worker owns feature-local scale profile/generator/runner files and ComparisonTests scale cases/helpers; target-specific files are worker-owned only if new-profile integration strictly requires them. Verification does not rely on local test or benchmark runs under ComparisonTests/Comparisons policies. There is no frontend work until a later complete source/run-bound public metrics projection is approved. Open-loop, shard-skew/fanout stress, recovery, movement, SQL complex-query comparison, endurance and powerloss are later separately frozen stages.
+Root owns workflow/AppHost/runner hardware/resource observations/aggregation/site joins. Worker owns feature-local scale profile/generator/runner files and ComparisonTests scale cases/helpers; target-specific files are worker-owned only if new-profile integration strictly requires them. Local functional regressions use the canonical Aspire-owned entry and remain development evidence. Native measurement and delivered-source qualification require their exact-source isolated Linux GitHub jobs. Public metrics require the complete authenticated source/run-bound projection and separate Website qualification under ADR-109 and ADR-112. Open-loop, shard-skew/fanout stress, recovery, movement, SQL complex-query comparison, endurance and powerloss are later separately frozen stages.
 
-## Accepted scale resource evidence and Aspire forwarding, 2026-10-05
+## Current scale evidence, forwarding and settlement contracts
 
-REQ/AC-SCALE-016 (new) and ADR-103 stage 10 (new). This accepted contract precedes private code; durable docs join before its live source. Only the two exact scaled profiles use the new sidecar. The historical 270 controls and website aggregate schema remain unchanged.
+`REQ/AC-SCALE-014..017` remain separate current acceptance contracts, including `REQ-SCALE-016` / `AC-SCALE-016` and `REQ-SCALE-017` / `AC-SCALE-017`. Their full
+inputs, limits, failure mapping and real-test ownership are defined in the owning
+[ScalingQualification specification](../Features/BenchmarkComparisons/ScalingQualification.md):
+[resource evidence and forwarding](../Features/BenchmarkComparisons/ScalingQualification.md#accepted-scale-resource-evidence-and-aspire-forwarding-2026-10-05),
+[the native cancellation regression](../Features/BenchmarkComparisons/ScalingQualification.md#native-probe-cancellation-regression-repair),
+[Aspire forwarding](../Features/BenchmarkComparisons/ScalingQualification.md#accepted-prerequisite-aspire-scale-forwarding-reqac-scale-014),
+and [original teardown settlement](../Features/BenchmarkComparisons/ScalingQualification.md#accepted-original-teardown-settlement-reqac-scale-017).
+These criteria preserve validated typed options; the exact Aspire-owned test
+entry; real native child/readiness/exit observations; original cancellation and
+task identity; complete reader/owner settlement; and safe cleanup with primary
+and cleanup failures retained. Local runs are development evidence; delivered
+qualification remains exact-source Linux GitHub evidence.
 
-Stage 10's native probe cancellation test repair is
-TASK-SCALE-NATIVE-CANCELLATION-024 in the owning
-[ScalingQualification contract](../Features/BenchmarkComparisons/ScalingQualification.md#native-probe-cancellation-regression-repair).
-It replaces an overly narrow exception-type assertion with actual readiness,
-original cancellation/settlement, exited-child observation and a healthy native
-follow-up. Production APIs, sidecar bounds and qualification requirements remain
-unchanged. The worker submits private guarded test sources; root owns review,
-integration and the actual Aspire/Linux gates.
+The scale-resource collector remains one AppHost-owned observation of up to
+three actual native server containers, separate from workload timing. Its
+original sidecar stays bounded to 64 KiB, resource samples use the specified
+five-second cadence and 1,680-sample/140-minute limits, and unavailable or
+truncated observations remain unqualified. The original 30-second cleanup bound
+is an escalation threshold, never permission to detach a task or emit a success
+receipt. The canonical feature specification owns the detailed byte/PID/read
+bounds, exact sidecar fields, TERM/KILL sequence and terminal-state oracles.
+These contracts do not change control/scaled report schemas or authorize local
+measurement in website evidence.
 
-One AppHost-owned collector observes the exact selected native target ContainerResources and lifecycle, never the load generator. It writes server-resource-evidence.v1 in a separate server-resource-evidence.json beside the original worker.json only after runner settlement; it binds exact source/run/attempt/job/target/nodeCount/scenario/profile and SHA256 of original worker bytes. AppHost/test teardown must await this original collector before reports are copied and app ownership is released. Failed/unavailable observation never changes workload timing/results or invents successful qualification.
+## Current open-loop source route and qualification boundary
 
-Observe actual Linux kernel/architecture, CPU vendor/family/model/stepping and physical/logical CPU membership, memory, AppHost effective cgroup envelope, actual target container full IDs/image IDs/start identity/state and cgroup CPU/memory limits/counters, and actual writable data mount filesystem type/capacity. Never substitute requested limits, client sampler counters, host processor count alone, unknown VM class or Docker cache-adjusted working set for server RSS. For exact sampled aggregate process RSS, read bounded cgroup.procs plus /proc/<pid>/status and start identity, verify each PID belongs to the exact current container/cgroup, and reject PID reuse/identity ambiguity. Name measurements maxObservedRssBytes and observedCpuUsage, not an unsampled true peak. Missing permissions/remote daemon/unavailable cgroup or storage is explicit unqualified evidence.
+REQ-SCALE-018 / AC-SCALE-018..021 define the independent fixed-arrival workload,
+actual operation accounting, cancellation proof and joined native resource
+lifecycle. Keep the centrally validated options, 16 native consumers, 64 queued
+items, scheduled-arrival deadline, 4,096 latency samples, typed rejection/failure
+mapping, original cancellation identity, retained task settlement and the existing
+native topology/accuracy/resource oracles. The canonical measurement rates are
+250, 1,000 and 4,000 operations per second over the two existing scaled profiles.
+The native open-loop plan contains 792 measurements (72 per target, including its
+144 explicit unsupported identities) and six KeyLoad three-node PointRead
+cancellation proofs. A proof retains the actual first `Completed=1024` marker and
+its typed identity/counter fields; cancellation-callback failure still joins every
+original task, and concurrent disposal returns the same settlement task. It does not
+replace or detach the original runner, cancellation, observation or disposal tasks. Host execution keeps the
+validated native control/scaled/vector timeout options at 60/140/145 minutes and
+the existing matrix bound of 256 rows. REQ-SCALE-022 / AC-SCALE-022 define the
+closed per-cell terminal and separate authenticated open-loop cohort receipt.
+REQ-SCALE-023 / AC-SCALE-023 define bounded matrix transport. The open-loop
+execution/options/tooling joins also preserve REQ-CQ-013 / AC-CQ-034 / AC-CQ-038.
+The complete current operational limits, artifact fields, CLI path rules and
+regression map remain in the [ScalingQualification specification](../Features/BenchmarkComparisons/ScalingQualification.md#accepted-next-stage-fixed-rate-open-loop-s1).
 
-Bounds: one collector, at most three native server containers, five-second cadence, at most 1,680 samples per resource and 140 minutes admitted observation work; retain online aggregates only. Per sample metadata at most 256 KiB, each regular proc/cgroup read at most 4 KiB except explicit hardware enumeration aggregate bounded 256 KiB; at most 128 admitted native PIDs and eight data mounts per container. Sidecar at most 64 KiB. Native Docker commands use closed argv, byte bounds, authenticated owned model identities, application stopping cancellation, TERM then one-second KILL and original exit/readers join. Thirty-second cleanup is an escalation/failure threshold, not detached settlement. Caps, truncation or absent samples force unqualified with existing safe missingEvidence categories; never fabricate zero/default counters.
+The current source route is joined in `benchmarks.yml`: the plan CLI creates the
+canonical isolated, scaled, vector, composite and open-loop plan artifacts. The
+main closed-loop work comprises 1,386 identities (330 control, 264 scaled CRUD,
+792 vector); three preflight identities per database remain separate. The
+open-loop plan is also separate: it contains 792 measurements (72 per target) and
+six KeyLoad cancellation proofs. The per-database matrix combines those sources:
+129 original rows (three preflights plus 30 control, 24 scaled and 72 vector rows),
+then 72 open-loop measurement rows per target and six additional KeyLoad proofs.
+That yields 201 rows for each of ten comparator groups and 207 for KeyLoad, 2,217
+rows total across the eleven groups. These matrix rows are not 2,217 comparable
+measurements and do not change the canonical main cohort or its separate
+2,530-file evidence inventory.
 
-Consumers retain the exact sidecar and authenticate its original artifact/provider/source binding and worker hash separately. No sidecar is manufactured for controls. Compare hardware identity, effective server CPU/memory envelope and storage class/capacity across each profile/nodeCount/scenario cohort, verifying each target's own image manifest separately. Container/PID identities and measured counters are provenance/output, not hardware-equivalence values. Reject mixed cohorts, mismatched actual envelopes, missing/corrupt/duplicate artifacts; no older fallback. Unsupported native cells retain their original explicit capability disposition and do not claim server samples.
+For matrix-size control, each workflow row transports only its `id`, `jobName`,
+`target` and `kind`. Before native resource preparation, the same-run artifact
+resolver validates the complete five-file plan inventory and resolves exactly one
+full canonical row from the existing selectors. The compact projection must fit
+the GitHub job-output limit of 1,048,576 UTF-16 bytes; full plan files and workload
+settings remain the source of authority. Missing, altered, mixed or ambiguous
+selectors fail before worker environment or resources are changed.
 
-Worker owns feature-local AppHost Contracts/Observation/Processes roles, minimal composition/lifecycle joins, bounded parser/identity/native regressions and scale-only script consumers. Root owns durable feature/ADR freeze, source integration, actual Aspire native Linux/Docker qualification, CI/publication, receipts and commits. Private implementation may rely on the existing 45 engine + 10 Aspire + 25 CI packets as explicit predecessor source, never silently overwrite their bases. A reviewable patch and base/post manifests are required. No checkout edits, gates or Git by the worker.
+After worker completion, the current workflow downloads and authenticates the
+original open-loop GitHub evidence, validates the closed terminal/archive and
+complete workload/proof identity set, and writes the separate
+`comparison-open-loop-intake` and `comparison-open-loop-cohort` artifacts. Per-cell measured artifacts use `comparison-open-loop-worker-{id}` and proof
+artifacts use `comparison-open-loop-proof-{id}`; their qualification logs use the
+matching distinct current prefixes. The collector/aggregator preserve measured,
+unsupported, failed and cancellation-proof states; incomplete, mixed, missing or
+corrupt evidence cannot become a qualified cohort. No public/product schema or new open-loop Website projection is enabled; existing
+control/scaled report schemas, 264 closed-loop scale identities and Website
+projection remain unchanged. Existing main-cohort, Website, functional coverage,
+recovery, RF3 and all exact-source Linux gates remain distinct and mandatory.
 
-The accepted SCALE-016 native-root correction follows the documented cgroup-v2
-root semantics: CPU/memory maximum interfaces exist on non-root cgroups. Preserve
-all actual non-root ancestor minima, effective cpuset and verified hierarchy
-identity; terminate at the real root rather than requiring nonexistent root
-limits. Missing/malformed/unreadable required child observations remain explicit
-unqualified evidence. The independent actual Linux oracle and supported-envelope
-regression must expose that distinction. Root owns integration/original Linux
-gates; partition_pages owns the guarded repair. No sidecar or stored schema
-changes occur and rollback cannot fabricate limits or reduce complete cohorts.
-
-## Accepted prerequisite: Aspire scale forwarding (REQ/AC-SCALE-014)
-
-Introduce only the separate KeyLoadTests:ScaleProfile test-harness selector. TestSuiteSettings accepts one exact canonical scaled ID only for Suite=comparison, the exact /*/*/IsolatedNativeComparisonTests/* filter, present native Benchmarks:Target, matching Benchmarks:EvidenceProfile, disabled Benchmarks:Enabled, no direct Benchmarks:ScaleProfile and no workload overrides. Reject missing suite, other suites, unknown/blank/case-mismatched IDs or mixed modes before any resource creation. Existing direct Benchmarks:ScaleProfile plus a suite remains rejected.
-
-run-workload passes --KeyLoadTests:ScaleProfile=<id> to the outer AppHost. Its owned runner alone receives Benchmarks__ScaleProfile=<id>; clear KeyLoadTests__ScaleProfile alongside KeyLoadTests__Suite so the harness selector does not leak into the nested native AppHost. IsolatedNativeCase reads the exact ordinary ComparisonWorkerSelection from the runner environment and passes --Benchmarks:ScaleProfile=<id> to its own nested resource-owning AppHost. Preserve exact evidence/source/native topology and all control behavior. IsolatedNativeCase uses exactly 140 minutes for the closed scale profile and its existing 60 minutes for controls; all original tasks/resources are still joined.
-
-Worker owns the narrow TestSuiteSettings/TestSuiteResources/IsolatedNativeCase/run-workload joins and real Aspire model plus independent argument/environment regressions. This is a prerequisite repair to the accepted SCALE-014 path, not a new alternate test caller. Durable docs join before live implementation.
-
-## Accepted stage 11: original teardown settlement, 2026-10-05
-
-REQ/AC-SCALE-017 and TASK-SCALE-ORIGINAL-TEARDOWN repair the inspected existing
-IsolatedNativeTeardown path, which detached a pending task after 30 seconds and
-replaced or suppressed actual cleanup failures. Freeze the exact owner/order,
-original-task join, native fatal classification and primary/cleanup preservation
-contract in ScalingQualification before implementation. The collector joins from
-stage 10 use the same lifetime; the existing control success path/report schemas
-remain unchanged.
-
-Implement in order: retain the original case failure; settle the original
-collector/capture and report writers; stop and dispose actual owners; delete data
-only after safe ownership release; write bounded safe categories; propagate the
-original ordered failures after all safely reachable stages. Keep 30 seconds as
-an escalation/failure threshold, never detached completion. Add genuine native
-Cases/Helpers regressions for pending settlement and simultaneous primary plus
-cleanup failures, and run them through the canonical Aspire comparison entry.
-ComparisonTests owns this code, partition_pages owns its private guarded packet,
-and root owns integration/gates/evidence/commit. There is no stored-data or wire-contract change;
-rollback cannot convert an unfinished original task into a passing qualification.
-The stage also replaces the collector's premature completed boolean with one
-memoized original completion task, preserves cancellation-callback failures
-while joining its original observation, and retains failed write settlement on
-repeated teardown. Its schema, byte/time bounds and unqualified categories stay
-unchanged. This lifecycle amendment precedes the private repair.
-
-## Accepted stage12: independent fixed-rate open-loop S1
-
-Related REQ-SCALE-018 / AC-SCALE-018..021 and TASK-SCALE-OPEN-LOOP are frozen in
-ScalingQualification before implementation. The actual current worker is
-completion-paced, generic exceptions are currently labeled rejection, and the
-session-cleanup helper can abandon its original disposal task after a timeout.
-The new stage must repair those seams while retaining every native target,
-correctness oracle, ownership bound and existing control/closed-loop result.
-
-Ordered implementation: (1) add strict rate/schedule/accounting contracts and
-document the exact typed native rejection mapping; (2) repair original session
-disposal settlement under SCALE-017; (3) implement monotonic bounded producer,
-16 native consumers,64 queued items, scheduled-arrival deadline, terminal state
-freeze, original join and4096-sample reporting; (4) add exact internal selector
-forwarding through the canonical Aspire comparison entry and separate worker-
-bound sidecar; (5) implement the independent792-cell receipt inside the existing
-eleven named database groups; (6) execute complete real native positive/error/
-cancellation/drain flows, whole solution gates and authenticated isolated Linux
-workloads. No source-only or local result qualifies the global cohort.
-
-Library ownership is BenchmarkComparisons Contracts/Execution/Validation/
-Reporting and the narrow actual adapters/ComparisonSessionCleanup; native tests
-use ComparisonTests Cases/Helpers/Assertions. Root owns durable contracts,
-shared AppHost/workflow joins and evidence/commits; the dedicated partition_pages
-Luna owns private guarded implementation. Scripts use new feature-local
-open-loop executable artifacts. Dependencies are the S1 native corpus and
-resource evidence, genuine provider topology and SCALE-017 original settlement.
-Public/product schema changes are N/A: this is a separate internal artifact;
-control schema3,264 closed-loop cells and website projection remain unchanged.
-Rollback removes the new selection/cohort without rewriting original receipts.
-The actual1/3/6-node objective, two physical owners, skew/fanout and recovery/
-movement depend on their own contracts and remain open after this stage.
-
-TASK-SCALE-OPENLOOP-HOST-001 implements the frozen native host join from
-ScalingQualification: bind and validate the actual options before target or
-unsupported output, route typed open-loop selections to their independent
-measurement/proof writer, and retain existing control/vector/closed-loop dispatch.
-Root owns live host joins; workers may prepare guarded private configuration-to-
-output regressions. Native Aspire and authenticated Linux evidence remain open.
-
-TASK-SCALE-OPENLOOP-NATIVE-001 uses the exact typed case intent, owned marker
-control, original-task settlement and distinct artifact-bound resource sidecar
-contract frozen in ScalingQualification. Root owns native case/AppHost joins;
-workers own only guarded new test Cases/Assertions/Helpers. Preserve the current
-IOptions observation policy and closed resource schema v2. Native measured/proof
-execution and the independent792-cell Linux cohort remain unqualified until
-actually executed; source joins do not mark this ADR Implemented.
-
-The parent retains the actual first Completed=1024 marker and verifies all its
-typed identity/counter fields against the proof milestone. A cancellation-callback
-failure still requires joining each retained original task before disposal;
-concurrent duplicate disposal returns the same settlement task. Meaningful tests
-exercise these actual lifecycle operations and their completion/failure states.
-These corrections preserve the original RF3, control, resource and provenance
-contracts and cannot relabel prior source-only packets as native proof.
-
-TASK-SCALE-OPENLOOP-NATIVE-OPTIONS-001 follows ADR-113 using the existing native
-provenance registration at case composition and typed options passed into the
-artifact assertions. Preserve each original identity and independent oracle;
-do not substitute a raw environment read or duplicate execution policy.
-ScalingQualification owns the exact file/agent join and six-case verification
-contract. This source integration leaves every native and Linux gate open.
-
-TASK-SCALE-OPENLOOP-INVENTORY-001 freezes the separate792-measurement/six-proof
-canonical plan in ScalingQualification before workflow or evidence changes.
-A Luna worker owns only its new plan module and real process-flow test packet;
-root owns all shared CLI, matrix, workload, workflow and artifact joins. Preserve
-the old composite schema and original control/scaled/vector rows. An exact
-inventory is static tooling evidence; it cannot qualify a database workload or
-publish new website metrics.
-
-TASK-SCALE-OPENLOOP-RESOURCE-OPTIONS-091F adds the existing centrally validated
-NativeComparisonExecutionOptions dependency to the open-loop runner and proof
-entry, preserving all v1 report, resource and cancellation contracts. Related
-requirements are REQ-CQ-013/AC-CQ-034/038 and AC-SCALE-018..021. The required
-runner argument precedes optional observers; the proof argument precedes the
-final cancellation token. The existing ClientResourceSampler owns its operational
-policy and receives the original IOptions instance. No parallel policy defaults,
-sampler, raw configuration or synthetic resource evidence is admitted. Stages:
-freeze this contract; Luna prepares a guarded private runner/proof packet; root
-joins both host callers using IsolatedHostTargetOwner.ExecutionOptions; build
-with native analyzers, run actual host/measurement/cancellation flows through
-Aspire, retain current-source resource results. Rollback restores the coherent
-caller/signature pair; all full-suite and Linux gates remain mandatory.
-
-The inventory test-process owner consumes one centrally bound and validated
-IOptions dependency for its actual deadline and stream/input/output limits,
-with defaults only in the feature-local test configuration definition. Luna
-prepares this guarded source-only extension and a meaningful owned-child
-cancel/failure-to-success flow; root joins it and runs native Aspire tests.
-This preserves REQ-CQ-013/AC-CQ-034/038, source guards and original child/readers
-settlement. No shape-only coverage contributor or new execution entry is added.
-
-TASK-SCALE-OPENLOOP-PLAN-JOINS-001 freezes the optional create-only
-`--open-loop-output` CLI join and explicit fourth matrix argument. Root owns
-isolated-plan-cli.mjs and isolated-preflight.mjs; preserve the old default129 rows
-and every original serialized row, then append72 measurements per database and
-only KeyLoad's six proofs (201/207, same11 groups, existing256 cap). Rate/proof
-labels and artifact/qualification prefixes are distinct and canonical. Verify
-actual CLI publication, complete matrix identity/partition and failed-input
-preservation through Aspire-owned tests. Existing CI selection stays unchanged
-until the separate workload and original-artifact/fairness admission joins are
-complete. Rollback removes only the new optional route; original outputs and all
-native qualification/publication gates remain mandatory.
-
-The selected open-loop output follows the same caller-owned create-only path
-semantics as the existing CLI outputs: bounded resolved paths and plain parents,
-with no new confinement to a test temp root. Absolute/normalized paths remain
-valid; an actual linked-parent escape fails before any linked target is changed.
-
-## Accepted stage13: original open-loop delivery and separate receipt
-
-REQ-SCALE-022 / AC-SCALE-022 / TASK-SCALE-OPENLOOP-DELIVERY-001 freeze the exact
-terminal/artifact/completeness/fairness contracts in ScalingQualification before
-implementation. The source audit found no workflow selection or authenticated
-aggregation route for existing native measured/proof outputs. This stage joins
-that route without widening WorkerSha256 or existing site schemas.
-
-Ordered stages: freeze the closed original terminal and cohort receipt; add new
-feature-local modules with real Node-process tooling flows; root joins canonical
-dispatch/finalizer/original GitHub ZIP admission and all eleven workflow groups
-together; retain and authenticate every measured/proof/unsupported/failed planned
-identity; run full Aspire-owned native gates and the exact-source Linux cohort.
-A complete authenticated failed cohort remains explicitly unqualified; missing
-or corrupt evidence fails closed without fallback.
-
-Ownership: scripts/Features/BenchmarkComparisons holds new colocated executable
-artifacts; tests/KeyLoad.UnitTests/Features/BenchmarkComparisons holds applicable
-Cases/Helpers/Assertions/Models/Configuration. A dedicated Luna worker owns only
-guarded private new modules/tests. Root owns existing scripts/workflow joins,
-full review, gates, evidence and all-scope checkpoints. Dependencies are the
-canonical792/six plan, native measured/proof writers, artifact-bound sidecars
-and original bounded GitHub archive/metadata primitives. Tooling fixtures never
-count as authentic measurements or product functional-coverage contributors.
-
-This is an additive internal change; original control/scaled/vector/publication and
-native topologies remain mandatory. CI selects the new plan only after the
-coherent dispatch-to-intake route exists. Rollback removes only this new route
-and preserves original immutable evidence. No new website open-loop projection
-is enabled. This ADR remains Accepted with native and delivered-source gates
-pending until the complete required evidence exists.
-
-## Accepted stage14: bounded GitHub matrix transport
-
-REQ/AC-SCALE-023 and TASK-SCALE-MATRIX-TRANSPORT-001 repair the actual Linux
-planning failure: full matrix job outputs exceeded GitHub's 1048576-byte UTF-16
-limit. Preserve all2217 canonical rows, eleven named groups and original five
-plan artifacts. The matrix transport contains only id/jobName/target/kind;
-same-run artifact resolution supplies the complete canonical row before resource
-preparation, using existing trusted selectors rather than a second selector path.
-
-Ordered implementation: freeze the transport and full-row resolution contract in
-ScalingQualification; update the existing plan CLI/matrix output and workflow
-download/resolution ordering; extend actual Node-process CLI/resolver flows while
-preserving independent full-row assertions; run Aspire-owned regressions, complete
-solution gates and the delivered-source Linux planning job. Root owns shared
-scripts/workflow joins and evidence; the Luna worker owns the guarded private
-implementation and test helpers in the existing BenchmarkComparisons slice.
-
-This changes internal matrix serialization only. Original plan, worker,
-terminal, archive and public metric schemas remain mandatory. Rollback must keep
-the output bound and complete canonical inventory; reverting to oversized output
-cannot count as successful delivery. No stored-data contract or test-entry change is involved.
+Source presence and matrix/artifact planning are not executed native workloads.
+No local source packet, successful build or partial receipt qualifies open-loop
+performance. Keep the 792 measurement and six proof identities, native operation
+oracles, resource bounds and terminal semantics pending until their actual
+source-bound Linux evidence is retained. This route does not close the separate two-RF3 six-silo physical-owner movement
+stages under [ADR-106](ADR-106-partition-owner-movement.md), or skew/fanout and
+recovery qualification. Native comparison topologies remain one, two and three
+actual members; the owner-movement topology has its own six-silo contract.
+Preserve the separate 30-logical-cell TimeSeries family and its 60 scale-specific jobs plus six preflights under ADR-050
+and ADR-059; neither family is folded into the 1,386/2,530 main cohort.

@@ -48,7 +48,7 @@ current workflow implementation and CI checks do not authorize dispatch or publi
 
 Requirements/acceptance are REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003 in the
 [acceptance matrix](../implementation/pipeline-release-v2-acceptance.md).
-[ADR-064](../ADR/ADR-064-three-pipeline-release-delivery.md) is required for release
+[ADR-064](../ADR/ADR-064-workflow-release-delivery.md) is required for release
 permissions, version identity, deployment artifacts and current-producer handoff.
 
 ```mermaid
@@ -69,7 +69,7 @@ flowchart LR
 ```
 
 Canonical ownership:
-- shared infrastructure: `.github/workflows/ci.yml`, `benchmarks.yml`, `website.yml`, `release.yml`,
+- shared infrastructure: `.github/workflows/build-and-tests.yml`, `benchmarks.yml`, `website.yml`, `release.yml`,
   root Dockerfile, the existing comparison Dockerfile and `Directory.Build.props`;
 - tooling: `scripts/Features/ReleaseDelivery/` version/asset helpers and distribution;
 - focused contracts/tests: `tests/KeyLoad.UnitTests/Features/ReleaseDelivery/`;

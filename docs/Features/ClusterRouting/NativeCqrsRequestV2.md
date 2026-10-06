@@ -1,14 +1,17 @@
 # Native CQRS stream contract v2
 
-[ADR-091](../../ADR/ADR-091-epoch7-interpretation-fence.md) records the historical epoch7/rpc3 admission decision and its native stream-shape, v2 alias/Id, and KLT2 framing constraints. The current application discovery contract publishes RequestInterfaceVersion4 while signed data-epoch7-rpc3 purposes remain the cohort admission evidence; this current test-oracle expectation does not retroactively amend ADR-091. The epoch6/rpc2 pins recorded below describe the prior C1 stage and do not authorize a mixed epoch6/7 deployment. Cancellation/shutdown/unavailable cohort fixtures now run without parallel contention, preserving every native RPC/TTL bound and failure oracle after the original Linux5-failure report.
+The current application contract uses RequestInterfaceVersion4, the existing
+native request stream aliases/IDs and the current signed-purpose constants. Every
+request validates the exact current signature and cohort identity before dispatch;
+stale or malformed purposes fail closed.
 
-Status: root implementation contract accepted, 2026-10-04; C1 implementation and regression fixtures are authored. The unchanged six C0 Aspire oracles also passed with published Communication10.2.9. C1 product qualification remains required; authored fault fixtures and local mechanism results do not close it. Canonical slice: ClusterRouting; parent [NativeCqrs](NativeCqrs.md). Decision: [ADR-082](../../ADR/ADR-082-native-cqrs-streams.md). Related slices: ClusterReplication, ClientApi, Authorization, ResourceExecution and StorageRecovery.
+Status: root implementation contract accepted, 2026-10-04; C1 implementation and regression fixtures are authored. The original six C0 Aspire oracle receipts remain bound to their recorded source and packages; they do not qualify a changed checkout. C1 product qualification remains required; authored fault fixtures and local mechanism results do not close it. Canonical slice: ClusterRouting; parent [NativeCqrs](NativeCqrs.md). Decision: [ADR-082](../../ADR/ADR-082-native-cqrs-streams.md). Related slices: ClusterReplication, ClientApi, Authorization, ResourceExecution and StorageRecovery.
 
 The existing final-response SDK and official MCP adapters must consume one native execution stream from the unique request grain. Their current final JSON remains the initial external contract. This stage does not advertise public progress or durable background work; C2 and C3 remain required.
 
 ```mermaid
 flowchart LR
-    Gateway[Persisted identity and signed request] --> Cohort[Authenticated compatible RF3 cohort]
+    Gateway[Persisted identity and signed request] --> Cohort[Authenticated current RF3 cohort]
     Cohort --> Request[Unique request RPC v2]
     Request --> Started[Native Started chunk]
     Started --> Capability[Existing authorized read or command grain]
@@ -107,9 +110,7 @@ without releasing an unfinished owner or pretending it joined; a later caller
 awaits the same original drain. ServerApplication must retain the native host
 and physical owner until the original join has occurred. Real Aspire RF3
 held-phase shutdown/restart through SDK and official MCP, exact Linux suites,
-fault/resource/endurance gates and bounded authority remain required. No data,
-public wire, placement or authorization migration occurs; rollback requires a
-homogeneous stopped cluster and cannot detach already admitted work.
+fault/resource/endurance gates and bounded authority remain required. The stream adds no persisted data or public authorization fields; recovery keeps the current cohort and cannot detach already admitted work.
 
 REQ-CRS-JOIN-001 / AC-CRS-JOIN-001: a real Create producer with a throwing
 registered cancellation callback remains joined by early enumerator disposal;
@@ -120,24 +121,16 @@ remain passing. Use real native Create, tokens and controlled tasks; no fake
 enumerator or abandoned observation wait. Always release and join original work
 in fixture cleanup, preserving observation plus cleanup failures.
 
-Luna lifecycle_wave owns a private source repair to Communication/Cqrs/CqrsStream
-and one cohesive cleanup helper; Luna cluster_wave independently owns new owning
-CQRS tests. Root owns README, canonical patch10.2.11 over published10.2.10, complete
-review, owning build/full TUnit/format checks, scoped commit/push, successful
-GitHub release, actual NuGet-feed/package verification and only then KeyLoad's
-central package update and Aspire consumer regressions. Both workers read the
-owning AGENTS.md and preserve its timestamps, constants, logging and API rules.
-No public stream, binary alias/field ID, database format or dependency replacement
-is introduced. Rollback retains the previous published package and its explicit
-failed-join evidence; no local package or project reference qualifies delivery.
-
-Delivery checkpoint2026-10-05: the owning repair is published as10.2.11 from
-Communication commit7777c90761f04b4bcffec1b5846fb74f96b8c072 through successful
-Release37250149897. Owning full native TUnit passed1363/1363. KeyLoad's three
-central references were restored from the official NuGet v3 feed; signed package
-repository commits and restored runner DLL bytes match the actual published
-payloads. The delivery receipt (report removed from repository)
-retains original evidence. Earlier10.2.9/10.2.10 records below remain history.
+A defect in the native producer cancellation/join contract belongs to the
+Communication repository. The owning repair must retain the native Create and
+stream API, add complete producer/finally/callback/fatal/error flows, and pass
+its required build, TUnit and formatter gates before canonical patch publication.
+Root integrates only a successfully released and feed-verified package, then
+runs the actual Aspire consumer flows with the centrally pinned package family.
+No consumer copy, local package or temporary project reference qualifies delivery.
+The historical report (removed from repository)
+retains immutable source/run/feed evidence for its recorded repair. It does not
+replace fresh gates for the current package pins or KeyLoad checkout.
 
 NodeWork development checkpoint75g: full Release build passed with0 warnings and
 0 errors; actual Aspire selected owner/kernel tests passed7/7, including the real
@@ -146,32 +139,8 @@ failure was an actual process StartTime observation in the comparison process-tr
 test, with its cleanup cancellation retained. The full gate is failed. Both
 cohorts' HEAD, all source and executable/runtime input inventories stayed unchanged;
 only explicitly identified native TestCluster output logs are excluded from inputs.
-The development receipt (report removed from repository)
-does not close the RF3 phase, migration, scalar/Linux, resource or endurance gates.
-
-TASK-CRS-C1-PRIOR-CHECKPOINT, accepted 2026-10-05, retains AC-CRS-002 and
-ADR-077/091's actual cold native6-to-native7 migration evidence after original
-run37242346547. One ten-document command does not produce the required native
-replica checkpoint at the default threshold1024. Luna cluster_wave owns a private
-patch for RequestCqrsRf3Epoch7Scenario, RequestCqrsRf3Epoch7WaveRunner,
-RequestCqrsRf3Wave and a new feature-local RequestCqrsRf3CheckpointSeed helper.
-Add an explicitly selected threshold16 only to that scenario's original prior
-wave through the existing AppHost KeyLoad:SnapshotThreshold configuration;
-ordinary waves and product defaults remain1024. Preserve cancellation-last
-signatures and existing native image proof, explicit RF3 membership, readiness,
-owned stop/dispose, exclusive lock joins and failure preservation.
-After the unchanged ten-document seed and exact SDK/MCP replay, issue at least20
-distinct real public SDK commits into a separately configured fixture collection,
-with independent stable command IDs and expected revision0. Validate their actual
-receipts and records and wait for all three real voters to apply the last receipt
-before capturing prior observations and stopping the original wave. Preserve
-every original seed document/revision and receipt oracle. Conversion runs only
-after owned shutdown and exclusive locks; original non-null snapshot, threshold,
-length/hash inventory, topology, byte-identical private profile, mixed-version
-rejection, restart, later-write and both-client assertions remain unchanged.
-No synthetic hard state, copied snapshot pointer, lowered oracle, shared corpus
-expansion, invented prior-image feature or new test authority is allowed. Root
-reviews the complete patch and qualifies it through the real Aspire RF3 caller.
+The historical report (removed from repository)
+does not close the RF3 phase, scalar/Linux, resource or endurance gates.
 
 TASK-CRS-C1-MCP-REJECTION-EVIDENCE, accepted 2026-10-05, refines
 AC-CRS-002/004 after the original follower-restart initialize HTTP400. The
@@ -223,7 +192,7 @@ the warnings-as-errors build and the real Aspire test caller.
 
 TASK-CRS-C1-MCP-GUARD-EVIDENCE, frozen2026-10-05, adds
 REQ-CRS-DIAG-002 / AC-CRS-DIAG-002. The actual follower runner must use the existing
-Epoch7WaveRunner ownership/failure path so an original action failure receives its
+current RF3 wave-runner ownership/failure path so an original action failure receives its
 own bounded diagnostics artifact only after original wave stop and subscription
 join. Preserve primary, stop, disposal and artifact failures through the existing
 ServerFailureObserver; retain every follower loss/rejoin, signed-generation,
@@ -247,7 +216,7 @@ reviews/integrates and owns image preparation, full build and actual Aspire RF3
 execution. Preserve image proof, RF3 membership and all existing time/resource
 bounds; no broad retry, new accepted errors, auth logging guess, production guard
 change or secondary parser is authorized. This fixture-only stage uses ADR-082's
-existing contracts, with no data/wire migration; rollback restores the prior runner
+existing contracts, with no persisted-format or public-wire change; rollback restores the current runner
 join and removes the new test. It cannot claim that either original MCP initialize
 failure has been fixed before the original public fault cases pass.
 
@@ -291,17 +260,17 @@ qualify actual armed RF3 phases or replace their mandatory both-client cases.
 | Requirement | Measurable acceptance | Automated evidence |
 |---|---|---|
 | REQ-CRS-001: one versioned native stream replaces the request Task RPC | AC-CRS-001: genuine native Orleans calls execute the signed read and command through exactly one independently keyed request grain and the existing capability grains. The new interface/method aliases and generated progress record round-trip with the native Communication converter. The retired request Task method and unused envelope-alias constant are absent; there is no runtime fallback or second dispatcher. | RequestCqrsRoutingTests; real Aspire SDK/MCP RF3 operations |
-| REQ-CRS-002: protocol compatibility is authenticated and distinct from persisted data format | AC-CRS-002: genuine signed discovery proves current, missing and incompatible application/peer-wire versions; tampered bytes or identities are rejected before cache or use. Real old/new-binary Aspire RF3 fixtures make new-binary admission reject an authenticated incompatible cohort and reject cross-version replica acknowledgements. Two compatible surviving voters still serve after the third is stopped. A compatible-cache→authenticated-mismatch refresh cannot reuse its prior address; a later authenticated runtime-generation replacement and cache expiry refresh compatibility within the declared bound. | RequestCqrsCohortTransitionTests, RequestCqrsCohortCancellationTests, RequestCqrsCohortLifetimeTests and RequestCqrsCohortShutdownTests; RequestCqrsRf3ColdMigrationTests and RequestCqrsRf3FollowerRestartTests |
+| REQ-CRS-002: signed current-cohort identity is authenticated before admission | AC-CRS-002: actual signed discovery verifies exact bytes, current purpose, voter/cluster/incarnation/nonce and bounded address before cache use. Stale-purpose, tampered, malformed or mismatched current identity fails closed before dispatch or effects. Current RF3 two-survivor operation, authenticated refresh, runtime-generation replacement and cache expiry retain their declared bounds. | RequestCqrsCohortTransitionTests, RequestCqrsCohortCancellationTests, RequestCqrsCohortLifetimeTests, RequestCqrsCohortShutdownTests, current signed-purpose rejection cases and RequestCqrsRf3FollowerRestartTests |
 | REQ-CRS-003: the producer has a small truthful well-formed lifecycle | AC-CRS-003: lazy execution verifies the exact signed scope and request GUID before Started. Valid routing emits Started then one terminal; an early rejection emits one Failed. Sequences are exactly1/2 or1, and no percentage, work count, authorization success or commit progress is invented. Domain rejection, genuine unexpected exception, cancellation and early disposal are covered with actual native producer settlement, a healthy following operation and no crossed concurrent identity/history. | RequestCqrsBoundaryTests lifecycle cases and RequestCqrsFatalSettlementTests; unchanged NativeCqrs controls; genuine RF3 abort qualification remains pending |
 | REQ-CRS-004: a stream cannot bypass resource or failure/privacy admission | AC-CRS-004: exact/excess chunk count, native encoded bytes, aggregate bytes, payload/detail bounds, sequence, kind, field shape, duplicate terminal, trailing chunk and missing-terminal inputs fail closed. The consumer reaches actual EOF and disposes without materializing a chunk list. Native byte measurement uses the actual silo serializer without retaining another encoded payload. Controlled private exception text, data and stack never reach the public result or logs. | RequestCqrsProtocolTests and native serializer/boundary tests; real RF3 privacy/resource tests |
 | REQ-CRS-005: RF3 receipts retain write-outcome authority across interruption | AC-CRS-005: actual interruption before and after native progress/commit preserves the canonical stable command ID and persisted receipt. A caller without a validated final response observes UnknownWriteOutcome for an interrupted write; same-ID retry with a fresh request GUID returns the canonical receipt without repeating effects. Cancellation is never proof of rollback. Read cancellation remains distinct. | OrleansRpcFailureTests cover translation only; deterministic interrupted-write and same-ID retry through real Aspire SDK/official MCP clients remain pending |
-| REQ-CRS-006: native Orleans RequestContext propagates bounded identity and request state without becoming authorization authority | AC-CRS-006: genuine native serialization and first/later pulls carry exactly the server-authenticated persisted subject and matching request/command GUIDs. Missing, extra, mismatched, unauthenticated and forged context fail before capability execution. Authentication carries no principal. Current persisted grants, expiry and revocation remain effective after the quorum barrier. Concurrent streams, cancellation, failure and early disposal restore both exact prior context values and preserve Graph context; a healthy following request has no inherited identity. Real restart/migration reconstructs state from a fresh signed request, never a retained activation or context cache. | RequestCqrsIdentityTests; genuine Aspire SDK/official MCP revocation, cancellation and migration tests |
+| REQ-CRS-006: native Orleans RequestContext propagates bounded identity and request state without becoming authorization authority | AC-CRS-006: genuine native serialization and first/later pulls carry exactly the server-authenticated persisted subject and matching request/command GUIDs. Missing, extra, mismatched, unauthenticated and forged context fail before capability execution. Authentication carries no principal. Current persisted grants, expiry and revocation remain effective after the quorum barrier. Concurrent streams, cancellation, failure and early disposal restore both exact prior context values and preserve Graph context; a healthy following request has no inherited identity. Real Orleans activation movement and restart reconstruct request state from a fresh signed request, never a retained activation or context cache. | RequestCqrsIdentityTests; genuine Aspire SDK/official MCP revocation, cancellation and activation-movement tests |
 
 Each requirement maps to its matching acceptance. These criteria refine AC-NCQRS-001–004; neither an authored interface nor a local mechanism fixture closes the RF3 product criteria. Frontend N/A: this stage has no requested UI.
 
 ## Frozen RPC and typed payload
 
-Keep `IRequestGrain` as the public C# interface name, but replace its native alias with `keyload.request.v2`, interface version2 and method `ExecuteStreamAsync`, alias `keyload.execute-stream.v2`. The method returns native `IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>` and accepts the same exact signed string and real CancellationToken. Remove the request Task method rather than retain compatibility code.
+Keep `IRequestGrain` as the public C# interface name and use its current native alias `keyload.request.v2` with `RequestInterfaceVersion4` and method `ExecuteStreamAsync`, alias `keyload.execute-stream.v2`. The alias generation and Orleans interface version are separate identifiers. The method returns native `IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>` and accepts the same exact signed string and real CancellationToken. Remove the request Task method rather than retain compatibility code.
 
 `ICommandPartitionGrain` and `IDatabaseReadGrain` retain their Task methods, aliases and interface version1; they remain the canonical bounded leaf operations. Give the request and capability interface versions distinct named constants. The request grain Graph edges use the new original method name and the unchanged leaf method names.
 
@@ -325,27 +294,37 @@ At lazy RequestGrain start, verify the exact signed envelope and actor GUID firs
 
 Native Orleans owns enumeration cancellation/disposal. Cleanup is allowed to release the already-owned producer/enumerator after product authority expires or is revoked; cleanup does not execute another capability, expose more data or acknowledge a write. C1 installs no additional Identity.Server stream table whose reauthorization could prevent that native cleanup. Actual resource exhaustion and cleanup failures remain observable, and tests must prove producer settlement with a healthy subsequent request. Context is disposable on activation movement or restart; fresh signed admission and persisted authority reconstruct the next request.
 
-Change the ephemeral signed request purpose to `keyload-grain-request-data-epoch6-rpc2`. Keep signed prefixKLT2, request envelope aliasv2 and Id0–9 (including retired Id7), frozen identity digests, canonical stored records, native payload/data epoch6 and persisted receipts unchanged. Old transient request tokens are deliberately invalidated. Delete the unused `GrainRoutingProtocol.EnvelopeAlias` which incorrectly names envelopev1.
+Use only the exact current signed request purpose and frozen request envelope alias/IDs from the native contract. Verify purpose, signature and actor request identity before publishing context or executing a capability. Stale-purpose signatures are rejected before dispatch and never translated. Stable command identity, canonical stored records and persisted receipts retain their current behavior. Remove only the unused envelope alias identified by the current protocol implementation.
 
-## Authenticated cohort and cold rollout
+## Authenticated current cohort and signed request purpose
 
-Discovery alone cannot prevent an old leader from receiving native replica acknowledgements from a new binary. Therefore this stage also versions the authenticated peer envelope from2 to3, with request/reply MAC purposes `keyload-replica-request-data-epoch6-rpc2` and `keyload-replica-reply-data-epoch6-rpc2`. Existing envelope types, generated Ids, service/method aliases, interface version1, exact payload bytes, replay admission and canonical commit journals remain unchanged. Incoming request/reply validation rejects a different envelope version before native endpoint execution; current MACs do not verify in an old binary.
+Before a public request grain is created or pulled, the caller verifies the exact
+current signed discovery bytes, voter identity, cluster, incarnation and nonce.
+The current discovered application and peer protocol values must match the
+frozen current contract. Tampered bytes, stale-purpose signatures, mismatched
+identity and unsupported current protocol values fail closed before entering the
+address cache or dispatch path. Only the exact current signed purpose is accepted.
 
-Keep discovery MAC purpose `keyload-replica-discovery-data-epoch6` and its existing MAC version2 as a separate named `DiscoveryMacVersion` constant. Today Discovery writes `ReplicaTransportProtocol.Version`; separate that value before increasing the peer envelope version. This preserves authenticated observation of an old discovery response rather than mislabelling a valid incompatible voter as an unauthenticated address.
+The fixed-voter owner retains one bounded authenticated observation per configured
+voter with the current address, runtime generation, protocol values, compatibility
+and monotonic observation time. A fresh authenticated mismatch replaces any cached
+positive fact before admission can continue. Unauthenticated or unavailable
+attempts cannot create a compatible fact. Refresh uses the existing linked
+RpcTimeout and caller deadline, joins the original attempt, and preserves the
+bounded fixed-voter cache. A fixed RF3 cohort continues to use its actual majority
+and separate native consensus barrier; an unavailable third voter is not by itself
+a protocol mismatch. Cached observations never replace persisted authorization
+or consensus authority.
 
-Extend the current discovery record aliasv2 with Id5: ApplicationRpcVersion (int), Id6: PeerEnvelopeVersion (int). The actual local state publishes2/3. Missing fields decode as0 and fail compatibility admission. Verify the existing signature over exact original bytes and voter/cluster/incarnation/nonce before trusting either field or an address. A version mismatch is a closed safe protocol rejection; it cannot enter the native address cache as compatible.
+Signed request verification remains ahead of identity-context publication and
+capability execution. The exact current purpose, bounded request payload and
+persisted authorization contract are shared by the SDK and official MCP routes.
+A stale signed purpose is rejected before dispatch, with no side effect; current
+signed requests retain their existing stable command ID and same-ID replay rules.
+Only the frozen current protocol and storage format are admitted. Unsupported
+versions fail before dispatch or storage publication; no conversion or alternate
+reader is available.
 
-Reuse the bounded fixed-voter discovery owner and monotonic cache bound `LowerElectionTimeout`; no unbounded registry or caller-supplied capability is introduced. Cohort admission before creating/pulling a public request grain and readiness probes all configured voters using cached authenticated facts only while fresh. Each remote refresh has its own real linked deadline of at most RpcTimeout, including gate wait, connection, headers and bounded body; the outer request/readiness deadline also applies. Join and dispose each owned attempt. Sequential refresh avoids making another peer consume its deadline while queued behind the existing discovery gate.
-
-For the initial fixed RF3 cohort, local transport plus at least one compatible remote gives the unchanged majority2. An unavailable third voter is not a protocol mismatch and cannot require all three to be alive. Any authenticated reachable incompatible voter fails public admission/readiness for the cohort; unauthenticated/unavailable endpoints cannot contribute to its compatible majority. Native consensus still independently acquires its real quorum barrier. Refresh invalidates an obsolete address/version before reuse, and a genuine new runtime generation can replace a prior mismatch. Cached observations imply a bounded detection delay, not instantaneous remote fencing.
-
-Each fixed voter retains one bounded authenticated observation with address, application/peer versions, runtime generation, compatibility outcome and monotonic observation time. An authenticated mismatch refresh replaces the prior compatible observation and makes subsequent ordinary resolve/admission reject it; throwing before cache assignment must not leave the old positive address usable. Missing version fields are an authenticated mismatch. Unauthenticated/unavailable attempts contribute no compatible fact and cannot forge a version observation. Cover compatible→mismatch→ordinary lookup and mismatch→genuine compatible runtime replacement explicitly.
-
-Cold rollout is mandatory: stop new admission, let existing final responses settle or require same-ID retry, stop all three old processes through the owning deployment/AppHost, deploy the same new image/source to all configured voters, then qualify readiness and operations. No mixed rolling compatibility is offered. The peer MAC/version change prevents an old active protocol from obtaining a new cross-version acknowledgement; no old-format replica fallback is permitted.
-
-An old binary does not acquire the new application admission gate. Two mutually compatible old voters can still form their own old-protocol majority during an accidental mixed deployment; the new-binary rejection and cross-version MAC failure do not claim to fence that majority. The required homogeneous cold rollout, actual old/new peer-exchange rejection and unchanged canonical consensus authority remain separate acceptance obligations.
-
-This is an ephemeral wire upgrade, not a persisted store upgrade. Replay nonces retain their existing expiry/recovery semantics; do not rewrite stores, receipts, snapshots, native ZoneTree WAL or atomic/replication journals. Rollback stops all new processes and starts a homogeneous prior binary over the unchanged supported data epoch, invalidating in-flight stream/token state. Never downgrade canonical data or replay an uncertain command under a different command ID.
 
 ## Producer, cancellation and bounds
 
@@ -370,34 +349,40 @@ At the product producer boundary, map handled domain/native failures and other n
 1. Root: this contract and ADR/task traceability; exact aliases/Ids/version constants, generated progress/context records, published Identity.Core pin/native converter registration, persisted subject scope and signed-context validator, peer MAC/discovery changes, counting-serializer registration and shared client/readiness joins. Do not start product writes until C0 passes with published packages.
 2. query_wave Luna/high: reviewable private patch for only RequestGrain, dedicated new ClusterRouting native producer/failure/lifetime helpers and minimal Graph edge method-name joins, against the root-frozen contracts. No alternate dispatcher, public SSE, generic DTO format, package or shared version invention.
 3. cluster_wave Luna/high: independent new `tests/KeyLoad.UnitTests/Features/ClusterRouting/RequestCqrs*.cs` using real native cluster/serializer and current actual signed codec/canonical store/coordinator. Cover every positive, negative, edge/error and concurrency/lifetime/identity criterion, including AC-CRS-006; no fake authority, provider, clock or weaker existing C0 oracle.
-4. lifecycle_wave Luna/high: after root freezes its exact files, private staged native cohort/readiness and process/RF3 test additions using authenticated original discovery and genuine old/new binaries. Root owns the shared Version/Id/MAC domain and AppHost/package joins; the worker cannot invent compatibility or topology.
-5. Root: review and join all patches; strict full Release build, formatter, governance; unchanged C0, new focused C1 and full normal/scalar/recovery suites through Aspire; genuine Docker RF3 SDK/official MCP mixed-cohort, failover, cancellation/privacy/resource/receipt proofs. Retain original source/run/artifacts, commit the completed coherent stage, push main and qualify exact-source Linux gates. No local result closes the delivered-source fault/endurance or public performance gates.
+4. lifecycle_wave Luna/high: after root freezes its exact files, private staged native cohort/readiness and process/RF3 test additions using authenticated original discovery and the authenticated current protocol. Root owns the shared Version/Id/MAC domain and AppHost/package joins; the worker cannot invent compatibility or topology.
+5. Root: review and join all patches; strict full Release build, formatter, governance; unchanged C0, new focused C1 and full normal/scalar/recovery suites through Aspire; genuine Docker RF3 SDK/official MCP current-cohort failover, cancellation/privacy/resource/receipt proofs. Retain original source/run/artifacts, commit the completed coherent stage, push main and qualify exact-source Linux gates. No local result closes the delivered-source fault/endurance or public performance gates.
 
 C2 public streams and C3 long-work/index lifecycle remain blocked on their own explicit contracts and this stage's actual qualification. A compile or package publication alone cannot mark ADR-082 Implemented or close the104-task plan.
 
 ## Root API refinement and owning failure repair, 2026-10-04
 
-The unchanged six C0 oracles passed through actual Aspire with published Graph10.0.9 and Communication10.2.7. Source and compiled runtime stayed unchanged; the original receipt is `artifacts/qualification/native-cqrs-c0-development-20261004/focused02-originals/manifest.json`. This satisfies C1's implementation prerequisite, without qualifying its product/RF3 criteria.
+The six C0 oracles use actual native Graph and Communication enumeration,
+context, failure and lifetime APIs with the current centrally pinned packages.
+Historical delivery and consumer receipts stay bound to their recorded source,
+packages and runs; unchanged test names do not qualify changed dependencies.
+Repeat the six oracles and current C1 product/RF3 gates for the delivered source.
 
-The owning Communication audit found that Create and Normalize converted even catchable fatal runtime failures into generic failed chunks. Its scoped10.2.8 repair excludes OutOfMemoryException, StackOverflowException and AccessViolationException, with actual native enumeration controls and ordinary-error/cancellation regressions. The original failure must escape joined enumeration, never enter a public generic Problem. KeyLoad consumes that repair only after canonical publication and verified feed availability, then repeats unchanged C0 controls. C1's producer must settle disposal and activation cleanup without masking either failure; no consumer workaround or detached producer is authorized.
+Native Create and Normalize must not convert OutOfMemoryException,
+StackOverflowException or AccessViolationException into generic failed chunks.
+Use the owning `CqrsRuntimeFailures.FindFatal` API to preserve direct and nested
+AggregateException fatal identity. Producer disposal and activation settlement
+must join without masking the primary or cleanup failure. Repair any defect in
+the owning repository through its complete canonical release/feed workflow.
+KeyLoad must not copy the fatal algorithm or detach the producer.
 
-Communication10.2.8 delivery is independently verified on owning source `bec54168254c00c21bc875d8a9aef5c2ad8030d3`: Release37206764247, CI37206764246 and CodeQL37206764277 succeeded; remote tag, four release digests/nuspec commits, actual indexed feed packages, native repository signatures and all nine payload entries per package were checked. Owning local TUnit passed1352/1352. Thirty-seven original files are sealed in `artifacts/qualification/native-cqrs-fatal-owning-development-20261004/publication-originals/manifest.json`. This remains immutable historical delivery evidence.
-
-The follow-up owning10.2.9 repair exposes native `CqrsRuntimeFailures.FindFatal` for direct and arbitrarily nested AggregateException fatal failures. Source `2b2e74d97054b3bb16050e45787cd762c191cc0a`, tag `v10.2.9` and successful Release37212280152, CI37212280242 and CodeQL37212280088 are independently verified. All four actual indexed NuGet packages preserve their nine original release payload entries and add only the verified repository signature; restored KeyLoad DLLs match those published bytes. Owning local TUnit passed1357/1357. The owning full formatter still reported15793 diagnostics in unchanged paths; changed-file formatting passed. Captured tool-response excerpts remain labelled transcriptions where raw stdout was not retained. Central pins now select10.2.9 and consumer restore passed. The full KeyLoad Release solution build passed with0 warnings and0 errors after joining the fatal settlement regressions; full formatter, unchanged C0 repeat and C1 product/RF3 qualification remain pending.
-
-TASK-CRS-C1-FATAL refines AC-CRS-003/004 with native KeyLoad regressions for create, move, disposal and activation settlement. Use preconstructed fatal exception objects for all three reserved runtime types, including deeply nested native AggregateException; never induce real resource exhaustion. The published owning helper must preserve the exact original fatal identity. Genuine CqrsStream.Create and NativeCqrsStreamLifetime enumeration must never convert that failure to a Failed chunk, must join producer disposal before activation settlement, and must settle every admitted cleanup exactly once before a healthy following stream. Cover primary/disposal/activation precedence and ordinary cleanup failures without weakening existing cancellation or C0 oracles. Test ownership is new RequestCqrsFatalSettlement files under the ClusterRouting unit slice; no consumer copy of the owning fatal algorithm is permitted.
+TASK-CRS-C1-FATAL refinesTASK-CRS-C1-FATAL refines AC-CRS-003/004 with native KeyLoad regressions for create, move, disposal and activation settlement. Use preconstructed fatal exception objects for all three reserved runtime types, including deeply nested native AggregateException; never induce real resource exhaustion. The published owning helper must preserve the exact original fatal identity. Genuine CqrsStream.Create and NativeCqrsStreamLifetime enumeration must never convert that failure to a Failed chunk, must join producer disposal before activation settlement, and must settle every admitted cleanup exactly once before a healthy following stream. Cover primary/disposal/activation precedence and ordinary cleanup failures without weakening existing cancellation or C0 oracles. Test ownership is new RequestCqrsFatalSettlement files under the ClusterRouting unit slice; no consumer copy of the owning fatal algorithm is permitted.
 
 Root shared APIs are `GrainRequestStreamProtocol` with the previously frozen count/byte/lifetime constants, generated `GrainRequestProgress` and `GrainRequestContextState`, `GrainIdentityContext.Validate(envelope, actorRequestId)`, and `GrainReplyFactory.StreamResult(reply)`. `GrainRequestStreamProblem.Validate(ManagedCode.Communication.Problem)` enforces exactly one ErrorCode string extension naming a defined KeyLoad enum, `urn:keyload:error:<name>`, title equal to that name, existing `Errors.Status(code)`, positive SafeDetail up to4096 characters, and null Instance. There are no arbitrary extensions, ErrorType, contradictory success/Problem, failed Value, extra progress or trailing terminal fields. The factory and consumer share this closed schema.
 
-`GrainNativeByteCounter.Measure<T>(Serializer<T>, T, int maximumBytes, CancellationToken)` uses the actual registered silo serializer and a lazy non-retaining counting destination. Exact pinned Orleans10.3.1 commit137d9acc17830f15b13a4eb0058d6cee633cad5e uses native Writer segments with maximum GetSpan hint1048576 for these accepted byte/string/GUID codecs. Scratch grows only when requested, up to that finite ceiling; count/admission checks actual cumulative Advance bytes, not requested capacity. Thus an exact admitted payload is not rejected because a native reservation hint exceeds its remaining quota. Cancellation is checked at entry and each buffer/count boundary. Original native converter/serializer session/Commit semantics remain intact; actual Identity.Core converter and running-silo principal/state boundary tests remain mandatory.
+`GrainNativeByteCounter.Measure<T>(Serializer<T>, T, int maximumBytes, IOptions<GrainRoutingOptions>, CancellationToken)` uses the actual registered silo serializer and a lazy non-retaining counting destination. Validated current GrainRoutingOptions admit native GetSpan/GetMemory requests only up to MaximumScratchBytes, whose absolute ceiling is1048576. Scratch grows only when requested within that bound; count/admission checks actual cumulative Advance bytes, not requested capacity. The exact centrally pinned serializer must pass the native boundary cases. Thus an exact admitted payload is not rejected because a native reservation hint exceeds its remaining quota. Cancellation is checked at entry and each buffer/count boundary. Original native converter/serializer session/Commit semantics remain intact; actual Identity.Core converter and running-silo principal/state boundary tests remain mandatory.
 
-The fixed-voter discovery owner exposes `EnsureCompatibleCohortAsync(CancellationToken)` and `HasCompatibleCohort`. Root keeps its existing constructor and owns shared version/MAC/generated record changes: request interface2, peer envelope3, discovery MAC2; discovery Id5/6 append application/peer versions, defaulting to0 when missing. One bounded observation per configured voter records authenticated address/runtime generation, versions, compatibility and monotonic time. A signed mismatch replaces prior positive state before throwing, and ordinary lookup rejects it while fresh. A refresh removes its obsolete cached fact before the owned attempt; unavailable or unauthenticated refresh cannot revive it. Each remote attempt has its own linked RpcTimeout, including gate wait and bounded HTTP read; cohort refresh is sequential and preserves the caller's outer deadline. Any fresh authenticated mismatch rejects cohort admission; local transport plus a compatible majority still works with the third voter unavailable. The node joins this owner before grain creation/pull, public readiness and routing status; cached status alone never replaces consensus or persisted authorization.
+The fixed-voter discovery owner exposes `EnsureCompatibleCohortAsync(CancellationToken)` and `HasCompatibleCohort`. Root keeps its existing constructor and owns shared version/MAC/generated-record changes required by the current signed protocol. One bounded observation per configured voter records authenticated address/runtime generation, versions, compatibility and monotonic time. A signed mismatch replaces an existing positive state before throwing, and ordinary lookup rejects it while fresh. A refresh removes its obsolete cached fact before the owned attempt; unavailable or unauthenticated refresh cannot revive it. Each remote attempt has its own linked RpcTimeout, including gate wait and bounded HTTP read; cohort refresh is sequential and preserves the caller's outer deadline. Any authenticated observation that fails the current cohort contract rejects admission; local transport plus a compatible majority still works with the third voter unavailable. The node joins this owner before grain creation/pull, public readiness and routing status; cached status alone never replaces consensus or persisted authorization.
 
 Discovery shutdown retains `IDisposable` and adds native `IAsyncDisposable` so the actual asynchronous silo host disposal can cancel and join every admitted discovery attempt before disposing its HTTP handler, semaphore and credentials. New admission fails after shutdown starts. The synchronous compatibility entry starts the same idempotent shutdown without blocking a captured scheduler; it may defer final resource disposal until the last admitted attempt settles. A concurrent attempt must not release a disposed gate or read cleared credentials. This is lifetime ownership, not a new membership or consensus authority; finite per-voter deadlines and caller cancellation still govern actual work, with no detached polling or timeout-abandoned attempt. Retain separate shutdown tests and the actual RF3 restart/cleanup proof.
 
 `ReplicaDiscoveryResources` is the sole physical owner of the HTTP exchange, discovery gate and stopping source. Its production lifetime takes that concrete owner through a constructor ownership transfer and disposes the owned field directly after cancellation and every admitted operation settle. Cohort operations use a concrete non-disposable resource-access view which borrows that owner. The isolated lifetime callback constructor borrows a caller-owned stopping source and retains its existing admission/settlement mechanism contract. The physical owner attempts every resource disposal and retains failures; the canonical shutdown task exposes those failures to all joining callers. No suppression, duplicate disposal or detached cleanup substitutes for this ownership contract.
 
-Current-image RF3 proof reuses `ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(CancellationToken)` to validate the original current source-bound receipt and manifest and return its immutable digest reference. The original homogeneous `VerifyAsync` still checks that same reference on all three resources. C1 compares each actual mixed-wave resource against either that verified current reference or the native RPC1 verifier's returned reference before starting resources; a scratch topology is unnecessary for parsing image identity.
+Current-image RF3 proof reuses `ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(CancellationToken)` to validate the current source-bound receipt and manifest and return its immutable digest reference. The homogeneous `VerifyAsync` checks that same reference on all three resources before startup. The actual Aspire runner owns resource start, readiness, execution and joined shutdown.
 
 The RF3 observation helper `RequestCqrsRf3SignedDiscovery.ReadAsync(DistributedApplication, string, Guid, ReadOnlyMemory<byte>, CancellationToken)` reads the existing discovery endpoint using the actual Aspire-discovered HTTP origin and PeerSecurity-signed GET. It admits at most the native MaximumDiscoveryBytes, verifies the returned signature with the existing ReplicaMessageMac over the exact original response bytes and actual request nonce, fixed voter, cluster and incarnation, then decodes with the same NativeSerialization codec used by that endpoint. Only an authenticated, transport-ready record with the exact fixed identity and a valid bounded SiloAddress is an observation. Rejoin must change the actual SiloAddress generation as well as the inspected process start; unsigned/PID-only observations cannot substitute. IntegrationTests receives test-friend access to the existing internal MAC/constants solely for this original-protocol oracle; no endpoint, public wire contract or runtime client authority is added.
 
@@ -407,91 +392,24 @@ The shared two-key publisher `GrainRequestIdentityScope(IServiceProvider, Princi
 
 For the fixed valid chunk shape, independently admitted Started and Completed maxima sum exactly to the aggregate ceiling. Retain the aggregate admission guard and actual native maximum-payload/one-over controls. Do not invent an unreachable valid-shape aggregate overflow by modifying counters or adding prohibited fields; those fields are rejected earlier by shape validation. Tests record actual encoded sum and the implication of the per-chunk bounds separately from malformed-shape rejection.
 
-Implementation remains ordered: root shared types/identity/counting/cohort joins, private producer patch, independent real native unit fixtures, genuine old/new Aspire RF3 fault fixtures under the current data-epoch contract, then full gates. The existing EmbeddedCoordinator no-op read barrier is local canonical regression only and cannot prove fresh RF3 authorization. The original image/source proof below remains immutable, while the current epoch7 fixture correction follows ADR-091 and the explicit contract below. Image production and full RF3 execution are mandatory; source presence does not qualify mixed-image admission or rejoin.
+Implementation remains ordered: root shared types, identity/counting/cohort joins,
+private producer patch, independent real native unit fixtures, current homogeneous
+Aspire RF3 fault fixtures, then full gates. The EmbeddedCoordinator no-op read
+barrier is local canonical regression only and cannot prove fresh RF3 authorization.
+The current source-bound image proof, real SDK/MCP operations and full RF3 execution
+remain mandatory; source presence is not runtime qualification.
 
-## Genuine prior image and AppHost test contract, 2026-10-04
+## Current-image RF3 follower restart
 
-TASK-CRS-C1-IMAGE and TASK-CRS-C1-RF3 implement AC-CRS-001/002/003/005/006 using a genuine prior executable. The fixed RPC1/peer2 baseline is Git commit `377886f35928866f083806062b446056d64539e3`, tree `937b2c0d576ef29afb33e943ddd452722ee6a16b`, with data epoch6. Root independently checked all3016 native Git files, modes, blob identities and content bytes: expanded bytes25738907, canonical source inventory SHA256 `70e92d99a96ed508ab4a1e617a5884d95cf3bfc97e99f3e131748a99cd6b640f`. Its exact Git archive is28180480 bytes, SHA256 `f4a36d2febcae6e35e857c735cbebe55d41ecd9dc2652b22a67b5f541039807f`. Native5's existing epoch5 source, image proof and cold storage upgrade remain a separate mandatory gate.
-
-ClusterRouting owns new script modules `rpc1-server-source.mjs`, `rpc1-server-proof.mjs`, `prepare-rpc1-server-image.mjs` and `verify-rpc1-server-image.mjs`, plus its local scripts policy. Reuse the existing bounded Git-archive/source inventory and image engine/registry helpers; do not create another registry, source overlay or substitute package. The producer's current GitHub source/run/attempt/repository/ref/workflow/job identity is distinct from the fixed baseline source. Require Linux, job `docker-rf3`, zero overlays, the exact tree/inventory/archive, original source bytes before and after image build, current pinned SDK/runtime bases, inspected native image config/revision label and original registry manifest bytes/digest. Use receipt kind `keyload.rpc1-epoch6-server-image-proof.v1` and the separate environment names `KEYLOAD_RPC1_SERVER_IMAGE`, `KEYLOAD_RPC1_IMAGE_RECEIPT`, `KEYLOAD_RPC1_SERVER_MANIFEST`. Bound receipt65536, manifest/inventory1048576 bytes and the exact source/archive sizes. Reject missing, extra, mixed-source or mismatched provenance. A producer or verifier error fails qualification; no local or synthetic GitHub identity qualifies this image.
-
-Root owns the AppHost join: new `src/KeyLoad.AppHost/Features/ClusterRouting/Topology/ProtocolCohortImages.cs`, the existing ClusterResources composition call and the shared hosting mode guard. Only explicit `KeyLoadTests:ProtocolCohort:Enabled=true` in an ephemeral three-voter child test AppHost enables overrides; exactly `KeyLoadTests:ProtocolCohort:Voters:node1`, `node2` and `node3` must each contain an immutable digest reference. Reject incomplete/unknown voter keys, overrides without the enable flag, non-ephemeral use, a selected suite runner, benchmark mode/target and benchmark node-count composition. Ordinary homogeneous composition retains its single current image. Image-reference syntax is AppHost admission; the test independently verifies each actual resource against the original current or RPC1 receipt before starting it. Do not weaken ClusterFixtureImageIdentity's homogeneous current-source assertion.
-
-New `RequestCqrsRf3*.cs` integration files own their separate mixed-wave model/proof, actual SDK and official MCP callers, finite observation deadlines and canonical profile/data roots. All Docker resources, start, readiness and shutdown belong to the actual AppHost. A mixed cohort is expected to have unavailable current readiness; wait for real resource startup and signed discovery rather than requiring every node to become Healthy. On each current node, readiness must be503 and a read through its real SDK must fail with closed OwnershipLost. The official MCP SDK must observe the real current endpoint's503 transport rejection during initialization, or a closed OwnershipLost tool failure if an already-established session reaches the gateway. Assert typed status/code only; never log raw body, Problem detail or credentials. This does not claim to fence an old-protocol majority.
-
-The original same-epoch/old-reader rollback wave contract is superseded by ADR-091's strict epoch7 admission. The actual prior image remains epoch6/RPC1; it must never be overlaid or relabelled as epoch7. Required current waves use the stopped-copy upgrade contract below. A separate homogeneous-current wave deterministically selects an actual follower from authoritative node statuses, stops that voter through scoped inspected fault injection, proves both clients still operate through the two compatible survivors, and rejoins the same voter through Aspire's native Start command with changed process/silo generation and recovered readiness. A configured node name alone does not establish follower status. Shutdown awaits actual owned disposal and retains cleanup failures; timeout-abandoned disposal is not settlement evidence. Live cache transitions/expiry and HTTP shutdown controls remain separate mechanism tests.
-
-### C1 epoch7 stopped-copy and incompatible-image correction
-
-TASK-CRS-C1-EPOCH7 preserves the fixed genuine RPC1/native6 source proof and
-original C1 document/queue/principal/receipt workload. Seed that workload through
-the existing RequestCqrsRf3Wave on three verified RPC1 images, capture real node
-identity and membership through NodeEpochRf3StatusOracle, and completely settle
-the wave and every canonical/replica/node lock. Reuse NodeEpochRf3Migration and
-the existing shared target-preparation method: exact stopped source inventories
-and profile, invalid-third negative barrier, all three Prepare/Verify results
-before any Publish, and unchanged original input verification. Do not replace
-the C1 workload with a sample-only migration fixture or infer native6 from a
-native5 image. The separate native5 whole-node fixture remains mandatory.
-
-The shared migration oracle pins receipt format2 and target epoch7 independently
-of the returned receipt. Its constructor takes the expected source epoch before
-any upgrade mutation: existing verified native5 fixtures default to5; C1 passes6
-after its genuine RPC1/native6 image proof. Reject other source expectations.
-Preserve every original inventory, identity, position and snapshot digest check.
-Compare complete decoded published receipts by canonical value, including all
-nested native byte values, rather than collection object identity.
-
-Before current serving, create one owned negative mixed root containing complete
-copies of published epoch7 node1 and untouched original epoch6 node2/3, with exact
-profile bytes and verified current/RPC1/RPC1 per-voter image references. This
-is an explicit incompatible-format/RPC fault wave, not a supported deployment or
-rolling upgrade. Assert signed current-node self-discovery reports RPC4/peer3,
-current node1 readiness503, and SDK/MCP closed OwnershipLost or MCP initialization503.
-The prior discovery uses the epoch6 signing purpose and cannot be authenticated
-as a version-zero record by the epoch7 verifier; never assert that false witness.
-Settle the entire negative wave and release its private locks before continuing.
-
-TASK-CRS-C1-EPOCH7-NO-QUORUM pins this negative wave to one compatible current
-voter: two compatible current voters form the legitimate RF3 majority and may
-serve when the old signing purpose prevents authenticated peer observations.
-The negative fixture must therefore observe signed current node1 identity only
-and prove absence of a compatible quorum through its real unavailable endpoint.
-It must not invent an authenticated incompatible peer or change production
-cohort admission. All homogeneous-current migration, preserved-receipt, restart
-and compatible-survivor assertions remain mandatory and unchanged. Root freezes
-this correction before the private fixture patch and owns final integration.
-
-Start homogeneous current RF3 on the actual published target root, verify all
-original C1 state and same-command receipts through real SDK/official MCP, and
-commit the current-write oracle. Stop fully, restart homogeneous current on that
-same target, then verify the retained current write/receipt and actual changed
-runtime generations. The prior originals and target inputs remain distinct;
-old binaries never open current epoch7 data and no stale-authority rollback is
-claimed. Retain roots on primary or cleanup failure and clean successful owned
-roots only after every AppHost/process/disposal settles.
-
-This negative wave establishes cross-epoch loss of compatible quorum only. It does
-not satisfy a protocol-only authenticated same-epoch old-binary gate; the fixed
-baseline is incapable of that proof. Authenticated version/tamper/cache mechanism
-tests and genuine compatible-survivor/follower-rejoin gates remain required and
-must retain their separate evidence. No original acceptance is closed by this
-source correction.
-
-Ownership: root freezes ADR/specification and owns all gates. Luna lifecycle_wave
-privately replaces RequestCqrsRf3ColdMigrationTests, its mixed/discovery oracle
-join, and new feature-local epoch-mismatch copy/scenario helpers. Shared joins
-expose the existing NodeEpochRf3CurrentWaveRunner.PrepareTargetsAsync as internal
-test infrastructure and correct the explicit source-aware golden expectations
-in NodeEpochRf3Migration and NodeEpochRf3MigrationAssertions as specified above,
-without changing the prepare/publish barrier, order or data oracles. Existing
-immutable image verifiers/scripts, production epochs, profile format, public SDK/
-MCP and original C1 workload remain unchanged. Remove newly unused legacy helpers
-and assertions in the same patch after an exact reference inventory.
-
-TASK-CRS-C1-IMAGE-JOURNAL refines AC-CRS-003 for the complete current/native5/RPC1 image preparation and owned-registry cleanup sequence. Actual Linux CI run37220907026 at2801b03 retained exactly32 successful native command records; RPC1 build and image inspection succeeded, but appending the next push result and cleanup result failed at the shared32-record journal cap. No test runner started, and this run does not qualify RF3. Admit at most64 native journal records for the complete bounded sequence, retaining the unchanged256KiB combined command output,512KiB encoded record,8MiB journal, process deadlines, actual exit status, sanitized diagnostics and ownership checks. Command65 or a byte-limit violation still fails closed and leaves every prior record unchanged. Root owns the one shared image-contract capacity change; lifecycle_wave owns only new private RequestCqrsImageJournalTests files under the ClusterRouting unit slice. Native Node child processes and real private files must prove the complete sequence remains recordable, the64/65 boundary and joined bounded-output failure. These development regressions cannot authenticate GitHub or fabricate a successful image; a fresh genuine Linux image/RF3 job remains mandatory.
-
-Root integrates scripts, CI environment/image artifacts and the test-only AppHost seam. The existing canonical `NodeEpochRf3OfflineProcess` also owns every verifier/upgrade child: finite observation or output failure stops only that owned process tree, then awaits actual exit and both bounded output readers to completion. Cleanup cannot return on a second timeout or attach a continuation as a substitute for joining owned work; retain the primary error and every distinct cleanup failure. Deduplicate only the identical primary exception object observed again when joining its same reader task. Positive completion, cancellation of a live native child and oversized native output receive separate process regressions, without Docker or synthetic image/GitHub evidence. Luna workers may implement only their frozen private script or new test paths. All final builds, native Aspire tests, immutable originals, stage commits and exact-source Linux qualification stay root-owned. This contract is accepted before implementation; it does not mark the ADR or any product acceptance complete.
+A homogeneous current RF3 wave deterministically selects an actual follower from
+authoritative node statuses, stops that voter through scoped inspected fault
+injection, proves both clients still operate through the two compatible survivors,
+and rejoins the same voter through Aspire's native Start command. Verify changed
+process/silo generation, restored readiness, preserved persisted state and a
+healthy follow-up SDK/official MCP operation. A configured node name alone does not
+establish follower status. Shutdown awaits actual owned disposal and retains
+cleanup failures; timeout-abandoned disposal is not settlement evidence. Current
+backup/restore and stored-outcome assertions remain separate real operations.
 
 ## C1 transport and outer failure boundary correction, 2026-10-04
 
@@ -532,7 +450,7 @@ The server owns callback admission/stopping/settlement and retains every distinc
 | AC-CRS-006 current authority | Hold after the real barrier and before persisted Reload. Revoke the synthetic worker through a separate real authorized administrator operation and verify the canonical persisted revocation before release. The original request must be Unauthenticated with no submitted effect; a healthy authorized following request succeeds. Post-commit revocation cannot undo a canonical outcome or bypass policy to disclose a receipt. |
 | AC-CRS-003/004 privacy and settlement | Trigger the controlled ordinary error on an actual request grain, consume actual SDK/MCP results and native logs, and reject every private message/Data/stack canary in public output/logs. Observe actual producer disposal, join cancellation/shutdown and execute a healthy fresh request with no inherited identity. This does not substitute helper-only byte bounds for an actual reachable public resource case. |
 
-TASK-CRS-C1-PHASE is cluster_wave Luna/high's private patch scope: new internal ClusterRouting phase identity/observer/settlement helpers, GrainRequestCodec, RequestGrain, CommandPartitionGrain, GrainCommandExecutor and DatabaseReadGrain. No AppHost, Server, package, policy or other test files may be changed. Root owns application of those shared joins. TASK-CRS-C1-FAULT-ORACLE is query_wave Luna/high's independent private scope: new RequestCqrsFaultOutcome, RequestCqrsFaultCallers and RequestCqrsFaultReceiptOracle under IntegrationTests/Features/ClusterRouting, using the existing real clients/contracts only. Actual controls and test entry points await the separately frozen control schema. lifecycle_wave remains read-only for the native migration join. Workers emit exact patches, base/post hashes, scope manifests and self-review; they run no shared build/test/Git mutation. Root reviews every diff, freezes control schema/registration and fixture joins, performs native Aspire verification, commits completed stages and follows exact-source Linux CI. C2/C3 and remaining plan tasks remain in progress.
+TASK-CRS-C1-PHASE is cluster_wave Luna/high's private patch scope: new internal ClusterRouting phase identity/observer/settlement helpers, GrainRequestCodec, RequestGrain, CommandPartitionGrain, GrainCommandExecutor and DatabaseReadGrain. No AppHost, Server, package, policy or other test files may be changed. Root owns application of those shared joins. TASK-CRS-C1-FAULT-ORACLE is query_wave Luna/high's independent private scope: new RequestCqrsFaultOutcome, RequestCqrsFaultCallers and RequestCqrsFaultReceiptOracle under IntegrationTests/Features/ClusterRouting, using the existing real clients/contracts only. Actual controls and test entry points await the separately frozen control schema. lifecycle_wave remains read-only for the native activation-movement join. Workers emit exact patches, base/post hashes, scope manifests and self-review; they run no shared build/test/Git mutation. Root reviews every diff, freezes control schema/registration and fixture joins, performs native Aspire verification, commits completed stages and follows exact-source Linux CI. C2/C3 and remaining plan tasks remain in progress.
 
 ### Accepted private phase-control schema and join, 2026-10-04
 
@@ -557,7 +475,7 @@ The fixture broadcasts identical Arm bytes to all three owned voter directories;
 
 The32-arm limit includes every distinct observed, temporarily pending or retired arm ID for the entire owned session, rather than only files still present. Deleting arm files cannot make retained claim/tombstone memory unbounded. SessionId uses the canonical lowercase nonempty GUID-N representation in trusted configuration and every private record. AppHost's new RequestCqrsProbe* helpers belong only to its ClusterRouting slice: ValidateMode rejects unknown/nested settings and incompatible modes before the suite/comparison branches; Read validates the private owned root, exact three node directories and owner records, separation from DataRoot, ephemeral non-benchmark RF3 and three equal immutable current references; Apply adds only the private bind mount and trusted Enabled/Root/SessionId environment. Owner validation uses bounded native System.Text.Json parsing with exactly the four frozen fields and no duplicate/unknown/nested/trailing data, not a public or canonical serializer. Unix root/node directories retain0700 and owner files0600; no existing path is claimed, chmodded or removed by AppHost. Root owns the shared hosting/ClusterResources joins and preserves the actual configured uid:gid and existing image proof. After completing the fixture bundle, query_wave may prepare only these new AppHost helper files as a private patch; no shared file, runtime process, gate or Git changes are delegated.
 
-Implementation order and ownership: cluster_wave Luna/high prepares only new Server/Features/ClusterRouting/RequestCqrsProbe* helpers as a private patch against the reviewed native phase interface; root owns NodeOptions, silo-only DI registration, AppHost validation/mount composition, fixture joins and combined gates. query_wave Luna/high prepares only new IntegrationTests/Features/ClusterRouting/RequestCqrsProbe* control helpers against these exact records; actual fault test entry points are a later bounded join after both helpers are reviewed. lifecycle_wave prepares the failed scalar18 original evidence bundle without source edits. Workers must not change shared files, public contracts, canonical data, credentials, thresholds, packages, tests of another scope, CI or Git state. Return base/post hashes and exact private patches; no shared build/test execution. Root reviews and integrates each bounded stage, runs the real Aspire caller and commits checkpoints with truthful pending RF3/Linux acceptance. Native migration control is excluded from this schema and retains its separately required native idle-migration join.
+Implementation order and ownership: cluster_wave Luna/high prepares only new Server/Features/ClusterRouting/RequestCqrsProbe* helpers as a private patch against the reviewed native phase interface; root owns NodeOptions, silo-only DI registration, AppHost validation/mount composition, fixture joins and combined gates. query_wave Luna/high prepares only new IntegrationTests/Features/ClusterRouting/RequestCqrsProbe* control helpers against these exact records; actual fault test entry points are a later bounded join after both helpers are reviewed. lifecycle_wave prepares the failed scalar18 original evidence bundle without source edits. Workers must not change shared files, public contracts, canonical data, credentials, thresholds, packages, tests of another scope, CI or Git state. Return base/post hashes and exact private patches; no shared build/test execution. Root reviews and integrates each bounded stage, runs the real Aspire caller and commits checkpoints with truthful pending RF3/Linux acceptance. Native Orleans activation movement remains governed by its current scheduling contract.
 
 TASK-CRS-C1-CONTROL-REBASE, accepted 2026-10-05, continues the same frozen control contract after the owner's feature-layout migration. Review the existing private Server, IntegrationTests and AppHost packets before preparing replacements; preserve their verified work rather than duplicating it. Cluster worker owns only Server probe helpers, lifecycle worker now owns only IntegrationTests probe control helpers, and query worker owns only AppHost probe helpers. Place pure models and contracts under the canonical slice Models/Contracts folders and executable responsibilities under their actual feature-local folders. Preserve every schema, quota, permission, native-phase, lifetime, retirement, image and provenance requirement above. The rebased packets remain private until root has reviewed their complete diffs and base/post inventory. Shared options, registration, hosting, fault-test entry points, gates and Git actions remain root-owned; the rebased helper source alone does not qualify a real RF3 fault.
 
@@ -580,7 +498,7 @@ patch against the reviewed Server R4 helper packet. Root integrates dependencies
 executes the actual Aspire caller, preserves originals and commits the stage.
 
 TASK-CRS-C1-APPHOST-REGULAR closes the private owner-file opening portion of
-AC-CRS-004 under ADR-077's existing regular-file contract. AppHost preflight
+AC-CRS-004 under the existing current-format regular-file contract. AppHost preflight
 must use the existing OfflineRegularFile.Inspect/OpenWithIdentity primitive for
 each owner.json, retaining the inspected native identity through bounded reading.
 Reject nonregular/link inputs before payload reading, enforce0600 and1..8192
@@ -649,7 +567,7 @@ implements the shared startup join, builds/formats/governs the full solution,
 runs the actual Aspire rf3 caller with four bounded development cases, retains
 native JSON/TRX/image/topology/phase evidence and follows exact-source Linux
 complete gates. Requirement mappings are the preceding AC-CRS-003/005 matrix;
-current-authority revocation, ordinary-fault privacy, migration, remote death,
+current-authority revocation, ordinary-fault privacy, activation movement, remote death,
 C2/C3 and full KL acceptance remain required separately.
 
 ADR-034/058 and the preceding accepted C1 control implementation contract already
@@ -695,19 +613,20 @@ or public command-outcome API. Existing ADR-034/058 and the guarded-store
 ownership contract cover this test-only addition; persisted records and
 generated native serializer contracts remain unchanged.
 
-1. Add the distinct CrashHost mode `c1-outcome-inspect`. Its closed V1 private
+1. Use the distinct CrashHost mode `c1-outcome-inspect`. Its closed V2 private
    UTF-8 input contains only `Version`, `Directory`, `ExpectedNodeId`,
-   `Incarnation`, `PrincipalId` and `CommandId`. Reject unknown/duplicate/missing
+   `Incarnation`, `PrincipalId`, `CommandId` and complete `Partition`. Reject unknown/duplicate/missing
    or null fields, invalid UTF-8, trailing content, empty IDs, non-canonical
    paths and principal identifiers over 256 UTF-8 bytes. Bound input to 8192
    bytes and JSON depth to four before the native existing-store open.
 2. Open only through `ZoneTreeExistingStore.Open`, with the supplied observed
    node ID and same-wave incarnation. Do not bootstrap, create directories,
    add a cache/fault observer, decode keys/records independently, use reflection
-   or call a format migration. Construct the normal DatabaseEngine with its
-   persisted-store policy implementation and call `Outcome(principal,id)`.
-   The result oracle is only null versus non-null.
-3. On successful native close, emit a closed V1 receipt containing only
+   or invoke a format converter. Observe only the canonical current scoped
+   StoredOutcome and its locator under the normal native store read gate.
+   This private synthetic-data oracle is not a public outcome lookup and must
+   prove both the absent held command and a real committed positive control.
+3. On successful native close, emit a closed V2 receipt containing only
    `Version`, `NodeId`, `Incarnation`, `FormatVersion`, `Position` and
    `OutcomePresent`, bounded to 4096 UTF-8 bytes. Never emit a path, principal,
    command, result content, credential or exception message/data/stack. Invalid
@@ -910,7 +829,7 @@ AC-CRS-DIAG-004 requires real child flags and successful explicit/final native
 probe observations, plus a genuine held-native-lock failure exposing only
 allowed fixed/numeric fields and preserving its original exception. Phase
 output alone does not establish the lock holder, repair AC-CRS-005 or qualify
-RF3. No product/data/transport migration; rollback removes these test-parent
+RF3. No product/data/transport format change; rollback removes these test-parent
 observations. ADR-082 remains Accepted.
 
 
@@ -927,3 +846,34 @@ After cleanup has stopped private-control admission, released any still-open hol
 ## Regression and qualification
 
 The existing actual SDK held-revocation RF3 case is the focused regression: it reaches the authenticated held request, persisted revocation ACK, release, typed `Unauthenticated`, producer settlement, first retirement, no-effect checks and then common cleanup. The test was previously marked failed solely because common cleanup repeated the completed retirement. Do not add a fake-provider fixture test: the relevant state transition requires real signed phase markers and the actual original producer. Keep the MCP case and its independent startup status; the CI55 MCP failure occurred before revocation and remains an unresolved startup diagnostic. Root owns the full strict build and Aspire RF3 rerun.
+
+### Current scoped C1 outcome oracle
+
+TASK-CRS-CURRENT-OUTCOME-040 refines AC-CRS-004/005 and the private offline
+observation above. The actual SDK positive control is a partition-scoped Batch;
+its canonical outcome is never a global outcome. Carry the exact full PartitionRef
+from that SDK seed through the bounded private V2 request to the child. Admit
+only Version2 and required non-null partition components, each with strict UTF-8
+length1..256, before the current guarded store open. Keep the existing8192-byte
+request,4096-byte receipt and JSON-depth4 limits; reject duplicate, unknown,
+missing or malformed nested fields. No private previous-version reader is kept.
+
+Within one native read gate, inspect only PartitionOutcome(partition,principal,id)
+and its exact outcome-locator-v2 pair. A present StoredOutcome must have current
+Partition scope and the identical full PartitionRef, with the locator value equal
+to the canonical partition outcome key. An absent outcome is a valid negative
+control only when its locator is also absent. Orphan, corrupt or mismatched
+scope/locator fails closed with no success receipt, no fallback or broad scan.
+This private synthetic-data observation supplies no public authorization API.
+
+The native fixture must create its positive control through actual authorized
+current resource configuration and partition Batch, close the store, inspect it
+through the real owned child, and reopen for a healthy operation. Cover the exact
+partition, another partition with the same command ID, malformed scope/locator,
+missing outcome, wire bounds and full process settlement. Retain all existing
+node/incarnation, locks, pipe drains, fault/cancellation and healthy controls.
+The RF3 flow still inspects the original three captured voters after full owner
+settlement, requires a real positive outcome on a majority and no held-command
+outcome, with actual SDK/official MCP authority-denial and no-effect assertions.
+Root owns review/join, native gates and Git; Luna owns only the guarded source
+paths in the explicit ownership inventory. Source review does not qualify RF3.

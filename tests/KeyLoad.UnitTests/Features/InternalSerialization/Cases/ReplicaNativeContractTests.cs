@@ -78,12 +78,9 @@ internal sealed class ReplicaNativeContractTests
     }
 
     [Test]
-    public async Task LegacyJsonAndUnknownReplicaPrefixFailExplicitly()
+    public async Task UnknownReplicaPrefixFailsExplicitly()
     {
         var request = new VoteRequest(Voter, 2, 0, 0);
-        var legacy = JsonDefaults.Serialize(request);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<VoteRequest>(legacy)).Code)
-            .IsEqualTo(ErrorCode.FormatUnsupported);
         var unknown = ReplicaProtocolCodec.Serialize(request);
         unknown[0] ^= TrailingByte;
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<VoteRequest>(unknown)).Code)

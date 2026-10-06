@@ -18,16 +18,10 @@ internal sealed class PartitionStores : IDisposable
         const int FailuresCountValidationBoundary = 1;
 
         var options = nodeOptions.Value;
-        Directory.CreateDirectory(directory);
-        if (!OperatingSystem.IsWindows())
+        var rootExists = PartitionRootAdmission.InspectBeforeOwnership(directory);
+        if (!rootExists)
         {
-            File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-        }
-
-        if (File.Exists(Path.Combine(directory, PartitionStoreProtocol.LegacyVotersFile))
-            || Directory.Exists(Path.Combine(directory, PartitionStoreProtocol.LegacyLogDirectory)))
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, PartitionStoreProtocol.LegacyDirectory);
+            Directory.CreateDirectory(directory);
         }
 
         ownership = new(Path.Combine(directory, PartitionStoreProtocol.OwnershipFile), FileMode.OpenOrCreate,
@@ -35,6 +29,11 @@ internal sealed class PartitionStores : IDisposable
         ZoneTreeStore? canonical = null;
         try
         {
+            PartitionRootAdmission.InspectWhileOwned(directory);
+            if (!OperatingSystem.IsWindows())
+            {
+                File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
             Canonical = canonical = Open(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory), executionOptions, cacheOptions, clock);
             Replica = Open(options, Path.Combine(directory, ReplicaProtocol.ReplicaDirectory), executionOptions, cacheOptions, clock);
         }
@@ -91,10 +90,7 @@ internal static class PartitionStoreProtocol
 {
     internal const string CanonicalDirectory = "database";
     internal const string OwnershipFile = "node.owner.lock";
-    internal const string LegacyVotersFile = "voters.bin";
-    internal const string LegacyLogDirectory = "raft";
     internal const string AdministratorId = "root";
     internal const string AdministratorTenant = "system";
     internal const string Wildcard = "*";
-    internal const string LegacyDirectory = "The directory contains an obsolete consensus format. Use a separate new cluster directory.";
 }

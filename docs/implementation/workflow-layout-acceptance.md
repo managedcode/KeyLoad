@@ -11,7 +11,7 @@ Pinned actions, least privileges, Linux qualification and real TUnit/MTP/SDK/MCP
 boundaries remain. Release builds and retains packages; no feed credentials or
 public NuGet publication is presumed from the request to build packages.
 
-- AC-WF-001 / REQ-WF-001: exactly ci.yml, tests.yml, benchmarks.yml, release.yml
+- AC-WF-001 / REQ-WF-001: exactly build-and-tests.yml, tests.yml, benchmarks.yml, release.yml
   and pages.yml exist at top level with names CI, Tests, Benchmarks, Release,
   Website. CI is PR/manual checks: repository rules, full Release/formatter and
   analyzer regression checks. Tests is main/PR/manual project qualification:
@@ -25,12 +25,12 @@ public NuGet publication is presumed from the request to build packages.
 - AC-WF-003 / REQ-WF-003: new isolated cohorts and TimeSeries receipts bind to
   Benchmarks and .github/workflows/benchmarks.yml with exact repo/ref/path/job
   checks. Wrong producer identity is rejected. Historical legacy main-push
-  comparison-suite remains KeyLoad CI/ci.yml and is never rewritten; current CI
+  comparison-suite remains KeyLoad CI/build-and-tests.yml and is never rewritten; current CI
   metadata is explicitly renamed CI while historical run checks remain exact.
   New CI has no push trigger, so its PR/manual runs cannot enter legacy push history.
 - AC-WF-004 / REQ-WF-004: Website watches Benchmarks completion and site pushes
   plus manual dispatch. The new executor identity is Website; isolated measured
-  producer checkout/copy uses benchmarks.yml, legacy measured source retains ci.yml.
+  producer checkout/copy uses benchmarks.yml, legacy measured source retains build-and-tests.yml.
   All exact artifact/source checks, freshness, coverage and site gates remain;
   incomplete producers cannot refresh published metrics.
 - AC-WF-005 / REQ-WF-005: Release supports v* tag/manual package builds from

@@ -26,7 +26,7 @@ internal sealed class ReplicaCohortAdmission
             const int CompatibleInitialValue = 1;
 
             var local = observations.ReadLocal();
-            if (!local.Compatible)
+            if (!local.CurrentContractCompatible || !local.TransportReady)
             {
                 return false;
             }
@@ -39,7 +39,7 @@ internal sealed class ReplicaCohortAdmission
                     continue;
                 }
 
-                if (!observation!.ProtocolCompatible)
+                if (!observation!.CurrentContractCompatible)
                 {
                     return false;
                 }
@@ -60,14 +60,14 @@ internal sealed class ReplicaCohortAdmission
 
         cancellationToken.ThrowIfCancellationRequested();
         var local = observations.ReadLocal();
+        if (!local.CurrentContractCompatible)
+        {
+            throw Incompatible();
+        }
+
         if (!local.TransportReady)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.InvalidDiscovery);
-        }
-
-        if (!local.Compatible)
-        {
-            throw Incompatible();
         }
 
         var compatible = CompatibleInitialValue;
@@ -86,8 +86,8 @@ internal sealed class ReplicaCohortAdmission
                 continue;
             }
 
-            incompatible |= !observation.ProtocolCompatible;
-            if (observation.ProtocolCompatible && observation.TransportReady)
+            incompatible |= !observation.CurrentContractCompatible;
+            if (observation.CurrentContractCompatible && observation.TransportReady)
             {
                 compatible++;
             }

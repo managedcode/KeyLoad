@@ -7,13 +7,15 @@ internal static class ResourcePolicyUpdates
     private const string StaleVersionMessage = "The expected resource schema version is stale.";
     private const string InvalidVersionMessage = "A policy update must increment the resource schema version exactly once.";
     private const string NoPolicyChangeMessage = "A policy update must change at least one field or header policy.";
-    private const string PhysicalMigrationMessage = "Resource migrations require an explicit migration job.";
+    private const string UnsupportedDefinitionChangeMessage =
+        "The requested resource definition change is unsupported.";
     private const string VersionExhaustedMessage = "The resource schema version cannot be incremented.";
 
-    /// <summary>Validates a resource creation, legacy identical-definition request, or policy-only CAS.</summary>
+    /// <summary>Validates a resource creation, identical current definition, or policy-only CAS.</summary>
     /// <param name="previous">The definition read from the current apply transaction, if any.</param>
     /// <param name="replacement">The complete replacement definition.</param>
-    /// <param name="expectedVersion">The expected current version, or null for legacy semantics.</param>
+    /// <param name="expectedVersion">The expected current version, or null for current create or
+    /// identical-definition semantics.</param>
     internal static void Validate(ResourceDefinition? previous, ResourceDefinition replacement, long? expectedVersion)
     {
         const int SchemaVersionStep = 1;
@@ -32,7 +34,7 @@ internal static class ResourcePolicyUpdates
         {
             if (JsonData.Fingerprint(previous) != JsonData.Fingerprint(replacement))
             {
-                throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalMigrationMessage);
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDefinitionChangeMessage);
             }
             return;
         }
@@ -51,7 +53,7 @@ internal static class ResourcePolicyUpdates
         }
         if (!SameNonPolicyDefinition(previous, replacement))
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, PhysicalMigrationMessage);
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDefinitionChangeMessage);
         }
         if (SamePolicies(previous, replacement))
         {

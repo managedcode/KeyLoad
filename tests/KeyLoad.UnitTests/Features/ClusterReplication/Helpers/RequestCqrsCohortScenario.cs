@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Orleans;
 using KeyLoad.Replication;
+using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ClusterReplication;
 
@@ -32,6 +33,7 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
     internal ReplicaSiloDiscoveryClient Client => client ?? throw new InvalidOperationException("The discovery client is not initialized.");
     internal RequestCqrsCohortEndpoint RemoteOne => Find(FirstRemote);
     internal RequestCqrsCohortEndpoint RemoteTwo => Find(SecondRemote);
+    internal string RuntimeAddress(int index) => runtime.RuntimeAddress(index);
 
     internal static async Task<RequestCqrsCohortScenario> StartAsync(
         RequestCqrsCohortRuntimeFixture runtime, CancellationToken token)
@@ -59,24 +61,28 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
 
     internal ReplicaSiloDiscovery Discovery(string voter, int addressIndex,
         int requestVersion = GrainRoutingProtocol.RequestInterfaceVersion,
-        int envelopeVersion = ReplicaTransportProtocol.Version)
+        int envelopeVersion = ReplicaTransportProtocol.Version,
+        int runtimeJournalReaderContract = StoreReaderContract.RuntimeJournal)
         => new(voter, Options.ClusterId, Configuration.Incarnation, runtime.RuntimeAddress(addressIndex), true,
-            requestVersion, envelopeVersion);
+            requestVersion, envelopeVersion, runtimeJournalReaderContract);
 
     internal void PublishCompatibleRemoteOne(int addressIndex)
         => RemoteOne.SetDiscovery(Authenticator(FirstRemote),
-            Discovery(FirstRemote, addressIndex));
+            Discovery(FirstRemote, addressIndex, runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
 
     internal void PublishRemoteOne(int addressIndex, int requestVersion, int envelopeVersion)
         => RemoteOne.SetDiscovery(Authenticator(FirstRemote),
-            Discovery(FirstRemote, addressIndex, requestVersion, envelopeVersion));
+            Discovery(FirstRemote, addressIndex, requestVersion, envelopeVersion, StoreReaderContract.RuntimeJournal));
 
     internal void PublishRemoteTwo(int addressIndex, int requestVersion, int envelopeVersion)
         => RemoteTwo.SetDiscovery(Authenticator(SecondRemote),
-            Discovery(SecondRemote, addressIndex, requestVersion, envelopeVersion));
+            Discovery(SecondRemote, addressIndex, requestVersion, envelopeVersion, StoreReaderContract.RuntimeJournal));
 
     internal void PublishRemoteOneRecord(ReplicaSiloDiscovery discovery)
         => RemoteOne.SetDiscovery(Authenticator(FirstRemote), discovery);
+
+    internal void PublishRemoteTwoRecord(ReplicaSiloDiscovery discovery)
+        => RemoteTwo.SetDiscovery(Authenticator(SecondRemote), discovery);
 
     internal void TamperRemoteOnePayload() => RemoteOne.SetTamperedPayload();
 
@@ -110,8 +116,10 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
         ConfigureSigner(remoteOne);
         ConfigureSigner(remoteTwo);
         PublishCompatibleRemoteOne(1);
-        remoteTwo.SetDiscovery(Authenticator(SecondRemote), Discovery(SecondRemote, 2));
-        var localState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), runtime.LocalSilo);
+        remoteTwo.SetDiscovery(Authenticator(SecondRemote),
+            Discovery(SecondRemote, 2, runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
+        var localState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(Configuration),
+            UnitRoutingOptions.Peers(Configuration, Options), runtime.LocalSilo, StoreReaderContract.RuntimeJournal);
         localState.MarkTransportReady();
         var localAuthenticator = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(Configuration), UnitRoutingOptions.Peers(Configuration, Options), localState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
         authenticators.Add(localAuthenticator);
@@ -121,12 +129,14 @@ internal sealed class RequestCqrsCohortScenario : IAsyncDisposable
     private void ConfigureSigner(RequestCqrsCohortEndpoint endpoint)
     {
         var remoteConfiguration = Configuration with { LocalId = endpoint.VoterId };
-        var remoteState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration), UnitRoutingOptions.Peers(remoteConfiguration, Options), runtime.LocalSilo);
+        var remoteState = new ReplicaSiloDiscoveryState(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration),
+            UnitRoutingOptions.Peers(remoteConfiguration, Options), runtime.LocalSilo, StoreReaderContract.RuntimeJournal);
         var authentication = new ReplicaEnvelopeAuthenticator(UnitExecutionOptions.ReplicaConfiguration(remoteConfiguration), UnitRoutingOptions.Peers(remoteConfiguration, Options), remoteState, TimeProvider.System, UnitRoutingOptions.Transport(), UnitRoutingOptions.Replay(Options.ReplayLimits));
         authenticators.Add(authentication);
         serverAuthenticators.Add(endpoint.VoterId, authentication);
         endpoint.SetDiscovery(authentication,
-            Discovery(endpoint.VoterId, endpoint.VoterId == LocalVoter ? 0 : endpoint.VoterId == FirstRemote ? 1 : 2));
+            Discovery(endpoint.VoterId, endpoint.VoterId == LocalVoter ? 0 : endpoint.VoterId == FirstRemote ? 1 : 2,
+                runtimeJournalReaderContract: StoreReaderContract.RuntimeJournal));
     }
 
     private ReplicaEnvelopeAuthenticator Authenticator(string voter)

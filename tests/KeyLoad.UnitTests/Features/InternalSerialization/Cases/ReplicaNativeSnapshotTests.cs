@@ -15,9 +15,10 @@ internal sealed class ReplicaNativeSnapshotTests
     private const string OldValue = "old-value";
     private const string NewValue = "new-value";
     private const int FirstChunkBytes = 32;
+    private static readonly byte[] UnsupportedManifest = [0x00, 0xff, 0x4b, 0x4c];
 
     [Test]
-    public async Task NativeIncomingDescriptorResumesAndLegacyDescriptorRefusesWithoutDeletingPartialImage()
+    public async Task NativeIncomingDescriptorResumesAndUnsupportedDescriptorRefusesWithoutDeletingPartialImage()
     {
         using var sourceFiles = new ReplicaNativeFiles();
         using var targetFiles = new ReplicaNativeFiles(sourceFiles.Configuration.Incarnation, sourceFiles.SigningKey);
@@ -38,7 +39,7 @@ internal sealed class ReplicaNativeSnapshotTests
         var imagePath = Path.Combine(snapshotDirectory, ReplicaProtocol.IncomingImage);
         var manifest = await File.ReadAllBytesAsync(manifestPath);
         await Assert.That(ReplicaProtocolCodec.Deserialize<ReplicaSnapshot>(manifest)).IsEqualTo(image);
-        await VerifyLegacyDescriptorAsync(receiver, image, manifestPath, imagePath, first);
+        await VerifyUnsupportedDescriptorAsync(receiver, manifestPath, imagePath, first);
         await Assert.That(targetLog.State.CommittedIndex).IsEqualTo(0);
         await Assert.That(target.Read(view => view.GetRecord<string>(KeyCodec.Encode(ValueKey)))).IsEqualTo(OldValue);
         await File.WriteAllBytesAsync(manifestPath, manifest);
@@ -78,13 +79,12 @@ internal sealed class ReplicaNativeSnapshotTests
         return (sender, sender.Create(1, 1));
     }
 
-    private static async Task VerifyLegacyDescriptorAsync(ReplicaSnapshotStore receiver, ReplicaSnapshot image,
+    private static async Task VerifyUnsupportedDescriptorAsync(ReplicaSnapshotStore receiver,
         string manifestPath, string imagePath, byte[] first)
     {
-        var legacy = JsonDefaults.Serialize(image);
-        await File.WriteAllBytesAsync(manifestPath, legacy);
+        await File.WriteAllBytesAsync(manifestPath, UnsupportedManifest);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(receiver.Recover).Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(await File.ReadAllBytesAsync(manifestPath)).IsEquivalentTo(legacy, CollectionOrdering.Matching);
+        await Assert.That(await File.ReadAllBytesAsync(manifestPath)).IsEquivalentTo(UnsupportedManifest, CollectionOrdering.Matching);
         await Assert.That(await File.ReadAllBytesAsync(imagePath)).IsEquivalentTo(first, CollectionOrdering.Matching);
         await Assert.That(receiver.Current).IsNull();
     }

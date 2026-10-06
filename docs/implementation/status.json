@@ -28,7 +28,7 @@
     "runtimeJournal": "docs/Features/ClusterRouting/RuntimeJournal.md",
     "restorePassed": true,
     "canonicalBuildPassed": false,
-    "verificationStage": "canonical_build_failed_456_shared_CrashHost_and_Comparisons_diagnostics_formatter_failed_1117_shared_diagnostics_no_owned_path_findings_2026_10_06",
+    "verificationStage": "R105_current_source_build_in_progress_formatter_and_Aspire_regressions_pending_after_four_fixture_joins_R104_build_format_passed_full_unit4023_of4044_with21_failures_exact_source_Linux_qualification_pending",
     "capabilityReview": "docs/Features/ClusterRouting/CapabilityReview.md",
     "capabilityReviewCompleted": true,
     "documentationVerifiedOn": "2026-10-06",
@@ -38,14 +38,13 @@
     "remaining": [
       "Freeze concrete interchangeable computation and bounded worker keys/quotas before native worker adoption",
       "Freeze actual long-operation control and disposable hint methods before selective interleaving or OneWay adoption",
-      "Obtain passing final canonical solution build and formatting after the shared quality migration",
-      "Qualify reader upgrade/backup/rollback with a frozen old executable, native job replay and owner adoption",
+      "Qualify current-format reader, backup/restore and native job replay with current-source operations and exact state/authority preservation.",
       "Freeze concrete native Streams outbox/provider/subscription and transaction-storage/visibility contracts before adoption",
       "Qualify per-silo lifecycle, native telemetry and measured collection/queue/repartitioner resource contracts",
       "Real operation Aspire unit/scalar/recovery/RF3, creator revocation, uncertain scheduling, functional coverage and exact-source Linux fault/resource/performance evidence"
     ],
-    "canonicalFormatterPassed": false,
-    "localDevelopmentReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+    "canonicalFormatterPassed": true,
+    "localDevelopmentReceipt": "R104 source-bound development build/formatter and actual Aspire StorageRecovery190/190 passed; full Aspire unit4044 executed4023 passed21 failed with zero skips and source/assembly drift. R105 fixture repairs joined, fresh build/regressions pending. Coverage binary exists but full coverage/CRAP and Linux delivery remain unqualified."
   },
   "NUGET-REFRESH-001": {
     "title": "All published NuGet versions refreshed on 2026-10-05",
@@ -106,11 +105,11 @@
         "artifactId": 11364407413,
         "reportSha256": "1d0dd5b41a38eaad02b74c00f4b95eb927a2822f137b7a5fcb36041eb3987dd2",
         "case": "OfficialGuideAndPromptAreBoundedAndRevokedCredentialsAreRejected",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
       }
     },
     "evidence": [
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
     ]
   },
   "DATABASE-COMPOSITION-001": {
@@ -160,7 +159,7 @@
       "latestIntegratedRf3Total": 67,
       "latestIntegratedRf3Passed": 67,
       "latestIntegratedRf3Failed": 0,
-      "latestIntegratedReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "latestIntegratedReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675",
       "laterSourceChangesExcluded": true
     },
     "fullDeclarativeCompositionComplete": false,
@@ -173,8 +172,8 @@
       "Complete Benchmarks and site qualification before publication"
     ],
     "fixtureReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
-    "copyReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
-    "integratedReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+    "copyReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37125791272",
+    "integratedReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37126562970",
     "selectedCompositionNormalRecoveryRf3Passed": true,
     "fullScalarQualificationPassed": true
   },
@@ -194,7 +193,7 @@
       "ciRunId": 37121245202,
       "ciUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37121245202",
       "ciStatus": "failure_original_reports_20261003T122859Z",
-      "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37121245202",
       "normalAndScalar": "not_executed_formatter_failure",
       "recoveryTotal": 183,
       "recoveryPassed": 128,
@@ -223,7 +222,7 @@
         "ownedSourceEquivalenceSha256": "200b1c6e942abde186915b639305f90833b2893d1af924fd3d78f5cb552ca0d8",
         "newStage": "independent_full_public_JSON_native_payload_oracles_and_RF3_ordinal_golden_plus_failure_only_Kurrent_setup_diagnostics",
         "runtimeQualified": false,
-        "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37126562970",
         "sourceStageReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "selectedSameInstanceWriterPassed": 2,
         "selectedKurrentDiagnosticFormatterPassed": 5,
@@ -242,7 +241,7 @@
         "benchmarkUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37124217649",
         "benchmarkStatus": "cancelled_zero_jobs_zero_artifacts_no_complete_cohort",
         "runtimeQualified": false,
-        "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/attempts/1",
         "selectedCurrentJobPolicyPassed": 19,
         "selectedSqlRf3CommentPassed": 2
       },
@@ -283,7 +282,7 @@
         "completeNativeCohortQualified": false,
         "websiteQualified": false,
         "foreignLaterWorkingTreeExcluded": true,
-        "nativeKeyLoadFailureReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "nativeKeyLoadFailureReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118"
       },
       "previousQualifiedCi": {
         "sourceRevision": "3ae408fe173bf0dd69dd335e688c17fe99457ad3",
@@ -298,7 +297,7 @@
         "analyzerUniquePassed": 118,
         "allNonpass": 0,
         "stageEPureCasesPerMode": 13,
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37129421675",
         "nativeBenchmarkRunId": 37129421599,
         "nativeBenchmarkConclusion": "cancelled_all27_preflight_and270_scenarios_without_steps",
         "completeNativeCohortQualified": false,
@@ -375,7 +374,7 @@
       "sourceRevision": "ca22b1baa919198c81749d86ffab56df24ec9317",
       "commentRf3CasesPassed": 2,
       "currentJobPolicyCasesPassed": 19,
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37124217640/attempts/1",
       "wholeCiPassed": false
     },
     "nativeKurrentPreflight": {
@@ -387,12 +386,12 @@
         3
       ],
       "selectedCasesPassed": 3,
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333/attempts/1",
       "fullCohortQualified": false,
       "newD1DiagnosticQualified": false,
       "routingDefectRootCauseEstablished": false
     },
-    "nativeBenchmarkFailureReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+    "nativeBenchmarkFailureReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37124527333",
     "nativeKurrentLatestFailure": {
       "sourceRevision": "7d1196db51f682f64ffcf4560e7b3f12b49b499b",
       "runId": 37132491118,
@@ -414,7 +413,7 @@
       "attempt": 1,
       "observedAtUtc": "2026-10-03T15:55:26Z",
       "runTerminal": false,
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37132491118",
       "jobs": [
         {
           "jobId": 111232263528,
@@ -445,7 +444,7 @@
     "evidence": [
       "Directory.Packages.props",
       "global.json",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37163610260",
       ".github/workflows/ci.yml",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred"
@@ -473,16 +472,16 @@
     "title": "ZoneTree durability audit і crash harness",
     "status": "in_progress",
     "atomicWalSerialization": {
-      "status": "mandatory_gates_qualified_remaining_resource_migration_performance_evidence_open",
+      "status": "mandatory_gates_qualified_historical_source; current_resource_performance_evidence_open",
       "decision": "docs/ADR/ADR-057-orleans-atomic-wal.md",
       "source": "generated_Orleans10.3.1_binary_mutations_closed_native_ReadOnlyMemoryOfByteCodec_explicit_kind_full_consumption_frame3_identity4_native_ZoneTree_unchanged",
-      "upgrade": "offline_old_binary_compact_verified_backup_homogeneous_RF3_no_JSON_fallback",
+      "upgrade": "current_identity_and_native_WAL_checkpoint_admission_reject_unsupported_or_corrupt_records_without_rewrite_or_fallback; current_backup_restore_preserves_native_format",
       "verification": "exactcf630751e_run37084177131_full_Release_restore_build_formatter_governance_analyzers118_normal1407_scalar1407_recovery136_RF3_63_no_skips_WAL66_each_mode_1000_atomic_process_cuts",
       "performance": "native_raw_byte_and_unchanged_size_protocol_regressions_qualified_no_measured_acceleration_allocations_power_loss_or_endurance_claim",
       "successorSequenceRepair": "qualified_exactcf630751e_run37084177131_terminal_MaxValue_successor_rejects_before_decode_apply_or_truncation_real_checkpoint_legal_limit_wrapped_negative_unchanged_authority_and_ownership",
       "sourceReviewGaps": [
         "decoded_memory_and_work_preallocation_contract_open",
-        "independent_frozen_binary_legacy_backup_and_old_executable_rollback_proof_open",
+        "additional_complete_length_and_short_header_corruption_cases_open",
         "additional_complete_length_and_short_header_corruption_cases_open"
       ],
       "decodedMemory": "native_remaining_input_checks_verified_source_only_recomputed_checksum_malformed_array_amplification_not_runtime_qualified_no_invented_count_cap_or_custom_wire_decoder",
@@ -492,7 +491,7 @@
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
         "conclusion": "failure"
       },
-      "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37084177131",
       "qualification": {
         "sourceRevision": "cf630751e0f24e4d8183e55510add9c7207e377f",
         "runId": 37084177131,
@@ -506,14 +505,14 @@
       "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
       "docs/implementation/durability-audit.md",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37065200835"
     ],
     "trialAdmission": {
       "scope": "storage_process_trial_fixtures_only",
       "source": "shared_four_slot_admission_original1000_seeded_trials_original15s20s_deadlines_success_receipt_after_atomic_assertions_cleanup",
       "qualification": "exact_b21_run37065200835_three_OS_136_of136_recovery_and1000_unique_atomic_trial_receipts_each_OS_no_skips_process_fault_only",
       "evidence": "Historical intermediate report removed from repository; no current qualification inferred",
-      "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+      "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37065200835"
     },
     "nativeInternalSerialization": {
       "status": "native_generated_3ae_complete_CI_pass_NSP006_local_development_pass_exact_source_CI_pending",
@@ -522,14 +521,14 @@
       "staticPreview": "Historical intermediate report removed from repository; no current qualification inferred",
       "qualified": false,
       "runtimeTestsExecuted": true,
-      "approvalRequired": "Owner explicitly directed continued implementation and GitHub testing on 2026-10-03; prior denied attempts are historical. No running-store conversion or product release is authorized by source installation.",
+      "approvalRequired": "Owner explicitly directed continued implementation and GitHub testing on 2026-10-03; prior denied attempts are historical. The first-release contract permits one strict current generated-native format and current-format backup/restore only; no old-format conversion or compatibility path is authorized.",
       "open": [
-        "Qualified offline old-store conversion and reverse/rollback tooling",
+        "General nested native type/reference/default/count/decoded-memory/work bounds",
         "General nested native type/reference/default/count/decoded-memory/work bounds",
         "Complete exact-source NSP006 five-source candidate mandatory gates",
         "Full comparable native performance, memory, endurance and fault evidence"
       ],
-      "activeRuntime": "Generated native source is installed. Delivered3ae408fe passes complete normal/scalar unit, recovery, analyzer and genuine RF3 SDK/MCP CI. Historical failed runs remain preserved. Pending NSP006 removes auxiliary terminal-type traversal allocations. Only NativeWireSupported and four scalar regressions are in scope; unrelated process-helper changes were undone by owner direction. The complete local24cell pair passes all12native allocation budgets, but only3of12JSONmean controls pass, so latency qualification remains open. Final five-source local image passes full build, normal/scalar2673each with identical test identities, recovery194, formatter and governance; exact delivered-source CI remains pending; local evidence cannot qualify website or maximum performance.",
+      "activeRuntime": "Generated native source is installed. Delivered3ae408fe passes complete normal/scalar unit, recovery, analyzer and genuine RF3 SDK/MCP CI. Historical failed runs remain preserved. Pending NSP006 removes auxiliary terminal-type traversal allocations. Only NativeWireSupported and four scalar regressions are in scope; unrelated process-helper changes were undone by owner direction. The complete local24cell pair passes all12native allocation budgets, but only3of12JSONmean controls pass, so latency qualification remains open. Historical five-source local image reported full build, normal/scalar2673each with identical test identities, recovery194, formatter and governance; that receipt is not bound to current source, current exact-source CI remains pending, and local evidence cannot qualify website or maximum performance.",
       "candidateStaticValidation": {
         "scope": "Exact captured TMP source closure only; not latest owner source",
         "projectsCompiled": 25,
@@ -561,7 +560,7 @@
         "recovery": 194,
         "rf3": 67,
         "analyzers": 118,
-        "scope": "Exact delivered source only; pending NSP006 five-source candidate and offline migration remain unqualified"
+        "scope": "Historical exact delivered source only; it does not qualify current-source gates, current format or website performance."
       },
       "localAllocationExperiment": {
         "scope": "Local macOS27.0.1 Arm64 M2Pro, BDN0.15.8/.NET10.0.12; frozen v8 production image; not final five-source or GitHub performance qualification",
@@ -645,12 +644,12 @@
       "https://github.com/managedcode/KeyLoad/actions/runs/37060131271",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37065200835",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37074392471",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37082449440",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37084177131"
     ],
     "latestJoinedBaseline": {
       "sha": "c10c48e40d8a9b452c9d131da549cab1e336692d",
@@ -667,7 +666,7 @@
       "wal": "66_of66_source_cases_each_normal_scalar_mode_19_source_methods_all_arguments_matched",
       "consumerTimeSeriesVersion": "10.0.0_not_current10.0.3",
       "measuredProfiles": "two_later_profiles_skipped_after_comparison_failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37079707413",
       "nativeFormat": "original_TUnit_JSON_not_converted_TRX",
       "coverage": "no_collector_invocation_or_collected_report_thresholds_unqualified",
       "failures": [
@@ -691,7 +690,7 @@
         "rf3": "62_of63_real_Docker_Aspire_SDK_MCP",
         "comparison": "2_of4",
         "measuredProfiles": "two_later_profiles_skipped_after_comparison_failure",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37077856823",
         "nativeFormat": "original_TUnit_JSON_not_converted_TRX",
         "coverage": "no_collector_invocation_or_collected_report_thresholds_unqualified",
         "failures": [
@@ -712,7 +711,7 @@
         "rf3": "skipped_after_image_preparation_failure",
         "comparison": "skipped_after_image_preparation_failure",
         "measuredProfiles": "skipped_after_image_preparation_failure",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37074392471",
         "imageFailureReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37073331174",
         "recoveryFailure": "Windows_ProjectionCrash_MutationApplied3_TaskCanceled_cause_unconfirmed"
       }
@@ -731,7 +730,7 @@
       "preflights": "17_of27_job_success_10_failed",
       "intensive270": "not_qualified_after_failed_preflights",
       "consumerTimeSeriesVersion": "10.0.3",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37087909605",
       "cacheSource": "outside_measured_SHA_native_cache_gates_pending"
     }
   },
@@ -769,7 +768,7 @@
         "rf3Total": 84,
         "overallConclusion": "failure",
         "newNodeStageQualified": false,
-        "originalReportsReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "originalReportsReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       }
     }
   },
@@ -800,7 +799,7 @@
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
     ],
     "qualification": {
       "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
@@ -826,7 +825,7 @@
         "rf3Total": 84,
         "overallConclusion": "failure",
         "newNodeStageQualified": false,
-        "originalReportsReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "originalReportsReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
       },
       "RF3ParitySource": {
         "cases": 3,
@@ -862,7 +861,7 @@
       "tests/KeyLoad.UnitTests/Features/ResourceExecution/Cases/TransactionTests.cs",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37384353741",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "runtimeQualified": false,
@@ -943,9 +942,9 @@
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/RequestGrain.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Grains/CommandPartitionGrain.cs",
       "src/KeyLoad.Orleans/Features/ClusterRouting/Topology/GrainPartitionResolver.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37245840909",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37249197752",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred"
@@ -973,7 +972,7 @@
         "scalar": "not_executed",
         "recovery": "296_of296",
         "rf3": "113_of118",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37249197752",
         "qualificationClosed": false
       },
       "latestRecoveryDevelopment": {
@@ -1090,7 +1089,7 @@
         "sourceAndRuntimeUnchanged": true,
         "sourceInventory": "/private/tmp/keyload-stage81k-before-20261005.json",
         "afterInventory": "/private/tmp/keyload-stage81k-after-graph-20261005.json",
-        "stage81Receipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "stage81Receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093"
       },
       "qualification": "pending",
       "allAcceptanceClosed": false
@@ -1210,7 +1209,7 @@
     "runtimeQualified": false,
     "remaining": [
       "rollup_implementation_and_full_acceptance",
-      "format_upgrade_and_unsupported_downgrade_qualification",
+      "strict_current_format_rejection_for_unsupported_or_corrupt_records_qualification",
       "Aspire_TUnit_process_recovery_RF3_exact_source_Linux_CI"
     ]
   },
@@ -1284,7 +1283,7 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
@@ -1306,7 +1305,7 @@
       "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
       "requirement": "REQ-ANN-015",
       "acceptance": "AC-ANN-015",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
       "runtimeQualified": false,
@@ -1333,11 +1332,11 @@
       "src/KeyLoad.Core/Features/Search/Execution/AnnSeedCollector.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReadBudgetTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/AnnSeedReservationTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37249197752",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "sourceStage": "R2A_bounded_historical_seed_9_source_12_tests_34_cases_full_static23_and_unchanged_actual_Aspire_normal34_scalar34_local_pass_persisted_projection_replay_and_delivered_Linux_RF3_pending",
@@ -1375,7 +1374,7 @@
       "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
       "requirement": "REQ-ANN-015",
       "acceptance": "AC-ANN-015",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
       "runtimeQualified": false,
@@ -1549,10 +1548,10 @@
       "docs/Features/StorageRecovery/NativeReadCuts.md",
       "docs/ADR/ADR-097-native-read-cut-leases.md",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37242346547",
       "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Queries/ZoneTreeReadCutLease.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeReadCutConsistencyTests.cs",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37245840909",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "implementation": {
@@ -1594,9 +1593,9 @@
       "docs/design/bounded-reads.md",
       "docs/design/command-admission.md",
       "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
     ],
     "disposableCacheWorkstream": {
       "status": "R100_wire_source_review_approved_R104_exact5bb_RF3_pass_verify_failed_R115_Node_source21_join_approved_current_full_development_failed_other_owner_SiteTests21_native_pending",
@@ -1606,11 +1605,11 @@
       "providerStage": "explicit_embedded_positive_point_values_index_pins_fills_charged_per_key_apply_invalidation_snapshot_generation_cold_recovery",
       "localBindingStage": "R93_existing_coordinated_cache_and_permit_native_cases_pass_normal_scalar_full_unit1583_each_zero_skips",
       "sourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
-      "nativeBaseline": "Historical intermediate report removed from repository; no current qualification inferred",
+      "nativeBaseline": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
       "checkpointNativeReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
       "physicalOwnerStage": "R93_actual_owner_identity_gate_closure_poison_native_cases_pass_normal_scalar_not_full_silo_ready_or_remote_grant",
       "nativeFixtureRepairs": "R93_d45_all17_R86_identity_failures_and_historical_byte77_pass_normal_scalar_explicit_nullable_absence_empty_presence_preserved",
-      "wireStage": "R100_unused_thirteen_generated_DTOs_closed_shape_size_transcript_nested_MAC_private_signer_correlation_source_review_approved_receipt_Historical intermediate report removed from repository; no current qualification inferred_integrated_and_new_native_gates_pending",
+      "wireStage": "R100_unused_thirteen_generated_DTOs_closed_shape_size_transcript_nested_MAC_private_signer_correlation_source_review_approved_receipt_https://github.com/managedcode/KeyLoad/actions/runs/37104211481_integrated_and_new_native_gates_pending",
       "clusterStage": "disabled_pending_authenticated_Orleans_physical_store_silo_policy_lease_and_real_RF3_tests",
       "metrics": "modeled_retention_distinct_from_native_lookup_allocations_RSS_no_speed_claim",
       "gates": "R104_exact5bb_RF3_63_analyzers118_pass_required_normal_scalar_recovery_comparisons_skipped_R113_current_full_development_Node0_Site21_errors_R115_formatter_Site_CA1865_final_new_SHA_native_coverage_profiles_open",
@@ -1632,7 +1631,7 @@
       "preserved": "both_authorized_barriers_RF3_Orleans_request_isolation_strict_decode_WAL_ACK_snapshot_errors",
       "gates": "native9e053_unit_default_SDK_status_oracle_error_RF3_control_admission_zero_count_error_scalar_skipped_comparison_image_model_error_all_measurements_skipped_new_test_only_repairs_require_exact_source_qualification_no_measured_speedup",
       "sourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
-      "nativeReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "nativeReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "repairSourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "sdkOracleSourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
       "phaseProfiling": {
@@ -1682,19 +1681,19 @@
         "canonicalStorage": "ZoneTree",
         "fullTextProvider": "ZoneTree.FullTextSearch",
         "candidateImplementationRemoved": true,
-        "historicalEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "historicalEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37124585233",
         "qualification": "Historical diagnostic results do not qualify the current provider integration or performance."
       }
     },
     "linux6e09Evidence": {
-      "path": "Historical intermediate report removed from repository; no current qualification inferred",
+      "path": "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
       "completeGate": false,
       "scalarFailed": 1,
       "recoverySkipped": true,
       "coldRf3Pending": true
     },
     "linux0d78Evidence": {
-      "path": "Historical intermediate report removed from repository; no current qualification inferred",
+      "path": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629",
       "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
       "normalPassed": 2919,
       "normalTotal": 2919,
@@ -1749,89 +1748,120 @@
     }
   },
   "KL-043": {
-    "title": "Upgrade і format compatibility",
+    "title": "Current-format recovery, backup and restore",
     "status": "in_progress",
+    "feature": "docs/Features/StorageRecovery/CurrentFormat.md",
+    "decision": "docs/ADR/ADR-116-first-release-current-format.md",
     "evidence": [
-      "docs/ADR/ADR-077-offline-native-data-epoch.md",
-      "docs/Features/StorageRecovery.md",
-      "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
-      "scripts/Features/StorageRecovery/build-prior-probe.sh",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochUpgradeProcessRecoveryTests.cs",
-      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochPriorAcceptanceTests.cs",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerNodeFormatUpgrade.cs",
-      "src/KeyLoad.Replication/Features/StorageRecovery",
-      "src/KeyLoad.Storage.IO/Features/StorageRecovery",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "docs/Features/StorageRecovery/CurrentFormat.md",
+      "docs/ADR/ADR-116-first-release-current-format.md",
+      "docs/ADR/ADR-011-current-native-format.md",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/CurrentStoragePreservationTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/CurrentWalRejectionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/NativeMissingIdentityTests.cs",
+      "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/RuntimeJournalReaderFenceTests.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeMetadataFormatTests.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/NativeBackupCutTests.cs",
+      "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/RecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/ClusterReplication/Cases/ClusterTests.cs"
     ],
-    "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
-    "sourceStage": "genuine_prior_image_built_and_cold_RF3_executed_exact_sample_conflict_oracle_corrected_renewed_RF3_pending",
+    "sourceStage": "accepted_current_native_format_contract; implementation_and_exact_source_qualification_pending",
     "runtimeQualified": false,
+    "fullTaskComplete": false,
     "remaining": [
-      "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
-      "complete_exact_delivered_source_Linux_original_qualification"
+      "Complete current-format write, reopen, WAL replay, compaction, checkpoint, backup and restore operations with exact state and authority assertions.",
+      "Complete strict absent, zero, unknown and corrupt identity/capability rejection flows without file or state mutation.",
+      "Retain real process recovery and current RF3 SDK/MCP operations, including incompatible signed-purpose/capability rejection and unchanged state.",
+      "Run complete current-source build, formatter, analyzers, normal/scalar/recovery/RF3 and exact-source Linux qualification; no current acceptance is closed by this proposal."
     ],
-    "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-    "fullSuiteDevelopmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
-    "localDevelopment": {
-      "normalUnit": 2908,
-      "scalarUnit": 2908,
-      "recovery": 257,
-      "newNodeAndIoCases": 42,
-      "actualNodeStageProcessKills": 6,
-      "uniqueAtomicCrashTrials": 1000,
-      "unchangedSourceAndRuntime": true
+    "historicalSupersededScope": {
+      "title": "Upgrade і format compatibility",
+      "status": "in_progress",
+      "evidence": [
+        "docs/ADR/ADR-077-offline-native-data-epoch.md",
+        "docs/Features/StorageRecovery.md",
+        "src/KeyLoad.Storage.ZoneTree/Features/StorageRecovery/Recovery/ZoneTreeFormatUpgrade.cs",
+        "scripts/Features/StorageRecovery/build-prior-probe.sh",
+        "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochUpgradeProcessRecoveryTests.cs",
+        "tests/KeyLoad.RecoveryTests/Features/StorageRecovery/Cases/EpochPriorAcceptanceTests.cs",
+        "Historical intermediate report removed from repository; no current qualification inferred",
+        "src/KeyLoad.Server/Features/StorageRecovery/Hosting/ServerNodeFormatUpgrade.cs",
+        "src/KeyLoad.Replication/Features/StorageRecovery",
+        "src/KeyLoad.Storage.IO/Features/StorageRecovery",
+        "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+        "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
+        "Historical intermediate report removed from repository; no current qualification inferred",
+        "https://github.com/managedcode/KeyLoad/actions/runs/37179484629"
+      ],
+      "decision": "docs/ADR/ADR-077-offline-native-data-epoch.md",
+      "sourceStage": "genuine_prior_image_built_and_cold_RF3_executed_exact_sample_conflict_oracle_corrected_renewed_RF3_pending",
+      "runtimeQualified": false,
+      "remaining": [
+        "homogeneous_Docker_Aspire_RF3_cold_upgrade_fixture_and_SDK_official_MCP_qualification",
+        "complete_exact_delivered_source_Linux_original_qualification"
+      ],
+      "developmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+      "fullSuiteDevelopmentEvidence": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668",
+      "localDevelopment": {
+        "normalUnit": 2908,
+        "scalarUnit": 2908,
+        "recovery": 257,
+        "newNodeAndIoCases": 42,
+        "actualNodeStageProcessKills": 6,
+        "uniqueAtomicCrashTrials": 1000,
+        "unchangedSourceAndRuntime": true
+      },
+      "linux6e09Evidence": {
+        "path": "https://github.com/managedcode/KeyLoad/actions/runs/37174348261",
+        "completeGate": false,
+        "scalarFailed": 1,
+        "recoverySkipped": true,
+        "coldRf3Pending": true
+      },
+      "coldRf3DevelopmentEvidence": {
+        "path": "Historical intermediate report removed from repository; no current qualification inferred",
+        "normalPassed": 2918,
+        "normalTotal": 2919,
+        "normalFailed": 1,
+        "scalarPassed": 2919,
+        "scalarTotal": 2919,
+        "recoveryPassed": 257,
+        "recoveryTotal": 257,
+        "newCasesPassedInNormalAndScalar": 11,
+        "sourceAndStableExecutableInventoryUnchanged": true,
+        "completeRuntimeOutputInventoryUnchanged": false,
+        "genuineColdRf3Executed": false,
+        "completeGate": false
+      },
+      "linux0d78Evidence": {
+        "path": "https://github.com/managedcode/KeyLoad/actions/runs/37179484629",
+        "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
+        "normalPassed": 2919,
+        "normalTotal": 2919,
+        "scalarPassed": 2919,
+        "scalarTotal": 2919,
+        "recoveryPassed": 257,
+        "recoveryTotal": 257,
+        "rf3Passed": 87,
+        "rf3Total": 88,
+        "rf3Failed": 1,
+        "actualPriorServingImageBuilt": true,
+        "actualColdRf3Executed": true,
+        "coldRf3Qualified": false,
+        "completeGate": false
+      },
+      "nextEpoch": {
+        "requirements": "docs/Features/StorageRecovery/Epoch7.md",
+        "decision": "docs/ADR/ADR-091-epoch7-interpretation-fence.md",
+        "stage": "strict_epoch7_checkpoint5_and_explicit_source5_or6_converter_implementation",
+        "owner": "query_wave",
+        "AppHostPriorProbePreparation": "source_implemented_not_runtime_verified",
+        "runtimeQualified": false
+      }
     },
-    "linux6e09Evidence": {
-      "path": "Historical intermediate report removed from repository; no current qualification inferred",
-      "completeGate": false,
-      "scalarFailed": 1,
-      "recoverySkipped": true,
-      "coldRf3Pending": true
-    },
-    "coldRf3DevelopmentEvidence": {
-      "path": "Historical intermediate report removed from repository; no current qualification inferred",
-      "normalPassed": 2918,
-      "normalTotal": 2919,
-      "normalFailed": 1,
-      "scalarPassed": 2919,
-      "scalarTotal": 2919,
-      "recoveryPassed": 257,
-      "recoveryTotal": 257,
-      "newCasesPassedInNormalAndScalar": 11,
-      "sourceAndStableExecutableInventoryUnchanged": true,
-      "completeRuntimeOutputInventoryUnchanged": false,
-      "genuineColdRf3Executed": false,
-      "completeGate": false
-    },
-    "linux0d78Evidence": {
-      "path": "Historical intermediate report removed from repository; no current qualification inferred",
-      "sourceSha": "0d78eb43dceac2f386dca7bbccb11f9d1e3d43a3",
-      "normalPassed": 2919,
-      "normalTotal": 2919,
-      "scalarPassed": 2919,
-      "scalarTotal": 2919,
-      "recoveryPassed": 257,
-      "recoveryTotal": 257,
-      "rf3Passed": 87,
-      "rf3Total": 88,
-      "rf3Failed": 1,
-      "actualPriorServingImageBuilt": true,
-      "actualColdRf3Executed": true,
-      "coldRf3Qualified": false,
-      "completeGate": false
-    },
-    "nextEpoch": {
-      "requirements": "docs/Features/StorageRecovery/Epoch7.md",
-      "decision": "docs/ADR/ADR-091-epoch7-interpretation-fence.md",
-      "stage": "strict_epoch7_checkpoint5_and_explicit_source5_or6_converter_implementation",
-      "owner": "query_wave",
-      "AppHostPriorProbePreparation": "source_implemented_not_runtime_verified",
-      "runtimeQualified": false
-    }
+    "verificationStage": "Current-source build, formatter, analyzers, normal/scalar/recovery/RF3 and Linux delivery evidence are not recorded here; qualification remains pending.",
+    "coverage": "unmeasured",
+    "crap": "unmeasured"
   },
   "KL-044": {
     "title": "Release gate і operational handbook",
@@ -2017,7 +2047,7 @@
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnRecallTests.cs",
       "tests/KeyLoad.UnitTests/Features/Search/Cases/PackedAnnReservationTests.cs",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "sourceStage": "R1_all_19_Aspire_normal_and_19_scalar_cases_pass_minimum_recall_0_988_current_full_build_and_formatter17_pass_required_full_runtime_and_delivered_Linux_gates_pending",
@@ -2047,7 +2077,7 @@
       "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
       "requirement": "REQ-ANN-015",
       "acceptance": "AC-ANN-015",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
       "runtimeQualified": false,
@@ -2196,7 +2226,7 @@
     ]
   },
   "KL-072": {
-    "title": "Token migration lineage",
+    "title": "Current ownership tokens and scoped outcomes",
     "status": "in_progress",
     "evidence": [
       "docs/Features/ClusterRouting/PhysicalShardCatalog.md",
@@ -2204,16 +2234,17 @@
       "src/KeyLoad.Core/Features/ClusterRouting/Identity/CommandOutcomePartitionIdentity.cs",
       "src/KeyLoad.Core/Features/ClusterRouting/Serialization/CommandOutcomePartitionLocatorSerialization.cs"
     ],
-    "feature": "docs/Features/ClusterRouting/TokenMigrationLineage.md",
-    "decision": "docs/ADR/ADR-017-migration-tokens.md",
-    "sourceStage": "native_stored_outcome_partition_scope_and_current_cut_placement_witness_joined_genuine_prior6_frames_passed_full_movement_lineage_pending",
+    "feature": "docs/Features/ClusterRouting/TokenOwnershipLineage.md",
+    "decision": "docs/ADR/ADR-017-ownership-session-tokens.md",
+    "sourceStage": "current_same_view_token_and_scoped_outcome_contract; cross_group_token_translation_remains_proposed",
     "fullTaskComplete": false,
     "runtimeQualified": false,
     "remaining": [
       "Fenced placement changes and durable token lineage contracts across physical movement",
-      "Stale/current lineage SDK/MCP positive/negative outcomes under migration, restart and failover",
+      "Current token and scoped-outcome SDK/MCP positive/negative flows across restart, failover and physical ownership movement; cross-group position translation remains separately proposed.",
       "Complete normal/scalar/recovery/RF3 gates on delivered source"
-    ]
+    ],
+    "historicalSourceStage": "native_stored_outcome_partition_scope_and_current_cut_placement_witness_joined_genuine_prior6_frames_passed_full_movement_lineage_pending"
   },
   "KL-073": {
     "title": "PostgreSQL baseline kit",
@@ -2246,7 +2277,7 @@
       "docs/ADR/ADR-103-scaled-fair-comparisons.md",
       "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Execution/ScaledComparisonRunner.cs",
       "tests/KeyLoad.ComparisonTests/Features/BenchmarkComparisons/Helpers/IsolatedNativeTeardown.cs",
-      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37384353741",
       "Historical intermediate report removed from repository; no current qualification inferred"
     ],
     "sourceStage": "canonical792_measurements_six_proofs_native_open_loop_matrix_terminalization_and_authenticated_GitHub_intake_joined_actual_Linux_workflow_cohort_pending",
@@ -2317,7 +2348,7 @@
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37292025093"
     ],
     "simd": {
       "ownerDirection": "confirmed_SIMD_dotNET_intrinsics_first_Rust_after_profiling",
@@ -2341,7 +2372,7 @@
       "status": "source_integrated_local_packed_ann31_normal_and31_scalar_pass",
       "requirement": "REQ-ANN-015",
       "acceptance": "AC-ANN-015",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37292025093",
       "actualDatasetRecords": 10000,
       "matchedAllMetricRecallAndFilterCells": true,
       "runtimeQualified": false,
@@ -2378,14 +2409,14 @@
       "src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs",
       "tests/KeyLoad.ComparisonTests/Features/TestInfrastructure/Cases/AspireTestEntryModelTests.cs",
       "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37245840909",
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37249197752",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37349838022",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37364493890"
     ],
     "decision": "docs/ADR/ADR-074-aspire-owned-test-entry.md",
     "sourceStage": "unified_Aspire_entry_5_local_development_cases_passed_original_TRX;complete_release_gates_pending",
@@ -2403,7 +2434,7 @@
       "unit": "3461_of3473_12_failed_no_skips",
       "unitScalar": "3461_of3473_12_failed_no_skips",
       "recovery": "cancelled_at_enclosing_job_timeout_no_complete_report",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred"
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
     },
     "latestLocalDevelopment": {
       "checkpoint": "stage86",
@@ -2412,7 +2443,7 @@
       "governance": "passed",
       "unit": "3490_of3492_2_failed_no_skips_or_cancellations",
       "fullTaskComplete": false,
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37364493890",
       "recovery": "299_of300_1_failed_no_skips_or_cancellations",
       "unitScalar": "3491_of3492_1_failed_no_skips_or_cancellations"
     },
@@ -2721,7 +2752,7 @@
       ],
       "latestOriginalRf3": {
         "sourceRevision": "5fa61f27a34b5c573579fca3a84b8e5201dbd82e",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37242346547",
         "fullSuitePassed": 103,
         "fullSuiteTotal": 118,
         "fullSuiteFailed": 15,
@@ -2981,7 +3012,7 @@
         "buildFormatGovernance": "passed_full_solution_exact_sha_all_three_OSes",
         "rf3IntegrationTests": "12_of29_pass_9_of26_caller_cases_3_of3_file_receipt_cases_17_MCP_initialization_failures",
         "comparisonTests": "2_of4_pass_native_completion_failed",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37021991878",
         "evidence": "docs/implementation/runtime-qualification-20261002.md"
       },
       "analyzerRegressionQualification": "118_of118_exact323d60499_standalone_and_all_three_OSes",
@@ -3035,7 +3066,7 @@
         "recovery": "not_run_after_unit_failure_on_all_three_OSes",
         "url": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756",
         "evidence": "docs/implementation/runtime-qualification-20261002.md",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37015193756",
         "artifacts": "/private/tmp/keyload-runtime-ci-37015193756/"
       },
       "developmentChecks": {
@@ -3154,8 +3185,8 @@
         "verification": "Linux136_of136_macOS136_of136_Windows136_of136_exacte8d1a9eb1",
         "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "refinement": "only_optional_metadata_FileNotFound_or_DirectoryNotFound_means_absent_required_owner_and_journal_remain_exclusive_under_same5s25ms",
-        "nativeReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
-        "sourceFollowupReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "nativeReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "sourceFollowupReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
         "sourceFollowup": "existing_physical_temp_helper_reuse_and_two_missing_required_intrinsic_timing_arguments_isolated_qualified_without_changing5s6s_bounds"
       },
       "previousMainBuildCi": {
@@ -3170,7 +3201,7 @@
           "failed": 0
         },
         "unitRecoveryRf3Comparison": "not_executed_after_failed_builds",
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred"
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37029344985"
       },
       "previousMainRuntimeCi": {
         "runId": 37042082081,
@@ -3263,7 +3294,7 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37042082081",
         "remaining": "W4_requires_new_exact_CI_recovery_Windows_host_startup_comparison_coverage_endurance_open"
       },
       "restartFailureDiagnostics": {
@@ -3271,14 +3302,14 @@
         "acceptance": "AC-TEST-007",
         "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "status": "five_projection_file_stream_regressions_and_RF3_leader_loss_pass_exacte8d1a9eb1_environmental_failure_path_unexecuted",
-        "nativeReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093"
+        "nativeReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       "comparisonHostStartupDiagnostics": {
         "requirement": "REQ-TEST-009",
         "acceptance": "AC-TEST-009",
-        "sourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "sourceReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
         "status": "four_projection_and_real_stream_methods_pass_on_each_OS_exacte8d1a9eb1_environmental_timeout_failure_branch_unexecuted",
-        "nativeReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093"
+        "nativeReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
       },
       "previousMainCi": {
         "runId": 37049469093,
@@ -3371,7 +3402,7 @@
           "timedOut": 0,
           "flaky": 0
         },
-        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
+        "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
         "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
       },
       "mainCiHistory": [
@@ -3466,7 +3497,7 @@
             "timedOut": 0,
             "flaky": 0
           },
-          "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37044499074",
           "remaining": "macOS11_fixture_path_and_Windows2_intrinsic_elapsed_recovery_failures_comparison_coverage_actual_migration_resource_endurance_open"
         },
         {
@@ -3560,7 +3591,7 @@
             "timedOut": 0,
             "flaky": 0
           },
-          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37049469093",
+          "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
           "remaining": "comparison_native_runner_Waiting_two_failures_measured_profiles_skipped_coverage_actual_migration_resource_endurance_power_loss_open"
         },
         {
@@ -3739,6 +3770,27 @@
       "nativeImageToolingOperation": "actual_complete_altered_occupied_healthy_materialization_flow_passed_Aspire_R25_original_inputs_and_native_exit_readers_verified_excluded_product_coverage",
       "sqlGraphPathOperation": "actual_extra_statement_rejection_unchanged_position_healthy_same_engine_retry_full_path_and_cut_passed_normal_and_scalar_R25",
       "recoveryContributorAttempt": "Aspire_prepare_native5_probe_failed_original_exit1_before_requested_recovery_runner_no_test_report_no_pass"
+    },
+    "currentCheckpoint": {
+      "original104Acceptance": {
+        "total": 104,
+        "fullyClosed": 0,
+        "closure": "only full mapped criteria and required evidence close an acceptance"
+      },
+      "codeDelivery": {
+        "currentBuild": "R105 full Release verification in progress after four reviewed current-fixture joins; R104 passed 4,101 inputs with zero source drift and zero warnings/errors",
+        "formatter": "R105 current-source formatter pending; R104 full dotnet format passed with zero source drift",
+        "verificationScope": "local source-bound development; Linux delivered-source gates remain open"
+      },
+      "nativeQualification": {
+        "physicalNativeId8Omission": "passed",
+        "physicalRF3Id7MissingFieldFlow": "open",
+        "functionalCoverageAndCRAP": "open",
+        "scalarRecoveryRF3AndLinuxDelivery": "open",
+        "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
+        "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; current full R104 unit completed with21 failures overall, R105 qualification pending",
+        "completeUnit": "R104 actual Aspire full unit completed: 4,044 executed, 4,023 passed, 21 failed, zero skipped and zero source/assembly drift. Four current-fixture repairs for 18 failures joined; three remaining failures under diagnosis. R105 rerun pending."
+      }
     }
   },
   "AdminDashboard": {
@@ -3855,7 +3907,7 @@
       "docs/implementation/central-sql.md",
       "docs/Features/QueryExecution.md",
       "docs/Features/QueryExecution.md",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37070004864"
     ],
     "remaining": [
       "SQL_declarative_cross_model_sources_and_JOIN",
@@ -3866,12 +3918,12 @@
   },
   "ISO-COMP-001": {
     "status": "in_progress",
-    "scope": "Linux-only isolated native engine x1/2/3 nodes x one scenario, common intensive workload, raw worker schema4, authenticated complete aggregation and site regeneration",
-    "specification": "docs/Features/BenchmarkComparisons.md#owner2026-10-03-isolated-linux-intensive-comparisons",
+    "scope": "Current Linux comparison and website cohort: 1,386 workers with worker schema 5; 2,530 authenticated site inputs (2,470 suite and 60 provider). The separate TimeSeries family requires 60 scale-specific measurement jobs from 30 logical identities plus six topology preflights. Complete native cohort and publication qualification remain open.",
+    "specification": "docs/Features/BenchmarkComparisons.md#current-complete-cohort-publication",
     "adr": "docs/ADR/ADR-056-isolated-linux-comparison-cells.md",
     "plan": "docs/Features/BenchmarkComparisons.md",
     "sourceReady": [
-      "closed270cellPlanner",
+      "closedCurrent1386WorkerPlan",
       "rawEnvelopeValidatorAndBoundedAggregator",
       "benchmarkFixedMembershipAndAtomicZoneTreeGuard",
       "selectedHostAndAtomicWorkerOutput",
@@ -3884,23 +3936,30 @@
       "authenticatedGitHubTransportSource",
       "fixedMembershipNativeFaultAssertions",
       "compactProjectionAndNativeBrowserSource",
-      "nativeIsolatedPagesCaptureAndBcl277FilePreparation",
+      "currentSiteCaptureAnd2530InputInventory",
       "privateOriginalReceiptByteAuthority",
-      "39SiteProductionAnd31CriticalCoverageInventory",
-      "49FileExecutedDependencyClosure",
-      "boundedLegacyAndIsolatedFinalBuilderComposite",
+      "currentDeclaredFunctionalSiteCoverageInventory",
+      "currentDeclaredExecutedDependencyClosure",
+      "boundedIsolatedFinalBuilderComposite",
       "independentEvidenceFreshnessBeforePagesDeployment"
     ],
     "pending": [
-      "repair3AuthenticD45PreflightFailuresAndRerunExactSource",
+      "fullCurrentSourceBuildFormatAndRequiredLinuxDeliveryGates",
       "realSDKMCPFixedMembershipFaultProofs",
-      "exactSHAFullLinuxRequiredGates",
-      "actualComplete270CellIntensiveCohort",
-      "schema4SiteCoverageBrowserAndPublication",
-      "separateNativeTimeSeriesIsolation"
+      "actualComplete1386WorkerCurrentNativeCohort",
+      "schema5SiteCoverageBrowserAnd2530InputPublicationQualification",
+      "separateNativeTimeSeries60ScaleJobsAnd6PreflightQualification",
+      "functionalCoverageCRAPScalarRecoveryAndRF3Qualification"
     ],
     "qualification": {
       "newIntensiveResults": null,
+      "currentCohortQualified": false,
+      "currentSiteInputs": {
+        "suite": 2470,
+        "provider": 60,
+        "total": 2530
+      },
+      "workerSchemaVersion": 5,
       "localTestsRun": false,
       "runtimeReady": false,
       "productionReady": false
@@ -3918,7 +3977,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "limits": "Full Release/format/governance pass; normal1852/1853 with sole known Result null-vs500 failure; recovery183/analyzer118/RF363 all pass. H114 normal passed, scalar/H12models/native27/270/TimeSeries6/30/site unexecuted."
     },
     "sourceEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
@@ -3933,7 +3992,7 @@
       "actualImageProbeSource": "890047996b651e76b3fbc6bb87dc941f91c9bd2e",
       "qualifiedNativeFacts": true,
       "completeMeasuredFamily": false,
-      "nativeFactsReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "nativeFactsReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37086903497",
       "pureCorpusOracleDigest": {
         "state": "qualified_30_cases_each_full_normal_scalar_at_exact2f_run37093197474",
         "tasks": [
@@ -3942,11 +4001,11 @@
         ],
         "nativeRunnerAndAdaptersImplemented": false,
         "measuredPerformanceClaim": false,
-        "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37093197474",
         "nextSourceTask": "TASK-ISO-TS007B_D_47_source_files_36_declared_cases_prepared_native_adapters_family_pending",
         "runnerSourcePrepared": true,
         "runnerDeclaredCases": 36,
-        "runnerQualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "runnerQualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
         "runnerQualification": "36_cases_each_normal_scalar_passed_at_d45_native_adapters_family_still_pending"
       },
       "nativeAdaptersSourcePrepared": true,
@@ -3971,7 +4030,7 @@
           "runId": 37109874881,
           "normalPassed": 35,
           "scalarExecuted": false,
-          "receipt": "Historical intermediate report removed from repository; no current qualification inferred"
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881"
         }
       },
       "executableFamilyPlan": {
@@ -3981,7 +4040,7 @@
         "authoredTUnitCases": 7,
         "nativeHostDispatchImplemented": false,
         "measuredFamilyQualified": false,
-        "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881",
         "actualNormalCases": 7,
         "actualScalarCases": 0
       },
@@ -3991,7 +4050,7 @@
         "plannedSlotCount": 50000,
         "nativeOrPublicationVerdict": false,
         "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
-        "qualificationReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
+        "qualificationReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881",
         "actualNormalCases": 8,
         "actualScalarCases": 0
       },
@@ -4004,7 +4063,7 @@
         "latestHInputQualification": {
           "state": "actual114_normal_cases_passed_at9b_source_gate_failed1_scalar_and_models_unexecuted",
           "sourceRevision": "9b3bd8ed64b42e7e3bd37d454face7984dfc6b5f",
-          "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
           "byteEqualHSourceBlobs": 10,
           "normalPassed": 114,
           "scalarExecuted": false,
@@ -4063,7 +4122,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "limits": "Full Release/format/governance pass; normal1852/1853 with sole known Result null-vs500 failure; recovery183/analyzer118/RF363 all pass. H114 normal passed, scalar/H12models/native27/270/TimeSeries6/30/site unexecuted."
     },
     "latestObservedCurrentMainBaseline": {
@@ -4072,7 +4131,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37097831105",
       "limits": "Original normal1583:1566pass17fail0skip; scalar and native comparisons skipped. RF363/recovery164/analyzer118 pass; actual new36 runner and earlier pure30 pass within failed normal suite. Null-memory fixture fix belongs to later d45 checkpoint."
     },
     "currentSourceQualificationRun": {
@@ -4081,7 +4140,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37111280400",
       "limits": "Full Release/format/governance pass; normal1852/1853 with sole known Result null-vs500 failure; recovery183/analyzer118/RF363 all pass. H114 normal passed, scalar/H12models/native27/270/TimeSeries6/30/site unexecuted."
     },
     "latestComparisonNativeBaseline": {
@@ -4090,7 +4149,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
       "limits": "Full source gates pass, normal/scalar1583, recovery164, analyzers118 and RF363 without skips. Native27 terminates24successful jobs (22measured and2explicit unavailable Neo4j) and3failures: Mongo2 image-import exit13, Mongo3 native priority takeover/3failed measured operations, Kurrent2 teardown20s exhausted30125/55378ACKed streams. Full270allocated0; aggregate/site skipped."
     },
     "lastPassingSourceQualification": {
@@ -4098,10 +4157,10 @@
       "runId": 37098964980,
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980",
       "sourceGates": "passed_full_Release_format_governance_analyzers118_normal1583_scalar1583_recovery164_RF3_63_all_no_skips",
       "wholeWorkflowAtCapture": "historical_source_receipt_in_progress_snapshot_terminal_comparison_receipt_now_available",
-      "terminalComparisonReceipt": "Historical intermediate report removed from repository; no current qualification inferred"
+      "terminalComparisonReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37098964980"
     },
     "priorSourceQualification": {
       "sourceRevision": "5bbf30f70e500f2031f3687fbfd98829da8d218f",
@@ -4109,7 +4168,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37104211481",
       "limits": "Full solution Release fails20 Node-helper diagnostics before normal/scalar/recovery; independent analyzer118 and RF363 pass all/no skips. Native27/full270/TimeSeries6/30 unallocated; images and aggregate skipped. New dirty source is not qualified.",
       "sourceGates": "failed_Release20_errors_normal_scalar_recovery_unexecuted_analyzer118_RF3_63_passed"
     },
@@ -4129,7 +4188,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37108640954",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37108640954",
       "limits": "Full source Release8Recoveryerrors; actual analyzer118/RF363 pass all, prior21Siteerrors absent. Raw8/normal/scalar/recovery/comparison-images/native27/270/TimeSeries6/30/coverage/site publication unqualified.",
       "sourceGates": "failed_Release8Recoveryerrors_normal_scalar_recovery_raw8_unexecuted_analyzer118_RF3_63_passed"
     },
@@ -4139,7 +4198,7 @@
       "runAttempt": 1,
       "url": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881",
       "conclusion": "failure",
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37109874881",
       "limits": "Full Release/formatter/governance pass; normal1737/1739, recovery181/182, analyzer118/RF363 pass. Scalar/images/models/native27/270/TimeSeries6/30/site unexecuted; raw8/selection35/family7 pass only in actual normal suite.",
       "sourceGates": "build_formatter_governance_passed_unit2_recovery1_failures_scalar_and_comparisons_skipped"
     },
@@ -4789,7 +4848,7 @@
       "ownerCorrection": "2026-10-06: Website is a separate fourth workflow; Build and Tests owns full solution build and ordinary tests; ready authenticated Benchmarks data is optional; absent data still publishes the qualified content-only site",
       "implementation": "source_implemented_and_development_verified",
       "benchmarkNativeSourceAndEngineUnchanged": true,
-      "websiteConsumer": "standalone Website own-main push/manual and completed Benchmarks workflow_run",
+      "websiteConsumer": "standalone Website own-main push/manual and final bounded Benchmarks dispatch; no workflow_run executor",
       "runtimeQualified": false,
       "publicationQualified": false,
       "selection": "newest_completed_own_main_push_or_workflow_dispatch_Benchmarks_with_successful_authenticated_aggregate; valid_failed_or_absent_aggregate_not_available; corrupt_selected_ready_evidence_fails; fresh_ready_tuple_or_null_before_deploy",
@@ -4873,7 +4932,7 @@
       "standaloneWebsite": {
         "requirement": "REQ-BC-WEB-006",
         "workflow": ".github/workflows/website.yml",
-        "buildAndTestsWorkflow": ".github/workflows/ci.yml",
+        "buildAndTestsWorkflow": ".github/workflows/build-and-tests.yml",
         "buildAndTestsName": "Build and Tests",
         "implementation": "source_implemented_native_content_only_qualified_and_published_current_complete_measured_cohort_still_required",
         "buildAndTestsDependency": false,
@@ -5147,6 +5206,35 @@
           },
           "qualificationScope": "content_and_website_pipeline_only; complete_current_measured_cohort_and_global_database_acceptance_remain_pending"
         }
+      },
+      "currentProducerContract": {
+        "workflows": [
+          "Build and Tests",
+          "Benchmarks",
+          "Website",
+          "Release"
+        ],
+        "currentPlan": {
+          "controlWorkers": 330,
+          "scaledWorkers": 264,
+          "vectorWorkers": 792,
+          "totalWorkers": 1386,
+          "workerSchemaVersion": 5
+        },
+        "siteInputFiles": {
+          "suite": 2470,
+          "provider": 60,
+          "total": 2530
+        },
+        "websiteTriggers": [
+          "trusted_own_main_push",
+          "workflow_dispatch",
+          "final_bounded_benchmarks_dispatch"
+        ],
+        "readyAuthenticatedMetricsOptional": true,
+        "noReadyMetrics": "qualified_content_only_without_figures",
+        "completeNativeQualification": false,
+        "publicationQualification": false
       }
     }
   },

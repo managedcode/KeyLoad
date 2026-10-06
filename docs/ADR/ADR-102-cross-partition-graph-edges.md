@@ -38,7 +38,7 @@ sequenceDiagram
     R->>T: Apply locator after current source verification
     T-->>R: Separate committed high-water state
     R->>S: Complete only the current matching intent
-    Note over S,T: One validated physical owner; no cross-partition atomic transaction
+    Note over S,T: One validated physical owner, no cross-partition atomic transaction
 ```
 
 Use `MaxScanRecords` and `MaxBatchBytes` for pending intent and receiver-state capacity, plus `MaxResults`/`MaxScanRecords`/`MaxBatchBytes` per bounded repair page and the original request deadline. Failed reservation prevents source commit. Do not discard unresolved intents or receiver tombstones automatically. Current placement must be validated against the complete same-shard tuple; different owners fail closed. Rollout uses the current native schema without rewriting existing records. Rollback stops new cross-partition writes/repair but retains canonical source records, unresolved intents and target high-water state. No restart is allowed to reinterpret an unknown native envelope as success. Physical movement remains subject to a separate owner-fenced contract and signed receipt.

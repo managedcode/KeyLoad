@@ -64,7 +64,7 @@ distinct from GitHub unit/recovery/RF3 SDK qualification and measured performanc
 
 Source-present baseline: sample append/order/dedup і inclusive bounded read. Planned: автоматична retention, rollups, chunk compression qualification та distributed series execution. Existing inclusive read repair keeps its wire shape; the additive aggregate/latest contract below is governed by ADR-052 and has separate pending source/qualification evidence.
 
-Рішення: [ADR-005 keyspace](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010 bounds/security](../ADR/ADR-010-query-budgets-security.md), [ADR-016 atomic/physical boundary](../ADR/ADR-016-atomic-physical-placement.md), [ADR-011 upgrades](../ADR/ADR-011-format-upgrades.md), [ADR-030 retention/restore](../ADR/ADR-030-retention-paused-restore.md). Shared codec/storage/replication integration — один lead; feature helpers та matching tests `Features/TimeSeries/`. Frontend N/A. Product tests — real TUnit, process recovery, Docker/Aspire SDK/MCP у GitHub; runtime evidence для спільного source pending.
+Рішення: [ADR-005 keyspace](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010 bounds/security](../ADR/ADR-010-query-budgets-security.md), [ADR-016 atomic/physical boundary](../ADR/ADR-016-atomic-physical-placement.md), [ADR-011 current native format](../ADR/ADR-011-current-native-format.md), [ADR-116 first-release format policy](../ADR/ADR-116-first-release-current-format.md), [ADR-030 retention/restore](../ADR/ADR-030-retention-paused-restore.md). Shared codec/storage/replication integration — один lead; feature helpers та matching tests `Features/TimeSeries/`. Frontend N/A. Product tests — real TUnit, process recovery, Docker/Aspire SDK/MCP у GitHub; runtime evidence для спільного source pending.
 
 ## ManagedCode.TimeSeries and Timescale comparison
 
@@ -123,8 +123,9 @@ Server/Features/TimeSeries HTTP routes. Shared ClusterRouting read-kind/dispatch
 ClientApi MCP catalog and ResourceExecution budget forwarding have one root
 integration owner. StorageRecovery owns shared reverse range traversal under
 REQ-STORAGE-013. Tests mirror TimeSeries in existing TUnit/MTP projects. Frontend
-N/A: these typed database reads add no dedicated page. Persistence migration
-N/A: the canonical sample keys/records/commits are unchanged.
+N/A: these typed database reads add no dedicated page. No conversion or backfill
+of another sample format is supported; current sample keys/records/commits remain
+unchanged under [CurrentFormat](StorageRecovery/CurrentFormat.md) and [ADR-116](../ADR/ADR-116-first-release-current-format.md).
 
 ```mermaid
 flowchart LR
@@ -174,16 +175,18 @@ the exact corrected-source full GitHub suites and coverage remain mandatory.
 [ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md) freezes a private,
 bounded generated-Orleans codec candidate before canonical storage integration.
 Current per-sample ZoneTree rows, ID receipts, sequences, retention floors and
-identity6 remain unchanged. Codec qualification does not close KL-078:
-correction generations, storage migration, rewrite cost and process/RF3 recovery
-still need their separate layout contract and original evidence.
+identity epoch7 remains unchanged. No conversion or rewrite of an earlier canonical
+sample representation is supported. Codec qualification does not close KL-078:
+correction generations and process/RF3 recovery still need their separate
+current-format contract and original evidence.
 
-The codec development receipt (report removed from repository)
+The historical report (removed from repository)
 records full Aspire normal/scalar2852/2852 verification and36 matched ordinary
 BenchmarkDotNet cases with exact source/runtime/corpus binding. Canonical samples
 still use their existing per-record ZoneTree representation. The measured controls
-cover1/32/256 samples per batch; full database scale, rewrite/correction recovery,
-RF3 and exact-source Linux qualification remain required for KL-078.
+cover1/32/256 samples per batch; full database scale, current-format integration,
+correction recovery, RF3 and exact-source Linux qualification remain required for
+KL-078. No old-record conversion or canonical storage rewrite is supported.
 
 | Requirement | Acceptance criterion | Planned automated evidence |
 |---|---|---|
@@ -191,8 +194,8 @@ RF3 and exact-source Linux qualification remain required for KL-078.
 | REQ-SERIES-017: lossless text and aggregates preserve raw meaning | AC-CHUNK-002: valid Unicode and unpaired UTF16 code units survive without replacement; raw fold count/sum/min/max and all four real series-reader results remain unchanged by encoding/decoding; duplicate ID/content remains one canonical sample and changed content conflicts | SampleChunkCodec* and SampleChunkStore* real ZoneTree cases; no reassociated sums or tolerance |
 | REQ-SERIES-018: counts, memory, work and failure are bounded | AC-CHUNK-003: 256 succeeds,257/empty reject as frozen; exact envelope admission/oversize and shared byte/deadline/cancellation cases fail whole before unsafe allocation; following real read succeeds and source bytes/cut/ID/sequence/floor remain unchanged | SampleChunkWire* and SampleChunkStore* real cuts, small/exact budgets, cancellation and actual reopen |
 | REQ-SERIES-019: generated native format has explicit integrity and compatibility | AC-CHUNK-004: permanent chunk alias/Ids/native golden remain stable; checksum, truncated/trailing native/columns, nonminimal varints, invalid offset/timestamp/sequence/order/value/text dictionary/shape reject as Corruption; unknown versions are FormatUnsupported | SampleChunkWire* structural and independent malformed fixtures |
-| REQ-SERIES-019: candidate cannot become a competing authority | AC-CHUNK-005: encoding at one actual authorized source cut writes no keys/files/journals, preserves old SampleRecord contracts and exact data after failure/reopen; private buffers release to the caller and no borrowed view escapes | SampleChunkStore* plus source review; storage/replica/public operation format changes forbidden in this stage |
-| REQ-SERIES-020: qualification and performance claims have actual provenance | AC-CHUNK-006: full build/formatter/governance and Aspire TUnit normal/scalar results are source-bound; labelled BenchmarkDotNet controls retain corpus/machine/source/bytes/sample/encode/decode allocations and cost; canonical rewrite/recovery and acceleration remain explicitly pending | TASK-CHUNK-MEASURE/JOIN; genuine Linux CI and original artifacts required for global qualification |
+| REQ-SERIES-019: candidate cannot become a competing authority | AC-CHUNK-005: encoding at one actual authorized source cut writes no keys/files/journals, preserves the current SampleRecord contract and exact data after failure/reopen; private buffers release to the caller and no borrowed view escapes | SampleChunkStore* plus source review; storage/replica/public operation format changes forbidden in this stage |
+| REQ-SERIES-020: qualification and performance claims have actual provenance | AC-CHUNK-006: full build/formatter/governance and Aspire TUnit normal/scalar results are source-bound; labelled BenchmarkDotNet controls retain corpus/machine/source/bytes/sample/encode/decode allocations and cost; current-format integration/recovery and acceleration remain explicitly pending | TASK-CHUNK-MEASURE/JOIN; genuine Linux CI and original artifacts required for global qualification |
 
 Canonical slice map: Core `Features/TimeSeries/SampleChunk*`; TUnit
 UnitTests `Features/TimeSeries/SampleChunk*`. Benchmark measurement is owned by
@@ -201,8 +204,10 @@ the shared [BenchmarkComparisons](BenchmarkComparisons.md) feature in
 the existing KeyLoad.Benchmarks executable. Frontend, SDK/MCP/HTTP and
 Orleans request surfaces are N/A for this transient private codec: their public
 contracts are unchanged. StorageRecovery, CrashHost, RecoveryTests and RF3 chunk
-integration are N/A for this first stage because no canonical chunk is written;
-they remain mandatory subsequent KL-078 work, not waived acceptance criteria.
+integration are N/A for this transient codec candidate because no canonical chunk
+is written; ordinary current-format integration and recovery remain mandatory
+KL-078 work, not waived acceptance criteria. No legacy-record conversion is
+supported.
 
 ```mermaid
 flowchart TD

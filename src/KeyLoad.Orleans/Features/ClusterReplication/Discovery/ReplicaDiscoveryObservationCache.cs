@@ -70,7 +70,7 @@ internal sealed class ReplicaDiscoveryObservationCache
 
     internal static SiloAddress RequireCompatible(ReplicaDiscoveryObservation observation)
     {
-        if (!observation.ProtocolCompatible)
+        if (!observation.CurrentContractCompatible)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ReplicaTransportProtocol.IncompatibleCohort);
         }

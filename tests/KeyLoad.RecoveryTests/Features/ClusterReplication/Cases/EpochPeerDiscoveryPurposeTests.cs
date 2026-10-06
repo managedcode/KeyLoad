@@ -7,15 +7,15 @@ namespace KeyLoad.RecoveryTests.Features.ClusterReplication;
 
 internal sealed class EpochPeerDiscoveryPurposeTests
 {
-    private const string LegacyPurpose = "keyload-discovery-request-v1";
+    private const string UnsupportedPurpose = "unsupported-peer-discovery-purpose";
     private const string CurrentPurpose = "keyload-discovery-request-data-epoch7";
 
     [Test]
-    public async Task AcEpoch005LegacySignedDiscoveryGetIsRejectedWithoutSpendingNonceAdmission()
+    public async Task AcEpoch005UnsupportedSignedDiscoveryGetIsRejectedWithoutSpendingNonceAdmission()
     {
         using var fixture = new PeerDiscoveryFixture();
-        using var stale = Sign(fixture.Secret, LegacyPurpose, Guid.NewGuid());
-        await Assert.That(await fixture.Receiver.ValidateAsync(PeerDiscoveryFixture.Incoming(stale),
+        using var unsupported = Sign(fixture.Secret, UnsupportedPurpose, Guid.NewGuid());
+        await Assert.That(await fixture.Receiver.ValidateAsync(PeerDiscoveryFixture.Incoming(unsupported),
             PeerDiscoveryFixture.Cancellation)).IsFalse();
 
         using var current = fixture.Sign();
