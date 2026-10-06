@@ -1318,7 +1318,7 @@ AC-BC-WEB-005 and precedes any deployment claim.
 
 The inventory root cause is the `scaled-cohort-` prefix including the producer-only
 `scaled-cohort-aggregate-cli.mjs` entry. That standalone Benchmarks CLI is absent
-from the actual 83-file Website executed dependency closure and never executes
+from the actual 84-file Website executed dependency closure and never executes
 in Website. Exclude only that exact entry from website evidence-module discovery;
 retain its producer ownership, all actual website imports, the complete closed
 feature/evidence inventories and existing 80/70/90 thresholds. Both measured and
@@ -1371,3 +1371,11 @@ contracts retain identical successful owned/native steps. Skipped jobs without
 steps and cancelled runs do not become unavailable-generation pins. The compatible
 cohort remains subject to original archive, source, provenance and freshness
 qualification; API artifact availability alone does not qualify publication.
+
+Standalone sourcef2dd44e5 run37482351429 successfully captured the compatible
+original cohort and its archives. Its source/tool gate then rejected the unchanged
+84-entry dependency closure because the composite still required83 entries.
+Align that exact frozen count with the existing complete manifest, retaining byte
+comparison, sorted uniqueness, regular-path and per-file hash checks. This is a
+static workflow contract repair under AC-BC-WEB-004/005; no file or coverage source
+is removed and no provider pass is claimed until the next genuine run succeeds.

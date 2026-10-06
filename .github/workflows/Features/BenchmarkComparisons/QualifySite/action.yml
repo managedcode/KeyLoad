@@ -82,7 +82,7 @@ runs:
         git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
         cmp "control/$closure" "website/$closure"
-        [[ "$(wc -l < "control/$closure")" == 83 ]]
+        [[ "$(wc -l < "control/$closure")" == 84 ]]
         LC_ALL=C sort -u "control/$closure" > "$EVIDENCE_DIR/isolated-dependencies.txt"
         cmp "control/$closure" "$EVIDENCE_DIR/isolated-dependencies.txt"
         sha256sum "website/$closure" >> "$EVIDENCE_DIR/executed-evidence-tools.sha256"

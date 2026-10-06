@@ -4879,7 +4879,7 @@
         "buildAndTestsDependency": false,
         "benchmarkSuccessDependency": false,
         "qualification": "existing_content_only_or_complete_measured_qualification_and_freshness_preserved",
-        "providerPublication": "first_standalone_run_failed_old_generation_capture_repair_verified_next_native_run_pending",
+        "providerPublication": "second_standalone_run_failed_stale_dependency_count_repair_prepared_native_reverification_pending",
         "siteTestsBuild": "passed_zero_warnings_zero_errors",
         "siteTestsFormat": "passed",
         "canonicalBuild": "passed_zero_warnings_zero_errors_final_source",
@@ -4915,7 +4915,21 @@
           "independentWorkflowStarted": true,
           "pagesPublished": false
         },
-        "unavailableProducerGenerations": 13
+        "unavailableProducerGenerations": 13,
+        "secondNativeRun": {
+          "source": "f2dd44e57395cb8096fbe0ae1b7a736b4c81e7ab",
+          "runId": 37482351429,
+          "conclusion": "failure",
+          "stage": "source_revisions_and_browser_tools",
+          "capture": "passed_original_metadata_and_archive_hashes",
+          "expectedDependencyCount": 83,
+          "actualDependencyCount": 84,
+          "pagesPublished": false,
+          "metadataProofSha256": "a7777017ae8a67d7b703feea3db467bfac7524b2161ce09a782d54fbc6d6dec7",
+          "selectedBenchmarkRun": 37184989107,
+          "selectedMeasuredSource": "73aebfd3f72695357834599e813aba77b9e274ad",
+          "qualification": "capture_only_not_site_or_current_database_qualification"
+        }
       }
     }
   },
