@@ -84,7 +84,7 @@ internal sealed class PartitionQueryMcpContractTests
         var position = fixture.Store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions("root", request, PartitionQueryPublicTestSupport.ExpectedOwner));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability).Because(failure.Message);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         var allowed = item with
         {

@@ -114,7 +114,7 @@ public static class ZoneTreeFormatUpgrade
     {
         ZoneTreeFormatUpgradeStage.VerifyDirectory(destination);
         var actual = ZoneTreeFormatUpgradeReceiptFile.Read(
-            Path.Combine(destination, ZoneTreeFormatUpgradeStage.ReceiptFileName), options.MaximumUpgradeReceiptBytes);
+            Path.Combine(destination, ZoneTreeFormatUpgradeStage.ReceiptFileName), options.MaximumUpgradeReceiptBytes, options.StreamBufferBytes);
         if (actual != expected)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradePathAmbiguous);

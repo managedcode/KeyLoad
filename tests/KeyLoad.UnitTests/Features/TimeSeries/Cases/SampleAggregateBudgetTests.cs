@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Features.TimeSeries;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -126,14 +127,23 @@ internal sealed class SampleAggregateBudgetTests
         await cancelled.CancelAsync();
         var cancellation = Assert.ThrowsExactly<OperationCanceledException>(() => limited.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request, cancelled.Token));
-        var expired = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var deadlineFailure = SampleAggregateTestData.Failure(() => expired.AggregateSamples(
-            SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
+        var invalidDeadline = new DatabaseLimits { QueryDeadlineSeconds = SampleAggregateTestData.InvalidDeadlineSeconds };
+        var invalidConfiguration = Assert.ThrowsExactly<InvalidOperationException>(invalidDeadline.Validate);
+        await Assert.That(invalidDeadline.IsValid()).IsFalse();
+        await Assert.That(invalidConfiguration.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
+        var expiredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(
+            new() { QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds }), TimeProvider.System);
+        await Task.Delay(TimeSpan.FromMilliseconds(SampleAggregateTestData.DeadlineElapsedWaitMilliseconds),
+            TestContext.Current!.Execution.CancellationToken);
+        var deadlineFailure = SampleAggregateTestData.Failure(() => db.Store.Read(view =>
+            SampleAggregateReader.Read(db.Database, expiredBudget.CreateView(view), SampleAggregateTestData.RootPrincipal,
+                request, expiredBudget)), ErrorCode.BudgetExceeded);
         var healthy = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
 
         await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(cancellation).IsNotNull();
         await Assert.That(deadlineFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(deadlineFailure.Message).IsEqualTo(SampleAggregateTestData.DeadlineExceededDetail);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await Assert.That(healthy.Count).IsEqualTo(0L);
     }

@@ -121,7 +121,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     {
         if (scaled)
         {
-            await KeyLoadScaledCorpusSeeder.SeedAsync(client, partition, dataset.Documents, cancellationToken);
+            await KeyLoadScaledCorpusSeeder.SeedAsync(client, partition, dataset.Documents, nativeExecutionOptions, cancellationToken);
             return;
         }
         foreach (var document in dataset.Documents)

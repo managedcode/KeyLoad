@@ -121,7 +121,7 @@ internal static class ZoneTreeFormatUpgradeBuilder
         ZoneTreeFormatUpgradeReceiptFile.VerifyRegularFile(ownerPath);
         using var ownership = new FileStream(ownerPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
         var identityPath = Path.Combine(directory, ZoneTreePersistenceFormat.IdentityFileName);
-        var identity = ZoneTreeIdentityFile.Read(identityPath, options.MaximumIdentityFileBytes);
+        var identity = ZoneTreeIdentityFile.Read(identityPath, options.MaximumIdentityFileBytes, options.StreamBufferBytes);
         VerifyIdentity(sourceIdentity, identity, allowMaintenanceChanges);
         using (var journal = new FileStream(Path.Combine(directory, ZoneTreePersistenceFormat.JournalFileName),
             FileMode.Open, FileAccess.Read, FileShare.Read, options.FileBufferBytes,

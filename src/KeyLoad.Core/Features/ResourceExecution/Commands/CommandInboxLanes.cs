@@ -2,12 +2,11 @@ namespace KeyLoad.Core;
 
 /// <summary>Owns the bounded control and data FIFO queues used by one command inbox.</summary>
 /// <remarks>Callers serialize every operation with the inbox gate.</remarks>
-internal sealed class CommandInboxLanes
+internal sealed class CommandInboxLanes(int maximumControlBurst)
 {
     private const int EmptyElementCount = 0;
     private const int AdjacentElementOffset = 1;
 
-    private const int MaximumControlBurst = 8;
     private const string SignalMismatchDetail = "The command queue signal is inconsistent.";
 
     private readonly Queue<AdmittedCommand> commands = [];
@@ -28,9 +27,9 @@ internal sealed class CommandInboxLanes
     /// <returns>The next command, or null when stopped and empty.</returns>
     public AdmittedCommand? Dequeue(bool stopped)
     {
-        if (controls.Count > EmptyElementCount && (commands.Count == EmptyElementCount || controlBurst < MaximumControlBurst))
+        if (controls.Count > EmptyElementCount && (commands.Count == EmptyElementCount || controlBurst < maximumControlBurst))
         {
-            controlBurst = Math.Min(controlBurst + AdjacentElementOffset, MaximumControlBurst);
+            controlBurst = Math.Min(controlBurst + AdjacentElementOffset, maximumControlBurst);
             return controls.Dequeue();
         }
         if (commands.Count > EmptyElementCount)

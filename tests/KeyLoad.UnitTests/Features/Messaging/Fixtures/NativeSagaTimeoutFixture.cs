@@ -67,6 +67,7 @@ internal sealed class NativeSagaTimeoutFixture : IAsyncInitializer, IAsyncDispos
             Database.Database.ConfigureRuntimeJournal(JournalOptions);
             Database.Configure("jobs", ResourceKind.WorkQueue);
             Database.Configure("timeouts", ResourceKind.WorkQueue);
+            NativeSagaTimeoutTestData.ConfigureSagaPrincipal(this);
             Current = this;
             await runtime.StartAsync(deadline.Token);
         }

@@ -61,7 +61,7 @@ public sealed class MongoTarget(string connectionString, string runId, string im
         events = database.GetCollection<BsonDocument>(MongoSchema.EventsCollection);
 
         await CreateIndexesAsync(cancellationToken);
-        await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, cancellationToken);
+        await MongoCorpusSeed.SeedAsync(dataset, documents, edges, events, StreamName, executionOptions, cancellationToken);
         if (dataset.Settings is not ScaledComparisonProfile)
         {
             await VerifyUniqueStreamInsertionAsync(cancellationToken);

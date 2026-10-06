@@ -543,6 +543,24 @@ vector digests and exact oracle results. `OpenLoopOriginalFailureTests` and
 original native tasks and cancellation callbacks, retaining original failures
 and joined disposal. These checks await the rebuilt Aspire-owned suite.
 
+The final operational-sink audit includes configured grain reply initial buffers,
+administrator failure-ring retention, native seed batches and storage stream
+buffers. Existing groups retain their original defaults and inclusive ceilings;
+actual allocation/chunking/file owners must consume the configured values.
+`CommandInboxExecutionOptions` owns the configurable control burst separately
+from serialized admission limits. Its configured lower-burst regressions retain
+data fairness, lane FIFO and all failure/cancellation ownership. New seed rows in
+`NativeComparisonAdapterPolicyTests` preserve native validation of inclusive
+bounds. These source additions await the final integrated build and Aspire run.
+
+`NativeTextFileStreamBufferPolicyTests` observes real unflushed file lengths under
+configured lower caps, omitted native buffer arguments and smaller/unbuffered
+native caller requests; invalid caps reject before file ownership. Existing
+external generated benchmark consumers verify that omitted environment settings
+preserve canonical typed defaults. Invalid standalone configuration is rejected
+at composition before allocation; valid target validation still precedes corpus
+construction. The rebuilt complete Aspire suite remains the acceptance gate.
+
 | Task | Owner / exact scope | Dependency / join |
 |---|---|---|
 | TASK-CQ-GENERAL-001 | Lead: contracts, central configuration markers/options registry integration, AppHost configuration, shared config/docs | Freeze034/035 and disjoint joins before worker writes |
@@ -841,6 +859,42 @@ does not qualify a build or contributor.
   Every original selected TRX and native test outcome must match that inventory.
   Native source/central-input/producer compile receipts remain mandatory; a later
   filesystem snapshot cannot establish an older test compilation.
+- The exact v3 contributors shape is an array of objects with only suite,
+  className, methodName, instanceName, requirements, acceptance, executedModules
+  and operationOutcomeAndState. suite is unit, unit-scalar, recovery or rf3;
+  identifiers match the original native TRX case, including data instances.
+  requirements and acceptance are nonempty unique feature REQ/AC arrays,
+  executedModules admits only canonical production modules, and the nonempty
+  operationOutcomeAndState records the reviewed complete executed flow and its
+  observed outcome/state. Source bytes bind through that suite's original native
+  test-image manifest; a description alone is not execution evidence. Tooling,
+  load, stress, performance and comparison cases are not product contributors.
+  All fields and identifiers use the captured descriptor/path bounds.
+  Each native merge suiteRuns row additionally binds
+  testImageManifestSha256 to its exact compiledTestsManifest suite entry; the
+  original functional report and TRX are independently hash/exit checked.
+- Native merge suiteRuns uses only suite, runId, sourceRevision,
+  sourceManifestSha256, testImageManifestSha256, nativeExitCode, functionalReport,
+  trx and coverage. File references have only path, length and sha256, confined
+  below the original evidence root. nativeExitCode is the observed original
+  Aspire-owned runner completion and must be zero, never an inferred value.
+  functionalReport references the unchanged original TUnit JSON report,
+  schemaVersion1. Its native assembly/suite and complete group/test identifiers,
+  passed status and integer summary must agree with the original TRX and admitted
+  contributors; failed/skipped/cancelled/timed-out/flaky or unexpected cases fail.
+  coverage references the original native MTP binary, not a rewritten XML report.
+  The native framework report keeps its original supported metadata fields;
+  closed custom descriptor keys do not authorize rewriting that report.
+- v3 scripts entries have only name and sha256, with unique safe basenames under
+  scripts/Features/CodeQuality/. Bind the complete actual functional-coverage*
+  executable/settings/contract inventory (ps1, mjs, sh, xml, json and dockerfile),
+  plus the owned .dockerignore. Hash and compare the complete inventory before
+  and after native execution; additions, removals, links or changed bytes fail.
+  Identity-tool and canonical compilation-target hashes retain their independent
+  compiledIdentity/compilationProducer bindings. Source revision is the original
+  candidate HEAD, contractSha256 binds the original frozen production contract,
+  and settingsSha256 binds the original captured collector settings. No guessed
+  exit, synthetic TUnit report or mutable late compilation snapshot is admitted.
 - AC-CQ-045: MTP reports and RF3 fixtures are separate explicit groups. Unit and
   scalar runs do not acquire a fictitious server roster. Each actual contributing
   RF3 fixture supplies exactly three original node context/terminal/report records.

@@ -47,7 +47,7 @@ internal static class NativeSagaTimeoutRestartWork
         {
             while (true)
             {
-                var current = fixture.Database.Database.InspectSaga(NativeSagaTimeoutTestData.RootPrincipalId, saga.Lane, saga.Id, cancellationToken);
+                var current = fixture.Database.Database.InspectSaga(NativeSagaTimeoutTestData.SagaPrincipalId, saga.Lane, saga.Id, cancellationToken);
                 if (current is { Phase: SagaPhase.TimedOut, Revision: TimeoutRevision })
                 {
                     return;

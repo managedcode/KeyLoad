@@ -17,9 +17,6 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
     private const string CohortNode1Key = "KeyLoadTests:ProtocolCohort:Voters:node1";
     private const string CohortNode2Key = "KeyLoadTests:ProtocolCohort:Voters:node2";
     private const string CohortNode3Key = "KeyLoadTests:ProtocolCohort:Voters:node3";
-    private const string TestImageNode1Key = "TestImages:node1";
-    private const string TestImageNode2Key = "TestImages:node2";
-    private const string TestImageNode3Key = "TestImages:node3";
     private const string Node1 = "node1";
     private const string Node2 = "node2";
     private const string Node3 = "node3";
@@ -88,15 +85,17 @@ internal sealed class RequestCqrsProbeAppHostAdmissionTests
     {
         await RequestCqrsProbeAppHostFileFixture.WithFixtureAsync(async fixture =>
         {
-            var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
-                new KeyValuePair<string, string?>(TestImageNode1Key, RequestCqrsProbeAppHostBuilder.ValidImage),
-                new KeyValuePair<string, string?>(TestImageNode2Key, RequestCqrsProbeAppHostBuilder.ValidImage),
-                new KeyValuePair<string, string?>(TestImageNode3Key, "ghcr.io/managedcode/keyload:other@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+            var builder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture);
+            var otherBuilder = RequestCqrsProbeAppHostBuilder.CreateBuilder(fixture,
+                new KeyValuePair<string, string?>(RuntimeContainerImage.ServerConfiguration,
+                    "ghcr.io/managedcode/keyload:other@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+            var currentImage = RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration);
+            var otherImage = RuntimeContainerImage.Read(otherBuilder, RuntimeContainerImage.ServerConfiguration);
             var unequal = new Dictionary<string, RuntimeContainerImage>(StringComparer.Ordinal)
             {
-                [Node1] = RuntimeContainerImage.Read(builder, TestImageNode1Key),
-                [Node2] = RuntimeContainerImage.Read(builder, TestImageNode2Key),
-                [Node3] = RuntimeContainerImage.Read(builder, TestImageNode3Key)
+                [Node1] = currentImage,
+                [Node2] = currentImage,
+                [Node3] = otherImage
             };
             var error = Assert.ThrowsExactly<InvalidOperationException>(() =>
                 RequestCqrsProbeProfile.Read(builder, fixture.DataRoot, true, null, unequal));

@@ -22,6 +22,7 @@ internal static class McpCanonicalTestData
     internal const string Entity = "mcp-entity";
     internal const string Principal = "mcp-principal";
     internal const string Field = "name";
+    internal const string FieldPath = "/" + Field;
     internal const string Cursor = "bounded-cursor";
     private const string Token = "delivery-token";
     private const string Handler = "handler-scope";
@@ -44,7 +45,7 @@ internal static class McpCanonicalTestData
     internal static readonly ProjectionConsumerRef Consumer = new(Partition, Resource);
 
     internal static AstQueryRequest Ast() => new(Partition,
-        new SelectQuery(Resource, null, [new Selection(Field, Field)], null, [], Limit));
+        new SelectQuery(Resource, null, [new Selection(FieldPath, Field)], null, [], Limit));
 
     internal static ImmutableArray<McpDecodeCase> Commands() =>
     [
@@ -114,7 +115,7 @@ internal static class McpCanonicalTestData
     ];
 
     private static PartitionQueryRequestV1 PartitionQuery() => new(1, [Partition],
-        new SelectQuery(Resource, null, [new Selection(Field, Field)], null, [], Limit),
+        new SelectQuery(Resource, null, [new Selection(FieldPath, Field)], null, [], Limit),
         null, false, 1);
 
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];

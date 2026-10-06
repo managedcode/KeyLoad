@@ -9,14 +9,14 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 [NotInParallel]
 internal sealed class NativeSagaTimeoutTraceIsolationTests(NativeSagaTimeoutFixture fixture)
 {
-    private const string RootPrincipalId = "root";
+    private const string SagaPrincipalId = NativeSagaTimeoutTestData.SagaPrincipalId;
     private const string CallerActivityName = "native-saga-caller";
     private const string SensitiveTraceState = "tenant=private";
 
     [Test]
     public async Task NativeScheduleDoesNotPersistAmbientCallerTraceState()
     {
-        var saga = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, RootPrincipalId, deadlineInFuture: true);
+        var saga = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId, deadlineInFuture: true);
         var dueTime = TimeProvider.System.GetUtcNow().Add(fixture.TestProfile.HeldJobDelay);
         using var caller = new Activity(CallerActivityName);
         caller.SetIdFormat(ActivityIdFormat.W3C);

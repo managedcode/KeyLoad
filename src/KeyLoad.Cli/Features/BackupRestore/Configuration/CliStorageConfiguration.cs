@@ -11,41 +11,16 @@ internal static class CliStorageConfiguration
 {
     private const string EnvironmentPrefix = "KEYLOAD_STORAGE__";
     private const string CacheEnvironmentPrefix = "KEYLOAD_POINTCACHE__";
-    private static readonly string[] PropertyNames =
-    [
-        nameof(ZoneTreeStorageExecutionOptions.MaxFrameBytes),
-        nameof(ZoneTreeStorageExecutionOptions.MaxSnapshotBytes),
-        nameof(ZoneTreeStorageExecutionOptions.CheckpointBatchBytes),
-        nameof(ZoneTreeStorageExecutionOptions.CheckpointBatchRecords),
-        nameof(ZoneTreeStorageExecutionOptions.MaximumRangeRecords),
-        nameof(ZoneTreeStorageExecutionOptions.MaximumRangeWorkBytes),
-        nameof(ZoneTreeStorageExecutionOptions.MaximumReadCutRecords),
-        nameof(ZoneTreeStorageExecutionOptions.MaximumReadCutExaminedBytes),
-        nameof(ZoneTreeStorageExecutionOptions.MaximumReadCutElapsed)
-    ];
-
-    private static readonly string[] CachePropertyNames =
-    [
-        nameof(ZoneTreePointCacheExecutionOptions.MaxEntries),
-        nameof(ZoneTreePointCacheExecutionOptions.MaxRetainedBytes),
-        nameof(ZoneTreePointCacheExecutionOptions.MaxKeyBytes),
-        nameof(ZoneTreePointCacheExecutionOptions.MaxValueBytes),
-        nameof(ZoneTreePointCacheExecutionOptions.MaxPinsPerEntry),
-        nameof(ZoneTreePointCacheExecutionOptions.MaximumVictimAttempts)
-    ];
-
     internal static CliStorageRuntimeOptions Read() => new(
-        Bind<ZoneTreeStorageExecutionOptions>(EnvironmentPrefix, PropertyNames,
+        Bind<ZoneTreeStorageExecutionOptions>(EnvironmentPrefix,
             options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
-        Bind<ZoneTreePointCacheExecutionOptions>(CacheEnvironmentPrefix, CachePropertyNames,
+        Bind<ZoneTreePointCacheExecutionOptions>(CacheEnvironmentPrefix,
             options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage));
 
-    private static OptionsManager<T> Bind<T>(string prefix, string[] propertyNames, Func<T, bool> validate, string message)
+    private static OptionsManager<T> Bind<T>(string prefix, Func<T, bool> validate, string message)
         where T : class
     {
-        var values = propertyNames.Select(name => new KeyValuePair<string, string?>(name,
-            Environment.GetEnvironmentVariable(prefix + name.ToUpperInvariant())));
-        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables(prefix).Build();
         using var configurationLifetime = configuration as IDisposable;
         var options = new OptionsManager<T>(new OptionsFactory<T>(
             [new ConfigureFromConfigurationOptions<T>(configuration)], [],

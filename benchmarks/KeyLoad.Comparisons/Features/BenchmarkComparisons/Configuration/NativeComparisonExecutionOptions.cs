@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons;
 public sealed partial class NativeComparisonExecutionOptions
 {
     private const int MinimumPositiveLimit = 0;
-    private const string NativeComparisonOperationalLimitsMustBePresentPositive = "Native comparison operational limits must be present, positive and consistent.";
+    internal const string NativeComparisonOperationalLimitsMustBePresentPositive = "Native comparison operational limits must be present, positive and consistent.";
     private const string DurationFormat = "c";
     private const int DefaultPostgresMinimumPoolSize = 10;
     private const int DefaultResourceSampleIntervalMilliseconds = 50;
@@ -73,6 +73,11 @@ public sealed partial class NativeComparisonExecutionOptions
         ValidateAdapterPolicy();
         ValidateReportPolicy();
         ValidateVectorPolicy();
+        var seedValidation = NativeComparisonSeedExecutionOptionsValidator.Instance.Validate(Options.DefaultName, this);
+        if (seedValidation.Failed)
+        {
+            throw new OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions), seedValidation.Failures);
+        }
         return this;
     }
 
@@ -95,5 +100,6 @@ public sealed partial class NativeComparisonExecutionOptions
         parameters[nameof(IndexPollInterval)] = IndexPollInterval.ToString(DurationFormat, CultureInfo.InvariantCulture);
         RecordAdapterEvidence(parameters);
         RecordVectorEvidence(parameters);
+        RecordSeedEvidence(parameters);
     }
 }

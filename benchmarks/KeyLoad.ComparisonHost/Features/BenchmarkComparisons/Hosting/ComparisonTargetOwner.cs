@@ -44,7 +44,7 @@ internal sealed class ComparisonTargetOwner(IOptions<NativeComparisonExecutionOp
         pendingTarget = new RabbitTarget(settings.RabbitConnection, settings.RunId, settings.RabbitImage, lifecycleOptions,
             management: rabbitManagementClient);
         PublishPendingTarget(rabbitManagementClient);
-        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions);
+        pendingTarget = new RedisTarget(settings.RedisConnection, settings.RunId, settings.RedisImage, lifecycleOptions, executionOptions);
         PublishPendingTarget();
         pendingTarget = new Neo4jTarget(neo4jClient, settings.RunId, settings.Neo4jImage, lifecycleOptions, executionOptions);
         PublishPendingTarget(neo4jClient);

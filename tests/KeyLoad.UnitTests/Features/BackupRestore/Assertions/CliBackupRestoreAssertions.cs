@@ -15,7 +15,7 @@ internal static class CliBackupRestoreAssertions
 
     internal static async Task SuccessfulProcessAsync(CliBackupRestoreProcessResult result)
     {
-        await Assert.That(result.ExitCode).IsEqualTo(0);
+        await Assert.That(result.ExitCode).IsEqualTo(0).Because(result.StandardError);
         await Assert.That(result.StandardError).IsEmpty();
         await Assert.That(result.OriginalExitJoined).IsTrue();
         await Assert.That(result.StandardOutputJoined).IsTrue();

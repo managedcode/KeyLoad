@@ -218,6 +218,8 @@ internal sealed class RuntimeJournalNativeSiloConfigurator : ISiloConfigurator
         {
             graph.AllowClientCallGrain<IRequestGrain>()
                 .AllowClientCallGrain<IRuntimeJournalReplayGrain>()
+                .AddGrainTransition<RuntimeJournalReplayGrain, IRequestGrain>()
+                .AllSourceMethodsToSpecificTargetMethods(nameof(IRequestGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IRuntimeJournalReplayGrain, IRequestGrain>()
                 .MethodsByName(
                     (nameof(IRuntimeJournalReplayGrain.SetAsync), nameof(IRequestGrain.ExecuteStreamAsync)),

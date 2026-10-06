@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-06",
+  "kind": "local_functional_operation_development_checkpoint",
+  "candidateRevision": "46cbcdc3bf36b44343e6ea74aa8ec2f013ab49c6",
+  "parentSourceReceipt": "docs/implementation/functional-coverage-flow-image-source-2026-10-06-r4.json",
+  "requirements": [
+    "REQ-CQ-009",
+    "AC-CQ-031",
+    "AC-CQ-039",
+    "AC-BACKUP-001",
+    "AC-BACKUP-002",
+    "AC-BACKUP-003"
+  ],
+  "qualified": false,
+  "all104AcceptanceClosed": false,
+  "latestSuccessfulNativeBuild": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+    "nativeExitCode": 0,
+    "buildCompletedSuccessfully": true,
+    "elapsedSeconds": 53.971,
+    "log": "/private/tmp/keyload-stage91i-r20-native-build-fresh-20261006.log",
+    "logSha256": "6906f91a6888e0deb9bb0802a48316f730cc7675c893820e792e03ab21385e94",
+    "inputCount": 4030,
+    "inputDrift": [],
+    "uniqueErrors": [],
+    "qualification": "local development; source drift invalidates exact-current-source qualification",
+    "originalDiagnostics": {
+      "path": "/private/tmp/keyload-stage91i-r20-native-build-fresh-20261006-diagnostics.json",
+      "length": 540,
+      "sha256": "17cc9ef5871aaceeb4b8e3e5cc30cf05ed11c85b89273ca5961044be2155fe50"
+    }
+  },
+  "latestAttemptedNativeBuild": {
+    "command": "dotnet build KeyLoad.slnx --no-restore --configuration Release --verbosity normal --disable-build-servers",
+    "nativeExitCode": 1,
+    "buildCompletedSuccessfully": false,
+    "elapsedSeconds": 97.642,
+    "log": "/private/tmp/keyload-stage91i-r21-native-build-fresh-20261006.log",
+    "logSha256": "fe504356d687b14a3d6388b2b41fe231f9203cc8cbc607679a0df54883168586",
+    "inputCount": 4030,
+    "inputDrift": [
+      "benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/Configuration/BenchmarkArtifactRegistration.cs",
+      "benchmarks/KeyLoad.BenchmarkScenarios/Features/BenchmarkComparisons/Configuration/BenchmarkScenarioSelectionRegistration.cs",
+      "benchmarks/KeyLoad.Comparisons/Features/BenchmarkComparisons/Contracts/IsolatedComparisonContract.cs",
+      "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+      "tests/KeyLoad.UnitTests/Features/ClusterRouting/Cases/RequestCqrsProbeAppHostAdmissionTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Fixtures/NativeSagaTimeoutFixture.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Helpers/NativeSagaTimeoutTestData.cs"
+    ],
+    "uniqueErrors": [
+      "/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/Features/CodeQuality/Build/FunctionalCompilationIdentity.targets(130,5): error : UnitTests sources changed during compilation; the embedded identity is not authoritative. [/Users/ksemenenko/Developer/KeyLoad/tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj]"
+    ],
+    "qualification": "local development; source drift invalidates exact-current-source qualification",
+    "originalDiagnostics": {
+      "path": "/private/tmp/keyload-stage91i-r21-native-build-fresh-20261006-diagnostics.json",
+      "length": 1579,
+      "sha256": "8937799b34b42cf164fa7086520f2b30975312e0b91c655848d270b26b42683f"
+    }
+  },
+  "cliBackupRestore": {
+    "summary": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+        "methodName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
+        "instanceName": "AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+        "methodName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
+        "instanceName": "AcBackup002CliRestoreRejectsNonemptyDestinationWithoutChangingEitherStore",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.BackupRestore.CliBackupRestoreFlowTests",
+        "methodName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
+        "instanceName": "AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore",
+        "status": "passed"
+      }
+    ],
+    "nativeTUnitReport": {
+      "path": "/private/tmp/keyload-stage91i-cli-flows-20261006-r20/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "length": 10646,
+      "sha256": "40d9d33078fa220dd5177928960f4dac98107c0f581d137bf559b14ece4eb373"
+    },
+    "originalTrx": {
+      "path": "/private/tmp/keyload-stage91i-cli-flows-20261006-r20/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "length": 5715,
+      "sha256": "13e382c6aeb04ac6cbbd8d1b80daea9501c69c134128f983c64ec7800a081030"
+    },
+    "nativeAspireExitCode": 0,
+    "scope": "Three actual Release CLI / native ZoneTree complete backup/archive/restore, rejected occupied destination with preserved data, rejected invalid storage budget before opening source followed by healthy backup/restore. Local Aspire-owned development execution; no RF3 or Linux qualification.",
+    "aspireLog": {
+      "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T022525_5aa8551b.log",
+      "length": 33708,
+      "sha256": "bef7c9515725eab3aff22b7821df3ad71acd5efa75ef9b50fc45d49d4c989c2f"
+    }
+  },
+  "queryCoverageAttempt": {
+    "summary": {
+      "total": 25,
+      "passed": 24,
+      "failed": 1,
+      "skipped": 0,
+      "cancelled": 0,
+      "timedOut": 0,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+        "instanceName": "PublicAndNativeRequestBodiesRoundTripTheSameTypedValues",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+        "instanceName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
+        "status": "error"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+        "instanceName": "PublicAndNativePageBodiesRoundTripRowsAndLeafWitnesses",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+        "instanceName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+        "instanceName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
+        "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMcpContractTests",
+        "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
+        "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicBudgetTests",
+        "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+        "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "methodName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+        "instanceName": "MaxBatchAdmitsTheCompleteNativeMergeAtItsExactBoundAndNoRowsBelowIt",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "methodName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+        "instanceName": "OneNativeGrantChargesIndexRangeAndDocumentPointReadsTogether",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryGrantTests",
+        "methodName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+        "instanceName": "ActualNativeReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+        "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "methodName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+        "instanceName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "methodName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+        "instanceName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryMergeTests",
+        "methodName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+        "instanceName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryCancellationTests",
+        "methodName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+        "instanceName": "ObservedNativeReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+        "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+        "instanceName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicAuthorizationTests",
+        "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+        "instanceName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicMergeTests",
+        "methodName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+        "instanceName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "methodName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+        "instanceName": "GeneratedPlanAndCompleteNativeResultRoundTripWithStableFields",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "methodName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+        "instanceName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryContractTests",
+        "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+        "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryAuthorizationTests",
+        "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+        "instanceName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+        "methodName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+        "instanceName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
+        "status": "passed"
+      },
+      {
+        "className": "KeyLoad.UnitTests.Features.QueryExecution.PartitionQueryPublicContractTests",
+        "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+        "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
+        "status": "passed"
+      }
+    ],
+    "nativeTUnitReport": {
+      "path": "/private/tmp/keyload-query-functional-coverage-20261006-r20/unit/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+      "length": 83005,
+      "sha256": "dc2e6814ad286ec7d00888dff8ac8fa5e3380e63c4ed117bd2a64ceb2a4c7ff8"
+    },
+    "originalTrx": {
+      "path": "/private/tmp/keyload-query-functional-coverage-20261006-r20/unit/KeyLoad.UnitTests_net10.0_arm64.trx",
+      "length": 36556,
+      "sha256": "16e96ca483db79b9c486f351f229edd30b25dd60106f848cd18f1a8244bf7b6c"
+    },
+    "nativeAspireExitCode": 2,
+    "qualified": false,
+    "scope": "Failed partial local Query normal-unit collection only; no scalar, recovery, RF3 or global production coverage admission.",
+    "coverage": {
+      "path": "/private/tmp/keyload-query-functional-coverage-20261006-r20/unit/query.cobertura.xml",
+      "length": 1012630,
+      "sha256": "ad2c909efed72c1d9b7f9feceb7831f2b1c1657247f5e3c1a56df02694880bf5"
+    },
+    "rawObservedCounts": {
+      "lines-valid": 3631,
+      "lines-covered": 821,
+      "branches-valid": 2394,
+      "branches-covered": 467
+    },
+    "linePercent": 22.610851005232718,
+    "branchPercent": 19.507101086048454,
+    "sourceManifest": {
+      "path": "/private/tmp/keyload-query-functional-coverage-20261006-r20/functional-coverage.source-manifest.json",
+      "length": 63097,
+      "sha256": "ab7553ce5e4fb6dbbde3588f2d9e5dc3cf01e6427d3f8efdbc2ea7e0fd384c8a"
+    },
+    "testImageManifest": {
+      "path": "/private/tmp/keyload-query-functional-coverage-20261006-r20/functional-coverage.test-image-manifest.json",
+      "length": 1041072,
+      "sha256": "99023b0544a52468abf893b7652219240304d2633014bbb5719738670749fbc5"
+    },
+    "aspireLog": {
+      "path": "/Users/ksemenenko/.aspire/logs/cli_20261006T022719_caac81d4.log",
+      "length": 34573,
+      "sha256": "2290197535e74dd71c497e1470898b7fbb029c25487f6ffd01aff5397ccd2ad2"
+    },
+    "identifiedFailure": "Canonical MCP test fixture used non-RFC6901 field path name instead of /name; fixture repaired without weakening the production decoder. Fresh build and retry pending after R21 native compilation source-drift rejection."
+  },
+  "coverage": {
+    "loadAndPerformanceTestsExcluded": true,
+    "completeOperationTestsRequired": true,
+    "globalPercent": null,
+    "currentSourceQualified": false,
+    "nativeFourSuiteBinaryUnionQualified": false
+  },
+  "remaining": [
+    "Fresh exact-source native full build after concurrent human edits; original compilation identity gate remains mandatory.",
+    "Fresh actual Aspire-owned Query normal and scalar collection with all 25 cases passed and exact source/native image verification.",
+    "Native source-bound original RF3 server collectors, owned lifecycle settlement, export and same-image binary merge.",
+    "Whole production coverage and uncovered line/branch analysis; 80/70/90 and no-decrease gates.",
+    "Required complete delivered-source Linux unit/recovery/RF3/fault/endurance qualification."
+  ]
+}

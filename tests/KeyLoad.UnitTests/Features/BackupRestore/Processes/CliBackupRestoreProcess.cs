@@ -35,13 +35,14 @@ internal static class CliBackupRestoreProcess
     internal static async Task<CliBackupRestoreProcessResult> RunAsync(
         IOptions<TestExecutionOptions> executionOptions,
         IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, string>? environmentOverrides = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         ArgumentNullException.ThrowIfNull(arguments);
         cancellationToken.ThrowIfCancellationRequested();
         var options = executionOptions.Value;
-        using var process = new Process { StartInfo = CreateStartInfo(arguments) };
+        using var process = new Process { StartInfo = CreateStartInfo(arguments, environmentOverrides) };
         var failures = new List<Exception>();
         var started = false;
         CliBackupRestoreProcessResult? result = null;
@@ -126,7 +127,8 @@ internal static class CliBackupRestoreProcess
             stdoutTask.IsCompleted, stderrTask.IsCompleted, ProcessDisposed: false);
     }
 
-    private static ProcessStartInfo CreateStartInfo(IReadOnlyList<string> arguments)
+    private static ProcessStartInfo CreateStartInfo(IReadOnlyList<string> arguments,
+        IReadOnlyDictionary<string, string>? environmentOverrides)
     {
         var root = FindRepositoryRoot();
         var assembly = Path.Combine(root, CliAssemblyPath);
@@ -146,6 +148,13 @@ internal static class CliBackupRestoreProcess
         foreach (var argument in arguments)
         {
             startInfo.ArgumentList.Add(argument);
+        }
+        if (environmentOverrides is not null)
+        {
+            foreach (var entry in environmentOverrides)
+            {
+                startInfo.Environment[entry.Key] = entry.Value;
+            }
         }
         return startInfo;
     }

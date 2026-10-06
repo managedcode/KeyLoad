@@ -20,7 +20,6 @@ internal static class OpenSearchNames
     internal const int ReplicatedNodeCount = 3;
     internal const int PrimaryShardCount = 1;
     internal const int ReplicatedCopiesCount = 3;
-    internal const int CleanupTimeoutSeconds = 10;
     internal const int NoFailures = 0;
     internal const int NoUnassignedShards = 0;
     internal const int SuccessStatusMinimum = 200;

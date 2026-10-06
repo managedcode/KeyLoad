@@ -85,7 +85,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     [Test]
     public async Task ConfiguredCheckpointBatchingChangesNativeFramesAndPreservesReopenedData()
     {
-        using var fixture = new StorageExecutionFixture(new() { CheckpointBatchRecords = 1 });
+        using var fixture = new StorageExecutionFixture(new() { CheckpointBatchRecords = 1, StreamBufferBytes = 1 });
         Seed(fixture.Store);
         var configured = Path.Combine(fixture.DirectoryPath, ConfiguredSnapshot);
         fixture.Store.CreateSnapshot(configured);
@@ -102,6 +102,20 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
     {
         var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
         var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { CheckpointBatchRecords = 0 });
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+        {
+            using var store = new ZoneTreeStore(new(path), invalid, UnitExecutionOptions.PointCacheExecution());
+        });
+        await Assert.That(Directory.Exists(path)).IsFalse();
+    }
+
+    [Test]
+    [Arguments(0)]
+    [Arguments(4097)]
+    public async Task InvalidNativeStreamBufferFailsBeforeDirectoryOwnershipIsCreated(int bufferBytes)
+    {
+        var path = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var invalid = Options.Create(new ZoneTreeStorageExecutionOptions { StreamBufferBytes = bufferBytes });
         Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             using var store = new ZoneTreeStore(new(path), invalid, UnitExecutionOptions.PointCacheExecution());

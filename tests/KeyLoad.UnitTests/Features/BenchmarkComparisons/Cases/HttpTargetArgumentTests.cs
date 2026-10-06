@@ -6,6 +6,7 @@ namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 internal sealed class HttpTargetArgumentTests
 {
     private const string DatasetParameter = "dataset";
+    private const string CorpusParameter = "corpus";
     private const string ApiKey = "test-key";
     private const string RunId = "cb4c5e4f-a2c3-4da1-b557-107109d85c68";
     private const string KeyLoadImage = "keyload-test-image";
@@ -31,11 +32,11 @@ internal sealed class HttpTargetArgumentTests
         var kurrent = new KurrentTarget(KurrentConnection, [kurrentHttp], RunId, KurrentImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle());
         var openSearch = new OpenSearchTarget(openSearchHttp, RunId, OpenSearchImage, ComparisonTopology.Standalone, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native());
 
-        await AssertMissingDatasetAsync(keyLoad, cancellationToken);
-        await AssertMissingDatasetAsync(neo4j, cancellationToken);
-        await AssertMissingDatasetAsync(qdrant, cancellationToken);
-        await AssertMissingDatasetAsync(kurrent, cancellationToken);
-        await AssertMissingDatasetAsync(openSearch, cancellationToken);
+        await AssertMissingDatasetAsync(keyLoad, DatasetParameter, cancellationToken);
+        await AssertMissingDatasetAsync(neo4j, DatasetParameter, cancellationToken);
+        await AssertMissingDatasetAsync(qdrant, CorpusParameter, cancellationToken);
+        await AssertMissingDatasetAsync(kurrent, CorpusParameter, cancellationToken);
+        await AssertMissingDatasetAsync(openSearch, DatasetParameter, cancellationToken);
 
         await keyLoad.DisposeAsync();
         await neo4j.DisposeAsync();
@@ -79,10 +80,10 @@ internal sealed class HttpTargetArgumentTests
         await AssertDisposedAsync(openSearchHttp);
     }
 
-    private static async Task AssertMissingDatasetAsync(IComparisonTarget target, CancellationToken cancellationToken)
+    private static async Task AssertMissingDatasetAsync(IComparisonTarget target, string expectedParameter, CancellationToken cancellationToken)
     {
         var error = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => target.InitializeAsync(null!, cancellationToken));
-        await Assert.That(error!.ParamName).IsEqualTo(DatasetParameter);
+        await Assert.That(error!.ParamName).IsEqualTo(expectedParameter);
     }
 
     private static async Task AssertDisposedAsync(HttpClient client)

@@ -85,7 +85,7 @@ internal sealed class ReplicaMembershipNativeStoreTests
         await using var consensus = new ReplicaConsensus(materializer, ReplicaExecutionTestOptions.Configuration(configuration),
             ReplicaExecutionTestOptions.Execution(), TimeProvider.System);
         await using var coordinator = new ClusterCoordinator(consensus, fixture.Database, new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), TimeProvider.System,
-            ReplicaExecutionTestOptions.Execution());
+            ReplicaExecutionTestOptions.Execution(), UnitAdmissionOptions.Inbox());
         using var deadline = new CancellationTokenSource(Timeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         using var host = new HostBuilder().UseOrleans(silo =>

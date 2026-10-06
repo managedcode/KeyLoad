@@ -65,7 +65,7 @@ public sealed class OpenSearchTarget(HttpClient client, string runId, string ima
         await OpenSearchIndex.CreateAsync(client, index, dataset.Settings.Dimensions, expectedCopies - AdjacentElementOffset, cancellationToken);
         indexCreated = true;
         var beforeSeed = await OpenSearchClusterEvidence.ObserveAsync(client, index, expectedCopies, topology, cancellationToken);
-        await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, cancellationToken);
+        await OpenSearchIndex.SeedAsync(client, index, dataset.Documents, expectedCopies, executionOptions, cancellationToken);
         if (dataset.Settings is not ScaledComparisonProfile)
         {
             await OpenSearchProbe.VerifyAsync(client, index, dataset.Documents[FirstElementIndex].Vector, expectedCopies, cancellationToken);

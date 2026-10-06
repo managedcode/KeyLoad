@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
@@ -56,7 +57,7 @@ internal sealed class ComparisonTopologyTests
     }
 
     [Test]
-    public void AcBct003MalformedAndUndefinedConfigurationRemainsRejectedByBinderOrValidation()
+    public async Task AcBct003MalformedAndUndefinedConfigurationRemainsRejectedByBinderOrValidation()
     {
         using var configuration = new ConfigurationManager();
         configuration[TopologySetting] = "Single, 3";
@@ -72,7 +73,10 @@ internal sealed class ComparisonTopologyTests
         foreach (var configured in new[] { "3", "4" })
         {
             configuration[TopologySetting] = configured;
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ComparisonOptions.Read(configuration));
+            var invalid = Assert.ThrowsExactly<OptionsValidationException>(() => ComparisonOptions.Read(configuration));
+            await Assert.That(invalid.OptionsType).IsEqualTo(typeof(ComparisonOptions));
+            await Assert.That(invalid.OptionsName).IsEqualTo(Options.DefaultName);
+            await Assert.That(invalid.Failures.SequenceEqual([ComparisonOptions.ValidationMessage])).IsTrue();
         }
     }
 }

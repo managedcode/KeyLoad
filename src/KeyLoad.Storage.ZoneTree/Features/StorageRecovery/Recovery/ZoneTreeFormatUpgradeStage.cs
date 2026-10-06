@@ -32,7 +32,7 @@ internal static class ZoneTreeFormatUpgradeStage
 
         VerifyDirectory(path);
         var receiptPath = Path.Combine(path, ReceiptFileName);
-        var existing = ZoneTreeFormatUpgradeReceiptFile.Read(receiptPath, options.MaximumUpgradeReceiptBytes);
+        var existing = ZoneTreeFormatUpgradeReceiptFile.Read(receiptPath, options.MaximumUpgradeReceiptBytes, options.StreamBufferBytes);
         if (existing != receipt)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);
@@ -80,7 +80,8 @@ internal static class ZoneTreeFormatUpgradeStage
     internal static void VerifyPublishable(string stagePath, ZoneTreeFormatUpgradeReceipt receipt, ZoneTreeStoreOptions options)
     {
         VerifyDirectory(stagePath);
-        var actual = ZoneTreeFormatUpgradeReceiptFile.Read(Path.Combine(stagePath, ReceiptFileName), options.MaximumUpgradeReceiptBytes);
+        var actual = ZoneTreeFormatUpgradeReceiptFile.Read(Path.Combine(stagePath, ReceiptFileName), options.MaximumUpgradeReceiptBytes,
+            options.StreamBufferBytes);
         if (actual != receipt || Directory.Exists(Path.Combine(stagePath, SourceCopyDirectory)))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, UpgradeStageMismatch);

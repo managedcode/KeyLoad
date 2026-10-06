@@ -27,6 +27,8 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), CacheReadPermitOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<RuntimeJournalOptions>().Bind(configuration.GetSection(RuntimeJournalOptions.SectionName))
             .Validate(options => options.IsValid(), RuntimeJournalOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<CommandInboxExecutionOptions>().Bind(configuration.GetSection(CommandInboxExecutionOptions.SectionName))
+            .Validate(options => options.IsValid(), CommandInboxExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ChangeFeedExecutionOptions>().Bind(configuration.GetSection(ChangeFeedExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ChangeFeedExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<TimeSeriesExecutionOptions>().Bind(configuration.GetSection(TimeSeriesExecutionOptions.SectionName))

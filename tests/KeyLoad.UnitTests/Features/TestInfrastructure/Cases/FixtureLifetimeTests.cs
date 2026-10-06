@@ -24,10 +24,11 @@ internal sealed class FixtureLifetimeTests
         var directory = NewDirectory();
         try
         {
-            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+            var failure = Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 using var unexpected = new TestDatabase(new() { MaxConcurrentQueries = concurrency }, directory);
             });
+            await Assert.That(failure.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
             await Assert.That(Directory.Exists(directory)).IsFalse();
             using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(reopened.Position).IsEqualTo(0L);

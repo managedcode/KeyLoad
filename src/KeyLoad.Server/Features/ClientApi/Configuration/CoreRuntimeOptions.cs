@@ -18,7 +18,8 @@ internal sealed record CoreRuntimeOptions(
     IOptions<QueryExecutionOptions> QueryExecution,
     IOptions<CacheMemoryLimits> CacheMemory,
     IOptions<CacheReadPermitOptions> CacheReadPermit,
-    IOptions<RuntimeJournalOptions> RuntimeJournal)
+    IOptions<RuntimeJournalOptions> RuntimeJournal,
+    IOptions<CommandInboxExecutionOptions> CommandInbox)
 {
     internal void ValidateBeforePhysicalOwnership()
     {
@@ -35,6 +36,7 @@ internal sealed record CoreRuntimeOptions(
         _ = CacheMemory.Value;
         _ = CacheReadPermit.Value;
         _ = RuntimeJournal.Value;
+        _ = CommandInbox.Value;
     }
 
     internal void RegisterBorrowed(IServiceCollection services)
@@ -52,5 +54,6 @@ internal sealed record CoreRuntimeOptions(
         services.AddSingleton(CacheMemory);
         services.AddSingleton(CacheReadPermit);
         services.AddSingleton(RuntimeJournal);
+        services.AddSingleton(CommandInbox);
     }
 }

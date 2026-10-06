@@ -146,7 +146,7 @@ internal sealed class AdminHttpMetricsTests
     public void AcCq034InvalidRetentionIsRejectedBeforeMetricsOwnerConstruction(int retained)
     {
         var options = Options.Create(new AdminObservationOptions { MaximumRecentFailures = retained });
-        Assert.ThrowsExactly<OptionsValidationException>(() => new AdminHttpMetrics(options));
+        Assert.ThrowsExactly<OptionsValidationException>(() => _ = new AdminHttpMetrics(options));
     }
 
     private static AdminHttpFailureDetail Failure(int index) =>

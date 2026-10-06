@@ -53,7 +53,7 @@ internal sealed class PartitionHost : IAsyncDisposable
                 runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
             Materializer = applying = new(Database, log, snapshots, executionOptions);
             Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
-            Coordinator = new(Consensus, Database, admission, clock, executionOptions);
+            Coordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
         }
         catch (Exception error)
         {

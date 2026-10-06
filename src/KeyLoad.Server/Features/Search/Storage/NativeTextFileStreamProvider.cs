@@ -8,6 +8,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
 {
     private const int NativeDefaultStreamBufferBytes = 4_096;
     private readonly LocalFileStreamProvider inner = new();
+    private readonly int fileBufferBytes = ReadFileBufferBytes(executionOptions);
     private readonly NativeTextPathAccess pathAccess = new(root, leaf, sourceNodeId, executionOptions: executionOptions);
 
     public IFileStream CreateFileStream(string path, FileMode mode, FileAccess access, FileShare share,
@@ -26,7 +27,7 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
             mode = FileMode.CreateNew;
             created = true;
         }
-        var stream = inner.CreateFileStream(full, mode, access, share, bufferSize, options);
+        var stream = inner.CreateFileStream(full, mode, access, share, Math.Min(bufferSize, fileBufferBytes), options);
         if (created)
         {
             NativeTextFileIO.SetPrivateFileMode(full);
@@ -149,4 +150,12 @@ internal sealed class NativeTextFileStreamProvider(string root, string leaf, Gui
 
     private static bool CreatesOrOpens(FileMode mode)
         => mode is FileMode.Create or FileMode.CreateNew or FileMode.OpenOrCreate or FileMode.Append;
+
+    private static int ReadFileBufferBytes(IOptions<NativeTextExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        var snapshot = executionOptions.Value;
+        snapshot.Validate();
+        return snapshot.FileBufferBytes;
+    }
 }

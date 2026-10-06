@@ -1,21 +1,21 @@
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class RedisScaledCorpusSeeder
 {
-    private const int BatchSize = 256;
-
     internal static async Task SeedAsync(IDatabase database, string prefix, IReadOnlyList<BenchmarkDocument> documents,
-        CancellationToken cancellationToken)
+        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
         const int FirstElementIndex = 0;
         const string ScaledCorpusSeedReceiptMismatchDetail = "ScaledCorpusSeedReceiptMismatch";
 
-        for (var offset = FirstElementIndex; offset < documents.Count; offset += BatchSize)
+        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.RedisSeedBatchSize;
+        for (var offset = FirstElementIndex; offset < documents.Count; offset += batchSize)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var count = Math.Min(BatchSize, documents.Count - offset);
+            var count = Math.Min(batchSize, documents.Count - offset);
             var batch = database.CreateBatch();
             var writes = new Task<bool>[count];
             for (var index = FirstElementIndex; index < count; index++)

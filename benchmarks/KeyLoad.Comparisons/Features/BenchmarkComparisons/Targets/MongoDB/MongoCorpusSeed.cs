@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -5,19 +6,19 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class MongoCorpusSeed
 {
-    private const int BatchSize = 256;
-
     public static async Task SeedAsync(IComparisonCorpus dataset, IMongoCollection<BsonDocument> documents,
         IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events,
-        Func<BenchmarkDocument, string> streamName, CancellationToken cancellationToken)
+        Func<BenchmarkDocument, string> streamName, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        CancellationToken cancellationToken)
     {
-        await InsertBatchesAsync(dataset.Documents.Select(MongoSchema.Document), documents, cancellationToken);
+        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.MongoSeedBatchSize;
+        await InsertBatchesAsync(dataset.Documents.Select(MongoSchema.Document), documents, batchSize, cancellationToken);
         if (dataset is BenchmarkDataset)
         {
-            await InsertBatchesAsync(dataset.Edges.Select(CreateEdge), edges, cancellationToken);
+            await InsertBatchesAsync(dataset.Edges.Select(CreateEdge), edges, batchSize, cancellationToken);
             var streamEvents = dataset.Documents.Select(document => MongoSchema.Event(streamName(document),
                 BenchmarkDataset.EventId(document), document.Json));
-            await InsertBatchesAsync(streamEvents, events, cancellationToken);
+            await InsertBatchesAsync(streamEvents, events, batchSize, cancellationToken);
         }
     }
 
@@ -25,9 +26,9 @@ internal static class MongoCorpusSeed
         => new() { [MongoSchema.IdField] = edge.Id, [MongoSchema.FromField] = edge.From, [MongoSchema.ToField] = edge.To };
 
     private static async Task InsertBatchesAsync(IEnumerable<BsonDocument> values,
-        IMongoCollection<BsonDocument> collection, CancellationToken cancellationToken)
+        IMongoCollection<BsonDocument> collection, int batchSize, CancellationToken cancellationToken)
     {
-        foreach (var batch in values.Chunk(BatchSize))
+        foreach (var batch in values.Chunk(batchSize))
         {
             await collection.InsertManyAsync(batch, cancellationToken: cancellationToken);
         }

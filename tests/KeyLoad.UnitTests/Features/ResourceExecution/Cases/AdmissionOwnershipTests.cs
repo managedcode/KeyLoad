@@ -29,7 +29,7 @@ internal sealed class AdmissionOwnershipTests
     [Test]
     public async Task InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal()
     {
-        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()));
+        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), UnitAdmissionOptions.Inbox());
         using var cancellation = new CancellationTokenSource();
         var reader = inbox.ReadAsync(cancellation.Token).AsTask();
 
@@ -44,7 +44,7 @@ internal sealed class AdmissionOwnershipTests
     public async Task AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork()
     {
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
-        await using var inbox = new AdmittedCommandInbox(governor);
+        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         using var cancellation = new CancellationTokenSource();
         var reader = inbox.ReadAsync(cancellation.Token).AsTask();
         var firstDisposal = inbox.DisposeAsync().AsTask();
@@ -60,7 +60,7 @@ internal sealed class AdmissionOwnershipTests
     [Test]
     public async Task PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop()
     {
-        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()));
+        await using var inbox = new AdmittedCommandInbox(new CommandAdmissionGovernor(UnitAdmissionOptions.Command()), UnitAdmissionOptions.Inbox());
         inbox.Stop();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
@@ -73,7 +73,7 @@ internal sealed class AdmissionOwnershipTests
     public async Task DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce()
     {
         var governor = new CommandAdmissionGovernor(UnitAdmissionOptions.Command());
-        await using var inbox = new AdmittedCommandInbox(governor);
+        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         var command = inbox.Enqueue(NewOperation(), NewPrincipal(), 0);
         await Assert.That(await inbox.ReadAsync()).IsSameReferenceAs(command);
 

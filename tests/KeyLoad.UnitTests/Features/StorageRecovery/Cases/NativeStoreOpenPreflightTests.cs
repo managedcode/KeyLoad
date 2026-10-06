@@ -21,12 +21,13 @@ internal sealed class NativeStoreOpenPreflightTests
         await files.AppendAsync(files.Frame());
         await files.AppendAsync(files.Frame(NativeStoreOpenPreflightFiles.NextPosition)[..^ChangedByte]);
         var before = await files.CaptureHashesAsync();
+        var options = files.Source.Options.ResolveExecutionOptions(UnitExecutionOptions.StorageExecution());
         using (var ownership = new FileStream(Path.Combine(files.Source.DirectoryPath, ZoneTreePersistenceFormat.OwnerLockFileName),
                    FileMode.Open, FileAccess.ReadWrite, FileShare.None))
         {
-            using var journal = ZoneTreeStoreFiles.OpenJournal(files.Source.Options, FileMode.Open);
+            using var journal = ZoneTreeStoreFiles.OpenJournal(options, FileMode.Open);
             journal.Position = ChangedByte;
-            ZoneTreeJournalPreflight.Validate(journal, files.Source.Options, files.Source.Identity.FormatVersion);
+            ZoneTreeJournalPreflight.Validate(journal, options, files.Source.Identity.FormatVersion);
             await Assert.That(journal.Position).IsEqualTo(0L);
         }
         await files.AssertHashesUnchangedAsync(before);

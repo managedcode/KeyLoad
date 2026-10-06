@@ -7,6 +7,7 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 internal static class NativeSagaTimeoutTestData
 {
     internal const string RootPrincipalId = "root";
+    internal const string SagaPrincipalId = "native-saga-owner";
     private const string SagaQueue = "jobs";
     private const string TimeoutQueue = "timeouts";
     internal const string SagaState = "{\"phase\":\"waiting-payment\"}";
@@ -31,14 +32,13 @@ internal static class NativeSagaTimeoutTestData
         var lane = new QueueLaneRef(fixture.Database.Partition, SagaQueue);
         var timeoutLane = new QueueLaneRef(fixture.Database.Partition, TimeoutQueue);
         var now = TimeProvider.System.GetUtcNow();
-        var dueAt = deadlineInFuture ? now.Add(fixture.TestProfile.CompletionTimeout) : now.Subtract(DueOffset);
+        var dueAt = deadlineInFuture ? now.Add(fixture.TestProfile.CompletionTimeout) : now.Add(DueOffset);
         var sagaId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var timeout = new SagaTimeoutDefinition(timeoutLane, TimeoutPayload, TimeoutHeaders, TimeToLive: SagaTimeoutTtlValue);
         var create = new CommandRequest(commandId, fixture.Database.Partition,
             [new CompareExchangeSaga(lane, sagaId, InitialRevision, SagaPhase.Waiting, SagaState, dueAt, timeout)]);
-        var requestTimestamp = deadlineInFuture ? now : dueAt.Subtract(DueOffset);
-        _ = fixture.Database.Submit(OperationKind.Batch, create, creator, commandId, requestTimestamp).Get<CommitReceipt>();
+        _ = fixture.Database.Submit(OperationKind.Batch, create, creator, commandId, now).Get<CommitReceipt>();
         var hint = new DueWorkHint(DueWorkKind.Saga, lane, sagaId, creator, RevisionOne,
             DueCoordinatorFields.NoGeneration, DueCoordinatorFields.FirstOrdinal, dueAt);
         return new NativeSagaTimeoutCase(lane, timeoutLane, sagaId, dueAt, hint);
@@ -49,7 +49,7 @@ internal static class NativeSagaTimeoutTestData
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, saga.Lane.Partition,
             [new CompareExchangeSaga(saga.Lane, saga.Id, RevisionOne, SagaPhase.Completed, CompletedState)]);
-        _ = fixture.Database.Submit(OperationKind.Batch, command, id: commandId).Get<CommitReceipt>();
+        _ = fixture.Database.Submit(OperationKind.Batch, command, SagaPrincipalId, id: commandId).Get<CommitReceipt>();
     }
 
     internal static void CancelSaga(NativeSagaTimeoutFixture fixture, NativeSagaTimeoutCase saga)
@@ -57,7 +57,18 @@ internal static class NativeSagaTimeoutTestData
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, saga.Lane.Partition,
             [new CompareExchangeSaga(saga.Lane, saga.Id, RevisionOne, SagaPhase.Cancelled, SagaState)]);
-        _ = fixture.Database.Submit(OperationKind.Batch, command, id: commandId).Get<CommitReceipt>();
+        _ = fixture.Database.Submit(OperationKind.Batch, command, SagaPrincipalId, id: commandId).Get<CommitReceipt>();
+    }
+
+    internal static void ConfigureSagaPrincipal(NativeSagaTimeoutFixture fixture)
+    {
+        const Capability capabilities = Capability.SchedulerManage | Capability.QueuePublish | Capability.QueueInspect;
+        var partition = fixture.Database.Partition;
+        var principal = new PrincipalRecord(SagaPrincipalId, partition.TenantId,
+            [new(partition.DatabaseId, SagaQueue, capabilities),
+                new(partition.DatabaseId, TimeoutQueue, capabilities)], []);
+        _ = fixture.Database.Submit(OperationKind.ConfigurePrincipal,
+            new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
 
     internal static void ConfigureRevocableCreator(NativeSagaTimeoutFixture fixture)

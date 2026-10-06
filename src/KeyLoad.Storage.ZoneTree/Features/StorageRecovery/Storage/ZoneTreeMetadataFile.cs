@@ -7,9 +7,9 @@ internal static class ZoneTreeMetadataFile
     private const int EndOfStreamRead = 0;
     private const int FirstBufferByte = 0;
 
-    internal static ReadOnlyMemory<byte> Read(string path, int maximumBytes, string unsupportedDetail)
+    internal static ReadOnlyMemory<byte> Read(string path, int maximumBytes, int streamBufferBytes, string unsupportedDetail)
     {
-        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, streamBufferBytes);
         if (file.Length > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, unsupportedDetail);

@@ -174,10 +174,14 @@ internal static class EpochPriorSourceProbe
 
     private static EpochPriorSourceReply VerifySnapshot(EpochPriorSourceRequest request)
     {
-        using var input = File.OpenRead(request.Snapshot ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe));
-        var snapshot = ZoneTreeCheckpointReader.Read(input, new ZoneTreeStoreOptions(request.Directory));
+        var executionOptions = CrashExecutionOptions.StorageExecution();
+        var configured = executionOptions.Value;
+        var descriptor = new ZoneTreeStoreOptions(request.Directory).ResolveExecutionOptions(executionOptions);
+        using var input = new FileStream(request.Snapshot ?? throw Errors.Fail(ErrorCode.Validation, InvalidProbe),
+            FileMode.Open, FileAccess.Read, FileShare.Read, configured.StreamBufferBytes);
+        var snapshot = ZoneTreeCheckpointReader.Read(input, descriptor);
         var identity = ZoneTreeIdentityFile.Read(Path.Combine(request.Directory,
-            ZoneTreePersistenceFormat.IdentityFileName), CrashExecutionOptions.StorageExecution().Value.MaximumIdentityFileBytes);
+            ZoneTreePersistenceFormat.IdentityFileName), configured.MaximumIdentityFileBytes, configured.StreamBufferBytes);
         return EpochPriorSourceReply.Succeeded(identity, snapshot.Position, snapshot.AppliedPosition);
     }
 

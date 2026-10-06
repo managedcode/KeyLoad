@@ -1,26 +1,41 @@
+using Microsoft.Extensions.Options;
+
 namespace KeyLoad.Core;
 
 /// <summary>Queues bounded admitted commands in control and data lanes for one registered reader.</summary>
-/// <remarks>Creates an inbox using the supplied command governor.</remarks>
-/// <param name="governor">The governor that owns command reservations.</param>
-public sealed class AdmittedCommandInbox(CommandAdmissionGovernor governor) : IAsyncDisposable
+public sealed class AdmittedCommandInbox : IAsyncDisposable
 {
     private const string PrincipalMismatchDetail = "Command admission requires the verified principal identity.";
     private const string StoppedDetail = "The node command queue has stopped accepting operations.";
     private const string ConcurrentReaderDetail = "The command inbox supports only one active reader.";
 
     private readonly Lock gate = new();
-    private readonly CommandInboxLanes lanes = new();
+    private readonly CommandInboxLanes lanes;
+    private readonly CommandInboxExecutionOptions execution;
     private const int NoReadyEntries = 0;
     private const int StopWakeCount = 1;
-    private readonly SemaphoreSlim available = new(NoReadyEntries, SignalCapacity(governor));
+    private readonly SemaphoreSlim available;
     private readonly TaskCompletionSource disposalCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private readonly CommandAdmissionGovernor governor = governor ?? throw new ArgumentNullException(nameof(governor));
+    private readonly CommandAdmissionGovernor governor;
     private bool stopped;
     private bool readerRegistered;
     private bool disposeStarted;
     private bool disposed;
     private TaskCompletionSource? readerDrained;
+
+    /// <summary>Creates an inbox using the supplied command governor and validated scheduling policy.</summary>
+    /// <param name="governor">The governor that owns command reservations.</param>
+    /// <param name="executionOptions">The native command scheduling options frozen for this inbox.</param>
+    public AdmittedCommandInbox(CommandAdmissionGovernor governor, IOptions<CommandInboxExecutionOptions> executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(governor);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        execution = executionOptions.Value;
+        execution.Validate();
+        this.governor = governor;
+        lanes = new(execution.MaximumControlBurst);
+        available = new(NoReadyEntries, SignalCapacity(governor));
+    }
 
     private static int SignalCapacity(CommandAdmissionGovernor governor)
     {

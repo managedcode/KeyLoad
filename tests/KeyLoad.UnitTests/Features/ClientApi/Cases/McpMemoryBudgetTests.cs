@@ -15,12 +15,12 @@ internal sealed class McpMemoryBudgetTests
     /// <param name="ingressBytes">The candidate ingress-lane capacity.</param>
     /// <param name="expectedParameterName">The constructor argument expected to be rejected.</param>
     [Test]
-    [Arguments(-1L, 1L, 1L, "dataBytes")]
-    [Arguments(1L, -1L, 1L, "controlBytes")]
-    [Arguments(1L, 1L, -1L, "ingressBytes")]
-    [Arguments(0L, 1L, 1L, "dataBytes")]
-    [Arguments(1L, 0L, 1L, "controlBytes")]
-    [Arguments(1L, 1L, 0L, "ingressBytes")]
+    [Arguments(-1L, 1L, 1L, nameof(McpMemoryLimits.DataBytes))]
+    [Arguments(1L, -1L, 1L, nameof(McpMemoryLimits.ControlBytes))]
+    [Arguments(1L, 1L, -1L, nameof(McpMemoryLimits.IngressBytes))]
+    [Arguments(0L, 1L, 1L, nameof(McpMemoryLimits.DataBytes))]
+    [Arguments(1L, 0L, 1L, nameof(McpMemoryLimits.ControlBytes))]
+    [Arguments(1L, 1L, 0L, nameof(McpMemoryLimits.IngressBytes))]
     public async Task NonPositiveLaneCapacityIsRejectedWithItsParameterName(
         long dataBytes,
         long controlBytes,

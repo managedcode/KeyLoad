@@ -114,16 +114,16 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         var crud = Strings(contract, CrudScenarios);
         var specialized = Strings(contract, SpecializedScenarios);
         await Assert.That(targets.SequenceEqual(new[] { "KeyLoad", "PostgreSQL + pgvector", "Qdrant", "RabbitMQ", "Redis",
-            "Neo4j", "MongoDB", "OpenSearch", "KurrentDB" })).IsTrue();
+            "Neo4j", "MongoDB", "OpenSearch", "KurrentDB", "SurrealDB", "HelixDB" })).IsTrue();
         await Assert.That(nodes.SequenceEqual(new[] { 1, 2, 3 })).IsTrue();
         await Assert.That(crud.SequenceEqual(new[] { "PointRead", "DocumentWrite", "DocumentUpdate", "DocumentDelete" })).IsTrue();
         await Assert.That(specialized.SequenceEqual(new[] { "VectorExact", "QueueCycle", "GraphNeighbors", "GraphTraverse",
             "StreamAppend", "StreamRead" })).IsTrue();
         var preflights = targets.Length * nodes.Length;
-        await Assert.That(preflights).IsEqualTo(27);
-        await Assert.That(preflights * crud.Length).IsEqualTo(108);
-        await Assert.That(preflights * specialized.Length).IsEqualTo(162);
-        await Assert.That(preflights * (crud.Length + specialized.Length)).IsEqualTo(270);
+        await Assert.That(preflights).IsEqualTo(33);
+        await Assert.That(preflights * crud.Length).IsEqualTo(132);
+        await Assert.That(preflights * specialized.Length).IsEqualTo(198);
+        await Assert.That(preflights * (crud.Length + specialized.Length)).IsEqualTo(330);
         await Assert.That(nodes.Length * (1 + crud.Length + specialized.Length)).IsEqualTo(33);
         await Assert.That(nodes.Length * (1 + crud.Length + specialized.Length) <= 256).IsTrue();
     }
@@ -148,8 +148,8 @@ internal sealed class WorkflowLayoutUnifiedPerformanceTests
         var workflow = WorkflowLayoutSource.Read(BenchmarksFile);
         await Assert.That(Count(workflow, "env: &database-environment")).IsEqualTo(1);
         await Assert.That(Count(workflow, "steps: &database-steps")).IsEqualTo(1);
-        await Assert.That(Count(workflow, "env: *database-environment")).IsEqualTo(8);
-        await Assert.That(Count(workflow, "steps: *database-steps")).IsEqualTo(8);
+        await Assert.That(Count(workflow, "env: *database-environment")).IsEqualTo(10);
+        await Assert.That(Count(workflow, "steps: *database-steps")).IsEqualTo(10);
         foreach (var jobId in WorkflowDatabaseGroups.JobIds)
         {
             var job = WorkflowLayoutSource.JobBlock(workflow, jobId);

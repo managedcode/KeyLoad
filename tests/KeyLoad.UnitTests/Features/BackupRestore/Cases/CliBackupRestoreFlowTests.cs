@@ -1,10 +1,14 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
 internal sealed class CliBackupRestoreFlowTests
 {
+    private const string FrameBudgetEnvironment = "KEYLOAD_STORAGE__MAXFRAMEBYTES";
+    private const string InvalidFrameBudget = "0";
+
     [Test]
     public async Task AcBackup001CliCommandsCopyUnpackAndRestoreCommittedStore()
     {
@@ -57,6 +61,33 @@ internal sealed class CliBackupRestoreFlowTests
             var healthy = await RunAsync(options, ["restore", fixture.BackupDirectory, fixture.RestoredDirectory], cancellationToken);
             await CliBackupRestoreAssertions.SuccessfulProcessAsync(healthy);
             await CliBackupRestoreAssertions.RestoredStoreAsync(fixture, healthy, fixture.RestoredDirectory);
+        }, cancellationToken);
+        await Assert.That(Directory.Exists(root)).IsFalse();
+    }
+
+    [Test]
+    public async Task AcBackup001CliRejectsInvalidStorageBudgetBeforeOpeningSourceThenRestoresHealthyBackup()
+    {
+        var options = CliBackupRestoreProcess.CaptureExecutionOptions();
+        var cancellationToken = TestContext.Current!.Execution.CancellationToken;
+        var root = await CliBackupRestoreFixture.RunAsync(async fixture =>
+        {
+            var sourceFiles = await CliBackupRestoreAssertions.CaptureFilesAsync(fixture.SourceDirectory, cancellationToken);
+            var rejected = await CliBackupRestoreProcess.RunAsync(options,
+                ["backup", fixture.SourceDirectory, fixture.BackupDirectory], cancellationToken,
+                new Dictionary<string, string> { [FrameBudgetEnvironment] = InvalidFrameBudget });
+            await CliBackupRestoreAssertions.RejectedProcessAsync(rejected);
+            await Assert.That(rejected.StandardError.Contains(ZoneTreeStorageExecutionOptions.ValidationMessage,
+                StringComparison.Ordinal)).IsTrue();
+            await Assert.That(Directory.Exists(fixture.BackupDirectory)).IsFalse();
+            await CliBackupRestoreAssertions.FilesEqualAsync(sourceFiles, fixture.SourceDirectory, cancellationToken);
+            await fixture.AssertSeedRemainsAsync();
+
+            var backup = await RunAsync(options, ["backup", fixture.SourceDirectory, fixture.BackupDirectory], cancellationToken);
+            await CliBackupRestoreAssertions.SuccessfulProcessAsync(backup);
+            var restored = await RunAsync(options, ["restore", fixture.BackupDirectory, fixture.RestoredDirectory], cancellationToken);
+            await CliBackupRestoreAssertions.SuccessfulProcessAsync(restored);
+            await CliBackupRestoreAssertions.RestoredStoreAsync(fixture, restored, fixture.RestoredDirectory);
         }, cancellationToken);
         await Assert.That(Directory.Exists(root)).IsFalse();
     }

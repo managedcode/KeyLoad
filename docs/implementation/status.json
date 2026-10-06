@@ -3682,9 +3682,11 @@
       "sourceReceipt": "docs/implementation/functional-coverage-exact-cases-native-options-source-2026-10-06-r3.json",
       "exactCaseCount": 25,
       "inventoriedQuerySourceFiles": 103,
-      "currentSourceReceipt": "docs/implementation/functional-coverage-flow-image-source-2026-10-06-r4.json",
-      "cliBackupRestoreFlows": "two_real_Release_CLI_ZoneTree_archive_restore_and_rejected_restore_preserved_state_flows_joined_not_executed",
-      "nativeServerCollector": "source_bound_test_only_image_materializer_and_original_server_connect_collector_wrapper_joined_actual_Aspire_RF3_collection_and_merge_pending"
+      "currentSourceReceipt": "docs/implementation/functional-coverage-operation-results-2026-10-06-r5.json",
+      "cliBackupRestoreFlows": "three_actual_Release_CLI_ZoneTree_complete_operation_flows_passed_3_of_3_through_Aspire_R20",
+      "nativeServerCollector": "source_bound_test_only_image_materializer_and_original_server_connect_collector_wrapper_joined_actual_Aspire_RF3_collection_and_merge_pending",
+      "queryNormalAttempt": "original_native_partial_collection_24_of_25_passed_one_invalid_MCP_fixture_repaired_retry_pending",
+      "latestBuildAttempt": "R21_rejected_native_compilation_source_drift_7_inputs_previous_R20_full_build_passed_0_drift"
     }
   },
   "AdminDashboard": {
@@ -4871,15 +4873,46 @@
     "status": "in_progress",
     "feature": "docs/Features/CodeQuality.md",
     "decision": "docs/ADR/ADR-113-centralized-runtime-options.md",
-    "sourceStage": "general_error_rules_and_native_options_owners_written_constructor_and_native_build_joins_in_progress",
+    "sourceStage": "runtime_policy_migration_runtime_failures_under_repair_final_canonical_refresh_pending",
     "canonicalBuildPassed": false,
     "runtimeQualified": false,
     "fullTaskComplete": false,
     "remaining": [
-      "Close all literal/policy and required-options call joins without changing defaults or protocol identities",
-      "Pass final canonical Release build and scoped formatting",
-      "Run actual Aspire-owned full analyzers/unit/scalar/recovery/RF3 and required coverage gates",
-      "Retain exact delivered-source Linux qualification"
-    ]
+      "Pass full Aspire-owned unit/scalar/recovery and native RF3 execution, retaining original reports",
+      "Pass required source-bound coverage and delivered-source Linux qualification",
+      "Review any actual runtime failures without weakening diagnostics, contracts or assertions"
+    ],
+    "canonicalFormatterPassed": false,
+    "developmentEvidence": {
+      "directory": "artifacts/code-quality/general-runtime-options-development-20261006",
+      "canonicalRelease": "keyload-general-options-full-release-v4.log",
+      "canonicalFormat": "keyload-general-options-canonical-format-v3.log",
+      "analyzers": {
+        "suite": "analyzers",
+        "passed": 340,
+        "failed": 0,
+        "skipped": 0,
+        "report": "analyzers-v2/KeyLoad.Analyzers.Tests-macos-net10.0.tunit-report.json"
+      },
+      "harnessPolicy": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "report": "harness-policy-v1/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json"
+      },
+      "unitV1": {
+        "passed": 3660,
+        "failed": 186,
+        "skipped": 0,
+        "report": "unit-v1/KeyLoad.UnitTests-macos-net10.0.tunit-report.json",
+        "status": "actual_full_Aspire_native_run_failed_options_joins_and_existing_contract_environment_failures_under_review"
+      },
+      "unitV2": {
+        "nativeExit": 134,
+        "status": "AppHost_received_stop_request_original_native_suite_report_not_produced_no_pass_claim",
+        "log": "keyload-general-options-aspire-unit-v2.log"
+      },
+      "qualification": "local development evidence; complete native runtime and delivered Linux qualification pending"
+    }
   }
 }

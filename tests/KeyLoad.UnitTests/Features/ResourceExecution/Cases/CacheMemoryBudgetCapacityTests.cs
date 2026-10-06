@@ -99,7 +99,7 @@ internal sealed class CacheMemoryBudgetCapacityTests
 
     private static void CreateAndUseBudget(CacheMemoryLimits limits)
     {
-        using var budget = new CacheMemoryBudget(UnitAdmissionOptions.Cache(limits));
+        using var budget = new CacheMemoryBudget(limits is null ? null! : UnitAdmissionOptions.Cache(limits));
         _ = budget.GetSnapshot();
     }
 

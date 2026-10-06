@@ -25,7 +25,7 @@ internal sealed class AdmittedCommandReadAllocationTests
             MaxTenantCommands = TotalCommandCount,
             MaxPrincipalCommands = TotalCommandCount
         }));
-        await using var inbox = new AdmittedCommandInbox(governor);
+        await using var inbox = new AdmittedCommandInbox(governor, UnitAdmissionOptions.Inbox());
         var principal = new PrincipalRecord(PrincipalId, TenantId, [], []);
         var commandCount = TotalCommandCount;
         FillInbox(inbox, principal, commandCount);

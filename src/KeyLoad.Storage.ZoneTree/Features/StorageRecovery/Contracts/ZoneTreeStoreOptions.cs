@@ -53,6 +53,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     private TimeSpan? maximumReadCutElapsed;
     private int? fileBufferBytes;
     private int? identityBufferBytes;
+    private int? streamBufferBytes;
     private int? maximumBackupManifestBytes;
     private int? maximumIdentityFileBytes;
     private int? maximumUpgradeReceiptBytes;
@@ -87,6 +88,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     internal TimeSpan MaximumReadCutElapsed => maximumReadCutElapsed ?? throw UnresolvedExecution();
     internal int FileBufferBytes => fileBufferBytes ?? throw UnresolvedExecution();
     internal int IdentityBufferBytes => identityBufferBytes ?? throw UnresolvedExecution();
+    internal int StreamBufferBytes => streamBufferBytes ?? throw UnresolvedExecution();
     internal int MaximumBackupManifestBytes => maximumBackupManifestBytes ?? throw UnresolvedExecution();
     internal int MaximumIdentityFileBytes => maximumIdentityFileBytes ?? throw UnresolvedExecution();
     internal int MaximumUpgradeReceiptBytes => maximumUpgradeReceiptBytes ?? throw UnresolvedExecution();
@@ -127,6 +129,7 @@ public sealed record ZoneTreeStoreOptions(string Directory)
         resolved.maximumReadCutElapsed = effective.MaximumReadCutElapsed;
         resolved.fileBufferBytes = effective.FileBufferBytes;
         resolved.identityBufferBytes = effective.IdentityBufferBytes;
+        resolved.streamBufferBytes = effective.StreamBufferBytes;
         resolved.maximumBackupManifestBytes = effective.MaximumBackupManifestBytes;
         resolved.maximumIdentityFileBytes = effective.MaximumIdentityFileBytes;
         resolved.maximumUpgradeReceiptBytes = effective.MaximumUpgradeReceiptBytes;

@@ -367,6 +367,13 @@ pre-storage rejection, exact errors, zero storage reads and unchanged position.
 Keep the existing test names and normal/scalar contributor identity. These local
 native-codec flows do not replace the official MCP/SDK RF3 AC-PQUERY-006 cases.
 
+Canonical MCP AST/partition-query fixtures use a valid RFC6901 field pointer
+while preserving their identifier alias. A bare identifier path is malformed
+input and must not mask the intended full-scan denial. The same decoded canonical
+request must pass normal validation, produce the specified consent rejection,
+then return the complete persisted row after explicit consent; correcting fixture
+input does not weaken production validation or change its error contract.
+
 Ownership: existing ClientApi/Cases/PartitionQueryMcpContractTests.cs and
 ClientApi/Helpers/PartitionQueryMcpTestData.cs in the QueryExecution test slice;
 production contracts, aliases, field IDs and execution paths are unchanged.

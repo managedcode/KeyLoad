@@ -1201,6 +1201,15 @@ producer/engine work, never commit/push, and stop on contract ambiguity. Join on
 after each owned artifact is reviewed. No new database topology, measurement,
 dependency, DNS or release work.
 
+TASK-WEB-002's selection regression recognizes the exact successful historical
+aggregate step sequence on an unsupported source as unavailable for optional
+publication. It authenticates the original run/job and every required step;
+malformed inventories, failed required steps and invalid repository identities
+remain errors. It never admits that source's metrics or adds its revision to the
+historical allowlist. SiteUnsupportedProducerSelectionTests maps this real Node
+selection/rejection/healthy follow-up flow and the actual GitHub optional-capture
+child to AC-BC-WEB-002. Source review is not native site or publication evidence.
+
 Baseline: Pages settings are valid; original run37349838172 has217/270 worker
 artifacts and failed aggregation. Existing website capture fails before checkout
 on this unavailable producer; this cannot be converted to authenticated metrics.

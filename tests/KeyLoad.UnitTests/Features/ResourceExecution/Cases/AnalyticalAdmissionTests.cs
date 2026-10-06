@@ -17,8 +17,10 @@ internal sealed class AnalyticalAdmissionTests
     public async Task AcMp004_ReservationIsSharedExactlyOnceAndRejectsInvalidLimits()
     {
         using var db = new TestDatabase(new() { MaxConcurrentQueries = 1 });
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()));
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = -1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()));
+        var zero = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()));
+        var negative = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxConcurrentQueries = -1 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.TimeSeriesExecution()));
+        await Assert.That(zero.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
+        await Assert.That(negative.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
         using var reservation = db.Database.AdmitQuery(default);
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(1);
         var exhausted = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.AdmitQuery(default));

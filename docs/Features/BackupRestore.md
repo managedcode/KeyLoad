@@ -94,6 +94,14 @@ the original nonzero exit, preserve existing destination bytes and storage state
 and complete a healthy follow-up operation. CLI dispatch and disposal assertions
 remain part of the operation flow; property access alone is not acceptance.
 
+The standalone CLI binds KEYLOAD_STORAGE__ and KEYLOAD_POINTCACHE__ through the
+native environment configuration provider. Missing variables preserve the
+canonical typed defaults; supplied values are validated before opening storage.
+The regression extends TASK-CQ-CLI-BACKUP-FLOW-001 with an actual invalid-budget
+backup child, unchanged committed source and absent backup destination, followed
+by successful backup and restore. Overrides are confined to that child process;
+the test does not mutate the runner environment or compare property accessors.
+
 These cases are functional contributors only after native collection binds
 their original executions and assemblies. They do not establish a cluster-wide
 cut, old-token fencing, RF3 recovery, power-loss safety, or a measured coverage

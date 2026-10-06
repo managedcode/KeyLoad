@@ -21,6 +21,7 @@ public sealed record ZoneTreeStorageExecutionOptions
     private const int DefaultMaximumReadCutElapsedMinutes = 1;
     private const int DefaultFileBufferBytes = 65_536;
     private const int DefaultIdentityBufferBytes = 4_096;
+    private const int DefaultStreamBufferBytes = 4_096;
     private const int DefaultMaximumBackupManifestBytes = 16_384;
     private const int DefaultMaximumIdentityFileBytes = 4_096;
     private const int DefaultMaximumUpgradeReceiptBytes = 65_536;
@@ -51,6 +52,8 @@ public sealed record ZoneTreeStorageExecutionOptions
     public int FileBufferBytes { get; init; } = DefaultFileBufferBytes;
     /// <summary>Maximum bytes used for IdentityBufferBytes during storage and offline operations.</summary>
     public int IdentityBufferBytes { get; init; } = DefaultIdentityBufferBytes;
+    /// <summary>The native buffer size of metadata, backup and checkpoint verification streams.</summary>
+    public int StreamBufferBytes { get; init; } = DefaultStreamBufferBytes;
     /// <summary>Maximum bytes used for MaximumBackupManifestBytes during storage and offline operations.</summary>
     public int MaximumBackupManifestBytes { get; init; } = DefaultMaximumBackupManifestBytes;
     /// <summary>Maximum bytes used for MaximumIdentityFileBytes during storage and offline operations.</summary>
@@ -67,6 +70,7 @@ public sealed record ZoneTreeStorageExecutionOptions
         && MaximumReadCutElapsed > TimeSpan.Zero && MaximumReadCutElapsed <= MaximumNativeTimerDuration
         && FileBufferBytes is >= MinimumPositiveBudget and <= DefaultFileBufferBytes
         && IdentityBufferBytes is >= MinimumPositiveBudget and <= DefaultIdentityBufferBytes
+        && StreamBufferBytes is >= MinimumPositiveBudget and <= DefaultStreamBufferBytes
         && MaximumBackupManifestBytes is >= MinimumPositiveBudget and <= DefaultMaximumBackupManifestBytes
         && MaximumIdentityFileBytes is >= MinimumPositiveBudget and <= DefaultMaximumIdentityFileBytes
         && MaximumUpgradeReceiptBytes is >= MinimumPositiveBudget and <= DefaultMaximumUpgradeReceiptBytes;

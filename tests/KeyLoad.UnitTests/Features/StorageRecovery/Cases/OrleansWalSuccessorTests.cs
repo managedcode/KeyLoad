@@ -76,7 +76,8 @@ internal sealed class OrleansWalSuccessorTests
             identity = seeded.Identity;
         }
 
-        var options = new ZoneTreeStoreOptions(files.DirectoryPath);
+        var options = new ZoneTreeStoreOptions(files.DirectoryPath)
+            .ResolveExecutionOptions(UnitExecutionOptions.StorageExecution());
         var path = Path.Combine(files.DirectoryPath, CheckpointFileName);
         using (var tree = ZoneTreeTreeFactory.Open(options))
         {

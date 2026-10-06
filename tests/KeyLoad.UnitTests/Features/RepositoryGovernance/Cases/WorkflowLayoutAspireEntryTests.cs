@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
@@ -34,8 +35,9 @@ internal sealed class WorkflowLayoutAspireEntryTests
         }
         await Assert.That(entry.Contains("'run', '--project', 'src/KeyLoad.AppHost', '--no-build', '--no-restore', '--configuration', 'Release'", StringComparison.Ordinal)).IsTrue();
         await Assert.That(entry.Contains("--KeyLoadTests:Suite=comparison", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(entry.Contains("--KeyLoadTests:Filter=/*/*/IsolatedNativeComparisonTests/*", StringComparison.Ordinal)).IsTrue();
-        await Assert.That(entry.Contains("--KeyLoadTests:TimeoutMinutes=140", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("const filter = openLoop?.filter ?? '/*/*/IsolatedNativeComparisonTests/*'", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("'--KeyLoadTests:Filter=' + filter", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(entry.Contains("`--KeyLoadTests:TimeoutMinutes=${vector || scaled ? 140 : 60}`", StringComparison.Ordinal)).IsTrue();
     }
 
     [Test]
@@ -118,26 +120,30 @@ internal sealed class WorkflowLayoutAspireEntryTests
     private static async Task AssertScalarRunnerSelectionAsync()
     {
         var source = ReadRepositoryFile("src/KeyLoad.AppHost/Features/TestInfrastructure/Hosting/TestSuiteResources.cs");
-        var runner = source.IndexOf("var runner = builder.AddExecutable(settings.ResourceName", StringComparison.Ordinal);
-        var scalarCondition = source.IndexOf("if (settings.Suite == \"unit-scalar\")", StringComparison.Ordinal);
+        var runner = source.IndexOf("var runner = CreateRunner(builder, settings.ResourceName, root, arguments)", StringComparison.Ordinal);
+        var scalarCondition = source.IndexOf("if (settings.Suite == TestSuiteProtocol.ScalarUnitSuite)", StringComparison.Ordinal);
         await Assert.That(runner).IsGreaterThan(-1);
         await Assert.That(scalarCondition).IsGreaterThan(runner);
+        await Assert.That(source.Contains("private const string IntrinsicsEnvironment = \"DOTNET_EnableHWIntrinsic\"", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(source.Contains("const string AddValueText = \"0\"", StringComparison.Ordinal)).IsTrue();
         await Assert.That(source[scalarCondition..].Contains(
-            "runner.WithEnvironment(\"DOTNET_EnableHWIntrinsic\", \"0\")", StringComparison.Ordinal)).IsTrue();
+            "runner.WithEnvironment(IntrinsicsEnvironment, AddValueText)", StringComparison.Ordinal)).IsTrue();
     }
 
     private static async Task AssertSuiteProjectsAsync()
     {
-        var source = ReadRepositoryFile("src/KeyLoad.AppHost/Features/TestInfrastructure/Execution/TestSuiteSettings.cs");
-        foreach (var mapping in new[]
+        foreach (var (suite, project) in new[]
         {
-            "\"analyzers\" => \"KeyLoad.Analyzers.Tests\"",
-            "\"unit\" or \"unit-scalar\" => \"KeyLoad.UnitTests\"",
-            "\"recovery\" => \"KeyLoad.RecoveryTests\"",
-            "\"rf3\" => \"KeyLoad.IntegrationTests\""
+            ("analyzers", "KeyLoad.Analyzers.Tests"),
+            ("unit", "KeyLoad.UnitTests"),
+            ("unit-scalar", "KeyLoad.UnitTests"),
+            ("recovery", "KeyLoad.RecoveryTests"),
+            ("rf3", "KeyLoad.IntegrationTests"),
+            ("comparison", "KeyLoad.ComparisonTests"),
+            ("site", "KeyLoad.SiteTests")
         })
         {
-            await Assert.That(source.Contains(mapping, StringComparison.Ordinal)).IsTrue();
+            await Assert.That(TestSuiteSelectionValidator.ProjectForSuite(suite)).IsEqualTo(project);
         }
     }
 

@@ -20,6 +20,10 @@ internal sealed class NativeComparisonAdapterPolicyTests
     [Arguments(nameof(NativeComparisonExecutionOptions.OpenLoopControlFileBufferBytes), 11)]
     [Arguments(nameof(NativeComparisonExecutionOptions.VectorCancellationCheckInterval), 4096)]
     [Arguments(nameof(NativeComparisonExecutionOptions.VectorYieldBatchSize), 256)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.MongoSeedBatchSize), 256)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.KeyLoadDocumentSeedBatchSize), 100)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.RedisSeedBatchSize), 256)]
+    [Arguments(nameof(NativeComparisonExecutionOptions.OpenSearchBulkBatchSize), 64)]
     public async Task NativeIntegerAdapterLimitsValidateInclusiveCeilingsAsync(string property, int maximum)
     {
         foreach (var accepted in new[] { maximum, 1 })
@@ -131,6 +135,28 @@ internal sealed class NativeComparisonAdapterPolicyTests
                 break;
             case nameof(NativeComparisonExecutionOptions.TimescaleMaximumPoolSize):
                 options.TimescaleMaximumPoolSize = value;
+                break;
+            default:
+                SetSeedOrReportInteger(options, property, value);
+                break;
+        }
+    }
+
+    private static void SetSeedOrReportInteger(NativeComparisonExecutionOptions options, string property, int value)
+    {
+        switch (property)
+        {
+            case nameof(NativeComparisonExecutionOptions.MongoSeedBatchSize):
+                options.MongoSeedBatchSize = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.KeyLoadDocumentSeedBatchSize):
+                options.KeyLoadDocumentSeedBatchSize = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.RedisSeedBatchSize):
+                options.RedisSeedBatchSize = value;
+                break;
+            case nameof(NativeComparisonExecutionOptions.OpenSearchBulkBatchSize):
+                options.OpenSearchBulkBatchSize = value;
                 break;
             default:
                 SetReportOrVectorInteger(options, property, value);

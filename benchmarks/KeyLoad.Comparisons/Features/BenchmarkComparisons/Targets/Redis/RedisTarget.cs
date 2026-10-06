@@ -9,12 +9,14 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="runId">Guid-formatted run identifier used to isolate benchmark keys.</param>
 /// <param name="image">Redis image reference recorded after initialization and replica verification.</param>
 /// <param name="lifecycleOptions">Centrally validated native lifecycle policy.</param>
+/// <param name="nativeExecutionOptions">Centrally validated native adapter execution policy.</param>
 /// <param name="topology">The expected single-primary or direct-replica topology; replicated mode does not imply sharding or failover.</param>
 /// <param name="replicas">Optional direct replica endpoints checked for the replicated durability receipt.</param>
 public sealed class RedisTarget(string connectionString, string runId, string image,
-    IOptions<ComparisonLifecycleOptions> lifecycleOptions,
+    IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
     ComparisonTopology topology = ComparisonTopology.Standalone, string[]? replicas = null) : IComparisonTarget
 {
+    private readonly IOptions<NativeComparisonExecutionOptions> executionOptions = NativeComparisonExecutionOptions.Require(nativeExecutionOptions);
     private const string FieldSeparator = ":";
 
     private const string RunIdentityFormat = "N";
@@ -77,7 +79,7 @@ public sealed class RedisTarget(string connectionString, string runId, string im
         var database = connection.GetDatabase();
         if (dataset.Settings is ScaledComparisonProfile)
         {
-            await RedisScaledCorpusSeeder.SeedAsync(database, prefix, dataset.Documents, cancellationToken).ConfigureAwait(false);
+            await RedisScaledCorpusSeeder.SeedAsync(database, prefix, dataset.Documents, executionOptions, cancellationToken).ConfigureAwait(false);
         }
         else
         {

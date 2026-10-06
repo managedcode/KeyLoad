@@ -19,7 +19,7 @@ internal sealed class IsolatedGitHubCompleteTests
     [Arguments("image-step-missing")]
     [Arguments("image-artifact-expired")]
     [Arguments("zip-total")]
-    public async Task AcIso006ControlledClosed270MetadataRequiresEveryCellAndOneSuccessfulImageJob(string corruption)
+    public async Task AcIso006ControlledClosed330MetadataRequiresEveryCellAndOneSuccessfulImageJob(string corruption)
     {
         var result = await IsolatedAggregateNodeProcess.RunAsync(
             ["--input-type=module", "-e", IsolatedGitHubCompleteProgram.Source,

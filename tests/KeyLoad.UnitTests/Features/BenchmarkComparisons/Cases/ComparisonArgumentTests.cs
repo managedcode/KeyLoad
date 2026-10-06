@@ -1,12 +1,13 @@
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonArgumentTests
 {
     private const string ConfigurationParameter = "configuration";
-    private const string OptionsParameter = "options";
+    private const string WorkloadOptionsParameter = "workloadOptions";
     private const string StartParameter = "start";
     private const string QueryParameter = "query";
     private const string ExpectedParameter = "expected";
@@ -30,22 +31,25 @@ internal sealed class ComparisonArgumentTests
     public async Task AcCq007MissingConfigurationAndCorpusOptionsRejectAtThePublicBoundary()
     {
         await AssertParameterAsync(() => ComparisonOptions.Read(null!), ConfigurationParameter);
-        await AssertParameterAsync(() => _ = new BenchmarkDataset(null!), OptionsParameter);
+        await AssertParameterAsync(() => _ = new BenchmarkDataset(null!), WorkloadOptionsParameter);
     }
 
     [Test]
     public async Task AcCq007RealConfigurationRetainsDefaultsValidSettingsAndBudgetRejection()
     {
         using var configuration = new ConfigurationManager();
-        await Assert.That(ComparisonOptions.Read(configuration)).IsEqualTo(new ComparisonOptions());
+        await Assert.That(ComparisonOptions.Read(configuration).Value).IsEqualTo(new ComparisonOptions());
 
         configuration[DocumentsSetting] = ConfiguredDocumentCount;
         configuration[TopKSetting] = ConfiguredTopK;
         var expected = new ComparisonOptions { Documents = DocumentCount, TopK = NeighborCount };
-        await Assert.That(ComparisonOptions.Read(configuration)).IsEqualTo(expected);
+        await Assert.That(ComparisonOptions.Read(configuration).Value).IsEqualTo(expected);
 
         configuration[TopKSetting] = InvalidTopK;
-        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => ComparisonOptions.Read(configuration));
+        var invalid = Assert.ThrowsExactly<OptionsValidationException>(() => ComparisonOptions.Read(configuration));
+        await Assert.That(invalid.OptionsType).IsEqualTo(typeof(ComparisonOptions));
+        await Assert.That(invalid.OptionsName).IsEqualTo(Options.DefaultName);
+        await Assert.That(invalid.Failures.SequenceEqual([ComparisonOptions.ValidationMessage])).IsTrue();
     }
 
     [Test]
@@ -76,18 +80,24 @@ internal sealed class ComparisonArgumentTests
     }
 
     [Test]
-    public async Task AcCq007MissingTargetsRejectBeforeInvalidCorpusOptionsAreUsed()
+    public async Task AcCq007MissingTargetsRejectBeforeCorpusAndInvalidOptionsRejectAtComposition()
     {
-        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native());
+        var invalid = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+            _ = new ComparisonRunner(Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native()));
+        await Assert.That(invalid.ParamName).IsEqualTo(nameof(ComparisonOptions));
+        var runner = new ComparisonRunner(Options.Create(SmallOptions()), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentNullException>(() =>
             runner.RunAsync((IComparisonTarget[])null!, null, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.ParamName).IsEqualTo(TargetsParameter);
     }
 
     [Test]
-    public async Task AcCq007EmptyTargetsRetainTheExistingRejectionBeforeCorpusConstruction()
+    public async Task AcCq007EmptyTargetsRejectBeforeCorpusAndInvalidOptionsRejectAtComposition()
     {
-        var runner = new ComparisonRunner(Microsoft.Extensions.Options.Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native());
+        var invalid = Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
+            _ = new ComparisonRunner(Options.Create(SmallOptions() with { Dimensions = InvalidDimensions }), UnitBenchmarkOptions.Native()));
+        await Assert.That(invalid.ParamName).IsEqualTo(nameof(ComparisonOptions));
+        var runner = new ComparisonRunner(Options.Create(SmallOptions()), UnitBenchmarkOptions.Native());
         var error = await Assert.ThrowsExactlyAsync<ArgumentException>(() =>
             runner.RunAsync([], null, TestContext.Current!.Execution.CancellationToken));
         await Assert.That(error!.ParamName).IsEqualTo(TargetsParameter);

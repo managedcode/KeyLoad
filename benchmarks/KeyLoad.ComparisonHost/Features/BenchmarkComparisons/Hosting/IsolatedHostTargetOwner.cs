@@ -37,7 +37,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
             IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),
             IsolatedHostConstants.Rabbit => new RabbitTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, CreateClient(native, PrimaryEndpointIndex)),
-            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, topology, [.. native.Replicas]),
+            IsolatedHostConstants.Redis => new RedisTarget(native.Connection!, settings.RunId, native.Image, lifecycleOptions, executionOptions, topology, [.. native.Replicas]),
             IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, lifecycleOptions, executionOptions),
             IsolatedHostConstants.Mongo => new MongoTarget(native.Connection!, settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),
             IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, topology, lifecycleOptions, executionOptions),

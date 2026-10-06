@@ -7,14 +7,12 @@ public sealed partial class NativeComparisonExecutionOptions
 {
     private const int DefaultTimescaleConnectionTimeoutSeconds = 30;
     private const int DefaultTimescaleCommandTimeoutSeconds = 30;
-    private const int MaximumTimescalePoolSize = 16;
     private const int DefaultKeyLoadGraphSeedBatchSize = 100;
     private const int DefaultNeo4jSeedBatchSize = 256;
     private const int DefaultNeo4jMaximumExecutionTimeSeconds = 30;
     private const int DefaultTimeSeriesInitialReadCapacity = 16;
     private const int DefaultReportFileBufferBytes = 65_536;
     private const int DefaultTimescaleCancellationTimeoutMilliseconds = 2000;
-    private const int DefaultTimescaleMinimumPoolSize = 0;
     private const int DefaultTimescaleMaximumPoolSize = 16;
     /// <summary>The maximum graph vertices seeded in one KeyLoad request.</summary>
     public int KeyLoadGraphSeedBatchSize { get; set; } = DefaultKeyLoadGraphSeedBatchSize;
@@ -33,7 +31,7 @@ public sealed partial class NativeComparisonExecutionOptions
     /// <summary>The native Timescale cancellation acknowledgement deadline.</summary>
     public int TimescaleCancellationTimeoutMilliseconds { get; set; } = DefaultTimescaleCancellationTimeoutMilliseconds;
     /// <summary>The minimum retained native Timescale connection pool capacity.</summary>
-    public int TimescaleMinimumPoolSize { get; set; } = DefaultTimescaleMinimumPoolSize;
+    public int TimescaleMinimumPoolSize { get; set; } = MinimumPositiveLimit;
     /// <summary>The maximum native Timescale connection pool capacity.</summary>
     public int TimescaleMaximumPoolSize { get; set; } = DefaultTimescaleMaximumPoolSize;
 
@@ -47,7 +45,7 @@ public sealed partial class NativeComparisonExecutionOptions
             || !IsNativeSecondsTimeout(TimescaleConnectionTimeout, DefaultTimescaleConnectionTimeoutSeconds)
             || !IsNativeSecondsTimeout(TimescaleCommandTimeout, DefaultTimescaleCommandTimeoutSeconds)
             || TimescaleCancellationTimeoutMilliseconds is <= MinimumPositiveLimit or > DefaultTimescaleCancellationTimeoutMilliseconds || TimescaleMinimumPoolSize < MinimumPositiveLimit
-            || TimescaleMaximumPoolSize <= MinimumPositiveLimit || TimescaleMaximumPoolSize > MaximumTimescalePoolSize
+            || TimescaleMaximumPoolSize <= MinimumPositiveLimit || TimescaleMaximumPoolSize > DefaultTimescaleMaximumPoolSize
             || TimescaleMinimumPoolSize > TimescaleMaximumPoolSize)
         {
             throw new Microsoft.Extensions.Options.OptionsValidationException(SectionName, typeof(NativeComparisonExecutionOptions),

@@ -27,7 +27,10 @@ internal static class SampleAggregateTestData
     internal const int OneResult = 1;
     internal const int ZeroScanRecords = 0;
     internal const int ZeroResults = 0;
-    internal const int DeadlineSeconds = 0;
+    internal const int DeadlineSeconds = 1;
+    internal const int InvalidDeadlineSeconds = 0;
+    internal const int DeadlineElapsedWaitMilliseconds = 1_100;
+    internal const string DeadlineExceededDetail = "The read execution deadline is exceeded.";
     internal const int TinyReadBytes = 1;
     internal const int ServerWindowLimit = 3;
     internal const int ExactBatchExtraByte = 1;

@@ -12,7 +12,7 @@ internal static class ZoneTreeIdentityFile
         var path = Path.Combine(options.Directory, IdentityFileName);
         if (File.Exists(path))
         {
-            var existing = Read(path, options.MaximumIdentityFileBytes);
+            var existing = Read(path, options.MaximumIdentityFileBytes, options.StreamBufferBytes);
             Validate(existing, options);
             return existing;
         }
@@ -51,7 +51,7 @@ internal static class ZoneTreeIdentityFile
 
     internal static StoreIdentity OpenExisting(ZoneTreeStoreOptions options, Guid expectedNodeId)
     {
-        var identity = Read(Path.Combine(options.Directory, IdentityFileName), options.MaximumIdentityFileBytes);
+        var identity = Read(Path.Combine(options.Directory, IdentityFileName), options.MaximumIdentityFileBytes, options.StreamBufferBytes);
         Validate(identity, options);
         if (identity.FormatVersion != CurrentDataEpoch)
         {
@@ -80,9 +80,9 @@ internal static class ZoneTreeIdentityFile
         }
     }
 
-    internal static StoreIdentity Read(string path, int maximumIdentityBytes)
+    internal static StoreIdentity Read(string path, int maximumIdentityBytes, int streamBufferBytes)
     {
-        var bytes = ZoneTreeMetadataFile.Read(path, maximumIdentityBytes, IdentityFormatUnsupported);
+        var bytes = ZoneTreeMetadataFile.Read(path, maximumIdentityBytes, streamBufferBytes, IdentityFormatUnsupported);
         return Read(bytes.Span);
     }
 

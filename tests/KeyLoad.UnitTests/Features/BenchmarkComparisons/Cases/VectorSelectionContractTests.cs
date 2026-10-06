@@ -40,15 +40,19 @@ internal sealed class VectorSelectionContractTests
         foreach (var replacement in new[]
         {
             (ComparisonWorkerSelection.VectorProfileSetting, "vector-5m-exact-plain-c16"),
-            (ComparisonWorkerSelection.VectorProfileSetting, ""),
             (ComparisonWorkerSelection.ScenarioSetting, nameof(Scenario.PointRead)),
             (ComparisonWorkerSelection.ProfileSetting, "intensive-1k-c16")
         })
         {
             using var configuration = Selection("vector-100k-exact-plain-c16");
             configuration[replacement.Item1] = replacement.Item2;
-            await Assert.That(() => ComparisonWorkerSelection.Read(configuration)).Throws<InvalidOperationException>();
+            var error = Assert.ThrowsExactly<InvalidOperationException>(() => ComparisonWorkerSelection.Read(configuration));
+            await Assert.That(error.Message).IsEqualTo(ComparisonWorkerSelection.InvalidSelection);
         }
+        using var emptySelector = Selection("vector-100k-exact-plain-c16");
+        emptySelector[ComparisonWorkerSelection.VectorProfileSetting] = string.Empty;
+        var emptyError = Assert.ThrowsExactly<ArgumentException>(() => ComparisonWorkerSelection.Read(emptySelector));
+        await Assert.That(emptyError.ParamName).IsEqualTo("id");
     }
 
     private static ConfigurationManager Selection(string id)

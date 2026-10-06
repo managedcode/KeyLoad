@@ -137,6 +137,29 @@ report bytes, corpus hashes and qualification criteria. Semantic enforcement
 includes actual framework file-buffer properties and constructor parameters;
 same-named source types must not impersonate those framework symbols.
 
+The final sink audit also moves grain reply initial reservation, administrator
+failure-log retention and Mongo/KeyLoad/Redis/OpenSearch seed batches into their
+existing native options groups. Preserve defaults 4096/50/256/100/256/64 and their
+inclusive ceilings. Actual allocation and chunking owners consume the snapshot;
+unused former cleanup constants are removed. Command inbox scheduling uses its
+own nonserialized `KeyLoad:CommandInboxExecution` group, with configurable
+MaximumControlBurst 1..8 and the original default 8. Keep the immutable fairness
+ceiling 8 and every existing admission Id/JSON contract; central server binding,
+borrowed silo registration and physical coordinator construction share the same
+validated wrapper. Configured lower-burst tests verify actual dequeue ordering.
+
+Storage stream buffering is distinct from transfer/chunk buffering. The native
+storage options group owns StreamBufferBytes 1..4096, default 4096, for metadata,
+backup and checkpoint FileStream owners, including former implicit OpenRead
+buffers. Preserve existing 65536-byte transfer/chunk defaults, original frame and
+manifest bytes, recovery validation and synchronous Flush(true) barriers.
+
+Native text file providers apply the bound FileBufferBytes ceiling to actual
+ZoneTree stream creation, including calls that omit the native interface's
+optional buffer parameter. Preserve smaller caller buffers and native unbuffered
+requests; reject invalid configured ceilings before taking file ownership. Real
+unflushed-file observations verify that lower configuration reaches the IO sink.
+
 Executable ComparisonTests native lifecycle helpers consume the same central
 binding contract through `NativeExecutionPolicyFixture.Harness()` and a typed
 `KeyLoad:NativeComparisonHarness` section. Ownership is feature-local
@@ -152,6 +175,21 @@ packages already present or explicitly added in the canonical package manifest;
 do not copy framework or ManagedCode implementations. Native Options.Create is
 permitted for explicitly validated standalone/test caller composition, not a fake
 options implementation or a hidden fallback replacing central server DI.
+
+Projection of environment settings into a native configuration provider omits
+absent variables rather than supplying null-valued keys which overwrite typed
+defaults. Explicit supplied values retain validation. Configuration validation
+runs at composition before dataset allocation; invalid standalone wrappers fail
+with the canonical Validate exception. After valid configuration, target
+validation still precedes corpus construction. Private request-probe mode
+validation precedes unrelated suite selectors in the central AppHost factory.
+
+The CLI explicitly references the already centrally pinned native environment
+configuration provider for KEYLOAD_STORAGE__ and KEYLOAD_POINTCACHE__. Omitted
+variables preserve canonical typed defaults; supplied budgets are validated before
+opening any storage files. No nullable-key inventory or parallel options defaults
+substitute for native binding. Actual CLI backup/reject/restore flows cover this
+composition repair under TASK-CQ-CLI-BACKUP-FLOW-001.
 
 Rollout is one coherent source rebuild. Preserve defaults/sections and fail invalid
 configuration before readiness/admission. Constructor/configuration ownership

@@ -37,7 +37,8 @@ internal static class BenchmarkScenarioSelectionRegistration
             [BenchmarkScenarioSelectionOptions.SectionName + SettingSeparator + nameof(BenchmarkScenarioSelectionOptions.RecordCount)] =
                 scaled ? Environment.GetEnvironmentVariable(RecordCountEnvironment) : null
         };
-        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values.Where(static entry => entry.Value is not null)).Build();
         using var configurationLifetime = configuration as IDisposable;
         return BenchmarkScenarioOptionsRegistration.Read<BenchmarkScenarioSelectionOptions>(configuration,
             BenchmarkScenarioSelectionOptions.SectionName, settings => Validate(settings, scaled), RecordCountFailure);

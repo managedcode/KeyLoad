@@ -1,20 +1,21 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
 internal static class KeyLoadScaledCorpusSeeder
 {
-    private const int BatchSize = 100;
-
     internal static async Task SeedAsync(KeyLoadClient client, PartitionRef partition,
-        IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+        IReadOnlyList<BenchmarkDocument> documents, IOptions<NativeComparisonExecutionOptions> executionOptions,
+        CancellationToken cancellationToken)
     {
         const int NoObservedItems = 0;
         const string SeedDocumentsToken = "SeedDocuments";
         const string ScaledCorpusSeedReceiptMismatchDetail = "ScaledCorpusSeedReceiptMismatch";
 
-        foreach (var batch in documents.Chunk(BatchSize))
+        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.KeyLoadDocumentSeedBatchSize;
+        foreach (var batch in documents.Chunk(batchSize))
         {
             cancellationToken.ThrowIfCancellationRequested();
             var mutations = batch.Select(document => (Mutation)new PutDocument(nameof(documents), document.Id, document.Json, NoObservedItems)).ToImmutableArray();

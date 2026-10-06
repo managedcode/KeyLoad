@@ -23,10 +23,10 @@ internal static class AppHostControlOptionsRegistration
         var options = new OptionsManager<AppHostControlOptions>(
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
+                value.RequestProbe = RequestCqrsProbeProfileSettingsReader.Read(configuration);
                 value.Tests = TestSuiteSettings.Read(configuration, execution);
                 value.TwoRf3 = TwoRf3Profile.ValidateAndRead(configuration);
                 ProtocolCohortImages.ValidateMode(configuration);
-                value.RequestProbe = RequestCqrsProbeProfileSettingsReader.Read(configuration);
                 value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);
                 value.Ephemeral = configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting);
                 value.BenchmarksEnabled = configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting);

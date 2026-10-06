@@ -38,10 +38,10 @@ internal static class ZoneTreeFormatUpgradeReceiptFile
         file.Flush(true);
     }
 
-    internal static ZoneTreeFormatUpgradeReceipt Read(string path, int maximumReceiptBytes)
+    internal static ZoneTreeFormatUpgradeReceipt Read(string path, int maximumReceiptBytes, int streamBufferBytes)
     {
         VerifyRegularFile(path);
-        var bytes = ZoneTreeMetadataFile.Read(path, maximumReceiptBytes, InvalidReceipt);
+        var bytes = ZoneTreeMetadataFile.Read(path, maximumReceiptBytes, streamBufferBytes, InvalidReceipt);
         var envelope = ZoneTreeMetadataBinary.Read<ZoneTreeIdentityEnvelope>(bytes.Span,
             ZoneTreePersistenceFormat.FormatUpgradeReceiptMagic, InvalidReceipt);
         if (!CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Checksum))

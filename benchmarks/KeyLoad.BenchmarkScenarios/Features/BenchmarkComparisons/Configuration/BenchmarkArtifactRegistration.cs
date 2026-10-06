@@ -29,7 +29,8 @@ internal static class BenchmarkArtifactRegistration
 
     private static IOptions<BenchmarkArtifactOptions> Read(Dictionary<string, string?> values)
     {
-        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values.Where(static entry => entry.Value is not null)).Build();
         using var configurationLifetime = configuration as IDisposable;
         return BenchmarkScenarioOptionsRegistration.Read<BenchmarkArtifactOptions>(configuration,
             BenchmarkArtifactOptions.SectionName, settings => settings.IsValid(), BenchmarkArtifactOptions.InvalidSource);

@@ -79,11 +79,27 @@ export function selectSiteAggregateJob(run, jobs) {
   if (matches.length === 0) return { successful: false, run, jobs };
   validateJobIdentity(matches[0], siteCohort(run), SITE_GH.aggregateJob);
   if (matches[0].status !== 'completed' || matches[0].conclusion !== 'success') return { successful: false, run, jobs };
+  const cohort = siteCohort(run);
+  const aggregate = matches[0];
   const steps = siteAggregateSteps(run.head_sha);
-  const inventory = matches[0].steps?.filter(step => steps.includes(step.name));
-  requireSite(inventory?.length === steps.length && inventory.every((step, index) => step.name === steps[index]));
+  const inventory = aggregate.steps?.filter(step => steps.includes(step.name));
+  if (inventory?.length !== steps.length || !inventory.every((step, index) => step.name === steps[index])) {
+    if (isUnsupportedHistoricalAggregate(run, aggregate)) {
+      validateSuccessfulJob(aggregate, cohort, SITE_GH.aggregateJob, SITE_GH.legacySteps);
+      return { successful: false, run, jobs };
+    }
+
+    requireSite(false);
+  }
+
   return { successful: true, run, jobs,
-    job: validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), siteCohort(run), SITE_GH.aggregateJob, steps) };
+    job: validateSuccessfulJob(uniqueNamed(jobs, SITE_GH.aggregateJob), cohort, SITE_GH.aggregateJob, steps) };
+}
+
+function isUnsupportedHistoricalAggregate(run, job) {
+  return !SITE_GH.legacySources.includes(run.head_sha) && Array.isArray(job.steps)
+    && job.steps.length === SITE_GH.legacySteps.length
+    && job.steps.every((step, index) => step?.name === SITE_GH.legacySteps[index]);
 }
 
 async function selectCurrentSiteEvidence(input, workflow, runs, producer, legacyArchive, optional) {

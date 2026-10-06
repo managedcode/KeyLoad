@@ -35,7 +35,7 @@ public sealed record IsolatedComparisonContract
     private static IsolatedComparisonContract Read()
     {
         const int ComparisonSchemaVersion = 1;
-        const int AcceptedWorkerSchemaVersion = 4;
+        const int AcceptedWorkerSchemaVersion = 5;
         const int SingleNodeTopology = 1;
         const int TwoNodeReplicaCount = 2;
         const int ThreeNodeTopology = 3;

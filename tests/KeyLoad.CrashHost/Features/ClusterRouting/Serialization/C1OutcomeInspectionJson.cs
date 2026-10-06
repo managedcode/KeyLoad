@@ -102,7 +102,7 @@ internal static class C1OutcomeInspectionJson
         }
         var line = new byte[lineLength];
         json.CopyTo(line);
-        line[ReceiptLineTerminatorBytes] = (byte)LineFeedCharacter;
+        line[^ReceiptLineTerminatorBytes] = (byte)LineFeedCharacter;
         return line;
     }
 

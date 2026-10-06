@@ -24,8 +24,8 @@ internal sealed class IsolatedPreflightTests
         var response = await IsolatedPlanNodeProcess.ProbeAsync(Preflight, plan);
         await Assert.That(response[IsolatedPlanFields.Ok]!.GetValue<bool>()).IsTrue();
         var cells = response[IsolatedPlanFields.Value]![IsolatedPlanFields.Include]!.AsArray();
-        await Assert.That(cells.Count).IsEqualTo(27);
-        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct().Count()).IsEqualTo(27);
+        await Assert.That(cells.Count).IsEqualTo(33);
+        await Assert.That(cells.Select(cell => cell![IsolatedPlanFields.Id]!.GetValue<string>()).Distinct().Count()).IsEqualTo(33);
         foreach (var cell in cells)
         {
             var target = cell![IsolatedPlanFields.Target]!.GetValue<string>();

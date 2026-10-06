@@ -47,8 +47,7 @@ internal static class AppHostOptionsRegistration
         var isolatedAdmission = Bind<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
             builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
             value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
-        var coverage = Bind<NativeCoverageExecutionOptions>(builder.Configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
-            value => value.IsValid(), NativeCoverageExecutionOptions.ValidationMessage);
+        var coverage = BindNativeCoverage(builder.Configuration);
         var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
             cluster, command, http, replay, profile, deployment, relay, workload, probeFiles, isolatedReplay, isolatedAdmission, coverage);
         Register(builder.Services, runtime);
@@ -89,6 +88,10 @@ internal static class AppHostOptionsRegistration
 
     internal static IOptions<TestBootstrapOptions> BindTestBootstrap(IConfiguration configuration) =>
         Bind<TestBootstrapOptions>(configuration, _ => true, TestExecutionOptions.ValidationMessage);
+
+    internal static IOptions<NativeCoverageExecutionOptions> BindNativeCoverage(IConfiguration configuration) =>
+        Bind<NativeCoverageExecutionOptions>(configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
+            options => options.IsValid(), NativeCoverageExecutionOptions.ValidationMessage);
 
     private static bool Validate(Action validate)
     {

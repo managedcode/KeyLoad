@@ -1,6 +1,7 @@
 
 using System.Globalization;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
@@ -8,7 +9,6 @@ internal static class OpenSearchIndex
 {
     private const int BulkLinesPerDocument = 2;
 
-    private const int BulkBatchSize = 64;
     private const string KeywordSubfield = OpenSearchNames.KeywordSubfield;
     private const string ShardsSetting = OpenSearchNames.ShardsParameter;
     private const string ReplicasSetting = OpenSearchNames.ReplicasParameter;
@@ -42,9 +42,10 @@ internal static class OpenSearchIndex
     }
 
     internal static async Task SeedAsync(HttpClient client, string index, IReadOnlyList<BenchmarkDocument> documents, int expectedCopies,
-        CancellationToken cancellationToken)
+        IOptions<NativeComparisonExecutionOptions> executionOptions, CancellationToken cancellationToken)
     {
-        foreach (var batch in documents.Chunk(BulkBatchSize))
+        var batchSize = NativeComparisonExecutionOptions.Require(executionOptions).Value.OpenSearchBulkBatchSize;
+        foreach (var batch in documents.Chunk(batchSize))
         {
             var lines = new List<string>(batch.Length * BulkLinesPerDocument);
             foreach (var document in batch)

@@ -31,13 +31,14 @@ internal sealed class GrainNativeReplyTests
     [Test]
     public async Task ActualNativeStreamAcceptsExactByteLimitAndRejectsOneByteLess()
     {
+        var options = UnitRoutingOptions.Routing();
         var value = new GrainValue(new BackupReceipt(Entity, CutPosition));
         var expected = NativeSerialization.Serialize(value);
-        using var exact = new GrainBoundedPayloadStream(expected.Length, CancellationToken.None);
+        using var exact = new GrainBoundedPayloadStream(expected.Length, options, CancellationToken.None);
         NativeSerialization.Serialize(value, exact);
         await Assert.That(exact.Complete().SequenceEqual(expected)).IsTrue();
         await Assert.That(exact.Length).IsEqualTo((long)expected.Length);
-        using var shortBuffer = new GrainBoundedPayloadStream(expected.Length - OneByte, CancellationToken.None);
+        using var shortBuffer = new GrainBoundedPayloadStream(expected.Length - OneByte, options, CancellationToken.None);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Serialize(value, shortBuffer));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(shortBuffer.Length <= expected.Length - OneByte).IsTrue();
@@ -64,9 +65,10 @@ internal sealed class GrainNativeReplyTests
     [Test]
     public async Task CancelledNativeStreamCannotWriteOrComplete()
     {
+        var options = UnitRoutingOptions.Routing();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        using var stream = new GrainBoundedPayloadStream(UnitRoutingOptions.Routing().Value.MaximumReplyBytes, cancellation.Token);
+        using var stream = new GrainBoundedPayloadStream(options.Value.MaximumReplyBytes, options, cancellation.Token);
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
             NativeSerialization.Serialize(new GrainValue(new BackupReceipt(Entity, CutPosition)), stream))).IsNotNull();
         await Assert.That(stream.Length).IsEqualTo(0L);

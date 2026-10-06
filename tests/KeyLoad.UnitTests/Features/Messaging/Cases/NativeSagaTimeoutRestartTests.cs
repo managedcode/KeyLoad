@@ -15,7 +15,7 @@ internal sealed class NativeSagaTimeoutRestartTests(NativeSagaTimeoutFixture fix
     {
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
         var saga = NativeSagaTimeoutTestData.CreateWaitingSaga(fixture,
-            NativeSagaTimeoutTestData.RootPrincipalId);
+            NativeSagaTimeoutTestData.SagaPrincipalId);
         var dueTime = TimeProvider.System.GetUtcNow().Add(fixture.TestProfile.RestartHeldJobDelay);
         var job = await fixture.JobHarness.ScheduleAsync(saga.Hint, dueTime, cancellationToken);
         var originalShards = await fixture.JobHarness.CaptureOwnedShardsAsync(dueTime, cancellationToken);
@@ -46,10 +46,10 @@ internal sealed class NativeSagaTimeoutRestartTests(NativeSagaTimeoutFixture fix
     private async Task AssertTimeoutEffectAsync(NativeSagaTimeoutCase saga)
     {
         var current = fixture.Database.Database.InspectSaga(
-            NativeSagaTimeoutTestData.RootPrincipalId, saga.Lane, saga.Id);
+            NativeSagaTimeoutTestData.SagaPrincipalId, saga.Lane, saga.Id);
         await Assert.That(current!.Phase).IsEqualTo(SagaPhase.TimedOut);
         await Assert.That(current.Revision).IsEqualTo(RevisionAfterTimeout);
-        var message = fixture.Database.Database.InspectMessage(NativeSagaTimeoutTestData.RootPrincipalId,
+        var message = fixture.Database.Database.InspectMessage(NativeSagaTimeoutTestData.SagaPrincipalId,
             saga.TimeoutLane, NativeSagaTimeoutTestData.TimeoutMessageId(saga.Id, WaitingRevision));
         await Assert.That(message).IsNotNull();
         var actual = message!;

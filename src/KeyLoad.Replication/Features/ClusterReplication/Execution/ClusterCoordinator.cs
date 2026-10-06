@@ -28,8 +28,10 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
     /// <param name="admission">Configured independent control and data admission budgets.</param>
     /// <param name="clock">Node system clock; a caller cannot choose leader evaluation time.</param>
     /// <param name="options">Centrally validated command deadline, frozen for this admission owner.</param>
+    /// <param name="inboxOptions">Centrally validated command lane scheduling policy.</param>
     public ClusterCoordinator(ReplicaConsensus consensus, DatabaseEngine database,
-        CommandAdmissionGovernor admission, TimeProvider clock, IOptions<ReplicaExecutionOptions> options)
+        CommandAdmissionGovernor admission, TimeProvider clock, IOptions<ReplicaExecutionOptions> options,
+        IOptions<CommandInboxExecutionOptions> inboxOptions)
     {
         ArgumentNullException.ThrowIfNull(consensus);
         ArgumentNullException.ThrowIfNull(database);
@@ -42,8 +44,8 @@ public sealed class ClusterCoordinator : ICommitCoordinator, IHostedService, IAs
         this.consensus = consensus;
         this.database = database;
         this.clock = clock;
+        commands = new(admission, inboxOptions);
         database.Durability = DurabilityProfile.QuorumProcessDurable;
-        commands = new(admission);
         consensus.ConfigureForwarding(AcceptForwardedAsync);
     }
 

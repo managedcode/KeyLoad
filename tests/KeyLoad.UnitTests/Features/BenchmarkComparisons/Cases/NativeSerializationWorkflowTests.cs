@@ -41,7 +41,10 @@ internal sealed class NativeSerializationWorkflowTests
 
         var aggregate = WorkflowLayoutSource.JobBlock(workflow, "comparison-aggregate");
         await Assert.That(aggregate.Contains(WorkflowDatabaseGroups.AggregateNeeds, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(aggregate.Contains("Check all 270 benchmark results", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("Check control and complete scale accounting", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("scaled-cohort-aggregate-cli.mjs", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("--composite-plan=", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(aggregate.Contains("Save internal scaled cohort receipt", StringComparison.Ordinal)).IsTrue();
         await Assert.That(aggregate.Contains("raw-storage", StringComparison.Ordinal)).IsFalse();
         await Assert.That(aggregate.Contains("internal-codec", StringComparison.Ordinal)).IsFalse();
 

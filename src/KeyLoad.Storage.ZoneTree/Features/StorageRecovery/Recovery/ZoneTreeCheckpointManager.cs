@@ -96,7 +96,8 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
 
     private StorageSnapshot ReadStaged(string temporary, long expectedAppliedPosition)
     {
-        using var input = new FileStream(temporary, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+        using var input = new FileStream(temporary, FileMode.Open, FileAccess.ReadWrite, FileShare.None,
+            runtime.Options.StreamBufferBytes);
         var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options, validate: ValidateReaderContract);
         if (snapshot.Incarnation != runtime.Identity.Incarnation || snapshot.AppliedPosition != expectedAppliedPosition
             || input.Position != input.Length)
@@ -113,7 +114,8 @@ internal sealed class ZoneTreeCheckpointManager(ZoneTreeStoreRuntime runtime)
     internal StorageSnapshot VerifySnapshot(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        using var input = File.OpenRead(path);
+        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
+            runtime.Options.StreamBufferBytes);
         var snapshot = ZoneTreeCheckpointReader.Read(input, runtime.Options, validate: ValidateReaderContract);
         if (input.Position != input.Length)
         {

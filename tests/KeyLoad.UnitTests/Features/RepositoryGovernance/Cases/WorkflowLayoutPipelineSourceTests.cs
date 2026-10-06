@@ -72,7 +72,8 @@ internal sealed class WorkflowLayoutPipelineSourceTests
         var expected = new[]
         {
             "name: Verify benchmark plan", "name: Download benchmark results",
-            "name: Check all 270 benchmark results", "name: Save combined benchmark results",
+            "name: Check control and complete scale accounting", "name: Save combined benchmark results",
+            "name: Save internal scaled cohort receipt",
             "name: Save GitHub result verification"
         };
         var authenticatedSteps = steps.Where(static step => !step.Contains("name: Download source code", StringComparison.Ordinal));
