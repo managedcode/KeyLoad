@@ -10,7 +10,6 @@ internal sealed class MongoReadinessResourceTests
     private const string ReadinessMount = "/bootstrap/isolated-mongo-readiness.js";
     private const string ClientMount = "/bootstrap/isolated-mongo.js";
     private const string ReadinessFile = "IsolatedMongoReadiness.js";
-    private const string Load = "await load(MongoBootstrap.readinessPath)";
     private const string EntryFile = "IsolatedMongoEntry.sh";
     private const string ClientFile = "IsolatedMongoInitiate.js";
     private const string Scripts = "Features/BenchmarkComparisons";
@@ -36,9 +35,8 @@ internal sealed class MongoReadinessResourceTests
         await Assert.That(Path.GetFileName(readiness.Source)).IsEqualTo(ReadinessFile);
         await Assert.That(File.Exists(readiness.Source)).IsTrue();
         var client = bootstrap.Annotations.OfType<ContainerMountAnnotation>().Single(mount => mount.Target == ClientMount);
-        var source = await File.ReadAllTextAsync(client.Source!, TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(source.Contains(Load, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(source.Contains("KeyLoadMongoReadiness.waitReady(hosts, set, deadline, admin)", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(client.IsReadOnly).IsTrue();
+        await Assert.That(File.Exists(client.Source)).IsTrue();
     }
 
     /// <summary>AC-MR-031-003: missing genuine helper bytes fail composition before native resources start.</summary>

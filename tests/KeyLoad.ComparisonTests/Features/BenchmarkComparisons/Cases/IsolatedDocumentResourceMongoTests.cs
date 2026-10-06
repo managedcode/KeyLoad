@@ -14,21 +14,6 @@ internal sealed class IsolatedDocumentResourceMongoTests
     private const string Script = "/bootstrap/isolated-mongo.sh";
     private const string BootstrapScript = "/bootstrap/isolated-mongo.js";
     private const string ReadinessScript = "/bootstrap/isolated-mongo-readiness.js";
-    private const string TopLevelAwait = "await bootstrap();";
-    private const string SetupDeadline = "const deadline = Date.now() + 120000;";
-    private const string BootstrapCompletion = """
-        bootstrap().then(
-            () => quit(0),
-            error => {
-                // Native failures are retained as a fixed classification without credential-bearing details.
-                if (lastDiagnostic === null || lastDiagnostic.predicate === MongoDiagnosticPredicate.none || lastDiagnostic.predicate === MongoDiagnosticPredicate.awaiting) rememberException(error);
-                print('MongoNativeBootstrapFailed');
-                printDiagnostic();
-                quit(1);
-            }
-        );
-        """;
-
     /// <summary>AC-ISO-002/003/005/006: exact native nodes and a bounded authenticated bootstrap completion barrier.</summary>
     [Test]
     [Arguments(1)]
@@ -47,8 +32,7 @@ internal sealed class IsolatedDocumentResourceMongoTests
         {
             await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, T.MongoData, fixture.Context.Root);
             await Assert.That(await IsolatedDocumentResourceAssertions.SecretAsync(node, Password)).IsSameReferenceAs(password);
-            await IsolatedDocumentResourceAssertions.VerifyScriptAsync(node, Script,
-                "chmod 600", "chown mongodb:mongodb", "/usr/local/bin/docker-entrypoint.sh");
+            await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(node, Script);
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Any(argument => argument.Value == T.ReplicaOption)).IsEqualTo(count > 1);
             await Assert.That(node.Annotations.OfType<WaitAnnotation>()).IsEmpty();
@@ -81,24 +65,10 @@ internal sealed class IsolatedDocumentResourceMongoTests
         await Assert.That(bootstrap.Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name)).IsEquivalentTo(nodes.Select(node => node.Name));
         await Assert.That(fixture.Context.Runner.Resource.Annotations.OfType<WaitAnnotation>().Any(wait =>
             ReferenceEquals(wait.Resource, bootstrap) && wait.WaitType == WaitType.WaitForCompletion)).IsTrue();
-        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(bootstrap, BootstrapScript,
-            "process.env", "replSetInitiate", "deadline", "auth", "quit(1)", "hosts.length > MongoBootstrap.one",
-            "await load(MongoBootstrap.readinessPath)", "KeyLoadMongoReadiness.waitReady(hosts, set, deadline, admin)");
-        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(bootstrap, ReadinessScript,
-            "replSetGetStatus", "replSetGetConfig", "isWritablePrimary", "primary === hosts[MongoReadiness.zero]",
-            "mongoReadinessSameRound(previous, current)", "pollMs: 500");
-        await VerifyCompletionAsync(bootstrap);
+        await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(bootstrap, BootstrapScript);
+        await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(bootstrap, ReadinessScript);
         var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(bootstrap);
         await Assert.That(configuration.Arguments.Select(argument => argument.Value).SequenceEqual(
             new[] { T.Shell, T.Quiet, T.NoDatabase, BootstrapScript }, StringComparer.Ordinal)).IsTrue();
-    }
-
-    private static async Task VerifyCompletionAsync(ContainerResource bootstrap)
-    {
-        var mount = bootstrap.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == BootstrapScript);
-        var source = await File.ReadAllTextAsync(mount.Source!, TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(source.TrimEnd().EndsWith(BootstrapCompletion, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(source.Contains(TopLevelAwait, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(source.Contains(SetupDeadline, StringComparison.Ordinal)).IsTrue();
     }
 }

@@ -1,5 +1,53 @@
 # CodeQuality
 
+## Behavioural test cleanup, owner correction 2026-10-06
+
+- REQ-CQ-014: functional tests execute an actual operation and verify its observable
+  outcome and resulting state. Reading repository source or workflow YAML to
+  assert words, calls, attributes or implementation shape is prohibited test proof.
+- AC-CQ-049: remove the source-only workflow tests, their unused readers/parsers and
+  the CI filter targeting the removed tests. Keep real governance CLI acceptance/
+  rejection flows, native compiler/analyzer diagnostics and database operations.
+  Verify remaining code with the canonical Release build and relevant Aspire suites.
+- AC-CQ-050: active requirements must not cite removed source-only tests as current
+  acceptance evidence. Workflow execution and original GitHub outcomes qualify
+  delivery behaviour; existing static governance stays in CI. Immutable historical
+  receipts keep their original test identities and results.
+
+AC-CQ-049 retains `GovernanceWorkingFileTests`, `IsolatedDocumentResourceMongoTests`,
+`IsolatedDocumentResourcePostgresTests`, `IsolatedResourceTopologyRedisTests` and
+`MongoReadinessResourceTests` as the automated operation/composition regressions.
+AC-CQ-050 uses an explicit review exception: inspect the active requirement/test
+mapping and retain actual original GitHub job outcomes for workflow behaviour;
+substring assertions cannot replace those outcomes.
+
+TASK-CQ-BEHAVIOURAL-TESTS-001 maps REQ-CQ-014 to AC-CQ-049/050. The lead owns policy,
+  docs, CI integration and final checks; the RepositoryGovernance worker removes
+  source-only cases/helpers, the comparison worker removes mounted-script token
+  assertions, and a read-only auditor checks remaining projects. Review each diff,
+  retain real positive/negative/edge operations, resolve live references, then run
+  format, Release build, static governance and affected Aspire tests. No database,
+  protocol, dependency, storage format or topology change is part of this cleanup;
+  existing ADR-033/ADR-032 contracts suffice (new ADR: N/A). Rollback restores this
+  coherent test/CI/doc change without touching unrelated work.
+
+```mermaid
+flowchart LR
+    Input[Real operation inputs] --> Operation[Compiler CLI or database operation]
+    Operation --> Assert[Observable result and resulting state]
+    Source[Source presence checks] --> Remove[Remove obsolete tests and helpers]
+```
+
+Local development verification on2026-10-06: canonical Release solution build
+passed with zero warnings/errors; full solution formatting, CI YAML parsing and
+static governance passed. The retained Aspire-owned focused cases passed37/37
+(governance9, document resources18, Mongo readiness7, Redis resources3), with no
+skips. Original reports are under `TestResults/source-text-cleanup/`. The canceled
+governance attempt and Redis rejection of the macOS symlink temp path remain
+retained; sequential retries using the real `/private/tmp` temp root passed
+without changing assertions or path guards. This is development evidence, not
+new Linux RF3/recovery or product qualification.
+
 REQ-CQ-006 maps to AC-CQ-008/009 in
 this Feature and the ADR-033 execution contract,
 under the accepted ADR-033 numeric extension. Four source-editable enabled error

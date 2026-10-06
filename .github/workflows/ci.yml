@@ -113,8 +113,6 @@ jobs:
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeBenchmarkProgressEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-entry --KeyLoadTests:ReportTrx=true
       - name: Test benchmark phase and attempt counters
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/ComparisonLiveProgress*/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-counters --KeyLoadTests:ReportTrx=true
-      - name: Test Aspire workflow entry contracts
-        run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/WorkflowLayoutAspireEntryTests/*' --KeyLoadTests:ResultsDirectory=TestResults/live-benchmark-workflow --KeyLoadTests:ReportTrx=true
       - name: Run unit tests
         run: dotnet run --project src/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit --KeyLoadTests:ReportTrx=true
       - name: Run unit tests without CPU intrinsics

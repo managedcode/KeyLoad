@@ -40,8 +40,7 @@ internal sealed class IsolatedDocumentResourcePostgresTests
         foreach (var node in nodes)
         {
             await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, Data, fixture.Context.Root);
-            await IsolatedDocumentResourceAssertions.VerifyScriptAsync(node, EntryScript,
-                "chown", "postgres:postgres", "/usr/local/bin/docker-entrypoint.sh", "pg_basebackup", "PGPASSWORD", "PG_VERSION");
+            await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(node, EntryScript);
             await Assert.That(node.Entrypoint).IsEqualTo(T.CommandShell);
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Select(argument => argument.Value).SequenceEqual(
@@ -49,8 +48,7 @@ internal sealed class IsolatedDocumentResourcePostgresTests
                     T.PostgresConfiguration, SlotRetention }, StringComparer.Ordinal)).IsTrue();
             await Assert.That(configuration.EnvironmentVariables.ToDictionary()[T.PgDataEnvironment]).IsEqualTo(T.PgData);
         }
-        await IsolatedDocumentResourceAssertions.VerifyScriptAsync(primary, InitScript,
-            "host replication", "scram-sha-256", "pg_create_physical_replication_slot", "true, false");
+        await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(primary, InitScript);
         var primaryEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(primary);
         await Assert.That(primaryEnvironment[StandbyCount]).IsEqualTo(
             (count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -61,7 +59,6 @@ internal sealed class IsolatedDocumentResourcePostgresTests
             var settings = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
             await Assert.That(settings[ApplicationName]).IsEqualTo("benchmark_standby" + index);
             await Assert.That(settings.ContainsKey(StandbyCount)).IsFalse();
-            await IsolatedDocumentResourceAssertions.VerifyScriptAsync(node, EntryScript, "--slot=\"$PGAPPNAME\"");
             await Assert.That(node.Annotations.OfType<WaitAnnotation>().Single().Resource).IsSameReferenceAs(primary);
         }
     }

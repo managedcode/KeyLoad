@@ -76,15 +76,10 @@ internal static class IsolatedDocumentResourceAssertions
         return parameter;
     }
 
-    internal static async Task VerifyScriptAsync(ContainerResource node, string target, params string[] required)
+    internal static async Task VerifyScriptMountAsync(ContainerResource node, string target)
     {
         var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == target);
         await Assert.That(mount.IsReadOnly).IsTrue();
-        var source = await File.ReadAllTextAsync(mount.Source!, TestContext.Current!.Execution.CancellationToken);
-        foreach (var text in required)
-        {
-            await Assert.That(source.Contains(text, StringComparison.Ordinal)).IsTrue();
-        }
-        await Assert.That(source.Contains("set -x", StringComparison.Ordinal)).IsFalse();
+        await Assert.That(File.Exists(mount.Source)).IsTrue();
     }
 }

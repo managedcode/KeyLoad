@@ -17,9 +17,4 @@ internal static class WorkflowDatabaseGroups
         ("surrealdb", "SurrealDB"),
         ("helixdb", "HelixDB")
     ];
-
-    internal static string[] JobIds => Entries.Select(static entry => "comparison-" + entry.Key).ToArray();
-
-    internal static string AggregateNeeds => "needs: [comparison-build, comparison-plan, comparison-images, "
-        + string.Join(", ", JobIds) + "]";
 }
