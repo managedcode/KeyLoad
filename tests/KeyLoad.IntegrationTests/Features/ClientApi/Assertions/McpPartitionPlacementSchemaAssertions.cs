@@ -48,7 +48,7 @@ internal static class McpPartitionPlacementSchemaAssertions
         await VerifyPartitionAsync(input, properties.GetProperty(McpDiscoveryProtocol.Partition));
         await VerifyPrimitiveAsync(input, properties.GetProperty(McpDiscoveryProtocol.PhysicalShardId), McpDiscoveryProtocol.String);
         var result = Resolve(output, output.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Result));
-        await Assert.That(HasType(result, McpDiscoveryProtocol.Boolean)).IsTrue();
+        await VerifyPrimitiveAsync(output, result, McpDiscoveryProtocol.Boolean);
     }
 
     private static async Task VerifyReadAsync(JsonElement input, JsonElement output)
@@ -80,9 +80,12 @@ internal static class McpPartitionPlacementSchemaAssertions
     private static async Task VerifyPartitionAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, PartitionFields, PartitionFields);
+        await VerifyObjectAsync(schema, PartitionFields.Add(McpDiscoveryProtocol.AtomicPartitionId), PartitionFields);
         foreach (var field in PartitionFields)
         { await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(field), McpDiscoveryProtocol.String); }
+        var computed = Resolve(root, schema.GetProperty(McpDiscoveryProtocol.Properties)
+            .GetProperty(McpDiscoveryProtocol.AtomicPartitionId));
+        await VerifyExactTypeSetAsync(computed, [McpDiscoveryProtocol.String, McpDiscoveryProtocol.Null]);
     }
 
     private static async Task VerifyObjectAsync(JsonElement schema, ImmutableArray<string> fields,
@@ -101,24 +104,23 @@ internal static class McpPartitionPlacementSchemaAssertions
     private static async Task VerifyPrimitiveAsync(JsonElement root, JsonElement schema, string expected)
     {
         schema = Resolve(root, schema);
-        await Assert.That(HasType(schema, expected)).IsTrue();
+        if (expected == McpDiscoveryProtocol.Integer)
+        {
+            await VerifyExactTypeSetAsync(schema, [McpDiscoveryProtocol.String, McpDiscoveryProtocol.Integer]);
+            return;
+        }
+        await Assert.That(schema.GetProperty(McpDiscoveryProtocol.Type).GetString()).IsEqualTo(expected);
     }
 
-    private static bool HasType(JsonElement schema, string expected)
+    private static async Task VerifyExactTypeSetAsync(JsonElement schema, string[] expected)
     {
-        if (schema.TryGetProperty(McpDiscoveryProtocol.Type, out var type))
-        {
-            if (type.ValueKind == JsonValueKind.String && type.GetString() == expected)
-            { return true; }
-            if (type.ValueKind == JsonValueKind.Array && type.EnumerateArray().Any(value => value.GetString() == expected))
-            { return true; }
-        }
-        foreach (var keyword in new[] { McpDiscoveryProtocol.AnyOf, McpDiscoveryProtocol.OneOf })
-        {
-            if (schema.TryGetProperty(keyword, out var variants) && variants.EnumerateArray().Any(value => HasType(value, expected)))
-            { return true; }
-        }
-        return false;
+        var type = schema.GetProperty(McpDiscoveryProtocol.Type);
+        await Assert.That(type.ValueKind).IsEqualTo(JsonValueKind.Array);
+        var actual = type.EnumerateArray().ToArray();
+        await Assert.That(actual.Length).IsEqualTo(expected.Length);
+        await Assert.That(actual.All(item => item.ValueKind == JsonValueKind.String)).IsTrue();
+        foreach (var item in expected)
+        { await Assert.That(actual.Count(value => value.GetString() == item)).IsEqualTo(1); }
     }
 
     private static JsonElement Resolve(JsonElement root, JsonElement schema)

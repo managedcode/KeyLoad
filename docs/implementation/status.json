@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R144 full Release passed with4,116 compile inputs and zero drift/warnings/errors; R147 full native formatter passed with zero drift; R145/R146 immutable COPY-context filesystem operation1/1 normal/scalar and R148 native Aspire immutable-image model1/1 passed with4,117 source inputs and zero source/image drift. Original259 Linux normal/scalar2765/2765 and recovery235/235 plus same-job native identity passed; its RF3 job failed. Actual owned local Docker image/RF3 and complete current Linux/functional product coverage remain open.",
+    "verificationStage": "R163 full native C# Release passed4,116 compile inputs with zero drift/warnings/errors; R165 full native formatter passed with zero drift. R153 real public partition-query SDK/MCP1/1 and R164 full discovery/query schema/Saga cohort6/6 passed on Aspire-owned Docker RF3 with4,117 source inputs and394 assembly paths, zero drift and no skips. Corrected R168/R169 native immutable local image prepare/verify/cleanup/repeated-absence lifecycle passed. These are local development receipts; complete current Linux RF3, functional product coverage and full task gates remain open.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
@@ -44,9 +44,9 @@
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "0fa8520118c18c4cf37587388c6c27d60b4fac85aa222a0aeeb15b647cbd0ad4",
+      "logSha256": "c09bf6e10ccd78c1e0a44b5e6eed3275e50cc468a03760554b9316a6a8606afd",
       "passed": true,
-      "qualification": "native local full Release build; complete current-source Linux and RF3 acceptance remain open"
+      "qualification": "native local full C# Release build; Node cleanup one-line repair separately verified by actual native image lifecycle; complete current-source Linux/RF3 acceptance remains open"
     },
     "currentFormatter": {
       "compileInputs": 4116,
@@ -100,10 +100,10 @@
         "trxSha256": "0873660dfd39ae31ac2a894894a71c75173e7a26f909332657345c1782b84cd9"
       },
       "verifiedOperation": "real Node filesystem symlink and20,001-entry rejection; exact standalone COPY ancestors, bytes/modes/digest; original source edit leaves immutable snapshot unchanged; original process/readers joined and owned-root cleanup followed by healthy recapture",
-      "actualDockerImagePassed": false,
-      "actualRf3Passed": false,
+      "actualDockerImagePassed": true,
+      "actualRf3Passed": true,
       "linuxQualified": false,
-      "qualification": "native local whole filesystem operation; actual Docker producer, test-owned Aspire RF3 and Linux source delivery still required"
+      "qualification": "R145/R146 real filesystem snapshot operation, R149 real native immutable Docker producer and R153/R164 actual Aspire-owned local RF3 SDK/MCP development passed; Linux delivery/global RF3 and product coverage remain open"
     },
     "immutableMembershipModelDevelopment": {
       "task": "TASK-MEMBERSHIP-IMAGE-ORACLE",
@@ -124,8 +124,136 @@
       "actualSixSiloMembershipPassed": false,
       "linuxQualified": false,
       "qualification": "native local controlled model validation; no registry provenance or database RF3 qualification inferred",
-      "finalBuildImageVerification": "R148 native model1/1 after R144 full build; all394 exact assembly paths unchanged throughout operation"
-    }
+      "finalBuildImageVerification": "R148 native model1/1 after R144 full build; all394 exact assembly paths unchanged throughout operation",
+      "lifecycleCaveat": "Pinned native BuildAsync releases and resumes the normal AppHost entrypoint; absence of an explicit test StartAsync call does not establish that no resources start. Model assertions do not qualify registry/Docker/readiness or six-silo membership."
+    },
+    "ownedLocalDockerRf3Development": {
+      "tasks": [
+        "TASK-TEST-LOCAL-STARTED-IMAGE-ORDER",
+        "TASK-MCP-NATIVE-SCHEMA-EVIDENCE",
+        "TASK-MCP-NATIVE-SCHEMA-ORACLE",
+        "TASK-JOBS-S1-AUTONOMOUS-RF3"
+      ],
+      "nativeExitCode": 0,
+      "passed": 6,
+      "total": 6,
+      "failed": 0,
+      "skipped": 0,
+      "sourceInputs": 4117,
+      "assemblyInputs": 394,
+      "sourceDrift": 0,
+      "assemblyDrift": 0,
+      "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
+      "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
+      "cases": [
+        {
+          "name": "AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints",
+          "outcome": "Passed"
+        },
+        {
+          "name": "AcMcpGw001RemovedAndRecursiveToolsFailBeforeExecution",
+          "outcome": "Passed"
+        },
+        {
+          "name": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
+          "outcome": "Passed"
+        },
+        {
+          "name": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
+          "outcome": "Passed"
+        },
+        {
+          "name": "AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision",
+          "outcome": "Passed"
+        },
+        {
+          "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
+          "outcome": "Passed"
+        }
+      ],
+      "imageConfigId": "sha256:5e31fd353af9b79977930a1ed016483a2e49c5923ceac33028bf3f577e5dc9df",
+      "inputDigest": "sha256:2b7976f6d2f08ba09b761c5f61e3a8908fb72f71086e7b603c83db8d53533fd5",
+      "publicPartitionQuery": {
+        "passed": 1,
+        "total": 1,
+        "logSha256": "839a688027b9790891513158d94bef7bcacf1f82a8a6454047b4bd814b8de070",
+        "trxSha256": "6d90ce4252b8984b245c91a4335ad9e3ec729cdb3eab4b90c56be73e0bc77c24"
+      },
+      "originalStartupFailure": "R151 Docker inspect ran before asynchronous resource creation; original failed log and TRX retained; current healthy wait precedes actual image inspection under unchanged2min startup token",
+      "qualification": "actual owned local Docker image through native TUnit fixtures; AppHost owns RF3 resources/readiness/discovered SDK and official MCP clients/shutdown; local development, not delivered Linux/full product qualification",
+      "linuxQualified": false
+    },
+    "ownedImageCleanupDevelopment": {
+      "task": "TASK-TEST-LOCAL-CLEANUP-COMMAND",
+      "initiatingDefect": "requireNoOwnedContainers passed a second docker executable token to runDocker, producing docker docker ps",
+      "originalCleanupExitCode": 1,
+      "originalFailedCleanupRetained": true,
+      "originalOwnedTagDiagnosticRemoval": {
+        "nativeExitCode": 0,
+        "ownedContainerCount": 0,
+        "identityAndLabelsVerified": true,
+        "logSha256": "2bb139a16c3447a0991dd2520a11bf2d98c3da538be1aa200fc5860fb982857c"
+      },
+      "prepareExitCode": 0,
+      "producerReceiptSha256": "4ea22ea92819b0c8ba4c33db6da13e878a95c730ecde3eb8a1ef256a61b79bac",
+      "originalBuildTailSha256": "6237ecb92423b9662a4e4f0e0bf651b99449e9755b392c05d334c9064c9c495b",
+      "canonicalStages": [
+        {
+          "action": "verify",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 1.114,
+          "logSha256": "0928f652e6825fc0b27f8abbe3a3a987147c811b41d4f9b7d40ca4cee3539b31",
+          "logBytes": 342,
+          "nativeIdentity": {
+            "provenance": "local-development",
+            "imageReference": "keyload/local-server:local-83ac2a96f8a14c62a1f1b2c2ee53d6b8",
+            "invocationId": "83ac2a96f8a14c62a1f1b2c2ee53d6b8",
+            "inputDigest": "sha256:2b7976f6d2f08ba09b761c5f61e3a8908fb72f71086e7b603c83db8d53533fd5",
+            "imageConfigId": "sha256:7d5135c576fd0e31cf1b7fca21f75b8d59133dd6e558fd01bd7307c7a92fc919"
+          }
+        },
+        {
+          "action": "cleanup",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 0.398,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "logBytes": 0
+        },
+        {
+          "action": "cleanup",
+          "nativeExitCode": 0,
+          "elapsedSeconds": 0.269,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "logBytes": 0
+        }
+      ],
+      "lifecycleReceiptSha256": "f5fb324157eb17708f16fd8720c1363dcd6eef64b66da694679bb8f4c55f07a2",
+      "qualification": "actual native local immutable image prepare/verify/cleanup/idempotent-absence lifecycle; not Docker database RF3 or Linux delivery proof",
+      "forceOrPruneUsed": false,
+      "linuxQualified": false
+    },
+    "latestOriginalRf3FailureCohorts": [
+      {
+        "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+        "runId": 37554329420,
+        "artifactId": 11455218921,
+        "passed": 141,
+        "total": 155,
+        "failed": 14,
+        "skipped": 0,
+        "originalZipSha256": "922bf38286cc1c15949dc2aaab9b9c4a9af8486b0dedb70e15f06a21fdbca8df"
+      },
+      {
+        "sourceCommit": "8844c29d88f809e50348076ee39d859c91415696",
+        "runId": 37555827366,
+        "artifactId": 11455674630,
+        "passed": 141,
+        "total": 155,
+        "failed": 14,
+        "skipped": 0,
+        "originalZipSha256": "97294b3d410d7be5a87bae0a3748a54fcea83b58362b1d8eb61a7f12886a5573"
+      }
+    ]
   },
   "TIME-PROVIDER-001": {
     "title": "Explicit TimeProvider ownership for current time, elapsed work and timers",
@@ -307,9 +435,19 @@
       "sourceJoined": true,
       "canonicalBuildPassed": true,
       "rf3Qualified": false,
-      "scope": "three original official-client schema oracles match exact native integer/string and nullable computed-field type sets; success assertions retain failure and expose only closed safe error code with mapped status",
+      "scope": "exact native integer/string, nullable computed PartitionRef metadata, nullable redacted-field items and placement schemas; all68 operation discovery schemas/hints checked by actual official MCP caller; closed safe error code diagnostics retain failures",
       "originalRf3Evidence": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722",
-      "remaining": "fresh official SDK discovery/query/incoming-graph operation flows and actual safe failure-code observation; no actual domain failure cause inferred"
+      "remaining": "Complete current-source Linux unfiltered gates, remaining incoming-graph/fault/restart/guidance qualification and source-bound full functional coverage; local6-case cohort does not qualify all ClientApi tasks.",
+      "localRf3Passed": true,
+      "localRf3Receipt": {
+        "passed": 6,
+        "total": 6,
+        "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
+        "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "qualification": "local actual Aspire-owned RF3; full ClientApi/Linux task qualification remains open"
+      }
     }
   },
   "DATABASE-COMPOSITION-001": {
@@ -3260,6 +3398,18 @@
         "fullSuiteTotal": 118,
         "fullSuiteFailed": 15,
         "qualified": false
+      },
+      "localAutonomousTimeoutReplayDevelopment": {
+        "case": "AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision",
+        "passed": 1,
+        "total": 1,
+        "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
+        "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
+        "operation": "autonomous TimedOut revision2, same admitted create receipt replay, distinct stale timeout RevisionConflict through SDK/MCP, one terminal message and no repeat",
+        "coordinatorIdentity": "fresh private command per due attempt; only a single uncertainty retry reuses it",
+        "lostAckQualified": false,
+        "leaderLossColdRestartQualified": false,
+        "linuxQualified": false
       }
     }
   },
@@ -4283,15 +4433,19 @@
         "pending": 0
       },
       "codeDelivery": {
-        "currentBuild": "R144 full native Release passed4,116 inputs with zero source drift/warnings/errors; original log SHA2560fa8520118c18c4cf37587388c6c27d60b4fac85aa222a0aeeb15b647cbd0ad4",
-        "formatter": "R147 full native dotnet format --verify-no-changes passed4,116 inputs with zero source drift, original native exit0",
-        "verificationScope": "R144 full Release passed with4,116 compile inputs and zero drift/warnings/errors; R147 full native formatter passed with zero drift; R145/R146 immutable COPY-context filesystem operation1/1 normal/scalar and R148 native Aspire immutable-image model1/1 passed with4,117 source inputs and zero source/image drift. Original259 Linux normal/scalar2765/2765 and recovery235/235 plus same-job native identity passed; its RF3 job failed. Actual owned local Docker image/RF3 and complete current Linux/functional product coverage remain open.",
+        "currentBuild": "R163 full native C# Release passed4,116 inputs, zero drift/warnings/errors; log SHA256c09bf6e10ccd78c1e0a44b5e6eed3275e50cc468a03760554b9316a6a8606afd",
+        "formatter": "R165 full native formatter passed4,116 inputs, zero drift and native exit0",
+        "verificationScope": "R163 full native C# Release passed4,116 compile inputs with zero drift/warnings/errors; R165 full native formatter passed with zero drift. R153 real public partition-query SDK/MCP1/1 and R164 full discovery/query schema/Saga cohort6/6 passed on Aspire-owned Docker RF3 with4,117 source inputs and394 assembly paths, zero drift and no skips. Corrected R168/R169 native immutable local image prepare/verify/cleanup/repeated-absence lifecycle passed. These are local development receipts; complete current Linux RF3, functional product coverage and full task gates remain open.",
         "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory",
         "qualityReview": {
           "sourceFindings": [
             "Bounded immutable Docker COPY snapshot replaces mutable-checkout build context; original producer/readers join before exclusive raw tail retention and cleanup.",
             "Pinned Aspire13.6 SHA256 setter clears Tag; exact native resolved-image assertion and six-resource changed-digest rejection/restoration operation verified.",
-            "KL-007 all19 mapped operations pass in original259 Linux normal/scalar/full235 recovery with same-job compiled image identity and zero33-file owned-source drift."
+            "KL-007 all19 mapped operations pass in original259 Linux normal/scalar/full235 recovery with same-job compiled image identity and zero33-file owned-source drift.",
+            "Existing ClusterFixture healthy wait now precedes Docker image inspection; actual public SDK/MCP partition-query operation passed.",
+            "Actual captured native output sets correct graph/query/placement oracles without changing production metadata or authorization; final official discovery/Saga cohort6/6 passed.",
+            "Stale public deterministic saga-timeout command assumption removed: replay uses the actual admitted command, and a distinct stale timeout remains RevisionConflict.",
+            "Native local image cleanup duplicated executable token repaired; real prepare/verify/cleanup/repeated-absence flow passed with scoped non-force removal."
           ],
           "sdkAnalyzersAndOwnedComplexity": "full Release build0warnings0errors; existing400file/200type/64method/depth3 limits enforced",
           "analyzerConfig": "unchanged central .editorconfig, warning severity and consumers; no suppression or analyzer package changes",
@@ -4385,7 +4539,63 @@
           "originalRf3CaseChanged": false,
           "rf3RuntimeQualified": false
         },
-        "localNativeIdentityPrepareVerify": "R116 native production/source and Unit/Recovery/Integration DLL/PDB receipt prepare+verify passed; manifest SHA2562f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09. Local uncommitted-source identity inspection is not original same-job Linux delivery qualification."
+        "localNativeIdentityPrepareVerify": "R116 native production/source and Unit/Recovery/Integration DLL/PDB receipt prepare+verify passed; manifest SHA2562f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09. Local uncommitted-source identity inspection is not original same-job Linux delivery qualification.",
+        "focusedLocalDockerRf3Stage": {
+          "tasks": [
+            "TASK-TEST-LOCAL-STARTED-IMAGE-ORDER",
+            "TASK-MCP-NATIVE-SCHEMA-EVIDENCE",
+            "TASK-MCP-NATIVE-SCHEMA-ORACLE",
+            "TASK-JOBS-S1-AUTONOMOUS-RF3"
+          ],
+          "nativeExitCode": 0,
+          "passed": 6,
+          "total": 6,
+          "failed": 0,
+          "skipped": 0,
+          "sourceInputs": 4117,
+          "assemblyInputs": 394,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "f4c76940a8965b651f9d8c8dde74e189737ef73ef2b5bb6e64469d98d1175eee",
+          "trxSha256": "8094ffc1620961edf712e5919f97a7535bff429e22b73b737b5e28741d2c0f83",
+          "cases": [
+            {
+              "name": "AcMcp001OfficialClientDiscoversMetaToolsAndSearchesCanonicalSchemasAndHints",
+              "outcome": "Passed"
+            },
+            {
+              "name": "AcMcpGw001RemovedAndRecursiveToolsFailBeforeExecution",
+              "outcome": "Passed"
+            },
+            {
+              "name": "AcMcp007OfficialClientReceivesCanonicalCapabilitiesAndFreshExecutionIds",
+              "outcome": "Passed"
+            },
+            {
+              "name": "AcMcp005CancelledNativeReadDoesNotPreventTheNextRealCall",
+              "outcome": "Passed"
+            },
+            {
+              "name": "AcJobs003DueTimeoutCommitsOneMessageAndOneTerminalSagaRevision",
+              "outcome": "Passed"
+            },
+            {
+              "name": "OfficialClientDiscoversExactPartitionQuerySchemaAndHints",
+              "outcome": "Passed"
+            }
+          ],
+          "imageConfigId": "sha256:5e31fd353af9b79977930a1ed016483a2e49c5923ceac33028bf3f577e5dc9df",
+          "inputDigest": "sha256:2b7976f6d2f08ba09b761c5f61e3a8908fb72f71086e7b603c83db8d53533fd5",
+          "publicPartitionQuery": {
+            "passed": 1,
+            "total": 1,
+            "logSha256": "839a688027b9790891513158d94bef7bcacf1f82a8a6454047b4bd814b8de070",
+            "trxSha256": "6d90ce4252b8984b245c91a4335ad9e3ec729cdb3eab4b90c56be73e0bc77c24"
+          },
+          "originalStartupFailure": "R151 Docker inspect ran before asynchronous resource creation; original failed log and TRX retained; current healthy wait precedes actual image inspection under unchanged2min startup token",
+          "qualification": "actual owned local Docker image through native TUnit fixtures; AppHost owns RF3 resources/readiness/discovered SDK and official MCP clients/shutdown; local development, not delivered Linux/full product qualification",
+          "linuxQualified": false
+        }
       }
     }
   },

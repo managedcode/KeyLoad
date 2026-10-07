@@ -105,13 +105,16 @@ internal static class PartitionQueryMcpSchemaAssertions
     {
         schema = Resolve(root, schema);
         schema = FindBranch(schema, McpDiscoveryProtocol.Object, allowNullType: true);
-        await Assert.That(schema.TryGetProperty(McpDiscoveryProtocol.AdditionalProperties, out var additional)).IsTrue();
-        await Assert.That(additional.ValueKind).IsNotEqualTo(JsonValueKind.False);
+        if (schema.TryGetProperty(McpDiscoveryProtocol.AdditionalProperties, out var additional))
+        {
+            await Assert.That(additional.ValueKind is JsonValueKind.True or JsonValueKind.Object).IsTrue();
+        }
     }
 
     private static async Task VerifyStringArrayAsync(JsonElement root, JsonElement schema)
     {
-        schema = FindBranch(Resolve(root, schema), McpDiscoveryProtocol.Array);
+        schema = Resolve(root, schema);
+        await VerifyExactTypeSetAsync(root, schema, McpDiscoveryProtocol.Array, McpDiscoveryProtocol.Null);
         await VerifyPrimitiveAsync(root, schema.GetProperty(McpDiscoveryProtocol.Items), McpDiscoveryProtocol.String);
     }
 

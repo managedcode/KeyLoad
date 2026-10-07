@@ -252,3 +252,22 @@ flowchart LR
     Runner --> Outcome[Original exit and MTP artifacts]
     Outcome --> Cleanup[Stop and dispose every owned AppHost]
 ```
+
+TASK-TEST-LOCAL-STARTED-IMAGE-ORDER refines REQ/AC-TEST-015 without a new
+resource or deadline. Root moves the existing native three-node healthy wait
+inside ClusterFixture.StartApplicationAsync after App.StartAsync and before
+local-image/native-coverage Docker config-ID inspection. Host startup return does
+not establish resource creation. Keep the same two-minute startup token, all
+image/receipt checks, private profile, public clients and joined partial-start
+cleanup. The actual local RF3 SDK/MCP operation is the regression; no source-text
+or getter test substitutes for it. Original R151 no-such-container failure remains
+a failed startup receipt. Local pass does not qualify Linux delivery.
+
+TASK-TEST-LOCAL-CLEANUP-COMMAND repairs the existing local owned-image container
+query under REQ/AC-TEST-015: runDocker owns the executable, so pass only `ps` and
+the existing bounded flags. Root owns the one-line local-server-image.mjs fix and
+the actual native prepare/verify/cleanup/repeated-absence operation. Preserve all
+image/receipt/label/config-ID gates and refusal of any referencing container;
+no force/prune or unrelated resource changes. Keep original failed cleanup and
+owned diagnostic removal receipts distinct from the corrected canonical flow.
+This command repair adds no resource, deadline, dependency or product contract.

@@ -342,8 +342,12 @@ source/test-image identity verification, without skips. Later native codec and
 captured-envelope criteria now close **KL-007**, with all19 mapped cases passing
 in both modes and all33 owned source files bound to the original compiled images.
 The newer cross-process ownership and read-cut regressions pass locally; their
-original Linux results remain pending. RF3, functional coverage, scale and release qualification remain
-open. The [implementation status](docs/implementation/status.json) records each
+original Linux results remain pending. Six focused local Docker RF3 flows now
+pass through the real SDK and official MCP clients, covering native schema
+discovery and autonomous saga timeout/replay. The owned image lifecycle also
+passes prepare, verify, cleanup and repeated cleanup. Full Linux RF3,
+functional coverage, scale and release qualification remain open. The
+[implementation status](docs/implementation/status.json) records each
 source and report boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation

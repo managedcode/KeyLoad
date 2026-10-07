@@ -181,11 +181,18 @@ For creator/caller policy tests, create future work, revoke the creator before
 the real due instant, and prove unchanged state after it. Check caller rejection
 while creator remains revoked; restore the caller and then creator before the
 positive transition and full projected SDK/MCP inspection. Use a long interval
-so the one accepted due occurrence remains exact. For saga expiry, independently
-derive the frozen S2 command ID, use the same creator and exact ExpireSaga payload,
-and require complete SDK/MCP receipt convergence whether service or public call
-commits first. Retain real early Validation, Waiting before deadline, TimedOut
-revision2, one timeout ID/message, ACK replay and no second transition.
+so the one accepted due occurrence remains exact. For saga expiry, leave the
+native service active and do not derive or expose its private command ID. After
+the autonomous transition reaches TimedOut revision2, replay the exact previously
+admitted Waiting-create command through the other public client and require the
+original complete receipt. Then submit an ExpireSaga with a fresh command ID and
+the stale expected revision through both SDK and MCP; both must report
+RevisionConflict while state remains terminal and the single timeout message
+remains unchanged. The coordinator creates a fresh private command ID for each
+new dispatch and reuses it only for that dispatch's single uncertainty retry;
+lost-ACK remains a separate acceptance case. Retain real early Validation,
+Waiting before deadline, TimedOut revision2, one timeout ID/message, ACK replay
+and no second transition.
 The service is always active; no fake clock, private expiry call, weakened
 terminal assertion or expected-response race may stand in for these proofs.
 Luna cluster_wave owns only the three existing Messaging RF3 cases and their

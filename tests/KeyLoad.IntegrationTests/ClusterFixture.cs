@@ -83,9 +83,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
             await StartApplicationAsync(containerNames, repository.FullName, timeout.Token).ConfigureAwait(false);
             ReadPrivateProfile();
-            var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-                .Select(ClusterFixtureProtocol.NodeName);
-            await AspireStartupReadiness.WaitForHealthyAsync(App, readinessNodes, timeout.Token);
         }
         catch (Exception startupFailure)
         {
@@ -109,6 +106,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable
             await coverage.VerifyBeforeStartAsync(App, token).ConfigureAwait(false);
         }
         await App.StartAsync(token).ConfigureAwait(false);
+        var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+            .Select(ClusterFixtureProtocol.NodeName);
+        await AspireStartupReadiness.WaitForHealthyAsync(App, readinessNodes, token).ConfigureAwait(false);
         if (localImageIdentity is not null)
         {
             await LocalRf3ImageIdentity.VerifyStartedContainersAsync(localImageIdentity, containerNames, token)

@@ -80,7 +80,13 @@ receipt. A dirty working tree is identified by these inputs, never a fabricated
 GitHub revision. The config ID is not a registry manifest digest. Before startup,
 the child verifies receipt schema/bounds, current input fingerprint, actual image
 ID/label and all three modeled tags. After startup it verifies each owned container's
-actual image config ID. Missing, oversized or malformed receipts, changed inputs,
+actual image config ID. StartAsync schedules resources asynchronously; await the
+existing native three-resource healthy readiness within the unchanged two-minute
+fixture startup token before inspecting their actual config IDs. Both local-image
+and native coverage started-image verification follow that readiness, and all
+public SDK/MCP operations remain after verification. Do not treat host StartAsync
+return as proof that Docker has created containers or add a separate retry/deadline.
+Missing, oversized or malformed receipts, changed inputs,
 wrong tags/labels/IDs and conflicting proof selectors fail before database effects.
 
 Build failure prevents runner execution. Every failure/cancellation joins the
@@ -98,6 +104,16 @@ original Docker build-output tail remain available for diagnosing failure.
 Retain the original development receipt and native test reports. Local results cannot
 qualify delivered-source Linux CI, registry image provenance or website metrics;
 the existing GitHub image producer and verifiers remain mandatory and unchanged.
+
+TASK-TEST-LOCAL-CLEANUP-COMMAND refines the same REQ/AC-TEST-015 owner contract.
+`local-image-process.mjs` already selects the Docker executable; the owned-image
+container query in `local-server-image.mjs` must pass only `ps` and its bounded
+arguments, never a second executable token. Root repairs that command after the
+actual R149 image's canonical cleanup failed. Verify the full native owned-image
+prepare, identity verification, cleanup and repeated-absence cleanup operation.
+Keep receipt/label/config-ID checks, zero running or stopped referencing
+containers, non-force removal and all original process/reader joins. This local
+tooling operation does not qualify database RF3, Linux delivery or coverage.
 
 TASK-TEST-LOCAL-CONTEXT-REALIZATION implements this existing REQ/AC-TEST-015
 snapshot and cleanup contract. Root freezes and owns the joins; unpack_atomicity

@@ -224,15 +224,21 @@ SetDispatch are explicit parity work, not completed methods.
 
 Canonical map: Client/Server `Features/ClientApi/` transport/adapters та matching IntegrationTests/UnitTests helpers; business operations/tests зберігають owning slice name. CLI — operator/worker entry point; окремий frontend N/A. Shared contracts і host composition мають одного integration owner. Freeze protocol → real parity tests → adapters → rollout/version contract → exact GitHub TUnit/recovery/Docker RF3 evidence. Existing source/test names не виконують planned MCP/agent AC; timeout не означає rollback.
 
-TASK-MCP-NATIVE-SCHEMA-EVIDENCE retains the original official-client input schemas
+TASK-MCP-NATIVE-SCHEMA-EVIDENCE retains the original official-client schemas
 needed to diagnose AC-MCP-001 / REQ/AC-CLIENT-006. The existing discovery,
 incoming-graph and partition-query RF3 cases capture only their exact shortest-path,
 incoming-graph and partition-query `Tool.InputSchema` objects before assertions.
+The original current-source R154/R155 output assertions also require the exact
+shortest-path and partition-query `Tool.OutputSchema` objects. Capture these two
+outputs in the same existing helper and call sites before assertions, with a
+fixed output filename marker and the exact official SDK output capture source.
 Keep every strict type/nullability/required-member/item/hint assertion unchanged.
 Each UTF-8 schema is at most 64 KiB; its sidecar is at most 1 KiB and contains
 only canonical tool name, official SDK capture source, actual Aspire RF3/node1
-context, owned filename, byte count and SHA-256. Three schema payloads total at
-most 192 KiB. Unknown tool names, non-object schemas, excess bounds and failed
+context, owned filename, byte count and SHA-256. The three inputs and two outputs
+total at most 320 KiB per capture set; each object and sidecar retains the existing
+independent bound. A missing output fails capture. Unknown tool names, non-object
+schemas, excess bounds and failed
 writes fail; no credentials, caller data or private inventory is recorded.
 
 ADR-039 freezes the test-only helper
@@ -254,18 +260,45 @@ projection cannot supply authority or replace the four required constructor
 identity fields. Their required set and the computed output value remain fixed.
 
 Root owns the contract and joins. ci_failure_evidence Luna owns only
-GraphIncomingMcpSchemaAssertions, PartitionQueryMcpSchemaAssertions and
-McpGraphPathInputSchemaAssertions in their current IntegrationTests slices.
+GraphIncomingMcpSchemaAssertions, PartitionQueryMcpSchemaAssertions,
+McpGraphPathInputSchemaAssertions and McpGraphPathSchemaAssertions in their
+current IntegrationTests slices.
 Compare exact allowed sets, rejecting duplicates and extra types; distinguish
 the optional computed metadata field from required identity strings. Preserve
 all property/required-member/item/effect-hint/catalog checks and native official
 client flows. Native output uses the same unchanged exporter options; review its
 current source shape and retain output execution as unqualified until the actual
-RF3 flow passes. No production schema, decoder, public contract, dependency or
+RF3 flow passes. For the parameters dictionary, omitted
+additionalProperties is open under Draft2020-12; explicit false remains rejected.
+An explicit value must be a boolean or object schema. The original259/884
+output-version stack proves array-versus-scalar disagreement; retain the frozen
+exact string/integer output set, with no duplicate, extra or null type. Labels
+input remains unchanged. No production schema, decoder, public contract, dependency or
 trust change is authorized by this test repair. Root builds, reviews, executes
 the real Aspire RF3 SDK flows and retains exact-source Linux original reports.
 Rollback removes only the oracle corrections, preserving captured failure
 evidence and every mandatory suite. UI/storage changes are N/A.
+
+The current-source R158/R159 official SDK output captures establish the remaining
+exact output sets: QueryRow.RedactedFields is array/null with string items;
+PartitionRef.AtomicPartitionId is string/null, while its four required identity
+strings remain scalar strings; GraphPath.Hops is exactly string/integer/null.
+Use those exact sets in the same existing output assertions, rejecting duplicates,
+extra types and malformed entries. Keep every field, required-member, item,
+reference-depth, catalog and effect-hint assertion. The captured output hashes
+are respectively `248fd97e9a3105df3d6376640b9eb82350fffa8fd829de5e55e04bec85970eb2`
+and `39c7b94a0a86777a5fb007407da7aa576d4b54f3164f5dce6bf05caf76075cf9`.
+Captured failed flows remain failed; actual passing SDK/RF3 and delivered Linux
+qualification are required after these precise oracle corrections.
+R162 subsequently reached the placement tools and failed their common
+PartitionRef property-set oracle. McpSchemaFactory exports their same canonical
+PartitionRef through the same native projection and input/output transforms as
+the captured graph/query tools. McpPartitionPlacementSchemaAssertions must also
+require the exact five properties, keep only the four constructor identities
+required, and check computed AtomicPartitionId's exact string/null set. Keep
+integer string/integer sets exact and scalar string/boolean fields strict. This
+source-bound inference still requires the actual full discovery flow to pass;
+no placement operation, schema exporter or authority rule changes.
 
 TASK-MCP-NATIVE-FAILURE-CODE supports REQ/AC-CLIENT-006 and AC-MCP-003/005/007
 after the original876c saga-timeout RF3 invocation returned IsError without its

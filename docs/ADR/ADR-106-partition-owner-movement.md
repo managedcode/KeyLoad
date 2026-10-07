@@ -250,3 +250,9 @@ the existing genuine six-container Linux test remains required. No image/provide
 change, bound increase or omitted assertion is required. Rollback changes only
 the test expectation and regression; actual Linux RF3 evidence remains required
 and unqualified. Root owns strict integration checks and original evidence.
+
+The added controlled BuildAsync model regression is validation evidence only.
+Aspire testing resumes the normal AppHost entry point; absence of an explicit
+StartAsync call is not a guarantee that resources never start. Joined application
+disposal and owned-root cleanup remain mandatory. The real homogeneous image,
+six-silo startup, membership and public fail-closed cases still qualify runtime.

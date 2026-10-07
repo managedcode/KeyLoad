@@ -385,6 +385,9 @@ packet; root owns the final join and gates. The added actual KeyLoad AppHost
 BuildAsync-only flow rejects one test-owned altered digest without changing any
 of the six image annotations, restores that input and verifies the healthy model.
 Its controlled immutable model reference is validation input, not registry or
-runtime evidence; it never starts containers or fabricates an image receipt.
+runtime evidence; it does not explicitly call StartAsync or fabricate an image
+receipt. The native testing builder resumes the AppHost entry point, so absence
+of that explicit call does not establish that resources never started. The owned
+application is disposed and joined before removing its private root.
 Retain the existing six-node real-image startup and client flow for Linux
 qualification. Rollback removes only this oracle correction and model regression.

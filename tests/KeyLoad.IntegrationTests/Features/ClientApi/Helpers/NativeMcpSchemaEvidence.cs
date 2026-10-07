@@ -19,21 +19,29 @@ internal static class NativeMcpSchemaEvidence
     private const string EvidenceDirectory = "mcp-schema-evidence";
     private const string SchemaSuffix = ".schema.json";
     private const string SidecarSuffix = ".metadata.json";
-    private const string CaptureSource =
+    private const string InputCaptureSource =
         "ModelContextProtocol.Client.McpClient.DiscoverKeyLoadToolAsync.Tool.InputSchema";
+    private const string OutputCaptureSource =
+        "ModelContextProtocol.Client.McpClient.DiscoverKeyLoadToolAsync.Tool.OutputSchema";
     private const string CaptureContext = "Aspire-owned Docker RF3 official MCP C# SDK client, node1";
     private static readonly JsonSerializerOptions SidecarOptions = new(JsonSerializerDefaults.Web);
 
-    internal static Task RetainGraphShortestPathAsync(Tool tool, CancellationToken token)
-        => RetainInputSchemaAsync(tool, McpCallerProtocol.GraphShortestPath, token);
+    internal static async Task RetainGraphShortestPathAsync(Tool tool, CancellationToken token)
+    {
+        await RetainSchemaAsync(tool, McpCallerProtocol.GraphShortestPath, output: false, token).ConfigureAwait(false);
+        await RetainSchemaAsync(tool, McpCallerProtocol.GraphShortestPath, output: true, token).ConfigureAwait(false);
+    }
 
     internal static Task RetainIncomingGraphAsync(Tool tool, CancellationToken token)
-        => RetainInputSchemaAsync(tool, GraphIncomingMcpProtocol.Tool, token);
+        => RetainSchemaAsync(tool, GraphIncomingMcpProtocol.Tool, output: false, token);
 
-    internal static Task RetainPartitionQueryAsync(Tool tool, CancellationToken token)
-        => RetainInputSchemaAsync(tool, McpCallerTools.QueryPartitions, token);
+    internal static async Task RetainPartitionQueryAsync(Tool tool, CancellationToken token)
+    {
+        await RetainSchemaAsync(tool, McpCallerTools.QueryPartitions, output: false, token).ConfigureAwait(false);
+        await RetainSchemaAsync(tool, McpCallerTools.QueryPartitions, output: true, token).ConfigureAwait(false);
+    }
 
-    private static async Task RetainInputSchemaAsync(Tool tool, string expectedName, CancellationToken token)
+    private static async Task RetainSchemaAsync(Tool tool, string expectedName, bool output, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(tool);
         var filenamePrefix = FilenamePrefix(expectedName);
@@ -42,12 +50,14 @@ internal static class NativeMcpSchemaEvidence
             throw new InvalidOperationException(
             "The MCP schema evidence tool name did not match its fixed capture scope.");
         }
-        if (tool.InputSchema.ValueKind != JsonValueKind.Object)
-        { throw new InvalidDataException("The native MCP input schema is not a JSON object."); }
-        var schemaText = tool.InputSchema.GetRawText();
+        var schema = output ? tool.OutputSchema
+            ?? throw new InvalidDataException("The native MCP output schema is missing.") : tool.InputSchema;
+        if (schema.ValueKind != JsonValueKind.Object)
+        { throw new InvalidDataException("The native MCP schema is not a JSON object."); }
+        var schemaText = schema.GetRawText();
         if (schemaText.Length > MaximumSchemaBytes
             || Encoding.UTF8.GetByteCount(schemaText) > MaximumSchemaBytes)
-        { throw new InvalidDataException("The native MCP input schema exceeds its evidence bound."); }
+        { throw new InvalidDataException("The native MCP schema exceeds its evidence bound."); }
         var schemaBytes = Encoding.UTF8.GetBytes(schemaText);
 
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
@@ -55,11 +65,12 @@ internal static class NativeMcpSchemaEvidence
         { throw new InvalidOperationException("The repository root for MCP schema evidence was not found."); }
         var directory = Path.Combine(repository.FullName, ArtifactDirectory, QualificationDirectory, EvidenceDirectory);
         Directory.CreateDirectory(directory);
-        var name = filenamePrefix + Guid.NewGuid().ToString("N");
+        var name = filenamePrefix + (output ? "output-" : string.Empty) + Guid.NewGuid().ToString("N");
         var schemaFile = name + SchemaSuffix;
         var schemaPath = Path.Combine(directory, schemaFile);
         var metadataPath = Path.Combine(directory, name + SidecarSuffix);
-        var metadata = new Sidecar(tool.Name, CaptureSource, CaptureContext, schemaFile, schemaBytes.Length,
+        var metadata = new Sidecar(tool.Name, output ? OutputCaptureSource : InputCaptureSource,
+            CaptureContext, schemaFile, schemaBytes.Length,
             Convert.ToHexStringLower(SHA256.HashData(schemaBytes)));
         var metadataBytes = JsonSerializer.SerializeToUtf8Bytes(metadata, SidecarOptions);
         if (metadataBytes.Length > MaximumSidecarBytes)

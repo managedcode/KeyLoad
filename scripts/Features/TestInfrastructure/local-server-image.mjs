@@ -198,7 +198,7 @@ async function readImageIds(root, reference) {
 }
 
 async function requireNoOwnedContainers(root, imageConfigId) {
-  const result = ensureSuccess(await runDocker(root, [localImage.docker, 'ps', localImage.all, '--no-trunc', localImage.filter,
+  const result = ensureSuccess(await runDocker(root, ['ps', localImage.all, '--no-trunc', localImage.filter,
     `ancestor=${imageConfigId}`, localImage.format, localImage.containersFormat], localImage.commandTimeoutMs), messages.imageCleanup);
   const lines = result.stdout.split(/\r?\n/u).filter(Boolean);
   if (lines.length > localImage.maxContainerRecords) throw new Error(messages.imageCleanup);

@@ -309,9 +309,14 @@ and additive capture calls in existing `McpDiscoveryTests`,
 joins, builds and executes those unchanged assertion flows through actual Aspire
 Docker RF3 and the official C# MCP client, then retains original GitHub artifacts.
 
-Capture only the three exact tool input schemas before the existing assertions:
+Capture only the three exact tool input schemas and the exact shortest-path and
+partition-query output schemas before the existing assertions:
 at most 64 KiB UTF-8 per object, with at most 1 KiB safe name/context/filename/size/
-SHA-256 sidecar. Use the existing repository-root helper and unique owned files
+SHA-256 sidecar. The current-source R154/R155 output failures require retaining
+the two actual `Tool.OutputSchema` objects before any further oracle correction.
+Use a fixed output filename marker and exact official SDK capture source;
+missing/non-object outputs fail, and all five objects total at most 320 KiB per
+capture set. Use the existing repository-root helper and unique owned files
 under uploaded `artifacts/qualification/mcp-schema-evidence/`; reject unknown
 names, invalid objects, excess size and failed writes. No credential, caller
 payload, private catalog, production logger, alternate schema or synthetic
@@ -325,7 +330,8 @@ REQ-GRAPH-010 / AC-GRAPH-009 using original876c run37546085722 input captures an
 the unchanged JsonDefaults.Web decoder/exporter. Root freezes and joins the
 ClientApi contract; ci_failure_evidence Luna owns only the existing
 IntegrationTests GraphIncomingMcpSchemaAssertions,
-PartitionQueryMcpSchemaAssertions and McpGraphPathInputSchemaAssertions.
+PartitionQueryMcpSchemaAssertions, McpGraphPathInputSchemaAssertions and
+McpGraphPathSchemaAssertions.
 First review exact integer string/integer, Labels array/null and optional
 computed AtomicPartitionId string/null projections against native metadata.
 Then correct exact-set oracles, rejecting duplicates/extra types while retaining
@@ -336,7 +342,28 @@ same native exporter options; source review cannot qualify an uncaptured output
 execution. Root joins full build/quality review and actual Aspire RF3/Linux
 originals. No public API, persistence, topology, dependency or trust change,
 compatibility reader or permissive type fallback is introduced. Rollback restores
-only prior test oracles; original failed outcomes remain historical failures.
+only prior test oracles; original failed outcomes remain historical failures. The original259/884 follow-up
+repairs only the open parameters-dictionary observation (omitted additionalProperties
+is open, an explicit false remains closed; explicit values must be boolean/object)
+and the exact non-nullable string/integer output type set. No labels-input or
+public exporter change accompanies this correction.
+
+The current-source R158/R159 native output captures additionally freeze
+QueryRow.RedactedFields array/null with string items, computed
+PartitionRef.AtomicPartitionId string/null beside four required scalar identity
+strings, and GraphPath.Hops string/integer/null. Correct only the matching output
+oracles with exact sets and no duplicates, extra types or malformed entries.
+Keep all other field, required-member, item, reference-depth, hint and catalog
+checks. Root retains the original captures and failures, rebuilds and verifies
+the same official SDK/RF3 flows and Linux delivery; capture or source review alone
+does not qualify these corrections. No production or dependency change is made.
+The R162 discovery flow also exposes the placement helper's old four-property
+PartitionRef oracle. Its same native McpSchemaFactory projection requires the
+same five-property/four-required-identity contract and exact computed string/null
+set. McpPartitionPlacementSchemaAssertions joins the scoped test-only correction;
+keep exact integer string/integer sets and strict scalar string/boolean fields.
+The actual full discovery case, including placement schemas and all hints, must
+pass before this source inference is qualified. The production path is unchanged.
 
 TASK-MCP-NATIVE-FAILURE-CODE maps REQ/AC-CLIENT-006 and AC-MCP-003/005/007 to
 the existing official-client success/error flows. Root owns the ClientApi

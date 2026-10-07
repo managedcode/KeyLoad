@@ -42,15 +42,16 @@ internal sealed class SagaTimeoutRf3Tests(ClusterFixture fixture)
         await SagaTimeoutRf3Assertions.WaitUntilAsync(dueAt, deadline.Token);
         await SagaTimeoutRf3Assertions.WaitForTimedOutAsync(sdk, scenario, sagaId, deadline.Token);
 
-        var timeoutCommand = RecurringSagaRf3Support.Command(
-            DueCommandRf3Identity.Saga(scenario.SourceQueue, sagaId), scenario.SourcePartition,
+        var createReplay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await mcp.CallAsync(McpCallerTools.DocumentsCommit, create, deadline.Token));
+        await Assert.That(JsonDefaults.Serialize(createReplay.Value).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(created))).IsTrue();
+        var staleTimeout = RecurringSagaRf3Support.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ExpireSaga(scenario.SourceQueue, sagaId, 1));
-        var timeoutReceipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
-            await mcp.CallAsync(McpCallerTools.DocumentsCommit, timeoutCommand, deadline.Token));
-        var replay = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(timeoutCommand, deadline.Token));
-        await Assert.That(JsonDefaults.Serialize(replay).AsSpan()
-            .SequenceEqual(JsonDefaults.Serialize(timeoutReceipt.Value))).IsTrue();
-        await Assert.That(replay.Mutations[0].Revision).IsEqualTo(2L);
+        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            staleTimeout, deadline.Token), ErrorCode.RevisionConflict, dispatched: true);
+        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await sdk.CommitAsync(staleTimeout, deadline.Token),
+            ErrorCode.RevisionConflict);
         await SagaTimeoutRf3Assertions.AssertPhaseAsync(sdk, mcp, scenario, sagaId, SagaPhase.TimedOut,
             expectedRevision: 2, dueAt, deadline.Token);
         await SagaTimeoutRf3Assertions.AssertTimeoutMessageAsync(sdk, mcp, scenario, sagaId, dueAt,
