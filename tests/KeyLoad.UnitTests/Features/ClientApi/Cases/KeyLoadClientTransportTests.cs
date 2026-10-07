@@ -71,7 +71,7 @@ internal sealed class KeyLoadClientTransportTests
         try
         {
             await WaitForFirstChunkAsync(response.FirstChunkWritten.Task, response.HandlerEntered.Task,
-                response.HandlerFailure.Task, () => response.Stage);
+                response.HandlerFailure.Task, pending, () => response.Stage);
             await Assert.That(pending.IsCompleted).IsFalse();
             await cancellation.CancelAsync();
             var cancelled = await pending.WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
@@ -128,12 +128,19 @@ internal sealed class KeyLoadClientTransportTests
     }
 
     private static async Task WaitForFirstChunkAsync(Task firstChunkWritten, Task handlerEntered,
-        Task<(FirstRequestStage Stage, Exception Error)> handlerFailure, Func<FirstRequestStage> currentStage)
+        Task<(FirstRequestStage Stage, Exception Error)> handlerFailure,
+        Task<ManagedCode.Communication.Result<NodeStatus>> pending, Func<FirstRequestStage> currentStage)
     {
         try
         {
-            var completed = await Task.WhenAny(firstChunkWritten, handlerFailure)
+            var completed = await Task.WhenAny(firstChunkWritten, handlerFailure, pending)
                 .WaitAsync(TimeSpan.FromSeconds(ServerWaitSeconds), TimeProvider.System);
+            if (completed == pending && !firstChunkWritten.IsCompleted)
+            {
+                var result = await pending;
+                throw new InvalidOperationException(
+                    $"SDK request completed before first Kestrel chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}; success: {result.IsSuccess}; code: {result.Problem?.ErrorCode}.");
+            }
             if (completed == handlerFailure)
             {
                 var failure = await handlerFailure;
@@ -144,7 +151,7 @@ internal sealed class KeyLoadClientTransportTests
         catch (TimeoutException exception)
         {
             throw new TimeoutException(
-                $"Timed out waiting for the first Kestrel response chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}.",
+                $"Timed out waiting for the first Kestrel response chunk; handler entered: {handlerEntered.IsCompleted}; stage: {currentStage()}; SDK completed: {pending.IsCompleted}; SDK status: {pending.Status}.",
                 exception);
         }
     }

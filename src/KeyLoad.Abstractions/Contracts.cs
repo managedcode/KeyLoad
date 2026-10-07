@@ -356,7 +356,9 @@ public enum OperationKind
     /// <summary>Commits an explicit atomic-partition assignment to its physical shard.</summary>
     BindAtomicPartitionPlacement,
     /// <summary>Changes private native runtime journal infrastructure through RF3.</summary>
-    RuntimeJournal
+    RuntimeJournal,
+    /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
+    ReceiveAcrossLanes
 }
 
 /// <summary>Carries a trusted operation and its evaluated principal and time.</summary>

@@ -182,7 +182,8 @@ public sealed partial class DatabaseEngine
         StoredOutcome outcome, long replicationIndex, bool persistOutcome)
     {
         // Domain effects, outcome and apply watermark share one redo transaction.
-        if (persistOutcome && transaction.ReadOwnedValue(resultKey) is null)
+        var outcomeAlreadyStored = persistOutcome && transaction.ReadOwnedValue(resultKey) is not null;
+        if (persistOutcome && !outcomeAlreadyStored)
         {
             transaction.PutRecord(resultKey, outcome);
             if (outcome.ScopeKind == CommandOutcomeScopeKind.Partition)
@@ -199,7 +200,7 @@ public sealed partial class DatabaseEngine
         {
             transaction.PutRecord(KeySpace.AppliedBytes, replicationIndex);
         }
-        if (!persistOutcome)
+        if (!persistOutcome || outcomeAlreadyStored && replicationIndex <= AtomicCommandCommitInitialSequence)
         {
             return;
         }

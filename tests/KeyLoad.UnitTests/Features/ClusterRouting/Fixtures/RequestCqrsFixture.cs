@@ -36,23 +36,26 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
     private readonly System.Threading.Lock disposalGate = new();
     private Task? disposal;
     private NativeRequestWorkOwner? requestWork;
-    private static RequestCqrsClusterFixture? ActiveFixture { get; set; }
+    private readonly string ownerId = Guid.NewGuid().ToString("N");
 
-    internal RequestCqrsClusterFixture()
+    internal RequestCqrsClusterFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null)
     {
-        Database = new TestDatabase();
-        ActiveFixture = this;
+        Clock = clock ?? TimeProvider.System;
+        RoutingOptions = UnitRoutingOptions.Routing(routing);
+        Database = new TestDatabase(timeProvider: Clock);
         try
         {
+            RequestCqrsFixtureOwners.Register(ownerId, this);
             var builder = new TestClusterBuilder(initialSilosCount: 1);
+            builder.Properties[RequestCqrsFixtureOwners.ConfigurationKey] = ownerId;
             builder.AddSiloBuilderConfigurator<RequestCqrsSiloConfigurator>();
             builder.AddClientBuilderConfigurator<RequestCqrsClientConfigurator>();
             Cluster = builder.Build();
-            Codec = new GrainRequestCodec(Database.Database, TimeProvider.System, RoutingOptions);
+            Codec = new GrainRequestCodec(Database.Database, Clock, RoutingOptions);
         }
         catch (Exception startupFailure)
         {
-            ActiveFixture = null;
+            RequestCqrsFixtureOwners.Release(ownerId);
             try
             {
                 Database.Dispose();
@@ -66,13 +69,11 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         }
     }
 
-    internal static RequestCqrsClusterFixture Current
-        => ActiveFixture ?? throw new InvalidOperationException("The native request fixture is not active.");
-
     internal TestCluster Cluster { get; }
     internal GrainRequestCodec Codec { get; }
     internal TestDatabase Database { get; }
-    internal IOptions<GrainRoutingOptions> RoutingOptions { get; } = UnitRoutingOptions.Routing();
+    internal TimeProvider Clock { get; }
+    internal IOptions<GrainRoutingOptions> RoutingOptions { get; }
     internal NativeRequestWorkOwner RequestWork => requestWork ??= new(RoutingOptions);
 
     public async Task InitializeAsync()
@@ -174,7 +175,7 @@ internal sealed class RequestCqrsClusterFixture : IAsyncInitializer, IAsyncDispo
         }
         finally
         {
-            ActiveFixture = null;
+            RequestCqrsFixtureOwners.Release(ownerId);
         }
     }
 }
@@ -187,7 +188,7 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
 
     public void Configure(ISiloBuilder siloBuilder)
     {
-        var fixture = RequestCqrsClusterFixture.Current;
+        var fixture = RequestCqrsFixtureOwners.Resolve(siloBuilder.Configuration);
         siloBuilder.AddActivityPropagation();
         siloBuilder.Services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestContextState).Assembly)
@@ -195,8 +196,9 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
             .AddAssembly(typeof(ClaimsPrincipalSurrogateConverter).Assembly));
         siloBuilder.Services.AddSingleton(fixture.Database.Database);
         siloBuilder.Services.AddSingleton<ICommitCoordinator>(new EmbeddedCoordinator(fixture.Database.Database));
-        siloBuilder.Services.AddSingleton(TimeProvider.System);
+        siloBuilder.Services.AddSingleton(fixture.Clock);
         siloBuilder.Services.AddSingleton(fixture.RoutingOptions);
+        siloBuilder.Services.AddSingleton(UnitExecutionOptions.Messaging());
         siloBuilder.Services.AddSingleton(_ => fixture.RequestWork);
         siloBuilder.Services.AddSingleton<GrainRequestCodec>();
         siloBuilder.Services.AddSingleton(new RequestCqrsCapabilityLedger());
@@ -206,6 +208,8 @@ internal sealed class RequestCqrsSiloConfigurator : ISiloConfigurator
         {
             graph.AllowClientCallGrain<IRequestCqrsIdentityProbeGrain>();
             graph.AllowClientCallGrain<IRequestGrain>()
+                .AddGrainTransition<IRequestGrain, IRequestGrain>()
+                .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
                 .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
                 .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()

@@ -85,8 +85,8 @@
       "id": "SQLC-ROUTINE",
       "name": "functions, procedures, DO, CALL",
       "syntax": "canonical CALL envelope in default query dialect1 only; nondefault version explicitly unsupported",
-      "execution": "sole canonical operation catalog only",
-      "evidence": "full routine execution pending"
+      "execution": "sole canonical operation catalog only; additive source-only CALL keyload_messages_receive_across_lanes(@args) uses MultiLaneReceiveRequest and independent typed lane outcomes in SQL envelope1/queryDialectVersion1",
+      "evidence": "TASK-KL087-MULTI-LANE-RECEIVE-001, REQ-MSG-007/AC-MSG-007, ADR-026; MultiLaneReceiveRf3Tests authors real SDK/MCP/SQL-SDK/SQL-MCP parity, execution pending. Full routine execution, full SQL and native client protocol qualification remain pending"
     },
     {
       "id": "SQLC-SESSION",

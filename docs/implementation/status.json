@@ -17,11 +17,12 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "StageIX local Release/format and final recovery243/243 pass; actual production normal/scalar full discovery and all five functional selections pass. Prior517f4b original Linux normal/scalar2876each,recovery236,analyzers388,sourceownership10 pass; RF3176/180 preserves four failures. Product coverage remains unmeasured; complete current-source Linux and fullRF3 gates remain required.",
+    "verificationStage": "Stage X local Release/format and focused35/35 pass; full recovery243/243 unchanged-input proof retained. Final current normal/scalar and production group discoveries in progress. Original0c2f Linux normal2875/2876 failed, scalar2876/2876 and recovery243/243 pass; RF3 still running. Product coverage remains unmeasured.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
-      "Diagnose SCAT mismatch and C1 guard cancellations; execute narrow C1 unknown receipt recovery and later membership/startup owner fixes",
-      "Validate whole-operation coverage selection against native discovery in both modes, then complete same-job sixteen-module collection/admission/merge; load/comparison excluded"
+      "Finish current complete normal/scalar and production coverage-selection discovery, retain original failures and successful repaired cohorts",
+      "Execute C1 same-command receipt reconciliation and scoped lifecycle diagnostics in genuine current-source RF3",
+      "Complete same-job sixteen-module coverage collection/admission/merge; load/comparison excluded; original thresholds unchanged"
     ],
     "latestOriginalLinux": {
       "sourceCommit": "517f4b731a9a9894b78cfc3fe05bade018ab7389",
@@ -238,23 +239,23 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "run": "R363",
-      "compileInputs": 4231,
+      "run": "R398",
+      "compileInputs": 4258,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
       "nativeExitCode": 0,
-      "elapsedSeconds": 251.14,
-      "logSha256": "3afbfaa301f25bcfe76c72c8de61099511e4317ee2cefa195cd31a12202da8f0",
+      "elapsedSeconds": 94.455,
+      "logSha256": "4d48df19171fc185adf4cc0d3bf0304fcf2a98bd8c02887ca3a0dec69990ce7e",
       "passed": true,
-      "qualification": "Complete final native local Release with strict analyzers after StageIX ownership/whitespace fixes; delivered-source fullLinux/RF3/product coverage remain required."
+      "qualification": "Complete Stage X native local Release after current source repairs; exact-source Linux/RF3 and product numeric coverage remain open."
     },
     "currentFormatter": {
-      "run": "R364",
+      "run": "R401",
       "nativeExitCode": 0,
-      "elapsedSeconds": 220.864,
+      "elapsedSeconds": 112.28,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4231,
+      "inputCount": 4258,
       "inputDrift": [],
       "qualification": "native local source-bound formatter verification, not functional or Linux proof"
     },
@@ -2838,6 +2839,322 @@
           }
         ]
       }
+    },
+    "stageXOriginalDevelopment": {
+      "sourceParentCommit": "0c2f4799df1ebfa1dd90cd0ae31c1fde4991b057",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "canonicalBuildRun": "R398",
+      "canonicalFormatRun": "R401",
+      "originalNativeDevelopment": {
+        "R382": {
+          "nativeExitCode": 2,
+          "elapsedSeconds": 13.876,
+          "logSha256": "000cd0fc7775bf5dc301d36b2f1b9da205af05b47c090c2dcd3d9910653baf22",
+          "sourceInputs": 4258,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "7003ea3d7fe8cf64fd6911ed86b3840a3c22d1ae4d9bf6bc7882e9b7ce75f6ff",
+              "counters": {
+                "total": "18",
+                "executed": "18",
+                "passed": "5",
+                "failed": "13",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R387": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 10.8,
+          "logSha256": "c5e6dc48485b07554bf007944259bcee2ac747655b3c29e2f038377ea658b0e3",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "44a588258baf601960d45212ea02106995e5b010a43ae0a913dbccc851c813ae",
+              "counters": {
+                "total": "18",
+                "executed": "18",
+                "passed": "18",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R390": {
+          "nativeExitCode": 2,
+          "elapsedSeconds": 564.198,
+          "logSha256": "bda4a63de57e37a9943db29012085887721514ef7d1855bf5060fb8e2b240c64",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "a7cc4997780e00b666f7404b329245c249261a6ae531369a8ad8ac93228870a9",
+              "counters": {
+                "total": "2894",
+                "executed": "2894",
+                "passed": "2892",
+                "failed": "2",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R391": {
+          "nativeExitCode": 2,
+          "elapsedSeconds": 575.61,
+          "logSha256": "1b5985c8653e8e2df1d2c2428740ef745879a6cc5cc2f0306287d261f6ae7e44",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "2241cbb933a7009f9ca1e657edc31f6e776f0e11b27dfe669e9b9220b3712ff9",
+              "counters": {
+                "total": "2894",
+                "executed": "2894",
+                "passed": "2892",
+                "failed": "2",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R392": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 392.838,
+          "logSha256": "efd358628e10dbe5afb6f7923fbae0ad47a6ab11f5514c637f3335487ac9b382",
+          "sourceInputs": 4259,
+          "assemblyInputs": 437,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "7f75ba2bb045ae810ccabb684762c75eaf35949740ee6e950337736197f57f81",
+              "counters": {
+                "total": "243",
+                "executed": "243",
+                "passed": "243",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ],
+          "currentRecoveryReuse": {
+            "actualRecoveryAndCrashImages": 437,
+            "imageDrift": [],
+            "productionRecoveryCrashAndCentralSourceInputs": 1466,
+            "scopedSourceDrift": [],
+            "boundary": "Original full recovery243/243 is retained on unchanged production/recovery/crash inputs and every current execution image; later edits affect UnitTests only. It is not a newly executed whole-repository recovery report."
+          }
+        },
+        "R399": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 11.802,
+          "logSha256": "6e742968a798e64a0c9a232bdad053e3b224c8e2c8378fe06540c4a02d062bef",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "e5b1c7fc9762990271819fc405fc2bcb4c03c34ea6d0b1b9e7d771d44fdab048",
+              "counters": {
+                "total": "35",
+                "executed": "35",
+                "passed": "35",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        }
+      },
+      "nativeDiscovery": {
+        "run": "R400",
+        "nativeCaseCount": 2896,
+        "originalJsonSha256": "95420ecd8c17d74c2f1ad639e9695e4802b0d45e7ed1d4850b6ac55805099cdf",
+        "sourceDrift": [],
+        "assemblyDrift": [],
+        "qualification": "Actual native full discovery only; no executed suite or numeric coverage implied."
+      },
+      "nativeImageObservation": {
+        "run": "R402",
+        "observationSha256": "594976a8459e14f873b8df2aa708032c2a652e922b004ef1fe7922085570c7f1",
+        "nativeImage": {
+          "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+          "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+          "dllSha256": "6b30d5c9831860ff64cfae3e5f752cbb55aa33f2c723ef02863f28fd039af7f1",
+          "pdbSha256": "480987f0f55dd7e776b3077a59169cd73d18063073a28a5458f979f1655ab5b9",
+          "moduleName": "KeyLoad.UnitTests.dll",
+          "compiledIdentityToolSha256": "baf2660772a551118067e33a0a7c62b8477722518561f27d5da2380be9a2d6bb",
+          "originalCompilationRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "inspectedSourceRoot": "/Users/ksemenenko/Developer/KeyLoad",
+          "mvid": "533db72b-a0ce-4185-90a9-2ea011acfa43",
+          "pdbGuid": "8c1dd5ab-72c3-4ec6-a638-32bd47e4f659",
+          "pdbStamp": 2752315550,
+          "compiledSourceBindingComplete": true,
+          "qualification": "static native identity inspection only; no test, coverage or build qualification"
+        },
+        "declaredSourceCount": 1101,
+        "qualification": "Actual native DLL/PDB/MVID/source binding; no operation or coverage qualification.",
+        "nativePdbDocumentCount": 1834
+      },
+      "reviewedInventory": {
+        "reviewRun": "R403",
+        "schemaVersion": 3,
+        "sha256": "11a6828a2ac1334fe856225914099b501b22cc108204cc4e8ff29061dc1a701c",
+        "functionalCases": 2502,
+        "requiredNonContributorCases": 394,
+        "excludedUnitCases": 0,
+        "coverageGroups": 5,
+        "qualification": "Native full census equality and strict inventory shape pass; filtered production discovery and execution recorded separately."
+      },
+      "currentNativeRuns": {
+        "R404": "Complete actual production full plus five filtered discoveries in both normal/scalar modes passed;12 selections, no drift. Discovery is not coverage execution.",
+        "R405": "complete normal unit execution in progress",
+        "R406": "complete scalar unit execution in progress"
+      },
+      "qualification": "Final local Release/format and focused35/35 pass; original full recovery243/243 retained on all unchanged production/recovery/crash inputs and437images. Complete current normal/scalar, exact-source Linux/RF3 and measured sixteen-module coverage remain required.",
+      "productionDiscovery": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 188.505,
+        "logSha256": "572520a1d499b204225cc2e34cfca875ffe9532b34e2054acfc8301f26d73a78",
+        "guardedInputs": 4708,
+        "sourceImageScriptDrift": [],
+        "qualification": "Actual full plus five filtered native discoveries in both modes only; no executed operation pass, numeric coverage or Linux qualification.",
+        "run": "R404",
+        "fullCensusPerMode": 2896,
+        "functionalGroupsPerMode": [
+          490,
+          522,
+          434,
+          509,
+          547
+        ],
+        "nativeSelections": 12,
+        "originalEvidenceFiles": 60
+      }
+    },
+    "stageIXOriginalLinux": {
+      "sourceCommit": "0c2f4799df1ebfa1dd90cd0ae31c1fde4991b057",
+      "runId": 37655841124,
+      "runAttempt": 1,
+      "runStatus": "in_progress",
+      "verifyConclusion": "failure",
+      "verifyJobId": 112910230335,
+      "rf3JobId": 112910126767,
+      "rf3Status": "in_progress",
+      "unitPassed": 2875,
+      "unitTotal": 2876,
+      "scalarPassed": 2876,
+      "scalarTotal": 2876,
+      "recoveryPassed": 243,
+      "recoveryTotal": 243,
+      "analyzerPassed": 388,
+      "analyzerTotal": 388,
+      "nativeSourceOwnershipPassed": 10,
+      "nativeSourceOwnershipTotal": 10,
+      "skipped": 0,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37655841124",
+      "originalTestArtifact": {
+        "artifactId": 11500289867,
+        "archiveSha256": "9d02bdb13124ee7e6cad2441a17df737c278bef55176bd5e5c3197928480009d",
+        "apiDigestVerified": true
+      },
+      "originalVerifyLogSha256": "9a68dad228a3509f72fc3ac03fa82ee95da1cb2cfbec48758d1909a71c6d46a9",
+      "failure": {
+        "nativeTest": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+        "firstChunkDeadlineSeconds": 5,
+        "handlerEntered": false,
+        "stage": "WaitingForHandler",
+        "causeEstablished": false,
+        "currentCorrection": "Observe original pending SDK task as well as first chunk, retain exact5second deadline and original cancellation/nexthealthy/join flows; diagnostic change only, no retry or readiness workaround."
+      },
+      "qualification": "Original authenticated Linux results belong to0c2f only; RF3 still running and normal suite failed. Stage X local reports do not replace them."
     }
   },
   "TIME-PROVIDER-001": {
@@ -8301,7 +8618,10 @@
     "evidence": [
       "src/KeyLoad.Core/Features/Messaging/Execution/Messaging.cs",
       "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MessagingTests.cs",
-      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "src/KeyLoad.Orleans/Features/Messaging/Execution/MultiLaneReceiveExecution.cs",
+      "tests/KeyLoad.UnitTests/Features/Messaging/Cases/MultiLaneReceiveWholeFlowTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/Messaging/Cases/MultiLaneReceiveCancellationRf3Tests.cs"
     ]
   },
   "KL-088": {
@@ -8438,7 +8758,9 @@
       "src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs",
       "src/KeyLoad.Core/Features/EventStreams/Execution/EventSources.cs",
       "src/KeyLoad.Artifacts/Features/BackupRestore/Execution/BackupArtifact.cs",
-      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs"
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/ArtifactTests.cs",
+      "tests/KeyLoad.UnitTests/Features/BackupRestore/Cases/EventingArtifactStateTests.cs",
+      "tests/KeyLoad.UnitTests/Features/Authorization/Cases/DeniedCommandReplayClockTests.cs"
     ]
   },
   "KL-099": {

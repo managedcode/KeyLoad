@@ -51,7 +51,22 @@ internal enum RequestCqrsLifecycleStage
     AuthorityWaveLockCheck,
     AuthorityWaveDiagnosticsArtifact,
     AuthorityRootDelete,
-    AuthorityWaveBuilderDispose
+    AuthorityWaveBuilderDispose,
+    GuardScenario,
+    GuardSeed,
+    GuardHeaders,
+    GuardBodyRead,
+    GuardBodyReaderDispose,
+    GuardProblemValidation,
+    GuardResponseOwnerDispose,
+    GuardWarningWait,
+    GuardHealthyCallers,
+    ScatOriginalWave,
+    ScatMismatchWave,
+    ScatCorrectedWave,
+    ScatSeed,
+    ScatMismatchAssertions,
+    ScatCorrectedAssertions
 }
 
 internal enum RequestCqrsNodeReadinessOutcome

@@ -146,6 +146,9 @@ internal static class NativeContractAliases
     internal const string ReadProjectionBatchRequest = "keyload.contract.read-projection-batch-request.v1";
     internal const string ReadSamplesRequest = "keyload.contract.read-samples-request.v1";
     internal const string ReadStreamRequest = "keyload.contract.read-stream-request.v1";
+    internal const string MultiLaneReceiveRequest = "keyload.messaging.multi-lane-receive-request.v1";
+    internal const string QueueLaneReceiveOutcome = "keyload.messaging.lane-receive-outcome.v1";
+    internal const string MultiLaneReceiveResult = "keyload.messaging.multi-lane-receive-result.v1";
     internal const string ReceiveRequest = "keyload.contract.receive-request.v1";
     internal const string ReceiveResult = "keyload.contract.receive-result.v1";
     internal const string ReceiveSubscriptionRequest = "keyload.contract.receive-subscription-request.v1";

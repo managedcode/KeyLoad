@@ -20,6 +20,8 @@ internal static class MessagingApi
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.RecurringSchedule, request));
         app.MapPost(SagaPath, (InspectSagaRequest request, HttpContext context) =>
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.Saga, request));
+        app.MapPost(MultiLaneReceiveProtocol.Route, (MultiLaneReceiveRequest request, HttpContext context) =>
+            ApiGrainDispatch.SubmitAsync(context, OperationKind.ReceiveAcrossLanes, request.RequestId, request));
         app.MapPost(ReceivePath, (ReceiveRequest request, HttpContext context) =>
             ApiGrainDispatch.SubmitAsync(context, OperationKind.Receive, request.RequestId, request));
         app.MapPost(DeliveryPath, (DeliveryCommand request, HttpContext context) =>

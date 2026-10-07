@@ -339,8 +339,9 @@ outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates. Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
 
-Current source includes bounded same-partition relational INNER JOIN and shared
-SDK, MCP and SQL operations across the database models. Complete RF3 fault
+Current source includes bounded same-partition relational INNER JOIN, multi-lane
+queue receive with independent leaf receipts, and shared SDK, MCP and SQL operations
+across the database models. Complete RF3 fault
 qualification, full SQL and its native client protocol, foreign keys, scaling and
 endurance remain in progress. The [status tracker](docs/implementation/status.json)
 records the actual source, test results and remaining acceptance gates.

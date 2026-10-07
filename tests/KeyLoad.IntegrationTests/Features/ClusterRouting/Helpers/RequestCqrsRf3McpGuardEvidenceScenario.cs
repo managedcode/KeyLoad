@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
 
@@ -10,15 +11,15 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
     private const string Node1 = RequestCqrsRf3Protocol.Node1;
 
     internal static async Task<string> ExecuteAsync(string root, NodeEpochRf3Profile profile,
-        string currentImage, CancellationToken cancellationToken)
+        string currentImage, RequestCqrsLifecycleEvidence lifecycle, CancellationToken cancellationToken)
     {
         var images = All(currentImage);
         RequestCqrsRf3Wave? completedWave = null;
-        await RequestCqrsRf3Epoch7WaveRunner.RunAsync(root, images, false, true, async wave =>
+        await RequestCqrsRf3Epoch7WaveRunner.RunObservedAsync(root, images, false, true, async wave =>
         {
             completedWave = wave;
-            await ExecuteInWaveAsync(wave, profile, cancellationToken).ConfigureAwait(false);
-        }, cancellationToken).ConfigureAwait(false);
+            await ExecuteInWaveAsync(wave, profile, lifecycle, cancellationToken).ConfigureAwait(false);
+        }, new(lifecycle), cancellationToken).ConfigureAwait(false);
         return (completedWave ?? throw new InvalidOperationException(MissingWaveMessage)).SaveDiagnosticsEvidence();
     }
 
@@ -33,14 +34,17 @@ internal static class RequestCqrsRf3McpGuardEvidenceScenario
     }
 
     private static async Task ExecuteInWaveAsync(RequestCqrsRf3Wave wave, NodeEpochRf3Profile profile,
-        CancellationToken cancellationToken)
+        RequestCqrsLifecycleEvidence lifecycle, CancellationToken cancellationToken)
     {
         var app = wave.App;
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardSeed);
         var workload = await RequestCqrsRf3Workload.SeedAsync(app, profile, cancellationToken).ConfigureAwait(false);
-        await RequestCqrsRf3McpGuardEvidenceCall.SendMalformedAsync(app, Node1, profile.AdminKey,
+        await RequestCqrsRf3McpGuardEvidenceCall.SendMalformedAsync(app, Node1, profile.AdminKey, lifecycle,
             cancellationToken).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardWarningWait);
         await wave.WaitForRejectionAsync(Node1, McpTransportStage.BodyMethodMismatch,
             McpTransportMethodCategory.ToolsCall, cancellationToken).ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardHealthyCallers);
         await workload.VerifyPreservedAsync(app, profile, cancellationToken).ConfigureAwait(false);
     }
 

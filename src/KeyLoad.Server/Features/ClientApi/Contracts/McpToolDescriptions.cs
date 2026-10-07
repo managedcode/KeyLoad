@@ -39,6 +39,7 @@ internal static class McpToolDescriptions
     private const string AdminAdmission = "Read administrator-authorized admission limits and actual node usage.";
     private const string AdminStatus = "Read administrator-authorized physical node identity, readiness and replication progress.";
     private const string DocumentsCommit = "Commit one authorized atomic batch of supported canonical mutations. Put each mutation kind before other object fields.";
+    private const string MessagesReceiveAcrossLanes = "Receive ordered independent queue lane outcomes. Retain each original request.requests receive requestId and payload for retry; there is no group transaction, receipt or shared read cut. Unknown stops later dispatch; cancellation may leave committed leases.";
     private const string MessagesReceive = "Receive a bounded set of queue messages. request.requestId is the stable write identity; retain delivery tokens for completion.";
     private const string MessagesComplete = "Acknowledge, reject or renew a queue delivery using its signed token.";
     private const string MessagesProcess = "Atomically complete an idempotent queue handler and its declared mutation effects.";
@@ -88,6 +89,7 @@ internal static class McpToolDescriptions
             or McpToolNames.AdminPartitionPlacementBind or McpToolNames.AdminPartitionPlacementRead
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
+        McpToolNames.MessagesReceiveAcrossLanes => MessagesReceiveAcrossLanes,
         McpToolNames.MessagesReceive => MessagesReceive,
         McpToolNames.MessagesComplete => MessagesComplete,
         McpToolNames.MessagesProcess => MessagesProcess,

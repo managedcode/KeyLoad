@@ -50,6 +50,8 @@ internal static class McpCanonicalTestData
     internal static ImmutableArray<McpDecodeCase> Commands() =>
     [
         Case(McpCatalogExpectations.DocumentsCommit, new CommandRequest(StableId, Partition, Effects()), CommandKey),
+        Case("keyload_messages_receive_across_lanes", new MultiLaneReceiveRequest(StableId,
+            [new ReceiveRequest(Guid.Parse("00000000-0000-0000-0000-000000000002"), Lane)]), ReceiveKey),
         Case(McpCatalogExpectations.MessagesReceive, new ReceiveRequest(StableId, Lane), ReceiveKey),
         Case(McpCatalogExpectations.MessagesComplete, new DeliveryCommand(StableId, Lane, Token, DeliveryAction.Ack), CommandKey),
         Case(McpCatalogExpectations.MessagesProcess, new ProcessingRequest(StableId, Lane, Token, Handler, Generation, Effects()), CommandKey),

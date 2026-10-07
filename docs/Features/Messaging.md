@@ -229,3 +229,147 @@ retained global failures remain separate from this proposal.
 
 
 TASK-EVENT-APPEND-SEEDED-CRASH-001 preserves REQ-MSG-005/AC-MSG-005 and original KL091 through the exact seven native during-append process cuts and original child/readers/store-lock ownership frozen in [EventStreams](EventStreams.md#task-event-append-seeded-crash-001) and ADR002. The new complete recovered doc/event/head/dedup/queue/outbox/receipt and same-ID/healthy-follow-up assertions use real ZoneTree and current serialization. No runtime qualification, timeout change, multi-lane or power-loss claim follows from source. Existing required Linux/RF3/coverage gates remain unchanged.
+
+## TASK-KL087-MULTI-LANE-RECEIVE-001
+
+Source implementation contract, not runtime qualification. Original KL-087 and
+architecture §39.3 require a multi-lane response which truthfully reports partial
+claims. REQ-MSG-007 / AC-MSG-007 refine REQ-MSG-001 / AC-MSG-001 under
+[ADR-026](../adr/ADR-026-fenced-delivery-inbox.md#multi-lane-receive-composition).
+
+REQ-MSG-007: one bounded public multi-lane receive composes ordered, independent
+canonical lane claims. `MultiLaneReceiveRequest.RequestId` identifies the outer
+request; each `Requests` entry retains its own nonempty stable ReceiveRequestId,
+unchanged canonical lane, message/byte ceiling and lease duration. The group has
+no persisted receipt or group-wide deduplication identity. Lost responses are
+reconciled by retrying the exact original per-lane requests; a new outer ID does
+not change a lane claim identity. Reordered/changed groups are different
+compositions; changing an existing lane payload under its stable ID follows the
+existing conflict contract. There is no global FIFO, common read cut, cross-lane
+rollback or cross-partition atomicity.
+
+Before the first lane, validate nonempty unique lane references and request IDs,
+no outer/leaf ID overlap, centrally bounded lane count (default/ceiling eight),
+and sums of positive message and byte ceilings against the existing maximum
+receive-message policy and DatabaseLimits.MaxBatchBytes. Each lane's lease and
+persisted quota are independently validated by the unchanged canonical receive.
+There is one outstanding child stream, no detached work, and the original outer
+execution token/deadline bounds every child. Every child uses a fresh separately
+signed request actor, subject-only native identity scope with exact restoration,
+current persisted authorization, its own quorum barrier and canonical atomic
+commit. No parent principal/grants authorize a child mutation. The parent reloads once before
+any lane work only to publish the native subject-only child identity. Later policy
+changes/revocation are evaluated by each child after its own quorum barrier; they
+return independent lane failures rather than replacing earlier committed outcomes.
+
+Every normally completed response has exactly one outcome per original entry,
+in original order. `Committed` contains the exact native ReceiveResult, including
+its durable token and possibly an empty delivery page; `Rejected` contains only
+the exact bounded safe error/detail returned by that lane, no deliveries or
+invented commit token. `Unknown` preserves the reported uncertainty error and
+stops dispatch; following lanes are `NotAttempted`, with no claim/error/result.
+OwnershipLost, Cancelled and UnknownWriteOutcome conservatively classify an
+attempt as Unknown. A malformed successful child value is Unknown, with a fixed
+safe uncertainty detail, after logging the original closed failure category; it
+stops later dispatch without pretending that the child rejected. If the original
+parent expires between lanes after any completed outcome, and its native identity
+and incarnation still validate, retain earlier outcomes and mark every remaining
+lane NotAttempted: no leaf was dispatched. The result carries the actual parent
+TokenInvalidated StopError and bounded SafeDetail. Other post-attempt parent
+identity/scope failures prevent safely releasing retained payloads and fail the
+outer operation as UnknownWriteOutcome; before any lane they preserve the original
+definitive error. Other transport/cleanup failures retain the native outer
+unknown-write boundary; they are not converted to manufactured lane rejections.
+Cancellation before first dispatch has no lane effect; cancellation after a
+submitted lane can leave committed leases, and may prevent returning any response.
+It stops later dispatch and joins actual native stream cleanup; unchanged stable
+lane retries recover receipts. No successful partial response is promised after
+caller cancellation.
+
+SDK `ReceiveAcrossLanesAsync`, POST `/v1/queues/receive-across-lanes`, and the
+on-demand operation tool `keyload_messages_receive_across_lanes` share the same
+native operation. Existing gateway catalog remains bounded; no operation tool is
+added to initial discovery. SQL operation envelope v1, queryDialectVersion=1
+supports `CALL keyload_messages_receive_across_lanes(@args)` through the same
+canonical descriptor; SELECT dialect2 and full SQL/protocol claims are unchanged.
+Schemas include typed ordered outcomes; hints are mutating, destructive and
+non-idempotent for the group (individual unchanged leaf requests are idempotent).
+
+AC-MSG-007: actual native request grains and real ZoneTree must demonstrate two
+committed lanes and exact stable replay without new store changes; one committed,
+one denied and later healthy committed lane with no effects on the denied lane;
+whole-group structural/budget rejection and pre-cancel preserve full store bytes
+and position; healthy next request returns complete literal payload/headers,
+lease metadata and token. SDK, official MCP and SQL CALL must return equal complete
+ordered partial outcomes from unchanged leaf IDs, with persisted message-state
+checks, ACK/replay and healthy follow-up. Real cancellation/uncertainty after
+submission additionally requires native ownership observation; no fake provider,
+sleep/race success branch or getter test can qualify it.
+
+```mermaid
+sequenceDiagram
+    participant Caller
+    participant R as Separate signed request grain
+    participant L as Fresh leaf request grain
+    participant P as Atomic partition owner
+    Caller->>R: Bounded ordered receive requests
+    loop Each lane, sequentially
+        R->>L: Original stable leaf ID, fresh signed actor
+        L->>P: Reload authorization, barrier, canonical receive
+        P-->>L: Committed result or exact rejection/uncertainty
+        L-->>R: Joined native CQRS terminal outcome
+    end
+    R-->>Caller: Ordered independent lane outcomes
+```
+
+Ownership: Abstractions/Messaging/Contracts owns wire contracts; Core/Messaging
+owns the validated lane-count setting and existing claim; Orleans/Messaging/Execution
+owns composition; ClusterRouting/RequestGrain integrates its native branch and
+explicit request-to-request graph transition; Server/Messaging owns the route,
+Client/Messaging owns SDK adapter and ClientApi owns explicit catalog/schema/hints.
+Unit Messaging cases and Integration Messaging cases own native whole operations.
+No new dependency, storage format, migration or alternate dispatcher is introduced.
+Existing single-lane contracts/aliases/IDs and replica log formats remain unchanged.
+Rollback removes the new composition ingress after draining owned work; committed
+leaf leases/receipts retain their existing expiry/retry semantics. Required build,
+normal/scalar unit, process recovery, RF3 and exact-source Linux gates remain open
+until their original native receipts exist. KL-087 remains in progress.
+
+
+### TASK-KL087-POST-DISPATCH-DRAIN-001 and caller cancellation follow-on
+
+REQ-MSG-007 / AC-MSG-007: once an actual child stream creation is invoked, a typed KeyLoad transport/stream-validation exception is an uncertain child outcome, not a definitive whole-group rejection. Retain already confirmed lane outcomes, emit UnknownWriteOutcome with the canonical static interrupted detail for that child, and mark the undispatched suffix NotAttempted. Preserve original exceptions in closed native diagnostics. Exceptions before invocation retain their original classification. Cancellation and cleanup aggregate failures are not caught or rewritten. This is a source correction; KL-087 remains in progress.
+
+The required caller-after-submit RF3 regression uses the existing RequestCqrsProbeFixture Hold at SubmitReturned for the first original stable ReceiveRequestId, bound to the persisted principal and signed discovery voter. Observe the marker and the public persisted first-lane claim before cancelling the original caller token; join the existing settlement and ProducerDisposed boundary before examining the outcome. SDK must expose its actual UnknownWriteOutcome; official MCP must retain its actual safe unknown tool result or actual transport/cancellation exception. No synthetic tool reply is permitted. The next lane must retain its complete original message state and have no original receipt. Retire the owned arm, retry unchanged original leaf IDs through the real callers, compare the durable first receipt and full literal deliveries, then ACK and run a complete healthy continuation. Original outer cancellation, deadlines, per-lane authorization and cleanup remain unchanged. Existing probe ownership, current-image Aspire orchestration and private marker trust are reused; no new production test hook, delay or retry loop. Native execution is mandatory and not claimed by this contract.
+
+
+### TASK-KL087-CALLER-AFTER-SUBMIT-RF3-001
+
+REQ-MSG-007 / AC-MSG-007, related REQ-CRS-003/004: two native tests, SDK and official MCP, use one actual separately Aspire-owned current-image RF3 wave each. The fixture arms the first original leaf ReceiveRequestId at existing SubmitReturned/Hold for the persisted non-admin queue principal; the signed-voter-bound marker plus complete public MessageInspection proves the first claim committed while the original caller is pending. No second leaf is submitted until this held first leaf finishes. Cancel the original caller CTS only after this observation. Require the native Cancelled settlement marker and ProducerDisposed join; original SDK must return UnknownWriteOutcome without a success payload; official MCP must expose its actual safe unknown tool error or its actual transport/cancellation exception. A nested leaf marker RequestId is not the outer MCP execution ID.
+
+Compare complete first and second MessageInspection bytes after settlement; the second is still Ready with original metadata/body/headers. Retire the exact owned arm before receipt reconciliation. Recover the unchanged first leaf via actual SDK and official MCP single-lane Receive, require complete result bytes and unchanged committed message bytes, then retry the entire unchanged group through both actual public clients: first result equals recovered durable receipt, second contains its first lease only. Full SDK/MCP group result bytes match and replay leaves complete inspections unchanged. ACK both exact recovered tokens through SDK and replay ACK through official MCP, verify the complete literal Acked metadata (state version3, attempt1, lease version1, generation1, original ready sequence1), cleared lease and null payload/headers because native ACK deletes message body. The healthy message uses the literal next ready sequence2. Delivered payload/headers remain checked before ACK. Then enqueue, claim and ACK a complete healthy literal message. This proves receipt recovery and exactly one observable first claim; it does not claim a public receipt-inspection endpoint for an undispatched leaf.
+
+The existing shared cleanup accepts a non-generic original Task solely to join any native SDK result type; it cancels admission, releases only owned open arms, joins original calls and producers, disposes clients, stops Aspire, joins controls, preserves primary and cleanup errors, and removes owned roots only on complete cleanup. Deadlines and image admission remain unchanged. New tests live in Messaging/Cases and Messaging/Helpers. Required native filters are /*/*/MultiLaneReceiveCancellationRf3Tests/* (two authored cases, not discovered inventory). Existing local-image standard8 selection is not expanded. Use the owning full RF3 image/fixture entry or separately reviewed explicit admission. Fresh build, actual native discovery, exact-source Linux execution and original output receipts remain mandatory. KL-087 remains in progress until its complete original criteria are qualified.
+
+
+### TASK-BACKUP-EVENTING-CUT-001 (KL-098 local capability-state proof)
+
+Freeze before code under REQ/AC-BACKUP-001/002/003/004, REQ/AC-EVENT-004/005/006 and REQ/AC-MSG-003/005/006: seed actual native resources, three canonical source events, two independent subscription groups, an out-of-order completion gap, one persisted subscription-processing inbox with document+queue effects, and a real leased queue message. Capture the native backup cut, pack/unpack the genuine current-format artifact, restore into a clean target and reopen real ZoneTree. Independently require stable positions/content/generation, literal group checkpoint/issued/gap state, exact document/message state and byte-identical retained event/subscription/inbox/queue/outbox records. Manifest/source cut and single restore-authority position increment are exact; archive bytes remain unchanged.
+
+Before explicit operator resume, fresh subscription and queue receive must fail exactly DispatchPaused and old source cursor/delivery tokens and pre-restore original command outcomes must fail exactly TokenInvalidated without effects. Persisted narrow principal denial remains enforced. Failed owned Apply outcomes commit exactly once and same-ID failed replay preserves complete result and store position. Old stored outcomes are retained; no old incarnation receipt is fabricated as current success.
+
+Reconcile through existing public native operations only: explicitly seek the restored group from retained beginning to a new subscription generation, clear that group's explicit pause, explicitly set dispatch running as administrator, and obtain genuine new-incarnation claims. Reprocess the already completed source position using the same handler scope/execution generation: the persisted inbox returns AlreadyProcessed with original effects token and no second document/enqueue. Close contiguous gaps with actual acknowledgements. A new bounded producer/claim/ack and final close/reopen prove healthy continuation and all canonical state. Use no sleeps, fake providers, raw system-key resume or implementation-only migration APIs.
+
+This closes only the missing local eventing artifact-state regression. KL-098 consumer/rebuild/transfer retention pins, event/topic purge/receipt horizon, history-loss reconciliation, remote-transfer KL094 and cluster-wide per-partition backup cut remain distinct open criteria. Current public event/topic APIs expose caps, reads and subscription seek, but no event/topic purge/pin implementation; the test must not synthesize history loss by deleting canonical keys or advertise local backup as a cluster cut. Existing outbox purge/pin and remote-transfer suites remain mandatory.
+
+Ownership: UnitTests BackupRestore Cases/Fixtures/Assertions/Helpers; native artifacts and ZoneTree product APIs unchanged. Ordered join: contract, test-only implementation, root format/build and full normal/scalar native execution with exact original source/DLL identities; Linux recovery/RF3/global gates unchanged. No coverage inventory edit or status closure. Failure retains owned source/backup/target root and original primary plus joined disposal errors. No product seam, format/serializer/public contract change. Rollback removes this task and its test-only flow; no old report is rewritten.
+
+### TASK-TEST-R382-NATIVE-OWNER-EXPIRY-001
+
+REQ-TEST-010 / AC-TEST-010 and REQ-MSG-007 / AC-MSG-007: original R382 native failure evidence is retained. Each actual native TestCluster builder carries one private fixture-owner token in its Properties; actual ISiloBuilder.Configuration resolves only that owning fixture. A separately owned fixture cannot replace or clear another builder's owner. Register before native build/start, unregister only the same owner during its original joined cleanup; startup failures retain original failure and database cleanup failures. No new product hook, alternate coordinator, timeout or provider. Existing shared PerTestSession and owned boundary fixtures keep their actual native Orleans/ZoneTree lifetimes.
+
+The parent expiry whole-flow advances the actual owning clock two minutes after the first committed claim. Its unchanged default30second lease has then expired. Canonical receive replay reauthorizes that lease (CommandOutcomes.ValidateCachedQueueReceive -> Messaging.Lease) and must return exact Rejected/LeaseExpired with null result; serializing that null as a recovered receipt was the test error. Assert complete outer/lane identity, typed failure, no stop error, unchanged original persisted ReceiveResult bytes, every native store byte and position, followed by fresh healthy receive. Never extend lease or parent deadline, reset clock, disable strict native validation or invent a result. Existing valid receipt replay cases remain intact. Fresh original focused normal/scalar, full native and Linux gates are required; no source-only PASS or closure.
+
+## TASK-NATIVE-PARENT-PAYLOAD-BOUNDARY (2026-10-07)
+
+REQ-MSG-007 / AC-MSG-007 and REQ-IS-001/002/005/006 / AC-IS-001/002/005/006 preserve ADR026 multi-lane composition and ADR060 native codecs. ReceiveAcrossLanes is an Orleans parent orchestration capability, intercepted before canonical Core command submission. Its real generated MultiLaneReceiveRequest public/native DTO is decoded by the existing HTTP/MCP/SQL typed descriptor; only each original Receive leaf is a canonical atomic command. Do not add a parent Core payload/identity/normalization mapping or group receipt. The exact enum mapping oracle must explicitly require the parent mapping absent and every other current operation mapping present. Genuine Core native command creation of this parent rejects UnsupportedCapability without storage effects; the real MCP descriptor JSON/native roundtrip preserves literal outer/leaf IDs, lane and ceilings with actual array/stream writer parity. Existing native parent/leaf and SDK/official MCP/SQL whole-operation flows remain mandatory. Original R390/R391 stale oracle failures are retained; no runtime success or coverage follows from source.

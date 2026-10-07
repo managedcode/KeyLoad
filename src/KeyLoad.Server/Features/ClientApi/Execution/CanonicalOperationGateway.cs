@@ -50,10 +50,20 @@ internal static class CanonicalOperationGateway
         {
             DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicOperationDispatch, outcome, started);
         }
-        var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
-        cancellationToken.ThrowIfCancellationRequested();
-        return new(requestId, McpBoundedJson.Serialize(value.Value,
-            context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
+        try
+        {
+            var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
+            cancellationToken.ThrowIfCancellationRequested();
+            return new(requestId, McpBoundedJson.Serialize(value.Value,
+                context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
+        }
+        catch (Exception failure) when (commandKind == OperationKind.ReceiveAcrossLanes
+            && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException)
+        {
+            GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
+                failure, requestId, GrainFailureStage.ReplyEncoding, ErrorCode.UnknownWriteOutcome);
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, MultiLaneReceiveProtocol.Interrupted);
+        }
     }
 
     /// <summary>Returns the actual operation identity, or null before actor dispatch began.</summary>

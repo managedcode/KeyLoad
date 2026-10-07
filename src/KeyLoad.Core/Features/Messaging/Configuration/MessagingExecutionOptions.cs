@@ -15,6 +15,7 @@ public sealed record MessagingExecutionOptions
     private const int DefaultQueueScanPageSize = 256;
     private const int MaximumQueueScanPageSize = 100_000;
     private const int DefaultMaximumDeliveryItems = 100;
+    private const int MaximumReceiveLanesCeiling = 8;
     private const int MinimumWorkCount = 1;
     private const int MinimumRetryExponent = 0;
     private const int MaximumSafeRetryExponent = 20;
@@ -31,6 +32,8 @@ public sealed record MessagingExecutionOptions
 
     /// <summary>Maximum messages admitted to one queue receive request.</summary>
     public int MaximumReceiveMessages { get; init; } = DefaultMaximumDeliveryItems;
+    /// <summary>Maximum independent lanes in one sequential receive composition.</summary>
+    public int MaximumReceiveLanes { get; init; } = MaximumReceiveLanesCeiling;
     /// <summary>Maximum events admitted to one subscription receive request.</summary>
     public int MaximumReceiveEvents { get; init; } = DefaultMaximumDeliveryItems;
 
@@ -40,7 +43,8 @@ public sealed record MessagingExecutionOptions
         && MaximumRetryExponent >= MinimumRetryExponent && MaximumRetryExponent <= MaximumSafeRetryExponent
         && QueueScanPageSize >= MinimumWorkCount && QueueScanPageSize <= MaximumQueueScanPageSize
         && MaximumReceiveMessages is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems
-        && MaximumReceiveEvents is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems;
+        && MaximumReceiveEvents is >= MinimumWorkCount and <= DefaultMaximumDeliveryItems
+        && MaximumReceiveLanes is >= MinimumWorkCount and <= MaximumReceiveLanesCeiling;
 
     /// <summary>Rejects invalid settings before database recovery or command admission.</summary>
     public void Validate()

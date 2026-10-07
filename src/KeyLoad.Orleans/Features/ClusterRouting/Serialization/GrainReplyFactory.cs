@@ -55,8 +55,12 @@ internal static class GrainReplyFactory
 
     internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics, IOptions<GrainRoutingOptions> options, Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification, CancellationToken cancellationToken = default)
     {
-        var code = FailureCode(error, command, cancellationToken);
+        var encodingFailure = command
+            && error.Data[GrainFailureDiagnostics.StageMetadataKey] is GrainFailureStage.ReplyEncoding;
+        var code = encodingFailure ? ErrorCode.UnknownWriteOutcome : FailureCode(error, command, cancellationToken);
         GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, code);
+        if (encodingFailure)
+        { return Rejected(code: code, detail: InterruptedWrite, options: options); }
         if (error is KeyLoadException failure)
         {
             return Rejected(code: code, detail: failure.Message, options: options);

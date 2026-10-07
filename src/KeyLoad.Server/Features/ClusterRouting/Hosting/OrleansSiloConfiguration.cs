@@ -166,6 +166,8 @@ internal static class OrleansSiloConfiguration
                 nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
             .AddGrainTransition<IRecurringDueCoordinatorGrain, IRequestGrain>()
             .MethodByName(nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
+            .AddGrainTransition<IRequestGrain, IRequestGrain>()
+            .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IRequestGrain.ExecuteStreamAsync)).And()
             .AddGrainTransition<IRequestGrain, IDatabaseReadGrain>()
             .MethodByName(nameof(IRequestGrain.ExecuteStreamAsync), nameof(IDatabaseReadGrain.ExecuteAsync)).And()
             .AddGrainTransition<IRequestGrain, ICommandPartitionGrain>()

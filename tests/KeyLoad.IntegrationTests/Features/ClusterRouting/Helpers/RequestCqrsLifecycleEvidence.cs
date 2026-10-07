@@ -16,6 +16,8 @@ internal sealed class RequestCqrsLifecycleEvidence
         RequestCqrsNodeReadinessOutcome.NotObserved
     ];
     private RequestCqrsLifecycleStage stage = RequestCqrsLifecycleStage.Scenario;
+    private RequestCqrsLifecycleStage scenarioPhase = RequestCqrsLifecycleStage.Scenario;
+    private RequestCqrsLifecycleStage? firstScenarioPhase;
     private RequestCqrsLifecycleSnapshot? terminal;
     private RequestCqrsRf3Diagnostics? diagnostics;
     private RequestCqrsRf3DiagnosticsSubscriberObserver? observer;
@@ -28,6 +30,8 @@ internal sealed class RequestCqrsLifecycleEvidence
     private readonly RequestCqrsResourceCompletionEvidence completionEvidence = new();
 
     internal void SetStage(RequestCqrsLifecycleStage value) => stage = value;
+    internal void SetScenarioPhase(RequestCqrsLifecycleStage value) => scenarioPhase = value;
+    internal void SetWaveToken(CancellationToken value) => waveToken = value;
     internal void SetTokens(CancellationToken caller, CancellationToken parent, CancellationToken wave)
     { callerToken = caller; parentToken = parent; waveToken = wave; }
     internal void BindDiagnostics(RequestCqrsRf3Diagnostics value) => diagnostics = value;
@@ -69,7 +73,7 @@ internal sealed class RequestCqrsLifecycleEvidence
     }
 
     internal void RecordFirstFailure()
-    { FirstFailureSnapshot ??= Snapshot(); }
+    { FirstFailureSnapshot ??= Snapshot(); firstScenarioPhase ??= scenarioPhase; }
 
     internal RequestCqrsLifecycleSnapshot? FirstFailureSnapshot { get; private set; }
 
@@ -92,7 +96,7 @@ internal sealed class RequestCqrsLifecycleEvidence
     {
         var first = Format(FirstFailureSnapshot ?? Snapshot());
         var last = Format(terminal ?? Snapshot());
-        var context = ContextPrefix + "first{" + first + "} terminal{" + last + "}";
+        var context = ContextPrefix + "phase=" + (firstScenarioPhase ?? scenarioPhase) + " first{" + first + "} terminal{" + last + "}";
         if (Encoding.UTF8.GetByteCount(context) > MaximumContextBytes)
         { throw new InvalidOperationException("The fixed C1 lifecycle context exceeded its byte limit."); }
         return context;

@@ -122,7 +122,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 68;
+    internal const int Count = 69;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -162,6 +162,7 @@ internal static class McpCatalogExpectations
         (AdminAdmission, AdminAdmissionRoute, GrainReadKind.Admission, null),
         (AdminStatus, AdminStatusRoute, GrainReadKind.NodeStatus, null),
         (DocumentsCommit, DocumentsCommitRoute, null, OperationKind.Batch),
+        ("keyload_messages_receive_across_lanes", "/v1/queues/receive-across-lanes", null, OperationKind.ReceiveAcrossLanes),
         (MessagesReceive, MessagesReceiveRoute, null, OperationKind.Receive),
         (MessagesComplete, MessagesCompleteRoute, null, OperationKind.Delivery),
         (MessagesProcess, MessagesProcessRoute, null, OperationKind.Processing),

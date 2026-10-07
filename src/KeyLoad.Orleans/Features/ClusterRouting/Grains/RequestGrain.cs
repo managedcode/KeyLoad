@@ -13,10 +13,11 @@ namespace KeyLoad.Orleans;
 /// <param name="clock">Runtime clock for the finite execution deadline.</param>
 /// <param name="workOwner">Silo-local owner for active request stream work.</param>
 /// <param name="options">The centrally validated request execution snapshot.</param>
+/// <param name="services">Borrowed native silo services for independent lane composition.</param>
 [global::Orleans.GrainType(GrainRoutingProtocol.RequestAlias), global::Orleans.Placement.PreferLocalPlacement]
 public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> diagnostics,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer, TimeProvider clock,
-    NativeRequestWorkOwner workOwner, IOptions<GrainRoutingOptions> options)
+    NativeRequestWorkOwner workOwner, IOptions<GrainRoutingOptions> options, IServiceProvider services)
     : Grain, IRequestGrain
 {
     /// <inheritdoc />
@@ -59,7 +60,19 @@ public sealed class RequestGrain(GrainRequestCodec codec, ILogger<RequestGrain> 
 
             writer.CancellationToken.ThrowIfCancellationRequested();
             GrainOperationReply reply;
-            if (command)
+            if (request.Envelope.CommandKind == OperationKind.ReceiveAcrossLanes)
+            {
+                var result = await MultiLaneReceiveExecution.ExecuteAsync(request, GrainFactory, services, codec,
+                    clock, chunkSerializer, options, diagnostics, writer.CancellationToken).ConfigureAwait(true);
+                try
+                { reply = GrainReplyFactory.Value(result, options, writer.CancellationToken); }
+                catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+                {
+                    GrainFailureDiagnostics.Mark(error, GrainFailureStage.ReplyEncoding);
+                    throw;
+                }
+            }
+            else if (command)
             {
                 stage = GrainFailureStage.PartitionResolution;
                 var partition = GrainPartitionResolver.Resolve(request);

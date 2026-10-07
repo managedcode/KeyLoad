@@ -60,7 +60,35 @@ internal sealed class NativeOperationSemanticsTests
     {
         foreach (var kind in Enum.GetValues<OperationKind>())
         {
-            await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNotNull();
+            if (kind == OperationKind.ReceiveAcrossLanes)
+            {
+                await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
+            }
+            else
+            {
+                await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNotNull();
+            }
         }
+    }
+
+    [Test]
+    public async Task OrleansParentCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState()
+    {
+        using var database = new TestDatabase();
+        var before = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
+            [new ReceiveRequest(Guid.NewGuid(), new(database.Partition, "parent-boundary"))]);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateNativeOperation(
+            OperationKind.ReceiveAcrossLanes, request.RequestId, "root",
+            database.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request)));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(failure.Message).IsEqualTo("The operation is unsupported.");
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(database.Store).SequenceEqual(before)).IsTrue();
+        database.Configure("parent-boundary", ResourceKind.WorkQueue);
+        database.Commit(new EnqueueMessage("parent-boundary", "healthy", "{}", "{}"));
+        await Assert.That(database.Database.InspectMessage("root", request.Requests[0].Lane, "healthy")!.PayloadJson)
+            .IsEqualTo("{}");
     }
 }

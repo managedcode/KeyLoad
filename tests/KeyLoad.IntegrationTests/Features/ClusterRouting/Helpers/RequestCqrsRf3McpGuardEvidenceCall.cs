@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Aspire.Hosting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -13,14 +14,16 @@ internal static class RequestCqrsRf3McpGuardEvidenceCall
     private const string ToolsCallMethod = "tools/call";
 
     internal static async Task SendMalformedAsync(DistributedApplication app, string node, string persistedKey,
-        CancellationToken cancellationToken)
+        RequestCqrsLifecycleEvidence lifecycle, CancellationToken cancellationToken)
     {
         using var client = McpCallerHttp.Create(app, node);
         using var request = CreateRequest(persistedKey);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardHeaders);
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
             .ConfigureAwait(false);
-        await RequestCqrsRf3McpGuardEvidenceCallAssertions.VerifyValidationAsync(response, cancellationToken)
+        await RequestCqrsRf3McpGuardEvidenceCallAssertions.VerifyValidationAsync(response, lifecycle, cancellationToken)
             .ConfigureAwait(false);
+        lifecycle.SetStage(RequestCqrsLifecycleStage.GuardResponseOwnerDispose);
     }
 
     private static HttpRequestMessage CreateRequest(string persistedKey)

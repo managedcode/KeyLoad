@@ -1,7 +1,6 @@
 using KeyLoad.Orleans;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
-using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -12,7 +11,7 @@ internal static class RequestCqrsPhaseFaultCleanup
         RequestCqrsRf3Wave? wave, bool waveStartupAttempted, RequestCqrsRf3Callers? caller,
         RequestCqrsRf3Callers? administrator,
         IReadOnlyList<ReplicaSiloDiscovery>? discovery, CancellationTokenSource? callerCancellation,
-        CancellationTokenSource? scenarioDeadline, Task<Result<CommitReceipt>>? sdkCall,
+        CancellationTokenSource? scenarioDeadline, Task? sdkCall,
         Task<RequestCqrsFaultMcpObservation>? mcpCall, Guid armId, List<Exception> failures)
     {
         var cleanup = new List<Exception>();
@@ -45,7 +44,7 @@ internal static class RequestCqrsPhaseFaultCleanup
         }
     }
 
-    private static async Task JoinOriginalCallsAsync(Task<Result<CommitReceipt>>? sdkCall,
+    private static async Task JoinOriginalCallsAsync(Task? sdkCall,
         Task<RequestCqrsFaultMcpObservation>? mcpCall, List<Exception> failures)
     {
         if (sdkCall is not null)

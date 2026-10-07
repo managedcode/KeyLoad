@@ -58,8 +58,8 @@ internal sealed record RequestCqrsRf3Workload(PartitionRef Partition, CommandReq
         var command = new CommandRequest(Guid.NewGuid(), Partition,
             [new PutDocument(RequestCqrsRf3Protocol.AdminCollection, id,
                 RequestCqrsRf3Protocol.ChangedDocumentJson, ExpectedRevision: 1, ExplicitReplacement: true)]);
-        var receipt = await McpCallerAssertions.SdkSuccessAsync(await clients.Sdk.CommitAsync(command,
-            cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+        var receipt = await RequestCqrsRf3CurrentWriteReconciliation.CommitAsync(clients.Sdk, command,
+            cancellationToken).ConfigureAwait(false);
         await VerifyDocumentAsync(clients, 0, RequestCqrsRf3Protocol.ChangedDocumentJson, 2, cancellationToken)
             .ConfigureAwait(false);
         return receipt;
