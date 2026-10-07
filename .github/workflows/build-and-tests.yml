@@ -116,6 +116,16 @@ jobs:
       - name: Build KeyLoad
         id: build
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release
+      - name: Prepare native source and test-image identity receipts
+        id: native-source-identity
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'TestResults/native-source-identity'
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode prepare -Root $root -EvidenceRoot $evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify the pinned native full-text package
         run: |
           node --input-type=module <<'JS'
@@ -175,6 +185,15 @@ jobs:
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
+      - name: Verify native source and test-image identity receipts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.native-source-identity.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $evidence = Join-Path $root 'TestResults/native-source-identity'
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
+            -Mode verify -Root $root -EvidenceRoot $evidence
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Save test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()

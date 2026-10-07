@@ -337,13 +337,14 @@ KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
 fanout, recovery and movement acceptance remains open. The joined stage has
 passed the local Release build with zero analyzer errors and warnings. The current
 native process-recovery suite passed **235/235**, with no skips. The latest full
-uninstrumented unit report, before the ANN test-scheduling correction, passed
-**2,762/2,763**, with one ANN construction deadline failure and no skips.
-Complete normal/scalar reruns and delivered-source Linux qualification remain
-open. The [original Linux source788 run](docs/implementation/runtime-qualification-37349838022.json)
-passes the official MCP SDK guidance case but fails the complete RF3 and release
-gates. [Checkpoint evidence](docs/implementation/partition-runtime-development-2026-10-05.json)
-keeps those failures and the remaining scalar, recovery, RF3 and scale gates explicit.
+uninstrumented unit report passed **2,763/2,763**. The [original Linux run at
+876c5237](https://github.com/managedcode/KeyLoad/actions/runs/37546085722)
+also passed normal and scalar **2,763/2,763** and recovery **235/235** without skips.
+The subsequent RF3 bootstrap admission and membership-image assertion fixes pass
+the local Release build and focused normal/scalar tests; their complete current-source
+reruns remain open. RF3, functional coverage, scale and release qualification remain
+open. The [implementation status](docs/implementation/status.json) records each
+source and report boundary.
 
 Functional coverage excludes load/comparison runs and admits complete operation
 flows only. The current Query profile binds exactly 25 named cases and 103 source

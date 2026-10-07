@@ -6,6 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class TwoRf3MembershipImageAssertions
 {
+    private const string DigestMarker = "@sha256:";
     internal static async Task VerifyAsync(DistributedApplication app, string reference,
         CancellationToken cancellationToken)
     {
@@ -21,16 +22,21 @@ internal static class TwoRf3MembershipImageAssertions
 
     private static async Task VerifyResourceAsync(ContainerResource resource, string reference)
     {
-        var digestMarker = reference.LastIndexOf("@sha256:", StringComparison.Ordinal);
+        var digestMarker = reference.LastIndexOf(DigestMarker, StringComparison.Ordinal);
         if (digestMarker <= 0)
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
         var imageTag = reference[..digestMarker];
-        var repository = imageTag[..imageTag.LastIndexOf(':')];
-        var digest = reference[(digestMarker + 8)..];
+        var tagSeparator = imageTag.LastIndexOf(':');
+        if (tagSeparator <= 0 || tagSeparator == imageTag.Length - 1)
+        { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
+        var repository = imageTag[..tagSeparator];
+        var acceptedTag = imageTag[(tagSeparator + 1)..];
+        var digest = reference[(digestMarker + DigestMarker.Length)..];
+        var expectedResolvedImage = repository + DigestMarker + digest;
         var image = resource.Annotations.OfType<ContainerImageAnnotation>().Single();
-        if (image.Image != repository || image.Tag is not null || image.SHA256 != "sha256:" + digest
+        if (image.Image != repository || image.Tag != acceptedTag || image.SHA256 != digest
             || !resource.TryGetContainerImageName(out var actual) || actual is null
-            || !actual.EndsWith("@sha256:" + digest, StringComparison.Ordinal))
+            || !string.Equals(actual, expectedResolvedImage, StringComparison.Ordinal))
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
         await Assert.That(TwoRf3MembershipProtocol.Nodes.Contains(resource.Name, StringComparer.Ordinal)).IsTrue();
     }

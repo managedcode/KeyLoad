@@ -22,6 +22,27 @@ Include owned DTO closures; persisted model values/scalars; WAL/checkpoint/ident
 
 Every requirement maps one-to-one to these criteria in InternalSerialization.md. Native JSON DOM surrogate tests preserve ordered properties/duplicate semantics, numeric lexemes and owned buffers. Semantic validation is required beyond serialization attributes. No large synthetic load tests are added. Performance/power-loss/endurance/production remain unmeasured unless separately evidenced; static review cannot satisfy runtime criteria.
 
+### Current native unit source crosswalk (mapping only; not qualification)
+
+This source crosswalk names the current assertion families reviewed against
+the acceptance rows. The grouped unit sources below are evidence pointers, not
+a claim that an individual test run qualifies a current gate.
+
+| Existing current REQ/AC | Reviewed current unit source and operation | Scope limit |
+|---|---|---|
+| REQ-IS-001 / AC-IS-001 | `NativeContractAttributeTests`, `NativeContractFamilyTests`, and the generated DTO assertions in `ReplicaGeneratedCodecCompatibilityTests` and `ReplicaNativeContractTests` | Attribute/type closure and generated values only; this is not the complete repository source inventory. |
+| REQ-IS-002 / AC-IS-002 | `NativeBoundaryTests`, `NativeWireCollectionTests`, `NativeWireBoundaryTests`, `NativeWireShapeTests`, `NativePairMetadataTests`, `NativeDomTests`, `NativeGraphTests`, `NativeJsonElementTests`, `NativeValueOperandTests`, `NativeInspectionTests`, `NativeReaderMalformedTests`, `NativeStreamTests`, `NativeNullableMetadataTests`, `NativeUnknownWellKnownHeaderReaderTests`, `NativeUnknownWellKnownHeaderTests`, `NativeUnknownWellKnownHeaderAuthenticationTests`, and the strict public-input profile cases | Native codec/DOM structural semantics and failure-before-effects; public HTTP/MCP JSON remains a separate protocol. R13 and R17 exact mappings are in ADR060. |
+| REQ-IS-003 / AC-IS-003 | `CoreModelPersistenceTests`, `CoreNativeAccountingTests`, `NativeOperationCoordinatorTests`, `NativeOperationResultTests`, selected `NativeContractFamilyTests` and `NativeNullableMetadataTests` cases | Actual ZoneTree values, native typed outcome replay and exact stored-byte accounting. `CoreNativeAccountingTests` assertions map here by behavior even though their method names say AC-IS-006. |
+| REQ-IS-004 / AC-IS-004; REQ-IS-008 / AC-IS-008 | `NativeCheckpointBatchTests`, `ReplicaNativePersistenceTests`, `ReplicaNativeSnapshotTests`, and current stored-state assertions in `ReplicaGeneratedCodecCompatibilityTests` | Current checkpoint/replica metadata validation, exact no-mutation/reopen, and unsupported-current-format rejection. Positive round trips do not demonstrate conversion or old-format compatibility. |
+| REQ-IS-005 / AC-IS-005 | `ReplicaNativeAdmissionTests`, `ReplicaNativeAuthorityTests`, `ReplicaNativeInspectionTests`, `ReplicaNativeEnumHeaderTests`, `ReplicaNativeContractTests`, `ReplicaInspectionResolutionArrayGuardTests`, `ReplicaInspectionResolutionBytesTests`, `ReplicaInspectionResolutionCollectionsTests`, `ReplicaInspectionResolutionReferencesTests`, and replica-specific methods above | Current native sender/proof, typed payload, inspection, byte/entry bound and borrowed-buffer behavior. These unit flows do not substitute for the Docker RF3 SDK/MCP gate. |
+| REQ-IS-006 / AC-IS-006 | `NativePublicCommandTransportTests`, `NativePublicNormalizationTests`, `NativePublicReadElementsTests`, `NativeOperationMarkerTests`, and current membership/generated request-reply cases | Public-to-native boundary conversion, principal/error precedence and typed request behavior. In-process tests are not official MCP SDK or RF3 qualification. |
+| REQ-IS-007 / AC-IS-007 | `CoreSignedClaimsTests`, `SignedClaimsExecutionPolicyTests`, `NativeOperationFingerprintTests`, `NativeOperationSemanticsTests`, and exact identity assertions in `NativeOperationOwnershipTests` / `NativeOperationAuthorityTests` | Current typed claims and unchanged canonical operation/retry identity; does not qualify performance or all authorization paths. |
+| REQ-IS-PERF005 / AC-IS-PERF005; REQ-IS-PERF006 / AC-IS-PERF006 | `NativeWireSupportedScalarAllocationTests`, `NativeWireSupportedScalarTests`, and `NativeWireSupportedScalarDepthTests` | Narrow local allocation/domain/depth assertions only; they do not satisfy the comparable BDN criteria. |
+| REQ-CQ-013 / AC-CQ-034/035 | `SerializationBufferPolicyTests`, `SerializationExecutionPolicyTests`, and `SignedClaimsExecutionPolicyTests` where their source-level AC-CQ comments name the criterion | Central typed operational-option admission and execution-boundary policy; these rows are cross-feature CodeQuality evidence, not additional InternalSerialization ACs. |
+
+No case in this slice maps to AC-IS-009 or AC-IS-PERF007: those require complete
+workflow/source-matched or comparative performance evidence. Exact-source normal/scalar workflow results remain required for qualification.
+
 ## Assumptions and compatibility
 
 Orleans10.4.0 and the existing central package pins are retained. Matching homogeneous cluster versions are required. Unsupported persisted formats are rejected; this acceptance does not authorize rewriting established stores. No direct Azure or production access. Product release remains outside this source task.

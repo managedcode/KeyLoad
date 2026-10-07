@@ -52,10 +52,11 @@ above against actual ZoneTree/TestDatabase primitives, without mocks, fake view,
 skips or weakened limits. Preserve callbacks' borrowed lifetime. Root reviews
 the complete private packets, then executes Aspire normal/scalar tests.
 
-Complete ownership is a later root-owned stage. Current epoch7 outcome keys have
-no partition locator; their hash cannot recover one. Copying every global outcome
-or dropping outcomes is incorrect. Existing-store migration needs its exact
-accepted upgrade/rollback contract. Current persisted authorization remains
+Complete ownership is a later root-owned stage. Global control outcomes have no
+movable partition locator; their hash cannot recover one. Copying every global
+outcome or dropping outcomes is incorrect. The current product must preserve
+explicit partition-associated outcomes and shared control authority without a
+data conversion or alternate reader. Current persisted authorization remains
 authority and an acknowledged revocation must fence all serving groups. Source
 and destination group indexes are never directly comparable; explicit ownership
 epoch invalidation is the first candidate under KL-072, pending full freeze.
@@ -81,7 +82,7 @@ flowchart LR
     Page --> Later[Later complete ownership and fenced transfer]
 ```
 
-The accepted native epoch/outcome prerequisite is [TokenOwnershipLineage](TokenOwnershipLineage.md), REQ/AC-PMOVE-005..006 and REQ/AC-MTOKEN-001..004 under ADR-017. Its partition-associated locator is additive; global authority and old unknown-scope outcomes remain explicit complete-image blockers. Family pages or a locator alone do not authorize installation or cutover.
+The accepted native epoch/outcome prerequisite is [TokenOwnershipLineage](TokenOwnershipLineage.md), REQ/AC-PMOVE-005..006 and REQ/AC-MTOKEN-001..004 under ADR-017. Its partition-associated locator is part of the current product; shared global authority remains an explicit complete-image dependency. Family pages or a locator alone do not authorize installation or cutover.
 
 
 # Accepted Stage 1A: shared Orleans membership; later physical movement contracts
@@ -92,7 +93,7 @@ Related: [PartitionTransfer](PartitionTransfer.md), [PhysicalShardCatalog](Physi
 
 ## Scope and source-backed boundary
 
-The original plan requires controlled copy/catch-up/barrier/switch/cleanup (KL-036), whole atomic partitions with generation readiness and restartable cleanup (KL-071), and either a supported old-token invalidation or correct lineage translation without comparing independent log positions (KL-072). Current contracts intentionally stop before those operations: AC-PMOVE-004 forbids an installer, `AtomicPartitionPlacementV1` only resolves to the single committed `DefaultShard`, `PhysicalShardCatalog` only boots epoch 1, and AC-MTOKEN-004 explicitly excludes epoch bump/cross-group cutover. This proposal is a new movement contract; it does not reclassify current PMAP, bounded pages, token issuance, outcome association or prior-frame compatibility as movement. Source anchors: `docs/design/architecture-v0.3.uk.md` §§4, 6, 28 and KL-036/071/072; `docs/ADR/ADR-016-atomic-physical-placement.md` §§1–5; `docs/ADR/ADR-017-ownership-session-tokens.md`; current `PhysicalShardCatalog`/`AtomicPartitionPlacement` and `PartitionTransfer` contracts.
+The original plan requires controlled copy/catch-up/barrier/switch/cleanup (KL-036), whole atomic partitions with generation readiness and restartable cleanup (KL-071), and either pre-movement token invalidation or correct lineage translation without comparing independent log positions (KL-072). Current contracts intentionally stop before those operations: AC-PMOVE-004 forbids an installer, `AtomicPartitionPlacementV1` only resolves to the single committed `DefaultShard`, `PhysicalShardCatalog` only boots epoch 1, and AC-MTOKEN-004 explicitly excludes epoch bump/cross-group cutover. This proposal is a new movement contract; it does not reclassify current PMAP, bounded pages, token issuance, outcome association or current-frame recovery as movement. Source anchors: `docs/design/architecture-v0.3.uk.md` §§4, 6, 28 and KL-036/071/072; `docs/ADR/ADR-016-atomic-physical-placement.md` §§1–5; `docs/ADR/ADR-017-ownership-session-tokens.md`; current `PhysicalShardCatalog`/`AtomicPartitionPlacement` and `PartitionTransfer` contracts.
 
 Stable identity remains the complete four-field `PartitionRef` / `AtomicPartitionId`. Physical shard identity remains a separate opaque ID for an independently configured RF3 replica group. A node-local `PartitionHost` owns its canonical ZoneTree store, replica log, file locks, materializer and apply gate. Orleans activation migration changes no physical ownership. Replica voters and Orleans silos are not separate logical shards.
 
@@ -361,3 +362,21 @@ transport/test ownership, and root owns integration and native evidence.
 There is no data/wire migration. Rollback disables the explicit profile and
 cannot retain an unmapped authority handler or abandoned disposable owner as a
 working six-node implementation.
+
+### Native immutable-image oracle repair
+
+TASK-MEMBERSHIP-IMAGE-ORACLE repairs the pre-start test oracle for the existing
+AC-MEMBERSHIP-006. `RuntimeContainerImage.Add` supplies the accepted tag and the
+64-character digest separately to native Aspire13.6.0. Its image annotation
+retains the tag and stores the digest without the `sha256:` prefix; the native
+resolved reference uses `repository@sha256:digest`. The current test's null-tag
+and prefixed-annotation assertions reject that valid pinned configuration before
+any of the six resources starts. Require the exact accepted repository, tag and
+digest metadata plus exact native resolved reference on all six resources;
+retain the existing fail-before-start mismatch behavior and actual six-container
+startup, signed membership, closed public calls and joined teardown. The patch
+owns only `TwoRf3MembershipImageAssertions.cs`; no image construction, profile,
+credential, topology, timeout or production behavior changes. Root freezes and
+reviews the contract, the worker prepares the guarded correction, and root joins
+strict build/format plus the existing exact-source Linux RF3 case. Source review
+alone does not qualify membership. Rollback restores only the prior test oracle.

@@ -11,6 +11,24 @@ the cluster control boundary is defined by [ADR-036](../ADR/ADR-036-orleans-foun
 | REQ-AUTH-002: public credential changes cannot disable or impersonate the cluster's membership authority | AC-AUTH-002: a persisted protected internal principal has no public API key; even an administrator cannot edit it or create a credential for it; revoking a public administrator does not revoke internal membership |
 | REQ-AUTH-003: internal authority can perform only its approved membership control operation | AC-AUTH-003: ordinary callers cannot submit Membership; the internal principal cannot submit data/security operations; real store outcomes preserve exact denial and unchanged effects |
 
+
+### Current unit case-to-acceptance crosswalk
+
+| Native case class | Existing requirement / acceptance | Evidence boundary |
+|---|---|---|
+| `ClusterPrincipalPolicyTests`, `ClusterPrincipalInitializationIntegrityTests` | REQ-AUTH-002 / AC-AUTH-002 | Protected internal-principal bootstrap/idempotence, public edit/credential denial, snapshot copy, and missing/modified/corrupt row rejection at an existing apply cut. This is local store/snapshot evidence, not quorum or RF3 proof. |
+| `ClusterPrincipalAuthorizationTests` | REQ-AUTH-003 / AC-AUTH-003 | Ordinary/public internal-membership denial, internal data/security denial, and internal membership after public-root revocation. |
+| `DocumentRowTenantMutationAuthorizationTests` | REQ-AUTH-005 / AC-AUTH-005, with the owning document boundary REQ-DSTORE-003 / AC-DSTORE-003 | Put/Patch/Delete cannot forge row owner or tenant. It does not cover all row-scoped read/query adapters. |
+| `DocumentFieldMutationAuthorizationTests`, `DocumentReplacementFieldAuthorizationTests`, `DocumentDeleteIndexAuthorizationTests` | REQ-AUTH-006 / AC-AUTH-006, with the owning document boundary REQ-DSTORE-003 / AC-DSTORE-003 | Persisted field-write and index-use grants are independently enforced on the tested mutation paths; this is not the complete adapter/lineage matrix. |
+| `ResourcePolicyUpdateTests`, `ResourcePolicyUpdateRejectionTests`, `ResourcePolicyUpdateVisibilityTests` | See the exact REQ-RPOL-001..004 mapping in [ResourcePolicyUpdates](Authorization/ResourcePolicyUpdates.md) | The unit cases map to RPOL-001/002/003; RPOL-004 remains the real SDK/MCP RF3 criterion. The blob-quota exclusion case is validator-only, not a store-apply flow. |
+
+`SignedEnvelopeTests` is physically under the Authorization test directory but
+is owned by InternalSerialization: map it only to REQ-IS-007 / AC-IS-007 in
+[InternalSerialization acceptance](InternalSerialization/Acceptance.md#requirements-and-acceptance).
+It is not evidence for public credential verification or persisted principal
+authorization.
+
+
 Slice map: new policy code `src/KeyLoad.Core/Features/Authorization/`; focused
 tests mirror `tests/KeyLoad.UnitTests/Features/Authorization/`. HTTP/MCP adapters
 remain ClientApi and invoke Orleans request grains. Principals/API keys remain

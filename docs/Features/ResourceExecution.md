@@ -279,6 +279,40 @@ consumption on that source. Current cache source awaits a later exact-SHA run.
 | REQ-MP-005: honest integrated qualification and resource measurement | AC-MP-011/012 | TASK-MP-010/011; exact-SHA GitHub full suites and resource JSON |
 | REQ-MP-006: remove avoidable JSON text byte copies and cached-receive request parses | AC-MP-006/009/011/012 | TASK-MP-007J under ADR-035; public strict text/byte, Unicode/error, owned lifetime, allocation and real-store replay cases |
 
+## Existing ResourceExecution test traceability proposal
+
+These links describe the tested subflow only. They do not close a complete AC or
+qualify the current delivered source. Exact parameterized case IDs, source hashes,
+line spans, candidate REQ/AC references and per-case limitations are captured in
+the private R1 review artifact; the R111 census itself was failed/non-final.
+
+| Existing requirement / AC | Exact source families or method identities | Observed contribution and boundary |
+|---|---|---|
+| REQ-RESOURCE-001 / AC-RESOURCE-001; REQ-ADM-001 / AC-ADM-001 | `CommandAdmissionGovernorTests.CancellationBeforeAdmissionDoesNotConsumeCapacity`; `HttpAdmissionGovernorTests`; `AdmissionOwnershipTests.HttpAdmissionRejectsInvalidPathFramingAndPrincipalBeforeReservation`; current command-governor cases named in the requirement table above | Real governor reservations check bounded node/data/control lanes, verified scope binding, rejection/cancellation accounting and release. Unit admission is not the planned mixed-load RF3 profile. |
+| REQ-ADM-001 / AC-ADM-001 | `AdmissionOwnershipTests.InvalidCommandReservationArgumentsLeaveEveryCounterUnchanged`; `DisposingUnresolvedDispatchedCommandReportsUnknownOutcomeAndReleasesOnce` | Actual invalid reservations leave counters unchanged; unresolved admitted command publishes UnknownWriteOutcome and releases its reservation once. This does not establish current caller integration or AC-ADM-003. |
+| REQ-ADM-002 / AC-ADM-002 | `AdmissionOwnershipTests.InboxRejectsConcurrentReaderWithoutConsumingTheQueuedSignal`; `AsyncDisposalStopsAndDrainsRegisteredReaderBeforeRejectingFutureWork`; `PreCancelledReadIsRejectedBeforeReaderOwnershipEvenAfterStop`; `AdmittedCommandInboxTests` | Real inbox single-reader, cancellation, FIFO, control-burst fairness, stop/drain, response cancellation, queue release and bounded reader behavior. `AdmittedCommandReadAllocationTests.WarmedPrefilledInboxReadsWithinSmallAllocationWindow` is an allocation control, not an AC-ADM-002 numeric criterion. |
+| REQ-MP-002 / AC-MP-004, AC-MP-005 | `AnalyticalAdmissionTests`; `BudgetedReadViewTests`; `ReadBudgetAllocationTests`; `ReadExecutionBudgetGrant*Tests`; `ReadExecutionTests` | Real engine/store reservation, shared read-byte/record debit, limits before reader/callback/materialization, read cancellation and healthy-follow-up subflows. Allocation assertions are scoped observations, not RSS/physical-I/O or performance qualification. |
+| REQ-MP-006 / AC-MP-006; REQ-MP-002 / AC-MP-003 | `CanonicalJsonTests`; `CanonicalJsonAllocationTests`; `JsonPathTests`; `JsonTextProtocolTests`; `JsonTextAllocationTests`; `PreparedScalarTests` | Exact canonical bytes/fingerprints, pointer/scalar behavior, strict text/byte decoding, malformed-input cleanup, persisted retry and bounded allocation cases. These cover named serializer paths, not all public API transports. |
+| REQ-MP-006 / AC-MP-006; REQ-MSG-001 / AC-MSG-001; REQ-MSG-003 / AC-MSG-003 | `JsonTextQueueReplayTests` and `JsonTextSubscriptionReplayTests` | Actual receive/replay preserves delivery identity, rejects changed raw request/result data, rechecks current principal or subscription generation, and rejects stale lease/token use. This is a replay/lease subset, not the full messaging API or official-client proof. |
+| REQ-ROC-001..004 / AC-ROC-001..004 | `ReadOnlyCollectionContractTests`; `ReadOnlyCollectionValidationTests`; `ReadOnlyCollectionWireTests`; `CanonicalKeyContractTests`; relevant `ReadBudgetAllocationTests` typed owned-read case | Reflection/API shape, exact wire/fingerprint bytes, required collection validation and real independent owned buffers/read results. AC-ROC-005/006 caller-wide build/delivery gates remain separate. |
+| REQ-CACHE-001..004 / AC-CACHE-001..008, AC-CACHE-011..015 (only per-method subset) | `CacheMemoryBudget*Tests`; `CacheReadPermit*Tests`; `ZoneTreeCoordinatedPointCache*Tests`; `ZoneTreePointCache*Tests` | Actual budget, permit, ZoneTree cache, owner-gate, coherence, authorization, pin/retirement and wire-primitive subflows as enumerated per case. `CacheControlWire*Tests` map only to the internal wire primitive AC-CACHE-014. No unit case here proves remote coordinator/RF3 activation, AC-CACHE-009 measured benefit or AC-CACHE-010 full qualification. |
+| REQ-RESOURCE-003/004 / AC-DBPROF-001..004 | `DatabasePhaseSchemaTests`; `DatabasePhaseBankTests`; `DatabasePhaseBankConcurrencyTests`; `DatabasePhaseArithmeticTests`; `DatabasePhaseAllocationTests` | Fixed bank shape, independent lanes, bounded arithmetic/contention/saturation, detached snapshots and configured primitive allocation. These do not prove all 32 production phase boundaries, private capture or overhead/benefit (AC-DBPROF-005..008). |
+| REQ-RESOURCE-003 / REQ-CQ-013; AC-DBPROF-002 / AC-CQ-034/035 | `DatabasePhaseExecutionOptionsTests` | Actual central options binding/validation and bank-construction ordering, including malformed/unknown/scalar settings and allowed bounds. This does not qualify enabled production startup or profiling output. |
+| REQ-CQ-013 / AC-CQ-034/035 | `CurrentPeerOptionsOwnerTests.AcNativePeerDiscoveryConfigurationReachesSocketBeforePhysicalOwnership`; `AcNativeDiscoveryDeadlineAtRpcBoundaryRejectsBeforePhysicalOwnership` | Actual IOptions values reach the socket handler and invalid settings reject before creating a physical data directory. Their source comment IDs `AC-NATIVE-004..006` do not match the current-format meanings; keep those IDs unmapped until their owner corrects the source traceability. |
+| REQ-AISQL-003 / AC-AISQL-007 | `SqlAdmissionTests` | Actual HTTP governor treats SQL as heavy data work, reserves before verified-scope binding, preserves direct-control progress during data saturation and exposes nonrecursive dynamic-effect discovery. Unit evidence does not replace the official .NET/MCP RF3 flow. |
+| REQ-DSTORE-001/002/004; REQ-EVENT-004; REQ-MSG-005; REQ-ROUTE-004; REQ-AUTH-004/005 | `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`; `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`; `ConcurrentCompareAndSwapHasOneWinner`; `SameLiteralPartitionKeyCannotCrossTransactionDomains`; `TransactionAuthorizationTests` | Preserve the existing many-to-many associations in DocumentStorage, EventStreams, Messaging, ClusterRouting and Authorization. These are actual single-partition DatabaseEngine operations with narrow effects/denial assertions; they do not prove cross-partition atomicity or RF3. `TransactionProtocolTests.MalformedMutationElementsBecomePersistedRejectionsRatherThanApplyExceptions` has per-argument candidate rows for document patch, event revision, topic, and sample negatives in the JSON sidecar; each is a narrow malformed-input persisted-rejection subflow, not its owning feature’s complete AC. The null generic mutation and oversized-frame scenario retain their separate proposals/unmapped reason. |
+
+The following cases remain deliberately unmapped: core null-argument guards without a
+current feature AC; the inbox allocation-window control without a declared numeric
+AC; `ReadGateLifetimeTests.AcCq016_DisposalObservesRealGateBeforeLaterStoreUse`
+(the referenced AC-CQ-016 is not currently defined); and
+`ResourceProtocolFailureTests.AcRoc003*` (the body tests persisted invalid-resource
+outcome/replay, while AC-ROC-003 governs owned results/dense-vector efficiency).
+Do not resolve these by prefix or filename inference. The AC-RESOURCE-002 measured
+operation/resource requirement, cache-on benefit, full RF3 admission, DB phase
+capture and all full delivered-source qualification remain open even when their
+unit subflows pass.
+
 Common storage/resource primitives are shared building blocks. Feature behavior
 stays in its canonical slice: StorageRecovery, QueryExecution, Search,
 DocumentStorage, EventStreams, TimeSeries, GraphTraversal, Messaging, ChangeFeeds,
@@ -314,6 +348,26 @@ Admission/inbox ownership and the related CLR type migration are governed by
 AC-ADM-001..003 extend REQ-RESOURCE-001 / AC-RESOURCE-001 and AC-MP-006/012.
 TASK-MP-010J owns disjoint admission source/tests; the lead joins actual callers
 and exact GitHub evidence. Semaphore disposal must follow registered-reader drain.
+
+TASK-ADM-CATALOG-BOOTSTRAP refines REQ-RESOURCE-001 / AC-RESOURCE-001 and
+REQ-ADM-001 / AC-ADM-001 before integration. Original Linux RF3 startup with a
+4,096-byte data ceiling rejects the administrator-authenticated
+`BootstrapPhysicalShardCatalog` through the ordinary data lane before the test
+can exercise its public operations. Classify only that existing system startup
+command into the existing reserved control lane. Keep its control payload/byte,
+node/tenant/principal count ceilings, native queue ordering, authentication,
+authorization, one request grain and RF3 acknowledgement unchanged. The native
+governor regression must hold a full data reservation, reject another data
+command without counters changing, admit bootstrap through the bounded control
+reserve, reject exhausted control capacity, release both leases exactly once
+and admit a healthy following operation. The existing actual Aspire RF3
+`AdmissionClusterTests.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable`
+must still start all three voters, reject `ConfigureResource` without claiming
+its command ID, reuse that ID for the authorized control operation, and report
+zero settled usage plus ready three-voter routing. No budget increase, bypass,
+bootstrap retry or alternate dispatcher is permitted. ADR-042 owns the ordered
+two-file implementation and original Linux qualification; local proof remains
+development evidence.
 
 No cache may outlive its authority/read cut without explicit invalidation. Mutable
 storage arrays cannot escape through a borrowing optimization. Cancellation and

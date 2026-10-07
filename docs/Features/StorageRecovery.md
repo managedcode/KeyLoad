@@ -14,6 +14,24 @@ endurance and power-loss gates remain separately mandatory and open; closing
 KL-007 cannot close or waive them. Current local normal/scalar operation results
 are supporting development evidence until the original Linux reports exist.
 
+TASK-KEYCODEC-NATIVE-IDENTITY binds that existing matching-identity gate to the
+original Build and Tests Linux job. Immediately after its Release build, prepare
+the existing CodeQuality production-source manifest and unit/recovery image
+sidecars in `TestResults/native-source-identity`; verify the same files after
+the unchanged full normal, scalar and recovery runs and retain them beside the
+original reports. Review the task's 33 owned source hashes against the matching
+Abstractions, Core, Storage.IO, Storage.ZoneTree, UnitTests and RecoveryTests
+source rows, original source/run/attempt/artifact provenance and executed
+DLL/PDB hashes, MVID and portable-PDB/compiler identities. These are native
+hash/identity receipts, not archived binaries. A manifest from the separately
+rebuilt RF3 job cannot bind these executions. Root owns the contract and final
+join; the workflow owner reuses the existing prepare/verify implementation in
+`scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1`
+without a new collector, manifest schema, case subset or qualification gate.
+Retain failed suite outcomes; the complete recovery stage must still pass.
+Rollback removes only the additive receipt steps. Codec bytes, topology, suite
+scope, individual deadlines and all separately required product gates stay fixed.
+
 | Requirement | Measurable acceptance and owned TUnit mapping |
 |---|---|
 | REQ-KEYCODEC-001: preserve ordered v1 bytes and explicit type normalization | AC-KEYCODEC-001: original goldens and10,000 seeded decimals stay exact; an independent10,000 mixed-type/composite corpus roundtrips to the defined normalized values and sorts by a semantic oracle; negatives, valid Unicode/escaping, all type tags and extrema pass. Fractional decimal literal vectors retain their bytes and decode exactly under InvariantCulture and a custom CurrentCulture with a non-ASCII negative sign. New KeyCodecMixedCorpus/KeyCodecMixedCorpusTests, KeyCodecGoldenContractTests and KeyCodecCultureContractTests under UnitTests/Features/StorageRecovery. |

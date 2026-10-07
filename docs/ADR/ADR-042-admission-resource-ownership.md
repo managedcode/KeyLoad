@@ -95,3 +95,29 @@ actual configured Linux GitHub gates.
 
 Primary guidance: [CA2000 ownership transfer](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2000)
 and [async disposal](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-disposeasync).
+
+## Physical catalog startup control admission
+
+TASK-ADM-CATALOG-BOOTSTRAP implements the ResourceExecution refinement of
+REQ-RESOURCE-001 / AC-RESOURCE-001 and REQ-ADM-001 / AC-ADM-001. Original Linux
+run37541109923 rejects `BootstrapPhysicalShardCatalog` during node1 startup at
+`PhysicalShardCatalogStartup.SubmitBootstrapAsync`; its ordinary data ceiling is
+4,096 bytes, exactly the governor's envelope floor, and serialized bootstrap
+work cannot fit. Node2's subsequent unavailable-majority error is secondary.
+The initial catalog mutation must use the existing bounded control reserve.
+It remains administrator-authenticated, authorized and RF3 committed through
+the same unique request grain; no admission or credential bypass is introduced.
+
+Root freezes this contract, the worker changes only
+`src/KeyLoad.Core/Features/ResourceExecution/Commands/CommandAdmissionGovernor.cs`
+and its existing `CommandAdmissionGovernorTests.cs`, then root reviews and joins
+strict build/format, focused normal/scalar governor operations and the unchanged
+actual Aspire RF3 admission case. Add only the existing bootstrap operation kind
+to the reserved classifier; preserve every lane ceiling and shared replication
+or inbox consumer. The regression executes full data/control reserve,
+rejection, exact lease release and healthy reuse, rather than asserting the
+classifier result alone. Delivered qualification requires the original Linux
+SDK/control/RF3 flow; source or local governor success cannot establish it.
+No wire, storage, deployment, format or dependency change is needed. Rollback
+removes only this operation's classifier inclusion and its matching regression;
+the original startup failure remains unqualified until real execution passes.

@@ -106,3 +106,22 @@ normal/scalar suites at2889/2889 each, recovery228/228 and1000 unique actual
 atomic process cuts. Literal fractional decimal goldens pass under invariant
 and custom-sign cultures. Exact delivered-source Linux/RF3 originals, endurance,
 power-loss and measured acceleration remain separate required gates.
+
+TASK-KEYCODEC-NATIVE-IDENTITY makes the existing exact-source Linux review
+concrete. The Build and Tests `verify` job prepares the unchanged native
+CodeQuality production-source manifest and test-image sidecars immediately
+after its Release solution build, runs the original normal/scalar/full-recovery
+commands, then verifies those same receipts and uploads them with the original
+reports. Root freezes and reviews this contract; the workflow owner changes only
+`.github/workflows/build-and-tests.yml` and joins on the existing
+`functional-coverage.production-source-manifest.ps1` prepare/verify calls. Review
+the 33 owned KL-007 source rows and original source/run/attempt/artifact provenance
+against the executed UnitTests and RecoveryTests DLL/PDB hashes, MVID,
+portable-PDB and compiler-source identities from that same build. A different
+job's rebuilt images cannot establish this binding. This adds no schema, binary
+archive, format change, test subset or new acceptance prerequisite. All18 mapped
+normal/scalar cases and the original unfiltered recovery stage must pass; other
+failures remain visible and RF3/endurance/power-loss gates remain separate.
+Verification comprises the existing native source-ownership regressions,
+workflow static checks, and the original Linux artifacts. Rollback removes only
+the additive workflow receipt steps; no storage or runtime rollback is needed.

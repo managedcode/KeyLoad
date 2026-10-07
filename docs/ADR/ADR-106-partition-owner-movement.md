@@ -222,3 +222,22 @@ integration, strict checks, original Linux RF3 evidence and commit. No stored-da
 an unmapped route or undisposed owner cannot be reported as delivered membership.
 
 Ownership movement and current same-view session tokens retain the contract in [ADR-017](ADR-017-ownership-session-tokens.md). Unknown or unverifiable lineage invalidates explicitly.
+
+## Native immutable-image oracle repair
+
+TASK-MEMBERSHIP-IMAGE-ORACLE implements the existing AC-MEMBERSHIP-006 pre-start
+identity check using pinned Aspire13.6.0 semantics. The native
+[`WithImageSHA256` implementation](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting/ContainerResourceBuilderExtensions.cs)
+stores its supplied digest unchanged and retains tag metadata; native
+[`TryGetContainerImageName`](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting/ApplicationModel/ResourceExtensions.cs)
+adds the `@sha256:` separator for the runtime reference. The accepted KeyLoad
+builder already supplies the unprefixed digest correctly. Repair only the
+existing test oracle's contradictory null-tag/prefixed-digest expectations.
+Root freezes this contract before the worker changes
+`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/TwoRf3MembershipImageAssertions.cs`;
+root reviews and joins strict build/format and the unchanged actual six-container
+startup, signed membership, closed-client and teardown flow. Require exact
+accepted repository/tag/digest metadata and exact resolved reference for all
+six nodes before Start. No new helper, image/provider replacement, deployment
+change, bound increase or omitted assertion is required. Rollback changes only
+the test expectation; actual Linux RF3 evidence remains required and unqualified.

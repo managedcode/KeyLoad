@@ -893,6 +893,25 @@
       },
       "latestOwnedSourceLinux": {
         "runIds": [
+          "37546085722"
+        ],
+        "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+        "mappedCaseCount": 18,
+        "normalPassed": 18,
+        "scalarPassed": 18,
+        "mappedSkipped": 0,
+        "ownedSourceClosureFiles": 33,
+        "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
+        "currentOwnedSourceDrift": 0,
+        "priorManifestMismatch": "sole UnitTests.csproj entry reflects benchmark-case ownership move; current frozen refresh matches all33 exact876c paths",
+        "wholeRecoveryPassed": 235,
+        "wholeRecoveryTotal": 235,
+        "originalTestArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
+        "independentCompiledImageReceiptAvailable": false,
+        "qualification": "original_Linux_full_normal_scalar_recovery_pass; same_job_compiled_image_task_identity_remains_open"
+      },
+      "previousOwnedSourceLinux": {
+        "runIds": [
           "37536668550",
           "37535888906"
         ],
@@ -906,6 +925,17 @@
         "wholeRecoveryTotal": 235,
         "independentCompiledImageReceiptAvailable": false,
         "qualification": "original_Linux_mapped_cases_pass; full_recovery_and_compiled_image_task_acceptance_remain_open"
+      },
+      "nativeIdentityRetention": {
+        "contract": "TASK-KEYCODEC-NATIVE-IDENTITY",
+        "feature": "docs/Features/StorageRecovery.md",
+        "adr": "docs/ADR/ADR-005-canonical-keyspace-codec.md",
+        "workflow": ".github/workflows/build-and-tests.yml",
+        "implementation": "existing production/native-test source manifest prepare after Release build and verify after original full normal/scalar/recovery, retained by always uploader",
+        "deliveredRuntimeQualified": false,
+        "localPreparePassed": true,
+        "localManifestSha256": "2f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09",
+        "localVerifyPassed": true
       }
     }
   },
@@ -3915,10 +3945,24 @@
         "closure": "only full mapped criteria and required evidence close an acceptance"
       },
       "codeDelivery": {
-        "currentBuild": "R114 full native Release passed4,111 inputs with zero source drift/warnings/errors; original log SHA256c13b5af305522ac54bab113ba955c1aac8c3d1517c5b7df47e10175795412727",
-        "formatter": "R114 full native dotnet format --verify-no-changes passed4,111 inputs with zero source drift",
-        "verificationScope": "local source-bound native TUnit development; current recovery235/235 passed; complete normal/scalar, exact-source Linux/RF3/endurance/coverage gates remain open",
-        "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory"
+        "currentBuild": "R116 full native Release passed4,111 inputs with zero source drift/warnings/errors; original log SHA256a30fc7d5c83850d2e4eac098033e92dcf2dffc73a511ab2fd993e9384cad09ab",
+        "formatter": "R116 full native dotnet format --verify-no-changes passed4,111 inputs with zero source drift, original native exit0",
+        "verificationScope": "R115 delivered876c source: local normal2763/2763 and earlier process recovery235/235 passed; original Linux876c normal/scalar2763/2763 and recovery235/235 passed. R116 admission/image repair focused normal/scalar6/6 passed; fresh complete R116 normal/scalar/RF3 and functional coverage remain open.",
+        "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory",
+        "qualityReview": {
+          "sourceFindings": [
+            "Confirmed RF3 bootstrap wrongly used exhausted data admission; one enum classification fix and whole reservation/rejection/release/follow-up regression.",
+            "Pinned Aspire13.6 container annotation retains tag and bare digest; exact native resolved-image assertion corrected without changing six-container topology."
+          ],
+          "sdkAnalyzersAndOwnedComplexity": "full Release build0warnings0errors; existing400file/200type/64method/depth3 limits enforced",
+          "analyzerConfig": "unchanged central .editorconfig, warning severity and consumers; no suppression or analyzer package changes",
+          "canonicalFormat": "passed",
+          "CSharpier": "N/A: repository-selected formatter is dotnet format",
+          "thirdPartyAnalyzerSkills": "reviewed against existing config; no new Roslynator/Meziantou/StyleCop package needed for scoped fixes",
+          "CRAP": "unmeasured without complete same-source functional coverage; no passing score inferred",
+          "workflowYamlAndNativeOrder": "PyYAML6.0.3 parse, original suite entry and identity prepare/verify/always-retention order passed",
+          "staticGovernanceAndDiff": "passed"
+        }
       },
       "currentArchitectureDecisions": {
         "reviewed": 111,
@@ -3926,23 +3970,24 @@
         "actualSvgRendersPassed": 116,
         "indexEntriesVerified": 111,
         "activeOldWorkflowFilenameReferences": 0,
-        "sourceBinding": "R7A binds all current111 ADR bytes after current-only narrative and journal-provider contract cleanup. All116 fence bodies and original R4 SVG hashes match exactly; index111 unique/resolved and obsolete workflow/cohort-plan scans pass. No new render or database qualification inferred"
+        "sourceBinding": "R116 rebind: all current112 ADR source hashes retained; all116 current Mermaid fence bytes match original native-rendered R4 inputs exactly. This is unchanged-diagram source binding, not new database/runtime qualification.",
+        "currentAdrFiles": 112
       },
       "nativeQualification": {
         "physicalNativeId8Omission": "passed",
         "physicalRF3Id7MissingFieldFlow": "open",
-        "functionalCoverageAndCRAP": "Open and unmeasured. Benchmark/comparison cases are physically transferred; R111 complete functional native census failed one ANN deadline. The private five-group inventory requires successful current normal/scalar census, exact CLR/MTP identities, owning REQ/AC mappings and the complete sixteen-module/RF3-server cohort before merge.",
+        "functionalCoverageAndCRAP": "Open and unmeasured. Original Linux876c and local R115 complete unit census passed. The complete current functional inventory still requires current normal/scalar source/image binding, exact CLR/MTP identities, reviewed owning REQ/AC flow mappings and the complete sixteen-module/RF3-server coverage cohort. Load/comparison runs are excluded.",
         "scalarRecoveryRF3AndLinuxDelivery": "open",
         "currentStorage": "R104 actual Aspire/TUnit StorageRecovery 190/190 passed with zero source/assembly drift",
         "BackupRestore": "R103 actual Aspire/TUnit 85/85 passed; complete current-source rerun and Linux qualification remain pending",
-        "completeUnit": "R111 full native uninstrumented unit: 2,763 executed, 2,762 passed, one ANN construction deadline failure, zero skips/source/assembly drift. The six existing heavyweight ANN flows now use native unkeyed isolation with identical bodies/corpora/budgets; fresh complete normal/scalar same-image reruns remain pending. Focused unchanged AdaptiveFilteredPlanner 6/6 is separate development evidence.",
+        "completeUnit": "R115 full native uninstrumented unit: 2,763/2,763 passed; zero failed/skipped/source drift/assembly drift. R116 adds one bounded bootstrap flow; its six governor cases pass normal/scalar. Fresh complete R116 same-image normal/scalar required for the final coverage inventory.",
         "focusedCurrentFixtures": {
           "ClusterRouting": "R107218/218 passed; TRX SHA256145e4fa04cebed567b59497f4d80b48429c1b6ef14510b48b1adb6f44b88087c",
           "ColdDiagnostics": "R107 fresh-process1/1 passed; TRX SHA2569aa036e548dff39a9c999c8bfce173d5bc60ea8e2f25d506303446c678225666",
           "DocumentMutationImageReads": "R1062/2 passed",
           "ReplicaNativePersistence": "R1068/8 passed",
           "ReaderCapability": "R1062/2 passed",
-          "NativeSagaJobs": "R1074/5 passed; TRX SHA2568971ea143c97d2718bc067d5e9a9cd3db5a10f6bd747a5c7e2ccbc236a57b0e2. Background journal work-loop method attribution needs observed confirmation; exact coordinator method edges did not repair it",
+          "NativeSagaJobs": "R107 focused4/5 failure is historical. Every case passes in the R115 complete normal report and original Linux876c complete normal/scalar reports; RF3 native-jobs qualification remains open.",
           "sourceAndAssemblyDrift": 0,
           "skipped": 0,
           "MaterializerLifecycle": "R113 native 4/4 passed; real converted journal fault preserves same terminal task/exception, committed-prefix reopen and physical-owner closure; TRX SHA25614d8ccfbc9ff7129310f251e6078adc8b1da9222e2d77c0dc0f570a8c30657a1"
@@ -3958,7 +4003,69 @@
           "trxSha256": "d97c0d9cd6a80a5537b85ea1e63d53dd9775f54ff6fad98c5253525d90ddd1b1",
           "logSha256": "8a0de4f8a87608f95ab6dc8ee4a814a9051434d8cef64336857b1e4c2cc454c1",
           "qualification": "local_native_process_recovery_development_only; exact_source_Linux_RF3_endurance_and_power_loss_gates_remain_open"
-        }
+        },
+        "currentNormalUnit": {
+          "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+          "passed": 2763,
+          "total": 2763,
+          "failed": 0,
+          "skipped": 0,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "trxSha256": "b201dd24354f4492ef3192d59ea5c04dc032375661152f2bf8e467f32c3785e6",
+          "logSha256": "c91f559be641901ed46a7752b9dd756209bb85f2eb255aa2a415b7823288a1ef",
+          "qualification": "local_native_TUnit_development; preceding_delivery_before_R116_Core_admission_change"
+        },
+        "latestOriginalLinuxVerify": {
+          "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
+          "runId": 37546085722,
+          "attempt": 1,
+          "verifyJobId": 112550358232,
+          "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722",
+          "verifyJobConclusion": "success",
+          "originalArtifactId": 11452371971,
+          "originalArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
+          "originalTrx": {
+            "unit.trx": {
+              "sha256": "1c86d88dcd4fc2600e7bdbb7d7d3bab1459c774aa18bdde63bffccd78bd80618",
+              "total": 2763,
+              "passed": 2763,
+              "failed": 0,
+              "skipped": 0
+            },
+            "unit-scalar.trx": {
+              "sha256": "7d12e9021c2ac0cd8c84aa69a1ba6da75fc8e9e8ad637a6f3829fefdd483c47d",
+              "total": 2763,
+              "passed": 2763,
+              "failed": 0,
+              "skipped": 0
+            },
+            "recovery.trx": {
+              "sha256": "7ca0352531a2d81553601cb6d7a6464f0900b7b8bbbf212736932f70e333cda9",
+              "total": 235,
+              "passed": 235,
+              "failed": 0,
+              "skipped": 0
+            }
+          },
+          "rf3Conclusion": "in_progress_at_observation",
+          "sameVerifyJobCompiledImageReceiptAvailable": false,
+          "qualification": "original_full_Linux_verify_lanes_pass; no_whole_workflow_RF3_coverage_or_new_R116_qualification_inferred"
+        },
+        "admissionBootstrapDevelopment": {
+          "stage": "R116",
+          "normalPassed": 6,
+          "scalarPassed": 6,
+          "skipped": 0,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "normalTrxSha256": "36cdac7d4bb14e8ae188344dbc8f895c6ba690033bbd8d8411e9d5b5f0b195c4",
+          "scalarTrxSha256": "f6562efd569b6014ff7bf7b911d13e1539ebba8265fa3754a2b481584850b622",
+          "implementation": "BootstrapPhysicalShardCatalog uses existing bounded reserved control lane; data/control exhaustion, exact rejection state, idempotent release and healthy follow-up covered",
+          "originalRf3CaseChanged": false,
+          "rf3RuntimeQualified": false
+        },
+        "localNativeIdentityPrepareVerify": "R116 native production/source and Unit/Recovery/Integration DLL/PDB receipt prepare+verify passed; manifest SHA2562f0ff8f683fc8ac1c98e4a5a9c8fb598fc1ec3fcb392695ce541c273e90e7c09. Local uncommitted-source identity inspection is not original same-job Linux delivery qualification."
       }
     }
   },

@@ -22,3 +22,7 @@
 - Read the [root policy](../AGENTS.md), [architecture map](Architecture.md), [RepositoryGovernance feature](Features/RepositoryGovernance.md), and [ADR-032](ADR/ADR-032-mcaf-governance.md) first.
 - This documentation module owns durable records for all canonical slices: `RepositoryGovernance`, `BenchmarkComparisons`, `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization`, `ChangeFeeds`, `StorageRecovery`, `ClusterReplication`, `ClusterRouting`, `ClientApi`, and `BackupRestore`.
 - Feature docs use `Features/<SliceName>.md`; architecture, implementation and ADR records remain under their existing global documentation roots.
+
+## Native TUnit entry, owner correction 2026-10-07
+- ADR-117 and the root's latest native-entry correction supersede the earlier outer AppHost test commands here. CI invokes native TUnit/Microsoft.Testing.Platform directly after build with Detailed output; C# fixtures own Aspire startup, readiness, discovered endpoints, real client workloads and joined cleanup. `scripts/Features/TestInfrastructure/run-tests.mjs` selects native arguments and environment only. Preserve every required suite, original report, exact-source Linux gate and development/qualification distinction.
+- The canonical current Build and Tests workflow is `.github/workflows/build-and-tests.yml`; historical `ci.yml` references above are not current dispatch instructions.
