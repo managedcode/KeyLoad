@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.Features.Search;
 
-internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBudget budget)
+internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBudget budget, bool explain = false)
 {
     private const int EmptyElementCount = 0;
     private const int AdjacentElementOffset = 1;
@@ -10,16 +10,24 @@ internal sealed class SearchRankFusion(int constant, int limit, ReadExecutionBud
 
     private readonly Dictionary<EntityRef, double> scores = [];
 
-    public void AddBranch(SearchScore[] branch, double weight)
+    private readonly SearchExplanationCapture? explanations = explain ? new(budget, constant) : null;
+
+    public void AddBranch(SearchScore[] branch, double weight, SearchBranchKind kind = SearchBranchKind.Text)
     {
         branch = GlobalBranchSinglePartitionAdapter.Prepare(branch);
         for (var rank = EmptyElementCount; rank < branch.Length; rank++)
         {
             GlobalBranchSinglePartitionAdapter.ValidateAt(branch, rank, budget);
             var reference = branch[rank].Reference;
-            scores[reference] = scores.GetValueOrDefault(reference) + weight / ((double)constant + rank + AdjacentElementOffset);
+            var nativeRank = rank + AdjacentElementOffset;
+            var contribution = weight / ((double)constant + rank + AdjacentElementOffset);
+            scores[reference] = scores.GetValueOrDefault(reference) + contribution;
+            if (weight > EmptyElementCount)
+            { explanations?.Record(reference, new(kind, nativeRank, weight, contribution)); }
         }
     }
+
+    public SearchHitExplanation? Explain(EntityRef reference) => explanations?.For(reference);
 
     public SearchScore[] Select()
     {

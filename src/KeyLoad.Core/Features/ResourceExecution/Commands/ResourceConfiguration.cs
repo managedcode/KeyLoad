@@ -41,6 +41,7 @@ public sealed partial class DatabaseEngine
         var definition = request.Definition;
         Features.RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
         BlobStorageOperations.ValidatePolicy(definition);
+        Features.Search.VectorFieldProfiles.Validate(definition);
         if (!Enum.IsDefined(definition.Kind) || !Enum.IsDefined(definition.Authority)
             || definition.Indexes.Any(index => index is null || index.Fields.Any(string.IsNullOrEmpty))
             || definition.FieldPolicies.Concat(definition.HeaderPolicies).Any(policy => policy is null || string.IsNullOrEmpty(policy.Path)))

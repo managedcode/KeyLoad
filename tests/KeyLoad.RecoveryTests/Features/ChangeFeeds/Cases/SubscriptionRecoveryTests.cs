@@ -76,7 +76,7 @@ internal sealed class SubscriptionProcessRecoveryTests
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var subscription = SubscriptionCrashScenario.Subscription;
         var checkpoint = database.GetSubscription("root", subscription).Checkpoint;
-        var document = database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"));
+        var document = database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"), cancellationToken: cancellationToken);
         await Assert.That(checkpoint is 0 or 1).IsTrue();
         await Assert.That(document is null).IsEqualTo(checkpoint == 0);
         var outcome = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(SubscriptionCrashScenario.Partition,
@@ -92,7 +92,7 @@ internal sealed class SubscriptionProcessRecoveryTests
         var recovered = database.Apply(original with { EvaluatedAt = TimeProvider.System.GetUtcNow() })
             .Get<SubscriptionProcessingResult>();
         await Assert.That(database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(1);
-        await Assert.That(database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"))!
+        await Assert.That(database.GetDocument("root", new(SubscriptionCrashScenario.Partition, "orders", "effect"), cancellationToken: cancellationToken)!
             .Revision).IsEqualTo(1);
         await AssertRetryReceiptAsync(database, subscription, original, recovered);
     }

@@ -23,12 +23,13 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
         var identity = await scenario.CreateReaderAsync(fixture, true, true, false, false, deadline.Token);
         var nodes = new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 };
         using var clients = new NativeTextRf3Clients(fixture, identity.Secret, nodes);
-        await UpdateCorpusAsync(scenario, clients.Administrators[0], deadline.Token);
-        await StopAndVerifyAsync(scenario, nodes, clients, deadline.Token);
+        var update = await UpdateCorpusAsync(scenario, clients.Administrators[0], deadline.Token);
+        await StopAndVerifyAsync(scenario, nodes, clients, update, deadline.Token);
     }
 
     private async Task StopAndVerifyAsync(NativeTextRf3Scenario scenario, string[] nodes,
-        NativeTextRf3Clients clients, CancellationToken cancellationToken)
+        NativeTextRf3Clients clients, (CommandRequest Command, CommitReceipt Receipt) update,
+        CancellationToken cancellationToken)
     {
         string? stoppedNode = null;
         var restarted = false;
@@ -40,6 +41,10 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
             await fixture.KillContainerAsync(stoppedNode, NativeTextRf3Scenario.FailureScenario, cancellationToken);
             var survivorIndex = Enumerable.Range(0, nodes.Length).First(index => index != leaderIndex);
             await WaitReadyAsync(clients.Administrators[survivorIndex], cancellationToken);
+            await VerifyUpdatedSearchAsync(scenario, clients.Callers[survivorIndex], clients.Secret,
+                nodes[survivorIndex], cancellationToken);
+            await NativeTextRf3ReplayAssertions.ReplayAsync(fixture, nodes[survivorIndex],
+                clients.Administrators[survivorIndex], update.Command, update.Receipt, cancellationToken);
             await VerifyUpdatedSearchAsync(scenario, clients.Callers[survivorIndex], clients.Secret,
                 nodes[survivorIndex], cancellationToken);
             await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
@@ -67,19 +72,8 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
     private async Task VerifyUpdatedSearchAsync(NativeTextRf3Scenario scenario, KeyLoadClient sdk,
         string identitySecret, string node, CancellationToken cancellationToken)
     {
-        var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(scenario.Text("needle"),
-            cancellationToken));
-        await Assert.That(empty).IsEmpty();
-        var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(scenario.Text("fresh"),
-            cancellationToken));
-        await Assert.That(healthy).HasSingleItem();
-        await Assert.That(healthy[0].Document.Reference.Id).IsEqualTo(NativeTextRf3Scenario.FirstId);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, node, identitySecret, cancellationToken);
-        var official = await McpCallerAssertions.SuccessAsync<RankedDocument[]>(await mcp.CallAsync(
-            McpCallerTools.SearchExecute, scenario.Text("fresh"), cancellationToken));
-        await Assert.That(JsonDefaults.Serialize(healthy).AsSpan()
-            .SequenceEqual(JsonDefaults.Serialize(official.Value))).IsTrue();
-        await AssertProjectedAsync(healthy[0].Document);
+        await NativeTextRf3ReplayAssertions.ResultsAsync(scenario, sdk, mcp, cancellationToken);
     }
 
     private async Task VerifyAllNodesAsync(NativeTextRf3Scenario scenario, string[] nodes,
@@ -91,13 +85,13 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
         }
     }
 
-    private static async Task UpdateCorpusAsync(NativeTextRf3Scenario scenario, KeyLoadClient administrator,
+    private static async Task<(CommandRequest Command, CommitReceipt Receipt)> UpdateCorpusAsync(NativeTextRf3Scenario scenario, KeyLoadClient administrator,
         CancellationToken cancellationToken)
     {
         var update = new CommandRequest(Guid.NewGuid(), scenario.Partition,
         [
             new PutDocument(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.FirstId,
-                NativeTextRf3Scenario.Document("fresh wording", NativeTextRf3Scenario.OwnerA),
+                NativeTextRf3ReplayAssertions.UpdatedJson,
                 NativeTextRf3Scenario.FirstRevision, new(NativeTextRf3Scenario.OwnerA)),
             new PutVector(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.FirstId,
                 NativeTextRf3Scenario.VectorField, [1, 0], NativeTextRf3Scenario.SpaceFor(),
@@ -105,7 +99,9 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
             new DeleteDocument(NativeTextRf3Scenario.Collection, NativeTextRf3Scenario.SecondId,
                 NativeTextRf3Scenario.FirstRevision)
         ]);
-        await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(update, cancellationToken));
+        var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(update, cancellationToken));
+        await NativeTextRf3ReplayAssertions.ReceiptAsync(update, receipt);
+        return (update, receipt);
     }
 
     private static async Task<int> FindLeaderIndexAsync(string[] nodes, KeyLoadClient[] administrators,
@@ -169,13 +165,6 @@ internal sealed class NativeTextRf3LeaderLossTests(ClusterFixture fixture)
         {
             failure.Data[DiagnosticsFailureKey] = diagnosticFailure;
         }
-    }
-
-    private static async Task AssertProjectedAsync(DocumentResult document)
-    {
-        await Assert.That(document.Redacted).IsTrue();
-        await Assert.That(document.RedactedFields).Contains(NativeTextRf3Scenario.SecretField);
-        await Assert.That(document.Json.Contains(NativeTextRf3Scenario.Secret, StringComparison.Ordinal)).IsFalse();
     }
 
     private sealed class NativeTextRf3Clients : IDisposable

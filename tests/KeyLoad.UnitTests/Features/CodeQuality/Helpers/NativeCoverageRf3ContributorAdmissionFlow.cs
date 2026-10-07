@@ -23,6 +23,7 @@ internal static class NativeCoverageRf3ContributorAdmissionFlow
         var options = Options.Create(new NativeCoverageExecutionOptions());
         var accepted = await NativeCoverageRf3ManifestReader.ReadAsync(path, options, token);
         await Assert.That(accepted.Contributors.Count).IsEqualTo(ExpectedContributors);
+        await NativeCoverageRf3SelectionAdmissionFlow.VerifyAsync(path, accepted, token);
         foreach (var mutation in new[] { Contributors, Method, Instance, Class, Rf3 })
         {
             var failures = new List<Exception>();

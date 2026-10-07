@@ -15,6 +15,7 @@ internal static class NativeCoverageTUnitSession
 {
     private const string RunnerName = "tests-rf3";
     private const string ArgumentsEnvironment = "KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS";
+    private static IDistributedApplicationTestingBuilder? testingBuilder;
     private static DistributedApplication? application;
     private static CancellationTokenSource? outputLifetime;
     private static Task? output;
@@ -32,8 +33,11 @@ internal static class NativeCoverageTUnitSession
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
         try
         {
-            var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, deadline.Token)
-                .ConfigureAwait(false);
+            deadline.Token.ThrowIfCancellationRequested();
+            testingBuilder = FixtureOwnedNativeCoveragePreparationComposition.Create(() =>
+                DistributedApplicationTestingBuilder.Create(arguments));
+            var builder = testingBuilder;
+            FixtureOwnedNativeCoveragePreparationComposition.Compose(builder);
             var runner = builder.Resources.OfType<ExecutableResource>().Single(resource => resource.Name == RunnerName);
             var configuration = await ExecutionConfigurationBuilder.Create(runner).WithEnvironmentVariablesConfig()
                 .BuildAsync(new DistributedApplicationExecutionContext(DistributedApplicationOperation.Publish),
@@ -81,22 +85,38 @@ internal static class NativeCoverageTUnitSession
                 }
                 if (output is not null)
                 { await CollectAsync(() => output, failures).ConfigureAwait(false); }
-                var imageCleanup = owned.Services.GetRequiredService<NativeCoverageRf3Cleanup>();
-                await CollectAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-                await CollectAsync(() => imageCleanup.CleanupAsync(deadline.Token), failures).ConfigureAwait(false);
+                NativeCoverageRf3Cleanup? imageCleanup = null;
+                ServerFailureObserver.Observe(() => imageCleanup = owned.Services.GetRequiredService<NativeCoverageRf3Cleanup>(), failures);
+                await DisposeBuilderAsync(failures).ConfigureAwait(false);
+                if (imageCleanup is not null)
+                { await CollectAsync(() => imageCleanup.CleanupAsync(deadline.Token), failures).ConfigureAwait(false); }
+            }
+            else
+            {
+                await DisposeBuilderAsync(failures).ConfigureAwait(false);
             }
         }
         finally
         {
-            outputLifetime?.Dispose();
+            ServerFailureObserver.Observe(() => outputLifetime?.Dispose(), failures);
             outputLifetime = null;
             output = null;
             foreach (var (key, value) in previousEnvironment)
-            { Environment.SetEnvironmentVariable(key, value); }
+            { ServerFailureObserver.Observe(() => Environment.SetEnvironmentVariable(key, value), failures); }
             previousEnvironment.Clear();
         }
         if (failures.Count > 0)
         { throw new AggregateException("Native TUnit coverage prerequisite cleanup failed.", failures); }
+    }
+
+    private static async Task DisposeBuilderAsync(List<Exception> failures)
+    {
+        var owned = testingBuilder;
+        testingBuilder = null;
+        if (owned is not null)
+        {
+            await CollectAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
     }
 
     private static Task CollectAsync(Func<Task> action, List<Exception> failures)

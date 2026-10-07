@@ -112,18 +112,18 @@ public sealed class SearchEngine
                 return [];
             }
             budget.Check();
-            var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget);
+            var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
             if (request.Text is not null)
             {
                 fusion.AddBranch(FilteredSearchBranch.Apply(
                     SearchBranchExecution.RankText(database, textProjection, view, principal, resource, request, budget, execution),
-                    eligibility, budget), request.TextWeight);
+                    eligibility, budget), request.TextWeight, SearchBranchKind.Text);
             }
             if (similarity is not null)
             {
-                fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility), request.VectorWeight);
+                fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility), request.VectorWeight, SearchBranchKind.Vector);
             }
-            return SearchBranchExecution.ProjectSelected(database, view, principal, resource, fusion.Select(), budget);
+            return SearchBranchExecution.ProjectSelected(database, view, principal, resource, fusion.Select(), budget, fusion);
         });
     }
 

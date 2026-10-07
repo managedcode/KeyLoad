@@ -295,3 +295,28 @@ REQ-CQ-039..045 / AC-CQ-039..045 retain the original source/image, artifact, col
 The original Linux run37655841124/attempt1/source0c2f4799df1ebfa1dd90cd0ae31c1fde4991b057 retains eleven BeforeTestSession selection failures; authored correction is not executed RF3 or coverage proof. Root owns fresh build, native census/inventory, full normal/scalar, recovery and covered RF3 execution.
 
 Implementation order: freeze closed cohort; introduce feature-local typed catalogue; route native admission and fixture equality through it; retain producer exact seven-class filter; extend the existing genuine source-preparation/rejection/restoration operation; qualify original native artifacts after root join. Rollback removes the complete correction rather than admitting wildcard/count-only substitutes. No data format or migration changes.
+
+## TASK-CQ-RF3-PREPARATION-OWNERSHIP-002
+
+REQ-CQ-039/040 and AC-CQ-039/040 retain the closed original eleven contributor,
+source/DLL/PDB/image/context and collector admission. Original4e18 BeforeSession
+selection failure used obsolete two-class runtime filter while producer selected
+seven classes/eleven cases; current shared catalogue already repairs that mismatch.
+No nested empty-string normalization is authorized: nested fixture mode/source are
+explicitly cleared, suite is absent, and current typed image context remains strict.
+
+The native TUnit coverage preparation owner must compose the AppHost directly through
+the existing Aspire testing builder API, validating outer original-node selection and
+exact closed catalogue first, then adding the unchanged real prerequisite resources.
+It must never resume a standalone TestSuiteApplication after removing its runner.
+The fixture owns preparation start/readiness/output/stop/dispose/collector cleanup;
+original primary plus joined cleanup failures remain retained. No deadline, image,
+source manifest, public RF3 topology, whitelist or thresholds change. Extend existing
+genuine source-preparation operation with exact old-selector rejection followed by
+healthy canonical-selector source admission and unchanged original manifest bytes.
+This admission control is supporting infrastructure evidence, not product coverage;
+actual covered RF3 eleven original collector flows and Linux gates remain mandatory.
+
+Supporting control owns GITHUB_SHA briefly under the existing globally nonparallel test, using only the genuine prepared native source manifest revision, restores the exact prior environment in finally and propagates primary/restore failures. Production selection still checks its original environment source SHA; no bypass parameter or fabricated manifest.
+
+R3 joined restoration: observe each original environment-key restore individually through existing ServerFailureObserver, continue every remaining key, retain all earlier stop/output/builder/image failures and throw only after restoration settles. Output lifetime disposal and cleanup service lookup similarly retain original failure identities. Prepare primary/cleanup aggregation remains unchanged. Correct actual AppHostRuntimeOptions.NativeCoverageRf3Image property verified in owning source.

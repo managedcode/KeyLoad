@@ -9,7 +9,7 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
         {
-            GrainReadKind.Document => database.GetDocument(principal, GrainNativePayload.Read<GetDocumentRequest>(payload).Reference),
+            GrainReadKind.Document => Document(principal, GrainNativePayload.Read<GetDocumentRequest>(payload), cancellationToken),
             GrainReadKind.Stream => Stream(principal, GrainNativePayload.Read<ReadStreamRequest>(payload), cancellationToken),
             GrainReadKind.EventSource => database.ReadEventSource(principal, GrainNativePayload.Read<ReadEventSourceRequest>(payload), cancellationToken),
             GrainReadKind.Subscription => database.GetSubscription(principal, GrainNativePayload.Read<GetSubscriptionRequest>(payload).Subscription),
@@ -52,6 +52,9 @@ internal sealed class GrainCoreReadCapabilities(DatabaseEngine database)
         or GrainReadKind.QueueTransfer or GrainReadKind.QueueTransferReceipt
         or GrainReadKind.RecurringSchedule or GrainReadKind.Saga or GrainReadKind.GraphShortestPath
         or GrainReadKind.AtomicPartitionPlacement or GrainReadKind.GraphIncomingEdges;
+
+    private DocumentResult? Document(string principal, GetDocumentRequest request, CancellationToken cancellationToken)
+        => database.GetDocument(principal, request.Reference, request.MinimumToken, cancellationToken);
 
     private StreamPage Stream(string principal, ReadStreamRequest request, CancellationToken cancellationToken)
         => database.ReadStream(principal, request.Stream, request.AfterRevision, request.Limit, cancellationToken);

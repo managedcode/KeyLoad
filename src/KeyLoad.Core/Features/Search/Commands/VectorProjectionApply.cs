@@ -244,6 +244,7 @@ public sealed partial class DatabaseEngine
         var document = VisibleVertex(transaction, principal, new(partition, vector.Collection, vector.Id));
         Authorization.RequireWriteRow(principal, document.Access);
         CheckRevision(document.Revision, vector.ExpectedDocumentRevision);
+        Features.Search.VectorFieldProfiles.Require(resource, vector);
         return document;
     }
 

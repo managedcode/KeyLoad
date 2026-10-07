@@ -85,14 +85,22 @@ public sealed partial class DatabaseEngine
     /// <summary>Reads one document after row and field authorization.</summary>
     /// <param name="principalId">Persisted principal identifier.</param>
     /// <param name="reference">Document identity.</param>
+    /// <param name="minimumToken">Optional acknowledged minimum in the same physical placement.</param>
+    /// <param name="cancellationToken">Cancellation checked within the final authorized read cut.</param>
     /// <returns>The projected document, or null when unavailable.</returns>
-    public DocumentResult? GetDocument(string principalId, EntityRef reference) => Store.Read(view =>
+    public DocumentResult? GetDocument(string principalId, EntityRef reference, CommitToken? minimumToken = null,
+        CancellationToken cancellationToken = default) => Store.Read(view =>
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
+        if (minimumToken is not null)
+        { ValidateDocumentSessionToken(view, reference.Partition, minimumToken); }
         var resource = Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         var record = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
-        return record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access) ? null : Project(principal, resource, record);
+        var result = record is null || record.Deleted || !Authorization.CanReadRow(principal, record.Access) ? null : Project(principal, resource, record);
+        cancellationToken.ThrowIfCancellationRequested();
+        return result;
     });
     /// <summary>Projects one already authorized document using persisted field policies.</summary>
     /// <param name="principal">Persisted principal.</param>

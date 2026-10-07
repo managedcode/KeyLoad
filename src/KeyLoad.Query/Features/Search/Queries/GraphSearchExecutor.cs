@@ -35,12 +35,12 @@ internal static class GraphSearchExecutor
         AuthorizeBranches(database, principal, resource, request.Search, similarity);
         var scoped = request.Scope is null ? null : ReadWalk(database, view, principal, request.Search.Partition,
             request.Scope.Walk, budget);
-        var fusion = new SearchRankFusion(request.Search.FusionConstant, request.Search.Limit, budget);
+        var fusion = new SearchRankFusion(request.Search.FusionConstant, request.Search.Limit, budget, request.Search.Explain);
         AddTextBranch(database, textProjection, principal, resource, view, request.Search, eligibility, scoped, fusion, budget, execution);
         AddVectorBranch(database, principal, view, request.Search, similarity, eligibility, scoped, fusion, budget);
         AddRetrieverBranch(database, principal, view, request, scoped, eligibility, fusion, budget);
         var selected = fusion.Select();
-        var hits = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget);
+        var hits = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget, fusion);
         var expansion = request.Expansion is null ? null : GraphSearchExpansion.Execute(database, principal,
             view, request, selected, hits, budget);
         var result = new GraphSearchResult([.. hits], expansion);
@@ -75,7 +75,7 @@ internal static class GraphSearchExecutor
         if (search.TextWeight > EmptyElementCount)
         {
             fusion.AddBranch(FilterScope(FilteredSearchBranch.Apply(branch, eligibility, budget), scoped, budget),
-                search.TextWeight);
+                search.TextWeight, SearchBranchKind.Text);
         }
     }
 
@@ -90,7 +90,7 @@ internal static class GraphSearchExecutor
         var branch = VectorRanker.Rank(database, view, principal, search, similarity, budget, eligibility);
         if (search.VectorWeight > EmptyElementCount)
         {
-            fusion.AddBranch(FilterScope(branch, scoped, budget), search.VectorWeight);
+            fusion.AddBranch(FilterScope(branch, scoped, budget), search.VectorWeight, SearchBranchKind.Vector);
         }
     }
 
@@ -117,7 +117,7 @@ internal static class GraphSearchExecutor
         candidates.Sort(GraphRetrieverOrder.Instance);
         if (request.Retriever.Weight > ZeroScore)
         {
-            fusion.AddBranch([.. candidates], request.Retriever.Weight);
+            fusion.AddBranch([.. candidates], request.Retriever.Weight, SearchBranchKind.Graph);
         }
     }
 

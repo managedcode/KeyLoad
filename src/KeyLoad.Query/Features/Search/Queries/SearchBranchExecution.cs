@@ -48,7 +48,7 @@ internal static class SearchBranchExecution
     }
 
     internal static RankedDocument[] ProjectSelected(DatabaseEngine database, IKeyValueView view,
-        PrincipalRecord principal, ResourceDefinition resource, SearchScore[] selected, ReadExecutionBudget budget)
+        PrincipalRecord principal, ResourceDefinition resource, SearchScore[] selected, ReadExecutionBudget budget, SearchRankFusion? fusion = null)
     {
         var result = new RankedDocument[selected.Length];
         long projectedBytes = NoRetainedBytes;
@@ -57,7 +57,8 @@ internal static class SearchBranchExecution
             budget.Check();
             var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(selected[index].Reference))
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingSelectedDocument);
-            var ranked = new RankedDocument(database.Project(principal, resource, document), selected[index].Score);
+            var ranked = new RankedDocument(database.Project(principal, resource, document), selected[index].Score,
+                fusion?.Explain(selected[index].Reference));
             var bytes = budget.MeasureResult(ranked);
             if (bytes > budget.MaximumResultBytes - projectedBytes)
             {

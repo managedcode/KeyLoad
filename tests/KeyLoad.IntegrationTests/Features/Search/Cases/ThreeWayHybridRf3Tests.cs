@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.QueryExecution;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 
@@ -9,6 +10,32 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal sealed class ThreeWayHybridRf3Tests(ClusterFixture fixture)
 {
     private const double Tolerance = 0.000000000001;
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task AcSearchExplainActualSdkOfficialMcpAndQ1CallReturnCompleteLiteralContributions(bool restricted)
+    {
+        using var deadline = McpCallerDeadline.Create();
+        var scenario = await ThreeWayHybridRf3Scenario.CreateAsync(fixture, deadline.Token);
+        var identity = await scenario.CreateReaderAsync(fixture, vectorGrant: true, deadline.Token);
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
+        await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
+            identity.Secret, deadline.Token);
+        var original = scenario.Request(restricted, expansion: false);
+        var request = original with { Search = original.Search with { Explain = true } };
+        var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.GraphSearchAsync(request, deadline.Token));
+        var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
+            ThreeWayHybridRf3Scenario.SearchGraphTool, request, deadline.Token));
+        var call = SqlRf3Protocol.Call(scenario.Partition, ThreeWayHybridRf3Scenario.SearchGraphTool, request);
+        await HybridExplainRf3Assertions.LiteralAsync(direct, scenario.Partition, restricted);
+        await HybridExplainRf3Assertions.LiteralAsync(official.Value, scenario.Partition, restricted);
+        await HybridExplainRf3Assertions.LiteralAsync(await SqlRf3Protocol.SdkAsync<GraphSearchResult>(
+            sdk, call, deadline.Token), scenario.Partition, restricted);
+        await HybridExplainRf3Assertions.LiteralAsync(await SqlRf3Protocol.McpAsync<GraphSearchResult>(
+            mcp, call, deadline.Token), scenario.Partition, restricted);
+    }
 
     [Test]
     public async Task AcGsearch003DirectAndSqlSdkAndOfficialMcpMatchIndependentThreeBranchOracle()

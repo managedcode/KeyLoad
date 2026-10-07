@@ -67,7 +67,7 @@ internal sealed class ReadRoundProtocolTests
         var state = await node.Consensus.StateAsync(token);
         await Assert.That(state.MaterializedPosition).IsGreaterThanOrEqualTo(receipt.Token.Position);
         await Assert.That(state.CommittedIndex).IsGreaterThanOrEqualTo(receipt.Token.Position);
-        var found = node.Database.GetDocument(ReplicaCrashModel.PrincipalId, ReplicaCrashModel.Document);
+        var found = node.Database.GetDocument(ReplicaCrashModel.PrincipalId, ReplicaCrashModel.Document, cancellationToken: token);
         await Assert.That(found).IsNotNull();
         await Assert.That(found!.Revision).IsEqualTo(1);
         await Assert.That(found.Json).IsEqualTo(ReplicaCrashModel.JsonAt(2));

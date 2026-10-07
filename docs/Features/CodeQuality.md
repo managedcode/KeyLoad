@@ -1869,3 +1869,30 @@ Stage XI native inventory binding (R453/R454): exact original full discovery obs
 
 
 Stage XI final decoder-corrected native inventory binding (R463/R464): genuine fresh help/list exits0, no4376-source/541-image drift, and exact2946 cases retain2551 functional/395 required ordinary with group495/522/440/522/572. Original stdout SHA dd0c297ecfd9c4f3f3c96773e0a3c8c62c078d22c96e0e7c53e5d179b59da98a; original image observation SHA 2e59fa10c5f46643781925cdc895c9f1694a5f83cf0d98981923c217f3a762fc, MVID60757605-ab25-4e92-8c1a-27fa028f58e7,1142 declared sources. Existing classifications/REQ/AC remain unchanged. R453/R454 evidence remains immutable; current binding replaces no historical outcomes. Strict native equality/admission, fresh full normal/scalar/recovery and exact-SHA Linux/RF3/runtime coverage gates remain required; discovery does not claim execution success or numeric coverage.
+
+## TASK-CQ-RF3-PREPARATION-OWNERSHIP-002
+
+REQ-CQ-039/040 and AC-CQ-039/040 retain the closed original eleven contributor,
+source/DLL/PDB/image/context and collector admission. Original4e18 BeforeSession
+selection failure used obsolete two-class runtime filter while producer selected
+seven classes/eleven cases; current shared catalogue already repairs that mismatch.
+No nested empty-string normalization is authorized: nested fixture mode/source are
+explicitly cleared, suite is absent, and current typed image context remains strict.
+
+The native TUnit coverage preparation owner must compose the AppHost directly through
+the existing Aspire testing builder API, validating outer original-node selection and
+exact closed catalogue first, then adding the unchanged real prerequisite resources.
+It must never resume a standalone TestSuiteApplication after removing its runner.
+The fixture owns preparation start/readiness/output/stop/dispose/collector cleanup;
+original primary plus joined cleanup failures remain retained. No deadline, image,
+source manifest, public RF3 topology, whitelist or thresholds change. Extend existing
+genuine source-preparation operation with exact old-selector rejection followed by
+healthy canonical-selector source admission and unchanged original manifest bytes.
+This admission control is supporting infrastructure evidence, not product coverage;
+actual covered RF3 eleven original collector flows and Linux gates remain mandatory.
+
+Supporting control owns GITHUB_SHA briefly under the existing globally nonparallel test, using only the genuine prepared native source manifest revision, restores the exact prior environment in finally and propagates primary/restore failures. Production selection still checks its original environment source SHA; no bypass parameter or fabricated manifest.
+
+R3 joined restoration: observe each original environment-key restore individually through existing ServerFailureObserver, continue every remaining key, retain all earlier stop/output/builder/image failures and throw only after restoration settles. Output lifetime disposal and cleanup service lookup similarly retain original failure identities. Prepare primary/cleanup aggregation remains unchanged. Correct actual AppHostRuntimeOptions.NativeCoverageRf3Image property verified in owning source.
+
+Native lifecycle repair: acquire the actual testing builder through the AppHost factory frame directly into the session owner, then compose prerequisites. Partial composition failures retain that original assigned builder for joined cleanup; no second standalone suite owner or disposable local factory result is introduced. Original R490/R491 diagnostics remain failed development evidence until the repaired native gates settle.

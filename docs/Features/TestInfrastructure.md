@@ -768,3 +768,28 @@ REQ/AC-TEST-010, original architecture KL014 and ADR039/117: one fresh owning Cl
 This is cold data/bootstrap proof on native RF3, not proof of an unprovisioned clean operating-system machine or a single server without external services. The original clean-machine criterion additionally requires authenticated Linux runner tool/image prerequisites and actual execution evidence; topology remains mandated RF3. Existing SdkSubmitReturnedCancellationReusesCommittedReceipt remains separate mandatory UnknownWriteOutcome recovery proof, including its retained original failure. No task closure or PASS is claimed from authored source.
 
 The fixed internal ClusterFixtureColdStartObservation records only selected Root plus actual directory/file existence after coverage root selection and argument construction, before native builder/startup. No callback, fault control or caller-selected root. The whole operation requires that observation absent and exact same actual root after startup. Existing covered RF3 profile remains exactly eleven selected cases; this new bootstrap case is normal RF3 qualification, not currently eligible for covered selection. Register its actual case through the existing ledger: normal mode is no-op; unexpected covered selection remains rejected, with no whitelist change or coverage suppression. Constructor random root does not establish selected-root identity.
+
+## TASK-CQ-RF3-PREPARATION-OWNERSHIP-002
+
+REQ-CQ-039/040 and AC-CQ-039/040 retain the closed original eleven contributor,
+source/DLL/PDB/image/context and collector admission. Original4e18 BeforeSession
+selection failure used obsolete two-class runtime filter while producer selected
+seven classes/eleven cases; current shared catalogue already repairs that mismatch.
+No nested empty-string normalization is authorized: nested fixture mode/source are
+explicitly cleared, suite is absent, and current typed image context remains strict.
+
+The native TUnit coverage preparation owner must compose the AppHost directly through
+the existing Aspire testing builder API, validating outer original-node selection and
+exact closed catalogue first, then adding the unchanged real prerequisite resources.
+It must never resume a standalone TestSuiteApplication after removing its runner.
+The fixture owns preparation start/readiness/output/stop/dispose/collector cleanup;
+original primary plus joined cleanup failures remain retained. No deadline, image,
+source manifest, public RF3 topology, whitelist or thresholds change. Extend existing
+genuine source-preparation operation with exact old-selector rejection followed by
+healthy canonical-selector source admission and unchanged original manifest bytes.
+This admission control is supporting infrastructure evidence, not product coverage;
+actual covered RF3 eleven original collector flows and Linux gates remain mandatory.
+
+Supporting control owns GITHUB_SHA briefly under the existing globally nonparallel test, using only the genuine prepared native source manifest revision, restores the exact prior environment in finally and propagates primary/restore failures. Production selection still checks its original environment source SHA; no bypass parameter or fabricated manifest.
+
+R3 joined restoration: observe each original environment-key restore individually through existing ServerFailureObserver, continue every remaining key, retain all earlier stop/output/builder/image failures and throw only after restoration settles. Output lifetime disposal and cleanup service lookup similarly retain original failure identities. Prepare primary/cleanup aggregation remains unchanged. Correct actual AppHostRuntimeOptions.NativeCoverageRf3Image property verified in owning source.

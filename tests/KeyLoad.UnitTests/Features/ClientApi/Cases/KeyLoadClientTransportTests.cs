@@ -28,6 +28,7 @@ internal sealed class KeyLoadClientTransportTests
     private const int LargeNodeIdLength = 524_288;
     private const int ErrorBodyLimitBytes = 64 * 1024;
     private const int ChunkSize = 64 * 1024;
+    private const int CancellationFirstChunkSize = 1024;
     private const int PartialBodyCharacterCount = 1024 * 1024;
     private const int ChunkDelayMilliseconds = 5;
     private const int ServerWaitSeconds = 5;
@@ -60,7 +61,7 @@ internal sealed class KeyLoadClientTransportTests
     public async Task MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest()
     {
         var partialResponse = Encoding.UTF8.GetBytes(PartialNodeJson + new string(PartialBodyCharacter, PartialBodyCharacterCount));
-        var response = new MidBodyCancellationResponse(partialResponse, Status(NodeAfterCancellation), ChunkSize);
+        var response = new MidBodyCancellationResponse(partialResponse, Status(NodeAfterCancellation), CancellationFirstChunkSize);
         await using var server = await KeyLoadClientKestrelServer.StartAsync(response.HandleAsync);
 
         using var cancellation = new CancellationTokenSource();

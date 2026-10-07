@@ -23,6 +23,7 @@ public sealed partial class DatabaseEngine
         var document = VisibleVertex(tx, principal, new(partition, vector.Collection, vector.Id));
         Authorization.RequireWriteRow(principal, document.Access);
         CheckRevision(document.Revision, vector.ExpectedDocumentRevision);
+        Features.Search.VectorFieldProfiles.Require(resource, vector);
         PutCanonicalVector(tx, partition, vector, document);
         return new(UpsertKindText, vector.Collection, vector.Id, document.Revision);
     }

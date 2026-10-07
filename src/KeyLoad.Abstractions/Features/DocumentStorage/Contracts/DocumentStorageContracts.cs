@@ -108,6 +108,9 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [Orleans.Id(12)]
     public RelationalSchema? RelationalSchema { get; init; }
+    /// <summary>Gets immutable authoritative vector profiles for configured collection fields.</summary>
+    [Orleans.Id(13)]
+    public ImmutableArray<VectorFieldProfile> VectorProfiles { get; init; } = [];
 }
 
 /// <summary>Describes row ownership and project metadata used by row-level access policy.</summary>

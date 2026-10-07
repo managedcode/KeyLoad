@@ -86,3 +86,45 @@ delivery. Rollback joins authorization/issuance/outbox callers coherently and
 cannot restore an invented epoch or discard scoped outcomes; recover forward if
 acknowledged metadata already exists. No movement-created epoch or acceleration
 claim follows from source/counter changes alone.
+
+## TASK-KL021-DOCUMENT-SESSION-READ-001
+
+Accepted homogeneous first-release document session-read implementation contract; runtime qualification remains open.
+
+REQ-SESSIONREAD-001 / AC-SESSIONREAD-001: Only document GET gains optional typed GetDocumentRequest.MinimumToken at generated native Id1, keeping Reference Id0 and alias. SDK explicit GetAsync(EntityRef, CommitToken, CancellationToken), HTTP/official MCP keyload_documents_get and Q1 CALL keyload_documents_get(@arguments) decode the exact same typed request via existing canonical catalog; absent option remains ordinary strong GET. This is not generic model/session cache support and does not add a dispatcher.
+
+REQ-SESSIONREAD-002 / AC-SESSIONREAD-002: The existing unique request/read grain obtains fresh native quorum barrier under original bounded ReplicaReadRoundExecutor timeout, including existing actual WaitForApplyAsync(barrier.Position). Afterwards document execution reloads persisted principal/grants and validates minimum token in the exact same native Store.Read cut as row/field authorization and document projection. Token must match database incarnation, exact atomic partition and current persisted ownership epoch; position must be positive and no greater than actual lastApplied at that cut. This barrier applies the current quorum commit cut, hence it already meets every previously acknowledged minimum token. A token beyond that fresh applied cut is explicitly rejected; there is no speculative wait for a caller-invented future position. No physical-lineage translation, stale-mode API or authority cache is added.
+
+REQ-SESSIONREAD-003 / AC-SESSIONREAD-003: Explicit existing TokenInvalidated category with distinct fixed safe reasons WrongIncarnation / OutOfScope / FuturePosition / InvalidPosition identifies token failures without exposing token values/credentials/records. Missing/corrupt applied authority is Corruption; unsupported ownership epoch is OwnershipLost or token invalidation per current placement witness policy. Persisted authorization is checked before token failure reasons; denial contains no row. Caller cancellation checked before admission and inside final cut, no partial result; native deadline/admission/drain unchanged. Former leader with no quorum cannot pass existing fresh barrier even for a valid historical token.
+
+REQ-SESSIONREAD-004 / AC-SESSIONREAD-004: Real ZoneTree local whole flows prove literal document/complete state+position unchanged after invalid incarnation/scope/future/position and pre-cancel, fresh authorized minimum succeeds and later revision continues. Real fixture-owned Aspire RF3 SDK+official MCP failover operation proves acknowledged write token→elected leader kill→token-bearing complete literal healthy read→all invalid variants fail→healthy token read; isolated former surviving leader/minority strong token read fails, both voter restoration and healthy read follow. Existing native receipt replay/Unknown scenarios remain separate and unchanged. Auth revocation must deny valid token then renewed persisted grant/healthy read.
+
+Ownership: Abstractions DocumentStorage DTO; Client overload; Core feature-local same-view validator and Documents reader; Orleans existing GrainCoreReadCapabilities routing; docs ClientApi/DocumentStorage/ClusterReplication + ADR017/036 amendment; unit DocumentStorage and RF3 ClusterReplication wholeflow. SQL Q1 CALL is exact typed operation envelope only; Q1 SELECT/AST and other read models do not accept session options in this stage. Same homogeneous current first-release cohort; native Id append/alias remains stable, no legacy reader/migration/runtime fallback. Root owns join/build/native discovery/test/Linux evidence and status; no qualification or closure inferred from authored source.
+
+## Proven epoch meaning before implementation
+
+DatabaseEngine.Token in Core/DatabaseEngine.cs obtains OwnershipEpoch from persisted ReadPlacementWitness.PlacementEpoch. AtomicPartitionPlacementReader Fallback/Explicit uses PhysicalShardCatalog.DefaultShard.PlacementEpoch; PhysicalShardCatalogRecordSerialization.InitialRecord initializes that physical-placement value. ReplicaElection.RunRound changes DurableReplicaLog term/vote, not physical catalog. Original authenticated 4e18 RF3 passed LeaderLossQueueScenario compares the entire pre-kill commit token to the actual replay token after elected leader kill. Hence elected leader failover keeps physical PlacementEpoch, and equality does not invalidate that acknowledged token. The new public wholeflow additionally checks a fresh postfailover command retains the same physical epoch/incarnation/atomic identity. Physical ownership movement with a changed placement epoch is explicitly unsupported by this minimal surface; it fails closed without invented lineage, and does not claim KL035/036/072 movement support.
+
+The current native fixture supports Kill/Restart and retains actual owner receipts.
+The authored authority-denial flow is a still-live surviving voter without quorum,
+not a network-isolated former leader while another majority stays live. That
+stronger KL021 authority scenario remains open until a bounded fixture-owned
+network partition contract exists; no manual Docker or new fault hook is added.
+Fresh barrier implementations are ReplicaReadRoundExecutor + ReplicaLeader.BarrierAsync:
+both use native Materializer.WaitForApplyAsync at their authenticated quorum cut.
+SDK method ownership is Features/DocumentStorage/Transport/DocumentSessionClient.cs.
+
+### Native MCP no-quorum boundary refinement
+
+McpHttpPipeline.RunAsync invokes DatabaseCredentialResolver.ReadAsync before
+native tool dispatch. Its fresh signed Authenticate read itself needs quorum.
+Therefore the no-quorum official caller must retain the actual native
+HttpRequestException HTTP503 rather than invent a CallToolResult error; SDK
+GET still asserts its actual typed OwnershipLost problem. The healthy
+restored token-bearing SDK/MCP/SQL results remain complete literal checks.
+This is not a tool outcome or session initialization success claim.
+
+The final no-quorum oracle retains both SDK's exact OwnershipLost/503/NoLeader
+problem and the official caller's actual native HTTP503 original exception,
+with its bounded five-field Problem body and credential/document privacy checks.
+It never converts that pre-tool HTTP failure into a fictitious tool result.

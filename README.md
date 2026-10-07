@@ -332,13 +332,13 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **11 accepted, 93 in progress and 0 pending**.
+The original 104-task plan has **12 accepted, 92 in progress and 0 pending**.
 Accepted: **KL-005** backup/restore, **KL-007** storage codecs, **KL-010**
 document CRUD/CAS, **KL-012** batch/idempotency, **KL-013** document-only filter/query,
 **KL-016** committed projection
 outbox, **KL-024** time-series ordering/idempotency and **KL-025** reference
 ranges/aggregates, **KL-022** graph storage, **KL-023** bounded graph traversal
-and **KL-020** three-node replicated apply.
+**KL-020** three-node replicated apply and **KL-026** retention, expiry and rollups.
 Each closure is bound to its original criteria and Linux
 operation evidence. Complete feature and cluster qualification remains open.
 

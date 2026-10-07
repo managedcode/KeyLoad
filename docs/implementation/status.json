@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R481 full current Release, R482 full formatter, R484/R485 selected18/18 normal/scalar and R483/R486/R487 original native inventory plus twelve production discoveries passed without source/image drift. Original failures retained. Complete current Linux suites, public RF3 and numerical product coverage remain open.",
+    "verificationStage": "Complete native Release build/formatter and normal2985/2985/recovery256/256 passed at exact unchanged source. Repaired product wholeflows29/29 normal/scalar passed. Original full scalar2984/2985 retains native PDB-reader exit134 failure; exact unchanged single control followup1/1 passed, without replacing failed report or asserting cause. Real census/PDB/source-bound inventory2985 (2592 functional/393controls, no load/comparison cases) passed strict production original-census validation; all twelve real workflow discoveries passed with unchanged native source/images/scripts. Current Linux RF3/endurance/fault/performance and numeric product coverage remain open.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Complete current normal/scalar/recovery and genuine RF3 Linux qualification; native selection discovery passed, retain original failed and repaired cohorts separately.",
@@ -4320,7 +4320,434 @@
           "archiveSha256": "458423d2bf38056bbbcabcaa8c7a30545beae7f3370c23fb5b2bfd2db945a612",
           "apiDigestVerified": true
         }
-      ]
+      ],
+      "completedRf3Original": {
+        "jobId": 113015778654,
+        "conclusion": "failure",
+        "required": "170/185 passed; 15 failures retained",
+        "covered": "0/11 passed; native BeforeTestSession canceled/disposed IServiceProvider failure retained",
+        "originalRequiredTrxSha256": "2a72433fac153d933b24cb86d038eca3d7698a18280a76179bfedad1140fc3af",
+        "originalCoveredTrxSha256": "789c5930c35c4ce9fa4ea4235857cc209d7ef5c6f263b8d90b14eb6168dfb1a2",
+        "originalArtifacts": {
+          "docker-rf3-qualification": {
+            "artifactId": 11516205298,
+            "archiveSha256": "1cd60be84eb98977ffdb224c3a087760503c7b76bc1ab543707f0c9cf9edf1cb"
+          },
+          "code-quality-docker-rf3": {
+            "artifactId": 11515982356,
+            "archiveSha256": "6cbd37fcc47d6b597e3e0628f8d5b8ea051a39338d4ba340193d01e6c5c4ee67"
+          },
+          "docker-rf3-image-evidence": {
+            "artifactId": 11515932427,
+            "archiveSha256": "43388084cf3b888eacc2dbb6e88b39430b15d87511ed0b90d78ab0f4c6c47ec1"
+          }
+        },
+        "productCoveragePercent": null
+      }
+    },
+    "stageXIIIOriginalDevelopment": {
+      "sourceParentCommit": "30fb49fb829bfd9575127ceca7e9908477a47647",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "originalTasksRemain": {
+        "done": 12,
+        "inProgress": 92,
+        "pending": 0
+      },
+      "joinedWorkstreams": [
+        "Typed document minimum commit-token read through native quorum/apply, SDK/official MCP/Q1 with current persisted authorization",
+        "Authoritative immutable per-field vector model/version/dimension/metric validation before direct publication and projection effect reuse",
+        "Fixture-owned native RF3 coverage preparation composition and complete partial-failure cleanup",
+        "Original native text projection disposal/removal/canonical rebuild whole flow",
+        "Existing public FTS update/delete full immutable MCP receipt replay after leader loss and literal healthy rejoin",
+        "Opt-in typed bounded actual hybrid branch contributions, privacy/default parity, observed native-work cancellation and independent literal healthy output",
+        "Native current-format complete resource/blob publication, failed receipt replay, exact partial/full read and real owner reopen; obsolete isolated compatibility cases removed"
+      ],
+      "sourceReadyIndependentReviews": true,
+      "verificationStage": "Complete native Release build/formatter and normal2985/2985/recovery256/256 passed at exact unchanged source. Repaired product wholeflows29/29 normal/scalar passed. Original full scalar2984/2985 retains native PDB-reader exit134 failure; exact unchanged single control followup1/1 passed, without replacing failed report or asserting cause. Real census/PDB/source-bound inventory2985 (2592 functional/393controls, no load/comparison cases) passed strict production original-census validation; all twelve real workflow discoveries passed with unchanged native source/images/scripts. Current Linux RF3/endurance/fault/performance and numeric product coverage remain open.",
+      "originalFailedBuildR490": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 115.483,
+        "inputCount": 4413,
+        "logSha256": "c2b2fb468bb8c3f2b1b47c413e574e097cf6626f1a1e9d80a336daa9556a7200",
+        "sourceDrift": 0,
+        "passed": false
+      },
+      "originalFailedFormatterR491": {
+        "nativeExitCode": 2,
+        "elapsedSeconds": 157.89,
+        "inputCount": 4413,
+        "logSha256": "5ba750b95db5a05713aea15236ddb74c1e32d9b96f402518833c9620c25f9de7",
+        "sourceDrift": 0,
+        "passed": false
+      },
+      "nativeDiagnosticRepair": "SDK feature namespace, actual cancellation propagation through existing recovery and vector reads, awaited CTS cancel, unused imports, bounded early-return rejection and actual builder ownership before prerequisite composition; independent read-only lifecycle review confirms retained primary and cleanup. No suppression, limit, deadline or topology changes.",
+      "originalFailedBuildR494": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 290.339,
+        "inputCount": 4420,
+        "logSha256": "222f40a4fb71ae40139a6b1bd4bac3b8fd363ff8ff2d6726220a69eb050c8206",
+        "sourceDrift": 0,
+        "passed": false,
+        "distinctDiagnostics": 12
+      },
+      "originalFormatterR495": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 270.21,
+        "inputCount": 4420,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceDrift": 0,
+        "passed": true,
+        "scope": "pre-repair snapshot only"
+      },
+      "originalFailedFormatterR500": {
+        "nativeExitCode": 2,
+        "elapsedSeconds": 310.279,
+        "inputCount": 4420,
+        "logSha256": "77132a3c050dacc96d7cd59994520881f2b4e2e8a029843901613f2c8f1a0ebe",
+        "sourceDrift": 0,
+        "passed": false,
+        "distinctDiagnostics": 2
+      },
+      "originalFailedBuildR499": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 398.656,
+        "inputCount": 4420,
+        "logSha256": "604dbb81005715b9d00fc30cd378b26ab5a733f5b74f071aa301195c84175d4a",
+        "sourceDrift": 0,
+        "passed": false,
+        "distinctDiagnostics": 2
+      },
+      "nativeFinalBuildR502": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 293.805,
+        "inputCount": 4420,
+        "logSha256": "4a9284d15e1d3ee51b428f756ad270f2f97f9ae8f2fe35441454ef56e1c3768e",
+        "sourceDrift": 0,
+        "passed": true,
+        "warnings": 0,
+        "errors": 0
+      },
+      "nativeFinalFormatterR503": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 255.332,
+        "inputCount": 4420,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceDrift": 0,
+        "passed": true
+      },
+      "originalFullNativeR504": {
+        "suite": "unit",
+        "passed": false,
+        "counters": {
+          "total": 2985,
+          "executed": 2985,
+          "passed": 2967,
+          "failed": 18,
+          "notExecuted": 0
+        },
+        "logSha256": "b5b1c49e8c99dcc5af4c8c838389f351d99cbbb647a79a10b979392889c14fa6",
+        "trxSha256": "f924b04335fd332443578ee7fb8f11dc75d2d474baf6c9b96746b91f38aeb5d9",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original pre-oracle-repair local native TUnit source; not current Linux RF3 or numeric product coverage"
+      },
+      "originalFullNativeR505": {
+        "suite": "unit-scalar",
+        "passed": false,
+        "counters": {
+          "total": 2985,
+          "executed": 2985,
+          "passed": 2967,
+          "failed": 18,
+          "notExecuted": 0
+        },
+        "logSha256": "e4e592c3b09c8da9965699462c046c349c3c9079e1e17e9db20432ccc01e3211",
+        "trxSha256": "a9c3fdd3637ef792068ad19cb6323e0bc65aabe4f82797a7e973cc22423fafc1",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original pre-oracle-repair local native TUnit source; not current Linux RF3 or numeric product coverage"
+      },
+      "originalFullNativeR506": {
+        "suite": "recovery",
+        "passed": true,
+        "counters": {
+          "total": 256,
+          "executed": 256,
+          "passed": 256,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "83f93ac655f2548464446829acac4f0bd6b0db6cbccdbdba73195654925bff91",
+        "trxSha256": "6dce3e6fbb97467ff7b97ecfb38409fcd7a23cef953dc54923df72c7c7119d68",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original pre-oracle-repair local native TUnit source; not current Linux RF3 or numeric product coverage"
+      },
+      "originalOracleRepairBuildR510": {
+        "nativeExitCode": 1,
+        "elapsedSeconds": 102.389,
+        "inputCount": 4423,
+        "logSha256": "7f5b09dd4b0b856fb9db9db6daf3bae7fcb425c6e137f1b7ee1fc663b5076fac",
+        "inputDrift": [],
+        "passed": false,
+        "scope": "Original native source snapshot at this attempt"
+      },
+      "nativeOracleRepairBuildR511": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 128.508,
+        "inputCount": 4423,
+        "logSha256": "20e89e31ca8d6a6a8edba6964e5f81ef3bbb4cbae88b61c5b31c1c91e4a1ba80",
+        "inputDrift": [],
+        "passed": true,
+        "scope": "Original native source snapshot at this attempt"
+      },
+      "nativeCurrentBuildR515": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 113.426,
+        "inputCount": 4423,
+        "logSha256": "49674f0a60e920d4b7694690e6f08d7d1e66542e7a4483c4bc08f6df45d7e074",
+        "inputDrift": [],
+        "passed": true,
+        "scope": "Original native source snapshot at this attempt"
+      },
+      "nativeFormatterR512": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 114.373,
+        "inputCount": 4423,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputDrift": [],
+        "passed": true
+      },
+      "nativeFormatterR521": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 189.171,
+        "inputCount": 4423,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputDrift": [],
+        "passed": true
+      },
+      "originalNativeR513": {
+        "suite": "unit",
+        "nativeExitCode": 2,
+        "passed": false,
+        "counters": {
+          "total": 29,
+          "executed": 29,
+          "passed": 27,
+          "failed": 2,
+          "notExecuted": 0
+        },
+        "logSha256": "7a517c2635e04f30e5e96b14b37470830bca76b228684af3275baf5539046d2d",
+        "trxSha256": "c84462bb72c68f5699a83e767373a1306307cebf0c8794b32cc5d323c13a8b37",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit development; filtered cases are not full qualification, process recovery is not power-loss proof"
+      },
+      "originalNativeR514": {
+        "suite": "unit-scalar",
+        "nativeExitCode": 2,
+        "passed": false,
+        "counters": {
+          "total": 29,
+          "executed": 29,
+          "passed": 27,
+          "failed": 2,
+          "notExecuted": 0
+        },
+        "logSha256": "e430fdba203eda9575cb192af1cf591c6eaf60aef65ec4d2b2d308da7cc352bd",
+        "trxSha256": "43ab19a39a46236eb5fe70dc335e68e0bf8ff74a10aafe4d789a6a7899f9f5e2",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit development; filtered cases are not full qualification, process recovery is not power-loss proof"
+      },
+      "originalNativeR516": {
+        "suite": "unit",
+        "nativeExitCode": 0,
+        "passed": true,
+        "counters": {
+          "total": 29,
+          "executed": 29,
+          "passed": 29,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "56581e8d5934b99f81b1b45bd099d54443bfa827d67c2dc0bce689ac0713f6db",
+        "trxSha256": "69459f00f2332c73220b2bfb541a227488dad4ce32d25f46bbcfbf8836c04a24",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit development; filtered cases are not full qualification, process recovery is not power-loss proof"
+      },
+      "originalNativeR517": {
+        "suite": "unit-scalar",
+        "nativeExitCode": 0,
+        "passed": true,
+        "counters": {
+          "total": 29,
+          "executed": 29,
+          "passed": 29,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "1ad5ff7e0ac49846f0ba5e7e88eb100622f9ed1037c65e63e8b083bf73e2f837",
+        "trxSha256": "19591bfa41330ceb7b916162f007482495a6e07c4eeff9175eeea25180f96c74",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit development; filtered cases are not full qualification, process recovery is not power-loss proof"
+      },
+      "originalNativeR520": {
+        "suite": "recovery",
+        "nativeExitCode": 0,
+        "passed": true,
+        "counters": {
+          "total": 256,
+          "executed": 256,
+          "passed": 256,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "f2437bc8aa711cb09cf3c63676ca3923bc56a53dc2ed3dfcec05c489497f3b63",
+        "trxSha256": "9bf9ad4664fd3b63a9602859237cd6db1a118e710f2c6fdb53d389ac74987746",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit development; filtered cases are not full qualification, process recovery is not power-loss proof"
+      },
+      "scalarNativeReaderAbortDiagnostic": {
+        "case": "AcCq044NativeCanonicalPdbBindsChecksumsRejectsChangedSourceAndAcceptsRestoration",
+        "reportedExitCode": 134,
+        "requiredExitCode": 1,
+        "nativeCrashSha256": "c304a23fa9b243efdd99c2e439ef60c9527f89348aeada173b40d1bce58938f6",
+        "nativeCrashSignal": "SIGABRT",
+        "exactChildAttributionEstablished": false,
+        "owningCauseEstablished": false,
+        "originalFailureRetained": true
+      },
+      "originalNativeR518": {
+        "suite": "unit",
+        "nativeExitCode": 0,
+        "passed": true,
+        "counters": {
+          "total": 2985,
+          "executed": 2985,
+          "passed": 2985,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "c1fbe6c244806e7a67e791f21d187f7483d7066ad8e00911fcf91a4d90ed0e9b",
+        "trxSha256": "025fcf764c37a145a204a8c747404eff190ee09ab7e9c415728a19c230bb17e4",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit; R526 is single original failed control followup, not replacement of failed full scalar report."
+      },
+      "originalNativeR519": {
+        "suite": "unit-scalar",
+        "nativeExitCode": 2,
+        "passed": false,
+        "counters": {
+          "total": 2985,
+          "executed": 2985,
+          "passed": 2984,
+          "failed": 1,
+          "notExecuted": 0
+        },
+        "logSha256": "349abb2772cc39aef21f90f6857404752f29b19fca72beb4abea57c39ee7d34b",
+        "trxSha256": "41367bbee124443a1b8250ef832091e232281c57392869a879472a7c019372ef",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit; R526 is single original failed control followup, not replacement of failed full scalar report."
+      },
+      "originalNativeR526": {
+        "suite": "unit-scalar",
+        "nativeExitCode": 0,
+        "passed": true,
+        "counters": {
+          "total": 1,
+          "executed": 1,
+          "passed": 1,
+          "failed": 0,
+          "notExecuted": 0
+        },
+        "logSha256": "fb8f99555a7b5c1641062474e1a882196778a3d5872e1ae5da6a2b0a75d1beb6",
+        "trxSha256": "e96ac9edad8a040b03caef7b2219cdcf1f0745d52e185969524f56dbb2b33940",
+        "sourceDrift": 0,
+        "imageDrift": 0,
+        "qualification": "Original local native TUnit; R526 is single original failed control followup, not replacement of failed full scalar report."
+      },
+      "currentNativeInventory": {
+        "observedTotal": 2985,
+        "functional": 2592,
+        "requiredOrdinary": 393,
+        "excluded": 0,
+        "groupCounts": [
+          518,
+          526,
+          448,
+          528,
+          572
+        ],
+        "inventorySha256": "56eb5c913fb6d947143549b0cadc8a8fa1e29a6bcf2319c62c28eede7617912c",
+        "originalCensusSha256": "00cfb243f09bef2119ee0edbb119b2a0d856ba1b742ebc729443ddfd1785ed85",
+        "nativeImageObservationSha256": "2084b19202efc24421e005f5f68c889619734687d39213e94942c449c8403adb",
+        "nativeMvid": "23c0dbbe-6fc8-4692-9edb-64fedfb84da3",
+        "dllSha256": "934f416b28368ec653352dba76720df850542c52e0840be38c52e6fb729d5d30",
+        "pdbSha256": "88c2ee315b0d2eb816e818c270b0cb762e044a632f9c71859dc1651a81e874a6",
+        "compiledSourceBindingComplete": true,
+        "strictOriginalCensusValidationPassed": true,
+        "strictValidationLogSha256": "f822312565730ecc9cf376f089c31b62515dc8d01a0b9fa2fbaa4eab6e871b93",
+        "reviewedRemovedOrdinaryCases": 2,
+        "allOriginalFunctionalClassificationsPreserved": true,
+        "productionTwelveDiscoveriesPassed": true,
+        "nativeRuntimeQualification": false,
+        "numericProductCoverage": null,
+        "productionDiscoveryLogSha256": "ab276f811f5e6adb7115dae05465d9919a3c159de69f27c38897f37a712757d0",
+        "productionDiscoveryReceiptSha256": "f0f0220722a245987c8fcbd3c932472337772cfb49259a74e11bd8b5ee7351b4"
+      },
+      "originalProductionDiscoveryR527": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 71.278,
+        "guardedInputs": 4873,
+        "logSha256": "ab276f811f5e6adb7115dae05465d9919a3c159de69f27c38897f37a712757d0",
+        "sourceImageScriptDrift": [],
+        "qualification": "Actual full plus five filtered native discoveries in both modes only; no executed operation pass, numeric coverage or Linux qualification.",
+        "nativeCountsPerMode": [
+          2985,
+          518,
+          526,
+          448,
+          528,
+          572
+        ],
+        "passed": true
+      }
+    },
+    "stageXIIOriginalLinux": {
+      "sourceRevision": "30fb49fb829bfd9575127ceca7e9908477a47647",
+      "runId": 37694136259,
+      "runAttempt": 1,
+      "verifyJobId": 113041473899,
+      "verifyConclusion": "failure",
+      "normal": "2961/2961 passed",
+      "scalar": "2960/2961 passed; original first response chunk timeout retained",
+      "recovery": "256/256 passed",
+      "sourceOwnership": "10/10 passed",
+      "analyzers": "388/388 passed",
+      "failedScalarCase": "MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest",
+      "originalArtifacts": {
+        "code-quality-ubuntu-latest": {
+          "artifactId": 11514754885,
+          "archiveSha256": "269b6782f1fc4a4255eddf8317a6f0b34fcdca5f10e51e845096e0ee2d7ff49e"
+        },
+        "test-results-ubuntu-latest": {
+          "artifactId": 11514694402,
+          "archiveSha256": "166f6b4547dea5c1b349826144bb41b7269c6817dffc6ad9b90196f4b66e74f6"
+        },
+        "analyzer-rule-evidence": {
+          "artifactId": 11514558320,
+          "archiveSha256": "e022b952c048da36967ade2e8582172e560289216323137ccdce3f3a88584504"
+        }
+      },
+      "rf3": "in progress; no pass inferred",
+      "productCoveragePercent": null
     }
   },
   "TIME-PROVIDER-001": {
@@ -8458,21 +8885,40 @@
   },
   "KL-026": {
     "title": "Retention, expiry і rollups",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "docs/ADR/ADR-073-logged-series-retention.md",
       "src/KeyLoad.Core/Features/TimeSeries/Commands/SampleRetentionCommands.cs",
       "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleRetentionLifecycleTests.cs",
-      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3Tests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRetentionRf3Tests.cs",
+      "docs/ADR/ADR-120-bounded-persisted-series-rollups.md",
+      "tests/KeyLoad.UnitTests/Features/TimeSeries/Cases/SampleRollupLeaseDropTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Cases/SampleRollupRf3Tests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/TimeSeries/Assertions/SampleRollupRf3WriteParity.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37686560768/job/113015778654",
+      "docs/Features/TimeSeries.md#task-kl026-original-acceptance-closeout-001"
     ],
     "decision": "docs/ADR/ADR-073-logged-series-retention.md",
-    "sourceStage": "logged_bounded_retention_source_and_tests_authored_runtime_unqualified",
-    "runtimeQualified": false,
-    "remaining": [
-      "rollup_implementation_and_full_acceptance",
-      "strict_current_format_rejection_for_unsupported_or_corrupt_records_qualification",
-      "Aspire_TUnit_process_recovery_RF3_exact_source_Linux_CI"
-    ]
+    "sourceStage": "original_KL026_acceptance_qualified_from_authenticated_Linux_operations",
+    "runtimeQualified": true,
+    "remaining": [],
+    "qualification": {
+      "sourceRevision": "aa10337b159eaf3ea012f29b7c3f4645d7557aac",
+      "runId": 37686560768,
+      "runAttempt": 1,
+      "verifyJobId": 113015831034,
+      "rf3JobId": 113015778654,
+      "originalRf3ReportSha256": "2a72433fac153d933b24cb86d038eca3d7698a18280a76179bfedad1140fc3af",
+      "imageManifestDigest": "sha256:b142fa977376d69aba9bd27f3f443a10aea9aad039b319ad30404c04f0abac24",
+      "rootVerifiedOriginalGitSourceCount": 1693,
+      "compiledSourceBindingSha256": "f95f035368babf23124024e2140a6e5abb5a96e05b21175c39f15cdaef86c400",
+      "requiredRf3": "170/185 passed; all 15 original failures retained",
+      "coveredRf3": "0/11 passed; original BeforeTestSession failures retained",
+      "scope": "Original KL026 four acceptance clauses only; current changed source, broader RF3/coverage/fault/endurance/performance gates remain open.",
+      "originalNormalScalarRecoveryCases": 65,
+      "originalRf3Case": "AcSeries024NativeSdkOfficialMcpSqlLateCorrectionAndOriginalReceiptParity",
+      "runtimeQualified": true
+    }
   },
   "KL-027": {
     "title": "Canonical vectors і exact search",
