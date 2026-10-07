@@ -311,3 +311,58 @@ a second entry. Root owns the
 DueFreshAttemptAssertions correction and tests through Aspire. This preserves
 the existing committed projection contract and strengthens the first source
 fixture, whose unchanged-head success assertion was incorrect.
+
+
+TASK-DUE-RF3-CREATOR-CALLERS refines the existing AC-DUE-003 B fixture before
+implementation. Actual R196 reached replacement leadership, then the first SDK
+schedule inspection failed with PermissionDenied: the seed discarded its
+persisted scoped creator credential and subsequent data calls used the separate
+cluster administrator. RecurringSaga intentionally disables the administrator
+bypass for data inspection. Preserve that production authorization contract.
+
+Carry the existing redacted `DueFaultRf3Creator` with the private seed, and redact
+the seed's own generated ToString. Use that persisted creator for every schedule,
+saga, queue-message, receive and ACK operation after leader loss, voter rejoin and
+cold restart. Give this fixture-owned principal the existing QueueConsume scope
+needed by the already-required consume/ACK flow, alongside its existing scoped
+SchedulerManage/QueuePublish/QueueInspect and field grants. Persist grants through
+the real admin configuration API; no caller role, fabricated principal or broad
+administrator data privilege. Administrator credentials remain exclusively on
+the existing status/dashboard/discovery control calls. Split the survivor scope
+so native dashboard assertions retain admin authority and data inspection uses
+the creator; preserve every original assertion, command/occurrence identity,
+read barrier, deadline, signed discovery observation, process join and cleanup.
+No credential may enter diagnostic artifacts, assertion-generated object text or
+provider logs. The shared no-quorum fixture retains its same authority boundary.
+
+Exact ownership: IntegrationTests Messaging Models `DueFaultRf3Seed` and the
+existing `DueFaultRf3Creator` redacted credential; Helpers `DueFaultRf3SeedWriter`,
+`DueFaultRf3IdentityWriter`, `DueFaultRf3Leadership`, `DueFaultRf3Run`, and, only
+where it performs the same data operations, `DueNoQuorumRf3Run`. Root owns this
+freeze, review/joins and genuine SDK/official-MCP RF3 gate; ci_failure_evidence
+Luna prepares the guarded private fixture correction. Native unit/format/build
+and actual leader-loss/rejoin/cold-restart/ACK operation outcomes verify the
+stage, followed by original delivered Linux evidence. Rollback removes only
+fixture ownership changes; production authorization, current formats and broad
+DUE acceptance remain mandatory. No migration, compatibility reader, new public
+API, dependency or relaxed test outcome is introduced.
+
+R204 executed the retained-creator leader/rejoin/cold-restart/outcome flow and
+reached its existing final MCP ACK. The creator also needs the distinct persisted
+`Capability.QueueAck` for that actual delivery operation, alongside QueueConsume,
+on the same existing recurring/saga/timeout lane scopes. Add exactly those
+consumption/ACK capabilities in DueFaultRf3IdentityWriter.Scope; preserve every
+field grant, principal identity, capability enforcement, token, receipt/replay
+and no-second-delivery assertion. This fixture authority correction does not
+change product authorization. The prior R204 case failed rather than passed.
+
+R206 completed `AcDue003AutonomousOutcomesSurviveLeaderRejoinAndCurrentColdRestart`
+through native TUnit and fixture-owned Aspire Docker RF3 on2026-10-07. The real
+SDK/official-MCP flow passed with creator authorization, replacement leadership,
+voter rejoin, cold restart, exact outcomes and final ACK/replay/exhaustion checks.
+The shared two-case run passed2/2 without skips or source/assembly drift; its
+original TRX SHA-256 is
+`6b915c662396baa4f25d09e2f3d64b7ff435d07338f3c03ae4e3bab942a62f6f`.
+R205 full native Release build also passed with zero warnings/errors or source
+drift. This is local development proof; no-quorum, complete current-source Linux
+RF3 and the other DUE acceptance gates remain individually open.

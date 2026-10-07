@@ -94,12 +94,14 @@ internal sealed class RequestCqrsRf3WaveStartup(string dataRoot, IReadOnlyDictio
         var observerFailures = new List<Exception>();
         await DisposeSubscriberObserverAsync(observerFailures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(observerFailures);
-        await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images, cancellationToken)
-            .ConfigureAwait(false);
+        var localImageIdentity = await RequestCqrsRf3ImageProof.VerifyModelAsync(application, images,
+            cancellationToken).ConfigureAwait(false);
         await application.StartAsync(cancellationToken).ConfigureAwait(false);
         lifecycleEvidence?.SetStage(RequestCqrsLifecycleStage.NodeReadiness);
         await RequestCqrsRf3WaveReadiness.WaitForNodesAsync(application, requireHealthy,
             cancellationToken, lifecycleEvidence).ConfigureAwait(false);
+        await RequestCqrsRf3ImageProof.VerifyStartedContainersAsync(localImageIdentity, containers, cancellationToken)
+            .ConfigureAwait(false);
         var runtime = new ContainerRuntimeControl(application, containers,
             ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
         wave = RequestCqrsRf3Wave.TransferOwned(dataRoot, runtime, ref application, ref diagnostics,

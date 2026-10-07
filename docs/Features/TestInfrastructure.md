@@ -85,6 +85,23 @@ The ordinary ClusterFixture and Wave paths remain mandatory RF3 evidence. The
 native testing wrapper owns final application disposal after reader settlement;
 inherited image/provenance settings are permitted, selected workload modes reject.
 
+`NativeLoggerModelControlSelectionTests` is a UnitTests model-isolation regression for this exact selector. It
+exercises the real distributed-application builder, options admission,
+`AddKeyLoad` composition, built RF3 model, owned directories, resource
+annotations and joined application disposal. Incompatible selections must reject
+before resources or the owned DataRoot exist. This case maps to
+DIAG-003/005/006 composition isolation only; it does not start resources, observe
+logger streams, execute database operations, contribute product functional
+coverage, or qualify Docker/RF3. The unchanged native logger whole flows and
+separate RF3 gates remain mandatory.
+
+The rejection matrix also covers `Ephemeral=false` and a blank DataRoot. For
+all rejected selections, observe the unchanged resource count and absent root
+before cleanup. Preserve the primary admission/assertion failure, delete only the
+unique root in `finally` if an unexpected failure created it, retain deletion
+failures after the primary, then verify the root is absent. This test-only
+refinement changes neither selector behavior nor product cleanup.
+
 [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md) specifies the owner-required
 single test entry and partial-start cleanup. Source and qualification are pending.
 

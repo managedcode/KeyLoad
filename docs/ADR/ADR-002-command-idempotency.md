@@ -31,9 +31,10 @@ precondition-error replay and independent authenticated-principal tests in
 UnitTests/Features/DocumentStorage. Root freezes the literal error, document,
 revision and outbox oracles; query_wave owns only the new cases/helpers. This
 stage changes no outcome format, canonical key or public API. Current source
-uses principal/command keys and partition-bearing fingerprints; independent
-resolved-partition identity remains an explicit implementation gap. The accepted identity decision remains unchanged. Tests of principal isolation
-must not stand in for partition isolation.
+uses the accepted full-scope v2 outcome and locator keys below, with independent
+principal, Global/Unknown and complete resolved-partition identity. Actual
+partition/reopen/RF3 cases supplement principal isolation; one scope cannot
+stand in for another.
 
 Current command outcomes have no automatic TTL or purge implementation. A
 matching authorized retry resolves its retained canonical outcome in the same
@@ -105,3 +106,19 @@ canonical current identity and outcome representation. Ordered source ownership
 and the real unit, scalar, process-recovery, restart, and RF3 cases remain mapped
 in the feature contract; root owns shared joins and actual qualification. This
 section records the current behavior contract and does not claim gate completion.
+
+## Original KL-012 task acceptance, 2026-10-07
+
+The implementation and original KL-012 batch/idempotency acceptance are
+qualified by the exact source/PDB-matched Linux reports and current native RF3
+refresh in TASK-DSTORE-KL010-KL012-CLOSEOUT under
+[DocumentStorage](../Features/DocumentStorage.md). The original two distinct
+CrashHost processes each verify100 matching retries, one complete effect cut,
+changed-content Conflict and a healthy follow-up; source and the original235/235
+recovery report match. The stated retention window is the current retained
+canonical record in the same incarnation with fresh persisted authorization;
+no automatic TTL/purge or finite-expiry policy is implemented. Public SDK/MCP
+full-partition replay and owned restart also pass. This task-local result does
+not mark the complete DocumentStorage/Messaging/EventStreams feature contracts,
+full Linux RF3, coverage, endurance, external effects or power-loss durability
+qualified. This ADR remains Accepted while its broader feature gates are open.

@@ -12,6 +12,10 @@ internal static class PhysicalShardCatalogRf3MismatchAssertions
         RequestCqrsRf3Workload workload, string mismatchedNode, CancellationToken cancellationToken)
     {
         var denied = CreateDeniedWrite(workload);
+        await app.ResourceNotifications.WaitForResourceHealthyAsync(RequestCqrsRf3Protocol.Node1, cancellationToken)
+            .ConfigureAwait(false);
+        await app.ResourceNotifications.WaitForResourceHealthyAsync(RequestCqrsRf3Protocol.Node2, cancellationToken)
+            .ConfigureAwait(false);
         await VerifyReadyAsync(app, RequestCqrsRf3Protocol.Node1, HttpStatusCode.OK, cancellationToken)
             .ConfigureAwait(false);
         await VerifyReadyAsync(app, RequestCqrsRf3Protocol.Node2, HttpStatusCode.OK, cancellationToken)

@@ -13,4 +13,8 @@ internal sealed record DueFaultRf3Seed(
     DateTimeOffset DueAt,
     RecurringScheduleDefinition Schedule,
     CommandRequest ScheduleCommand,
-    CommandRequest SagaCommand);
+    CommandRequest SagaCommand,
+    DueFaultRf3Creator Creator)
+{
+    public override string ToString() => "DueFaultRf3Seed(<private>)";
+}

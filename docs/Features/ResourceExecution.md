@@ -560,3 +560,62 @@ The lead freezes and reviews this scope, joins the source and owns Aspire tests,
 receipts and commits. The query worker owns a private patch for only the two
 existing Cases files and, if required, one cohesive real-clock Helpers file.
 Other test methods, cache admission and production code are outside this stage.
+
+## TASK-ADM-RUNTIME-JOURNAL-BOOTSTRAP (2026-10-07)
+
+This narrow refinement of REQ-RESOURCE-001 / AC-RESOURCE-001 and
+REQ-ADM-001 / AC-ADM-001 follows the actual R199 admission regression. The
+existing4096-byte user-data ceiling rejects the separately authenticated native
+`RuntimeJournalMutation(BootstrapIdentity)` at startup after catalog bootstrap.
+The fixture never reaches its unchanged user admission assertions. This private
+startup identity mutation must use the existing bounded control reservation.
+
+Classify only the native `OperationKind.RuntimeJournal`, typed action
+`BootstrapIdentity` and exact current empty bootstrap shape: empty journal name,
+Guid.Empty instance, zero owner/content revisions, null metadata ETag, empty
+data, initialized empty set/remove collections. Preserve current native HMAC
+authority validation, signed RuntimeJournalPurpose, verified principal binding,
+persisted administrator validation, protected-identity rejection and execution
+reauthorization. The lane is not authority; no caller-supplied purpose, role or
+lane flag may grant it. Kind-only RuntimeJournal remains data, as do Create,
+UpdateMetadata, Append, Replace and Delete. Malformed, unsupported, unauthenticated
+or oversized candidates must not gain control admission or state effects.
+
+Reuse native generated serialization/inspection and existing shape validation.
+Bound candidate inspection with the existing control payload ceiling, rejecting
+large candidates from control eligibility before materializing their body; do
+not decode large ordinary journal content solely for lane classification, copy
+a codec or let borrowed proxy strings escape as executable operations. Replica
+classification remains after native authority and exact payload validation.
+Record the admitted lane immutably once in the lease/command and route the inbox
+from that owned reservation, retaining native FIFO and bounded control-burst
+fairness. Preserve all data/control payload, bytes, count, tenant and principal
+limits, original cancellation, exactly-once reservation release, unique request
+grain, ordered node-local ownership and RF3 acknowledgement barriers.
+
+Root freezes ADR-042 and this contract. The Luna worker owns a private guarded
+packet in Core ResourceExecution/Commands (governor, inbox, lanes, admitted
+command and a cohesive classifier helper if needed),
+Replication/ClusterReplication/Admission/ReplicaNativeOperationAdmission.cs,
+and whole-operation UnitTests/Features/ResourceExecution cases/helpers. A new
+helper must preserve400-file/200-type/64-method syntax-token limits; do not
+expand a type or duplicate code to bypass them. Existing signed native APIs,
+wire fields, aliases, persisted format, dependency and public routes stay exact.
+Root reviews/joins and owns all native gates.
+
+Required positive/negative/edge flows fill the data reserve, reject a second
+ordinary mutation without quota/state effects, admit and execute the genuine
+identity bootstrap through bounded control, reject exhausted control capacity,
+and complete/fail/dispose/cancel with exact settled counters and a healthy
+following command. Ordinary journal actions, nonempty bootstrap shape, wrong
+principal/purpose/native authority and oversized candidates cannot use the
+startup reserve. Assert actual operation/state and owned queue settlement,
+not just classifier booleans or getters. Existing journal authority regressions
+remain mandatory. The unchanged actual native Aspire Docker RF3
+`AdmissionClusterTests.FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable`
+must start all three voters, reject data before claiming its command ID, reuse
+that ID for authorized control, keep3-voter readiness and report settled usage.
+Run normal/scalar focused operations, full Release/formatter/governance and
+actual SDK/official MCP RF3, then retain exact-source Linux evidence. All gates
+remain required; no increased cap, retry, alternate dispatcher or fixture-only
+authorization bypass repairs this product defect.

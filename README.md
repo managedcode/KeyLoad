@@ -332,7 +332,7 @@ Discovery exposes static operation documentation. Each invocation checks current
 
 > **KeyLoad is a development preview.** Try it, build with it and [tell us what breaks](https://github.com/managedcode/KeyLoad/issues), but don't trust it with production data yet.
 
-The original 104-task plan has **1 fully accepted, 103 in progress and 0 pending**.
+The original 104-task plan has **3 fully accepted, 101 in progress and 0 pending**.
 KL-075 now has its first scaling source stage; six-node, open-loop, shard-skew,
 fanout, recovery and movement acceptance remains open. The joined stage has
 passed the local Release build with zero analyzer errors and warnings. The
@@ -341,6 +341,11 @@ passed normal and scalar **2,765/2,765**, recovery **235/235** and same-job nati
 source/test-image identity verification, without skips. Later native codec and
 captured-envelope criteria now close **KL-007**, with all19 mapped cases passing
 in both modes and all33 owned source files bound to the original compiled images.
+Original document **KL-010 CRUD/CAS** and **KL-012 batch/idempotency** acceptance
+is also closed: unchanged product/test source is bound to original Linux reports
+and compiled PDBs, including100 retries in each of two real processes. Their
+five SDK/MCP/restart RF3 cases pass in both retained Linux reports and a fresh
+local native Aspire/Docker run. This does not qualify the full RF3 cohort.
 The newer cross-process ownership and read-cut regressions pass locally; their
 task acceptance remains open. The [newer original Linux run at 6816ae91](https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154)
 passed normal and scalar **2,767/2,767**, recovery **235/235** and same-job native

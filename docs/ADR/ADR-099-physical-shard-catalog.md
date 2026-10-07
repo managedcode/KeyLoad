@@ -78,3 +78,27 @@ flowchart TD
     Validate --> Serve[Ready SDK and MCP operations]
     Validate -->|Invalid or uncertain| Closed[Fence requests and join shutdown]
 ```
+# TASK-SCAT-RF3-MISMATCH-SURVIVOR-READINESS
+
+The accepted AC-SCAT-003 mismatch flow must join native Aspire health for the
+two correctly configured survivors before their existing HTTP200 assertions.
+Use the unchanged parent cancellation/deadline and native notification API;
+the deliberately conflicting voter is still checked by its original HTTP503
+or observed terminal-process denial. Root owns the feature-local mismatch
+assertion helper, then runs the actual test-owned Docker RF3 case with the
+verified current image. All denied-write, corrected-wave, SDK/MCP, disposal
+and state-preservation checks remain mandatory. This fixture admission join
+does not change product readiness, quorum or fencing behavior.
+
+The mismatch flow's corrected-wave oracle uses its own exact seeded
+RequestCqrsRf3Workload.InitialDocuments[0] for document-00. R204 exposed an
+unrelated McpDocumentProtocol.InitialJson expectation at that final assertion.
+Root changes only the existing mismatch case argument/import, retaining native
+survivor health, conflicting-voter denial, revision/receipt/all-voter byte
+equality, denied-write absence and joined cleanup. Rerun the actual RF3 case;
+this changes no product behavior or standalone Unicode/restart oracle.
+
+R206's actual native TUnit/Aspire Docker RF3 mismatch case passed every retained
+denial, corrected-wave and exact SDK/MCP state assertion. PhysicalShardCatalog
+records its original source/assembly-bound TRX identity. This local fixture
+proof does not close complete current-source Linux RF3 or other shard criteria.

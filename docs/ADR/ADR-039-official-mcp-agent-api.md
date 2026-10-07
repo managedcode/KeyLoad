@@ -376,3 +376,25 @@ First review the native envelope, then build and execute real Aspire RF3 flows,
 retaining exact-source Linux originals. The known timeout failure remains
 unqualified until its actual cause and full saga outcomes are verified. No
 production/trust/persistence/dependency change. Rollback removes only the reason.
+
+
+TASK-CLIENT-ADMIN-SDK-PARITY is accepted before source integration under the linked
+ClientApi REQ/AC-CLIENT-004/005/006 and BackupRestore AC-BACKUP-001 observable
+archive outcome. The ClientApi feature freezes exact new SDK signatures, bodyless
+POST selection, stable dispatch command-ID header, persisted authority, backup
+non-idempotence/unknown-write behavior and current transport reuse. No server
+route, MCP schema, storage format, dependency, second dispatcher, trusted role,
+timeout or automatic retry changes. BackupRestore and Messaging own their public
+extensions and actual SDK/official-MCP RF3 business cases; ClientApi owns existing
+internal method selection and route constants. Root owns docs/shared joins and
+native gates; Luna owns the guarded source packet. Order: freeze contract, review
+and join the exact eight source paths, full build/format, genuine owned RF3
+archive restore and dispatch authority/replay flows, original Linux source-bound
+qualification, stage commit/push. Rollback removes only the new SDK adapters,
+optional internal override and regressions; canonical server/MCP behavior stays
+current. No development-format migration is introduced. Preserve primary and
+joined cleanup failures, exact original outcomes and the existing broad gates.
+The observed archive portion does not close bounded streaming/peak memory,
+cluster-cut/reconciliation or AC-BACKUP-004; member denial does not qualify
+revocation/cancellation parity. This decision remains Accepted until all its
+required implementation and qualification exist.

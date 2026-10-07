@@ -66,3 +66,31 @@ Later sweeps use fresh IDs. A caller retry of an existing command ID replays its
 original terminal receipt. Canonical occurrence IDs, monotonic schedule state,
 saga revision CAS and serializer aliases/IDs remain stable. Actual Aspire RF3 and
 exact-source Linux gates remain required for S2 qualification.
+
+
+TASK-DUE-RF3-CREATOR-CALLERS is accepted before fixture implementation under
+REQ/AC-DUE-003 and the linked DueCoordination contract. Actual R196 fails its
+first post-replacement schedule inspection with PermissionDenied because the
+fixture dropped its scoped creator and used the cluster administrator for data.
+The production no-administrator-bypass rule remains unchanged. The feature
+freezes exact credential ownership, redacted object text, persisted lane-level
+QueueConsume needed by existing ACK assertions, separate admin control callers
+and the seven permitted Messaging fixture paths. Order: freeze, Luna guarded
+private correction, root review/join, build/format and genuine Aspire RF3
+leader-loss/rejoin/cold-restart/ACK plus no-quorum regression, original Linux
+source-bound delivery. Preserve all assertions/deadlines/signed controls and
+joined cleanup. Rollback changes only fixture credentials/ownership; broad DUE
+acceptance and no production qualification claim remain unchanged.
+
+TASK-DUE-RF3-CREATOR-CALLERS includes the distinct current QueueAck capability
+for the already-required SDK receive/official-MCP ACK flow on the same three
+scoped queues. R204 reached final ACK after its cold-restart/outcome assertions
+and correctly received PermissionDenied without that grant. Root changes only
+the existing fixture Scope expression, retains full token/receipt/exhaustion
+assertions and reruns the actual owned native RF3 case; no authorization bypass
+or product capability change is permitted.
+
+R206's actual native TUnit/Aspire Docker RF3 leader/rejoin/cold-restart case
+passed with real SDK/MCP consumption and final ACK; the source/assembly-bound
+TRX identity and local qualification limits are recorded in DueCoordination.
+Current full Linux RF3 and no-quorum evidence remain required separately.

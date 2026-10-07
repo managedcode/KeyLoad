@@ -162,3 +162,40 @@ it. One-process fixture preparation is development/test setup, not RF3 quorum
 qualification. Current-format positive recovery fixtures and intentionally missing/corrupt-catalog negative controls remain unchanged. Root owns these fixture joins and the sequential Aspire recovery gate.
 
 TASK-SCAT-VALIDATION-IDENTITY preserves REQ/AC-SCAT-002: independent invalid native bootstrap bodies use independent command GUIDs. Reusing the deterministic shard bootstrap GUID with different bodies tests the mandatory global command-identity Conflict contract, not standalone Validation. Keep exact invalid-list/null/corruption, absent-catalog and unchanged-state assertions and the separate replay/conflict tests. This fixture-only refinement uses existing ADR-099; it changes no product identity or validation ordering.
+# TASK-SCAT-RF3-MISMATCH-SURVIVOR-READINESS (2026-10-07)
+
+AC-SCAT-003's mismatched-voter flow starts a wave without requiring every voter
+to be healthy, because the conflicting voter must remain fenced. Before its
+unchanged public readiness assertions, the fixture must await native Aspire
+health for node1 and node2 using the existing parent cancellation/deadline.
+Docker Running alone does not prove that an HTTP request can be admitted.
+Preserve exact survivor HTTP200, conflicting-voter HTTP503 or observed terminal
+process denial, denied SDK/MCP write and complete post-correction state checks.
+Root owns the two native waits in
+`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/PhysicalShardCatalogRf3MismatchAssertions.cs`
+and actual owned RF3 verification. No server policy, topology, timeout, retry,
+assertion or image provenance contract changes; ADR-099 remains the governing
+architecture. The original R197 flow failed at node1's first HTTP request with
+ResponseEnded before testing the conflicting voter. The revised flow remains
+unqualified until its actual native case completes.
+
+R204 reached the corrected-wave SDK/MCP state checks after the native survivor
+health join, conflicting-voter denial and preserved seed receipt. The last
+all-voter assertion incorrectly expected McpDocumentProtocol.InitialJson, which
+belongs to a separate Unicode CRUD fixture. This wave actually seeds
+RequestCqrsRf3Workload.InitialDocuments[0]. Root must compare against that exact
+independent original write input for document-00 on every voter, never derive
+expected text from recovered data or relax byte equality/revision/absence
+assertions. Remove the now-unused DocumentStorage import in the mismatch case.
+The standalone Unicode/restart flow remains unchanged and passed in R203.
+
+R206 completed `AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission`
+through actual native TUnit and fixture-owned Aspire Docker RF3 on2026-10-07.
+It passed the survivor health/readiness, conflicting-voter admission denial,
+unchanged seed/denied-write absence and corrected-wave exact SDK/MCP results.
+The shared two-case run passed2/2 with no skips or source/assembly drift; its
+original TRX SHA-256 is
+`6b915c662396baa4f25d09e2f3d64b7ff435d07338f3c03ae4e3bab942a62f6f`.
+R205 full native Release build passed with zero warnings/errors or source drift.
+This qualifies the local fixture correction; complete current-source Linux RF3
+and the remaining physical-shard acceptance gates remain open.

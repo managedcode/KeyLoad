@@ -19,12 +19,12 @@ internal static class DueFaultRf3SeedWriter
         await using var callers = await NodeEpochRf3Callers.ConnectAsync(app,
             RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2,
             creator.Secret, cancellationToken).ConfigureAwait(false);
-        return await WriteDueRecordsAsync(callers, partition, recurringLane, sagaLane, timeoutLane, cancellationToken)
+        return await WriteDueRecordsAsync(callers, creator, partition, recurringLane, sagaLane, timeoutLane, cancellationToken)
             .ConfigureAwait(false);
     }
 
     private static async Task<DueFaultRf3Seed> WriteDueRecordsAsync(NodeEpochRf3Callers callers,
-        PartitionRef partition, QueueLaneRef recurringLane, QueueLaneRef sagaLane, QueueLaneRef timeoutLane,
+        DueFaultRf3Creator creator, PartitionRef partition, QueueLaneRef recurringLane, QueueLaneRef sagaLane, QueueLaneRef timeoutLane,
         CancellationToken cancellationToken)
     {
         var dueAt = TimeProvider.System.GetUtcNow().AddSeconds(DueFaultRf3Protocol.DueDelaySeconds).ToUniversalTime();
@@ -47,7 +47,7 @@ internal static class DueFaultRf3SeedWriter
         AssertSetupLead(dueAt);
         return new(partition, recurringLane, sagaLane, timeoutLane, scheduleId, sagaId,
             DueFaultRf3Identifiers.Occurrence(scheduleId), DueFaultRf3Identifiers.TimeoutMessage(sagaId), dueAt,
-            schedule, scheduleCommand, sagaCommand);
+            schedule, scheduleCommand, sagaCommand, creator);
     }
 
     private static CommandRequest SagaCommand(PartitionRef partition, QueueLaneRef sagaLane,

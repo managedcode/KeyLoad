@@ -286,3 +286,18 @@ flowchart LR
     Verify --> Identity[New incarnation and dispatch paused]
     Identity --> Resume[Explicit reconciliation and resume]
 ```
+
+
+TASK-CLIENT-ADMIN-SDK-PARITY adds only the observable archive portion of
+AC-BACKUP-001 through the ClientApi contract and ADR-039. The actual RF3 case uses
+SDK and discovered official MCP backup operations after an SDK seed commit,
+locates each distinct archive through complete dashboard inventories and actual
+voter bind mounts, verifies its native cut, restores/reopens exact canonical
+state and joins disposal/exact-root deletion. Ownership:
+Client `Features/BackupRestore/Transport/BackupClient.cs`; IntegrationTests
+`Features/BackupRestore/Cases/AdminBackupClientParityTests.cs` and
+`Helpers/AdminBackupArchiveVerifier.cs`. Root owns native build/format/RF3 and
+original delivered Linux evidence. Bounded archive pieces/peak-memory,
+cluster-cut and capability-state reconciliation remain separately required; these
+receipts do not close AC-BACKUP-001 in full or AC-BACKUP-004. No archive format,
+server endpoint, dependency, automatic retry or migration changes are introduced.

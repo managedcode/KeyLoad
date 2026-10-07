@@ -314,3 +314,51 @@ identity/call-site supplies operation context; CallToolResult contains no tool
 name. Root builds and retains actual official-client Aspire RF3/Linux outcomes;
 this observation cannot qualify the saga or repair its unknown initiating cause.
 Production/format/dependency changes are N/A. Rollback removes only this reason.
+
+
+TASK-CLIENT-ADMIN-SDK-PARITY freezes the two missing public SDK extensions before
+source integration under REQ/AC-CLIENT-004/005/006. Existing signatures and default
+transport method inference remain unchanged. `BackupAsync(CancellationToken)`
+sends one authenticated bodyless `POST /v1/admin/backup` through the current
+transport, returns the canonical `BackupReceipt`, and classifies interrupted
+writes as `UnknownWriteOutcome`. It has no command ID or automatic retry: a
+further explicit call may create another archive. `SetDispatchAsync(Guid
+commandId, bool paused, CancellationToken)` requires a nonempty caller-owned ID,
+sends bodyless `POST /v1/admin/dispatch?paused=true|false` with that exact
+`X-KeyLoad-Command-Id`, and returns the canonical boolean. The server's persisted
+administrator authorization, signed operation, separate request grain, replay
+and conflicting-payload semantics are unchanged; no caller role is accepted.
+
+Ownership is `Client/Features/BackupRestore/Transport/BackupClient.cs` and
+`Client/Features/Messaging/Transport/DispatchClient.cs`, joined to the existing
+ClientApi route constants and internal `KeyLoadClient.Send`/`KeyLoadClientTransport`
+method override. Existing callers omit the optional override and retain their
+GET-for-null/POST-for-body selection. Business regressions belong to IntegrationTests
+BackupRestore `AdminBackupClientParityTests`/`AdminBackupArchiveVerifier` and
+Messaging `AdminDispatchClientParityTests`. Frontend is N/A because these are
+SDK adapters for existing administrator operations; contracts and server routes
+already exist. ADR-039 owns integration and rollback.
+
+The actual Aspire RF3 backup flow commits a canonical seed through SDK, invokes
+one SDK backup and one discovered official-MCP backup, and requires valid distinct
+receipts. For each archive, complete bounded dashboard inventories must identify
+exactly one physical voter and manifest; resolve only beneath the fixture-owned
+bind mounts, compare retained file lengths with observed bytes, verify the native
+backup cut includes the seed, restore into a unique owned directory and reopen
+exact reference/JSON/revision/non-tombstone state. Require a new incarnation,
+paused dispatch and an unchanged verified source archive. Join native disposal
+and exact-root deletion while preserving primary and cleanup failures.
+
+The dispatch flow establishes an administrator-unpaused baseline inside its
+cleanup scope, persists a DocumentsRead-only member and requires its pause to
+fail with PermissionDenied. Immediately commit a healthy administrator write
+without any intervening dispatch mutation, proving denial had no effect. Then
+exercise same-ID/same-boolean replay through both clients, changed-payload
+Conflict, paused-write rejection with unchanged JSON/revision, and cross-client
+resume/pause followed by healthy commits/public reads. Bounded observed cleanup
+restores dispatch. Root reviews guards, builds/formats, executes the real SDK and
+official-MCP fixture, retains original evidence, and commits/pushes the stage.
+Source integration and runtime qualification are pending. This stage covers only
+the observable archive outcome portion of AC-BACKUP-001; streaming/memory,
+cluster-cut/reconciliation, cancellation/revocation parity and all remaining
+ClientApi/BackupRestore acceptance stay mandatory and open.

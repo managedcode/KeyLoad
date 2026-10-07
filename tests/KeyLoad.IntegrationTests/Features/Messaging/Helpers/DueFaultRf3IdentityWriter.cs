@@ -68,7 +68,7 @@ internal static class DueFaultRf3IdentityWriter
     }
 
     private static ScopeGrant Scope(PartitionRef partition, QueueLaneRef lane, Capability capabilities)
-        => new(partition.DatabaseId, lane.Queue, capabilities);
+        => new(partition.DatabaseId, lane.Queue, capabilities | Capability.QueueConsume | Capability.QueueAck);
 
     private static string CreateSecret()
         => DueFaultRf3Protocol.ApiKeyPrefix + Guid.NewGuid().ToString("N") + DueFaultRf3Protocol.SecretSeparator

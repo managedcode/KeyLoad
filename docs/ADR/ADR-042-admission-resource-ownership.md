@@ -121,3 +121,36 @@ SDK/control/RF3 flow; source or local governor success cannot establish it.
 No wire, storage, deployment, format or dependency change is needed. Rollback
 removes only this operation's classifier inclusion and its matching regression;
 the original startup failure remains unqualified until real execution passes.
+
+## Native runtime-journal startup control admission
+
+TASK-ADM-RUNTIME-JOURNAL-BOOTSTRAP extends the existing catalog startup reserve
+under REQ/AC-RESOURCE-001 and REQ/AC-ADM-001. R199's actual RF3 admission flow
+fails in RuntimeJournalStartupRequests.BootstrapAsync:4096-byte data capacity
+cannot retain its ordinary envelope plus payload. The complete closed action,
+shape, native authority, bounds and negative matrix are frozen in the linked
+ResourceExecution feature before code. Reserve only the exact authenticated
+native BootstrapIdentity shape; ordinary RuntimeJournal actions remain data.
+No kind-wide exemption, caller role/purpose trust, data-budget change or journal
+provider replacement is accepted. The signed request, persisted administrator,
+protected identity, reauthorization, ordered apply and RF3 contracts stay exact.
+
+Ordered implementation: root freezes contract; worker uses native bounded
+inspection and current shape checks, then joins operation-aware reservation in
+Core ResourceExecution/Commands, immutable admitted lane reuse in inbox/command
+and CommandInboxLanes, and matching post-authority replica classification in
+Replication/ClusterReplication/Admission/ReplicaNativeOperationAdmission.cs.
+Worker adds whole-operation ResourceExecution unit cases/helpers with genuine
+issued native operations, state preservation, saturation/release and healthy
+reuse. Root independently reviews the guarded source, runs full Release,
+normal/scalar focused operations and formatter/governance, then uses a fresh
+verified image for the unchanged real SDK/MCP admission RF3 case and original
+Linux qualification. Existing journal authority/signature/purpose and recovery
+regressions remain mandatory. Capture lane once and preserve all fairness and
+shutdown ownership; never materialize an unbounded ordinary body to classify it.
+
+No storage/wire/dependency/public API rollout is required. Rollback removes only
+this narrow classifier/reservation integration and matching regressions; no data
+rewrite, migration or alternate representation exists. Until actual required
+native gates pass, this accepted repair is source work pending qualification.
+Full admission/mixed-load/performance and other feature gates remain open.

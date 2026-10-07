@@ -1,5 +1,4 @@
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.DocumentStorage;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
 using KeyLoad.Server;
 
@@ -60,7 +59,7 @@ internal sealed class PhysicalShardCatalogRf3MismatchTests
             configureCohort: false, requireHealthy: true, cancellationToken).ConfigureAwait(false);
         await workload.VerifyPreservedAsync(corrected.App, profile, cancellationToken).ConfigureAwait(false);
         await PhysicalShardCatalogRf3Assertions.VerifyAllVotersAsync(corrected.App, profile.AdminKey,
-            Reference(workload), McpDocumentProtocol.InitialJson, cancellationToken).ConfigureAwait(false);
+            Reference(workload), workload.InitialDocuments[0], cancellationToken).ConfigureAwait(false);
         await PhysicalShardCatalogRf3Assertions.VerifyAbsentAsync(corrected.App, profile.AdminKey,
             deniedReference, cancellationToken).ConfigureAwait(false);
     }

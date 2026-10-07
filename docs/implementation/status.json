@@ -17,7 +17,7 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R187 full native C# Release passed4,119 compile inputs, zero source drift/warnings/errors; R188 all six unchanged native Aspire C1 logger controls passed6/6 with4,120 source and394 assembly paths, zero drift/no skips. R189/R190 native WAL/open/recovery whole flows passed21/21 in each normal/scalar mode with541 assembly paths, zero drift/no skips. R191 full native formatter passed4,119 inputs with zero drift; R186 original imports-order failure retained. R183 due wave rejected local receipt before AppHost creation; no RF3 pass inferred. Original6816 Linux verify passed2767 each mode plus235 recovery; RF3 canceled near60-minute job ceiling without TRX. Current Linux/RF3/product coverage/full task gates remain open.",
+    "verificationStage": "Stage IV: R205 full native Release passed4,122 compile inputs with zero drift/warnings/errors; R203 actual fixture-owned Docker RF3 document SDK/MCP acceptance passed5/5, R206 due leader/rejoin/cold-restart and shard mismatch/corrected-wave passed2/2, each with4,123 source and394 assembly paths, zero drift/no skips. R194/R195 native model operation controls passed2/2 normal/scalar. R204 original late assertion/fixture grant failures retained and corrected; R198 follower MCP400 and R199 runtime-journal admission remain open. KL-010/KL-012 original task scopes closed from independently verified Linux/source/PDB and RF3 evidence. Current full Linux/RF3 and product coverage remain open; R207 full native formatter passed4,122 inputs with zero drift.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
       "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
@@ -40,19 +40,20 @@
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
     },
     "currentBuild": {
-      "compileInputs": 4119,
+      "compileInputs": 4122,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "544646e19b258ed5c265a820d78e7813c877d87e6375f261c5e731655be71453",
+      "logSha256": "db1efff8c82655651cbbd67c98fccdd5fbbb0a59fc0a9ecbe8b90314928c8375",
       "passed": true,
-      "qualification": "Native local full C# Release build for C1/WAL checkpoint; complete delivered Linux/RF3 gates remain open"
+      "qualification": "R205 native local full C# Release build for Stage IV fixture corrections; delivered Linux/global RF3 remain open"
     },
     "currentFormatter": {
-      "compileInputs": 4119,
+      "compileInputs": 4122,
       "inputDrift": 0,
       "nativeExitCode": 0,
-      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "R207 full native source-bound formatter verification; not functional or Linux proof"
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "6816ae919cac67c217c85096d04d474667e80f1f",
@@ -361,6 +362,30 @@
         "trxSha256": "5ea4bafb910bed2c11c63f5de1ecef3286f6d16f058637656352b1fa7b89f904"
       },
       "qualification": "R183 is a pre-start rejection, not an executed RF3 due/leader/cold-restart flow; guarded source packet awaits integration and native verification"
+    },
+    "dueAndShardRf3Development": {
+      "tasks": [
+        "TASK-DUE-RF3-CREATOR-CALLERS",
+        "TASK-SCAT-RF3-MISMATCH-SURVIVOR-READINESS"
+      ],
+      "nativeExitCode": 0,
+      "passed": 2,
+      "total": 2,
+      "failed": 0,
+      "skipped": 0,
+      "sourceInputs": 4123,
+      "assemblyInputs": 394,
+      "sourceDrift": 0,
+      "assemblyDrift": 0,
+      "logSha256": "73265d86477b5c631ee596b596f88b262fdff951ee4327ab9f1a7306ce159f5d",
+      "trxSha256": "6b915c662396baa4f25d09e2f3d64b7ff435d07338f3c03ae4e3bab942a62f6f",
+      "cases": [
+        "AcDue003AutonomousOutcomesSurviveLeaderRejoinAndCurrentColdRestart",
+        "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission"
+      ],
+      "verifiedOperation": "Persisted scoped creator SDK/MCP due inspection/receive/ACK after leader loss, voter rejoin and cold restart; native survivor readiness, conflicting-voter admission denial, denied-write absence and corrected-wave exact seeded SDK/MCP results",
+      "qualification": "Actual owned local Docker image through native TUnit fixtures; AppHost owns RF3 resources/readiness/discovered SDK and official MCP clients/shutdown; local development, not delivered Linux/full product qualification",
+      "linuxQualified": false
     }
   },
   "TIME-PROVIDER-001": {
@@ -1570,7 +1595,7 @@
   },
   "KL-010": {
     "title": "Document CRUD та CAS",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
@@ -1578,11 +1603,15 @@
       "tests/KeyLoad.UnitTests/Features/DocumentStorage",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/McpDocumentCrudParityTests.cs",
-      "https://github.com/managedcode/KeyLoad/actions/runs/37349838022"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37349838022",
+      "docs/Features/DocumentStorage.md",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37560457057",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576928739",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37555827366/job/112581704430"
     ],
     "qualification": {
-      "sourceStage": "real_ZoneTree_CRUD_revision_validation_index_and_persisted_policy_matrix",
-      "runtimeQualified": false,
+      "sourceStage": "original_CRUD_CAS_JSON_bounds_tombstone_and_exact_text_task_acceptance_Linux_source_PDB_bound_and_current_native_RF3_passed",
+      "runtimeQualified": true,
       "localDevelopment": {
         "newCrudCases": 8,
         "normalUnit": 2889,
@@ -1590,11 +1619,8 @@
         "recovery": 228,
         "unchangedSourceAndRuntime": true
       },
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
-      "remaining": [
-        "complete_exact_source_Linux_Docker_Aspire_RF3_gate",
-        "exact_literal_document_content_through_both_native_RF3_clients_and_restart"
-      ],
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154",
+      "remaining": [],
       "earlierDeliveredSource": {
         "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
         "runId": "37168813668",
@@ -1619,8 +1645,138 @@
         "originalNativeReportSha256": "1d0dd5b41a38eaad02b74c00f4b95eb927a2822f137b7a5fcb36041eb3987dd2",
         "completeSuiteQualified": false,
         "laterSourceQualified": false
+      },
+      "taskAcceptance": {
+        "completedAt": "2026-10-07",
+        "sourceCommit": "6816ae919cac67c217c85096d04d474667e80f1f",
+        "runId": 37560457057,
+        "verifyJobId": 112596312154,
+        "verifyJobConclusion": "success",
+        "sameJobSourceAndImageVerifyPassed": true,
+        "originalTestArtifactId": 11458227354,
+        "originalTestArtifactSha256": "aa41efe04a04e3bb4ba9009c85f17b642f8f8e694077d5f5c7fd3f7fe6343a85",
+        "originalSuites": {
+          "unit": {
+            "trxSha256": "4b90d557cb6107555c6037dd661ef3eee4d9ae82818f01e95139277be952356a",
+            "total": 2767,
+            "passed": 2767,
+            "failed": 0,
+            "skipped": 0
+          },
+          "scalar": {
+            "trxSha256": "f6c6654646ed785beb6ba8dfed323b0c0aa4c48ff7d7a25b54f90203d777fafb",
+            "total": 2767,
+            "passed": 2767,
+            "failed": 0,
+            "skipped": 0
+          },
+          "recovery": {
+            "trxSha256": "999b9098b3df05bb94b815dfe0f4775cc85a10ae76e2d814e8f1be9a74d95fb4",
+            "total": 235,
+            "passed": 235,
+            "failed": 0,
+            "skipped": 0
+          }
+        },
+        "rootIndependentValidationSha256": "aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b",
+        "nonAppHostProductSourcesCurrentAndOriginalPdbMatched": 1142,
+        "currentChangedProductPaths": [
+          "src/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
+          "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+          "src/KeyLoad.AppHost/Hosting/KeyLoadAppHostApplication.cs"
+        ],
+        "originalTestImageIsProvenanceNotStandaloneQualification": true,
+        "originalRf3TaskReports": [
+          {
+            "runId": 37554329420,
+            "trxSha256": "6ce35c8f3d477dd950e92715832a5d18b1808439f5b79eccdbcb56c8c206cf35",
+            "counters": {
+              "total": "155",
+              "executed": "155",
+              "passed": "141",
+              "failed": "14",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "manifestSha256": "52af24cabb2f11948fd72becca320db8e7c4ecbc37e6c31eb6c5844f5c454d15",
+            "dllSha256": "84bd52fe67dc84e73474ec6fd17c1c88dcebcca90bbbb768c409f1f1aeeb712d",
+            "pdbSha256": "c4d5f7879c2277495db7f7dd82f25aa0b296b2597428fcdf9bf54b5429caa7cf",
+            "mvid": "b8bb52ff-52e9-4f05-81c5-5fa0202a7346",
+            "pdbGuid": "a986d561-204d-444e-94cd-78b14317f654",
+            "fullRf3Qualified": false
+          },
+          {
+            "runId": 37555827366,
+            "trxSha256": "e8d1f5beca5f9b786dd66aad745051bd9e47aa6b79362d6f0f51e43fc46cdb40",
+            "counters": {
+              "total": "155",
+              "executed": "155",
+              "passed": "141",
+              "failed": "14",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "manifestSha256": "9fb870b4361ba5e9d371bdd60975c50c03f2748db6e31abc3961a84f982a5f22",
+            "dllSha256": "1db7cfe9da3e1aa9c3316bc7e7fbbe50298aba80a900243324b10f5792ea8b30",
+            "pdbSha256": "9f573cac058fd4e7847f034278fe3a711858b25449ac8555cf9a933e1e0e122e",
+            "mvid": "60b4bfcb-4a01-42b8-8c35-0e03ca39d1c2",
+            "pdbGuid": "d4f2d5a0-718a-4a0c-8df8-0d783219ce32",
+            "fullRf3Qualified": false
+          }
+        ],
+        "currentNativeRf3Refresh": {
+          "passed": 5,
+          "total": 5,
+          "skipped": 0,
+          "logSha256": "ff5bc8a069dc9f5a018623319aca43ae0da7f9ddf5c83b8e10236f51b6accfbc",
+          "trxSha256": "5248d0f18836513f79e7e1a0759c9f34acfe165ca93a8586fa36b8a135efb0d5",
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "qualification": "actual local native TUnit fixture-owned Aspire Docker RF3 through real SDK/official MCP; not Linux or full-suite qualification"
+        },
+        "fullRf3Qualified": false,
+        "separateProductGates": [
+          "complete_linux_rf3",
+          "full_document_storage_feature",
+          "endurance",
+          "power_loss",
+          "full_product_functional_coverage"
+        ],
+        "requirements": [
+          "REQ-DSTORE-001",
+          "REQ-DSTORE-008"
+        ],
+        "criteria": [
+          "AC-DSTORE-001",
+          "AC-DSTORE-008"
+        ],
+        "qualified": true,
+        "originalTaskScope": "Get/Put/Patch/Delete expectedRevision tombstone; 32-contender CAS one winner; malformed/duplicate/oversized/over-depth JSON rejection; exact-content client/restart supplement",
+        "unitOwnedMatchingSourceFiles": 23,
+        "mappedRf3Cases": 4
       }
-    }
+    },
+    "allAcceptanceClosed": true
   },
   "KL-011": {
     "title": "Strict indexes і unique scope",
@@ -1633,7 +1789,7 @@
   },
   "KL-012": {
     "title": "Batch і persisted idempotency",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/DocumentStorage/Execution/Documents.cs",
       "src/KeyLoad.Core/DatabaseEngine.cs",
@@ -1641,21 +1797,170 @@
       "Historical intermediate report removed from repository; no current qualification inferred",
       "Historical intermediate report removed from repository; no current qualification inferred",
       "https://github.com/managedcode/KeyLoad/actions/runs/37384353741",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "Historical intermediate report removed from repository; no current qualification inferred",
+      "docs/Features/DocumentStorage.md",
+      "docs/ADR/ADR-002-command-idempotency.md",
+      "tests/KeyLoad.RecoveryTests/Features/DocumentStorage/Cases/CommandIdempotencyProcessRecoveryTests.cs",
+      "tests/KeyLoad.IntegrationTests/Features/DocumentStorage/Cases/ScopedCommandIdentityRf3Tests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37560457057",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576928739",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37555827366/job/112581704430"
     ],
-    "runtimeQualified": false,
-    "allAcceptanceClosed": false,
+    "runtimeQualified": true,
+    "allAcceptanceClosed": true,
     "commandOutcomeDevelopment": {
       "recovery": "one_actual_two_process_100_retry_case_passed",
       "normal": "2_of2",
       "scalar": "2_of2",
       "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
-      "partitionScopedOutcomeContract": "source_joined_native_unit_scalar_recovery_RF3_and_coverage_pending",
-      "qualified": false
+      "partitionScopedOutcomeContract": "current_v2_task_acceptance_qualified_in_original_Linux_normal_scalar_recovery_and_task_RF3",
+      "qualified": true
     },
-    "sourceStage": "partition_scoped_v2_outcomes_and_private_CrashHost_observation_seam_joined_current_build_process_recovery_and_RF3_gates_pending",
+    "sourceStage": "atomic_batch_scoped_outcomes_100_retries_each_of_two_real_processes_conflict_retention_Linux_source_PDB_bound_and_current_native_RF3_passed",
     "scopedOutcomeSourceReceipt": "Historical intermediate report removed from repository; no current qualification inferred",
-    "fullPartitionIdentityFlows": "four_actual_scope_replay_conflict_close_reopen_cases_joined_current_native_gates_pending"
+    "fullPartitionIdentityFlows": "four_dimension_scope_retry_conflict_reopen_cases_Linux_normal_scalar_passed_current_sources_PDB_matched",
+    "qualification": {
+      "runtimeQualified": true,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154",
+      "remaining": [],
+      "taskAcceptance": {
+        "completedAt": "2026-10-07",
+        "sourceCommit": "6816ae919cac67c217c85096d04d474667e80f1f",
+        "runId": 37560457057,
+        "verifyJobId": 112596312154,
+        "verifyJobConclusion": "success",
+        "sameJobSourceAndImageVerifyPassed": true,
+        "originalTestArtifactId": 11458227354,
+        "originalTestArtifactSha256": "aa41efe04a04e3bb4ba9009c85f17b642f8f8e694077d5f5c7fd3f7fe6343a85",
+        "originalSuites": {
+          "unit": {
+            "trxSha256": "4b90d557cb6107555c6037dd661ef3eee4d9ae82818f01e95139277be952356a",
+            "total": 2767,
+            "passed": 2767,
+            "failed": 0,
+            "skipped": 0
+          },
+          "scalar": {
+            "trxSha256": "f6c6654646ed785beb6ba8dfed323b0c0aa4c48ff7d7a25b54f90203d777fafb",
+            "total": 2767,
+            "passed": 2767,
+            "failed": 0,
+            "skipped": 0
+          },
+          "recovery": {
+            "trxSha256": "999b9098b3df05bb94b815dfe0f4775cc85a10ae76e2d814e8f1be9a74d95fb4",
+            "total": 235,
+            "passed": 235,
+            "failed": 0,
+            "skipped": 0
+          }
+        },
+        "rootIndependentValidationSha256": "aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b",
+        "nonAppHostProductSourcesCurrentAndOriginalPdbMatched": 1142,
+        "currentChangedProductPaths": [
+          "src/KeyLoad.AppHost/Hosting/AppHostControlOptions.cs",
+          "src/KeyLoad.AppHost/Hosting/AppHostControlOptionsRegistration.cs",
+          "src/KeyLoad.AppHost/Hosting/KeyLoadAppHostApplication.cs"
+        ],
+        "originalTestImageIsProvenanceNotStandaloneQualification": true,
+        "originalRf3TaskReports": [
+          {
+            "runId": 37554329420,
+            "trxSha256": "6ce35c8f3d477dd950e92715832a5d18b1808439f5b79eccdbcb56c8c206cf35",
+            "counters": {
+              "total": "155",
+              "executed": "155",
+              "passed": "141",
+              "failed": "14",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "manifestSha256": "52af24cabb2f11948fd72becca320db8e7c4ecbc37e6c31eb6c5844f5c454d15",
+            "dllSha256": "84bd52fe67dc84e73474ec6fd17c1c88dcebcca90bbbb768c409f1f1aeeb712d",
+            "pdbSha256": "c4d5f7879c2277495db7f7dd82f25aa0b296b2597428fcdf9bf54b5429caa7cf",
+            "mvid": "b8bb52ff-52e9-4f05-81c5-5fa0202a7346",
+            "pdbGuid": "a986d561-204d-444e-94cd-78b14317f654",
+            "fullRf3Qualified": false
+          },
+          {
+            "runId": 37555827366,
+            "trxSha256": "e8d1f5beca5f9b786dd66aad745051bd9e47aa6b79362d6f0f51e43fc46cdb40",
+            "counters": {
+              "total": "155",
+              "executed": "155",
+              "passed": "141",
+              "failed": "14",
+              "error": "0",
+              "timeout": "0",
+              "aborted": "0",
+              "inconclusive": "0",
+              "passedButRunAborted": "0",
+              "notRunnable": "0",
+              "notExecuted": "0",
+              "disconnected": "0",
+              "warning": "0",
+              "completed": "0",
+              "inProgress": "0",
+              "pending": "0"
+            },
+            "manifestSha256": "9fb870b4361ba5e9d371bdd60975c50c03f2748db6e31abc3961a84f982a5f22",
+            "dllSha256": "1db7cfe9da3e1aa9c3316bc7e7fbbe50298aba80a900243324b10f5792ea8b30",
+            "pdbSha256": "9f573cac058fd4e7847f034278fe3a711858b25449ac8555cf9a933e1e0e122e",
+            "mvid": "60b4bfcb-4a01-42b8-8c35-0e03ca39d1c2",
+            "pdbGuid": "d4f2d5a0-718a-4a0c-8df8-0d783219ce32",
+            "fullRf3Qualified": false
+          }
+        ],
+        "currentNativeRf3Refresh": {
+          "passed": 5,
+          "total": 5,
+          "skipped": 0,
+          "logSha256": "ff5bc8a069dc9f5a018623319aca43ae0da7f9ddf5c83b8e10236f51b6accfbc",
+          "trxSha256": "5248d0f18836513f79e7e1a0759c9f34acfe165ca93a8586fa36b8a135efb0d5",
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "qualification": "actual local native TUnit fixture-owned Aspire Docker RF3 through real SDK/official MCP; not Linux or full-suite qualification"
+        },
+        "fullRf3Qualified": false,
+        "separateProductGates": [
+          "complete_linux_rf3",
+          "full_document_storage_feature",
+          "endurance",
+          "power_loss",
+          "full_product_functional_coverage"
+        ],
+        "requirements": [
+          "REQ-DSTORE-004",
+          "REQ-DSTORE-006",
+          "REQ-DSTORE-007",
+          "REQ-DSTORE-009"
+        ],
+        "criteria": [
+          "AC-DSTORE-004",
+          "AC-DSTORE-006",
+          "AC-DSTORE-007",
+          "AC-DSTORE-009"
+        ],
+        "qualified": true,
+        "scope": "original KL-012 atomic outcome/batch and 100-retry restart/conflict/retention plus current principal/full-partition outcome flows; broader supplemental full-feature gates remain separate",
+        "retriesInFirstProcess": 100,
+        "retriesInDistinctRecoveryProcess": 100,
+        "realProcessKillNotPowerLoss": true,
+        "retentionContract": "no automatic TTL/purge; canonical outcome retained in same incarnation and reauthorized on retry; explicit removal/incarnation change outside guarantee",
+        "recoveryOwnedMatchingSourceFiles": 9,
+        "mappedRf3Cases": 1
+      }
+    }
   },
   "KL-013": {
     "title": "Query AST, planner і cursors",

@@ -53,18 +53,18 @@ The current root-level files are documented migration debt under ADR-032, not th
 - Direct document writes are denied when catalog authority is `EventStream`. Row and field permissions are checked on mutation/read. Reads omit deleted or row-invisible records and use the persisted field projector.
 - Index definitions currently support scalar paths with inclusion rules for null/missing values. Updates remove old keys and write new keys in the same transaction. Unique values are enforced within the partition; a conflicting owner rejects the transaction.
 - `CommandRequest` and mutation records participate in the shared ordered batch path. Existing tests cover document/event/queue batch atomicity and persisted command retry. The literal partition key alone does not merge distinct transaction domains.
-- The observed implementation does not establish multikey, covering, partial, computed, global-unique, online generation rebuild, or cluster-wide split semantics. These remain design/backlog work in section 7 and KL-010..012/039.
+- The observed implementation does not establish multikey, covering, partial, computed, global-unique, online generation rebuild, or cluster-wide split semantics. These remain design/backlog work in section 7 and the indexing/shard workstreams KL-011/039; they are outside the original KL-010 CRUD/CAS and KL-012 batch/outcome task scopes.
 
 ## Requirements and acceptance
 
 | Requirement | Measurable acceptance | Existing TUnit evidence or planned test |
 |---|---|---|
-| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; actual `DocumentCrudRevisionTests` and `DocumentPutValidationAtomicityTests` cover create/missing/delete/invalid JSON/authority. Local full-suite evidence below; exact-source CI qualification pending. |
+| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; actual `DocumentCrudRevisionTests` and `DocumentPutValidationAtomicityTests` cover create/missing/delete/invalid JSON/authority. Original source/PDB-matched Linux normal/scalar evidence and all four task RF3 cases passed; current native RF3 refresh passed. See TASK-DSTORE-KL010-KL012-CLOSEOUT below. |
 | REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; actual `DocumentScalarIndexMutationTests` covers persisted old/new index transitions and rollback. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; actual field/row/tenant matrix plus isolated replacement-write and Delete-index-use controls. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
 | REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Native placement admission adds exactly three bounded metadata point reads to the six current mutation/outcome reads, reused by the Batch receipt and every outbox effect under REQ/AC-MTOKEN-007. The current atomic roster performs one additional existing-entry validation per distinct candidate partition before publishing or validating its first-write row; the single-partition mutation oracle is therefore six mutation/outcome plus three placement plus one roster lookup (ten), with unchanged paired-size payload work. Actual native counters must verify the current per-operation total and paired-size payload work; an obsolete outcome lookup must not be retained to satisfy an old counter. | TASK-MP-007I in ADR-035 and ADR-017; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
-| REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. This remains planned until original Aspire/native reports exist. |
+| REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. The original Linux two-process case passed in run37560457057, with unchanged source bound to its native compiled image; see the scoped closeout below. |
 | REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | TASK-DSTORE-OUTCOME-MATRIX under ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
 | REQ-DSTORE-009: persist command identity in its full resolved scope | AC-DSTORE-009 passes when the current scoped-key, retained-error, corruption, restart and public RF3 flows below all pass without outcome rewrites, guessed partition identity or ambiguous principal/ID lookup. | TASK-DSTORE-SCOPED-OUTCOMES-001..004; ADR-002, ADR-011 and ADR-017; real ZoneTree unit/scalar, existing CrashHost recovery and SDK/official MCP Aspire RF3 cases. Contract accepted before implementation; no complete gate is claimed. |
 
@@ -199,10 +199,12 @@ identity; no caller-supplied role or metadata-before-authorization shortcut is
 permitted. These flows extend AC-DSTORE-009 and its existing native unit/scalar,
 recovery and RF3 evidence, without qualifying an unexecuted gate.
 
-The scoped implementation, current callers and authored operation flows were
-joined in the historical report (removed from repository).
-It captures that historical source and root corrections to shared options. Current build, formatter, unit/scalar, process recovery, RF3 and
-functional coverage are pending; AC-DSTORE-006/009 remain open.
+The current scoped implementation and callers have original source-matched
+Linux normal/scalar and process-recovery proof. The original KL-012 acceptance
+and named public RF3 partition/restart flow are closed below. Full feature
+qualification, the complete Linux RF3 cohort and functional coverage remain
+separate open gates; a task closeout does not mark every supplemental criterion
+or the full DocumentStorage feature complete.
 
 The accepted [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md)
 assigns CRUD handlers and new matching tests to one worker, and shared
@@ -258,7 +260,7 @@ flowchart LR
     Commit --> Read[Authorized projected read or bounded query]
 ```
 
-The 2026-10-04 development receipt (report removed from repository) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. Local development verification is authorized through unified Aspire; delivered-source qualification still requires complete Linux GitHub original build/TUnit/recovery/Docker RF3 artifacts. Required official MCP parity through Aspire RF3 remains pending. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
+The 2026-10-04 development receipt (report removed from repository) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. The original Linux and actual SDK/official-MCP RF3 task closeout below supersedes that task-local pending qualification. Complete current-source Linux RF3 and broader feature acceptance remain required. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
 
 ## RF3 CRUD public-client completion (2026-10-04 accepted test scope)
 
@@ -275,3 +277,41 @@ authority/corruption/revision/receipt/no-second-effect assertions stay intact.
 Canonical validation/fingerprint golden bytes remain unchanged; canonical retry
 equivalence must not rewrite the first acknowledged document text. These cases
 map to REQ/AC-DSTORE-008 and ADR-060 with the dedicated exact-content tests.
+
+## TASK-DSTORE-KL010-KL012-CLOSEOUT (2026-10-07)
+
+Root independently validated the original reports, current source hashes and
+native PDB document hashes before closing the original task acceptance.
+[Linux run37560457057](https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154)
+at `6816ae919cac67c217c85096d04d474667e80f1f` passed normal/scalar2767 each
+and recovery235, without failures or skips, and passed same-job source/image
+verification. Twenty-two mapped whole-operation unit cases pass in both modes;
+the distinct two-process hundred-retry recovery case passes. The root audit
+binds23 document/outcome unit source files, nine recovery source files and all1142
+unchanged non-AppHost product source files to their original PDB checksums.
+The three changed AppHost model-control files remain separate infrastructure
+work. Native identity manifests are provenance combined with those executed
+reports, never standalone qualification.
+
+| Original task | Requirements, cases and acceptance proof |
+|---|---|
+| KL-010 CRUD/CAS and JSON validation | REQ/AC-DSTORE-001 and exact-text supplement008: `DocumentCrudRevisionTests`, `DocumentPutValidationAtomicityTests`, `DocumentExactContentTests`, plus the32-contender `TransactionTests.ConcurrentCompareAndSwapHasOneWinner`. Get/Put/Patch/Delete/recreate preserve exact monotone revisions/tombstone; stale/authority failures and malformed/duplicate/oversized/deep JSON preserve state. The three `McpDocumentCrudParityTests` and all-voter `PhysicalShardCatalogRf3Tests` preserve receipts and exact unredacted text across SDK/MCP and restart. |
+| KL-012 atomic batch/outcome and persisted replay | REQ/AC-DSTORE-004/006 and principal/full-scope supplements007/009: `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `CommandIdempotencyProcessRecoveryTests.AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart`, command/principal/scoped-outcome cases and four `FullPartitionOutcomeIdentityTests`. One hundred retries in each distinct real process preserve complete receipt, one document/event/queue effect and original outbox cut; changed content conflicts and a fresh authorized command succeeds. Current retention is the explicit no-auto-expiry canonical-record/same-incarnation/reauthorization contract above. `ScopedCommandIdentityRf3Tests` proves SDK/MCP partition-scoped replay/conflict and owned voter restart. |
+
+All five named RF3 cases passed in both original Linux runs
+[37554329420](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576928739)
+and [37555827366](https://github.com/managedcode/KeyLoad/actions/runs/37555827366/job/112581704430),
+with their exact current test/workflow/assertion files bound to the original PDBs.
+Their full RF3 suites each had141 passed/14 failed; those unrelated failures
+remain open. On2026-10-07 the same five cases passed again in actual local
+native TUnit, fixture-owned Aspire Docker RF3, with both real clients, zero
+skips and zero source/assembly drift. Original TRX SHA-256 is
+`5248d0f18836513f79e7e1a0759c9f34acfe165ca93a8586fa36b8a135efb0d5`.
+The root independent original-source/report audit SHA-256 is
+`aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b`;
+full artifact/report identities are retained in `docs/implementation/status.json`.
+No new feature behavior or duplicate getter/shape tests were added for closeout;
+ADR-002/060 already govern these operations. This closes the original two task
+scopes only. Complete DocumentStorage, full Linux RF3, endurance, power loss and
+full product functional coverage are still open; process kill is not power-loss
+proof. Other feature criteria remain individually tracked.

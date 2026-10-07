@@ -35,7 +35,7 @@ internal static class DueFaultRf3Run
                 {
                     await VerifyColdRestartAsync(wave.App, root, seeded.State, profile.Profile, profile.Bytes,
                         seeded.Seed, deadline.Token).ConfigureAwait(false);
-                    await ConsumeOutcomesAsync(wave.App, profile.Profile, seeded.Seed, deadline.Token)
+                    await ConsumeOutcomesAsync(wave.App, seeded.Seed, deadline.Token)
                         .ConfigureAwait(false);
                     return true;
                 }, deadline.Token).ConfigureAwait(false);
@@ -76,19 +76,19 @@ internal static class DueFaultRf3Run
             .ConfigureAwait(false);
         await RequestCqrsRf3DiscoveryOracle.AssertReplacementAsync(prior.Discovery, discovery).ConfigureAwait(false);
         await using var first = await NodeEpochRf3Callers.ConnectAsync(app,
-            RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node1, profile.AdminKey, cancellationToken)
+            RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node1, seed.Creator.Secret, cancellationToken)
             .ConfigureAwait(false);
         await using var second = await NodeEpochRf3Callers.ConnectAsync(app,
-            RequestCqrsRf3Protocol.Node3, RequestCqrsRf3Protocol.Node3, profile.AdminKey, cancellationToken)
+            RequestCqrsRf3Protocol.Node3, RequestCqrsRf3Protocol.Node3, seed.Creator.Secret, cancellationToken)
             .ConfigureAwait(false);
         await DueFaultRf3Assertions.AssertOutcomesAsync(first, second, seed, cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task ConsumeOutcomesAsync(DistributedApplication app, NodeEpochRf3Profile profile,
+    private static async Task ConsumeOutcomesAsync(DistributedApplication app,
         DueFaultRf3Seed seed, CancellationToken cancellationToken)
     {
         await using var callers = await NodeEpochRf3Callers.ConnectAsync(app,
-            RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, profile.AdminKey, cancellationToken)
+            RequestCqrsRf3Protocol.Node1, RequestCqrsRf3Protocol.Node2, seed.Creator.Secret, cancellationToken)
             .ConfigureAwait(false);
         await DueFaultRf3Assertions.AcknowledgeAndProveExhaustionAsync(callers, seed, cancellationToken)
             .ConfigureAwait(false);

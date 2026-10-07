@@ -26,7 +26,7 @@ internal static class DueFaultRf3Leadership
         var cut = new DueFaultRf3LeaderCut(leader.Name, survivors, beforeStatus, beforeDiscovery, 0);
         await VerifySurvivorProgressAsync(app, profile, seed, cut, cancellationToken).ConfigureAwait(false);
         var requiredApplied = await ReadSurvivorHighWaterAsync(app, profile, cut, cancellationToken).ConfigureAwait(false);
-        await VerifySurvivorOutcomesAsync(app, profile, seed, cut, cancellationToken).ConfigureAwait(false);
+        await VerifySurvivorOutcomesAsync(app, seed, cut, cancellationToken).ConfigureAwait(false);
         return cut with { RequiredApplied = requiredApplied };
     }
 
@@ -47,7 +47,7 @@ internal static class DueFaultRf3Leadership
         { throw new InvalidOperationException(LeaderMissing); }
         await RequestCqrsRf3DiscoveryOracle.AssertOneReplacementAsync(cut.BeforeDiscovery, current, index)
             .ConfigureAwait(false);
-        await VerifySurvivorOutcomesAsync(app, profile, seed, cut, cancellationToken).ConfigureAwait(false);
+        await VerifySurvivorOutcomesAsync(app, seed, cut, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task VerifySurvivorProgressAsync(DistributedApplication app, NodeEpochRf3Profile profile,
@@ -60,15 +60,19 @@ internal static class DueFaultRf3Leadership
         var firstSdk = new KeyLoadClient(firstHttp, profile.AdminKey, IntegrationClientOptions.Execution());
         var secondSdk = new KeyLoadClient(secondHttp, profile.AdminKey, IntegrationClientOptions.Execution());
         var observed = await WaitForReplacementLeaderAsync(firstSdk, secondSdk, cut, deadline.Token).ConfigureAwait(false);
-        await using var first = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[0], cut.Survivors[0],
+        await using var firstAdmin = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[0], cut.Survivors[0],
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
-        await using var second = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[1], cut.Survivors[1],
+        await using var secondAdmin = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[1], cut.Survivors[1],
             profile.AdminKey, cancellationToken).ConfigureAwait(false);
-        await AssertSnapshotMatchesAsync(first, cut.Survivors[0], observed.First, deadline.Token).ConfigureAwait(false);
-        await AssertSnapshotMatchesAsync(second, cut.Survivors[1], observed.Second, deadline.Token).ConfigureAwait(false);
+        await AssertSnapshotMatchesAsync(firstAdmin, cut.Survivors[0], observed.First, deadline.Token).ConfigureAwait(false);
+        await AssertSnapshotMatchesAsync(secondAdmin, cut.Survivors[1], observed.Second, deadline.Token).ConfigureAwait(false);
         await AssertSurvivorDiscoveryAsync(app, profile, cut, cancellationToken).ConfigureAwait(false);
+        await using var firstData = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[0], cut.Survivors[0],
+            seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
+        await using var secondData = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[1], cut.Survivors[1],
+            seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
         await WaitUntilDueAsync(seed.DueAt, cancellationToken).ConfigureAwait(false);
-        await WaitForDueEffectsAsync(first.Sdk, second.Sdk, seed, cancellationToken).ConfigureAwait(false);
+        await WaitForDueEffectsAsync(firstData.Sdk, secondData.Sdk, seed, cancellationToken).ConfigureAwait(false);
         await Assert.That(observed.First.Leader).IsNotEqualTo(VoterOrigin(cut.LeaderNode));
     }
 
@@ -162,13 +166,13 @@ internal static class DueFaultRf3Leadership
     }
 
     private static async Task VerifySurvivorOutcomesAsync(Aspire.Hosting.DistributedApplication app,
-        NodeEpochRf3Profile profile, DueFaultRf3Seed seed, DueFaultRf3LeaderCut cut,
+        DueFaultRf3Seed seed, DueFaultRf3LeaderCut cut,
         CancellationToken cancellationToken)
     {
         await using var first = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[0], cut.Survivors[0],
-            profile.AdminKey, cancellationToken).ConfigureAwait(false);
+            seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
         await using var second = await NodeEpochRf3Callers.ConnectAsync(app, cut.Survivors[1], cut.Survivors[1],
-            profile.AdminKey, cancellationToken).ConfigureAwait(false);
+            seed.Creator.Secret, cancellationToken).ConfigureAwait(false);
         await DueFaultRf3Assertions.AssertOutcomesAsync(first, second, seed, cancellationToken).ConfigureAwait(false);
     }
 

@@ -34,8 +34,22 @@ sequenceDiagram
     Store-->>Caller: Same commit receipt or whole batch rollback
 ```
 
-Exact pass/fail, positive/negative/edge/error/type/null/migration/rollback and
+Exact pass/fail, positive/negative/edge/error/type/null/current-format rejection/rollback and
 test methodology are canonical in [SQL acceptance](QueryExecution.md)
 and [execution contract](QueryExecution.md). Rows require current persisted authority;
 schema constraints are not row-level grants. Compile and runtime checks run in
 GitHub only; coverage/endurance/power-loss and later JOIN/FK gates stay explicit.
+
+
+TASK-REL-004-INNER-JOIN-001..006 is accepted for the first bounded same-partition
+Text primary-key INNER equijoin under REQ-REL-004. [ADR-118](../ADR/ADR-118-bounded-relational-inner-join.md)
+freezes Q2/AST2 grammar, exact source identity/projection, authorization, single
+read-cut, cumulative scan/probe/byte/result/cancellation limits, exact paths and
+whole-operation native/RF3 tests before implementation. AC-REL-004-JOIN-001..006
+map there to parser/version execution, native ZoneTree results/reopen, persisted
+resource/row/field authority, boundary/error/healthy-follow-up flows and real
+SDK/official-MCP RF3. Existing typed-row and mixed-model requirements remain
+mandatory; arbitrary joins, FK/check/default/cascade, full SQL and client protocol
+remain open. Source and qualification for this operator are pending. UI N/A:
+existing SQL/SDK/MCP callers expose the operation; storage engine/format N/A:
+reuse canonical ZoneTree rows under the existing node-local RF3 owner.

@@ -152,3 +152,5 @@ flowchart LR
 | [ADR-114: verified backup artifact publication](ADR-114-verified-artifact-publication.md) | Accepted |
 | [ADR-115: TimeProvider ownership](ADR-115-time-provider.md) | Accepted |
 | [ADR-116: one current format before the first release](ADR-116-first-release-current-format.md) | Accepted |
+
+| [ADR-118: bounded typed-row INNER JOIN](ADR-118-bounded-relational-inner-join.md) | Accepted |

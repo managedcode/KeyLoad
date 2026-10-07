@@ -15,14 +15,26 @@ internal static class RequestCqrsRf3ImageProof
 
     internal static async Task<RequestCqrsRf3Images> ReadAsync(CancellationToken cancellationToken)
     {
-        var current = await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken).ConfigureAwait(false);
+        var root = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
+        var localIdentity = await LocalRf3ImageIdentity.ReadVerifiedAsync(root, cancellationToken).ConfigureAwait(false);
+        var current = localIdentity?.Reference
+            ?? await ClusterFixtureImageIdentity.ReadVerifiedReferenceAsync(cancellationToken).ConfigureAwait(false);
         return new(current);
     }
 
-    internal static async Task VerifyModelAsync(DistributedApplication app, IReadOnlyDictionary<string, string> expected,
-        CancellationToken cancellationToken)
+    internal static async Task<LocalRf3ImageIdentity.Identity?> VerifyModelAsync(DistributedApplication app,
+        IReadOnlyDictionary<string, string> expected, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(app);
+        var localIdentity = await LocalRf3ImageIdentity.VerifyBeforeStartAsync(app,
+            ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, cancellationToken).ConfigureAwait(false);
+        if (localIdentity is not null)
+        {
+            var expectedReference = ValidateExpectedReferences(expected);
+            if (!string.Equals(localIdentity.Reference, expectedReference, StringComparison.Ordinal))
+            { throw new InvalidOperationException(ResourceMismatch); }
+            return localIdentity;
+        }
         await Assert.That(expected.Count).IsEqualTo(RequestCqrsRf3Protocol.NodeCount);
         var actual = app.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ContainerResource>().Where(resource => IsNode(resource.Name)).ToArray();
@@ -33,6 +45,24 @@ internal static class RequestCqrsRf3ImageProof
             { throw new InvalidOperationException(ResourceMismatch); }
             await VerifyNodeAsync(node, reference, cancellationToken).ConfigureAwait(false);
         }
+        return null;
+    }
+
+    internal static Task VerifyStartedContainersAsync(LocalRf3ImageIdentity.Identity? localIdentity,
+        IReadOnlyDictionary<string, string> containerNames, CancellationToken cancellationToken)
+        => localIdentity is null ? Task.CompletedTask
+            : LocalRf3ImageIdentity.VerifyStartedContainersAsync(localIdentity, containerNames, cancellationToken);
+
+    private static string ValidateExpectedReferences(IReadOnlyDictionary<string, string> expected)
+    {
+        ArgumentNullException.ThrowIfNull(expected);
+        if (expected.Count != RequestCqrsRf3Protocol.NodeCount
+            || !expected.ContainsKey(RequestCqrsRf3Protocol.Node1)
+            || !expected.ContainsKey(RequestCqrsRf3Protocol.Node2)
+            || !expected.ContainsKey(RequestCqrsRf3Protocol.Node3))
+        { throw new InvalidOperationException(ResourceMismatch); }
+        var references = expected.Values.Distinct(StringComparer.Ordinal).ToArray();
+        return references.Length == 1 ? references[0] : throw new InvalidOperationException(ResourceMismatch);
     }
 
     private static async Task VerifyNodeAsync(ContainerResource resource, string expected,

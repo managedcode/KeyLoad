@@ -189,3 +189,16 @@ These candidate references do not certify an AC or a native run. The R111 input 
 | SQL comment/parser/budget tests | REQ/AC-SQLC-002..004, REQ-AISQL-003 / AC-AISQL-007, and REQ-QUERY-004 / AC-QUERY-004 where applicable | Parser shape and byte-boundary checks are traceable but not sufficient contributor flows by themselves; query execution/result assertions are required. |
 
 `QueryConstructionTests.AcCq012NullDatabaseIsRejectedAtConstruction` remains unmapped: it is a constructor guard with no database operation and no exact owning AC. Existing comments on `NativeQueryCursorTests` (`AC-IS-001`) and parser cases (`AC-ROC-006`) do not match their current owning criteria and should not be copied into the crosswalk.
+
+
+TASK-REL-004-INNER-JOIN-001..006 extends REQ-QUERY-007 only with the exact bounded
+Q2/AST2 Text primary-key INNER equijoin in [ADR-118](../ADR/ADR-118-bounded-relational-inner-join.md).
+AC-QUERY-007-JOIN-001/002 and AC-REL-004-JOIN-001..006 map to explicit language/AST
+admission, declared schemas/aliases, both persisted resource and row grants,
+join/order field-use, safe projection, one committed read-cut, deterministic
+ordinal order and cumulative existing work/byte/result/deadline limits. The
+linked ADR owns exact public optional metadata, version inventories, source
+roles, error/reopen/concurrency and real Aspire RF3 SDK/official-MCP flows. Q1 and
+AST1 operations stay current. Arbitrary/distributed joins, FK semantics, full SQL
+and native SQL client protocol remain required and open. Source/runtime evidence
+for this first operator is pending; no plan task closes from its contract alone.
