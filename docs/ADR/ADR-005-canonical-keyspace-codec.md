@@ -1,6 +1,6 @@
 # ADR-005: Canonical namespaces and ordered key codec
 
-Status: Accepted; golden-vector and current-format qualification pending. Related current source: `src/KeyLoad.Abstractions/Storage/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/architecture-v0.3.uk.md).
+Status: Accepted; KL-007 v1 codec and captured-envelope criteria implemented and Linux-qualified. Resource-family and full StorageRecovery qualification remain open. Related current source: `src/KeyLoad.Abstractions/Storage/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/architecture-v0.3.uk.md).
 
 ## Context and decision
 
@@ -142,3 +142,15 @@ decimal representability guard even if the preceding canonical-domain checks
 make it unreachable; coverage does not authorize altering the implementation or
 adding artificial private calls. Production storage/format/trust/topology and
 dependency changes are N/A. Rollback removes only the added regression flow.
+
+## KL-007 acceptance evidence, 2026-10-07
+
+[Linux run37554329420, verify job112576973966](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576973966)
+at259a3fa5 passed19/19 mapped cases in each normal/scalar lane, the full2,765/2,765
+unit runs and235/235 process recovery. Native source/test-image identity
+verification passed after those suites. The33-file owned closure remains exact
+in the current checkout and is bound to original source/PDB/project-input rows.
+[StorageRecovery](../Features/StorageRecovery.md#kl-007-v1-key-and-captured-envelope-completion)
+and [status.json](../implementation/status.json) retain the criterion mapping,
+original artifact identities and hashes. KL-007 is complete; this receipt does
+not qualify full RF3, endurance, power-loss or measured acceleration.

@@ -228,16 +228,25 @@ Ownership movement and current same-view session tokens retain the contract in [
 TASK-MEMBERSHIP-IMAGE-ORACLE implements the existing AC-MEMBERSHIP-006 pre-start
 identity check using pinned Aspire13.6.0 semantics. The native
 [`WithImageSHA256` implementation](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting/ContainerResourceBuilderExtensions.cs)
-stores its supplied digest unchanged and retains tag metadata; native
+stores its supplied digest unchanged; the native SHA256 setter clears Tag, as
+defined by [ContainerImageAnnotation](https://source.dot.net/Aspire.Hosting/ApplicationModel/ContainerImageAnnotation.cs.html). Native
 [`TryGetContainerImageName`](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting/ApplicationModel/ResourceExtensions.cs)
 adds the `@sha256:` separator for the runtime reference. The accepted KeyLoad
 builder already supplies the unprefixed digest correctly. Repair only the
-existing test oracle's contradictory null-tag/prefixed-digest expectations.
+existing test oracle: the unprefixed digest remains exact, and a pinned image
+requires null Tag. The prior retained-tag correction was wrong and original922
+RF3 rejected the valid model before startup.
 Root freezes this contract before the worker changes
-`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/TwoRf3MembershipImageAssertions.cs`;
+`tests/KeyLoad.IntegrationTests/Features/ClusterRouting/Assertions/TwoRf3MembershipImageAssertions.cs`
+and new `Cases/TwoRf3MembershipImageModelTests.cs` in that same slice;
 root reviews and joins strict build/format and the unchanged actual six-container
 startup, signed membership, closed-client and teardown flow. Require exact
-accepted repository/tag/digest metadata and exact resolved reference for all
-six nodes before Start. No new helper, image/provider replacement, deployment
+accepted repository, null Tag, digest and exact resolved reference for all
+six nodes before Start. unpack_atomicity Luna prepares a guarded private packet.
+The actual KeyLoad AppHost BuildAsync-only regression rejects a test-owned digest
+change without mutating any annotation, then accepts the restored healthy model.
+Controlled model input is not an authenticated registry receipt or runtime image;
+the existing genuine six-container Linux test remains required. No image/provider replacement, deployment
 change, bound increase or omitted assertion is required. Rollback changes only
-the test expectation; actual Linux RF3 evidence remains required and unqualified.
+the test expectation and regression; actual Linux RF3 evidence remains required
+and unqualified. Root owns strict integration checks and original evidence.

@@ -17,10 +17,10 @@
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "R130 full Release and R133 native formatter passed with 4,113 compile inputs and zero drift; strengthened read-cut lifetime class5/5 normal/scalar; original922 Linux full normal/scalar2764/2764 and recovery235/235 plus same-job native identity passed; RF3 terminal cancelled, original failure artifacts pending review; current complete Linux gates remain open",
+    "verificationStage": "R144 full Release passed with4,116 compile inputs and zero drift/warnings/errors; R147 full native formatter passed with zero drift; R145/R146 immutable COPY-context filesystem operation1/1 normal/scalar and R148 native Aspire immutable-image model1/1 passed with4,117 source inputs and zero source/image drift. Original259 Linux normal/scalar2765/2765 and recovery235/235 plus same-job native identity passed; its RF3 job failed. Actual owned local Docker image/RF3 and complete current Linux/functional product coverage remain open.",
     "remaining": [
       "Complete current-source Linux native unit/scalar/recovery with same-job compiled image identity and RF3 public SDK/MCP acceptance",
-      "Resolve actual RF3 failures; local focused diagnostics did not deploy because the intended server image setting was absent",
+      "Resolve original RF3 failures through current-source test-owned Aspire public SDK/MCP operations; model-only and filesystem proofs do not qualify Docker/RF3",
       "Complete reviewed functional operation inventory and actual source-bound coverage; load/comparison/shape tests remain excluded"
     ],
     "latestOriginalLinux": {
@@ -40,36 +40,91 @@
       "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722"
     },
     "currentBuild": {
-      "compileInputs": 4113,
+      "compileInputs": 4116,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
-      "logSha256": "caeb8fb61f61da1c018ad71606a7fcc59c73ee520a7904a3d184c343725b5cbf",
+      "logSha256": "0fa8520118c18c4cf37587388c6c27d60b4fac85aa222a0aeeb15b647cbd0ad4",
       "passed": true,
-      "qualification": "native local full Release build; Linux task acceptance remains open"
+      "qualification": "native local full Release build; complete current-source Linux and RF3 acceptance remain open"
     },
     "currentFormatter": {
-      "compileInputs": 4113,
+      "compileInputs": 4116,
       "inputDrift": 0,
       "nativeExitCode": 0,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "latestVerifiedNativeLinux": {
-      "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
-      "runId": 37550611380,
-      "jobId": 112564950216,
-      "normalPassed": 2764,
-      "normalTotal": 2764,
-      "scalarPassed": 2764,
-      "scalarTotal": 2764,
+      "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+      "runId": 37554329420,
+      "jobId": 112576973966,
+      "normalPassed": 2765,
+      "normalTotal": 2765,
+      "scalarPassed": 2765,
+      "scalarTotal": 2765,
       "recoveryPassed": 235,
       "recoveryTotal": 235,
       "failed": 0,
       "skipped": 0,
       "sameJobSourceImageIdentityPassed": true,
-      "rf3": "cancelled; original terminal artifacts pending review, no RF3 pass inferred",
-      "qualification": "original completed Linux verify job; current added codec/owner tests need their own source-bound original outcomes",
-      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
+      "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
+      "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
+    },
+    "immutableLocalImageContextDevelopment": {
+      "task": "TASK-TEST-LOCAL-CONTEXT-REALIZATION",
+      "normal": {
+        "passed": 1,
+        "total": 1,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4117,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "af96e1328a74e00b84b70ba5ee199df5e7c2f493935e1b9c369f14f7aca901eb",
+        "trxSha256": "3089964389011408d5c103696afad7824e533dbfee689568b3646d1f1c035bef"
+      },
+      "scalar": {
+        "passed": 1,
+        "total": 1,
+        "failed": 0,
+        "skipped": 0,
+        "sourceInputs": 4117,
+        "assemblyInputs": 541,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "nativeExitCode": 0,
+        "logSha256": "1f1d0bc89f24f531caa543d8530056515fb9d91773075cc2c4d4dd39c09659f2",
+        "trxSha256": "0873660dfd39ae31ac2a894894a71c75173e7a26f909332657345c1782b84cd9"
+      },
+      "verifiedOperation": "real Node filesystem symlink and20,001-entry rejection; exact standalone COPY ancestors, bytes/modes/digest; original source edit leaves immutable snapshot unchanged; original process/readers joined and owned-root cleanup followed by healthy recapture",
+      "actualDockerImagePassed": false,
+      "actualRf3Passed": false,
+      "linuxQualified": false,
+      "qualification": "native local whole filesystem operation; actual Docker producer, test-owned Aspire RF3 and Linux source delivery still required"
+    },
+    "immutableMembershipModelDevelopment": {
+      "task": "TASK-MEMBERSHIP-IMAGE-ORACLE",
+      "feature": "docs/Features/ClusterRouting/PartitionTransfer.md",
+      "decision": "docs/ADR/ADR-106-partition-owner-movement.md",
+      "passed": 1,
+      "total": 1,
+      "failed": 0,
+      "skipped": 0,
+      "sourceInputs": 4117,
+      "assemblyInputs": 394,
+      "sourceDrift": 0,
+      "assemblyDrift": 0,
+      "nativeExitCode": 0,
+      "logSha256": "d201bae7bf2e7072d24a18f1bb6af56178f0f190672b14f2fc912b8f75e562bc",
+      "trxSha256": "0fd4d5f9e5a51817a8dc25d59a8a36924fabcfc87fa49d5c866c67800bcc234a",
+      "verifiedOperation": "actual six-resource KeyLoad AppHost image-model verifier rejects changed digest without mutation and accepts restored complete native annotation tuples; pinned Aspire SHA256 clears Tag",
+      "actualSixSiloMembershipPassed": false,
+      "linuxQualified": false,
+      "qualification": "native local controlled model validation; no registry provenance or database RF3 qualification inferred",
+      "finalBuildImageVerification": "R148 native model1/1 after R144 full build; all394 exact assembly paths unchanged throughout operation"
     }
   },
   "TIME-PROVIDER-001": {
@@ -882,29 +937,21 @@
   },
   "KL-007": {
     "title": "KeyCodec і storage envelopes",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Abstractions/Storage/KeyCodec.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecTests.cs",
       "src/KeyLoad.Abstractions/Features/StorageRecovery/Serialization/KeyCodecReadPrimitives.cs",
       "tests/KeyLoad.UnitTests/Features/StorageRecovery",
-      "Historical intermediate report removed from repository; no current qualification inferred"
+      "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+      "docs/Features/StorageRecovery.md",
+      "docs/ADR/ADR-005-canonical-keyspace-codec.md"
     ],
     "qualification": {
-      "sourceStage": "root_reviewed_valid_v1_preserving_validation_and_invariant_decimal_read",
-      "runtimeQualified": false,
-      "localDevelopment": {
-        "newKeyCodecCases": 14,
-        "originalKeyCodecCases": 4,
-        "normalUnit": 2889,
-        "scalarUnit": 2889,
-        "recovery": 228,
-        "unchangedSourceAndRuntime": true
-      },
-      "receipt": "Historical intermediate report removed from repository; no current qualification inferred",
-      "remaining": [
-        "exact_owned_source_Linux_normal_and_scalar19_case_parity_same_job_native_image_identity_and_ADR005_recovery_open_existing_store_evidence"
-      ],
+      "sourceStage": "all19_mapped_v1_codec_and_native_envelope_flows_Linux_normal_scalar_passed_with_same_job_native_source_image_identity_and_full235_recovery",
+      "runtimeQualified": true,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+      "remaining": [],
       "earlierDeliveredSource": {
         "sha": "e97bf30af7ecff5aff467385832ed89a70fe6ee7",
         "runId": "37168813668",
@@ -915,17 +962,6 @@
         "overallConclusion": "failure",
         "newNodeStageQualified": false,
         "originalReportsReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37168813668"
-      },
-      "currentScalarDevelopment": {
-        "passed": 18,
-        "total": 18,
-        "skipped": 0,
-        "trxSha256": "dcc3820613e7ed8a27e50a070948f6910dc1603c1abf65568fa73637f5fdc684",
-        "sourceInputs": 4152,
-        "assemblyInputs": 190,
-        "sourceDrift": 0,
-        "assemblyDrift": 0,
-        "qualification": "local_Aspire_scalar_development_only_Linux_task_acceptance_open"
       },
       "taskAcceptance": {
         "requirements": [
@@ -950,44 +986,90 @@
           "power_loss",
           "measured_acceleration"
         ],
-        "qualified": false
+        "qualified": true,
+        "completedAt": "2026-10-07",
+        "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+        "runId": 37554329420,
+        "verifyJobId": 112576973966,
+        "originalCaseIdentityMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+        "rootIndependentValidationSha256": "3ea0001e6e533c45c8877a5446a2dbb5718e47d1d1547cdd73fffeeace1edc34"
       },
       "latestOwnedSourceLinux": {
         "runIds": [
-          "37550611380"
+          "37554329420"
         ],
-        "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
-        "verifyJobId": 112564950216,
-        "mappedCaseCount": 18,
-        "normalPassed": 18,
-        "scalarPassed": 18,
+        "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+        "verifyJobId": 112576973966,
+        "verifyJobConclusion": "success",
+        "mappedCaseCount": 19,
+        "normalPassed": 19,
+        "scalarPassed": 19,
+        "mappedFailed": 0,
         "mappedSkipped": 0,
+        "sameOriginalCaseIdentities": true,
         "ownedSourceClosureFiles": 33,
-        "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
-        "currentOwnedSourceDrift": 1,
-        "currentOwnedSourceChangedPaths": [
-          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
-        ],
-        "wholeNormalPassed": 2764,
-        "wholeNormalTotal": 2764,
-        "wholeScalarPassed": 2764,
-        "wholeScalarTotal": 2764,
+        "ownedSourceClosureRefreshSha256": "3ddbe2d8d99db51af64cb0f208667f2784697f22e471a715a55b762cd5088746",
+        "currentOwnedSourceDrift": 0,
+        "currentOwnedSourceChangedPaths": [],
+        "wholeNormalPassed": 2765,
+        "wholeNormalTotal": 2765,
+        "wholeScalarPassed": 2765,
+        "wholeScalarTotal": 2765,
         "wholeRecoveryPassed": 235,
         "wholeRecoveryTotal": 235,
-        "originalTestArtifactId": 11453513011,
-        "originalTestArtifactSha256": "f5e4987a00e88757ee0a070ce8e4dbe9444367823ad7e719fb2df4337e879950",
-        "normalTrxSha256": "fdd8df079e08d9447e4a151b6ee7049a00a54c74bdf3b9023da9678f3f22e94d",
-        "scalarTrxSha256": "aa29ccea657a9184327a7b1e91cf2e79aa1d724a432e5d274d76ca5bba9787d2",
-        "recoveryTrxSha256": "2c77109dc98aa6330e3b298634d241658a8f4dd5ce65fcb7eb6eff6fcfd9fa61",
+        "originalTestArtifactId": 11455960477,
+        "originalTestArtifactSha256": "b8abeed2ae2cd774b9468dff945685a538f7617fb2376d4dfef1a39b4bb42d37",
+        "originalQualityArtifactId": 11456080134,
+        "originalQualityArtifactSha256": "0ab6d2e0cfc9d13a76cc619d4f10e50832dbd8ed030a2abfba9ef8356eb6dd16",
+        "normalTrxSha256": "b0a864381dbcd993cee55a6c3b837054ea55131f8b8c8f39871d3e4f82abf76c",
+        "scalarTrxSha256": "8a1218ca49eda4c58cf183b367b45634b32566cd70319c20369c54ddc473de47",
+        "recoveryTrxSha256": "d85af3efdf955893db135ac0c676d3fbde4a15c51f198878c127e7f375a8896e",
+        "normalTUnitJsonSha256": "0d3440e48eca1e2a267438b1d062736da06dd88ec0480610bc0e5e4e00681d45",
+        "scalarTUnitJsonSha256": "0ffa2a477654c1f0457bfddfebf266e98f16d1ef45af7d5e57113ab24599e4d7",
+        "recoveryTUnitJsonSha256": "6c4d8c3c02ea0145d52adbd0978d1f3bcac0a4402ee8a5093955073317d64015",
         "independentCompiledImageReceiptAvailable": true,
         "sameJobSourceAndImageVerifyPassed": true,
-        "productionSourceManifestSha256": "a6cca1a13764229e37eaea1e29497bd86de6ca871cab4244c5945ad7dd1cc8a6",
-        "unitImageManifestSha256": "d640fd5aa2be6bc5ac570cb04abb21e9f9fdd2de9d226851510990904c9182a3",
-        "recoveryImageManifestSha256": "8681a2d02e3d66429151f7f51102701ce481cd41e2975bad3069c831d36a3993",
+        "productionSourceManifestSha256": "2a9ae6ab96e8f2b6b9bbc2d321c8c319ef426a987527f365365cdfd096df4de9",
+        "unitImageManifestSha256": "3f1b507be9e01c1f62d9fe90a0e827db52778e36de7c57029cd313484ecca154",
+        "recoveryImageManifestSha256": "879fc0442a64730ce478f499e5f1a812929197f55511d63702c0c32bfdebec8b",
+        "nativeTestImageIdentities": {
+          "unit": {
+            "project": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
+            "sourceCount": 1027,
+            "buildInputCount": 6,
+            "dll": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.dll",
+            "pdb": "tests/KeyLoad.UnitTests/bin/Release/net10.0/KeyLoad.UnitTests.pdb",
+            "dllSha256": "cc0fcbe39e5188a8fe801b0b0a9c43298c123edf59fa69fb0d9bbbc3dfb0f81e",
+            "pdbSha256": "b118074b8c48b5f65b456b45650b542e532b1a2d4b30725f5ab9bb946269b95b",
+            "mvid": "795452f8-a8bd-4949-ae3d-09a704d76341",
+            "pdbGuid": "9d9b5f93-c589-4d63-8c2e-fa14389ecc4b",
+            "pdbStamp": 3834695770,
+            "sourceFilesWithoutPdbDocuments": [],
+            "compiledSourceBindingComplete": true,
+            "documentCount": 1729,
+            "qualificationField": "static native identity inspection only; no test, coverage or build qualification"
+          },
+          "recovery": {
+            "project": "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
+            "sourceCount": 83,
+            "buildInputCount": 6,
+            "dll": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.dll",
+            "pdb": "tests/KeyLoad.RecoveryTests/bin/Release/net10.0/KeyLoad.RecoveryTests.pdb",
+            "dllSha256": "5fe955fc3a22c5576b1d7a8516ab3a84526b05543b8788899e194316dc68ad49",
+            "pdbSha256": "9dd82192870fa1e5aa98cf8ccdef154452ca9053362863bb2e8b8ce01116a5ad",
+            "mvid": "b6c6612b-f475-4819-b3b4-cb4ce65961ec",
+            "pdbGuid": "0e5a03f9-bad4-4f43-841b-8f6b6d941a84",
+            "pdbStamp": 2471868563,
+            "sourceFilesWithoutPdbDocuments": [],
+            "compiledSourceBindingComplete": true,
+            "documentCount": 132,
+            "qualificationField": "static native identity inspection only; no test, coverage or build qualification"
+          }
+        },
         "ownedSourceRowsBound": 33,
         "ownedSourceRowsMismatched": 0,
-        "qualification": "original_Linux_all18_mapped_cases_full_normal_scalar_recovery_and_same_job_source_image_identity_pass; current19_case_source_requires_its_original_Linux_result",
-        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
+        "qualification": "all_REQ_AC_KEYCODEC001_through004_task_criteria_passed_with_original_Linux_normal_scalar_full_recovery_same_job_source_image_identity; separate_product_RF3_endurance_power_loss_and_measured_acceleration_open",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
       },
       "previousOwnedSourceLinux": {
         "runIds": [
@@ -1041,8 +1123,9 @@
         "branchCoverage": "unmeasured; original native report contains no branch-outcome rows",
         "remainingLine": "KeyCodecDecimal.cs:72 retained defensive parse guard; preceding domain checks appear to make it unreachable; source reasoning is not runtime coverage",
         "analysisSha256": "291276377369bd23154af7f7f7f516873496c5bf708cbb0971b5600973eed9e0",
-        "linuxQualified": false,
-        "fullProductCoverageQualified": false
+        "linuxQualified": true,
+        "fullProductCoverageQualified": false,
+        "linuxReceipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
       },
       "priorOwnedSourceLinuxAt876c": {
         "runIds": [
@@ -1065,6 +1148,43 @@
         "currentOwnedSourceChangedPaths": [
           "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
         ]
+      },
+      "priorOwnedSourceLinuxAt922": {
+        "runIds": [
+          "37550611380"
+        ],
+        "sourceCommit": "922a9f39b35c8725e9c03e113e08b89a1888d0ed",
+        "verifyJobId": 112564950216,
+        "mappedCaseCount": 18,
+        "normalPassed": 18,
+        "scalarPassed": 18,
+        "mappedSkipped": 0,
+        "ownedSourceClosureFiles": 33,
+        "ownedSourceClosureRefreshSha256": "8dc6b330c6f4297bd1261cad1141a36ea2ac44327779f4d38109969269197e17",
+        "currentOwnedSourceDrift": 1,
+        "currentOwnedSourceChangedPaths": [
+          "tests/KeyLoad.UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs"
+        ],
+        "wholeNormalPassed": 2764,
+        "wholeNormalTotal": 2764,
+        "wholeScalarPassed": 2764,
+        "wholeScalarTotal": 2764,
+        "wholeRecoveryPassed": 235,
+        "wholeRecoveryTotal": 235,
+        "originalTestArtifactId": 11453513011,
+        "originalTestArtifactSha256": "f5e4987a00e88757ee0a070ce8e4dbe9444367823ad7e719fb2df4337e879950",
+        "normalTrxSha256": "fdd8df079e08d9447e4a151b6ee7049a00a54c74bdf3b9023da9678f3f22e94d",
+        "scalarTrxSha256": "aa29ccea657a9184327a7b1e91cf2e79aa1d724a432e5d274d76ca5bba9787d2",
+        "recoveryTrxSha256": "2c77109dc98aa6330e3b298634d241658a8f4dd5ce65fcb7eb6eff6fcfd9fa61",
+        "independentCompiledImageReceiptAvailable": true,
+        "sameJobSourceAndImageVerifyPassed": true,
+        "productionSourceManifestSha256": "a6cca1a13764229e37eaea1e29497bd86de6ca871cab4244c5945ad7dd1cc8a6",
+        "unitImageManifestSha256": "d640fd5aa2be6bc5ac570cb04abb21e9f9fdd2de9d226851510990904c9182a3",
+        "recoveryImageManifestSha256": "8681a2d02e3d66429151f7f51102701ce481cd41e2975bad3069c831d36a3993",
+        "ownedSourceRowsBound": 33,
+        "ownedSourceRowsMismatched": 0,
+        "qualification": "original_Linux_all18_mapped_cases_full_normal_scalar_recovery_and_same_job_source_image_identity_pass; current19_case_source_requires_its_original_Linux_result",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37550611380"
       }
     }
   },
@@ -4157,18 +4277,21 @@
     "currentCheckpoint": {
       "original104Acceptance": {
         "total": 104,
-        "fullyClosed": 0,
-        "closure": "only full mapped criteria and required evidence close an acceptance"
+        "fullyClosed": 1,
+        "closure": "only full mapped criteria and required evidence close an acceptance",
+        "inProgress": 103,
+        "pending": 0
       },
       "codeDelivery": {
-        "currentBuild": "R116 full native Release passed4,111 inputs with zero source drift/warnings/errors; original log SHA256a30fc7d5c83850d2e4eac098033e92dcf2dffc73a511ab2fd993e9384cad09ab",
-        "formatter": "R116 full native dotnet format --verify-no-changes passed4,111 inputs with zero source drift, original native exit0",
-        "verificationScope": "R115 delivered876c source: local normal2763/2763 and earlier process recovery235/235 passed; original Linux876c normal/scalar2763/2763 and recovery235/235 passed. R116 admission/image repair focused normal/scalar6/6 passed; fresh complete R116 normal/scalar/RF3 and functional coverage remain open.",
+        "currentBuild": "R144 full native Release passed4,116 inputs with zero source drift/warnings/errors; original log SHA2560fa8520118c18c4cf37587388c6c27d60b4fac85aa222a0aeeb15b647cbd0ad4",
+        "formatter": "R147 full native dotnet format --verify-no-changes passed4,116 inputs with zero source drift, original native exit0",
+        "verificationScope": "R144 full Release passed with4,116 compile inputs and zero drift/warnings/errors; R147 full native formatter passed with zero drift; R145/R146 immutable COPY-context filesystem operation1/1 normal/scalar and R148 native Aspire immutable-image model1/1 passed with4,117 source inputs and zero source/image drift. Original259 Linux normal/scalar2765/2765 and recovery235/235 plus same-job native identity passed; its RF3 job failed. Actual owned local Docker image/RF3 and complete current Linux/functional product coverage remain open.",
         "governance": "Current static governance passed: preserved root policy prefix,27 projects,4 modules,required local policies and unchanged empty skill inventory",
         "qualityReview": {
           "sourceFindings": [
-            "Confirmed RF3 bootstrap wrongly used exhausted data admission; one enum classification fix and whole reservation/rejection/release/follow-up regression.",
-            "Pinned Aspire13.6 container annotation retains tag and bare digest; exact native resolved-image assertion corrected without changing six-container topology."
+            "Bounded immutable Docker COPY snapshot replaces mutable-checkout build context; original producer/readers join before exclusive raw tail retention and cleanup.",
+            "Pinned Aspire13.6 SHA256 setter clears Tag; exact native resolved-image assertion and six-resource changed-digest rejection/restoration operation verified.",
+            "KL-007 all19 mapped operations pass in original259 Linux normal/scalar/full235 recovery with same-job compiled image identity and zero33-file owned-source drift."
           ],
           "sdkAnalyzersAndOwnedComplexity": "full Release build0warnings0errors; existing400file/200type/64method/depth3 limits enforced",
           "analyzerConfig": "unchanged central .editorconfig, warning severity and consumers; no suppression or analyzer package changes",
@@ -4233,40 +4356,21 @@
           "qualification": "local_native_TUnit_development; preceding_delivery_before_R116_Core_admission_change"
         },
         "latestOriginalLinuxVerify": {
-          "sourceCommit": "876c5237d7aaefb0a0e42f1efd7bdc26efd14803",
-          "runId": 37546085722,
-          "attempt": 1,
-          "verifyJobId": 112550358232,
-          "runUrl": "https://github.com/managedcode/KeyLoad/actions/runs/37546085722",
-          "verifyJobConclusion": "success",
-          "originalArtifactId": 11452371971,
-          "originalArtifactSha256": "4254c74cd8dccffdc6ddd0f1e68a1ac77c07eaf89d360c059b24823cb2cf24be",
-          "originalTrx": {
-            "unit.trx": {
-              "sha256": "1c86d88dcd4fc2600e7bdbb7d7d3bab1459c774aa18bdde63bffccd78bd80618",
-              "total": 2763,
-              "passed": 2763,
-              "failed": 0,
-              "skipped": 0
-            },
-            "unit-scalar.trx": {
-              "sha256": "7d12e9021c2ac0cd8c84aa69a1ba6da75fc8e9e8ad637a6f3829fefdd483c47d",
-              "total": 2763,
-              "passed": 2763,
-              "failed": 0,
-              "skipped": 0
-            },
-            "recovery.trx": {
-              "sha256": "7ca0352531a2d81553601cb6d7a6464f0900b7b8bbbf212736932f70e333cda9",
-              "total": 235,
-              "passed": 235,
-              "failed": 0,
-              "skipped": 0
-            }
-          },
-          "rf3Conclusion": "in_progress_at_observation",
-          "sameVerifyJobCompiledImageReceiptAvailable": false,
-          "qualification": "original_full_Linux_verify_lanes_pass; no_whole_workflow_RF3_coverage_or_new_R116_qualification_inferred"
+          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+          "runId": 37554329420,
+          "jobId": 112576973966,
+          "normalPassed": 2765,
+          "normalTotal": 2765,
+          "scalarPassed": 2765,
+          "scalarTotal": 2765,
+          "recoveryPassed": 235,
+          "recoveryTotal": 235,
+          "failed": 0,
+          "skipped": 0,
+          "sameJobSourceImageIdentityPassed": true,
+          "rf3": "failed; actual original failure cohort being repaired, no RF3 pass inferred",
+          "qualification": "original completed Linux verify job; newly added image-context and membership-model cases require their own current-source delivered Linux outcomes",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420"
         },
         "admissionBootstrapDevelopment": {
           "stage": "R116",

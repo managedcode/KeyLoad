@@ -63,8 +63,20 @@ across the three codec files. The remaining line is the retained defensive decim
 parse guard; the preceding canonical coefficient/exponent/scale checks imply an
 exact nonzero decimal with the required sign and scale. This is source reasoning,
 not an executed failure path. The two constant-only files remain executable N/A
-and branch coverage remains unmeasured. Current33-file/19-case Linux normal,
-scalar, compiled identity and full recovery evidence is still required.
+and branch coverage remains unmeasured.
+
+KL-007 is complete against AC-KEYCODEC-001..004. The
+[original Linux run37554329420](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576973966)
+at source259a3fa5 passed all19 exact mapped identities in both normal and scalar,
+the full2,765-case unit census in each mode and235/235 process-recovery cases,
+without failures or skips. Same-job source/test-image verification passed after
+all three suites. All33 owned paths match the current checkout, the exact Git
+source and original compiled source/PDB or project-input rows. Original artifact
+IDs, ZIP/TRX/TUnit hashes and DLL/PDB/MVID identities are retained in
+[status.json](../implementation/status.json). Independent root verification
+rehashes the original ZIPs, binds every source row and checks all19 original
+identities. This closes this task's codec/envelope criteria; the separate
+StorageRecovery RF3, endurance, power-loss and performance gates remain open.
 
 | Requirement | Measurable acceptance and owned TUnit mapping |
 |---|---|

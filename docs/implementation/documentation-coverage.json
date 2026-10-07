@@ -4528,7 +4528,20 @@
         "docs/ADR/ADR-011-current-native-format.md",
         "docs/ADR/ADR-035-memory-performance.md",
         "docs/ADR/ADR-036-orleans-foundation.md"
-      ]
+      ],
+      "taskAcceptanceEvidence": {
+        "status": "complete",
+        "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+        "runId": 37554329420,
+        "verifyJobId": 112576973966,
+        "normalMappedCases": 19,
+        "scalarMappedCases": 19,
+        "wholeRecoveryPassed": 235,
+        "ownedSourceRowsBound": 33,
+        "originalCaseMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+        "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+        "separateProductGates": "RF3/endurance/power-loss/performance remain open; this record does not qualify those gates"
+      }
     },
     {
       "id": "KL-008",
@@ -9378,8 +9391,21 @@
           "actual_Aspire_full_normal_scalar_and_process_recovery",
           "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
         ],
-        "state": "accepted_root_frozen_20261004_before_worker_write_release",
-        "joinCondition": "valid_golden_and_frozen_identity_bytes_unchanged_no_alias_format_or_authority_migration"
+        "state": "mapped_task_acceptance_complete_20261007_original_Linux19_normal_scalar_and_full235_recovery_with_native_identity; separate_product_gates_open",
+        "joinCondition": "valid_golden_and_frozen_identity_bytes_unchanged_no_alias_format_or_authority_migration",
+        "taskAcceptanceEvidence": {
+          "status": "complete",
+          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+          "runId": 37554329420,
+          "verifyJobId": 112576973966,
+          "normalMappedCases": 19,
+          "scalarMappedCases": 19,
+          "wholeRecoveryPassed": 235,
+          "ownedSourceRowsBound": 33,
+          "originalCaseMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+          "separateProductGates": "RF3/endurance/power-loss/performance remain open; this record does not qualify those gates"
+        }
       },
       {
         "id": "TASK-KEYCODEC-VALIDATION",
@@ -9421,9 +9447,22 @@
           "actual_Aspire_full_normal_scalar_and_process_recovery",
           "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
         ],
-        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "state": "mapped_task_acceptance_complete_20261007_original_Linux19_normal_scalar_and_full235_recovery_with_native_identity; separate_product_gates_open",
         "joinCondition": "all_valid_v1_keys_roundtrip_and_no_new_format_copy_suppression_or_exception_payload_leak",
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "taskAcceptanceEvidence": {
+          "status": "complete",
+          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+          "runId": 37554329420,
+          "verifyJobId": 112576973966,
+          "normalMappedCases": 19,
+          "scalarMappedCases": 19,
+          "wholeRecoveryPassed": 235,
+          "ownedSourceRowsBound": 33,
+          "originalCaseMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+          "separateProductGates": "RF3/endurance/power-loss/performance remain open; this record does not qualify those gates"
+        }
       },
       {
         "id": "TASK-KEYCODEC-ORACLES",
@@ -9464,9 +9503,22 @@
           "actual_Aspire_full_normal_scalar_and_process_recovery",
           "exact_source_Linux_Docker_Aspire_RF3_original_artifacts"
         ],
-        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "state": "mapped_task_acceptance_complete_20261007_original_Linux19_normal_scalar_and_full235_recovery_with_native_identity; separate_product_gates_open",
         "joinCondition": "existing_goldens_unchanged_independent_oracles_real_store_no_mock_skip_or_deep_CLR_immutability_claim",
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "taskAcceptanceEvidence": {
+          "status": "complete",
+          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+          "runId": 37554329420,
+          "verifyJobId": 112576973966,
+          "normalMappedCases": 19,
+          "scalarMappedCases": 19,
+          "wholeRecoveryPassed": 235,
+          "ownedSourceRowsBound": 33,
+          "originalCaseMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+          "separateProductGates": "RF3/endurance/power-loss/performance remain open; this record does not qualify those gates"
+        }
       },
       {
         "id": "TASK-DSTORE-MUTATION-MATRIX",
@@ -9678,7 +9730,7 @@
           "actual_Aspire_full_normal_scalar_and_process_recovery_originals",
           "exact_delivered_source_Linux_Docker_Aspire_RF3"
         ],
-        "state": "root_review_complete_full_Aspire_local_normal_scalar_recovery_verified_exact_Linux_RF3_pending_20261004",
+        "state": "mapped_task_acceptance_complete_20261007_original_Linux19_normal_scalar_and_full235_recovery_with_native_identity; separate_product_gates_open",
         "id": "TASK-KEYCODEC-CULTURE",
         "owner": "query_wave_gpt_6_luna_high",
         "permissions": [
@@ -9703,7 +9755,20 @@
           "literal_positive_negative_fractional_decimal_custom_culture_oracle"
         ],
         "joinCondition": "no_writer_byte_or_native_alias_change_no_global_default_culture_mutation_restore_CurrentCulture_in_finally",
-        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred"
+        "developmentEvidence": "Historical intermediate report removed from repository; no current qualification inferred",
+        "taskAcceptanceEvidence": {
+          "status": "complete",
+          "sourceCommit": "259a3fa5ae8ab1efcacb7285e3b61e416f9819b0",
+          "runId": 37554329420,
+          "verifyJobId": 112576973966,
+          "normalMappedCases": 19,
+          "scalarMappedCases": 19,
+          "wholeRecoveryPassed": 235,
+          "ownedSourceRowsBound": 33,
+          "originalCaseMapSha256": "1594e79d493908f4ba2645021f5ddadf80c5d6a8501a8d084934b943ed6cd366",
+          "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37554329420",
+          "separateProductGates": "RF3/endurance/power-loss/performance remain open; this record does not qualify those gates"
+        }
       },
       {
         "modelTier": "cost_efficient_bounded_coding",

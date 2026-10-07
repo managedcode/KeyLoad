@@ -104,6 +104,28 @@ snapshot and cleanup contract. Root freezes and owns the joins; unpack_atomicity
 Luna owns only `scripts/Features/TestInfrastructure/local-image-context.mjs`,
 the new cohesive `local-image-snapshot.mjs`, `local-server-image.mjs` and
 `tests/KeyLoad.UnitTests/Features/TestInfrastructure/Cases/LocalRf3ImageContextSnapshotTests.cs`.
+The reviewed R2 correction is assigned to ci_failure_evidence Luna and adds only
+`scripts/Features/TestInfrastructure/local-image-process.mjs` and the cohesive
+`UnitTests/Features/TestInfrastructure/Processes/LocalImageSnapshotProcess.cs`.
+Admit each metadata entry and its bytes before retaining it; use bounded directory
+enumeration rather than an unbounded readdir array. Track exclusive staging
+ancestors for standalone COPY files separately from the unchanged canonical
+digest entries. The Node regression includes that real COPY path and an actual
+over-limit rejection followed by unchanged input and healthy capture.
+Build-output retention uses the existing65,536-byte per-stream cap and a separate
+invocation-owned `<receiptPath>.build-output.json` file with only original stdout
+and stderr tail bytes encoded as base64. Write it exclusively after the original
+producer and both readers settle, on success or failure, before snapshot cleanup;
+retain its write failure alongside the original failure. No receipt field changes.
+Only Docker build uses tail retention; introspection keeps its strict output-limit
+rejection. A reader fault or signal immediately terminates only the owned child,
+arms the existing kill grace and joins all original work while preserving failures.
+The C# Node fixture has a60-second operation deadline,8-KiB drained output bounds,
+owned-child termination and original reader/exit joining. Preserve the operation
+failure with every cleanup failure; attempt both snapshots and parent cleanup.
+The C# caller creates the private unique filesystem root, supplies it to Node,
+and removes only that owned root after original process/readers join, including
+timeout and reader-failure paths where Node cannot reach its own finally.
 First admit the exact existing input metadata and limits, then stream admitted
 regular files into an exclusive invocation context with no-follow/stat checks,
 preserving paths and file/directory modes. Hash the bytes actually copied; retain

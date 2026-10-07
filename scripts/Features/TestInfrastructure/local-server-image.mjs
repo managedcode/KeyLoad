@@ -2,9 +2,9 @@ import { lstat, mkdir, open, rename, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { readBuildInputs } from './local-image-context.mjs';
+import { cleanupBuildContextSnapshot, createBuildContextSnapshot, readBuildInputs, sameScaffolds } from './local-image-snapshot.mjs';
 import { localImage, messages } from './local-image-contracts.mjs';
-import { ensureSuccess, runDocker } from './local-image-process.mjs';
+import { ensureSuccess, getBuildOutput, runDocker } from './local-image-process.mjs';
 
 const expectedReceiptFields = Object.freeze([
   'schemaVersion', 'state', 'provenance', 'invocationId', 'imageReference', 'inputDigest', 'imageConfigId',
@@ -28,31 +28,60 @@ export async function runLocalImageAction(action, tag, receiptPath, root = proce
 
 async function prepare(root, tag, receiptPath) {
   await ensureLocalDocker(root);
-  const inputs = await readBuildInputs(root);
   const invocationId = tag.slice(localImage.imageTagPrefix.length);
+  const buildOutputPath = receiptPath + '.build-output.json';
   if ((await readImageIds(root, imageReference(tag))).length !== 0
-    || await lstat(receiptPath).then(() => true, () => false)) {
+    || await lstat(receiptPath).then(() => true, error => {
+      if (error?.code === 'ENOENT') return false;
+      throw error;
+    })
+    || await lstat(buildOutputPath).then(() => true, error => {
+      if (error?.code === 'ENOENT') return false;
+      throw error;
+    })) {
     throw new Error(messages.imageMismatch);
   }
-  let receipt = createReceipt(tag, invocationId, inputs, localImage.buildingState, '');
-  await writeReceipt(receiptPath, receipt);
-  const reference = imageReference(tag);
-  const build = await runDocker(root, [localImage.dockerImage, localImage.build, '--file', 'Dockerfile', '--tag', reference,
-    '--label', localImage.sourceContextLabelPrefix + inputs.digest,
-    '--label', localImage.invocationLabelPrefix + invocationId, '.'], localImage.buildTimeoutMs, false);
-  if (build.code !== 0) {
-    const present = await readImageIds(root, reference);
-    if (present.length === 0) {
-      receipt = createReceipt(tag, invocationId, inputs, localImage.absentState, '');
-      await writeReceipt(receiptPath, receipt);
+  const snapshot = await createBuildContextSnapshot(root);
+  let primary;
+  let actual;
+  let buildFailed = false;
+  let buildStarted = false;
+  let buildOutput;
+  try {
+    await writeReceipt(receiptPath, createReceipt(tag, invocationId, snapshot, localImage.buildingState, ''));
+    const reference = imageReference(tag);
+    await verifySnapshot(snapshot);
+    buildStarted = true;
+    let build;
+    try {
+      build = await runDocker(snapshot.directory, [localImage.dockerImage, localImage.build, '--file', 'Dockerfile',
+        '--tag', reference, '--label', localImage.sourceContextLabelPrefix + snapshot.digest,
+        '--label', localImage.invocationLabelPrefix + invocationId, '.'], localImage.buildTimeoutMs, false, true);
+    } catch (error) {
+      buildOutput = getBuildOutput(error) ?? emptyBuildOutput();
+      throw error;
+    }
+    buildOutput = build;
+    await verifySnapshot(snapshot);
+    buildFailed = build.code !== 0;
+    if (buildFailed && (await readImageIds(root, reference)).length === 0) {
+      await writeReceipt(receiptPath, createReceipt(tag, invocationId, snapshot, localImage.absentState, ''));
       throw new Error(messages.imageBuild);
     }
+    actual = await inspectImage(root, reference);
+    validateImage(actual, snapshot.digest, invocationId);
+  } catch (error) {
+    primary = error;
+    if (buildStarted && !buildOutput) buildOutput = getBuildOutput(error) ?? emptyBuildOutput();
   }
-  const actual = await inspectImage(root, reference);
-  validateImage(actual, inputs.digest, invocationId);
-  receipt = createReceipt(tag, invocationId, inputs, localImage.readyState, actual.imageConfigId);
-  await writeReceipt(receiptPath, receipt);
-  if (build.code !== 0) throw new Error(messages.imageBuild);
+  const failures = primary ? [primary] : [];
+  if (buildStarted) {
+    await captureFailure(() => writeBuildOutput(root, buildOutputPath, buildOutput ?? emptyBuildOutput()), failures);
+  }
+  await captureFailure(() => cleanupBuildContextSnapshot(snapshot), failures);
+  throwFailures(failures);
+  await writeReceipt(receiptPath, createReceipt(tag, invocationId, snapshot, localImage.readyState, actual.imageConfigId));
+  if (buildFailed) throw new Error(messages.imageBuild);
 }
 
 async function verify(root, tag, receiptPath) {
@@ -88,13 +117,9 @@ async function cleanup(root, tag, receiptPath) {
   }
   const receipt = await readReceipt(root, receiptPath, tag);
   if (receipt.state === localImage.absentState) throw new Error(messages.invalidReceipt);
-  const inputs = await readBuildInputs(root);
-  if (inputs.digest !== receipt.inputDigest || !sameArray(inputs.bases, receipt.pinnedBaseImages)) {
-    throw new Error(messages.contextChanged);
-  }
   if (ids.length !== 1) throw new Error(messages.dockerIdentity);
   const actual = await inspectImage(root, reference);
-  validateImage(actual, inputs.digest, receipt.invocationId);
+  validateImage(actual, receipt.inputDigest, receipt.invocationId);
   if (receipt.state === localImage.readyState && actual.imageConfigId !== receipt.imageConfigId) {
     throw new Error(messages.imageMismatch);
   }
@@ -102,6 +127,36 @@ async function cleanup(root, tag, receiptPath) {
   ensureSuccess(await runDocker(root, [localImage.dockerImage, localImage.remove, reference],
     localImage.commandTimeoutMs), messages.imageCleanup);
   if ((await readImageIds(root, reference)).length !== 0) throw new Error(messages.imageCleanup);
+}
+
+async function verifySnapshot(snapshot) {
+  const actual = await readBuildInputs(snapshot.directory);
+  if (actual.digest !== snapshot.digest || actual.files !== snapshot.files || actual.bytes !== snapshot.bytes
+    || !sameArray(actual.bases, snapshot.bases) || !sameScaffolds(actual.scaffolds, snapshot.scaffolds)) {
+    throw new Error(messages.contextChanged);
+  }
+}
+
+async function captureFailure(action, failures) {
+  try { await action(); }
+  catch (error) { failures.push(error); }
+}
+
+function throwFailures(failures) {
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1) throw new AggregateError(failures, messages.imageCleanup);
+}
+
+
+function emptyBuildOutput() {
+  return Object.freeze({ stdoutTail: Buffer.alloc(0), stderrTail: Buffer.alloc(0) });
+}
+
+async function writeBuildOutput(root, pathname, output) {
+  await verifyExistingReceiptDirectory(root, pathname);
+  const bytes = Buffer.from(JSON.stringify({ stdoutTailBase64: output.stdoutTail.toString('base64'),
+    stderrTailBase64: output.stderrTail.toString('base64') }) + '\n', 'utf8');
+  await writeFile(pathname, bytes, { flag: 'wx', mode: 0o600 });
 }
 
 function createReceipt(tag, invocationId, inputs, state, imageConfigId) {

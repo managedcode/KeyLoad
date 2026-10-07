@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
-import { lstat, open, readdir } from 'node:fs/promises';
+import { lstat, open, opendir } from 'node:fs/promises';
 import path from 'node:path';
 import { localImage, messages } from './local-image-contracts.mjs';
 
@@ -15,92 +15,132 @@ const expectedCopies = Object.freeze([
 const expectedRuntimeCopy = 'COPY --from=build /app/publish/ ./';
 const pinnedBasePattern = /^FROM (\S+@sha256:[a-f0-9]{64})(?: AS [a-z0-9_-]+)?$/;
 
-export async function readBuildInputs(root) {
-  const dockerfileBytes = await readTopLevelFile(root, 'Dockerfile');
-  const dockerfile = dockerfileBytes.toString('utf8');
-  const copies = parseCopies(dockerfile);
-  const bases = parsePinnedBases(dockerfile);
-  const ignoreBytes = await readTopLevelFile(root, '.dockerignore');
-  const ignored = parseIgnore(ignoreBytes.toString('utf8'));
+export async function enumerateBuildInputs(root) {
+  root = path.resolve(root);
   const selected = new Map();
-  await addFile(root, '.dockerignore', ignored, selected);
-  await addFile(root, 'Dockerfile', ignored, selected);
+  const scaffolds = new Map();
+  const admission = { bytes: 0, entries: 0 };
+  const dockerfile = await readTopLevelInput(root, 'Dockerfile', selected, admission);
+  const ignore = await readTopLevelInput(root, '.dockerignore', selected, admission);
+  const copies = parseCopies(dockerfile.bytes.toString('utf8'));
+  const bases = parsePinnedBases(dockerfile.bytes.toString('utf8'));
+  const ignored = parseIgnore(ignore.bytes.toString('utf8'));
   for (const copy of copies) {
     for (const source of copy.sources) {
       const normalized = source.endsWith('/') ? source.slice(0, -1) : source;
-      await visitSource(root, normalized, ignored, selected);
+      await addRequiredParents(root, normalized, ignored, selected, scaffolds, admission);
+      await visitSource(root, normalized, ignored, selected, admission, true);
     }
   }
-  const entries = [...selected.entries()].sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0);
-  if (entries.length === 0 || entries.length > localImage.maxInputFiles) throw new Error(messages.invalidContext);
-  const digest = createHash('sha256');
-  let totalBytes = 0;
-  for (const [relative, entry] of entries) {
-    if (entry.kind === 'file') totalBytes += entry.bytes.length;
-    if (totalBytes > localImage.maxInputBytes) throw new Error(messages.invalidContext);
-    digest.update(frame(relative));
-    digest.update(Buffer.from([entry.kind === 'directory' ? 1 : 2]));
-    digest.update(uint32(entry.mode));
-    digest.update(uint64(entry.kind === 'directory' ? 0 : entry.bytes.length));
-    if (entry.bytes) digest.update(entry.bytes);
-  }
-  return Object.freeze({ digest: `sha256:${digest.digest('hex')}`, bases, files: entries.length, bytes: totalBytes });
+  const entries = [...selected.entries()].sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+    .map(([relative, entry]) => Object.freeze({
+      relative,
+      absolute: path.join(root, ...relative.split('/')),
+      kind: entry.kind,
+      mode: entry.mode,
+      size: entry.size,
+      stat: entry.stat,
+      controlDigest: entry.controlDigest ?? null,
+    }));
+  if (entries.length === 0) throw new Error(messages.invalidContext);
+  return Object.freeze({ entries: Object.freeze(entries), scaffolds: Object.freeze([...scaffolds.values()]),
+    bases: Object.freeze(bases), files: entries.length, bytes: admission.bytes });
 }
 
-async function readTopLevelFile(root, name) {
+async function readTopLevelInput(root, name, selected, admission) {
   const absolute = path.join(root, name);
   const before = await lstat(absolute);
   if (!before.isFile() || before.isSymbolicLink() || before.size > localImage.maxInputFileBytes) {
     throw new Error(messages.invalidContext);
   }
-  return readBoundedFile(absolute, before);
+  addSelected(name, { kind: 'file', mode: before.mode & 0o777, size: before.size, stat: before,
+    controlDigest: null }, selected, admission);
+  const bytes = await readBoundedFile(absolute, before);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  selected.set(name, { kind: 'file', mode: before.mode & 0o777, size: before.size, stat: before,
+    controlDigest: digest });
+  return Object.freeze({ stat: before, bytes, digest });
 }
 
-async function visitSource(root, relative, ignored, selected) {
+async function addRequiredParents(root, relative, ignored, selected, scaffolds, admission) {
+  const segments = toPosix(relative).split('/');
+  let current = '';
+  for (const segment of segments.slice(0, -1)) {
+    current = current ? current + '/' + segment : segment;
+    if (selected.has(current) || scaffolds.has(current)) continue;
+    const absolute = path.join(root, ...current.split('/'));
+    const stat = await lstat(absolute).catch(() => null);
+    if (!stat?.isDirectory() || stat.isSymbolicLink() || isIgnored(current, ignored)) {
+      throw new Error(messages.invalidContext);
+    }
+    addScaffold(current, absolute, stat, scaffolds, admission);
+  }
+}
+
+async function visitSource(root, relative, ignored, selected, admission, required) {
   const absolute = path.join(root, relative);
   const before = await lstat(absolute).catch(() => null);
   if (!before || before.isSymbolicLink()) throw new Error(messages.invalidContext);
-  if (isIgnored(relative, ignored)) return;
+  if (isIgnored(relative, ignored)) {
+    if (required) throw new Error(messages.invalidContext);
+    return;
+  }
   if (before.isDirectory()) {
-    selected.set(toPosix(relative), { kind: 'directory', mode: before.mode & 0o777, bytes: null });
-    const names = await readdir(absolute);
-    names.sort((left, right) => left.localeCompare(right, 'en'));
-    for (const name of names) await visitSource(root, path.join(relative, name), ignored, selected);
+    const posix = toPosix(relative);
+    addSelected(posix, { kind: 'directory', mode: before.mode & 0o777, size: 0, stat: before }, selected, admission);
+    const directory = await opendir(absolute);
+    for await (const child of directory) await visitSource(root, path.join(relative, child.name), ignored, selected, admission, false);
     const after = await lstat(absolute);
     if (!sameStat(before, after)) throw new Error(messages.contextChanged);
     return;
   }
   if (!before.isFile() || before.size > localImage.maxInputFileBytes) throw new Error(messages.invalidContext);
-  const bytes = await readBoundedFile(absolute, before);
-  selected.set(toPosix(relative), { kind: 'file', mode: before.mode & 0o777, bytes });
+  addSelected(toPosix(relative), { kind: 'file', mode: before.mode & 0o777, size: before.size, stat: before,
+    controlDigest: null }, selected, admission);
+}
+
+function addSelected(relative, entry, selected, admission) {
+  if (selected.has(relative)) return;
+  if (admission.entries >= localImage.maxInputFiles) throw new Error(messages.invalidContext);
+  const bytes = admission.bytes + (entry.kind === 'file' ? entry.size : 0);
+  if (bytes > localImage.maxInputBytes) throw new Error(messages.invalidContext);
+  selected.set(relative, entry);
+  admission.entries++;
+  admission.bytes = bytes;
+}
+
+function addScaffold(relative, absolute, stat, scaffolds, admission) {
+  if (admission.entries >= localImage.maxInputFiles) throw new Error(messages.invalidContext);
+  scaffolds.set(relative, Object.freeze({ relative, absolute, kind: 'directory', mode: stat.mode & 0o777, stat }));
+  admission.entries++;
 }
 
 async function readBoundedFile(absolute, expected) {
   let handle;
+  let bytes;
+  const failures = [];
   try {
     handle = await open(absolute, constants.O_RDONLY | constants.O_NOFOLLOW);
     const opened = await handle.stat();
-    if (!opened.isFile() || opened.dev !== expected.dev || opened.ino !== expected.ino
-      || opened.size !== expected.size) throw new Error(messages.contextChanged);
-    const bytes = Buffer.allocUnsafe(expected.size + 1);
-    const { bytesRead } = await handle.read(bytes, 0, bytes.length, 0);
+    if (!opened.isFile() || !sameStat(expected, opened)) throw new Error(messages.contextChanged);
+    const buffer = Buffer.allocUnsafe(expected.size + 1);
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0);
     const afterHandle = await handle.stat();
     const afterPath = await lstat(absolute);
     if (bytesRead !== expected.size || !sameStat(expected, afterHandle) || !sameStat(expected, afterPath)) {
       throw new Error(messages.contextChanged);
     }
-    return bytes.subarray(0, bytesRead);
+    bytes = buffer.subarray(0, bytesRead);
   } catch (error) {
-    if (error?.message === messages.contextChanged) throw error;
-    throw new Error(messages.invalidContext);
-  } finally {
-    await handle?.close();
+    failures.push(error?.message === messages.contextChanged ? error : new Error(messages.invalidContext));
   }
-}
-
-async function addFile(root, relative, ignored, selected) {
-  if (isIgnored(relative, ignored)) throw new Error(messages.invalidContext);
-  await visitSource(root, relative, ignored, selected);
+  if (handle) {
+    try { await handle.close(); }
+    catch (error) { failures.push(error); }
+  }
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1) throw new AggregateError(failures, messages.invalidContext);
+  return bytes;
 }
 
 function parseCopies(dockerfile) {
@@ -158,24 +198,7 @@ function isIgnored(relative, rules) {
 
 function sameStat(left, right) {
   return left.dev === right.dev && left.ino === right.ino && left.size === right.size
-    && (left.mode & 0o777) === (right.mode & 0o777) && left.mtimeMs === right.mtimeMs;
-}
-
-function frame(value) {
-  const bytes = Buffer.from(value, 'utf8');
-  return Buffer.concat([uint32(bytes.length), bytes]);
-}
-
-function uint32(value) {
-  const bytes = Buffer.allocUnsafe(4);
-  bytes.writeUInt32BE(value);
-  return bytes;
-}
-
-function uint64(value) {
-  const bytes = Buffer.allocUnsafe(8);
-  bytes.writeBigUInt64BE(BigInt(value));
-  return bytes;
+    && (left.mode & 0o777) === (right.mode & 0o777) && left.mtimeMs === right.mtimeMs && left.ctimeMs === right.ctimeMs;
 }
 
 function toPosix(value) { return value.split(path.sep).join('/'); }

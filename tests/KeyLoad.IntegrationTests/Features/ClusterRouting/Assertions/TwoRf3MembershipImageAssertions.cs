@@ -7,6 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class TwoRf3MembershipImageAssertions
 {
     private const string DigestMarker = "@sha256:";
+    private const char TagSeparator = ':';
+
     internal static async Task VerifyAsync(DistributedApplication app, string reference,
         CancellationToken cancellationToken)
     {
@@ -25,16 +27,17 @@ internal static class TwoRf3MembershipImageAssertions
         var digestMarker = reference.LastIndexOf(DigestMarker, StringComparison.Ordinal);
         if (digestMarker <= 0)
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
-        var imageTag = reference[..digestMarker];
-        var tagSeparator = imageTag.LastIndexOf(':');
-        if (tagSeparator <= 0 || tagSeparator == imageTag.Length - 1)
+        var taggedImage = reference[..digestMarker];
+        var tagSeparator = taggedImage.LastIndexOf(TagSeparator);
+        if (tagSeparator <= 0 || tagSeparator == taggedImage.Length - 1)
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }
-        var repository = imageTag[..tagSeparator];
-        var acceptedTag = imageTag[(tagSeparator + 1)..];
+        var repository = taggedImage[..tagSeparator];
         var digest = reference[(digestMarker + DigestMarker.Length)..];
         var expectedResolvedImage = repository + DigestMarker + digest;
         var image = resource.Annotations.OfType<ContainerImageAnnotation>().Single();
-        if (image.Image != repository || image.Tag != acceptedTag || image.SHA256 != digest
+        if (!string.Equals(image.Image, repository, StringComparison.Ordinal)
+            || image.Registry is not null || image.Tag is not null
+            || !string.Equals(image.SHA256, digest, StringComparison.Ordinal)
             || !resource.TryGetContainerImageName(out var actual) || actual is null
             || !string.Equals(actual, expectedResolvedImage, StringComparison.Ordinal))
         { throw new InvalidOperationException(TwoRf3MembershipProtocol.ImageMismatch); }

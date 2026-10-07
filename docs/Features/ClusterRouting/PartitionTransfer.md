@@ -367,16 +367,24 @@ working six-node implementation.
 
 TASK-MEMBERSHIP-IMAGE-ORACLE repairs the pre-start test oracle for the existing
 AC-MEMBERSHIP-006. `RuntimeContainerImage.Add` supplies the accepted tag and the
-64-character digest separately to native Aspire13.6.0. Its image annotation
-retains the tag and stores the digest without the `sha256:` prefix; the native
-resolved reference uses `repository@sha256:digest`. The current test's null-tag
-and prefixed-annotation assertions reject that valid pinned configuration before
-any of the six resources starts. Require the exact accepted repository, tag and
-digest metadata plus exact native resolved reference on all six resources;
+64-character digest separately to native Aspire13.6.0. Setting the native SHA256
+clears Tag; the annotation stores the unprefixed digest and the resolved reference
+uses `repository@sha256:digest`. The original922 Linux run rejected this valid
+model because the previous correction incorrectly required a retained Tag.
+Require the exact accepted repository, null Tag, digest and full native resolved
+reference on all six resources; the authenticated receipt still retains its tag.
 retain the existing fail-before-start mismatch behavior and actual six-container
 startup, signed membership, closed public calls and joined teardown. The patch
-owns only `TwoRf3MembershipImageAssertions.cs`; no image construction, profile,
+owns `TwoRf3MembershipImageAssertions.cs` and a new cohesive
+`Cases/TwoRf3MembershipImageModelTests.cs`; no image construction, profile,
 credential, topology, timeout or production behavior changes. Root freezes and
 reviews the contract, the worker prepares the guarded correction, and root joins
 strict build/format plus the existing exact-source Linux RF3 case. Source review
-alone does not qualify membership. Rollback restores only the prior test oracle.
+alone does not qualify membership. unpack_atomicity Luna owns the private source
+packet; root owns the final join and gates. The added actual KeyLoad AppHost
+BuildAsync-only flow rejects one test-owned altered digest without changing any
+of the six image annotations, restores that input and verifies the healthy model.
+Its controlled immutable model reference is validation input, not registry or
+runtime evidence; it never starts containers or fabricates an image receipt.
+Retain the existing six-node real-image startup and client flow for Linux
+qualification. Rollback removes only this oracle correction and model regression.

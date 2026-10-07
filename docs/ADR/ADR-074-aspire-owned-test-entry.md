@@ -52,6 +52,23 @@ build from a mutable checkout after merely hashing it. Root owns the contract
 and final joins; unpack_atomicity Luna owns local-image-context.mjs, the new
 local-image-snapshot.mjs, local-server-image.mjs and the single real TUnit/Node
 LocalRf3ImageContextSnapshotTests.cs under their existing TestInfrastructure slice.
+R2 source review assigns ci_failure_evidence Luna the correction and adds exactly
+local-image-process.mjs and Processes/LocalImageSnapshotProcess.cs. Incremental
+metadata admission and bounded opendir traversal precede retention; separately
+owned implicit COPY ancestors do not alter canonical digest entries. Keep the
+existing65,536-byte per-stream limit for build tails, exclusively retained as
+base64 stdout/stderr bytes in `<receiptPath>.build-output.json` after actual exit
+and both readers settle on every build outcome. Strict introspection limits stay
+unchanged. Original reader failure/signal arms owned termination and existing
+grace escalation immediately; join originals and aggregate independent failures.
+The genuine Node filesystem case owns a60-second deadline and8-KiB output bounds,
+tests actual standalone COPY ancestors and over-limit rejection before healthy
+capture, and preserves primary plus all cleanup failures.
+The C# caller owns the private unique filesystem root and passes it to Node;
+after original child/readers join it cleans that root even if Node was killed
+before its own cleanup. Retain the primary and independent cleanup failures.
+Root owns the final join, native TUnit gates and real Docker/Aspire proof. The original receipt schema,
+CLI, package, topology, producer deadline and data-format contracts stay fixed.
 
 Stages: admit existing exact COPY metadata and20,000-file/512-MiB limits; stream
 regular no-follow/stat-checked files into an exclusive owned snapshot with exact
