@@ -12,6 +12,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     private const int BeforeFirstLogPosition = 0;
 
     private readonly int applyBatchSize;
+    private readonly Func<ReplicaEntry, IDisposable?>? canonicalObservation;
     private const int CoalescedApplyWakeCapacity = 1;
     private readonly Channel<bool> work = Channel.CreateBounded<bool>(new BoundedChannelOptions(CoalescedApplyWakeCapacity)
     { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropWrite });
@@ -28,8 +29,9 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
     /// <param name="log">Borrowed durable log supplying the committed prefix.</param>
     /// <param name="snapshots">Borrowed checkpoint store that recovers verified pending installations.</param>
     /// <param name="options">Centrally validated ordered apply budgets, frozen for this physical owner.</param>
+    /// <param name="canonicalObservation">Optional closed private native apply observation, opened on this worker only.</param>
     public ReplicaMaterializer(DatabaseEngine database, IDurableReplicaLog log, IReplicaSnapshotStore snapshots,
-        IOptions<ReplicaExecutionOptions> options)
+        IOptions<ReplicaExecutionOptions> options, Func<ReplicaEntry, IDisposable?>? canonicalObservation = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(log);
@@ -38,6 +40,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
         var settings = options.Value;
         settings.Validate();
         applyBatchSize = settings.ApplyBatchSize;
+        this.canonicalObservation = canonicalObservation;
         Database = database;
         Log = log;
         Snapshots = snapshots;
@@ -119,7 +122,7 @@ public sealed class ReplicaMaterializer : IAsyncDisposable
                 long completedCut = BeforeFirstLogPosition;
                 try
                 {
-                    ReplicaCanonicalApply.ApplyBatch(Database, Log, applyBatchSize);
+                    ReplicaCanonicalApply.ApplyBatch(Database, Log, applyBatchSize, canonicalObservation);
                     completedCut = Database.LastApplied;
                 }
                 finally { applyGate.Release(); }

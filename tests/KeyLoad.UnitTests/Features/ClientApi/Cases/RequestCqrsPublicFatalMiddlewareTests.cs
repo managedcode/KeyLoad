@@ -24,7 +24,7 @@ internal sealed class RequestCqrsPublicFatalMiddlewareTests
     public async Task AcCrs003004HttpBoundaryPreservesNativeFatalIdentityAndAllowsNextRequest()
     {
         using var capture = new RequestFailureDiagnosticEventSourceCapture();
-        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
+        using var factory = RequestFailureDiagnosticLoggerFactory.Create();
         var logger = factory.CreateLogger<ServerErrorMiddleware>();
         foreach (var type in new[] { typeof(OutOfMemoryException), typeof(StackOverflowException), typeof(AccessViolationException) })
         {

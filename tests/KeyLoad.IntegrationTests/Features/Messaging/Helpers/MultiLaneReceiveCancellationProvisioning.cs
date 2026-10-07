@@ -6,6 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class MultiLaneReceiveCancellationProvisioning
 {
+    private const long QueuePolicyEpoch = 2;
+
     internal static async Task<MultiLaneReceiveRequest> SeedAsync(KeyLoadClient administrator,
         RequestCqrsPhaseFaultIdentity identity, CancellationToken token)
     {
@@ -14,11 +16,12 @@ internal static class MultiLaneReceiveCancellationProvisioning
         var principal = new PrincipalRecord(identity.PrincipalId, partition.TenantId,
             [.. queues.Select(queue => new ScopeGrant(partition.DatabaseId, queue,
                 Capability.QueueConsume | Capability.QueueAck))], [])
-        { ClusterAdministrator = false };
+        { ClusterAdministrator = false, PolicyEpoch = QueuePolicyEpoch };
         var stored = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(
             Guid.NewGuid(), principal, token).ConfigureAwait(false)).ConfigureAwait(false);
         await Assert.That(stored.ClusterAdministrator).IsFalse();
         await Assert.That(stored.Id).IsEqualTo(identity.PrincipalId);
+        await Assert.That(stored.PolicyEpoch).IsEqualTo(QueuePolicyEpoch);
         foreach (var queue in queues)
         {
             await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),

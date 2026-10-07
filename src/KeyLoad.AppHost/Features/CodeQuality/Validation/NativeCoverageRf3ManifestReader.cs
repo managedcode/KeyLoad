@@ -134,14 +134,7 @@ internal static class NativeCoverageRf3ManifestReader
     }
 
     private static bool IsAllowedClass(string className, string methodName, string instanceName)
-        => instanceName == methodName && (className, methodName) switch
-        {
-            (NativeCoverageRf3Protocol.QueryContributorClass, NativeCoverageRf3Protocol.QueryContributorMethod) => true,
-            (NativeCoverageRf3Protocol.CrudContributorClass, NativeCoverageRf3Protocol.CrudCreatePatchDeleteMethod) => true,
-            (NativeCoverageRf3Protocol.CrudContributorClass, NativeCoverageRf3Protocol.CrudPatchDeleteCreateMethod) => true,
-            (NativeCoverageRf3Protocol.CrudContributorClass, NativeCoverageRf3Protocol.CrudStaleReplacementMethod) => true,
-            _ => false
-        };
+        => NativeCoverageRf3ContributorCatalog.Contributors.Contains(new(className, methodName, instanceName));
 
     private static string RequireString(JsonElement element, string property)
     {

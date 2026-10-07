@@ -305,3 +305,59 @@ Root must discover/execute all four under /*/*/IndexedReferenceWholeFlowTests/* 
 ## TASK-KL087-MULTI-LANE-RECEIVE-001
 
 REQ-MSG-007 / AC-MSG-007 and ADR-026 freeze the new bounded ordered queue receive composition in [Messaging](Messaging.md#task-kl087-multi-lane-receive-001). SQL envelope v1 CALL `keyload_messages_receive_across_lanes(@args)` at queryDialectVersion1 decodes that same native command; it does not extend SELECT dialect2 or full SQL/protocol conformance. Official MCP discovery uses the bounded gateway and explicit typed schema; the initial tool set is unchanged. No runtime or Linux qualification is claimed.
+
+## SQLC-SERIES-ROLLUP-001 — bounded explicit derived buckets
+
+TASK-KL026-BOUNDED-ROLLUP-001 / REQ-SERIES-024 / AC-SERIES-024 under [TimeSeries](TimeSeries.md) and [ADR120](../ADR/ADR-120-bounded-persisted-series-rollups.md) binds Q1/dialect1 `CALL keyload_series_read_rollup(@arguments)` to the same current authorized scoped native read as SDK/MCP. The parameter is the exact public MCP argument envelope `{request: ReadSampleRollupRequest}`; SQL does not bypass schema, result bounds or persisted grants. Existing `CALL keyload_documents_commit(@arguments)` accepts the new generated typed refresh/drop Batch mutations with the canonical commandId in its request; it does not add another write dispatcher or weaken receipts. SampleRollupRf3Tests is authored literal four-path read parity and native SDK/MCP stable write replay; native execution is pending. No new SELECT syntax, full SQL or SQL-client protocol compatibility is claimed.
+
+
+## TASK-KL098-TOPIC-RETENTION-001 contract join
+
+[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and SQL CALL keyload_documents_commit use the same typed mutation decoder and fresh authorized request grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. Current raw backup/snapshot includes bounded native identity tombstones inside existing topic-event-id family without a format migration. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionRf3Tests and native TopicRetentionOperationTests bind this join; build/runtime/exact-SHA Linux recovery/RF3 qualification remains pending.
+
+
+## TASK-KL045-Q2-OPERATOR-MATRIX-001 — preserved versioned whole-operation fixtures
+
+REQ-KL045-Q2-001 maps original KL045 public operator semantics/cost/permission and preserved AST fixtures to existing REQ-QUERY-007, AC-QUERY-007-JOIN-001/002 and ADR118. Scope is only existing declared Q2.InnerJoin.v1, not every manifest profile.
+
+| Existing Q2 operator | Semantics | Bounded cost class | Required persisted authority |
+|---|---|---|---|
+| INNER JOIN Text foreign field to right Text primary key | Same atomic partition, distinct aliases/typed collections; null/missing/unmatched foreign key yields no pair; sources retain original entity IDs/revisions | Bounded left native scan plus right primary-key probes; cumulative native read/retained/output grants | Query and DocumentsRead on both resources; current row/field policy filtering before result |
+| Explicit source-qualified projection | Declared selected fields/aliases with immutable source references | Selected JSON retained/output byte budget | Current field read/redaction policy on both source resources |
+| Left declared primary-key ASC ordering plus LIMIT | Deterministic ordinal left entity order, bounded one page, no continuation/EXPLAIN/filter profile | Bounded scan/results limit, no unrestricted sort/pagination promise | Same current authorized cut as join/projection |
+| AST2/SQL dialect2 admission | Preserved version2 typed fixture can be JSON and native-generated-binary roundtripped, then actual evaluator must return identical complete page | Request structure/byte/depth validation before native query access | Version fixture grants no identity; engine uses current persisted principal |
+
+AC-KL045-Q2-001: Q2CapabilityWholeFlowTests roundtrips a complete typed AST2 fixture through actual public JSON and generated native binary codecs, executes each on genuine seeded ZoneTree, and compares complete pages against real SQL dialect2 plus literal source IDs/revisions/name/total. Snapshot whole store/position unchanged. Six roundtripped unsupported fixtures (AST1, unknown AST3, predicate, EXPLAIN, alias collision, self-source) must return exact UnsupportedCapability/safe detail before ANY native point/range work on that same owner, retain complete store/position, and a following roundtripped healthy AST2 must still produce complete literal page and SQL parity. Metadata catalog/getter checks alone are not acceptance.
+
+Ownership UnitTests QueryExecution Cases/Helpers using existing typed relational fixtures and QueryEngine; no production/public contract/dependency change. Freeze contract then author tests; root joins guarded source, formats/builds, genuine postjoin inventory and normal/scalar execution plus existing recovery/RF3/Linux gates. Original failures remain. Rollback only test/spec appendix. Original KL045 remains open for modelViews/GraphSearch/Path/change-feed/live-query full operator inventory and qualification.
+
+
+## TASK-KL051-NORMALIZED-PLAN-ERROR-001 — actual adapter plans and vector attachment boundary
+
+REQ-KL051-PLAN-001 / AC-KL051-PLAN-001 refine existing REQ-QUERY-004/005/006 and AC-QUERY-004/005/006 under ADR004/010/118. Real SQL named decimal/string parameters, preserved JSON AST with same typed parameters and native C# Q1 builder literal lowering execute same indexed predicate/order/projection. Actual EXPLAIN pages must byte-match all three inputs, with independent literal accessPath/atomicPartition/nativeScanBudget plan, complete literal rows/source revisions and full-store/position invariance. Fresh persisted denied principal must yield exact same PermissionDenied safe detail on all three actual input operations; no returned partial page. Following privileged full literal results must remain healthy. This is real executor work, not static normalized-AST getter equality.
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001 map REQ-QUERY-007 and existing graph-search profile to actual SQL named vector-array attachment, typed C# GraphSearchRequest and its public JSON roundtrip. Persist two real cosine vectors/raw documents, execute SQL SearchSqlAsync and native GraphSearchAsync for both typed/public JSON inputs, compare complete results with independent literal document/entity/revision/JSON/rank score/empty expansion. Wrong dimension must reject exact Validation before native access, preserve full store/cut, then valid actual operation completes. SQL parser safe detail and typed-search validator safe detail are distinct existing contract messages and remain exact; code parity does not fabricate message equivalence.
+
+Source-proven boundary: KeyLoadQuery<T> currently explicitly supports scalar Q1 expression lowering only; there is no C# LINQ vector attachment/parameter-marker API. SQL vector attachments use Q1.Search.v1/SqlGraphSearchRequest, not scalar SELECT. These tests do not introduce a builder/parallel planner or claim three-input LINQ vector plan equivalence. Original KL051 remains open for complete vector-builder lowering and equivalent public profile errors; actual supported subset may be qualified only after original native execution. No unsupported expression is silently evaluated client-side.
+
+Ownership UnitTests QueryExecution Cases/Helpers, existing ZoneTree/TestDatabase/QueryEngine/SearchEngine and actual public KeyLoadQuery APIs. Docs then tests; root guarded join/format/build/current native discovery normal/scalar/recovery/RF3/Linux gates; preserve originals and no source-only PASS. Rollback only tests/appendix, no production/dependency/protocol change.
+
+## TASK-KL013-ORIGINAL-ACCEPTANCE-CLOSEOUT-001
+
+Original KL013 bounded acceptance is supported by authenticated [Linux verify run37666943488/job112948571657](https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948571657) at `4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0`. All four native `IndexedReferenceWholeFlowTests.Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState` arguments pass in both normal/scalar lanes. REQ-QUERY002/003/005/006 and AC-QUERY005/006 +AC-MP003 map through TASK-KL013-INDEX-REFERENCE-WHOLEFLOW-001 and ADR004/010/012/013/020/022: real indexed/reference literal rows, stable tied order/pagination, exact tampered/expired rejection, full native store/position invariance and healthy continuation. Original native test MVID `6aa5ad29-ba69-4fe5-8a22-ef3e923b6ff7`, matching portable PDB and declared source hashes bind that executed cohort; the source identity receipt alone is not execution proof. Normal TRX SHA256 `725e41e17c55e3df4209650d5ce2e8842ab15c8b1748f0348e12a7aaabadd092`; scalar `b35fe02f99453a80313af6f8123099a2d9c0274b7fc70fee7ff4f1dcff2880da`. This closes original task criteria only; preceding source-stage pending wording is historical. Changed StageXI, full SQL/protocol, broader planner/operator capabilities and whole-feature/RF3 qualification remain separate. Original failed/superseded receipts are retained.
+
+## TASK-KL051-VECTOR-R441-INPUT-REPAIR-001
+
+REQ-KL051-VECTOR-001 / AC-KL051-VECTOR-001 retains the actual Q1.Search.v1
+boundary under ADR-054/090: SqlGraphSearchRequest requires AllowFullScan true
+and SEARCH requires a graph scope/retriever/expansion operator. The native R441
+failure used a false opt-in and vector-only statement, so it rejected the
+envelope before vector dimension validation. AdapterVectorWholeFlow now uses
+explicit opt-in and a depth-zero graph scope seeded by both persisted vector
+entities; identical typed/public JSON requests carry that same scope. The
+native graph is configured with no edges. Scope preserves both literal ranks
+and null expansion. Exact wrong-dimension parser/typed diagnostics, pre-read
+rejection, full state/cut preservation and healthy complete result remain
+mandatory. This repairs test input only; no SQL support/public contract change
+or runtime PASS is inferred. Original R441 receipt remains immutable and fresh
+native execution is required.

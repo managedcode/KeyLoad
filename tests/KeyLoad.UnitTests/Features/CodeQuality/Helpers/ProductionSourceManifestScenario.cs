@@ -54,6 +54,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         var prepared = await ProductionSourceManifestProcess.RunAsync(executionOptions, Prepare, evidenceRoot, cancellationToken);
         await AssertSuccessfulProcessAsync(prepared);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
+        await NativeCoverageRf3ContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
         await VerifyTamperRejectedAsync(ManifestFile, cancellationToken);
         await VerifyTamperRejectedAsync("functional-coverage.test-image.recovery.json", cancellationToken);
         await VerifyTamperRejectedAsync(SettingsFile, cancellationToken);
@@ -86,6 +87,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         var result = await ProductionSourceManifestProcess.RunAsync(executionOptions, Verify, evidenceRoot, cancellationToken);
         await AssertSuccessfulProcessAsync(result);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
+        await NativeCoverageRf3ContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
     }
 
     private static async Task AssertSuccessfulProcessAsync(ProductionSourceManifestProcessResult result)

@@ -14,6 +14,7 @@ internal static class MutationDiscriminatorNames
     internal const string DeleteDocument = "deleteDocument";
     internal const string AppendEvents = "appendEvents";
     internal const string PublishTopic = "publishTopic";
+    internal const string PurgeTopic = "purgeTopic";
     internal const string EnqueueMessage = "enqueue";
     internal const string UpsertEdge = "upsertEdge";
     internal const string DeleteEdge = "deleteEdge";
@@ -21,6 +22,8 @@ internal static class MutationDiscriminatorNames
     internal const string CompleteCrossPartitionReverseEdge = "completeCrossPartitionReverseEdge";
     internal const string AppendSamples = "appendSamples";
     internal const string ExpireSamples = "expireSamples";
+    internal const string RefreshSampleRollup = SampleRollupProtocol.RefreshKind;
+    internal const string DropSampleRollup = SampleRollupProtocol.DropKind;
     internal const string StoreAggregateSnapshot = "storeAggregateSnapshot";
     internal const string PutVector = "putVector";
     internal const string QueueToGraph = "queueToGraph";
@@ -261,6 +264,7 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(DeleteDocument), MutationDiscriminatorNames.DeleteDocument)]
 [JsonDerivedType(typeof(AppendEvents), MutationDiscriminatorNames.AppendEvents)]
 [JsonDerivedType(typeof(PublishTopic), MutationDiscriminatorNames.PublishTopic)]
+[JsonDerivedType(typeof(PurgeTopic), MutationDiscriminatorNames.PurgeTopic)]
 [JsonDerivedType(typeof(EnqueueMessage), MutationDiscriminatorNames.EnqueueMessage)]
 [JsonDerivedType(typeof(UpsertEdge), MutationDiscriminatorNames.UpsertEdge)]
 [JsonDerivedType(typeof(DeleteEdge), MutationDiscriminatorNames.DeleteEdge)]
@@ -268,6 +272,8 @@ public sealed record CommandOutcome([property: Orleans.Id(0)] string Fingerprint
 [JsonDerivedType(typeof(CompleteCrossPartitionReverseEdge), MutationDiscriminatorNames.CompleteCrossPartitionReverseEdge)]
 [JsonDerivedType(typeof(AppendSamples), MutationDiscriminatorNames.AppendSamples)]
 [JsonDerivedType(typeof(ExpireSamples), MutationDiscriminatorNames.ExpireSamples)]
+[JsonDerivedType(typeof(RefreshSampleRollup), MutationDiscriminatorNames.RefreshSampleRollup)]
+[JsonDerivedType(typeof(DropSampleRollup), MutationDiscriminatorNames.DropSampleRollup)]
 [JsonDerivedType(typeof(StoreAggregateSnapshot), MutationDiscriminatorNames.StoreAggregateSnapshot)]
 [JsonDerivedType(typeof(PutVector), MutationDiscriminatorNames.PutVector)]
 [JsonDerivedType(typeof(QueueToGraph), MutationDiscriminatorNames.QueueToGraph)]

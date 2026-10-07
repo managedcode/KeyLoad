@@ -38,7 +38,9 @@ internal sealed class RequestCqrsProbeJson
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty
             || !ValidPrincipal(value.PrincipalId)
             || !Enum.IsDefined(value.Action) || !Enum.IsDefined(value.Phase)
-            || value.Phase == RequestCqrsProbePhase.ProducerDisposed
+            || value.Phase is RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed
+            || !RequestCqrsCanonicalArmValidation.Valid(value)
+            || value.TargetVoter is { } target && StrictUtf8.GetByteCount(target) > executionOptions.Value.MaximumPrincipalBytes
             || read != (value.CommandId == Guid.Empty) || read && !Enum.IsDefined(value.ReadKind!.Value))
         { throw Invalid(); }
         return value;
@@ -59,7 +61,8 @@ internal sealed class RequestCqrsProbeJson
         if (value.Version != RequestCqrsProbeProtocol.Version || value.Kind != RequestCqrsProbeProtocol.MarkerKind
             || !RequestCqrsProbeOptionsReader.IsSessionId(value.SessionId) || value.ArmId == Guid.Empty || value.RequestId == Guid.Empty
             || !Enum.IsDefined(value.Phase) || !Enum.IsDefined(value.Outcome)
-            || string.IsNullOrWhiteSpace(value.Voter) || string.IsNullOrWhiteSpace(value.SiloAddress))
+            || string.IsNullOrWhiteSpace(value.Voter) || string.IsNullOrWhiteSpace(value.SiloAddress)
+            || !RequestCqrsCanonicalMarkerValidation.Valid(value))
         { throw Invalid(); }
         return value;
     }
@@ -97,6 +100,8 @@ internal sealed class RequestCqrsProbeJson
         { throw Invalid(); }
         try
         { _ = StrictUtf8.GetCharCount(bytes); }
+        catch (EncoderFallbackException)
+        { throw Invalid(); }
         catch (DecoderFallbackException)
         { throw Invalid(); }
         var reader = new Utf8JsonReader(bytes, new JsonReaderOptions
@@ -113,9 +118,12 @@ internal sealed class RequestCqrsProbeJson
             if (reader.TokenType != JsonTokenType.PropertyName || reader.ValueIsEscaped)
             { throw Invalid(); }
             var name = reader.GetString();
-            if (name is null || fields.IndexOf(name) < IndexOfValidationBoundary || !seen.Add(name)
-                || !reader.Read() || reader.TokenType is JsonTokenType.StartArray or JsonTokenType.StartObject
-                || reader.TokenType is JsonTokenType.EndArray or JsonTokenType.EndObject)
+            if (name is null || fields.IndexOf(name) < IndexOfValidationBoundary || !seen.Add(name) || !reader.Read())
+            { throw Invalid(); }
+            if (name == nameof(RequestCqrsProbeArmRecord.Partition) && reader.TokenType == JsonTokenType.StartObject)
+            { RequestCqrsProbePartitionShape.Read(ref reader, executionOptions.Value.MaximumPrincipalBytes); }
+            else if (reader.TokenType is JsonTokenType.StartArray or JsonTokenType.StartObject
+                or JsonTokenType.EndArray or JsonTokenType.EndObject)
             { throw Invalid(); }
         }
         if (reader.TokenType != JsonTokenType.EndObject || reader.Read() || seen.Count != fields.Length)
@@ -130,6 +138,8 @@ internal sealed class RequestCqrsProbeJson
             return JsonSerializer.Deserialize(bytes, typeInfo);
         }
         catch (JsonException)
+        { throw Invalid(); }
+        catch (EncoderFallbackException)
         { throw Invalid(); }
         catch (DecoderFallbackException)
         { throw Invalid(); }

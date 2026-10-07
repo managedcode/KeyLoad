@@ -94,5 +94,7 @@ public enum GrainReadKind
     /// <summary>Reads one pinned private native runtime journal page.</summary>
     RuntimeJournalPage,
     /// <summary>Reads the complete admitted private native runtime journal catalog.</summary>
-    RuntimeJournalCatalog
+    RuntimeJournalCatalog,
+    /// <summary>Reads one current revisioned derived time-series rollup.</summary>
+    SampleRollup
 }

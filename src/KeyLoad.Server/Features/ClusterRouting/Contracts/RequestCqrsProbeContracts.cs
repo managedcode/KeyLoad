@@ -9,7 +9,11 @@ internal enum RequestCqrsProbePhase
     AuthorizationReload,
     BeforeSubmit,
     SubmitReturned,
-    ProducerDisposed
+    ProducerDisposed,
+    CanonicalJournalFlushed,
+    CanonicalOutboundObserved,
+    CanonicalIndependentAppendCompleted,
+    CanonicalOwnerDisposed
 }
 
 internal enum RequestCqrsProbeAction
@@ -41,7 +45,11 @@ internal readonly record struct RequestCqrsProbeArmRecord(
     [property: JsonRequired] Guid CommandId,
     [property: JsonRequired] GrainReadKind? ReadKind,
     [property: JsonRequired] RequestCqrsProbePhase Phase,
-    [property: JsonRequired] RequestCqrsProbeAction Action);
+    [property: JsonRequired] RequestCqrsProbeAction Action,
+    [property: JsonRequired] RequestCqrsProbePartitionRecord? Partition = null,
+    [property: JsonRequired] Guid? SourceRequestId = null,
+    [property: JsonRequired] string? TargetVoter = null,
+    [property: JsonRequired] Guid? SourceArmId = null);
 
 internal readonly record struct RequestCqrsProbeReleaseRecord(
     [property: JsonRequired] int Version,
@@ -60,4 +68,6 @@ internal readonly record struct RequestCqrsProbeMarkerRecord(
     [property: JsonRequired] RequestCqrsProbePhase Phase,
     [property: JsonRequired] RequestCqrsProbeOutcome Outcome,
     [property: JsonRequired] string Voter,
-    [property: JsonRequired] string SiloAddress);
+    [property: JsonRequired] string SiloAddress,
+    [property: JsonRequired] long? EntryIndex = null,
+    [property: JsonRequired] long? EntryTerm = null);

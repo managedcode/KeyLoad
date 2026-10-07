@@ -2,7 +2,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class RequestCqrsProbeFixtureProtocol
 {
-    internal const int Version = 1;
+    internal const int Version = 2;
     internal const int MaximumRecordBytes = 8_192;
     internal const int MaximumVoterBytes = 1_048_576;
     internal const int MaximumFilesPerVoter = 400;

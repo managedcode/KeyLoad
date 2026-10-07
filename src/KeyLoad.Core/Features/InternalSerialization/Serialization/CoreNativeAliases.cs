@@ -2,6 +2,7 @@ namespace KeyLoad.Core.Features.InternalSerialization;
 
 internal static class CoreNativeAliases
 {
+    internal const string RetainedTopicEventIdentity = "keyload.core.v1.RetainedTopicEventIdentity";
     internal const string AuthorizedDocumentChange = "keyload.core.v1.AuthorizedDocumentChange";
     internal const string AuthorizedDocumentChangePage = "keyload.core.v1.AuthorizedDocumentChangePage";
     internal const string BlobCommandScope = "keyload.core.v1.BlobCommandScope";

@@ -47,6 +47,8 @@ internal static class McpCatalogExpectations
     private const string SeriesAggregateRoute = "/v1/series/aggregate";
     internal const string SeriesWindows = "keyload_series_windows";
     private const string SeriesWindowsRoute = "/v1/series/windows";
+    internal const string SeriesRollup = "keyload_series_read_rollup";
+    private const string SeriesRollupRoute = "/v1/series/rollups/read";
     internal const string SeriesRetention = "keyload_series_retention";
     private const string SeriesRetentionRoute = "/v1/series/retention";
     internal const string QueryExecute = "keyload_query_execute";
@@ -122,7 +124,7 @@ internal static class McpCatalogExpectations
     private const string ResourcesListRoute = "/v1/admin/dashboard/resources";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
     private const string QueueBrowseRoute = "/v1/admin/dashboard/queue";
-    internal const int Count = 69;
+    internal const int Count = 70;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries { get; } =
     [
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
@@ -145,6 +147,7 @@ internal static class McpCatalogExpectations
         (SeriesLatest, SeriesLatestRoute, GrainReadKind.LatestSample, null),
         (SeriesAggregate, SeriesAggregateRoute, GrainReadKind.AggregateSamples, null),
         (SeriesWindows, SeriesWindowsRoute, GrainReadKind.AggregateSampleWindows, null),
+        (SeriesRollup, SeriesRollupRoute, GrainReadKind.SampleRollup, null),
         (SeriesRetention, SeriesRetentionRoute, GrainReadKind.SampleRetention, null),
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),

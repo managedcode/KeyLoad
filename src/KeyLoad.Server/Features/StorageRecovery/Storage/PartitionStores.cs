@@ -13,7 +13,7 @@ internal sealed class PartitionStores : IDisposable
 
     internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions,
-        TimeProvider? clock = null)
+        TimeProvider? clock = null, Action<CommitStage, long, int>? canonicalObserver = null)
     {
         const int FailuresCountValidationBoundary = 1;
 
@@ -34,7 +34,7 @@ internal sealed class PartitionStores : IDisposable
             {
                 File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             }
-            Canonical = canonical = Open(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory), executionOptions, cacheOptions, clock);
+            Canonical = canonical = Open(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory), executionOptions, cacheOptions, clock, canonicalObserver);
             Replica = Open(options, Path.Combine(directory, ReplicaProtocol.ReplicaDirectory), executionOptions, cacheOptions, clock);
         }
         catch (Exception error)
@@ -52,10 +52,11 @@ internal sealed class PartitionStores : IDisposable
     internal ZoneTreeStore Canonical { get; }
     internal ZoneTreeStore Replica { get; }
 
-    private static ZoneTreeStore Open(NodeOptions options, string directory, IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions, TimeProvider? clock) => new(new(directory)
+    private static ZoneTreeStore Open(NodeOptions options, string directory, IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions, TimeProvider? clock, Action<CommitStage, long, int>? observer = null) => new(new(directory)
     {
         Incarnation = options.Incarnation,
-        SigningKey = Convert.FromBase64String(options.SigningKey)
+        SigningKey = Convert.FromBase64String(options.SigningKey),
+        FaultObserver = observer
     }, executionOptions, cacheOptions, clock);
 
     public void Dispose()

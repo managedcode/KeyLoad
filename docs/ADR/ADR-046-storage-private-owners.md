@@ -129,3 +129,25 @@ entire private decomposition as one source unit; do not roll back enabled analys
 add alternate API paths or reassign node-local storage to grains. Existing unrelated
 native/website/adapter work is protected. Process kills qualify only their declared
 failure model, never power-loss durability or production readiness.
+
+
+## TASK-KL008-NATIVE-MAINTENANCE-JOIN-001 — actual native merge disposal
+
+REQ-STORAGE-MAINTENANCE-JOIN-001: the existing node-local ZoneTree owner must join its actual tracked native merge thread before releasing tree/journal/owner file handles. This retains original KL008 disposal-waits-jobs acceptance; read-cut join alone does not prove maintenance completion. No product API, timer, dependency, format or public boundary changes.
+
+AC-STORAGE-MAINTENANCE-JOIN-001: NativeMaintenanceLifetimeTests seeds complete independent literal byte records through real atomic Commit, updates/deletes through another Commit, and starts the existing native maintainer EvictToDisk. Observe native OnDiskSegmentCreated (actual disk record serialization completed on the merger thread), hold only that native callback under the existing ten-second lifetime bound, start real owner Dispose, observe actual same-owner queued writer under a real Read, then its acquired writer gate before releasing the merge callback. Dispose must remain incomplete only AFTER those native observations. Release and join original Dispose, observe SUCCESS terminal native merge and stopped original thread, open every original file exclusively, reopen same native owner/position/full literal scan, perform healthy real Commit and reopen its complete expected bytes. A pre-call Task state, native Start callback, sleep, padded corpus or getter-only check cannot substitute.
+
+Ordered ownership: UnitTests StorageRecovery Cases/Helpers/Assertions; current ZoneTreeStoreRuntime and ZoneTreeStore internal friend composition share one real physical runtime/maintainer, no second provider or storage owner. Actual ZoneTree1.9.8 package repository commit13ee11e19007301fdea72b9210de62f6257f4929 source defines OnMergeOperationStarted before thread creation; therefore that event is not the work oracle. OnDiskSegmentCreated runs after native disk creation on merge worker; original maintainer Dispose waits tracked threads. Native caller/cleanup must join before closing barriers or deleting files, preserve primary plus cleanup errors, and retain root on failure. Cancellation of the test does not skip joining or fabricate a successful merge.
+
+Root integrates guarded source then runs native focused/full normal/scalar and existing recovery/RF3 gates. No source-only PASS, power-loss/endurance, Linux delivery or original KL008 closure is claimed. Rollback removes only this authored test/doc addition.
+
+```mermaid
+flowchart LR
+  Commit[Actual committed literal records] --> Merge[Native tracked merge disk created]
+  Merge --> Hold[Owned native callback held]
+  Hold --> Dispose[Real owner dispose enters writer gate]
+  Dispose --> Join[Release callback and join original worker]
+  Join --> Reopen[Exclusive original files and complete healthy reopen]
+```
+
+Scope limitation: pinned native Maintainer.Dispose joins merge threads, but its periodic cache-cleanup Task is not retained/awaited. This case qualifies only observed merge-thread completion; periodic-job joined completion remains unqualified and original KL008 remains open. No detached-job completion is inferred from cancellation or released file locks.

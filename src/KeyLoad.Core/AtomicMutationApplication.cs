@@ -19,6 +19,7 @@ public sealed partial class DatabaseEngine
     {
         var token = commitToken ?? Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
+        TopicPurgeReadBudget? purgeBudget = null;
         foreach (var (mutation, derived) in ExpandCommandMutations(tx, principal, partition, mutations, now))
         {
             var documentId = mutation switch { PutDocument put => put.Id, PatchDocument patch => patch.Id, DeleteDocument delete => delete.Id, _ => null };
@@ -32,7 +33,9 @@ public sealed partial class DatabaseEngine
                 DeleteDocument delete => Delete(tx, principal, partition, delete, now, context),
                 _ => null
             };
-            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position);
+            if (mutation is PurgeTopic)
+            { purgeBudget ??= new TopicPurgeReadBudget(OperationLimitsOptions); }
+            var receipt = image?.Receipt ?? ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget);
             if (derived)
             {
                 receipt = receipt with { CompositionReferences = CompositionMutationReferences(mutation) };
@@ -85,10 +88,11 @@ public sealed partial class DatabaseEngine
     }
 
     private MutationReceipt ApplyNonDocumentMutation(IAtomicTransaction tx, PrincipalRecord principal,
-        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position) => mutation switch
+        PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget) => mutation switch
         {
             AppendEvents events => Append(tx, principal, partition, events, now),
             PublishTopic topic => Publish(tx, principal, partition, topic, now),
+            PurgeTopic topic => PurgeTopicHistory(tx, partition, topic, purgeBudget),
             EnqueueMessage message => Enqueue(tx, principal, partition, message, now),
             UpsertEdge edge => Upsert(tx, principal, partition, edge),
             DeleteEdge edge => RemoveEdge(tx, principal, partition, edge),
@@ -96,6 +100,10 @@ public sealed partial class DatabaseEngine
             CompleteCrossPartitionReverseEdge edge => CompleteGraphReverseDelivery(tx, principal, partition, edge),
             AppendSamples samples => Append(tx, principal, partition, samples),
             ExpireSamples samples => Expire(tx, principal, partition, samples, now),
+            RefreshSampleRollup rollup => global::KeyLoad.Core.Features.TimeSeries.SampleRollupCommands.Refresh(
+                this, tx, principal, partition, rollup, timeSeriesExecution.MaximumRollupBuckets),
+            DropSampleRollup rollup => global::KeyLoad.Core.Features.TimeSeries.SampleRollupCommands.Drop(
+                this, tx, principal, partition, rollup),
             StoreAggregateSnapshot snapshot => SaveAggregateSnapshot(tx, principal, partition, snapshot),
             PutVector vector => Upsert(tx, principal, partition, vector),
             CreateQueueTransfer transfer => ApplyCreateQueueTransfer(tx, principal, partition, transfer, now),

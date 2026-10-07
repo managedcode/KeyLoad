@@ -25,7 +25,7 @@ internal static class RequestCqrsProbeProtocol
     internal const string OrdinaryMessage = "keyload-c1-private-probe-ordinary-canary";
     internal const string OrdinaryDataKey = "keyload-c1-private-probe-data";
     internal const string OrdinaryDataValue = "keyload-c1-private-probe-data-canary";
-    internal const int Version = 1;
+    internal const int Version = 2;
     internal const int MaximumJsonDepth = 4;
     internal const int MaximumPrincipalBytes = 256;
     internal const int MaximumRecordBytes = 8_192;

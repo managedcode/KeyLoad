@@ -16,6 +16,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
     private Task? shutdown;
     private readonly RequestProbeExecutionOptions settings;
     private readonly TimeProvider clock;
+    internal RequestCqrsCanonicalApplyObserver Canonical { get; }
 
     internal RequestCqrsProbeObserver(RequestCqrsProbeFiles files, IOptions<ReplicaConfiguration> replicaOptions,
         string siloAddress, IHostApplicationLifetime applicationLifetime, IOptions<RequestProbeExecutionOptions> executionOptions, TimeProvider? clock = null)
@@ -27,6 +28,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         settings = executionOptions.Value;
         this.clock = clock ?? TimeProvider.System;
         lifecycle = new(executionOptions);
+        Canonical = new(files, lifecycle, CreateMarker, HoldAsync);
     }
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
@@ -177,7 +179,7 @@ internal sealed class RequestCqrsProbeObserver : IGrainRequestPhaseObserver, IAs
         RequestCqrsProbePhase phase, RequestCqrsProbeOutcome outcome)
         => new(RequestCqrsProbeProtocol.Version, RequestCqrsProbeProtocol.MarkerKind, claim.Arm.Record.SessionId,
             claim.Arm.Record.ArmId, claim.Identity.RequestId, claim.Identity.CommandId, phase, outcome,
-            replica.LocalId, siloAddress);
+            replica.LocalId, siloAddress, claim.EntryIndex, claim.EntryTerm);
 
     private static void ThrowOrdinary()
     {

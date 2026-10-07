@@ -30,19 +30,20 @@ internal sealed class GraphSearchRf3LeaderLossTests(ClusterFixture fixture)
         string? stoppedNode = null;
         var restarted = false;
         Exception? primary = null;
+        var addition = GraphSearchRf3DurableAddition.Create(scenario);
         try
         {
             var leaderIndex = await FindLeaderIndexAsync(clients.Administrators, cancellationToken);
             stoppedNode = Nodes[leaderIndex];
             await fixture.KillContainerAsync(stoppedNode, "graph-search-rf3-leader-loss", cancellationToken);
-            var survivor = (leaderIndex + 1) % Nodes.Length;
-            await WaitForSurvivorQuorumAsync(clients.Administrators, leaderIndex, cancellationToken);
-            await WriteAndReadOnSurvivorAsync(scenario, clients, survivor, cancellationToken);
+            var survivor = await GraphSearchRf3SurvivorReadiness.WaitAsync(scenario,
+                clients.Administrators, Nodes, leaderIndex, cancellationToken);
+            var receipt = await WriteAndReadOnSurvivorAsync(scenario, clients, survivor, addition, cancellationToken);
             await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
             restarted = true;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
-            await VerifyClusterCatchupAsync(scenario, clients, cancellationToken);
+            await VerifyClusterCatchupAsync(scenario, clients, addition, receipt, cancellationToken);
         }
         catch (Exception failure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(failure))
         {
@@ -59,10 +60,20 @@ internal sealed class GraphSearchRf3LeaderLossTests(ClusterFixture fixture)
         }
     }
 
-    private async Task WriteAndReadOnSurvivorAsync(GraphSearchRf3Scenario scenario,
-        GraphSearchRf3NodeClients clients, int survivor, CancellationToken cancellationToken)
+    private async Task<CommitReceipt> WriteAndReadOnSurvivorAsync(GraphSearchRf3Scenario scenario,
+        GraphSearchRf3NodeClients clients, int survivor, CommandRequest addition, CancellationToken cancellationToken)
     {
-        await scenario.AddReachableDocumentAsync(clients.Administrators[survivor], cancellationToken);
+        var original = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[survivor]
+            .GraphSearchAsync(GraphSearchRf3Scenario.Request(scenario.Partition), cancellationToken));
+        await GraphSearchRf3LeaderLossLiterals.HitsAsync(scenario, original, added: false);
+        var receipt = await GraphSearchRf3DurableAddition.CommitAsync(clients.Administrators[survivor], addition, cancellationToken);
+        await GraphSearchRf3DurableAddition.ReplayAsync(clients.Administrators[survivor], addition, receipt, cancellationToken);
+        await using (var adminMcp = await McpOfficialClient.ConnectAsync(fixture, Nodes[survivor], fixture.AdminKey, cancellationToken))
+        {
+            var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await adminMcp.CallAsync(
+                McpCallerTools.DocumentsCommit, addition, cancellationToken));
+            await Assert.That(JsonDefaults.Serialize(replay.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
+        }
         var request = GraphSearchRf3Scenario.Request(scenario.Partition);
         var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[survivor]
             .GraphSearchAsync(request, cancellationToken));
@@ -74,32 +85,10 @@ internal sealed class GraphSearchRf3LeaderLossTests(ClusterFixture fixture)
         var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await mcp.CallAsync(
             GraphSearchRf3Scenario.SearchGraphTool, request, cancellationToken));
         await GraphSearchRf3Assertions.AssertEquivalentAsync(result, official.Value);
-    }
-
-    private static async Task WaitForSurvivorQuorumAsync(KeyLoadClient[] administrators, int stoppedIndex,
-        CancellationToken cancellationToken)
-    {
-        await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-        {
-            var survivors = Enumerable.Range(0, Nodes.Length).Where(index => index != stoppedIndex).ToArray();
-            var replies = await Task.WhenAll(survivors.Select(index => administrators[index].StatusAsync(cancellationToken)));
-            if (replies.Any(reply => !reply.IsSuccess))
-            {
-                return false;
-            }
-
-            var statuses = replies.Select(reply => reply.Value!).ToArray();
-            var leader = statuses[0].Leader;
-            if (statuses.Any(status => !status.RoutingReady || status.Voters != Nodes.Length
-                || string.IsNullOrWhiteSpace(status.Leader)
-                || !string.Equals(status.Leader, leader, StringComparison.Ordinal)))
-            {
-                return false;
-            }
-
-            return Uri.TryCreate(leader, UriKind.Absolute, out var address)
-                && survivors.Any(index => string.Equals(address.Host, Nodes[index], StringComparison.Ordinal));
-        }, cancellationToken);
+        await GraphSearchRf3LeaderLossLiterals.HitsAsync(scenario, result, added: true);
+        await GraphSearchRf3LeaderLossLiterals.HitsAsync(scenario, official.Value, added: true);
+        await GraphSearchRf3LeaderLossLiterals.GraphAsync(scenario, clients.Administrators[survivor], cancellationToken);
+        return receipt;
     }
 
     private static async Task<int> FindLeaderIndexAsync(KeyLoadClient[] administrators,
@@ -115,19 +104,22 @@ internal sealed class GraphSearchRf3LeaderLossTests(ClusterFixture fixture)
     }
 
     private static async Task VerifyClusterCatchupAsync(GraphSearchRf3Scenario scenario,
-        GraphSearchRf3NodeClients clients, CancellationToken cancellationToken)
+        GraphSearchRf3NodeClients clients, CommandRequest addition, CommitReceipt receipt, CancellationToken cancellationToken)
     {
         foreach (var node in Nodes)
         {
             await WaitReadyAsync(clients.Administrators[Array.IndexOf(Nodes, node)], cancellationToken);
         }
-        foreach (var reader in clients.Readers)
+        for (var index = 0; index < Nodes.Length; index++)
         {
-            var result = await McpCallerAssertions.SdkSuccessAsync(await reader.GraphSearchAsync(
+            await GraphSearchRf3DurableAddition.ReplayAsync(clients.Administrators[index], addition, receipt, cancellationToken);
+            await GraphSearchRf3LeaderLossLiterals.GraphAsync(scenario, clients.Administrators[index], cancellationToken);
+            var result = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[index].GraphSearchAsync(
                 GraphSearchRf3Scenario.Request(scenario.Partition), cancellationToken));
             await GraphSearchRf3Assertions.AssertHitsAsync(result,
                 (GraphSearchRf3Scenario.Alpha, 1d / 61), (GraphSearchRf3Scenario.Beta, 1d / 62),
                 ("delta", 1d / 63), (GraphSearchRf3Scenario.Gamma, 1d / 64));
+            await GraphSearchRf3LeaderLossLiterals.HitsAsync(scenario, result, added: true);
         }
     }
 

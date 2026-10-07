@@ -46,12 +46,21 @@ internal static class CrashHostApplication
             DatabaseCompositionCrashScenario.Mode => DatabaseCompositionCrashScenario.RunAsync(directory, store, boundary),
             AggregateReplayCrashScenario.Mode => AggregateReplayCrashScenario.RunAsync(directory, store, boundary),
             EventAppendCrashContract.Mode => EventAppendCrashScenario.RunAsync(directory, store, boundary),
+            TopicPurgeCrashContract.Mode => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, false),
+            TopicPurgeCrashContract.Mode + TopicPurgeCrashContract.PinnedSuffix => TopicPurgeCrashScenario.RunAsync(directory, store, boundary, true),
+            SampleRollupCrashContract.PrepareMode or SampleRollupCrashContract.RefreshFaultMode
+                or SampleRollupCrashContract.DropFaultMode or SampleRollupCrashContract.RefreshRecoverMode
+                or SampleRollupCrashContract.DropRecoverMode or SampleRollupCrashContract.VerifyMode
+                => SampleRollupCrashScenario.RunAsync(directory, store, boundary, mode),
             SampleRetentionCrashScenario.Mode => SampleRetentionCrashScenario.RunAsync(directory, store, boundary),
             EventProjectionCrashScenario.Mode => EventProjectionCrashScenario.RunAsync(directory, store, boundary),
             RecurringScheduleCrashScenario.Mode => RecurringScheduleCrashScenario.RunAsync(directory, store, boundary),
             SagaTimeoutCrashScenario.Mode => SagaTimeoutCrashScenario.RunAsync(directory, store, boundary),
             CommandIdempotencyCrashContract.FirstMode => CommandIdempotencyCrashScenario.RunFirstAsync(directory, store),
             CommandIdempotencyCrashContract.ReplayMode => CommandIdempotencyCrashScenario.RunReplayAsync(directory, store),
+            CompositeIndexCrashContract.PrepareMode or CompositeIndexCrashContract.FaultMode
+                or CompositeIndexCrashContract.RecoverMode or CompositeIndexCrashContract.VerifyMode
+                => CompositeIndexCrashScenario.RunAsync(directory, store, boundary, mode),
             ScalarIndexCrashContract.PrepareMode or ScalarIndexCrashContract.FaultMode
                 or ScalarIndexCrashContract.RecoverMode or ScalarIndexCrashContract.VerifyMode
                 => ScalarIndexCrashScenario.RunAsync(directory, store, boundary, mode),

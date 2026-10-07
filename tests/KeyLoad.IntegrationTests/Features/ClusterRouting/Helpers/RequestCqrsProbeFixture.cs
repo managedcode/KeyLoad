@@ -35,7 +35,7 @@ internal sealed class RequestCqrsProbeFixture
         => RequestCqrsProbeFixtureFactory.Create(dataRoot, sessionId);
 
     internal Guid WriteArm(string principalId, Guid commandId, GrainReadKind? readKind,
-        RequestCqrsProbePhase phase, RequestCqrsProbeAction action)
+        RequestCqrsProbePhase phase, RequestCqrsProbeAction action, PartitionRef? partition = null, Guid? sourceRequestId = null, string? targetVoter = null, Guid? sourceArmId = null)
     {
         lock (sync)
         {
@@ -47,9 +47,11 @@ internal sealed class RequestCqrsProbeFixture
             var armId = Guid.NewGuid();
             while (arms.ContainsKey(armId))
             { armId = Guid.NewGuid(); }
-            var bytes = RequestCqrsProbeJsonWriter.Arm(SessionId, armId, principalId, commandId, readKind, phase, action);
+            var bytes = RequestCqrsProbeJsonWriter.Arm(SessionId, armId, principalId, commandId, readKind, phase, action, partition, sourceRequestId, targetVoter, sourceArmId);
             var decoded = Json.ReadArm(bytes);
             RequestCqrsProbeArmValidator.ValidateDecoded(decoded, armId, principalId, commandId, readKind, phase, action);
+            if (decoded.Partition?.ToPartition() != partition || decoded.SourceRequestId != sourceRequestId || decoded.TargetVoter != targetVoter || decoded.SourceArmId != sourceArmId)
+            { throw new InvalidOperationException(InvalidArm); }
             RequestCqrsProbeBroadcast.WriteIdentical(Nodes, nodeDirectories, ownerRecords,
                 RequestCqrsProbeFileNames.Arm(armId), bytes);
             var state = new RequestCqrsProbeArmState(principalId, commandId, readKind, phase, action, bytes)
@@ -153,7 +155,7 @@ internal sealed class RequestCqrsProbeFixture
             admissionStopped = true;
             if (arms.Values.Any(arm => (arm.Action == RequestCqrsProbeAction.Hold
                     && arm.RequestId is not null && !arm.Settled && !arm.Retired)
-                || (arm.RequestId is not null && !arm.ProducerDisposedSeen)))
+                || (arm.RequestId is not null && !arm.OwnerDisposedSeen)))
             { throw new InvalidOperationException(UnsettledGates); }
             if (cleaned)
             { return Task.CompletedTask; }
@@ -181,7 +183,7 @@ internal sealed class RequestCqrsProbeFixture
             if (!arms.TryGetValue(marker.ArmId, out var arm))
             { throw new InvalidOperationException(MarkerMismatch); }
             RequestCqrsProbeMarkerState.Record(SessionId, arm, marker, node, expectedPhase, expectedOutcome,
-                signedDiscovery, activeGates);
+                signedDiscovery, activeGates, Json);
         }
     }
 

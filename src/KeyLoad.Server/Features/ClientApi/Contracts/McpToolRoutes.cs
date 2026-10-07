@@ -22,6 +22,7 @@ internal static class McpToolRoutes
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestRoute;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateRoute;
     internal const string SeriesWindows = TimeSeriesReadProtocol.WindowsRoute;
+    internal const string SeriesRollup = SampleRollupProtocol.ReadRoute;
     internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionRoute;
     internal const string QueryExecute = "/v1/query";
     internal const string QueryAst = "/v1/query/ast";

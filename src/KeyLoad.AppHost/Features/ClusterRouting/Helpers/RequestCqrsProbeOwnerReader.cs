@@ -10,7 +10,7 @@ internal static class RequestCqrsProbeOwnerReader
     internal const UnixFileMode PrivateFileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
     private const int MaximumJsonDepth = 1;
     private const int RequiredFieldCount = 4;
-    private const int OwnerVersion = 1;
+    private const int OwnerVersion = 2;
     private const string VersionField = "Version";
     private const string KindField = "Kind";
     private const string SessionField = "SessionId";

@@ -14,7 +14,8 @@ internal static class RequestCqrsProbeArmValidator
         if (string.IsNullOrWhiteSpace(principalId)
             || !principalId.StartsWith("c1-probe-", StringComparison.Ordinal)
             || StrictUtf8.GetByteCount(principalId) > 256 || !Enum.IsDefined(phase)
-            || phase == RequestCqrsProbePhase.ProducerDisposed || !Enum.IsDefined(action)
+            || phase is RequestCqrsProbePhase.ProducerDisposed or RequestCqrsProbePhase.CanonicalOutboundObserved
+                or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed || !Enum.IsDefined(action)
             || (readKind is null) == (commandId == Guid.Empty)
             || (readKind is { } read && !Enum.IsDefined(read)))
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.InvalidArm); }

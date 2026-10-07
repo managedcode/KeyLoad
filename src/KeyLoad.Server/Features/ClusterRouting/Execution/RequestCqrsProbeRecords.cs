@@ -108,7 +108,9 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
         {
             if (armMap.TryGetValue(marker.ArmId, out var arm)
                 && (arm.CommandId != marker.CommandId || marker.Phase != arm.Phase && marker.Phase != RequestCqrsProbePhase.ProducerDisposed
-                    || !ValidOutcome(arm, marker)))
+                    && !CanonicalAdjunct(arm, marker)
+                    || !ValidOutcome(arm, marker)
+                    || !RequestCqrsCanonicalScopeValidation.Matches(arm, marker)))
             { throw Invalid(); }
         }
         if (releases.GroupBy(release => release.ArmId)
@@ -127,9 +129,12 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     {
         if (marker.Version != RequestCqrsProbeProtocol.Version || marker.Kind != RequestCqrsProbeProtocol.MarkerKind
             || marker.SessionId != sessionId || marker.Voter != voter || marker.RequestId == Guid.Empty
+            || !RequestCqrsCanonicalMarkerValidation.Valid(marker)
             || marker.Phase is not (RequestCqrsProbePhase.ProducerDisposed
                 or RequestCqrsProbePhase.RequestStarted or RequestCqrsProbePhase.AuthorizationReload
-                or RequestCqrsProbePhase.BeforeSubmit or RequestCqrsProbePhase.SubmitReturned)
+                or RequestCqrsProbePhase.BeforeSubmit or RequestCqrsProbePhase.SubmitReturned
+                or RequestCqrsProbePhase.CanonicalJournalFlushed or RequestCqrsProbePhase.CanonicalOutboundObserved
+                or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed)
             || snapshot.Markers.Any(existing => RequestCqrsProbeFiles.MarkerName(existing) == RequestCqrsProbeFiles.MarkerName(marker)))
         { throw Invalid(); }
         var group = snapshot.Markers
@@ -141,8 +146,10 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
             && producerClaim.Record.ArmId == marker.ArmId && IsRetiredArm(marker.ArmId, producerClaim.ExactBytes);
         var validArm = marker.Phase == RequestCqrsProbePhase.ProducerDisposed
             ? activeClaim || retiredProducerClaim
-            : producerClaim is null && active is not null;
-        if (group.Length >= executionOptions.Value.MaximumMarkersPerRequest || !validArm)
+            : active is not null && (producerClaim is null || activeClaim && CanonicalAdjunct(active.Record, marker));
+        if (group.Any(existing => existing.EntryIndex != marker.EntryIndex || existing.EntryTerm != marker.EntryTerm)
+            || active is not null && !RequestCqrsCanonicalScopeValidation.Matches(active.Record, marker)
+            || group.Length >= executionOptions.Value.MaximumMarkersPerRequest || !validArm)
         { throw Invalid(); }
     }
 
@@ -160,6 +167,11 @@ internal sealed class RequestCqrsProbeRecords(string sessionId, string voter, by
     internal bool IsRetiredArm(Guid armId, byte[] bytes)
         => retiredArms.Contains(armId) && knownArms.TryGetValue(armId, out var known)
             && CryptographicOperations.FixedTimeEquals(known.Bytes, bytes);
+
+    private static bool CanonicalAdjunct(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
+        => arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed && arm.Action == RequestCqrsProbeAction.Hold
+            && arm.Partition is not null && marker.Outcome == RequestCqrsProbeOutcome.Observed
+            && marker.Phase is RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed;
 
     private static bool ValidOutcome(RequestCqrsProbeArmRecord arm, RequestCqrsProbeMarkerRecord marker)
     {

@@ -31,6 +31,7 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOption
         const int EmptyAttempt = 0;
         const int AttemptStep = 1;
 
+        ReplicaCanonicalApplyObservation.ObserveOutbound();
         var payload = EncodePayload(payloadBytes);
         using var timeout = new CancellationTokenSource(configuration.RpcTimeout, time);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
@@ -41,7 +42,8 @@ public sealed class ReplicaGrainServiceClient(IServiceProvider services, IOption
             {
                 try
                 {
-                    return await ExchangeAsync(voterId, method, payload, attempt != EmptyAttempt, deadline.Token).ConfigureAwait(false);
+                    var reply = await ExchangeAsync(voterId, method, payload, attempt != EmptyAttempt, deadline.Token).ConfigureAwait(false);
+                    return reply;
                 }
                 catch (OrleansMessageRejectionException) when (attempt + AttemptStep < maximumAttempts)
                 {

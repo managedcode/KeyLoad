@@ -8,14 +8,17 @@ internal static class RequestCqrsProbeMarkerState
 {
     internal static void Record(string sessionId, RequestCqrsProbeArmState arm,
         RequestCqrsProbeMarkerRecord marker, string node, string expectedPhase, string expectedOutcome,
-        IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery, IDictionary<string, int> activeGates)
+        IReadOnlyList<ReplicaSiloDiscovery> signedDiscovery, IDictionary<string, int> activeGates, RequestCqrsProbeJson json)
     {
         if (marker.Version != RequestCqrsProbeFixtureProtocol.Version
             || marker.Kind != RequestCqrsProbeFixtureProtocol.MarkerKind || marker.SessionId != sessionId
             || marker.RequestId == Guid.Empty || marker.CommandId != arm.CommandId
+            || !RequestCqrsCanonicalMarkerValidation.Valid(marker)
             || marker.Phase.ToString() != expectedPhase || marker.Outcome.ToString() != expectedOutcome
             || (arm.Retired && marker.Phase != RequestCqrsProbePhase.ProducerDisposed)
-            || (marker.Phase != arm.Phase && marker.Phase != RequestCqrsProbePhase.ProducerDisposed)
+            || (marker.Phase != arm.Phase && marker.Phase != RequestCqrsProbePhase.ProducerDisposed
+                && !(arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed
+                    && marker.Phase is RequestCqrsProbePhase.CanonicalOutboundObserved or RequestCqrsProbePhase.CanonicalIndependentAppendCompleted or RequestCqrsProbePhase.CanonicalOwnerDisposed))
             || ((marker.Outcome is RequestCqrsProbeOutcome.Released or RequestCqrsProbeOutcome.Cancelled)
                 && arm.Action != RequestCqrsProbeAction.Hold)
             || (marker.Outcome == RequestCqrsProbeOutcome.FaultRequested
@@ -26,6 +29,15 @@ internal static class RequestCqrsProbeMarkerState
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
         if (arm.RequestId is { } claimed && claimed != marker.RequestId)
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        if (arm.Phase == RequestCqrsProbePhase.CanonicalJournalFlushed)
+        {
+            var canonical = json.ReadArm(arm.Bytes);
+            if (!RequestCqrsCanonicalScopeValidation.Matches(canonical, marker))
+            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+            if (arm.MarkerRecords.Take(arm.MarkerRecordCount).Any(previous => previous is { } retained
+                && (retained.EntryIndex != marker.EntryIndex || retained.EntryTerm != marker.EntryTerm)))
+            { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
+        }
         var matching = MatchDiscovery(marker, signedDiscovery);
         if (!matching.TransportReady || matching.SiloAddress != marker.SiloAddress)
         { throw new InvalidOperationException(RequestCqrsProbeFixtureProtocol.MarkerMismatch); }
@@ -34,6 +46,8 @@ internal static class RequestCqrsProbeMarkerState
         arm.RequestId = marker.RequestId;
         if (marker.Phase == RequestCqrsProbePhase.ProducerDisposed)
         { arm.ProducerDisposedSeen = true; }
+        if (marker.Phase == RequestCqrsProbePhase.CanonicalOwnerDisposed)
+        { arm.CanonicalOwnerDisposedSeen = true; }
         if (arm.Action == RequestCqrsProbeAction.Hold && marker.Phase == arm.Phase)
         { ApplyGateOutcome(arm, marker, node, activeGates); }
     }
@@ -80,7 +94,7 @@ internal static class RequestCqrsProbeMarkerState
         => left.Version == right.Version && left.Kind == right.Kind && left.SessionId == right.SessionId
             && left.ArmId == right.ArmId && left.RequestId == right.RequestId && left.CommandId == right.CommandId
             && left.Phase == right.Phase && left.Outcome == right.Outcome && left.Voter == right.Voter
-            && left.SiloAddress == right.SiloAddress;
+            && left.SiloAddress == right.SiloAddress && left.EntryIndex == right.EntryIndex && left.EntryTerm == right.EntryTerm;
 
     private static void ApplyGateOutcome(RequestCqrsProbeArmState arm, RequestCqrsProbeMarkerRecord marker,
         string node, IDictionary<string, int> activeGates)

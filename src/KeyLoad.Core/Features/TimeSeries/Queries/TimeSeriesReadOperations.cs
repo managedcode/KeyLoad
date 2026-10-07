@@ -58,6 +58,19 @@ public static class TimeSeriesReadOperations
         return Read(database, (view, budget) => SampleRetentionStatusReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
+    /// <summary>Reads one current bounded derived rollup under the original scoped read budget.</summary>
+    /// <param name="database">Actual node-local database owner.</param>
+    /// <param name="principalId">Current persisted caller.</param>
+    /// <param name="request">Exact explicit half-open bucket.</param>
+    /// <param name="cancellationToken">Original caller cancellation.</param>
+    /// <returns>Current revision and nullable bucket; stale snapshots reject.</returns>
+    public static SampleRollupResult ReadSampleRollup(this DatabaseEngine database, string principalId,
+        ReadSampleRollupRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Read(database, (view, budget) => SampleRollupReader.Read(database, view, principalId, request, budget), cancellationToken);
+    }
+
     private static T Read<T>(DatabaseEngine database, Func<IKeyValueView, ReadExecutionBudget, T> read,
         CancellationToken cancellationToken)
     {

@@ -22,6 +22,7 @@ internal static class McpToolNames
     internal const string SeriesLatest = TimeSeriesReadProtocol.LatestTool;
     internal const string SeriesAggregate = TimeSeriesReadProtocol.AggregateTool;
     internal const string SeriesWindows = TimeSeriesReadProtocol.WindowsTool;
+    internal const string SeriesRollup = SampleRollupProtocol.ReadTool;
     internal const string SeriesRetention = TimeSeriesReadProtocol.RetentionTool;
     internal const string QueryExecute = "keyload_query_execute";
     internal const string QueryAst = "keyload_query_ast";

@@ -17,6 +17,8 @@ internal sealed class ZoneTreeReadCounters
     private long rangeLimitLookaheads;
     private long rangeExaminedBytes;
 
+    internal Guid SessionId => sessionId;
+
     internal void Point(bool owned, long bytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(bytes);

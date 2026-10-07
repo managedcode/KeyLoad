@@ -118,11 +118,16 @@ internal static class OrleansSiloConfiguration
     {
         if (options.RequestCqrsProbe.Enabled)
         {
-            services.AddSingleton(provider => RequestCqrsProbeObserverFactory.Create(
+            services.AddSingleton<IReplicaTransportObservation>(provider =>
+            {
+                _ = provider.GetRequiredService<RequestCqrsProbeObserver>();
+                return partition.ApplyProbe;
+            });
+            services.AddSingleton(provider => AttachApplyObserver(partition, RequestCqrsProbeObserverFactory.Create(
                 options.RequestCqrsProbe, provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), options.AllowPrivateNetworkHttp,
                 provider.GetRequiredService<ILocalSiloDetails>(), provider.GetRequiredService<IHostApplicationLifetime>(),
                 provider.GetRequiredService<IOptions<RequestProbeExecutionOptions>>(), provider.GetRequiredService<TimeProvider>())
-                ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions));
+                ?? throw new InvalidOperationException(RequestCqrsProbeProtocol.InvalidOptions)));
             services.AddSingleton<IGrainRequestPhaseObserver>(provider => provider.GetRequiredService<RequestCqrsProbeObserver>());
         }
         services.AddSingleton(provider => new GrainRequestCodec(partition.Database, provider.GetRequiredService<TimeProvider>(),
@@ -130,6 +135,12 @@ internal static class OrleansSiloConfiguration
         {
             PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>()
         });
+    }
+
+    private static RequestCqrsProbeObserver AttachApplyObserver(PartitionHost partition, RequestCqrsProbeObserver observer)
+    {
+        partition.ApplyProbe.Attach(observer);
+        return observer;
     }
 
     private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica, IPAddress address,

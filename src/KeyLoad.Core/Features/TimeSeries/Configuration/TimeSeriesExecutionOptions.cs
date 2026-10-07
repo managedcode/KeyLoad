@@ -22,9 +22,13 @@ public sealed record TimeSeriesExecutionOptions
     /// <summary>The maximum text code units walked between codec cancellation and deadline checks.</summary>
     public int TextCancellationCheckIntervalCodeUnits { get; init; } = DefaultTextCancellationCheckIntervalCodeUnits;
 
-    /// <summary>Whether admission and codec execution stay within the current qualified policy bounds.</summary>
+    /// <summary>Maximum retained bucket identities per series, including revision tombstones.</summary>
+    public int MaximumRollupBuckets { get; init; } = TimeSeriesReadDefaults.MaxWindows;
+
+    /// <summary>Whether admission and codec execution satisfy the central policy bounds.</summary>
     public bool IsValid() => MaximumAppendSamples is >= MinimumWorkCount and <= DefaultMaximumAppendSamples
         && HashChunkBytes is >= MinimumWorkCount and <= DefaultHashChunkBytes
+        && MaximumRollupBuckets is >= MinimumWorkCount and <= TimeSeriesReadDefaults.MaxWindows
         && TextCancellationCheckIntervalCodeUnits is >= MinimumWorkCount and <= DefaultTextCancellationCheckIntervalCodeUnits;
 
     /// <summary>Rejects invalid settings before operation admission.</summary>

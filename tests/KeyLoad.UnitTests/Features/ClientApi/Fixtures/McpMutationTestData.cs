@@ -2,9 +2,11 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>All twenty-five real public mutation DTOs, independent of catalog discovery.</summary>
+/// <summary>Canonical real public mutation DTOs, independent of catalog discovery.</summary>
 internal static class McpMutationTestData
 {
+    private const string RefreshRollupKind = "refreshSampleRollup";
+    private const string DropRollupKind = "dropSampleRollup";
     private const string EventId = "mcp-event";
     private const string EventType = "mcp-event-type";
     private const string EdgeId = "mcp-edge";
@@ -21,6 +23,7 @@ internal static class McpMutationTestData
     private const string DeleteKind = "deleteDocument";
     private const string AppendKind = "appendEvents";
     private const string PublishKind = "publishTopic";
+    private const string PurgeKind = "purgeTopic";
     private const string EnqueueKind = "enqueue";
     private const string UpsertEdgeKind = "upsertEdge";
     private const string DeleteEdgeKind = "deleteEdge";
@@ -43,9 +46,9 @@ internal static class McpMutationTestData
     private const string CompareExchangeSagaKind = "compareExchangeSaga";
     private const string ExpireSagaKind = "expireSaga";
     internal static readonly ImmutableArray<string> Discriminators =
-        [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind,
+        [PutKind, PatchKindName, DeleteKind, AppendKind, PublishKind, PurgeKind,
          EnqueueKind, UpsertEdgeKind, DeleteEdgeKind, ApplyReverseEdgeKind, CompleteReverseEdgeKind, SamplesKind, VectorKind,
-         QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, StoreAggregateSnapshotKind,
+         QueueToGraphKind, GraphToQueueKind, ExpireSamplesKind, RefreshRollupKind, DropRollupKind, StoreAggregateSnapshotKind,
          VectorProjectionKind, CreateTransferKind, AcceptTransferKind, CompleteTransferKind,
          ConfigureScheduleKind, EmitOccurrencesKind, CancelScheduleKind, CompareExchangeSagaKind, ExpireSagaKind];
 
@@ -58,6 +61,7 @@ internal static class McpMutationTestData
         new AppendEvents(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             [Event()], ExpectedStreamRevision.Any),
         new PublishTopic(McpCanonicalTestData.Resource, [Event()]),
+        new PurgeTopic(McpCanonicalTestData.Resource, Revision),
         new EnqueueMessage(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity, McpCanonicalTestData.EmptyJson),
         new UpsertEdge(McpCanonicalTestData.Resource, EdgeId, McpCanonicalTestData.Reference, McpCanonicalTestData.Reference, Label),
         new DeleteEdge(McpCanonicalTestData.Resource, EdgeId),
@@ -76,6 +80,10 @@ internal static class McpMutationTestData
             DateTimeOffset.UnixEpoch, SampleRetentionDefaults.DefaultDeletes),
         new StoreAggregateSnapshot(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
             Revision, Model, Dimension, McpCanonicalTestData.EmptyJson, 0, Revision),
+        new RefreshSampleRollup(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1), 0),
+        new DropSampleRollup(McpCanonicalTestData.Resource, McpCanonicalTestData.Entity,
+            DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1), Revision),
         .. McpDerivedMutationTestData.Create()
     ];
 

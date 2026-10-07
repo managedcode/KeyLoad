@@ -113,6 +113,7 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),
+        Read(McpCatalogExpectations.SeriesRollup, new ReadSampleRollupRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1))),
         Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
 

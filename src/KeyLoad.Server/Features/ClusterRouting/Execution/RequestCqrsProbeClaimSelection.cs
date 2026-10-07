@@ -14,6 +14,7 @@ internal static class RequestCqrsProbeClaimSelection
         var matches = snapshot.Arms.Where(loaded => loaded.Record.PrincipalId == identity.PrincipalId
             && loaded.Record.CommandId == identity.CommandId
             && loaded.Record.ReadKind == identity.ReadKind && identity.RequestId != Guid.Empty
+            && loaded.Record.Phase != RequestCqrsProbePhase.CanonicalJournalFlushed
             && !snapshot.Markers.Any(marker => marker.ArmId == loaded.Record.ArmId)).ToArray();
         if (matches.Length == EmptyMatchesLength)
         { return null; }

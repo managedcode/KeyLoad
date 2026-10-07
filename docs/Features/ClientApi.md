@@ -424,3 +424,42 @@ REQ-MSG-007 / AC-MSG-007 and ADR-026 freeze the new bounded ordered queue receiv
 ## TASK-CLIENT-FIRST-CHUNK-ADMISSION-DIAGNOSTIC (2026-10-07)
 
 REQ-CLIENT-002 / AC-MP-009 retains the real Kestrel mid-body cancellation and healthy subsequent SDK request under ADR-035. Original Linux run 37655841124 failed before handler admission within its unchanged five-second first-chunk deadline. Awaiting server startup is already present; this outcome does not establish a startup or scheduler defect. The test must observe original pending SDK completion alongside original first-chunk and handler-failure signals, reject premature completion, and retain joined cancellation/server cleanup. Diagnostic output contains only bounded phase, success flag and error code; no credentials or response payload. No retry, warmup, deadline increase or product change is authorized by this diagnostic amendment. Fresh native reproduction and original failures remain required evidence.
+
+## TASK-KL026-BOUNDED-ROLLUP-001 public boundary
+
+REQ-SERIES-024 / AC-SERIES-024 in [TimeSeries](TimeSeries.md) and [ADR120](../ADR/ADR-120-bounded-persisted-series-rollups.md) add only canonical typed `ReadSampleRollupRequest -> SampleRollupResult` at `/v1/series/rollups/read`, SDK ReadSampleRollupAsync and underlying on-demand `keyload_series_read_rollup` schema/read-only hints. Initial discovery catalog remains bounded under ADR114; grants are checked fresh by the owning request/read cut. RefreshSampleRollup / DropSampleRollup use the existing authorized CommitAsync / keyload_documents_commit Batch mutation schema, native request grain and RF3 acknowledgement path. Authored SampleRollupRf3Tests uses persisted credentials and literal SDK/official-MCP/shared-SQL parity; no native qualification or complete KL026 claim follows from source.
+
+
+## TASK-KL098-TOPIC-RETENTION-001 contract join
+
+[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and SQL CALL keyload_documents_commit use the same typed mutation decoder and fresh authorized request grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. Current raw backup/snapshot includes bounded native identity tombstones inside existing topic-event-id family without a format migration. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionRf3Tests and native TopicRetentionOperationTests bind this join; build/runtime/exact-SHA Linux recovery/RF3 qualification remains pending.
+
+
+### TASK-DIAG-NATIVE-EVENTSOURCE-004 (authored)
+
+REQ/AC-DIAG-001/002 retain exact generic503, closed failure category/phase, UTC timestamp and exclusion of exception CLR identity, message, credential and user data. The genuine EventSource test factory explicitly admits Error for only KeyLoad.Server.ServerErrorMiddleware on EventSourceLoggerProvider. Native listener enable/update/dispose must not revoke that owning factory admission. The regression reconfigures and disposes a second actual native logging EventListener, invokes the real middleware once, and requires original safe response and formatted diagnostic; no provider substitute, retry, wait or production hook. Fatal, domain and canceled flows preserve original outcomes and no unexpected diagnostics.
+
+Microsoft's .NET10 LoggingEventSource OnEventCommand replaces singleton FilterSpecs on Enable/Update and sets provider None on Disable; see https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/Microsoft.Extensions.Logging.EventSource/src/LoggingEventSource.cs. This proves a native filter ownership hazard, not the identity of an interfering listener in the retained original Linux empty-output failure. Root must execute full normal/scalar and the actual diagnostic operation after join. ADR-033 coordinates native coverage proof; existing diagnostic production architecture is unchanged.
+
+The native capture admits only FormattedMessage whose actual official LoggerName payload equals KeyLoad.Server.ServerErrorMiddleware (native payload position2). An actual foreign-category warning must reach its own native listener and remain absent from this capture, before the secondary listener is disposed. The subsequent real middleware failure retains exact safe503/category/phase/time and exclusion of both private canaries, followed by a successful200 request with unchanged captured failure text.
+
+## TASK-MCP-CATALOG-KL087-ORACLE-001 — complete official operation discovery
+
+REQ-CLIENT-006 / AC-MCP-001 and ADR-039/114 require the independent official
+SDK schema/effect inventory to include the existing canonical
+`keyload_messages_receive_across_lanes` operation. Original Linux RF3
+run37666943488 at4e18 completed183 with173passed/10failed; the discovery case
+successfully verified every one of its68 listed tools then failed expected69.
+The test oracle omitted KL087 while the canonical native server command catalog
+already exposed it. Current rollup adds one operation, so retain expected70;
+add the missing independent operation rather than reducing that bound. Require
+outer request only, body requestId/requests, and exact readOnly=false,
+idempotent=false, destructive=true hints. The outer ID supplies correlation,
+not a shared receipt or idempotent group transaction; original stable per-lane
+IDs and partial outcomes remain authoritative. The initial three gateway meta
+tools remain unchanged. Real official on-demand discovery, canonical schemas
+and actual MultiLaneReceiveRf3Tests operations remain required; this source
+repair alone is not runtime qualification or original-task closure.
+
+
+TASK-MCP-R457-ROLLUP-READ-CORPUS / REQ-MCP-003 / AC-MCP-003: original complete normal and scalar R457/R458 each executed2946 cases and failed only the stale body-read corpus count28. The canonical independently authored corpus adds ReadSampleRollupRequest, making29 body-bearing reads; four no-body read contracts and28 mutation contracts remain unchanged. Update only this literal body-read expectation, preserving every canonical DTO native roundtrip, absent/null/unknown/wrong-case rejection and private-value exclusion. These are required ordinary protocol controls and do not contribute product functional coverage. Existing ClientApi ADRs cover this contract; no product schema, dispatch, bounds or authorization changes. Fresh native compilation, focused normal/scalar decoder execution and complete current suites remain required; preserve both original failures.

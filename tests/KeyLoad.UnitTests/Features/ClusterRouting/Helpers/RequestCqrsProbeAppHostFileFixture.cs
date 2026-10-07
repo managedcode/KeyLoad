@@ -94,7 +94,7 @@ internal sealed class RequestCqrsProbeAppHostFileFixture : IDisposable
     }
 
     private static string OwnerJson(string session, string voter)
-        => "{\"Version\":1,\"Kind\":\"Owner\",\"SessionId\":\"" + session
+        => "{\"Version\":2,\"Kind\":\"Owner\",\"SessionId\":\"" + session
             + "\",\"Voter\":\"" + voter + "\"}";
 
 }

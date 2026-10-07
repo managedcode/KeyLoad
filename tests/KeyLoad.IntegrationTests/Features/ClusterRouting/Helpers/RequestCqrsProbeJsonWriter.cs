@@ -21,7 +21,7 @@ internal static class RequestCqrsProbeJsonWriter
         });
 
     internal static byte[] Arm(string sessionId, Guid armId, string principalId, Guid commandId,
-        GrainReadKind? readKind, RequestCqrsProbePhase phase, RequestCqrsProbeAction action)
+        GrainReadKind? readKind, RequestCqrsProbePhase phase, RequestCqrsProbeAction action, PartitionRef? partition = null, Guid? sourceRequestId = null, string? targetVoter = null, Guid? sourceArmId = null)
         => Encode(writer =>
         {
             writer.WriteStartObject();
@@ -37,6 +37,30 @@ internal static class RequestCqrsProbeJsonWriter
             { writer.WriteNull(ReadKindField); }
             writer.WriteString(PhaseField, phase.ToString());
             writer.WriteString(ActionField, action.ToString());
+            writer.WritePropertyName(nameof(RequestCqrsProbeArmRecord.Partition));
+            if (partition is null)
+            { writer.WriteNullValue(); }
+            else
+            {
+                writer.WriteStartObject();
+                writer.WriteString(nameof(PartitionRef.TenantId), partition.TenantId);
+                writer.WriteString(nameof(PartitionRef.DatabaseId), partition.DatabaseId);
+                writer.WriteString(nameof(PartitionRef.TransactionDomainId), partition.TransactionDomainId);
+                writer.WriteString(nameof(PartitionRef.PartitionKey), partition.PartitionKey);
+                writer.WriteEndObject();
+            }
+            if (sourceRequestId is { } source)
+            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceRequestId), source); }
+            else
+            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceRequestId)); }
+            if (sourceArmId is { } sourceArm)
+            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.SourceArmId), sourceArm); }
+            else
+            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.SourceArmId)); }
+            if (targetVoter is not null)
+            { writer.WriteString(nameof(RequestCqrsProbeArmRecord.TargetVoter), targetVoter); }
+            else
+            { writer.WriteNull(nameof(RequestCqrsProbeArmRecord.TargetVoter)); }
             writer.WriteEndObject();
         });
 

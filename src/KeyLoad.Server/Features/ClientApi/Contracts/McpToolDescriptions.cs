@@ -23,6 +23,7 @@ internal static class McpToolDescriptions
     private const string SeriesLatest = "Read the latest authorized sample at or before an optional inclusive UTC timestamp; sample is null when absent.";
     private const string SeriesAggregate = "Read complete raw count, sum, minimum, maximum and sum/count average in [from, untilExclusive); null end includes the maximum timestamp. Exceeding maxSamples rejects the whole result.";
     private const string SeriesWindows = "Read dense fixed-width UTC windows anchored at from, including empty windows and a clamped final window. Sample and window caps reject the whole result when exceeded.";
+    private const string SeriesRollup = "Read one current explicit UTC rollup bucket with exact revision, raw watermark and finite sum/count statistics; stale snapshots reject until explicit correction.";
     private const string SeriesRetention = "Read the persisted exclusive UTC retention floor, cumulative physical purge count and remaining-page status under current series read authorization.";
     private const string QueryExecute = "Execute an authorized read-only query with bounded work; continue with its returned cursor.";
     private const string QueryAst = "Execute the canonical typed query AST. Put polymorphic kind before other object fields and preserve its returned cursor.";
@@ -76,7 +77,7 @@ internal static class McpToolDescriptions
         McpToolNames.GraphShortestPath => GraphShortestPath,
         McpToolNames.GraphIncomingEdges => GraphIncomingEdges,
         McpToolNames.SeriesRead or McpToolNames.SeriesLatest or McpToolNames.SeriesAggregate
-            or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention => SeriesDescription(name),
+            or McpToolNames.SeriesWindows or McpToolNames.SeriesRetention or McpToolNames.SeriesRollup => SeriesDescription(name),
         McpToolNames.QuerySearch or McpToolNames.QueryGraphPath or McpToolNames.QueryExecute or McpToolNames.QueryAst
             or McpToolNames.QueryCapabilities or McpToolNames.QueryLiveStart or McpToolNames.QueryLiveRead or McpToolNames.QueryPartitions
             => QueryDescription(name),
@@ -129,6 +130,7 @@ internal static class McpToolDescriptions
         McpToolNames.SeriesAggregate => SeriesAggregate,
         McpToolNames.SeriesWindows => SeriesWindows,
         McpToolNames.SeriesRetention => SeriesRetention,
+        McpToolNames.SeriesRollup => SeriesRollup,
         _ => throw new ArgumentOutOfRangeException(nameof(name))
     };
 

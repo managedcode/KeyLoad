@@ -15,6 +15,7 @@ public sealed partial class DatabaseEngine
     private const string TopicHeadKeySpace = "topic-head";
     private const string EventSequenceKeySpace = "event-sequence";
     private const string TopicEventIdKeySpace = "topic-event-id";
+    private const int RetainedTopicDigestCharacters = 64;
     private const string PublishTopicKind = "publishTopic";
     private const string PausedTopicMessage = "This topic is paused.";
     private const string InvalidTopicEventCountMessage = "The topic event count is invalid.";
@@ -75,6 +76,13 @@ public sealed partial class DatabaseEngine
                 PayloadJson = JsonData.Validate(item.PayloadJson, Limits),
                 HeadersJson = JsonData.Validate(item.HeadersJson, Limits)
             };
+            if (tx.ReadOwnedValue(PurgedTopicIdentityKey(source, item.EventId)) is { } purgedBytes)
+            {
+                var purged = ReadPurgedTopicIdentity(purgedBytes, source, firstAvailablePosition);
+                throw JsonData.Fingerprint(data) == purged.ContentDigest
+                    ? Errors.Fail(ErrorCode.DuplicateEventId, DuplicateEventDetail)
+                    : Errors.Fail(ErrorCode.Conflict, ConflictingEventContentDetail);
+            }
             if (tx.ReadOwnedValue(idKey) is { } retained)
             {
                 RejectDuplicateEvent(SourceRecord(tx, source, NativeSerialization.Deserialize<long>(retained)).Data, data);

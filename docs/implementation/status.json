@@ -9,15 +9,15 @@
     "functionalWorkflow": ".github/workflows/build-and-tests.yml",
     "benchmarkWorkflow": ".github/workflows/benchmarks.yml",
     "runtimeQualified": false,
-    "canonicalBuildPassed": true,
-    "canonicalFormatterPassed": true,
+    "canonicalBuildPassed": false,
+    "canonicalFormatterPassed": false,
     "preservedBenchmarkTestMethods": 566,
     "localFocusedFunctionalTestsPassed": 18,
     "localServerOnlyImageRegressionPassed": 1,
     "localMovedContractTestsPassed": 27,
     "compiledUnitBenchmarkTypes": 0,
     "compiledComparisonBenchmarkTypes": 588,
-    "verificationStage": "Stage X local Release/format and focused35/35 pass; full recovery243/243 unchanged-input proof retained. Final current normal/scalar and production group discoveries in progress. Original0c2f Linux normal2875/2876 failed, scalar2876/2876 and recovery243/243 pass; RF3 still running. Product coverage remains unmeasured.",
+    "verificationStage": "Complete local Release/format and corrected decoder normal4/scalar4 passed before a final trailing EOF blank-line cleanup. Exact unit inventory/group discovery passed. Original full recovery256/256 and fullnormal/scalar2945/2946 failures retained. Checkpoint includes allcurrentcode; exact-current complete repaired/LinuxRF3/coverage gates remainopen.",
     "remaining": [
       "Delivered exact-current-source Linux complete normal/scalar/recovery/fullRF3 with original same-job source/image identities",
       "Finish current complete normal/scalar and production coverage-selection discovery, retain original failures and successful repaired cohorts",
@@ -239,25 +239,27 @@
       "qualification": "Authenticated original Linux517f4b verify passes; complete RF3 has four preserved failures. Later local StageIX evidence is a separate source/build cohort. Product coverage remains unmeasured."
     },
     "currentBuild": {
-      "run": "R398",
-      "compileInputs": 4258,
+      "run": "R460",
+      "compileInputs": 4375,
       "inputDrift": 0,
       "warnings": 0,
       "errors": 0,
       "nativeExitCode": 0,
-      "elapsedSeconds": 94.455,
-      "logSha256": "4d48df19171fc185adf4cc0d3bf0304fcf2a98bd8c02887ca3a0dec69990ce7e",
+      "elapsedSeconds": 115.638,
+      "logSha256": "f1a42ff22b63b697db2e445bc7b47fd2a98cb6408c973501e6476ea76253639a",
       "passed": true,
-      "qualification": "Complete Stage X native local Release after current source repairs; exact-source Linux/RF3 and product numeric coverage remain open."
+      "qualification": "Complete current local Release passed; full repaired suites/Linux/RF3/coverage remain open.",
+      "finalWhitespaceCleanupAfterBuild": true
     },
     "currentFormatter": {
-      "run": "R401",
+      "run": "R462",
       "nativeExitCode": 0,
-      "elapsedSeconds": 112.28,
+      "elapsedSeconds": 93.915,
       "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "inputCount": 4258,
-      "inputDrift": [],
-      "qualification": "native local source-bound formatter verification, not functional or Linux proof"
+      "inputCount": 4375,
+      "inputDrift": 0,
+      "qualification": "Complete current local formatter passed; no runtime/Linux qualification.",
+      "finalWhitespaceCleanupAfterFormatter": true
     },
     "latestVerifiedNativeLinux": {
       "sourceCommit": "57532cd54301f893dcd6ddf7cf4ea6f17da9ed0f",
@@ -3051,6 +3053,72 @@
               }
             }
           ]
+        },
+        "R405": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 498.768,
+          "logSha256": "a9afccf3b9001469577fab2736736b17179cb3cd22da390bd6cea782a73c331d",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "f7de8ec239f8ca251e1e7d131668b81aa4c48d8270f675f8b4f68dcbb9b3e8d9",
+              "counters": {
+                "total": "2896",
+                "executed": "2896",
+                "passed": "2896",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R406": {
+          "nativeExitCode": 0,
+          "elapsedSeconds": 506.215,
+          "logSha256": "c9065faf40931dda77ac4b05711f124d6310ad683d6367e70f2ff4effc72f139",
+          "sourceInputs": 4259,
+          "assemblyInputs": 553,
+          "sourceDrift": [],
+          "assemblyDrift": [],
+          "qualification": "local native TUnit development; filtered cases and process-kill are not complete Linux RF3/endurance/power-loss proof",
+          "originalReports": [
+            {
+              "sha256": "366e77ed7e6628815abdab4e7cec15736c7f476c39542432255903a6028cc2ee",
+              "counters": {
+                "total": "2896",
+                "executed": "2896",
+                "passed": "2896",
+                "failed": "0",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
         }
       },
       "nativeDiscovery": {
@@ -3095,10 +3163,10 @@
       },
       "currentNativeRuns": {
         "R404": "Complete actual production full plus five filtered discoveries in both normal/scalar modes passed;12 selections, no drift. Discovery is not coverage execution.",
-        "R405": "complete normal unit execution in progress",
-        "R406": "complete scalar unit execution in progress"
+        "R405": "Complete native local suite2896/2896 passed, zero skips/source/image drift; original source belongs toStageX4e18.",
+        "R406": "Complete native local suite2896/2896 passed, zero skips/source/image drift; original source belongs toStageX4e18."
       },
-      "qualification": "Final local Release/format and focused35/35 pass; original full recovery243/243 retained on all unchanged production/recovery/crash inputs and437images. Complete current normal/scalar, exact-source Linux/RF3 and measured sixteen-module coverage remain required.",
+      "qualification": "Stage X original complete local normal2896/2896, scalar2896/2896, focused35/35, fullRelease/format and12production discovery selections passed; original recovery243/243 retains unchanged scoped source/437images. Numeric coverage and exact-source Linux/RF3 remain open.",
       "productionDiscovery": {
         "nativeExitCode": 0,
         "elapsedSeconds": 188.505,
@@ -3117,17 +3185,18 @@
         ],
         "nativeSelections": 12,
         "originalEvidenceFiles": 60
-      }
+      },
+      "sourceCommit": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0"
     },
     "stageIXOriginalLinux": {
       "sourceCommit": "0c2f4799df1ebfa1dd90cd0ae31c1fde4991b057",
       "runId": 37655841124,
       "runAttempt": 1,
-      "runStatus": "in_progress",
+      "runStatus": "completed",
       "verifyConclusion": "failure",
       "verifyJobId": 112910230335,
       "rf3JobId": 112910126767,
-      "rf3Status": "in_progress",
+      "rf3Status": "completed",
       "unitPassed": 2875,
       "unitTotal": 2876,
       "scalarPassed": 2876,
@@ -3154,7 +3223,893 @@
         "causeEstablished": false,
         "currentCorrection": "Observe original pending SDK task as well as first chunk, retain exact5second deadline and original cancellation/nexthealthy/join flows; diagnostic change only, no retry or readiness workaround."
       },
-      "qualification": "Original authenticated Linux results belong to0c2f only; RF3 still running and normal suite failed. Stage X local reports do not replace them."
+      "qualification": "Original authenticated0c2f Linux complete normal2875/2876, scalar2876/2876, recovery243/243 andRF3177/180; failed fullcohort, coveredRF3startup11/11failed exactselection andgroup5native loggercapture failed inbothmodes. Preserved source-bound original reports; newer local passes do notreplace them.",
+      "conclusion": "failure",
+      "rf3Conclusion": "failure",
+      "rf3Passed": 177,
+      "rf3Total": 180,
+      "rf3Failed": 3,
+      "originalRf3Artifacts": [
+        {
+          "artifactId": 11503497330,
+          "name": "docker-rf3-image-evidence",
+          "apiDigest": "sha256:3d0b9d0edb93551ca3a3cf8acfede0df0a8a125ae1e5910b660d270c64d5cc2e",
+          "archiveSha256": "3d0b9d0edb93551ca3a3cf8acfede0df0a8a125ae1e5910b660d270c64d5cc2e",
+          "archiveBytes": 28769
+        },
+        {
+          "artifactId": 11503387300,
+          "name": "docker-rf3-qualification",
+          "apiDigest": "sha256:592c452a9867c9d3dbf3cc3e65ba9adad82e5997e32ab30dd3b1ed86f3d9dc99",
+          "archiveSha256": "592c452a9867c9d3dbf3cc3e65ba9adad82e5997e32ab30dd3b1ed86f3d9dc99",
+          "archiveBytes": 51584149
+        },
+        {
+          "artifactId": 11503287419,
+          "name": "code-quality-docker-rf3",
+          "apiDigest": "sha256:1a060c71651cf56e6ae8870e8013a65c4b43c66784ba4d438c106d83c3b0607b",
+          "archiveSha256": "1a060c71651cf56e6ae8870e8013a65c4b43c66784ba4d438c106d83c3b0607b",
+          "archiveBytes": 2076445
+        }
+      ],
+      "originalRf3Report": {
+        "sha256": "ee32c6b15f25559057e6f7c24230195b44c55e0e99d21603007b2427980b1778",
+        "counters": {
+          "total": "180",
+          "executed": "180",
+          "passed": "177",
+          "failed": "3",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "failures": [
+          {
+            "test": "AcScat003OneVoterWithConflictingShardIdentityStaysFencedAndDeniesAdmission",
+            "message": "TaskCanceledException: A task was canceled.",
+            "duration": "00:02:13.4873293"
+          },
+          {
+            "test": "AcCrsDiag002RealGuardWarningIsCapturedBetweenHealthySdkAndMcpCalls",
+            "message": "TaskCanceledException: A task was canceled.",
+            "duration": "00:12:13.4438607"
+          },
+          {
+            "test": "AcGsearch006CommittedGraphMutationSurvivesLeaderLossAndRestart",
+            "message": "AssertionException: Expected to be true, because The canonical SDK outcome reported OwnershipLost.\nbut found False\n\nat Assert.That(result.IsSuccess).IsTrue().Because(\"The canonical SDK outcome reported OwnershipLost.\")",
+            "duration": "00:00:21.2319229"
+          }
+        ]
+      },
+      "originalCoveredReports": [
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/KeyLoad.IntegrationTests_net10.0_x64.trx",
+          "sha256": "bffadb8e510db8b68ffba681a7c0735327faf7d3add920af07595b69ec98eeb2",
+          "counters": {
+            "total": "11",
+            "executed": "11",
+            "passed": "0",
+            "failed": "11",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": [
+            {
+              "test": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            },
+            {
+              "test": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+              "message": "BeforeTestSessionException: BeforeTestSession hook failed: The original-node coverage selection is invalid."
+            }
+          ]
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/recovery/KeyLoad.RecoveryTests_net10.0_x64.trx",
+          "sha256": "7b76028462ee3414fbe0a5bc51b00bd01ef5be2cce9aabec8d8af526586b0e0d",
+          "counters": {
+            "total": "1",
+            "executed": "1",
+            "passed": "1",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-census/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "1db9af571b561aeda5bc8664895631f1fc36eaf10f7c0aa1bb666366e79b8fb1",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-01/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "b186717f1bde2c6f95e464275d93702e415958d3dff1af203fccd1f00b6b1a8d",
+          "counters": {
+            "total": "490",
+            "executed": "490",
+            "passed": "490",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-02/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "e94a0f15a2354116ee6f6806a7586f6770ee0e35bfd9c19ca941e01dd8a351de",
+          "counters": {
+            "total": "522",
+            "executed": "522",
+            "passed": "522",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-03/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "001d5c239b3b4cc52e57f74b33f94e653ab9ae72cedd2297c60ba2019b1e5587",
+          "counters": {
+            "total": "416",
+            "executed": "416",
+            "passed": "416",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-04/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "47bda6bc561272e2f0b9468d9a85efe2dec4af5602cbcfb3521a4b524bc1151f",
+          "counters": {
+            "total": "509",
+            "executed": "509",
+            "passed": "509",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-functional-05/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "8bf11c387428fc3d28933b42c8e86a6dde67179d6bf158e6404e57f8c5dd4921",
+          "counters": {
+            "total": "547",
+            "executed": "547",
+            "passed": "546",
+            "failed": "1",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": [
+            {
+              "test": "InvalidOperationFailureUsesClosedCategoryAndOmitsClrTypeAndMessage",
+              "message": "AssertionException: Expected to contain \"InvalidOperation\"\nbut received \"\"\n\nat Assert.That(output).Contains(nameof(RequestFailureCategory.InvalidOperation))"
+            }
+          ]
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-census/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "73aa3f2ebcf5124f653bae9e3e1c88a68f360499a6137dab2f0729b880059626",
+          "counters": {
+            "total": "2876",
+            "executed": "2876",
+            "passed": "2876",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-01/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "b59e0e304011ca86d7de351a500371f20395ff1d4161930fa2f672c6452cd77f",
+          "counters": {
+            "total": "490",
+            "executed": "490",
+            "passed": "490",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-02/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "3574ab289dd12005074d1c2a60bd6390e0881745c881d7002273be6ae4b0f3ec",
+          "counters": {
+            "total": "522",
+            "executed": "522",
+            "passed": "522",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-03/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "2d7aa0435d4e8c24a1bb8f1410d0f3ed1ff0952f42a5bbb2232ce46b8ecf6146",
+          "counters": {
+            "total": "416",
+            "executed": "416",
+            "passed": "416",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-04/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "562e74ebec71b9cb04f8e0f0eece7ea7b3fe19ad2cd2350321cc2dfc72463a7c",
+          "counters": {
+            "total": "509",
+            "executed": "509",
+            "passed": "509",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": []
+        },
+        {
+          "relativeReport": "docker-rf3-qualification/TestResults/functional-coverage/rf3/unit-scalar-functional-05/KeyLoad.UnitTests_net10.0_x64.trx",
+          "sha256": "536bb6bb91a09aee7492a08ccc14ad240fc70eaa2e106466beb99afbca47f902",
+          "counters": {
+            "total": "547",
+            "executed": "547",
+            "passed": "546",
+            "failed": "1",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failures": [
+            {
+              "test": "InvalidOperationFailureUsesClosedCategoryAndOmitsClrTypeAndMessage",
+              "message": "AssertionException: Expected to contain \"InvalidOperation\"\nbut received \"\"\n\nat Assert.That(output).Contains(nameof(RequestFailureCategory.InvalidOperation))"
+            }
+          ]
+        }
+      ]
+    },
+    "stageXIOriginalDevelopment": {
+      "sourceParentCommit": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "runtimeQualified": false,
+      "productCoveragePercent": null,
+      "verificationStage": "Complete local Release/format and corrected decoder normal4/scalar4 passed before a final trailing EOF blank-line cleanup. Exact unit inventory/group discovery passed. Original full recovery256/256 and fullnormal/scalar2945/2946 failures retained. Checkpoint includes allcurrentcode; exact-current complete repaired/LinuxRF3/coverage gates remainopen.",
+      "joinedWorkstreams": [
+        "KL026 persisted bounded rollups",
+        "KL098 inclusive purge, retainedID authority, native corruption andprocesscuts",
+        "KL011 composite/range process recovery",
+        "KL008 native merge/disposal join proof",
+        "KL045 Q2operationmatrix",
+        "KL051 normalized adapter whole-flows and actual vector attachment",
+        "KL009 physical follower canonical owner and genuine independent native Append proof",
+        "RF3 graph leader readiness, exact native receipts and replay",
+        "Coverage exact eleven contributor admission and native logger isolation"
+      ],
+      "originalTasksRemain": {
+        "done": 10,
+        "inProgress": 94,
+        "pending": 0
+      },
+      "failedNativeBuilds": [
+        {
+          "run": "R411",
+          "nativeExitCode": 1,
+          "sourceInputs": 4333,
+          "sourceDrift": 0,
+          "errors": 13,
+          "logSha256": "25ca16b1e83a023996112a5d9d88ec4b91da0d882697a7e7b2dedfa3e3d902eb",
+          "originalReceiptSha256": "7c46580cc8adef2e1b0fcbd9cc5aa0eda336487b703c1454e7ea9e23824f6094",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R413",
+          "nativeExitCode": 1,
+          "sourceInputs": 4335,
+          "sourceDrift": 0,
+          "errors": 8,
+          "logSha256": "8bdd6b86b9beb3d827bade51bccbeaec36b8499c145ddf584a623267b90c82f1",
+          "originalReceiptSha256": "e84f9a703a106c1adde8dc778707dd15d133e59a8707cf38f83b408fdbb8aee9",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R417",
+          "nativeExitCode": 1,
+          "sourceInputs": 4361,
+          "sourceDrift": 0,
+          "errors": 1,
+          "logSha256": "accdcf55b0bab80c97e9cfff7da51227b8ed93ce423be8187313a9d8324eec3c",
+          "originalReceiptSha256": "ab8f82426314f14d5706488cb62e8e25a7386d4c2d506427262a9bbe0e2d882d",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R418",
+          "nativeExitCode": 1,
+          "sourceInputs": 4361,
+          "sourceDrift": 0,
+          "errors": 3,
+          "logSha256": "8e03cf8a1dca1c965975e311fc4232902dbf3d0614a10fc0280c1e53f57e1c47",
+          "originalReceiptSha256": "6d272327bc4f169aa6418eb8d978fb2a5c0eded0ea69340ea7f8d989f7491904",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R421",
+          "nativeExitCode": 1,
+          "sourceInputs": 4361,
+          "sourceDrift": 0,
+          "errors": 10,
+          "logSha256": "722238dba90ad317e2ad58344126fb22e110ac2d5a56f6c0447bed6723e6a613",
+          "originalReceiptSha256": "26dd840d3986925fccaf6f7452c99cc3d8eb25539ab2ff7a6f7a8252a8f9ee0d",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R426",
+          "nativeExitCode": 1,
+          "sourceInputs": 4361,
+          "sourceDrift": 0,
+          "errors": 1,
+          "logSha256": "19705c52ac6eef63b498a3fe0c0b49efd49c452e9e93f6147b0af4b035bcbc74",
+          "originalReceiptSha256": "b8bbc4416176b8a544cb094caa7225f9d0d5fe912cecb4323290e9471ec4eec1",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R430",
+          "nativeExitCode": 1,
+          "sourceInputs": 4374,
+          "sourceDrift": 0,
+          "errors": 1,
+          "logSha256": "90e2627a518cb7936a525c60ac9a7c7d9026f934deeb0212d50a887ef255fe06",
+          "originalReceiptSha256": "0086aa382deb168bce71efbb91233d076d6cd00f13a26c28c3cec78a1710ebae",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R431",
+          "nativeExitCode": 1,
+          "sourceInputs": 4374,
+          "sourceDrift": 0,
+          "errors": 80,
+          "logSha256": "271a1fb07ae58f4db2ee70133475bfb8d0fb2769b2be8d10a2b5da9714168668",
+          "originalReceiptSha256": "a1a9f0f703732e48c0a9c1b2e880f093951e3cc73c9ebd75066760726c0e4d50",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R433",
+          "nativeExitCode": 1,
+          "sourceInputs": 4374,
+          "sourceDrift": 0,
+          "errors": 20,
+          "logSha256": "2ee52a55ff6d80a2f3b2f023f21e73aeea33bfa8245db147a9ad704c53119d07",
+          "originalReceiptSha256": "5bae90b196bc04046743f10062037f47ea6e3140d3ce10291d62e6a1355c0d44",
+          "qualification": "original failed local build preserved; no test or runtime qualification"
+        },
+        {
+          "run": "R435",
+          "nativeExitCode": 1,
+          "sourceInputs": 4374,
+          "sourceDrift": 0,
+          "errors": 35,
+          "logSha256": "8d763d4ab464de009613a035b28097efa49655bc7a8a9685b977dcae5e5d5476",
+          "originalReceiptSha256": "879f96911c69daca719d3ddf93883ba51dbaded3f0e453f2a1c240374a236c08",
+          "qualification": "original failed local build preserved; Integration and Recovery compiled, Unit still failed"
+        },
+        {
+          "run": "R448",
+          "nativeExitCode": 1,
+          "sourceInputs": 4375,
+          "sourceDrift": 0,
+          "errors": 1,
+          "logSha256": "75e8e045c6be2298860ddcb7bb6b4cc78786e36387986cd37ac61432980fbe42",
+          "originalReceiptSha256": "77210ffd0aae4124c04b5be14439af3cf136215605fa4153170966448c053e1b",
+          "qualification": "Original failed full build; one unnecessary using removed before a fresh build, no runtime claim."
+        }
+      ],
+      "originalFocusedRuntimeFailures": {
+        "R441": {
+          "nativeExitCode": 2,
+          "elapsedSeconds": 13.65,
+          "sourceInputs": 4375,
+          "assemblyInputs": 553,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "0e2388e9cb3eb0043d1b62f0542f6f0a537aedea6f9caa729b35a66fbbe051a0",
+          "reports": [
+            {
+              "sha256": "147b2b29ba5cdf92dcba2599810fcfd6c8ea480ca1c985b247e7ee0d1ddd4e34",
+              "counters": {
+                "total": "70",
+                "executed": "70",
+                "passed": "55",
+                "failed": "15",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        },
+        "R442": {
+          "nativeExitCode": 2,
+          "elapsedSeconds": 9.186,
+          "sourceInputs": 4375,
+          "assemblyInputs": 437,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "0ff59068299c3f54138f7eb136a3df7ec07bf9c45722e31ad88fd22165977ddf",
+          "reports": [
+            {
+              "sha256": "4250d0cace6eea67483180d96fb521e55faaabaff5a54729de7cb0d72f4988af",
+              "counters": {
+                "total": "13",
+                "executed": "13",
+                "passed": "11",
+                "failed": "2",
+                "error": "0",
+                "timeout": "0",
+                "aborted": "0",
+                "inconclusive": "0",
+                "passedButRunAborted": "0",
+                "notRunnable": "0",
+                "notExecuted": "0",
+                "disconnected": "0",
+                "warning": "0",
+                "completed": "0",
+                "inProgress": "0",
+                "pending": "0"
+              }
+            }
+          ]
+        }
+      },
+      "originalFormatterFailure": {
+        "run": "R440",
+        "nativeExitCode": 2,
+        "inputDrift": 0,
+        "importsDiagnostics": 4,
+        "logSha256": "979bd260c3ce2f341c4617e7b12fc89c18960e9fb1d48a2d64689282593871b6"
+      },
+      "originalSuccessfulBuild": {
+        "nativeExitCode": 0,
+        "elapsedSeconds": 192.722,
+        "inputCount": 4374,
+        "logSha256": "d9148ef71b0a88c02970bcf493489aeb3df34661aa4b8f45f06f1146d314da9a",
+        "run": "R439",
+        "currentAfterRuntimeCorrections": false
+      },
+      "currentBuild": {
+        "run": "R460",
+        "compileInputs": 4375,
+        "inputDrift": 0,
+        "warnings": 0,
+        "errors": 0,
+        "nativeExitCode": 0,
+        "elapsedSeconds": 115.638,
+        "logSha256": "f1a42ff22b63b697db2e445bc7b47fd2a98cb6408c973501e6476ea76253639a",
+        "passed": true,
+        "qualification": "Complete current local Release passed; full repaired suites/Linux/RF3/coverage remain open."
+      },
+      "currentFocusedRecovery": {
+        "run": "R451",
+        "nativeExitCode": 0,
+        "passed": 13,
+        "executed": 13,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "a74dcea3456471ff125a04365326d6881294d339a66d7f89f76b5e3327b3ced3",
+        "trxSha256": "8be74a1e0d0cd6a1ad37c22f359043e4180679a97dcd00d3a58de63e6ef665c5",
+        "qualification": "Native local composite-index, inclusive-topic-purge and rollup process whole flows passed; complete recovery/Linux/RF3 separate."
+      },
+      "currentFormatter": {
+        "run": "R462",
+        "nativeExitCode": 0,
+        "elapsedSeconds": 93.915,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "inputCount": 4375,
+        "inputDrift": 0,
+        "qualification": "Complete current local formatter passed; no runtime/Linux qualification."
+      },
+      "currentFocusedUnit": {
+        "run": "R450",
+        "nativeExitCode": 0,
+        "passed": 70,
+        "executed": 70,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "180bb361b0c071984419ccf7686c3db6734fb406d12be232202067fe9ce07f39",
+        "trxSha256": "35cded4dd22f0e3d122284180c3e330c4221e65c87ab064667c5be3f4ac94128",
+        "qualification": "Actual selected local whole operations/native manifest admission passed; complete normal/scalar/Linux/RF3 and numeric coverage separate."
+      },
+      "currentNativeInventory": {
+        "nativeCensusRun": "R463",
+        "nativeImageRun": "R464",
+        "nativeDiscoveryRun": "R465",
+        "completeCases": 2946,
+        "functionalCases": 2551,
+        "requiredOrdinaryCases": 395,
+        "excludedCases": 0,
+        "groups": [
+          495,
+          522,
+          440,
+          522,
+          572
+        ],
+        "inventorySha256": "2292456cfcbef2feb26240dfa93c55a0d39a8bb9852d1f1dd6789c2c60c47c8a",
+        "originalFullCensusSha256": "dd0c297ecfd9c4f3f3c96773e0a3c8c62c078d22c96e0e7c53e5d179b59da98a",
+        "originalNativeImageObservationSha256": "2e59fa10c5f46643781925cdc895c9f1694a5f83cf0d98981923c217f3a762fc",
+        "nativeMvid": "60757605-ab25-4e92-8c1a-27fa028f58e7",
+        "declaredSources": 1142,
+        "nativeFilteredDiscoveries": 12,
+        "drift": 0,
+        "qualification": "Fresh canonical strict schema3/full native census2946 equals reviewed inventory; all twelve real normal/scalar full/group discoveries passed on exact corrected current source/image with0drift. No executed coverage or Linux/RF3 inference.",
+        "nativeProductionDiscoveryLogSha256": "c81aa710c171fb661e173416c69f2d62da895c1c0998fb63663d8bd18bf025a8"
+      },
+      "originalCompleteRuntimeFailures": {
+        "R457": {
+          "nativeExitCode": 2,
+          "passed": 2945,
+          "executed": 2946,
+          "failed": 1,
+          "failure": "AcMcp003EveryBodyReadPreservesTheCanonicalDto expected28, actual29 canonical read DTOs",
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "6c20ccbc2a85d4c8c156a5ad6f6e3b868286008edf5f905d891efcec96f8fae1",
+          "trxSha256": "e1a107fa00d1cb4ebb9f15b32ba1c617e9bf9a010945b90aaaa6ab55028f55b9"
+        },
+        "R458": {
+          "nativeExitCode": 2,
+          "passed": 2945,
+          "executed": 2946,
+          "failed": 1,
+          "failure": "AcMcp003EveryBodyReadPreservesTheCanonicalDto expected28, actual29 canonical read DTOs",
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "3306472f76f09249008d8a8fa0f46bbfd3e52265f531a8f7cc750f8852f656e0",
+          "trxSha256": "6d9ed7eb0d09604957cac888e0d2e977197d13552ccb0c5b5ea0d8d8c953e160"
+        }
+      },
+      "originalCompleteRecovery": {
+        "run": "R459",
+        "nativeExitCode": 0,
+        "passed": 256,
+        "executed": 256,
+        "sourceDrift": 0,
+        "assemblyDrift": 0,
+        "logSha256": "5a6d6c808c5a2f75c66ce1e736e56ff410769eed93c841409f9093b1bd0fcdf0",
+        "trxSha256": "cd5c0f7e771d2c18cdef2195ff6dd1487c2501c6388a1e54c83248acfa4e83e6",
+        "qualification": "Complete original StageXI local process recovery; subsequent decoder-only correction and full current/Linux/RF3 gates separate."
+      },
+      "correctedDecoderRegressions": {
+        "normal": {
+          "run": "R461A",
+          "nativeExitCode": 0,
+          "passed": 4,
+          "executed": 4,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "87186f4ad5d38da6090f4bc78bdaee75ac4df794d526b02c95d3b53309793c02",
+          "trxSha256": "e255fa9aeace56cc053706ad4c5f2e69ea80b583b2a53b2f9ad1f3dad0510217"
+        },
+        "scalar": {
+          "run": "R461B",
+          "nativeExitCode": 0,
+          "passed": 4,
+          "executed": 4,
+          "sourceDrift": 0,
+          "assemblyDrift": 0,
+          "logSha256": "e573319273ed24ad4c62498d25a5d4c55d17da9902e9d9ebf972509fcc42a940",
+          "trxSha256": "ad03d88e12fd35c7ca2673e1441383a1d256fa7872e4b76892be6c0d5de4ddc0"
+        }
+      },
+      "originalR453R454Inventory": {
+        "nativeCensusRun": "R453",
+        "nativeImageRun": "R454",
+        "nativeDiscoveryRun": "R456",
+        "completeCases": 2946,
+        "functionalCases": 2551,
+        "requiredOrdinaryCases": 395,
+        "excludedCases": 0,
+        "groups": [
+          495,
+          522,
+          440,
+          522,
+          572
+        ],
+        "inventorySha256": "85d67e4e620485fa563a702da06ff01af467e3e7aa7f19dfc9c35305ee9e843e",
+        "originalFullCensusSha256": "dd0c297ecfd9c4f3f3c96773e0a3c8c62c078d22c96e0e7c53e5d179b59da98a",
+        "originalNativeImageObservationSha256": "cc492d8d750579c03270b30bee840fe7ad96e1702b7a9d95c3fa566ee78189ab",
+        "nativeMvid": "ae7dcfe4-4764-4825-98c1-82f99df2d3e5",
+        "declaredSources": 1142,
+        "nativeFilteredDiscoveries": 12,
+        "drift": 0,
+        "qualification": "Canonical strict schema3/full census equality and all actual normal/scalar full/group discovery passed; discovery is not execution or measured coverage."
+      },
+      "finalWhitespaceCleanup": {
+        "file": "src/KeyLoad.Abstractions/Features/EventStreams/Contracts/TopicRetention.cs",
+        "change": "Removed one extra trailing blank line caught by staged diff-check; no syntax/contract/behavior changes.",
+        "currentNativeGatesPending": true
+      }
+    },
+    "stageXOriginalLinux": {
+      "sourceCommit": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "runId": 37666943488,
+      "runAttempt": 1,
+      "verifyJobId": 112948571657,
+      "verifyConclusion": "success",
+      "runStatus": "completed",
+      "rf3Status": "completed",
+      "unitPassed": 2896,
+      "unitTotal": 2896,
+      "scalarPassed": 2896,
+      "scalarTotal": 2896,
+      "recoveryPassed": 243,
+      "recoveryTotal": 243,
+      "nativeSourceOwnershipPassed": 10,
+      "nativeSourceOwnershipTotal": 10,
+      "skipped": 0,
+      "archives": [
+        {
+          "artifactId": 11505461931,
+          "name": "test-results-ubuntu-latest",
+          "archiveSha256": "7dc4d0cb423bb95acdb0ad4170797f91feea07b84826f7bc9cd1520de1096aae",
+          "apiDigestVerified": true
+        },
+        {
+          "artifactId": 11505207296,
+          "name": "code-quality-ubuntu-latest",
+          "archiveSha256": "c3e20c28889e6ae594b98b32ab35ae25169ca5dac9549abfb6d743a9c822339d",
+          "apiDigestVerified": true
+        },
+        {
+          "artifactId": 11508405696,
+          "name": "docker-rf3-qualification",
+          "archiveSha256": "4222afd4591622562404e4e08ca2e48ac33efb87fe967bd3fc499788ecbcb418",
+          "apiDigestVerified": true
+        },
+        {
+          "artifactId": 11507468852,
+          "name": "code-quality-docker-rf3",
+          "archiveSha256": "abf72c6d2daf51744f4f2bb3d27aa86102618c9c94d80b55b3b74ef7e93279f5",
+          "apiDigestVerified": true
+        },
+        {
+          "artifactId": 11508845377,
+          "name": "docker-rf3-image-evidence",
+          "archiveSha256": "4f47535fb0415230f7f5ae2e0a0a0d7d0144f5350c87ffc741c5687e55ec310b",
+          "apiDigestVerified": true
+        }
+      ],
+      "normalTrxSha256": "725e41e17c55e3df4209650d5ce2e8842ab15c8b1748f0348e12a7aaabadd092",
+      "scalarTrxSha256": "b35fe02f99453a80313af6f8123099a2d9c0274b7fc70fee7ff4f1dcff2880da",
+      "recoveryTrxSha256": "d0236317686090254f676374e270b7724e82a8970d89d1da8c52c678d0e6553d",
+      "originalSourceManifestSha256": "183bd773ab32d72eb22219aae01ee07c05a6a7f893021a30be8d2d15faafcaa5",
+      "originalCompiledProductCount": 16,
+      "receipt": "https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948571657",
+      "qualification": "Authenticated original completed Linux verify passed; original RF3 failed173/183 and coveredRF3 rejected11/11. Changed StageXI remains unqualified; product coverage unmeasured.",
+      "rf3UninstrumentedStepConclusion": "failure",
+      "rf3FailureDetails": "Authenticated original full RF3:173/183; ten original failures retained. Current source repairs are not an executed repaired RF3 cohort.",
+      "runConclusion": "failure",
+      "rf3Conclusion": "failure",
+      "rf3JobId": 112948482972,
+      "rf3Passed": 173,
+      "rf3Total": 183,
+      "rf3Failed": 10,
+      "rf3CoveredPassed": 0,
+      "rf3CoveredTotal": 11,
+      "rf3CoveredFailed": 11,
+      "rf3TrxSha256": "8c9eb6c1b6fad38a0dd8532ea8f375465623939ef7784d9bb9ba9e24f938f75c",
+      "rf3CoveredTrxSha256": "a4675d4160e41481ba42abf77e69b6ba6ef222debf74d1337b0dd243745c791e",
+      "rf3OriginalLogSha256": "a21849fc06dde20e56efae36b5b04724ce43248089a730c459508ce2613caa32",
+      "rf3CoveredFailureDetails": "All eleven original BeforeTestSession failures rejected original-node coverage selection; no operation execution or numeric coverage admission."
     }
   },
   "TIME-PROVIDER-001": {
@@ -5369,13 +6324,27 @@
   },
   "KL-013": {
     "title": "Query AST, planner і cursors",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryAst.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Execution/SqlParser.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.cs",
-      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs"
-    ]
+      "tests/KeyLoad.UnitTests/Features/QueryExecution/Cases/SecurityAndQueryTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948571657",
+      "docs/Features/QueryExecution.md#task-kl013-original-acceptance-closeout-001"
+    ],
+    "qualification": {
+      "sourceStage": "original_4e18_bounded_index_reference_pagination_cursor_acceptance",
+      "runtimeQualified": true,
+      "scope": "original KL013 criteria only; changed StageXI/full SQL/QueryExecution module gates excluded",
+      "sourceRevision": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "normalCases": 4,
+      "scalarCases": 4,
+      "originalTestMvid": "6aa5ad29-ba69-4fe5-8a22-ef3e923b6ff7",
+      "normalTrxSha256": "725e41e17c55e3df4209650d5ce2e8842ab15c8b1748f0348e12a7aaabadd092",
+      "scalarTrxSha256": "b35fe02f99453a80313af6f8123099a2d9c0274b7fc70fee7ff4f1dcff2880da",
+      "currentStageXIQualified": false
+    }
   },
   "KL-014": {
     "title": "Standalone server і C# SDK",
@@ -6704,20 +7673,32 @@
   },
   "KL-022": {
     "title": "Graph storage",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/GraphTraversal/Storage/DatabaseEngine.GraphKeys.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Commands/DatabaseEngine.GraphMutations.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphReads.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphTraversalReader.cs",
       "tests/KeyLoad.UnitTests/Features/GraphTraversal/Cases/GraphTraversalTests.cs",
-      "docs/Features/TimeSeries.md",
-      "docs/ADR/ADR-050-timeseries-timescale-comparison.md"
-    ]
+      "https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948571657",
+      "docs/Features/GraphTraversal.md#task-kl022-kl023-original-acceptance-closeout-001",
+      "docs/Features/GraphTraversal.md"
+    ],
+    "qualification": {
+      "sourceRevision": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "runtimeQualified": true,
+      "scope": "original KL-022 acceptance only; broader graph feature, RF3, coverage, performance/endurance gates retained",
+      "normalCases": 3,
+      "scalarCases": 3,
+      "originalTestMvid": "6aa5ad29-ba69-4fe5-8a22-ef3e923b6ff7",
+      "normalTrxSha256": "725e41e17c55e3df4209650d5ce2e8842ab15c8b1748f0348e12a7aaabadd092",
+      "scalarTrxSha256": "b35fe02f99453a80313af6f8123099a2d9c0274b7fc70fee7ff4f1dcff2880da",
+      "currentStageXIQualified": false
+    }
   },
   "KL-023": {
     "title": "Bounded graph traversal",
-    "status": "in_progress",
+    "status": "done",
     "evidence": [
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphReads.cs",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/GraphSearchReachabilityReader.cs",
@@ -6727,7 +7708,9 @@
       "docs/ADR/ADR-098-bounded-graph-paths.md",
       "src/KeyLoad.Core/Features/GraphTraversal/Queries/DatabaseEngine.GraphShortestPath.cs",
       "src/KeyLoad.Query/Features/QueryExecution/Queries/QueryEngine.GraphPath.cs",
-      "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphPathRf3ParityTests.cs"
+      "tests/KeyLoad.IntegrationTests/Features/GraphTraversal/Cases/GraphPathRf3ParityTests.cs",
+      "https://github.com/managedcode/KeyLoad/actions/runs/37666943488/job/112948571657",
+      "docs/Features/GraphTraversal.md#task-kl022-kl023-original-acceptance-closeout-001"
     ],
     "shortestPath": {
       "status": "source_integrated_local_graph26_SQL11_MCP6_normal_scalar_pass_RF3_and_full_Linux_gates_pending",
@@ -6764,7 +7747,18 @@
       "qualification": "pending",
       "allAcceptanceClosed": false
     },
-    "localDevelopmentCheckpoint85": "Historical intermediate report removed from repository; no current qualification inferred"
+    "localDevelopmentCheckpoint85": "Historical intermediate report removed from repository; no current qualification inferred",
+    "qualification": {
+      "sourceRevision": "4e18ba1ba29ae31970302e6bfa43ad9c04ead7e0",
+      "runtimeQualified": true,
+      "scope": "original KL-023 acceptance only; broader graph feature, RF3, coverage, performance/endurance gates retained",
+      "normalCases": 5,
+      "scalarCases": 5,
+      "originalTestMvid": "6aa5ad29-ba69-4fe5-8a22-ef3e923b6ff7",
+      "normalTrxSha256": "725e41e17c55e3df4209650d5ce2e8842ab15c8b1748f0348e12a7aaabadd092",
+      "scalarTrxSha256": "b35fe02f99453a80313af6f8123099a2d9c0274b7fc70fee7ff4f1dcff2880da",
+      "currentStageXIQualified": false
+    }
   },
   "KL-024": {
     "title": "Time-series core",

@@ -47,6 +47,7 @@ internal static class PartitionRecordFamilies
     internal const string Sample = "sample";
     internal const string SampleIdentity = "sample-id";
     internal const string SampleRetention = "sample-retention-v1";
+    internal const string SampleRollup = "sample-rollup-v1";
     internal const string SampleSequence = "sample-sequence";
     internal const string Scheduled = "scheduled";
     internal const string StreamHead = "stream-head";
@@ -107,6 +108,7 @@ internal static class PartitionRecordFamilies
         Sample,
         SampleIdentity,
         SampleRetention,
+        SampleRollup,
         SampleSequence,
         Scheduled,
         StreamHead,

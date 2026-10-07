@@ -7,6 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>The accepted ADR-039 public schema and effect oracle, independent of server implementation objects.</summary>
 internal static class McpCatalogExpectations
 {
+    private const string MultiLaneReceiveName = "keyload_messages_receive_across_lanes";
+    private const string RequestsProperty = "requests";
     private const string DashboardName = "keyload_admin_dashboard";
     private const string ResourcesListName = "keyload_admin_resources_list";
     private const string QueueBrowseName = "keyload_admin_queue_browse";
@@ -38,6 +40,8 @@ internal static class McpCatalogExpectations
         Read(McpCallerTools.SeriesAggregate, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From]),
         Read(McpCallerTools.SeriesWindows, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set,
             McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From, McpDiscoveryProtocol.UntilExclusive, McpDiscoveryProtocol.Width]),
+        Read(SampleRollupProtocol.ReadTool, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set,
+            McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From, McpDiscoveryProtocol.UntilExclusive]),
         Read(McpCallerTools.SeriesRetention, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set,
             McpDiscoveryProtocol.SeriesId]),
         Read(McpCallerTools.QueryExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql]),
@@ -73,6 +77,8 @@ internal static class McpCatalogExpectations
         Read(ResourcesListName, [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId]),
         Read(QueueBrowseName, [McpDiscoveryProtocol.Lane]),
         Write(McpCallerTools.DocumentsCommit, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Mutations]),
+        new(MultiLaneReceiveName, false, false, true, McpExpectedBody.Object, false,
+            [McpCallerProtocol.RequestId, RequestsProperty]),
         Write(McpCallerTools.MessagesReceive, [McpCallerProtocol.RequestId, McpDiscoveryProtocol.Lane]),
         Write(McpCallerTools.MessagesComplete, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.Action]),
         Write(McpCallerTools.MessagesProcess, [McpCallerProtocol.CommandId, McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.Token, McpDiscoveryProtocol.HandlerScope, McpDiscoveryProtocol.ExecutionGeneration, McpDiscoveryProtocol.Effects]),

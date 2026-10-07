@@ -127,21 +127,9 @@ internal static class NativeCoverageRf3FixtureSourceReader
 
     private static bool HasExactCases(IReadOnlyCollection<NativeCoverageRf3CaseIdentity> cases)
     {
-        var expected = new HashSet<NativeCoverageRf3CaseIdentity>
-        {
-            new(NativeCoverageRf3FixtureProtocol.QueryContributorClass,
-                NativeCoverageRf3FixtureProtocol.QueryContributorMethod,
-                NativeCoverageRf3FixtureProtocol.QueryContributorMethod),
-            new(NativeCoverageRf3FixtureProtocol.CrudContributorClass,
-                NativeCoverageRf3FixtureProtocol.CrudCreatePatchDeleteMethod,
-                NativeCoverageRf3FixtureProtocol.CrudCreatePatchDeleteMethod),
-            new(NativeCoverageRf3FixtureProtocol.CrudContributorClass,
-                NativeCoverageRf3FixtureProtocol.CrudPatchDeleteCreateMethod,
-                NativeCoverageRf3FixtureProtocol.CrudPatchDeleteCreateMethod),
-            new(NativeCoverageRf3FixtureProtocol.CrudContributorClass,
-                NativeCoverageRf3FixtureProtocol.CrudStaleReplacementMethod,
-                NativeCoverageRf3FixtureProtocol.CrudStaleReplacementMethod)
-        };
+        var expected = NativeCoverageRf3ContributorCatalog.Contributors.Select(contributor =>
+            new NativeCoverageRf3CaseIdentity(contributor.ClassName, contributor.MethodName, contributor.InstanceName))
+            .ToHashSet();
         return cases.All(expected.Remove) && expected.Count == 0;
     }
 

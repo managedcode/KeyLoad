@@ -12,9 +12,10 @@ namespace KeyLoad.Orleans;
 /// <param name="discovery">Local runtime-generation discovery state.</param>
 /// <param name="authentication">Peer-envelope authentication and bounded replay admission.</param>
 /// <param name="diagnostics">Operational logging for unexpected endpoint failures.</param>
+/// <param name="observation">Optional construction-owned observation of actual authenticated exchanges.</param>
 public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerFactory loggerFactory,
     IReplicaEndpoint endpoint, ReplicaSiloDiscoveryState discovery, ReplicaEnvelopeAuthenticator authentication,
-    ILogger<PartitionReplicaGrainService> diagnostics)
+    ILogger<PartitionReplicaGrainService> diagnostics, IReplicaTransportObservation? observation = null)
     : GrainService(id, silo, loggerFactory), IPartitionReplicaGrainService
 {
     private const int FailureEventId = 3;
@@ -40,6 +41,7 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
         try
         {
             request = authentication.VerifyRequest(request);
+            var completed = observation?.BeginIncoming(request.Method);
             await endpoint.TransportReady.WaitAsync(cancellationToken).ConfigureAwait(true);
             var result = await endpoint.HandleAsync(request.Method, request.Payload, cancellationToken).ConfigureAwait(true);
             if (result.Length > authentication.MaximumPayloadBytes)
@@ -47,7 +49,9 @@ public sealed class PartitionReplicaGrainService(GrainId id, Silo silo, ILoggerF
                 throw Errors.Fail(ErrorCode.ResourceExhausted, ReplicaTransportProtocol.PayloadExceeded);
             }
 
-            return authentication.CreateReply(request, result);
+            var reply = authentication.CreateReply(request, result);
+            completed?.Invoke(request.Payload, result);
+            return reply;
         }
         catch (KeyLoadException error)
         {

@@ -48,12 +48,19 @@ internal sealed class SampleAggregateAccumulator
             throw Errors.Fail(ErrorCode.Validation, NonFiniteAggregate);
         }
 
+        return Reconstruct(count, total, minimum.Min(), maximum.Max());
+    }
+
+    internal static SampleAggregate Reconstruct(long count, double total, double? minimum, double? maximum)
+    {
+        if (count == EmptySampleCount)
+        { return Empty; }
         var average = total / count;
         if (!double.IsFinite(average))
         {
             throw Errors.Fail(ErrorCode.Validation, NonFiniteAggregate);
         }
 
-        return new(count, total, minimum.Min(), maximum.Max(), average);
+        return new(count, total, minimum, maximum, average);
     }
 }

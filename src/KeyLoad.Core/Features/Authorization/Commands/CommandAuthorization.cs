@@ -122,6 +122,7 @@ public sealed partial class DatabaseEngine
                 PutDocument or PatchDocument or DeleteDocument => Capability.DocumentsWrite,
                 AppendEvents => Capability.EventsAppend,
                 PublishTopic => Capability.TopicsPublish,
+                PurgeTopic => Capability.SchemaManage | Capability.TopicsRead,
                 EnqueueMessage => Capability.QueuePublish,
                 UpsertEdge or DeleteEdge or QueueToGraph or ApplyCrossPartitionReverseEdge
                     or CompleteCrossPartitionReverseEdge => Capability.GraphWrite,
@@ -131,6 +132,8 @@ public sealed partial class DatabaseEngine
                     or CompareExchangeSaga or ExpireSaga => Capability.SchedulerManage | Capability.QueuePublish,
                 AppendSamples => Capability.SeriesAppend,
                 ExpireSamples => Capability.SeriesManage,
+                RefreshSampleRollup => Capability.SeriesManage | Capability.SeriesRead,
+                DropSampleRollup => Capability.SeriesManage,
                 StoreAggregateSnapshot => Capability.EventsSnapshotsManage | Capability.EventsRead,
                 PutVector => Capability.DocumentsWrite,
                 global::KeyLoad.ApplyVectorProjection => Capability.DocumentsWrite,

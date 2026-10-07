@@ -10,6 +10,7 @@ namespace KeyLoad.Server;
 internal sealed class PartitionHost : IAsyncDisposable
 {
     private readonly PartitionStores stores;
+    internal Features.ClusterRouting.RequestCqrsCanonicalApplyBridge ApplyProbe { get; }
     private readonly DurableReplicaLog log;
     private readonly Lock lifecycle = new();
     private Task? shutdown;
@@ -37,7 +38,8 @@ internal sealed class PartitionHost : IAsyncDisposable
         options.Validate();
         DirectoryPath = Path.GetFullPath(options.DataDirectory);
         Configuration = replicaOptions.Value;
-        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock);
+        ApplyProbe = new(Configuration.LocalId);
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache, clock, options.RequestCqrsProbe.Enabled ? ApplyProbe.StorageObserver : null);
         ReplicaMaterializer? applying = null;
         DurableReplicaLog? openedLog = null;
         ITextProjection? openedText = null;
@@ -51,7 +53,7 @@ internal sealed class PartitionHost : IAsyncDisposable
             BootstrapFreshNode(options);
             TextProjection = openedText = new NativeTextProjection(Path.Combine(DirectoryPath, SearchIndexDirectoryName),
                 runtimeOptions.Core.DatabaseLimits, Database.Store.Identity.NodeId, runtimeOptions.NativeText);
-            Materializer = applying = new(Database, log, snapshots, executionOptions);
+            Materializer = applying = new(Database, log, snapshots, executionOptions, options.RequestCqrsProbe.Enabled ? ApplyProbe.Enter : null);
             Consensus = new(Materializer, replicaOptions, executionOptions, clock, logger);
             Coordinator = new(Consensus, Database, admission, clock, executionOptions, runtimeOptions.Core.CommandInbox);
         }

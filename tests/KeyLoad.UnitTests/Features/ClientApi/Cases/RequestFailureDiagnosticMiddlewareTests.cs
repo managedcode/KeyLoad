@@ -189,7 +189,7 @@ internal sealed class RequestFailureDiagnosticMiddlewareTests
     }
 
     private static ILoggerFactory CreateLoggerFactory()
-        => LoggerFactory.Create(builder => builder.AddEventSourceLogger());
+        => RequestFailureDiagnosticLoggerFactory.Create();
 
     private static async Task AssertGenericResponseAsync(int status, byte[] body)
     {
@@ -239,6 +239,7 @@ internal sealed class RequestFailureDiagnosticEventSourceCapture : EventListener
     private const string FilterSpecsKey = "FilterSpecs";
     private const string ServerErrorLoggerCategory = "KeyLoad.Server.ServerErrorMiddleware";
     private const string LoggerFilter = ServerErrorLoggerCategory + ":Error";
+    private const int LoggerNamePayloadIndex = 2;
     private readonly ConcurrentQueue<string> messages = new();
 
     internal string Text => string.Join(" ", messages);
@@ -254,7 +255,10 @@ internal sealed class RequestFailureDiagnosticEventSourceCapture : EventListener
 
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
-        if (eventData.EventName == "FormattedMessage" && eventData.Payload is { } payload)
+        if (eventData.EventName == "FormattedMessage" && eventData.Payload is { } payload
+            && payload.Count > LoggerNamePayloadIndex
+            && payload[LoggerNamePayloadIndex] is string category
+            && string.Equals(category, ServerErrorLoggerCategory, StringComparison.Ordinal))
         {
             messages.Enqueue(string.Join(" ", payload));
         }

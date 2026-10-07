@@ -19,6 +19,9 @@ internal sealed class RequestCqrsProbeArmState(string principalId, Guid commandI
     internal bool Settled { get; set; }
     internal bool Retired { get; set; }
     internal bool ProducerDisposedSeen { get; set; }
+    internal bool CanonicalOwnerDisposedSeen { get; set; }
+    internal bool OwnerDisposedSeen => Phase == RequestCqrsProbePhase.CanonicalJournalFlushed
+        ? CanonicalOwnerDisposedSeen : ProducerDisposedSeen;
     internal string? GateVoter { get; set; }
     internal RequestCqrsProbeMarkerRecord?[] MarkerRecords { get; } = new RequestCqrsProbeMarkerRecord?[
         RequestCqrsProbeFixtureProtocol.MaximumMarkerRecordsPerArm];

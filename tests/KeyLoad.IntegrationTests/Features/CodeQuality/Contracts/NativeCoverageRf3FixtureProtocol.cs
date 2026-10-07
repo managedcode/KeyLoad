@@ -49,13 +49,7 @@ internal static class NativeCoverageRf3FixtureProtocol
     internal const string InvalidContext = "The original RF3 coverage fixture context is invalid.";
     internal const string InvalidFixture = NativeCoverageRf3Protocol.InvalidFixture;
     internal const string InvalidRun = "The original coverage run manifest is invalid.";
-    internal const string QueryContributorClass = "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests";
     internal const string Rf3Suite = NativeCoverageRf3Protocol.Rf3Suite;
-    internal const string CrudContributorClass = "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests";
-    internal const string QueryContributorMethod = "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder";
-    internal const string CrudCreatePatchDeleteMethod = "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle";
-    internal const string CrudPatchDeleteCreateMethod = "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle";
-    internal const string CrudStaleReplacementMethod = "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo";
     internal const int SchemaVersion = 1;
     internal const int MaximumReceiptBytes = 4 * 1024 * 1024;
     internal const int MaximumSourceManifestBytes = 64 * 1024 * 1024;
